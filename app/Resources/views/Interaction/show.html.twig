@@ -1,0 +1,32 @@
+{% extends "layout.html.twig" %}
+
+{% set interaction = entity %}
+{% set edit_route_name = 'app_interaction_edit' %}
+
+{% block headline %}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+
+    <br />
+    {{ interaction.isLikely == 1 ? 'Likely Interaction' : 'Unlikely Interaction' }}<br />
+    {{ interaction.isOldWorld == 1 ? 'Old World' : 'New World' }}<br />
+    Location Description: {{ interaction.location.description }}<br />
+    Habitat Type: {{ interaction.location.habitatType.name }}<br />
+    Elevation: {{ interaction.location.elevation }}<br />
+    GPS: {{ interaction.location.gpsData }}<br />
+    Country: {{ interaction.location.country.name }}<br />
+    Note: {{ interaction.note }}<br />
+
+    <br />
+    Reported by: {{ interaction.citation.description }}<br /><br />
+    Full Text: {{ interaction.citation.fullText }}<br /><br />
+    {{ interaction.citation.isSecondary == 1 ? 'Secondary Citation' : 'Direct Citation' }}<br />
+    Publication: <a href="{{ path('app_publication_show', { 'slug': interaction.citation.publication.slug }) }}">{{ interaction.citation.publication.name }}</a><br />
+    Issue: {{ interaction.citation.publicationIssue }}<br />
+    <a href="{{ path('app_citation_show', { 'id': interaction.citation.id }) }}">View Citaiton Details</a>
+
+
+
+{% endblock detail %}

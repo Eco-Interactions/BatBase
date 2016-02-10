@@ -1,0 +1,22 @@
+{% extends "layout.html.twig" %}
+
+{% set interactiontype = entity %}
+{% set interactions = interactiontype.interactions %}
+{% set view_all_route = path('app_interaction_type') %}
+{% set view_all_ent_plural = 'Interaction Types' %}
+{% set edit_route_name = 'app_interaction_type_edit' %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'invis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
+	{% if is_granted('ROLE_ADMIN') %}
+		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+	{% endif %}
+
+{% block datatable %}interaction_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+    {{ include('interaction_tbl.html.twig') }}
+{% endblock detail %}

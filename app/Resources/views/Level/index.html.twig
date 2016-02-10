@@ -1,0 +1,26 @@
+{% extends "layout.html.twig" %}
+
+{% set levels = entities %}
+
+{% block detail %}
+    <ul>
+    <table class="levels_list">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Plural Name</th>
+                <th>Ordinal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for level in levels %}
+                <tr>
+                    <td><a href="{{ path('app_level_show', { 'id': level.id }) }}">{{ level.name }}</a></td>
+                    <td>{{ level.pluralname }}</td>
+                    <td>{{ level.ordinal }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </ul>
+{% endblock detail %}

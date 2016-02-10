@@ -1,0 +1,5 @@
+<ul id="taxon-outline">
+{% for taxon in taxon.childTaxa %}
+	{{ include('domain/taxon_node.html.twig') }}
+{% endfor %}
+</ul>

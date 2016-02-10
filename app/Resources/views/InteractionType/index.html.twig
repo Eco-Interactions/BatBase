@@ -1,0 +1,23 @@
+{% extends "layout.html.twig" %}
+
+{% set interactionTypes = entities %}
+{% set new_ent_route = path('app_interaction_type_new') %}
+{% set this_ent_plural = 'Interaction Types' %}
+{% set this_ent_singl = 'Interaction Type' %}
+
+{% block headline %}
+	{{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul id="int-type-idx">
+        {% for interactionType in interactionTypes %}
+            <li>
+                <a href="{{ path('app_interaction_type_show', { 'slug': interactionType.slug }) }}">{{ interactionType.name }}</a> ({{ interactionType.interactions | length }} interactions)
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock detail %}
+
+
+

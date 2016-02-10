@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+
+{% set namings = entities %}
+
+{% block detail %}
+    <ul>
+        {% for naming in namings %}
+            <li>
+                <a href="{{ path('app_naming_show', { 'id': naming.id }) }}">{{ naming }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock detail %}
+{% block adminlnks %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <h3>Admin Links</h3>
+        <a href="{{ path('app_naming_new') }}">Add Naming</a>
+    {% endif %}
+{% endblock adminlnks %}
+

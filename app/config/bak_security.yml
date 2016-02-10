@@ -1,0 +1,49 @@
+security:
+    encoders:
+        Symfony\Component\Security\Core\User\User: bcrypt
+
+    role_hierarchy:
+        ROLE_ADMIN:       [ROLE_USER]
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+    providers:
+        in_memory:
+            memory:
+                users:
+                    taylor:
+                        password: $2a$12$3QJkpBf8FkhDzoVULof85OsV0RlBtCgQiK4EODc2fy1/wR1tVz53W
+                        roles: 'ROLE_SUPER_ADMIN'
+                    sarah:
+                        password: $2a$12$okpq9mEHekCWGeTL/CN35OBqKyPBF4NQz.B1wvp.1Ay.IRe4c8reW
+                        roles: 'ROLE_SUPER_ADMIN'
+                    cullen:
+                        password: $2a$12$RNqZhJEncj2lALXgTq.JVuno5TVe6qyJVJIRQa2WzeyUEwHy8xvgS
+                        roles: 'ROLE_ADMIN'
+                    tuli:
+                        password: $2a$12$1fEAXB9/cknJnrYz7nILNO2VgDc8y8MENHRI1SYvCBndmxxs6UrYC
+                        roles: 'ROLE_ADMIN'
+                    tester:
+                        password: $2a$12$e.s/8hrwYyIzdyfewGJKHOY64VTqJRpNC.MewsHxuRCig.AwkmxlK
+                        roles: 'ROLE_USER'
+    firewalls:
+        dev:
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            pattern:  /.*
+            form_login:
+                login_path: /login
+                check_path: /login_check
+                default_target_path: /
+            logout:
+                path: /logout
+                target: /
+            security: true
+            anonymous: true
+    access_control:
+        - { path: /login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /edit$, roles: ROLE_ADMIN }
+        - { path: /update$, roles: ROLE_ADMIN }
+        - { path: /delete$, roles: ROLE_ADMIN }
+        - { path: /new$, roles: ROLE_ADMIN }
+        - { path: /.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }

@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set view_all_route = path('app_habitat_type') %}
+{% set view_all_ent_plural = 'Habitat Types' %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	Creating New Habitat Type
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(form) }}
+    </ul>
+{% endblock detail %}

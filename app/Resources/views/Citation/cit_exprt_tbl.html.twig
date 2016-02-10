@@ -1,0 +1,89 @@
+<table id="cit_exprt_tbl" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Citation ID</th>
+            <th>Description</th>
+            <th>Full Text</th>
+            <th>Year</th>
+            <th>Title</th>
+            <th>Publication Title</th>
+            <th>Publication Type</th>
+            <th>Publisher</th>
+            <th>Volume</th>
+            <th>Issue</th>
+            <th>Pages</th>
+            <th>Authors</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for citation in citations %}
+        {% set fulltxtwords = citation.fullText|split(' ') %}
+        {% set authwords = [] %}
+        {% set authnames = [] %}
+        {% set datefound = false %}
+        {% set datetxt = 'none' %}
+        {% for wordtxt in fulltxtwords %}
+            {% set wordisdate = false %}
+            {% if datefound == false %}
+                {% if wordtxt matches '/\\d+/' %}
+                    {% set possdatetxt = wordtxt|trim(' .abcd') %}
+                    {% if possdatetxt|length == 4 %}
+                        {% set wordisdate = true %}
+                        {% set datefound = true %}
+                        {% set datetxt = possdatetxt %}
+                    {% endif %}
+                {% endif %}
+                {% if wordisdate == false %}
+                    {% set authwords = authwords|merge([wordtxt]) %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% set authtxt = authwords|join(' ') %}
+        {% set pgs = '--Pages-' %}
+        {% set issue = '--Issue-' %}
+        {% set potentialpages = fulltxtwords|slice(-1, 1)|join|trim('.') %}
+            {% set strippedPgs = potentialpages|replace({'-':''})  %}
+                {% if strippedPgs matches '/^[0-9]+$/' %}
+                    {% set pgs = potentialpages %}
+                {% endif %}
+        {% set potentialissue = fulltxtwords|slice(-2, 1)|join|trim(':') %}
+            {% if potentialissue matches '/^[0-9]+$/' %}
+                {% set issue = potentialissue %}
+            {% endif %}
+
+{#                      TESTING COMMITING TO SERVER       #}
+
+
+        <tr>
+            <td>{{citation.id}}</td>
+            <td>{{citation.description}}</td>
+            <td>{{citation.fullText}}</td>
+            <td>{{datetxt}}</td>
+            <td>--Title-</td>
+            <td>
+                {% if citation.publication != 'Unspecified' %}
+                    {{citation.publication}}
+                {% else %} 
+                    --Publication-Title-
+                {% endif %}
+            
+            </td>
+            <td>--Pub-Type-</td>
+            <td>--Publisher-</td>
+            <td>--Volume-</td>
+            <td>{{ issue }}</td>
+            <td>{{ pgs }}</td>
+            <td>
+                {% set authors = [] %}
+                {% for attribution in citation.attributions %}
+                    {% set author = attribution.author.lastname %}
+                    {% if author != 'et al.' %}
+                        {% set authors = authors|merge([author]) %}
+                    {% endif %}
+                {% endfor %}
+                {{ authors|join(', ') }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,16 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Definitions{% endblock %}
+
+{% block detail %}
+	<div id="def-frame">
+	{% embed 'two_cols_sect.html.twig' %}
+		{% block firstcol %}
+			{{ interactionDefs.content|raw }}
+		{% endblock %}
+		{% block secondcol %}
+			{{ habitatDefs.content|raw }}
+		{% endblock %}
+	{% endembed %}
+	</div>
+{% endblock detail %}

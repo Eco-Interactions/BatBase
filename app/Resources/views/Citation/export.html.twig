@@ -1,0 +1,21 @@
+{% extends "layout.html.twig" %}
+
+{% set citations = entities %}
+
+{% block datatable %}cit_exprt_tbl{% endblock datatable %}
+
+{% block masthead %}
+	<div class="hiddenElem" id="masthead"  data-hide-slider="true"></div>
+{% endblock %}
+
+{% block headline %}
+	Exporting Citations
+{% endblock headline %}
+
+{% block pageid -%}
+	exprtContnt
+{%- endblock pageid %}
+
+{% block detail %}
+  {{ include('citation/cit_exprt_tbl.html.twig') }}
+{% endblock detail %}

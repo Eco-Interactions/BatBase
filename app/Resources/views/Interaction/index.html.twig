@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+
+{% set interactions = entities %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
+	{% if is_granted('ROLE_ADMIN') %}
+		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+	{% endif %}
+{% set new_ent_route = path('app_interaction_new') %}
+{% set this_ent_plural = 'Interactions' %}
+{% set this_ent_singl = 'Interaction' %}
+
+{% block datatable %}interaction_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+    {{ include('interaction_tbl.html.twig') }}
+{% endblock detail %}

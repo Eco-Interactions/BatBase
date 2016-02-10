@@ -1,0 +1,62 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Bat Eco-Interactions Database{% endblock %}
+
+{% block detail %}
+	<div id="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
+	{% block firstcol %}
+		<h3>The data </h3>
+		<p>The Database catalogs accounts of the interactions of bats with plants and arthropods
+		published in peer-reviewed literature. For each interaction, we include family, genus, and species of
+		each interactor (bat, plant, or arthropod), type of interaction (pollination, visitation, consumption,
+		dispersal, or transport), details of the location (country, habitat type, elevation, GPS), and citation.
+		The number of interactions in the database will continue to grow as we make every effort to keep this
+		information up-to-date. </p>
+		<h3>How to use</h3>
+		<p>Users can browse, sort, and filter interaction data by the following attributes:</p>
+		<ul id="db-field-list">
+			<li class="cav">bat species or group</li>
+			<li class="cav">object of the interaction (plant or arthropod)</li>
+			<li class="cav"><a href="{{ path('AppBundle_defs') }}" title="View Defintions">interaction type</a></li>
+			<li class="cav">country</li>
+			<li class="cav"><a href="{{ path('AppBundle_defs') }}" title="View Defintions">habitat</a></li>
+			<li class="cav">author</li>
+		</ul>
+		<h3>Caveats</h3>
+		<ul id="caveats">
+			<li class="cav"> A record indicates a report of either bats in general, Chiroptera , or of a specific genera and/or
+			species of bat documented pollinating, dispersing seeds, or consuming arthropods. The scientific names
+			of the bat, plant and arthropod are currently reported as found in the original publication. These names
+			may or may not be the currently accepted names for the taxa. </li>
+			<li class="cav"> Reports have been categorized by interaction type and were not verified in the field.</li>
+		</ul><br>
+		<h3>How to cite</h3>
+		<p>If you use search results, or data, from this site in a publication, as part of any other printed media,
+		or in online content, please cite them as follows:</p>
+		<p><em>Geiselman, Cullen K., Defex, Tuli. I. 2015. Bat Eco-Interactions Database. www.batplant.org, version
+		(date accessed).</em></p>
+        <h3>How to get involved</h3>
+        <p>This is an on-going project with the goal of capturing all <em>published</em> interactions observed between bats and plants and bats and arthropods to facilitate additional studies on the subject. We invite your help with this project. We are starting our beta testing phase where enthusiastic collaborators and experts can contribute  to our ongoing development and expansion. Please sign up to get more information or to become a beta tester beta tester <a href="{{ path('fos_user_registration_register')}}">here</a>.</p>
+	{% endblock %}
+	{% block secondcol %}
+	<div id="constrained-col">
+		<h3>Copyright</h3>
+		<p>You are welcome to include information from Bat Eco-Interactions Database in your own printed and
+		online material for non-commercial use only, given that such inserts are clearly identified as coming
+		from Bat Eco-Interactions Database, with a backward link to the respective source page. Photos and
+		drawings belong to the indicated persons or organizations and have their own copyright statements.</p>
+		<h3>Disclaimer and Terms of Use</h3>
+		<p>This website includes text, photos, and other visual media created by the Bat Eco-Interactions
+		Database project. We encourage further use, re-publication, and dissemination of our information,
+		provided that the facts remain undistorted and the original source of the information is mentioned. </p>
+		<p>We assume no responsibility for the content of external links, and these are provided only to help
+		users. We present information as correctly as possible. However, we cannot exclude errors, and
+		neither we can be held responsible for any inconvenience that may arise from these. Use of this
+		website indicates acknowledgment of these terms of use. </p><br>
+	</div>
+	{% endblock %}
+	{% endembed %}
+	<hr>
+	<img id="data-map" src="{{ asset('bundles/app/images/data-map.png') }}" alt="Conceptual Map of Data" height="520" width="784">
+{% endblock detail %}

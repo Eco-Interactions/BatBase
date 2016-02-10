@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set naming = entity %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <p><a href="{{ path('app_naming_show', { 'id': naming.id }) }}"> Return to {{ naming }}</a></p>
+{% endblock detail %}
+
+{% block sidebar %}
+    <h3><a href="{{ path('app_naming') }}">View All Namings</a></h3>
+{% endblock sidebar %}
+

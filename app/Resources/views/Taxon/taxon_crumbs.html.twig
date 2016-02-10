@@ -1,0 +1,4 @@
+{% for ancestor in ancestors %}	<a
+		href="{{ path('app_taxon_show', { 'slug': ancestor.slug }) }}"
+		title="View {{ ancestor.level }} {{ ancestor }}"
+	>{{ ancestor }}</a> > {% endfor %}

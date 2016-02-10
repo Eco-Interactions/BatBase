@@ -1,0 +1,10 @@
+{{ this_ent_plural }}
+{% if is_granted('ROLE_ADMIN') %}
+	<a href="{{ new_ent_route }}">
+		<img 	src="{{ asset('bundles/app/images/eif.plus.opt.svg') }}"
+				id="hdricopen"
+				title="Add New {{ this_ent_singl }}"
+				alt="Add {{ this_ent_singl }}"
+		>
+	</a>
+{% endif %}

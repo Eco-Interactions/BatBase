@@ -1,0 +1,8 @@
+				<div>({{ roleCnt }} interaction{{ roleCnt > 1 ? 's' : '' }})</div>
+				{% for role in roles %}
+					<div>
+						{{ role.interactionType.name }} -
+						<a href="{{ path('app_taxon_show', { 'id': role.object.id }) }}">{{ role.object.displayname }}</a>
+						reported by <a href="{{ path('app_citation_show', { 'id': role.citation.id }) }}">{{ role.citation.description  }}</a>
+					</div>
+				{% endfor %}

@@ -1,0 +1,70 @@
+{% if is_granted('ROLE_ADMIN') %}
+	{% set editcol = 9 %}
+{% else %}
+	{% set editcol = false %}
+{% endif %}
+
+<table id="locs_list" class="display" data-editcol="{{ editcol }}"{{ cntrypg is defined ? 'data-sortcol="3"' : '' }}">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Description</th>
+            <th class="{{ loccols.country }}">Country</th>
+            <th>Regions</th>
+            <th class="{{ loccols.habtype }}">Habitat Type</th>
+            <th>Elevation</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Citations</th>
+            <th>Interaction Count</th>
+            {% if is_granted('ROLE_ADMIN') %}
+				<th></th>
+			{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for location in locations %}
+        <tr>
+            <td>
+				<a href="{{ path('app_location_show', { 'id': location.id }) }}">
+					<img src="{{ asset('bundles/app/images/eif.mag.forward.svg') }}" class="icomag" title="View Location Details" alt="View Details" />
+				</a>
+            </td>
+            <td>{{ location.description }}</td>
+            <td class="{{ loccols.country }}"><a href="{{ path('app_country_show', { 'slug': location.country.slug }) }}">{{ location.country.name}}</a></td>
+            <td>{{ location.regions|join(' , ') }}</td>
+            <td class="{{ loccols.habtype }}"><a href="{{ path('app_habitat_type_show', { 'slug': location.habitatType.slug }) }}">{{ location.habitatType.name }}</a></td>
+            <td>{{ location.elevation }} {{ location.elevUnitAbbrv }}</td>
+            <td>{{ location.latitude|trim('0') }}</td>
+            <td>{{ location.longitude|trim('0') }}</td>
+            <td>
+				{% set citationary = [] %}
+				{% set unqcitationcnt = 0 %}
+				{% set unshowncnt = 0 %}
+				{% for interaction in location.interactions %}
+					{% set citationdesc = interaction.citation.description %}
+					{% if citationdesc not in citationary %}
+						{% if unqcitationcnt < 3 %}
+							{% set citationary = citationary|merge([citationdesc]) %}
+						{% else %}
+							{% set unshowncnt = unshowncnt + 1 %}
+						{% endif %}
+						{% set unqcitationcnt = unqcitationcnt + 1 %}
+					{% endif %}
+				{% endfor %}
+				{{ citationary|join(' / ') }}
+				{% if unshowncnt > 0 %}
+					...and {{ unshowncnt }} other unique citations ({{ unqcitationcnt }} ttl)
+				{% endif %}
+			</td>
+			<td>{{ location.interactions | length }}</td>
+			{% if is_granted('ROLE_ADMIN') %}
+				<td><a href="{{ path('app_location_edit', { 'id': location.id }) }}">
+					<img src="{{ asset('bundles/app/images/eif.pencil.svg') }}" class="icopen" title="Edit Location" alt="Edit Location" />
+					</a>
+				</td>
+			{% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

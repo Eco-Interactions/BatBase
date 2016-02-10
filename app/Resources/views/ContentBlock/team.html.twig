@@ -1,0 +1,22 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}About the Team{% endblock %}
+
+{% block detail %}
+	<div id="team-pg">
+		{% embed 'three_cols_sect.html.twig' %}
+		{% block firstcol %}
+			<div class="bio-img"><img src="{{ asset('bundles/app/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
+			{{ cullenBio.content|raw }}
+		{% endblock %}
+		{% block secondcol %}
+			<div class="bio-img"><img src="{{ asset('bundles/app/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
+			{{ tuliBio.content|raw }}
+		{% endblock %}
+		{% block thirdcol %}
+			<div class="bio-img"><img src="{{ asset('bundles/app/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
+			{{ taylorBio.content|raw }}
+		{% endblock %}
+		{% endembed %}
+	</div>
+{% endblock detail %}

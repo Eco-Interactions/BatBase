@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Bat Eco-Interactions Database{% endblock %}
+
+{% block detail %}
+	<div id="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
+		{% block firstcol %}
+			{{ firstCol.content|raw }}
+		{% endblock %}
+		{% block secondcol %}
+			{{ secondCol.content|raw }}
+		{% endblock %}
+	{% endembed %}
+	<hr>
+	<img id="data-map" src="{{ asset('bundles/app/images/data-map.png') }}" alt="Conceptual Map of Data" height="520" width="784">
+{% endblock detail %}

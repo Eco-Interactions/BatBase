@@ -1,0 +1,69 @@
+{% extends "layout.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('bundles/app/css/feedback-viewer.css') }}" />
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('bundles/app/js/feedback-viewer.js') }}"></script>
+{% endblock javascripts %}
+
+{% block pageid %}
+    exprtContnt
+{% endblock %}
+
+{% block datatable %}feedback_tbl{% endblock datatable %}
+
+{% block masthead %}
+    <div class="invis" id="masthead"  data-hide-slider="true"></div>
+{% endblock %}
+
+{% block headline %}
+    Beta Tester Feedback
+{% endblock headline %}
+
+{% block detail %}
+    <table id="feedback_tbl" class="display">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Created By</th>
+                <th>Topic</th>
+                <th>Page</th>
+                <th>Content</th>
+                <th>Admin Notes</th>
+                <th>Assigned User</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in entities %}
+                {% set user = feedback.createdBy %}
+                {% set route = 'Home' %}
+                {% if feedback.route != '/' %}
+                    {% set routeParts = feedback.route|split('/') %}
+                    {% set route = routeParts|join(' ') %}
+                {% endif %}
+                <tr>
+                    <td>{{ feedback.created|date("F jS \\a\\t g:ia") }}</td>
+                    <td><a href="mailto:{{ user.email }}?subject=website%20feedback">{{ user }}</a></td>
+                    <td>{{ feedback.topic }}</td>
+                    <td>
+                        <a  href="{{app.request.getSchemeAndHttpHost() ~ app.request.baseUrl ~ feedback.route}}"
+                            class="feedback-link"
+                            data-ajaxload="{{ path('app_feedback_load', { 'id': feedback.id }) }}"
+                            data-ajaxupdate="{{ path('app_feedback_update', { 'id': feedback.id }) }}">
+                            {{ route }}
+                        </a>
+                    </td>
+                    <td>{{ feedback.content }}</td>
+                    <td>{{ feedback.adminNotes }}</td>
+                    <td>{{ feedback.assignedUser }}</td>
+                    <td>{{ feedback.status }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "layout.html.twig" %}
+
+{% set author = entity %}
+{% set view_all_route = path('app_author') %}
+{% set view_all_ent_plural = 'Authors' %}
+{% set edit_route_name = 'app_author_edit' %}
+
+{% block datatable %}cits_list{% endblock datatable %}
+
+{# {% block pagedata %}data-frames="citFrames"{% endblock %} #}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+	<div class="inln-flds">
+		<span class="lbl">Full Name:</span> {{ author.fullname }}
+		<span class="lbl">Short Name:</span> {{ author.shortname }}
+		<span class="lbl">Last Name:</span> {{ author.lastname }}
+	</div>
+	<h4>Citations for {{ author }}</h4>
+    {{ include('auth_cit_tbl.html.twig') }}
+{% endblock detail %}

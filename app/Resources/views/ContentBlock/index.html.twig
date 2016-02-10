@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+
+{% set contentBlocks = entities %}
+
+{% set new_ent_route = path('admin_content_block_new') %}
+{% set this_ent_plural = 'Content Blocks' %}
+{% set this_ent_singl = 'Content Block' %}
+{% block headline %}
+	{{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+	<ul>
+        {% for contentblock in contentBlocks %}
+            <li class="top-em-mrg">
+                <a href="{{ path('admin_content_block_show', { 'slug': contentblock.slug }) }}">{{ contentblock }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock detail %}

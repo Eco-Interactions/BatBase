@@ -1,0 +1,19 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block headline %}Join BatPlant.org{% endblock %}
+
+{% block fos_user_content %}
+<div id="reg-form-container">
+	<div>
+		<p class="top-em-mrg five-wide">If you're interested in bat eco-interactions,
+		sign up and get early access to the database. We will never spam you or sell your email.</p>
+		<p class="five-wide">Just provide your email, select a username and password,
+		and tell us about your interest in batplant.org</p>
+		<p class="five-wide">If you'd like to help beta-test the site as it develops or help
+		with refining and extending the data, be sure to mention that as well.</p>
+	</div>
+	<div class="top-em-mrg bot-em-mrg">
+		{% include "FOSUserBundle:Registration:register_content.html.twig" %}
+	</div>
+<div>
+{% endblock fos_user_content %}

@@ -1,0 +1,13 @@
+{% extends "layout.html.twig" %}
+
+{% set domains = entities %}
+
+{% block detail %}
+    <ul>
+        {% for domain in domains %}
+        <li>
+            <a href="{{ path('app_domain_show', { 'slug': domain.slug }) }}">{{ domain }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock detail %}

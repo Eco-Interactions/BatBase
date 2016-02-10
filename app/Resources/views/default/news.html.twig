@@ -1,0 +1,26 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}batplant.org news{% endblock %}
+
+{% block detail %}
+	<div id="introtext">
+        <p>
+        We are currently expanding the database to include interactions in the Old World and have added new
+        data fields, including country, GPS coordinates, habitat type, and likelihood of the interaction since 
+        some accounts, such as bat pollinating Vanilla orchids, are dubious but have been perpetuated in the 
+        literature.
+        </p>
+        <p>
+        We have also corrected for synonymy using the Tropicos database (<a href="http://www.tropicos.org/" target="_blank">www.tropicos.org</a>)
+        for plants and follow N. B. Simmons. 2005. Order Chiroptera (In: Wilson, D.E., Reeder, D.M., eds. 
+        Mammal species of the world. A taxonomic and geographic reference. 3rd Edition.
+        Baltimore: Johns Hopkins University Press, 312-529.) for bats. 
+        </p>
+        <p>
+        A new version of the software behind batplant.org is in progress, and will be released to
+        the community as free and open source software. We are paying close attention to emerging standards
+        (both in biodiversity infomatics and in web development) to facilitate the sharing of data and source code
+        between projects.
+        </p>
+	</div>
+{% endblock detail %}

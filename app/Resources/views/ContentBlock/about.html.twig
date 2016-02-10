@@ -1,0 +1,16 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}About BatPlant.org{% endblock %}
+
+{% block detail %}
+	<div id="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
+		{% block firstcol %}
+			{{ historyAndGettingInvolved.content|raw }}
+		{% endblock %}
+		{% block secondcol %}
+			{{ contactAndAcknowledgments.content|raw }}
+		{% endblock %}
+	{% endembed %}
+	</div>
+{% endblock detail %}

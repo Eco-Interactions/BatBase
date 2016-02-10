@@ -1,0 +1,47 @@
+{% if is_granted('ROLE_ADMIN') %}
+	{% set editcol = 5 %}
+{% else %}
+	{% set editcol = false %}
+{% endif %}
+
+<table id="auths_list" class="display" data-editcol="{{ editcol }}" data-sortcol="1">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Last Name</th>
+            <th>Short Name</th>
+            <th>Full Name</th>
+            <th>Citation Count</th>
+            <th>Interaction Count</th>
+            {% if is_granted('ROLE_ADMIN') %}
+				<th></th>
+			{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for author in authors %}
+			<tr>
+				<td>
+					<a href="{{ path('app_author_show', { 'slug': author.slug }) }}">
+						<img src="{{ asset('bundles/app/images/eif.mag.forward.svg') }}" class="icomag" title="View Author Details" alt="View Details" />
+					</a>
+				</td>
+				<td><a href="{{ path('app_author_show', { 'slug': author.slug }) }}">{{ author.lastname }}</a></td>
+				<td>{{ author }}</td>
+				<td>{{ author.fullname }}</td>
+	            <td>{{ author.attributions | length }}</td>
+					{% set ttlints = 0 %}
+					{% for attribution in author.attributions %}
+						{% set ttlints = ttlints + (attribution.citation.interactions | length) %}
+					{% endfor %}
+				<td>{{ ttlints }}</td>
+				{% if is_granted('ROLE_ADMIN') %}
+					<td><a href="{{ path('app_author_edit', { 'slug': author.slug }) }}">
+						<img src="{{ asset('bundles/app/images/eif.pencil.svg') }}" class="icopen" title="Edit Author" alt="Edit Author" />
+						</a>
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+    </tbody>
+</table>

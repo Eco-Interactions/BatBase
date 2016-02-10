@@ -1,0 +1,38 @@
+{% extends "layout.html.twig" %}
+
+{% block crumbs %}Bat-Plant Interaction Database - Admin Menu{% endblock crumbs %}
+{% block headline %}Admin Menu Page{% endblock %}
+
+{% block detail %}
+	<img src="{{ asset('bundles/app/images/mast01.jpg') }}" alt="BapPlant.org" />
+{% endblock detail %}
+
+{% block sidebar %}
+    <ul>
+		<li>
+			<a href="{{ path('app_publication') }}">
+				Browse Database by Publication
+			</a>
+		</li>
+		<li>
+			<a href="{{ path('app_author') }}">
+				Browse Database by Author
+			</a>
+		</li>
+		<li>
+			<a href="{{ path('app_location') }}">
+				Browse Database by Location
+			</a>
+		</li>
+		<li>
+			Is Admin:  {{ is_admin }}
+		</li>
+	</ul>
+{% endblock sidebar %}
+
+{% block footer %}
+	<p>
+		<a href="{{ path('app_interaction_new') }}">+</a>
+		Site and Data Copyright 2014 batplant.org - Bat photos Copyright 2013 Merlin Tuttle
+	</p>
+{% endblock %}

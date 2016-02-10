@@ -1,0 +1,106 @@
+<table id="int_exprt_tbl" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Citation</th>
+            <th>Citation Short</th>
+            <th>Country</th>
+            <th>Location Description</th>
+            <th>Habitat Type</th>
+            <th>Lat.</th>
+            <th>Long.</th>
+            <th>Elev. (or Range Min)</th>
+            <th>Elev. Range Max</th>
+            <th>Interaction Type</th>
+            <th>Subject Domain</th>
+            <th>Subject Family</th>
+            <th>Subject Genus</th>
+            <th>Subject Species</th>
+            <th>Plant/Insect</th>
+            <th>Object Class</th>
+            <th>Object Order</th>
+            <th>Object Family</th>
+            <th>Object Genus</th>
+            <th>Object Species</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for interaction in interactions %}
+            {% set subjectspecies = '' %}
+            {% set subjectgenus = '' %}
+            {% set subjectfamily = '' %}
+            {% set objectspecies = '' %}
+            {% set objectgenus = '' %}
+            {% set objectfamily = '' %}
+            {% if interaction.subject.level == "Family" %}
+                {% set subjectfamily = interaction.subject %}
+            {% else %}
+                {% if interaction.subject.level == "Genus" %}
+                    {% set subjectgenus = interaction.subject %}
+                    {% set subjectfamily = subjectgenus.parenttaxon %}
+                {% else %}
+                    {% if interaction.subject.level == "Species" %}
+                        {% set subjectspecies = interaction.subject %}
+                        {% set subjectgenus = interaction.subject.parenttaxon %}
+                        {% set subjectfamily = subjectgenus.parenttaxon %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if interaction.object.level == "Family" %}
+                {% set objectfamily = interaction.object %}
+            {% else %}
+                {% if interaction.object.level == "Genus" %}
+                    {% set objectgenus = interaction.object %}
+                    {% set objectfamily = objectgenus.parenttaxon %}
+                {% else %}
+                    {% if interaction.object.level == "Species" %}
+                        {% set objectspecies = interaction.object %}
+                        {% set objectgenus = interaction.object.parenttaxon %}
+                        {% set objectfamily = objectgenus.parenttaxon %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% set typestr = interaction.interactionType %}
+            {% if typestr == "Unspecified" %}
+                {% set typestr = "--Unspecified-" %}
+            {% endif %}
+            {% set cntrystr = interaction.location.country %}
+            {% if cntrystr == "Unspecified" %}
+                {% set cntrystr = "--Unspecified-" %}
+            {% endif %}
+            {% set habtypstr = interaction.location.habitatType %}
+            {% if habtypstr == "Unspecified" %}
+                {% set habtypstr = "--Unspecified-" %}
+            {% endif %}
+            {% set locstr = interaction.location %}
+            {% if (habtypstr == "--Unspecified-" and cntrystr == "--Unspecified-") %}
+                {% set locstr = "--Unspecified-" %}
+            {% endif %}
+            {% if locstr == "Unspecified" %}
+                {% set locstr = "--Unspecified-" %}
+            {% endif %}
+
+        <tr>
+            <td>{{ interaction.citation.id }}</a></td>
+            <td>{{ interaction.citation }}</a></td>
+            <td>{{ cntrystr }}</td>
+            <td>{{ locstr }}</td>
+            <td>{{ habtypstr }}</td>
+            <td>{{ interaction.location.latitude|trim('0')}}</td>
+            <td>{{ interaction.location.longitude|trim('0')}}</td>
+            <td>{{ interaction.location.elevation}}</td>
+            <td></td>
+            <td>{{ typestr }}</td>
+            <td>Bats</td>
+            <td>{{ subjectfamily }}</td>
+            <td>{{ subjectgenus }}</td>
+            <td>{{ subjectspecies }}</td>
+            <td>Plant</td>
+            <td></td>
+            <td></td>
+            <td>{{ objectfamily }}</td>
+            <td>{{ objectgenus }}</td>
+            <td>{{ objectspecies }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

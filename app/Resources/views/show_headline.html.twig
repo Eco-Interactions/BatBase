@@ -1,0 +1,17 @@
+{{ entity }}
+{% if is_granted('ROLE_ADMIN') %}
+	{% if entity.slug is defined %}
+		<a href="{{ path(edit_route_name, { 'slug': entity.slug }) }}">
+	{% else %}
+		<a href="{{ path(edit_route_name, { 'id': entity.id }) }}">
+	{% endif %}
+		<img src="{{ asset('bundles/app/images/eif.pencil.svg') }}"
+				id="hdricopen"
+				title="Edit {{ entity }}"
+				alt="Edit {{ entity }}"
+		>
+		</a>
+{% endif %}
+
+
+

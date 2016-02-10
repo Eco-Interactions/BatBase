@@ -1,0 +1,34 @@
+{% extends "layout.html.twig" %}
+
+{% set location = entity %}
+{% set interactions = location.interactions %}
+{% set view_all_route = path('app_location') %}
+{% set view_all_ent_plural = 'Locations' %}
+{% set edit_route_name = 'app_location_edit' %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
+	{% if is_granted('ROLE_ADMIN') %}
+		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+	{% endif %}
+
+{% block datatable %}interaction_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+		{{ include('two_cols_sect.html.twig') }}
+		 <div id="loc-desc"></div>
+        <ul class="loc-display" id="loc-disp">
+            <li>Description: {{ location.description }}</li>
+            <li>Habitat Type: <a href="{{ path('app_habitat_type_show', { 'slug': location.habitatType.slug }) }}">{{ location.habitatType }}</a></li>
+            <li>Country: <a href="{{ path('app_country_show', { 'slug': location.country.slug }) }}">{{ location.country }}</a></li>
+            <li>Regions: {{ location.regions|join(' , ') }}</li>
+            <li>Latitude: {{ location.latitude }}</li>
+            <li>Longitude: {{ location.longitude }}</li>
+            <li>Elevation: {{ location.elevation }} {{ location.elevUnitAbbrv }}</li>
+            <li>Old Gps Data: {{ location.gpsdata }}</li>
+        </ul>
+        {{ include('interaction_tbl.html.twig') }}
+{% endblock detail %}

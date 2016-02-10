@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set taxon = entity %}
+
+{% block headline %}
+	{{ include('taxon/taxon_crumbs.html.twig') }}
+	Editing {{ taxon.level }}: {{ taxon }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <p><a href="{{ path('app_taxon_show', { 'slug': taxon.slug }) }}"> Return to {{ taxon }}</a></p>
+{% endblock detail %}

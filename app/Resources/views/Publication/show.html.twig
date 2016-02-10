@@ -1,0 +1,31 @@
+{% extends "layout.html.twig" %}
+
+{% set publication = entity %}
+{% set edit_route_name = 'app_publication_edit' %}
+{% set citations = publication.citations %}
+
+{% block datatable %}cits_list{% endblock datatable %}
+
+{# {% block pagedata %}data-frames="citFrames"{% endblock %} #}
+
+{% block headline %}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+	<div class="inln-flds">
+        <span class="lbl">Name:</span> {{ publication.name }}
+        <span class="lbl">DOI:</span> {{ publication.doi }}
+        {% if publication.linkurl is not empty %}
+            <a href=" {{ publication.linkurl }}" >
+            {% if publication.linkdisplay is empty  %}
+                <span class="lbl">{{ publication }} Website</span>
+            {% else %}
+                <span class="lbl">{{ publication.linkdisplay }}</span>
+            {% endif %}
+           </a>
+        {% endif %}
+    </div>
+	<h4>Citations</h4>
+    {{ include('cit_tbl.html.twig') }}
+{% endblock detail %}

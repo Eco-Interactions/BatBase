@@ -1,0 +1,205 @@
+body {
+    font-size: 1em;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	margin:0;
+	padding:0;
+	border:0;
+	width:100%;
+	min-width:600px;
+  -webkit-margin-before: 0em;
+  -webkit-margin-after: 0em;
+  -webkit-margin-start: 0px;
+  -webkit-margin-end: 0px;
+  -webkit-padding-start: 0px;
+}
+
+a:link {
+    color: DimGray;
+    text-decoration: none;
+}
+a:visited {
+}
+a:hover {
+    color: DarkGray;
+    text-decoration: underline;
+}
+a:active {
+}
+
+input, select, textarea {
+	font-size: 1em;
+	padding: .2em;
+	margin: .5em;
+}
+
+input[type=text] {
+	width: 500px;
+}
+
+textarea { 
+	vertical-align: top; 
+}
+
+
+button {
+	margin-top: .75em;
+	padding: .25em .5em .25em .5em;
+    font-size: 1.5em;
+}
+
+h1, h2, h3 {
+
+}
+p {
+
+}
+
+#introtext {
+	margin: 25px;
+	width: 600px;
+}
+
+#outerframe {
+	width:1200px;	
+	margin: auto;
+}
+
+#topfixed {
+	position: fixed;
+	width:1200px;
+	height: 314px;
+	padding: 0px 0px 0px 0px;
+	background-color: White;
+	top: 0;
+	z-index: 10;
+	font-size: 0;
+}
+
+#masthead {
+	background-color: Black;
+	width:100%;
+	height: 209px;
+	margin: 0 auto;
+}
+
+#masthead img{
+    display:block;
+    margin:auto;
+}
+
+#hdrmenu {
+    display: block;
+    height: 48px;
+	text-align: center;
+	padding: 5px 0px 0px 0px;
+	border-bottom: 2px solid Gray;
+	margin: 0 0 0 0;
+}
+
+#hdrmenu ul li {
+    display: inline;
+	font-size: 28px;
+	text-decoration: none;
+	margin: 0 0 0 0;
+	padding: .2em .5em .2em .5em;
+}
+
+#hdrmenu a:link {
+  color: #000;
+  text-shadow:2px 2px 3px #999999;
+  text-decoration:none;
+} 
+#hdrmenu a:visited {
+  color: #000;
+  text-decoration: none;
+  color: #000;
+} 
+#hdrmenu a:hover {
+  color: #333333;
+  text-shadow: 3px 3px 4px #999999;
+  text-decoration:none;
+  position:relative;
+  top:-1px;
+} 
+#hdrmenu a:active {
+  color: #333333;
+}
+
+#hdrtext {
+	font-size: 21px;
+	height: 42px;
+	border-bottom: 1px solid Gray;
+	padding: 7px 0 0 15px;
+}
+
+#sidemenu {
+	margin-top: 25px;
+}
+
+#adminlinks {
+	color: Blue;
+	border: 1px solid Blue;
+	text-align: center;
+	margin: 25px 0 25px 0;
+	padding: 5px 5px 15px 5px;
+	background-color: PowderBlue;
+}
+
+#adminlinks a:link {
+  color: Blue;
+} 
+#adminlinks a:visited {
+  color: Blue;
+} 
+
+.colframe {
+	margin-top: 314px;
+	position:relative;	/* This fixes the IE7 overflow hidden bug */
+	clear:both;
+	float:left;
+	width:100%;
+	overflow:hidden;
+}
+
+.colright,
+.colmid,
+.colleft {
+	float:left;
+	width:100%;
+	position:relative;
+}
+.col1,
+.col2,
+.col3 {
+	float:left;
+	position:relative;
+	padding:0 0 1em 0;
+	overflow:hidden;
+}
+/* 2 Column (left menu) settings */
+.colframe {
+	background:#fff;		/* right column background colour */
+}
+.colframe .colleft {
+	right:70%;			/* right column width */
+	border-right: 1px solid Gray;	
+}
+.colframe .col1 {
+	width:66%;			/* right column content width */
+	left:102%;			/* 100% plus left column left padding */
+}
+.colframe .col2 {
+	width:26%;			/* left column content width (column width minus left and right padding) */
+	left:6%;			/* (right column left and right padding) plus (left column left padding) */
+}
+/* Footer styles */
+#footer {
+	clear:both;
+	float:left;
+	width:100%;
+	border-top:1px solid #000;
+}
+#footer p {
+	padding:10px;
+	margin:0;
+}

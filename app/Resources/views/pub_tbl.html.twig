@@ -1,0 +1,57 @@
+{% if is_granted('ROLE_ADMIN') %}
+	{% set editcol = 6 %}
+{% else %}
+	{% set editcol = false %}
+{% endif %}
+
+<table id="pubs_list" class="display" data-editcol="{{ editcol }}" data-sortcol="1">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>DOI</th>
+            <th>Link</th>
+            <th>Citation Count</th>
+            <th>Interaction Count</th>
+            {% if is_granted('ROLE_ADMIN') %}
+				<th></th>
+			{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for publication in publications %}
+			<tr>
+				<td>
+					<a href="{{ path('app_publication_show', { 'slug': publication.slug }) }}">
+						<img src="{{ asset('bundles/app/images/eif.mag.forward.svg') }}" class="icomag" title="View Publication Details" alt="View Details" />
+					</a>
+				</td>
+				<td><a href="{{ path('app_publication_show', { 'slug': publication.slug }) }}">{{ publication }}</a></td>
+				<td>{{ publication.doi }}</td>
+				<td>
+					{% if publication.linkurl is not empty %}
+						<a href=" {{ publication.linkurl }}" >
+						{% if publication.linkdisplay is empty  %}
+							<span class="lbl">{{ publication }} Website</span>
+						{% else %}
+							<span class="lbl">{{ publication.linkdisplay }}</span>
+						{% endif %}
+							</a>
+					{% endif %}
+				</td>
+	            <td>{{ publication.citations | length }}</td>
+					{% set ttlints = 0 %}
+					{% for citation in publication.citations %}
+						{% set ttlints = ttlints + (citation.interactions | length) %}
+					{% endfor %}
+				<td>{{ ttlints }}</td>
+				{% if is_granted('ROLE_ADMIN') %}
+					<td><a href="{{ path('app_publication_edit', { 'slug': publication.slug }) }}">
+						<img src="{{ asset('bundles/app/images/eif.pencil.svg') }}" class="icopen" title="Edit Publication" alt="Edit Publication" />
+						</a>
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+    </tbody>
+</table>

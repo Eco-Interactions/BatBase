@@ -1,0 +1,18 @@
+{% extends "layout.html.twig" %}
+
+{% set contentBlock = entity %}
+{% set view_all_route = path('admin_content_block') %}
+{% set view_all_ent_plural = 'Content Blocks' %}
+{% set edit_route_name = 'admin_content_block_edit' %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+	<div class="em-mrg">
+		<span class="lbl">Name:</span> <br>{{ contentBlock.name }}<br><br><br>
+		<span class="lbl top-em-mrg">Content:</span> <br>{{ contentBlock.content|raw }}<br>
+	</div>
+{% endblock detail %}

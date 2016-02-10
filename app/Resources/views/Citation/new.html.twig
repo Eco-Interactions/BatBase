@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set view_all_route = path('app_citation') %}
+{% set view_all_ent_plural = 'Citations' %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	Creating New Citation
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(form) }}
+	</ul>
+{% endblock detail %}

@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Welcome to Bat Eco-Interactions{% endblock %}
+
+{% block detail %}
+	<div id="top-pgs">
+	{% embed 'sidebar_sect.html.twig' %}
+		{% block firstcol %}
+			{% if eifrole == 'member' %}
+				<h3 style="color: #2D7853;">Welcome {{ eifusername }}</h3>
+				{{ memberWelcome.content|raw }}
+			{% endif %}
+			{{ introduction.content|raw }}
+		{% endblock firstcol %}
+		{% block secondcol %}
+			{{ secondColBlock.content|raw }}
+		{% endblock secondcol%}
+	{% endembed %}
+	</div>
+{% endblock detail %}

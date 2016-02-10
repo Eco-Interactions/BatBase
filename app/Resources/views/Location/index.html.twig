@@ -1,0 +1,23 @@
+{% extends "layout.html.twig" %}
+
+{% set locations = entities %}
+{% set new_ent_route = path('app_location_new') %}
+{% set this_ent_plural = 'Locations' %}
+{% set this_ent_singl = 'Location' %}
+
+{% block datatable %}locs_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'invis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
+{% if is_granted('ROLE_ADMIN') %}
+	{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+{% endif %}
+{% set loccols = { country: 'vis', habtype: 'vis'} %}
+{% block detail %}
+		{{ include('loc_tbl.html.twig') }}
+{% endblock detail %}
+
+{% block twocols %}{% endblock twocols %}

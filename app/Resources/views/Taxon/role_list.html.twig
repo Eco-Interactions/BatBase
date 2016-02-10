@@ -1,0 +1,11 @@
+<h3>{{ roleCnt }} interactions</h3>
+<ul>
+		{% for role in roles %}
+			<li>
+				<a href="{{ path('app_interaction_show', { 'id': role.id }) }}">
+					{{ role.interactionType.name }} {{ ofby }} {{ role.object.level.name }} {{ role.object.displayname }}
+				</a>
+
+			</li>
+		{% endfor %}
+</ul>
