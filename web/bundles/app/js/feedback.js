@@ -126,6 +126,4 @@ $(function() {
 		$masthead.prepend(popup);
 		$("#feedback-popup>button[name='post-feedback']").fadeTo( 'fast' , .35);
 	}
-
-});
-
+});  /* End of namespacing anonymous function */

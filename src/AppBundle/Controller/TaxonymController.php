@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -227,7 +228,40 @@ class TaxonymController extends Controller
             ->setAction($this->generateUrl('app_taxonym_delete', array('id' => $id)))
             ->setMethod('DELETE')
             ->add('submit', 'submit', array('label' => 'Delete'))
-            ->getForm()
-        ;
+            ->getForm();
     }
+
+    /**
+     * Ajax action to create a new Feedback entity.
+     *
+     * @Route("/post", name="app_taxonym_post")
+     * @Method("POST")
+     */
+    public function postAction(Request $request)
+    {
+        $requestContent = $request->getContent();
+        $postedData = json_decode($requestContent);
+        $name = $postedData->name;
+
+        $entity = new taxonym();
+        $entity->setName($name);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($entity);
+        $em->flush();
+
+        $response = new JsonResponse();
+        // $response->headers->set('Access-Control-Allow-Methods', '*');
+        // $response->headers->set('Access-Control-Allow-Origin', "chrome-extension://boipiikadifeknmbagecoeleagafgcmf/");
+        $response->setData(array(
+            'recievedData' => $postedData,
+        ));
+        return $response;
+    }
+
 }
+
+
+// in webview - sends json obj
+//      post message with entity objs str
+// conf dialog shown
