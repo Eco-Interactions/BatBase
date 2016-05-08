@@ -1,5 +1,10 @@
 {% extends "FOSUserBundle::layout.html.twig" %}
 
+{% block javascripts %}
+	{{ parent() }}
+	<script src="{{ asset('bundles/app/js/editor-login.js') }}"></script>
+{% endblock %}
+
 {% block headline %}Log In{% endblock %}
 
 {% block fos_user_content %}
