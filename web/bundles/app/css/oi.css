@@ -294,12 +294,10 @@ span.lbl {
 .inln-flds span {
 	padding: 0 5px 0 55px;
 }
-.sidebar-outer {
+.flex-row-wrap {
 	display: flex;
 	flex-direction: row;
-}
-.sidebar-outer p {
-	width: 100%;
+	flex-wrap: wrap;
 }
 .main-col {
 	flex-grow: 8;
@@ -389,4 +387,20 @@ span.lbl {
 	margin-top: 3px;
 	padding: 10px 0 0 0;
 	border-top:1px solid #000;
+}
+#app-login {
+  justify-content: space-between;
+  align-items: center;
+  width: 600px;
+  height: 65vh;
+  padding-top: 5em;
+  margin: 0 auto;
+}
+/*------------Shared Styles----------------------------*/
+.flex-wrap {
+	flex-wrap: wrap;
+}
+.flex-row {
+	display: flex;
+	flex-direction: row;
 }
