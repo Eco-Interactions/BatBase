@@ -28,19 +28,13 @@
 			$pgCntnrElem.empty();
 	  }
 	  function buildLoginView() {  console.log("buildLoginView called");
-      // $form.unbind('submit').bind('submit', loginSubmit);			//This isn't working.
 	  	$divCntnr = $('<div>').attr('id', 'app-login').addClass('flex-row flex-wrap');
 	  	$divCntnr.append('<img id="batHorzLogo" src="bundles/app/images/BatLogo_Horizontal_Color.svg" style="height: 150px;"/>');
 	  	$divCntnr.append('<h4>Please login with your batplant.org username and password to begin upload.</h4>');
 			$form.appendTo($divCntnr);
 	  }
-	  // function loginSubmit(event) {  console.log("loginSubmit called. event = %O", event);
-	  // 	event.preventDefault();
-	  // 	sendEditorMsg({tag: "loggingIn"});
-	  // 	$form.submit();
-	  // }
   } /* End buildEditorLoginView */
-  function failedSubmit(msg) {
+  function failedSubmit(msgData) {
   	sendEditorMsg({tag: 'reLogin'});
   }
 
