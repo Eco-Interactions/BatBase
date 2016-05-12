@@ -74,7 +74,7 @@
 
     <body data-feedback-url="{{ feedbackurl }}" data-this-url="{{ app.request.pathinfo }}">
 	{% block body %}
-		<div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
+		<div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
 			{% block masthead %}
 			<div id="masthead"  data-img-path="{{ asset('bundles/app/images/') }}">
 				<div id="logo-overlay">
