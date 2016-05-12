@@ -18,9 +18,9 @@
 {% endif %}
 
 {% if is_granted("ROLE_BETA") %}
-	{% set feedbackurl = app.request.getSchemeAndHttpHost() ~ path('app_feedback_post') %}
+	{% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% else %}
-	{% set feedbackurl = "false" %}
+	{% set targeturl = "false" %}
 {% endif %}
 
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
@@ -72,9 +72,9 @@
 		{% endblock javascripts %}
     </head>
 
-    <body data-feedback-url="{{ feedbackurl }}" data-this-url="{{ app.request.pathinfo }}">
+    <body data-ajax-target-url="{{ targeturl }}" data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
 	{% block body %}
-		<div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
+		<div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
 			{% block masthead %}
 			<div id="masthead"  data-img-path="{{ asset('bundles/app/images/') }}">
 				<div id="logo-overlay">

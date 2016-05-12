@@ -16,8 +16,8 @@
   	msgTagMap[msg.data.tag](msg.data);
   }
 	function sendRole(msgData) {
-		var userRole = $('#pg-container').data("user-role");
-		var userName = $('#pg-container').data("user-name");
+		var userRole = $('body').data("user-role");
+		var userName = $('body').data("user-name");
 		sendEditorMsg({
 			tag: "loginRole",
 			role: userRole,

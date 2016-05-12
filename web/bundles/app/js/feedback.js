@@ -6,7 +6,7 @@ $(function() {
 	var submitDisabled = true;
 	var $body = $('body');
 	var $masthead = $('#masthead');
-	var feedbackUrl = $body.data('feedback-url');
+	var feedbackUrl = $body.data('ajax-target-url') + 'feedback/post';
 	var thisUrl = $body.data('this-url');
 	var $lastTopMenu = $('#oimenu>li.last');
 
