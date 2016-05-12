@@ -4,9 +4,7 @@
 
 {% block javascripts %}
   {{ parent() }}
-	{% if is_granted('ROLE_ADMIN') %}
-		<script src="{{ asset('bundles/app/js/on-admin-login.js') }}"></script>
-	{% endif %}
+	<script src="{{ asset('bundles/app/js/on-admin-login.js') }}"></script>
 {% endblock %}
 
 
