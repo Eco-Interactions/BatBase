@@ -1,7 +1,7 @@
 (function(){  console.log("on admin login called.")
 	var sendEditorMsg;
 	var msgTagMap = {
-		init: function(){}, 		// gets sent on successful login by toolbar's init contentload event listener
+		init: Function.prototype, 		// gets sent on successful login by toolbar's init contentload event listener
 		loginRole: sendRole,
 		uploadData: sendEntityData
 	};
