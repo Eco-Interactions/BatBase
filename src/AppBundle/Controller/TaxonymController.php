@@ -234,28 +234,36 @@ class TaxonymController extends Controller
     /**
      * Ajax action to create a new Feedback entity.
      *
-     * @Route("/post", name="app_taxonym_post")
+     * @Route("/push", name="app_taxonym_push")
      * @Method("POST")
      */
-    public function postAction(Request $request)
+    public function pushAction(Request $request)
     {
+        var_dump($request);
         $requestContent = $request->getContent();
-        $postedData = json_decode($requestContent);
-        $name = $postedData->name;
+        $pushedData = json_decode($requestContent);
 
-        $entity = new taxonym();
-        $entity->setName($name);
+        $returnData = [];
 
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($entity);
-        $em->flush();
+        foreach ($pushedData as $entityData) {
+            $name = $entityData->name;
+
+            $entity = new Taxonym();
+            $entity->setName($name);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+            $em->flush();
+
+            $returnData[$name] = [ "id" => $entity->getId() ];
+            // $entityData->id = $entity->getId();
+        }
 
         $response = new JsonResponse();
-        // $response->headers->set('Access-Control-Allow-Methods', '*');
-        // $response->headers->set('Access-Control-Allow-Origin', "chrome-extension://boipiikadifeknmbagecoeleagafgcmf/");
         $response->setData(array(
-            'recievedData' => $postedData,
+            'returnData' => $returnData,
         ));
+
         return $response;
     }
 

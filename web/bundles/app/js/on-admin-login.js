@@ -6,7 +6,7 @@
 		uploadData: sendEntityData
 	};
   window.addEventListener('message', webviewMsgHandler, false);
-  // document.addEventListener("DOMContentLoaded", onDomLoad);
+  document.addEventListener("DOMContentLoaded", onDomLoad);
 
 	function sendMsg(appId, appOrigin, msgData) {
 		appId.postMessage(msgData, appOrigin)
@@ -24,11 +24,38 @@
 			user: userName
 		});
 	}
-	function sendEntityData(msgData) {
-		console.log("data to upload = %O", msgData.data);
+	function recieveEntityData(msgData) {  console.log("data to upload = %O", msgData.data);
+		var data = { entityData: msgData.data };
+		sendEntityData(msgData.entity, data);
+	}
+	function sendEntityData(entity, data) {
+		// var targetUrl = Routing.generate('taxonymn/push');    console.log("targeturk = %s", targetUrl)
+		var targetUrl = $('body').data('ajax-target-url') + entity + '/push'; console.log("targeturk = %s", targetUrl)
+    $.ajax({
+		  method: "POST",
+		  url: $('body').data('ajax-target-url') + entity + '/push',
+		  success: dataSubmitted,
+		  error: ajaxError,
+		  data: JSON.stringify(data)
+		});
 	}
 	function onDomLoad() {
-		var userRole = $('#pg-container').data("user-role"); console.log("userRole = ", userRole);
+		sendStubs();
+	}
+	function ajaxError(jqXHR, textStatus, errorThrown) {
+		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
+	}
+	function dataSubmitted(data, textStatus, jqXHR) {
+		console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+	}
+	function sendStubs() {
+		sendEntityData("taxonym", getTaxonymStubs());
+	}
+	function getTaxonymStubs() {
+		return [ { 'name': 'Taxonys Singularis' },
+             { 'name': 'Repeatus Taxonymicus' },
+             { 'name': 'Creativ Cranius' },
+             { 'name': 'Infini Potentius' } ];
 	}
 
 }());  /* End of namespacing anonymous function */
