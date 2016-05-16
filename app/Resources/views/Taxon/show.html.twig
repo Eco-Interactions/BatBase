@@ -9,6 +9,7 @@
 		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
 	{% endif %}
 
+{% block datatable %}interaction_list{% endblock datatable %}
 
 {% block headline %}
 	{{ include('show_headline.html.twig') }}
