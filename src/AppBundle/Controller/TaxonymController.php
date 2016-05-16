@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -232,14 +233,13 @@ class TaxonymController extends Controller
     }
 
     /**
-     * Ajax action to create a new Feedback entity.
+     * Ajax action to create a new taxonym entity.
      *
-     * @Route("/push", name="app_taxonym_push")
+     * @Route("/post", name="app_taxonym_post")
      * @Method("POST")
      */
-    public function pushAction(Request $request)
+    public function postAction(Request $request)
     {
-        var_dump($request);
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);
 

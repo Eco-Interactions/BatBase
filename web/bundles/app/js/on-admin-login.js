@@ -8,6 +8,15 @@
   window.addEventListener('message', webviewMsgHandler, false);
   document.addEventListener("DOMContentLoaded", onDomLoad);
 
+	function onDomLoad() {
+		sendTaxonymStubs();
+	}
+	function ajaxError(jqXHR, textStatus, errorThrown) {
+		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
+	}
+	function dataSubmitted(data, textStatus, jqXHR) { console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+		var taxonymData = getTaxonymStubReturnData();
+	}
 	function sendMsg(appId, appOrigin, msgData) {
 		appId.postMessage(msgData, appOrigin)
 	}
@@ -29,26 +38,21 @@
 		sendEntityData(msgData.entity, data);
 	}
 	function sendEntityData(entity, data) {
-		// var targetUrl = Routing.generate('taxonymn/push');    console.log("targeturk = %s", targetUrl)
-		var targetUrl = $('body').data('ajax-target-url') + entity + '/push'; console.log("targeturk = %s", targetUrl)
+		// var targetUrl = $('body').data('ajax-target-url') + entity + '/post'; console.log("targeturk = %s", targetUrl)
     $.ajax({
 		  method: "POST",
-		  url: $('body').data('ajax-target-url') + entity + '/push',
+		  url: $('body').data('ajax-target-url') + entity + '/post',
 		  success: dataSubmitted,
 		  error: ajaxError,
 		  data: JSON.stringify(data)
 		});
 	}
-	function onDomLoad() {
-		sendStubs();
-	}
-	function ajaxError(jqXHR, textStatus, errorThrown) {
-		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
-	}
-	function dataSubmitted(data, textStatus, jqXHR) {
-		console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
-	}
-	function sendStubs() {
+
+
+
+
+	/*------------- Stubby Methods -------------------------------------------------------------------------*/
+	function sendTaxonymStubs() {
 		sendEntityData("taxonym", getTaxonymStubs());
 	}
 	function getTaxonymStubs() {
@@ -57,5 +61,29 @@
              { 'name': 'Creativ Cranius' },
              { 'name': 'Infini Potentius' } ];
 	}
+	function getTaxonymStubReturnData() {
+		return [ { 'Taxonys Singularis':   { 'id': 1 } },
+						 { 'Repeatus Taxonymicus': { 'id': 2 } },
+						 { 'Creativ Cranius':      { 'id': 3 } },
+						 { 'Infini Potentius':     { 'id': 4 } } ];
+	}
+	function getTaxaStubData(){
+		// return [{
+		// 	lvl: 6
+		// }
+
+
+
+
+
+
+		// ]
+
+
+
+	}
+
+
+
 
 }());  /* End of namespacing anonymous function */
