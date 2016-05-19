@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -277,4 +278,52 @@ class AuthorController extends Controller
 
         return $this->redirect($this->generateUrl('app_author'));
     }
+
+    /**
+     * Ajax action to create a new Author entity.
+     *
+     * @Route("/post", name="app_author_post")
+     * @Method("POST")
+     */
+    public function postAction(Request $request)
+    {
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+
+        $refData = [];
+        $returnData = [];
+
+        foreach ($pushedData as $entityData) {
+            $refId = $entityData->tempId;
+            $shortName = $entityData->shortName;
+            $lastName = $entityData->last;
+            $fullName = $entityData->first . $entityData->middle . $entityData->last . $entityData->suffix;
+
+            $entity = new Author();
+            $entity->setShortName($shortName);
+            $entity->setLastName($lastName);
+            $entity->setFullName($fullName);
+            $refData[$refId] = $entity;
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+        }
+
+        $em->flush();
+
+        foreach ($refData as $refId => $entity) {
+            $returnData[$refId] = $entity->getId();
+        }
+
+        // $returnData[$name] = [ "id" => $entity->getId() ];
+        // $entityData->id = $entity->getId();
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'author' => $returnData,
+        ));
+
+        return $response;
+    }
+
 }
