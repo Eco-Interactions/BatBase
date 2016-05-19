@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -260,4 +261,50 @@ class PublicationController extends Controller
             'entities' => $entities,
         ));
     }
+
+    /**
+     * Ajax action to create a new Publication entity.
+     *
+     * @Route("/post", name="app_publication_post")
+     * @Method("POST")
+     */
+    public function postAction(Request $request)
+    {
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        $entityData = $pushedData->entityData;
+
+        $refData = [];
+        $returnData = [];
+
+        foreach ($entityData as $data) {
+            $refId = $data->tempId;
+            $name = $data->pubTitle;
+            $publisher = $data->publisher;
+            $pubType = $data->pubType;
+
+            $entity = new Publication();
+            $entity->setName($name);
+            // $entity->setLastName($lastName);
+            // $entity->setFullName($fullName);
+            $refData[$refId] = $entity;
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+        }
+
+        $em->flush();
+
+        foreach ($refData as $refId => $entity) {
+            $returnData[$refId] = $entity->getId();
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'publication' => $returnData,
+        ));
+
+        return $response;
+    }
+
 }
