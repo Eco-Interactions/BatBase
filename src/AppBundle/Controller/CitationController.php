@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -246,4 +247,52 @@ class CitationController extends Controller
             'entities' => $entities,
         ));
     }
+
+    /**
+     * Ajax action to create a new Citation entity.
+     *
+     * @Route("/post", name="app_citation_post")
+     * @Method("POST")
+     */
+    public function postAction(Request $request)
+    {
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        $entityData = $pushedData->entityData;
+        $refEntityData = $pushedData->refData;
+
+        $refData = [];
+        $returnData = [];
+
+        foreach ($entityData as $data) {
+            $refId = $data->citId;
+            // $description = $data->??;
+            $fullText = $data->fullText;
+            $authors = $data->author;
+            $publication = $refEntityData->publication[$data->publication];
+
+            $entity = new Citation();
+            $entity->setName($name);
+            // $entity->setLastName($lastName);
+            // $entity->setFullName($fullName);
+            $refData[$refId] = $entity;
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+        }
+
+        $em->flush();
+
+        foreach ($refData as $refId => $entity) {
+            $returnData[$refId] = $entity->getId();
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'publication' => $returnData,
+        ));
+
+        return $response;
+    }
+
 }

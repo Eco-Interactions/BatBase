@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -243,5 +244,53 @@ class RegionController extends Controller
             ->add('submit', 'submit', array('label' => 'Delete'))
             ->getForm()
         ;
+    }
+
+    /**
+     * Ajax action to create a new Region entity.
+     *
+     * @Route("/post", name="app_region_post")
+     * @Method("POST")
+     */
+    public function postAction(Request $request)
+    {
+        // $requestContent = $request->getContent();
+        // $pushedData = json_decode($requestContent);
+        // $entityData = $pushedData->entityData;
+
+        // $refData = [];
+        // $returnData = [];
+
+        // foreach ($pushedData as $entityData) {
+        //     $refId = $entityData->tempId;
+        //     $name = $entityData->pubTitle;
+        //     $publisher = $entityData->publisher;
+        //     $pubType = $entityData->pubType;
+
+        //     $entity = new Publication();
+        //     $entity->setName($name);
+        //     // $entity->setLastName($lastName);
+        //     // $entity->setFullName($fullName);
+        //     $refData[$refId] = $entity;
+
+        //     $em = $this->getDoctrine()->getManager();
+        //     $em->persist($entity);
+        // }
+
+        // $em->flush();
+
+        // foreach ($refData as $refId => $entity) {
+        //     $returnData[$refId] = $entity->getId();
+        // }
+
+        // // $returnData[$name] = [ "id" => $entity->getId() ];
+        // // $entityData->id = $entity->getId();
+
+        // $response = new JsonResponse();
+        // $response->setData(array(
+        //     'publication' => $returnData,
+        // ));
+
+        // return $response;
     }
 }
