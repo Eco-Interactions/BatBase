@@ -285,7 +285,7 @@ class AuthorController extends Controller
      * @Route("/post", name="app_author_post")
      * @Method("POST")
      */
-    public function postAction(Request $request)
+    public function postAction(Request $request)            // postNewAction
     {
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);

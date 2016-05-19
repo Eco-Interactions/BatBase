@@ -43,7 +43,7 @@
 		var entities = ['author', 'publication']
 		var data = msgData.data;
 
-		entities.forEach(function(entity){
+		entities.forEach(function(entity){											//check json size being uploaded 
 			var dataObj = { entityData: data[entity], refData: postedData };
 			postEntityData(entity, dataObj);
 		});
