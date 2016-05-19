@@ -1,21 +1,17 @@
 (function(){  console.log("on admin login called.")
 	var sendEditorMsg;
+	var postedData = {};
+
 	var msgTagMap = {
 		init: Function.prototype, 		// gets sent on successful login by toolbar's init contentload event listener
 		loginRole: sendRole,
-		uploadData: sendEntityData
+		uploadData: recieveEntityData
 	};
   window.addEventListener('message', webviewMsgHandler, false);
   document.addEventListener("DOMContentLoaded", onDomLoad);
 
 	function onDomLoad() {
-		sendTaxonymStubs();
-	}
-	function ajaxError(jqXHR, textStatus, errorThrown) {
-		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
-	}
-	function dataSubmitted(data, textStatus, jqXHR) { console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
-		var taxonymData = getTaxonymStubReturnData();
+		sendResultStubs();
 	}
 	function sendMsg(appId, appOrigin, msgData) {
 		appId.postMessage(msgData, appOrigin)
@@ -33,16 +29,30 @@
 			user: userName
 		});
 	}
-	function recieveEntityData(msgData) {  console.log("data to upload = %O", msgData.data);
-		var data = { entityData: msgData.data };
-		sendEntityData(msgData.entity, data);
+	function ajaxError(jqXHR, textStatus, errorThrown) {
+		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
 	}
-	function sendEntityData(entity, data) {
-		// var targetUrl = $('body').data('ajax-target-url') + entity + '/post'; console.log("targeturk = %s", targetUrl)
+
+
+/*------------------Post Entity Data Methods-------------------------*/
+	function dataSubmitSucess(data, textStatus, jqXHR) { console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+		var entity = Object.keys(data)[0];
+		postedData[entity] = data[entity];  console.log("postedData = %O", postedData)
+	}
+	function recieveEntityData(msgData) {  console.log("data to upload = %O", msgData.data);
+		var entities = ['author', 'publication']
+		var data = msgData.data;
+
+		entities.forEach(function(entity){
+			var dataObj = { entityData: data[entity], refData: postedData };
+			postEntityData(entity, dataObj);
+		});
+	}
+	function postEntityData(entity, data) {
     $.ajax({
 		  method: "POST",
 		  url: $('body').data('ajax-target-url') + entity + '/post',
-		  success: dataSubmitted,
+		  success: dataSubmitSucess,
 		  error: ajaxError,
 		  data: JSON.stringify(data)
 		});
