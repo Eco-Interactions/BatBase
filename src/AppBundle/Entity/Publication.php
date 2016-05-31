@@ -59,6 +59,19 @@ class Publication
     private $name;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="publication_type", type="string", length=255, nullable=true)
+     */
+    private $publicationType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
+     */
+    private $publisher;
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="publication")
@@ -237,6 +250,54 @@ class Publication
     public function getName()
     {
         return $this->name;
+    }
+    
+    /**
+     * Set publicationType.
+     *
+     * @param string $publicationType
+     *
+     * @return Citation
+     */
+    public function setPublicationType($publicationType)
+    {
+        $this->publicationType = $publicationType;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationType.
+     *
+     * @return string
+     */
+    public function getPublicationType()
+    {
+        return $this->publicationType;
+    }
+
+    /**
+     * Set publisher.
+     *
+     * @param string $publisher
+     *
+     * @return Citation
+     */
+    public function setPublisher($publisher)
+    {
+        $this->publisher = $publisher;
+
+        return $this;
+    }
+
+    /**
+     * Get publisher.
+     *
+     * @return string
+     */
+    public function getPublisher()
+    {
+        return $this->publisher;
     }
 
     /**

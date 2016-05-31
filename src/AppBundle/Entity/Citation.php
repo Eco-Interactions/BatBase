@@ -53,6 +53,33 @@ class Citation
     private $publicationIssue;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
+     */
+    private $publicationPages;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
+     */
+    private $publicationVolume;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     */
+    private $title;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="year", type="string", length=255, nullable=true)
+     */
+    private $year;
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="citation")
@@ -229,7 +256,100 @@ class Citation
     {
         return $this->publicationIssue;
     }
+    /**
+     * Set publicationPages.
+     *
+     * @param string $publicationPages
+     *
+     * @return Citation
+     */
+    public function setPublicationPages($publicationPages)
+    {
+        $this->publicationPages = $publicationPages;
 
+        return $this;
+    }
+
+    /**
+     * Get publicationPages.
+     *
+     * @return string
+     */
+    public function getPublicationPages()
+    {
+        return $this->publicationPages;
+    }
+
+    /**
+     * Set publicationVolume.
+     *
+     * @param string $publicationVolume
+     *
+     * @return Citation
+     */
+    public function setPublicationVolum($publicationVolume)
+    {
+        $this->publicationVolume = $publicationVolume;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationVolume.
+     *
+     * @return string
+     */
+    public function getPublicationVolum()
+    {
+        return $this->publicationVolume;
+    }
+    /**
+     * Set title.
+     *
+     * @param string $title
+     *
+     * @return Citation
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set year.
+     *
+     * @param string $year
+     *
+     * @return Citation
+     */
+    public function setYear($year)
+    {
+        $this->year = $year;
+
+        return $this;
+    }
+
+    /**
+     * Get year.
+     *
+     * @return string
+     */
+    public function getYear()
+    {
+        return $this->year;
+    }
     /**
      * Add interactions.
      *
