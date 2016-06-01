@@ -49,21 +49,33 @@
 		});
 	}
 	function postEntityData(entity, data) {
-    $.ajax({
-		  method: "POST",
-		  url: $('body').data('ajax-target-url') + entity + '/post',
-		  success: dataSubmitSucess,
-		  error: ajaxError,
-		  data: JSON.stringify(data)
+    	$.ajax({
+			method: "POST",
+			url: 'ajax/post',
+			success: dataSubmitSucess,
+			error: ajaxError,
+			data: JSON.stringify({
+				entity: entity, 
+				data: data
+			})
 		});
 	}
 
 
 
-
 	/*------------- Stubby Methods -------------------------------------------------------------------------*/
 	function sendResultStubs() {
-		recieveEntityData(getResultStubs());
+		postEntityData("Taxonym", getTaxonymStubs());
+	}
+	function getTaxonymStubs() {
+		return [ { 'name': 'Taxonys Singularis',
+					'tempId': 1 },
+		         { 'name': 'Repeatus Taxonymicus',
+					'tempId': 2 },
+		         { 'name': 'Creativ Cranius',
+					'tempId': 3 },
+		         { 'name': 'Infini Potentius',
+					'tempId': 4 } ];
 	}
 	function getResultStubs() {
 		return { "data": {
