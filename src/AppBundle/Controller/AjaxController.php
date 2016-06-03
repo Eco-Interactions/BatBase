@@ -23,30 +23,36 @@ class AjaxController extends Controller
      * @Method("POST")
      */
     public function postAction(Request $request) 
-	{
-	    if (!$request->isXmlHttpRequest()) {
-	        return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-	    }
-
+	  {
+  	    if (!$request->isXmlHttpRequest()) {
+  	        return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+  	    }   
+  
+        $logger = $this->get('logger');
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);
-        $entityName = "AppBundle\\Entity\\" . $pushedData->entity;
         $entityData = $pushedData->data;
+        $entityName = $pushedData->entity;
+        // $entityName = "Author";
+        $entityClass = "AppBundle\\Entity\\" . $entityName;
         $refData = [];
         $returnData = [];
+        $em = $this->getDoctrine()->getManager();
 
-        foreach ($entityData as $rcrd) {   var_dump($rcrd);     	
-        	$entity = new $entityName;
+        foreach ($entityData as $rcrds) {     
 
-    		foreach ($rcrd as $field => $val) {
-        		$setField = "set" . ucfirst($field);
-        		if ($field === "tempId") { continue; }
-        		$entity->$setField = $val;
-    		}
-        	$refData[$rcrd->tempId] = $entity;
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($entity);
+            foreach ($rcrds as $rcrdId => $rcrd) {         $logger->info('SASSSSSSS:: RCRD ->' . print_r($rcrd, true));
+                $entity = new $entityClass;
+                
+                foreach ($rcrd as $field => $val) {     // $logger->info('SASSSSSSS:: field ->' . print_r($field, true));
+                    if ($field === "tempId") { continue; }
+                    $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
+                    $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));
+                }
+                $refData[$rcrdId] = $entity;
+                
+                $em->persist($entity);
+            }
         }
 
         $em->flush();
