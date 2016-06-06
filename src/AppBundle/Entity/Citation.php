@@ -287,7 +287,7 @@ class Citation
      *
      * @return Citation
      */
-    public function setPublicationVolum($publicationVolume)
+    public function setPublicationVolume($publicationVolume)
     {
         $this->publicationVolume = $publicationVolume;
 
@@ -299,7 +299,7 @@ class Citation
      *
      * @return string
      */
-    public function getPublicationVolum()
+    public function getPublicationVolume()
     {
         return $this->publicationVolume;
     }
