@@ -35,23 +35,62 @@
 
 
 /*------------------Post Entity Data Methods-------------------------*/
-	function dataSubmitSucess(data, textStatus, jqXHR) { console.log("Something Like Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
-		var entity = Object.keys(data)[0];
-		postedData[entity] = data[entity];  console.log("postedData = %O", postedData)
+	function dataSubmitSucess(data, textStatus, jqXHR) { 
+		var entity = Object.keys(data)[0];			console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
+		postedData[entity] = data[entity];  
 	}
 	function recieveEntityData(msgData) {  console.log("upload data = %O", msgData.data);
-		var entities = ['attribution']					//author, publication, attribution
-		var data = msgData.data;
+		var data = msgData.data;  		   console.log("postedData = %O", postedData)
 
-		entities.forEach(function(entity){											//check json size being uploaded 
-			var dataObj = { entityData: data[entity], refData: postedData };
-			postEntityData(entity, dataObj);
-		});
+		$.when.apply($, postSimpleEntities(data)).done(postRemainingEntities);		//	.done(postInteractions);
+	
+		function postSimpleEntities() {
+			var entities = ['publication', 'author', 'country', 'habitatType', 'region', 'level', 'intTag', 'interactionType'];	//, 'citation'  'author', 'publication', 'attribution'				//author, publication, attribution
+			return postAry(entities);
+		}
+		function postAry(entityAry) {
+			var deferred = [];
+
+			entityAry.forEach(function(entity){			console.log("curEntity = %s", entity);						//check json size being uploaded 
+				var entityRelationships = getRelationships(entity);
+				var dataObj = { entityData: data[entity], refData: postedData, linkFields: entityRelationships };
+				deferred.push(postEntityData(entity, dataObj));
+			});
+
+			return deferred;
+		}
+		function postRemainingEntities() { console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
+			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).done(postInteractions);
+		}
+		function postCitsAndLocs() {				console.log('postCitsAndLocs called');
+			return postAry(['citation', 'location']);
+		}
+		function postAttr() {				console.log('postAttr called');
+			return postAry(['attribution']);
+		}
+		function postTaxa() {		console.log('postTaxa called');
+		    var dataObj = { entityData: data['taxon'], refData: postedData }; console.log("dataObj = %O", dataObj);
+			return postEntityData('taxon', dataObj, 'ajax/post/taxon');
+		}
+		function postInteractions(argument) {		console.log('postInteractions called');
+			// body...
+		}
+	} 
+	function getRelationships(entity) {
+		var relationships = {
+			attribution: ['citation', 'author'],
+			citation: ['publication'],
+			taxon: ['level', 'parentTaxon'],
+			location: ['country', 'habitatType', 'region'],
+			interaction: ['level', 'subject', 'object', 'tags', 'interactionType'],
+		}
+		return relationships[entity] || [];
 	}
-	function postEntityData(entity, data) {
-    	$.ajax({
+
+	function postEntityData(entity, data, url) {
+    	return $.ajax({
 			method: "POST",
-			url: 'ajax/post',
+			url: url || 'ajax/post',
 			success: dataSubmitSucess,
 			error: ajaxError,
 			data: JSON.stringify({
@@ -66,6 +105,7 @@
 	/*------------- Stubby Methods -------------------------------------------------------------------------*/
 	function sendResultStubs() {
 		recieveEntityData(getResultStubs());
+		// console.log("results = %O", getResultStubs());
 		// postEntityData("Taxonym", getTaxonymStubs());
 	}
 	function getTaxonymStubs() {
