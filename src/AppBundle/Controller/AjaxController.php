@@ -144,4 +144,85 @@ class AjaxController extends Controller
 
         return $response;
     }
+    /**
+     * Post to Interaction Entity.
+     *
+     * @Route("/post/interaction", name="app_ajax_post_interaction")
+     * @Method("POST")
+     */
+    public function postInteractionAction(Request $request) 
+      {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
+        $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        
+        $entityData = $pushedData->data->entityData;
+        $refData = $pushedData->data->refData;         $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+        $linkFields = $pushedData->data->linkFields;       $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
+
+        $entityClassPrefix = "AppBundle\\Entity\\";
+        $interaction = $entityClassPrefix . "Interaction";
+        $returnRefs = [];
+        $returnData = [];
+        $fieldTransMap = [
+            "subject" => "taxon",
+            "object" => "taxon",
+            "tags" => "intTag"
+        ];
+
+        foreach ($entityData as $rcrdId => $rcrd) {    
+            $entity = new $interaction;
+            
+            foreach ($rcrd as $field => $val) {        $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
+                if ($field === "tempId") { continue; }
+                if ($val === null) { continue; }
+
+                $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
+      
+                $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
+                    $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                    $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
+                    $entity->$setField($relatedEntity);
+                };
+
+                $setRefs = function($field, $val) use ($setRefField) {
+                    if (is_array($val)) {
+                        foreach ($val as $subVal){
+                            $setRefField($field, $subVal);
+                        }
+                    } else {
+                        $setRefField($field, $val);                     
+                    }
+                };  
+
+                if (isset($fieldTransMap[$field])) {
+                    $fieldEntity = $fieldTransMap[$field];      $logger->error('SASSSSSSS:: fieldEntity ->' . print_r($fieldEntity, true));                        
+                    $setRefs($fieldEntity, $val);
+                } else {
+                    $setRefs($field, $val);        
+                }
+            }
+
+            $returnRefs[$rcrdId] = $entity;
+            $em->persist($entity);
+        }
+
+        $em->flush();
+
+        foreach ($returnRefs as $refId => $entity) {
+            $returnData[$refId] = $entity->getId();
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'interaction' => $returnData,
+        ));
+
+        return $response;
+    }
 }
