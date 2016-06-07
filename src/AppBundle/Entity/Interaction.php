@@ -285,7 +285,7 @@ class Interaction
      *
      * @return Interaction
      */
-    public function addTag(\AppBundle\Entity\IntTag $tags)
+    public function setTags(\AppBundle\Entity\IntTag $tags)
     {
         $this->tags[] = $tags;
 
