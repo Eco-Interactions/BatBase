@@ -48,15 +48,14 @@
 			var entities = ['publication', 'author', 'country', 'habitatType', 'region', 'level', 'intTag', 'interactionType'];	//, 'citation'  'author', 'publication', 'attribution'				//author, publication, attribution
 			return postAry(entities);
 		}
+		function postSingle(entity) {
+			var entityRelationships = getRelationships(entity);
+		    var dataObj = { entityData: data[entity], refData: postedData, linkFields: entityRelationships };
+			return postEntityData(entity, dataObj);
+		}
 		function postAry(entityAry) {
 			var deferred = [];
-
-			entityAry.forEach(function(entity){			console.log("curEntity = %s", entity);						//check json size being uploaded 
-				var entityRelationships = getRelationships(entity);
-				var dataObj = { entityData: data[entity], refData: postedData, linkFields: entityRelationships };
-				deferred.push(postEntityData(entity, dataObj));
-			});
-
+			entityAry.forEach(function(entity){	deferred.push(postSingle(entity)); });
 			return deferred;
 		}
 		function postRemainingEntities() { console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
@@ -66,14 +65,16 @@
 			return postAry(['citation', 'location']);
 		}
 		function postAttr() {				console.log('postAttr called');
-			return postAry(['attribution']);
+			return postSingle('attribution');
 		}
 		function postTaxa() {		console.log('postTaxa called');
 		    var dataObj = { entityData: data['taxon'], refData: postedData }; console.log("dataObj = %O", dataObj);
 			return postEntityData('taxon', dataObj, 'ajax/post/taxon');
 		}
-		function postInteractions(argument) {		console.log('postInteractions called');
-			// body...
+		function postInteractions() {		console.log('postInteractions called');
+			var relationships = getRelationships('interaction');
+		 	var dataObj = { entityData: data['interaction'], refData: postedData, linkFields: relationships }; console.log("dataObj = %O", dataObj);
+			return postEntityData('interaction', dataObj, 'ajax/post/interaction');
 		}
 	} 
 	function getRelationships(entity) {
@@ -82,7 +83,7 @@
 			citation: ['publication'],
 			taxon: ['level', 'parentTaxon'],
 			location: ['country', 'habitatType', 'region'],
-			interaction: ['level', 'subject', 'object', 'tags', 'interactionType'],
+			interaction: ['level', 'subject', 'object', 'tags', 'interactionType', 'citation', 'location'],
 		}
 		return relationships[entity] || [];
 	}
