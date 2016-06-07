@@ -163,7 +163,6 @@ class AjaxController extends Controller
         
         $entityData = $pushedData->data->entityData;
         $refData = $pushedData->data->refData;         $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
-        $linkFields = $pushedData->data->linkFields;       $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
 
         $entityClassPrefix = "AppBundle\\Entity\\";
         $interaction = $entityClassPrefix . "Interaction";

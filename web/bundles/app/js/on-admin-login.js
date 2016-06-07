@@ -73,7 +73,7 @@
 		}
 		function postInteractions() {		console.log('postInteractions called');
 			var relationships = getRelationships('interaction');
-		 	var dataObj = { entityData: data['interaction'], refData: postedData, linkFields: relationships }; console.log("dataObj = %O", dataObj);
+		 	var dataObj = { entityData: data['interaction'], refData: postedData }; console.log("dataObj = %O", dataObj);
 			return postEntityData('interaction', dataObj, 'ajax/post/interaction');
 		}
 	} 
@@ -82,8 +82,7 @@
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
 			taxon: ['level', 'parentTaxon'],
-			location: ['country', 'habitatType', 'region'],
-			interaction: ['level', 'subject', 'object', 'tags', 'interactionType', 'citation', 'location'],
+			location: ['country', 'habitatType', 'region']
 		}
 		return relationships[entity] || [];
 	}
