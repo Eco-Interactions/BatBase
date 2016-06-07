@@ -35,7 +35,7 @@ class AjaxController extends Controller
         $pushedData = json_decode($requestContent);
         
         $entityData = $pushedData->data->entityData;
-        $refData = $pushedData->data->refData;          $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+        $refData = $pushedData->data->refData;        //  $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
         $linkFields = $pushedData->data->linkFields;       $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
 
         $entityName = $pushedData->entity;
@@ -47,7 +47,7 @@ class AjaxController extends Controller
         foreach ($entityData as $rcrdId => $rcrd) {    
             $entity = new $entityClass;
             
-            foreach ($rcrd as $field => $val) {       // $logger->info('SASSSSSSS:: field ->' . print_r($field, true));
+            foreach ($rcrd as $field => $val) {        $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
                 if ($field === "tempId") { continue; }
                 
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
@@ -55,14 +55,21 @@ class AjaxController extends Controller
                 if (!empty($linkFields) && in_array($field, $linkFields)) {      $logger->error('SASSSSSSS:: val ->' . print_r($val, true));
                     if ($val === null) { continue; }
 
-                    $refId = $refData->$field->$val;     // $logger->error('SASSSSSSS:: refId ->' . print_r($refId, true));
-                    $repo = 'AppBundle:' . $entityName;
-                    $relatedEntity = $em->getRepository($entityClassPrefix . $field)->find($refId);
-                    $entity->$setField($relatedEntity);
-                    continue;
+                    if (is_array($val)) {
+                        foreach ($val as $subVal){
+                            $refId = $refData->$field->$subVal;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                            $relatedEntity = $em->getRepository($entityClassPrefix . $field)->find($refId);
+                            $entity->$setField($relatedEntity);
+                        }
+                    } else {
+                        $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: refId ->' . print_r($refId, true));
+                        $relatedEntity = $em->getRepository($entityClassPrefix . $field)->find($refId);
+                        $entity->$setField($relatedEntity);                        
+                    }
+                } else {
+                    $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));   
                 }
                 
-                $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));
             }
 
             $returnRefs[$rcrdId] = $entity;
