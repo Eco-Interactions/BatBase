@@ -26,8 +26,7 @@ class AjaxController extends Controller
 	  {
   	    if (!$request->isXmlHttpRequest()) {
   	        return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-  	    }   
-        // ini_set("display_errors", "1");
+  	    }  
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
@@ -51,25 +50,26 @@ class AjaxController extends Controller
                 if ($field === "tempId") { continue; }
                 
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
-      
+                
+                $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
+                    $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                    $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
+                    $entity->$setField($relatedEntity);
+                };
+
                 if (!empty($linkFields) && in_array($field, $linkFields)) {      $logger->error('SASSSSSSS:: val ->' . print_r($val, true));
                     if ($val === null) { continue; }
 
                     if (is_array($val)) {
-                        foreach ($val as $subVal){
-                            $refId = $refData->$field->$subVal;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
-                            $relatedEntity = $em->getRepository($entityClassPrefix . $field)->find($refId);
-                            $entity->$setField($relatedEntity);
+                        foreach ($val as $subVal) {
+                            $setRefField($field, $subVal);                           
                         }
                     } else {
-                        $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: refId ->' . print_r($refId, true));
-                        $relatedEntity = $em->getRepository($entityClassPrefix . $field)->find($refId);
-                        $entity->$setField($relatedEntity);                        
+                        $setRefField($field, $val);              
                     }
                 } else {
                     $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));   
                 }
-                
             }
 
             $returnRefs[$rcrdId] = $entity;
@@ -139,7 +139,7 @@ class AjaxController extends Controller
 
         $response = new JsonResponse();
         $response->setData(array(
-            "Taxon" => $taxaRefs,
+            "taxon" => $taxaRefs,
         ));
 
         return $response;
