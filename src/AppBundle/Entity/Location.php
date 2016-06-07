@@ -39,11 +39,18 @@ class Location
     private $elevation;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="elevation_max", type="integer", nullable=true)
+     */
+    private $elevationMax;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="elev_unit_abbrv", type="string", length=3)
      */
-    private $elevUnitAbbrv;
+    private $elevUnitAbbrv = "m";
 
     /**
      * @var string
@@ -195,7 +202,7 @@ class Location
      *
      * @return Country
      */
-    public function addRegion(\AppBundle\Entity\Region $regions)
+    public function setRegion(\AppBundle\Entity\Region $regions)
     {
         $this->regions[] = $regions;
 
@@ -266,6 +273,30 @@ class Location
     public function setElevation($elevation)
     {
         $this->elevation = $elevation;
+
+        return $this;
+    }
+
+    /**
+     * Get elevation max.
+     *
+     * @return int
+     */
+    public function getElevationMax()
+    {
+        return $this->elevationMax;
+    }
+
+    /**
+     * Set elevation Max.
+     *
+     * @param int $elevationMax
+     *
+     * @return Location
+     */
+    public function setElevationMax($elevationMax)
+    {
+        $this->elevationMax = $elevationMax;
 
         return $this;
     }

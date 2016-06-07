@@ -311,11 +311,11 @@
 		      "1": {
 		        "description": "Uruguay-Forest",
 		        "elevation": null,
-		        "elevationMaxRange": null,
+		        "elevationMax": null,
 		        "latitude": null,
 		        "longitude": null,
 		        "country": 1,
-		        "regions": [
+		        "region": [
 		          1
 		        ],
 		        "habitatType": 1
@@ -323,11 +323,11 @@
 		      "2": {
 		        "description": "Embrapa Cerrados",
 		        "elevation": 879,
-		        "elevationMaxRange": null,
+		        "elevationMax": null,
 		        "latitude": "-15.6283333",
 		        "longitude": "-47.37083333",
 		        "country": 2,
-		        "regions": [
+		        "region": [
 		          1
 		        ],
 		        "habitatType": 2
@@ -335,11 +335,11 @@
 		      "3": {
 		        "description": "Tucson, AZ",
 		        "elevation": 758,
-		        "elevationMaxRange": null,
+		        "elevationMax": null,
 		        "latitude": 32.2217429,
 		        "longitude": "-110.926479",
 		        "country": 3,
-		        "regions": [
+		        "region": [
 		          2
 		        ],
 		        "habitatType": 3
