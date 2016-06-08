@@ -48,9 +48,9 @@ class Location
     /**
      * @var string
      *
-     * @ORM\Column(name="elev_unit_abbrv", type="string", length=3)
+     * @ORM\Column(name="elev_unit_abbrv", type="string", length=3, nullable=true)
      */
-    private $elevUnitAbbrv = "m";
+    private $elevUnitAbbrv;
 
     /**
      * @var string
