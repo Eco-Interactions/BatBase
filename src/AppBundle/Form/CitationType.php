@@ -15,6 +15,7 @@ class CitationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('title')
             ->add('description')
             ->add('full_text',
                         'textarea',
@@ -26,8 +27,10 @@ class CitationType extends AbstractType
                         )
                     )
             ->add('is_secondary')
-            ->add('publication_issue')
             ->add('publication')
+            ->add('publication_volume')
+            ->add('publication_issue')
+            ->add('publication_pages')
         ;
     }
 
