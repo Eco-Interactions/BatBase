@@ -8,10 +8,10 @@
 		uploadData: recieveEntityData
 	};
   window.addEventListener('message', webviewMsgHandler, false);
-  document.addEventListener("DOMContentLoaded", onDomLoad);
+  // document.addEventListener("DOMContentLoaded", onDomLoad);
 
 	function onDomLoad() {
-		sendResultStubs();
+		// sendResultStubs();
 	}
 	function sendMsg(appId, appOrigin, msgData) {
 		appId.postMessage(msgData, appOrigin)
@@ -37,10 +37,15 @@
 /*------------------Post Entity Data Methods-------------------------*/
 	function dataSubmitSucess(data, textStatus, jqXHR) { 
 		var entity = Object.keys(data)[0];			console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
-		postedData[entity] = data[entity];  
+		if ( entity === "interaction" ) {
+			if ( postedData.interaction === undefined ) { postedData.interaction = []; }
+			postedData.interaction.push( data[entity] );	
+		} else {
+			postedData[entity] = data[entity];  
+		}
 	}
-	function recieveEntityData(msgData) {  console.log("upload data = %O", msgData.data);
-		var data = msgData.data;  		   console.log("postedData = %O", postedData)
+	function recieveEntityData(msgData) {  console.log("upload data = %O", JSON.parse(msgData.data.jsonData));
+		var data = JSON.parse(msgData.data.jsonData);  		   console.log("postedData = %O", postedData)
 
 		$.when.apply($, postSimpleEntities(data)).done(postRemainingEntities);		//	.done(postInteractions);
 	
@@ -59,7 +64,7 @@
 			return deferred;
 		}
 		function postRemainingEntities() { console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
-			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).done(postInteractions);
+			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).done(postInteractions);  //
 		}
 		function postCitsAndLocs() {				console.log('postCitsAndLocs called');
 			return postAry(['citation', 'location']);
@@ -73,10 +78,42 @@
 		}
 		function postInteractions() {		console.log('postInteractions called');
 			var relationships = getRelationships('interaction');
-		 	var dataObj = { entityData: data['interaction'], refData: postedData }; console.log("dataObj = %O", dataObj);
-			return postEntityData('interaction', dataObj, 'ajax/post/interaction');
+
+			if (Object.keys(data['interaction']).length > 1000) {
+				chunkObjs(data['interaction']);
+			} else {
+			 	var dataObj = { entityData: data['interaction'], refData: postedData }; console.log("dataObj = %O", dataObj);
+				return postEntityData('interaction', dataObj, 'ajax/post/interaction');
+			}
 		}
 	} 
+	function chunkObjs(rcrdsObj) {		 console.log("chunkObjs called. rcrdsObj =%O", rcrdsObj);
+		var i, temparray, chunk = 1000;
+		var objKeys = Object.keys(rcrdsObj);
+
+		for ( i = 0; i < objKeys.length; i += chunk) {// console.log("objKeys.length = %s. looping NOW", objKeys.length)
+		    temparray = objKeys.slice(i,i+chunk); //console.log("temparray = %O", temparray)
+		    rcrdsChunk = {};
+		    temparray.forEach(function(key){ // console.log("rcrdsObj[key].tempId = ", rcrdsObj[key].tempId);
+		    	rcrdsChunk[key] = rcrdsObj[key];
+		    });
+		    pushInteractionChunk(rcrdsChunk, 'interaction', 'ajax/post/interaction');
+		} 
+
+		function pushInteractionChunk(data, entity, url) {
+			var dataObj = { entityData: data, refData: postedData }; console.log("rcrdsChunk = %O", JSON.parse(JSON.stringify(rcrdsChunk)));
+			return $.ajax({
+				method: "POST",
+				url: url,
+				success: dataSubmitSucess,
+				error: ajaxError,
+				data: JSON.stringify({
+					entity: 'interaction', 
+					data: dataObj
+				})
+			});
+		}
+	}
 	function getRelationships(entity) {
 		var relationships = {
 			attribution: ['citation', 'author'],
