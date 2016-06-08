@@ -35,29 +35,29 @@ class AjaxController extends Controller
         
         $entityData = $pushedData->data->entityData;
         $refData = $pushedData->data->refData;        //  $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
-        $linkFields = $pushedData->data->linkFields;       $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
+        $linkFields = $pushedData->data->linkFields;     //  $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
 
         $entityName = $pushedData->entity;
         $entityClassPrefix = "AppBundle\\Entity\\";
-        $entityClass = $entityClassPrefix . $entityName;
+        $entityClass = $entityClassPrefix . $entityName;        $logger->info('SASSSSSSS:: entityName ->' . print_r($entityName, true));
         $returnRefs = [];
         $returnData = [];
 
         foreach ($entityData as $rcrdId => $rcrd) {    
             $entity = new $entityClass;
             
-            foreach ($rcrd as $field => $val) {        $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
+            foreach ($rcrd as $field => $val) {     //   $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
                 if ($field === "tempId") { continue; }
                 
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
                 
                 $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
-                    $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                    $refId = $refData->$field->$val;  //    $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
                     $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
                     $entity->$setField($relatedEntity);
                 };
 
-                if (!empty($linkFields) && in_array($field, $linkFields)) {      $logger->error('SASSSSSSS:: val ->' . print_r($val, true));
+                if (!empty($linkFields) && in_array($field, $linkFields)) {   //   $logger->error('SASSSSSSS:: val ->' . print_r($val, true));
                     if ($val === null) { continue; }
 
                     if (is_array($val)) {
@@ -75,7 +75,6 @@ class AjaxController extends Controller
             $returnRefs[$rcrdId] = $entity;
             $em->persist($entity);
         }
-
         $em->flush();
 
         foreach ($returnRefs as $refId => $entity) {
@@ -100,14 +99,14 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }   
-        // ini_set("display_errors", "1");
+        set_time_limit(300);
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);
         
-        $entityData = $pushedData->data->entityData;     //$logger->error('SASSSSSSS:: taxon entityData ->' . print_r($entityData, true));
+        $entityData = $pushedData->data->entityData;   //  $logger->error('SASSSSSSS:: taxon entityData ->' . print_r($entityData, true));
         $levelRefs = $pushedData->data->refData->level;    //      $logger->error('SASSSSSSS:: levelRefs ->' . print_r($levelRefs, true));
 
         $entityClass = "AppBundle\\Entity\\Taxon";
@@ -120,13 +119,13 @@ class AjaxController extends Controller
             $entity->setDisplayName($rcrd->displayName);
 
             $lvlRef = $rcrd->level;
-            $lvlId = $levelRefs->$lvlRef;      $logger->error('SASSSSSSS:: taxaRefs ->' . print_r($taxaRefs, true));
+            $lvlId = $levelRefs->$lvlRef;    //  $logger->error('SASSSSSSS:: taxaRefs ->' . print_r($taxaRefs, true));
             $lvlEntity = $em->getRepository("AppBundle\\Entity\\Level")->find($lvlId);
             $entity->setLevel($lvlEntity);
 
             if ($rcrd->parentTaxon !== null) {
-                $prntRef = $rcrd->parentTaxon;      $logger->error('SASSSSSSS:: prntRef ->' . print_r($prntRef, true));
-                $prntId = $taxaRefs[$prntRef];      $logger->error('SASSSSSSS:: prntId ->' . print_r($prntId, true));
+                $prntRef = $rcrd->parentTaxon;  //    $logger->error('SASSSSSSS:: prntRef ->' . print_r($prntRef, true));
+                $prntId = $taxaRefs[$prntRef];   //   $logger->error('SASSSSSSS:: prntId ->' . print_r($prntId, true));
                 $prntEntity = $em->getRepository("AppBundle\\Entity\\Taxon")->find($prntId);
                 $entity->setParentTaxon($prntEntity);
             }
@@ -155,6 +154,8 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
+        set_time_limit(500);
+
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
