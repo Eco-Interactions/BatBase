@@ -9,6 +9,8 @@
         <tr>
             <th></th>
             <th>Name</th>
+            <th>Publisher</th>
+            <th>Type</th>
             <th>DOI</th>
             <th>Link</th>
             <th>Citation Count</th>
@@ -27,6 +29,8 @@
 					</a>
 				</td>
 				<td><a href="{{ path('app_publication_show', { 'slug': publication.slug }) }}">{{ publication }}</a></td>
+				<td>{{ publication.publisher }}</td>
+				<td>{{ publication.publicationType }}</td>
 				<td>{{ publication.doi }}</td>
 				<td>
 					{% if publication.linkurl is not empty %}

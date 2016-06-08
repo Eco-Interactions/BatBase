@@ -13,8 +13,11 @@
 {% endblock headline %}
 
 {% block detail %}
+    <h4>Publication Details</h4>
 	<div class="inln-flds">
         <span class="lbl">Name:</span> {{ publication.name }}
+        <span class="lbl">Publisher:</span> {{ publication.publisher }}
+        <span class="lbl">Type:</span> {{ publication.publicationType }}
         <span class="lbl">DOI:</span> {{ publication.doi }}
         {% if publication.linkurl is not empty %}
             <a href=" {{ publication.linkurl }}" >

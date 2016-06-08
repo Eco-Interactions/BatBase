@@ -16,9 +16,11 @@ class PublicationType extends AbstractType
     {
         $builder
             ->add('doi')
+            ->add('name')
+            ->add('publisher')
+            ->add('publication_type')
             ->add('link_display')
             ->add('link_url')
-            ->add('name')
         ;
     }
 
