@@ -1,4 +1,4 @@
-(function(){  console.log("on admin login called.")
+(function(){ // console.log("on admin login called.")
 	var sendEditorMsg;
 	var postedData = {};
 
@@ -64,7 +64,7 @@
 			return deferred;
 		}
 		function postRemainingEntities() { console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
-			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).done(postInteractions);  //
+			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).then(postDomains).done(postInteractions);  //
 		}
 		function postCitsAndLocs() {				console.log('postCitsAndLocs called');
 			return postAry(['citation', 'location']);
@@ -75,6 +75,9 @@
 		function postTaxa() {		console.log('postTaxa called');
 		    var dataObj = { entityData: data['taxon'], refData: postedData }; console.log("dataObj = %O", dataObj);
 			return postEntityData('taxon', dataObj, 'ajax/post/taxon');
+		}
+		function postDomains() {
+			return postSingle('domain');
 		}
 		function postInteractions() {		console.log('postInteractions called');
 			var relationships = getRelationships('interaction');
@@ -118,8 +121,9 @@
 		var relationships = {
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
-			taxon: ['level', 'parentTaxon'],
-			location: ['country', 'habitatType', 'region']
+			domain: ['taxon'],
+			location: ['country', 'habitatType', 'region'],
+			taxon: ['level', 'parentTaxon']
 		}
 		return relationships[entity] || [];
 	}
