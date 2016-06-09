@@ -13,6 +13,7 @@
             <th>Regions</th>
             <th class="{{ loccols.habtype }}">Habitat Type</th>
             <th>Elevation</th>
+            <th>Elevation Max</th>
             <th>Latitude</th>
             <th>Longitude</th>
             <th>Citations</th>
@@ -31,10 +32,19 @@
 				</a>
             </td>
             <td>{{ location.description }}</td>
-            <td class="{{ loccols.country }}"><a href="{{ path('app_country_show', { 'slug': location.country.slug }) }}">{{ location.country.name}}</a></td>
+            {% if (location.country != null) %}
+            	<td class="{{ loccols.country }}"><a href="{{ path('app_country_show', { 'slug': location.country.slug }) }}">{{ location.country.name}}</a></td>
+            {% else %}
+            	<td></td>
+            {% endif %}
             <td>{{ location.regions|join(' , ') }}</td>
-            <td class="{{ loccols.habtype }}"><a href="{{ path('app_habitat_type_show', { 'slug': location.habitatType.slug }) }}">{{ location.habitatType.name }}</a></td>
+            {% if (location.habitatType != null) %}
+            	<td class="{{ loccols.habtype }}"><a href="{{ path('app_habitat_type_show', { 'slug': location.habitatType.slug }) }}">{{ location.habitatType.name }}</a></td>
+            {% else %}
+            	<td></td>
+            {% endif %}
             <td>{{ location.elevation }} {{ location.elevUnitAbbrv }}</td>
+            <td>{{ location.elevationMax }} {{ location.elevUnitAbbrv }}</td>
             <td>{{ location.latitude|trim('0') }}</td>
             <td>{{ location.longitude|trim('0') }}</td>
             <td>
@@ -54,7 +64,7 @@
 				{% endfor %}
 				{{ citationary|join(' / ') }}
 				{% if unshowncnt > 0 %}
-					...and {{ unshowncnt }} other unique citations ({{ unqcitationcnt }} ttl)
+					...and {{ unshowncnt }} other unique citations ({{ unqcitationcnt }} total)
 				{% endif %}
 			</td>
 			<td>{{ location.interactions | length }}</td>

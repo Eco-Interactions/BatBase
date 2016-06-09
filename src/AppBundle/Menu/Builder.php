@@ -45,6 +45,10 @@ class Builder extends ContainerAware
 					'route' => 'app_domain_show',
 					'routeParameters' => array('slug' => 'plant')
 				));
+				$menu['Database']->addChild('All Arthropod Taxa', array(
+					'route' => 'app_domain_show',
+					'routeParameters' => array('slug' => 'arthropod')
+				));
 				$menu['Database']->addChild('All Interactions', array('route' => 'app_interaction'));
 			}
 			$menu->addChild($user_name, array('uri' => '#'));
@@ -57,7 +61,7 @@ class Builder extends ContainerAware
 					$menu[$user_name]['Export']->setAttribute('class', 'smtrigger arrow');
 						$menu[$user_name]['Export']->addChild('Authors', array('route' => 'app_author_export'));
 						$menu[$user_name]['Export']->addChild('Citations', array('route' => 'app_citation_export'));
-						$menu[$user_name]['Export']->addChild('Interactions', array('route' => 'app_interaction_export'));
+						// $menu[$user_name]['Export']->addChild('Interactions', array('route' => 'app_interaction_export'));
 					}
 		} else {
 			$menu->addChild('Login', array('route' => 'fos_user_security_login'));

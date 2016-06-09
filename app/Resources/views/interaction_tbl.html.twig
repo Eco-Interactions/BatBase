@@ -30,13 +30,21 @@
 				</a>
             </td>
             <td class="{{ colclass.intrtype }}"><a href="{{ path('app_interaction_type_show', { 'slug': interaction.interactiontype.slug }) }}">{{ interaction.interactiontype }}</a></td>
-            <td class="{{ colclass.loc }}"><a href="{{ path('app_location_show', { 'id': interaction.location.id }) }}">{{ interaction.location}}</a></td>
+            {% if (interaction.location != null) %}
+                <td class="{{ colclass.loc }}"><a href="{{ path('app_location_show', { 'id': interaction.location.id }) }}">{{ interaction.location}}</a></td>
+            {% else %}
+                <td></td>
+            {% endif %}
             <td class="{{ colclass.subj }}"><a href="{{ path('app_taxon_show', { 'slug': interaction.subject.slug }) }}">{{ interaction.subject }}</a></td>
             <td class="{{ colclass.slvl }}">{{ interaction.subject.level }}</td>
             <td class="{{ colclass.obj }}"><a href="{{ path('app_taxon_show', { 'slug': interaction.object.slug }) }}">{{ interaction.object }}</a></td>
             <td class="{{ colclass.olvl }}">{{ interaction.object.level }}</td>
             <td class="{{ colclass.cit }}"><a href="{{ path('app_citation_show', { 'id': interaction.citation.id }) }}">{{ interaction.citation }}</a></td>
-            <td class="{{ colclass.pub }}"><a href="{{ path('app_publication_show', { 'slug': interaction.citation.publication.slug }) }}">{{ interaction.citation.publication }}</a></td>
+            {% if (interaction.citation.publication != null) %}
+                <td class="{{ colclass.pub }}"><a href="{{ path('app_publication_show', { 'slug': interaction.citation.publication.slug }) }}">{{ interaction.citation.publication }}</a></td>
+            {% else %}
+                <td></td>
+            {% endif %}
 			{% if is_granted('ROLE_ADMIN') %}
 				<td class="{{ colclass.admin }}"><a href="{{ path('app_interaction_edit', { 'id': interaction.id }) }}">
 					<img src="{{ asset('bundles/app/images/eif.pencil.svg') }}" class="icopen" title="Edit Interaction" alt="Edit Interaction" />
