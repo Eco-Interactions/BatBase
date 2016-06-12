@@ -4,6 +4,7 @@
 {% set interactions = interactiontype.interactions %}
 {% set view_all_route = path('app_interaction_type') %}
 {% set view_all_ent_plural = 'Interaction Types' %}
+{% set entity_class = 'Interaction Type' %}
 {% set edit_route_name = 'app_interaction_type_edit' %}
 {% set colclass = {'ico': 'vis', 'intrtype': 'invis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
 	{% if is_granted('ROLE_ADMIN') %}

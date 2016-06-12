@@ -1,6 +1,7 @@
 {% extends "layout.html.twig" %}
 
 {% set taxon = entity %}
+{% set entity_class = 'Taxon' %}
 {% set childCnt = taxon.childtaxa | length %}
 {% set achild = taxon.childtaxa | first %}
 {% set edit_route_name = 'app_taxon_edit' %}

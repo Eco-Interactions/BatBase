@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Tests\Controller;
+namespace Tests\AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -25,7 +25,7 @@ class DomainControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/domain');
 
         $link = $crawler
-            ->filter('div#detail-block a') // find all links with the text "Greet"
+            ->filter('div#detail-block a') // find the first link inside detail container
             ->link()
         ;
         $crawler = $client->click($link);

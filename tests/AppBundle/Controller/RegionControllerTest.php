@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Tests\Controller;
+namespace Tests\AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -26,7 +26,7 @@ class RegionControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/region');
 
         $link = $crawler
-            ->filter('div#detail-block a') // find all links with the text "Greet"
+            ->filter('div#detail-block a') // find the first link inside data table
             ->link()
         ;
         $crawler = $client->click($link);
@@ -37,50 +37,35 @@ class RegionControllerTest extends WebTestCase
             'Missing element div#detail-block:li');
     }
 
-    /*
-    public function testCompleteScenario()
+    public function testEdit()
     {
-        // Create a new client to browse the application
         $client = static::createClient();
-
-        // Create a new entry in the database
-        $crawler = $client->request('GET', '/region/');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), "Unexpected HTTP status code for GET /region/");
-        $crawler = $client->click($crawler->selectLink('Create a new entry')->link());
-
-        // Fill in the form and submit it
-        $form = $crawler->selectButton('Create')->form(array(
-            'appbundle_region[field_name]'  => 'Test',
-            // ... other fields to fill
+        $client->followRedirects();
+ 
+        $crawler = $client->request('GET', '/login');
+        $form = $crawler->selectButton('_submit')->form(array(
+          '_username'  => 'testAdmin',
+          '_password'  => 'pw4testAdmin',
         ));
 
         $client->submit($form);
-        $crawler = $client->followRedirect();
+        
+        $crawler = $client->request('GET', '/region');
+        $showLink = $crawler
+            ->filter('div#detail-block a') // find the first link inside data table
+            ->link()
+        ;
+        $crawler = $client->click($showLink);
 
-        // Check data in the show view
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("Test")')->count(), 'Missing element td:contains("Test")');
+        $editLink = $crawler
+            ->selectLink('Edit Region')
+            ->link();
+        
+        $crawler = $client->click($editLink);
 
-        // Edit the entity
-        $crawler = $client->click($crawler->selectLink('Edit')->link());
-
-        $form = $crawler->selectButton('Update')->form(array(
-            'appbundle_region[field_name]'  => 'Foo',
-            // ... other fields to fill
-        ));
-
-        $client->submit($form);
-        $crawler = $client->followRedirect();
-
-        // Check the element contains an attribute with value equals "Foo"
-        $this->assertGreaterThan(0, $crawler->filter('[value="Foo"]')->count(), 'Missing element [value="Foo"]');
-
-        // Delete the entity
-        $client->submit($crawler->selectButton('Delete')->form());
-        $crawler = $client->followRedirect();
-
-        // Check the entity has been delete on the list
-        $this->assertNotRegExp('/Foo/', $client->getResponse()->getContent());
+        $this->assertGreaterThan(
+            0,
+            $crawler->filter('div#detail-block form')->count(),
+            'Missing element div#detail-block form');
     }
-
-    */
 }
