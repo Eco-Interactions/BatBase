@@ -66,50 +66,14 @@
 	function recieveEntityData(msgData) { 										console.log("upload data = %O", JSON.parse(msgData.data.jsonData));
 		var data = JSON.parse(msgData.data.jsonData);  		   					console.log("postedData = %O", postedData)
 
-		$.when.apply($, postSimpleEntities(data)).done(postRemainingEntities);		
-		/**
-		 * Pushes all entities that are not dependent on return data from another.
-		 * @return {array} Ajax promises.
-		 */
-		function postSimpleEntities() {
-			var entities = ['publication', 'author', 'country', 'habitatType', 
-							'region', 'level', 'intTag', 'interactionType'	  ];	
-			return postAry(entities);
+		$.when.apply($, postSimpleEntities(data)).done(postSecondRound);		
+		/** Continues pushing entities in an order that facilitates referencing. */
+		function postSecondRound() { 										// console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
+			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).then(postDomains).done(postRemainingEntities);  //
 		}
-		/**
-		 * Pushes remaining entities in an order that facilitates referencing. 
-		 */
-		function postRemainingEntities() { 										// console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
-			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).then(postDomains).done(postInteractions);  //
-		}
-		function postCitsAndLocs() {											// console.log('postCitsAndLocs called');
-			return postAry(['citation', 'location']);
-		}
-		function postAttr() {													// console.log('postAttr called');
-			return postSingle('attribution');
-		}
-		/**
-		 * TODO: Split taxa records into sets under 1000, probably 500.
-		 */
-		function postTaxa() {													console.log('postTaxa called. This could take awhile.');
-		    var dataObj = { entityData: data['taxon'], refData: postedData }; 	// console.log("dataObj = %O", dataObj);
-			return postEntityData('taxon', dataObj, 'ajax/post/taxon');
-		}
-		function postDomains() {
-			return postSingle('domain');
-		}
-		/**
-		 * NOTE: Splits record collections over 1000 into seperate ajax calls.
-		 */
-		function postInteractions() {											// console.log('postInteractions called');
-			var relationships = getRelationships('interaction');
-
-			if (Object.keys(data['interaction']).length > 1000) {
-				chunkObjs(data['interaction']);
-			} else {
-			 	var dataObj = { entityData: data['interaction'], refData: postedData };// console.log("dataObj = %O", dataObj);
-				return postEntityData('interaction', dataObj, 'ajax/post/interaction');
-			}
+		/** Final push sequence. */
+		function postRemainingEntities() {
+			$.when.apply($, postInteractions()).done(postTags);
 		}
 		/**
 		 * Pushes a single entity, the posted reference data, and an array of 
@@ -130,12 +94,66 @@
 			entityAry.forEach(function(entity){	deferred.push(postSingle(entity)); });
 			return deferred;
 		}
+	/*---------------------------Entity Post Methods--------------------------*/
+		/**
+		 * Pushes all entities that are not dependent on return data from another.
+		 * @return {array} Ajax promises.
+		 */
+		function postSimpleEntities() {
+			var entities = ['publication', 'author', 'country', 'habitatType', 
+							'region', 'level', 'interactionType' ];	
+			return postAry(entities);
+		}
+		function postCitsAndLocs() {											// console.log('postCitsAndLocs called');
+			return postAry(['citation', 'location']);
+		}
+		function postAttr() {													// console.log('postAttr called');
+			return postSingle('attribution');
+		}
+		/**
+		 * NOTE: Due to their self-referencing nature, Taxa must be sent together,
+		 * and take a verry long time to upload.
+		 */
+		function postTaxa() {													console.log('postTaxa called. This could take awhile.');
+		    var dataObj = { entityData: data['taxon'], refData: postedData }; 	// console.log("dataObj = %O", dataObj);
+			return postEntityData('taxon', dataObj, 'ajax/post/taxon');
+		}
+		function postDomains() {
+			return postSingle('domain');
+		}
+		function postTags() {
+			joinPostedInteraction();
+			return postSingle('intTag');										console.log("posting final entity (IntTag).")
+		}
+		/**
+		 * NOTE: Splits record collections over 1000 into seperate ajax calls.
+		 */
+		function postInteractions() {											// console.log('postInteractions called');
+			var relationships = getRelationships('interaction');
+
+			if (Object.keys(data['interaction']).length > 1000) {
+				return chunkObjs(data['interaction']);
+			} else {
+			 	var dataObj = { entityData: data['interaction'], refData: postedData };// console.log("dataObj = %O", dataObj);
+				return postEntityData('interaction', dataObj, 'ajax/post/interaction');
+			}
+		}
+		function joinPostedInteraction() { 
+			var merged = {};
+			postedData.interaction.forEach(function(intRefAry){
+				for (var refId in intRefAry) {
+					merged[refId] = intRefAry[refId];
+				}
+			});  	
+			postedData.interaction = merged;
+		}
 	} /* End recieveEntityData */
 	/**
 	 * Splits interaction record collections over 1000 into seperate ajax calls.
 	 */
 	function chunkObjs(rcrdsObj) {		 										// console.log("chunkObjs called. rcrdsObj =%O", rcrdsObj);
 		var i, temparray, chunk = 1000;
+		var deferred = [];
 		var objKeys = Object.keys(rcrdsObj);
 
 		for ( i = 0; i < objKeys.length; i += chunk) {
@@ -144,8 +162,9 @@
 		    temparray.forEach(function(key){ 
 		    	rcrdsChunk[key] = rcrdsObj[key];
 		    });
-		    pushInteractionChunk(rcrdsChunk, 'interaction', 'ajax/post/interaction');
-		} 
+		    deferred.push(pushInteractionChunk(rcrdsChunk, 'interaction', 'ajax/post/interaction'));
+		}
+		return deferred; 
 
 		function pushInteractionChunk(data, entity, url) {
 			var dataObj = { entityData: data, refData: postedData }; 			// console.log("rcrdsChunk = %O", JSON.parse(JSON.stringify(rcrdsChunk)));
@@ -171,6 +190,7 @@
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
 			domain: ['taxon'],
+			intTag: ['interaction'],
 			location: ['country', 'habitatType', 'region'],
 			taxon: ['level', 'parentTaxon']
 		}
@@ -196,9 +216,8 @@
 			})
 		});
 	}
-
 /*-------------------------Test Methods --------------------------------------*/
-  	// document.addEventListener("DOMContentLoaded", onDomLoad);
+ //  	document.addEventListener("DOMContentLoaded", onDomLoad);
 	// function onDomLoad() { sendResultStubs(); }
 
 /*-------------Stubby Methods-------------------------------------------------*/

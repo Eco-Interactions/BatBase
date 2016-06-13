@@ -129,7 +129,7 @@ class IntTag
      *
      * @return IntTag
      */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
+    public function setInteraction(\AppBundle\Entity\Interaction $interactions)
     {
         $this->interactions[] = $interactions;
 
