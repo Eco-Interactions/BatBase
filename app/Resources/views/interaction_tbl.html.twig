@@ -9,6 +9,7 @@
         <tr>
             <th class="{{ colclass.ico }}"></th>
             <th class="{{ colclass.intrtype }}">Interaction Type</th>
+            <th class="{{ colclass.tags }}">Tags</th>
             <th class="{{ colclass.loc }}">Location</th>
             <th class="{{ colclass.subj }}">Subject Taxon</th>
             <th class="{{ colclass.slvl }}">Subject Level</th>
@@ -23,6 +24,14 @@
     </thead>
     <tbody>
         {% for interaction in interactions %}
+            {% if interaction.tags is not empty %}
+                {% set tags = interaction.tags %}
+            {% else %}
+                {% set tags = '' %}
+            {% endif %}
+
+
+
         <tr>
             <td class="{{ colclass.ico }}">
 				<a href="{{ path('app_interaction_show', { 'id': interaction.id }) }}">
@@ -30,6 +39,7 @@
 				</a>
             </td>
             <td class="{{ colclass.intrtype }}"><a href="{{ path('app_interaction_type_show', { 'slug': interaction.interactiontype.slug }) }}">{{ interaction.interactiontype }}</a></td>
+            <td class="{{ colclass.tags }}">{{ tags }}</td>
             {% if (interaction.location != null) %}
                 <td class="{{ colclass.loc }}"><a href="{{ path('app_location_show', { 'id': interaction.location.id }) }}">{{ interaction.location}}</a></td>
             {% else %}

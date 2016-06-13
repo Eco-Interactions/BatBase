@@ -1,7 +1,7 @@
 {% extends "layout.html.twig" %}
 
 {% set interactions = entities %}
-{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'tags':'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'vis', 'pub': 'vis'} %}
 	{% if is_granted('ROLE_ADMIN') %}
 		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
 	{% endif %}
