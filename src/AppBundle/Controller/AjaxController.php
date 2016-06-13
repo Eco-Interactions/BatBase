@@ -99,7 +99,7 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }   
-        set_time_limit(300);
+        set_time_limit(1000);
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
@@ -154,7 +154,7 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-        set_time_limit(500);
+        set_time_limit(1000);
 
 
         $em = $this->getDoctrine()->getManager();
@@ -163,7 +163,7 @@ class AjaxController extends Controller
         $pushedData = json_decode($requestContent);
         
         $entityData = $pushedData->data->entityData;
-        $refData = $pushedData->data->refData;         $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+        $refData = $pushedData->data->refData;       //  $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
 
         $entityClassPrefix = "AppBundle\\Entity\\";
         $interaction = $entityClassPrefix . "Interaction";
@@ -178,7 +178,7 @@ class AjaxController extends Controller
         foreach ($entityData as $rcrdId => $rcrd) {    
             $entity = new $interaction;
             
-            foreach ($rcrd as $field => $val) {        $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
+            foreach ($rcrd as $field => $val) {     //   $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
                 if ($field === "tempId") { continue; }
                 if ($val === null) { continue; }
 
@@ -201,7 +201,7 @@ class AjaxController extends Controller
                 };  
 
                 if (isset($fieldTransMap[$field])) {
-                    $fieldEntity = $fieldTransMap[$field];      $logger->error('SASSSSSSS:: fieldEntity ->' . print_r($fieldEntity, true));                        
+                    $fieldEntity = $fieldTransMap[$field];   //   $logger->error('SASSSSSSS:: fieldEntity ->' . print_r($fieldEntity, true));                        
                     $setRefs($fieldEntity, $val);
                 } else {
                     $setRefs($field, $val);        
