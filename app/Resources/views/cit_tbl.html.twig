@@ -16,6 +16,7 @@
             <th>Pages</th>
             <th>Type</th>
             <th>Full Text</th>
+            <th>Tags</th>
             <th>Interaction Count</th>
             {% if is_granted('ROLE_ADMIN') %}
 				<th></th>
@@ -42,6 +43,7 @@
                 <td>{{ citation.publicationpages }}</td>
                 <td>{{ citation.isSecondary == 1 ? 'Secondary Citation' : 'Direct Citation' }}</td>
                 <td>{{ citation.fulltext }}</td>
+                <td>{{ citation.tags|join(', ') }}</td>
     			<td>{{ citation.interactions | length }}</td>
     			{% if is_granted('ROLE_ADMIN') %}
     				<td><a href="{{ path('app_citation_edit', { 'id': citation.id }) }}">

@@ -6,7 +6,7 @@
 {% set view_all_ent_plural = 'Citations' %}
 {% set entity_class = 'Citation' %}
 {% set edit_route_name = 'app_citation_edit' %}
-{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'invis', 'pub': 'i`nvis'} %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'tags':'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'invis', 'pub': 'i`nvis'} %}
 	{% if is_granted('ROLE_ADMIN') %}
 		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
 	{% endif %}

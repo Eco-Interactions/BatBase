@@ -24,17 +24,6 @@
     </thead>
     <tbody>
         {% for interaction in interactions %}
-
-            {% if interaction.tags is not empty %}
-                {% set tags = [] %}
-                {% for tag in interaction.tags %}
-                    {% if tag.constrainedToEntity == "Interaction" %}
-                        {% set tags = tags|merge([tag]) %}
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                {% set tags = [''] %}
-            {% endif %}
             <tr>
                 <td class="{{ colclass.ico }}">
     				<a href="{{ path('app_interaction_show', { 'id': interaction.id }) }}">
@@ -42,7 +31,7 @@
     				</a>
                 </td>
                 <td class="{{ colclass.intrtype }}"><a href="{{ path('app_interaction_type_show', { 'slug': interaction.interactiontype.slug }) }}">{{ interaction.interactiontype }}</a></td>
-                <td class="{{ colclass.tags }}">{{ tags|join(", ") }}</td>
+                <td class="{{ colclass.tags }}">{{ interaction.tags|join(", ") }}</td>
                 {% if (interaction.location != null) %}
                     <td class="{{ colclass.loc }}"><a href="{{ path('app_location_show', { 'id': interaction.location.id }) }}">{{ interaction.location}}</a></td>
                 {% else %}
