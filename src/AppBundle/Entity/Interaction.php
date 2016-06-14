@@ -96,8 +96,8 @@ class Interaction
     private $object;
 
     /**
-     * @ORM\ManyToMany(targetEntity="IntTag", mappedBy="interactions")
-     * @ORM\JoinTable(name="interaction_int_tag")
+     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="interactions")
+     * @ORM\JoinTable(name="interaction_tag")
      */
     private $tags;
 
@@ -281,11 +281,11 @@ class Interaction
     /**
      * Add Tags.
      *
-     * @param \AppBundle\Entity\IntTag $tags
+     * @param \AppBundle\Entity\Tag $tags
      *
      * @return Interaction
      */
-    public function setTags(\AppBundle\Entity\IntTag $tags)
+    public function setTags(\AppBundle\Entity\Tag $tags)
     {
         $this->tags[] = $tags;
 
@@ -295,9 +295,9 @@ class Interaction
     /**
      * Remove Tags.
      *
-     * @param \AppBundle\Entity\IntTag $tags
+     * @param \AppBundle\Entity\Tag $tags
      */
-    public function removeTag(\AppBundle\Entity\IntTag $tags)
+    public function removeTag(\AppBundle\Entity\Tag $tags)
     {
         $this->tags->removeElement($tags);
     }

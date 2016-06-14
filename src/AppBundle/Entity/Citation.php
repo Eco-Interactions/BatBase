@@ -79,6 +79,13 @@ class Citation
      * @ORM\Column(name="year", type="string", length=255, nullable=true)
      */
     private $year;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="citations")
+     * @ORM\JoinTable(name="citation_tag")
+     */
+    private $tags;
+
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -149,6 +156,7 @@ class Citation
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->attributions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -350,6 +358,41 @@ class Citation
     {
         return $this->year;
     }
+
+    /**
+     * Add Tags.
+     *
+     * @param \AppBundle\Entity\Tag $tags
+     *
+     * @return Interaction
+     */
+    public function setTags(\AppBundle\Entity\Tag $tags)
+    {
+        $this->tags[] = $tags;
+
+        return $this;
+    }
+
+    /**
+     * Remove Tags.
+     *
+     * @param \AppBundle\Entity\Tag $tags
+     */
+    public function removeTag(\AppBundle\Entity\Tag $tags)
+    {
+        $this->tags->removeElement($tags);
+    }
+
+    /**
+     * Get tags.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
     /**
      * Add interactions.
      *

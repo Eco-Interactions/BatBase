@@ -51,7 +51,7 @@ class InteractionType
     private $interactions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="IntTag", mappedBy="constrainedToType")
+     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="constrainedToType")
      * @ORM\JoinTable(name="type_tag_contraints")
      */
     private $validTags;
@@ -216,11 +216,11 @@ class InteractionType
     /**
      * Add validTags.
      *
-     * @param \AppBundle\Entity\IntTag $validTags
+     * @param \AppBundle\Entity\Tag $validTags
      *
      * @return InteractionType
      */
-    public function addValidTag(\AppBundle\Entity\IntTag $validTags)
+    public function addValidTag(\AppBundle\Entity\Tag $validTags)
     {
         $this->validTags[] = $validTags;
 
@@ -230,9 +230,9 @@ class InteractionType
     /**
      * Remove validTags.
      *
-     * @param \AppBundle\Entity\IntTag $validTags
+     * @param \AppBundle\Entity\Tag $validTags
      */
-    public function removeValidTag(\AppBundle\Entity\IntTag $validTags)
+    public function removeValidTag(\AppBundle\Entity\Tag $validTags)
     {
         $this->validTags->removeElement($validTags);
     }
