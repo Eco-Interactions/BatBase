@@ -39,7 +39,6 @@
 			user: userName
 		});
 	}
-
 /*-----------------AJAX Callbacks---------------------------------------------*/
 	/**
 	 * Stores reference objects for posted entities with each record's temporary 
@@ -58,7 +57,7 @@
 	function ajaxError(jqXHR, textStatus, errorThrown) {
 		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
 	}
-/*------------------Post Entity Data Methods-------------------------*/
+/*------------------Post Entity Data Methods----------------------------------*/
 	/**
 	 * Receives validated data and pushes each entity's record collection up to batplant.org.
 	 * @param  {object} Validated data received from the editor.
@@ -82,7 +81,9 @@
 		 */
 		function postSingle(entity) {
 			var entityRelationships = getRelationships(entity);
-		    var dataObj = { entityData: data[entity], refData: postedData, linkFields: entityRelationships };
+			var postedRefData = getReleventRefs(entityRelationships);  console.log("postedRefData = %O", postedRefData);
+
+		    var dataObj = { entityData: data[entity], refData: postedRefData, linkFields: entityRelationships };
 			return postEntityData(entity, dataObj);
 		}
 		/**
@@ -93,6 +94,13 @@
 			var deferred = [];
 			entityAry.forEach(function(entity){	deferred.push(postSingle(entity)); });
 			return deferred;
+		}
+		function getReleventRefs(relationshipAry) {
+			var refs = {};
+			relationshipAry.forEach(function(entity){
+				refs[entity] = postedData[entity];   if ( refs[entity] === undefined ){console.log("Empty Ref Obj for ", entity)}
+			});
+			return refs;
 		}
 	/*---------------------------Entity Post Methods--------------------------*/
 		/**
@@ -123,7 +131,7 @@
 		}
 		function postTags() {
 			joinPostedInteraction();
-			return postSingle('intTag');										console.log("posting final entity (IntTag).")
+			return postSingle('tag');										console.log("posting final entity (Tag).")
 		}
 		/**
 		 * NOTE: Splits record collections over 1000 into seperate ajax calls.
@@ -138,6 +146,10 @@
 				return postEntityData('interaction', dataObj, 'ajax/post/interaction');
 			}
 		}
+		/** 
+		 * Interactions are processed in batches, their return reference data is
+		 * stored as arrays. These arrays are merged here.
+		 */
 		function joinPostedInteraction() { 
 			var merged = {};
 			postedData.interaction.forEach(function(intRefAry){
@@ -190,7 +202,7 @@
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
 			domain: ['taxon'],
-			intTag: ['interaction'],
+			tag: ['interaction', 'citation'],
 			location: ['country', 'habitatType', 'region'],
 			taxon: ['level', 'parentTaxon']
 		}
