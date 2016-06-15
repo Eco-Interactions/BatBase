@@ -36,47 +36,47 @@ class InteractionControllerTest extends WebTestCase
             'Missing element div#detail-block a');
     }
 
-    public function testEdit()
-    {
-        $client = static::createClient();
-        $client->followRedirects();
+    // public function testEdit()
+    // {
+    //     $client = static::createClient();
+    //     $client->followRedirects();
  
-        $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('_submit')->form(array(
-          '_username'  => 'testAdmin',
-          '_password'  => 'pw4testAdmin',
-        ));
+    //     $crawler = $client->request('GET', '/login');
+    //     $form = $crawler->selectButton('_submit')->form(array(
+    //       '_username'  => 'testAdmin',
+    //       '_password'  => 'pw4testAdmin',
+    //     ));
 
-        $client->submit($form);
+    //     $client->submit($form);
         
-        $crawler = $client->request('GET', '/interaction');
-        $showLink = $crawler
-            ->filter('div#detail-block a') // find the first link inside data table
-            ->link()
-        ;
-        $crawler = $client->click($showLink);
+    //     $crawler = $client->request('GET', '/interaction');
+    //     $showLink = $crawler
+    //         ->filter('div#detail-block a') // find the first link inside data table
+    //         ->link()
+    //     ;
+    //     $crawler = $client->click($showLink);
 
-        $editLink = $crawler
-            ->selectLink('Edit Interaction')
-            ->link();
+    //     $editLink = $crawler
+    //         ->selectLink('Edit Interaction')
+    //         ->link();
         
-        $crawler = $client->click($editLink);
+    //     $crawler = $client->click($editLink);
 
-        $this->assertGreaterThan(
-            0,
-            $crawler->filter('div#detail-block form')->count(),
-            'Missing element div#detail-block form');
-    }
+    //     $this->assertGreaterThan(
+    //         0,
+    //         $crawler->filter('div#detail-block form')->count(),
+    //         'Missing element div#detail-block form');
+    // }
 
-    public function testExport()
-    {
-        $client = static::createClient();
-        $client->followRedirects();
-        $crawler = $client->request('GET', '/interaction/export');
+    // public function testExport()
+    // {
+    //     $client = static::createClient();
+    //     $client->followRedirects();
+    //     $crawler = $client->request('GET', '/interaction/export');
 
-        $this->assertGreaterThan(
-            0,
-            $crawler->filter('div#exprtContnt table')->count(),
-            'Missing element div#exprtContnt table');
-    }
+    //     $this->assertGreaterThan(
+    //         0,
+    //         $crawler->filter('div#exprtContnt table')->count(),
+    //         'Missing element div#exprtContnt table');
+    // }
 }
