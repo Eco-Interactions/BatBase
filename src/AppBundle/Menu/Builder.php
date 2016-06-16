@@ -20,6 +20,7 @@ class Builder extends ContainerAware
 			$menu['About']->addChild('Database', array('route' => 'app_db_top'));
 			$menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
 			$menu['About']->addChild('Team', array('route' => 'app_team'));
+   		$menu->addChild('Search', array('route' => 'app_search'));
 //        $menu->addChild('Links', array('route' => 'AppBundle_links'));
 //        $menu->addChild('News', array('route' => 'AppBundle_news'));
 		if ($this->_isLoggedInUser($options['usrrole'])) {

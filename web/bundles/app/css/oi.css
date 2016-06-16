@@ -94,7 +94,7 @@ span.lbl {
 .invis {
 	display: none;
 }
-/*- Flex -*/
+/*--------------- Flex ---------------------*/
 .flex-wrap {
 	flex-wrap: wrap;
 }
@@ -225,6 +225,45 @@ span.lbl {
 	z-index: 1000;
 }
 /*-------------------------------- Pages -------------------------------------*/
+/*-------- Search --------------*/
+#search-opts {
+	margin: 1em auto 2em auto;
+	height: 100px;
+	width: 1300px;
+	border: 1px black solid;
+	border-radius: .5em;
+}
+.opts-row {
+	padding: .7em;
+	margin: auto;
+	width: 98%;
+	height: 50%;
+}
+#focus-top-opts {
+	width: 100%;
+	height: 100%;
+	display: inline;
+}
+.opts-box {
+	width: 150px;
+	height: 25px;
+	margin: 0 .7em 0 .5em;
+}
+#top-opts {
+	border-bottom: black 1px solid;
+}
+#search-focus {
+	margin-right: 1em;
+}
+input[name=textEntry] {
+	margin-right: 1em;
+}
+#sel-domain {
+}
+
+
+
+
 /*----------- FOS / Registration Page ---------*/
 .fos_user_user_show {
 	margin-top: 1em;

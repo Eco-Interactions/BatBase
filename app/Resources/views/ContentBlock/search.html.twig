@@ -12,7 +12,25 @@
 {% endblock headline %}
 
 {% block detail %}
-    <div id="search-opts" style="height: 100%; border: 1px solid black;" class="ag-fresh"></div>
+    <div id="search-opts" class="ag-fresh ">
+        <div id="top-opts" class="opts-row">
+
+            <span>Search Interactions By: </span>
+            <select id="search-focus" class="opts-box">
+                <option value="taxa" selected>Taxon</option>
+                <option value="locs">Location</option>
+                <option value="auths">Author</option>
+            </select>
+
+            <div id="focus-top-opts"></div>
+        </div>
+        <div class ="opts-row">
+
+
+
+
+        </div>
+    </div>
     <div id="search-grid" style="height: 100%; border: 1px solid black;" class="ag-fresh"></div>
 
 
