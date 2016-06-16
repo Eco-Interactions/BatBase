@@ -367,4 +367,25 @@ class ContentBlockController extends Controller
              )
         );
     }
+
+    /**
+     * Finds and displays Definition page content blocks.
+     *
+     * @Route("/search", name="app_search")
+     */
+    public function searchAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+
+        // $firstcol = $repo->findOneBy(array('slug' => 'home-pg-intro'));
+
+        return $this->render('contentblock/search.html.twig', array(
+            // 'introduction' => $firstcol,
+            // 'memberWelcome' => $memberwelcome,
+            // 'secondColBlock' => $secondcol,
+             )
+        );
+    }
 }

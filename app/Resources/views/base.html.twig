@@ -39,17 +39,19 @@
             <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/buttons.dataTables.min.css') }}" />
             <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/fixedHeader.dataTables.min.css') }}" />
 
+    		<link rel="stylesheet" href="{{ asset('bundles/app/grid/ag-grid.css') }}" />
+		    <link rel="stylesheet" href="{{ asset('bundles/app/grid/theme-fresh.css') }}" />
+
 			<link rel="stylesheet" href="{{ asset('bundles/app/css/ei-reset.css') }}" />
 			<link rel="stylesheet" href="{{ asset('bundles/app/css/header.css') }}" />
 			<link rel="stylesheet" href="{{ asset('bundles/app/css/oi.css') }}" />
-
-
 		{% endblock stylesheets %}
 		{% block javascripts %}
 			<!-- remove zart-ez-logs and switch to minified libs for production -->
 			<script src="{{ asset('bundles/app/js/eco-int-namespace.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/zart-ez-logs-0.1.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/jquery/jquery-2.1.4.js') }}"></script>
+		    <script src="{{ asset('bundles/app/grid/ag-grid.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/slider/eif-frames.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/slider/oislider-config.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/slider/beaverslider-full.js') }}"></script>

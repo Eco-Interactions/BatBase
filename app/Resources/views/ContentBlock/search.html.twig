@@ -1,0 +1,19 @@
+{% extends "layout.html.twig" %}
+
+{# {% set interaction = entity %} #}
+
+{% block javascripts %}
+    {{parent()}}
+    <script src="{{ asset('bundles/app/js/search-page.js') }}"></script>
+{% endblock %}
+
+{% block headline %}
+	Advanced Search
+{% endblock headline %}
+
+{% block detail %}
+    <div id="search-opts" style="height: 100%; border: 1px solid black;" class="ag-fresh"></div>
+    <div id="search-grid" style="height: 100%; border: 1px solid black;" class="ag-fresh"></div>
+
+
+{% endblock detail %}
