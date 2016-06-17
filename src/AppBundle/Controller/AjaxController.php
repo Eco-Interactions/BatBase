@@ -185,7 +185,7 @@ class AjaxController extends Controller
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
       
                 $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
-                    $refId = $refData->$field->$val;      $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                    $refId = $refData->$field->$val;   //   $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
                     $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
                     $entity->$setField($relatedEntity);
                 };
@@ -238,19 +238,42 @@ class AjaxController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
+
         $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent);   $logger->error('SASSSSSSS:: requestContent ->' . print_r($requestContent, true));
+        $pushedData = json_decode($requestContent); //  $logger->error('SASSSSSSS:: requestContent ->' . print_r($requestContent, true));
+        $repo = $pushedData->repo;        $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $repoQ = $pushedData->repoQ;
+        $props = $pushedData->props;
 
-        $focus = $pushedData->focus;
-        $queryObj = $pushedData->query;      //   $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+        $returnObj = new \stdClass;
+        $tempId = 1;
+
+        if ($repoQ === 'findAll') {
+            $entities = $em->getRepository('AppBundle:' . $repo)
+                    ->findAll();
+
+        } else if ($repoQ === "findOne") {
+            // $entity = $em->getRepository('AppBundle:' . $repo)
+            //         ->findOneBy(array('slug' => $slug));
+        }   // $logger->error('SASSSSSSS:: entity ->' . print_r($entity, true));
+
+        foreach ($entities as $entity) {  $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+            $returnObj->$tempId = [];
 
 
+            foreach ($props as $prop) {
+                $getProp = 'get' . ucfirst($prop);  $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
+                $propVal = $entity->$getProp();     $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
 
+                $returnObj->$tempId = array_merge($returnObj->$tempId, [ $prop => $propVal ] );
+            }
 
+            ++$tempId;
+        }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $pushedData,
+            'results' => $returnObj,
         ));
 
         return $response;
