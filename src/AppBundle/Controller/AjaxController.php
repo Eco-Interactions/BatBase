@@ -225,4 +225,36 @@ class AjaxController extends Controller
 
         return $response;
     }
+    /**
+     * Get Search Data.
+     *
+     * @Route("/search", name="app_ajax_search")
+     */
+    public function searchAction(Request $request) 
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
+        $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);   $logger->error('SASSSSSSS:: requestContent ->' . print_r($requestContent, true));
+
+        $focus = $pushedData->focus;
+        $queryObj = $pushedData->query;      //   $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+
+
+
+
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $pushedData,
+        ));
+
+        return $response;
+    }
+
+
 }
