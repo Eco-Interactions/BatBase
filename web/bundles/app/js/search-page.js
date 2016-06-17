@@ -1,20 +1,15 @@
-(function(){
-	console.log("search scripts running fine. You are beautiful. ag = %O", ag)
-
-	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
-
+(function(){  console.log("Anything you can do, you can do awesome...");
 	var columnDefs = [];
-
 	var rowData = [];
-
 	var gridOptions = {
 	    columnDefs: columnDefs,
 	    rowData: rowData
 	};
 
+	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
+
 	function onDOMContentLoaded () {
 		$("select[name='search-focus']").change(selectSearchFocus);
-
 	    // var gridDiv = document.querySelector('#myGrid');
 	    new agGridGlobalFunc('#search-grid', gridOptions);
 
@@ -22,13 +17,23 @@
 	}
 
 	function selectSearchFocus(e) {
-	    if ( $('#search-focus').val() == 'taxa' ) { showTaxonSearchMethods(); }
+	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
-	function showTaxonSearchMethods() {
-		$('#focus-top-opts').html(taxonFocusHtml());
+/*------------------Taxa Search Methods---------------------------------------*/
+	function getDomains() {
+		var dataPkg = {
+			repo: 'domain',
+			repoQ: 'findAll',
+			props: ['slug', 'name']		//Idx0 = findOneBy
+		};
+		sendAjaxQuery(dataPkg, 'ajax/search', showTaxonSearchMethods)
+	}
+	function showTaxonSearchMethods(data) {  console.log("data recieved. %O", data);
+		buildTaxaSearchHtml(data);
+		// $('#focus-top-opts').html(buildTaxaSearchHtml(data));
 		$("input[name='searchMethod']").change(taxaSearchMethod);
 
-		taxaSearchMethod();
+		// taxaSearchMethod();
 	}
 	function taxaSearchMethod(e) { console.log("change fired");
 	    if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
@@ -43,30 +48,18 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	if ( $('#sel-domain').val() == 'bats' ) { showBatLevels(); console.log("bats is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'bat' ) { showBatLevels(); console.log("bats is selected") }  //showBatLevels();
 	}
 	function showBatLevels() {
 		var searchParams = {
 			focus: 'Taxon',
 			query: {
-				domain: 'bats'
+				domain: 'bat'
 			}
 		};
 		$('#opts-row2').html(batLevelsHtml());
 
 		sendAjaxQuery(searchParams, 'ajax/search/taxa');
-	}
-	// function getResults(searchParams) {
-	// 	return sendAjaxQuery(searchParams);
-	// }
-	function sendAjaxQuery(dataPkg, url) {  console.log("Sending Ajax data =%O", dataPkg)
-		$.ajax({
-			method: "POST",
-			url: url || 'ajax/search',
-			success: dataSubmitSucess,
-			error: ajaxError,
-			data: JSON.stringify(dataPkg)
-		});
 	}
 	function batLevelsHtml() {
 		return `<span>Family: </span>
@@ -76,23 +69,80 @@
 				<span>Species: </span>
 				<select id="species" class="opts-box"></select>`;
 	}
-	function taxonFocusHtml() {
-		return `<label>
-                <input type="radio" name="searchMethod" value="textSearch">
-                Text Search 
-                <input type="text" name="textEntry" class="opts-box" placeholder="Enter Taxon Name">
-            </label>
-            <label>
-                <input type="radio" name="searchMethod" value="browseSearch" checked>
-                Browse Taxa Names
-                <select id="sel-domain" class="opts-box" disabled>
-                    <option value="bats" selected>Bats</option>
-                    <option value="plants">Plants</option>
-                    <option value="bugs">Arthropods</option>
-                </select>
-            </label>`;
+	function buildTaxaSearchHtml(data) {
+		var txtSearchElems = buildTxtSearchElems();
+		var browseElems = buildBrowseElems();
+		var domainOpts = getDomainOpts(data.results); console.log("domainOpts = %O", domainOpts);
+		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+
+		$('#focus-top-opts').append([txtSearchElems, browseElems])
+
+        function getDomainOpts(data) {
+        	var optsAry = [];
+        	for (var rcrdId in data) { console.log("rcrdId = %O", data[rcrdId]);
+        		optsAry.push({ value: data[rcrdId].slug, text: data[rcrdId].name });
+        	}
+        	return optsAry;
+        }
+		function buildTxtSearchElems() {
+			var elems = createElem('label');
+			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
+			$(elems).append(createElem('span', { text: "Text Search" })); // console.log("elems = %O", elems)
+			$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
+			return elems;
+		}
+		function buildBrowseElems() {
+			var elems = createElem('label');
+			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
+			$(elems).append(createElem('span', { text: "Browse Taxa Names" })); // console.log("elems = %O", elems)
+			return elems;
+		}
+	} /* End buildTaxaSearchHtml */
+/*----------------------Util----------------------------------------------------------------------*/
+	function buildSelectElem(options, attrs) {
+		var selectElem = createElem('select', attrs); 
+
+		options.forEach(function(opts){
+			$(selectElem).append($("<option/>", {
+			    value: opts.value,
+			    text: opts.text
+			}));
+		});
+		return selectElem;
 	}
-/*-----------------AJAX Callbacks---------------------------------------------*/
+	function createElem(tag, attrs) {   console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
+	    var elem = document.createElement(tag);
+	
+		if (attrs) {
+		    elem.id = attrs.id || '';
+		    elem.className = attrs.class || '';   //Space seperated classNames
+
+		    if (attrs.text) { $(elem).text(attrs.text); }
+
+		    if (attrs.name || attrs.type || attrs.value ) { 
+		    	$(elem).attr({
+		    		name: attrs.name   || '', 
+		    		type: attrs.type   || '',
+		    		value: attrs.value || '',
+		    		placeholder: attrs.placeholder || '',
+		    	}); 
+		    }
+		}
+	
+	    // if (parentElem) { parentElem.appendChild(elem); }
+
+	    return elem;
+	}
+/*-----------------AJAX ------------------------------------------------------*/
+	function sendAjaxQuery(dataPkg, url, successCb) {  console.log("Sending Ajax data =%O", dataPkg)
+		$.ajax({
+			method: "POST",
+			url: url,
+			success: successCb || dataSubmitSucess,
+			error: ajaxError,
+			data: JSON.stringify(dataPkg)
+		});
+	}
 	/**
 	 * Stores reference objects for posted entities with each record's temporary 
 	 * reference id and the new database id.     
