@@ -43,13 +43,18 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	if ( $('#sel-domain').val() == 'bats' ) { console.log("bats is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() == 'bats' ) { showBatLevels(); console.log("bats is selected") }  //showBatLevels();
 	}
 	function showBatLevels() {
-		$('#focus-top-opts').html(batLevelsHtml());
+		$('#opts-row2').html(batLevelsHtml());
 	}
 	function batLevelsHtml() {
-		return '';
+		return `<span>Family: </span>
+				<select id="family" class="opts-box"></select>
+				<span>Genus: </span>
+				<select id="genus" class="opts-box"></select>
+				<span>Species: </span>
+				<select id="species" class="opts-box"></select>`;
 	}
 	function taxonFocusHtml() {
 		return `<label>
