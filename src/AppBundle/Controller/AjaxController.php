@@ -289,7 +289,6 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-        // error_reporting(E_Error);
 
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
@@ -299,7 +298,6 @@ class AjaxController extends Controller
 
 
         $returnObj = new \stdClass;
-        // $tempId = 1;
 
         $domainPrnt = $em->getRepository('AppBundle:' . $pushedParams->repo)
                     ->findOneBy(array('slug' => $pushedParams->id));

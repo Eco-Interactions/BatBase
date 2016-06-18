@@ -48,7 +48,7 @@
 	}
 	function selectTaxaDomain(e) {
     	if ( $('#sel-domain').val() === 'bat' ) { console.log("bats is selected") }  //showBatLevels();
-    	if ( $('#sel-domain').val() === 'arthropod' ) { showBugLevels(); console.log("bats is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'arthropod' ) { showBugLevels(); console.log("bugs is selected") }  //showBatLevels();
 	}
 	function showBugLevels() {
 		var params = {
@@ -58,12 +58,47 @@
 			refProps: ['parentTaxon', 'level'],
 			roles: ['ObjectRoles']
 		};
-		// $('#opts-row2').html(batLevelsHtml());
-
 		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
 	}
 	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
-		// body...
+		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
+		var lvlOpts = buildLvlOptions(taxaIntRcrds);		console.log("lvlOpts = %O", lvlOpts);
+		// var classSel = 
+		// var orderSel = 
+		// var famSel = 
+		// var genusSel = 
+		// var speciSel = 
+		
+	}
+	function buildLvlOptions(rcrds) {
+		var optsObj = {};
+		for (var lvl in rcrds) {
+			var taxaNames = Object.keys(rcrds[lvl]).sort(); console.log("taxaNames = %O", taxaNames);
+			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
+		}
+		return optsObj;
+	}
+	function buildTaxaOptions(taxaNames, rcrds) {
+		return taxaNames.map(function(taxaKey){
+			return {
+				value: rcrds[taxaKey].slug,
+				text: taxaKey
+			};
+		});
+	}
+	function separateByLevel(rcrds) {
+		var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
+		var topLvl = 6;
+		var separated = {};
+
+		for (var taxon in rcrds){
+			if (separated[rcrds[taxon].level] === undefined) { separated[rcrds[taxon].level] = {}; }
+			// Not doing anything with top level currently, but during refactor it may be more useful.
+			if (levels.indexOf(rcrds[taxon].level) < topLvl) { topLvl = levels.indexOf(rcrds[taxon].level); }
+			
+			separated[rcrds[taxon].level][rcrds[taxon].displayName] = rcrds[taxon];
+		}
+		return separated;
 	}
 	function batLevelsHtml() {
 		return `<span>Family: </span>
