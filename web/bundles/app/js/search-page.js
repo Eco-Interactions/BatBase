@@ -30,10 +30,9 @@
 	}
 	function showTaxonSearchMethods(data) {  console.log("data recieved. %O", data);
 		buildTaxaSearchHtml(data);
-		// $('#focus-top-opts').html(buildTaxaSearchHtml(data));
 		$("input[name='searchMethod']").change(taxaSearchMethod);
 
-		// taxaSearchMethod();
+		taxaSearchMethod();
 	}
 	function taxaSearchMethod(e) { console.log("change fired");
 	    if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
@@ -48,18 +47,23 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	if ( $('#sel-domain').val() === 'bat' ) { showBatLevels(); console.log("bats is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'bat' ) { console.log("bats is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'arthropod' ) { showBugLevels(); console.log("bats is selected") }  //showBatLevels();
 	}
-	function showBatLevels() {
-		var searchParams = {
-			focus: 'Taxon',
-			query: {
-				domain: 'bat'
-			}
+	function showBugLevels() {
+		var params = {
+			repo: 'domain',
+			id: 'arthropod',
+			props: ['displayName', 'slug' ],
+			refProps: ['parentTaxon', 'level'],
+			roles: ['ObjectRoles']
 		};
-		$('#opts-row2').html(batLevelsHtml());
+		// $('#opts-row2').html(batLevelsHtml());
 
-		sendAjaxQuery(searchParams, 'ajax/search/taxa');
+		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
+	}
+	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
+		// body...
 	}
 	function batLevelsHtml() {
 		return `<span>Family: </span>
@@ -75,7 +79,10 @@
 		var domainOpts = getDomainOpts(data.results); console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
-		$('#focus-top-opts').append([txtSearchElems, browseElems])
+		$('#focus-top-opts').append([txtSearchElems, browseElems]);
+		/*-- Init State --*/
+		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
+		$('#sel-domain').val('arthropod');
 
         function getDomainOpts(data) {
         	var optsAry = [];
