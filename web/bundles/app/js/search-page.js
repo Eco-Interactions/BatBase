@@ -62,13 +62,23 @@
 	}
 	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
 		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
-		var lvlOpts = buildLvlOptions(taxaIntRcrds);		console.log("lvlOpts = %O", lvlOpts);
-		// var classSel = 
-		// var orderSel = 
-		// var famSel = 
-		// var genusSel = 
-		// var speciSel = 
-		
+		var elems = buildBugSelects(buildLvlOptions(taxaIntRcrds));
+
+		$('#opts-row2').append(elems);
+	}
+	function buildBugSelects(lvlOpts) {
+		var selElems = [];
+		selElems.push(createElem('span', { text: "Class: " }));
+		selElems.push(buildSelectElem(lvlOpts.Class, { class: "opts-box", id: "selClass" }));
+		selElems.push(createElem('span', { text: "Order: " }));
+		selElems.push(buildSelectElem(lvlOpts.Order, { class: "opts-box", id: "selOrder" }));
+		selElems.push(createElem('span', { text: "Family: " }));
+		selElems.push(buildSelectElem(lvlOpts.Family, { class: "opts-box", id: "selFam" }));
+		selElems.push(createElem('span', { text: "Genus: " }));
+		selElems.push(buildSelectElem(lvlOpts.Genus, { class: "opts-box", id: "selGenus" }));
+		selElems.push(createElem('span', { text: "Species: " }));
+		selElems.push(buildSelectElem(lvlOpts.Species, { class: "opts-box", id: "selSpecies" }));
+		return selElems;
 	}
 	function buildLvlOptions(rcrds) {
 		var optsObj = {};
