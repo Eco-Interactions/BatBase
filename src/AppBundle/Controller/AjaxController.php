@@ -279,5 +279,106 @@ class AjaxController extends Controller
         return $response;
     }
 
+    /**
+     * Get Taxa Search Data.
+     *
+     * @Route("/search/taxa", name="app_ajax_search_taxa")
+     */
+    public function searchTaxaAction(Request $request) 
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+        // error_reporting(E_Error);
 
+        $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
+
+        $requestContent = $request->getContent();
+        $pushedParams = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
+
+
+        $returnObj = new \stdClass;
+        // $tempId = 1;
+
+        $domainPrnt = $em->getRepository('AppBundle:' . $pushedParams->repo)
+                    ->findOneBy(array('slug' => $pushedParams->id));
+
+        $prntTaxon = $domainPrnt->getTaxon();
+
+        $directChildren = $prntTaxon->getChildTaxa();
+
+        $this->getNextLevel($directChildren, $pushedParams, $returnObj);
+
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $returnObj,
+        ));
+
+        return $response;
+    }
+    // Recurse to leaf taxon and call getTaxonData
+    private function getNextLevel($siblings, $params, $returnObj) 
+    {
+        foreach ($siblings as $taxon) {
+            $children = $taxon->getChildTaxa(); 
+
+            if (count($children) >= 1) {
+                $this->getNextLevel($children, $params, $returnObj);
+                $this->getTaxonData($taxon, $params, $returnObj);
+            } else {
+                $this->getTaxonData($taxon, $params, $returnObj);
+            }
+        }
+    }
+    private function getTaxonData($taxon, $params, $returnObj) 
+    {
+        $taxonId = $taxon->getSlug();
+        $returnObj->$taxonId = new \stdClass;
+
+        foreach ($params->props as $prop) {
+            $getProp = 'get' . ucfirst($prop);
+            $returnObj->$taxonId->$prop = $taxon->$getProp();           
+        }
+        $returnObj->$taxonId->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
+        $returnObj->$taxonId->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
+    }
+    private function getTaxaInteractions($taxon, $params, $returnObj) 
+    {
+        $intRcrds = new \stdClass;
+
+        foreach ($params->roles as $role) {
+            $getIntRcrds = 'get' . $role; 
+            $interactions = $taxon->$getIntRcrds();
+            $intRcrds->$role = $this->getInteractions($interactions, $params, $returnObj);
+        }
+        return $intRcrds;
+    }
+    private function getInteractions($interactions, $params, $returnObj)
+    {
+        $intRcrds = [];
+
+        foreach ($interactions as $int) {
+            $rcrd = new \stdClass;
+         
+            $rcrd->id = $int->getId();
+            $rcrd->note = $int->getNote();
+            $rcrd->citation = $int->getCitation()->getDescription();
+            $rcrd->interactionType = $int->getInteractionType()->getName();
+            $rcrd->subject = $int->getSubject()->getDisplayName();
+            $rcrd->object = $int->getObject()->getDisplayName();
+            $rcrd->tags = $int->getTags();
+
+            if ($int->getLocation() !== null) {
+                $rcrd->location = $int->getLocation()->getDescription();
+                $rcrd->country = $int->getLocation()->getCountry() === null ?
+                    null : $int->getLocation()->getCountry()->getName() ;
+                $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
+                    null : $int->getLocation()->getHabitatType()->getName() ;
+            }
+            array_push( $intRcrds, $rcrd );
+        }
+        return $intRcrds;
+    }
 }
