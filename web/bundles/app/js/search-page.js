@@ -180,9 +180,7 @@
 		    	}); 
 		    }
 		}
-	
-	    // if (parentElem) { parentElem.appendChild(elem); }
-
+		
 	    return elem;
 	}
 /*-----------------AJAX ------------------------------------------------------*/
