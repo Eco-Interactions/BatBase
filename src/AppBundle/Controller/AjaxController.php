@@ -299,12 +299,12 @@ class AjaxController extends Controller
 
         $returnObj = new \stdClass;
 
-        $domainPrnt = $em->getRepository('AppBundle:' . $pushedParams->repo)
+        $domainParnt = $em->getRepository('AppBundle:' . $pushedParams->repo)
                     ->findOneBy(array('slug' => $pushedParams->id));
 
-        $prntTaxon = $domainPrnt->getTaxon();
+        $parntTaxon = $domainParnt->getTaxon();
 
-        $directChildren = $prntTaxon->getChildTaxa();
+        $directChildren = $parntTaxon->getChildTaxa();
 
         $this->getNextLevel($directChildren, $pushedParams, $returnObj);
 
@@ -332,15 +332,29 @@ class AjaxController extends Controller
     }
     private function getTaxonData($taxon, $params, $returnObj) 
     {
-        $taxonId = $taxon->getSlug();
+        $taxonId = $taxon->getId();
         $returnObj->$taxonId = new \stdClass;
 
         foreach ($params->props as $prop) {
             $getProp = 'get' . ucfirst($prop);
             $returnObj->$taxonId->$prop = $taxon->$getProp();           
         }
+
+        $returnObj->$taxonId->children = $this->getChildren($taxon, $params, $returnObj);
+        $returnObj->$taxonId->parentTaxon = $taxon->getParentTaxon()->getId();           
         $returnObj->$taxonId->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
         $returnObj->$taxonId->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
+    }
+    private function getChildren($taxon, $params, $returnObj)
+    {
+        $childEntities = $taxon->getChildTaxa();
+        $children = [];
+
+        foreach ($childEntities as $child)
+        {
+            array_push($children, $child->getId());
+        }
+        return $children;
     }
     private function getTaxaInteractions($taxon, $params, $returnObj) 
     {
