@@ -306,7 +306,7 @@ class AjaxController extends Controller
 
         $directChildren = $parntTaxon->getChildTaxa();
 
-        $this->getNextLevel($directChildren, $pushedParams, $returnObj);
+        $this->getNextLevel([$parntTaxon], $pushedParams, $returnObj);
 
 
         $response = new JsonResponse();
@@ -371,6 +371,9 @@ class AjaxController extends Controller
     {
         $intRcrds = [];
 
+        $logger = $this->get('logger');
+
+
         foreach ($interactions as $int) {
             $rcrd = new \stdClass;
          
@@ -378,8 +381,14 @@ class AjaxController extends Controller
             $rcrd->note = $int->getNote();
             $rcrd->citation = $int->getCitation()->getDescription();
             $rcrd->interactionType = $int->getInteractionType()->getName();
-            $rcrd->subject = $int->getSubject()->getDisplayName();
-            $rcrd->object = $int->getObject()->getDisplayName();
+            $rcrd->subject = array(
+                "name" => $int->getSubject()->getDisplayName(),
+                "Level" => $int->getSubject()->getLevel()->getName(),
+                "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
+            $rcrd->object = array(
+                "name" => $int->getObject()->getDisplayName(),
+                "level" => $int->getObject()->getLevel()->getName(),
+                "id" => $int->getObject()->getId() );
             $rcrd->tags = $int->getTags();
 
             if ($int->getLocation() !== null) {
