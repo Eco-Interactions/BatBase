@@ -383,7 +383,7 @@ class AjaxController extends Controller
             $rcrd->interactionType = $int->getInteractionType()->getName();
             $rcrd->subject = array(
                 "name" => $int->getSubject()->getDisplayName(),
-                "Level" => $int->getSubject()->getLevel()->getName(),
+                "level" => $int->getSubject()->getLevel()->getName(),
                 "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
             $rcrd->object = array(
                 "name" => $int->getObject()->getDisplayName(),

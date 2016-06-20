@@ -120,13 +120,14 @@
 			if ( skipFields.indexOf(field) !== -1 ) { continue; }
 			if ( field === "subject" || field === "object" ) {
 				rowData[field] = getTaxonName(intRcrd[field]);	
+			} else {
+				rowData[field] = intRcrd[field];
 			}
-			rowData[field] = intRcrd[field];
 		}   // console.log("getIntData called. rowData = %O", rowData);
 		return rowData;
 	}
-	function getTaxonName(taxaData) {
-		return taxaData.level === "Species" ? 
+	function getTaxonName(taxaData) {  console.log("taxaData = %O", taxaData)
+		return taxaData.level == "Species" ? 
 				taxaData.name : 
 				taxaData.level + ' ' + taxaData.name;
 	}
