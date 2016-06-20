@@ -65,6 +65,30 @@
 		var elems = buildBugSelects(buildLvlOptions(taxaIntRcrds));
 
 		$('#opts-row2').append(elems);
+
+		loadTaxaGrid( buildTaxaTree(taxaIntRcrds['Phylum'], data['results']) );
+	}
+	function buildTaxaTree(toplvltaxa, taxaObj) { 
+		var tree = {}
+		for (var taxon in toplvltaxa) {  //console.log("toplvltaxa[taxon] = %O", toplvltaxa[taxon])
+			tree[taxon] = toplvltaxa[taxon];  
+			toplvltaxa[taxon].children = getChildTaxa(toplvltaxa[taxon].children, taxaObj);
+		} console.log("tree = %O", tree);
+		return tree;
+
+		function getChildTaxa(children, taxaObj) { // console.log("get Child Taxa called. arguments = %O", arguments);
+			return children.map(function(childId){
+				var child = taxaObj[childId]; //console.log("childId = %s, child = %O", childId, child);
+
+				if (child.children.length >= 1) { 
+					child.children = getChildTaxa(child.children, taxaObj);
+				} else {
+					child.children = null;
+				}
+
+				return child;
+			});
+		}
 	}
 	function buildBugSelects(lvlOpts) {
 		var selElems = [];
