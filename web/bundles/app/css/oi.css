@@ -142,6 +142,11 @@ span.lbl {
 #top-pgs .second-col {
 	margin: 0 100px 0 25px;
 }
+.sidebar { 
+  flex-grow: 2; 
+  padding: 25px 55px 15px 15px; 
+  font-size: 1.1em; 
+}
 #footer {
 	font-size: 1em;
 	width:100%;
@@ -258,7 +263,8 @@ span.lbl {
 input[name=textEntry] {
 	margin-right: 1em;
 }
-#sel-domain {
+#grid-cntnr {
+	height: 666px;
 }
 
 
