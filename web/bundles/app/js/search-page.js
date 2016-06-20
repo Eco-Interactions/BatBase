@@ -1,25 +1,178 @@
 (function(){  console.log("Anything you can do, you can do awesome...");
-	var columnDefs = [];
-	var rowData = [];
+	/**
+	 * openRow = The identifier for the row in datagrid to be expanded on grid-load
+	 */
+	var gridDiv, openRow, rowData = [], columnDefs = [];
 	var gridOptions = {
-	    columnDefs: columnDefs,
-	    rowData: rowData
+	    columnDefs: getColumnDefs(),
+	    rowData: rowData,
+	    // debug: true,
+	    getNodeChildDetails: getNodeChildDetails
+        // rowSelection: 'multiple',
+        // rowsAlreadyGrouped: true,
+        // enableColResize: true,
+        // enableSorting: true,
+        // unSortIcon: true,
+        // showToolPanel: true,
+        // toolPanelSuppressValues: true,
+        // toolPanelSuppressPivot: true,
+        // enableFilter: true,
+        // rowHeight: 26,
+        // onRowClicked: rowClicked
 	};
 
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
 		$("select[name='search-focus']").change(selectSearchFocus);
-	    // var gridDiv = document.querySelector('#myGrid');
-	    new agGridGlobalFunc('#search-grid', gridOptions);
 
 		selectSearchFocus();
+	}
+	function loadGrid(gridOpts) {
+		var gridOptObj = gridOpts || gridOptions;
+	    gridDiv = document.querySelector('#search-grid');
+	    new agGrid.Grid(gridDiv, gridOptObj);
 	}
 
 	function selectSearchFocus(e) {
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
-/*------------------Taxa Search Methods---------------------------------------*/
+/*------------------AG Grid Methods-------------------------------------------*/
+	function getColumnDefs() {
+		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
+					cellRendererParams: { innerRenderer: innerCellRenderer }
+        		},
+			    {headerName: "Subject Taxon", field: "subject"},
+			    {headerName: "Object Taxon", field: "object"},
+			    {headerName: "Interaction Type", field: "interactionType"},
+			    {headerName: "Tags", field: "tags"},
+			    {headerName: "Habitat Type", field: "habitatType"},
+			    {headerName: "Country", field: "country"},
+			    {headerName: "Location Description", field: "location"},
+			    {headerName: "Citation", field: "citation"},
+			    {headerName: "Note", field: "note"}];
+	}
+	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
+		return params.data.name || null;
+	}
+	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
+	    if (rcrd.isParent) {
+	        return {
+	            group: true,
+	            expanded: rcrd.open,
+	            children: rcrd.children
+	        };
+	    } else {
+	        return null;
+	    }
+  	}
+	function loadTaxaGrid(taxaTree, opentaxa) {
+		var topTaxaRows = [];
+		for (var taxon in taxaTree) {
+			topTaxaRows.push( getRowData(taxaTree[taxon]) );
+		}
+		topTaxaRows.forEach(function(taxaRowAry){ $.merge(rowData, taxaRowAry);	});  console.log("final rows = %O", rowData);
+
+		loadGrid();
+	}
+	function getRowData(taxon) {//   console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments);
+		var isParent = taxon.children !== null; 
+		var rows = [];
+		rows.push({
+			name: taxon.displayName,
+			isParent: taxon.interactions !== null || taxon.children !== null,
+			open: taxon.slug === openRow,
+			children: getRowDataForChildren(taxon),
+			// data: {
+	  //           "note": null,
+	  //           "citation": "Willig, M. R., G. R. Camilo & S. J. Noble. 1993",
+	  //           "interactionType": "Consumption",
+	  //           "subject": "Artibeus planirostris",
+	  //           "object": "Arachnida",
+	  //           "location": "Chapada do Araripe in the Floresta Nacional Araripe-Apodí",
+	  //           "country": "Brazil",
+	  //           "habitatType": "Desert"
+			// }
+          
+		});
+
+		// getTaxaInteractions(taxon);
+		
+		return rows;
+		
+	} /* End getRowData */
+	function getTaxaInteractions(taxon) {
+		var ints = [];
+		for (var role in taxon.interactions) {
+			if ( taxon.interactions[role].length >= 1 ) {
+				taxon.interactions[role].forEach(function(intRcrd){
+					ints.push( getIntData(intRcrd) );
+				});
+			}
+		}
+		return ints;
+	}
+	function getIntData(intRcrd) {
+		var skipFields = ['id', 'tags'];
+		var rowData = {};
+
+		for (var field in intRcrd) {
+			if ( skipFields.indexOf(field) !== -1 ) { continue; }
+			if ( field === "subject" || field === "object" ) {
+				rowData[field] = getTaxonName(intRcrd[field]);	
+			}
+			rowData[field] = intRcrd[field];
+		}   // console.log("getIntData called. rowData = %O", rowData);
+		return rowData;
+	}
+	function getTaxonName(taxaData) {
+		return taxaData.level === "Species" ? 
+				taxaData.name : 
+				taxaData.level + ' ' + taxaData.name;
+	}
+	function getRowDataForChildren(parent) {
+		var chldData = [];
+		var tempChldArys = [];
+
+		for (var childKey in parent.children) {
+			if (parent.children !== null) {tempChldArys.push( getRowData(parent.children[childKey]) )}
+		}
+
+		tempChldArys.push(getTaxaInteractions(parent));
+
+		tempChldArys.forEach(function(ary){
+			$.merge(chldData, ary);
+		});		//	console.log("chldData = %O", chldData);
+
+		return chldData;
+	}
+		// parent: true,
+            // open: true,
+            // name: 'C:',
+            // children: [
+            //     {folder: true,
+            //         name: 'Windows',
+            //         size: '',
+            //         type: 'File Folder',
+            //         dateModified: '27/02/2014 04:12',
+            //         children: [
+            //             {name: 'bfsve.exe', size: '56 kb', type: 'Application', dateModified: '13/03/2014 10:14'},
+            //             {name: 'csup.txt', size: '1 kb', type: 'Text Document', dateModified: '27/11/2012 04:12'},
+            //             {name: 'diagwrn.xml', size: '21 kb', type: 'XML File', dateModified: '18/03/2014 00:56'}
+            //         ]
+            //     },
+// var columnDefs = [
+//     {headerName: "Taxa Tree", field: "name"},
+//     {headerName: "Subject", field: "subject"}
+//     {headerName: "Object", field: "object"}
+//     {headerName: "Interaction Type", field: "interactionType"},
+//     {headerName: "Tags", field: "tags"},
+//     {headerName: "Habitat Type", field: "habitatType"}
+//     {headerName: "Country", field: "country"}
+//     {headerName: "Location Description", field: "location"}
+//     {headerName: "Citation", field: "citation"}
+//     {headerName: "Note", field: "note"}
+// ];/*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {
 		var dataPkg = {
 			repo: 'domain',
@@ -58,6 +211,7 @@
 			refProps: ['parentTaxon', 'level'],
 			roles: ['ObjectRoles']
 		};
+		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
 		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
 	}
 	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
@@ -107,7 +261,7 @@
 	function buildLvlOptions(rcrds) {
 		var optsObj = {};
 		for (var lvl in rcrds) {
-			var taxaNames = Object.keys(rcrds[lvl]).sort(); console.log("taxaNames = %O", taxaNames);
+			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
 		}
 		return optsObj;
@@ -134,14 +288,6 @@
 		}
 		return separated;
 	}
-	function batLevelsHtml() {
-		return `<span>Family: </span>
-				<select id="family" class="opts-box"></select>
-				<span>Genus: </span>
-				<select id="genus" class="opts-box"></select>
-				<span>Species: </span>
-				<select id="species" class="opts-box"></select>`;
-	}
 	function buildTaxaSearchHtml(data) {
 		var txtSearchElems = buildTxtSearchElems();
 		var browseElems = buildBrowseElems();
@@ -155,7 +301,7 @@
 
         function getDomainOpts(data) {
         	var optsAry = [];
-        	for (var rcrdId in data) { console.log("rcrdId = %O", data[rcrdId]);
+        	for (var rcrdId in data) { //console.log("rcrdId = %O", data[rcrdId]);
         		optsAry.push({ value: data[rcrdId].slug, text: data[rcrdId].name });
         	}
         	return optsAry;
@@ -186,7 +332,7 @@
 		});
 		return selectElem;
 	}
-	function createElem(tag, attrs) {   console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
+	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
 	    var elem = document.createElement(tag);
 	
 		if (attrs) {
