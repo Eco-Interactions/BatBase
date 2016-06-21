@@ -7,17 +7,18 @@
 	    columnDefs: getColumnDefs(),
 	    rowData: rowData,
 	    // debug: true,
-	    getNodeChildDetails: getNodeChildDetails
-        // rowSelection: 'multiple',
+	    getNodeChildDetails: getNodeChildDetails,
+	    getRowClass: getStyleClass,
+	    onRowGroupOpened: softRefresh,
+        rowSelection: 'multiple',
         // rowsAlreadyGrouped: true,
-        // enableColResize: true,
-        // enableSorting: true,
-        // unSortIcon: true,
-        // showToolPanel: true,
+        enableColResize: true,
+        enableSorting: true,
+        unSortIcon: true,
         // toolPanelSuppressValues: true,
         // toolPanelSuppressPivot: true,
-        // enableFilter: true,
-        // rowHeight: 26,
+        enableFilter: true,
+        rowHeight: 26,
         // onRowClicked: rowClicked
 	};
 
@@ -38,22 +39,35 @@
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
 /*------------------AG Grid Methods-------------------------------------------*/
-	function getColumnDefs() {
+	function getColumnDefs() {   console.log("typeof cellClassRules", typeof cellClassRules )
 		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer }
-        		},
-			    {headerName: "Subject Taxon", field: "subject"},
-			    {headerName: "Object Taxon", field: "object"},
-			    {headerName: "Interaction Type", field: "interactionType"},
-			    {headerName: "Tags", field: "tags"},
-			    {headerName: "Habitat Type", field: "habitatType"},
-			    {headerName: "Country", field: "country"},
-			    {headerName: "Location Description", field: "location"},
-			    {headerName: "Citation", field: "citation"},
-			    {headerName: "Note", field: "note"}];
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
+			    {headerName: "Subject Taxon", field: "subject", width: 175,},
+			    {headerName: "Object Taxon", field: "object", width: 150 },
+			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
+			    {headerName: "Tags", field: "tags", width: 100,},
+			    {headerName: "Habitat Type", field: "habitatType", width: 125,},
+			    {headerName: "Country", field: "country", width: 100,},
+			    {headerName: "Location Description", field: "location", width: 300,},
+			    {headerName: "Citation", field: "citation", width: 300,},
+			    {headerName: "Note", field: "note", width: 300,} ];
 	}
 	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
+	}
+	function getStyleClass(params) {  console.log("row params = %O", params);
+		var lvlClassMap = {
+			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
+			'Class': 'row-class',		'Order': 'row-order',
+			'Family': 'row-family',		'Genus': 'row-genus',
+			'Species': 'row-species'
+		};
+		if (params.node.data.isParent === false || ( params.node.expanded === true && params.data.interactions === true ) ) {
+			return lvlClassMap[params.data.taxaLvl];
+		} 
+	}
+	function softRefresh() {
+		gridOptions.api.refreshView();
 	}
 	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
 	    if (rcrd.isParent) {
@@ -75,7 +89,7 @@
 
 		loadGrid();
 	}
-	function getRowData(taxon) {//   console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments);
+	function getRowData(taxon) { if (taxon.displayName === "Mesostigmata") { console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments); }
 		var isParent = taxon.children !== null; 
 		var rows = [];
 		rows.push({
@@ -83,6 +97,8 @@
 			isParent: taxon.interactions !== null || taxon.children !== null,
 			open: taxon.slug === openRow,
 			children: getRowDataForChildren(taxon),
+			taxaLvl: taxon.level,
+			interactions: taxon.interactions[Object.keys(taxon.interactions)[0]].length > 0
 			// data: {
 	  //           "note": null,
 	  //           "citation": "Willig, M. R., G. R. Camilo & S. J. Noble. 1993",
@@ -103,18 +119,20 @@
 	} /* End getRowData */
 	function getTaxaInteractions(taxon) {
 		var ints = [];
+		var taxaLvl = taxon.level; 
 		for (var role in taxon.interactions) {
 			if ( taxon.interactions[role].length >= 1 ) {
 				taxon.interactions[role].forEach(function(intRcrd){
-					ints.push( getIntData(intRcrd) );
+					ints.push( getIntData(intRcrd, taxaLvl) );
 				});
 			}
 		}
 		return ints;
 	}
-	function getIntData(intRcrd) {
+	function getIntData(intRcrd, taxaLvl) {
 		var skipFields = ['id', 'tags'];
-		var rowData = {};
+		var rowData = { isParent: false,
+						taxaLvl: taxaLvl };
 
 		for (var field in intRcrd) {
 			if ( skipFields.indexOf(field) !== -1 ) { continue; }
@@ -126,7 +144,7 @@
 		}   // console.log("getIntData called. rowData = %O", rowData);
 		return rowData;
 	}
-	function getTaxonName(taxaData) {  console.log("taxaData = %O", taxaData)
+	function getTaxonName(taxaData) { // console.log("taxaData = %O", taxaData)
 		return taxaData.level == "Species" ? 
 				taxaData.name : 
 				taxaData.level + ' ' + taxaData.name;
@@ -135,11 +153,12 @@
 		var chldData = [];
 		var tempChldArys = [];
 
+		tempChldArys.push(getTaxaInteractions(parent));
+
 		for (var childKey in parent.children) {
 			if (parent.children !== null) {tempChldArys.push( getRowData(parent.children[childKey]) )}
 		}
 
-		tempChldArys.push(getTaxaInteractions(parent));
 
 		tempChldArys.forEach(function(ary){
 			$.merge(chldData, ary);
@@ -147,32 +166,6 @@
 
 		return chldData;
 	}
-		// parent: true,
-            // open: true,
-            // name: 'C:',
-            // children: [
-            //     {folder: true,
-            //         name: 'Windows',
-            //         size: '',
-            //         type: 'File Folder',
-            //         dateModified: '27/02/2014 04:12',
-            //         children: [
-            //             {name: 'bfsve.exe', size: '56 kb', type: 'Application', dateModified: '13/03/2014 10:14'},
-            //             {name: 'csup.txt', size: '1 kb', type: 'Text Document', dateModified: '27/11/2012 04:12'},
-            //             {name: 'diagwrn.xml', size: '21 kb', type: 'XML File', dateModified: '18/03/2014 00:56'}
-            //         ]
-            //     },
-// var columnDefs = [
-//     {headerName: "Taxa Tree", field: "name"},
-//     {headerName: "Subject", field: "subject"}
-//     {headerName: "Object", field: "object"}
-//     {headerName: "Interaction Type", field: "interactionType"},
-//     {headerName: "Tags", field: "tags"},
-//     {headerName: "Habitat Type", field: "habitatType"}
-//     {headerName: "Country", field: "country"}
-//     {headerName: "Location Description", field: "location"}
-//     {headerName: "Citation", field: "citation"}
-//     {headerName: "Note", field: "note"}
 // ];/*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {
 		var dataPkg = {
