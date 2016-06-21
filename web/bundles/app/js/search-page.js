@@ -55,7 +55,7 @@
 	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
 	}
-	function getStyleClass(params) {  console.log("row params = %O", params);
+	function getStyleClass(params) { // console.log("row params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
@@ -257,6 +257,7 @@
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
+			optsObj[lvl].unshift({value: 'none', text: ' '});
 		}
 		return optsObj;
 	}
@@ -315,15 +316,19 @@
 		}
 	} /* End buildTaxaSearchHtml */
 /*----------------------Util----------------------------------------------------------------------*/
-	function buildSelectElem(options, attrs) {
+	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
-
+		var selected = selected || 'none';
+		
 		options.forEach(function(opts){
 			$(selectElem).append($("<option/>", {
 			    value: opts.value,
 			    text: opts.text
 			}));
 		});
+
+		$(selectElem).val(selected);
+
 		return selectElem;
 	}
 	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
