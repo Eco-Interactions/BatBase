@@ -38,135 +38,7 @@
 	function selectSearchFocus(e) {
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
-/*------------------AG Grid Methods-------------------------------------------*/
-	function getColumnDefs() {   console.log("typeof cellClassRules", typeof cellClassRules )
-		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 175,},
-			    {headerName: "Object Taxon", field: "object", width: 150 },
-			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
-			    {headerName: "Tags", field: "tags", width: 100,},
-			    {headerName: "Habitat Type", field: "habitatType", width: 125,},
-			    {headerName: "Country", field: "country", width: 100,},
-			    {headerName: "Location Description", field: "location", width: 300,},
-			    {headerName: "Citation", field: "citation", width: 300,},
-			    {headerName: "Note", field: "note", width: 300,} ];
-	}
-	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
-		return params.data.name || null;
-	}
-	function getStyleClass(params) { // console.log("row params = %O", params);
-		var lvlClassMap = {
-			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
-			'Class': 'row-class',		'Order': 'row-order',
-			'Family': 'row-family',		'Genus': 'row-genus',
-			'Species': 'row-species'
-		};
-		if (params.node.data.isParent === false || ( params.node.expanded === true && params.data.interactions === true ) ) {
-			return lvlClassMap[params.data.taxaLvl];
-		} 
-	}
-	function softRefresh() {
-		gridOptions.api.refreshView();
-	}
-	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
-	    if (rcrd.isParent) {
-	        return {
-	            group: true,
-	            expanded: rcrd.open,
-	            children: rcrd.children
-	        };
-	    } else {
-	        return null;
-	    }
-  	}
-	function loadTaxaGrid(taxaTree, opentaxa) {
-		var topTaxaRows = [];
-		for (var taxon in taxaTree) {
-			topTaxaRows.push( getRowData(taxaTree[taxon]) );
-		}
-		topTaxaRows.forEach(function(taxaRowAry){ $.merge(rowData, taxaRowAry);	});  console.log("final rows = %O", rowData);
-
-		loadGrid();
-	}
-	function getRowData(taxon) { if (taxon.displayName === "Mesostigmata") { console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments); }
-		var isParent = taxon.children !== null; 
-		var rows = [];
-		rows.push({
-			name: taxon.displayName,
-			isParent: taxon.interactions !== null || taxon.children !== null,
-			open: taxon.slug === openRow,
-			children: getRowDataForChildren(taxon),
-			taxaLvl: taxon.level,
-			interactions: taxon.interactions[Object.keys(taxon.interactions)[0]].length > 0
-			// data: {
-	  //           "note": null,
-	  //           "citation": "Willig, M. R., G. R. Camilo & S. J. Noble. 1993",
-	  //           "interactionType": "Consumption",
-	  //           "subject": "Artibeus planirostris",
-	  //           "object": "Arachnida",
-	  //           "location": "Chapada do Araripe in the Floresta Nacional Araripe-Apodí",
-	  //           "country": "Brazil",
-	  //           "habitatType": "Desert"
-			// }
-          
-		});
-
-		// getTaxaInteractions(taxon);
-		
-		return rows;
-		
-	} /* End getRowData */
-	function getTaxaInteractions(taxon) {
-		var ints = [];
-		var taxaLvl = taxon.level; 
-		for (var role in taxon.interactions) {
-			if ( taxon.interactions[role].length >= 1 ) {
-				taxon.interactions[role].forEach(function(intRcrd){
-					ints.push( getIntData(intRcrd, taxaLvl) );
-				});
-			}
-		}
-		return ints;
-	}
-	function getIntData(intRcrd, taxaLvl) {
-		var skipFields = ['id', 'tags'];
-		var rowData = { isParent: false,
-						taxaLvl: taxaLvl };
-
-		for (var field in intRcrd) {
-			if ( skipFields.indexOf(field) !== -1 ) { continue; }
-			if ( field === "subject" || field === "object" ) {
-				rowData[field] = getTaxonName(intRcrd[field]);	
-			} else {
-				rowData[field] = intRcrd[field];
-			}
-		}   // console.log("getIntData called. rowData = %O", rowData);
-		return rowData;
-	}
-	function getTaxonName(taxaData) { // console.log("taxaData = %O", taxaData)
-		return taxaData.level == "Species" ? 
-				taxaData.name : 
-				taxaData.level + ' ' + taxaData.name;
-	}
-	function getRowDataForChildren(parent) {
-		var chldData = [];
-		var tempChldArys = [];
-
-		tempChldArys.push(getTaxaInteractions(parent));
-
-		for (var childKey in parent.children) {
-			if (parent.children !== null) {tempChldArys.push( getRowData(parent.children[childKey]) )}
-		}
-
-
-		tempChldArys.forEach(function(ary){
-			$.merge(chldData, ary);
-		});		//	console.log("chldData = %O", chldData);
-
-		return chldData;
-	}
-// ];/*------------------Taxa Search Methods---------------------------------------*/
+/*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {
 		var dataPkg = {
 			repo: 'domain',
@@ -197,25 +69,6 @@
     	if ( $('#sel-domain').val() === 'bat' ) { console.log("bats is selected") }  //showBatLevels();
     	if ( $('#sel-domain').val() === 'arthropod' ) { showBugLevels(); console.log("bugs is selected") }  //showBatLevels();
 	}
-	function showBugLevels() {
-		var params = {
-			repo: 'domain',
-			id: 'arthropod',
-			props: ['displayName', 'slug' ],
-			refProps: ['parentTaxon', 'level'],
-			roles: ['ObjectRoles']
-		};
-		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
-		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
-	}
-	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
-		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
-		var elems = buildBugSelects(buildLvlOptions(taxaIntRcrds));
-
-		$('#opts-row2').append(elems);
-
-		loadTaxaGrid( buildTaxaTree(taxaIntRcrds['Phylum'], data['results']) );
-	}
 	function buildTaxaTree(toplvltaxa, taxaObj) { 
 		var tree = {}
 		for (var taxon in toplvltaxa) {  //console.log("toplvltaxa[taxon] = %O", toplvltaxa[taxon])
@@ -237,6 +90,37 @@
 				return child;
 			});
 		}
+	} /* End buildTaxaTree */
+/*---------------Bat Search Methods-------------------------------------------*/
+	function showBatLevels() {
+		var params = {
+			repo: 'domain',
+			id: 'bat',
+			props: ['displayName', 'slug' ],
+			roles: ['ObjectRoles']
+		};
+		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
+		sendAjaxQuery(params, 'ajax/search/taxa', buildBatLvlHtml);
+	}
+/*---------------Plant Search Methods-----------------------------------------*/
+/*---------------Arthropod Search Methods-------------------------------------*/
+	function showBugLevels() {
+		var params = {
+			repo: 'domain',
+			id: 'arthropod',
+			props: ['displayName', 'slug' ],
+			roles: ['ObjectRoles']
+		};
+		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
+		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
+	}
+	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
+		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
+		var elems = buildBugSelects(buildLvlOptions(taxaIntRcrds));
+
+		$('#opts-row2').append(elems);
+
+		loadTaxaGrid( buildTaxaTree(taxaIntRcrds['Phylum'], data['results']) );
 	}
 	function buildBugSelects(lvlOpts) {
 		var selElems = [];
@@ -315,6 +199,128 @@
 			return elems;
 		}
 	} /* End buildTaxaSearchHtml */
+/*------------------AG Grid Methods-------------------------------------------*/
+	function getColumnDefs() {   console.log("typeof cellClassRules", typeof cellClassRules )
+		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
+			    {headerName: "Subject Taxon", field: "subject", width: 175,},
+			    {headerName: "Object Taxon", field: "object", width: 150 },
+			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
+			    {headerName: "Tags", field: "tags", width: 100,},
+			    {headerName: "Habitat Type", field: "habitatType", width: 125,},
+			    {headerName: "Country", field: "country", width: 100,},
+			    {headerName: "Location Description", field: "location", width: 300,},
+			    {headerName: "Citation", field: "citation", width: 300,},
+			    {headerName: "Note", field: "note", width: 300,} ];
+	}
+	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
+		return params.data.name || null;
+	}
+	function getStyleClass(params) { // console.log("row params = %O", params);
+		var lvlClassMap = {
+			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
+			'Class': 'row-class',		'Order': 'row-order',
+			'Family': 'row-family',		'Genus': 'row-genus',
+			'Species': 'row-species'
+		};
+		if (params.node.data.isParent === false || ( params.node.expanded === true && params.data.interactions === true ) ) {
+			return lvlClassMap[params.data.taxaLvl];
+		} 
+	}
+	function softRefresh() {
+		gridOptions.api.refreshView();
+	}
+	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
+	    if (rcrd.isParent) {
+	        return {
+	            group: true,
+	            expanded: rcrd.open,
+	            children: rcrd.children
+	        };
+	    } else {
+	        return null;
+	    }
+  	}
+	function loadTaxaGrid(taxaTree, opentaxa) {
+		var topTaxaRows = [];
+		for (var taxon in taxaTree) {
+			topTaxaRows.push( getRowData(taxaTree[taxon]) );
+		}
+		topTaxaRows.forEach(function(taxaRowAry){ $.merge(rowData, taxaRowAry);	});  console.log("final rows = %O", rowData);
+
+		loadGrid();
+	}
+	function getRowData(taxon) { if (taxon.displayName === "Mesostigmata") { console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments); }
+		var isParent = taxon.children !== null; 
+		var rows = [];
+		rows.push({
+			name: taxon.displayName,
+			isParent: taxon.interactions !== null || taxon.children !== null,
+			open: taxon.slug === openRow,
+			children: getRowDataForChildren(taxon),
+			taxaLvl: taxon.level,
+			interactions: taxon.interactions[Object.keys(taxon.interactions)[0]].length > 0 ,          
+		});
+		
+		return rows;
+		
+	} /* End getRowData */
+	function getTaxaInteractions(taxon) {
+		var ints = [];
+		var taxaLvl = taxon.level; 
+		for (var role in taxon.interactions) {
+			if ( taxon.interactions[role].length >= 1 ) {
+				taxon.interactions[role].forEach(function(intRcrd){
+					ints.push( getIntData(intRcrd, taxaLvl) );
+				});
+			}
+		}
+		return ints;
+	}
+	function getIntData(intRcrd, taxaLvl) {
+		var rowData = { isParent: false,
+						taxaLvl: taxaLvl };
+
+		for (var field in intRcrd) {
+			if ( field === 'id' ) { continue; }
+			if ( field === 'tags' ) { rowData[field] = getTags(intRcrd[[field]]); }
+			if ( field === "subject" || field === "object" ) {
+				rowData[field] = getTaxonName(intRcrd[field]);	
+			} else {
+				rowData[field] = intRcrd[field];
+			}
+		}   // console.log("getIntData called. rowData = %O", rowData);
+		return rowData;
+	}
+	function getTags(tagAry) {
+		var tagStrAry = [];
+		tagAry.forEach(function(tagStr) {
+			tagStrAry.push(tagStr);
+		});
+		return tagStrAry.join(', ');
+	}
+	function getTaxonName(taxaData) { // console.log("taxaData = %O", taxaData)
+		return taxaData.level == "Species" ? 
+				taxaData.name : 
+				taxaData.level + ' ' + taxaData.name;
+	}
+	function getRowDataForChildren(parent) {
+		var chldData = [];
+		var tempChldArys = [];
+
+		tempChldArys.push(getTaxaInteractions(parent));
+
+		for (var childKey in parent.children) {
+			if (parent.children !== null) {tempChldArys.push( getRowData(parent.children[childKey]) )}
+		}
+
+
+		tempChldArys.forEach(function(ary){
+			$.merge(chldData, ary);
+		});		//	console.log("chldData = %O", chldData);
+
+		return chldData;
+	}
 /*----------------------Util----------------------------------------------------------------------*/
 	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
