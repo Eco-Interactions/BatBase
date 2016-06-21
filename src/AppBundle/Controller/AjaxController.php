@@ -257,13 +257,13 @@ class AjaxController extends Controller
             //         ->findOneBy(array('slug' => $slug));
         }   // $logger->error('SASSSSSSS:: entity ->' . print_r($entity, true));
 
-        foreach ($entities as $entity) {  $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+        foreach ($entities as $entity) { // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
             $returnObj->$tempId = [];
 
 
             foreach ($props as $prop) {
-                $getProp = 'get' . ucfirst($prop);  $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
-                $propVal = $entity->$getProp();     $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
+                $getProp = 'get' . ucfirst($prop); // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
+                $propVal = $entity->$getProp();    // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
 
                 $returnObj->$tempId = array_merge($returnObj->$tempId, [ $prop => $propVal ] );
             }
@@ -304,10 +304,9 @@ class AjaxController extends Controller
 
         $parntTaxon = $domainParnt->getTaxon();
 
-        $directChildren = $parntTaxon->getChildTaxa();
-
         $this->getNextLevel([$parntTaxon], $pushedParams, $returnObj);
 
+       // $logger->error('SASSSSSSS:: $returnObj->320->interactions->ObjectRoles[0]->tags ->' . print_r($returnObj, true));
 
         $response = new JsonResponse();
         $response->setData(array(
@@ -333,17 +332,19 @@ class AjaxController extends Controller
     private function getTaxonData($taxon, $params, $returnObj) 
     {
         $taxonId = $taxon->getId();
-        $returnObj->$taxonId = new \stdClass;
+        $taxonKey = strval($taxonId);
+
+        $returnObj->$taxonKey = new \stdClass;
 
         foreach ($params->props as $prop) {
             $getProp = 'get' . ucfirst($prop);
-            $returnObj->$taxonId->$prop = $taxon->$getProp();           
+            $returnObj->$taxonKey->$prop = $taxon->$getProp();           
         }
 
-        $returnObj->$taxonId->children = $this->getChildren($taxon, $params, $returnObj);
-        $returnObj->$taxonId->parentTaxon = $taxon->getParentTaxon()->getId();           
-        $returnObj->$taxonId->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
-        $returnObj->$taxonId->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
+        $returnObj->$taxonKey->children = $this->getChildren($taxon, $params, $returnObj);
+        $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon()->getId();           
+        $returnObj->$taxonKey->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
+        $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
     }
     private function getChildren($taxon, $params, $returnObj)
     {
@@ -389,7 +390,7 @@ class AjaxController extends Controller
                 "name" => $int->getObject()->getDisplayName(),
                 "level" => $int->getObject()->getLevel()->getName(),
                 "id" => $int->getObject()->getId() );
-            $rcrd->tags = $int->getTags();
+            $rcrd->tags = $this->getTagAry($int->getTags());  
 
             if ($int->getLocation() !== null) {
                 $rcrd->location = $int->getLocation()->getDescription();
@@ -401,5 +402,13 @@ class AjaxController extends Controller
             array_push( $intRcrds, $rcrd );
         }
         return $intRcrds;
+    }
+    private function getTagAry($tags)
+    {
+        $ary = [];
+        foreach ($tags as $tag) {
+            array_push($ary, $tag->getTag());
+        }
+        return $ary;
     }
 }
