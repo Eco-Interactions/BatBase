@@ -232,11 +232,12 @@ span.lbl {
 /*-------------------------------- Pages -------------------------------------*/
 /*-------- Search --------------*/
 #search-opts {
-	margin: 1em auto 2em auto;
+	margin: .5em auto .5em auto;
 	height: 100px;
-	width: 1300px;
-	border: 1px black solid;
+	width: 1450px;
+	/*border: 1px black solid;*/
 	border-radius: .5em;
+	font-size: 1.2em;
 }
 .opts-row {
 	padding: .7em;
@@ -263,10 +264,30 @@ span.lbl {
 input[name=textEntry] {
 	margin-right: 1em;
 }
-#grid-cntnr {
+#search-grid {
 	height: 666px;
 }
-
+.row-kingdom {
+	background-color: rgba(128,0,128,.1) !important; /* purple */
+}
+.row-phylum {
+	background-color: rgba(0,128,0,.1) !important; /* green */
+}
+.row-class {
+	background-color: rgba(0,0,255,.1) !important; /* blue */
+}
+.row-order {
+	background-color: rgba(255,128,0,.1) !important; /* orange */
+}
+.row-family {
+	background-color: rgba(0,245,255,.1) !important; /* turquoise */
+}
+.row-genus {
+	background-color: rgba(255,255,0,.1) !important; /* yellow */
+}
+.row-species {
+	background-color: rgba(255,0,0,.1) !important; /* red */
+}
 
 
 
