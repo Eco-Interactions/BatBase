@@ -5,18 +5,16 @@
 	var gridDiv, openRow, rowData = [], columnDefs = [];
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
-	    rowData: rowData,
+	    // rowData: rowData,
 	    // debug: true,
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getStyleClass,
 	    onRowGroupOpened: softRefresh,
-        rowSelection: 'multiple',
+        // rowSelection: 'multiple',
         // rowsAlreadyGrouped: true,
         enableColResize: true,
         enableSorting: true,
         unSortIcon: true,
-        // toolPanelSuppressValues: true,
-        // toolPanelSuppressPivot: true,
         enableFilter: true,
         rowHeight: 26,
         // onRowClicked: rowClicked
@@ -29,8 +27,10 @@
 
 		selectSearchFocus();
 	}
-	function loadGrid(gridOpts) {
+	function loadGrid(gridOpts) {   console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
+		gridOptObj.rowData = rowData;
+
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
 	}
@@ -49,11 +49,49 @@
 	}
 	function showTaxonSearchMethods(data) {  console.log("data recieved. %O", data);
 		buildTaxaSearchHtml(data);
-		$("input[name='searchMethod']").change(taxaSearchMethod);
+		$("input[name='searchMethod']").change(onTaxaSearchMethodChange);
 
-		taxaSearchMethod();
+		initSearchState();
 	}
-	function taxaSearchMethod(e) { console.log("change fired");
+	function initSearchState() {
+		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
+		$('#sel-domain').val('plant');
+		onTaxaSearchMethodChange();
+	}
+	/**
+	 * Builds the HTML for the search methods available for the taxa-focused search,
+	 * both text search and browsing through the taxa names by level.
+	 */
+	function buildTaxaSearchHtml(data) {
+		var txtSearchElems = buildTxtSearchElems();
+		var browseElems = buildBrowseElems();
+		var domainOpts = getDomainOpts(data.results); console.log("domainOpts = %O", domainOpts);
+		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+
+		$('#focus-top-opts').append([txtSearchElems, browseElems]);
+		
+        function getDomainOpts(data) {
+        	var optsAry = [];
+        	for (var rcrdId in data) { //console.log("rcrdId = %O", data[rcrdId]);
+        		optsAry.push({ value: data[rcrdId].slug, text: data[rcrdId].name });
+        	}
+        	return optsAry;
+        }
+		function buildTxtSearchElems() {
+			var elems = createElem('label');
+			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
+			$(elems).append(createElem('span', { text: "Text Search" })); // console.log("elems = %O", elems)
+			$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
+			return elems;
+		}
+		function buildBrowseElems() {
+			var elems = createElem('label');
+			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
+			$(elems).append(createElem('span', { text: "Browse Taxa Names" })); // console.log("elems = %O", elems)
+			return elems;
+		}
+	} /* End buildTaxaSearchHtml */
+	function onTaxaSearchMethodChange(e) { console.log("change fired");
 	    if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
 	   		$("input[name='textEntry']").attr('disabled', false);
 	   		$('#sel-domain').attr('disabled', true);
@@ -66,9 +104,88 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	if ( $('#sel-domain').val() === 'bat' ) { console.log("bats is selected") }  //showBatLevels();
-    	if ( $('#sel-domain').val() === 'arthropod' ) { showBugLevels(); console.log("bugs is selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'bat' ) { getInteractions('chiroptera', 'bat', ['SubjectRoles']); console.log("bats are selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'plant' ) { getInteractions('plantae', 'plant', ['ObjectRoles']); console.log("plants are selected") }  //showBatLevels();
+    	if ( $('#sel-domain').val() === 'arthropod' ) { getInteractions('arthropoda', 'arthropod', ['ObjectRoles']); console.log("bugs are selected") }  //showBatLevels();
 	}
+	/** Ajax to get all interaction rcrds for passed domain. */
+	function getInteractions(slug, domainId, roles) {
+		var params = {
+			repo: 'domain',
+			id: domainId,
+			props: ['displayName', 'slug' ],
+			roles: roles
+		};
+		openRow = slug;		//Row in datagrid will be expanded on load
+		sendAjaxQuery(params, 'ajax/search/taxa', buildSearchOptsAndGrid);
+	}
+	/**
+	 * Seperates interaction records by level @separateByLevel(); builds select dropdowns
+	 * for each level populated with the taxonymns at that level @buildSelects(); 
+	 * clears any previous search data @clearPreviousSearch(); appends selects; 
+	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
+	 * transforms data into grid format loads data grid @loadTaxaGrid().
+	 */
+	function buildSearchOptsAndGrid(data) {  	console.log("Here are you're interactions Grand Master... Data = %O", data);
+		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
+		var levels = Object.keys(taxaIntRcrds);
+		var domainLvl = levels.shift(); 
+		var elems = buildSelects(buildLvlOptions(taxaIntRcrds), levels);
+
+		clearPreviousSearch();
+		$('#opts-row2').append(elems);
+		loadTaxaGrid( buildTaxaTree(taxaIntRcrds[domainLvl], data['results']) );
+	}
+	function clearPreviousSearch() {
+		$('#opts-row2').html('');		// Clear previous search's options
+		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid resources		
+		// $('#search-grid').empty();
+	}
+	/**
+	 * Returns an object with taxa records keyed by their display name and organized 
+	 * under their respective levels.
+	 */
+	function separateByLevel(rcrds) {
+		var separated = {};
+		for (var taxon in rcrds){
+			if (separated[rcrds[taxon].level] === undefined) { separated[rcrds[taxon].level] = {}; }
+			separated[rcrds[taxon].level][rcrds[taxon].displayName] = rcrds[taxon];
+		}
+		return separated;
+	}
+	function buildLvlOptions(rcrds) {
+		var optsObj = {};
+		for (var lvl in rcrds) {
+			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
+			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
+			optsObj[lvl].unshift({value: 'none', text: ' '});
+		}
+		return optsObj;
+	}
+	function buildTaxaOptions(taxaNames, rcrds) {
+		return taxaNames.map(function(taxaKey){
+			return {
+				value: rcrds[taxaKey].slug,
+				text: taxaKey
+			};
+		});
+	}
+	function buildSelects(lvlOpts, levels) {
+		var selElems = [];
+		levels.forEach(function(level){
+			var text = level + ': ';
+			var id = 'sel' + level;
+			selElems.push(createElem('span', { text: text }));
+			selElems.push(buildSelectElem(lvlOpts[level], { class: "opts-box", id: id }));
+		});
+
+		return selElems;
+	}
+	/**
+	 * Returns a taxonomic hierarchy of the interaction data.
+	 * @param  {object} toplvltaxa Taxonomic hierarchy starting with the domain taxa.
+	 * @param  {object} taxaObj    Interaction records returned from the server.
+	 */
 	function buildTaxaTree(toplvltaxa, taxaObj) { 
 		var tree = {}
 		for (var taxon in toplvltaxa) {  //console.log("toplvltaxa[taxon] = %O", toplvltaxa[taxon])
@@ -92,113 +209,11 @@
 		}
 	} /* End buildTaxaTree */
 /*---------------Bat Search Methods-------------------------------------------*/
-	function showBatLevels() {
-		var params = {
-			repo: 'domain',
-			id: 'bat',
-			props: ['displayName', 'slug' ],
-			roles: ['ObjectRoles']
-		};
-		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
-		sendAjaxQuery(params, 'ajax/search/taxa', buildBatLvlHtml);
-	}
+
 /*---------------Plant Search Methods-----------------------------------------*/
+
 /*---------------Arthropod Search Methods-------------------------------------*/
-	function showBugLevels() {
-		var params = {
-			repo: 'domain',
-			id: 'arthropod',
-			props: ['displayName', 'slug' ],
-			roles: ['ObjectRoles']
-		};
-		openRow = 'arthropoda';		//Row in datagrid will be expanded on load
-		sendAjaxQuery(params, 'ajax/search/taxa', buildBugLvlHtml);
-	}
-	function buildBugLvlHtml(data) { console.log("Success is yours. Data = %O", data);
-		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
-		var elems = buildBugSelects(buildLvlOptions(taxaIntRcrds));
 
-		$('#opts-row2').append(elems);
-
-		loadTaxaGrid( buildTaxaTree(taxaIntRcrds['Phylum'], data['results']) );
-	}
-	function buildBugSelects(lvlOpts) {
-		var selElems = [];
-		selElems.push(createElem('span', { text: "Class: " }));
-		selElems.push(buildSelectElem(lvlOpts.Class, { class: "opts-box", id: "selClass" }));
-		selElems.push(createElem('span', { text: "Order: " }));
-		selElems.push(buildSelectElem(lvlOpts.Order, { class: "opts-box", id: "selOrder" }));
-		selElems.push(createElem('span', { text: "Family: " }));
-		selElems.push(buildSelectElem(lvlOpts.Family, { class: "opts-box", id: "selFam" }));
-		selElems.push(createElem('span', { text: "Genus: " }));
-		selElems.push(buildSelectElem(lvlOpts.Genus, { class: "opts-box", id: "selGenus" }));
-		selElems.push(createElem('span', { text: "Species: " }));
-		selElems.push(buildSelectElem(lvlOpts.Species, { class: "opts-box", id: "selSpecies" }));
-		return selElems;
-	}
-	function buildLvlOptions(rcrds) {
-		var optsObj = {};
-		for (var lvl in rcrds) {
-			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
-			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
-			optsObj[lvl].unshift({value: 'none', text: ' '});
-		}
-		return optsObj;
-	}
-	function buildTaxaOptions(taxaNames, rcrds) {
-		return taxaNames.map(function(taxaKey){
-			return {
-				value: rcrds[taxaKey].slug,
-				text: taxaKey
-			};
-		});
-	}
-	function separateByLevel(rcrds) {
-		var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
-		var topLvl = 6;
-		var separated = {};
-
-		for (var taxon in rcrds){
-			if (separated[rcrds[taxon].level] === undefined) { separated[rcrds[taxon].level] = {}; }
-			// Not doing anything with top level currently, but during refactor it may be more useful.
-			if (levels.indexOf(rcrds[taxon].level) < topLvl) { topLvl = levels.indexOf(rcrds[taxon].level); }
-			
-			separated[rcrds[taxon].level][rcrds[taxon].displayName] = rcrds[taxon];
-		}
-		return separated;
-	}
-	function buildTaxaSearchHtml(data) {
-		var txtSearchElems = buildTxtSearchElems();
-		var browseElems = buildBrowseElems();
-		var domainOpts = getDomainOpts(data.results); console.log("domainOpts = %O", domainOpts);
-		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
-
-		$('#focus-top-opts').append([txtSearchElems, browseElems]);
-		/*-- Init State --*/
-		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
-		$('#sel-domain').val('arthropod');
-
-        function getDomainOpts(data) {
-        	var optsAry = [];
-        	for (var rcrdId in data) { //console.log("rcrdId = %O", data[rcrdId]);
-        		optsAry.push({ value: data[rcrdId].slug, text: data[rcrdId].name });
-        	}
-        	return optsAry;
-        }
-		function buildTxtSearchElems() {
-			var elems = createElem('label');
-			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
-			$(elems).append(createElem('span', { text: "Text Search" })); // console.log("elems = %O", elems)
-			$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
-			return elems;
-		}
-		function buildBrowseElems() {
-			var elems = createElem('label');
-			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
-			$(elems).append(createElem('span', { text: "Browse Taxa Names" })); // console.log("elems = %O", elems)
-			return elems;
-		}
-	} /* End buildTaxaSearchHtml */
 /*------------------AG Grid Methods-------------------------------------------*/
 	function getColumnDefs() {   console.log("typeof cellClassRules", typeof cellClassRules )
 		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
@@ -243,10 +258,13 @@
   	}
 	function loadTaxaGrid(taxaTree, opentaxa) {
 		var topTaxaRows = [];
+		var finalRowData = [];
 		for (var taxon in taxaTree) {
 			topTaxaRows.push( getRowData(taxaTree[taxon]) );
 		}
-		topTaxaRows.forEach(function(taxaRowAry){ $.merge(rowData, taxaRowAry);	});  console.log("final rows = %O", rowData);
+		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
+
+		rowData = finalRowData;  console.log("rowData = %O", rowData);
 
 		loadGrid();
 	}
@@ -278,19 +296,19 @@
 		return ints;
 	}
 	function getIntData(intRcrd, taxaLvl) {
-		var rowData = { isParent: false,
+		var intRowData = { isParent: false,
 						taxaLvl: taxaLvl };
 
 		for (var field in intRcrd) {
 			if ( field === 'id' ) { continue; }
-			if ( field === 'tags' ) { rowData[field] = getTags(intRcrd[[field]]); }
+			if ( field === 'tags' ) { intRowData[field] = getTags(intRcrd[[field]]); }
 			if ( field === "subject" || field === "object" ) {
-				rowData[field] = getTaxonName(intRcrd[field]);	
+				intRowData[field] = getTaxonName(intRcrd[field]);	
 			} else {
-				rowData[field] = intRcrd[field];
+				intRowData[field] = intRcrd[field];
 			}
-		}   // console.log("getIntData called. rowData = %O", rowData);
-		return rowData;
+		}   // console.log("getIntData called. intRowData = %O", intRowData);
+		return intRowData;
 	}
 	function getTags(tagAry) {
 		var tagStrAry = [];
