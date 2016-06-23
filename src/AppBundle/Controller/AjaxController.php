@@ -273,7 +273,7 @@ class AjaxController extends Controller
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $returnObj,
+            'results' => $returnObj
         ));
 
         return $response;
@@ -295,7 +295,7 @@ class AjaxController extends Controller
 
         $requestContent = $request->getContent();
         $pushedParams = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
-
+        $domain = ucfirst($pushedParams->id);
 
         $returnObj = new \stdClass;
 
@@ -311,6 +311,7 @@ class AjaxController extends Controller
         $response = new JsonResponse();
         $response->setData(array(
             'results' => $returnObj,
+            'domain' => $domain
         ));
 
         return $response;
@@ -342,7 +343,8 @@ class AjaxController extends Controller
         }
 
         $returnObj->$taxonKey->children = $this->getChildren($taxon, $params, $returnObj);
-        $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon()->getId();           
+        $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon() ?
+            $taxon->getParentTaxon()->getId() : null ;           
         $returnObj->$taxonKey->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
         $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
     }
