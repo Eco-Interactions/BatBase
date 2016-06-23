@@ -5,18 +5,19 @@
 	var gridDiv, openRow, rowData = [], columnDefs = [];
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
-	    // rowData: rowData,
-	    // debug: true,
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getStyleClass,
 	    onRowGroupOpened: softRefresh,
-        // rowSelection: 'multiple',
-        // rowsAlreadyGrouped: true,
         enableColResize: true,
         enableSorting: true,
         unSortIcon: true,
         enableFilter: true,
         rowHeight: 26,
+		isExternalFilterPresent: isExternalFilterPresent, 
+		doesExternalFilterPass: doesExternalFilterPass,
+	    debug: true,
+        // rowSelection: 'multiple',
+        // rowsAlreadyGrouped: true,
         // onRowClicked: rowClicked
 	};
 
@@ -55,7 +56,7 @@
 	}
 	function initSearchState() {
 		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
-		$('#sel-domain').val('plant');
+		$('#sel-domain').val('bat');
 		onTaxaSearchMethodChange();
 	}
 	/**
@@ -65,7 +66,7 @@
 	function buildTaxaSearchHtml(data) {
 		var txtSearchElems = buildTxtSearchElems();
 		var browseElems = buildBrowseElems();
-		var domainOpts = getDomainOpts(data.results); console.log("domainOpts = %O", domainOpts);
+		var domainOpts = getDomainOpts(data.results); 		//console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
 		$('#focus-top-opts').append([txtSearchElems, browseElems]);
@@ -91,7 +92,7 @@
 			return elems;
 		}
 	} /* End buildTaxaSearchHtml */
-	function onTaxaSearchMethodChange(e) { console.log("change fired");
+	function onTaxaSearchMethodChange(e) { // console.log("change fired");
 	    if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
 	   		$("input[name='textEntry']").attr('disabled', false);
 	   		$('#sel-domain').attr('disabled', true);
@@ -120,26 +121,26 @@
 		sendAjaxQuery(params, 'ajax/search/taxa', buildSearchOptsAndGrid);
 	}
 	/**
-	 * Seperates interaction records by level @separateByLevel(); builds select dropdowns
+	 * Separates interaction records by level @separateByLevel(); builds select dropdowns
 	 * for each level populated with the taxonymns at that level @buildSelects(); 
 	 * clears any previous search data @clearPreviousSearch(); appends selects; 
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
-	 * transforms data into grid format loads data grid @loadTaxaGrid().
+	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildSearchOptsAndGrid(data) {  	console.log("Here are you're interactions Grand Master... Data = %O", data);
+	function buildSearchOptsAndGrid(data) {  	console.log("Here are your interactions Grand Master... Data = %O", data);
+		var domain = data.domain; 
 		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
 		var levels = Object.keys(taxaIntRcrds);
-		var domainLvl = levels.shift(); 
+		var domainLvl = levels.shift();
 		var elems = buildSelects(buildLvlOptions(taxaIntRcrds), levels);
 
 		clearPreviousSearch();
 		$('#opts-row2').append(elems);
-		loadTaxaGrid( buildTaxaTree(taxaIntRcrds[domainLvl], data['results']) );
+		loadTaxaGrid( buildTaxaTree(taxaIntRcrds[domainLvl], data['results']), domain );
 	}
 	function clearPreviousSearch() {
 		$('#opts-row2').html('');		// Clear previous search's options
-		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid resources		
-		// $('#search-grid').empty();
+		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid
 	}
 	/**
 	 * Returns an object with taxa records keyed by their display name and organized 
@@ -152,12 +153,19 @@
 			separated[rcrds[taxon].level][rcrds[taxon].displayName] = rcrds[taxon];
 		}
 		return separated;
+	} /* End separateByLevel */
+	function buildLevelStructure(levels) {
+		var obj = {};
+		levels.reverse().forEach(function(lvl){
+			obj[lvl] = null;
+		});  console.log("obj = %O", obj)
+		return obj;
 	}
 	function buildLvlOptions(rcrds) {
 		var optsObj = {};
 		for (var lvl in rcrds) {
-			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
-			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
+			var taxaNames = rcrds[lvl] === null ? [] : Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
+			optsObj[lvl] = rcrds[lvl] === null ? [] : buildTaxaOptions(taxaNames, rcrds[lvl]);
 			optsObj[lvl].unshift({value: 'none', text: ' '});
 		}
 		return optsObj;
@@ -208,16 +216,10 @@
 			});
 		}
 	} /* End buildTaxaTree */
-/*---------------Bat Search Methods-------------------------------------------*/
-
-/*---------------Plant Search Methods-----------------------------------------*/
-
-/*---------------Arthropod Search Methods-------------------------------------*/
-
 /*------------------AG Grid Methods-------------------------------------------*/
-	function getColumnDefs() {   console.log("typeof cellClassRules", typeof cellClassRules )
+	function getColumnDefs() {  
 		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, filter: false },		//cellClassRules: getStyleClass
 			    {headerName: "Subject Taxon", field: "subject", width: 175,},
 			    {headerName: "Object Taxon", field: "object", width: 150 },
 			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
@@ -238,7 +240,9 @@
 			'Family': 'row-family',		'Genus': 'row-genus',
 			'Species': 'row-species'
 		};
-		if (params.node.data.isParent === false || ( params.node.expanded === true && params.data.interactions === true ) ) {
+		if (params.node.data.isParent === false || 
+		  ( params.node.expanded === true && params.data.interactions === true ) ||
+			params.node.data.domainInts === true ) {
 			return lvlClassMap[params.data.taxaLvl];
 		} 
 	}
@@ -256,26 +260,35 @@
 	        return null;
 	    }
   	}
-	function loadTaxaGrid(taxaTree, opentaxa) {
+	function isExternalFilterPresent() { console.log("isExternalFilterPresent called")
+		return true;
+	}
+
+	function doesExternalFilterPass(node) {			//return true || false
+	 	console.log("node in filter: %O", node);  
+	 	return true; 
+	}
+/*---------------------------- Taxa Specific -------------------------------- */
+	function loadTaxaGrid(taxaTree, domain) {
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
-			topTaxaRows.push( getRowData(taxaTree[taxon]) );
+			topTaxaRows.push( getRowData(taxaTree[taxon], domain) );
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
-		rowData = finalRowData;  console.log("rowData = %O", rowData);
+		rowData = finalRowData; // console.log("rowData = %O", rowData);
 
 		loadGrid();
 	}
-	function getRowData(taxon) { if (taxon.displayName === "Mesostigmata") { console.log("getRowData called for %s = %O. arguments = %O", taxon.displayName, taxon, arguments); }
+	function getRowData(taxon, domain) { 
 		var isParent = taxon.children !== null; 
 		var rows = [];
 		rows.push({
 			name: taxon.displayName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
 			open: taxon.slug === openRow,
-			children: getRowDataForChildren(taxon),
+			children: getRowDataForChildren(taxon, domain),
 			taxaLvl: taxon.level,
 			interactions: taxon.interactions[Object.keys(taxon.interactions)[0]].length > 0 ,          
 		});
@@ -283,6 +296,40 @@
 		return rows;
 		
 	} /* End getRowData */
+	function getRowDataForChildren(parent, domain) {
+		var chldData = [];
+		var tempChldArys = [];
+		var domainMap = {
+			Bat: 'chiroptera',
+			Plant: 'plantae',
+			Arthropod: 'arthropoda'
+		};  
+
+		if ( parent.slug === domainMap[domain] ) { chldData.push(getDomainInteractions(parent, domain));   
+		} else { tempChldArys.push(getTaxaInteractions(parent)); }
+
+		for (var childKey in parent.children) {
+			if (parent.children !== null) { tempChldArys.push( getRowData(parent.children[childKey]) )}
+		}
+
+		tempChldArys.forEach(function(ary){	$.merge(chldData, ary);	});		
+
+		return chldData;
+	}
+	/** Groups interactions attributed directly to a domain. */
+	function getDomainInteractions(taxon, domain) {
+		if (taxon.interactions !== null) { 
+			return {
+				name: 'Unspecified ' + domain + ' interactions',
+				isParent: true,
+				open: false,
+				children: getTaxaInteractions(taxon),
+				taxaLvl: taxon.level,
+				interactions: true,
+				domainInts: true
+			};
+		}
+	}
 	function getTaxaInteractions(taxon) {
 		var ints = [];
 		var taxaLvl = taxon.level; 
@@ -322,23 +369,6 @@
 				taxaData.name : 
 				taxaData.level + ' ' + taxaData.name;
 	}
-	function getRowDataForChildren(parent) {
-		var chldData = [];
-		var tempChldArys = [];
-
-		tempChldArys.push(getTaxaInteractions(parent));
-
-		for (var childKey in parent.children) {
-			if (parent.children !== null) {tempChldArys.push( getRowData(parent.children[childKey]) )}
-		}
-
-
-		tempChldArys.forEach(function(ary){
-			$.merge(chldData, ary);
-		});		//	console.log("chldData = %O", chldData);
-
-		return chldData;
-	}
 /*----------------------Util----------------------------------------------------------------------*/
 	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
@@ -360,7 +390,7 @@
 	
 		if (attrs) {
 		    elem.id = attrs.id || '';
-		    elem.className = attrs.class || '';   //Space seperated classNames
+		    elem.className = attrs.class || '';   //Space separated classNames
 
 		    if (attrs.text) { $(elem).text(attrs.text); }
 
