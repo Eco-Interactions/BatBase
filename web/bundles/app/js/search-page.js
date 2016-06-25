@@ -148,8 +148,8 @@
 		}
 	}
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
-		$('#opts-row2').html('');		// Clear previous search's options
 		var elems = buildSelects(levelOptsObj, lvls);
+		$('#opts-row2').html('');		// Clear previous search's options
 		$('#opts-row2').append(elems);
 		setSelectedVals(selected);
 	}
@@ -280,19 +280,35 @@
 /*---------------------------- Taxa Specific -------------------------------- */
  	/*---------Filter Functions------------------------------*/
 	function isExternalFilterPresent() { console.log("isExternalFilterPresent called")
-		return isTaxonymSelected();
+		console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
+		return isTaxonymSelected('filter');
+		// return true;
 	}
-	function doesExternalFilterPass(node) {	// console.log("node in filter: %O", node);  
-        var filterSelections = {};
-        levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;
-        	if ($(selId).val() !== 'all' || $(selId).val() !== undefined) { 
-        		filterSelections[lvl] = $(selId).val();
-        	} 
-        });
-        populateSelects(filterSelections);
+	function doesExternalFilterPass(node) {	 console.log("externally filtering. node = %O", node);  
+        // var filterSelections = {};
+        // levels.forEach(function(lvl){
+        // 	var selId = '#sel' + lvl;
+        // 	if ($(selId).val() !== 'all' || $(selId).val() !== undefined) { 
+        // 		filterSelections[lvl] = $(selId).val();
+        // 	} 
+        // });
+        // populateSelects(filterSelections);
 	 	return true; 
 	}
+	function isTaxonymSelected(filterCheck) {
+        var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
+        var selected = false;
+
+        levels.forEach(function(lvl){
+        	var selId = '#sel' + lvl;
+        	if ($(selId).val() !== undefined && $(selId).val() !== 'all' && $(selId).val() !== 'empty') { 
+        		filterSelections[lvl] = $(selId).val();
+        		selected = true;
+        	} 
+        });
+        return filterCheck ? (selected === false ? false : true) : (selected === false ? false : filterSelections); 
+	}
+	/*------------------Level Select Methods----------------------------------*/
 	function syncLevelSelects() {
 		var selected = isTaxonymSelected();
 		if (selected) {
@@ -356,20 +372,6 @@
 			});
 		}
 	} /* End repopulateDropDowns */
-	function isTaxonymSelected() {
-        var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
-        var selected = false;
-
-        levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;
-        	if ($(selId).val() !== undefined && $(selId).val() !== 'all') { 
-        		filterSelections[lvl] = $(selId).val();
-        		selected = true;
-        	} 
-        });
-
-        return selected === false ? false : filterSelections;
-	}
 	/*---------Data Conversion------------------------------*/
 	function loadTaxaGrid(taxaTree, domain) {
 		var topTaxaRows = [];
