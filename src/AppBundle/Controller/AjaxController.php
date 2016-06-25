@@ -246,27 +246,22 @@ class AjaxController extends Controller
         $props = $pushedData->props;
 
         $returnObj = new \stdClass;
-        $tempId = 1;
 
-        if ($repoQ === 'findAll') {
+        if ($repoQ === 'findAll') 
+        {
             $entities = $em->getRepository('AppBundle:' . $repo)->findAll();
-        } else if ($repoQ === "findOne") {
-            // $entity = $em->getRepository('AppBundle:' . $repo)
-            //         ->findOneBy(array('slug' => $slug));
-        }   // $logger->error('SASSSSSSS:: entity ->' . print_r($entity, true));
+        } 
 
-        foreach ($entities as $entity) { // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
-            $returnObj->$tempId = [];
-
-
-            foreach ($props as $prop) {
+        foreach ($entities as $entity) 
+        { // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+            $taxonId = strval($entity->getTaxon()->getId());
+            $returnObj->$taxonId = [];
+            foreach ($props as $prop) 
+            {
                 $getProp = 'get' . ucfirst($prop); // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
                 $propVal = $entity->$getProp();    // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
-
-                $returnObj->$tempId = array_merge($returnObj->$tempId, [ $prop => $propVal ] );
+                $returnObj->$taxonId = array_merge( $returnObj->$taxonId, [ $prop => $propVal ] );
             }
-
-            ++$tempId;
         }
 
         $response = new JsonResponse();
@@ -289,23 +284,22 @@ class AjaxController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $logger = $this->get('logger');
-
+        // $logger = $this->get('logger');
         $requestContent = $request->getContent();
-        $pushedParams = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
-        // $domain = ucfirst($pushedParams->id);
+        $pushedParams = json_decode($requestContent); //$logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
+
         $returnObj = new \stdClass;
 
         $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
-        // $this->getNextLevel([$parntTaxon], $pushedParams, $returnObj);
-        // $parntTaxon = $domainParnt->getTaxon();
-        foreach ($taxa as $taxon) {
+
+        foreach ($taxa as $taxon) 
+        {
             $this->getTaxonData($taxon, $pushedParams, $returnObj);
         }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'taxaRcrds' => $returnObj
+            'results' => $returnObj
         ));
 
         return $response;
@@ -331,7 +325,8 @@ class AjaxController extends Controller
 
         $returnObj->$taxonKey = new \stdClass;
 
-        foreach ($params->props as $prop) {
+        foreach ($params->props as $prop) 
+        {
             $getProp = 'get' . ucfirst($prop);
             $returnObj->$taxonKey->$prop = $taxon->$getProp();           
         }
@@ -357,7 +352,8 @@ class AjaxController extends Controller
     {
         $intRcrds = new \stdClass;
 
-        foreach ($params->roles as $role) {
+        foreach ($params->roles as $role) 
+        {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
             $intRcrds->$role = $this->getInteractions($interactions, $params);
@@ -370,7 +366,8 @@ class AjaxController extends Controller
 
         $intRcrds = [];
 
-        foreach ($interactions as $int) {
+        foreach ($interactions as $int) 
+        {
             $rcrd = new \stdClass;
          
             $rcrd->id = $int->getId();
@@ -401,7 +398,8 @@ class AjaxController extends Controller
     private function getTagAry($tags)
     {
         $ary = [];
-        foreach ($tags as $tag) {
+        foreach ($tags as $tag) 
+        {
             array_push($ary, $tag->getTag());
         }
         return $ary;
