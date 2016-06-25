@@ -2,7 +2,8 @@
 	/**
 	 * openRow = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, openRow, rowData = [], columnDefs = [];
+	var gridDiv, openRow, recievedData, dataSet, rowData = [], columnDefs = [];
+    var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    getNodeChildDetails: getNodeChildDetails,
@@ -15,10 +16,7 @@
         rowHeight: 26,
 		isExternalFilterPresent: isExternalFilterPresent, 
 		doesExternalFilterPass: doesExternalFilterPass,
-	    debug: true,
-        // rowSelection: 'multiple',
-        // rowsAlreadyGrouped: true,
-        // onRowClicked: rowClicked
+	    // debug: true,
 	};
 
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -56,7 +54,7 @@
 	}
 	function initSearchState() {
 		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
-		$('#sel-domain').val('bat');
+		$('#sel-domain').val('arthropod');
 		onTaxaSearchMethodChange();
 	}
 	/**
@@ -129,17 +127,39 @@
 	 */
 	function buildSearchOptsAndGrid(data) {  	console.log("Here are your interactions Grand Master... Data = %O", data);
 		var domain = data.domain; 
-		var taxaIntRcrds = separateByLevel(data.results);   console.log("taxaIntRcrds = %O", taxaIntRcrds);
-		var levels = Object.keys(taxaIntRcrds);
+		recievedData = data.results;
+		dataSet = separateByLevel(data.results);   console.log("dataSet = %O", dataSet);
+		var levels = Object.keys(dataSet);
 		var domainLvl = levels.shift();
-		var elems = buildSelects(buildLvlOptions(taxaIntRcrds), levels);
+		var lvlOptsObj = buildLvlOptions(dataSet);
 
-		clearPreviousSearch();
-		$('#opts-row2').append(elems);
-		loadTaxaGrid( buildTaxaTree(taxaIntRcrds[domainLvl], data['results']), domain );
+		clearPreviousGrid();
+		addClearlevelSelectsBttn();
+		setLevelSelects();
+		loadTaxaGrid( buildTaxaTree(dataSet[domainLvl], data['results']), domain );
+
+		function setLevelSelects() { console.log("-----Clearing Level Filters-------")
+			loadLevelSelectElems(lvlOptsObj, levels);
+		}
+		function addClearlevelSelectsBttn() {
+			var button = createElem('input', {type: 'button', value: 'Clear Level Filters'});
+			$('#opts-row1').append(button);
+			$(button).click(setLevelSelects);
+		}
 	}
-	function clearPreviousSearch() {
+	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
 		$('#opts-row2').html('');		// Clear previous search's options
+		var elems = buildSelects(levelOptsObj, lvls);
+		$('#opts-row2').append(elems);
+		setSelectedVals(selected);
+	}
+	function setSelectedVals(selected) {
+		for (var lvl in selected) {
+			var selId = '#sel' + lvl;
+			$(selId).val(selected[lvl]);
+		}
+	}
+	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid
 	}
 	/**
@@ -154,33 +174,30 @@
 		}
 		return separated;
 	} /* End separateByLevel */
-	function buildLevelStructure(levels) {
-		var obj = {};
-		levels.reverse().forEach(function(lvl){
-			obj[lvl] = null;
-		});  console.log("obj = %O", obj)
-		return obj;
-	}
-	function buildLvlOptions(rcrds) {
+	function buildLvlOptions(rcrds) {  console.log("lvlOptsBuild rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
-			var taxaNames = rcrds[lvl] === null ? [] : Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
-			optsObj[lvl] = rcrds[lvl] === null ? [] : buildTaxaOptions(taxaNames, rcrds[lvl]);
-			optsObj[lvl].unshift({value: 'none', text: ' '});
+			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
+			optsObj[lvl] = buildTaxaOptions(taxaNames);
+			if (taxaNames.length === 0 || taxaNames.length === 1) { 
+				optsObj[lvl].push({value: 'empty', text: ' '});
+			} else if (taxaNames.length > 1) {
+				optsObj[lvl].unshift({value: 'all', text: '- All -'});
+			}
 		}
 		return optsObj;
 	}
-	function buildTaxaOptions(taxaNames, rcrds) {
+	function buildTaxaOptions(taxaNames) {
 		return taxaNames.map(function(taxaKey){
 			return {
-				value: rcrds[taxaKey].slug,
+				value: taxaKey,
 				text: taxaKey
 			};
 		});
 	}
-	function buildSelects(lvlOpts, levels) {
+	function buildSelects(lvlOpts, levelAry) {
 		var selElems = [];
-		levels.forEach(function(level){
+		levelAry.forEach(function(level){
 			var text = level + ': ';
 			var id = 'sel' + level;
 			selElems.push(createElem('span', { text: text }));
@@ -217,9 +234,10 @@
 		}
 	} /* End buildTaxaTree */
 /*------------------AG Grid Methods-------------------------------------------*/
+	function softRefresh() { gridOptions.api.refreshView(); }
 	function getColumnDefs() {  
 		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, filter: false },		//cellClassRules: getStyleClass
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
 			    {headerName: "Subject Taxon", field: "subject", width: 175,},
 			    {headerName: "Object Taxon", field: "object", width: 150 },
 			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
@@ -246,9 +264,6 @@
 			return lvlClassMap[params.data.taxaLvl];
 		} 
 	}
-	function softRefresh() {
-		gridOptions.api.refreshView();
-	}
 	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
 	    if (rcrd.isParent) {
 	        return {
@@ -256,19 +271,106 @@
 	            expanded: rcrd.open,
 	            children: rcrd.children
 	        };
-	    } else {
-	        return null;
-	    }
+	    } else { return null; }
   	}
-	function isExternalFilterPresent() { console.log("isExternalFilterPresent called")
-		return true;
-	}
-
-	function doesExternalFilterPass(node) {			//return true || false
-	 	console.log("node in filter: %O", node);  
-	 	return true; 
+ 	/*---------Filter Functions------------------------------*/
+	function onFilterChange() {
+		gridOptions.api.onFilterChanged();
 	}
 /*---------------------------- Taxa Specific -------------------------------- */
+ 	/*---------Filter Functions------------------------------*/
+	function isExternalFilterPresent() { console.log("isExternalFilterPresent called")
+		return isTaxonymSelected();
+	}
+	function doesExternalFilterPass(node) {	// console.log("node in filter: %O", node);  
+        var filterSelections = {};
+        levels.forEach(function(lvl){
+        	var selId = '#sel' + lvl;
+        	if ($(selId).val() !== 'all' || $(selId).val() !== undefined) { 
+        		filterSelections[lvl] = $(selId).val();
+        	} 
+        });
+        populateSelects(filterSelections);
+	 	return true; 
+	}
+	function syncLevelSelects() {
+		var selected = isTaxonymSelected();
+		if (selected) {
+			for (var lvl in selected) {  console.log("lvl = ", lvl);
+				var taxonym = selected[lvl];		console.log("taxonym = ", taxonym); 
+				selected[lvl] = dataSet[lvl][taxonym];
+			}
+			repopulateDropDowns(selected);
+		}
+	}
+	function repopulateDropDowns(selected) {
+		var revLevels = levels.map(function(lvl){return lvl}).reverse(); //console.log("revLevels = %O", revLevels);
+		var relatedTaxaOpts = {};
+		var selectedVals = {}; console.log("selectedVals = %O", selectedVals)
+		var lvls = Object.keys(dataSet);
+		lvls.shift();
+		
+		buildRelatedTaxaOptsObj();
+		
+		var lvlOptsObj = buildLvlOptions(relatedTaxaOpts);
+		loadLevelSelectElems(lvlOptsObj, lvls, selectedVals)
+
+		function buildRelatedTaxaOptsObj() {
+			revLevels.some(function(lvl, idx) {
+				if (selected[lvl]) {
+					buildTaxaOptsObj(selected[lvl], lvl, idx);
+					return true;
+				}
+			});  console.log("relatedTaxaOpts = %O", relatedTaxaOpts);
+
+		}
+		function buildTaxaOptsObj(selected, lvl, idx) {
+			relatedTaxaOpts[lvl] = {};
+			relatedTaxaOpts[lvl][selected.displayName] = selected;
+			selectedVals[lvl] = selected.displayName;
+
+			if (selected.children) { getChildren(selected.children); }
+			getParents(selected.parentTaxon);
+			addEmptyLvlOpts();
+		}
+		function getChildren(directChildren) {
+			directChildren.forEach(function(grandChild){
+				if (directChildren.length === 1) { selectedVals[grandChild.level] = grandChild.displayName; }				
+				if (relatedTaxaOpts[grandChild.level] === undefined) { relatedTaxaOpts[grandChild.level] = {}; }
+				relatedTaxaOpts[grandChild.level][grandChild.displayName] = grandChild;
+				if (grandChild.children) { getChildren(grandChild.children); }
+			});
+		}
+		function getParents(parentId) {
+			if (parentId === 1 || parentId === null) {return} 
+			if (parentId == Object.keys(recievedData)[0]) {return}  //console.log("first key ")
+			var parent = recievedData[parentId];
+			if (relatedTaxaOpts[parent.level] === undefined) { relatedTaxaOpts[parent.level] = {}; }
+			relatedTaxaOpts[parent.level][parent.displayName] = parent;
+			selectedVals[parent.level] = parent.displayName;
+			if (parent.parentTaxon) { getParents(parent.parentTaxon); }
+		}
+		function addEmptyLvlOpts() {  console.log("dataSet = %O", dataSet)
+			lvls.forEach(function(lvl) {
+				if (relatedTaxaOpts[lvl] === undefined) { relatedTaxaOpts[lvl] = {}; }
+			});
+		}
+	} /* End repopulateDropDowns */
+	function isTaxonymSelected() {
+        var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
+        var selected = false;
+
+        levels.forEach(function(lvl){
+        	var selId = '#sel' + lvl;
+        	if ($(selId).val() !== undefined && $(selId).val() !== 'all') { 
+        		filterSelections[lvl] = $(selId).val();
+        		selected = true;
+        	} 
+        });
+
+        return selected === false ? false : filterSelections;
+	}
+	/*---------Data Conversion------------------------------*/
 	function loadTaxaGrid(taxaTree, domain) {
 		var topTaxaRows = [];
 		var finalRowData = [];
@@ -305,7 +407,7 @@
 			Arthropod: 'arthropoda'
 		};  
 
-		if ( parent.slug === domainMap[domain] ) { chldData.push(getDomainInteractions(parent, domain));   
+		if ( parent.slug === domainMap[domain] ) { getDomainInteractions(parent, domain);   
 		} else { tempChldArys.push(getTaxaInteractions(parent)); }
 
 		for (var childKey in parent.children) {
@@ -315,19 +417,20 @@
 		tempChldArys.forEach(function(ary){	$.merge(chldData, ary);	});		
 
 		return chldData;
-	}
-	/** Groups interactions attributed directly to a domain. */
-	function getDomainInteractions(taxon, domain) {
-		if (taxon.interactions !== null) { 
-			return {
-				name: 'Unspecified ' + domain + ' interactions',
-				isParent: true,
-				open: false,
-				children: getTaxaInteractions(taxon),
-				taxaLvl: taxon.level,
-				interactions: true,
-				domainInts: true
-			};
+		/** Groups interactions attributed directly to a domain. */
+		function getDomainInteractions(taxon, domain) {
+			var intAry = taxon.interactions[Object.keys(taxon.interactions)[0]]; console.log("intAry = %O", intAry) 
+			if (intAry.length > 0) { 
+				chldData.push({
+					name: 'Unspecified ' + domain + ' Interactions',
+					isParent: true,
+					open: false,
+					children: getTaxaInteractions(taxon),
+					taxaLvl: taxon.level,
+					interactions: true,
+					domainInts: true
+				});
+			}
 		}
 	}
 	function getTaxaInteractions(taxon) {
@@ -370,9 +473,10 @@
 				taxaData.level + ' ' + taxaData.name;
 	}
 /*----------------------Util----------------------------------------------------------------------*/
+	/*------------ HTML Generators ---------------------------*/
 	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
-		var selected = selected || 'none';
+		var selected = selected || 'all';
 		
 		options.forEach(function(opts){
 			$(selectElem).append($("<option/>", {
@@ -382,12 +486,12 @@
 		});
 
 		$(selectElem).val(selected);
+		$(selectElem).change(syncLevelSelects);
 
 		return selectElem;
 	}
 	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
 	    var elem = document.createElement(tag);
-	
 		if (attrs) {
 		    elem.id = attrs.id || '';
 		    elem.className = attrs.class || '';   //Space separated classNames
@@ -403,8 +507,11 @@
 		    	}); 
 		    }
 		}
-		
 	    return elem;
+	}
+	/* --------------------- General Helpers ------------------------------*/
+	function ucfirst(string) { 
+		return string.charAt(0).toUpperCase() + string.slice(1); 
 	}
 /*-----------------AJAX ------------------------------------------------------*/
 	function sendAjaxQuery(dataPkg, url, successCb) {  console.log("Sending Ajax data =%O", dataPkg)
