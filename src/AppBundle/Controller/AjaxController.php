@@ -249,9 +249,7 @@ class AjaxController extends Controller
         $tempId = 1;
 
         if ($repoQ === 'findAll') {
-            $entities = $em->getRepository('AppBundle:' . $repo)
-                    ->findAll();
-
+            $entities = $em->getRepository('AppBundle:' . $repo)->findAll();
         } else if ($repoQ === "findOne") {
             // $entity = $em->getRepository('AppBundle:' . $repo)
             //         ->findOneBy(array('slug' => $slug));
@@ -295,41 +293,37 @@ class AjaxController extends Controller
 
         $requestContent = $request->getContent();
         $pushedParams = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
-        $domain = ucfirst($pushedParams->id);
-
+        // $domain = ucfirst($pushedParams->id);
         $returnObj = new \stdClass;
 
-        $domainParnt = $em->getRepository('AppBundle:' . $pushedParams->repo)
-                    ->findOneBy(array('slug' => $pushedParams->id));
-
-        $parntTaxon = $domainParnt->getTaxon();
-
-        $this->getNextLevel([$parntTaxon], $pushedParams, $returnObj);
-
-       // $logger->error('SASSSSSSS:: $returnObj->320->interactions->ObjectRoles[0]->tags ->' . print_r($returnObj, true));
+        $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
+        // $this->getNextLevel([$parntTaxon], $pushedParams, $returnObj);
+        // $parntTaxon = $domainParnt->getTaxon();
+        foreach ($taxa as $taxon) {
+            $this->getTaxonData($taxon, $pushedParams, $returnObj);
+        }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $returnObj,
-            'domain' => $domain
+            'taxaRcrds' => $returnObj
         ));
 
         return $response;
     }
     // Recurse to leaf taxon and call getTaxonData
-    private function getNextLevel($siblings, $params, $returnObj) 
-    {
-        foreach ($siblings as $taxon) {
-            $children = $taxon->getChildTaxa(); 
+    // private function getNextLevel($siblings, $params, $returnObj) 
+    // {
+    //     foreach ($siblings as $taxon) {
+    //         $children = $taxon->getChildTaxa(); 
 
-            if (count($children) >= 1) {
-                $this->getNextLevel($children, $params, $returnObj);
-                $this->getTaxonData($taxon, $params, $returnObj);
-            } else {
-                $this->getTaxonData($taxon, $params, $returnObj);
-            }
-        }
-    }
+    //         if (count($children) >= 1) {
+    //             $this->getNextLevel($children, $params, $returnObj);
+    //             $this->getTaxonData($taxon, $params, $returnObj);
+    //         } else {
+    //             $this->getTaxonData($taxon, $params, $returnObj);
+    //         }
+    //     }
+    // }
     private function getTaxonData($taxon, $params, $returnObj) 
     {
         $taxonId = $taxon->getId();
@@ -342,13 +336,13 @@ class AjaxController extends Controller
             $returnObj->$taxonKey->$prop = $taxon->$getProp();           
         }
 
-        $returnObj->$taxonKey->children = $this->getChildren($taxon, $params, $returnObj);
+        $returnObj->$taxonKey->children = $this->getChildren($taxon, $params);
         $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           
         $returnObj->$taxonKey->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
-        $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params, $returnObj);
+        $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params);
     }
-    private function getChildren($taxon, $params, $returnObj)
+    private function getChildren($taxon, $params)
     {
         $childEntities = $taxon->getChildTaxa();
         $children = [];
@@ -359,23 +353,22 @@ class AjaxController extends Controller
         }
         return $children;
     }
-    private function getTaxaInteractions($taxon, $params, $returnObj) 
+    private function getTaxaInteractions($taxon, $params) 
     {
         $intRcrds = new \stdClass;
 
         foreach ($params->roles as $role) {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
-            $intRcrds->$role = $this->getInteractions($interactions, $params, $returnObj);
+            $intRcrds->$role = $this->getInteractions($interactions, $params);
         }
         return $intRcrds;
     }
-    private function getInteractions($interactions, $params, $returnObj)
+    private function getInteractions($interactions, $params)
     {
+        if ( count($interactions) === 0 ) { return null; }
+
         $intRcrds = [];
-
-        $logger = $this->get('logger');
-
 
         foreach ($interactions as $int) {
             $rcrd = new \stdClass;
