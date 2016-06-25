@@ -266,6 +266,7 @@ input[name=textEntry] {
 }
 #search-grid {
 	height: 666px;
+	border: black 1px solid;
 }
 .row-kingdom {
 	background-color: rgba(128,0,128,.1) !important; /* purple */

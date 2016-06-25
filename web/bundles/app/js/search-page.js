@@ -44,11 +44,12 @@
 			repoQ: 'findAll',
 			props: ['slug', 'name']		//Idx0 = findOneBy
 		};
-		sendAjaxQuery(dataPkg, 'ajax/search', showTaxonSearchMethods)
+		sendAjaxQuery(dataPkg, 'ajax/search', showTaxonSearchMethods);
 	}
-	function showTaxonSearchMethods(data) {  console.log("data recieved. %O", data);
+	function showTaxonSearchMethods(data) {  console.log("domain data recieved. %O", data);
 		buildTaxaSearchHtml(data);
 		$("input[name='searchMethod']").change(onTaxaSearchMethodChange);
+		getAllTaxaRcrds();
 
 		initSearchState();
 	}
@@ -57,11 +58,23 @@
 		$('#sel-domain').val('arthropod');
 		onTaxaSearchMethodChange();
 	}
+		/** Ajax to get all interaction rcrds for passed domain. */
+	function getAllTaxaRcrds() {
+		var params = {
+			props: ['displayName', 'slug' ],
+			roles: ['ObjectRoles', 'SubjectRoles']
+		};
+		// openRow = slug;		//Row in datagrid will be expanded on load
+		sendAjaxQuery(params, 'ajax/search/taxa', storeTaxaRcrds);
+	}
+	function storeTaxaRcrds(data) {  console.log("taxaRcrds recieved. %O", data);
+		recievedData = data.results;
+	}
 	/**
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
 	 */
-	function buildTaxaSearchHtml(data) {
+	function buildTaxaSearchHtml(data) {  console.log("buildTaxaSearchHtml called. ");
 		var txtSearchElems = buildTxtSearchElems();
 		var browseElems = buildBrowseElems();
 		var domainOpts = getDomainOpts(data.results); 		//console.log("domainOpts = %O", domainOpts);
@@ -103,9 +116,9 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	if ( $('#sel-domain').val() === 'bat' ) { getInteractions('chiroptera', 'bat', ['SubjectRoles']); console.log("bats are selected") }  //showBatLevels();
-    	if ( $('#sel-domain').val() === 'plant' ) { getInteractions('plantae', 'plant', ['ObjectRoles']); console.log("plants are selected") }  //showBatLevels();
-    	if ( $('#sel-domain').val() === 'arthropod' ) { getInteractions('arthropoda', 'arthropod', ['ObjectRoles']); console.log("bugs are selected") }  //showBatLevels();
+    	// if ( $('#sel-domain').val() === 'bat' ) { getInteractions('chiroptera', 'bat', ['SubjectRoles']); console.log("bats are selected") }  //showBatLevels();
+    	// if ( $('#sel-domain').val() === 'plant' ) { getInteractions('plantae', 'plant', ['ObjectRoles']); console.log("plants are selected") }  //showBatLevels();
+    	// if ( $('#sel-domain').val() === 'arthropod' ) { getInteractions('arthropoda', 'arthropod', ['ObjectRoles']); console.log("bugs are selected") }  //showBatLevels();
 	}
 	/** Ajax to get all interaction rcrds for passed domain. */
 	function getInteractions(slug, domainId, roles) {
@@ -279,12 +292,12 @@
 	}
 /*---------------------------- Taxa Specific -------------------------------- */
  	/*---------Filter Functions------------------------------*/
-	function isExternalFilterPresent() { console.log("isExternalFilterPresent called")
+	function isExternalFilterPresent() { //console.log("isExternalFilterPresent called")
 		console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
 		return isTaxonymSelected('filter');
 		// return true;
 	}
-	function doesExternalFilterPass(node) {	 console.log("externally filtering. node = %O", node);  
+	function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
         // var filterSelections = {};
         // levels.forEach(function(lvl){
         // 	var selId = '#sel' + lvl;
