@@ -331,6 +331,7 @@ class AjaxController extends Controller
             $returnObj->$taxonKey->$prop = $taxon->$getProp();           
         }
 
+        $returnObj->$taxonKey->id = $taxon->getId();
         $returnObj->$taxonKey->children = $this->getChildren($taxon, $params);
         $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           

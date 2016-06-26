@@ -2,8 +2,9 @@
 	/**
 	 * openRow = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, openRow, recievedData, dataSet, rowData = [], columnDefs = [];
+	var gridDiv, openRow, rcrdsById, dataSet, rowData = [], columnDefs = [];
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
+	var sessionStorage = setSessionStorage();
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    getNodeChildDetails: getNodeChildDetails,
@@ -38,37 +39,51 @@
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
 /*------------------Taxa Search Methods---------------------------------------*/
-	function getDomains() {
+	function getDomains() {  
 		var dataPkg = {
 			repo: 'domain',
 			repoQ: 'findAll',
-			props: ['slug', 'name']		//Idx0 = findOneBy
-		};
-		sendAjaxQuery(dataPkg, 'ajax/search', showTaxonSearchMethods);
+			props: ['slug', 'name']		
+		}; 
+		var storedDomains = sessionStorage ? sessionStorage.getItem('domainRcrds') : false; 
+		if( storedDomains ) {  console.log("Stored Domains Loaded");
+			showTaxonSearchMethods(JSON.parse(storedDomains));
+		} else {  console.log("Domains Not Found In Storage.");
+			sendAjaxQuery(dataPkg, 'ajax/search', storeAndLoadDomains);
+		}
+	}
+	function storeAndLoadDomains(data) {
+		populateStorage('domainRcrds', JSON.stringify(data.results));
+		showTaxonSearchMethods(data.results);
 	}
 	function showTaxonSearchMethods(data) {  console.log("domain data recieved. %O", data);
 		buildTaxaSearchHtml(data);
 		$("input[name='searchMethod']").change(onTaxaSearchMethodChange);
-		getAllTaxaRcrds();
-
 		initSearchState();
+		getAllTaxaRcrds();
 	}
 	function initSearchState() {
 		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
-		$('#sel-domain').val('arthropod');
-		onTaxaSearchMethodChange();
+		$('#sel-domain').val('4');
 	}
-		/** Ajax to get all interaction rcrds for passed domain. */
+	/** Ajax to get all interaction rcrds. */
 	function getAllTaxaRcrds() {
 		var params = {
 			props: ['displayName', 'slug' ],
 			roles: ['ObjectRoles', 'SubjectRoles']
 		};
-		// openRow = slug;		//Row in datagrid will be expanded on load
-		sendAjaxQuery(params, 'ajax/search/taxa', storeTaxaRcrds);
+		var storedTaxa = sessionStorage ? sessionStorage.getItem('taxaRcrds') : false; 
+		if( storedTaxa ) {  console.log("Stored taxaRcrds Loaded");
+			rcrdsById = JSON.parse(storedTaxa);
+			onTaxaSearchMethodChange();
+		} else {  console.log("taxaRcrds Not Found In Storage.");
+			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
+		}
 	}
-	function storeTaxaRcrds(data) {  console.log("taxaRcrds recieved. %O", data);
-		recievedData = data.results;
+	function recieveTaxaRcrds(data) {  console.log("taxaRcrds recieved. %O", data);
+		rcrdsById = data.results;
+		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
+		onTaxaSearchMethodChange();
 	}
 	/**
 	 * Builds the HTML for the search methods available for the taxa-focused search,
@@ -77,15 +92,15 @@
 	function buildTaxaSearchHtml(data) {  console.log("buildTaxaSearchHtml called. ");
 		var txtSearchElems = buildTxtSearchElems();
 		var browseElems = buildBrowseElems();
-		var domainOpts = getDomainOpts(data.results); 		//console.log("domainOpts = %O", domainOpts);
+		var domainOpts = getDomainOpts(data); 		console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
 		$('#focus-top-opts').append([txtSearchElems, browseElems]);
 		
         function getDomainOpts(data) {
         	var optsAry = [];
-        	for (var rcrdId in data) { //console.log("rcrdId = %O", data[rcrdId]);
-        		optsAry.push({ value: data[rcrdId].slug, text: data[rcrdId].name });
+        	for (var taxonId in data) { //console.log("taxon = %O", data[taxonId]);
+        		optsAry.push({ value: taxonId, text: data[taxonId].name });
         	}
         	return optsAry;
         }
@@ -116,21 +131,45 @@
 	    }
 	}
 	function selectTaxaDomain(e) {
-    	// if ( $('#sel-domain').val() === 'bat' ) { getInteractions('chiroptera', 'bat', ['SubjectRoles']); console.log("bats are selected") }  //showBatLevels();
-    	// if ( $('#sel-domain').val() === 'plant' ) { getInteractions('plantae', 'plant', ['ObjectRoles']); console.log("plants are selected") }  //showBatLevels();
-    	// if ( $('#sel-domain').val() === 'arthropod' ) { getInteractions('arthropoda', 'arthropod', ['ObjectRoles']); console.log("bugs are selected") }  //showBatLevels();
+    	var domainTaxon = rcrdsById[$('#sel-domain').val()]; console.log("domainTaxon = %O", domainTaxon)
+		showAllDomainInteractions(domainTaxon);
 	}
-	/** Ajax to get all interaction rcrds for passed domain. */
-	function getInteractions(slug, domainId, roles) {
-		var params = {
-			repo: 'domain',
-			id: domainId,
-			props: ['displayName', 'slug' ],
-			roles: roles
-		};
-		openRow = slug;		//Row in datagrid will be expanded on load
-		sendAjaxQuery(params, 'ajax/search/taxa', buildSearchOptsAndGrid);
+	/** Show all data for domain. */
+	function showAllDomainInteractions(domainTaxon) {  console.log("domainTaxon=%O", domainTaxon)
+		var topTaxonName = domainTaxon.slug;
+		storeDomainLevel();
+		getTaxaTreeAndBuildGrid(domainTaxon);
+		
+		function storeDomainLevel() {
+			var domainLvl = domainTaxon.level;
+			populateStorage('domainLvl', domainLvl);
+		}
 	}
+	/** Build taxaTree with passed taxon as the top of the tree.  */
+	function getTaxaTreeAndBuildGrid(topTaxon) {
+		var taxaTree = buildTaxaTree(topTaxon);
+		openRow = topTaxon.id;   //console.log("openRow=", openRow)
+		dataSet = separateByLevel(taxaTree, topTaxon.displayName);  console.log("dataSet = %O", dataSet)
+		buildSearchOptsAndGrid(taxaTree);
+	}
+	/**
+	 * Returns an object with taxa records keyed by their display name and organized 
+	 * under their respective levels.
+	 */
+	function separateByLevel(taxaTree, topTaxon) {
+		var separated = {};
+		separate(taxaTree[topTaxon]);
+		return separated;
+
+		function separate(taxon) {
+			if (separated[taxon.level] === undefined) { separated[taxon.level] = {}; }
+			separated[taxon.level][taxon.displayName] = taxon;
+			
+			if (taxon.children) { 
+				taxon.children.forEach(function(child){ separate(child); }); 
+			}
+		}
+	} /* End separateByLevel */
 	/**
 	 * Separates interaction records by level @separateByLevel(); builds select dropdowns
 	 * for each level populated with the taxonymns at that level @buildSelects(); 
@@ -138,10 +177,7 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildSearchOptsAndGrid(data) {  	console.log("Here are your interactions Grand Master... Data = %O", data);
-		var domain = data.domain; 
-		recievedData = data.results;
-		dataSet = separateByLevel(data.results);   console.log("dataSet = %O", dataSet);
+	function buildSearchOptsAndGrid(taxaTree) {
 		var levels = Object.keys(dataSet);
 		var domainLvl = levels.shift();
 		var lvlOptsObj = buildLvlOptions(dataSet);
@@ -149,15 +185,17 @@
 		clearPreviousGrid();
 		addClearlevelSelectsBttn();
 		setLevelSelects();
-		loadTaxaGrid( buildTaxaTree(dataSet[domainLvl], data['results']), domain );
+		loadTaxaGrid( taxaTree );
 
 		function setLevelSelects() { console.log("-----Clearing Level Filters-------")
 			loadLevelSelectElems(lvlOptsObj, levels);
 		}
-		function addClearlevelSelectsBttn() {
-			var button = createElem('input', {type: 'button', value: 'Clear Level Filters'});
-			$('#opts-row1').append(button);
-			$(button).click(setLevelSelects);
+		function addClearlevelSelectsBttn() {  console.log("$('#clearLvls') = ", $('#clearLvls'))
+			if (!$('#clearLvls').length) {
+				var button = createElem('input', {id:'clearLvls', type: 'button', value: 'Clear Level Filters'});
+				$('#opts-row1').append(button);
+				$(button).click(setLevelSelects);
+			}
 		}
 	}
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
@@ -175,18 +213,6 @@
 	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid
 	}
-	/**
-	 * Returns an object with taxa records keyed by their display name and organized 
-	 * under their respective levels.
-	 */
-	function separateByLevel(rcrds) {
-		var separated = {};
-		for (var taxon in rcrds){
-			if (separated[rcrds[taxon].level] === undefined) { separated[rcrds[taxon].level] = {}; }
-			separated[rcrds[taxon].level][rcrds[taxon].displayName] = rcrds[taxon];
-		}
-		return separated;
-	} /* End separateByLevel */
 	function buildLvlOptions(rcrds) {  console.log("lvlOptsBuild rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
@@ -224,25 +250,24 @@
 	 * @param  {object} toplvltaxa Taxonomic hierarchy starting with the domain taxa.
 	 * @param  {object} taxaObj    Interaction records returned from the server.
 	 */
-	function buildTaxaTree(toplvltaxa, taxaObj) { 
-		var tree = {}
-		for (var taxon in toplvltaxa) {  //console.log("toplvltaxa[taxon] = %O", toplvltaxa[taxon])
-			tree[taxon] = toplvltaxa[taxon];  
-			toplvltaxa[taxon].children = getChildTaxa(toplvltaxa[taxon].children, taxaObj);
-		} console.log("tree = %O", tree);
+	function buildTaxaTree(topTaxon) { 
+		var tree = {}; 					console.log("tree = %O", tree);
+		tree[topTaxon.displayName] = topTaxon;  
+		topTaxon.children = getChildTaxa(topTaxon.children);	
+
 		return tree;
 
-		function getChildTaxa(children, taxaObj) { // console.log("get Child Taxa called. arguments = %O", arguments);
-			return children.map(function(childId){
-				var child = taxaObj[childId]; //console.log("childId = %s, child = %O", childId, child);
+		function getChildTaxa(children) {  console.log("get Child Taxa called. arguments = %O", arguments);
+			return children.map(function(child){
+				if (typeof child === "object") { return child; }
 
-				if (child.children.length >= 1) { 
-					child.children = getChildTaxa(child.children, taxaObj);
-				} else {
-					child.children = null;
-				}
+				var childRcrd = rcrdsById[child]; console.log("child = %O", child);
 
-				return child;
+				if (childRcrd.children.length >= 1) { 
+					childRcrd.children = getChildTaxa(childRcrd.children);
+				} else { childRcrd.children = null; }
+
+				return childRcrd;
 			});
 		}
 	} /* End buildTaxaTree */
@@ -372,8 +397,8 @@
 		}
 		function getParents(parentId) {
 			if (parentId === 1 || parentId === null) {return} 
-			if (parentId == Object.keys(recievedData)[0]) {return}  //console.log("first key ")
-			var parent = recievedData[parentId];
+			var parent = rcrdsById[parentId];
+			if (parent.level === sessionStorage.getItem('domainLvl')) {return}  //console.log("first key ")
 			if (relatedTaxaOpts[parent.level] === undefined) { relatedTaxaOpts[parent.level] = {}; }
 			relatedTaxaOpts[parent.level][parent.displayName] = parent;
 			selectedVals[parent.level] = parent.displayName;
@@ -386,11 +411,11 @@
 		}
 	} /* End repopulateDropDowns */
 	/*---------Data Conversion------------------------------*/
-	function loadTaxaGrid(taxaTree, domain) {
+	function loadTaxaGrid(taxaTree) {
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
-			topTaxaRows.push( getRowData(taxaTree[taxon], domain) );
+			topTaxaRows.push( getRowData(taxaTree[taxon]) );
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
@@ -398,31 +423,37 @@
 
 		loadGrid();
 	}
-	function getRowData(taxon, domain) { 
+	function getRowData(taxon) {  // console.log("taxon = %O", taxon);
 		var isParent = taxon.children !== null; 
-		var rows = [];
+		var rows = []; // console.log("taxon.id = ", taxon.id);
 		rows.push({
+			id: taxon.id,
 			name: taxon.displayName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
-			open: taxon.slug === openRow,
-			children: getRowDataForChildren(taxon, domain),
+			open: taxon.id === openRow, 
+			children: getRowDataForChildren(taxon),
 			taxaLvl: taxon.level,
-			interactions: taxon.interactions[Object.keys(taxon.interactions)[0]].length > 0 ,          
-		});
-		
+			interactions: hasInteractions(taxon),          
+		});		
 		return rows;
-		
 	} /* End getRowData */
-	function getRowDataForChildren(parent, domain) {
+	function hasInteractions(taxon) {
+		var intsFound = false;
+		for ( var role in taxon.interactions ) {
+			intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;		
+		}
+		return intsFound;
+	} 
+	function getRowDataForChildren(parent) {
 		var chldData = [];
 		var tempChldArys = [];
 		var domainMap = {
-			Bat: 'chiroptera',
-			Plant: 'plantae',
-			Arthropod: 'arthropoda'
+			'2': 'Bat',
+			'3': 'Plant',
+			'4': 'Arthropod'
 		};  
 
-		if ( parent.slug === domainMap[domain] ) { getDomainInteractions(parent, domain);   
+		if ( parent.id in domainMap ) { getDomainInteractions(parent, domainMap[parent.id]);   
 		} else { tempChldArys.push(getTaxaInteractions(parent)); }
 
 		for (var childKey in parent.children) {
@@ -434,9 +465,9 @@
 		return chldData;
 		/** Groups interactions attributed directly to a domain. */
 		function getDomainInteractions(taxon, domain) {
-			var intAry = taxon.interactions[Object.keys(taxon.interactions)[0]]; console.log("intAry = %O", intAry) 
-			if (intAry.length > 0) { 
+			if (hasInteractions(taxon)) { 
 				chldData.push({
+					id: taxon.id,
 					name: 'Unspecified ' + domain + ' Interactions',
 					isParent: true,
 					open: false,
@@ -452,7 +483,7 @@
 		var ints = [];
 		var taxaLvl = taxon.level; 
 		for (var role in taxon.interactions) {
-			if ( taxon.interactions[role].length >= 1 ) {
+			if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
 				taxon.interactions[role].forEach(function(intRcrd){
 					ints.push( getIntData(intRcrd, taxaLvl) );
 				});
@@ -524,9 +555,42 @@
 		}
 	    return elem;
 	}
-	/* --------------------- General Helpers ------------------------------*/
+	/* --------------------- General Helpers ---------------------------------*/
 	function ucfirst(string) { 
 		return string.charAt(0).toUpperCase() + string.slice(1); 
+	}
+/*------------------------------Storage Methods-------------------------------*/
+function setSessionStorage() {
+		if (storageAvailable('sessionStorage')) { 
+	   		return window['sessionStorage'];  console.log("Storage available. Setting now. sessionStorage = %O", sessionStorage);
+		} else { 
+			return false; 				      console.log("No Session Storage Available"); 
+		}
+	}
+	function storageAvailable(type) {
+		try {
+			var storage = window[type];
+			var x = '__storage_test__';
+
+			storage.setItem(x, x);
+			storage.removeItem(x);
+			return true;
+		}
+		catch(e) {
+			return false;
+		}
+	}
+	function populateStorage(key, val) {
+		if (sessionStorage) { console.log("SessionStorage active.");
+			sessionStorage.setItem(key, val);
+		} else { console.log("No Session Storage Available"); }
+	}
+	function getRemainingStorageSpace() {
+		 var limit = 1024 * 1024 * 5; // 5 MB
+		 return limit - unescape(encodeURIComponent(JSON.stringify(sessionStorage))).length;
+	}
+	function sizeOfString(string) {
+		return string.length;
 	}
 /*-----------------AJAX ------------------------------------------------------*/
 	function sendAjaxQuery(dataPkg, url, successCb) {  console.log("Sending Ajax data =%O", dataPkg)
