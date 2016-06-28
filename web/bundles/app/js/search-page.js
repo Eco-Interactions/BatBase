@@ -18,8 +18,8 @@
         unSortIcon: true,
         enableFilter: true,
         rowHeight: 26,
-		isExternalFilterPresent: isExternalFilterPresent, 
-		doesExternalFilterPass: doesExternalFilterPass,
+		// isExternalFilterPresent: isExternalFilterPresent, 
+		// doesExternalFilterPass: doesExternalFilterPass,
 	    // debug: true,
 	};
 
@@ -50,23 +50,22 @@
 		}; 
 		var storedDomains = sessionStorage ? sessionStorage.getItem('domainRcrds') : false; 
 		if( storedDomains ) {  console.log("Stored Domains Loaded");
-			showTaxonSearchMethods(JSON.parse(storedDomains));
+			showTaxonSearch(JSON.parse(storedDomains));
 		} else {  console.log("Domains Not Found In Storage.");
 			sendAjaxQuery(dataPkg, 'ajax/search', storeAndLoadDomains);
 		}
 	}
 	function storeAndLoadDomains(data) {
 		populateStorage('domainRcrds', JSON.stringify(data.results));
-		showTaxonSearchMethods(data.results);
+		showTaxonSearch(data.results);
 	}
-	function showTaxonSearchMethods(data) { // console.log("domain data recieved. %O", data);
+	function showTaxonSearch(data) { // console.log("domain data recieved. %O", data);
 		buildTaxaSearchHtml(data);
-		$("input[name='searchMethod']").change(onTaxaSearchMethodChange);
+		// $("input[name='searchMethod']").change(onTaxaSearchMethodChange);
 		initSearchState();
 		getAllTaxaRcrds();
 	}
 	function initSearchState() {
-		$('input[name="searchMethod"][value=browseSearch]').prop('checked', true);
 		$('#sel-domain').val('4');
 	}
 	/** Ajax to get all interaction rcrds. */
@@ -93,12 +92,12 @@
 	 * both text search and browsing through the taxa names by level.
 	 */
 	function buildTaxaSearchHtml(data) {  //console.log("buildTaxaSearchHtml called. ");
-		var txtSearchElems = buildTxtSearchElems();
-		var browseElems = buildBrowseElems();
+		// var txtSearchElems = buildTxtSearchElems();
+		var browseElems = createElem('span', { text: "Sort by: " });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
-		$('#focus-top-opts').append([txtSearchElems, browseElems]);
+		$('#focus-top-opts').append(browseElems);
 		
         function getDomainOpts(data) {
         	var optsAry = [];
@@ -107,48 +106,49 @@
         	}
         	return optsAry;
         }
-		function buildTxtSearchElems() {
-			var elems = createElem('label');
-			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
-			$(elems).append(createElem('span', { id:'txtSearchSpan', text: "Text Search" })); // console.log("elems = %O", elems)
-			$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
-			return elems;
-		}
-		function buildBrowseElems() {
-			var elems = createElem('label');
-			$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
-			$(elems).append(createElem('span', { text: "Browse Taxa Names" })); // console.log("elems = %O", elems)
-			return elems;
-		}
+		// function buildTxtSearchElems() {
+		// 	var elems = createElem('label');
+		// 	$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
+		// 	$(elems).append(createElem('span', { id:'txtSearchSpan', text: "Text Search" })); // console.log("elems = %O", elems)
+		// 	$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
+		// 	return elems;
+		// }
+		// function buildBrowseElems() {
+		// 	// var elems = createElem('label');
+		// 	// $(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
+		// 	$(elems).append(createElem('span', { text: "Sort by: " })); // console.log("elems = %O", elems)
+		// 	return elems;
+		// }
 	} /* End buildTaxaSearchHtml */
 	function onTaxaSearchMethodChange(e) { // console.log("change fired");
-	    if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
-	   		$("input[name='textEntry']").attr('disabled', false);
-	   		$('#sel-domain').attr('disabled', true);
-	   		setTextSearchOptions();
-	    } else {  // Browse Taxa Names
-	        $("input[name='textEntry']").attr('disabled', true);
-	   		$('#sel-domain').attr('disabled', false);
-			$('#sel-domain').change(selectTaxaDomain);
-			setBrowseSearchOptions();			
-			selectTaxaDomain();
-	    }
+	    // if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
+	   	// 	$("input[name='textEntry']").attr('disabled', false);
+	   	// 	$('#sel-domain').attr('disabled', true);
+	   	// 	setTextSearchOptions();
+	    // } else {  // Browse Taxa Names
+	     //    $("input[name='textEntry']").attr('disabled', true);
+	   		// $('#sel-domain').attr('disabled', false);
+		$('#sel-domain').change(selectTaxaDomain);
+		// setBrowseSearchOptions();	
+		clearPreviousGrid();		
+		selectTaxaDomain();
+	    // }
 	}
-	function setTextSearchOptions() {
-		// clearPreviousGrid();
-		rmvClearLevelSelectsBttn();
-		clearLevelSelectElems();
-	}
-	function setBrowseSearchOptions() {
-		clearPreviousGrid();
-	}
+	// function setTextSearchOptions() {
+	// 	// clearPreviousGrid();
+	// 	rmvClearLevelSelectsBttn();
+	// 	clearLevelSelectElems();
+	// }
+	// function setBrowseSearchOptions() {
+	// 	clearPreviousGrid();
+	// }
 	function selectTaxaDomain(e) {
     	var domainTaxon = rcrdsById[$('#sel-domain').val()]; console.log("domainTaxon = %O", domainTaxon)
 		showAllDomainInteractions(domainTaxon);
 	}
 	/** Show all data for domain. */
 	function showAllDomainInteractions(domainTaxon) {//  console.log("domainTaxon=%O", domainTaxon)
-		var topTaxonName = domainTaxon.slug;
+		// var topTaxonName = domainTaxon.slug;
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		
@@ -163,6 +163,9 @@
 		openRows = [topTaxon.id.toString()];   //console.log("openRows=", openRows)
 		dataSet = separateByLevel(taxaTree, topTaxon.displayName); /// console.log("dataSet = %O", dataSet)
 		buildBrowseSearchOptsndGrid(taxaTree);
+	}
+	function resetDataSet(taxaTree) {
+		// body...
 	}
 	/**
 	 * Returns an object with taxa records keyed by their display name and organized 
@@ -252,10 +255,24 @@
 			}
 		});
 	}
-	function getSelectedRowIds(selected) {
+	function getSelectedRowIds(selected) {  console.log("selected = %O", selected)
 		var ary = [];
-		for (var lvl in selected) { ary.push(selected[lvl]); }
+		for (var lvl in selected) { 
+			pushSelectedId(selected[lvl]);		}
 		return ary;
+
+		function getParentId(taxonId) {  console.log("taxonId = ", taxonId)
+			var taxon = rcrdsById[taxonId];   
+			var parentId = taxon.parentTaxon;
+			pushSelectedId(parentId);
+		}
+		function pushSelectedId(id) {
+			if (id !== null) {
+				id = id.toString();
+				ary.push(id);
+				getParentId(id); 
+			}
+		}
 	}
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
 		var elems = buildSelects(levelOptsObj, lvls);
@@ -390,7 +407,7 @@
 	}
 /*---------------------------- Taxa Specific -------------------------------- */
  	/*---------Filter Functions------------------------------*/
-	function isExternalFilterPresent() { console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
+	function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
 		return isTaxonymSelected('filter');
 	}
 	function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
@@ -401,7 +418,7 @@
         var selected = false;
 
         levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;  console.log("level = %s, val = %s", lvl, $(selId).val());
+        	var selId = '#sel' + lvl;  //console.log("level = %s, val = %s", lvl, $(selId).val());
         	if ($(selId).val() !== undefined && $(selId).val() !== 'all') { 
         		filterSelections[lvl] = $(selId).val();
         		selected = true;
@@ -484,7 +501,7 @@
 
 		loadGrid();
 	}
-	function getRowData(taxon) { //  console.log("taxon = %O", taxon);
+	function getRowData(taxon) { if (taxon.displayName == 'Hemiptera') { console.log("taxon = %O", taxon); }
 		var isParent = taxon.children !== null;// console.log("openRows.indexOf(taxon.id) !== -1", openRows.indexOf(taxon.id) !== -1)
 		var rows = []; // console.log("taxon.id = ", taxon.id);  console.log("openRows = %O", openRows)
 		rows.push({
@@ -669,12 +686,6 @@ function setSessionStorage() {
 	 */
 	function dataSubmitSucess(data, textStatus, jqXHR) { 
 		var entity = "Your Mom";										console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
-		// if ( entity === "interaction" ) {
-		// 	if ( postedData.interaction === undefined ) { postedData.interaction = []; }
-		// 	postedData.interaction.push( data[entity] );	
-		// } else {
-		// 	postedData[entity] = data[entity];  
-		// }
 	}
 	function ajaxError(jqXHR, textStatus, errorThrown) {
 		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
