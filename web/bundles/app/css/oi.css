@@ -98,14 +98,16 @@ span.lbl {
 .flex-wrap {
 	flex-wrap: wrap;
 }
+/*.flex-grow {
+	flex-grow: 2;
+}*/
 .flex-row {
 	display: flex;
 	flex-direction: row;
 }
-.flex-row-wrap {
+.flex-col {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
+	flex-direction: column;	
 }
 /*-------------------------- Main Layout -------------------------------------*/
 #pg-container {
@@ -232,37 +234,48 @@ span.lbl {
 /*-------------------------------- Pages -------------------------------------*/
 /*-------- Search --------------*/
 #search-opts {
-	margin: .5em auto .5em auto;
-	height: 100px;
+	margin: 1em auto 2em auto;
+	height: 111px;
 	width: 1450px;
-	/*border: 1px black solid;*/
 	border-radius: .5em;
 	font-size: 1.1em;
 }
-.opts-row {
+.opts-col {
 	padding: .7em;
-	margin: auto;
-	width: 98%;
-	height: 50%;
-}
-#focus-top-opts {
-	width: 100%;
 	height: 100%;
-	display: inline;
+	flex: 0 0 370px;  	 /*Don't grow or shrink, width.*/ 
+	justify-content: space-between;
+}
+
+.margin-1-auto {
+	/*margin: 1em auto 1em auto;*/
 }
 .opts-box {
-	width: 150px;
+	width: 130px;
 	height: 25px;
 	margin: 0 .7em 0 .5em;
 }
-#opts-row1 {
-	border-bottom: black 1px solid;
+#opts-col1 {
+	border-right: black 1px solid;
 }
-#search-focus {
-	margin-right: 1em;
+#opts-col2 {
+	margin-left: .5em;
 }
-input[name=textEntry] {
-	margin-right: 1em;
+#sort-opts {
+	justify-content: space-between;
+}
+.lvl-select {
+	margin: .3em;
+	justify-content: space-between;
+}
+#filter-bttns {
+	/*border: 1px black solid;*/
+	display: inline-flex;
+	justify-content: space-between;
+	height: 44px;
+}
+#clearLvls {
+	width:125px;
 }
 #search-grid {
 	height: 666px;

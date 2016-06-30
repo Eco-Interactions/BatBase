@@ -59,9 +59,8 @@
 		populateStorage('domainRcrds', JSON.stringify(data.results));
 		showTaxonSearch(data.results);
 	}
-	function showTaxonSearch(data) { // console.log("domain data recieved. %O", data);
+	function showTaxonSearch(data) { 											// console.log("domain data recieved. %O", data);
 		buildTaxaSearchHtml(data);
-		// $("input[name='searchMethod']").change(onTaxaSearchMethodChange);
 		initSearchState();
 		getAllTaxaRcrds();
 	}
@@ -75,14 +74,14 @@
 			roles: ['ObjectRoles', 'SubjectRoles']
 		};
 		var storedTaxa = sessionStorage ? sessionStorage.getItem('taxaRcrds') : false; 
-		if( storedTaxa ) {  console.log("Stored taxaRcrds Loaded");
+		if( storedTaxa ) {  													console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else {  console.log("taxaRcrds Not Found In Storage.");
+		} else {  																console.log("taxaRcrds Not Found In Storage.");
 			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											// console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -91,64 +90,50 @@
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
 	 */
-	function buildTaxaSearchHtml(data) {  //console.log("buildTaxaSearchHtml called. ");
-		// var txtSearchElems = buildTxtSearchElems();
+	function buildTaxaSearchHtml(data) { 										// console.log("buildTaxaSearchHtml called. ");
 		var browseElems = createElem('span', { text: "Sort by: " });
+		var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
-		$('#focus-top-opts').append(browseElems);
+		$('#sort-opts').append([browseElems, filterBttnCntnr]);
+		addFilterButtons();
+		$('#sel-domain').change(selectTaxaDomain);
 		
         function getDomainOpts(data) {
         	var optsAry = [];
-        	for (var taxonId in data) { //console.log("taxon = %O", data[taxonId]);
+        	for (var taxonId in data) { 										//console.log("taxon = %O", data[taxonId]);
         		optsAry.push({ value: taxonId, text: data[taxonId].name });
         	}
         	return optsAry;
         }
-		// function buildTxtSearchElems() {
-		// 	var elems = createElem('label');
-		// 	$(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'textSearch' })); 
-		// 	$(elems).append(createElem('span', { id:'txtSearchSpan', text: "Text Search" })); // console.log("elems = %O", elems)
-		// 	$(elems).append(createElem('input', { class:'opts-box', name: 'textEntry', type: 'text', placeholder: 'Enter Taxon Name' })); 
-		// 	return elems;
-		// }
-		// function buildBrowseElems() {
-		// 	// var elems = createElem('label');
-		// 	// $(elems).append(createElem('input', { name: 'searchMethod', type: 'radio', value: 'browseSearch' })); 
-		// 	$(elems).append(createElem('span', { text: "Sort by: " })); // console.log("elems = %O", elems)
-		// 	return elems;
-		// }
 	} /* End buildTaxaSearchHtml */
-	function onTaxaSearchMethodChange(e) { // console.log("change fired");
-	    // if ( $('input[name="searchMethod"]:checked').val() == 'textSearch' ) {
-	   	// 	$("input[name='textEntry']").attr('disabled', false);
-	   	// 	$('#sel-domain').attr('disabled', true);
-	   	// 	setTextSearchOptions();
-	    // } else {  // Browse Taxa Names
-	     //    $("input[name='textEntry']").attr('disabled', true);
-	   		// $('#sel-domain').attr('disabled', false);
-		$('#sel-domain').change(selectTaxaDomain);
-		// setBrowseSearchOptions();	
+	function addFilterButtons() {
+		addClearLevelSelectsBttn();
+		addApplyFiltersBttn();
+	}
+	function addClearLevelSelectsBttn() { 
+		if (!$('#clearLvls').length) {
+			var button = createElem('input', {id:'clearLvls', type: 'button', value: 'Clear Level Filters'});
+			$('#filter-bttns').append(button);
+		}
+	}
+	function addApplyFiltersBttn() {
+		if (!$('#applyFilters').length) {
+			var button = createElem('input', {id:'applyFilters', type: 'button', value: 'Apply Filters'});
+			$('#filter-bttns').append(button);
+		}		
+	}
+	function onTaxaSearchMethodChange(e) { 
 		clearPreviousGrid();		
 		selectTaxaDomain();
-	    // }
 	}
-	// function setTextSearchOptions() {
-	// 	// clearPreviousGrid();
-	// 	rmvClearLevelSelectsBttn();
-	// 	clearLevelSelectElems();
-	// }
-	// function setBrowseSearchOptions() {
-	// 	clearPreviousGrid();
-	// }
 	function selectTaxaDomain(e) {
-    	var domainTaxon = rcrdsById[$('#sel-domain').val()]; console.log("domainTaxon = %O", domainTaxon)
+    	var domainTaxon = rcrdsById[$('#sel-domain').val()]; 					// console.log("domainTaxon = %O", domainTaxon)
 		showAllDomainInteractions(domainTaxon);
 	}
 	/** Show all data for domain. */
-	function showAllDomainInteractions(domainTaxon) {//  console.log("domainTaxon=%O", domainTaxon)
-		// var topTaxonName = domainTaxon.slug;
+	function showAllDomainInteractions(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		
@@ -160,12 +145,9 @@
 	/** Build taxaTree with passed taxon as the top of the tree.  */
 	function getTaxaTreeAndBuildGrid(topTaxon) {
 		var taxaTree = buildTaxaTree(topTaxon);
-		openRows = [topTaxon.id.toString()];   //console.log("openRows=", openRows)
-		dataSet = separateByLevel(taxaTree, topTaxon.displayName); /// console.log("dataSet = %O", dataSet)
+		openRows = [topTaxon.id.toString()];  									//console.log("openRows=", openRows)
+		dataSet = separateByLevel(taxaTree, topTaxon.displayName); 				// console.log("dataSet = %O", dataSet)
 		buildBrowseSearchOptsndGrid(taxaTree);
-	}
-	function resetDataSet(taxaTree) {
-		// body...
 	}
 	/**
 	 * Returns an object with taxa records keyed by their display name and organized 
@@ -192,36 +174,24 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  console.log("dataSet = %O", dataSet)
+	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("dataSet = %O", dataSet)
 		var curDataSet = curSet || dataSet;
 		var levels = Object.keys(curDataSet);
 		var domainLvl = levels.shift();
 		var lvlOptsObj = buildLvlOptions(curDataSet);
 
 		clearPreviousGrid();
-		addApplyFiltersBttn();
 		setLevelSelects();
-		addClearLevelSelectsBttn();
 		loadTaxaGrid( taxaTree );
+
+		$('#clearLvls').click(setLevelSelects);
+		$('#applyFilters').click(updateTaxaBrowseSearch);
 
 		function setLevelSelects() {
 			loadLevelSelectElems( lvlOptsObj, levels );
 		}
-		function addClearLevelSelectsBttn() { 
-			if (!$('#clearLvls').length) {
-				var button = createElem('input', {id:'clearLvls', type: 'button', value: 'Clear Level Filters'});
-				$('#opts-row1').append(button);
-				$(button).click(setLevelSelects);
-			}
-		}
 	} /* End buildBrowseSearchOptsndGrid */
-	function addApplyFiltersBttn() {
-		if (!$('#applyFilters').length) {
-			var button = createElem('input', {id:'applyFilters', type: 'button', value: 'Apply Filters'});
-			$('#opts-row1').append(button);
-			$(button).click(updateTaxaData);
-		}		
-	}
+
 	function rmvClearLevelSelectsBttn() {
 		if ($('#clearLvls').length) { $('#clearLvls').remove(); }
 	}
@@ -233,35 +203,33 @@
 		clearPreviousGrid();
 		loadTaxaGrid(taxaTree);
 	}
-	function updateTaxaData() {
-	    if ( $('input[name="searchMethod"]:checked').val() === 'browseSearch' ) { console.log("browse search updating.")
-			updateTaxaBrowseSearch();
-		} else if ( $('input[name="searchMethod"]:checked').val() === 'textSearch' ) {  console.log("text search updating.")
-			updateTaxaTextSearch();
-		}
-	}	
-	function updateTaxaTextSearch() {
-		var searchStr = $('#txtSearchSpan').text();  console.log("searchStr = ", searchStr)
-	}
 	function updateTaxaBrowseSearch() {
-		var selectedTaxa = isTaxonymSelected();  //console.log("selectedTaxa = %O", selectedTaxa);
-		levels.some(function(lvl){
-			if (selectedTaxa[lvl]) {
-				var topTaxon = rcrdsById[selectedTaxa[lvl]];
-				var taxaTree = buildTaxaTree(topTaxon);
-				openRows = getSelectedRowIds(selectedTaxa); //  console.log("openRows =%O", openRows)
-				updateGrid(taxaTree);
-				return true;
-			}
-		});
-	}
-	function getSelectedRowIds(selected) {  console.log("selected = %O", selected)
+		var selectedTaxa = isTaxonymSelected(); 								// console.log("selectedTaxa = %O", selectedTaxa);
+		var domainLvl = sessionStorage.getItem('domainLvl');
+
+		if (domainLvl in selectedTaxa) {
+			loadGridForTaxon(selectedTaxa[domainLvl]);
+		} else {
+			levels.some(function(lvl){
+				if (selectedTaxa[lvl]) {
+					loadGridForTaxon(selectedTaxa[lvl])
+					return true; } });
+		}
+
+		function loadGridForTaxon(taxonId) {
+			var topTaxon = rcrdsById[taxonId];
+			var taxaTree = buildTaxaTree(topTaxon);
+			openRows = getSelectedRowIds(selectedTaxa); 						//  console.log("openRows =%O", openRows)
+			updateGrid(taxaTree);
+		}
+	} /* End updateTaxaBrowseSearch */
+	function getSelectedRowIds(selected) { 										// console.log("selected = %O", selected)
 		var ary = [];
 		for (var lvl in selected) { 
 			pushSelectedId(selected[lvl]);		}
 		return ary;
 
-		function getParentId(taxonId) {  console.log("taxonId = ", taxonId)
+		function getParentId(taxonId) {  										// console.log("taxonId = ", taxonId)
 			var taxon = rcrdsById[taxonId];   
 			var parentId = taxon.parentTaxon;
 			pushSelectedId(parentId);
@@ -277,25 +245,25 @@
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
 		var elems = buildSelects(levelOptsObj, lvls);
 		clearLevelSelectElems();		
-		$('#opts-row2').append(elems);
+		$('#opts-col2').append(elems);
 		setSelectedVals(selected);
 	}
 	function clearLevelSelectElems() {
-		$('#opts-row2').empty();
+		$('#opts-col2').empty();
 	}
-	function setSelectedVals(selected) {//  console.log("selected in setSelectedVals = %O", selected);
+	function setSelectedVals(selected) {										//  console.log("selected in setSelectedVals = %O", selected);
 		for (var lvl in selected) {
 			var selId = '#sel' + lvl;
 			$(selId).val(selected[lvl]);
 		}
 	}
 	function clearPreviousGrid() {
-		if (gridOptions.api) { gridOptions.api.destroy(); }		// Clear previous grid
+		if (gridOptions.api) { gridOptions.api.destroy(); }		
 	}
-	function buildLvlOptions(rcrds) { // console.log("lvlOptsBuild rcrds = %O", rcrds);
+	function buildLvlOptions(rcrds) { 											// console.log("lvlOptsBuild rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
-			var taxaNames = Object.keys(rcrds[lvl]).sort(); //console.log("taxaNames = %O", taxaNames);
+			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
 			if (taxaNames.length === 0) { 
 				optsObj[lvl].push({value: 'none', text: '- None -'});
@@ -329,8 +297,11 @@
 		levelAry.forEach(function(level){
 			var text = level + ': ';
 			var id = 'sel' + level;
-			selElems.push(createElem('span', { text: text }));
-			selElems.push(buildSelectElem(lvlOpts[level], { class: "opts-box", id: id }));
+			var labelElem = createElem('label', { class: "lvl-select flex-row" });
+			var spanElem = createElem('span', { text: text });
+			var selectElem = buildSelectElem(lvlOpts[level], { class: "opts-box", id: id });
+			$(labelElem).append([spanElem, selectElem]);
+			selElems.push(labelElem);
 		});
 		return selElems;
 	}
@@ -346,12 +317,12 @@
 
 		return tree;
 
-		function getChildTaxa(children) { // console.log("get Child Taxa called. arguments = %O", arguments);
+		function getChildTaxa(children) {										// console.log("get Child Taxa called. arguments = %O", arguments);
 			if (children === null) { return null; }
 			return children.map(function(child){
 				if (typeof child === "object") { return child; }
 
-				var childRcrd = rcrdsById[child]; // console.log("child = %O", child);
+				var childRcrd = rcrdsById[child]; 								// console.log("child = %O", child);
 
 				if (childRcrd.children.length >= 1) { 
 					childRcrd.children = getChildTaxa(childRcrd.children);
@@ -376,10 +347,10 @@
 			    {headerName: "Citation", field: "citation", width: 300,},
 			    {headerName: "Note", field: "note", width: 300,} ];
 	}
-	function innerCellRenderer(params) { // console.log("params in cell renderer = %O", params)
+	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
 	}
-	function getStyleClass(params) { // console.log("row params = %O", params);
+	function getStyleClass(params) { 											// console.log("row params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
@@ -392,7 +363,7 @@
 			return lvlClassMap[params.data.taxaLvl];
 		} 
 	}
-	function getNodeChildDetails(rcrd) {	//	console.log("rcrd = %O", rcrd)	
+	function getNodeChildDetails(rcrd) {										//	console.log("rcrd = %O", rcrd)	
 	    if (rcrd.isParent) {
 	        return {
 	            group: true,
@@ -407,33 +378,40 @@
 	}
 /*---------------------------- Taxa Specific -------------------------------- */
  	/*---------Filter Functions------------------------------*/
-	function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
-		return isTaxonymSelected('filter');
-	}
-	function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
-	 	return true; 
-	}
+	// function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
+	// 	return isTaxonymSelected('filter');
+	// }
+	// function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
+	//  	return true; 
+	// }
 	function isTaxonymSelected(filterCheck) {
         var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
         var selected = false;
 
         levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;  //console.log("level = %s, val = %s", lvl, $(selId).val());
-        	if ($(selId).val() !== undefined && $(selId).val() !== 'all') { 
+        	var selId = '#sel' + lvl;  console.log("level = %s, val = %s", lvl, $(selId).val());
+        	if ($(selId).val() !== undefined && $(selId).val() !== null && $(selId).val() !== 'all') { 
         		filterSelections[lvl] = $(selId).val();
         		selected = true;
         	} 
         });
-        return filterCheck ? (selected === false ? false : true) : (selected === false ? false : filterSelections); 
+        return selected === false ? selectDomain() : filterSelections; 
+
+        function selectDomain() {
+			var domainLvl = sessionStorage.getItem('domainLvl');
+        	var domain = {};
+        	domain[domainLvl] = dataSet[domainLvl][[Object.keys(dataSet[domainLvl])[0]]].id;
+        	return domain;
+        }
 	}
 	/*------------------Level Select Methods----------------------------------*/
 	function syncLevelSelects() {
 		var selected = isTaxonymSelected();
-		var selectedVals = getSelectedVals(selected); //console.log("selectedVals = %O", selectedVals)
-		if ( selected ) { repopulateDropDowns(selected, selectedVals); }
+		var selectedVals = getSelectedVals(selected);							//console.log("selectedVals = %O", selectedVals)
+		repopulateDropDowns(selected, selectedVals);
 	}
 	function repopulateDropDowns(selected, selectedVals) {
-		var revLevels = levels.map(function(lvl){return lvl}).reverse(); //console.log("revLevels = %O", revLevels);
+		var revLevels = levels.map(function(lvl){return lvl}).reverse(); 
 		var relatedTaxaOpts = {};
 		var lvls = Object.keys(dataSet);
 		lvls.shift();
@@ -449,7 +427,7 @@
 					buildTaxaOptsObj(selected[lvl], lvl, idx);
 					return true;
 				}
-			}); // console.log("relatedTaxaOpts = %O", relatedTaxaOpts);
+			}); 																// console.log("relatedTaxaOpts = %O", relatedTaxaOpts);
 		}
 		function buildTaxaOptsObj(lowestSelectedID, lvl, idx) {
 			var selected = rcrdsById[lowestSelectedID];
@@ -484,7 +462,7 @@
 	function getSelectedVals(selected) {
 		var vals = {};
 		for (var lvl in selected) {
-			vals[lvl] = selected[lvl];  //console.log("selected in getselectedVals = %O", JSON.parse(JSON.stringify(selected)));
+			vals[lvl] = selected[lvl];  										//console.log("selected in getselectedVals = %O", JSON.parse(JSON.stringify(selected)));
 		}
 		return vals;
 	}
@@ -497,13 +475,13 @@
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
-		rowData = finalRowData; // console.log("rowData = %O", rowData);
+		rowData = finalRowData;													// console.log("rowData = %O", rowData);
 
 		loadGrid();
 	}
-	function getRowData(taxon) { if (taxon.displayName == 'Hemiptera') { console.log("taxon = %O", taxon); }
-		var isParent = taxon.children !== null;// console.log("openRows.indexOf(taxon.id) !== -1", openRows.indexOf(taxon.id) !== -1)
-		var rows = []; // console.log("taxon.id = ", taxon.id);  console.log("openRows = %O", openRows)
+	function getRowData(taxon) { 
+		var isParent = taxon.children !== null;
+		var rows = []; 
 		rows.push({
 			id: taxon.id,
 			name: taxon.displayName,
@@ -581,7 +559,7 @@
 			} else {
 				intRowData[field] = intRcrd[field];
 			}
-		}   // console.log("getIntData called. intRowData = %O", intRowData);
+		}  																 		// console.log("getIntData called. intRowData = %O", intRowData);
 		return intRowData;
 	}
 	function getTags(tagAry) {
@@ -591,7 +569,7 @@
 		});
 		return tagStrAry.join(', ');
 	}
-	function getTaxonName(taxaData) { // console.log("taxaData = %O", taxaData)
+	function getTaxonName(taxaData) { 											// console.log("taxaData = %O", taxaData)
 		return taxaData.level == "Species" ? 
 				taxaData.name : 
 				taxaData.level + ' ' + taxaData.name;
@@ -639,9 +617,9 @@
 /*------------------------------Storage Methods-------------------------------*/
 function setSessionStorage() {
 		if (storageAvailable('sessionStorage')) { 
-	   		return window['sessionStorage'];  console.log("Storage available. Setting now. sessionStorage = %O", sessionStorage);
+	   		return window['sessionStorage'];  									//console.log("Storage available. Setting now. sessionStorage = %O", sessionStorage);
 		} else { 
-			return false; 				      console.log("No Session Storage Available"); 
+			return false; 				      									// console.log("No Session Storage Available"); 
 		}
 	}
 	function storageAvailable(type) {
@@ -658,7 +636,7 @@ function setSessionStorage() {
 		}
 	}
 	function populateStorage(key, val) {
-		if (sessionStorage) { console.log("SessionStorage active.");
+		if (sessionStorage) { 													// console.log("SessionStorage active.");
 			sessionStorage.setItem(key, val);
 		} else { console.log("No Session Storage Available"); }
 	}
@@ -670,7 +648,7 @@ function setSessionStorage() {
 		return string.length;
 	}
 /*-----------------AJAX ------------------------------------------------------*/
-	function sendAjaxQuery(dataPkg, url, successCb) {  console.log("Sending Ajax data =%O", dataPkg)
+	function sendAjaxQuery(dataPkg, url, successCb) {  							console.log("Sending Ajax data =%O", dataPkg)
 		$.ajax({
 			method: "POST",
 			url: url,
@@ -685,7 +663,7 @@ function setSessionStorage() {
 	 * Interactions are sent in sets of 1000, so the returns are collected in an array.
 	 */
 	function dataSubmitSucess(data, textStatus, jqXHR) { 
-		var entity = "Your Mom";										console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
+		var entity = "Your Mom";												console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
 	}
 	function ajaxError(jqXHR, textStatus, errorThrown) {
 		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
