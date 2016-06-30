@@ -11,7 +11,7 @@
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    getNodeChildDetails: getNodeChildDetails,
-	    getRowClass: getStyleClass,
+	    getRowClass: getRowStyleClass,
 	    onRowGroupOpened: softRefresh,
         enableColResize: true,
         enableSorting: true,
@@ -197,9 +197,7 @@
 	}
 	/*----------------Apply Fitler Update Methods-----------------------------*/
 	function updateGrid(taxaTree) {
-		if ( $('input[name="searchMethod"]:checked').val() === 'browseSearch' ) {
-			syncLevelSelects();
-		}
+		syncLevelSelects();
 		clearPreviousGrid();
 		loadTaxaGrid(taxaTree);
 	}
@@ -336,7 +334,7 @@
 	function softRefresh() { gridOptions.api.refreshView(); }
 	function getColumnDefs() {  
 		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 } },		//cellClassRules: getStyleClass
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
 			    {headerName: "Subject Taxon", field: "subject", width: 175,},
 			    {headerName: "Object Taxon", field: "object", width: 150 },
 			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
@@ -350,18 +348,28 @@
 	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
 	}
-	function getStyleClass(params) { 											// console.log("row params = %O", params);
+	function getRowStyleClass(params) { 										// console.log("getRowStyleClass params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
 			'Family': 'row-family',		'Genus': 'row-genus',
 			'Species': 'row-species'
 		};
-		if (params.node.data.isParent === false || 
-		  ( params.node.expanded === true && params.data.interactions === true ) ||
-			params.node.data.domainInts === true ) {
+		if (params.data.name === undefined) {
 			return lvlClassMap[params.data.taxaLvl];
 		} 
+	}
+	function getCellStyleClass(params) {										 console.log("getCellStyleClass params = %O", params);
+		var lvlClassMap = {
+			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
+			'Class': 'row-class',		'Order': 'row-order',
+			'Family': 'row-family',		'Genus': 'row-genus',
+			'Species': 'row-species'
+		};
+		if ((params.node.expanded === true && params.data.interactions === true 
+					&& params.data.name !== undefined) || params.node.data.domainInts === true) {
+			return lvlClassMap[params.data.taxaLvl];
+		}
 	}
 	function getNodeChildDetails(rcrd) {										//	console.log("rcrd = %O", rcrd)	
 	    if (rcrd.isParent) {
@@ -496,6 +504,7 @@
 	function hasInteractions(taxon) {
 		var intsFound = false;
 		for ( var role in taxon.interactions ) {
+			if (intsFound) {continue}
 			intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;		
 		}
 		return intsFound;
