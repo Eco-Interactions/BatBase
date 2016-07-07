@@ -226,41 +226,38 @@ class AjaxController extends Controller
         return $response;
     }
     /**
-     * Get Search Data.
+     * Get Domain Data.
      *
-     * @Route("/search", name="app_ajax_search")
+     * @Route("/search/domain", name="app_ajax_search_domain")
      */
-    public function searchAction(Request $request) 
+    public function searchDomainAction(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $logger = $this->get('logger');
+        // $logger = $this->get('logger');
 
         $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent); //  $logger->error('SASSSSSSS:: requestContent ->' . print_r($requestContent, true));
-        $repo = $pushedData->repo;        $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
-        $repoQ = $pushedData->repoQ;
+        $pushedData = json_decode($requestContent);                             // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
         $props = $pushedData->props;
 
         $returnObj = new \stdClass;
 
-        if ($repoQ === 'findAll') 
-        {
-            $entities = $em->getRepository('AppBundle:' . $repo)->findAll();
-        } 
+        $entities = $em->getRepository('AppBundle:Domain')->findAll();
 
         foreach ($entities as $entity) 
-        { // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+        {                                                                       // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
             $taxonId = strval($entity->getTaxon()->getId());
             $returnObj->$taxonId = [];
             foreach ($props as $prop) 
             {
-                $getProp = 'get' . ucfirst($prop); // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
-                $propVal = $entity->$getProp();    // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
-                $returnObj->$taxonId = array_merge( $returnObj->$taxonId, [ $prop => $propVal ] );
+                $getProp = 'get' . ucfirst($prop);                              // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
+                $propVal = $entity->$getProp();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
+                $returnObj->$taxonId = array_merge( 
+                    $returnObj->$taxonId, [ $prop => $propVal ] 
+                );
             }
         }
 
@@ -304,20 +301,6 @@ class AjaxController extends Controller
 
         return $response;
     }
-    // Recurse to leaf taxon and call getTaxonData
-    // private function getNextLevel($siblings, $params, $returnObj) 
-    // {
-    //     foreach ($siblings as $taxon) {
-    //         $children = $taxon->getChildTaxa(); 
-
-    //         if (count($children) >= 1) {
-    //             $this->getNextLevel($children, $params, $returnObj);
-    //             $this->getTaxonData($taxon, $params, $returnObj);
-    //         } else {
-    //             $this->getTaxonData($taxon, $params, $returnObj);
-    //         }
-    //     }
-    // }
     private function getTaxonData($taxon, $params, $returnObj) 
     {
         $taxonId = $taxon->getId();

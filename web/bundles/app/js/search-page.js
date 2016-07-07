@@ -55,11 +55,20 @@
 			sendAjaxQuery(dataPkg, 'ajax/search', storeAndLoadDomains);
 		}
 	}
-	function storeAndLoadDomains(data) {
+/*------------------Taxa Search Methods---------------------------------------*/
+	function getDomains() {  
+		var storedDomains = sessionStorage ? sessionStorage.getItem('domainRcrds') : false; 
+		if( storedDomains ) {  console.log("Stored Domains Loaded");
+			showTaxonSearch(JSON.parse(storedDomains));
+		} else {  console.log("Domains Not Found In Storage.");
+			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
+		}
+	}
+	function storeAndLoadDomains(data) {										console.log("domain data recieved. %O", data);
 		populateStorage('domainRcrds', JSON.stringify(data.results));
 		showTaxonSearch(data.results);
 	}
-	function showTaxonSearch(data) { 											// console.log("domain data recieved. %O", data);
+	function showTaxonSearch(data) { 											 
 		buildTaxaSearchHtml(data);
 		initSearchState();
 		getAllTaxaRcrds();
@@ -81,7 +90,7 @@
 			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  											// console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											 console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -129,7 +138,7 @@
 		selectTaxaDomain();
 	}
 	function selectTaxaDomain(e) {
-    	var domainTaxon = rcrdsById[$('#sel-domain').val()]; 					// console.log("domainTaxon = %O", domainTaxon)
+    	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
 		showAllDomainInteractions(domainTaxon);
 	}
 	/** Show all data for domain. */
