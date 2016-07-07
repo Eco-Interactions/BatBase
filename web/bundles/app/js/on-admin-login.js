@@ -68,7 +68,7 @@
 		$.when.apply($, postSimpleEntities(data)).done(postSecondRound);		
 		/** Continues pushing entities in an order that facilitates referencing. */
 		function postSecondRound() { 										// console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
-			$.when.apply($, postCitsAndLocs()).then(postAttr).then(postTaxa).then(postDomains).done(postRemainingEntities);  //
+			$.when.apply($, postCitsAndCntry()).then(postLocs).then(postAttr).then(postTaxa).then(postDomains).done(postRemainingEntities);  //
 		}
 		/** Final push sequence. */
 		function postRemainingEntities() {
@@ -112,8 +112,11 @@
 							'region', 'level', 'interactionType' ];	
 			return postAry(entities);
 		}
-		function postCitsAndLocs() {											// console.log('postCitsAndLocs called');
-			return postAry(['citation', 'location']);
+		function postCitsAndCntry() {											// console.log('postCitsAndLocs called');
+			return postAry(['citation', 'country']);
+		}		
+		function postLocs() {													// console.log('postAttr called');
+			return postSingle('location');
 		}
 		function postAttr() {													// console.log('postAttr called');
 			return postSingle('attribution');
@@ -199,6 +202,7 @@
 	 */
 	function getRelationships(entity) {
 		var relationships = {
+			country: ['defaultRegion'],
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
 			domain: ['taxon'],
