@@ -89,6 +89,50 @@ class AjaxController extends Controller
         return $response;
     }
     /**
+     * Post locations to regions
+     * 
+     * @Route("/post/region", name="app_ajax_post_region")
+     * @Method("POST")
+     */
+    public function postRegionAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }   
+        
+        $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        
+        $entityData = $pushedData->data->entityData;
+        $refData = $pushedData->data->refData;        //  $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+
+        $returnRefs = [];
+        $returnData = [];
+
+        foreach ($entityData as $rcrdId => $rcrd) {   
+            $regRef =  $rcrd->region;
+            $locRef = $rcrd->location;
+            $regRefId = $refData->region->$regRef;    //  $logger->error('SASSSSSSS:: regRefId ->' . print_r($regRefId, true));
+            $locRefId = $refData->location->$locRef;   // $logger->error('SASSSSSSS:: locRefId ->' . print_r($locRefId, true));
+
+            $region = $em->getRepository('AppBundle:Region')->findOneBy(array('id' => $regRefId));
+            $loc = $em->getRepository('AppBundle:Location')->findOneBy(array('id' => $locRefId));
+
+            $region->addLocation($loc);
+            $em->persist($region);
+        }
+        $em->flush();
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            "region_location" => "success",
+        ));
+
+        return $response;
+    }
+    /**
      * Post new Taxon entities.
      *
      * @Route("/post/taxon", name="app_ajax_post_taxon")
