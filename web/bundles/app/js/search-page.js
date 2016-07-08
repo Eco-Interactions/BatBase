@@ -39,21 +39,28 @@
 	}
 
 	function selectSearchFocus(e) {
+	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
-/*------------------Taxa Search Methods---------------------------------------*/
-	function getDomains() {  
+/*------------------Location Search Methods-----------------------------------*/
+	function getLocations() {
 		var dataPkg = {
-			repo: 'domain',
+			repo: 'region',
 			repoQ: 'findAll',
-			props: ['slug', 'name']		
+			props: ['slug', 'description', 'locations']		
 		}; 
-		var storedDomains = sessionStorage ? sessionStorage.getItem('domainRcrds') : false; 
-		if( storedDomains ) {  console.log("Stored Domains Loaded");
-			showTaxonSearch(JSON.parse(storedDomains));
-		} else {  console.log("Domains Not Found In Storage.");
-			sendAjaxQuery(dataPkg, 'ajax/search', storeAndLoadDomains);
+		var storedLocs = sessionStorage ? sessionStorage.getItem('locRcrds') : false; 
+		if( storedLocs ) {  console.log("Stored Locations Loaded");
+			showLocSearch(JSON.parse(storedDomains));
+		} else {  console.log("Locations Not Found In Storage.");
+			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
+	}
+	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
+		// body...
+	}
+	function showLocSearch(locData) {
+		// body...
 	}
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
