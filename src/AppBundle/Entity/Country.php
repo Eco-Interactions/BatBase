@@ -49,7 +49,7 @@ class Country
      *   @ORM\JoinColumn(name="default_region", referencedColumnName="id", nullable=true)
      * })
      */
-    private $defaultRegion;
+    private $region;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -157,37 +157,37 @@ class Country
     }
 
     /**
-     * Add Default Region.
+     * Add Region.
      *
-     * @param \AppBundle\Entity\Region $defaultRegion
+     * @param \AppBundle\Entity\Region $region
      *
      * @return Country
      */
-    public function setDefaultRegion(\AppBundle\Entity\Region $defaultRegion)
+    public function setRegion(\AppBundle\Entity\Region $region)
     {
-        $this->defaultRegion = $defaultRegion;
+        $this->region = $region;
 
         return $this;
     }
 
     /**
-     * Remove Default Region.
+     * Remove Region.
      *
-     * @param \AppBundle\Entity\Region $defaultRegion
+     * @param \AppBundle\Entity\Region $region
      */
-    public function removeDefaultRegion(\AppBundle\Entity\Region $defaultRegion)
+    public function removeRegion(\AppBundle\Entity\Region $region)
     {
-        $this->defaultRegion->removeElement($defaultRegion);
+        $this->region->removeElement($region);
     }
 
     /**
-     * Get Default Region.
+     * Get Region.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDefaultRegion()
+    public function getRegion()
     {
-        return $this->defaultRegion;
+        return $this->region;
     }
 
     /**

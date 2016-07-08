@@ -150,8 +150,8 @@ class AjaxController extends Controller
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);
         
-        $entityData = $pushedData->data->entityData;   //  $logger->error('SASSSSSSS:: taxon entityData ->' . print_r($entityData, true));
-        $levelRefs = $pushedData->data->refData->level;    //      $logger->error('SASSSSSSS:: levelRefs ->' . print_r($levelRefs, true));
+        $entityData = $pushedData->data->entityData;    $logger->error('SASSSSSSS:: taxon entityData ->' . print_r($entityData, true));
+        $levelRefs = $pushedData->data->refData->level;          $logger->error('SASSSSSSS:: levelRefs ->' . print_r($levelRefs, true));
 
         $entityClass = "AppBundle\\Entity\\Taxon";
         $returnData = [];
@@ -269,6 +269,7 @@ class AjaxController extends Controller
 
         return $response;
     }
+/**------------------------Search By Taxa-------------------------------------*/
     /**
      * Get Domain Data.
      *
@@ -295,6 +296,7 @@ class AjaxController extends Controller
         {                                                                       // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
             $taxonId = strval($entity->getTaxon()->getId());
             $returnObj->$taxonId = [];
+
             foreach ($props as $prop) 
             {
                 $getProp = 'get' . ucfirst($prop);                              // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
@@ -314,7 +316,7 @@ class AjaxController extends Controller
     }
 
     /**
-     * Get Taxa Search Data.
+     * Get Interactions by Taxa.
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -388,7 +390,91 @@ class AjaxController extends Controller
         }
         return $intRcrds;
     }
-    private function getInteractions($interactions, $params)
+/**------------------------Search By Location---------------------------------*/
+
+    /**
+     * Get Interactions by Region and Location.
+     *
+     * @Route("/search/location", name="app_ajax_search_location")
+     */
+    public function searchLocationsAction(Request $request) 
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
+        $em = $this->getDoctrine()->getManager();
+        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+
+        $returnObj = new \stdClass;
+
+        $regions = $em->getRepository('AppBundle:Region')->findAll();
+
+        foreach ($regions as $region) 
+        {                     //  $logger->error('SASSSSSSS:: region ->' . print_r($region, true));
+            $regionId = strval($region->getId());
+            $slug = $region->getSlug();
+            $desc = $region->getDescription();
+            $locs = $this->getLocInteractions($region);
+                                 //   $logger->error('SASSSSSSS:: finished LocInt gathering');
+            $returnObj->$regionId = [
+                "slug" => $slug,
+                "desc" => $desc,
+                "locInts" => $locs
+            ];
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $returnObj
+        ));
+
+        return $response;
+    }
+
+    private function getLocInteractions($region)
+    {
+        $logger = $this->get('logger');   $logger->error('SASSSSSSS:: getLocInteractions called.');
+        $countries = new \stdClass; 
+          
+        $locations = $region->getLocations();  $logger->error('SASSSSSSS:: about to get location... loc count = ' . count($locations));;
+
+        foreach ($locations as $location) {  $logger->error('SASSSSSSS:: getting location...');
+            $loc = new \stdClass;
+
+            $loc->id = $location->getId();
+            $loc->desc = $location->getDescription();
+            $loc->elev = $location->getElevation();
+            $loc ->elevMax = $location->getElevationMax();
+            $loc->elevUnit = $location->getElevUnitAbbrv();
+            $loc->gpsData = $location->getGpsData();
+            $loc->lat = $location->getLatitude();
+            $loc->long = $location->getLongitude();
+            $country = $location->getCountry();
+            $loc->country = $country;
+            $loc->habitatType = $location->getHabitatType();  // $logger->error('SASSSSSSS:: getting interactions...');
+            // $interactions = $location->getInteractions();
+            // $loc->intRcrds = $this->getInteractions($interactions);
+
+            if (property_exists($countries, $country)) {
+                $countries->$country = array_merge( 
+                    $countries->$country, [ $loc->id => $loc ]
+                );            
+            } else {
+                $countries->$country = [ $loc->id => $loc ];
+            }
+        }
+
+        return $countries;
+    }
+
+
+
+
+
+
+/**------------------------Shared Search Methods------------------------------*/
+    private function getInteractions($interactions)
     {
         if ( count($interactions) === 0 ) { return null; }
 
@@ -432,4 +518,5 @@ class AjaxController extends Controller
         }
         return $ary;
     }
+
 }

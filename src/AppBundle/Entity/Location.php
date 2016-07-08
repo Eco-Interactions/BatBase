@@ -160,6 +160,16 @@ class Location
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
     }
+    
+    /**
+     * Get id.
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * Add interactions.
@@ -230,16 +240,6 @@ class Location
     }
 
     /**
-     * Get id.
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
      * Set description.
      *
      * @param string $description
@@ -278,6 +278,16 @@ class Location
     }
 
     /**
+     * Get elevation.
+     *
+     * @return int
+     */
+    public function getElevation()
+    {
+        return $this->elevation;
+    }
+
+    /**
      * Get elevation max.
      *
      * @return int
@@ -299,16 +309,6 @@ class Location
         $this->elevationMax = $elevationMax;
 
         return $this;
-    }
-
-    /**
-     * Get elevation.
-     *
-     * @return int
-     */
-    public function getElevation()
-    {
-        return $this->elevation;
     }
 
     /**
