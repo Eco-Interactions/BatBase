@@ -68,7 +68,8 @@
 		$.when.apply($, postSimpleEntities(data)).done(postSecondRound);		
 		/** Continues pushing entities in an order that facilitates referencing. */
 		function postSecondRound() { 										// console.log("postRemainingEntities called. posted data = %O", JSON.parse(JSON.stringify(postedData)));
-			$.when.apply($, postCitsAndCntry()).then(postLocs).then(postAttr).then(postTaxa).then(postDomains).done(postRemainingEntities);  //
+			$.when.apply($, postCitsAndCntry()).then(postLocs).then(postRegionLocs)
+				.then(postAttr).then(postTaxa).then(postDomains).done(postRemainingEntities);  //
 		}
 		/** Final push sequence. */
 		function postRemainingEntities() {
@@ -108,8 +109,7 @@
 		 * @return {array} Ajax promises.
 		 */
 		function postSimpleEntities() {
-			var entities = ['publication', 'author', 'country', 'habitatType', 
-							'region', 'level', 'interactionType' ];	
+			var entities = ['publication', 'author', 'habitatType', 'region', 'level', 'interactionType' ];	
 			return postAry(entities);
 		}
 		function postCitsAndCntry() {											// console.log('postCitsAndLocs called');
@@ -117,6 +117,10 @@
 		}		
 		function postLocs() {													// console.log('postAttr called');
 			return postSingle('location');
+		}
+		function postRegionLocs() {
+			var dataObj = { entityData: data['region_locs'], refData: postedData }; 	// console.log("dataObj = %O", dataObj);
+			return postEntityData('region', dataObj, 'ajax/post/region');
 		}
 		function postAttr() {													// console.log('postAttr called');
 			return postSingle('attribution');
@@ -202,12 +206,12 @@
 	 */
 	function getRelationships(entity) {
 		var relationships = {
-			country: ['defaultRegion'],
 			attribution: ['citation', 'author'],
 			citation: ['publication'],
+			country: ['region'],
 			domain: ['taxon'],
-			tag: ['interaction', 'citation'],
 			location: ['country', 'habitatType', 'region'],
+			tag: ['interaction', 'citation'],
 			taxon: ['level', 'parentTaxon']
 		}
 		return relationships[entity] || [];
