@@ -3,7 +3,7 @@
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
 	var gridDiv, rcrdsById, dataSet, 
-		openRows = {}, 
+		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
@@ -17,19 +17,22 @@
         enableSorting: true,
         unSortIcon: true,
         enableFilter: true,
-        rowHeight: 26,
-		// isExternalFilterPresent: isExternalFilterPresent, 
-		// doesExternalFilterPass: doesExternalFilterPass,
-	    // debug: true,
+        rowHeight: 26
 	};
 
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
 		$("#search-focus").change(selectSearchFocus);
-
 		selectSearchFocus();
 	}
+	function selectSearchFocus(e) {  											console.log("select(ing)SearchFocus")
+	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
+	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
+	}
+/*=================Search Methods=============================================*/
+/*----------------------Shared------------------------------------------------*/
+	/*-------------------Grid Methods-----------------------------------------*/
 	function loadGrid(gridOpts) {  // console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
 		gridOptObj.rowData = rowData;
@@ -37,13 +40,32 @@
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
 	}
-
-	function selectSearchFocus(e) {  											console.log("select(ing)SearchFocus")
-	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
-	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
+	function getIntData(intRcrd, intRcrdObj){
+		for (var field in intRcrd) {
+			if ( field === 'id' ) { continue; }
+			if ( field === 'tags' ) { intRcrdObj[field] = getTags(intRcrd[[field]]); }
+			if ( field === "subject" || field === "object" ) { 
+				intRcrdObj[field] = getTaxonName(intRcrd[field]);	
+			} else {
+				intRcrdObj[field] = intRcrd[field];
+			}
+		}  																 		// console.log("getTaxaIntData called. intRowData = %O", intRowData);
+		return intRcrdObj;
+	}	
+	function getTags(tagAry) {
+		var tagStrAry = [];
+		tagAry.forEach(function(tagStr) {
+			tagStrAry.push(tagStr);
+		});
+		return tagStrAry.join(', ');
 	}
-/*=================Search Methods=============================================*/
-/*----------------------Shared------------------------------------------------*/
+	function getTaxonName(taxaData) { 											//console.log("taxaData = %O", taxaData)
+		return taxaData.level == "Species" ? 
+				taxaData.name : 
+				taxaData.level + ' ' + taxaData.name;
+	}	
+
+	/*-------------------Html Methods-----------------------------------------*/
 	function clearCol2() {
 		$('#opts-col2').empty();
 	}
@@ -69,11 +91,62 @@
 	}
 	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
 		populateStorage('locRcrds', JSON.stringify(data.results));
-		showLocSearch();
+		showLocSearch(data.results);
 	}
 	function showLocSearch(locData) {  											console.log("showLocSearch called. locData = %O", locData)
-		showLocSearchHtml(locData);		
+		showLocSearchHtml(locData);
+		loadLocGrid(locData)		
 	}
+	/*-----------------Grid Methods-------------------------------------------*/
+	function loadLocGrid(locData) {
+		var topRegionRows = [];
+		var finalRowData = [];   console.log("topRegionRows = %O", topRegionRows);
+		for (var region in locData) {
+			topRegionRows.push( [getLocRowData(locData[region], region)] );
+		}
+		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
+
+		rowData = finalRowData;													console.log("rowData = %O", rowData);
+		loadGrid();
+	}
+	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
+		return {
+			// id: taxon.id,
+			name: locName || null,	/* Interaction rows have no name to display. */
+			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
+			open: openRows.indexOf(locName) !== -1, 
+			children: getLocRowDataForChildren(locObj),
+			// taxaLvl: taxon.level,
+			interactions: locObj.intRcrds !== undefined,     /* Location objects have collections of interactions as children. */     
+		};		
+	}
+	function getLocRowDataForChildren(locObj) {
+		var regionRows = [];
+		if (locObj.interactionType !== undefined) { return false; }
+		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
+		if (locObj.intRcrds !== undefined) { return getlocIntRowData(locObj.intRcrds); }
+
+		for (var country in locObj) {
+			regionRows.push( getLocRowData( locObj[country], country ) );
+		}
+		return regionRows;
+	}
+	function handleUnspecifiedRegions(locAry) {
+		return locAry.map(function(locObj){
+			return getLocRowData(locObj, locObj.desc);
+		});
+	}
+	function getlocIntRowData(intRcrdAry) {
+		return intRcrdAry.map(function(intRcrd){  console.log("intRcrd = %O", intRcrd);
+			var intRcrdObj = { isParent: false };
+			return getIntData(intRcrd, intRcrdObj);
+		});
+	}
+
+
+
+
+	/*-----------------Html Methods-------------------------------------------*/
 	function showLocSearchHtml(locData) {
 		var locOpts = buildLocOptions(locData);
 		var locSelElems = buildLocSelectElems(locOpts);
@@ -307,7 +380,7 @@
 				getParentId(id); 
 			}
 		}
-	}
+	} /* End getSelectedRowIds */
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
 		var elems = buildSelects(levelOptsObj, lvls);
 		clearCol2();		
@@ -404,8 +477,9 @@
 			    {headerName: "Object Taxon", field: "object", width: 150 },
 			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
 			    {headerName: "Tags", field: "tags", width: 100,},
-			    {headerName: "Habitat Type", field: "habitatType", width: 125,},
-			    {headerName: "Country", field: "country", width: 100,},
+			    {headerName: "Habitat Type", field: "habitatType", width: 125 },
+			    {headerName: "Country", field: "country", width: 100 },
+			    {headerName: "Region", field: "region", width: 100 },
 			    {headerName: "Location Description", field: "location", width: 300,},
 			    {headerName: "Citation", field: "citation", width: 300,},
 			    {headerName: "Note", field: "note", width: 300,} ];
@@ -544,7 +618,7 @@
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
-			topTaxaRows.push( getRowData(taxaTree[taxon]) );
+			topTaxaRows.push( getTaxaRowData(taxaTree[taxon]) );
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
@@ -552,21 +626,18 @@
 
 		loadGrid();
 	}
-	function getRowData(taxon) { 
-		var isParent = taxon.children !== null;
-		var rows = []; 
-		rows.push({
+	function getTaxaRowData(taxon) { 
+		return [{
 			id: taxon.id,
 			name: taxon.displayName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
 			open: openRows.indexOf(taxon.id.toString()) !== -1, 
-			children: getRowDataForChildren(taxon),
+			children: getTaxaRowDataForChildren(taxon),
 			taxaLvl: taxon.level,
-			interactions: hasInteractions(taxon),          
-		});		
-		return rows;
-	} /* End getRowData */
-	function hasInteractions(taxon) {
+			interactions: taxaHasInteractions(taxon),          
+		}];		
+	} /* End getTaxaRowData */
+	function taxaHasInteractions(taxon) {
 		var intsFound = false;
 		for ( var role in taxon.interactions ) {
 			if (intsFound) {continue}
@@ -574,7 +645,7 @@
 		}
 		return intsFound;
 	} 
-	function getRowDataForChildren(parent) {
+	function getTaxaRowDataForChildren(parent) {
 		var chldData = [];
 		var tempChldArys = [];
 		var domainMap = {
@@ -587,7 +658,7 @@
 		} else { tempChldArys.push(getTaxaInteractions(parent)); }
 
 		for (var childKey in parent.children) {
-			if (parent.children !== null) { tempChldArys.push( getRowData(parent.children[childKey]) )}
+			if (parent.children !== null) { tempChldArys.push( getTaxaRowData(parent.children[childKey]) )}
 		}
 
 		tempChldArys.forEach(function(ary){	$.merge(chldData, ary);	});		
@@ -595,7 +666,7 @@
 		return chldData;
 		/** Groups interactions attributed directly to a domain. */
 		function getDomainInteractions(taxon, domain) {
-			if (hasInteractions(taxon)) { 
+			if (taxaHasInteractions(taxon)) { 
 				chldData.push({
 					id: taxon.id,
 					name: 'Unspecified ' + domain + ' Interactions',
@@ -615,38 +686,17 @@
 		for (var role in taxon.interactions) {
 			if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
 				taxon.interactions[role].forEach(function(intRcrd){
-					ints.push( getIntData(intRcrd, taxaLvl) );
+					ints.push( getTaxaIntData(intRcrd, taxaLvl) );
 				});
 			}
 		}
 		return ints;
 	}
-	function getIntData(intRcrd, taxaLvl) {
+	function getTaxaIntData(intRcrd, taxaLvl) {
 		var intRowData = { isParent: false,
-						taxaLvl: taxaLvl };
-
-		for (var field in intRcrd) {
-			if ( field === 'id' ) { continue; }
-			if ( field === 'tags' ) { intRowData[field] = getTags(intRcrd[[field]]); }
-			if ( field === "subject" || field === "object" ) {
-				intRowData[field] = getTaxonName(intRcrd[field]);	
-			} else {
-				intRowData[field] = intRcrd[field];
-			}
-		}  																 		// console.log("getIntData called. intRowData = %O", intRowData);
-		return intRowData;
-	}
-	function getTags(tagAry) {
-		var tagStrAry = [];
-		tagAry.forEach(function(tagStr) {
-			tagStrAry.push(tagStr);
-		});
-		return tagStrAry.join(', ');
-	}
-	function getTaxonName(taxaData) { 											// console.log("taxaData = %O", taxaData)
-		return taxaData.level == "Species" ? 
-				taxaData.name : 
-				taxaData.level + ' ' + taxaData.name;
+						taxaLvl: taxaLvl 
+		};
+		return getIntData(intRcrd, intRowData);
 	}
 /*----------------------Util----------------------------------------------------------------------*/
 	/*------------ HTML Generators ---------------------------*/
