@@ -428,38 +428,61 @@ class AjaxController extends Controller
 
             if ($location->getCountry() === null) {
                 $country =  null;
-                $region = "Unspecified";
+                $countryId = null;
             } else { 
                 $country = $location->getCountry()->getName();
-                $region = $location->getCountry()->getRegion()->getDescription();
+                $countryId = $location->getCountry()->getId();
             }
+            $region = $this->getLocRegions($location->getRegions());            //$logger->error('SASSSSSSSSSSSS:: region = ' . print_r($region, true));
             $loc->country = $country;
+            $loc->countryId = $countryId;
             $loc->region = $region;
-         
-            if ( $country === null ) {
-                if ( !property_exists($intsByRegion, $region) ) { $intsByRegion->$region = []; }
 
-                $intsByRegion->$region = array_merge( 
-                    $intsByRegion->$region, [ $loc->id => $loc ]
-                );            
+            if ( $country === null ) {
+                if ( !property_exists($intsByRegion, $region) ) {  $logger->error('SASSSSSSSSSSSS:: region property being created = ' . print_r($region, true));
+                    $intsByRegion->$region = []; 
+                }
+                if (is_array($intsByRegion->$region)) {
+                    $intsByRegion->$region = array_merge( 
+                        $intsByRegion->$region, [ $loc->id => $loc ]
+                    );         
+                } else {
+                    if ( !property_exists($intsByRegion->$region, "Unspecified") ) {
+                        $intsByRegion->$region->Unspecified = [];
+                    }
+                    $intsByRegion->$region->Unspecified = array_merge( 
+                        $intsByRegion->$region->Unspecified, [ $loc->id => $loc ]
+                    ); 
+                }
             } else {
-                if ( !property_exists($intsByRegion, $region) ) { $intsByRegion->$region = new \stdClass; }
+                if ( !property_exists($intsByRegion, $region) ) {  $logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
+                    $intsByRegion->$region = new \stdClass; 
+                }
                 if ( !property_exists($intsByRegion->$region, $country) ) { 
                     $intsByRegion->$region->$country = []; 
                 }
-                
                 $intsByRegion->$region->$country = array_merge( 
                     $intsByRegion->$region->$country, [ $loc->id => $loc ]
                 );            
             }
-        }
+        }  // $logger->error('SASSSSSSSSSSSS:: about to return... ->' . print_r($intsByRegion, true));
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $intsByRegion
+            'results' => $intsByRegion              //$intsByRegion
         ));
 
         return $response;
+    }
+    private function getLocRegions($regionEntities)  /*Can't figure out how to properly access the first propeprty, i.e. the first region, so only the first region is being used currently.*/
+    {
+        if ($regionEntities[0] !== null) {
+            $region = $regionEntities[0]->getDescription();
+            $regionAry = explode(",", $region);
+            return $regionAry[0];
+        } else {
+            return "Unspecified";
+        }
     }
 /**------------------------Shared Search Methods------------------------------*/
     private function getInteractions($interactions)
@@ -490,6 +513,8 @@ class AjaxController extends Controller
                 $rcrd->location = $int->getLocation()->getDescription();
                 $rcrd->country = $int->getLocation()->getCountry() === null ?
                     null : $int->getLocation()->getCountry()->getName() ;
+                $rcrd->region = $int->getLocation()->getCountry() === null ?
+                    null : $int->getLocation()->getCountry()->getRegion()->getDescription() ;
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
                     null : $int->getLocation()->getHabitatType()->getName() ;
             }
