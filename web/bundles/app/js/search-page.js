@@ -26,7 +26,7 @@
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
-		$("select[name='search-focus']").change(selectSearchFocus);
+		$("#search-focus").change(selectSearchFocus);
 
 		selectSearchFocus();
 	}
@@ -38,29 +38,82 @@
 	    new agGrid.Grid(gridDiv, gridOptObj);
 	}
 
-	function selectSearchFocus(e) {
+	function selectSearchFocus(e) {  											console.log("select(ing)SearchFocus")
 	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
+/*=================Search Methods=============================================*/
+/*----------------------Shared------------------------------------------------*/
+	function clearCol2() {
+		$('#opts-col2').empty();
+	}
+	/** Creates an opts obj for each 'item' in array with value and text as 'item' */
+	function buildSimpleOpts(optAry) {
+		var opts = []
+		optAry.forEach(function(option){
+			opts.push({
+				value: option,
+				text: option  });
+		});
+		opts.unshift({value: 'all', text: '- All -'});
+		return opts;
+	}	
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
-		var dataPkg = {
-			repo: 'region',
-			repoQ: 'findAll',
-			props: ['slug', 'description', 'locations']		
-		}; 
 		var storedLocs = sessionStorage ? sessionStorage.getItem('locRcrds') : false; 
 		if( storedLocs ) {  console.log("Stored Locations Loaded");
-			showLocSearch(JSON.parse(storedDomains));
+			showLocSearch(JSON.parse(storedLocs));
 		} else {  console.log("Locations Not Found In Storage.");
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
 	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
-		// body...
+		populateStorage('locRcrds', JSON.stringify(data.results));
+		showLocSearch();
 	}
-	function showLocSearch(locData) {
-		// body...
+	function showLocSearch(locData) {  											console.log("showLocSearch called. locData = %O", locData)
+		showLocSearchHtml(locData);		
+	}
+	function showLocSearchHtml(locData) {
+		var locOpts = buildLocOptions(locData);
+		var locSelElems = buildLocSelectElems(locOpts);
+		clearCol2();
+		$('#opts-col2').append(locSelElems);
+	}
+	function buildLocOptions(locData) {
+		var countries = [];
+		var regions = [];
+		var optsObj = {};
+		for (var region in locData) {  
+			if (Array.isArray(locData[region])) { 
+				regions.push(region);
+				continue; 
+			} 
+			regions.push(region); 
+			addCountries(locData[region]);
+		}
+		optsObj["Region"] = buildSimpleOpts(regions.sort());
+		optsObj["Country"] = buildSimpleOpts(countries.sort());
+		return optsObj;
+
+		function addCountries(region) {
+			for (var country in region) {  
+				countries.push(country);
+			} 
+		}
+	} /* End buildLocOptions */
+	function buildLocSelectElems(locOptsObj) {
+		var elems = [];
+		for (var selVal in locOptsObj) {
+			var text = selVal + ': ';
+			var id = 'sel' + selVal;
+			var labelElem = createElem('label', { class: "lvl-select flex-row" });
+			var spanElem = createElem('span', { text: text });
+			var selectElem = buildSelectElem(locOptsObj[selVal], { class: "opts-box", id: id });
+			$(labelElem).append([spanElem, selectElem]);
+			elems.push(labelElem);
+		}
+		return elems;
 	}
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
@@ -194,7 +247,7 @@
 		var curDataSet = curSet || dataSet;
 		var levels = Object.keys(curDataSet);
 		var domainLvl = levels.shift();
-		var lvlOptsObj = buildLvlOptions(curDataSet);
+		var lvlOptsObj = buildTaxaLvlOptions(curDataSet);
 
 		clearPreviousGrid();
 		setLevelSelects();
@@ -207,7 +260,6 @@
 			loadLevelSelectElems( lvlOptsObj, levels );
 		}
 	} /* End buildBrowseSearchOptsndGrid */
-
 	function rmvClearLevelSelectsBttn() {
 		if ($('#clearLvls').length) { $('#clearLvls').remove(); }
 	}
@@ -258,12 +310,9 @@
 	}
 	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
 		var elems = buildSelects(levelOptsObj, lvls);
-		clearLevelSelectElems();		
+		clearCol2();		
 		$('#opts-col2').append(elems);
 		setSelectedVals(selected);
-	}
-	function clearLevelSelectElems() {
-		$('#opts-col2').empty();
 	}
 	function setSelectedVals(selected) {										//  console.log("selected in setSelectedVals = %O", selected);
 		for (var lvl in selected) {
@@ -274,7 +323,7 @@
 	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		
 	}
-	function buildLvlOptions(rcrds) { 											// console.log("lvlOptsBuild rcrds = %O", rcrds);
+	function buildTaxaLvlOptions(rcrds) { 											// console.log("lvlOptsBuild rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
@@ -375,7 +424,7 @@
 			return lvlClassMap[params.data.taxaLvl];
 		} 
 	}
-	function getCellStyleClass(params) {										 console.log("getCellStyleClass params = %O", params);
+	function getCellStyleClass(params) {									//	 console.log("getCellStyleClass params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
@@ -442,7 +491,7 @@
 		
 		buildRelatedTaxaOptsObj();
 		
-		var lvlOptsObj = buildLvlOptions(relatedTaxaOpts);
+		var lvlOptsObj = buildTaxaLvlOptions(relatedTaxaOpts);
 		loadLevelSelectElems(lvlOptsObj, lvls, selectedVals);
 
 		function buildRelatedTaxaOptsObj() {
