@@ -406,40 +406,12 @@ class AjaxController extends Controller
         $em = $this->getDoctrine()->getManager();
         // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
 
-        $returnObj = new \stdClass;
+        $intsByRegion = new \stdClass;
 
-        $regions = $em->getRepository('AppBundle:Region')->findAll();
+        $locations = $em->getRepository('AppBundle:Location')->findAll();
 
-        foreach ($regions as $region) 
-        {                     //  $logger->error('SASSSSSSS:: region ->' . print_r($region, true));
-            $regionId = strval($region->getId());
-            $slug = $region->getSlug();
-            $desc = $region->getDescription();
-            $locs = $this->getLocInteractions($region);
-                                 //   $logger->error('SASSSSSSS:: finished LocInt gathering');
-            $returnObj->$regionId = [
-                "slug" => $slug,
-                "desc" => $desc,
-                "locInts" => $locs
-            ];
-        }
-
-        $response = new JsonResponse();
-        $response->setData(array(
-            'results' => $returnObj
-        ));
-
-        return $response;
-    }
-
-    private function getLocInteractions($region)
-    {
-        $logger = $this->get('logger');   $logger->error('SASSSSSSS:: getLocInteractions called.');
-        $countries = new \stdClass; 
-          
-        $locations = $region->getLocations();  $logger->error('SASSSSSSS:: about to get location... loc count = ' . count($locations));;
-
-        foreach ($locations as $location) {  $logger->error('SASSSSSSS:: getting location...');
+        foreach ($locations as $location) 
+        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
             $loc = new \stdClass;
 
             $loc->id = $location->getId();
@@ -450,29 +422,45 @@ class AjaxController extends Controller
             $loc->gpsData = $location->getGpsData();
             $loc->lat = $location->getLatitude();
             $loc->long = $location->getLongitude();
-            $country = $location->getCountry();
-            $loc->country = $country;
-            $loc->habitatType = $location->getHabitatType();  // $logger->error('SASSSSSSS:: getting interactions...');
-            // $interactions = $location->getInteractions();
-            // $loc->intRcrds = $this->getInteractions($interactions);
+            $loc->habitatType = $location->getHabitatType() === null ? null : $location->getHabitatType()->getName();  // $logger->error('SASSSSSSS:: getting interactions...');
+            $interactions = $location->getInteractions();
+            $loc->intRcrds = $this->getInteractions($interactions);
 
-            if (property_exists($countries, $country)) {
-                $countries->$country = array_merge( 
-                    $countries->$country, [ $loc->id => $loc ]
+            if ($location->getCountry() === null) {
+                $country =  null;
+                $region = "Unspecified";
+            } else { 
+                $country = $location->getCountry()->getName();
+                $region = $location->getCountry()->getRegion()->getDescription();
+            }
+            $loc->country = $country;
+            $loc->region = $region;
+         
+            if ( $country === null ) {
+                if ( !property_exists($intsByRegion, $region) ) { $intsByRegion->$region = []; }
+
+                $intsByRegion->$region = array_merge( 
+                    $intsByRegion->$region, [ $loc->id => $loc ]
                 );            
             } else {
-                $countries->$country = [ $loc->id => $loc ];
+                if ( !property_exists($intsByRegion, $region) ) { $intsByRegion->$region = new \stdClass; }
+                if ( !property_exists($intsByRegion->$region, $country) ) { 
+                    $intsByRegion->$region->$country = []; 
+                }
+                
+                $intsByRegion->$region->$country = array_merge( 
+                    $intsByRegion->$region->$country, [ $loc->id => $loc ]
+                );            
             }
         }
 
-        return $countries;
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $intsByRegion
+        ));
+
+        return $response;
     }
-
-
-
-
-
-
 /**------------------------Shared Search Methods------------------------------*/
     private function getInteractions($interactions)
     {
