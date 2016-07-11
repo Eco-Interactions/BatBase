@@ -41,10 +41,36 @@
 		}
 	}
 	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
-		populateStorage('locRcrds', JSON.stringify(data.results));
-		showLocSearch(data.results);
+		var locRcrds = sortLocTree(data.results);
+		populateStorage('locRcrds', JSON.stringify(locRcrds));
+		showLocSearch(locRcrds);
 	}
-	function showLocSearch(locData) {  											//console.log("showLocSearch called. locData = %O", locData)
+	function sortLocTree(locData) {
+		var sortedLocs = {};
+		var regions = Object.keys(locData).sort();  console.log("regions = %O", regions)
+		for (var i=0; i<regions.length; i++){
+			if (Array.isArray(locData[regions[i]])) { 
+				sortedLocs[regions[i]] = locData[regions[i]].sort();
+				continue;
+			}
+			sortedLocs[regions[i]] = sortCountryLvl(locData[regions[i]]);
+		}
+		return sortedLocs;
+	}
+	function sortCountryLvl(regionObj) {
+		var countries = Object.keys(regionObj).sort();
+		var returnObj = {};
+		for (var i=0; i<countries.length; i++){
+			returnObj[countries[i]] = regionObj[countries[i]].sort(alphaLocDesc);
+		}		
+		return returnObj;
+	}
+	function alphaLocDesc(a, b) {
+		var x=a.desc.toLowerCase();
+	    var y=b.desc.toLowerCase();
+	    return x<y ? -1 : x>y ? 1 : 0;
+	}
+	function showLocSearch(locData) {  											console.log("showLocSearch called. locData = %O", locData)
 		showLocSearchHtml(locData);
 		loadLocGrid(locData)		
 	}
@@ -52,12 +78,12 @@
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
 		var finalRowData = [];   console.log("topRegionRows = %O", topRegionRows);
-		for (var region in locData) {
+		for (var region in locData) {  console.log("region = ", region)
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
 
-		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		rowData = finalRowData;													console.log("rowData = %O", rowData);
 		loadGrid("Regions-Countries-Locations");
 	}
 	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
@@ -502,7 +528,7 @@
 		}
 		return vals;
 	}
-	/*---------Data Conversion------------------------------*/
+	/*---------Data Formatting------------------------------------------------*/
 	function loadTaxaGrid(taxaTree) {  console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
 		var topTaxaRows = [];
 		var finalRowData = [];
@@ -586,8 +612,8 @@
 						taxaLvl: taxaLvl 
 		};
 		return getIntData(intRcrd, intRowData);
-	}/*----------------------Shared------------------------------------------------*/
-
+	}
+	/*===================Shared===============================================*/
 	/*-------------------Html Methods-----------------------------------------*/
 	function clearCol2() {
 		$('#opts-col2').empty();
@@ -611,7 +637,6 @@
 	// function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
 	//  	return true; 
 	// }
-	/*-------------------Grid Methods-----------------------------------------*/
 	function loadGrid(mainCol, gridOpts) {  // console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
 		gridOptObj.rowData = rowData;
@@ -699,7 +724,7 @@
 	        };
 	    } else { return null; }
   	}
- 	/*---------Filter Functions------------------------------*/
+ 	/*========================Filter Functions================================*/
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
