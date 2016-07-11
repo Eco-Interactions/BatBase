@@ -439,7 +439,7 @@ class AjaxController extends Controller
             $loc->region = $region;
 
             if ( $country === null ) {
-                if ( !property_exists($intsByRegion, $region) ) {  $logger->error('SASSSSSSSSSSSS:: region property being created = ' . print_r($region, true));
+                if ( !property_exists($intsByRegion, $region) ) {//  $logger->error('SASSSSSSSSSSSS:: region property being created = ' . print_r($region, true));
                     $intsByRegion->$region = []; 
                 }
                 if (is_array($intsByRegion->$region)) {
@@ -455,7 +455,7 @@ class AjaxController extends Controller
                     ); 
                 }
             } else {
-                if ( !property_exists($intsByRegion, $region) ) {  $logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
+                if ( !property_exists($intsByRegion, $region) ) {  ///$logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
                     $intsByRegion->$region = new \stdClass; 
                 }
                 if ( !property_exists($intsByRegion->$region, $country) ) { 
@@ -478,8 +478,8 @@ class AjaxController extends Controller
     {
         if ($regionEntities[0] !== null) {
             $region = $regionEntities[0]->getDescription();
-            $regionAry = explode(",", $region);
-            return $regionAry[0];
+            // $regionAry = explode(",", $region);
+            return $region;              //$regionAry[0];
         } else {
             return "Unspecified";
         }
