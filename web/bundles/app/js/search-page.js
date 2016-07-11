@@ -31,55 +31,6 @@
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
 /*=================Search Methods=============================================*/
-/*----------------------Shared------------------------------------------------*/
-	/*-------------------Grid Methods-----------------------------------------*/
-	function loadGrid(gridOpts) {  // console.log("final rows = %O", rowData);
-		var gridOptObj = gridOpts || gridOptions;
-		gridOptObj.rowData = rowData;
-
-	    gridDiv = document.querySelector('#search-grid');
-	    new agGrid.Grid(gridDiv, gridOptObj);
-	}
-	function getIntData(intRcrd, intRcrdObj){
-		for (var field in intRcrd) {
-			if ( field === 'id' ) { continue; }
-			if ( field === 'tags' ) { intRcrdObj[field] = getTags(intRcrd[[field]]); }
-			if ( field === "subject" || field === "object" ) { 
-				intRcrdObj[field] = getTaxonName(intRcrd[field]);	
-			} else {
-				intRcrdObj[field] = intRcrd[field];
-			}
-		}  																 		// console.log("getTaxaIntData called. intRowData = %O", intRowData);
-		return intRcrdObj;
-	}	
-	function getTags(tagAry) {
-		var tagStrAry = [];
-		tagAry.forEach(function(tagStr) {
-			tagStrAry.push(tagStr);
-		});
-		return tagStrAry.join(', ');
-	}
-	function getTaxonName(taxaData) { 											//console.log("taxaData = %O", taxaData)
-		return taxaData.level == "Species" ? 
-				taxaData.name : 
-				taxaData.level + ' ' + taxaData.name;
-	}	
-
-	/*-------------------Html Methods-----------------------------------------*/
-	function clearCol2() {
-		$('#opts-col2').empty();
-	}
-	/** Creates an opts obj for each 'item' in array with value and text as 'item' */
-	function buildSimpleOpts(optAry) {
-		var opts = []
-		optAry.forEach(function(option){
-			opts.push({
-				value: option,
-				text: option  });
-		});
-		opts.unshift({value: 'all', text: '- All -'});
-		return opts;
-	}	
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = sessionStorage ? sessionStorage.getItem('locRcrds') : false; 
@@ -93,7 +44,7 @@
 		populateStorage('locRcrds', JSON.stringify(data.results));
 		showLocSearch(data.results);
 	}
-	function showLocSearch(locData) {  											console.log("showLocSearch called. locData = %O", locData)
+	function showLocSearch(locData) {  											//console.log("showLocSearch called. locData = %O", locData)
 		showLocSearchHtml(locData);
 		loadLocGrid(locData)		
 	}
@@ -106,8 +57,8 @@
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
 
-		rowData = finalRowData;													console.log("rowData = %O", rowData);
-		loadGrid();
+		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		loadGrid("Regions-Countries-Locations");
 	}
 	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
 		return {
@@ -137,7 +88,7 @@
 		});
 	}
 	function getlocIntRowData(intRcrdAry) {
-		return intRcrdAry.map(function(intRcrd){  console.log("intRcrd = %O", intRcrd);
+		return intRcrdAry.map(function(intRcrd){ // console.log("intRcrd = %O", intRcrd);
 			var intRcrdObj = { isParent: false };
 			return getIntData(intRcrd, intRcrdObj);
 		});
@@ -468,69 +419,7 @@
 			});
 		}
 	} /* End buildTaxaTree */
-/*------------------AG Grid Methods-------------------------------------------*/
-	function softRefresh() { gridOptions.api.refreshView(); }
-	function getColumnDefs() {  
-		return [{headerName: "Taxa Tree", field: "name", width: 300, cellRenderer: 'group', 
-					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 175,},
-			    {headerName: "Object Taxon", field: "object", width: 150 },
-			    {headerName: "Interaction Type", field: "interactionType", width: 125,},
-			    {headerName: "Tags", field: "tags", width: 100,},
-			    {headerName: "Habitat Type", field: "habitatType", width: 125 },
-			    {headerName: "Country", field: "country", width: 100 },
-			    {headerName: "Region", field: "region", width: 100 },
-			    {headerName: "Location Description", field: "location", width: 300,},
-			    {headerName: "Citation", field: "citation", width: 300,},
-			    {headerName: "Note", field: "note", width: 300,} ];
-	}
-	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
-		return params.data.name || null;
-	}
-	function getRowStyleClass(params) { 										// console.log("getRowStyleClass params = %O", params);
-		var lvlClassMap = {
-			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
-			'Class': 'row-class',		'Order': 'row-order',
-			'Family': 'row-family',		'Genus': 'row-genus',
-			'Species': 'row-species'
-		};
-		if (params.data.name === undefined) {
-			return lvlClassMap[params.data.taxaLvl];
-		} 
-	}
-	function getCellStyleClass(params) {									//	 console.log("getCellStyleClass params = %O", params);
-		var lvlClassMap = {
-			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
-			'Class': 'row-class',		'Order': 'row-order',
-			'Family': 'row-family',		'Genus': 'row-genus',
-			'Species': 'row-species'
-		};
-		if ((params.node.expanded === true && params.data.interactions === true 
-					&& params.data.name !== undefined) || params.node.data.domainInts === true) {
-			return lvlClassMap[params.data.taxaLvl];
-		}
-	}
-	function getNodeChildDetails(rcrd) {										//	console.log("rcrd = %O", rcrd)	
-	    if (rcrd.isParent) {
-	        return {
-	            group: true,
-	            expanded: rcrd.open,
-	            children: rcrd.children
-	        };
-	    } else { return null; }
-  	}
- 	/*---------Filter Functions------------------------------*/
-	function onFilterChange() {
-		gridOptions.api.onFilterChanged();
-	}
-/*---------------------------- Taxa Specific -------------------------------- */
- 	/*---------Filter Functions------------------------------*/
-	// function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
-	// 	return isTaxonymSelected('filter');
-	// }
-	// function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
-	//  	return true; 
-	// }
+/*---------------------------- Taxa Specific Filters-------------------------------- */
 	function isTaxonymSelected(filterCheck) {
         var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
         var selected = false;
@@ -624,7 +513,7 @@
 
 		rowData = finalRowData;													// console.log("rowData = %O", rowData);
 
-		loadGrid();
+		loadGrid("Taxa Tree");
 	}
 	function getTaxaRowData(taxon) { 
 		return [{
@@ -697,8 +586,381 @@
 						taxaLvl: taxaLvl 
 		};
 		return getIntData(intRcrd, intRowData);
+	}/*----------------------Shared------------------------------------------------*/
+
+	/*-------------------Html Methods-----------------------------------------*/
+	function clearCol2() {
+		$('#opts-col2').empty();
 	}
+	/** Creates an opts obj for each 'item' in array with value and text as 'item' */
+	function buildSimpleOpts(optAry) {
+		var opts = []
+		optAry.forEach(function(option){
+			opts.push({
+				value: option,
+				text: option  });
+		});
+		opts.unshift({value: 'all', text: '- All -'});
+		return opts;
+	}	
+
+    /*--------------AG Grid Methods-------------------------------------------*/
+    	// function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
+	// 	return isTaxonymSelected('filter');
+	// }
+	// function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
+	//  	return true; 
+	// }
+	/*-------------------Grid Methods-----------------------------------------*/
+	function loadGrid(mainCol, gridOpts) {  // console.log("final rows = %O", rowData);
+		var gridOptObj = gridOpts || gridOptions;
+		gridOptObj.rowData = rowData;
+		gridOptObj.columnDefs = getColumnDefs(mainCol),
+
+	    gridDiv = document.querySelector('#search-grid');
+	    new agGrid.Grid(gridDiv, gridOptObj);
+	}
+	function getIntData(intRcrd, intRcrdObj){
+		for (var field in intRcrd) {
+			if ( field === 'id' ) { continue; }
+			if ( field === 'tags' ) { intRcrdObj[field] = getTags(intRcrd[[field]]); }
+			if ( field === "subject" || field === "object" ) { 
+				intRcrdObj[field] = getTaxonName(intRcrd[field]);	
+			} else {
+				intRcrdObj[field] = intRcrd[field];
+			}
+		}  																 		// console.log("getTaxaIntData called. intRowData = %O", intRowData);
+		return intRcrdObj;
+	}	
+	function getTags(tagAry) {
+		var tagStrAry = [];
+		tagAry.forEach(function(tagStr) {
+			tagStrAry.push(tagStr);
+		});
+		return tagStrAry.join(', ');
+	}
+	function getTaxonName(taxaData) { 											//console.log("taxaData = %O", taxaData)
+		return taxaData.level == "Species" ? 
+				taxaData.name : 
+				taxaData.level + ' ' + taxaData.name;
+	}	
+	function softRefresh() { gridOptions.api.refreshView(); }
+	function getColumnDefs(mainCol) {  
+		return [{headerName: mainCol, field: "name", width: 300, cellRenderer: 'group', 
+					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
+					cellClass: getCellStyleClass, suppressFilter: true },		//cellClassRules: getCellStyleClass
+			    {headerName: "Subject Taxon", field: "subject", width: 175 },
+			    {headerName: "Object Taxon", field: "object", width: 150 },
+			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
+			    {headerName: "Tags", field: "tags", width: 100, filter: UniqueValuesFilter},
+			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
+			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
+			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
+			    {headerName: "Location Description", field: "location", width: 300,},
+			    {headerName: "Citation", field: "citation", width: 300,},
+			    {headerName: "Note", field: "note", width: 300,} ];
+	}
+	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
+		return params.data.name || null;
+	}
+	function getRowStyleClass(params) { 										// console.log("getRowStyleClass params = %O", params);
+		var lvlClassMap = {
+			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
+			'Class': 'row-class',		'Order': 'row-order',
+			'Family': 'row-family',		'Genus': 'row-genus',
+			'Species': 'row-species'
+		};
+		var lvlAry = [1, 2, 3, 4, 5, 6, 7];
+		if (params.data.name === undefined || params.data.name === null) {
+			var isTaxa = params.data.taxaLvl !== undefined ? lvlClassMap[params.data.taxaLvl] : false;
+			// var lvlIdx = lvlAry[Math.floor(Math.random() * lvlAry.length)];
+			// var lvlClass = lvlClassMap[Object.keys(lvlClassMap)[lvlIdx]];
+			return isTaxa || 'row-kingdom';
+		} 
+	}
+	function getCellStyleClass(params) {									//	 console.log("getCellStyleClass params = %O", params);
+		var lvlClassMap = {
+			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
+			'Class': 'row-class',		'Order': 'row-order',
+			'Family': 'row-family',		'Genus': 'row-genus',
+			'Species': 'row-species'
+		};
+		if ((params.node.expanded === true && params.data.interactions === true 
+					&& params.data.name !== undefined) || params.node.data.domainInts === true) {
+			return lvlClassMap[params.data.taxaLvl];
+		}
+	}
+	function getNodeChildDetails(rcrd) {										//	console.log("rcrd = %O", rcrd)	
+	    if (rcrd.isParent) {
+	        return {
+	            group: true,
+	            expanded: rcrd.open,
+	            children: rcrd.children
+	        };
+	    } else { return null; }
+  	}
+ 	/*---------Filter Functions------------------------------*/
+	function onFilterChange() {
+		gridOptions.api.onFilterChanged();
+	}
+    /**
+     * Class function: 
+     * This filter presents all unique values of column in filter window to potentially filter on.
+     */
+    function UniqueValuesFilter() {}
+    UniqueValuesFilter.prototype.init = function (params) { console.log("UniqueValuesFilter.prototype.init. params = %O", params)
+	    this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
+        this.filterModifiedCallback = params.filterModifiedCallback;
+	    this.valueGetter = params.valueGetter;
+        this.colDef = params.colDef;
+	    this.filterActive = true;
+	    this.filterChangedCallback = params.filterChangedCallback; // Called after "apply"
+        this.rowsInBodyContainer = {};
+    	this.eGui = document.createElement('div');
+		this.eGui.innerHTML = '<div>' +
+            '<div class="ag-filter-header-container">' +
+            '<label>' +
+            '<input id="selectAll" type="checkbox" class="ag-filter-checkbox"/>' +
+            'Select All' +
+            '</label>' +
+            '</div>' +
+            '<div class="ag-filter-list-viewport">' +
+            '<div class="ag-filter-list-container">' +
+            '<div id="itemForRepeat" class="ag-filter-item">' +
+            '<label>' +
+            '<input type="checkbox" class="ag-filter-checkbox" filter-checkbox="true"/>' +
+            '<span class="ag-filter-value"></span>' +
+            '</label>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        this.createGui();
+    }
+    UniqueValuesFilter.prototype.getGui = function () {
+	    return this.eGui;
+    }
+    UniqueValuesFilter.prototype.isFilterActive = function() {
+	    return this.filterActive;
+    }
+    UniqueValuesFilter.prototype.doesFilterPass = function (node) {
+	    if (this.model.isEverythingSelected()) { return true; }  // if no filter, always pass
+	    if (this.model.isNothingSelected()) { return false; }    // if nothing selected in filter, always fail
+	    var value = this.valueGetter(node);
+	    value = makeNull(value);
+	    if (Array.isArray(value)) {
+	        for (var i = 0; i < value.length; i++) {
+	            if (this.model.isValueSelected(value[i])) { return true; }
+	        }
+	        return false;
+	    } else { return this.model.isValueSelected(value); }
+	    
+	    return true;
+	}
+    UniqueValuesFilter.prototype.getApi = function () {
+  		var that = this;
+	    return {}
+    }
+    // optional methods
+    UniqueValuesFilter.prototype.afterGuiAttached = function(params) {
+        this.drawVirtualRows();
+    };
+    UniqueValuesFilter.prototype.onNewRowsLoaded = function () {}
+    UniqueValuesFilter.prototype.onAnyFilterChanged = function () {}
+    UniqueValuesFilter.prototype.destroy = function () {}
+    // Support methods
+	UniqueValuesFilter.prototype.createGui = function () {
+	    var _this = this;
+	    this.eListContainer = this.eGui.querySelector(".ag-filter-list-container");
+	    this.eFilterValueTemplate = this.eGui.querySelector("#itemForRepeat");
+	    this.eSelectAll = this.eGui.querySelector("#selectAll");
+	    this.eListViewport = this.eGui.querySelector(".ag-filter-list-viewport");
+	    this.eListContainer.style.height = (this.model.getUniqueValueCount() * 20) + "px";
+	    removeAllChildren(this.eListContainer);
+	    this.eSelectAll.onclick = this.onSelectAll.bind(this);
+	    if (this.model.isEverythingSelected()) { this.eSelectAll.checked = true; 
+	    } else if (this.model.isNothingSelected()) { this.eSelectAll.checked = false; }
+	};
+    UniqueValuesFilter.prototype.onSelectAll = function () {
+        var checked = this.eSelectAll.checked;
+        if (checked) { this.model.selectEverything(); }
+        else { this.model.selectNothing(); }
+
+        this.updateAllCheckboxes(checked);
+        this.filterChangedCallback();
+    };
+    UniqueValuesFilter.prototype.updateAllCheckboxes = function (checked) {
+        var currentlyDisplayedCheckboxes = this.eListContainer.querySelectorAll("[filter-checkbox=true]");
+        for (var i = 0, l = currentlyDisplayedCheckboxes.length; i < l; i++) {
+            currentlyDisplayedCheckboxes[i].checked = checked;
+        }
+    };
+  	UniqueValuesFilter.prototype.drawVirtualRows = function () {
+	    var topPixel = this.eListViewport.scrollTop;
+	    var firstRow = Math.floor(topPixel / 20);
+	    this.renderRows(firstRow);
+	};
+	UniqueValuesFilter.prototype.renderRows = function (start) {
+	    var _this = this;
+	    for (var rowIndex = start; rowIndex <= this.model.getDisplayedValueCount(); rowIndex++) {
+	        //check this row actually exists (in case overflow buffer window exceeds real data)
+	        if (this.model.getDisplayedValueCount() > rowIndex) {
+	            var value = this.model.getDisplayedValue(rowIndex);
+	            _this.insertRow(value, rowIndex);
+	        }
+	    }
+	};
+	UniqueValuesFilter.prototype.insertRow = function (value, rowIndex) {
+	    var _this = this;
+	    var eFilterValue = this.eFilterValueTemplate.cloneNode(true);
+	    var valueElement = eFilterValue.querySelector(".ag-filter-value");
+        var blanksText = '(-None-)';
+        var displayNameOfValue = value === null ? blanksText : value;
+        valueElement.innerHTML = displayNameOfValue;
+	    var eCheckbox = eFilterValue.querySelector("input");
+	    eCheckbox.checked = this.model.isValueSelected(value);
+	    eCheckbox.onclick = function () {
+	        _this.onCheckboxClicked(eCheckbox, value);
+	    };
+	    eFilterValue.style.top = (20 * rowIndex) + "px";
+	    this.eListContainer.appendChild(eFilterValue);
+	    this.rowsInBodyContainer[rowIndex] = eFilterValue;
+	};
+	UniqueValuesFilter.prototype.onCheckboxClicked = function (eCheckbox, value) {
+	    var checked = eCheckbox.checked;
+	    if (checked) {
+	        this.model.selectValue(value);
+	        if (this.model.isEverythingSelected()) {
+	            this.eSelectAll.checked = true;
+	        }
+	    }
+	    else {
+	        this.model.unselectValue(value);
+	        //if set is empty, nothing is selected
+	        if (this.model.isNothingSelected()) {
+	            this.eSelectAll.checked = false;
+	        }
+	    }
+	    this.filterChangedCallback();
+	};
+	/*------------------------UnqValsColumnFilterModel----------------------------------*/
+	/** Class Function */
+    function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { // console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
+ 		this.colDef = colDef;			console.log("colDef = %O", this.colDef);
+        this.rowModel = rowModel;		console.log("rowModel = %O", this.rowModel);
+        this.valueGetter = valueGetter; console.log("valueGetter = %O", this.valueGetter);
+        this.doesRowPassOtherFilters = doesRowPassOtherFilters; console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
+        this.filterParams = this.colDef.filterParams;  console.log("filterParams = %O", this.filterParams);
+        this.usingProvidedSet = this.filterParams && this.filterParams.values;
+        this.createAllUniqueValues();
+        this.createAvailableUniqueValues();
+        this.displayedValues = this.availableUniqueValues;
+        this.selectedValuesMap = {};
+        this.selectEverything();
+    }
+	UnqValsColumnFilterModel.prototype.createAllUniqueValues = function () {
+        if (this.usingProvidedSet) { 
+        	this.allUniqueValues = toStrings(this.filterParams.values);
+        }
+        else { this.allUniqueValues = toStrings(this.getUniqueValues()); }
+        this.allUniqueValues.sort(); 
+    };
+    UnqValsColumnFilterModel.prototype.getUniqueValues = function () {
+        var _this = this;
+        var uniqueCheck = {};
+        var result = [];
+        this.rowModel.forEachNode(function (node) {
+            if (!node.group) {
+                var value = _this.valueGetter(node);
+                if (value === "" || value === undefined) { value = null; }
+                addUniqueValueIfMissing(value);
+            }
+        });
+        function addUniqueValueIfMissing(value) {
+            if (!uniqueCheck.hasOwnProperty(value)) {
+                result.push(value);
+                uniqueCheck[value] = 1; }
+        }
+        return result;
+    };
+    UnqValsColumnFilterModel.prototype.createAvailableUniqueValues = function () {
+        this.availableUniqueValues = this.allUniqueValues;
+    };
+    UnqValsColumnFilterModel.prototype.selectEverything = function () {
+        var count = this.allUniqueValues.length;
+        for (var i = 0; i < count; i++) {
+            var value = this.allUniqueValues[i];
+            this.selectedValuesMap[value] = null;
+        }
+        this.selectedValuesCount = count;
+    };
+    UnqValsColumnFilterModel.prototype.getUniqueValueCount = function () {
+        return this.allUniqueValues.length;
+    };
+    UnqValsColumnFilterModel.prototype.selectEverything = function () {
+        var count = this.allUniqueValues.length;
+        for (var i = 0; i < count; i++) {
+            var value = this.allUniqueValues[i];
+            this.selectedValuesMap[value] = null;
+        }
+        this.selectedValuesCount = count;
+    };
+    UnqValsColumnFilterModel.prototype.selectNothing = function () {
+        this.selectedValuesMap = {};
+        this.selectedValuesCount = 0;
+    };
+    UnqValsColumnFilterModel.prototype.unselectValue = function (value) {
+        if (this.selectedValuesMap[value] !== undefined) {
+            delete this.selectedValuesMap[value];
+            this.selectedValuesCount--;
+        }
+    };
+    UnqValsColumnFilterModel.prototype.selectValue = function (value) {
+        if (this.selectedValuesMap[value] === undefined) {
+            this.selectedValuesMap[value] = null;
+            this.selectedValuesCount++;
+        }
+    };
+    UnqValsColumnFilterModel.prototype.isEverythingSelected = function () {
+        return this.allUniqueValues.length === this.selectedValuesCount;
+    };
+    UnqValsColumnFilterModel.prototype.isNothingSelected = function () {
+        return this.allUniqueValues.length === 0;
+    };
+    UnqValsColumnFilterModel.prototype.isValueSelected = function (value) {
+        return this.selectedValuesMap[value] !== undefined;
+    };
+    UnqValsColumnFilterModel.prototype.getDisplayedValueCount = function () {
+        return this.displayedValues.length;
+    };
+    UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
+        return this.displayedValues[index];
+    };
 /*----------------------Util----------------------------------------------------------------------*/
+   /*---------Unique Values Filter Utils--------*/
+    function loadTemplate(template) {
+        var tempDiv = document.createElement("div");
+        tempDiv.innerHTML = template;
+        return tempDiv.firstChild;
+    }
+    function toStrings(array) {
+        return array.map(function (item) {
+            if (item === undefined || item === null || !item.toString) {
+                return null;
+            } else { return item.toString(); }
+        });
+    }
+	function removeAllChildren(node) {
+        if (node) {
+            while (node.hasChildNodes()) {
+                node.removeChild(node.lastChild); }
+        }
+    }
+    function makeNull(value) {
+        if (value === null || value === undefined || value === "") {
+            return null;
+        } else { return value; }
+    }
 	/*------------ HTML Generators ---------------------------*/
 	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
