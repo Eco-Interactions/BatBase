@@ -1,18 +1,19 @@
-(function(){  console.log("Anything you can do, you can do awesome...");
+(function(){  //console.log("Anything you can do, you can do awesome...");
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, dataSet, 
+	var gridDiv, rcrdsById, dataSet, pastFocus,
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
-	var sessionStorage = setSessionStorage();
+	var localStorage = setlocalStorage();
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getRowStyleClass,
 	    onRowGroupOpened: softRefresh,
+	    onAfterFilterChanged: afterFilterChanged,
         enableColResize: true,
         enableSorting: true,
         unSortIcon: true,
@@ -24,19 +25,48 @@
 
 	function onDOMContentLoaded () {
 		$("#search-focus").change(selectSearchFocus);
+	    initSearchState();
 		selectSearchFocus();
 	}
-	function selectSearchFocus(e) {  											console.log("select(ing)SearchFocus")
+	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
+	    showLoadingMsg();
 	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
+	function initSearchState() {
+		var pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; console.log("pastFocus = ", pastFocus	)
+		if (pastFocus){  console.log("pastFocus = taxa ? ", pastFocus == "taxa" )
+			$('#search-focus').val(pastFocus);
+		} else { $('#search-focus').val("taxa"); }
+	}
+	function showLoadingMsg() {
+		$('#borderLayout_eRootPanel').fadeTo(100, .3);
+	    $('#popUpDiv, #overlay').show();
+	}
+	function hideLoadingMsg() {
+		$('#borderLayout_eRootPanel').fadeTo(100, 1);
+	    $('#popUpDiv, #overlay').hide();
+	}
 /*=================Search Methods=============================================*/
+	function ifChangedFocus(focus) {
+		if (focus !== pastFocus) { console.log("clearing session storage. pastFocus = ", pastFocus);
+			localStorage.clear(); 
+			pastFocus = focus;
+			populateStorage('pastFocus', focus);
+		}
+		clearPastHtmlOptions()
+	}
+	function clearPastHtmlOptions() {
+		$('#sort-opts').empty();
+		$('#opts-col2').empty();
+	}
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
-		var storedLocs = sessionStorage ? sessionStorage.getItem('locRcrds') : false; 
+		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
 		if( storedLocs ) {  console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
 		} else {  console.log("Locations Not Found In Storage.");
+			ifChangedFocus("locs");
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
@@ -70,30 +100,29 @@
 	    var y=b.desc.toLowerCase();
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
-	function showLocSearch(locData) {  											console.log("showLocSearch called. locData = %O", locData)
-		showLocSearchHtml(locData);
+	function showLocSearch(locData) {  										console.log("showLocSearch called. locData = %O", locData)
+		clearPreviousGrid();
 		loadLocGrid(locData)		
+	    hideLoadingMsg();
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
-		var finalRowData = [];   console.log("topRegionRows = %O", topRegionRows);
-		for (var region in locData) {  console.log("region = ", region)
+		var finalRowData = [];   // console.log("topRegionRows = %O", topRegionRows);
+		for (var region in locData) {  // console.log("region = ", region)
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
 
-		rowData = finalRowData;													console.log("rowData = %O", rowData);
-		loadGrid("Regions-Countries-Locations");
+		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		loadGrid("Location Tree");
 	}
 	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
 		return {
-			// id: taxon.id,
 			name: locName || null,	/* Interaction rows have no name to display. */
 			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
 			open: openRows.indexOf(locName) !== -1, 
 			children: getLocRowDataForChildren(locObj),
-			// taxaLvl: taxon.level,
 			interactions: locObj.intRcrds !== undefined,     /* Location objects have collections of interactions as children. */     
 		};		
 	}
@@ -119,58 +148,13 @@
 			return getIntData(intRcrd, intRcrdObj);
 		});
 	}
-
-
-
-
-	/*-----------------Html Methods-------------------------------------------*/
-	function showLocSearchHtml(locData) {
-		var locOpts = buildLocOptions(locData);
-		var locSelElems = buildLocSelectElems(locOpts);
-		clearCol2();
-		$('#opts-col2').append(locSelElems);
-	}
-	function buildLocOptions(locData) {
-		var countries = [];
-		var regions = [];
-		var optsObj = {};
-		for (var region in locData) {  
-			if (Array.isArray(locData[region])) { 
-				regions.push(region);
-				continue; 
-			} 
-			regions.push(region); 
-			addCountries(locData[region]);
-		}
-		optsObj["Region"] = buildSimpleOpts(regions.sort());
-		optsObj["Country"] = buildSimpleOpts(countries.sort());
-		return optsObj;
-
-		function addCountries(region) {
-			for (var country in region) {  
-				countries.push(country);
-			} 
-		}
-	} /* End buildLocOptions */
-	function buildLocSelectElems(locOptsObj) {
-		var elems = [];
-		for (var selVal in locOptsObj) {
-			var text = selVal + ': ';
-			var id = 'sel' + selVal;
-			var labelElem = createElem('label', { class: "lvl-select flex-row" });
-			var spanElem = createElem('span', { text: text });
-			var selectElem = buildSelectElem(locOptsObj[selVal], { class: "opts-box", id: id });
-			$(labelElem).append([spanElem, selectElem]);
-			elems.push(labelElem);
-		}
-		return elems;
-	}
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
-		var storedDomains = sessionStorage ? sessionStorage.getItem('domainRcrds') : false; 
+		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
 		if( storedDomains ) {  console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
 		} else {  console.log("Domains Not Found In Storage.");
+			ifChangedFocus("taxa");
 			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
 		}
 	}
@@ -180,11 +164,11 @@
 	}
 	function showTaxonSearch(data) { 											 
 		buildTaxaSearchHtml(data);
-		initSearchState();
+		initTaxaSearchState();
 		getAllTaxaRcrds();
 	}
-	function initSearchState() {
-		$('#sel-domain').val('4');
+	function initTaxaSearchState() {
+		$('#sel-domain').val('2');	
 	}
 	/** Ajax to get all interaction rcrds. */
 	function getAllTaxaRcrds() {
@@ -192,7 +176,7 @@
 			props: ['displayName', 'slug' ],
 			roles: ['ObjectRoles', 'SubjectRoles']
 		};
-		var storedTaxa = sessionStorage ? sessionStorage.getItem('taxaRcrds') : false; 
+		var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
 		if( storedTaxa ) {  													console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
@@ -255,7 +239,8 @@
 	function showAllDomainInteractions(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
-		
+	    hideLoadingMsg();
+
 		function storeDomainLevel() {
 			var domainLvl = domainTaxon.level;
 			populateStorage('domainLvl', domainLvl);
@@ -321,7 +306,7 @@
 	}
 	function updateTaxaBrowseSearch() {
 		var selectedTaxa = isTaxonymSelected(); 								// console.log("selectedTaxa = %O", selectedTaxa);
-		var domainLvl = sessionStorage.getItem('domainLvl');
+		var domainLvl = localStorage.getItem('domainLvl');
 
 		if (domainLvl in selectedTaxa) {
 			loadGridForTaxon(selectedTaxa[domainLvl]);
@@ -389,7 +374,7 @@
 
 		function fillInMissingLvls() {
 			var lvls = Object.keys(dataSet);
-			var domainLvl = sessionStorage.getItem('domainLvl');
+			var domainLvl = localStorage.getItem('domainLvl');
 			lvls.forEach(function(lvl){
 				if (lvl !== domainLvl && optsObj[lvl] === undefined) { 
 					optsObj[lvl] = [{value: 'none', text: '- None -'}]; 
@@ -460,7 +445,7 @@
         return selected === false ? selectDomain() : filterSelections; 
 
         function selectDomain() {
-			var domainLvl = sessionStorage.getItem('domainLvl');
+			var domainLvl = localStorage.getItem('domainLvl');
         	var domain = {};
         	domain[domainLvl] = dataSet[domainLvl][[Object.keys(dataSet[domainLvl])[0]]].id;
         	return domain;
@@ -510,7 +495,7 @@
 		function getParents(parentId) {
 			if (parentId === 1 || parentId === null) {return} 
 			var parent = rcrdsById[parentId];
-			if (parent.level === sessionStorage.getItem('domainLvl')) {return}  //console.log("first key ")
+			if (parent.level === localStorage.getItem('domainLvl')) {return}  //console.log("first key ")
 			if (relatedTaxaOpts[parent.level] === undefined) { relatedTaxaOpts[parent.level] = {}; }
 			relatedTaxaOpts[parent.level][parent.displayName] = parent;
 			if (parent.parentTaxon) { getParents(parent.parentTaxon); }
@@ -728,12 +713,15 @@
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
+	function afterFilterChanged() {  //console.log("UniqueValuesFilter = %O", UniqueValuesFilter);
+		// var filterApi = UniqueValuesFilter.getApi();  console.log("filterApi = %O", filterApi);
+	}
     /**
      * Class function: 
      * This filter presents all unique values of column in filter window to potentially filter on.
      */
     function UniqueValuesFilter() {}
-    UniqueValuesFilter.prototype.init = function (params) { console.log("UniqueValuesFilter.prototype.init. params = %O", params)
+    UniqueValuesFilter.prototype.init = function (params) { //console.log("UniqueValuesFilter.prototype.init. params = %O", params)
 	    this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
         this.filterModifiedCallback = params.filterModifiedCallback;
 	    this.valueGetter = params.valueGetter;
@@ -746,7 +734,7 @@
             '<div class="ag-filter-header-container">' +
             '<label>' +
             '<input id="selectAll" type="checkbox" class="ag-filter-checkbox"/>' +
-            'Select All' +
+            '( Select All )' +
             '</label>' +
             '</div>' +
             '<div class="ag-filter-list-viewport">' +
@@ -761,6 +749,7 @@
             '</div>' +
             '</div>';
         this.createGui();
+        this.createApi();
     }
     UniqueValuesFilter.prototype.getGui = function () {
 	    return this.eGui;
@@ -783,8 +772,58 @@
 	    return true;
 	}
     UniqueValuesFilter.prototype.getApi = function () {
-  		var that = this;
-	    return {}
+        return this.api;
+    };
+    UniqueValuesFilter.prototype.createApi = function () {
+	    var model = this.model;
+        var that = this;
+        this.api = {
+            // setMiniFilter: function (newMiniFilter) {
+            //     model.setMiniFilter(newMiniFilter);
+            // },
+            // getMiniFilter: function () {
+            //     return model.getMiniFilter();
+            // },
+            selectEverything: function () {
+                that.eSelectAll.checked = true;
+            },
+            isFilterActive: function () {
+                return model.isFilterActive();
+            },
+            selectNothing: function () {
+                that.eSelectAll.checked = false;
+            },
+            unselectValue: function (value) {
+                model.unselectValue(value);
+                that.refreshVirtualRows();
+            },
+            selectValue: function (value) {
+                model.selectValue(value);
+                that.refreshVirtualRows();
+            },
+            isValueSelected: function (value) {
+                return model.isValueSelected(value);
+            },
+            isEverythingSelected: function () {
+                return model.isEverythingSelected();
+            },
+            isNothingSelected: function () {
+                return model.isNothingSelected();
+            },
+            getUniqueValueCount: function () {
+                return model.getUniqueValueCount();
+            },
+            getUniqueValue: function (index) {
+                return model.getUniqueValue(index);
+            },
+            getModel: function () {
+                return model.getModel();
+            },
+            setModel: function (dataModel) {
+                model.setModel(dataModel);
+                that.refreshVirtualRows();
+            }
+        };
     }
     // optional methods
     UniqueValuesFilter.prototype.afterGuiAttached = function(params) {
@@ -839,8 +878,8 @@
 	    var _this = this;
 	    var eFilterValue = this.eFilterValueTemplate.cloneNode(true);
 	    var valueElement = eFilterValue.querySelector(".ag-filter-value");
-        var blanksText = '(-None-)';
-        var displayNameOfValue = value === null ? blanksText : value;
+        var blanksText = '( Blanks )';
+        var displayNameOfValue = value === null || value === "" ? blanksText : value;
         valueElement.innerHTML = displayNameOfValue;
 	    var eCheckbox = eFilterValue.querySelector("input");
 	    eCheckbox.checked = this.model.isValueSelected(value);
@@ -871,11 +910,11 @@
 	/*------------------------UnqValsColumnFilterModel----------------------------------*/
 	/** Class Function */
     function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { // console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
- 		this.colDef = colDef;			console.log("colDef = %O", this.colDef);
-        this.rowModel = rowModel;		console.log("rowModel = %O", this.rowModel);
-        this.valueGetter = valueGetter; console.log("valueGetter = %O", this.valueGetter);
-        this.doesRowPassOtherFilters = doesRowPassOtherFilters; console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
-        this.filterParams = this.colDef.filterParams;  console.log("filterParams = %O", this.filterParams);
+ 		this.colDef = colDef;			// console.log("colDef = %O", this.colDef);
+        this.rowModel = rowModel;		// console.log("rowModel = %O", this.rowModel);
+        this.valueGetter = valueGetter; // console.log("valueGetter = %O", this.valueGetter);
+        this.doesRowPassOtherFilters = doesRowPassOtherFilters; // console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
+        this.filterParams = this.colDef.filterParams;  // console.log("filterParams = %O", this.filterParams);
         this.usingProvidedSet = this.filterParams && this.filterParams.values;
         this.createAllUniqueValues();
         this.createAvailableUniqueValues();
@@ -961,6 +1000,26 @@
     UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
         return this.displayedValues[index];
     };
+    UnqValsColumnFilterModel.prototype.getModel = function () {
+        if (!this.isFilterActive()) { return null; }
+        var selectedValues = [];
+        iterateObject(this.selectedValuesMap, function (key) {
+            selectedValues.push(key);
+        });
+        return selectedValues;
+    };
+    UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
+        if (model && !isSelectAll) {
+            this.selectNothing();
+            for (var i = 0; i < model.length; i++) {
+                var newValue = model[i];
+                if (this.allUniqueValues.indexOf(newValue) >= 0) {
+                    this.selectValue(model[i]);
+                } else { console.warn('Value ' + newValue + ' is not a valid value for filter'); }
+            }
+        }
+        else { this.selectEverything(); }
+    };
 /*----------------------Util----------------------------------------------------------------------*/
    /*---------Unique Values Filter Utils--------*/
     function loadTemplate(template) {
@@ -986,6 +1045,14 @@
             return null;
         } else { return value; }
     }
+    function iterateObject(object, callback) {
+        var keys = Object.keys(object);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            var value = object[key];
+            callback(key, value);
+        }
+    };
 	/*------------ HTML Generators ---------------------------*/
 	function buildSelectElem(options, attrs, selected) {
 		var selectElem = createElem('select', attrs); 
@@ -1026,9 +1093,9 @@
 		return string.charAt(0).toUpperCase() + string.slice(1); 
 	}
 /*------------------------------Storage Methods-------------------------------*/
-function setSessionStorage() {
-		if (storageAvailable('sessionStorage')) { 
-	   		return window['sessionStorage'];  									//console.log("Storage available. Setting now. sessionStorage = %O", sessionStorage);
+function setlocalStorage() {
+		if (storageAvailable('localStorage')) { 
+	   		return window['localStorage'];  									//console.log("Storage available. Setting now. localStorage = %O", localStorage);
 		} else { 
 			return false; 				      									// console.log("No Session Storage Available"); 
 		}
@@ -1047,13 +1114,13 @@ function setSessionStorage() {
 		}
 	}
 	function populateStorage(key, val) {
-		if (sessionStorage) { 													// console.log("SessionStorage active.");
-			sessionStorage.setItem(key, val);
+		if (localStorage) { 													// console.log("localStorage active.");
+			localStorage.setItem(key, val);
 		} else { console.log("No Session Storage Available"); }
 	}
 	function getRemainingStorageSpace() {
 		 var limit = 1024 * 1024 * 5; // 5 MB
-		 return limit - unescape(encodeURIComponent(JSON.stringify(sessionStorage))).length;
+		 return limit - unescape(encodeURIComponent(JSON.stringify(localStorage))).length;
 	}
 	function sizeOfString(string) {
 		return string.length;

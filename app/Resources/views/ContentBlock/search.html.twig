@@ -18,15 +18,20 @@
                 <span>Filter Interactions By: </span>
                 <select id="search-focus" class="opts-box">
                     <option value="taxa">Taxon</option>
-                    <option value="locs" selected>Location</option>
-                    <option value="auths">Author</option>
+                    <option value="locs">Location</option>
+                    {# <option value="auths">Author</option> #}
                 </select>
             </label>
             <div id="sort-opts" class="flex-row"></div>
         </div>
         <div id="opts-col2" class="flex-col flex-wrap"></div>
     </div>
-    <div id="search-grid" class="ag-fresh"></div>
-
+    
+    <div>
+        <div id="search-grid" class="ag-fresh">
+            <div id="overlay"></div>
+            <div id="popUpDiv">Loading...</div>
+        </div>
+    </div>
 
 {% endblock detail %}
