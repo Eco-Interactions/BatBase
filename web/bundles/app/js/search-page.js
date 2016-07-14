@@ -2,14 +2,16 @@
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, dataSet, pastFocus,
+	var gridDiv, rcrdsById, dataSet
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
+	var pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; 	
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
 	var localStorage = setlocalStorage();
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
+	    getHeaderCellTemplate: getHeaderCellTemplate, 
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getRowStyleClass,
 	    onRowGroupOpened: softRefresh,
@@ -24,6 +26,8 @@
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
+		// localStorage.clear();
+		pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; 	 console.log("pastFocus = ", pastFocus	)
 		$("#search-focus").change(selectSearchFocus);
 	    initSearchState();
 		selectSearchFocus();
@@ -34,11 +38,9 @@
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
 	function initSearchState() {
-		var pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; console.log("pastFocus = ", pastFocus	)
-		if (pastFocus){  console.log("pastFocus = taxa ? ", pastFocus == "taxa" )
-			$('#search-focus').val(pastFocus);
+		if (pastFocus){ $('#search-focus').val(pastFocus);
 		} else { $('#search-focus').val("taxa"); }
-	}
+	} 
 	function showLoadingMsg() {
 		$('#borderLayout_eRootPanel').fadeTo(100, .3);
 	    $('#popUpDiv, #overlay').show();
@@ -49,7 +51,7 @@
 	}
 /*=================Search Methods=============================================*/
 	function ifChangedFocus(focus) {
-		if (focus !== pastFocus) { console.log("clearing session storage. pastFocus = ", pastFocus);
+		if (focus !== pastFocus) { //console.log("clearing local storage. pastFocus = ", pastFocus);
 			localStorage.clear(); 
 			pastFocus = focus;
 			populateStorage('pastFocus', focus);
@@ -57,9 +59,14 @@
 		clearPastHtmlOptions()
 	}
 	function clearPastHtmlOptions() {
-		$('#sort-opts').empty();
-		$('#opts-col2').empty();
+		$('#sort-opts, #opts-col2').fadeTo(250, 0, emptySearchOpts);
 	}
+	function emptySearchOpts() {
+		$('#opts-col2').empty();
+		$('#sort-opts').empty();
+		$('#sort-opts, #opts-col2').fadeTo(0, 1);
+	}
+
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
@@ -70,14 +77,14 @@
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
-	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
+	function storeAndLoadLocs(data) {											//console.log("location data recieved. %O", data);
 		var locRcrds = sortLocTree(data.results);
 		populateStorage('locRcrds', JSON.stringify(locRcrds));
 		showLocSearch(locRcrds);
 	}
 	function sortLocTree(locData) {
 		var sortedLocs = {};
-		var regions = Object.keys(locData).sort();  console.log("regions = %O", regions)
+		var regions = Object.keys(locData).sort();  								//console.log("regions = %O", regions)
 		for (var i=0; i<regions.length; i++){
 			if (Array.isArray(locData[regions[i]])) { 
 				sortedLocs[regions[i]] = locData[regions[i]].sort();
@@ -100,7 +107,7 @@
 	    var y=b.desc.toLowerCase();
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
-	function showLocSearch(locData) {  										console.log("showLocSearch called. locData = %O", locData)
+	function showLocSearch(locData) {  										//console.log("showLocSearch called. locData = %O", locData)
 		clearPreviousGrid();
 		loadLocGrid(locData)		
 	    hideLoadingMsg();
@@ -158,7 +165,7 @@
 			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
 		}
 	}
-	function storeAndLoadDomains(data) {										console.log("domain data recieved. %O", data);
+	function storeAndLoadDomains(data) {										//console.log("domain data recieved. %O", data);
 		populateStorage('domainRcrds', JSON.stringify(data.results));
 		showTaxonSearch(data.results);
 	}
@@ -177,14 +184,14 @@
 			roles: ['ObjectRoles', 'SubjectRoles']
 		};
 		var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
-		if( storedTaxa ) {  													console.log("Stored taxaRcrds Loaded");
+		if( storedTaxa ) {  		console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else {  																console.log("taxaRcrds Not Found In Storage.");
+		} else {   console.log("taxaRcrds Not Found In Storage.");
 			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  											 console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											// console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -202,7 +209,8 @@
 		$('#sort-opts').append([browseElems, filterBttnCntnr]);
 		addFilterButtons();
 		$('#sel-domain').change(selectTaxaDomain);
-		
+		$('#sort-opts').fadeTo(0, .3);
+
         function getDomainOpts(data) {
         	var optsAry = [];
         	for (var taxonId in data) { 										//console.log("taxon = %O", data[taxonId]);
@@ -239,6 +247,7 @@
 	function showAllDomainInteractions(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
+		$('#sort-opts').fadeTo(500, 1);
 	    hideLoadingMsg();
 
 		function storeDomainLevel() {
@@ -654,16 +663,34 @@
 				taxaData.name : 
 				taxaData.level + ' ' + taxaData.name;
 	}	
+	/**
+	 * Copied from agGrid's default template, with columnId added to create unique ID's
+	 * @param  {obj} params  {column, colDef, context, api}
+	 */
+	function getHeaderCellTemplate(params) {  
+		var colId = params.column.colId + 'ColFilterIcon';  
+		return '<div class="ag-header-cell">' +
+	        '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
+	        '  <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
+	        '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +
+	        '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
+	        '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
+	        '    <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
+	        '    <a name="' + colId + '" id="agFilter" class="anything ag-header-icon ag-filter-icon"></a>' +
+	        '    <span id="agText" class="ag-header-cell-text"></span>' +
+	        '  </div>' +
+	        '</div>'; 
+	}
 	function softRefresh() { gridOptions.api.refreshView(); }
 	function getColumnDefs(mainCol) {  
-		return [{headerName: mainCol, field: "name", width: 300, cellRenderer: 'group', 
+		return [{headerName: mainCol, field: "name", width: 300, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
-					cellClass: getCellStyleClass, suppressFilter: true },		//cellClassRules: getCellStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 175 },
-			    {headerName: "Object Taxon", field: "object", width: 150 },
-			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
+					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
+			    {headerName: "Subject Taxon", field: "subject", width: 175, headerTooltip: "The subject of the interaction." },
+			    {headerName: "Object Taxon", field: "object", width: 150 , suppressFilter: true },
+			    {headerName: "Interaction Type", field: "interactionType", width: 165, filter: UniqueValuesFilter },
 			    {headerName: "Tags", field: "tags", width: 100, filter: UniqueValuesFilter},
-			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
+			    {headerName: "Habitat Type", field: "habitatType", width: 140, filter: UniqueValuesFilter },
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Location Description", field: "location", width: 300,},
@@ -714,7 +741,8 @@
 		gridOptions.api.onFilterChanged();
 	}
 	function afterFilterChanged() {  //console.log("UniqueValuesFilter = %O", UniqueValuesFilter);
-		// var filterApi = UniqueValuesFilter.getApi();  console.log("filterApi = %O", filterApi);
+		var filterApi = UniqueValuesFilter.getApi();  console.log("filterApi = %O", filterApi);
+		///console.log("$('#ag-filter') = %O", $('#ag-filter'))
 	}
     /**
      * Class function: 
@@ -755,7 +783,7 @@
 	    return this.eGui;
     }
     UniqueValuesFilter.prototype.isFilterActive = function() {
-	    return this.filterActive;
+	    return this.model.isFilterActive();
     }
     UniqueValuesFilter.prototype.doesFilterPass = function (node) {
 	    if (this.model.isEverythingSelected()) { return true; }  // if no filter, always pass
@@ -784,14 +812,16 @@
             // getMiniFilter: function () {
             //     return model.getMiniFilter();
             // },
-            selectEverything: function () {
-                that.eSelectAll.checked = true;
-            },
             isFilterActive: function () {
                 return model.isFilterActive();
             },
+            selectEverything: function () {
+                that.eSelectAll.checked = true;
+				// model.selectEverything();
+            },
             selectNothing: function () {
                 that.eSelectAll.checked = false;
+				// model.selectNothing();
             },
             unselectValue: function (value) {
                 model.unselectValue(value);
@@ -830,7 +860,10 @@
         this.drawVirtualRows();
     };
     UniqueValuesFilter.prototype.onNewRowsLoaded = function () {}
-    UniqueValuesFilter.prototype.onAnyFilterChanged = function () {}
+    UniqueValuesFilter.prototype.onAnyFilterChanged = function () { console.log("arguments?? = %O", arguments);
+    	var curFilterModel = this.model.getModel();  console.log("curFilterModel = %O", curFilterModel)
+
+    }
     UniqueValuesFilter.prototype.destroy = function () {}
     // Support methods
 	UniqueValuesFilter.prototype.createGui = function () {
@@ -1000,6 +1033,9 @@
     UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
         return this.displayedValues[index];
     };
+    UnqValsColumnFilterModel.prototype.isFilterActive = function () {
+        return this.allUniqueValues.length !== this.selectedValuesCount;
+    };
     UnqValsColumnFilterModel.prototype.getModel = function () {
         if (!this.isFilterActive()) { return null; }
         var selectedValues = [];
@@ -1097,7 +1133,7 @@ function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 
 	   		return window['localStorage'];  									//console.log("Storage available. Setting now. localStorage = %O", localStorage);
 		} else { 
-			return false; 				      									// console.log("No Session Storage Available"); 
+			return false; 				      									// console.log("No Local Storage Available"); 
 		}
 	}
 	function storageAvailable(type) {
@@ -1116,7 +1152,7 @@ function setlocalStorage() {
 	function populateStorage(key, val) {
 		if (localStorage) { 													// console.log("localStorage active.");
 			localStorage.setItem(key, val);
-		} else { console.log("No Session Storage Available"); }
+		} else { console.log("No Local Storage Available"); }
 	}
 	function getRemainingStorageSpace() {
 		 var limit = 1024 * 1024 * 5; // 5 MB

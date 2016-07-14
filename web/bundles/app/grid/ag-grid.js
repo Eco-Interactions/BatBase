@@ -16455,8 +16455,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        // template can be a string or a dom element, if string we need to convert to a dom element
 	        var result;
-	        if (typeof userProvidedTemplate === 'string') {
-	            result = utils_1.Utils.loadTemplate(userProvidedTemplate);
+	        if (typeof userProvidedTemplate === 'string') {  				
+	            result = utils_1.Utils.loadTemplate(userProvidedTemplate);				
+		        this.addInIcon(result, 'sortAscending', '#agSortAsc', column, svgFactory.createArrowUpSvg);     // Sarah (rnbwspctrm) added this and the  
+		        this.addInIcon(result, 'sortDescending', '#agSortDesc', column, svgFactory.createArrowDownSvg); //  following 4 lines (5 total) through 
+		        this.addInIcon(result, 'sortUnSort', '#agNoSort', column, svgFactory.createArrowUpDownSvg);		//  this 'if' to continue using ag-grids 
+		        this.addInIcon(result, 'menu', '#agMenu', column, svgFactory.createMenuSvg);					//  icons with modified header HTML.
+		        this.addInIcon(result, 'filter', '#agFilter', column, svgFactory.createFilterSvg);
 	        }
 	        else if (utils_1.Utils.isNodeOrElement(userProvidedTemplate)) {
 	            result = userProvidedTemplate;
