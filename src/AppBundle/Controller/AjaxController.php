@@ -163,7 +163,7 @@ class AjaxController extends Controller
             $entity->setDisplayName($rcrd->displayName);
 
             $lvlRef = $rcrd->level;
-            $lvlId = $levelRefs->$lvlRef;    //  $logger->error('SASSSSSSS:: taxaRefs ->' . print_r($taxaRefs, true));
+            $lvlId = $levelRefs->$lvlRef;     $logger->error('SASSSSSSS:: lvlId ->' . print_r($lvlId, true));
             $lvlEntity = $em->getRepository("AppBundle\\Entity\\Level")->find($lvlId);
             $entity->setLevel($lvlEntity);
 
@@ -225,7 +225,10 @@ class AjaxController extends Controller
             foreach ($rcrd as $field => $val) {     //   $logger->info('SASSSSSSS:: rcrd ->' . print_r($rcrd, true));
                 if ($field === "tempId") { continue; }
                 if ($val === null) { continue; }
-
+                if ($field === "note") { 
+                    $entity->setNote($val);
+                    continue;
+                }
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
       
                 $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
