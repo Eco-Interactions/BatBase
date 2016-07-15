@@ -299,6 +299,9 @@ ag-grid-ng2 {
   width: 110px;
   margin: 4px 4px 0px 4px;
 }
+.ag-header-cell-filtered {
+    background-color: #e5e5e5;
+}
 .ag-no-vertical-scroll .ag-scrolls {
   height: unset;
 }

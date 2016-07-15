@@ -305,7 +305,6 @@ span.lbl {
 	justify-content: space-between;
 }
 #filter-bttns {
-	/*border: 1px black solid;*/
 	display: inline-flex;
 	justify-content: space-between;
 	height: 44px;
@@ -314,14 +313,14 @@ span.lbl {
 	width:125px;
 }
 #grid-tools {
-	margin: .2em auto 1em auto;
+	margin: 1em auto .2em auto;
 	padding: .1em;
-	width: 1480px;
-	height: 32px;
+	width: 1498px;
+	height: 28px;
 	font-size: 1.1em;
 }
-button[name="xpnd-tree"] {
-	height: 26px;
+.grid-bttn {
+	margin: 0 .3em 0 .2em;
 	background: -webkit-linear-gradient(#fff, #d3d3d3);
 	background: -moz-linear-gradient(#fff, #d3d3d3);
 	background: -o-linear-gradient(#fff, #d3d3d3);
@@ -331,7 +330,7 @@ button[name="xpnd-tree"] {
 #grid-status {
 	margin: 0 0 0 .2em;
 	flex-grow: 1;
-	border: 1px solid black;
+	padding: .2em;
 }
 #search-grid {
 	height: 666px;

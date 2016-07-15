@@ -2,11 +2,11 @@
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, dataSet
+	var gridDiv, rcrdsById, dataSet, 
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
-	var pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; 	
+	var curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
 	var localStorage = setlocalStorage();
 	var gridOptions = {
@@ -15,6 +15,7 @@
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getRowStyleClass,
 	    onRowGroupOpened: softRefresh,
+	    onBeforeFilterChanged: beforeFilterChange, 
 	    onAfterFilterChanged: afterFilterChanged,
         enableColResize: true,
         enableSorting: true,
@@ -27,8 +28,11 @@
 
 	function onDOMContentLoaded () {
 		// localStorage.clear();
-		pastFocus = localStorage ? localStorage.getItem('pastFocus') : false; 	 console.log("pastFocus = ", pastFocus	)
+		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		$("#search-focus").change(selectSearchFocus);
+		$('button[name="xpand-tree"]').click(toggleExpandTree);
+		$('button[name="clr-grid-fltrs"]').click(clearAllGridFilters);
+		setGridStatus('No Active Filters.'); 
 	    initSearchState();
 		selectSearchFocus();
 	}
@@ -38,7 +42,7 @@
 	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
 	}
 	function initSearchState() {
-		if (pastFocus){ $('#search-focus').val(pastFocus);
+		if (curFocus){ $('#search-focus').val(curFocus);
 		} else { $('#search-focus').val("taxa"); }
 	} 
 	function showLoadingMsg() {
@@ -49,17 +53,28 @@
 		$('#borderLayout_eRootPanel').fadeTo(100, 1);
 	    $('#popUpDiv, #overlay').hide();
 	}
+	function toggleExpandTree() {  console.log("toggleExpandTree")
+  		var expanded = $(this).data('xpanded');
+  		if (expanded) { 
+  			gridOptions.api.collapseAll();
+  			$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
+		} else { 
+			gridOptions.api.expandAll();	
+			$('#xpand-tree').html("Collapse Tree Data");
+  		}
+		$(this).data("xpanded", !expanded);
+	}
 /*=================Search Methods=============================================*/
 	function ifChangedFocus(focus) {
-		if (focus !== pastFocus) { //console.log("clearing local storage. pastFocus = ", pastFocus);
+		if (focus !== curFocus) { //console.log("clearing local storage. curFocus = ", curFocus);
 			localStorage.clear(); 
-			pastFocus = focus;
-			populateStorage('pastFocus', focus);
+			curFocus = focus;
+			populateStorage('curFocus', focus);
 		}
 		clearPastHtmlOptions()
 	}
 	function clearPastHtmlOptions() {
-		$('#sort-opts, #opts-col2').fadeTo(250, 0, emptySearchOpts);
+		$('#sort-opts, #opts-col2').fadeTo(150, 0, emptySearchOpts);
 	}
 	function emptySearchOpts() {
 		$('#opts-col2').empty();
@@ -169,13 +184,13 @@
 		populateStorage('domainRcrds', JSON.stringify(data.results));
 		showTaxonSearch(data.results);
 	}
-	function showTaxonSearch(data) { 											 
+	function showTaxonSearch(data) { 	
 		buildTaxaSearchHtml(data);
 		initTaxaSearchState();
 		getAllTaxaRcrds();
 	}
-	function initTaxaSearchState() {
-		$('#sel-domain').val('2');	
+	function initTaxaSearchState() { console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
+		if ($('#sel-domain').val() === null) { $('#sel-domain').val('2'); }
 	}
 	/** Ajax to get all interaction rcrds. */
 	function getAllTaxaRcrds() {
@@ -740,13 +755,70 @@
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
-	function afterFilterChanged() {  //console.log("UniqueValuesFilter = %O", UniqueValuesFilter);
-		var filterApi = UniqueValuesFilter.getApi();  console.log("filterApi = %O", filterApi);
-		///console.log("$('#ag-filter') = %O", $('#ag-filter'))
+	function afterFilterChanged() {} //console.log("afterFilterChange") 
+	/** Resets Grid Status' Active Filter display */
+	function beforeFilterChange() {  console.log("beforeFilterChange")
+		clearGridStatus();
+		getActiveDefaultGridFilters();	
+	} 
+	/**
+	 * Resets grid state to top focus options: Taxa are reset to the domain level, 
+	 * and locations are entirely reset.
+	 */
+	function clearAllGridFilters() { 
+		var prevDomain = $('#sel-domain').val(); console.log("prevDomain = ", prevDomain)			
+		if (prevDomain){
+			$('#sel-domain').val(prevDomain);
+			onTaxaSearchMethodChange();
+		} else {
+			clearPreviousGrid();
+			selectSearchFocus(); 
+		}
+		getActiveDefaultGridFilters();
+	}
+	/** Returns an obj with all filter models. */
+	function getAllFilterModels() {
+		return {
+			"Subject Taxon": gridOptions.api.getFilterApi("subject").getModel(),
+			"Object Taxon": gridOptions.api.getFilterApi("object").getModel(),
+			"Interaction Type": gridOptions.api.getFilterApi("interactionType").getModel(),
+			"Tags": gridOptions.api.getFilterApi("tags").getModel(),
+			"Habitat Type": gridOptions.api.getFilterApi("habitatType").getModel(),
+			"Country": gridOptions.api.getFilterApi("country").getModel(),
+			"Region": gridOptions.api.getFilterApi("region").getModel(),
+			"Location Desc.": gridOptions.api.getFilterApi("location").getModel(),
+			"Citation": gridOptions.api.getFilterApi("citation").getModel(),
+			"Note": gridOptions.api.getFilterApi("note").getModel()
+		}; 	
+	}
+	/**
+	 * Checks all filter models for any active filters. Sets grid-status with resulting 
+	 * active filters.
+	 */
+	function getActiveDefaultGridFilters() {									// console.log("getActiveDefaultGridFilters called.")
+		var filterStatus;
+		var intro =  'Columns with Active Filters: ';
+		var activeFilters = [];
+		if (gridOptions.api === undefined) { return; }
+		var filterModels = getAllFilterModels();		
+		var columns = Object.keys(filterModels);		
+
+		for (var i=0; i < columns.length; i++) {
+			if (filterModels[columns[i]] !== null) { activeFilters.push(columns[i]); }
+		}
+		filterStatus = activeFilters.length > 0 ? intro + activeFilters.join(', ') : 'No Active Filters.';
+		setGridStatus(filterStatus); 
+	}
+	function setGridStatus(status) {  console.log("setGridStatus. status = ", status)
+		$('#grid-status').text(status);
+	}
+	function clearGridStatus() {
+		$('#grid-status').empty();
+		activeFilters = [];
 	}
     /**
      * Class function: 
-     * This filter presents all unique values of column in filter window to potentially filter on.
+     * This filter presents all unique values of column to potentially filter on.
      */
     function UniqueValuesFilter() {}
     UniqueValuesFilter.prototype.init = function (params) { //console.log("UniqueValuesFilter.prototype.init. params = %O", params)
@@ -755,14 +827,14 @@
 	    this.valueGetter = params.valueGetter;
         this.colDef = params.colDef;
 	    this.filterActive = true;
-	    this.filterChangedCallback = params.filterChangedCallback; // Called after "apply"
+	    this.filterChangedCallback = params.filterChangedCallback; 
         this.rowsInBodyContainer = {};
     	this.eGui = document.createElement('div');
 		this.eGui.innerHTML = '<div>' +
             '<div class="ag-filter-header-container">' +
             '<label>' +
             '<input id="selectAll" type="checkbox" class="ag-filter-checkbox"/>' +
-            '( Select All )' +
+            ' ( Select All )' +
             '</label>' +
             '</div>' +
             '<div class="ag-filter-list-viewport">' +
@@ -799,29 +871,21 @@
 	    
 	    return true;
 	}
-    UniqueValuesFilter.prototype.getApi = function () {
+    UniqueValuesFilter.prototype.getApi = function () { // Not Working??
         return this.api;
     };
     UniqueValuesFilter.prototype.createApi = function () {
 	    var model = this.model;
         var that = this;
         this.api = {
-            // setMiniFilter: function (newMiniFilter) {
-            //     model.setMiniFilter(newMiniFilter);
-            // },
-            // getMiniFilter: function () {
-            //     return model.getMiniFilter();
-            // },
             isFilterActive: function () {
                 return model.isFilterActive();
             },
-            selectEverything: function () {
+            selectEverything: function () { 
                 that.eSelectAll.checked = true;
-				// model.selectEverything();
             },
             selectNothing: function () {
                 that.eSelectAll.checked = false;
-				// model.selectNothing();
             },
             unselectValue: function (value) {
                 model.unselectValue(value);
@@ -850,19 +914,28 @@
                 return model.getModel();
             },
             setModel: function (dataModel) {
-                model.setModel(dataModel);
+            	if (dataModel === null) { that.eSelectAll.checked = true; } 
+            	model.setModel(dataModel);
                 that.refreshVirtualRows();
+            }, 
+            refreshHeader: function() {
+				gridOptions.api.refreshHeader();
             }
-        };
-    }
+        };  
+    }  
     // optional methods
     UniqueValuesFilter.prototype.afterGuiAttached = function(params) {
         this.drawVirtualRows();
     };
     UniqueValuesFilter.prototype.onNewRowsLoaded = function () {}
-    UniqueValuesFilter.prototype.onAnyFilterChanged = function () { console.log("arguments?? = %O", arguments);
-    	var curFilterModel = this.model.getModel();  console.log("curFilterModel = %O", curFilterModel)
+    UniqueValuesFilter.prototype.onAnyFilterChanged = function () {
+    	var colFilterModel = this.model.getModel();								
+    	if ( colFilterModel === null ) { return; }
+    	var col = Object.keys(colFilterModel)[0];
+    	var colFilterIconName = col + 'ColFilterIcon'; 							// console.log("colFilterIconName = %O", colFilterIconName)
+    	var selectedStr = colFilterModel[col].length > 0 ? colFilterModel[col].join(', ') : "None";
 
+    	$('a[name=' + colFilterIconName + ']').attr("title", "Showing:\n" + selectedStr);
     }
     UniqueValuesFilter.prototype.destroy = function () {}
     // Support methods
@@ -891,6 +964,23 @@
         for (var i = 0, l = currentlyDisplayedCheckboxes.length; i < l; i++) {
             currentlyDisplayedCheckboxes[i].checked = checked;
         }
+    };
+    UniqueValuesFilter.prototype.refreshVirtualRows = function () {
+        this.clearVirtualRows();
+        this.drawVirtualRows();
+    };
+    UniqueValuesFilter.prototype.clearVirtualRows = function () {
+        var rowsToRemove = Object.keys(this.rowsInBodyContainer);
+        this.removeVirtualRows(rowsToRemove);
+    };
+    //takes array of row id's
+    UniqueValuesFilter.prototype.removeVirtualRows = function (rowsToRemove) {  // console.log("removeVirtualRows called. rows = %O", rowsToRemove)
+        var _this = this;
+        rowsToRemove.forEach(function (indexToRemove) {
+            var eRowToRemove = _this.rowsInBodyContainer[indexToRemove];
+            _this.eListContainer.removeChild(eRowToRemove);
+            delete _this.rowsInBodyContainer[indexToRemove];
+        });
     };
   	UniqueValuesFilter.prototype.drawVirtualRows = function () {
 	    var topPixel = this.eListViewport.scrollTop;
@@ -933,6 +1023,7 @@
 	    }
 	    else {
 	        this.model.unselectValue(value);
+			this.eSelectAll.checked = false;
 	        //if set is empty, nothing is selected
 	        if (this.model.isNothingSelected()) {
 	            this.eSelectAll.checked = false;
@@ -983,14 +1074,6 @@
     UnqValsColumnFilterModel.prototype.createAvailableUniqueValues = function () {
         this.availableUniqueValues = this.allUniqueValues;
     };
-    UnqValsColumnFilterModel.prototype.selectEverything = function () {
-        var count = this.allUniqueValues.length;
-        for (var i = 0; i < count; i++) {
-            var value = this.allUniqueValues[i];
-            this.selectedValuesMap[value] = null;
-        }
-        this.selectedValuesCount = count;
-    };
     UnqValsColumnFilterModel.prototype.getUniqueValueCount = function () {
         return this.allUniqueValues.length;
     };
@@ -1001,6 +1084,7 @@
             this.selectedValuesMap[value] = null;
         }
         this.selectedValuesCount = count;
+        // this.
     };
     UnqValsColumnFilterModel.prototype.selectNothing = function () {
         this.selectedValuesMap = {};
@@ -1035,14 +1119,18 @@
     };
     UnqValsColumnFilterModel.prototype.isFilterActive = function () {
         return this.allUniqueValues.length !== this.selectedValuesCount;
+    	// return false;
     };
     UnqValsColumnFilterModel.prototype.getModel = function () {
+        var model = {};
+        var column = this.colDef.field;
+        model[column] = [];
         if (!this.isFilterActive()) { return null; }
         var selectedValues = [];
         iterateObject(this.selectedValuesMap, function (key) {
-            selectedValues.push(key);
+            model[column].push(key);
         });
-        return selectedValues;
+        return model;
     };
     UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
         if (model && !isSelectAll) {
@@ -1057,6 +1145,30 @@
         else { this.selectEverything(); }
     };
 /*----------------------Util----------------------------------------------------------------------*/
+	function addOrRemoveCssClass(element, className, add) {
+        if (add) { addCssClass(element, className);
+        } else { removeCssClass(element, className); }
+	}
+	function removeCssClass(element, className) {
+        if (element.className && element.className.length > 0) {
+            var cssClasses = element.className.split(' ');
+            var index = cssClasses.indexOf(className);
+            if (index >= 0) {
+                cssClasses.splice(index, 1);
+                element.className = cssClasses.join(' ');
+            }
+        }
+    };
+    function addCssClass(element, className) {
+        if (element.className && element.className.length > 0) {
+            var cssClasses = element.className.split(' ');
+            if (cssClasses.indexOf(className) < 0) {
+                cssClasses.push(className);
+                element.className = cssClasses.join(' ');
+            }
+        }
+        else { element.className = className; }
+    };
    /*---------Unique Values Filter Utils--------*/
     function loadTemplate(template) {
         var tempDiv = document.createElement("div");
