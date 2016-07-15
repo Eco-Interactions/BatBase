@@ -23,7 +23,6 @@
         enableFilter: true,
         rowHeight: 26
 	};
-
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
@@ -57,12 +56,16 @@
   		var expanded = $(this).data('xpanded');
   		if (expanded) { 
   			gridOptions.api.collapseAll();
-  			$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
+			$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
 		} else { 
 			gridOptions.api.expandAll();	
 			$('#xpand-tree').html("Collapse Tree Data");
   		}
 		$(this).data("xpanded", !expanded);
+	}
+	function resetToggleTreeBttn() {
+		$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
+		$('#xpand-tree').data("xpanded", false);
 	}
 /*=================Search Methods=============================================*/
 	function ifChangedFocus(focus) {
@@ -206,7 +209,7 @@
 			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  											// console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											 console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -251,11 +254,12 @@
 		}		
 	}
 	function onTaxaSearchMethodChange(e) { 
-		clearPreviousGrid();		
+		clearPreviousGrid();
 		selectTaxaDomain();
 	}
-	function selectTaxaDomain(e) {
+	function selectTaxaDomain(e) {	
     	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
+		resetToggleTreeBttn();
 		showAllDomainInteractions(domainTaxon);
 	}
 	/** Show all data for domain. */
@@ -551,9 +555,11 @@
 		loadGrid("Taxa Tree");
 	}
 	function getTaxaRowData(taxon) { 
+		var taxonName = taxon.level === "Species" ? 
+			taxon.displayName : taxon.level + " " + taxon.displayName;
 		return [{
 			id: taxon.id,
-			name: taxon.displayName,
+			name: taxonName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
 			open: openRows.indexOf(taxon.id.toString()) !== -1, 
 			children: getTaxaRowDataForChildren(taxon),
