@@ -319,7 +319,7 @@ class AjaxController extends Controller
     }
 
     /**
-     * Get Interactions by Taxa.
+     * Get Interaction IDs by Taxa.
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -396,7 +396,7 @@ class AjaxController extends Controller
 /**------------------------Search By Location---------------------------------*/
 
     /**
-     * Get Interactions by Region and Location.
+     * Get Interactions IDs by Region and Location.
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
@@ -487,42 +487,70 @@ class AjaxController extends Controller
             return "Unspecified";
         }
     }
+    /**
+     * Get Interactions.
+     *
+     * @Route("/search/interaction", name="app_ajax_search_interaction")
+     */
+    public function searchInteractionAction(Request $request) 
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
+        $em = $this->getDoctrine()->getManager();
+        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+
+        $intRcrds = new \stdClass;
+
+        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
+
+        foreach ($interactions as $int) 
+        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
+            $rcrd = new \stdClass;
+            $intId = $int->getId();
+            $rcrd->id = $intId;
+            $rcrd->note = $int->getNote();
+            $rcrd->citation = $int->getCitation()->getDescription();
+            $rcrd->interactionType = $int->getInteractionType()->getName();
+            $rcrd->subject = array(
+                "name" => $int->getSubject()->getDisplayName(),
+                "level" => $int->getSubject()->getLevel()->getName(),
+                "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
+            $rcrd->object = array(
+                "name" => $int->getObject()->getDisplayName(),
+                "level" => $int->getObject()->getLevel()->getName(),
+                "id" => $int->getObject()->getId() );
+            $rcrd->tags = $this->getTagAry($int->getTags());  
+
+            if ($int->getLocation() !== null) {
+                $rcrd->location = $int->getLocation()->getDescription();
+                $rcrd->country = $int->getLocation()->getCountry() === null ?
+                    null : $int->getLocation()->getCountry()->getName() ;
+                $rcrd->region = $int->getLocation()->getCountry() === null ?
+                    null : $int->getLocation()->getCountry()->getRegion()->getDescription() ;
+                $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
+                    null : $int->getLocation()->getHabitatType()->getName() ;
+            }
+            
+            $intRcrds->$intId = $rcrd;
+        }
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $intRcrds
+        ));
+
+        return $response;
+
+    }
 /**------------------------Shared Search Methods------------------------------*/
     private function getInteractions($interactions)
     {
         if ( count($interactions) === 0 ) { return null; }
-
         $intRcrds = [];
 
         foreach ($interactions as $int) 
         {
-
-            // $rcrd = new \stdClass;
-         
-            // $rcrd->id = $int->getId();
-            // $rcrd->note = $int->getNote();
-            // $rcrd->citation = $int->getCitation()->getDescription();
-            // $rcrd->interactionType = $int->getInteractionType()->getName();
-            // $rcrd->subject = array(
-            //     "name" => $int->getSubject()->getDisplayName(),
-            //     "level" => $int->getSubject()->getLevel()->getName(),
-            //     "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
-            // $rcrd->object = array(
-            //     "name" => $int->getObject()->getDisplayName(),
-            //     "level" => $int->getObject()->getLevel()->getName(),
-            //     "id" => $int->getObject()->getId() );
-            // $rcrd->tags = $this->getTagAry($int->getTags());  
-
-            // if ($int->getLocation() !== null) {
-            //     $rcrd->location = $int->getLocation()->getDescription();
-            //     $rcrd->country = $int->getLocation()->getCountry() === null ?
-            //         null : $int->getLocation()->getCountry()->getName() ;
-            //     $rcrd->region = $int->getLocation()->getCountry() === null ?
-            //         null : $int->getLocation()->getCountry()->getRegion()->getDescription() ;
-            //     $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
-            //         null : $int->getLocation()->getHabitatType()->getName() ;
-            // }
-            // array_push( $intRcrds, $rcrd );
             array_push( $intRcrds, $int->getId() );
         }
         return $intRcrds;

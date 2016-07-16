@@ -84,6 +84,26 @@
 		$('#sort-opts').empty();
 		$('#sort-opts, #opts-col2').fadeTo(0, 1);
 	}
+	function getInteractions() {  												console.log("getInteractions called. ")
+		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
+		if ( intRcrds ) { fillTreeWithInteractions( intRcrds ); 				console.log("Stored interactions loaded = %O", intRcrds);
+		} else { sendAjaxQuery({}, 'ajax/search/interaction', storeInteractions); }
+	}
+	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
+		populateStorage('intRcrds', data.results);  
+		fillTreeWithInteractions( data.results );
+	}
+	function fillTreeWithInteractions(intRcrds) {
+		var focus = localStorage.getItem('curFocus'); 
+		var gridBuilders = focus === "taxa" ? buildBrowseSearchOptsndGrid : loadLocGrid;
+		
+		fillDataSetWithInteractionRcrds();
+	}
+	function fillDataSetWithInteractionRcrds() {  console.log("fillDataSetWithInteractionRcrds called. DataSet = %O", dataSet);
+		for (var rcrdId in dataSet) {
+
+		}
+	}
 
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
@@ -97,6 +117,7 @@
 	}
 	function storeAndLoadLocs(data) {											//console.log("location data recieved. %O", data);
 		var locRcrds = sortLocTree(data.results);
+		dataSet = locRcrds;
 		populateStorage('locRcrds', JSON.stringify(locRcrds));
 		showLocSearch(locRcrds);
 	}
@@ -127,7 +148,8 @@
 	}
 	function showLocSearch(locData) {  										//console.log("showLocSearch called. locData = %O", locData)
 		clearPreviousGrid();
-		loadLocGrid(locData)		
+		loadLocGrid(locData);
+		getInteractions();		
 	    hideLoadingMsg();
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
@@ -260,10 +282,11 @@
 	function selectTaxaDomain(e) {	
     	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
 		resetToggleTreeBttn();
-		showAllDomainInteractions(domainTaxon);
+		showDomainTree(domainTaxon);
+		getInteractions();
 	}
 	/** Show all data for domain. */
-	function showAllDomainInteractions(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
+	function showDomainTree(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		$('#sort-opts').fadeTo(500, 1);
