@@ -37,8 +37,8 @@
 	}
 	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
 	    showLoadingMsg();
-	    if ( $('#search-focus').val() == 'locs' ) { getLocations();  }
-	    if ( $('#search-focus').val() == 'taxa' ) { getDomains();  }
+	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
+	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
 	}
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
@@ -68,20 +68,23 @@
 		$('#xpand-tree').data("xpanded", false);
 	}
 /*=================Search Methods=============================================*/
-	function ifChangedFocus(focus) {
-		if (focus !== curFocus) { //console.log("clearing local storage. curFocus = ", curFocus);
+	function ifChangedFocus(focus, buildGridFunc) {  console.log("changed focus arguments = %O", arguments);
+		if (focus !== curFocus) { 
 			curFocus = focus;
 			populateStorage('curFocus', focus);
+			resetToggleTreeBttn();
+			clearPastHtmlOptions();
+		} else { buildGridFunc(); }
+
+		function clearPastHtmlOptions() {
+			$('#sort-opts, #opts-col2').fadeTo(100, 0, emptySearchOpts);
 		}
-		clearPastHtmlOptions()
-	}
-	function clearPastHtmlOptions() {
-		$('#sort-opts, #opts-col2').fadeTo(150, 0, emptySearchOpts);
-	}
-	function emptySearchOpts() {
-		$('#opts-col2').empty();
-		$('#sort-opts').empty();
-		$('#sort-opts, #opts-col2').fadeTo(0, 1);
+		function emptySearchOpts() {  console.log("emptying search options");
+			$('#opts-col2').empty();
+			$('#sort-opts').empty();
+			$('#sort-opts, #opts-col2').fadeTo(0, 1);
+			buildGridFunc();
+		}
 	}
 /*------------------Interaction Record Methods-----------------------------------*/
 	/**
@@ -123,7 +126,7 @@
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
 	     */
-		function fillTaxaSetWithInteractionRcrds(treeObj) { 					console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
+		function fillTaxaSetWithInteractionRcrds(treeObj) { 					// console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
 			for (var sibling in treeObj) {   
 				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds)
 				if (treeObj[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(treeObj[sibling].children) }
@@ -165,7 +168,6 @@
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
-		ifChangedFocus("locs");
 		if( storedLocs ) {  console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
 		} else {  console.log("Locations Not Found In Storage.");
@@ -254,7 +256,6 @@
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
-		ifChangedFocus("taxa");
 		if( storedDomains ) {  console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
 		} else {  console.log("Domains Not Found In Storage.");
@@ -345,8 +346,7 @@
 	function showDomainTree(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
-		$('#sort-opts').fadeTo(500, 1);
-	    // hideLoadingMsg();
+		$('#sort-opts').fadeTo(150, 1);
 
 		function storeDomainLevel() {
 			var domainLvl = domainTaxon.level;
