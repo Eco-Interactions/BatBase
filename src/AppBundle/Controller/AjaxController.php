@@ -427,7 +427,7 @@ class AjaxController extends Controller
             $loc->long = $location->getLongitude();
             $loc->habitatType = $location->getHabitatType() === null ? null : $location->getHabitatType()->getName();  // $logger->error('SASSSSSSS:: getting interactions...');
             $interactions = $location->getInteractions();
-            $loc->intRcrds = $this->getInteractions($interactions);
+            $loc->interactions = $this->getInteractions($interactions);
 
             if ($location->getCountry() === null) {
                 $country =  null;
