@@ -2,7 +2,7 @@
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, dataSet, 
+	var gridDiv, rcrdsById, taxaByLvl, curTree,
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
@@ -70,7 +70,6 @@
 /*=================Search Methods=============================================*/
 	function ifChangedFocus(focus) {
 		if (focus !== curFocus) { //console.log("clearing local storage. curFocus = ", curFocus);
-			localStorage.clear(); 
 			curFocus = focus;
 			populateStorage('curFocus', focus);
 		}
@@ -84,40 +83,97 @@
 		$('#sort-opts').empty();
 		$('#sort-opts, #opts-col2').fadeTo(0, 1);
 	}
+/*------------------Interaction Record Methods-----------------------------------*/
+	/**
+	 * Checks if interaction records have been saved in local storage. If not, sends 
+	 * ajax to get them with @storeInteractions as the success callback. If records 
+	 * are available in storage call @fillTreeWithInteraction. 
+	 */
 	function getInteractions() {  												console.log("getInteractions called. ")
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
-		if ( intRcrds ) { fillTreeWithInteractions( intRcrds ); 				console.log("Stored interactions loaded = %O", intRcrds);
+		showLoadingMsg();
+		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
+			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'ajax/search/interaction', storeInteractions); }
 	}
 	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
-		populateStorage('intRcrds', data.results);  
+		var intRcrds = JSON.stringify(data.results);
+		populateStorage('intRcrds', intRcrds);  
 		fillTreeWithInteractions( data.results );
 	}
-	function fillTreeWithInteractions(intRcrds) {
+	/**
+	 * Back fills the displayed search focus' data tree with interaction records
+	 * and then rebuilds the displayed grid.
+	 */
+	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
+		var gridBuilder;
 		var focus = localStorage.getItem('curFocus'); 
-		var gridBuilders = focus === "taxa" ? buildBrowseSearchOptsndGrid : loadLocGrid;
-		
-		fillDataSetWithInteractionRcrds();
-	}
-	function fillDataSetWithInteractionRcrds() {  console.log("fillDataSetWithInteractionRcrds called. DataSet = %O", dataSet);
-		for (var rcrdId in dataSet) {
 
+		if (focus === "taxa"){  console.log("focus = 'taxa'");
+			gridBuilder = buildBrowseSearchOptsndGrid;
+			fillTaxaSetWithInteractionRcrds(curTree);  
+		} else if (focus === "locs") { console.log("focus = 'locs'");
+			gridBuilder = loadLocGrid;
+			fillLocsSetWithInteractionRcrds(curTree)
 		}
-	}
+		clearPreviousGrid();
+		gridBuilder(curTree);
+	    hideLoadingMsg();
+	    /**
+	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
+	     * as the top-most parent, and the first "sibling".
+	     */
+		function fillTaxaSetWithInteractionRcrds(treeObj) { 					console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
+			for (var sibling in treeObj) {   
+				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds)
+				if (treeObj[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(treeObj[sibling].children) }
+			}
+		}
+		function replaceTaxaInteractions(interactionsObj) {   					// console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
+			for (var role in interactionsObj) {
+				if (interactionsObj[role] !== null) { 
+					replaceInteractions(interactionsObj[role]) }
+			}
+		}
+		/**
+		 * The Location tree obj has regions as keys at the top-most level. If 
+		 * that region has countries, it is an object with it's countries as keys. 
+		 * If a region has no countries, and for every country key, the location 
+		 * records are in array format.
+		 */
+		function fillLocsSetWithInteractionRcrds(treeObj) { 					console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
+			for (var topKey in treeObj) {  										// console.log("topKey of treeObj = ", topKey);
+				if (Array.isArray(treeObj[topKey])) {  
+					getArrayInteractions(treeObj[topKey]);
+					continue;
+				}
+				fillLocsSetWithInteractionRcrds(treeObj[topKey]);
+			}
+		}
+		function getArrayInteractions(treeAry) { 								// console.log("treeAry = %O", treeAry)
+			treeAry.forEach(function(locObj){
+				replaceInteractions(locObj.interactions, intRcrds)
+			});
+		}
+		function replaceInteractions(interactionsAry) {  						// console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+			interactionsAry.forEach(function(intId, idx, orgAry){
+				orgAry[idx] = intRcrds[intId];
+			});
+		}
+	} /* End fillTreeWithInteractions */
 
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
+		ifChangedFocus("locs");
 		if( storedLocs ) {  console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
 		} else {  console.log("Locations Not Found In Storage.");
-			ifChangedFocus("locs");
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
-	function storeAndLoadLocs(data) {											//console.log("location data recieved. %O", data);
+	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
 		var locRcrds = sortLocTree(data.results);
-		dataSet = locRcrds;
 		populateStorage('locRcrds', JSON.stringify(locRcrds));
 		showLocSearch(locRcrds);
 	}
@@ -150,13 +206,13 @@
 		clearPreviousGrid();
 		loadLocGrid(locData);
 		getInteractions();		
-	    hideLoadingMsg();
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
-		var finalRowData = [];   // console.log("topRegionRows = %O", topRegionRows);
-		for (var region in locData) {  // console.log("region = ", region)
+		var finalRowData = [];   console.log("locData = %O", locData);
+		curTree = locData;
+		for (var region in locData) { // console.log("region = ", region)
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
@@ -173,11 +229,11 @@
 			interactions: locObj.intRcrds !== undefined,     /* Location objects have collections of interactions as children. */     
 		};		
 	}
-	function getLocRowDataForChildren(locObj) {
+	function getLocRowDataForChildren(locObj) {// console.log("getLocRowDataForChildren called. locObj = %O", locObj)
 		var regionRows = [];
 		if (locObj.interactionType !== undefined) { return false; }
 		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
-		if (locObj.intRcrds !== undefined) { return getlocIntRowData(locObj.intRcrds); }
+		if (locObj.interactions !== undefined) { return getlocIntRowData(locObj.interactions); }
 
 		for (var country in locObj) {
 			regionRows.push( getLocRowData( locObj[country], country ) );
@@ -198,10 +254,10 @@
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
+		ifChangedFocus("taxa");
 		if( storedDomains ) {  console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
 		} else {  console.log("Domains Not Found In Storage.");
-			ifChangedFocus("taxa");
 			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
 		}
 	}
@@ -214,8 +270,8 @@
 		initTaxaSearchState();
 		getAllTaxaRcrds();
 	}
-	function initTaxaSearchState() { console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
-		if ($('#sel-domain').val() === null) { $('#sel-domain').val('2'); }
+	function initTaxaSearchState() { // console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
+		if ($('#sel-domain').val() === null) { $('#sel-domain').val('4'); }
 	}
 	/** Ajax to get all interaction rcrds. */
 	function getAllTaxaRcrds() {
@@ -290,7 +346,7 @@
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		$('#sort-opts').fadeTo(500, 1);
-	    hideLoadingMsg();
+	    // hideLoadingMsg();
 
 		function storeDomainLevel() {
 			var domainLvl = domainTaxon.level;
@@ -300,8 +356,9 @@
 	/** Build taxaTree with passed taxon as the top of the tree.  */
 	function getTaxaTreeAndBuildGrid(topTaxon) {
 		var taxaTree = buildTaxaTree(topTaxon);
+		curTree = taxaTree;
 		openRows = [topTaxon.id.toString()];  									//console.log("openRows=", openRows)
-		dataSet = separateByLevel(taxaTree, topTaxon.displayName); 				// console.log("dataSet = %O", dataSet)
+		taxaByLvl = separateByLevel(taxaTree, topTaxon.displayName); 				// console.log("taxaByLvl = %O", taxaByLvl)
 		buildBrowseSearchOptsndGrid(taxaTree);
 	}
 	/**
@@ -329,11 +386,11 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("dataSet = %O", dataSet)
-		var curDataSet = curSet || dataSet;
-		var levels = Object.keys(curDataSet);
+	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("taxaByLvl = %O", taxaByLvl)
+		var curTaxaByLvl = curSet || taxaByLvl;
+		var levels = Object.keys(curTaxaByLvl);
 		var domainLvl = levels.shift();
-		var lvlOptsObj = buildTaxaLvlOptions(curDataSet);
+		var lvlOptsObj = buildTaxaLvlOptions(curTaxaByLvl);
 
 		clearPreviousGrid();
 		setLevelSelects();
@@ -424,7 +481,7 @@
 		return optsObj;
 
 		function fillInMissingLvls() {
-			var lvls = Object.keys(dataSet);
+			var lvls = Object.keys(taxaByLvl);
 			var domainLvl = localStorage.getItem('domainLvl');
 			lvls.forEach(function(lvl){
 				if (lvl !== domainLvl && optsObj[lvl] === undefined) { 
@@ -498,7 +555,7 @@
         function selectDomain() {
 			var domainLvl = localStorage.getItem('domainLvl');
         	var domain = {};
-        	domain[domainLvl] = dataSet[domainLvl][[Object.keys(dataSet[domainLvl])[0]]].id;
+        	domain[domainLvl] = taxaByLvl[domainLvl][[Object.keys(taxaByLvl[domainLvl])[0]]].id;
         	return domain;
         }
 	}
@@ -511,7 +568,7 @@
 	function repopulateDropDowns(selected, selectedVals) {
 		var revLevels = levels.map(function(lvl){return lvl}).reverse(); 
 		var relatedTaxaOpts = {};
-		var lvls = Object.keys(dataSet);
+		var lvls = Object.keys(taxaByLvl);
 		lvls.shift();
 		
 		buildRelatedTaxaOptsObj();
@@ -551,7 +608,7 @@
 			relatedTaxaOpts[parent.level][parent.displayName] = parent;
 			if (parent.parentTaxon) { getParents(parent.parentTaxon); }
 		}
-		function addEmptyLvlOpts() {  console.log("dataSet = %O", dataSet)
+		function addEmptyLvlOpts() {  console.log("taxaByLvl = %O", taxaByLvl)
 			lvls.forEach(function(lvl) {
 				if (relatedTaxaOpts[lvl] === undefined) { relatedTaxaOpts[lvl] = {}; }
 			});
