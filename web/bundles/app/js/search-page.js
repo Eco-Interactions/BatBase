@@ -30,7 +30,7 @@
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		$("#search-focus").change(selectSearchFocus);
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
-		$('button[name="clr-grid-fltrs"]').click(clearAllGridFilters);
+		$('button[name="reset-grid"]').click(resetGrid);
 		setGridStatus('No Active Filters.'); 
 	    initSearchState();
 		selectSearchFocus();
@@ -56,15 +56,15 @@
   		var expanded = $(this).data('xpanded');
   		if (expanded) { 
   			gridOptions.api.collapseAll();
-			$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
+			$('#xpand-tree').html("&nbspExpand Tree&nbsp");
 		} else { 
 			gridOptions.api.expandAll();	
-			$('#xpand-tree').html("Collapse Tree Data");
+			$('#xpand-tree').html("Collapse Tree");
   		}
 		$(this).data("xpanded", !expanded);
 	}
 	function resetToggleTreeBttn() {
-		$('#xpand-tree').html("&nbspExpand Tree Data&nbsp");
+		$('#xpand-tree').html("&nbspExpand Tree&nbsp");
 		$('#xpand-tree').data("xpanded", false);
 	}
 /*=================Search Methods=============================================*/
@@ -85,7 +85,7 @@
 			$('#sort-opts, #opts-col2').fadeTo(0, 1);
 			buildGridFunc();
 		}
-	}
+	} /* End ifChangedFocus */
 /*------------------Interaction Record Methods-----------------------------------*/
 	/**
 	 * Checks if interaction records have been saved in local storage. If not, sends 
@@ -160,7 +160,9 @@
 		}
 		function replaceInteractions(interactionsAry) {  						// console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
 			interactionsAry.forEach(function(intId, idx, orgAry){
-				orgAry[idx] = intRcrds[intId];
+				if (typeof intId === "number") {	//If not, then the tree has already been 
+					orgAry[idx] = intRcrds[intId];	//filled with the interaction records
+				}
 			});
 		}
 	} /* End fillTreeWithInteractions */
@@ -851,15 +853,9 @@
 	 * Resets grid state to top focus options: Taxa are reset to the domain level, 
 	 * and locations are entirely reset.
 	 */
-	function clearAllGridFilters() { 
-		var prevDomain = $('#sel-domain').val(); console.log("prevDomain = ", prevDomain)			
-		if (prevDomain){
-			$('#sel-domain').val(prevDomain);
-			onTaxaSearchMethodChange();
-		} else {
-			clearPreviousGrid();
-			selectSearchFocus(); 
-		}
+	function resetGrid() { 
+		getInteractions();
+		resetToggleTreeBttn();
 		getActiveDefaultGridFilters();
 	}
 	/** Returns an obj with all filter models. */
