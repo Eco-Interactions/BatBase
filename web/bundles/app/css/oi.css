@@ -275,6 +275,7 @@ span.lbl {
 	width: 1450px;
 	border-radius: .5em;
 	font-size: 1.1em;
+	/*justify-content: space-between;*/
 }
 .opts-col {
 	padding: .7em;
@@ -357,8 +358,24 @@ span.lbl {
 .row-species {
 	background-color: rgba(255,0,0,.1) !important; /* red */
 }
-
-
+/*-- Walkthrough --*/
+#tut-opts {
+	align-self: flex-start;
+}
+#tut-spacer, #tut-cntnr {
+	flex-grow: 1;
+}
+#tggl-hints, #strt-tut{
+	height: 30px;
+	margin: 5px;
+}
+.intro-tips {
+	width: 420px;
+	text-align: justify;
+}
+a[role="button"] {
+	cursor: pointer;
+}
 
 /*----------- FOS / Registration Page ---------*/
 .fos_user_user_show {

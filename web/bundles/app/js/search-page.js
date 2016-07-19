@@ -31,6 +31,7 @@
 		$("#search-focus").change(selectSearchFocus);
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
+		$("#strt-tut").click(startIntro)
 		setGridStatus('No Active Filters.'); 
 	    initSearchState();
 		selectSearchFocus();
@@ -86,7 +87,7 @@
 			buildGridFunc();
 		}
 	} /* End ifChangedFocus */
-/*------------------Interaction Record Methods-----------------------------------*/
+/*------------------Interaction (Record Fill) Methods-----------------------------------*/
 	/**
 	 * Checks if interaction records have been saved in local storage. If not, sends 
 	 * ajax to get them with @storeInteractions as the success callback. If records 
@@ -122,6 +123,8 @@
 		clearPreviousGrid();
 		gridBuilder(curTree);
 	    hideLoadingMsg();
+   	    showWalkthroughIfFirstVisit();
+
 	    /**
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
@@ -274,7 +277,7 @@
 		getAllTaxaRcrds();
 	}
 	function initTaxaSearchState() { // console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
-		if ($('#sel-domain').val() === null) { $('#sel-domain').val('4'); }
+		if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
 	}
 	/** Ajax to get all interaction rcrds. */
 	function getAllTaxaRcrds() {
@@ -300,7 +303,7 @@
 	 * both text search and browsing through the taxa names by level.
 	 */
 	function buildTaxaSearchHtml(data) { 										// console.log("buildTaxaSearchHtml called. ");
-		var browseElems = createElem('span', { text: "Sort by: " });
+		var browseElems = createElem('span', { id:"sort-taxa-by", text: "Sort by: " });
 		var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
@@ -741,6 +744,7 @@
 
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
+
 	}
 	function getIntData(intRcrd, intRcrdObj){
 		for (var field in intRcrd) {
@@ -1226,6 +1230,121 @@
         }
         else { this.selectEverything(); }
     };
+/*========================= Walkthrough Methods ==================================================*/
+	function showWalkthroughIfFirstVisit() {
+		var newVisit = localStorage ? localStorage.getItem('prevVisit') || true : true; 	 console.log("newVisit = ", newVisit)
+		if ( newVisit ) { startIntro(); }	
+	}
+	function startIntro(startStep){  console.log("startStep = ", startStep)
+		var intro = introJs();
+		var startStep = startStep || 0; 
+		intro.setOptions({
+			showStepNumbers: false,
+			skipLabel: "Exit",
+			doneLabel: "I'm done.",
+			tooltipClass: "intro-tips", 
+			steps: [
+				{
+					element: "#tut-opts", 
+					intro: "<b><center>Welcome to the Advanced Search Page!</center></b><br><br>" +
+						"This is an interactive demonstration the search functionality.<br><br>" +
+						"This tutorial is available to you here at any time and there are hints " +
+						" scattered around the page with focused information for complex areas. " + 
+						"<br><br>Start the tutorial?",
+					position: "left",
+					hint: "Walthrough features and functionality of the advanced search page.",
+					hintButtonLabel: "Got it."
+					
+				},
+				{
+					/*element: document.querySelector("#filter-opts"),*/
+					element: "#filter-opts",
+					intro: "Select a focus for your search. <br><br>Interaction records will be" + 
+						" displayed in a tree structure sorted by the selected focus.<br><br>" +
+						"Taxa are the default focus, the most complex, and where this " +
+						"tutorial will continue from."
+				},
+				{
+					element:"#sort-taxa-by",
+					intro: "Select the taxa realm to sort the interaction records by:<br><br>" +
+						"<center>Bats, Plants, or Arthropods.</center><br>We haven selected the " +
+						"Plant realm for this tutorial.",
+					position: "right"
+				},
+				{
+					element: "#search-grid",
+					intro: "The resulting interaction records are displayed here.",
+					position: "top"
+				},
+				{
+					element: "#xpand-tree",
+					intro: "Click here to expand the displayed tree. Try it now.",
+					position: "right"
+				},
+				{
+					// element: "#opts-col2",
+					intro: "<center>There are a few different ways to filter the results.</center>",
+					position: "left"
+				},
+				{
+					element: ".ag-header",
+					intro: "Hover over a column header to reveal the filter menu for that column.",
+					position: "top"
+				},
+				{
+					element: "button[name=\"reset-grid\"]",
+					intro: "Click here at any point to clear all filters and reset your results.",
+					position: "right"
+				},
+				// {
+				// 	element: "#opts-col2",
+				// 	intro: "The levels of taxonyms in the currently selected taxa-tree are displayed here." +
+				// 			"<br><br>Once a taxonym is selected, the remaining level-dropdowns will " +
+				// 			"repopulate with only directly-related taxa.",
+				// 	position: "left"
+				// },
+				{
+					element: "#opts-col2",
+					intro: "<b><center>There are some taxa-specific search filters available.</center></b><br>" + 
+						"The levels of taxonyms in the currently selected taxa-tree are displayed here." +
+						"<br><br>Once a taxonym is selected, the remaining level-dropdowns will " +
+						"repopulate with only directly-related taxa.",
+					position: "left"
+				},
+				{
+					element: "#filter-bttns",
+					intro: "If you'd like to reset the level selects, click 'Clear Level Filters'. <br><br>" +
+						"When finished selecting, click 'Apply Filters' to rebuild the data-grid with the " +
+						"updated taxa-tree. The top-most selected level will be the start of the updated tree.",
+					position: "right"
+				},
+				// {
+				// 	element: "#step5",
+				// 	intro: "Get it, use it."
+				// },
+				// {
+				// 	element: "#step5",
+				// 	intro: "Get it, use it."
+				// },
+				// {
+				// 	element: "#step5",
+				// 	intro: "Get it, use it."
+				// }
+			]
+		});
+		intro.addHints();
+		intro.start();
+	
+		intro.onafterchange(function(targetElement) {  /* targetElement of next step. */
+			if (targetElement === $('#search-focus')) {
+				console.log("search-focus is the next step.")
+			}
+		});
+	}
+	function function_name(argument) {
+		// body...
+	}
+
 /*----------------------Util----------------------------------------------------------------------*/
 	function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);
