@@ -14,21 +14,24 @@ class Builder extends ContainerAware
         $menu = $factory->createItem('root');
         $menu->setChildrenAttributes(array('id' => 'oimenu'));
 		$menu->addChild('Home', array('route' => 'app_home'));
-        $menu->addChild('About', array('uri' => '#'));
-        $menu['About']->setAttribute('class', 'smtrigger arrow');
-			$menu['About']->addChild('batplant.org', array('route' => 'app_about'));
-			$menu['About']->addChild('Database', array('route' => 'app_db_top'));
-			$menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
-			$menu['About']->addChild('Team', array('route' => 'app_team'));
-   		$menu->addChild('Search', array('route' => 'app_search'));
+        $menu->addChild('About Us', array('route' => 'app_about'));
+   //      $menu['About ']->setAttribute('class', 'smtrigger arrow');
+			// $menu['About']->addChild('batplant.org', );
+			// $menu['About']->addChild('Team', array('route' => 'app_team'));
 //        $menu->addChild('Links', array('route' => 'AppBundle_links'));
 //        $menu->addChild('News', array('route' => 'AppBundle_news'));
 		if ($this->_isLoggedInUser($options['usrrole'])) {
 			if ($this->_isAdmin($options['usrrole'])) {
 			$menu->addChild('Database', array('uri' => '#'));
 			$menu['Database']->setAttribute('class', 'smtrigger arrow');
+   				$menu['Database']->addChild('Search', array('route' => 'app_search'));
+				$menu['Database']->addChild('About', array('uri' => '#'));
+				$menu['Database']['About']->setAttribute('class', 'smtrigger arrow');				
+				$menu['Database']['About']->addChild('The Database', array('route' => 'app_db_top'));
+				$menu['Database']['About']->addChild('Definitions', array('route' => 'app_definitions'));
 				$menu['Database']->addChild('Interaction Types', array('route' => 'app_interaction_type'));
 				$menu['Database']->addChild('Citations', array('uri' => '#'));
+				$menu['Database']->addChild('All Taxa', array('route' => 'app_domain'));
 				$menu['Database']['Citations']->setAttribute('class', 'smtrigger arrow');
 					$menu['Database']['Citations']->addChild('All Citations', array('route' => 'app_citation'));
 					$menu['Database']['Citations']->addChild('Publications', array('route' => 'app_publication'));
@@ -38,19 +41,7 @@ class Builder extends ContainerAware
 					$menu['Database']['Locations']->addChild('All Locations', array('route' => 'app_location'));
 					$menu['Database']['Locations']->addChild('Countries', array('route' => 'app_country'));
 					$menu['Database']['Locations']->addChild('Habitat Types', array('route' => 'app_habitat_type'));
-				$menu['Database']->addChild('All Bat Taxa', array(
-					'route' => 'app_domain_show',
-					'routeParameters' => array('slug' => 'bat')
-				));
-				$menu['Database']->addChild('All Plant Taxa', array(
-					'route' => 'app_domain_show',
-					'routeParameters' => array('slug' => 'plant')
-				));
-				$menu['Database']->addChild('All Arthropod Taxa', array(
-					'route' => 'app_domain_show',
-					'routeParameters' => array('slug' => 'arthropod')
-				));
-				$menu['Database']->addChild('All Interactions', array('route' => 'app_interaction'));
+				// $menu['Database']->addChild('All Interactions', array('route' => 'app_interaction'));
 			}
 			$menu->addChild($user_name, array('uri' => '#'));
 			$menu[$user_name]->setAttribute('class', 'smtrigger arrow');
