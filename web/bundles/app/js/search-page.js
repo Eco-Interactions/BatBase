@@ -786,19 +786,19 @@
 	}
 	function softRefresh() { gridOptions.api.refreshView(); }
 	function getColumnDefs(mainCol) {  
-		return [{headerName: mainCol, field: "name", width: 300, cellRenderer: 'group', suppressFilter: true,
+		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 175, headerTooltip: "The subject of the interaction." },
+			    {headerName: "Subject Taxon", field: "subject", width: 150, headerTooltip: "The subject of the interaction." },
 			    {headerName: "Object Taxon", field: "object", width: 150 , suppressFilter: true },
-			    {headerName: "Interaction Type", field: "interactionType", width: 165, filter: UniqueValuesFilter },
+			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
 			    {headerName: "Tags", field: "tags", width: 100, filter: UniqueValuesFilter},
-			    {headerName: "Habitat Type", field: "habitatType", width: 140, filter: UniqueValuesFilter },
+			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
-			    {headerName: "Location Description", field: "location", width: 300,},
-			    {headerName: "Citation", field: "citation", width: 300,},
-			    {headerName: "Note", field: "note", width: 300,} ];
+			    {headerName: "Location Description", field: "location", width: 170,},
+			    {headerName: "Citation", field: "citation", width: 100,},
+			    {headerName: "Note", field: "note", width: 100,} ];
 	}
 	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
