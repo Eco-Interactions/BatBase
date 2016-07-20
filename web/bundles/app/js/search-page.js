@@ -28,12 +28,16 @@
 	function onDOMContentLoaded () {
 		// localStorage.clear();
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
+		addDomEventListeners();
+
+		setGridStatus('No Active Filters.'); 
+	    initSearchState();
+	}
+	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
-		setGridStatus('No Active Filters.'); 
-	    initSearchState();
-		selectSearchFocus();
+		$('button[name="csv"]').click(downloadDisplayedData);
 	}
 	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
 	    showLoadingMsg();
@@ -43,6 +47,7 @@
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
 		} else { $('#search-focus').val("taxa"); }
+		selectSearchFocus();
 	} 
 	function showLoadingMsg() {
 		$('#borderLayout_eRootPanel').fadeTo(100, .3);
@@ -67,8 +72,23 @@
 		$('#xpand-tree').html("&nbspExpand Tree&nbsp");
 		$('#xpand-tree').data("xpanded", false);
 	}
+	function hideGroupColFilterMenu() {
+		$('.ag-header-cell-menu-button.name').hide();
+	}
+/*=================CSV Methods================================================*/
+	function downloadDisplayedData() {
+		var fileName = curFocus + ".csv";
+		var params = {
+			// processCellCallback: processTreeRows,
+			// suppressQuotes: true,
+			// fileName: "bat eco interactions-csv_download_failedBrain",
+			// customHeader: "This is a custom header.\n\n",
+			// customFooter: "This is a custom footer."
+		};
+		var displayedRows = gridOptions.api.exportDataAsCsv(params);
+	}
 /*=================Search Methods=============================================*/
-	function ifChangedFocus(focus, buildGridFunc) {  console.log("changed focus arguments = %O", arguments);
+	function ifChangedFocus(focus, buildGridFunc) { // console.log("changed focus arguments = %O", arguments);
 		if (focus !== curFocus) { 
 			curFocus = focus;
 			populateStorage('curFocus', focus);
@@ -92,14 +112,14 @@
 	 * ajax to get them with @storeInteractions as the success callback. If records 
 	 * are available in storage call @fillTreeWithInteraction. 
 	 */
-	function getInteractions() {  												console.log("getInteractions called. ")
+	function getInteractions() {  												//console.log("getInteractions called. ")
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		showLoadingMsg();
-		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
+		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'ajax/search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
+	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data.results);
 		var intRcrds = JSON.stringify(data.results);
 		populateStorage('intRcrds', intRcrds);  
 		fillTreeWithInteractions( data.results );
@@ -108,20 +128,21 @@
 	 * Back fills the displayed search focus' data tree with interaction records
 	 * and then rebuilds the displayed grid.
 	 */
-	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
+	function fillTreeWithInteractions(intRcrds) {   							//console.log("fillTreeWithInteractionscalled.");
 		var gridBuilder;
 		var focus = localStorage.getItem('curFocus'); 
 
-		if (focus === "taxa"){  console.log("focus = 'taxa'");
+		if (focus === "taxa"){  //console.log("focus = 'taxa'");
 			gridBuilder = buildBrowseSearchOptsndGrid;
 			fillTaxaSetWithInteractionRcrds(curTree);  
-		} else if (focus === "locs") { console.log("focus = 'locs'");
+		} else if (focus === "locs") { //console.log("focus = 'locs'");
 			gridBuilder = loadLocGrid;
 			fillLocsSetWithInteractionRcrds(curTree)
 		}
 		clearPreviousGrid();
 		gridBuilder(curTree);
 	    hideLoadingMsg();
+	    hideGroupColFilterMenu();
 	    /**
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
@@ -170,13 +191,13 @@
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
-		if( storedLocs ) {  console.log("Stored Locations Loaded");
+		if( storedLocs ) {  //console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
-		} else {  console.log("Locations Not Found In Storage.");
+		} else { // console.log("Locations Not Found In Storage.");
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
-	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
+	function storeAndLoadLocs(data) {											//console.log("location data recieved. %O", data);
 		var locRcrds = sortLocTree(data.results);
 		populateStorage('locRcrds', JSON.stringify(locRcrds));
 		showLocSearch(locRcrds);
@@ -258,9 +279,9 @@
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
-		if( storedDomains ) {  console.log("Stored Domains Loaded");
+		if( storedDomains ) { // console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
-		} else {  console.log("Domains Not Found In Storage.");
+		} else { // console.log("Domains Not Found In Storage.");
 			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
 		}
 	}
@@ -283,14 +304,14 @@
 			roles: ['ObjectRoles', 'SubjectRoles']
 		};
 		var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
-		if( storedTaxa ) {  		console.log("Stored taxaRcrds Loaded");
+		if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else {   console.log("taxaRcrds Not Found In Storage.");
+		} else { //  console.log("taxaRcrds Not Found In Storage.");
 			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  											 console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											 //console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -542,11 +563,11 @@
 	} /* End buildTaxaTree */
 /*---------------------------- Taxa Specific Filters-------------------------------- */
 	function isTaxonymSelected(filterCheck) {
-        var filterSelections = {};  console.log("filterSelections = %O", filterSelections)
+        var filterSelections = {}; // console.log("filterSelections = %O", filterSelections)
         var selected = false;
 
         levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;  console.log("level = %s, val = %s", lvl, $(selId).val());
+        	var selId = '#sel' + lvl;  //console.log("level = %s, val = %s", lvl, $(selId).val());
         	if ($(selId).val() !== undefined && $(selId).val() !== null && $(selId).val() !== 'all') { 
         		filterSelections[lvl] = $(selId).val();
         		selected = true;
@@ -624,7 +645,7 @@
 		return vals;
 	}
 	/*---------Data Formatting------------------------------------------------*/
-	function loadTaxaGrid(taxaTree) {  console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
+	function loadTaxaGrid(taxaTree) {  //console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
@@ -774,8 +795,8 @@
 		var colId = params.column.colId + 'ColFilterIcon';  
 		return '<div class="ag-header-cell">' +
 	        '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
-	        '  <span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
-	        '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +
+	        '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column, 
+	        '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +									//which breaks the grid. The provided 'supressFilter' option doesn't work.
 	        '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
 	        '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
 	        '    <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
@@ -789,16 +810,19 @@
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 150, headerTooltip: "The subject of the interaction." },
-			    {headerName: "Object Taxon", field: "object", width: 150 , suppressFilter: true },
+			    {headerName: "Subject Taxon", field: "subject", width: 150 },
+			    {headerName: "Subject Taxon", field: "subject", width: 150 },
+
+			    {headerName: "Subject Taxon", field: "subject", width: 150 },
+			    {headerName: "Object Taxon", field: "object", width: 150  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
-			    {headerName: "Tags", field: "tags", width: 100, filter: UniqueValuesFilter},
+			    {headerName: "Tags", field: "tags", width: 90, filter: UniqueValuesFilter},
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Location Description", field: "location", width: 170,},
 			    {headerName: "Citation", field: "citation", width: 100,},
-			    {headerName: "Note", field: "note", width: 100,} ];
+			    {headerName: "Note", field: "note", width: 110,} ];
 	}
 	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
@@ -854,6 +878,7 @@
 	 * and locations are entirely reset.
 	 */
 	function resetGrid() { 
+		openRows = curFocus === "taxa" ? [$('#sel-domain').val()] : [];
 		getInteractions();
 		resetToggleTreeBttn();
 		getActiveDefaultGridFilters();

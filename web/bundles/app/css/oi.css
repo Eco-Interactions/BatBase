@@ -332,6 +332,9 @@ span.lbl {
 	flex-grow: 1;
 	padding: .2em;
 }
+button[name="csv"] {
+	align-self: flex-end;
+}
 #search-grid {
 	height: 666px;
 	border: black 1px solid;
