@@ -810,9 +810,13 @@
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Subject Taxon", field: "subject", width: 150 },
-			    {headerName: "Subject Taxon", field: "subject", width: 150 },
-
+			    {headerName: "Tree Kingdom", field: "treeKingdom", width: 150, hide:true },
+			    {headerName: "Tree Phylum", field: "treePhylum", width: 150, hide:true },
+			    {headerName: "Tree Class", field: "treeClass", width: 150, hide:true },
+			    {headerName: "Tree Order", field: "treeOrder", width: 150, hide:true },
+			    {headerName: "Tree Family", field: "treeFamily", width: 150, hide:true },
+			    {headerName: "Tree Genus", field: "treeGenus", width: 150, hide:true },
+			    {headerName: "Tree Species", field: "treeSpecies", width: 150, hide:true },
 			    {headerName: "Subject Taxon", field: "subject", width: 150 },
 			    {headerName: "Object Taxon", field: "object", width: 150  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
