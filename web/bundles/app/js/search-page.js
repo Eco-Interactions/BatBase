@@ -653,17 +653,18 @@
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
-		rowData = finalRowData;													// console.log("rowData = %O", rowData);
+		rowData = finalRowData;													console.log("rowData = %O", rowData);
 
 		loadGrid("Taxa Tree");
 	}
-	function getTaxaRowData(taxon) { 
+	function getTaxaRowData(taxon) { console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
 		var taxonName = taxon.level === "Species" ? 
 			taxon.displayName : taxon.level + " " + taxon.displayName;
 		return [{
 			id: taxon.id,
 			name: taxonName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
+			parentTaxon: rcrdsById[taxon.parentTaxon],
 			open: openRows.indexOf(taxon.id.toString()) !== -1, 
 			children: getTaxaRowDataForChildren(taxon),
 			taxaLvl: taxon.level,
@@ -749,6 +750,23 @@
 	}	
 
     /*--------------AG Grid Methods-------------------------------------------*/
+    function fillHiddenColumns(displayedRows) {  console.log("displayedRows = %O", displayedRows)
+    	var curTaxaHeirarchy = {};
+
+    	rowAry.forEach(function(row) { console.log("row.data = %O", row.data);
+    		if (row.open) { getRowTreeData(row.data); }
+    	});
+    	getDisplayedData(displayedRows);
+	    
+	    function getDisplayedData(rowAry) {
+	    	rowAry.forEach(function(row) { console.log("row.data = %O", row.data);
+	    		if (row.open) { getRowTreeData(row.data); }
+	    	});
+	    }
+	    function getRowTreeData(row) {
+	    	curTaxaHeirarchy[row.taxaLvl]
+	    }
+    } /* End fillHiddenColumns */
     	// function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
 	// 	return isTaxonymSelected('filter');
 	// }
@@ -792,7 +810,7 @@
 	 * @param  {obj} params  {column, colDef, context, api}
 	 */
 	function getHeaderCellTemplate(params) {  
-		var colId = params.column.colId + 'ColFilterIcon';  
+		var filterId = params.column.colId + 'ColFilterIcon';  
 		return '<div class="ag-header-cell">' +
 	        '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
 	        '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column, 
@@ -800,7 +818,7 @@
 	        '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
 	        '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
 	        '    <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
-	        '    <a name="' + colId + '" id="agFilter" class="anything ag-header-icon ag-filter-icon"></a>' +
+	        '    <a name="' + filterId + '" id="agFilter" class="anything ag-header-icon ag-filter-icon"></a>' +
 	        '    <span id="agText" class="ag-header-cell-text"></span>' +
 	        '  </div>' +
 	        '</div>'; 
@@ -810,13 +828,13 @@
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Tree Kingdom", field: "treeKingdom", width: 150, hide:true },
-			    {headerName: "Tree Phylum", field: "treePhylum", width: 150, hide:true },
-			    {headerName: "Tree Class", field: "treeClass", width: 150, hide:true },
-			    {headerName: "Tree Order", field: "treeOrder", width: 150, hide:true },
-			    {headerName: "Tree Family", field: "treeFamily", width: 150, hide:true },
-			    {headerName: "Tree Genus", field: "treeGenus", width: 150, hide:true },
-			    {headerName: "Tree Species", field: "treeSpecies", width: 150, hide:true },
+			    {headerName: "Tree Kingdom", field: "treeKingdom", width: 150, hide: true },
+			    {headerName: "Tree Phylum", field: "treePhylum", width: 150, hide: true },
+			    {headerName: "Tree Class", field: "treeClass", width: 150, hide: true },
+			    {headerName: "Tree Order", field: "treeOrder", width: 150, hide: true },
+			    {headerName: "Tree Family", field: "treeFamily", width: 150, hide: true },
+			    {headerName: "Tree Genus", field: "treeGenus", width: 150, hide: true },
+			    {headerName: "Tree Species", field: "treeSpecies", width: 150, hide: true },
 			    {headerName: "Subject Taxon", field: "subject", width: 150 },
 			    {headerName: "Object Taxon", field: "object", width: 150  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
@@ -871,7 +889,12 @@
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
-	function afterFilterChanged() {} //console.log("afterFilterChange") 
+	function afterFilterChanged() {
+		if (curFocus === "taxa") { 
+			var rowModel = gridOptions.api.getModel();  console.log("rowModel = %O", rowModel);
+			fillHiddenColumns(rowModel.rowsToDisplay);
+		}
+	} //console.log("afterFilterChange") 
 	/** Resets Grid Status' Active Filter display */
 	function beforeFilterChange() {  console.log("beforeFilterChange")
 		clearGridStatus();
