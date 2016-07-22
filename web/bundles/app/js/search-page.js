@@ -659,14 +659,14 @@
 
 		loadGrid("Taxa Tree");
 	}
-	function getTaxaRowData(taxon) { console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
+	function getTaxaRowData(taxon) { //console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
 		var taxonName = taxon.level === "Species" ? 
 			taxon.displayName : taxon.level + " " + taxon.displayName;
 		return [{
 			id: taxon.id,
 			name: taxonName,
 			isParent: taxon.interactions !== null || taxon.children !== null,
-			parentTaxon: rcrdsById[taxon.parentTaxon],
+			parentTaxon: taxon.parentTaxon,
 			open: openRows.indexOf(taxon.id.toString()) !== -1, 
 			children: getTaxaRowDataForChildren(taxon),
 			taxaLvl: taxon.level,
@@ -752,33 +752,70 @@
 	}	
 
     /*--------------AG Grid Methods-------------------------------------------*/
-    function fillHiddenColumns(displayedRows) {  console.log("displayedRows = %O", displayedRows)
+    /**
+     * Fills additional columns with flattened taxa-tree parent chain data for csv exports.
+     */
+    function fillHiddenTaxaColumns(curTaxaTree) {  
     	var curTaxaHeirarchy = {};
+    	getNextLvlTaxaData(curTaxaTree);
 
-    	rowAry.forEach(function(row) { console.log("row.data = %O", row.data);
-    		if (row.open) { getRowTreeData(row.data); }
-    	});
-    	getDisplayedData(displayedRows);
-	    
-	    function getDisplayedData(rowAry) {
-	    	rowAry.forEach(function(row) { console.log("row.data = %O", row.data);
-	    		if (row.open) { getRowTreeData(row.data); }
-	    	});
-	    }
-	    function getRowTreeData(row) {
-	    	curTaxaHeirarchy[row.taxaLvl]
-	    }
+    	function getNextLvlTaxaData(treeObj) {
+	    	for(var topTaxon in treeObj) {  
+	    		syncTaxaHeir( treeObj[topTaxon].displayName, treeObj[topTaxon].level, treeObj[topTaxon].parentTaxon);
+	    		fillInteractionRcrdsWithTaxaTreeData( treeObj[topTaxon].interactions );
+	    		if (treeObj[topTaxon].children) { 
+	    			getNextLvlTaxaData( treeObj[topTaxon].children ); }	    		
+	    	}
+    	}
+    	/**
+    	 * The top taxon for the taxa domain triggers the taxa-heirarchy init @fillInAvailableLevels. 
+    	 * For each subsequent taxa, every level more specific that the parent 
+    	 * lvl is cleared from the taxa-heirarchy @clearLowerLvls.  
+    	 */
+    	function syncTaxaHeir(taxonName, lvl, parentTaxon) {  console.log("syncTaxaHeir called. arguments = %O", arguments)
+    		if (parentTaxon === null || parentTaxon === 1) { fillInAvailableLevels(lvl);
+    		} else { clearLowerLvls(rcrdsById[parentTaxon].level) }
+
+    		curTaxaHeirarchy[lvl] = taxonName;
+    	}
+    	/**
+    	 * Inits the taxa-heirarchy object that will be used to track of the current
+    	 * parent chain of each taxon being processed. 
+    	 * */
+    	function fillInAvailableLevels(topLvl) { 
+    		var topIdx = levels.indexOf(topLvl);
+    		for (var i = topIdx; i < levels.length; i++) { 
+    			curTaxaHeirarchy[levels[i]] = null;
+    		}  
+    	}
+    	function clearLowerLvls(parentLvl) {
+    		var topIdx = levels.indexOf(parentLvl);
+    		for (var i = ++topIdx; i < levels.length; i++) { curTaxaHeirarchy[levels[i]] = null; }
+    	}
+    	function fillInteractionRcrdsWithTaxaTreeData(intObj) {
+    		for (var role in intObj) {
+    			if (intObj[role] !== null) { intObj[role].forEach(addTaxaTreeFields) }
+    		}
+    	} 
+		function addTaxaTreeFields(intRcrdObj) {
+    		var lvlMap = {
+    			'Kingdom': 'treeKingdom', 'Phylum': 'treePhylum', 'Class': 'treeClass', 'Order': 'treeOrder', 
+    			'Family': 'treeFamily', 'Genus': 'treeGenus', 'Species': 'treeSpecies' 
+    		};
+			for (var lvl in curTaxaHeirarchy) { 
+				intRcrdObj[lvlMap[lvl]] = lvl === 'Species' ? 
+					getSpeciesName(curTaxaHeirarchy[lvl]) : curTaxaHeirarchy[lvl];
+			}
+		}
+		function getSpeciesName(speciesName) {
+			return speciesName === null ? null : ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
+		}
     } /* End fillHiddenColumns */
-    	// function isExternalFilterPresent() { //console.log("isTaxonymSelected('filter')", isTaxonymSelected('filter'))
-	// 	return isTaxonymSelected('filter');
-	// }
-	// function doesExternalFilterPass(node) {	// console.log("externally filtering. node = %O", node);  
-	//  	return true; 
-	// }
-	function loadGrid(mainCol, gridOpts) {  // console.log("final rows = %O", rowData);
+	function loadGrid(mainCol, hideCols, gridOpts) {  // console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
+		var hideCols = hideCols || true;
 		gridOptObj.rowData = rowData;
-		gridOptObj.columnDefs = getColumnDefs(mainCol),
+		gridOptObj.columnDefs = getColumnDefs(mainCol, hideCols),
 
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
@@ -826,7 +863,7 @@
 	        '</div>'; 
 	}
 	function softRefresh() { gridOptions.api.refreshView(); }
-	function getColumnDefs(mainCol) {  
+	function getColumnDefs(mainCol, hideCols) {  
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
@@ -891,12 +928,7 @@
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
-	function afterFilterChanged() {
-		if (curFocus === "taxa") { 
-			var rowModel = gridOptions.api.getModel();  console.log("rowModel = %O", rowModel);
-			fillHiddenColumns(rowModel.rowsToDisplay);
-		}
-	} //console.log("afterFilterChange") 
+	function afterFilterChanged() {} //console.log("afterFilterChange") 
 	/** Resets Grid Status' Active Filter display */
 	function beforeFilterChange() {  console.log("beforeFilterChange")
 		clearGridStatus();
