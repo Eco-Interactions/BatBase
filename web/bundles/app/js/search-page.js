@@ -40,7 +40,7 @@
 		$('button[name="csv"]').click(downloadDisplayedData);
 	}
 	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
-	    showLoadingMsg();
+	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
 	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
 	}
@@ -49,11 +49,13 @@
 		} else { $('#search-focus').val("taxa"); }
 		selectSearchFocus();
 	} 
-	function showLoadingMsg() {
+	function showPopUpMsg(msg) {
+		var popUpMsg = msg || "Loading...";
+		$("#popUpDiv").text(popUpMsg);
 		$('#borderLayout_eRootPanel').fadeTo(100, .3);
 	    $('#popUpDiv, #overlay').show();
 	}
-	function hideLoadingMsg() {
+	function hidePopUpMsg() {
 		$('#borderLayout_eRootPanel').fadeTo(100, 1);
 	    $('#popUpDiv, #overlay').hide();
 	}
