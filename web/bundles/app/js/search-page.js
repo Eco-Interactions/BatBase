@@ -11,6 +11,7 @@
 	var localStorage = setlocalStorage();
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
+	    rowSelection: 'multiple',	//Used for csv export
 	    getHeaderCellTemplate: getHeaderCellTemplate, 
 	    getNodeChildDetails: getNodeChildDetails,
 	    getRowClass: getRowStyleClass,
@@ -37,7 +38,7 @@
 		$("#search-focus").change(selectSearchFocus);
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
-		$('button[name="csv"]').click(downloadDisplayedData);
+		$('button[name="csv"]').click(exportCsvData);
 	}
 	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
 	    showPopUpMsg();
@@ -78,19 +79,70 @@
 		$('.ag-header-cell-menu-button.name').hide();
 	}
 /*=================CSV Methods================================================*/
-	function downloadDisplayedData() {
-		var fileName = curFocus + ".csv";
+	/**
+	 * Exports a csv of the interaction records displayed in the grid, removing 
+	 * tree rows and flattening tree data where possible: currently only taxa.
+	 * For taxa csv export: The relevant tree columns are shown and also exported. 
+	 */
+	function exportCsvData() {
+		var fileName = curFocus === "taxa" ? 
+			"Bat Eco-Interaction Records by Taxa.csv" : "Bat Eco-Interaction Records by Location.csv";
 		var params = {
-			// processCellCallback: processTreeRows,
-			// suppressQuotes: true,
-			// fileName: "bat eco interactions-csv_download_failedBrain",
+			onlySelected: true,
+			fileName: fileName,
 			// customHeader: "This is a custom header.\n\n",
 			// customFooter: "This is a custom footer."
 		};
-		var displayedRows = gridOptions.api.exportDataAsCsv(params);
+		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
+		gridOptions.columnApi.setColumnVisible("name", false)
+		selectRowsForExport();
+		gridOptions.api.exportDataAsCsv(params);
+		returnGridState();
+		// getInteractionsAndBuildGrid();
+	}
+	function returnGridState() {
+		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
+		gridOptions.columnApi.setColumnVisible("name", true);
+		gridOptions.api.deselectAll();
+		hidePopUpMsg();
+	}
+	function showOverlayAndTaxaCols() {
+		showPopUpMsg("Exporting...");
+		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), true)
+
+	}
+	function getCurTaxaLvlCols() { console.log("taxaByLvl = %O", taxaByLvl)
+		var lvls = Object.keys(taxaByLvl);
+		return lvls.map(function(lvl){ return 'tree' + lvl; });
+	}
+	function hideOverlayAndTaxaCols() {
+		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), false)
+	}
+	/**
+	 * Selects every interaction row in the currently displayed grid by expanding all
+	 * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
+	 */
+	function selectRowsForExport() {
+		var curDisplayedRows, returnRows;
+		gridOptions.api.expandAll();
+		curDisplayedRows = gridOptions.api.getModel().rowsToDisplay;  			
+		curDisplayedRows.forEach(selectInteractions);
+		console.log("selected rows = %O", gridOptions.api.getSelectedNodes())	
+	}
+	/**
+	 * A row is identified as an interaction row by the 'interactionType' property
+	 * present in the interaction row data.
+	 */
+	function selectInteractions(rowNode) { 
+		if (rowNode.data.interactionType !== undefined) {  						
+			rowNode.setSelected(true);
+		}
 	}
 /*=================Search Methods=============================================*/
-	function ifChangedFocus(focus, buildGridFunc) { // console.log("changed focus arguments = %O", arguments);
+	/**
+	 * Updates and resets the focus 'state' of the search, either 'taxa' or 'locs'.
+	 */
+	function ifChangedFocus(focus, buildGridFunc) {
 		if (focus !== curFocus) { 
 			curFocus = focus;
 			populateStorage('curFocus', focus);
@@ -114,9 +166,9 @@
 	 * ajax to get them with @storeInteractions as the success callback. If records 
 	 * are available in storage call @fillTreeWithInteraction. 
 	 */
-	function getInteractions() {  												//console.log("getInteractions called. ")
+	function getInteractionsAndBuildGrid() {  												//console.log("getInteractionsAndBuildGrid called. ")
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
-		showLoadingMsg();
+		showPopUpMsg();
 		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'ajax/search/interaction', storeInteractions); }
@@ -133,17 +185,18 @@
 	function fillTreeWithInteractions(intRcrds) {   							//console.log("fillTreeWithInteractionscalled.");
 		var gridBuilder;
 		var focus = localStorage.getItem('curFocus'); 
+		clearPreviousGrid();
 
 		if (focus === "taxa"){  //console.log("focus = 'taxa'");
 			gridBuilder = buildBrowseSearchOptsndGrid;
 			fillTaxaSetWithInteractionRcrds(curTree);  
+	    	fillHiddenTaxaColumns(curTree);
 		} else if (focus === "locs") { //console.log("focus = 'locs'");
 			gridBuilder = loadLocGrid;
 			fillLocsSetWithInteractionRcrds(curTree)
 		}
-		clearPreviousGrid();
 		gridBuilder(curTree);
-	    hideLoadingMsg();
+	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
 	    /**
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
@@ -232,7 +285,7 @@
 	function showLocSearch(locData) {  										//console.log("showLocSearch called. locData = %O", locData)
 		clearPreviousGrid();
 		loadLocGrid(locData);
-		getInteractions();		
+		getInteractionsAndBuildGrid();		
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	function loadLocGrid(locData) {
@@ -365,7 +418,7 @@
     	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
 		resetToggleTreeBttn();
 		showDomainTree(domainTaxon);
-		getInteractions();
+		getInteractionsAndBuildGrid();
 	}
 	/** Show all data for domain. */
 	function showDomainTree(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
@@ -940,7 +993,7 @@
 	 */
 	function resetGrid() { 
 		openRows = curFocus === "taxa" ? [$('#sel-domain').val()] : [];
-		getInteractions();
+		getInteractionsAndBuildGrid();
 		resetToggleTreeBttn();
 		getActiveDefaultGridFilters();
 	}
