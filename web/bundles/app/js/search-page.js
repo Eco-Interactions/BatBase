@@ -382,7 +382,6 @@
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
 		$('#sort-opts').append([browseElems, filterBttnCntnr]);
-		addFilterButtons();
 		$('#sel-domain').change(selectTaxaDomain);
 		$('#sort-opts').fadeTo(0, .3);
 
@@ -394,22 +393,7 @@
         	return optsAry;
         }
 	} /* End buildTaxaSearchHtml */
-	function addFilterButtons() {
-		addClearLevelSelectsBttn();
-		addApplyFiltersBttn();
-	}
-	function addClearLevelSelectsBttn() { 
-		if (!$('#clearLvls').length) {
-			var button = createElem('input', {id:'clearLvls', type: 'button', value: 'Clear Level Filters'});
-			$('#filter-bttns').append(button);
-		}
-	}
-	function addApplyFiltersBttn() {
-		if (!$('#applyFilters').length) {
-			var button = createElem('input', {id:'applyFilters', type: 'button', value: 'Apply Filters'});
-			$('#filter-bttns').append(button);
-		}		
-	}
+
 	function onTaxaSearchMethodChange(e) { 
 		clearPreviousGrid();
 		selectTaxaDomain();
@@ -474,99 +458,96 @@
 		setLevelSelects();
 		loadTaxaGrid( taxaTree );
 
-		$('#clearLvls').click(setLevelSelects);
-		$('#applyFilters').click(updateTaxaBrowseSearch);
-
-		function setLevelSelects() {
-			loadLevelSelectElems( lvlOptsObj, levels );
-		}
+		function setLevelSelects() { loadLevelSelectElems( lvlOptsObj, levels ); }
 	} /* End buildBrowseSearchOptsndGrid */
 	function rmvClearLevelSelectsBttn() {
 		if ($('#clearLvls').length) { $('#clearLvls').remove(); }
 	}
 	/*----------------Apply Fitler Update Methods-----------------------------*/
-	function updateGrid(taxaTree) {
-		syncLevelSelects();
-		clearPreviousGrid();
-		loadTaxaGrid(taxaTree);
-	}
-	function updateTaxaBrowseSearch() {
-		var selectedTaxa = isTaxonymSelected(); 								// console.log("selectedTaxa = %O", selectedTaxa);
-		var domainLvl = localStorage.getItem('domainLvl');
+	/**
+	 * When a level dropdown is changed, the grid is updated with the selected taxon
+	 * as the top of the new tree. If the dropdowns are cleared, the taxa-grid is 
+	 * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
+	 */
+	function updateTaxaSearch() {  console.log("$(this).val() = ", $(this).val())
+		var selectedTaxa = $(this).val(); 										// console.log("selectedTaxa = %O", selectedTaxa);
+		var selTaxonRcrd = rcrdsById[selectedTaxa]  
+		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				// console.log("selectedVals = %O", selectedVals);
 
-		if (domainLvl in selectedTaxa) {
-			loadGridForTaxon(selectedTaxa[domainLvl]);
-		} else {
-			levels.some(function(lvl){
-				if (selectedTaxa[lvl]) {
-					loadGridForTaxon(selectedTaxa[lvl])
-					return true; } });
-		}
+		repopulateDropDowns(selTaxonRcrd, selectedVals);
+		updateFilterStatus();
+		loadGridForTaxon();
 
-		function loadGridForTaxon(taxonId) {
-			var topTaxon = rcrdsById[taxonId];
-			var taxaTree = buildTaxaTree(topTaxon);
-			openRows = getSelectedRowIds(selectedTaxa); 						//  console.log("openRows =%O", openRows)
-			updateGrid(taxaTree);
-		}
-	} /* End updateTaxaBrowseSearch */
-	function getSelectedRowIds(selected) { 										// console.log("selected = %O", selected)
-		var ary = [];
-		for (var lvl in selected) { 
-			pushSelectedId(selected[lvl]);		}
-		return ary;
+		function loadGridForTaxon() {
+			var taxaTree = buildTaxaTree(selTaxonRcrd);
+			openRows = selectedTaxa; 
 
-		function getParentId(taxonId) {  										// console.log("taxonId = ", taxonId)
-			var taxon = rcrdsById[taxonId];   
-			var parentId = taxon.parentTaxon;
-			pushSelectedId(parentId);
+			clearPreviousGrid();
+			loadTaxaGrid(taxaTree);
 		}
-		function pushSelectedId(id) {
-			if (id !== null) {
-				id = id.toString();
-				ary.push(id);
-				getParentId(id); 
+		function updateFilterStatus() {
+			var curLevel = selTaxonRcrd.level;
+			var taxonName = selTaxonRcrd.displayName;
+			var status = "Showing " + curLevel + " " + taxonName + ": "; 
+			setGridStatus(status);
+		}
+	} /* End updateTaxaSearch */
+	/** Selects ancestors of the selected taxa to set as value of their levels dropdown. */
+	function getRelatedTaxaToSelect(selectedTaxaObj) {
+		var topTaxaIds = [1, 2, 3, 4]; //Animalia, chiroptera, plantae, arthropoda 
+		var selected = {};
+		var lvls = Object.keys(taxaByLvl);
+		lvls.shift(); 		// remove domain, 'group taxa by', level
+
+		selectAncestorTaxa(selectedTaxaObj);
+		selectEmptyAnscestors(selectedTaxaObj.level);
+		return selected;
+
+		function selectAncestorTaxa(taxon) {									// console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
+			if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
+				selected[taxon.level] = taxon.id; 								// console.log("setting lvl = ", taxon.level)
+				selectAncestorTaxa(rcrdsById[taxon.parentTaxon])
 			}
 		}
-	} /* End getSelectedRowIds */
-	function loadLevelSelectElems(levelOptsObj, lvls, selected) {
+		function selectEmptyAnscestors(prevLvl) { if (prevLvl === undefined) {return;}
+			var nextLvl = levels[ levels.indexOf(prevLvl) - 1 ]; 
+			if (lvls.indexOf(nextLvl) !== -1) {  
+				if (selected[nextLvl] === undefined) { selected[nextLvl] = "none"; }
+				selectEmptyAnscestors(nextLvl);
+			}
+		}
+	} /* End getRelatedTaxaToSelect */
+	function loadLevelSelectElems(levelOptsObj, lvls, selected) { console.log("loadLevelSelectElems. arguments = %O", arguments)
 		var elems = buildSelects(levelOptsObj, lvls);
 		clearCol2();		
 		$('#opts-col2').append(elems);
 		setSelectedVals(selected);
 	}
-	function setSelectedVals(selected) {										//  console.log("selected in setSelectedVals = %O", selected);
-		for (var lvl in selected) {
-			var selId = '#sel' + lvl;
-			$(selId).val(selected[lvl]);
-		}
-	}
+    function setSelectedVals(selected) {                   						// console.log("selected in setSelectedVals = %O", selected);
+    	Object.keys(taxaByLvl).forEach(function(lvl) {
+	        var selId = '#sel' + lvl;
+			$(selId).find('option[value="all"]').hide();
+    		if (selected !== undefined) {
+	            if (selected[lvl]) { 
+	            	$(selId).val(selected[lvl]); 
+					$(selId).find('option[value="none"]').hide();
+				}
+	    	}
+	    });
+    }
 	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		
 	}
-	function buildTaxaLvlOptions(rcrds) { 											// console.log("lvlOptsBuild rcrds = %O", rcrds);
+	function buildTaxaLvlOptions(rcrds) {  console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
-			if (taxaNames.length === 0) { 
-				optsObj[lvl].push({value: 'none', text: '- None -'});
-			} else if (taxaNames.length > 0) {
+			if (taxaNames.length > 0 && taxaNames[0] !== "None") {
 				optsObj[lvl].unshift({value: 'all', text: '- All -'});
 			}
 		}
-		fillInMissingLvls();
 		return optsObj;
-
-		function fillInMissingLvls() {
-			var lvls = Object.keys(taxaByLvl);
-			var domainLvl = localStorage.getItem('domainLvl');
-			lvls.forEach(function(lvl){
-				if (lvl !== domainLvl && optsObj[lvl] === undefined) { 
-					optsObj[lvl] = [{value: 'none', text: '- None -'}]; 
-				}
-			});
-		}
 	}
 	function buildTaxaOptions(taxaNames, taxaRcrds) {
 		return taxaNames.map(function(taxaKey){
@@ -617,12 +598,18 @@
 		}
 	} /* End buildTaxaTree */
 /*---------------------------- Taxa Specific Filters-------------------------------- */
+	/**
+	 * Goes through levels from kingdom through species and checks if that level dropdown
+	 * exists and has a selected value. 
+	 * @param  {[type]}  filterCheck [description]
+	 * @return {Boolean}             [description]
+	 */
 	function isTaxonymSelected(filterCheck) {
         var filterSelections = {}; // console.log("filterSelections = %O", filterSelections)
         var selected = false;
 
         levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;  //console.log("level = %s, val = %s", lvl, $(selId).val());
+        	var selId = '#sel' + lvl;  console.log("level = %s, val = %s", lvl, $(selId).val());
         	if ($(selId).val() !== undefined && $(selId).val() !== null && $(selId).val() !== 'all') { 
         		filterSelections[lvl] = $(selId).val();
         		selected = true;
@@ -638,59 +625,74 @@
         }
 	}
 	/*------------------Level Select Methods----------------------------------*/
-	function syncLevelSelects() {
-		var selected = isTaxonymSelected();
-		var selectedVals = getSelectedVals(selected);							//console.log("selectedVals = %O", selectedVals)
-		repopulateDropDowns(selected, selectedVals);
-	}
-	function repopulateDropDowns(selected, selectedVals) {
-		var revLevels = levels.map(function(lvl){return lvl}).reverse(); 
-		var relatedTaxaOpts = {};
+	/**
+	 * Reloads level dropdowns based on the newest selected taxon. Only the direct
+	 * decendents of the selected taxon are included in their level drop downs, 
+	 * all taxa at levels above the selected taxa are included in the drop downs, 
+	 * drect ancestors will be selected as their dropdownsx 'value' later.
+	 */
+	function repopulateDropDowns(selTaxonRcrd, selectedVals) {
 		var lvls = Object.keys(taxaByLvl);
-		lvls.shift();
-		
-		buildRelatedTaxaOptsObj();
+		lvls.shift(); 		// remove domain, 'group taxa by', level
+		var relatedTaxaOpts = buildTaxaOptsObj(selTaxonRcrd, selTaxonRcrd.level);
 		
 		var lvlOptsObj = buildTaxaLvlOptions(relatedTaxaOpts);
 		loadLevelSelectElems(lvlOptsObj, lvls, selectedVals);
 
-		function buildRelatedTaxaOptsObj() {
-			revLevels.some(function(lvl, idx) {
-				if (selected[lvl] && selected[lvl] !== 'none') {
-					buildTaxaOptsObj(selected[lvl], lvl, idx);
-					return true;
-				}
-			}); 																// console.log("relatedTaxaOpts = %O", relatedTaxaOpts);
-		}
-		function buildTaxaOptsObj(lowestSelectedID, lvl, idx) {
-			var selected = rcrdsById[lowestSelectedID];
+		/**
+		 *  Builds an object keyed by level with options for the dropdown build. 
+		 *  The selected taxon will be the only taxon present in it's level, it's 
+		 *  direct children will be put in at their respective levels, and all taxon 
+		 *  in the levels above will be included in the dropdowns, later the direct
+		 *  ancestors of the selected taxon will be also be set as their level's value.
+		 */
+		function buildTaxaOptsObj(selectedTaxon, lvl) {
+			var relatedTaxaOpts = {};
 			relatedTaxaOpts[lvl] = {};
-			relatedTaxaOpts[lvl][selected.displayName] = selected;
+			relatedTaxaOpts[lvl][selectedTaxon.displayName] = selectedTaxon;
 
-			if (selected.children) { getChildren(selected.children); }
-			getParents(selected.parentTaxon);
-			addEmptyLvlOpts();
-		}
-		function getChildren(directChildren) {
-			directChildren.forEach(function(grandChild){
-				if (relatedTaxaOpts[grandChild.level] === undefined) { relatedTaxaOpts[grandChild.level] = {}; }
-				relatedTaxaOpts[grandChild.level][grandChild.displayName] = grandChild;
-				if (grandChild.children) { getChildren(grandChild.children); }
-			});
-		}
-		function getParents(parentId) {
-			if (parentId === 1 || parentId === null) {return} 
-			var parent = rcrdsById[parentId];
-			if (parent.level === localStorage.getItem('domainLvl')) {return}  //console.log("first key ")
-			if (relatedTaxaOpts[parent.level] === undefined) { relatedTaxaOpts[parent.level] = {}; }
-			relatedTaxaOpts[parent.level][parent.displayName] = parent;
-			if (parent.parentTaxon) { getParents(parent.parentTaxon); }
-		}
-		function addEmptyLvlOpts() {  console.log("taxaByLvl = %O", taxaByLvl)
-			lvls.forEach(function(lvl) {
-				if (relatedTaxaOpts[lvl] === undefined) { relatedTaxaOpts[lvl] = {}; }
-			});
-		}
+			if (selectedTaxon.children) { getChildren(selectedTaxon.children); }
+			initEmptyLowerLevels(selectedTaxon.level);
+			getAllTaxaInHigherLevels(selectedTaxon.level);
+			addEmptyLvls(selectedTaxon.level);
+			return relatedTaxaOpts;
+	
+			function getChildren(directChildren) {  							// console.log("children = %O", directChildren)
+				directChildren.forEach(function(grandChild){
+					if (relatedTaxaOpts[grandChild.level] === undefined) { relatedTaxaOpts[grandChild.level] = {}; }
+					relatedTaxaOpts[grandChild.level][grandChild.displayName] = grandChild;
+					if (grandChild.children) { getChildren(grandChild.children); }
+				});
+			}
+			function getAllTaxaInHigherLevels(prevLvl) { 						// console.log("--prevLvl = %s, lvls =%O", prevLvl, lvls)
+				var nextLvl = levels[ levels.indexOf(prevLvl) - 1 ];
+				var showLvl = lvls.indexOf[nextLvl];	 						// console.log("--higherLvl = ", nextLvl)
+				if (showLvl === -1 || nextLvl === localStorage.getItem('domainLvl')) {return;} 
+				relatedTaxaOpts[nextLvl] = taxaByLvl[nextLvl]; 
+				if (selectedVals[nextLvl] === "none") { relatedTaxaOpts[nextLvl]["None"] = { id: "none" }; }
+				getAllTaxaInHigherLevels(nextLvl);
+			}
+			function initEmptyLowerLevels(lastLvl) { 							// console.log("--lastLvl = ", lastLvl)
+				var lowerLvl = levels[ levels.indexOf(lastLvl) + 1 ];   		// console.log("--lowerLvl = ", lowerLvl)
+				if (lvls.indexOf[lowerLvl] !== -1 && relatedTaxaOpts[lowerLvl] === undefined){
+					relatedTaxaOpts[lowerLvl] = {};
+					relatedTaxaOpts[lowerLvl]["None"] = { id: 'none' };
+					selectedVals[lowerLvl] = "none";
+				};	
+			}
+			function addEmptyLvls(taxonLvl) {  									// console.log("relatedTaxaOpts before empty levels = %O", JSON.parse(JSON.stringify(relatedTaxaOpts)));
+				var selectedLvlIdx = lvls.indexOf(taxonLvl);
+				lvls.forEach(function(lvl) {
+					if (relatedTaxaOpts[lvl] === undefined) { console.log("lvl is undefined = ", lvl);
+						var newLvlIdx = lvls.indexOf(taxonLvl);
+						if (newLvlIdx < selectedLvlIdx) { relatedTaxaOpts[lvl] = taxaByLvl[lvl]; 
+						} else { relatedTaxaOpts[lvl] = {}; }
+						relatedTaxaOpts[lvl]["None"] = { id: 'none' };
+						selectedVals[lvl] = "none";
+					}
+				});
+			}
+		} /* End buildTaxaOptsObj */
 	} /* End repopulateDropDowns */
 	function getSelectedVals(selected) {
 		var vals = {};
@@ -700,7 +702,7 @@
 		return vals;
 	}
 	/*---------Data Formatting------------------------------------------------*/
-	function loadTaxaGrid(taxaTree) {  //console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
+	function loadTaxaGrid(taxaTree) {  console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
@@ -825,7 +827,7 @@
     	 * For each subsequent taxa, every level more specific that the parent 
     	 * lvl is cleared from the taxa-heirarchy @clearLowerLvls.  
     	 */
-    	function syncTaxaHeir(taxonName, lvl, parentTaxon) {  console.log("syncTaxaHeir called. arguments = %O", arguments)
+    	function syncTaxaHeir(taxonName, lvl, parentTaxon) { 
     		if (parentTaxon === null || parentTaxon === 1) { fillInAvailableLevels(lvl);
     		} else { clearLowerLvls(rcrdsById[parentTaxon].level) }
 
@@ -984,8 +986,8 @@
 	function afterFilterChanged() {} //console.log("afterFilterChange") 
 	/** Resets Grid Status' Active Filter display */
 	function beforeFilterChange() {  console.log("beforeFilterChange")
-		clearGridStatus();
-		getActiveDefaultGridFilters();	
+		// clearGridStatus();
+        getActiveDefaultGridFilters();    
 	} 
 	/**
 	 * Resets grid state to top focus options: Taxa are reset to the domain level, 
@@ -1042,7 +1044,7 @@
      * This filter presents all unique values of column to potentially filter on.
      */
     function UniqueValuesFilter() {}
-    UniqueValuesFilter.prototype.init = function (params) { //console.log("UniqueValuesFilter.prototype.init. params = %O", params)
+    UniqueValuesFilter.prototype.init = function (params) { 					//console.log("UniqueValuesFilter.prototype.init. params = %O", params)
 	    this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
         this.filterModifiedCallback = params.filterModifiedCallback;
 	    this.valueGetter = params.valueGetter;
@@ -1435,7 +1437,8 @@
 		});
 
 		$(selectElem).val(selected);
-		$(selectElem).change(syncLevelSelects);
+		$(selectElem).change(updateTaxaSearch);
+		// $(selectElem).click(hideones);
 		return selectElem;
 	}
 	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
