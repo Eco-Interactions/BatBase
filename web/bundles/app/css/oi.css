@@ -268,17 +268,18 @@ span.lbl {
 /*-------- Search --------------*/
 #search-opts {
 	margin: 1em auto 0 auto;
-	height: 111px;
-	width: 1450px;
+	height: 90px;
+	width: 1500px;
 	border-radius: .5em;
 	font-size: 1.1em;
 	/*justify-content: space-between;*/
 }
 .opts-col {
-	padding: .7em;
+	padding: .3em;
 	height: 100%;
 	flex: 0 0 370px;  	 /*Don't grow or shrink, width.*/ 
 	justify-content: space-between;
+	align-items: flex-end;
 }
 
 .margin-1-auto {
@@ -311,7 +312,7 @@ span.lbl {
 	width:125px;
 }
 #grid-tools {
-	margin: 1em auto .2em auto;
+	margin: .7em auto .2em auto;
 	padding: .1em;
 	width: 1498px;
 	height: 28px;

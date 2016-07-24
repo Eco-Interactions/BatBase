@@ -39,13 +39,9 @@
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
 		$('button[name="csv"]').click(exportCsvData);
-
 		$("#strt-tut").click(startIntro)
-		setGridStatus('No Active Filters.'); 
-	    initSearchState();
-		selectSearchFocus();
 	}
-	function selectSearchFocus(e) {  											//console.log("select(ing)SearchFocus")
+	function selectSearchFocus(e) {  				console.log("select(ing)SearchFocus")
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
 	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
@@ -87,22 +83,25 @@
 	/**
 	 * Updates and resets the focus 'state' of the search, either 'taxa' or 'locs'.
 	 */
-	function ifChangedFocus(focus, buildGridFunc) {
-		if (focus !== curFocus) { 
+	function ifChangedFocus(focus, buildGridFunc) { 							// console.log("ifChangedFocus called.")
+		var showingOpts = true;
+		if (focus !== curFocus) {   
 			curFocus = focus;
 			populateStorage('curFocus', focus);
 			resetToggleTreeBttn();
 			clearPastHtmlOptions();
 		} else { buildGridFunc(); }
 
-		function clearPastHtmlOptions() {
+		function clearPastHtmlOptions() {    
 			$('#sort-opts, #opts-col2').fadeTo(100, 0, emptySearchOpts);
 		}
-		function emptySearchOpts() {  console.log("emptying search options");
-			$('#opts-col2').empty();
-			$('#sort-opts').empty();
-			$('#sort-opts, #opts-col2').fadeTo(0, 1);
-			buildGridFunc();
+		function emptySearchOpts() {  											// console.log("emptying search options");
+			if (!showingOpts) {
+				$('#opts-col2').empty();
+				$('#sort-opts').empty();
+				$('#sort-opts, #opts-col2').fadeTo(0, 1);
+				buildGridFunc();
+			} else { showingOpts = false; } //This works while there are only two elems to fade
 		}
 	} /* End ifChangedFocus */
 /*------------------Interaction (Record Fill) Methods-----------------------------------*/
@@ -321,8 +320,8 @@
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
 	 */
-	function buildTaxaSearchHtml(data) { 										// console.log("buildTaxaSearchHtml called. ");
-		var browseElems = createElem('span', { id:"sort-taxa-by", text: "Sort by: " });
+	function buildTaxaSearchHtml(data) { 	 console.log("buildTaxaSearchHtml called. ");
+		var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
 		var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
 		$(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
@@ -1334,7 +1333,6 @@
 		selectRowsForExport();
 		gridOptions.api.exportDataAsCsv(params);
 		returnGridState();
-		// getInteractionsAndBuildGrid();
 	}
 	function returnGridState() {
 		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
@@ -1389,11 +1387,12 @@
 			steps: [
 				{
 					element: "#tut-opts", 
-					intro: "<b><center>Welcome to the Advanced Search Page!</center></b><br><br>" +
-						"This is an interactive demonstration the search functionality.<br><br>" +
-						"This tutorial is available to you here at any time and there are hints " +
+					intro: "<h2><center>Welcome to the Advanced Search Page!</center></h2><br>" +
+						"<center>This is a demonstration the search functionality.</center><br>" +
+						"This tutorial is available to you by clicking on the 'Tutorial' button at any time. " +
+						"By clicking on the 'Show Hints' button you can show or hide how-to hints " +
 						" scattered around the page with focused information for complex areas. " + 
-						"<br><br>Start the tutorial?",
+						"<br><br>Click 'Next' to start the tutorial.",
 					position: "left",
 					hint: "Walthrough features and functionality of the advanced search page.",
 					hintButtonLabel: "Got it."
