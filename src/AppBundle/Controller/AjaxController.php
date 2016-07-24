@@ -289,7 +289,6 @@ class AjaxController extends Controller
 
         $requestContent = $request->getContent();
         $pushedData = json_decode($requestContent);                             // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
-        $props = $pushedData->props;
 
         $returnObj = new \stdClass;
 
@@ -299,15 +298,14 @@ class AjaxController extends Controller
         {                                                                       // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
             $taxonId = strval($entity->getTaxon()->getId());
             $returnObj->$taxonId = [];
+            $slug = $entity->getSlug();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
+            $name = $entity->getPluralName();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
 
-            foreach ($props as $prop) 
-            {
-                $getProp = 'get' . ucfirst($prop);                              // $logger->error('SASSSSSSS:: getProp ->' . print_r($getProp, true));
-                $propVal = $entity->$getProp();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
-                $returnObj->$taxonId = array_merge( 
-                    $returnObj->$taxonId, [ $prop => $propVal ] 
-                );
-            }
+            $returnObj->$taxonId = array_merge( 
+                $returnObj->$taxonId, [ 
+                    "slug" => $slug, "name" => $name 
+                ] 
+            );
         }
 
         $response = new JsonResponse();
