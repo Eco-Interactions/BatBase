@@ -25,9 +25,6 @@ a:active {
 button {
 	border: 1px solid;
     border-radius: 2px;
-    /*margin: 23px 0 23px 0;*/
-    /*padding: .20em;*/
-    /*font-size: 1.5em;*/
 }
 form input, form select, form textarea {
     font-size: 1em;
@@ -369,7 +366,6 @@ button[name="csv"] {
 	flex-grow: 1;
 }
 #tggl-hints, #strt-tut{
-	height: 30px;
 	margin: 5px;
 }
 .intro-tips {

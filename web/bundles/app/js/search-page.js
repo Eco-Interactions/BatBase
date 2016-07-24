@@ -83,66 +83,6 @@
 	function hideGroupColFilterMenu() {
 		$('.ag-header-cell-menu-button.name').hide();
 	}
-/*=================CSV Methods================================================*/
-	/**
-	 * Exports a csv of the interaction records displayed in the grid, removing 
-	 * tree rows and flattening tree data where possible: currently only taxa.
-	 * For taxa csv export: The relevant tree columns are shown and also exported. 
-	 */
-	function exportCsvData() {
-		var fileName = curFocus === "taxa" ? 
-			"Bat Eco-Interaction Records by Taxa.csv" : "Bat Eco-Interaction Records by Location.csv";
-		var params = {
-			onlySelected: true,
-			fileName: fileName,
-			// customHeader: "This is a custom header.\n\n",
-			// customFooter: "This is a custom footer."
-		};
-		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnVisible("name", false)
-		selectRowsForExport();
-		gridOptions.api.exportDataAsCsv(params);
-		returnGridState();
-		// getInteractionsAndBuildGrid();
-	}
-	function returnGridState() {
-		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnVisible("name", true);
-		gridOptions.api.deselectAll();
-		hidePopUpMsg();
-	}
-	function showOverlayAndTaxaCols() {
-		showPopUpMsg("Exporting...");
-		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), true)
-
-	}
-	function getCurTaxaLvlCols() { console.log("taxaByLvl = %O", taxaByLvl)
-		var lvls = Object.keys(taxaByLvl);
-		return lvls.map(function(lvl){ return 'tree' + lvl; });
-	}
-	function hideOverlayAndTaxaCols() {
-		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), false)
-	}
-	/**
-	 * Selects every interaction row in the currently displayed grid by expanding all
-	 * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
-	 */
-	function selectRowsForExport() {
-		var curDisplayedRows, returnRows;
-		gridOptions.api.expandAll();
-		curDisplayedRows = gridOptions.api.getModel().rowsToDisplay;  			
-		curDisplayedRows.forEach(selectInteractions);
-		console.log("selected rows = %O", gridOptions.api.getSelectedNodes())	
-	}
-	/**
-	 * A row is identified as an interaction row by the 'interactionType' property
-	 * present in the interaction row data.
-	 */
-	function selectInteractions(rowNode) { 
-		if (rowNode.data.interactionType !== undefined) {  						
-			rowNode.setSelected(true);
-		}
-	}
 /*=================Search Methods=============================================*/
 	/**
 	 * Updates and resets the focus 'state' of the search, either 'taxa' or 'locs'.
@@ -1374,7 +1314,66 @@
         }
         else { this.selectEverything(); }
     };
-/*========================= Walkthrough Methods ==================================================*/
+/*=================CSV Methods================================================*/
+	/**
+	 * Exports a csv of the interaction records displayed in the grid, removing 
+	 * tree rows and flattening tree data where possible: currently only taxa.
+	 * For taxa csv export: The relevant tree columns are shown and also exported. 
+	 */
+	function exportCsvData() {
+		var fileName = curFocus === "taxa" ? 
+			"Bat Eco-Interaction Records by Taxa.csv" : "Bat Eco-Interaction Records by Location.csv";
+		var params = {
+			onlySelected: true,
+			fileName: fileName,
+			// customHeader: "This is a custom header.\n\n",
+			// customFooter: "This is a custom footer."
+		};
+		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
+		gridOptions.columnApi.setColumnVisible("name", false)
+		selectRowsForExport();
+		gridOptions.api.exportDataAsCsv(params);
+		returnGridState();
+		// getInteractionsAndBuildGrid();
+	}
+	function returnGridState() {
+		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
+		gridOptions.columnApi.setColumnVisible("name", true);
+		gridOptions.api.deselectAll();
+		hidePopUpMsg();
+	}
+	function showOverlayAndTaxaCols() {
+		showPopUpMsg("Exporting...");
+		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), true)
+
+	}
+	function getCurTaxaLvlCols() { console.log("taxaByLvl = %O", taxaByLvl)
+		var lvls = Object.keys(taxaByLvl);
+		return lvls.map(function(lvl){ return 'tree' + lvl; });
+	}
+	function hideOverlayAndTaxaCols() {
+		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), false)
+	}
+	/**
+	 * Selects every interaction row in the currently displayed grid by expanding all
+	 * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
+	 */
+	function selectRowsForExport() {
+		var curDisplayedRows, returnRows;
+		gridOptions.api.expandAll();
+		curDisplayedRows = gridOptions.api.getModel().rowsToDisplay;  			
+		curDisplayedRows.forEach(selectInteractions);
+		console.log("selected rows = %O", gridOptions.api.getSelectedNodes())	
+	}
+	/**
+	 * A row is identified as an interaction row by the 'interactionType' property
+	 * present in the interaction row data.
+	 */
+	function selectInteractions(rowNode) { 
+		if (rowNode.data.interactionType !== undefined) {  						
+			rowNode.setSelected(true);
+		}
+	}/*========================= Walkthrough Methods ==================================================*/
 	function showWalkthroughIfFirstVisit() {
 		var newVisit = localStorage ? localStorage.getItem('prevVisit') || true : true; 	 console.log("newVisit = ", newVisit)
 		if ( newVisit ) { startIntro(); }	
