@@ -347,6 +347,7 @@
 	}
 	function selectTaxaDomain(e) {	
     	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
+		populateStorage('curDomain', $('#sel-domain').val());
 		resetToggleTreeBttn();
 		showDomainTree(domainTaxon);
 		getInteractionsAndBuildGrid();
@@ -814,11 +815,10 @@
 			return speciesName === null ? null : ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
 		}
     } /* End fillHiddenColumns */
-	function loadGrid(mainCol, hideCols, gridOpts) {  // console.log("final rows = %O", rowData);
+	function loadGrid(mainCol, gridOpts) {  // console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
-		var hideCols = hideCols || true;
 		gridOptObj.rowData = rowData;
-		gridOptObj.columnDefs = getColumnDefs(mainCol, hideCols),
+		gridOptObj.columnDefs = getColumnDefs(mainCol),
 
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
@@ -867,17 +867,24 @@
 	        '</div>'; 
 	}
 	function softRefresh() { gridOptions.api.refreshView(); }
-	function getColumnDefs(mainCol, hideCols) {  
+	/**
+	 * Tree columns are hidden until taxa export and are used for the flattened 
+	 * taxa-tree data. The role is set to subject for 'bats' exports, object for plants and bugs.
+	 */
+	function getColumnDefs(mainCol) { 
+		var domain = localStorage.getItem('curDomain') || false;  console.log("domain = ", domain)
+		var taxaRole = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
+
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: "Tree Kingdom", field: "treeKingdom", width: 150, hide: true },
-			    {headerName: "Tree Phylum", field: "treePhylum", width: 150, hide: true },
-			    {headerName: "Tree Class", field: "treeClass", width: 150, hide: true },
-			    {headerName: "Tree Order", field: "treeOrder", width: 150, hide: true },
-			    {headerName: "Tree Family", field: "treeFamily", width: 150, hide: true },
-			    {headerName: "Tree Genus", field: "treeGenus", width: 150, hide: true },
-			    {headerName: "Tree Species", field: "treeSpecies", width: 150, hide: true },
+			    {headerName: taxaRole + " Kingdom", field: "treeKingdom", width: 150, hide: true },
+			    {headerName: taxaRole + " Phylum", field: "treePhylum", width: 150, hide: true },
+			    {headerName: taxaRole + " Class", field: "treeClass", width: 150, hide: true },
+			    {headerName: taxaRole + " Order", field: "treeOrder", width: 150, hide: true },
+			    {headerName: taxaRole + " Family", field: "treeFamily", width: 150, hide: true },
+			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
+			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
 			    {headerName: "Subject Taxon", field: "subject", width: 150 },
 			    {headerName: "Object Taxon", field: "object", width: 150  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
@@ -1360,7 +1367,7 @@
 		returnGridState();
 	}
 	function returnGridState() {
-		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
+		// if (curFocus === "taxa") { hideOverlayAndTaxaCols(); }
 		gridOptions.columnApi.setColumnVisible("name", true);
 		gridOptions.api.deselectAll();
 		hidePopUpMsg();
