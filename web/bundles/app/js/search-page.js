@@ -1448,7 +1448,7 @@
 						position: "top"
 					},
 					{
-						element: "#xpand-tree",
+						element: "#xpand-tree",   
 						intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><br><center>You can try it now.</center>",
 						position: "right"
 					},
