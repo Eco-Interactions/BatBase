@@ -2,7 +2,7 @@
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, taxaByLvl, curTree, intro, 
+	var gridDiv, rcrdsById, taxaByLvl, curTree, intro,
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
@@ -31,7 +31,6 @@
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		addDomEventListeners();
 
-		setGridStatus('No Active Filters.'); 
 	    initSearchState();
 	}
 	function addDomEventListeners() {
@@ -51,6 +50,7 @@
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
 		} else { $('#search-focus').val("taxa"); }
+		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
 	function showPopUpMsg(msg) {
@@ -352,7 +352,7 @@
 		getInteractionsAndBuildGrid();
 	}
 	/** Show all data for domain. */
-	function showDomainTree(domainTaxon) {							//  console.log("domainTaxon=%O", domainTaxon)
+	function showDomainTree(domainTaxon) {							// console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		$('#sort-opts').fadeTo(150, 1);
@@ -395,8 +395,8 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("taxaByLvl = %O", taxaByLvl)
-		var curTaxaByLvl = curSet || taxaByLvl;
+	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					console.log("taxaByLvl = %O", taxaByLvl)
+		var curTaxaByLvl = curSet || taxaByLvl;  console.log("curTaxaByLvl = %O", curTaxaByLvl)
 		var levels = Object.keys(curTaxaByLvl);
 		var domainLvl = levels.shift();
 		var lvlOptsObj = buildTaxaLvlOptions(curTaxaByLvl);
@@ -435,8 +435,9 @@
 		function updateFilterStatus() {
 			var curLevel = selTaxonRcrd.level;
 			var taxonName = selTaxonRcrd.displayName;
-			var status = "Showing " + curLevel + " " + taxonName + ": "; 
-			setGridStatus(status);
+			var status = "Filtering on: " + curLevel + " " + taxonName; 
+			clearGridStatus();
+			setLevelFilterStatus(status);
 		}
 	} /* End updateTaxaSearch */
 	/** Selects ancestors of the selected taxa to set as value of their levels dropdown. */
@@ -491,7 +492,7 @@
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
 			if (taxaNames.length > 0 && taxaNames[0] !== "None") {
-				optsObj[lvl].unshift({value: 'all', text: '- All -'});
+				optsObj[lvl].unshift({value: 'all', text: '- All -                 '});
 			}
 		}
 		return optsObj;
@@ -601,7 +602,7 @@
 			if (selectedTaxon.children) { getChildren(selectedTaxon.children); }
 			initEmptyLowerLevels(selectedTaxon.level);
 			getAllTaxaInHigherLevels(selectedTaxon.level);
-			addEmptyLvls(selectedTaxon.level);
+			addEmptyLvls(selectedTaxon.level); console.log("relatedTaxaOpts = %O", relatedTaxaOpts)
 			return relatedTaxaOpts;
 	
 			function getChildren(directChildren) {  							// console.log("children = %O", directChildren)
@@ -611,11 +612,11 @@
 					if (grandChild.children) { getChildren(grandChild.children); }
 				});
 			}
-			function getAllTaxaInHigherLevels(prevLvl) { 						// console.log("--prevLvl = %s, lvls =%O", prevLvl, lvls)
+			function getAllTaxaInHigherLevels(prevLvl) { 						console.log("--prevLvl = %s, lvls =%O", prevLvl, lvls)
 				var nextLvl = levels[ levels.indexOf(prevLvl) - 1 ];
-				var showLvl = lvls.indexOf[nextLvl];	 						// console.log("--higherLvl = ", nextLvl)
+				var showLvl = lvls.indexOf(nextLvl);	console.log("showLvl = ", showLvl) 						
 				if (showLvl === -1 || nextLvl === localStorage.getItem('domainLvl')) {return;} 
-				relatedTaxaOpts[nextLvl] = taxaByLvl[nextLvl]; 
+				relatedTaxaOpts[nextLvl] = taxaByLvl[nextLvl];  console.log("--higherLvl = ", nextLvl)
 				if (selectedVals[nextLvl] === "none") { relatedTaxaOpts[nextLvl]["None"] = { id: "none" }; }
 				getAllTaxaInHigherLevels(nextLvl);
 			}
@@ -946,6 +947,7 @@
 		getInteractionsAndBuildGrid();
 		resetToggleTreeBttn();
 		getActiveDefaultGridFilters();
+		initNoFiltersStatus();
 	}
 	/** Returns an obj with all filter models. */
 	function getAllFilterModels() {
@@ -968,7 +970,6 @@
 	 */
 	function getActiveDefaultGridFilters() {									// console.log("getActiveDefaultGridFilters called.")
 		var filterStatus;
-		var intro =  'Columns with Active Filters: ';
 		var activeFilters = [];
 		if (gridOptions.api === undefined) { return; }
 		var filterModels = getAllFilterModels();		
@@ -977,15 +978,37 @@
 		for (var i=0; i < columns.length; i++) {
 			if (filterModels[columns[i]] !== null) { activeFilters.push(columns[i]); }
 		}
-		filterStatus = activeFilters.length > 0 ? intro + activeFilters.join(', ') : 'No Active Filters.';
-		setGridStatus(filterStatus); 
+		getFilterStatus();
+		filterStatus = getFilterStatus();
+		setGridFilterStatus(filterStatus); 
+		
+		function getFilterStatus() {
+			var tempStatusTxt;
+			if (activeFilters.length > 0) {
+				if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
+					return activeFilters.join(', ') + '.';
+				} else {
+					tempStatusTxt = $('#xtrnl-filter-status').text();
+					if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
+						setLevelFilterStatus(tempStatusTxt + ', ');
+					}
+					return activeFilters.join(', ') + '.'; }
+			}
+		}
 	}
-	function setGridStatus(status) {  console.log("setGridStatus. status = ", status)
-		$('#grid-status').text(status);
+	function setGridFilterStatus(status) {  console.log("setGridFilterStatus. status = ", status)
+		$('#grid-filter-status').text(status);
+	}
+	function setLevelFilterStatus(status) {
+		$('#xtrnl-filter-status').text(status);
 	}
 	function clearGridStatus() {
-		$('#grid-status').empty();
+		$('#grid-filter-status, #xtrnl-filter-status').empty();
 		activeFilters = [];
+	}
+	function initNoFiltersStatus() {
+		$('#xtrnl-filter-status').text('Filtering on: ');
+		$('#grid-filter-status').text('No Active Filters.');
 	}
     /**
      * Class function: 
@@ -1417,7 +1440,7 @@
 							"by clicking 'Exit', or anywhere on the greyed background." +
 							// "By clicking on the 'Show Hints' button you can show or hide how-to hints " +
 							// " scattered around the page with focused information for complex areas. " + 
-							"<br><br><center><h2>Click 'Next' to start the tutorial.</h2></center>",
+							"<br><br><center><h2>Use the arrow keys or click 'Next' to start the tutorial.</h2></center>",
 						position: "left",
 						// hint: "Walthrough features and functionality of the advanced search page.",
 						// hintButtonLabel: "Got it."
@@ -1427,7 +1450,7 @@
 						/*element: document.querySelector("#filter-opts"),*/
 						element: "#filter-opts",
 						intro: "<h3><center>The search results can be grouped by either<br> Taxa or Location.<center></h3> <br> " + 
-							"<b>Interaction records will be displayed grouped under the outline tree, in the first column of the grid.</b><br><br>" +
+							"<b>Interaction records will be displayed grouped under the outline tree in the first column of the grid.</b><br><br>" +
 							"Locations are in a Region-Country-Location structure and Taxa are arranged by Parent-Child relationships." +
 							"<br><br>Taxa are the default focus, the most complex, and where this tutorial will continue from.",
 					},
@@ -1449,14 +1472,14 @@
 					},
 					{
 						element: "#xpand-tree",   
-						intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><br><center>You can try it now.</center>",
+						intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><center>You can try it now.</center>",
 						position: "right"
 					},
 					{
 						element: ".ag-header",
-						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br><b>Hover over a " +
-							"column header to reveal the filter menu for that column.</b> Some columns can be filtered by text, " +
-							"and others by selecting or deselecting values in that column.",
+						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br>Hovering over a " +
+							"column header reveals the filter menu for that column.",
+							// Some columns can be filtered by text, " +"and others by selecting or deselecting values in that column.",
 						position: "top"
 					},
 					{
@@ -1472,15 +1495,15 @@
 							"on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The outline " +
 							"will change to show the selected taxon as the top of the outline.<br><br><b>When a dropdown is used " +
 							"to filter the data, the other dropdowns will also change to reflect the data shown.</b><br><br>- Dropdowns " +
-							"below the selected level will contain only direct decendents of the selected Taxon.<br>- Dropdowns above the selected " +
+							"below the selected level will contain only decendents of the selected Taxon.<br>- Dropdowns above the selected " +
 							"level will have the direct ancestor selected, but will also contain all of the taxa at that higher level, allowing " +
-							"the search to be broadened.<br>- Any levels that are not present in the selected Taxon's family will have 'None' selected.",
+							"the search to be broadened.<br>- Any levels that are not recorded in the selected Taxon's ancestry chain will have 'None' selected.",
 						position: "left"
 					},
 					{
 						element: "button[name=\"csv\"]",
 						intro: "<h3>Data displayed in the grid can be exported in csv format.</h3><br>For Taxa exports, " +
-							"the outline tree will be collapsed into additional columns at the start of each interaction.<br><br>" +
+							"the outline tree will be translated into additional columns at the start of each interaction.<br><br>" +
 							"The Location outline is not translated into the interaction data at this time, every other column " +
 							"will export.",
 						position: "left"

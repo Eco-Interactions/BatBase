@@ -235,7 +235,7 @@ span.lbl {
 	position: absolute;
 	z-index: 1000;
 }
-/* Pop Up, Overlay, and Webview Styles */
+/* Pop Up and Overlay Styles */
 #overlay {
 	display: none;
     position: absolute;
@@ -289,6 +289,7 @@ span.lbl {
 	width: 130px;
 	height: 25px;
 	margin: 0 .7em 0 .5em;
+	z-index: 100;
 }
 #opts-col1 {
 	border-right: black 1px solid;
@@ -329,7 +330,14 @@ span.lbl {
 #grid-status {
 	margin: 0 0 0 .2em;
 	flex-grow: 1;
-	padding: .2em;
+	padding: .2em;	
+}
+#xtrnl-filter-status {
+	flex-shrink: 1;
+	margin-right: .3em;
+}
+#grid-filter-status {
+	flex-grow: 1;
 }
 button[name="csv"] {
 	align-self: flex-end;
@@ -337,6 +345,9 @@ button[name="csv"] {
 #search-grid {
 	height: 555px;
 	border: black 1px solid;
+}
+.ag-menu{
+	z-index: 100;
 }
 .row-kingdom {
 	background-color: rgba(128,0,128,.1) !important; /* purple */
