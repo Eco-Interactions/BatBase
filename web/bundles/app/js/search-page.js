@@ -2,7 +2,7 @@
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var gridDiv, rcrdsById, taxaByLvl, curTree,
+	var gridDiv, rcrdsById, taxaByLvl, curTree, intro, 
 		openRows = [], 
 		rowData = [], 
 		columnDefs = [];
@@ -39,12 +39,14 @@
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
 		$('button[name="csv"]').click(exportCsvData);
-		$("#strt-tut").click(startIntro)
+		$("#strt-tut").click(startIntro);
+		// $("#tggl-hints").click(toggleHints);
 	}
 	function selectSearchFocus(e) {  				console.log("select(ing)SearchFocus")
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
 	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
+	    showWalkthroughIfFirstVisit();
 	}
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
@@ -142,7 +144,7 @@
 		gridBuilder(curTree);
 	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
-   	    showWalkthroughIfFirstVisit();
+   	    // showWalkthroughIfFirstVisit();
 	    /**
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
@@ -882,7 +884,7 @@
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
-			    {headerName: "Location Description", field: "location", width: 170,},
+			    {headerName: "Location Description", field: "location", width: 175,},
 			    {headerName: "Citation", field: "citation", width: 100,},
 			    {headerName: "Note", field: "note", width: 110,} ];
 	}
@@ -1373,115 +1375,119 @@
 		}
 	}/*========================= Walkthrough Methods ==================================================*/
 	function showWalkthroughIfFirstVisit() {
-		var newVisit = localStorage ? localStorage.getItem('prevVisit') || true : true; 	 console.log("newVisit = ", newVisit)
-		if ( newVisit ) { startIntro(); }	
+		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false; 	 //console.log("newVisit = ", newVisit)
+		if ( !prevVisit ) { 
+			startIntro(); 
+			populateStorage('prevVisit', true);
+		}	
 	}
-	function startIntro(startStep){  console.log("startStep = ", startStep)
-		var intro = introJs();
-		var startStep = startStep || 0; 
-		intro.setOptions({
-			showStepNumbers: false,
-			skipLabel: "Exit",
-			doneLabel: "I'm done.",
-			tooltipClass: "intro-tips", 
-			steps: [
-				{
-					element: "#tut-opts", 
-					intro: "<h2><center>Welcome to the Advanced Search Page!</center></h2><br>" +
-						"<center>This is a demonstration the search functionality.</center><br>" +
-						"This tutorial is available to you by clicking on the 'Tutorial' button at any time. " +
-						"By clicking on the 'Show Hints' button you can show or hide how-to hints " +
-						" scattered around the page with focused information for complex areas. " + 
-						"<br><br>Click 'Next' to start the tutorial.",
-					position: "left",
-					hint: "Walthrough features and functionality of the advanced search page.",
-					hintButtonLabel: "Got it."
-					
-				},
-				{
-					/*element: document.querySelector("#filter-opts"),*/
-					element: "#filter-opts",
-					intro: "Select a focus for your search. <br><br>Interaction records will be" + 
-						" displayed in a tree structure sorted by the selected focus.<br><br>" +
-						"Taxa are the default focus, the most complex, and where this " +
-						"tutorial will continue from."
-				},
-				{
-					element:"#sort-taxa-by",
-					intro: "Select the taxa realm to sort the interaction records by:<br><br>" +
-						"<center>Bats, Plants, or Arthropods.</center><br>We haven selected the " +
-						"Plant realm for this tutorial.",
-					position: "right"
-				},
-				{
-					element: "#search-grid",
-					intro: "The resulting interaction records are displayed here.",
-					position: "top"
-				},
-				{
-					element: "#xpand-tree",
-					intro: "Click here to expand the displayed tree. Try it now.",
-					position: "right"
-				},
-				{
-					// element: "#opts-col2",
-					intro: "<center>There are a few different ways to filter the results.</center>",
-					position: "left"
-				},
-				{
-					element: ".ag-header",
-					intro: "Hover over a column header to reveal the filter menu for that column.",
-					position: "top"
-				},
-				{
-					element: "button[name=\"reset-grid\"]",
-					intro: "Click here at any point to clear all filters and reset your results.",
-					position: "right"
-				},
-				// {
-				// 	element: "#opts-col2",
-				// 	intro: "The levels of taxonyms in the currently selected taxa-tree are displayed here." +
-				// 			"<br><br>Once a taxonym is selected, the remaining level-dropdowns will " +
-				// 			"repopulate with only directly-related taxa.",
-				// 	position: "left"
-				// },
-				{
-					element: "#opts-col2",
-					intro: "<b><center>There are some taxa-specific search filters available.</center></b><br>" + 
-						"The levels of taxonyms in the currently selected taxa-tree are displayed here." +
-						"<br><br>Once a taxonym is selected, the remaining level-dropdowns will " +
-						"repopulate with only directly-related taxa.",
-					position: "left"
-				},
-				{
-					element: "#filter-bttns",
-					intro: "If you'd like to reset the level selects, click 'Clear Level Filters'. <br><br>" +
-						"When finished selecting, click 'Apply Filters' to rebuild the data-grid with the " +
-						"updated taxa-tree. The top-most selected level will be the start of the updated tree.",
-					position: "right"
-				},
-				// {
-				// 	element: "#step5",
-				// 	intro: "Get it, use it."
-				// },
-				// {
-				// 	element: "#step5",
-				// 	intro: "Get it, use it."
-				// },
-				// {
-				// 	element: "#step5",
-				// 	intro: "Get it, use it."
-				// }
-			]
-		});
-		intro.addHints();
+	// function toggleHints() {
+ //  		var hidden = $(this).data('hidden');
+ //  		if (hidden) { 
+	// 		introJs().addHints();
+	// 		$('#tggl-hints').html("&nbspHide  Hints&nbsp");
+	// 	} else { 
+	// 		introJs().hideHints();
+	// 		$('#tggl-hints').html("&nbspShow  Hints");
+
+ //  		}
+	// 	$(this).data("hidden", !hidden);
+	// }
+	function startIntro(startStep){
+		if (intro) { console.log("intro = %O", intro)
+			intro.exit() 
+		} else { buildIntro();
+		}
 		intro.start();
-	
-		intro.onafterchange(function(targetElement) {  /* targetElement of next step. */
-			if (targetElement === $('#search-focus')) {
-				console.log("search-focus is the next step.")
-			}
-		});
+
+		function buildIntro() {  console.log("buildIntro called")
+			intro = introJs();
+			var startStep = startStep || 0; 
+			intro.setOptions({
+				showStepNumbers: false,
+				skipLabel: "Exit",
+				doneLabel: "I'm done.",
+				tooltipClass: "intro-tips", 
+				steps: [
+					{
+						element: "#tut-opts", 
+						intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
+							"<b>This tutorial is a demonstration the search functionality.</b> It is available to you by " +
+							"clicking on this button at any time.<br><br>You can exit the tutorial " +
+							"by clicking 'Exit', or anywhere on the greyed background." +
+							// "By clicking on the 'Show Hints' button you can show or hide how-to hints " +
+							// " scattered around the page with focused information for complex areas. " + 
+							"<br><br><center><h2>Click 'Next' to start the tutorial.</h2></center>",
+						position: "left",
+						// hint: "Walthrough features and functionality of the advanced search page.",
+						// hintButtonLabel: "Got it."
+						
+					},
+					{
+						/*element: document.querySelector("#filter-opts"),*/
+						element: "#filter-opts",
+						intro: "<h3><center>The search results can be grouped by either<br> Taxa or Location.<center></h3> <br> " + 
+							"<b>Interaction records will be displayed grouped under the outline tree, in the first column of the grid.</b><br><br>" +
+							"Locations are in a Region-Country-Location structure and Taxa are arranged by Parent-Child relationships." +
+							"<br><br>Taxa are the default focus, the most complex, and where this tutorial will continue from.",
+					},
+					{
+						element:"#sort-opts",
+						intro: "<center><b>Results by taxa must be further grouped by the taxa realm: Bats, Plants, or Arthropoda.</b>" +
+							"<br><br>We have selected Plants for this tutorial.</center>",
+						position: "right"
+					},
+					{
+						element: "#search-grid",
+						intro: "<h3><center>The resulting interaction data is displayed here.</center></h3><br><b><center>When first displayed " +
+							"all interactions in the database are available for further filtering or sorting.</center></b><br>" +
+							"The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
+							"<br><br>The <b>'Object Taxon'</b> column shows the plant or arthropod interacted <i>with</i>." +
+							"<br><br> Columns can be resized by dragging the column header dividers.<br><br>Note on Taxa names: Species names " +
+							"include the genus in the species name and names at all other levels have the level added to the start of their name.",
+						position: "top"
+					},
+					{
+						element: "#xpand-tree",
+						intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><br><center>You can try it now.</center>",
+						position: "right"
+					},
+					{
+						element: ".ag-header",
+						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br><b>Hover over a " +
+							"column header to reveal the filter menu for that column.</b> Some columns can be filtered by text, " +
+							"and others by selecting or deselecting values in that column.",
+						position: "top"
+					},
+					{
+						element: "button[name=\"reset-grid\"]",
+						intro: "<b>Click here at any point to clear all filters and reset the results.</b>",
+						position: "right"
+					},
+					{
+						element: "#opts-col2",
+						intro: "<h3><center>There are taxa-specific search filters available.</center></h3><br>" + 
+							"<b>These dropdowns show all taxon levels that are used in the outline tree.</b> When first displayed, " +
+							"all taxa for each level will be available in the dropdown selection lists.<br><br><b>You can focus  " +
+							"on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The outline " +
+							"will change to show the selected taxon as the top of the outline.<br><br><b>When a dropdown is used " +
+							"to filter the data, the other dropdowns will also change to reflect the data shown.</b><br><br>- Dropdowns " +
+							"below the selected level will contain only direct decendents of the selected Taxon.<br>- Dropdowns above the selected " +
+							"level will have the direct ancestor selected, but will also contain all of the taxa at that higher level, allowing " +
+							"the search to be broadened.<br>- Any levels that are not present in the selected Taxon's family will have 'None' selected.",
+						position: "left"
+					},
+					{
+						element: "button[name=\"csv\"]",
+						intro: "<h3>Data displayed in the grid can be exported in csv format.</h3><br>For Taxa exports, " +
+							"the outline tree will be collapsed into additional columns at the start of each interaction.<br><br>" +
+							"The Location outline is not translated into the interaction data at this time, every other column " +
+							"will export.",
+						position: "left"
+					},
+				]
+			});
+		}
 	}
 	function function_name(argument) {
 		// body...
