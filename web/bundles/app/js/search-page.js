@@ -27,12 +27,18 @@
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
 	function onDOMContentLoaded () {
-		// localStorage.clear();
+		clearLocalStorageCheck();
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		addDomEventListeners();
 
 		authDependentInit();
 	    initSearchState();
+	}
+	function clearLocalStorageCheck() {
+		if (localStorage && !localStorage.getItem('alpha')){
+			localStorage.clear();
+			populateStorage('alpha', true);
+		}
 	}
 	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
@@ -44,6 +50,7 @@
 		var userRole = $('body').data("user-role");  console.log("----userRole === visitor ", userRole === "visitor")
 		if (userRole === "visitor") {
 			$('button[name="csv"]').prop('disabled', true);
+			$('button[name="csv"]').prop('title', "Register to download.");
 			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
 		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
