@@ -292,7 +292,7 @@ span.lbl {
 	width: 130px;
 	height: 25px;
 	margin: 0 .7em 0 .5em;
-	z-index: 100;
+	z-index: 20;
 }
 #opts-col1 {
 	border-right: black 1px solid;
@@ -346,7 +346,7 @@ button[name="csv"] {
 	align-self: flex-end;
 }
 #search-grid {
-	height: 555px;
+	height: 868px;
 	border: black 1px solid;
 }
 .ag-menu{
@@ -537,6 +537,13 @@ width: 215em;}
 }
 #team-sect .second-col {
 	width: 272em;
+}
+#team-sect .four-col-outer>div.fourth-col {
+	width: 220px;
+	flex-shrink: 0;
+}
+#team-sect div {
+	/*text-align: justify;*/
 }
 .disc-list>li {
 	list-style: disc;
