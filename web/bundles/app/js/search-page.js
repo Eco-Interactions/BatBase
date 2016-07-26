@@ -31,15 +31,21 @@
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		addDomEventListeners();
 
+		authDependentInit();
 	    initSearchState();
 	}
 	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
-		$('button[name="csv"]').click(exportCsvData);
 		$("#strt-tut").click(startIntro);
-		// $("#tggl-hints").click(toggleHints);
+	}
+	function authDependentInit() {
+		var userRole = $('body').data("user-role");  console.log("----userRole === visitor ", userRole === "visitor")
+		if (userRole === "visitor") {
+			$('button[name="csv"]').prop('disabled', true);
+			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
+		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
 	function selectSearchFocus(e) {  				console.log("select(ing)SearchFocus")
 	    showPopUpMsg();
@@ -144,7 +150,6 @@
 		gridBuilder(curTree);
 	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
-   	    // showWalkthroughIfFirstVisit();
 	    /**
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
@@ -247,13 +252,14 @@
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		loadGrid("Location Tree");
 	}
-	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
+	function getLocRowData(locObj, locName) {  console.log("getLocRowData. arguments = %O", arguments);
 		return {
 			name: locName || null,	/* Interaction rows have no name to display. */
 			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
 			open: openRows.indexOf(locName) !== -1, 
 			children: getLocRowDataForChildren(locObj),
-			interactions: locObj.intRcrds !== undefined,     /* Location objects have collections of interactions as children. */     
+			intCnt: locObj.interactions !== undefined ? locObj.interactions.length : null,
+			interactions: locObj.interactions !== undefined,     /* Location objects have collections of interactions as children. */     
 		};		
 	}
 	function getLocRowDataForChildren(locObj) {// console.log("getLocRowDataForChildren called. locObj = %O", locObj)
@@ -322,7 +328,7 @@
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
 	 */
-	function buildTaxaSearchHtml(data) { 	 console.log("buildTaxaSearchHtml called. ");
+	function buildTaxaSearchHtml(data) { 	 									// console.log("buildTaxaSearchHtml called. ");
 		var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
 		var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
@@ -396,8 +402,8 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					console.log("taxaByLvl = %O", taxaByLvl)
-		var curTaxaByLvl = curSet || taxaByLvl;  console.log("curTaxaByLvl = %O", curTaxaByLvl)
+	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("taxaByLvl = %O", taxaByLvl)
+		var curTaxaByLvl = curSet || taxaByLvl;  
 		var levels = Object.keys(curTaxaByLvl);
 		var domainLvl = levels.shift();
 		var lvlOptsObj = buildTaxaLvlOptions(curTaxaByLvl);
@@ -466,7 +472,7 @@
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
-	function loadLevelSelectElems(levelOptsObj, lvls, selected) { console.log("loadLevelSelectElems. arguments = %O", arguments)
+	function loadLevelSelectElems(levelOptsObj, lvls, selected) { 				// console.log("loadLevelSelectElems. arguments = %O", arguments)
 		var elems = buildSelects(levelOptsObj, lvls);
 		clearCol2();		
 		$('#opts-col2').append(elems);
@@ -487,7 +493,7 @@
 	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		
 	}
-	function buildTaxaLvlOptions(rcrds) {  console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
+	function buildTaxaLvlOptions(rcrds) {  										// console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
@@ -651,7 +657,7 @@
 		return vals;
 	}
 	/*---------Data Formatting------------------------------------------------*/
-	function loadTaxaGrid(taxaTree) {  console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
+	function loadTaxaGrid(taxaTree) {  //console.log("loadTaxaGrid called. taxaTree = %O", taxaTree)
 		var topTaxaRows = [];
 		var finalRowData = [];
 		for (var taxon in taxaTree) {
@@ -659,7 +665,7 @@
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
 
-		rowData = finalRowData;													console.log("rowData = %O", rowData);
+		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 
 		loadGrid("Taxa Tree");
 	}
@@ -675,16 +681,27 @@
 			children: getTaxaRowDataForChildren(taxon),
 			taxaLvl: taxon.level,
 			interactions: taxaHasInteractions(taxon),          
-		}];		
+			intCnt: taxaHasInteractions(taxon) ? getIntCount(taxon) : null,
+		}];	
+		/** Only counting one role with interactions currently. */
 	} /* End getTaxaRowData */
 	function taxaHasInteractions(taxon) {
 		var intsFound = false;
 		for ( var role in taxon.interactions ) {
 			if (intsFound) {continue}
-			intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;		
+			intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;	
+			if (intsFound) { intCnt = taxon.interactions[role].length; }	
 		}
 		return intsFound;
 	} 
+	function getIntCount(taxon) {
+		var intCnt = null;
+		for ( var role in taxon.interactions ) {
+			intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;	
+			if (intsFound) { intCnt = taxon.interactions[role].length; }	
+		}  
+		return intCnt;
+	}
 	function getTaxaRowDataForChildren(parent) {
 		var chldData = [];
 		var tempChldArys = [];
@@ -872,7 +889,7 @@
 	 * taxa-tree data. The role is set to subject for 'bats' exports, object for plants and bugs.
 	 */
 	function getColumnDefs(mainCol) { 
-		var domain = localStorage.getItem('curDomain') || false;  console.log("domain = ", domain)
+		var domain = localStorage.getItem('curDomain') || false;  
 		var taxaRole = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
@@ -885,13 +902,14 @@
 			    {headerName: taxaRole + " Family", field: "treeFamily", width: 150, hide: true },
 			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
 			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
-			    {headerName: "Subject Taxon", field: "subject", width: 150 },
-			    {headerName: "Object Taxon", field: "object", width: 150  },
-			    {headerName: "Interaction Type", field: "interactionType", width: 150, filter: UniqueValuesFilter },
-			    {headerName: "Tags", field: "tags", width: 90, filter: UniqueValuesFilter},
+			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count" },
+			    {headerName: "Subject Taxon", field: "subject", width: 133 },
+			    {headerName: "Object Taxon", field: "object", width: 133  },
+			    {headerName: "Interaction Type", field: "interactionType", width: 146, filter: UniqueValuesFilter },
+			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
-			    {headerName: "Region", field: "region", width: 100, filter: UniqueValuesFilter },
+			    {headerName: "Region", field: "region", width: 88, filter: UniqueValuesFilter },
 			    {headerName: "Location Description", field: "location", width: 175,},
 			    {headerName: "Citation", field: "citation", width: 100,},
 			    {headerName: "Note", field: "note", width: 110,} ];
@@ -1428,11 +1446,15 @@
 			intro.exit() 
 		} else { buildIntro();
 		}
+		$('#search-grid').css("height", "444px");
 		intro.start();
 
 		function buildIntro() {  console.log("buildIntro called")
 			intro = introJs();
 			var startStep = startStep || 0; 
+
+			intro.onexit(function() { $('#search-grid').css("height", "888px"); });
+
 			intro.setOptions({
 				showStepNumbers: false,
 				skipLabel: "Exit",
@@ -1445,13 +1467,8 @@
 							"<b>This tutorial is a demonstration the search functionality.</b> It is available to you by " +
 							"clicking on this button at any time.<br><br>You can exit the tutorial " +
 							"by clicking 'Exit', or anywhere on the greyed background." +
-							// "By clicking on the 'Show Hints' button you can show or hide how-to hints " +
-							// " scattered around the page with focused information for complex areas. " + 
 							"<br><br><center><h2>Use the arrow keys or click 'Next' to start the tutorial.</h2></center>",
 						position: "left",
-						// hint: "Walthrough features and functionality of the advanced search page.",
-						// hintButtonLabel: "Got it."
-						
 					},
 					{
 						/*element: document.querySelector("#filter-opts"),*/
@@ -1470,11 +1487,13 @@
 					{
 						element: "#search-grid",
 						intro: "<h3><center>The resulting interaction data is displayed here.</center></h3><br><b><center>When first displayed " +
-							"all interactions in the database are available for further filtering or sorting.</center></b><br>" +
-							"The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
+							"all interactions in the database are available for further filtering or sorting.</center></b>" +
+							"<br>The <b>'Count'</b> column shows the number of interactions attributed to each Taxon or Location in the outline tree." +
+							"<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
 							"<br><br>The <b>'Object Taxon'</b> column shows the plant or arthropod interacted <i>with</i>." +
-							"<br><br> Columns can be resized by dragging the column header dividers.<br><br>Note on Taxa names: Species names " +
-							"include the genus in the species name and names at all other levels have the level added to the start of their name.",
+							"<br><br> Columns can be resized by dragging the column header dividers and rearranged by dragging the header iteself." +
+							"<br><br>Note on Taxa names: Species names include the genus in the species name and names at all other levels have the" +
+							"level added to the start of their name.",
 						position: "top"
 					},
 					{
@@ -1483,10 +1502,10 @@
 						position: "right"
 					},
 					{
-						element: ".ag-header",
+						element: "#search-grid",
 						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br>Hovering over a " +
-							"column header reveals the filter menu for that column.",
-							// Some columns can be filtered by text, " +"and others by selecting or deselecting values in that column.",
+							"column header reveals the filter menu for that column.<br><br>Some columns can be filtered by text, " +
+							"and others by selecting or deselecting values in that column.",
 						position: "top"
 					},
 					{
@@ -1509,7 +1528,8 @@
 					},
 					{
 						element: "button[name=\"csv\"]",
-						intro: "<h3>Data displayed in the grid can be exported in csv format.</h3><br>For Taxa exports, " +
+						intro: "<h3><center>As a member of batplant.org, data displayed in the grid can be exported in csv format.</center></h3>" +
+							"<br>The columns are exported in the order they are displayed in the grid.<br><br>For Taxa exports, " +
 							"the outline tree will be translated into additional columns at the start of each interaction.<br><br>" +
 							"The Location outline is not translated into the interaction data at this time, every other column " +
 							"will export.",
