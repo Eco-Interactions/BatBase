@@ -115,7 +115,7 @@ class ContentBlockController extends Controller
     /**
      * Displays a form to edit an existing Content Block entity.
      *
-     * @Route("/{slug}/edit", name="admin_content_block_edit")
+     * @Route("/admin/contentblock/{slug}/edit", name="admin_content_block_edit")
      */
     public function editAction($slug)
     {
@@ -159,7 +159,7 @@ class ContentBlockController extends Controller
     /**
      * Edits an existing Content Block entity.
      *
-     * @Route("/{slug}/update", name="admin_content_block_update")
+     * @Route("/admin/contentblock/{slug}/update", name="admin_content_block_update")
      * @Method({"PUT", "POST"})
      */
     public function updateAction(Request $request, $slug)
@@ -192,7 +192,7 @@ class ContentBlockController extends Controller
     /**
      * Deletes a Content Block entity.
      *
-     * @Route("/{slug}/delete", name="admin_content_block_delete")
+     * @Route("/admin/contentblock/{slug}/delete", name="admin_content_block_delete")
      */
     public function deleteAction(Request $request, $slug)
     {
@@ -295,10 +295,18 @@ class ContentBlockController extends Controller
 
         $firstCol = $repo->findOneBy(array('slug' => 'about-pg-first-col'));
         $secondCol = $repo->findOneBy(array('slug' => 'about-pg-second-col'));
+        $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
+        $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
+        $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
+        $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
 
         return $this->render('contentblock/about.html.twig', array(
             'historyAndGettingInvolved' => $firstCol,
             'contactAndAcknowledgments' => $secondCol,
+            'cullenBio' => $cullen,
+            'tuliBio' => $tuli,
+            'taylorBio' => $taylor,
+            'sarahBio' => $sarah,
              )
         );
     }
@@ -359,12 +367,14 @@ class ContentBlockController extends Controller
         $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
         $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
         $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
+        $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
 
         return $this->render('contentblock/team.html.twig', array(
             'cullenBio' => $cullen,
             'tuliBio' => $tuli,
             'taylorBio' => $taylor,
-             )
+            'sarahBio' => $sarah,
+            )
         );
     }
 

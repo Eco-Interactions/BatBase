@@ -1,16 +1,41 @@
 {% extends "layout.html.twig" %}
 
+{% set entity_class = "Content Blocks"%}
+
 {% block headline %}About BatPlant.org{% endblock %}
 
 {% block detail %}
-	<div id="top-pgs">
-	{% embed 'two_cols_sect.html.twig' %}
-		{% block firstcol %}
-			{{ historyAndGettingInvolved.content|raw }}
-		{% endblock %}
-		{% block secondcol %}
-			{{ contactAndAcknowledgments.content|raw }}
-		{% endblock %}
-	{% endembed %}
+	<div id="top-pgs" class="bot-em-mrg">
+		{% embed 'two_cols_sect.html.twig' %}
+			{% block firstcol %}
+				{{ historyAndGettingInvolved.content|raw }}
+			{% endblock %}
+			{% block secondcol %}
+				{{ contactAndAcknowledgments.content|raw }}
+			{% endblock %}
+		{% endembed %}
+	</div>
+	<hr>
+	<div id="team-sect">
+		<div id="team-hdr"><h3>The Bat Eco-Interactions Team</h3></div>
+		{# <hr> #}
+		{% embed 'four_cols_sect.html.twig' %}
+			{% block firstcol %}
+				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
+				{{ cullenBio.content|raw }}
+			{% endblock %}
+			{% block secondcol %}
+				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
+				{{ tuliBio.content|raw }}
+			{% endblock %}
+			{% block thirdcol %}
+				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
+				{{ taylorBio.content|raw }}
+			{% endblock %}
+			{% block fourthcol %}
+				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
+				{{ sarahBio.content|raw }}
+			{% endblock %}
+		{% endembed %}
 	</div>
 {% endblock detail %}

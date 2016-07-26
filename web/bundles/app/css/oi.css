@@ -51,13 +51,13 @@ form button:hover {
 	border: 1.5px solid;
 	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
-.two-col-outer, .three-col-outer {
+.two-col-outer, .three-col-outer, .four-col-outer {
 	margin-top: 10px;
 	display: flex;
 	justify-content: center;
 	flex-direction: row;
 }
-.first-col, .three-col-outer .second-col  {
+.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col  {
 	border-right: 1px solid #cccccc;
 	margin-right: 2em;
 	padding: 0 1.25em 0 0;
@@ -146,7 +146,10 @@ span.lbl {
 	font-size: 1.05em;
 }
 #top-pgs .second-col {
-	margin: 0 100px 0 25px;
+	margin: 0 20px 0 5px;
+}
+#top-pgs .first-col {
+	width: 1800px;
 }
 .sidebar { 
   flex-grow: 2; 
@@ -496,7 +499,7 @@ width: 215em;}
 	padding: .3em;
 	margin: 0 1em 0 1em;
 }
-#def-frame li {
+#def-frame li, #future-dev-ul li {
 	margin: 0 1.5em 0 1.2em;
 	font-size: 1em;
 	padding: .5em .5em .5em 0;
@@ -510,7 +513,7 @@ width: 215em;}
 #def-frame .disc-list {
 	margin: 0 0 0 1.5em;
 }
-#caveats>li.cav, #db-field-list>li.cav {
+#caveats>li.cav, #db-field-list>li.cav, #future-dev-ul>li {
     list-style: disc;
     display: list-item;
     margin-left: 3em;
@@ -520,6 +523,11 @@ width: 215em;}
 	margin-left: 0;
 }
 /*--- Team ---*/
+#team-hdr {
+	text-align: center;
+	margin: 2em auto 2em auto;
+	font-size: 1.2em;
+}
 .bio-img {
 	height: 200px;
 	width: 160px;
@@ -527,7 +535,7 @@ width: 215em;}
 	margin: 0 1em 1.5em 0;
 	box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
 }
-#team-pg .second-col {
+#team-sect .second-col {
 	width: 272em;
 }
 .disc-list>li {
