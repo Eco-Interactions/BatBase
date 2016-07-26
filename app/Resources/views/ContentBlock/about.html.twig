@@ -5,18 +5,22 @@
 {% block headline %}About BatPlant.org{% endblock %}
 
 {% block detail %}
-	<div id="top-pgs" class="bot-em-mrg">
+	<div id="top-pgs">
 		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
 				{{ historyAndGettingInvolved.content|raw }}
+				{# <div id="future-dev" class="em-mrg"> #}
+					{{ futureDev.content|raw }}
+				{# </div> #}
 			{% endblock %}
 			{% block secondcol %}
 				{{ contactAndAcknowledgments.content|raw }}
 			{% endblock %}
 		{% endembed %}
+		<span class="em-mrg"></span>
 	</div>
 	<hr>
-	<div id="team-sect">
+	<div id="team-sect" class="top-em-mrg">
 		<div id="team-hdr"><h3>The Bat Eco-Interactions Team</h3></div>
 		{# <hr> #}
 		{% embed 'four_cols_sect.html.twig' %}

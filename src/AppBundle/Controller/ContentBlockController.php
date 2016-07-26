@@ -299,10 +299,12 @@ class ContentBlockController extends Controller
         $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
         $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
         $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
+        $futureDev = $repo->findOneBy(array('slug' => 'future-developments'));
 
         return $this->render('contentblock/about.html.twig', array(
             'historyAndGettingInvolved' => $firstCol,
             'contactAndAcknowledgments' => $secondCol,
+            'futureDev' => $futureDev,
             'cullenBio' => $cullen,
             'tuliBio' => $tuli,
             'taylorBio' => $taylor,
