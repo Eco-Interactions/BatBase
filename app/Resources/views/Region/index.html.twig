@@ -10,7 +10,7 @@
 {% endblock headline %}
 
 {% block detail %}
-    <ul id="int-type-idx">
+    <ul id="ul-big">
         {% for region in regions %}
             <li>
                 <a href="{{ path('app_region_show', { 'slug': region.slug }) }}">{{ region.description }}</a>

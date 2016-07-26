@@ -2,12 +2,17 @@
 
 {% set domains = entities %}
 
+{% block headline %}
+    Taxa Families
+{% endblock headline %}
+
 {% block detail %}
-    <ul>
+    <ul id="ul-big">
         {% for domain in domains %}
-        <li>
-            <a href="{{ path('app_domain_show', { 'slug': domain.slug }) }}">{{ domain }}</a>
-        </li>
+            {% set taxonName = domain.taxon.displayName %}
+            <li>
+                <a href="{{ path('app_domain_show', { 'slug': domain.slug }) }}">{{ domain }} - {{ taxonName }}</a>
+            </li>
         {% endfor %}
     </ul>
 {% endblock detail %}

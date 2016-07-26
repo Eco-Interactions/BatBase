@@ -10,7 +10,7 @@
 {% endblock headline %}
 
 {% block detail %}
-    <ul id="int-type-idx">
+    <ul id="ul-big">
         {% for interactionType in interactionTypes %}
             <li>
                 <a href="{{ path('app_interaction_type_show', { 'slug': interactionType.slug }) }}">{{ interactionType.name }}</a> ({{ interactionType.interactions | length }} interactions)

@@ -472,11 +472,11 @@ label[for=fos_user_registration_form_about_me] {
 	margin: 40px auto 40px auto;
 }
 /*-- Interaction Type --*/
-#int-type-idx {
+#ul-big {
 	margin-left: 2em;
 	font-size: 1.3em;
 }
-#int-type-idx li {
+#ul-big li {
 	margin: 1em 0 1em 0;
 }
 /*-- Definition --*/
