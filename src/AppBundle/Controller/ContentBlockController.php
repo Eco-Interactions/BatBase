@@ -294,13 +294,7 @@ class ContentBlockController extends Controller
         $repo = $em->getRepository('AppBundle:ContentBlock');
         $contentBlocks = $repo->findByPage("about");
 
-        $returnData = [];
-
-        foreach ($contentBlocks as $block) {
-            $name = $block->getSlug();
-            $content = $block->getContent();
-            $returnData = array_merge($returnData, array($name => $content));
-        }
+        $returnData = $this->getPageBlocks($contentBlocks);
 
         return $this->render('contentblock/about.html.twig', array(
                 "entities" => $returnData,
@@ -358,41 +352,16 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("about-db");
 
-        $firstCol = $repo->findOneBy(array('slug' => 'db-top-first-col'));
-        $secondCol = $repo->findOneBy(array('slug' => 'db-top-second-col'));
+        $returnData = $this->getPageBlocks($contentBlocks);
 
         return $this->render('contentblock/db_top.html.twig', array(
-            'firstCol' => $firstCol,
-            'secondCol' => $secondCol,
-             )
-        );
-    }
-
-    /**
-     * Finds and displays team page content blocks.
-     *
-     * @Route("/team", name="app_team")
-     */
-    public function teamAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-
-        $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
-        $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
-        $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
-        $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
-
-        return $this->render('contentblock/team.html.twig', array(
-            'cullenBio' => $cullen,
-            'tuliBio' => $tuli,
-            'taylorBio' => $taylor,
-            'sarahBio' => $sarah,
+            'entities' => $returnData,
             )
         );
     }
+
 
     /**
      * Finds and displays the future developments page content blocks.
@@ -436,4 +405,41 @@ class ContentBlockController extends Controller
              )
         );
     }
+    /** Returns an associative array of the content blocks relevant data for a page. */
+    public function getPageBlocks($contentBlocks)
+    {
+        $returnData = [];
+
+        foreach ($contentBlocks as $block) {
+            $name = $block->getSlug();
+            $content = $block->getContent();
+            $returnData = array_merge($returnData, array($name => $content));
+        }
+
+        return $returnData;
+    }
+    // /**
+    //  * Finds and displays team page content blocks.
+    //  *
+    //  * @Route("/team", name="app_team")
+    //  */
+    // public function teamAction()
+    // {
+    //     $em = $this->getDoctrine()->getManager();
+
+    //     $repo = $em->getRepository('AppBundle:ContentBlock');
+
+    //     $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
+    //     $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
+    //     $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
+    //     $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
+
+    //     return $this->render('contentblock/team.html.twig', array(
+    //         'cullenBio' => $cullen,
+    //         'tuliBio' => $tuli,
+    //         'taylorBio' => $taylor,
+    //         'sarahBio' => $sarah,
+    //         )
+    //     );
+    // }
 }
