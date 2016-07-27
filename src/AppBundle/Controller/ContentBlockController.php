@@ -312,14 +312,13 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("definitions");
 
-        $interactionDefs = $repo->findOneBy(array('slug' => 'definitions-interaction-types-first-col'));
-        $habitatDefs = $repo->findOneBy(array('slug' => 'definitions-habitat-types-second-col'));
+        $returnData = $this->getPageBlocks($contentBlocks);
 
         return $this->render('contentblock/definitions.html.twig', array(
-            'interactionDefs' => $interactionDefs,
-            'habitatDefs' => $habitatDefs,
-             )
+            'entities' => $returnData,
+            )
         );
     }
 

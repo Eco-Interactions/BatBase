@@ -297,6 +297,15 @@ span.lbl {
 .ul-big li {
 	margin: 1em 0 1em 0;
 }
+.disc-list>li {
+	list-style: disc;
+    display: list-item;
+	padding-left: 2em;
+}
+.circle-list>li {
+	list-style: circle;
+    display: list-item;
+}
 /*-------------------------------- Pages -------------------------------------*/
 /*-------- Search --------------*/
 #search-opts {
@@ -537,7 +546,8 @@ label[for=fos_user_registration_form_about_me] {
 	margin: 15px 0px 10px 0;
 }
 #def-frame .first-col {
-width: 215em;}
+width: 150%;
+}
 #def-frame>div>div {
 	padding: 0 1em 1em 1em;
 }
@@ -559,6 +569,9 @@ width: 215em;}
 }
 #def-frame .disc-list {
 	margin: 0 0 0 1.5em;
+}
+#def-frame .circle-list {
+	margin: 0 0 0 2.5em;
 }
 #caveats>li.cav, #db-field-list>li.cav, #future-dev-ul>li {
     list-style: disc;
@@ -591,11 +604,6 @@ width: 215em;}
 }
 #team-sect div {
 	/*text-align: justify;*/
-}
-.disc-list>li {
-	list-style: disc;
-    display: list-item;
-	padding-left: 2em;
 }
 /*-- Taxon --*/
 #taxon-outline li {

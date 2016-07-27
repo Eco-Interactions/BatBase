@@ -1,15 +1,17 @@
 {% extends "layout.html.twig" %}
 
+{% set blocks = entities %}
+
 {% block headline %}Definitions{% endblock %}
 
 {% block detail %}
 	<div id="def-frame">
 	{% embed 'two_cols_sect.html.twig' %}
 		{% block firstcol %}
-			{{ interactionDefs.content|raw }}
+			{{ blocks["definitions-habitat-types"]|raw }}
 		{% endblock %}
 		{% block secondcol %}
-			{{ habitatDefs.content|raw }}
+			{{ blocks["definitions-interaction-types"]|raw }}
 		{% endblock %}
 	{% endembed %}
 	</div>
