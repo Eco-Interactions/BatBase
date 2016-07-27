@@ -277,6 +277,11 @@ span.lbl {
 	font-size: 1.1em;
 	/*justify-content: space-between;*/
 }
+#loc-dev-msg {
+	margin: 20px 20px 0 50px;
+	width: 750px;
+	/*font-weight: bold;*/
+}
 .opts-col {
 	padding: .3em;
 	height: 100%;

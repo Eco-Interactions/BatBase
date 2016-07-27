@@ -251,6 +251,8 @@
 		var topRegionRows = [];
 		var finalRowData = [];   console.log("locData = %O", locData);
 		curTree = locData;
+
+		addFutureDevMsg();
 		for (var region in locData) { // console.log("region = ", region)
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
@@ -258,6 +260,16 @@
 
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		loadGrid("Location Tree");
+	}
+	function addFutureDevMsg() {
+		$('#opts-col2').empty();
+		var div = document.createElement("div");
+		div.id = "loc-dev-msg";
+		$(div).text("We will soon be restructuring how location data is " +
+		 "stored in the database to be more flexible and more compatible with future " + 
+		 " additions such as map views. Once that is complete, this location view will " + 
+		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
+		$('#opts-col2').append(div);
 	}
 	function getLocRowData(locObj, locName) {  console.log("getLocRowData. arguments = %O", arguments);
 		return {
