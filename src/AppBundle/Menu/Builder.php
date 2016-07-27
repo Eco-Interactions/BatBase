@@ -19,6 +19,7 @@ class Builder extends ContainerAware
         $menu['About']->addChild('batplant.org', array('route' => 'app_about'));
 		$menu['About']->addChild('The Database', array('route' => 'app_db_top'));
 		$menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
+		$menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));
 			// $menu['About']->addChild('batplant.org', );
 			// $menu['About']->addChild('Team', array('route' => 'app_team'));
 			// if ($this->_isAdmin($options['usrrole'])) {
@@ -31,12 +32,13 @@ class Builder extends ContainerAware
 				$menu['Database']['Explore']->addChild('Citations', array('route' => 'app_citation'));
 				$menu['Database']['Explore']->addChild('Interaction Types', array('route' => 'app_interaction_type'));
 				$menu['Database']['Explore']->addChild('Locations', array('route' => 'app_location'));
+				$menu['Database']['Explore']->addChild('Publications', array('route' => 'app_publication'));
 				$menu['Database']['Explore']->addChild('Taxa', array('route' => 'app_domain'));
 		if ($this->_isLoggedInUser($options['usrrole'])) {
-				$menu['Database']->addChild('Export', array('uri' => '#'));
-				$menu['Database']['Export']->setAttribute('class', 'smtrigger arrow');
-					$menu['Database']['Export']->addChild('Authors', array('route' => 'app_author_export'));
-					$menu['Database']['Export']->addChild('Citations', array('route' => 'app_citation_export'));
+				// $menu['Database']->addChild('Export', array('uri' => '#'));
+				// $menu['Database']['Export']->setAttribute('class', 'smtrigger arrow');
+				// 	$menu['Database']['Export']->addChild('Authors', array('route' => 'app_author_export'));
+				// 	$menu['Database']['Export']->addChild('Citations', array('route' => 'app_citation_export'));
 					// $menu[$user_name]['Export']->addChild('Interactions', array('route' => 'app_interaction_export'));
 			$menu->addChild($user_name, array('uri' => '#'));
 			$menu[$user_name]->setAttribute('class', 'smtrigger arrow');

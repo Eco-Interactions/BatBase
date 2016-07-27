@@ -356,7 +356,7 @@ class ContentBlockController extends Controller
     }
 
     /**
-     * Finds and displays about page content blocks.
+     * Finds and displays team page content blocks.
      *
      * @Route("/team", name="app_team")
      */
@@ -376,6 +376,28 @@ class ContentBlockController extends Controller
             'tuliBio' => $tuli,
             'taylorBio' => $taylor,
             'sarahBio' => $sarah,
+            )
+        );
+    }
+
+    /**
+     * Finds and displays the future developments page content blocks.
+     *
+     * @Route("/future-developments", name="app_future_dev")
+     */
+    public function futureDevelopmentsAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+
+        $futureDev = $repo->findOneBy(array('slug' => 'future-developments'));
+        // $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
+        // $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
+        // $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
+
+        return $this->render('contentblock/future_dev.html.twig', array(
+            'futureDev' => $futureDev,
             )
         );
     }

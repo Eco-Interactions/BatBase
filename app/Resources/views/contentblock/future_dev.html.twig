@@ -1,0 +1,22 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}Future Developments{% endblock %}
+
+{# {% block javascripts %} #}
+  {# {{ parent() }} #}
+    {# // <script src="{{ asset('bundles/app/js/on-admin-login.js') }}"></script> #}
+{# {% endblock %} #}
+
+
+{% block detail %}
+    <div id="top-pgs">
+    {% embed 'sidebar_sect.html.twig' %}
+        {% block firstcol %}
+            {{ futureDev.content|raw }}
+        {% endblock firstcol %}
+        {% block secondcol %}
+            {# {{ secondColBlock.content|raw }} #}
+        {% endblock secondcol%}
+    {% endembed %}
+    </div>
+{% endblock detail %}

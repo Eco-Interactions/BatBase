@@ -16,6 +16,7 @@ class ContentBlockType extends AbstractType
     {
         $builder
             ->add('name')
+            ->add('page')
             ->add('content')
         ;
     }
