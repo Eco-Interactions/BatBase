@@ -5,6 +5,7 @@
     {{parent()}}
     <link rel="stylesheet" href="{{ asset('bundles/app/css/walkthrough/introjs.css') }}" />
 {% endblock %}
+
 {% block javascripts %}
     {{parent()}}
     <script src="{{ asset('bundles/app/js/search-page.js') }}"></script>
@@ -35,7 +36,6 @@
             <div id="tut-spacer"></div>
             <div id="tut-opts" class="flex-col">
                 <button id="strt-tut" class="ag-fresh grid-bttn">Tutorial</button>
-                {# <button id="tggl-hints" class="ag-fresh grid-bttn">&nbspHide Hints&nbsp</button> #}
             </div>
         </div>
     </div>
@@ -43,17 +43,14 @@
         <button id="xpand-tree" class="ag-fresh ag-header-cell grid-bttn" name="xpand-tree">&nbspExpand Tree&nbsp</button>
         <button class="ag-fresh ag-header-cell grid-bttn" name="reset-grid">Reset Data</button>
         <div id="grid-status" class="flex-row">
-            {# <span>Filtering on:</span>  #}
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="grid-filter-status"></div>
         </div>
         <button class="ag-fresh ag-header-cell grid-bttn" name="csv">Download CSV</button>
     </div>
     
-    {# <div> Could this be a left over, now superfluous div wrapper? #}    
     <div id="search-grid" class="ag-fresh">
         <div id="overlay"></div>
         <div id="popUpDiv"></div>
     </div>
-    {# </div> #}
 {% endblock detail %}
