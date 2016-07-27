@@ -140,7 +140,7 @@ span.lbl {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
 }
-#top-pgs p, #top-pgs ul li, #top-pgs ol li  {
+#top-pgs p, #top-pgs ul li, #top-pgs ol li  {		/*Clean up all these old references and free the ids!*/
 	margin: .2em 0 0 1em;
 	padding: .3em 0 .3em 0;
 	font-size: 1.05em;
@@ -149,6 +149,21 @@ span.lbl {
 	margin: 0 20px 0 5px;
 }
 #top-pgs .first-col {
+	width: 1800px;
+}
+.top-pgs h3 {
+	font-size: 1.2em;
+	margin: .75em 0 .5em 0;
+}
+.top-pgs p, .top-pgs ul li, .top-pgs ol li  {		/*Clean up all these old references and free the ids!*/
+	margin: .2em 0 0 1em;
+	padding: .3em 0 .3em 0;
+	font-size: 1.05em;
+}
+.top-pgs .second-col {
+	margin: 0 20px 0 5px;
+}
+.top-pgs .first-col {
 	width: 1800px;
 }
 .sidebar { 
@@ -490,6 +505,12 @@ label[for=fos_user_registration_form_about_me] {
 	width: 100%;
 }
 /*-- About DB --*/
+/*#about-db .first-col {
+	width: 25%;
+}*/
+#about-db .second-col {
+	width: 150%;
+}
 #data-map {
 	display: block;
 	margin: 40px auto 40px auto;
