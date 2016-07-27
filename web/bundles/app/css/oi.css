@@ -267,6 +267,21 @@ span.lbl {
     z-index: 200;
     border-radius: 5px;
 }
+/*--- List Styles ---*/
+#ul-big {								/*Clean up old id references*/
+	margin-left: 2em;
+	font-size: 1.3em;
+}
+#ul-big li {
+	margin: 1em 0 1em 0;
+}
+.ul-big {
+	margin-left: 2em;
+	font-size: 1.3em;
+}
+.ul-big li {
+	margin: 1em 0 1em 0;
+}
 /*-------------------------------- Pages -------------------------------------*/
 /*-------- Search --------------*/
 #search-opts {
@@ -479,13 +494,19 @@ label[for=fos_user_registration_form_about_me] {
 	display: block;
 	margin: 40px auto 40px auto;
 }
-/*-- Interaction Type --*/
-#ul-big {
-	margin-left: 2em;
-	font-size: 1.3em;
+/*-- Sources --*/
+#src-pg>p {
+	width: 1050px;
+	font-size: 1.21em;
+	text-align: justify;
+	margin-left: 1em;
 }
-#ul-big li {
-	margin: 1em 0 1em 0;
+#src-pg>ul {
+	font-size: 1.2em;
+	margin-left: 2.2em;
+}
+#src-pg>ul>li {
+	margin: .4em;
 }
 /*-- Definition --*/
 #def-frame p {

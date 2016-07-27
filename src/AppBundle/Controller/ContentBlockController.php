@@ -335,6 +335,25 @@ class ContentBlockController extends Controller
     }
 
     /**
+     * Finds and displays Source page content blocks.
+     *
+     * @Route("/sources", name="app_sources")
+     */
+    public function sourcesAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+
+        $contentblock = $repo->findOneBy(array('slug' => 'sources-main'));
+
+        return $this->render('contentblock/sources.html.twig', array(
+            "entities" => $contentblock
+            )
+        );
+    }
+
+    /**
      * Finds and displays about page content blocks.
      *
      * @Route("/db", name="app_db_top")

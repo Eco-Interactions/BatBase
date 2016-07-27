@@ -1,0 +1,11 @@
+{% extends "layout.html.twig" %}
+
+{% set sourcesContentBlock = entities %}
+
+{% block headline %} Citations for Bat Eco-Interactions Database {% endblock headline %}
+
+{% block detail %}
+    <div id="src-pg">
+        {{ sourcesContentBlock.content|raw }}
+    </div>
+{% endblock detail %}
