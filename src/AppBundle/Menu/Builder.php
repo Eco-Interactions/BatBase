@@ -16,8 +16,8 @@ class Builder extends ContainerAware
 		$menu->addChild('Home', array('route' => 'app_home'));
 		$menu->addChild('About', array('uri' => '#'));
         $menu['About']->setAttribute('class', 'smtrigger arrow');
-        $menu['About']->addChild('The Project', array('route' => 'app_about'));
-		$menu['About']->addChild('The Database', array('route' => 'app_db_top'));  //Citations
+        $menu['About']->addChild('Project', array('route' => 'app_about'));
+		$menu['About']->addChild('Database', array('route' => 'app_db_top'));  //Citations
 		$menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
 		$menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));
 			// $menu['About']->addChild('batplant.org', );

@@ -292,24 +292,19 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("about");
 
-        $firstCol = $repo->findOneBy(array('slug' => 'about-pg-first-col'));
-        $secondCol = $repo->findOneBy(array('slug' => 'about-pg-second-col'));
-        $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
-        $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
-        $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
-        $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
-        $futureDev = $repo->findOneBy(array('slug' => 'future-developments'));
+        $returnData = [];
+
+        foreach ($contentBlocks as $block) {
+            $name = $block->getSlug();
+            $content = $block->getContent();
+            $returnData = array_merge($returnData, array($name => $content));
+        }
 
         return $this->render('contentblock/about.html.twig', array(
-            'historyAndGettingInvolved' => $firstCol,
-            'contactAndAcknowledgments' => $secondCol,
-            'futureDev' => $futureDev,
-            'cullenBio' => $cullen,
-            'tuliBio' => $tuli,
-            'taylorBio' => $taylor,
-            'sarahBio' => $sarah,
-             )
+                "entities" => $returnData,
+            )
         );
     }
 
