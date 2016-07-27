@@ -5,15 +5,20 @@
 {% block headline %}The Project{% endblock %}
 
 {% block detail %}
-	<div id="top-pgs">
+	<div id="about-pg" class="top-pgs">
 		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
 				{{ blocks["about-pg-history"]|raw }}
 				{{ blocks["about-pg-future-dev"]|raw }}
 			{% endblock %}
 			{% block secondcol %}
-				{{ blocks["about-pg-contact"]|raw }}
-				{{ blocks["about-pg-acknowledgements"]|raw }}
+				<div>
+					{{ blocks["about-pg-announcements"]|raw }}
+				</div>
+				<div>
+					{{ blocks["about-pg-contact"]|raw }}
+					{{ blocks["about-pg-acknowledgements"]|raw }}
+				</div>
 			{% endblock %}
 		{% endembed %}
 		<span class="em-mrg"></span>

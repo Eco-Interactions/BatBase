@@ -296,6 +296,7 @@ class ContentBlockController extends Controller
 
         $returnData = $this->getPageBlocks($contentBlocks);
 
+
         return $this->render('contentblock/about.html.twig', array(
                 "entities" => $returnData,
             )
@@ -332,11 +333,13 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("sources");
 
-        $contentblock = $repo->findOneBy(array('slug' => 'sources-main'));
+        $returnData = $this->getPageBlocks($contentBlocks);
+
 
         return $this->render('contentblock/sources.html.twig', array(
-            "entities" => $contentblock
+            "entities" => $returnData,
             )
         );
     }
@@ -372,14 +375,15 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("future-developments");
+        $announcements = $repo->findBySlug("announcements");
 
-        $futureDev = $repo->findOneBy(array('slug' => 'future-developments'));
-        // $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
-        // $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
-        // $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
+        $returnData = $this->getPageBlocks($contentBlocks);
+        // Add 'about' pg's announcements block
+        $returnData = array_merge($returnData, $this->getPageBlocks($announcements));
 
         return $this->render('contentblock/future_dev.html.twig', array(
-            'futureDev' => $futureDev,
+            'entities' => $returnData,
             )
         );
     }

@@ -508,15 +508,35 @@ label[for=fos_user_registration_form_about_me] {
 	background: #2D7853;
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
+/*-- Future Dev --*/
+#future-dev-pg .first-col {
+	/*width:150%;*/
+}
+#future-dev-pg .second-col {
+	width:150%;
+}
+#future-dev-pg ul {
+	margin-left: 1em;
+}
 /*--- Export ---*/
 #exprtContnt {
 	position: absolute;
 	width: 100%;
 }
+/*-- About --*/
+#about-pg .second-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+#about-pg .first-col {
+	width: 200%;
+}
+
 /*-- About DB --*/
-/*#about-db .first-col {
-	width: 25%;
-}*/
+#about-db .first-col>ul {
+	margin-left: 1em;
+}
 #about-db .second-col {
 	width: 150%;
 }
@@ -526,7 +546,7 @@ label[for=fos_user_registration_form_about_me] {
 }
 /*-- Sources --*/
 #src-pg>p {
-	width: 1050px;
+	width: 800px;
 	font-size: 1.21em;
 	text-align: justify;
 	margin-left: 1em;

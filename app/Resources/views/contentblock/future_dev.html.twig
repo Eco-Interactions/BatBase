@@ -1,21 +1,18 @@
 {% extends "layout.html.twig" %}
 
+{% set blocks = entities %}
+
 {% block headline %}Future Developments{% endblock %}
 
-{# {% block javascripts %} #}
-  {# {{ parent() }} #}
-    {# // <script src="{{ asset('bundles/app/js/on-admin-login.js') }}"></script> #}
-{# {% endblock %} #}
-
-
 {% block detail %}
-    <div id="top-pgs">
-    {% embed 'sidebar_sect.html.twig' %}
+    <div id="future-dev-pg" class="top-pgs">
+    {% embed 'two_cols_sect.html.twig' %}
         {% block firstcol %}
-            {{ futureDev.content|raw }}
+            {{ blocks["future-developments-overview"]|raw }}
+            {{ blocks["future-developments-announcements"]|raw }}
         {% endblock firstcol %}
         {% block secondcol %}
-            {# {{ secondColBlock.content|raw }} #}
+            {{ blocks["list-of-future-articles"]|raw }}
         {% endblock secondcol%}
     {% endembed %}
     </div>
