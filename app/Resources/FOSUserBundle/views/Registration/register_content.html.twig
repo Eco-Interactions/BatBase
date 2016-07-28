@@ -9,8 +9,12 @@
     {{ form_row(form.username) }}
     {{ form_row(form.plainPassword.first) }}
     {{ form_row(form.plainPassword.second) }}
+
+    <div class="top-em-mrg">
+        <a id="reg-toc" href="Javascript:void(0)">Read and Agree to our Terms of Use to complete your registration.</a>
+    </div>
     <div>
-        <input type="submit" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
+        <input id="reg-submit" type="submit" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
     </div>
 {{ form_end(form) }}
 </form>

@@ -3,17 +3,33 @@
 {% block headline %}Join BatPlant.org{% endblock %}
 
 {% block fos_user_content %}
-<div id="reg-form-container">
-	<div>
-		<p class="top-em-mrg five-wide">If you're interested in bat eco-interactions,
-		sign up and get early access to the database. We will never spam you or sell your email.</p>
-		<p class="five-wide">Just provide your email, select a username and password,
-		and tell us about your interest in batplant.org</p>
-		<p class="five-wide">If you'd like to help beta-test the site as it develops or help
-		with refining and extending the data, be sure to mention that as well.</p>
+	<div class="two-col-outer top-pgs">
+		<div class="first-col">
+				<h3>Our Project</h3>
+				<p>This is an on-going project with the goal of capturing all published 
+					interactions observed between bats and plants and bats and arthropods 
+					to facilitate additional studies on the subject.</p>
+				<h3>How to get involved</h3>
+				<p>Our database is open sourced and continually updated by collaborators, 
+					so we invite your collaboration and active engagement with this project. 
+					We are starting our beta testing phase where enthusiastic collaborators 
+					and experts can contribute to our ongoing development and expansion.</p>
+				<h3>Become a member</h3>
+				<p>Sign up to get more information or to become a beta tester here. Just provide 
+					your email, select a username and password, and tell us about your interest 
+					in batplant.org</p>
+				<p>If you'd like to help beta-test the site as it develops or help
+				with refining and extending the data, be sure to mention that as well.</p>
+				<h3>Seeking Contributions</h3>
+				<p class="top-em-mrg">We are collecting titles and pdfs of articles that should be added to 
+					the database. <a href="future-developments">Click here</a> to see a list of 
+					the articles we plan on adding and please send additional suggestions to 
+					<a href="mailto:nowhere@mozilla.org?subject=website%20feedback">info@batplant.org</a>.</p>
+		</div>
+		<div class="second-col">
+			<div id="reg-form-container">
+				{% include "FOSUserBundle:Registration:register_content.html.twig" %}
+			</div>
+		</div>
 	</div>
-	<div class="top-em-mrg bot-em-mrg">
-		{% include "FOSUserBundle:Registration:register_content.html.twig" %}
-	</div>
-<div>
 {% endblock fos_user_content %}

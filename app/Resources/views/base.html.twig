@@ -66,6 +66,7 @@
             <script src="{{ asset('bundles/app/js/data-tables/dataTables.fixedHeader.min.js') }}"></script>
             <script src="{{ asset('bundles/app/js/data-tables/oi-tables.js') }}"></script>
 
+            <script src="{{ asset('bundles/app/js/toc.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/oi.js') }}"></script>
 
 			{% if is_granted("ROLE_BETA") %}
@@ -107,17 +108,23 @@
 			</div>
 			<div id="{% block pageid %}content-detail{% endblock pageid %}">
 				<div id="detail-block">{% block detail %}{% endblock %}</div>
-				<div id="footer">
+				<div id="footer" class="flex-row">
 					{% block footer %}
-						<p>Site and Data Copyright 2015 batplant.org -
+						<span>Site and Data Copyright 2015 batplant.org -
 							Bat photos Copyright: Merlin D. Tuttle/Bat Conservation International
 							<a href="http://www.batcon.org/">www.batcon.org</a>
-						</p>
-					{% endblock %}
+						</span>
+                        <span>
+                            <a id="footer-toc" href="Javascript:void(0)">
+                                batplant.org Terms of Use</a>
+                        </span>
+                    {% endblock %}
 				</div>
 			</div>
-		</div>
-
+        </div>
+        <div id="base-overlay">
+            <div id="base-popUpDiv"></div>
+        </div>
     {% endblock body %}
     </body>
 </html>

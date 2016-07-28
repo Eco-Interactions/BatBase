@@ -376,11 +376,8 @@ class ContentBlockController extends Controller
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
         $contentBlocks = $repo->findByPage("future-developments");
-        $announcements = $repo->findBySlug("announcements");
 
         $returnData = $this->getPageBlocks($contentBlocks);
-        // Add 'about' pg's announcements block
-        $returnData = array_merge($returnData, $this->getPageBlocks($announcements));
 
         return $this->render('contentblock/future_dev.html.twig', array(
             'entities' => $returnData,
