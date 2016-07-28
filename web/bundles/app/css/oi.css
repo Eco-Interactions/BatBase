@@ -179,7 +179,7 @@ span.lbl {
 	border-top:1px solid #000;
 	justify-content: space-between;
 }
-#footer-toc {
+#footer-tos {
 	/*align-self: flex-end;*/
 }
 /*-- Header --*/
@@ -385,7 +385,7 @@ span.lbl {
 #grid-filter-status {
 	flex-grow: 1;
 }
-button[name="csv"] {
+button[name="csv"], #close-tos-bttn {
 	align-self: flex-end;
 }
 #search-grid {
@@ -430,7 +430,7 @@ button[name="csv"] {
 	width: 420px;
 	text-align: justify;
 }
-a[role="button"] {
+a[role="button"], #close-tos-bttn {
 	cursor: pointer;
 }
 /*-- Popups --*/
@@ -519,6 +519,13 @@ label[for=fos_user_registration_form_about_me] {
 }
 #terms-div p {
 	margin: .3em .3em .3em 1.3em; 
+}
+#accept-tos-cntnr {
+	justify-content: space-between;
+	text-align: right;
+}
+#close-tos-bttn {
+	margin-top: 2em;
 }
 /*------- Feedback ----------------*/
 #feedback-popup {

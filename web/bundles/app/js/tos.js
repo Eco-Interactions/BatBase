@@ -1,58 +1,77 @@
 $(document).ready(function() {
-    $('#reg-toc, #footer-toc').click(showToc);
+    $('#reg-tos, #footer-tos').click(showTos);
     disableRegSubmit();
 
+    /** If this is the registration page, diable the submit button. */
     function disableRegSubmit() {
-        if ($("#reg-submit")) {  console.log("submit being diabled")
+        if ($("#reg-submit")) {
             $('#reg-submit').prop('disabled', true);
         }
     }
-    function showToc() {  console.log("showToc called")
-        if ($(this).id === "reg-toc") {
-            showAndAgreeWithToc()
-            showTocWindow();
-        } else {
-            showTocWindow();
-        }
+    /** Show the ToS. If this is the registration page, show the 'accept' elements */
+    function showTos() {  
+        if ($(this)[0].id === "reg-tos") { 
+            showTosWindow();
+            addRegTosElems();
+        } else { showTosWindow(); }
     }
 
-    function showTocWindow() {  console.log("showTocWindow called")
-        $("#base-popUpDiv").html(getTocHtml);
-        addTocStyles();
+    function showTosWindow() {  console.log("showTosWindow called")
+        $("#base-popUpDiv").html(getTosHtml);
+        addTosStyles();
         bindEscEvents();
-    }
-    function addTocStyles() {
-        $("#base-popUpDiv").css({
-            "height": "90%",
-            "width": "75%",
-            "margin": "auto",
-            "overflow-y": "scroll",
-            "padding": "2em",
-        });
-        $("#base-overlay").css({
-            "display": "flex",
-            "background": "rgba(27,59,27,.7)"
-        });
-    }
-    function bindEscEvents() {
-        $(document).on('keyup',function(evt) {
-            if (evt.keyCode == 27) {
-                closeTocWindow();
-            }
-        });
-        $("#base-overlay").click(closeTocWindow);
-        $("#base-popUpDiv").click(function(e) {
-            e.stopPropagation();
-        });
-    }
+        function addTosStyles() {
+            $("#base-popUpDiv").css({
+                "height": "90%",
+                "width": "75%",
+                "margin": "auto",
+                "overflow-y": "scroll",
+                "padding": "2em",
+            });
+            $("#base-overlay").css({
+                "display": "flex",
+                "background": "rgba(22,22,22,.7)"
+            });
+        }
+        function bindEscEvents() {
+            $(document).on('keyup',function(evt) {
+                if (evt.keyCode == 27) { closeTosWindow(); }
+            });
+            $("#base-overlay").click(closeTosWindow);
+            $("#base-popUpDiv").click(function(e) { e.stopPropagation(); });
+        }
+    } /* End showTosWindow */
     function unbindEscEvents() {
         $(document).on('keyup',function(){});
         $("#base-overlay").click(function(){});
     }
-    function closeTocWindow() {
+    function closeTosWindow() {
         $("#base-overlay").css({
             "display": "none"});
         unbindEscEvents();
+    }
+    function addRegTosElems() {  console.log("addRegTosElems called")
+        var acceptDiv = document.createElement("div");
+        acceptDiv.id = "accept-tos-cntnr";
+        acceptDiv.className = "flex-col";
+        $(acceptDiv).append(acceptTosHtml());
+        $("#base-popUpDiv").append(acceptDiv);
+
+        $("#accept-tos").click(acceptTos);
+        $('#close-tos-bttn').click(closeTosWindow)
+    }
+    function acceptTosHtml() {
+        return `
+        <span>These Terms of Use are always available in bottom right of any page on this website.</span>
+        <label id="accept-tos" class="top-em-mrg">
+            <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
+        </label>
+        <button id="close-tos-bttn" class="grid-bttn">Close</button>
+        `;
+    }
+    function acceptTos() {
+        $('#reg-submit').prop('disabled', false);
+        $('#reg-tos-cntnr').empty();
     }
 
 
@@ -87,8 +106,7 @@ $(document).ready(function() {
 
 
 
-
-    function getTocHtml() {
+    function getTosHtml() {
         return `<div id="terms-div">
     <h3>batplant.org Terms of use</h3>
 <span class="lbl top-em-mrg">General</span>
