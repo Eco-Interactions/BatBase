@@ -1,21 +1,27 @@
 $(document).ready(function() {
     $('#reg-tos, #footer-tos').click(showTos);
-    disableRegSubmit();
+    hideRegistrationSubmit();
 
     /** If this is the registration page, diable the submit button. */
-    function disableRegSubmit() {
-        if ($("#reg-submit")) {
-            $('#reg-submit').prop('disabled', true);
-        }
+    function hideRegistrationSubmit() {
+        if ($("#reg-submit")) { replaceWithAcceptTosBttn(); }
+    }
+    function replaceWithAcceptTosBttn() {
+        $('#reg-submit').hide()
     }
     /** Show the ToS. If this is the registration page, show the 'accept' elements */
     function showTos() {  
         if ($(this)[0].id === "reg-tos") { 
             showTosWindow();
-            addRegTosElems();
+            addRegistrationTosElems();
         } else { showTosWindow(); }
+        addCloseButton();
     }
-
+    function addCloseButton() {
+        $("#base-popUpDiv").append(`
+            <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
+        $('#close-tos-bttn').click(closeTosWindow)
+    }
     function showTosWindow() {  console.log("showTosWindow called")
         $("#base-popUpDiv").html(getTosHtml);
         addTosStyles();
@@ -23,7 +29,7 @@ $(document).ready(function() {
         function addTosStyles() {
             $("#base-popUpDiv").css({
                 "height": "90%",
-                "width": "75%",
+                "width": "83%",
                 "margin": "auto",
                 "overflow-y": "scroll",
                 "padding": "2em",
@@ -46,11 +52,10 @@ $(document).ready(function() {
         $("#base-overlay").click(function(){});
     }
     function closeTosWindow() {
-        $("#base-overlay").css({
-            "display": "none"});
+        $("#base-overlay").css({ "display": "none" });
         unbindEscEvents();
     }
-    function addRegTosElems() {  console.log("addRegTosElems called")
+    function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
         var acceptDiv = document.createElement("div");
         acceptDiv.id = "accept-tos-cntnr";
         acceptDiv.className = "flex-col";
@@ -58,20 +63,17 @@ $(document).ready(function() {
         $("#base-popUpDiv").append(acceptDiv);
 
         $("#accept-tos").click(acceptTos);
-        $('#close-tos-bttn').click(closeTosWindow)
     }
     function acceptTosHtml() {
         return `
-        <span>These Terms of Use are always available in bottom right of any page on this website.</span>
-        <label id="accept-tos" class="top-em-mrg">
-            <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
-        </label>
-        <button id="close-tos-bttn" class="grid-bttn">Close</button>
-        `;
+            <span>These Terms of Use are always available in bottom right of any page on this website.</span>
+            <label id="accept-tos" class="top-em-mrg">
+                <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
+            </label>`;
     }
     function acceptTos() {
-        $('#reg-submit').prop('disabled', false);
-        $('#reg-tos-cntnr').empty();
+        $('#reg-tos').hide();
+        $('#reg-submit').show();
     }
 
 

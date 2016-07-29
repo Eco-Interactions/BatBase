@@ -10,11 +10,7 @@
     {{ form_row(form.plainPassword.first) }}
     {{ form_row(form.plainPassword.second) }}
 
-    <div id="reg-tos-cntnr" class="top-em-mrg">
-        <a id="reg-tos" href="Javascript:void(0)">Read and Agree to our Terms of Use to complete your registration.</a>
-    </div>
-    <div>
-        <input id="reg-submit" type="submit" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
-    </div>
-{{ form_end(form) }}
+    <input id="reg-tos" class="top-em-mrg" type="button" value="Agree to our Terms of Use" />
+    <input id="reg-submit" type="submit" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
+    {{ form_end(form) }}
 </form>

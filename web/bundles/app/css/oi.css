@@ -365,12 +365,12 @@ span.lbl {
 	height: 28px;
 	font-size: 1.1em;
 }
-.grid-bttn {
-	margin: 0 .3em 0 .2em;
-	background: -webkit-linear-gradient(#fff, #d3d3d3);
+.grid-bttn, .tos-bttn {
+	margin: 0 .3em 0 .2em;/*
+	background: -webkit-linear-gradient(#fff, #d3d3/*d3);
 	background: -moz-linear-gradient(#fff, #d3d3d3);
 	background: -o-linear-gradient(#fff, #d3d3d3);
-	background: -ms-linear-gradient(#fff, #d3d3d3);
+	background: -ms-linear-gradient(#fff, #d3d3d3);*/
 	background: linear-gradient(#fff, #d3d3d3);
 }
 #grid-status {
@@ -430,7 +430,7 @@ button[name="csv"], #close-tos-bttn {
 	width: 420px;
 	text-align: justify;
 }
-a[role="button"], #close-tos-bttn {
+a[role="button"], .tos-bttn {
 	cursor: pointer;
 }
 /*-- Popups --*/
@@ -465,6 +465,9 @@ a[role="button"], #close-tos-bttn {
 /*----------- FOS / Registration Page ---------*/
 .fos_user_user_show {
 	margin-top: 1em;
+}
+#register-pg .second-col {
+	min-width: 550px;
 }
 textarea[id^=fos_user_registration_form] {
 	width: 500px;
@@ -504,15 +507,9 @@ label[for=fos_user_registration_form_about_me] {
 	margin-top: 3em;
 }
 #terms-div {
-	/*overflow-y: scroll;*/
-	/*overflow-x: wrap;*/
-	/*height: 400px;*/
-	/*width: 600px;*/
 	padding: 1em;
-	/*border: WhiteSmoke groove 1px;*/
 	text-align: left;
     box-shadow: inset 0 0 7px 4px rgba(255,255,255,.5);
-
 }
 #terms-div h3 {
 	text-align: center;
@@ -526,6 +523,10 @@ label[for=fos_user_registration_form_about_me] {
 }
 #close-tos-bttn {
 	margin-top: 2em;
+}
+#reg-tos {
+	margin-top: 1em;
+    /*background-color: buttonface;*/
 }
 /*------- Feedback ----------------*/
 #feedback-popup {
