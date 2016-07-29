@@ -30,7 +30,6 @@
 		clearLocalStorageCheck();
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		addDomEventListeners();
-		initSearchTips();
 		authDependentInit();
 	    initSearchState();
 	}
@@ -164,7 +163,7 @@
 	     */
 		function fillTaxaSetWithInteractionRcrds(treeObj) { 					// console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
 			for (var sibling in treeObj) {   
-				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds)
+				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds);
 				if (treeObj[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(treeObj[sibling].children) }
 			}
 		}
@@ -248,6 +247,29 @@
 		getInteractionsAndBuildGrid();		
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
+	/*----------------- Shared -----------------------------------------------*/
+	function backfillSubInteractionsIntoCnt(rowData) {   //console.log("rowData = %O", rowData);
+		for (var treeNode in rowData) {  console.log("rowData[treeNode] = %O", rowData[treeNode]);
+			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
+			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
+			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
+			if (rowData[treeNode].children) { 
+				backfillSubInteractionsIntoCnt(rowData[treeNode].children); 
+			}
+		}
+	}
+	function addSubInteractions(treeNode) {  //console.log("addSubInteractions called. treeNode =%O", treeNode);
+		var cnt = 0;
+		for (var childNode in treeNode.children) {
+			if (treeNode.children[childNode].interactions) {
+				var childCnt = treeNode.children[childNode].intCnt || 0; console.log("childCnt = ", childCnt)
+				cnt += childCnt;
+			}
+			if (treeNode.children[childNode].children) { cnt += addSubInteractions(treeNode.children[childNode]); }
+		}
+		return cnt;
+	}
+	/*----------------- Location ---------------------------------------------*/
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
 		var finalRowData = [];   console.log("locData = %O", locData);
@@ -258,7 +280,7 @@
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
-
+		backfillSubInteractionsIntoCnt(finalRowData);
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		loadGrid("Location Tree");
 	}
@@ -272,7 +294,7 @@
 		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
 		$('#opts-col2').append(div);
 	}
-	function getLocRowData(locObj, locName) {  console.log("getLocRowData. arguments = %O", arguments);
+	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
 		return {
 			name: locName || null,	/* Interaction rows have no name to display. */
 			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
@@ -684,7 +706,7 @@
 			topTaxaRows.push( getTaxaRowData(taxaTree[taxon]) );
 		}
 		topTaxaRows.forEach(function(taxaRowAry){ $.merge(finalRowData, taxaRowAry);	}); 
-
+		backfillSubInteractionsIntoCnt(finalRowData);
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 
 		loadGrid("Taxa Tree");
@@ -859,7 +881,6 @@
 
 	    gridDiv = document.querySelector('#search-grid');
 	    new agGrid.Grid(gridDiv, gridOptObj);
-
 	}
 	function getIntData(intRcrd, intRcrdObj){
 		for (var field in intRcrd) {
@@ -1548,7 +1569,7 @@
 		}
 	}
 	/**
-	 * Fills and styles base overlay to display the search tips.
+	 * Fills and styles the base-overlayPopUp to display the search tips.
 	 */
 	function initSearchTips() { 
 		addPopUpStyles();
@@ -1557,11 +1578,14 @@
 	}
 	function showTips() {  console.log("show tips called.")
 		if (!$('#tips-close-bttn').length) { initSearchTips(); }
-	    $('#base-overlay, #base-overlayPopUp').show();
+	    $('#base-overlay, #base-overlayPopUp').fadeIn(500);
 	}
 	function hideTips() {
-	    $('#base-overlay, #base-overlayPopUp').hide();
+	    $('#base-overlay').fadeOut(500, removeTips);
 	}
+   function removeTips() {  console.log("removeTips called.")
+	   	$('#base-overlay, #base-overlayPopUp').css("display", "none");
+   }
 	function addPopUpStyles() {
 		$('#base-overlayPopUp').css({
 			"height": "811px",
