@@ -579,6 +579,10 @@ label[for=fos_user_registration_form_about_me] {
 #future-dev-pg ul {
 	margin-left: 1em;
 }
+#articles-add{
+	height: 100vh;
+	width: 100vw;
+}
 /*--- Export ---*/
 #exprtContnt {
 	position: absolute;

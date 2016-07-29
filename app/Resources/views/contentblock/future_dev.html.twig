@@ -11,8 +11,13 @@
             {{ blocks["future-developments-overview"]|raw }}
             {{ blocks["future-developments-announcements"]|raw }}
         {% endblock firstcol %}
-        {% block secondcol %}
-            {{ blocks["list-of-future-articles"]|raw }}
+        {% block secondcol %}            
+            <h3>Publications to be added to the database:</h3>
+            <embed src="{{ asset('bundles/app/files/Publications To Add.pdf') }}" height="455px" width="790px">
+            <h3>Suggestions?</h3>
+            <p>If you have suggestions for additional publications or articles, 
+                please send the relevant information and a pdf of it to 
+                <a href="mailto:nowhere@mozilla.org?subject=website%20feedback">info@batplant.org</a>.</p>
         {% endblock secondcol%}
     {% endembed %}
     </div>
