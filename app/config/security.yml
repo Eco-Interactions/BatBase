@@ -29,7 +29,7 @@ security:
         - { path: /update$, roles: ROLE_ADMIN }
         - { path: /delete$, roles: ROLE_ADMIN }
         - { path: /new$, roles: ROLE_ADMIN }
-        - { path: feedback/post, roles: ROLE_BETA }
+        - { path: feedback/post, roles: ROLE_USER }
         - { path: /.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
     role_hierarchy:

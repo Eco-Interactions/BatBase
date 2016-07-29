@@ -17,7 +17,7 @@
 	{% set eifrole = 'visitor' %}
 {% endif %}
 
-{% if is_granted("ROLE_BETA") %}
+{% if is_granted("ROLE_USER") %}
 	{% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% else %}
 	{% set targeturl = "false" %}
@@ -69,7 +69,7 @@
             <script src="{{ asset('bundles/app/js/tos.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/oi.js') }}"></script>
 
-			{% if is_granted("ROLE_BETA") %}
+			{% if is_granted("ROLE_USER") %}
 				<script src="{{ asset('bundles/app/js/feedback.js') }}"></script>
 			{% endif %}
 		{% endblock javascripts %}
