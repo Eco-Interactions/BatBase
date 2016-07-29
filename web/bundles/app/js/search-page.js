@@ -30,7 +30,7 @@
 		clearLocalStorageCheck();
 		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
 		addDomEventListeners();
-
+		initSearchTips();
 		authDependentInit();
 	    initSearchState();
 	}
@@ -45,6 +45,7 @@
 		$('button[name="xpand-tree"]').click(toggleExpandTree);
 		$('button[name="reset-grid"]').click(resetGrid);
 		$("#strt-tut").click(startIntro);
+		$("#show-tips").click(showTips);
 	}
 	function authDependentInit() {
 		var userRole = $('body').data("user-role");  console.log("----userRole === visitor ", userRole === "visitor")
@@ -68,13 +69,13 @@
 	} 
 	function showPopUpMsg(msg) {
 		var popUpMsg = msg || "Loading...";
-		$("#popUpDiv").text(popUpMsg);
+		$("#search-popUpDiv").text(popUpMsg);
 		$('#borderLayout_eRootPanel').fadeTo(100, .3);
-	    $('#popUpDiv, #overlay').show();
+	    $('#search-popUpDiv, #search-overlay').show();
 	}
 	function hidePopUpMsg() {
 		$('#borderLayout_eRootPanel').fadeTo(100, 1);
-	    $('#popUpDiv, #overlay').hide();
+	    $('#search-popUpDiv, #search-overlay').hide();
 	}
 	function toggleExpandTree() {  console.log("toggleExpandTree")
   		var expanded = $(this).data('xpanded');
@@ -1448,18 +1449,6 @@
 			populateStorage('prevVisit', true);
 		}	
 	}
-	// function toggleHints() {
- //  		var hidden = $(this).data('hidden');
- //  		if (hidden) { 
-	// 		introJs().addHints();
-	// 		$('#tggl-hints').html("&nbspHide  Hints&nbsp");
-	// 	} else { 
-	// 		introJs().hideHints();
-	// 		$('#tggl-hints').html("&nbspShow  Hints");
-
- //  		}
-	// 	$(this).data("hidden", !hidden);
-	// }
 	function startIntro(startStep){
 		if (intro) { console.log("intro = %O", intro)
 			intro.exit() 
@@ -1558,10 +1547,63 @@
 			});
 		}
 	}
-	function function_name(argument) {
-		// body...
+	/**
+	 * Fills and styles base overlay to display the search tips.
+	 */
+	function initSearchTips() { 
+		addPopUpStyles();
+		$('#base-overlayPopUp').html(searchTips());
+		bindEscEvents();
 	}
-
+	function showTips() {  console.log("show tips called.")
+		if (!$('#tips-close-bttn').length) { initSearchTips(); }
+	    $('#base-overlay, #base-overlayPopUp').show();
+	}
+	function hideTips() {
+	    $('#base-overlay, #base-overlayPopUp').hide();
+	}
+	function addPopUpStyles() {
+		$('#base-overlayPopUp').css({
+			"height": "811px",
+			"width": "650px",
+			"padding": "2.2em", 
+			"text-align": "left",
+			"align-last": "right"
+		});
+		setPopUpPos();
+	}
+	/**
+	 * Finds top position of fixed parent overlay and then sets the popUp  position accordingly.
+	 */
+	function setPopUpPos() {
+		var parentPos = $('#base-overlay').offset();
+		$('#base-overlayPopUp').offset(
+			{ top: (parentPos.top + 88), left: 1000});
+	}
+    function bindEscEvents() {
+    	addCloseButton();
+        $(document).on('keyup',function(evt) {
+            if (evt.keyCode == 27) { hideTips(); }
+        });
+        $("#base-overlay").click(hideTips);
+        $("#base-overlayPopUp").click(function(e) { e.stopPropagation(); });
+    }
+    function addCloseButton() {
+        $("#base-overlayPopUp").append(`
+            <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
+        $('#tips-close-bttn').click(hideTips)
+    }
+   	function searchTips() {
+		return `
+			<h3>Tips for searching</h3>
+			<ul class="disc-list" style="width: 755px margin: auto"> 
+			    <br><li>Users can search the database by clicking on “Search” in the drop-down menu under the “Database” tab. You can follow along with the tutorial for a guided tour of the search functionality.</li>
+			    <br><li>If you would like to search by interaction type or habitat type, hover on “Interaction Type” header, click on the revealed filter menu, and select which type to include in your search. (<a href="{{ path('app_definitions') }}">Click here </a>to see definitions for each interaction and habitat type.)</li>
+			    <br><li>If you are interested in knowing all the fruit species known from a bat species’ diet, search for the bat species, then select “Fruit” and “Seed” among the Tags. This will provide you with a list of all plant species known to have their fruit consumed, seeds consumed, and seeds dispersed by that particular bat species. (<a href="{{ path('app_definitions') }}">Click here </a>to see definitions for each interaction type.)</li>
+			    <br><li>Similarly, if you are interested in knowing all of the flower species known from a bat species’ diet, search for the bat species, then select “Flower” among the Tags. This will provide you with a list of all plant species known to have their flowers visited, consumed, or pollinated by that particular bat species.</li>
+			    <br><li>If you are interested in knowing all of the bat species known to visit or pollinate a particular plant species, select Taxon and then Plant in the “Group Taxa by” menu. Select the most specific level you would like (family, genus, species). Next, select “Flower” from the “Tag” column's header menu. This will provide information on the bats that visit the flower as well as those that have been confirmed pollinating it.</li>
+			</ul>`;
+	}
 /*----------------------Util----------------------------------------------------------------------*/
 	function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);
