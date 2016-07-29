@@ -18,16 +18,16 @@ $(document).ready(function() {
         addCloseButton();
     }
     function addCloseButton() {
-        $("#base-popUpDiv").append(`
+        $("#base-overlayPopUp").append(`
             <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
         $('#close-tos-bttn').click(closeTosWindow)
     }
     function showTosWindow() {  console.log("showTosWindow called")
-        $("#base-popUpDiv").html(getTosHtml);
+        $("#base-overlayPopUp").html(getTosHtml);
         addTosStyles();
         bindEscEvents();
         function addTosStyles() {
-            $("#base-popUpDiv").css({
+            $("#base-overlayPopUp").css({
                 "height": "90%",
                 "width": "83%",
                 "margin": "auto",
@@ -43,7 +43,7 @@ $(document).ready(function() {
                 if (evt.keyCode == 27) { closeTosWindow(); }
             });
             $("#base-overlay").click(closeTosWindow);
-            $("#base-popUpDiv").click(function(e) { e.stopPropagation(); });
+            $("#base-overlayPopUp").click(function(e) { e.stopPropagation(); });
         }
     } /* End showTosWindow */
     function unbindEscEvents() {
@@ -59,7 +59,7 @@ $(document).ready(function() {
         acceptDiv.id = "accept-tos-cntnr";
         acceptDiv.className = "flex-col";
         $(acceptDiv).append(acceptTosHtml());
-        $("#base-popUpDiv").append(acceptDiv);
+        $("#base-overlayPopUp").append(acceptDiv);
 
         $("#accept-tos").click(acceptTos);
     }

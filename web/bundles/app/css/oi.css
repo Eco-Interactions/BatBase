@@ -269,7 +269,7 @@ span.lbl {
     flex-direction: column;
     justify-content: center;
 }
-#base-popUpDiv {
+#base-overlayPopUp {
 	/*display: none;*/
     /*position: absolute;*/
     text-align: center;
@@ -278,6 +278,9 @@ span.lbl {
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
     z-index: 20000;
     border-radius: 5px;
+}
+#base-popUpDiv {
+
 }
 /*--- List Styles ---*/
 #ul-big {								/*Clean up old id references*/
@@ -335,6 +338,11 @@ span.lbl {
 	border-radius: .5em;
 	font-size: 1.1em;
 	/*justify-content: space-between;*/
+}
+#tips-close-bttn {
+	position: absolute;
+	top: 770px;
+	left: 550px;
 }
 #loc-dev-msg {
 	margin: 20px 20px 0 50px;
@@ -455,7 +463,7 @@ a[role="button"], .tos-bttn {
 	cursor: pointer;
 }
 /*-- Popups --*/
-#overlay {					/*TODO: Change these ids to specify the search page they're used for*/
+#search-overlay {					/*TODO: Change these ids to specify the search page they're used for*/
 	display: none;
     position: absolute;
     top: 0;
@@ -466,7 +474,7 @@ a[role="button"], .tos-bttn {
     opacity: 0;
     z-index: 100;
 }
-#popUpDiv {
+#search-popUpDiv {
 	display: none;
     position: absolute;
     text-align: center;
