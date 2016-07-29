@@ -258,7 +258,10 @@ span.lbl {
     position: fixed;
     top: 0;
     bottom: 0;
-    background: #999;
+    background: #000;
+    background: -webkit-radial-gradient(center,ellipse cover,
+    	rgba(0,0,0,0.4) 0, 
+    	rgba(0,0,0,0.9) 100%);
     width: 100vw;
     height: 100vh;
     /*opacity: .3;*/
@@ -312,13 +315,12 @@ span.lbl {
 	font-size: 1.35em;
 }
 #home-pg .second-col {
-	flex-shrink: 2;
-	min-width: 550px;
+	flex-shrink: 1;
+	min-width: 300px;
 	padding-right: 1em;
 }
 #home-pg .first-col { 
-	flex-grow: 2; 
-	/*flex-shrink: 0;*/
+	flex-grow: 1; 
 	/*max-width: 1100px;*/
 	border-right: none;
 	min-width: 715px;

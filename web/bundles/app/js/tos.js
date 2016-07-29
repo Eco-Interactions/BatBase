@@ -35,8 +35,7 @@ $(document).ready(function() {
                 "padding": "2em",
             });
             $("#base-overlay").css({
-                "display": "flex",
-                "background": "rgba(22,22,22,.7)"
+                "display": "flex"
             });
         }
         function bindEscEvents() {
