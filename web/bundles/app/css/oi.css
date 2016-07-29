@@ -136,11 +136,11 @@ span.lbl {
 #detail-block h5 {
 	margin: 0 0 5px 0;
 }
-#top-pgs h3 {
+/*#top-pgs h3 {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
 }
-#top-pgs p, #top-pgs ul li, #top-pgs ol li  {		/*Clean up all these old references and free the ids!*/
+#top-pgs p, #top-pgs ul li, #top-pgs ol li  {		Clean up all these old references and free the ids!
 	margin: .2em 0 0 1em;
 	padding: .3em 0 .3em 0;
 	font-size: 1.05em;
@@ -150,7 +150,7 @@ span.lbl {
 }
 #top-pgs .first-col {
 	width: 1800px;
-}
+}*/
 .top-pgs h3 {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
@@ -165,11 +165,6 @@ span.lbl {
 }
 .top-pgs .first-col {
 	width: 1800px;
-}
-.sidebar { 
-  flex-grow: 2; 
-  padding: 25px 55px 15px 15px; 
-  font-size: 1.1em; 
 }
 #footer {
 	font-size: 1em;
@@ -306,6 +301,30 @@ span.lbl {
     display: list-item;
 }
 /*-------------------------------- Pages -------------------------------------*/
+/*--- Home --- */
+#home-pg p {
+	font-size: 1.15em;
+}
+#home-pg h3 {
+	font-size: 1.3em;
+}
+#home-pg h2 {
+	font-size: 1.35em;
+}
+#home-pg .second-col {
+	flex-shrink: 2;
+	min-width: 550px;
+	padding-right: 1em;
+}
+#home-pg .first-col { 
+	flex-grow: 2; 
+	/*flex-shrink: 0;*/
+	/*max-width: 1100px;*/
+	border-right: none;
+	min-width: 715px;
+	padding: 25px 55px 15px 15px; 
+	margin-right: 0;
+}
 /*-------- Search --------------*/
 #search-opts {
 	margin: 1em auto 0 auto;

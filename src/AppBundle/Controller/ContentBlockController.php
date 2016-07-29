@@ -269,16 +269,13 @@ class ContentBlockController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("home");
 
-        $firstcol = $repo->findOneBy(array('slug' => 'home-pg-intro'));
-        $secondcol = $repo->findOneBy(array('slug' => 'home-pg-second-col'));
-        $memberwelcome = $repo->findOneBy(array('slug' => 'home-member-welcome'));
+        $returnData = $this->getPageBlocks($contentBlocks);
 
         return $this->render('contentblock/home.html.twig', array(
-            'introduction' => $firstcol,
-            'memberWelcome' => $memberwelcome,
-            'secondColBlock' => $secondcol,
-             )
+            'entities' => $returnData
+            )
         );
     }
 

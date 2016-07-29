@@ -1,25 +1,26 @@
 {% extends "layout.html.twig" %}
 
+{% set blocks = entities %}
+
 {% block headline %}Welcome to Bat Eco-Interactions{% endblock %}
 
 {% block javascripts %}
-  {{ parent() }}
+    {{ parent() }}
 	<script src="{{ asset('bundles/app/js/on-admin-login.js') }}"></script>
 {% endblock %}
 
-
 {% block detail %}
-	<div id="top-pgs">
-	{% embed 'sidebar_sect.html.twig' %}
+	<div id="home-pg" class="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
 		{% block firstcol %}
 			{% if eifrole == 'member' %}
-				<h3 style="color: #2D7853;">Welcome {{ eifusername }}</h3>
-				{{ memberWelcome.content|raw }}
+				<h2 style="color: #2D7853;">Welcome {{ eifusername }}</h2>
+				{{ blocks['member-welcome']|raw }}
 			{% endif %}
-			{{ introduction.content|raw }}
+			{{ blocks['home-pg-intro']|raw }}
 		{% endblock firstcol %}
 		{% block secondcol %}
-			{{ secondColBlock.content|raw }}
+			{{ blocks['home-pg-second-col']|raw }}
 		{% endblock secondcol%}
 	{% endembed %}
 	</div>
