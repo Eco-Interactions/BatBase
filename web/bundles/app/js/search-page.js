@@ -383,8 +383,8 @@
 		populateStorage('domainRcrds', JSON.stringify(data.results));
 		showTaxonSearch(data.results);
 	}
-	function showTaxonSearch(data) { 	
-		buildTaxaSearchHtml(data);
+	function showTaxonSearch(data) {
+		if (!$("#sel-domain").length) { buildTaxaSearchHtml(data); } 	
 		initTaxaSearchState();
 		getAllTaxaRcrds();
 	}
