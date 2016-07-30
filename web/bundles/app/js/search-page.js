@@ -1608,9 +1608,6 @@
 			});
 		}
 	}
-	/**
-	 * Fills and styles the base-overlayPopUp to display the search tips.
-	 */
 	function initSearchTips() { 
 		addPopUpStyles();
 		$('#base-overlayPopUp').html(searchTips());
@@ -1623,9 +1620,9 @@
 	function hideTips() {
 	    $('#base-overlay').fadeOut(500, removeTips);
 	}
-   function removeTips() {  console.log("removeTips called.")
+	function removeTips() {  console.log("removeTips called.")
 	   	$('#base-overlay, #base-overlayPopUp').css("display", "none");
-   }
+	}
 	function addPopUpStyles() {
 		$('#base-overlayPopUp').css({
 			"height": "811px",
