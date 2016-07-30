@@ -1517,16 +1517,17 @@
 	function startIntro(startStep){
 		if (intro) { console.log("intro = %O", intro)
 			intro.exit() 
-		} else { buildIntro();
+		} else { 
+			buildIntro();
 		}
-		$('#search-grid').css("height", "444px");
+		setGridState();
 		intro.start();
 
 		function buildIntro() {  console.log("buildIntro called")
 			intro = introJs();
 			var startStep = startStep || 0; 
 
-			intro.onexit(function() { $('#search-grid').css("height", "888px"); });
+			intro.onexit(function() { resetGridState(); });
 
 			intro.setOptions({
 				showStepNumbers: false,
@@ -1610,8 +1611,19 @@
 					},
 				]
 			});
+		} /* End buildIntro */
+		function setGridState() {
+			$('#search-grid').css("height", "444px");
+			$('#search-focus').val('taxa');
+			selectSearchFocus();
+			$('#search-focus').off("change");
 		}
-	}
+		function resetGridState() {
+			$('#search-focus').val('taxa');
+			$('#search-grid').css("height", "888px")		
+			$('#search-focus').change(selectSearchFocus);
+		}
+	} 	/* End startIntro */
 	function initSearchTips() { 
 		addPopUpStyles();
 		$('#base-overlayPopUp').html(searchTips());
