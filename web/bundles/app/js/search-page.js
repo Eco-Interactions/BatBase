@@ -1645,7 +1645,7 @@
 			"width": "650px",
 			"padding": "2.2em", 
 			"text-align": "left",
-			"align-last": "right"
+			"margin": "auto"
 		});
 		setPopUpPos();
 	}
@@ -1655,7 +1655,7 @@
 	function setPopUpPos() {
 		var parentPos = $('#base-overlay').offset();
 		$('#base-overlayPopUp').offset(
-			{ top: (parentPos.top + 88), left: 1000});
+			{ top: (parentPos.top + 88)});  		//, left: 1000
 	}
     function bindEscEvents() {
     	addCloseButton();
