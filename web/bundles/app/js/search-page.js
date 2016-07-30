@@ -18,6 +18,7 @@
 	    onRowGroupOpened: softRefresh,
 	    onBeforeFilterChanged: beforeFilterChange, 
 	    onAfterFilterChanged: afterFilterChanged,
+	    onModelUpdated: onModelUpdated,
         enableColResize: true,
         enableSorting: true,
         unSortIcon: true,
@@ -248,8 +249,47 @@
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	/*----------------- Shared -----------------------------------------------*/
+	/**
+	 * When the grid rowModel is updated, the total interaction count for each 
+	 * tree node, displayed in the "count" column, is updated to count only displayed
+	 * interactions. Any rows filtered out will not be included in the totals.
+	 */
+	function onModelUpdated() {
+		updateSubInteractionCount( gridOptions.api.getModel().rootNode );
+	}
+	/**
+	 * Sets new interaction totals for each tree node @getChildrenCnt and then 
+	 * calls the grid's softRefresh method, which refreshes any rows with "volatile"
+	 * set "true" in the columnDefs - currently only "Count".
+	 */
+	function updateSubInteractionCount(rootNode) {
+		getChildrenCnt(rootNode.childrenAfterFilter);  
+		gridOptions.api.softRefreshView();
+	}
+	function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
+		var nodeCnt, ttl = 0;
+		nodeChildren.forEach(function(child) {
+			nodeCnt = 0;
+			nodeCnt += addSubNodeInteractions(child);
+			ttl += nodeCnt;
+			if (nodeCnt !== 0) { child.data.intCnt = nodeCnt; }
+		});
+		return ttl;
+	}
+	/**
+	 * Interaction records are identified by their lack of any children, specifically 
+	 * their lack of a "childrenAfterFilter" property.
+	 */
+	function addSubNodeInteractions(child) {  
+		var cnt = 0;
+		if (child.childrenAfterFilter) {
+			cnt += getChildrenCnt(child.childrenAfterFilter);
+			if (cnt !== 0) { child.data.intCnt = cnt; }
+		} else { ++cnt; }
+		return cnt;
+	}
 	function backfillSubInteractionsIntoCnt(rowData) {   //console.log("rowData = %O", rowData);
-		for (var treeNode in rowData) {  console.log("rowData[treeNode] = %O", rowData[treeNode]);
+		for (var treeNode in rowData) { // console.log("rowData[treeNode] = %O", rowData[treeNode]);
 			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
 			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
 			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
@@ -262,7 +302,7 @@
 		var cnt = 0;
 		for (var childNode in treeNode.children) {
 			if (treeNode.children[childNode].interactions) {
-				var childCnt = treeNode.children[childNode].intCnt || 0; console.log("childCnt = ", childCnt)
+				var childCnt = treeNode.children[childNode].intCnt || 0; //console.log("childCnt = ", childCnt)
 				cnt += childCnt;
 			}
 			if (treeNode.children[childNode].children) { cnt += addSubInteractions(treeNode.children[childNode]); }
@@ -943,7 +983,7 @@
 			    {headerName: taxaRole + " Family", field: "treeFamily", width: 150, hide: true },
 			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
 			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
-			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count" },
+			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count", volatile: true },
 			    {headerName: "Subject Taxon", field: "subject", width: 133 },
 			    {headerName: "Object Taxon", field: "object", width: 133  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 146, filter: UniqueValuesFilter },
@@ -1420,14 +1460,14 @@
 			// customFooter: "This is a custom footer."
 		};
 		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnVisible("name", false)
+		gridOptions.columnApi.setColumnsVisible(["name", "count"], false)
 		selectRowsForExport();
 		gridOptions.api.exportDataAsCsv(params);
 		returnGridState();
 	}
 	function returnGridState() {
 		// if (curFocus === "taxa") { hideOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnVisible("name", true);
+		gridOptions.columnApi.setColumnsVisible(["name", "count"], true);
 		gridOptions.api.deselectAll();
 		hidePopUpMsg();
 	}
@@ -1621,11 +1661,27 @@
 		return `
 			<h3>Tips for searching</h3>
 			<ul class="disc-list" style="width: 755px margin: auto"> 
-			    <br><li>Users can search the database by clicking on “Search” in the drop-down menu under the “Database” tab. You can follow along with the tutorial for a guided tour of the search functionality.</li>
-			    <br><li>If you would like to search by interaction type or habitat type, hover on “Interaction Type” header, click on the revealed filter menu, and select which type to include in your search. (<a href="{{ path('app_definitions') }}">Click here </a>to see definitions for each interaction and habitat type.)</li>
-			    <br><li>If you are interested in knowing all the fruit species known from a bat species’ diet, search for the bat species, then select “Fruit” and “Seed” among the Tags. This will provide you with a list of all plant species known to have their fruit consumed, seeds consumed, and seeds dispersed by that particular bat species. (<a href="{{ path('app_definitions') }}">Click here </a>to see definitions for each interaction type.)</li>
-			    <br><li>Similarly, if you are interested in knowing all of the flower species known from a bat species’ diet, search for the bat species, then select “Flower” among the Tags. This will provide you with a list of all plant species known to have their flowers visited, consumed, or pollinated by that particular bat species.</li>
-			    <br><li>If you are interested in knowing all of the bat species known to visit or pollinate a particular plant species, select Taxon and then Plant in the “Group Taxa by” menu. Select the most specific level you would like (family, genus, species). Next, select “Flower” from the “Tag” column's header menu. This will provide information on the bats that visit the flower as well as those that have been confirmed pollinating it.</li>
+			    <br><li>You can search the database by clicking on “Search” in the drop-down menu 
+			    under the “Database” tab. Follow along with the tutorial for a guided tour 
+			    of the search functionality.</li>
+			    <br><li>If you would like to search by interaction type or habitat type, hover on 
+			    “Interaction Type” header, click on the revealed filter menu, and select which type 
+			    to include in your search. (<a href="definitions">Click here to see definitions</a> 
+			    for each interaction and habitat type.)</li>
+			    <br><li>If you are interested in knowing all the fruit species known from a bat species’ 
+				diet, search for the bat species, then select “Fruit” and “Seed” among the Tags. This will 
+				provide you with a list of all plant species known to have their fruit consumed, seeds 
+				consumed, and seeds dispersed by that particular bat species. 
+				(<a href="definitions">Click here to see definitions </a>for each interaction type.)</li>
+			    <br><li>Similarly, if you are interested in knowing all of the flower species known 
+			    from a bat species’ diet, search for the bat species, then select “Flower” among the 
+			    Tags. This will provide you with a list of all plant species known to have their 
+			    flowers visited, consumed, or pollinated by that particular bat species.</li>
+			    <br><li>If you are interested in knowing all of the bat species known to visit or 
+			    pollinate a particular plant species, select Taxon and then Plant in the “Group Taxa 
+			    by” menu. Select the most specific level you would like (family, genus, species). 
+			    Next, select “Flower” from the “Tag” column's header menu. This will provide information 
+			    on the bats that visit the flower as well as those that have been confirmed pollinating it.</li>
 			</ul>`;
 	}
 /*----------------------Util----------------------------------------------------------------------*/
