@@ -272,7 +272,8 @@
 			nodeCnt = 0;
 			nodeCnt += addSubNodeInteractions(child);
 			ttl += nodeCnt;
-			if (nodeCnt !== 0) { child.data.intCnt = nodeCnt; }
+			if (nodeCnt !== 0 && child.data.intCnt !== null) { 
+				child.data.intCnt = nodeCnt; }
 		});
 		return ttl;
 	}
@@ -285,7 +286,10 @@
 		if (child.childrenAfterFilter) {
 			cnt += getChildrenCnt(child.childrenAfterFilter);
 			if (cnt !== 0) { child.data.intCnt = cnt; }
-		} else { ++cnt; }
+		} else { 
+			++cnt;
+			child.data.intCnt = null; 
+		}
 		return cnt;
 	}
 	function backfillSubInteractionsIntoCnt(rowData) {   //console.log("rowData = %O", rowData);
@@ -1460,14 +1464,14 @@
 			// customFooter: "This is a custom footer."
 		};
 		if (curFocus === "taxa") { showOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnsVisible(["name", "count"], false)
+		gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], false)
 		selectRowsForExport();
 		gridOptions.api.exportDataAsCsv(params);
 		returnGridState();
 	}
 	function returnGridState() {
 		// if (curFocus === "taxa") { hideOverlayAndTaxaCols(); }
-		gridOptions.columnApi.setColumnsVisible(["name", "count"], true);
+		gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], true);
 		gridOptions.api.deselectAll();
 		hidePopUpMsg();
 	}
