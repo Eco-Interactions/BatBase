@@ -29,7 +29,7 @@ $(document).ready(function() {
         function addTosStyles() {
             $("#base-overlayPopUp").css({
                 "height": "90%",
-                "width": "83%",
+                "width": "63%",
                 "margin": "auto",
                 "overflow-y": "scroll",
                 "padding": "2em",
