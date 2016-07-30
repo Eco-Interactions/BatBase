@@ -169,8 +169,8 @@ span.lbl {
 #footer {
 	font-size: 1em;
 	width:100%;
-	margin-top: 3px;
-	padding: 10px 0 0 0;
+	/*margin-top: 3px;*/
+	padding: 1em 0 3em 0;
 	border-top:1px solid #000;
 	justify-content: space-between;
 }
@@ -425,7 +425,7 @@ button[name="csv"], #close-tos-bttn {
 	z-index: 100;
 }
 .row-kingdom {
-	background-color: rgba(128,0,128,.1) !important; /* purple */
+	background-color: rgba(128,0,128,.08) !important; /* purple */
 }
 .row-phylum {
 	background-color: rgba(0,128,0,.1) !important; /* green */
