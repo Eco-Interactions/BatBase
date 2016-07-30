@@ -5,7 +5,7 @@ $(function(){	/* framePlayer object */								//			var zl = zartEzLogger();
 		player.curFrame = null;
 		var hideSlider = $('#masthead').data('hide-slider') ? true : false;
 		if (!hideSlider) {
-			var imagePath = $('#masthead').data('img-path');
+			var imagePath = getImagePath();  console.log("--------------imagePath = ", imagePath)
 			var autoRunning = true;
 			var bSlider = new BeaverSlider(getSliderCfg());					//	zl.al(arguments, 'post-bs init');
 			var $msgContainer = $('.message-container');
@@ -14,7 +14,11 @@ $(function(){	/* framePlayer object */								//			var zl = zartEzLogger();
 			initFramePlayerCtrls();
 			nextFrame();
 		}
-
+		function getImagePath() {
+			var imageUrl = $('#masthead').data('img-path').split("/");
+			var cacheQuery = imageUrl.splice(imageUrl.length-1, 1);
+			return imageUrl.join('/') + '/';
+		}
 		function getSliderCfg() {	/* Function Defs are in this scope so Pointers are passed to events from here */
 			var bSliderConfig = ECO_INT_FMWK.bSliderCfg;
 			bSliderConfig.events = {};

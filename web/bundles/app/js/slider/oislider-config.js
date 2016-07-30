@@ -1,7 +1,12 @@
 $(function(){
 	var frames = ECO_INT_FMWK.frameSet.frames;
-	var imagePath = $('#masthead').data('img-path');
-
+	var imagePath = getImagePath();
+	
+	function getImagePath() {
+		var imageUrl = $('#masthead').data('img-path').split("/");
+		var cacheQuery = imageUrl.splice(imageUrl.length-1, 1);
+		return imageUrl.join('/') + '/';
+	}
 	ECO_INT_FMWK.bSliderCfg = {
 			type: "slider",
 			structure: {
