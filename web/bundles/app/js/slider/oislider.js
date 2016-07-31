@@ -5,7 +5,7 @@ $(function(){	/* framePlayer object */								//			var zl = zartEzLogger();
 		player.curFrame = null;
 		var hideSlider = $('#masthead').data('hide-slider') ? true : false;
 		if (!hideSlider) {
-			var imagePath = getImagePath();  console.log("--------------imagePath = ", imagePath)
+			var imagePath = getImagePath();  
 			var autoRunning = true;
 			var bSlider = new BeaverSlider(getSliderCfg());					//	zl.al(arguments, 'post-bs init');
 			var $msgContainer = $('.message-container');

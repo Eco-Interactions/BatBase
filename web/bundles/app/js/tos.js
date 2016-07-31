@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('#reg-tos, #footer-tos').click(showTos);
+    $('#reg-tos, #footer-tos, .tos-trigger').click(showTos);
     hideRegistrationSubmit();
 
     /** If this is the registration page, diable the submit button. */

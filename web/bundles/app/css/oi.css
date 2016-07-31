@@ -631,8 +631,8 @@ label[for=fos_user_registration_form_about_me] {
 #about-db .first-col>ul {
 	margin-left: 1em;
 }
-#about-db .second-col {
-	width: 150%;
+#about-db .second-col, #about-db .first-col {
+	width: 42%;
 }
 #data-map {
 	display: block;

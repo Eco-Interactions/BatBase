@@ -991,8 +991,8 @@
 			    {headerName: "Subject Taxon", field: "subject", width: 133 },
 			    {headerName: "Object Taxon", field: "object", width: 133  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 146, filter: UniqueValuesFilter },
-			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
+			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 88, filter: UniqueValuesFilter },
 			    {headerName: "Location Description", field: "location", width: 175,},
@@ -1538,10 +1538,11 @@
 					{
 						element: "#tut-opts", 
 						intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
-							"<b>This tutorial is a demonstration the search functionality.</b> It is available to you by " +
-							"clicking on this button at any time.<br><br>You can exit the tutorial " +
+							"<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
+							"clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +
+							"creative searches to filter your results you can explore once the tutorial ends.<br><br>You can exit the tutorial " +
 							"by clicking 'Exit', or anywhere on the greyed background." +
-							"<br><br><center><h2>Use the arrow keys or click 'Next' to start the tutorial.</h2></center>",
+							"<br><br><center><h2>Use your right arrow key or click 'Next' to start the tutorial.</h2></center>",
 						position: "left",
 					},
 					{
@@ -1577,9 +1578,10 @@
 					},
 					{
 						element: "#search-grid",
-						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br>Hovering over a " +
-							"column header reveals the filter menu for that column.<br><br>Some columns can be filtered by text, " +
-							"and others by selecting or deselecting values in that column.",
+						intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br><b>Hovering over a " +
+							"column header reveals the filter menu for that column.</b><br><br>Some columns can be filtered by text, " +
+							"and others by selecting or deselecting values in that column.<br><br><center><b>Try exploring the filter menus " +
+							"a bit now.</b></center>",
 						position: "top"
 					},
 					{
@@ -1606,7 +1608,8 @@
 							"<br>The columns are exported in the order they are displayed in the grid.<br><br>For Taxa exports, " +
 							"the outline tree will be translated into additional columns at the start of each interaction.<br><br>" +
 							"The Location outline is not translated into the interaction data at this time, every other column " +
-							"will export.",
+							"will export.<br><br>For an explanation of the csv format and how to use the file, see the note at the " + 
+							"bottom of the \"Search Tips\"",
 						position: "left"
 					},
 				]
@@ -1614,13 +1617,15 @@
 		} /* End buildIntro */
 		function setGridState() {
 			$('#search-grid').css("height", "444px");
-			$('#search-focus').val('taxa');
+			$('#search-focus').val("taxa");
+	        $('#show-tips').off("click");
 			selectSearchFocus();
 			$('#search-focus').off("change");
 		}
 		function resetGridState() {
-			$('#search-focus').val('taxa');
-			$('#search-grid').css("height", "888px")		
+			$('#search-focus').val("taxa");
+			$('#search-grid').css("height", "888px");
+	        $('#show-tips').click(showTips);
 			$('#search-focus').change(selectSearchFocus);
 		}
 	} 	/* End startIntro */
@@ -1632,15 +1637,22 @@
 	function showTips() {  console.log("show tips called.")
 		if (!$('#tips-close-bttn').length) { initSearchTips(); }
 	    $('#base-overlay, #base-overlayPopUp').fadeIn(500);
+        $('#show-tips').html("&nbsp&nbspHide Tips&nbsp&nbsp");
+        $('#show-tips').off("click");
+        $('#show-tips').click(hideTips);
 	}
 	function hideTips() {
 	    $('#base-overlay').fadeOut(500, removeTips);
+        $('#show-tips').html("Search Tips");
+        $('#show-tips').off("click");
+        $('#show-tips').click(showTips);
 	}
 	function removeTips() {  console.log("removeTips called.")
 	   	$('#base-overlay, #base-overlayPopUp').css("display", "none");
 	}
 	function addPopUpStyles() {
 		$('#base-overlayPopUp').css({
+			"font-size": "1.1em",
 			"height": "811px",
 			"width": "650px",
 			"padding": "2.2em", 
@@ -1663,6 +1675,8 @@
             if (evt.keyCode == 27) { hideTips(); }
         });
         $("#base-overlay").click(hideTips);
+        $('#show-tips').off("click");
+        $('#show-tips').click(hideTips);
         $("#base-overlayPopUp").click(function(e) { e.stopPropagation(); });
     }
     function addCloseButton() {
@@ -1673,29 +1687,33 @@
    	function searchTips() {
 		return `
 			<h3>Tips for searching</h3>
-			<ul class="disc-list" style="width: 755px margin: auto"> 
-			    <br><li>You can search the database by clicking on “Search” in the drop-down menu 
-			    under the “Database” tab. Follow along with the tutorial for a guided tour 
-			    of the search functionality.</li>
-			    <br><li>If you would like to search by interaction type or habitat type, hover on 
-			    “Interaction Type” header, click on the revealed filter menu, and select which type 
-			    to include in your search. (<a href="definitions">Click here to see definitions</a> 
-			    for each interaction and habitat type.)</li>
-			    <br><li>If you are interested in knowing all the fruit species known from a bat species’ 
-				diet, search for the bat species, then select “Fruit” and “Seed” among the Tags. This will 
-				provide you with a list of all plant species known to have their fruit consumed, seeds 
-				consumed, and seeds dispersed by that particular bat species. 
-				(<a href="definitions">Click here to see definitions </a>for each interaction type.)</li>
-			    <br><li>Similarly, if you are interested in knowing all of the flower species known 
-			    from a bat species’ diet, search for the bat species, then select “Flower” among the 
-			    Tags. This will provide you with a list of all plant species known to have their 
-			    flowers visited, consumed, or pollinated by that particular bat species.</li>
-			    <br><li>If you are interested in knowing all of the bat species known to visit or 
-			    pollinate a particular plant species, select Taxon and then Plant in the “Group Taxa 
-			    by” menu. Select the most specific level you would like (family, genus, species). 
-			    Next, select “Flower” from the “Tag” column's header menu. This will provide information 
-			    on the bats that visit the flower as well as those that have been confirmed pollinating it.</li>
-			</ul>`;
+            <ul class="disc-list" style="font-size: 1.1em width: 755px margin: auto"> 
+                <br><li style="padding-left: 1em"><strong>To search by specific interaction or habitat types</strong> hover on 
+                “Interaction Type” header, click on the revealed filter menu, and select which type 
+                to include in your search. (<a href="definitions">Click here to see definitions</a> 
+                for each interaction and habitat type.)</li>
+                <br><li style="padding-left: 1em"><strong>Interested in knowing all the fruit species known from a bat species’ 
+                diet?</strong> Search for the bat species, then select only “Fruit” and “Seed” in the filter 
+                menu for the Tags column. This will provide you with a list of all plant species known to have their 
+                fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
+                <br><li style="padding-left: 1em"><strong>Or all of the flower species known from a bat species’ diet?</strong> 
+                Search for the bat species, then only “Flower” in the filter menu for the Tags column. This will provide 
+                you with a list of all plant species known to have their flowers visited, consumed, 
+                or pollinated by that particular bat species.</li>
+                <br><li style="padding-left: 1em"><strong>Interested in knowing all of the bat species known to visit or 
+                pollinate a particular plant species?</strong> Select Taxon for "Group interactions by" 
+                and then Plant for “Group Taxa by”. You can the optionally narrow to the most specific 
+                level you would like: family, genus, species. Next, select only “Flower” in the filter menu for the 
+                Tags column. This will provide information on the bats that visited 
+                the flower as well as those that have been confirmed pollinating it.</li>
+                <br><li style="padding-left: 1em"><b>Follow along with the tutorial for a guided tour 
+                of the search functionality.</b></li><br>
+            </ul>
+            <p style="font-size: 1.1em text-align: justify"> Note: "csv" stands for comma seperated values. The interaction
+            data in the grid can be downloaded in this format, as a plain-text file containing tabular 
+            data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
+            `;;
+
 	}
 /*----------------------Util----------------------------------------------------------------------*/
 	function addOrRemoveCssClass(element, className, add) {
