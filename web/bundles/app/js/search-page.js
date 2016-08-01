@@ -1619,7 +1619,7 @@
 			$('#search-grid').css("height", "444px");
 			$('#search-focus').val("taxa");
 	        $('#show-tips').off("click");
-			selectSearchFocus();
+			// selectSearchFocus();
 			$('#search-focus').off("change");
 		}
 		function resetGridState() {
@@ -1653,7 +1653,7 @@
 	function addPopUpStyles() {
 		$('#base-overlayPopUp').css({
 			"font-size": "1.1em",
-			"height": "811px",
+			"height": "666px",
 			"width": "650px",
 			"padding": "2.2em", 
 			"text-align": "left",

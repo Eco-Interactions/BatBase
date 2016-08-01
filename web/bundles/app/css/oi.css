@@ -341,7 +341,7 @@ span.lbl {
 }
 #tips-close-bttn {
 	position: absolute;
-	top: 770px;
+	top: 630px;
 	left: 550px;
 }
 #loc-dev-msg {
@@ -600,11 +600,11 @@ label[for=fos_user_registration_form_about_me] {
 }
 /*-- Future Dev --*/
 #future-dev-pg .first-col {
-	/*width:150%;*/
+	width: 64%;
 }
-#future-dev-pg .second-col {
-	width:150%;
-}
+/*#future-dev-pg .second-col {
+	width: 40%;
+}*/
 #future-dev-pg ul {
 	margin-left: 1em;
 }
@@ -631,8 +631,11 @@ label[for=fos_user_registration_form_about_me] {
 #about-db .first-col>ul {
 	margin-left: 1em;
 }
-#about-db .second-col, #about-db .first-col {
-	width: 42%;
+#about-db .first-col {
+	width: 54%;
+}
+#about-db .second-col {
+	width: 46%;
 }
 #data-map {
 	display: block;
