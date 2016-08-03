@@ -35,9 +35,13 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
-		if (localStorage && !localStorage.getItem('alpha')){
-			localStorage.clear();
-			populateStorage('alpha', true);
+		if (localStorage && !localStorage.getItem('beta')){
+			removeFromStorage('taxaRcrds', true);
+			removeFromStorage('locRcrds', true);
+			removeFromStorage('intRcrds', true);
+			removeFromStorage('alpha', true);
+			// localStorage.clear();
+			populateStorage('beta', true);
 		}
 	}
 	function addDomEventListeners() {
@@ -77,7 +81,7 @@
 		$('#borderLayout_eRootPanel').fadeTo(100, 1);
 	    $('#search-popUpDiv, #search-overlay').hide();
 	}
-	function toggleExpandTree() {  console.log("toggleExpandTree")
+	function toggleExpandTree() {  												// console.log("toggleExpandTree")
   		var expanded = $(this).data('xpanded');
   		if (expanded) { 
   			gridOptions.api.collapseAll();
@@ -180,7 +184,7 @@
 		 * If a region has no countries, and for every country key, the location 
 		 * records are in array format.
 		 */
-		function fillLocsSetWithInteractionRcrds(treeObj) { 					console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
+		function fillLocsSetWithInteractionRcrds(treeObj) { 					// console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
 			for (var topKey in treeObj) {  										// console.log("topKey of treeObj = ", topKey);
 				if (Array.isArray(treeObj[topKey])) {  
 					getArrayInteractions(treeObj[topKey]);
@@ -316,7 +320,7 @@
 	/*----------------- Location ---------------------------------------------*/
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
-		var finalRowData = [];   console.log("locData = %O", locData);
+		var finalRowData = [];  // console.log("locData = %O", locData);
 		curTree = locData;
 
 		addFutureDevMsg();
@@ -1837,6 +1841,9 @@ function setlocalStorage() {
 		if (localStorage) { 													// console.log("localStorage active.");
 			localStorage.setItem(key, val);
 		} else { console.log("No Local Storage Available"); }
+	}
+	function removeFromStorage(key) {
+		localStorage.removeItem(key);
 	}
 	function getRemainingStorageSpace() {
 		 var limit = 1024 * 1024 * 5; // 5 MB
