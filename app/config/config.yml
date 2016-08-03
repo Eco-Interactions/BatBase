@@ -89,7 +89,7 @@ fos_user:
     firewall_name: main
     user_class: AppBundle\Entity\User
     from_email:
-        address:        batplantdb@gmail.com
+        address:        noreply@batplant.org
         sender_name:    BatPlant.org
     registration:
         confirmation:
