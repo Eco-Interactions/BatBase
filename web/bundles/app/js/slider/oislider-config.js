@@ -3,7 +3,8 @@ $(function(){
 	var imagePath = getImagePath();
 	
 	function getImagePath() {
-		var imageUrl = $('#masthead').data('img-path').split("/");
+		var imageUrl = $('#masthead').data('img-path') ? 
+			$('#masthead').data('img-path').split("/") : [];		
 		var cacheQuery = imageUrl.splice(imageUrl.length-1, 1);
 		return imageUrl.join('/') + '/';
 	}
