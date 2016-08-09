@@ -81,6 +81,36 @@ class Location
     private $showOnMap;
 
     /**
+     * @var \AppBundle\Entity\Location
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLoc")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id")
+     * })
+     */
+    private $parentLoc;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc")
+     * @ORM\OrderBy({
+     *     "displayName"="ASC"
+     * })
+     */
+    private $childLocs;
+
+    /**
+     * @var \AppBundle\Entity\LocationType
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
+     * })
+     */
+    private $locationType;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location")
@@ -158,6 +188,7 @@ class Location
     public function __construct()
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->childLocs = new \Doctrine\Common\Collections\ArrayCollection();
         $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
@@ -169,74 +200,6 @@ class Location
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Add interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     *
-     * @return Location
-     */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions[] = $interactions;
-
-        return $this;
-    }
-
-    /**
-     * Remove interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     */
-    public function removeInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions->removeElement($interactions);
-    }
-
-    /**
-     * Get interactions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getInteractions()
-    {
-        return $this->interactions;
-    }
-
-    /**
-     * Add Regions.
-     *
-     * @param \AppBundle\Entity\Region $regions
-     *
-     * @return Country
-     */
-    public function setRegion(\AppBundle\Entity\Region $regions)
-    {
-        $this->regions[] = $regions;
-
-        return $this;
-    }
-
-    /**
-     * Remove Regions.
-     *
-     * @param \AppBundle\Entity\Region $regions
-     */
-    public function removeRegion(\AppBundle\Entity\Region $regions)
-    {
-        $this->regions->removeElement($regions);
-    }
-
-    /**
-     * Get regions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRegions()
-    {
-        return $this->regions;
     }
 
     /**
@@ -405,6 +368,156 @@ class Location
     public function getLongitude()
     {
         return $this->longitude;
+    }
+
+    /**
+     * Set parentLoc.
+     *
+     * @param \AppBundle\Entity\Location $parentLoc
+     *
+     * @return Location
+     */
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc = null)
+    {
+        $this->parentLoc = $parentLoc;
+
+        return $this;
+    }
+
+    /**
+     * Get parentLoc.
+     *
+     * @return \AppBundle\Entity\Location
+     */
+    public function getParentLoc()
+    {
+        return $this->parentLoc;
+    }
+
+    /**
+     * Add childLoc.
+     *
+     * @param \AppBundle\Entity\Location $childLoc
+     *
+     * @return Location
+     */
+    public function addChildLoc(\AppBundle\Entity\Location $childLoc)
+    {
+        $this->childLoc[] = $childLoc;
+
+        return $this;
+    }
+
+    /**
+     * Remove childLoc.
+     *
+     * @param \AppBundle\Entity\Location $childLoc
+     */
+    public function removeChildLoc(\AppBundle\Entity\Location $childLoc)
+    {
+        $this->childLoc->removeElement($childLoc);
+    }
+
+    /**
+     * Get childLoc.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildLoc()
+    {
+        return $this->childLoc;
+    }
+
+    /**
+     * Set locationType.
+     *
+     * @param \AppBundle\Entity\LocationType $locationType
+     *
+     * @return Location
+     */
+    public function setLocationType(\AppBundle\Entity\LocationType $locationType = null)
+    {
+        $this->locationType = $locationType;
+
+        return $this;
+    }
+
+    /**
+     * Get locationType.
+     *
+     * @return \AppBundle\Entity\LocationType
+     */
+    public function getLocationType()
+    {
+        return $this->locationType;
+    }
+
+    /**
+     * Add interactions.
+     *
+     * @param \AppBundle\Entity\Interaction $interactions
+     *
+     * @return Location
+     */
+    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
+    {
+        $this->interactions[] = $interactions;
+
+        return $this;
+    }
+
+    /**
+     * Remove interactions.
+     *
+     * @param \AppBundle\Entity\Interaction $interactions
+     */
+    public function removeInteraction(\AppBundle\Entity\Interaction $interactions)
+    {
+        $this->interactions->removeElement($interactions);
+    }
+
+    /**
+     * Get interactions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getInteractions()
+    {
+        return $this->interactions;
+    }
+
+    /**
+     * Add Regions.
+     *
+     * @param \AppBundle\Entity\Region $regions
+     *
+     * @return Country
+     */
+    public function setRegion(\AppBundle\Entity\Region $regions)
+    {
+        $this->regions[] = $regions;
+
+        return $this;
+    }
+
+    /**
+     * Remove Regions.
+     *
+     * @param \AppBundle\Entity\Region $regions
+     */
+    public function removeRegion(\AppBundle\Entity\Region $regions)
+    {
+        $this->regions->removeElement($regions);
+    }
+
+    /**
+     * Get regions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRegions()
+    {
+        return $this->regions;
     }
 
     /**
