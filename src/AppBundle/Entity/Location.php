@@ -378,7 +378,7 @@ class Location
      *
      * @return Location
      */
-    public function setParentLoc(\AppBundle\Entity\Location $parentLoc = null)
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc)
     {
         $this->parentLoc = $parentLoc;
 
