@@ -99,6 +99,7 @@ class AjaxController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }   
+
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
         $requestContent = $request->getContent();
@@ -146,7 +147,7 @@ class AjaxController extends Controller
                     $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));   
                 }
             }
-            $em->persist($entity);  //$logger->info('SASSSSSSS:: parent id ??->' . print_r($entity->getParentLoc()->getId(), true));    $logger->info('SASSSSSSS:: parent id ??->' . print_r($entity->getParentLoc()->getId(), true));   
+            $em->persist($entity);
             $em->flush();
         
                 $logger->error('SASSSSSSS:: parentLocId ->' . print_r($entity->getParentLoc()->getId(), true));
