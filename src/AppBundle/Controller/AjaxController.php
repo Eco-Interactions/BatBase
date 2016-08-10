@@ -51,7 +51,7 @@ class AjaxController extends Controller
                 
                 $setField = "set" . ucfirst($field); //  $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
                 
-                $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $entityClassPrefix, $logger) {
+                $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $logger) {
                     $refId = $refData->$field->$val;  //    $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
                     $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
                     $entity->$setField($relatedEntity);
@@ -88,6 +88,81 @@ class AjaxController extends Controller
 
         return $response;
     }
+    /**
+     * Post entitoes with more complex relationships and/or properties.
+     * 
+     * @Route("/post/complex", name="app_ajax_post_complex")
+     * @Method("POST")
+     */
+    public function postComplexAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }   
+        
+        $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent);
+        
+        $entityData = $pushedData->data->entityData;
+        $refData = $pushedData->data->refData;                 $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+        $linkFields = $pushedData->data->linkFields;           $logger->error('SASSSSSSS:: linkFields ->' . print_r($linkFields, true));
+        $cmplxFields = $pushedData->data->cmplxFields;        // $logger->error('SASSSSSSS:: refData ->' . print_r($refData, true));
+
+        $entityName = $pushedData->entity;
+        $entityClassPrefix = "AppBundle\\Entity\\";
+        $entityClass = $entityClassPrefix . $entityName;        $logger->info('SASSSSSSS:: entityName ->' . print_r($entityName, true));
+        
+        $returnRefs = [];
+        $returnData = [];
+
+        foreach ($entityData as $rcrdId => $rcrd) {   
+            $entity = new $entityClass;
+
+            foreach ($rcrd as $field => $val) {
+                if ($val === null) { continue; }
+
+                $setField = "set" . ucfirst($field);            $logger->info('SASSSSSSS:: setField ->' . print_r($setField, true));
+
+                $setRefField = function($field, $val) use ($entity, $refData, $setField, $em, $logger) {
+                    $refId = $refData->$field->$val;  //    $logger->error('SASSSSSSS:: subRefId ->' . print_r($refId, true));
+                    $relatedEntity = $em->getRepository("AppBundle\\Entity\\" . $field)->find($refId);
+                    $entity->$setField($relatedEntity);
+                };
+
+                if (!empty($linkFields) && in_array($field, $linkFields)) {      //$logger->error('SASSSSSSS:: val ->' . print_r($val, true));
+                    if (is_array($val)) {
+                        foreach ($val as $subVal) {
+                            $setRefField($field, $subVal);                           
+                        }
+                    } else {
+                        $setRefField($field, $val);              
+                    }
+                } elseif (property_exists($cmplxFields, $field)) {
+                    $relEntity = $em->getRepository('AppBundle:' . $cmplxFields->$field)
+                        ->findOneBy(array('id' => $val));  $logger->error('SASSSSSSS:: relEntity desc->' . print_r($relEntity->getDescription(), true));
+                    $entity->$setField = $relEntity;     $logger->info('SASSSSSSS:: parent id ??->' . print_r($entity->getParentLoc()->getId(), true));   
+                    ;            
+                } else {
+                    $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));   
+                }
+            }
+            $em->persist($entity);
+            $em->flush();
+        
+                $logger->error('SASSSSSSS:: parentLocId ->' . print_r($entity->getParentLoc()->getId(), true));
+
+            $returnData[$rcrdId] = $entity->getId();
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            $entityName => $returnData,
+        ));
+
+        return $response;
+    }    
     /**
      * Post locations to regions
      * 
