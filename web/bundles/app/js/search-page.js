@@ -35,13 +35,11 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
-		if (localStorage && !localStorage.getItem('beta')){
-			removeFromStorage('taxaRcrds', true);
-			removeFromStorage('locRcrds', true);
-			removeFromStorage('intRcrds', true);
-			removeFromStorage('alpha', true);
-			// localStorage.clear();
-			populateStorage('beta', true);
+		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
+		if (localStorage && !localStorage.getItem('gamma')){
+			localStorage.clear();
+			if ( prevVisit ) { populateStorage('prevVisit', true); }
+			populateStorage('gamma', true);
 		}
 	}
 	function addDomEventListeners() {
