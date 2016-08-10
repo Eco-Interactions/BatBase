@@ -83,7 +83,7 @@ class Location
     /**
      * @var \AppBundle\Entity\Location
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLoc")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLocs")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id")
      * })
@@ -190,6 +190,7 @@ class Location
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childLocs = new \Doctrine\Common\Collections\ArrayCollection();
         $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
+        // $this->defaultLoc = 
     }
     
     /**
@@ -377,7 +378,7 @@ class Location
      *
      * @return Location
      */
-    public function setParentLoc(\AppBundle\Entity\Location $parentLoc = null)
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc)
     {
         $this->parentLoc = $parentLoc;
 
@@ -395,37 +396,37 @@ class Location
     }
 
     /**
-     * Add childLoc.
+     * Add childLocs.
      *
-     * @param \AppBundle\Entity\Location $childLoc
+     * @param \AppBundle\Entity\Location $childLocs
      *
      * @return Location
      */
-    public function addChildLoc(\AppBundle\Entity\Location $childLoc)
+    public function addChildLocs(\AppBundle\Entity\Location $childLocs)
     {
-        $this->childLoc[] = $childLoc;
+        $this->childLocs[] = $childLocs;
 
         return $this;
     }
 
     /**
-     * Remove childLoc.
+     * Remove childLocs.
      *
-     * @param \AppBundle\Entity\Location $childLoc
+     * @param \AppBundle\Entity\Location $childLocs
      */
-    public function removeChildLoc(\AppBundle\Entity\Location $childLoc)
+    public function removeChildLocs(\AppBundle\Entity\Location $childLocs)
     {
-        $this->childLoc->removeElement($childLoc);
+        $this->childLocs->removeElement($childLocs);
     }
 
     /**
-     * Get childLoc.
+     * Get childLocs.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getChildLoc()
+    public function getChildLocs()
     {
-        return $this->childLoc;
+        return $this->childLocs;
     }
 
     /**
