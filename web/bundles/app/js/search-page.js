@@ -36,10 +36,10 @@
 	}
 	function clearLocalStorageCheck() {
 		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-		if (localStorage && !localStorage.getItem('gamma')){
+		if (localStorage && !localStorage.getItem('delta')){
 			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
-			populateStorage('gamma', true);
+			populateStorage('delta', true);
 		}
 	}
 	function addDomEventListeners() {
@@ -186,9 +186,9 @@
 			for (var topKey in treeObj) {  										// console.log("topKey of treeObj = ", topKey);
 				if (Array.isArray(treeObj[topKey])) {  
 					getArrayInteractions(treeObj[topKey]);
-					continue;
+				} else {
+					fillLocsSetWithInteractionRcrds(treeObj[topKey]);
 				}
-				fillLocsSetWithInteractionRcrds(treeObj[topKey]);
 			}
 		}
 		function getArrayInteractions(treeAry) { 								// console.log("treeAry = %O", treeAry)
@@ -214,31 +214,65 @@
 			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
 		}
 	}
-	function storeAndLoadLocs(data) {											//console.log("location data recieved. %O", data);
+	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
 		var locRcrds = sortLocTree(data.results);
 		populateStorage('locRcrds', JSON.stringify(locRcrds));
 		showLocSearch(locRcrds);
 	}
-	function sortLocTree(locData) {
-		var sortedLocs = {};
-		var regions = Object.keys(locData).sort();  								//console.log("regions = %O", regions)
-		for (var i=0; i<regions.length; i++){
-			if (Array.isArray(locData[regions[i]])) { 
-				sortedLocs[regions[i]] = locData[regions[i]].sort();
-				continue;
-			}
-			sortedLocs[regions[i]] = sortCountryLvl(locData[regions[i]]);
-		}
+	/**
+	 * Alpabetizes all locations and sub-locations in the data object and nests 
+	 * sub-regions under their parent region.
+	 */
+	function sortLocTree(data) {
+		var locData = nestSubRegions(data);    console.log("----locData = %O", locData);
+		var sortedLocs = sortLocDataObj(locData);   console.log("sortedLocs = %O", sortedLocs)
 		return sortedLocs;
 	}
-	function sortCountryLvl(regionObj) {
-		var countries = Object.keys(regionObj).sort();
-		var returnObj = {};
-		for (var i=0; i<countries.length; i++){
-			returnObj[countries[i]] = regionObj[countries[i]].sort(alphaLocDesc);
-		}		
-		return returnObj;
+	/** Nests sub-regions under their parent regions. */
+	function nestSubRegions(data) {  									    console.log("nestSubRegions called. locData = %O", data);
+		var subRegionMap = {
+			"North Africa" : "Africa", 			"North Asia" : "Asia",
+			"Sub-Saharan Africa" : "Africa",	"West & Central Asia" : "Asia",
+			"East Asia" : "Asia",				"South & Southeast Asia" : "Asia" };
+		var returnData = {};
+		returnData["Africa"] = { "Africa-Unspecified": data["Africa"]["Africa-Unspecified"] };
+		returnData["Asia"] = {};
+
+		for (var region in data) {   console.log("region = ", region)
+			if (region in subRegionMap) { //console.log("region in subRegion map = %s, %s", region, subRegionMap[region])
+				returnData[subRegionMap[region]][region] = data[region];  //console.log("returnData[%s] = %O", region, returnData[subRegionMap[region]])
+			} else if (region !== "Africa"){ returnData[region] = data[region]; } 
+		}
+		return returnData;
 	}
+	/** Alpabetizes all locations and sub-locations in the data object */
+	function sortLocDataObj(data) {
+		var keys = Object.keys(data).sort();  		console.log("keys = %O", keys)
+		var returnObj = {};
+		for (var i=0; i<keys.length; i++){ 
+			returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
+		}
+		return returnObj;
+	
+		function sortSubLocs(locObj) {   console.log("sortSubLocs locObj = %O", locObj)
+			var subLocs = Object.keys(locObj).sort();
+			var returnObj = {};
+
+			for (var i=0; i<subLocs.length; i++){
+				if (Array.isArray(locObj[subLocs[i]])) { 
+					returnObj[subLocs[i]] = locObj[subLocs[i]].sort(alphaLocDesc);
+				} else if (typeof locObj[subLocs[i]] === "object" && locObj[subLocs[i]] !== null) {  
+					handleLocObj(locObj[subLocs[i]], subLocs[i]); }
+			}		
+			return returnObj;
+
+			function handleLocObj(locObj, subLoc) {
+				if (locObj.id === undefined) { returnObj[subLoc] = sortSubLocs(locObj); 
+				} else { returnObj[subLoc] = locObj; }
+			}
+		} /* End sortSubLocs */
+	} /* End sortLocDataObj */
+	/** Alphabetizes array via sort method. */
 	function alphaLocDesc(a, b) {
 		var x=a.desc.toLowerCase();
 	    var y=b.desc.toLowerCase();
