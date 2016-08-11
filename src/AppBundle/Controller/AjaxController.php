@@ -427,6 +427,9 @@ class AjaxController extends Controller
             $interactions = $location->getInteractions();
             $loc->interactions = $this->getInteractions($interactions);
 
+            $region = $this->getLocRegions($location->getRegions());            //$logger->error('SASSSSSSSSSSSS:: region = ' . print_r($region, true));
+            $loc->region = $region;
+
             if ($location->getCountry() === null) {
                 $country =  null;
                 $countryId = null;
@@ -434,31 +437,19 @@ class AjaxController extends Controller
                 $country = $location->getCountry()->getName();
                 $countryId = $location->getCountry()->getId();
             }
-            $region = $this->getLocRegions($location->getRegions());            //$logger->error('SASSSSSSSSSSSS:: region = ' . print_r($region, true));
             $loc->country = $country;
             $loc->countryId = $countryId;
-            $loc->region = $region;
 
-            if ( $country === null ) {
-                if ( !property_exists($intsByRegion, $region) ) {//  $logger->error('SASSSSSSSSSSSS:: region property being created = ' . print_r($region, true));
-                    $intsByRegion->$region = []; 
-                }
-                if (is_array($intsByRegion->$region)) {
-                    $intsByRegion->$region = array_merge( 
-                        $intsByRegion->$region, [ $loc->id => $loc ]
-                    );         
-                } else {
-                    if ( !property_exists($intsByRegion->$region, "Unspecified") ) {
-                        $intsByRegion->$region->Unspecified = [];
-                    }
-                    $intsByRegion->$region->Unspecified = array_merge( 
-                        $intsByRegion->$region->Unspecified, [ $loc->id => $loc ]
-                    ); 
-                }
+            if ( !property_exists($intsByRegion, $region) ) {  ///$logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
+                $intsByRegion->$region = new \stdClass; 
+            }
+            if ( $country === null ) { // 
+                $locDesc = $loc->desc;
+                if ( !property_exists($intsByRegion->$region, $locDesc) ) { 
+                    $intsByRegion->$region->$locDesc = []; 
+                }                
+                array_push( $intsByRegion->$region->$locDesc, $loc ); 
             } else {
-                if ( !property_exists($intsByRegion, $region) ) {  ///$logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
-                    $intsByRegion->$region = new \stdClass; 
-                }
                 if ( !property_exists($intsByRegion->$region, $country) ) { 
                     $intsByRegion->$region->$country = []; 
                 }
