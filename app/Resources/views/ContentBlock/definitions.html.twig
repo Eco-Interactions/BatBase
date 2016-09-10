@@ -8,10 +8,14 @@
 	<div id="def-frame">
 	{% embed 'two_cols_sect.html.twig' %}
 		{% block firstcol %}
-			{{ blocks["definitions-habitat-types"]|raw }}
+			<div id="definitions-habitat-types" class="wysiwyg">
+				{{ blocks["definitions-habitat-types"]|raw }}
+			</div>
 		{% endblock %}
 		{% block secondcol %}
-			{{ blocks["definitions-interaction-types"]|raw }}
+			<div id="definitions-interaction-types" class="wysiwyg">
+				{{ blocks["definitions-interaction-types"]|raw }}
+			</div>
 		{% endblock %}
 	{% endembed %}
 	</div>
