@@ -8,8 +8,12 @@
     <div id="future-dev-pg" class="top-pgs">
     {% embed 'two_cols_sect.html.twig' %}
         {% block firstcol %}
-            {{ blocks["future-developments-announcements"]|raw }}
-            {{ blocks["future-developments-overview"]|raw }}
+            <div id="future-developments-announcements" class="wysiwyg">
+                {{ blocks["future-developments-announcements"]|raw }}
+            </div>
+            <div id="future-developments-overview" class="wysiwyg">
+                {{ blocks["future-developments-overview"]|raw }}
+            </div>
         {% endblock firstcol %}
         {% block secondcol %}            
             <h3>Publications to be added to the database:</h3>
