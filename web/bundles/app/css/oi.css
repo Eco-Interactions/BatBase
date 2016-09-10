@@ -167,10 +167,10 @@ span.lbl {
 }
 .wsywigEdit {
 	position: absolute;
-	top: -10px;
+	top: 0;
 	right: 0;
 	height: 1.5em;
-	z-index: 1000;
+	z-index: 10;
 }
 /*-- Header --*/
 #logo-overlay {

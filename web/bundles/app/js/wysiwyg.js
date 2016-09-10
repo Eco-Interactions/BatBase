@@ -33,7 +33,8 @@ $(document).ready(function(){
                     save: { // plugin name
                         init: function(trumbowyg) { 
                             const btnDef = {
-                                ico: 'upload',
+                                // ico: 'save',
+                                hasIcon: false,
                                 fn: function() {                            // console.log("saving. trumbowyg = %O", trumbowyg );
                                     var blkId = trumbowyg.o.plugins.save.id;
                                     var content = $('#' + blkId ).trumbowyg('html');            // console.log("blkId = ", blkId)
