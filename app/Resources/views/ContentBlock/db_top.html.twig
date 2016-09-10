@@ -8,13 +8,23 @@
 	<div id="about-db" class="top-pgs bot-em-mrg">
 	{% embed 'two_cols_sect.html.twig' %}
 		{% block firstcol %}
-			{{ blocks["about-db-data"]|raw }}
-			{{ blocks["how-to-cite"]|raw }}
-			{{ blocks["about-db-how-to-use"]|raw }}
-			{{ blocks["about-db-tips"]|raw }}
+			<div id="about-db-data" class="wysiwyg">
+				{{ blocks["about-db-data"]|raw }}
+			</div>
+			<div id="how-to-cite" class="wysiwyg">
+				{{ blocks["how-to-cite"]|raw }}
+			</div>
+			<div id="about-db-how-to-use" class="wysiwyg">
+				{{ blocks["about-db-how-to-use"]|raw }}
+			</div>
+			<div id="about-db-tips" class="wysiwyg">
+				{{ blocks["about-db-tips"]|raw }}
+			</div>
 		{% endblock %}
 		{% block secondcol %}
-			{{ blocks["about-db-caveats"]|raw }}
+			<div id="about-db-caveats" class="wysiwyg">
+				{{ blocks["about-db-caveats"]|raw }}
+			</div>
 		{% endblock %}
 	{% endembed %}
 	</div>
