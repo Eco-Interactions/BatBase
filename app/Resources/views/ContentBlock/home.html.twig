@@ -15,12 +15,18 @@
 		{% block firstcol %}
 			{% if eifrole == 'member' %}
 				<h2 style="color: #2D7853;">Welcome {{ eifusername }}</h2>
-				{{ blocks['member-welcome']|raw }}
+				<div class="wysiwyg" id="member-welcome">
+					{{ blocks['member-welcome']|raw }}
+				</div>
 			{% endif %}
-			{{ blocks['home-pg-intro']|raw }}
+			<div class="wysiwyg" id="home-pg-intro">
+				{{ blocks['home-pg-intro']|raw }}
+			</div>
 		{% endblock firstcol %}
 		{% block secondcol %}
-			{{ blocks['home-pg-second-col']|raw }}
+			<div class="wysiwyg" id="home-pg-second-col">
+				{{ blocks['home-pg-second-col']|raw }}
+			</div>
 		{% endblock secondcol%}
 	{% endembed %}
 	</div>

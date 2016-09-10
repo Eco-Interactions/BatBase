@@ -136,21 +136,6 @@ span.lbl {
 #detail-block h5 {
 	margin: 0 0 5px 0;
 }
-/*#top-pgs h3 {
-	font-size: 1.2em;
-	margin: .75em 0 .5em 0;
-}
-#top-pgs p, #top-pgs ul li, #top-pgs ol li  {		Clean up all these old references and free the ids!
-	margin: .2em 0 0 1em;
-	padding: .3em 0 .3em 0;
-	font-size: 1.05em;
-}
-#top-pgs .second-col {
-	margin: 0 20px 0 5px;
-}
-#top-pgs .first-col {
-	width: 1800px;
-}*/
 .top-pgs h3 {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
@@ -176,6 +161,16 @@ span.lbl {
 }
 #footer-tos {
 	/*align-self: flex-end;*/
+}
+.wysiwyg {
+	position: relative;
+}
+.wsywigEdit {
+	position: absolute;
+	top: -10px;
+	right: 0;
+	height: 1.5em;
+	z-index: 1000;
 }
 /*-- Header --*/
 #logo-overlay {
@@ -642,10 +637,9 @@ label[for=fos_user_registration_form_about_me] {
 	margin: 40px auto 40px auto;
 }
 /*-- Sources --*/
-#src-pg>p {
+/*#src-pg {
 	width: 800px;
 	font-size: 1.21em;
-	text-align: justify;
 	margin-left: 1em;
 }
 #src-pg>ul {
@@ -654,7 +648,7 @@ label[for=fos_user_registration_form_about_me] {
 }
 #src-pg>ul>li {
 	margin: .4em;
-}
+}*/
 /*-- Definition --*/
 #def-frame p {
 }
