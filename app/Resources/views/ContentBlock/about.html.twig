@@ -8,15 +8,21 @@
 	<div id="about-pg" class="top-pgs">
 		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
-				{{ blocks["about-pg-history"]|raw }}
-				{{ blocks["about-pg-future-dev"]|raw }}
+				<div id="about-pg-history" class="wysiwyg">
+					{{ blocks["about-pg-history"]|raw }}
+				</div>
+				<div id="about-pg-future-dev" class="wysiwyg">
+					{{ blocks["about-pg-future-dev"]|raw }}
+				</div>	-
 			{% endblock %}
 			{% block secondcol %}
-				<div>
+				<div  id="about-pg-announcements" class="wysiwyg">
 					{{ blocks["about-pg-announcements"]|raw }}
 				</div>
-				<div>
+				<div  id="about-pg-contact" class="wysiwyg">
 					{{ blocks["about-pg-contact"]|raw }}
+				</div>
+				<div id="about-pg-acknowledgements" class="wysiwyg">
 					{{ blocks["about-pg-acknowledgements"]|raw }}
 				</div>
 			{% endblock %}
@@ -29,19 +35,27 @@
 		{% embed 'four_cols_sect.html.twig' %}
 			{% block firstcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
-				{{ blocks["team-cullen"]|raw }}
+				<div id="team-cullen" class="wysiwyg">
+					{{ blocks["team-cullen"]|raw }}
+				</div>
 			{% endblock %}
 			{% block secondcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
-				{{ blocks["team-tuli"]|raw }}
+				<div id="team-tuli" class="wysiwyg">
+					{{ blocks["team-tuli"]|raw }}
+				</div>
 			{% endblock %}
 			{% block thirdcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
-				{{ blocks["team-taylor"]|raw }}
+				<div id="team-taylor" class="wysiwyg">
+					{{ blocks["team-taylor"]|raw }}
+				</div>
 			{% endblock %}
 			{% block fourthcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
-				{{ blocks["team-sarah"]|raw }}
+				<div id="team-sarah" class="wysiwyg">
+					{{ blocks["team-sarah"]|raw }}
+				</div>
 			{% endblock %}
 		{% endembed %}
 	</div>
