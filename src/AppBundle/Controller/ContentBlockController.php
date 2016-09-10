@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -156,6 +157,7 @@ class ContentBlockController extends Controller
 
         return $form;
     }
+    
     /**
      * Edits an existing Content Block entity.
      *
@@ -164,6 +166,10 @@ class ContentBlockController extends Controller
      */
     public function updateAction(Request $request, $slug)
     {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
         $em = $this->getDoctrine()->getManager();
 
         $entity = $em->getRepository('AppBundle:ContentBlock')
@@ -173,21 +179,20 @@ class ContentBlockController extends Controller
             throw $this->createNotFoundException('Unable to find Content Block entity.');
         }
 
-        $deleteForm = $this->createDeleteForm($entity->getId());
-        $editForm = $this->createEditForm($entity);
-        $editForm->handleRequest($request);
+        $logger = $this->get('logger');
+        $requestContent = $request->getContent();
+        $pushedData = json_decode($requestContent); $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $content = $pushedData->content;
 
-        if ($editForm->isSubmitted()) {
-            $em->flush();
+        $entity->setContent($content);
+        $em->flush();
 
-            return $this->redirect($this->generateUrl('admin_content_block_edit', array('slug' => $slug)));
-        }
-
-        return $this->render('contentblock/edit.html.twig', array(
-            'entity' => $entity,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
+        $response = new JsonResponse();
+        $response->setData(array(
+            'contentblock' => "success",
         ));
+
+        return $response;
     }
     /**
      * Deletes a Content Block entity.
