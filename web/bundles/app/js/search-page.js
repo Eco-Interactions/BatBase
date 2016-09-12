@@ -35,9 +35,9 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
+			localStorage.clear();
 		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
 		if (localStorage && !localStorage.getItem('delta')){
-			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
 			populateStorage('delta', true);
 		}
@@ -133,7 +133,7 @@
 		showPopUpMsg();
 		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
-		} else { sendAjaxQuery({}, 'ajax/search/interaction', storeInteractions); }
+		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
 	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data.results);
 		var intRcrds = JSON.stringify(data.results);
@@ -211,7 +211,7 @@
 		if( storedLocs ) {  //console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
 		} else { // console.log("Locations Not Found In Storage.");
-			sendAjaxQuery({}, 'ajax/search/location', storeAndLoadLocs);
+			sendAjaxQuery({}, 'search/location', storeAndLoadLocs);
 		}
 	}
 	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
@@ -412,7 +412,7 @@
 		if( storedDomains ) { // console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
 		} else { // console.log("Domains Not Found In Storage.");
-			sendAjaxQuery({props: ['slug', 'name']}, 'ajax/search/domain', storeAndLoadDomains);
+			sendAjaxQuery({props: ['slug', 'name']}, 'search/domain', storeAndLoadDomains);
 		}
 	}
 	function storeAndLoadDomains(data) {										//console.log("domain data recieved. %O", data);
@@ -438,7 +438,7 @@
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
 		} else { //  console.log("taxaRcrds Not Found In Storage.");
-			sendAjaxQuery(params, 'ajax/search/taxa', recieveTaxaRcrds);
+			sendAjaxQuery(params, 'search/taxa', recieveTaxaRcrds);
 		}
 	}
 	function recieveTaxaRcrds(data) {  											 //console.log("taxaRcrds recieved. %O", data);
@@ -1885,7 +1885,7 @@ function setlocalStorage() {
 		return string.length;
 	}
 /*-----------------AJAX ------------------------------------------------------*/
-	function sendAjaxQuery(dataPkg, url, successCb) {  							console.log("Sending Ajax data =%O", dataPkg)
+	function sendAjaxQuery(dataPkg, url, successCb) {  							console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
 		$.ajax({
 			method: "POST",
 			url: url,

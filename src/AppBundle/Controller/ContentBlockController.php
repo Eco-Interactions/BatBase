@@ -366,7 +366,6 @@ class ContentBlockController extends Controller
         );
     }
 
-
     /**
      * Finds and displays the future developments page content blocks.
      *
@@ -387,26 +386,6 @@ class ContentBlockController extends Controller
         );
     }
 
-    /**
-     * Finds and displays Definition page content blocks.
-     *
-     * @Route("/search", name="app_search")
-     */
-    public function searchAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-
-        // $firstcol = $repo->findOneBy(array('slug' => 'home-pg-intro'));
-
-        return $this->render('contentblock/search.html.twig', array(
-            // 'introduction' => $firstcol,
-            // 'memberWelcome' => $memberwelcome,
-            // 'secondColBlock' => $secondcol,
-             )
-        );
-    }
     /** Returns an associative array of the content blocks relevant data for a page. */
     public function getPageBlocks($contentBlocks)
     {
@@ -420,28 +399,4 @@ class ContentBlockController extends Controller
 
         return $returnData;
     }
-    // /**
-    //  * Finds and displays team page content blocks.
-    //  *
-    //  * @Route("/team", name="app_team")
-    //  */
-    // public function teamAction()
-    // {
-    //     $em = $this->getDoctrine()->getManager();
-
-    //     $repo = $em->getRepository('AppBundle:ContentBlock');
-
-    //     $cullen = $repo->findOneBy(array('slug' => 'team-pg-cullen-bio'));
-    //     $tuli = $repo->findOneBy(array('slug' => 'team-pg-tuli-bio'));
-    //     $taylor = $repo->findOneBy(array('slug' => 'team-pg-taylor-bio'));
-    //     $sarah = $repo->findOneBy(array('slug' => 'team-pg-sarah-bio'));
-
-    //     return $this->render('contentblock/team.html.twig', array(
-    //         'cullenBio' => $cullen,
-    //         'tuliBio' => $tuli,
-    //         'taylorBio' => $taylor,
-    //         'sarahBio' => $sarah,
-    //         )
-    //     );
-    // }
 }
