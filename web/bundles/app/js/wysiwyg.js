@@ -7,13 +7,42 @@ $(document).ready(function(){
     var userRole = $('body').data("user-role");
     if (userRole === "admin" || userRole === "super") { initWysiwyg(); }
     /**
-     *  Adds edit icons to each content block, contained inside of a div with 
-     *  the 'wysiwyg' class, on the page.
+     *  Adds edit content button to the top of any page with editable content blocks.
      */
     function initWysiwyg() {
-        var contentBlocks = $('.wysiwyg');  console.log("contentBlocks = %O", contentBlocks);
-        addEditPencils();
+        var contentBlocks = $('.wysiwyg'); // console.log("contentBlocks = %O", contentBlocks);
+        if (contentBlocks.length > 0) { addEditContentButton(); }
     } /* End initWysiwyg */
+    function addEditContentButton() {
+        var button = $('<button/>', {
+            text: "Edit Content", 
+            id: 'editContentBttn',
+            click: toggleContentBlockEditing
+        });  //console.log("button = %O", button)
+        button.css({
+            position: "absolute",
+            top: "8px",         // We were using px for the 'batplant.org' just above this button...  
+            right: "10px"       // in the interest of visual consistency, I am using px to style this as well.
+        });
+        $('#hdrtext').append(button);
+        $('#editContentBttn').data('editing', false);  // tracks which content block contains the active editor, if any.
+    }
+    /**
+     * Manages init and exit 'edit states' and related ui on the page.
+     */
+    function toggleContentBlockEditing() { 
+        var editorElem = $('#editContentBttn').data('editing');      //   console.log("togggling.  editorElem = %O", editorElem)
+        if (editorElem !== false) {
+            removeEditPencils();
+            $('#' + editorElem).trumbowyg("destroy");
+            $('#editContentBttn').data('editing', false)
+            $('#editContentBttn').text("Edit Content");
+        } else {
+            addEditPencils();
+            $('#editContentBttn').data('editing', true)
+            $('#editContentBttn').text("Stop Editing");
+        }
+    }
     /**
      * Extends the Trumbowyg library to include 'save' and 'cancel' buttons 
      * for the interface. The save button updates the content block in the 
@@ -71,7 +100,7 @@ $(document).ready(function(){
     } /* End addButtons */
     /** Returns the block container id by removing '-edit' from the passed editId */
     function getBlockContainerId(editId) {
-        var elemIdAry = editId.split('-'); //
+        var elemIdAry = editId.split('-'); 
         elemIdAry.pop();
         return elemIdAry.join('-');
     }
@@ -81,7 +110,7 @@ $(document).ready(function(){
      */
     function addEditPencils() {     
         var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'bundles/app/images/eif.pencil.svg';  
-        var contentBlocks = $('.wysiwyg');  console.log("contentBlocks = %O", contentBlocks);
+        var contentBlocks = $('.wysiwyg');  //console.log("contentBlocks = %O", contentBlocks);
         
         for (var i = 0; i < contentBlocks.length; i++) {
             var blkId = contentBlocks[i].id;  //console.log("blkId = ", blkId);
@@ -92,8 +121,8 @@ $(document).ready(function(){
         }
         $('.wsywigEdit').click(startWysiwyg);
         /** Starts the wysiwyg editor. If 'super' admin, includes additional buttons. */
-        function startWysiwyg(e) {  console.log("starting! e.parent = %O", e.target)
-            var containerElemId = getBlockContainerId(e.target.id); console.log("containerElemId = ", containerElemId)
+        function startWysiwyg(e) { // console.log("starting! e.parent = %O", e.target)
+            var containerElemId = getBlockContainerId(e.target.id); //console.log("containerElemId = ", containerElemId)
             var bttns = [
                 ['formatting'],
                 'btnGrp-semantic',
@@ -105,8 +134,9 @@ $(document).ready(function(){
                 ['horizontalRule'],
                 ['save', 'cancel']
             ];
-            removeEditPencils();
-            //adds developer buttons
+            $('#editContentBttn').data('editing', containerElemId); // tracks which content block contains the active editor
+            removeEditPencils();   //adds developer buttons
+            
             if (userRole === "super") { bttns.splice(6, 0, ['viewHTML', 'removeformat']); }
             
             $('#' + containerElemId).trumbowyg({    

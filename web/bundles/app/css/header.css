@@ -75,6 +75,7 @@
 
 #hdrtext {
 	display: flex;
+    position: relative;
 	justify-content: space-between;
 	text-align: right;
     font-size: 21px;

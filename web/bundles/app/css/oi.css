@@ -171,8 +171,25 @@ span.lbl {
 	right: 0;
 	height: 1.5em;
 	z-index: 10;
+	cursor: pointer;
+}
+#hdrtext>button {
+	/*border: 1px solid #1b3b1b;*/
+	background: #3399ff;
+	color: white;
+	/*font-weight: bold;*/
+	border-radius: 5px;
+	width: 135px;
+	box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+	/*padding: .5em;*/
+	/*margin: .5em 1em 0 0;*/
+}
+#hdrtext>button:hover {
+	background: #1A80E6;
+	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
 /*-- Header --*/
+
 #logo-overlay {
 	position: absolute;
 	top: 80px;
@@ -637,18 +654,18 @@ label[for=fos_user_registration_form_about_me] {
 	margin: 40px auto 40px auto;
 }
 /*-- Sources --*/
-/*#src-pg {
+#src-pg p {
 	width: 800px;
 	font-size: 1.21em;
 	margin-left: 1em;
 }
-#src-pg>ul {
+#src-pg ul {
 	font-size: 1.2em;
 	margin-left: 2.2em;
 }
-#src-pg>ul>li {
+#src-pg ul>li {
 	margin: .4em;
-}*/
+}
 /*-- Definition --*/
 #def-frame p {
 }
