@@ -50,14 +50,40 @@ class ContentBlockControllerTest extends WebTestCase
             'Missing element div#detail-block p');
     }
 
-    public function testTeam()
-    {
-        $client = static::createClient();
-        $client->followRedirects();
-        $crawler = $client->request('GET', '/team');
-        $this->assertGreaterThan(
-            0,
-            $crawler->filter('div#detail-block p')->count(),
-            'Missing element div#detail-block p');
-    }
+    // public function testEdit()               //Tackle functional testing a different way.
+    // {
+    //     $client = static::createClient();
+    //     $client->followRedirects();
+ 
+    //     $crawler = $client->request('GET', '/login');
+    //     $form = $crawler->selectButton('_submit')->form(array(
+    //       '_username'  => 'testAdmin',
+    //       '_password'  => 'pw4testAdmin',
+    //     ));
+
+    //     $client->submit($form);
+        
+    //     $crawler = $client->request('GET', '/home');
+
+    //     $crawler = $client->click("editContentBttn");
+
+    //     $showEditPencilLink = $crawler
+    //         ->filter('button#editContentBttn')        
+    //         // ->link()
+    //     ;
+
+    //     $editPencilLink = $crawler
+    //         ->filter('img.wysiwygEdit')        
+    //         // ->link()
+    //     ;
+        
+    //     $crawler = $client->click($editPencilLink);
+
+    //     $this->assertGreaterThan(
+    //         0,
+    //         $crawler->filter('div.trumbowyg')->count(),
+    //         'Missing element div.trumbowyg');
+    // }
+
+
 }
