@@ -9,9 +9,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use AppBundle\Entity\Location;
 
 /**
- * Migration adds a new location for each Country with the location type 'country'. 
+ * Migration adds a new location for each region with the location type 'region'. 
  */
-class Version20160922Countries extends AbstractMigration implements ContainerAwareInterface
+class Version201609221Regions extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
@@ -29,20 +29,15 @@ class Version20160922Countries extends AbstractMigration implements ContainerAwa
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
        
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $countries = $em->getRepository('AppBundle:Country')->findAll();
+        $regions = $em->getRepository('AppBundle:Region')->findAll();
 
-        foreach ($countries as $country) {    
+        foreach ($regions as $region) {    
             $entity = new Location();
-            $entity->setDescription($country->getName());
+            $entity->setDescription($region->getDescription());
             $entity->setLocationType($em->getRepository('AppBundle:LocationType')
-                ->findOneBy(array('id' => 2)));
+                ->findOneBy(array('id' => 1)));
 
-            $parentDesc = $country->getRegion()->getDescription();
-            $parent = $em->getRepository('AppBundle:Location')
-                ->findOneBy(array('description' => $parentDesc));
-            $entity->setParentLoc($parent);
-
-            $childLocs = $country->getLocations();  
+            $childLocs = $region->getLocations();
 
             foreach ($childLocs as $loc) {
                 $entity->addChildLocs($loc);
@@ -59,9 +54,6 @@ class Version20160922Countries extends AbstractMigration implements ContainerAwa
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');      
-   
-
-
     }
 
     // /**
