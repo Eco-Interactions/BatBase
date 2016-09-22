@@ -12,7 +12,7 @@ use AppBundle\Entity\Location;
  * Migration updates all locations with its parentLoc, and relevent location types
  * for "areas" and "points". ->remove($Entity)
  */
-class Version20160922Locations extends AbstractMigration implements ContainerAwareInterface
+class Version201609223Locations extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
