@@ -4,12 +4,23 @@ namespace Application\Migrations;
 
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use AppBundle\Entity\LocationType;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Migration adds location parent self-join and LocationType entity. 
  */
-class Version20160809221825 extends AbstractMigration
+class Version20160809221825 extends AbstractMigration implements ContainerAwareInterface
 {
+
+    private $container;
+
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+    }
+
     /**
      * @param Schema $schema
      */
@@ -37,9 +48,30 @@ class Version20160809221825 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE location DROP FOREIGN KEY FK_5E9E89CB2B099F37');
+        $this->addSql('ALTER TABLE location DROP FOREIGN KEY FK_5E9E89CB2A160917');
         $this->addSql('DROP TABLE location_type');
         $this->addSql('DROP INDEX IDX_5E9E89CB2A160917 ON location');
         $this->addSql('DROP INDEX IDX_5E9E89CB2B099F37 ON location');
         $this->addSql('ALTER TABLE location DROP parent_loc_id, DROP location_type_id');
     }
+
+    /**
+     * @param Schema $schema
+     */
+    public function postUp(Schema $schema)
+    {
+        $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+
+        $em = $this->container->get('doctrine.orm.entity_manager');
+        $locTypes = ['Region', 'Country', 'Area', 'Point'];
+
+        foreach ($locTypes as $locType) {    
+            $entity = new LocationType();
+            $entity->setName($locType);
+
+            $em->persist($entity);
+        }
+        $em->flush();
+    }
+
 }
