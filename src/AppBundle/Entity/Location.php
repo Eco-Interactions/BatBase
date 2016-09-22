@@ -402,9 +402,10 @@ class Location
      *
      * @return Location
      */
-    public function addChildLocs(\AppBundle\Entity\Location $childLocs)
+    public function addChildLocs(\AppBundle\Entity\Location $childLoc)
     {
-        $this->childLocs[] = $childLocs;
+        $this->childLocs[] = $childLoc;
+        $childLoc->setParentLoc($this);
 
         return $this;
     }
