@@ -43,7 +43,7 @@ class Version201609223Locations extends AbstractMigration implements ContainerAw
                         && $entity->getLongitude() === null) {   
                     $entity->setLocationType($em->getRepository('AppBundle:LocationType')
                         ->findOneBy(array('id' => 3)));
-                } else {   print("point identified");
+                } else {   
                     $entity->setLocationType($em->getRepository('AppBundle:LocationType')
                         ->findOneBy(array('id' => 4)));
                 }
