@@ -461,9 +461,9 @@ class Location
      *
      * @return Location
      */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
+    public function addInteraction(\AppBundle\Entity\Interaction $interaction)
     {
-        $this->interactions[] = $interactions;
+        $this->interactions[] = $interaction;
 
         return $this;
     }
@@ -473,9 +473,10 @@ class Location
      *
      * @param \AppBundle\Entity\Interaction $interactions
      */
-    public function removeInteraction(\AppBundle\Entity\Interaction $interactions)
+    public function removeInteraction(\AppBundle\Entity\Interaction $interaction)
     {
-        $this->interactions->removeElement($interactions);
+        $interaction->removeLocation();
+        $this->interactions->removeElement($interaction);
     }
 
     /**
