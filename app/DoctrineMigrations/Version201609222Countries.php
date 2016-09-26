@@ -9,7 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use AppBundle\Entity\Location;
 
 /**
- * Migration adds a new location for each Country with the location type 'country'. 
+ * Migration updates existing country (-Unspecified) locations or adds a new location
+ * for any not currently in the database. 
  */
 class Version201609222Countries extends AbstractMigration implements ContainerAwareInterface
 {
@@ -22,6 +23,8 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
     }
 
     /**
+     * For each country, either update current location entity by dropping '-Unspecified' 
+     * and adding a "country" location type or create new location. 
      * @param Schema $schema
      */
     public function up(Schema $schema)
@@ -31,27 +34,74 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
         $em = $this->container->get('doctrine.orm.entity_manager');
         $countries = $em->getRepository('AppBundle:Country')->findAll();
 
-        foreach ($countries as $country) {    
-            $entity = new Location();
-            $entity->setDescription($country->getName());
-            $entity->setLocationType($em->getRepository('AppBundle:LocationType')
-                ->findOneBy(array('id' => 2)));
-
-            $parentDesc = $country->getRegion()->getDescription();
-            $parent = $em->getRepository('AppBundle:Location')
-                ->findOneBy(array('description' => $parentDesc)); 
-            $entity->setParentLoc($parent);
-
-            $childLocs = $country->getLocations();  
-
-            foreach ($childLocs as $loc) {
-                $entity->addChildLocs($loc);
+        foreach ($countries as $country) {
+            $curLoc = null;
+            $nameTrans = ["Venezuela, Bolivarian Republic of" => "Venezuela", "Bolivia, Plurinational State of" => "Bolivia",
+                          "Tanzania, United Republic of" => "Tanzania", "Micronesia, Federated States of" => "Micronesia" ]; 
+            $edgeCases = ["United States" => "USA"];
+            $cntryName = $findByName = $country->getName();
+            if (array_key_exists($cntryName, $nameTrans)) {
+                $cntryName = $findByName = $nameTrans[$cntryName];
+                $country->setName($cntryName);                
+            } else if (array_key_exists($cntryName, $edgeCases)) {
+                $findByName = $edgeCases[$cntryName];
             }
-            $em->persist($entity);
+            $locDesc = $cntryName.'-Unspecified';    
+            $locEntity = $em->getRepository('AppBundle:Location')
+                ->findOneBy(array('description' => $locDesc));
+
+            if ($locEntity === null) {                                              
+                $this->BuildLocEntity($country, $cntryName, $em);
+            } else {                                                       
+                $this->UpdateLocEntity($locEntity, $country, $cntryName, $em);    
+            }
         }
+    }
+    private function FindLocationUnspecified($cntryName, $em)
+    {
+        $locDesc = $cntryName.'-Unspecified';  
+        return $em->getRepository('AppBundle:Location')
+            ->findOneBy(array('description' => $locDesc)); 
+    }
+    private function UpdateLocEntity($locEntity, $country, $cntryName, $em)
+    {
+        $locEntity->setDescription($cntryName);
+        $locEntity->setLocationType($em->getRepository('AppBundle:LocationType')
+            ->findOneBy(array('id' => 2)));
+        $locEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6')));
+
+        $parentDesc = $country->getRegion()->getDescription();
+        $parent = $em->getRepository('AppBundle:Location')
+            ->findOneBy(array('description' => $parentDesc)); 
+        $locEntity->setParentLoc($parent);
+
+        $em->persist($locEntity);
         $em->flush();
     }
+    private function BuildLocEntity($country, $cntryName, $em)
+    {
+        $entity = new Location();
+        $entity->setDescription($cntryName);
+        $entity->setCreatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6')));  //Sarah
+        $entity->setLocationType($em->getRepository('AppBundle:LocationType')
+            ->findOneBy(array('id' => 2))); 
 
+        $parentDesc = $country->getRegion()->getDescription();
+        $parent = $em->getRepository('AppBundle:Location')
+            ->findOneBy(array('description' => $parentDesc)); 
+
+        $entity->setParentLoc($parent);
+
+        $childLocs = $country->getLocations();  
+
+        foreach ($childLocs as $loc) {
+            $entity->addChildLocs($loc);
+        }
+        $em->persist($entity);
+        $em->flush();
+    }
     /**
      * @param Schema $schema
      */
@@ -59,19 +109,5 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');      
-   
-
-
     }
-
-    // /**
-    //  * @param Schema $schema
-    //  */
-    // public function postUp(Schema $schema)
-    // {
-    //     $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
-
- 
-    // }
-
 }
