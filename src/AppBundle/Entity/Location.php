@@ -85,7 +85,7 @@ class Location
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLocs")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id", onDelete="SET NULL")
      * })
      */
     private $parentLoc;
@@ -628,6 +628,16 @@ class Location
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Set created by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
     }
 
     /**
