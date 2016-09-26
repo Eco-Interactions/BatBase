@@ -95,7 +95,7 @@ class Location
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc")
      * @ORM\OrderBy({
-     *     "displayName"="ASC"
+     *     "description"="ASC"
      * })
      */
     private $childLocs;
