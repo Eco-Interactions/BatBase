@@ -63,7 +63,7 @@ class Version20160809221825 extends AbstractMigration implements ContainerAwareI
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $locTypes = ['Region', 'Country', 'Area', 'Point'];
+        $locTypes = ['Region', 'Country', 'Habitat', 'Area', 'Point'];
 
         foreach ($locTypes as $locType) {    
             $entity = new LocationType();
