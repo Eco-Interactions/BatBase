@@ -153,10 +153,10 @@
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data.results);
+	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
 		var intRcrds = JSON.stringify(data.results);
 		populateStorage('intRcrds', intRcrds);  
-		fillTreeWithInteractions( data.results );
+		// fillTreeWithInteractions( data.results );
 	}
 	/**
 	 * Back fills the displayed search focus' data tree with interaction records
