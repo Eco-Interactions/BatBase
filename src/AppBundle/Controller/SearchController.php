@@ -153,7 +153,7 @@ class SearchController extends Controller
 /**------------------------Search By Location---------------------------------*/
 
     /**
-     * Get Interactions IDs by Region and Location.
+     * Get Location Data organized by Parent Regions.
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
@@ -164,79 +164,68 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
-
         $intsByRegion = new \stdClass;
+        $locRegions = $em->getRepository('AppBundle:Location')
+            ->findBy(array('locationType' => '1'));
 
-        $locations = $em->getRepository('AppBundle:Location')->findAll();
+        foreach ($locRegions as $regionLoc) 
+        {                    
+            $regionName = $regionLoc->getDescription(); 
 
-        foreach ($locations as $location) 
-        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
-            $loc = new \stdClass;
-
-            $loc->id = $location->getId();
-            $loc->desc = $location->getDescription();
-            $loc->elev = $location->getElevation();
-            $loc ->elevMax = $location->getElevationMax();
-            $loc->elevUnit = $location->getElevUnitAbbrv();
-            $loc->gpsData = $location->getGpsData();
-            $loc->lat = $location->getLatitude();
-            $loc->long = $location->getLongitude();
-            $loc->habitatType = $location->getHabitatType() === null ? null : $location->getHabitatType()->getName();  // $logger->error('SASSSSSSS:: getting interactions...');
-            $interactions = $location->getInteractions();
-            $loc->interactions = $this->getInteractions($interactions);
-
-            $region = $this->getLocRegions($location->getRegions());            //$logger->error('SASSSSSSSSSSSS:: region = ' . print_r($region, true));
-            $loc->region = $region;
-
-            if ($location->getCountry() === null) {
-                $country =  null;
-                $countryId = null;
-            } else { 
-                $country = $location->getCountry()->getName();
-                $countryId = $location->getCountry()->getId();
+            if ($regionLoc->getParentLoc() === null) { // Only top regions are handled here.
+                $intsByRegion->$regionName = $this->GetLocDataObj($regionLoc, $regionName);
             }
-            $loc->country = $country;
-            $loc->countryId = $countryId;
-
-            if ( !property_exists($intsByRegion, $region) ) {  ///$logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
-                $intsByRegion->$region = new \stdClass; 
-            }
-            if ( $country === null ) { // 
-                $locDesc = $loc->desc;
-                if ( !property_exists($intsByRegion->$region, $locDesc) ) { 
-                    $intsByRegion->$region->$locDesc = []; 
-                }                
-                array_push( $intsByRegion->$region->$locDesc, $loc ); 
-            } else {
-                if ( !property_exists($intsByRegion->$region, $country) ) { 
-                    $intsByRegion->$region->$country = []; 
-                }
-                $intsByRegion->$region->$country = array_merge( 
-                    $intsByRegion->$region->$country, [ $loc->id => $loc ]
-                );            
-            }
-        }  // $logger->error('SASSSSSSSSSSSS:: about to return... ->' . print_r($intsByRegion, true));
-
+        }
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $intsByRegion              //$intsByRegion
+            'results' => $intsByRegion              
         ));
 
         return $response;
     }
-    private function getLocRegions($regionEntities)  /*Can't figure out how to properly access the first propeprty, i.e. the first region, so only the first region is being used currently.*/
+    /**
+     * Builds and returns Location Search Data object.
+     */
+    private function GetLocDataObj($locEntity, $locDesc)
     {
-        if ($regionEntities[0] !== null) {
-            $region = $regionEntities[0]->getDescription();
-            // $regionAry = explode(",", $region);
-            return $region;              //$regionAry[0];
-        } else {
-            return "Unspecified";
+        $data = new \stdClass; 
+        $childLocs = $locEntity->getChildLocs();  
+
+        $data->childLocs = $this->GetChildSearchData($locEntity, $childLocs);
+        $data->description = $locEntity->getDescription();
+        $data->elevation = $locEntity->getElevation();
+        $data->elevationMax = $locEntity->getElevationMax();
+        $data->gpsData = $locEntity->getGpsData();
+        $data->latitude = $locEntity->getLatitude();
+        $data->longitude = $locEntity->getLongitude();
+        $data->locationType = $locEntity->getLocationType()->getName(); 
+        
+        $habitatType = $locEntity->getHabitatType();            //echo("\nhabitatType = ".gettype($habitatType)); 
+        $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
+        
+        $interactions = $locEntity->getInteractions();
+        $data->interactions = $this->getInteractions($interactions);
+
+        if ($data->locationType !== "Region") {
+            $data->parentLoc = $locEntity->getParentLoc()->getId();
         }
+        return $data;
     }
     /**
-     * Get Interactions.
+     * Returns an object keyed with child location descriptions and their data.
+     */
+    private function GetChildSearchData($parentLoc, $childLocs)
+    {
+        $data = new \stdClass;
+
+        foreach ($childLocs as $childLoc) {
+            $childName = $childLoc->getDescription();
+            $data->$childName = $this->GetLocDataObj($childLoc, $childName);
+        }     
+        return $data;
+    }
+    /*
+     * Returns all interaction records.
      *
      * @Route("/search/interaction", name="app_ajax_search_interaction")
      */
@@ -247,14 +236,13 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
 
         $intRcrds = new \stdClass;
 
         $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
 
         foreach ($interactions as $int) 
-        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
+        {                     
             $rcrd = new \stdClass;
             $intId = $int->getId();
             $rcrd->id = $intId;
@@ -264,7 +252,7 @@ class SearchController extends Controller
             $rcrd->subject = array(
                 "name" => $int->getSubject()->getDisplayName(),
                 "level" => $int->getSubject()->getLevel()->getName(),
-                "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
+                "id" => $int->getSubject()->getId() );  
             $rcrd->object = array(
                 "name" => $int->getObject()->getDisplayName(),
                 "level" => $int->getObject()->getLevel()->getName(),
@@ -273,10 +261,6 @@ class SearchController extends Controller
 
             if ($int->getLocation() !== null) {
                 $rcrd->location = $int->getLocation()->getDescription();
-                $rcrd->country = $int->getLocation()->getCountry() === null ?
-                    null : $int->getLocation()->getCountry()->getName() ;
-                $rcrd->region = $int->getLocation()->getCountry() === null ?
-                    null : $int->getLocation()->getCountry()->getRegion()->getDescription() ;
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
                     null : $int->getLocation()->getHabitatType()->getName() ;
             }
