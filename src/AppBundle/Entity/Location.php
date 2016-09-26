@@ -641,6 +641,16 @@ class Location
     }
 
     /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+    }
+
+    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
