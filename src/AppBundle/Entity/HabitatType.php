@@ -146,7 +146,7 @@ class HabitatType
      *
      * @param \AppBundle\Entity\Location $locations
      *
-     * @return Country
+     * @return HabitatType
      */
     public function addLocation(\AppBundle\Entity\Location $locations)
     {
