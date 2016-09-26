@@ -10,7 +10,8 @@ use AppBundle\Entity\Location;
 use AppBundle\Entity\Region;
 
 /**
- * Migration adds a new location for each region with the location type 'region'. 
+ * Migration updates existing region (-Unspecified) locations or adds a new location
+ * for any not currently in the database. 
  */
 class Version201609221Regions extends AbstractMigration implements ContainerAwareInterface
 {
@@ -23,6 +24,9 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
     }
 
     /**
+     * For each region, either update current location entity by dropping '-Unspecified' 
+     * and adding a "REgion" location type or create new location. 
+     * Subregions must be created last to be able to reference their parent location/region.
      * @param Schema $schema
      */
     public function up(Schema $schema)
@@ -31,27 +35,24 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
        
         $em = $this->container->get('doctrine.orm.entity_manager');
 
-        $this->AddAsiaToRegions($em);
+        $this->AddMissingParentRegions($em);
         $this->AddRegionsToLocs($em);
     }
-    private function AddAsiaToRegions($em)
+    private function AddMissingParentRegions($em)
     {
         $entity = new Region();
         $entity->setDescription("Asia");
         $em->persist($entity);
         $em->flush();
     }
-    /**
-     * For each region, creates a new Location entity with type "Region". 
-     * Subregions must be created last to be able to reference their parent location/region.
-     */
     private function AddRegionsToLocs($em)
     {
         $regions = $em->getRepository('AppBundle:Region')->findAll();
-        $regionWithSubRegions = array();
+        $regionWithSubRegions = ['Mariana Islands' => ['Oceania']];
 
         foreach ($regions as $region) {
             $regionName = $region->getDescription();
+            // Sub-regions must be handled after all top-regions.
             $parentRegion = $this->IsSubRegion($region, $regionName);
             if ($parentRegion !== false) {  
                 if (!array_key_exists($parentRegion, $regionWithSubRegions)) {
@@ -60,15 +61,35 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
                 array_push($regionWithSubRegions[$parentRegion], $region->getDescription()); //Can't pass full entity obj around reliably.
                 continue;
             }
-            $this->BuildLocEntity($region, null, $em);    
+            // If there is a current location entity for this region, update it.
+            $curLoc = $em->getRepository('AppBundle:Location')
+                ->findOneBy(array('description' => $regionName.'-Unspecified'));
+            if ($curLoc === null) {                                         print("location for '".$regionName."'' Not found. \n");
+                $this->BuildLocEntity($region, null, $em);
+            } else {
+                $this->UpdateLocEntity($curLoc, $regionName, $em);    
+            }
         }  
         $this->AddSubRegions($regionWithSubRegions, $em);
+    }
+    private function UpdateLocEntity($locEntity, $regionName, $em)
+    {
+        $locEntity->setDescription($regionName);
+        $locEntity->setLocationType($em->getRepository('AppBundle:LocationType')
+            ->findOneBy(array('id' => 1)));
+        $locEntity->setUpdatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6')));
+
+        $em->persist($locEntity);
+        $em->flush();
     }
     private function BuildLocEntity($region, $parent, $em)
     {
         $entity = new Location();
         $regionName = $region->getDescription();
         $entity->setDescription($regionName);
+        $entity->setCreatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6')));
         $entity->setLocationType($em->getRepository('AppBundle:LocationType')
             ->findOneBy(array('id' => 1)));
 
@@ -81,21 +102,26 @@ class Version201609221Regions extends AbstractMigration implements ContainerAwar
         $em->persist($entity);
         $em->flush();
     }
-    private function AddSubRegions($regionWithSubRegions	, $em)
+    private function AddSubRegions($regionWithSubRegions, $em)
     {
         foreach ($regionWithSubRegions as $parentRegion => $regions) {  
             $parentLoc = $em->getRepository('AppBundle:Location')
                 ->findOneBy(array('description' => $parentRegion));
-                
-            foreach ($regions as $subRegion) {
-                $region = $em->getRepository('AppBundle:Region')
-                ->findOneBy(array('description' => $subRegion));
 
-                $this->BuildLocEntity($region, $parentLoc, $em);
+            foreach ($regions as $subRegion) { 
+                // If there is a current location entity for this region, update it.
+                $curLoc = $em->getRepository('AppBundle:Location')
+                    ->findOneBy(array('description' => $subRegion.'-Unspecified'));
+                if ($curLoc === null) {                         print("location for --SUBREGION--".$subRegion." Not found. \n");
+                    $region = $em->getRepository('AppBundle:Region')
+                        ->findOneBy(array('description' => $subRegion));
+                    $this->BuildLocEntity($region, $parentLoc, $em);
+                } else {
+                    $this->UpdateLocEntity($subRegion, $regionName, null, $em);    
+                }
             }
         }
     }
-        
     /**
      * Africa is the parent region for North Africa and Sub-Saharan Africa.
      * Asia is the parent region for East Asia, North Asia, South & Southeast Asia, and West & Central Asia. 
