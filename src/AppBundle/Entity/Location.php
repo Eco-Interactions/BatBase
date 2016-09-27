@@ -118,6 +118,22 @@ class Location
     private $interactions;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Region", mappedBy="locations")
+     * @ORM\JoinTable(name="regions_locations")
+     */
+    private $regions;
+
+    /**
+     * @var \AppBundle\Entity\Country
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Country", inversedBy="locations")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="country_id", referencedColumnName="id")
+     * })
+     */
+    private $country;
+
+    /**
      * @var \AppBundle\Entity\HabitatType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\HabitatType", inversedBy="locations")
@@ -173,6 +189,8 @@ class Location
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childLocs = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
+        // $this->defaultLoc = 
     }
     
     /**
@@ -472,6 +490,64 @@ class Location
     }
 
     /**
+     * Add Regions.
+     *
+     * @param \AppBundle\Entity\Region $regions
+     *
+     * @return Country
+     */
+    public function setRegion(\AppBundle\Entity\Region $regions)
+    {
+        $this->regions[] = $regions;
+
+        return $this;
+    }
+
+    /**
+     * Remove Regions.
+     *
+     * @param \AppBundle\Entity\Region $regions
+     */
+    public function removeRegion(\AppBundle\Entity\Region $regions)
+    {
+        $this->regions->removeElement($regions);
+    }
+
+    /**
+     * Get regions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRegions()
+    {
+        return $this->regions;
+    }
+
+    /**
+     * Set country.
+     *
+     * @param \AppBundle\Entity\Country $country
+     *
+     * @return Location
+     */
+    public function setCountry(\AppBundle\Entity\Country $country = null)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country.
+     *
+     * @return \AppBundle\Entity\Country
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
      * Set habitatType.
      *
      * @param \AppBundle\Entity\HabitatType $habitatType
@@ -611,6 +687,13 @@ class Location
      */
     public function __toString()
     {
-        return $this->getDescription();
+        if ($this->getDescription()) {
+            return $this->getDescription();
+        }
+        $country = $this->getCountry()->getName();
+        $habitatType = $this->getHabitatType()->getName();
+        $gpsdata = $this->getGpsData();
+
+        return $country.' '.$habitatType.' '.$gpsdata;
     }
 }
