@@ -1,0 +1,24 @@
+{% extends "layout.html.twig" %}
+
+{% set country = entity %}
+{% set locations = country.locations %}
+{% set loccols = { country: 'invis', habtype: 'vis'} %}
+{% set cntrypg = true %}
+{% set view_all_route = path('app_location') %}
+{% set view_all_ent_plural = 'Locations' %}
+{% set entity_class = 'Country' %}
+{% set edit_route_name = 'app_country_edit' %}
+
+{% block datatable %}locs_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{% set view_all_route = path('app_country') %}
+	{% set view_all_ent_plural = 'Countries' %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('show_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+		{{ include('loc_tbl.html.twig') }}
+{% endblock detail %}

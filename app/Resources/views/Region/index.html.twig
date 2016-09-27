@@ -1,0 +1,20 @@
+{% extends "layout.html.twig" %}
+
+{% set regions = entities %}
+{% set this_ent_plural = 'Regions' %}
+{% set this_ent_singl = 'Region' %}
+{% set new_ent_route = path('app_region_new') %}
+
+{% block headline %}
+    {{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul id="ul-big">
+        {% for region in regions %}
+            <li>
+                <a href="{{ path('app_region_show', { 'slug': region.slug }) }}">{{ region.description }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

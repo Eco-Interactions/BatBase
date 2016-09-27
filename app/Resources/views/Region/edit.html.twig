@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% set region = entity %}
+{% set view_all_route = path('app_region') %}
+{% set view_all_ent_plural = 'Regions' %}
+
+{% block headline %}
+		{{ include('view_all_uplink.html.twig') }}
+		Editing Type: {{ region }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <h5><a href="{{ path('app_region_show', { 'slug': region.slug }) }}"> Return to {{ region }}</a></h5>
+{% endblock detail %}

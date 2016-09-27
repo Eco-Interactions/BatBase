@@ -1,0 +1,23 @@
+{% extends "layout.html.twig" %}
+
+{% set countries = entities %}
+
+{% set view_all_route = path('app_location') %}
+{% set view_all_ent_plural = 'Locations' %}
+
+{% set new_ent_route = path('app_country_new') %}
+{% set this_ent_plural = 'Countries' %}
+{% set this_ent_singl = 'Country' %}
+
+{% block datatable %}loc_det_list{% endblock datatable %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ include('idx_headline.html.twig') }}
+{% endblock headline %}
+
+{% block detail %}
+	<div style="width: 50%; margin: 0 auto;">
+	{{ include('country_tbl.html.twig') }}
+	</div>
+{% endblock detail %}
