@@ -42,28 +42,20 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');
-
-        $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent);                             // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
 
         $returnObj = new \stdClass;
 
-        $entities = $em->getRepository('AppBundle:Domain')->findAll();
-
-        foreach ($entities as $entity) 
-        {                                                                       // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+        foreach ($domainEntities as $entity) 
+        {                                                                 
             $taxonId = strval($entity->getTaxon()->getId());
             $returnObj->$taxonId = [];
-            $slug = $entity->getSlug();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
-            $name = $entity->getPluralName();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
+            $slug = $entity->getSlug();                               
+            $name = $entity->getPluralName();                              
 
             $returnObj->$taxonId = array_merge( 
-                $returnObj->$taxonId, [ 
-                    "slug" => $slug, "name" => $name 
-                ] 
+                $returnObj->$taxonId, [ "slug" => $slug, "name" => $name ] 
             );
         }
 
@@ -76,7 +68,7 @@ class SearchController extends Controller
     }
 
     /**
-     * Get Interaction IDs by Taxa.
+     * Get Taxa Data organized by parent taxa.
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -85,64 +77,63 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
+        $requestContent = $request->getContent();
+        $pushedParams = json_decode($requestContent); 
+        $domainTaxaIds = $pushedParams->domainIds;
 
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');
-        $requestContent = $request->getContent();
-        $pushedParams = json_decode($requestContent); //$logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
 
         $returnObj = new \stdClass;
 
-        $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
-
-        foreach ($taxa as $taxon) 
+        foreach ($domainTaxaIds as $domainTaxonId) 
         {
-            $this->getTaxonData($taxon, $pushedParams, $returnObj);
-        }
+            $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
+                ->findOneBy(array('id' => $domainTaxonId));
+            $taxonName = $domainTaxonEntity->getDisplayName();
+
+            $returnObj->$taxonName = $this->getTaxonData($domainTaxonEntity, $em);
+        }  
 
         $response = new JsonResponse();
-        $response->setData(array(
+        $response->setData(array(                                       //strval($taxonId);
             'results' => $returnObj
         ));
 
         return $response;
     }
-    private function getTaxonData($taxon, $params, $returnObj) 
+    private function getTaxonData($taxon, $em) 
     {
-        $taxonId = $taxon->getId();
-        $taxonKey = strval($taxonId);
+        $data = new \stdClass;
 
-        $returnObj->$taxonKey = new \stdClass;
-
-        foreach ($params->props as $prop) 
-        {
-            $getProp = 'get' . ucfirst($prop);
-            $returnObj->$taxonKey->$prop = $taxon->$getProp();           
-        }
-
-        $returnObj->$taxonKey->id = $taxon->getId();
-        $returnObj->$taxonKey->children = $this->getChildren($taxon, $params);
-        $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon() ?
+        $data->id = $taxon->getId();
+        $data->name = $taxon->getDisplayName();
+        $data->slug = $taxon->getSlug();
+        $data->children = $this->getChildren($taxon);
+        $data->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           
-        $returnObj->$taxonKey->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
-        $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params);
+        $data->level = $taxon->getLevel()->getName();               
+        $data->interactions = $this->getTaxaInteractions($taxon, $params);
+
+        return $data;
     }
-    private function getChildren($taxon, $params)
+    private function getChildren($taxon)
     {
+        $data = new \stdClass;
         $childEntities = $taxon->getChildTaxa();
-        $children = [];
 
         foreach ($childEntities as $child)
         {
-            array_push($children, $child->getId());
+            $childName = $child->getDisplayName();
+            $data->$childName = getTaxonData($child);
         }
-        return $children;
+        return $data;
     }
-    private function getTaxaInteractions($taxon, $params) 
+    private function getTaxaInteractions($taxon) 
     {
         $intRcrds = new \stdClass;
+        $roles = ['SubjectRoles', 'ObjectRoles'];
 
-        foreach ($params->roles as $role) 
+        foreach ($roles as $role) 
         {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
@@ -234,12 +225,10 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-
         $em = $this->getDoctrine()->getManager();
+        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
 
         $intRcrds = new \stdClass;
-
-        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
 
         foreach ($interactions as $int) 
         {                     
@@ -264,9 +253,9 @@ class SearchController extends Controller
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
                     null : $int->getLocation()->getHabitatType()->getName() ;
             }
-            
             $intRcrds->$intId = $rcrd;
         }
+        
         $response = new JsonResponse();
         $response->setData(array(
             'results' => $intRcrds
