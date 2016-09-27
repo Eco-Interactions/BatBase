@@ -231,16 +231,6 @@ class Interaction
     }
 
     /**
-     * Remove location.
-     *
-     * @return \AppBundle\Entity\Location
-     */
-    public function removeLocation()
-    {
-        $this->location = null;
-    }
-
-    /**
      * Set subject.
      *
      * @param \AppBundle\Entity\Taxon $subject
