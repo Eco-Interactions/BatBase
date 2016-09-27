@@ -136,14 +136,6 @@ class Location
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -151,6 +143,14 @@ class Location
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -378,9 +378,9 @@ class Location
     }
 
     /**
-     * Add childLocs.
+     * Add childLoc.
      *
-     * @param \AppBundle\Entity\Location $childLocs
+     * @param \AppBundle\Entity\Location $childLoc
      *
      * @return Location
      */
@@ -393,13 +393,13 @@ class Location
     }
 
     /**
-     * Remove childLocs.
+     * Remove childLoc.
      *
-     * @param \AppBundle\Entity\Location $childLocs
+     * @param \AppBundle\Entity\Location $childLoc
      */
-    public function removeChildLocs(\AppBundle\Entity\Location $childLocs)
+    public function removeChildLoc(\AppBundle\Entity\Location $childLoc)
     {
-        $this->childLocs->removeElement($childLocs);
+        $this->childLocs->removeElement($childLoc);
     }
 
     /**
@@ -525,6 +525,16 @@ class Location
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -535,33 +545,13 @@ class Location
     }
 
     /**
-     * Get last updated datetime.
-     *
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * Get created by user.
+     * Get createdBy user.
      *
      * @return \AppBundle\Entity\User
      */
     public function getCreatedBy()
     {
         return $this->createdBy;
-    }
-
-    /**
-     * Set created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function setCreatedBy(\AppBundle\Entity\User $user)
-    {
-        $this->createdBy = $user;
     }
 
     /**
@@ -575,6 +565,16 @@ class Location
     }
 
     /**
+     * Get last updated datetime.
+     *
+     * @return \DateTime
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -585,16 +585,6 @@ class Location
     }
 
     /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
-    }
-
-    /**
      * Set deleted at.
      *
      * @param \DateTime $deletedAt
@@ -602,6 +592,16 @@ class Location
     public function setDeletedAt($deletedAt)
     {
         $this->deletedAt = $deletedAt;
+    }
+
+    /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
     }
 
     /**
