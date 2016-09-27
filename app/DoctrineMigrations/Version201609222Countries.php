@@ -57,12 +57,6 @@ class Version201609222Countries extends AbstractMigration implements ContainerAw
             }
         }
     }
-    private function FindLocationUnspecified($cntryName, $em)
-    {
-        $locDesc = $cntryName.'-Unspecified';  
-        return $em->getRepository('AppBundle:Location')
-            ->findOneBy(array('description' => $locDesc)); 
-    }
     private function UpdateLocEntity($locEntity, $country, $cntryName, $em)
     {
         $locEntity->setDescription($cntryName);
