@@ -37,6 +37,13 @@ class LocationType
     private $name;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="ordinal", type="integer", nullable=true)
+     */
+    private $ordinal;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="locationType")
@@ -139,6 +146,30 @@ class LocationType
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set ordinal.
+     *
+     * @param int $ordinal
+     *
+     * @return LocationType
+     */
+    public function setOrdinal($ordinal)
+    {
+        $this->ordinal = $ordinal;
+
+        return $this;
+    }
+
+    /**
+     * Get ordinal.
+     *
+     * @return int
+     */
+    public function getOrdinal()
+    {
+        return $this->ordinal;
     }
 
     /**
