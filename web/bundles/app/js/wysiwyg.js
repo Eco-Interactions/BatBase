@@ -33,21 +33,18 @@ $(document).ready(function(){
     function toggleContentBlockEditing() { 
         var editorElem = $('#editContentBttn').data('editing');      //   console.log("togggling.  editorElem = %O", editorElem)
         if (editorElem !== false) {
-            removeEditPencils();
-            $('#' + editorElem).trumbowyg("destroy");
-            $('#editContentBttn').data('editing', false)
-            $('#editContentBttn').text("Edit Content");
+            $('#editContentBttn').text("Refreshing...");
+            location.reload(true);
         } else {
             addEditPencils();
             $('#editContentBttn').data('editing', true)
-            $('#editContentBttn').text("Stop Editing");
+            $('#editContentBttn').text("Cancel Edit");
         }
     }
     /**
      * Extends the Trumbowyg library to include 'save' and 'cancel' buttons 
      * for the interface. The save button updates the content block in the 
-     * database and then refreshes the page. The cancel button closes the 
-     * wysiwyg editor without modifying the block.
+     * database and then refreshes the page. 
      */
     function addButtons() {
         (function($) {
@@ -62,7 +59,6 @@ $(document).ready(function(){
                     save: { // plugin name
                         init: function(trumbowyg) { 
                             const btnDef = {
-                                // ico: 'save',
                                 hasIcon: false,
                                 fn: function() {                            // console.log("saving. trumbowyg = %O", trumbowyg );
                                     var blkId = trumbowyg.o.plugins.save.id;
@@ -79,19 +75,6 @@ $(document).ready(function(){
                                 }
                             };
                             trumbowyg.addBtnDef('save', btnDef);
-                        }
-                    },
-                    cancel: {
-                        init: function(trumbowyg) {
-                            const btnDef = {
-                                ico: 'close',
-                                fn: function() { 
-                                    var blkId = trumbowyg.o.plugins.save.id;                    // console.log("canceling. blkId = ", blkId); 
-                                    $('#' + blkId ).trumbowyg('destroy'); 
-                                    addEditPencils();   
-                                },
-                            };
-                            trumbowyg.addBtnDef('cancel', btnDef);
                         }
                     }
                 }
@@ -128,11 +111,11 @@ $(document).ready(function(){
                 'btnGrp-semantic',
                 // ['superscript', 'subscript'],
                 ['link'],
-                ['insertImage'],
+                // ['insertImage'],
                 'btnGrp-justify',
                 'btnGrp-lists',
                 ['horizontalRule'],
-                ['save', 'cancel']
+                ['save']
             ];
             $('#editContentBttn').data('editing', containerElemId); // tracks which content block contains the active editor
             removeEditPencils();   //adds developer buttons
@@ -144,9 +127,6 @@ $(document).ready(function(){
                 autogrow: false,
                 plugins: {  // options object unique to each instance of the wysiwyg.
                     save: {
-                        id: containerElemId
-                    },
-                    cancel: {
                         id: containerElemId
                     }
                 }
