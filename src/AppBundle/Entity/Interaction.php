@@ -56,6 +56,16 @@ class Interaction
     private $citation;
 
     /**
+     * @var \AppBundle\Entity\Source
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="interactions")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id")
+     * })
+     */
+    private $source;
+
+    /**
      * @var \AppBundle\Entity\InteractionType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\InteractionType", inversedBy="interactions")
@@ -110,14 +120,6 @@ class Interaction
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -125,6 +127,14 @@ class Interaction
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -156,6 +166,102 @@ class Interaction
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set note.
+     *
+     * @param string $note
+     *
+     * @return Note
+     */
+    public function setNote($note)
+    {
+        $this->note = $note;
+
+        return $this;
+    }
+
+    /**
+     * Get note.
+     *
+     * @return note
+     */
+    public function getNote()
+    {
+        return $this->note;
+    }
+
+    /**
+     * Set isLikely.
+     *
+     * @param bool $isLikely
+     *
+     * @return Interaction
+     */
+    public function setIsLikely($isLikely)
+    {
+        $this->isLikely = $isLikely;
+
+        return $this;
+    }
+
+    /**
+     * Get isLikely.
+     *
+     * @return bool
+     */
+    public function getIsLikely()
+    {
+        return $this->isLikely;
+    }
+
+    /**
+     * Set isOldWorld.
+     *
+     * @param bool $isOldWorld
+     *
+     * @return Interaction
+     */
+    public function setIsOldWorld($isOldWorld)
+    {
+        $this->isOldWorld = $isOldWorld;
+
+        return $this;
+    }
+
+    /**
+     * Get isOldWorld.
+     *
+     * @return bool
+     */
+    public function getIsOldWorld()
+    {
+        return $this->isOldWorld;
+    }
+
+    /**
+     * Set source.
+     *
+     * @param \AppBundle\Entity\Source $source
+     *
+     * @return Interaction
+     */
+    public function setSource(\AppBundle\Entity\Source $source = null)
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Get source.
+     *
+     * @return \AppBundle\Entity\Source
+     */
+    public function getSource()
+    {
+        return $this->source;
     }
 
     /**
@@ -313,75 +419,13 @@ class Interaction
     }
 
     /**
-     * Set note.
+     * Set createdBy user.
      *
-     * @param string $note
-     *
-     * @return Note
+     * @return \AppBundle\Entity\User
      */
-    public function setNote($note)
+    public function setCreatedBy(\AppBundle\Entity\User $user)
     {
-        $this->note = $note;
-
-        return $this;
-    }
-
-    /**
-     * Get note.
-     *
-     * @return note
-     */
-    public function getNote()
-    {
-        return $this->note;
-    }
-
-    /**
-     * Set isLikely.
-     *
-     * @param bool $isLikely
-     *
-     * @return Interaction
-     */
-    public function setIsLikely($isLikely)
-    {
-        $this->isLikely = $isLikely;
-
-        return $this;
-    }
-
-    /**
-     * Get isLikely.
-     *
-     * @return bool
-     */
-    public function getIsLikely()
-    {
-        return $this->isLikely;
-    }
-
-    /**
-     * Set isOldWorld.
-     *
-     * @param bool $isOldWorld
-     *
-     * @return Interaction
-     */
-    public function setIsOldWorld($isOldWorld)
-    {
-        $this->isOldWorld = $isOldWorld;
-
-        return $this;
-    }
-
-    /**
-     * Get isOldWorld.
-     *
-     * @return bool
-     */
-    public function getIsOldWorld()
-    {
-        return $this->isOldWorld;
+        $this->createdBy = $user;
     }
 
     /**
@@ -395,6 +439,26 @@ class Interaction
     }
 
     /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+    }
+
+    /**
      * Get last updated datetime.
      *
      * @return \DateTime
@@ -402,16 +466,6 @@ class Interaction
     public function getUpdated()
     {
         return $this->updated;
-    }
-
-    /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
     }
 
     /**
@@ -425,16 +479,6 @@ class Interaction
     }
 
     /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
-    }
-
-    /**
      * Set deleted at.
      *
      * @param \DateTime $deletedAt
@@ -442,6 +486,16 @@ class Interaction
     public function setDeletedAt($deletedAt)
     {
         $this->deletedAt = $deletedAt;
+    }
+
+    /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
     }
 
     /**
