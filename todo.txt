@@ -13,10 +13,14 @@ LOC DISPLYNAME~~
 Import Process::
     Add SourceTypes
 
+
+    publication -> citationSources
+
     Start Importing Sources::
         Publications->
             New source. Type "Publication"
                 import issue, vol, pages
+            pub"name"->"displayName"
 
                 citations => set as parent;
 
@@ -176,6 +180,9 @@ Notes:
                     returnObj[key] = val;
                 }
             }
+        --Valuable lessons:
+            ++ When making massive changes with unforseeable consequences and side effects, break the changes 
+                into as many steps as possible- especially add and delete stages!!  
 -------------------------------------------------------------------------------------------------------
 Validation reporting notes:
 
@@ -224,5 +231,4 @@ Deployment Steps:
             "Framework:
                 assets:
                     version: 'v%'"              
-
 
