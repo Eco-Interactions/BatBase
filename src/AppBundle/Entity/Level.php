@@ -58,15 +58,7 @@ class Level
      * @ORM\Column(type="datetime")
      */
     private $created;
-
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
+    
     /**
      * @var User
      *
@@ -75,6 +67,14 @@ class Level
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -210,6 +210,16 @@ class Level
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -220,6 +230,26 @@ class Level
     }
 
     /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+    }
+
+    /**
      * Get last updated datetime.
      *
      * @return \DateTime
@@ -227,16 +257,6 @@ class Level
     public function getUpdated()
     {
         return $this->updated;
-    }
-
-    /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
     }
 
     /**

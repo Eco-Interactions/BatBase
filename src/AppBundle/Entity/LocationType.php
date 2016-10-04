@@ -6,13 +6,13 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Region.
+ * LocationType.
  *
- * @ORM\Table(name="region")
+ * @ORM\Table(name="location_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  */
-class Region
+class LocationType
 {
     /**
      * @var int
@@ -24,26 +24,29 @@ class Region
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"description"})
+     * @Gedmo\Slug(fields={"name"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
 
     /**
-     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
-     */
-    private $deletedAt;
-
-    /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="name", type="string", length=255)
      */
-    private $description;
+    private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Location", inversedBy="regions")
-     * @ORM\JoinTable(name="regions_locations")
+     * @var int
+     *
+     * @ORM\Column(name="ordinal", type="integer", nullable=true)
+     */
+    private $ordinal;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="locationType")
      */
     private $locations;
 
@@ -56,14 +59,6 @@ class Region
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -71,6 +66,14 @@ class Region
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -122,11 +125,59 @@ class Region
     }
 
     /**
-     * Add Locations.
+     * Set name.
+     *
+     * @param string $name
+     *
+     * @return LocationType
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set ordinal.
+     *
+     * @param int $ordinal
+     *
+     * @return LocationType
+     */
+    public function setOrdinal($ordinal)
+    {
+        $this->ordinal = $ordinal;
+
+        return $this;
+    }
+
+    /**
+     * Get ordinal.
+     *
+     * @return int
+     */
+    public function getOrdinal()
+    {
+        return $this->ordinal;
+    }
+
+    /**
+     * Add locations.
      *
      * @param \AppBundle\Entity\Location $locations
      *
-     * @return Region
+     * @return LocationType
      */
     public function addLocation(\AppBundle\Entity\Location $locations)
     {
@@ -136,7 +187,7 @@ class Region
     }
 
     /**
-     * Remove Locations.
+     * Remove locations.
      *
      * @param \AppBundle\Entity\Location $locations
      */
@@ -155,48 +206,15 @@ class Region
         return $this->locations;
     }
 
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
-    }
 
     /**
-     * Set deleted at.
+     * Set createdBy user.
      *
-     * @param /DateTime $deletedAt
+     * @return \AppBundle\Entity\User
      */
-    public function setDeletedAt($deletedAt)
+    public function setCreatedBy(\AppBundle\Entity\User $user)
     {
-        $this->deletedAt = $deletedAt;
-    }
-
-    /**
-     * Set description.
-     *
-     * @param string $description
-     *
-     * @return Region
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Get description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
+        $this->createdBy = $user;
     }
 
     /**
@@ -210,6 +228,26 @@ class Region
     }
 
     /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+    }
+
+    /**
      * Get last updated datetime.
      *
      * @return \DateTime
@@ -217,16 +255,6 @@ class Region
     public function getUpdated()
     {
         return $this->updated;
-    }
-
-    /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
     }
 
     /**
@@ -238,7 +266,7 @@ class Region
     {
         return $this->updatedBy;
     }
-
+    
     /**
      * Get string representation of object.
      *
@@ -246,6 +274,6 @@ class Region
      */
     public function __toString()
     {
-        return $this->getDescription();
+        return $this->getName();
     }
 }

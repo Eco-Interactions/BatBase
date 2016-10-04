@@ -42,28 +42,20 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');
-
-        $requestContent = $request->getContent();
-        $pushedData = json_decode($requestContent);                             // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
 
         $returnObj = new \stdClass;
 
-        $entities = $em->getRepository('AppBundle:Domain')->findAll();
-
-        foreach ($entities as $entity) 
-        {                                                                       // $logger->error('SASSSSSSS:: entity ->' . print_r('entity', true));
+        foreach ($domainEntities as $entity) 
+        {                                                                 
             $taxonId = strval($entity->getTaxon()->getId());
             $returnObj->$taxonId = [];
-            $slug = $entity->getSlug();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
-            $name = $entity->getPluralName();                                 // $logger->error('SASSSSSSS:: propVal ->' . print_r($propVal, true));
+            $slug = $entity->getSlug();                               
+            $name = $entity->getPluralName();                              
 
             $returnObj->$taxonId = array_merge( 
-                $returnObj->$taxonId, [ 
-                    "slug" => $slug, "name" => $name 
-                ] 
+                $returnObj->$taxonId, [ "slug" => $slug, "name" => $name ] 
             );
         }
 
@@ -76,7 +68,7 @@ class SearchController extends Controller
     }
 
     /**
-     * Get Interaction IDs by Taxa.
+     * Get Taxa Data organized by parent taxa.
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -85,64 +77,63 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
+        $requestContent = $request->getContent();
+        $pushedParams = json_decode($requestContent); 
+        $domainTaxaIds = $pushedParams->domainIds;
 
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');
-        $requestContent = $request->getContent();
-        $pushedParams = json_decode($requestContent); //$logger->error('SASSSSSSS:: pushedParams ->' . print_r($pushedParams, true));
 
         $returnObj = new \stdClass;
 
-        $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
-
-        foreach ($taxa as $taxon) 
+        foreach ($domainTaxaIds as $domainTaxonId) 
         {
-            $this->getTaxonData($taxon, $pushedParams, $returnObj);
-        }
+            $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
+                ->findOneBy(array('id' => $domainTaxonId));
+            $taxonName = $domainTaxonEntity->getDisplayName();
+
+            $returnObj->$taxonName = $this->getTaxonData($domainTaxonEntity, $em);
+        }  
 
         $response = new JsonResponse();
-        $response->setData(array(
+        $response->setData(array(                                       //strval($taxonId);
             'results' => $returnObj
         ));
 
         return $response;
     }
-    private function getTaxonData($taxon, $params, $returnObj) 
+    private function getTaxonData($taxon, $em) 
     {
-        $taxonId = $taxon->getId();
-        $taxonKey = strval($taxonId);
+        $data = new \stdClass;
 
-        $returnObj->$taxonKey = new \stdClass;
-
-        foreach ($params->props as $prop) 
-        {
-            $getProp = 'get' . ucfirst($prop);
-            $returnObj->$taxonKey->$prop = $taxon->$getProp();           
-        }
-
-        $returnObj->$taxonKey->id = $taxon->getId();
-        $returnObj->$taxonKey->children = $this->getChildren($taxon, $params);
-        $returnObj->$taxonKey->parentTaxon = $taxon->getParentTaxon() ?
+        $data->id = $taxon->getId();
+        $data->name = $taxon->getDisplayName();
+        $data->slug = $taxon->getSlug();
+        $data->children = $this->getChildren($taxon);
+        $data->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           
-        $returnObj->$taxonKey->level = $taxon->getLevel()->getName();                //getInteractions($taxon);
-        $returnObj->$taxonKey->interactions = $this->getTaxaInteractions($taxon, $params);
+        $data->level = $taxon->getLevel()->getName();               
+        $data->interactions = $this->getTaxaInteractions($taxon, $params);
+
+        return $data;
     }
-    private function getChildren($taxon, $params)
+    private function getChildren($taxon)
     {
+        $data = new \stdClass;
         $childEntities = $taxon->getChildTaxa();
-        $children = [];
 
         foreach ($childEntities as $child)
         {
-            array_push($children, $child->getId());
+            $childName = $child->getDisplayName();
+            $data->$childName = getTaxonData($child);
         }
-        return $children;
+        return $data;
     }
-    private function getTaxaInteractions($taxon, $params) 
+    private function getTaxaInteractions($taxon) 
     {
         $intRcrds = new \stdClass;
+        $roles = ['SubjectRoles', 'ObjectRoles'];
 
-        foreach ($params->roles as $role) 
+        foreach ($roles as $role) 
         {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
@@ -153,7 +144,7 @@ class SearchController extends Controller
 /**------------------------Search By Location---------------------------------*/
 
     /**
-     * Get Interactions IDs by Region and Location.
+     * Get Location Data organized by Parent Regions.
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
@@ -164,79 +155,68 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
-
         $intsByRegion = new \stdClass;
+        $locRegions = $em->getRepository('AppBundle:Location')
+            ->findBy(array('locationType' => '1'));
 
-        $locations = $em->getRepository('AppBundle:Location')->findAll();
+        foreach ($locRegions as $regionLoc) 
+        {                    
+            $regionName = $regionLoc->getDescription(); 
 
-        foreach ($locations as $location) 
-        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
-            $loc = new \stdClass;
-
-            $loc->id = $location->getId();
-            $loc->desc = $location->getDescription();
-            $loc->elev = $location->getElevation();
-            $loc ->elevMax = $location->getElevationMax();
-            $loc->elevUnit = $location->getElevUnitAbbrv();
-            $loc->gpsData = $location->getGpsData();
-            $loc->lat = $location->getLatitude();
-            $loc->long = $location->getLongitude();
-            $loc->habitatType = $location->getHabitatType() === null ? null : $location->getHabitatType()->getName();  // $logger->error('SASSSSSSS:: getting interactions...');
-            $interactions = $location->getInteractions();
-            $loc->interactions = $this->getInteractions($interactions);
-
-            $region = $this->getLocRegions($location->getRegions());            //$logger->error('SASSSSSSSSSSSS:: region = ' . print_r($region, true));
-            $loc->region = $region;
-
-            if ($location->getCountry() === null) {
-                $country =  null;
-                $countryId = null;
-            } else { 
-                $country = $location->getCountry()->getName();
-                $countryId = $location->getCountry()->getId();
+            if ($regionLoc->getParentLoc() === null) { // Only top regions are handled here.
+                $intsByRegion->$regionName = $this->GetLocDataObj($regionLoc, $regionName);
             }
-            $loc->country = $country;
-            $loc->countryId = $countryId;
-
-            if ( !property_exists($intsByRegion, $region) ) {  ///$logger->error('SASSSSSSSSSSSS:: region property being created with country = ' . print_r($region, true));
-                $intsByRegion->$region = new \stdClass; 
-            }
-            if ( $country === null ) { // 
-                $locDesc = $loc->desc;
-                if ( !property_exists($intsByRegion->$region, $locDesc) ) { 
-                    $intsByRegion->$region->$locDesc = []; 
-                }                
-                array_push( $intsByRegion->$region->$locDesc, $loc ); 
-            } else {
-                if ( !property_exists($intsByRegion->$region, $country) ) { 
-                    $intsByRegion->$region->$country = []; 
-                }
-                $intsByRegion->$region->$country = array_merge( 
-                    $intsByRegion->$region->$country, [ $loc->id => $loc ]
-                );            
-            }
-        }  // $logger->error('SASSSSSSSSSSSS:: about to return... ->' . print_r($intsByRegion, true));
-
+        }
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $intsByRegion              //$intsByRegion
+            'results' => $intsByRegion              
         ));
 
         return $response;
     }
-    private function getLocRegions($regionEntities)  /*Can't figure out how to properly access the first propeprty, i.e. the first region, so only the first region is being used currently.*/
+    /**
+     * Builds and returns Location Search Data object.
+     */
+    private function GetLocDataObj($locEntity, $locDesc)
     {
-        if ($regionEntities[0] !== null) {
-            $region = $regionEntities[0]->getDescription();
-            // $regionAry = explode(",", $region);
-            return $region;              //$regionAry[0];
-        } else {
-            return "Unspecified";
+        $data = new \stdClass; 
+        $childLocs = $locEntity->getChildLocs();  
+
+        $data->childLocs = $this->GetChildSearchData($locEntity, $childLocs);
+        $data->description = $locEntity->getDescription();
+        $data->elevation = $locEntity->getElevation();
+        $data->elevationMax = $locEntity->getElevationMax();
+        $data->gpsData = $locEntity->getGpsData();
+        $data->latitude = $locEntity->getLatitude();
+        $data->longitude = $locEntity->getLongitude();
+        $data->locationType = $locEntity->getLocationType()->getName(); 
+        
+        $habitatType = $locEntity->getHabitatType();            //echo("\nhabitatType = ".gettype($habitatType)); 
+        $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
+        
+        $interactions = $locEntity->getInteractions();
+        $data->interactions = $this->getInteractions($interactions);
+
+        if ($data->locationType !== "Region") {
+            $data->parentLoc = $locEntity->getParentLoc()->getId();
         }
+        return $data;
     }
     /**
-     * Get Interactions.
+     * Returns an object keyed with child location descriptions and their data.
+     */
+    private function GetChildSearchData($parentLoc, $childLocs)
+    {
+        $data = new \stdClass;
+
+        foreach ($childLocs as $childLoc) {
+            $childName = $childLoc->getDescription();
+            $data->$childName = $this->GetLocDataObj($childLoc, $childName);
+        }     
+        return $data;
+    }
+    /*
+     * Returns all interaction records.
      *
      * @Route("/search/interaction", name="app_ajax_search_interaction")
      */
@@ -245,16 +225,13 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-
         $em = $this->getDoctrine()->getManager();
-        // $logger = $this->get('logger');            // $logger->error('SASSSSSSS:: pushedData ->' . print_r($pushedData, true));
+        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
 
         $intRcrds = new \stdClass;
 
-        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
-
         foreach ($interactions as $int) 
-        {                     //  $logger->error('SASSSSSSS:: location ->' . print_r($location, true));
+        {                     
             $rcrd = new \stdClass;
             $intId = $int->getId();
             $rcrd->id = $intId;
@@ -264,7 +241,7 @@ class SearchController extends Controller
             $rcrd->subject = array(
                 "name" => $int->getSubject()->getDisplayName(),
                 "level" => $int->getSubject()->getLevel()->getName(),
-                "id" => $int->getSubject()->getId() );  // $logger->error('SASSSSSSS:: $rcrd->subject ->' . print_r($rcrd->subject, true));
+                "id" => $int->getSubject()->getId() );  
             $rcrd->object = array(
                 "name" => $int->getObject()->getDisplayName(),
                 "level" => $int->getObject()->getLevel()->getName(),
@@ -273,16 +250,12 @@ class SearchController extends Controller
 
             if ($int->getLocation() !== null) {
                 $rcrd->location = $int->getLocation()->getDescription();
-                $rcrd->country = $int->getLocation()->getCountry() === null ?
-                    null : $int->getLocation()->getCountry()->getName() ;
-                $rcrd->region = $int->getLocation()->getCountry() === null ?
-                    null : $int->getLocation()->getCountry()->getRegion()->getDescription() ;
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
                     null : $int->getLocation()->getHabitatType()->getName() ;
             }
-            
             $intRcrds->$intId = $rcrd;
         }
+        
         $response = new JsonResponse();
         $response->setData(array(
             'results' => $intRcrds

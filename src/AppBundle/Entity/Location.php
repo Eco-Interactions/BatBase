@@ -81,27 +81,41 @@ class Location
     private $showOnMap;
 
     /**
+     * @var \AppBundle\Entity\Location
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLocs")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id", onDelete="SET NULL")
+     * })
+     */
+    private $parentLoc;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="parentLoc")
+     * @ORM\OrderBy({
+     *     "description"="ASC"
+     * })
+     */
+    private $childLocs;
+
+    /**
+     * @var \AppBundle\Entity\LocationType
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
+     * })
+     */
+    private $locationType;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location")
      */
     private $interactions;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Region", mappedBy="locations")
-     * @ORM\JoinTable(name="regions_locations")
-     */
-    private $regions;
-
-    /**
-     * @var \AppBundle\Entity\Country
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Country", inversedBy="locations")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="country_id", referencedColumnName="id")
-     * })
-     */
-    private $country;
 
     /**
      * @var \AppBundle\Entity\HabitatType
@@ -122,14 +136,6 @@ class Location
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -137,6 +143,14 @@ class Location
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -158,7 +172,7 @@ class Location
     public function __construct()
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->childLocs = new \Doctrine\Common\Collections\ArrayCollection();
     }
     
     /**
@@ -169,74 +183,6 @@ class Location
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Add interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     *
-     * @return Location
-     */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions[] = $interactions;
-
-        return $this;
-    }
-
-    /**
-     * Remove interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     */
-    public function removeInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions->removeElement($interactions);
-    }
-
-    /**
-     * Get interactions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getInteractions()
-    {
-        return $this->interactions;
-    }
-
-    /**
-     * Add Regions.
-     *
-     * @param \AppBundle\Entity\Region $regions
-     *
-     * @return Country
-     */
-    public function setRegion(\AppBundle\Entity\Region $regions)
-    {
-        $this->regions[] = $regions;
-
-        return $this;
-    }
-
-    /**
-     * Remove Regions.
-     *
-     * @param \AppBundle\Entity\Region $regions
-     */
-    public function removeRegion(\AppBundle\Entity\Region $regions)
-    {
-        $this->regions->removeElement($regions);
-    }
-
-    /**
-     * Get regions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRegions()
-    {
-        return $this->regions;
     }
 
     /**
@@ -408,27 +354,121 @@ class Location
     }
 
     /**
-     * Set country.
+     * Set parentLoc.
      *
-     * @param \AppBundle\Entity\Country $country
+     * @param \AppBundle\Entity\Location $parentLoc
      *
      * @return Location
      */
-    public function setCountry(\AppBundle\Entity\Country $country = null)
+    public function setParentLoc(\AppBundle\Entity\Location $parentLoc)
     {
-        $this->country = $country;
+        $this->parentLoc = $parentLoc;
 
         return $this;
     }
 
     /**
-     * Get country.
+     * Get parentLoc.
      *
-     * @return \AppBundle\Entity\Country
+     * @return \AppBundle\Entity\Location
      */
-    public function getCountry()
+    public function getParentLoc()
     {
-        return $this->country;
+        return $this->parentLoc;
+    }
+
+    /**
+     * Add childLoc.
+     *
+     * @param \AppBundle\Entity\Location $childLoc
+     *
+     * @return Location
+     */
+    public function addChildLocs(\AppBundle\Entity\Location $childLoc)
+    {
+        $this->childLocs[] = $childLoc;
+        $childLoc->setParentLoc($this);
+
+        return $this;
+    }
+
+    /**
+     * Remove childLoc.
+     *
+     * @param \AppBundle\Entity\Location $childLoc
+     */
+    public function removeChildLoc(\AppBundle\Entity\Location $childLoc)
+    {
+        $this->childLocs->removeElement($childLoc);
+    }
+
+    /**
+     * Get childLocs.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildLocs()
+    {
+        return $this->childLocs;
+    }
+
+    /**
+     * Set locationType.
+     *
+     * @param \AppBundle\Entity\LocationType $locationType
+     *
+     * @return Location
+     */
+    public function setLocationType(\AppBundle\Entity\LocationType $locationType = null)
+    {
+        $this->locationType = $locationType;
+
+        return $this;
+    }
+
+    /**
+     * Get locationType.
+     *
+     * @return \AppBundle\Entity\LocationType
+     */
+    public function getLocationType()
+    {
+        return $this->locationType;
+    }
+
+    /**
+     * Add interactions.
+     *
+     * @param \AppBundle\Entity\Interaction $interactions
+     *
+     * @return Location
+     */
+    public function addInteraction(\AppBundle\Entity\Interaction $interaction)
+    {
+        $this->interactions[] = $interaction;
+
+        return $this;
+    }
+
+    /**
+     * Remove interactions.
+     *
+     * @param \AppBundle\Entity\Interaction $interactions
+     */
+    public function removeInteraction(\AppBundle\Entity\Interaction $interaction)
+    {
+        $interaction->removeLocation();
+        $this->interactions->removeElement($interaction);
+    }
+
+    /**
+     * Get interactions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getInteractions()
+    {
+        return $this->interactions;
     }
 
     /**
@@ -485,6 +525,16 @@ class Location
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -492,6 +542,26 @@ class Location
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -505,16 +575,6 @@ class Location
     }
 
     /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -522,16 +582,6 @@ class Location
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
     }
 
     /**
@@ -545,19 +595,22 @@ class Location
     }
 
     /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
+    }
+
+    /**
      * Get string representation of object.
      *
      * @return string
      */
     public function __toString()
     {
-        if ($this->getDescription()) {
-            return $this->getDescription();
-        }
-        $country = $this->getCountry()->getName();
-        $habitatType = $this->getHabitatType()->getName();
-        $gpsdata = $this->getGpsData();
-
-        return $country.' '.$habitatType.' '.$gpsdata;
+        return $this->getDescription();
     }
 }

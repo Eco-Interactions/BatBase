@@ -138,10 +138,10 @@
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data.results);
+	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
 		var intRcrds = JSON.stringify(data.results);
 		populateStorage('intRcrds', intRcrds);  
-		fillTreeWithInteractions( data.results );
+		// fillTreeWithInteractions( data.results );
 	}
 	/**
 	 * Back fills the displayed search focus' data tree with interaction records
@@ -414,8 +414,8 @@
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
 		if( storedDomains ) { //console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
-		} else { //console.log("Domains Not Found In Storage.");
-			sendAjaxQuery({props: ['slug', 'name']}, 'search/domain', storeAndLoadDomains);
+		} else { // console.log("Domains Not Found In Storage.");
+			sendAjaxQuery({}, 'search/domain', storeAndLoadDomains);
 		}
 	}
 	function storeAndLoadDomains(data) {										//console.log("domain data recieved. %O", data);
@@ -425,23 +425,20 @@
 	function showTaxonSearch(data) {
 		if (!$("#sel-domain").length) { buildTaxaSearchHtml(data); } 	
 		initTaxaSearchState();
-		getAllTaxaRcrds();
+		getAllTaxaRcrds(data);
 	}
 	function initTaxaSearchState() { //console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
 		if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
 	}
 	/** Ajax to get all interaction rcrds. */
-	function getAllTaxaRcrds() {
-		var params = {
-			props: ['displayName', 'slug' ],
-			roles: ['ObjectRoles', 'SubjectRoles']
-		};
+	function getAllTaxaRcrds(domainData) {  
+		var domainIds = Object.keys(domainData);  console.log("domainData = %O", domainData);
 		var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
 		if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else { //console.log("taxaRcrds Not Found In Storage.");
-			sendAjaxQuery(params, 'search/taxa', recieveTaxaRcrds);
+		} else { //  console.log("taxaRcrds Not Found In Storage.");
+			sendAjaxQuery({domainIds: domainIds}, 'search/taxa', recieveTaxaRcrds);
 		}
 	}
 	function recieveTaxaRcrds(data) {  											 //console.log("taxaRcrds recieved. %O", data);
