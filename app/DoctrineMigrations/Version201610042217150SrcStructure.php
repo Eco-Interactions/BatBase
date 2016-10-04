@@ -6,7 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Adds Source, SourceType, and Contributor entities with all related fields added and/or modified. 
  */
 class Version201610042217150SrcStructure extends AbstractMigration
 {
@@ -15,7 +15,6 @@ class Version201610042217150SrcStructure extends AbstractMigration
      */
     public function up(Schema $schema)
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE contributor (id INT AUTO_INCREMENT NOT NULL, citation_id INT DEFAULT NULL, author_id INT DEFAULT NULL, created_by INT DEFAULT NULL, updated_by INT DEFAULT NULL, cited_as VARCHAR(255) DEFAULT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL, INDEX IDX_DA6F9793500A8AB7 (citation_id), INDEX IDX_DA6F9793F675F31B (author_id), INDEX IDX_DA6F9793DE12AB56 (created_by), INDEX IDX_DA6F979316FE72E1 (updated_by), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
