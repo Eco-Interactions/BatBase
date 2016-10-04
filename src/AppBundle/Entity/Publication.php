@@ -23,19 +23,26 @@ class Publication
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
-    
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="displayName", type="string", length=255)
-     */
-    private $displayName;
 
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="displayName", type="string", length=255, unique=true)
+     */
+    private $displayName;
+
+    /**
+     * @var string
+     * //port to displayName and delete
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
 
     /**
      * @var string
@@ -98,10 +105,17 @@ class Publication
 
     /**
      * @var \Doctrine\Common\Collections\Collection
+     * //port to citatoinSources and delete
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="publication")
+     */
+    private $citations;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="publication") 
      */
-    private $citations;
+    private $citationSources;
 
     /**
      * @var \DateTime
@@ -160,6 +174,28 @@ class Publication
     }
 
     /**
+     * Set slug.
+     *
+     * @return string
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug.
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
      * Set displayName.
      *
      * @param string $displayName
@@ -182,29 +218,31 @@ class Publication
     {
         return $this->displayName;
     }
-    
+
     /**
-     * Set slug.
+     * Set name.
      *
-     * @return string
+     * @param string $name
+     *
+     * @return Publication
      */
-    public function setSlug($slug)
+    public function setName($name)
     {
-        $this->slug = $slug;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get slug.
+     * Get name.
      *
      * @return string
      */
-    public function getSlug()
+    public function getName()
     {
-        return $this->slug;
+        return $this->name;
     }
-
+    
     /**
      * Set publicationType.
      *
@@ -430,6 +468,39 @@ class Publication
         return $this->citations;
     }
 
+    /**
+     * Add citationSource.
+     *
+     * @param \AppBundle\Entity\Source $citationSource
+     *
+     * @return Publication
+     */
+    public function addCitationSource(\AppBundle\Entity\Source $citationSource)
+    {
+        $this->citationSources[] = $citationSource;
+
+        return $this;
+    }
+
+    /**
+     * Remove citationSource.
+     *
+     * @param \AppBundle\Entity\Source $citationSource
+     */
+    public function removeCitationSource(\AppBundle\Entity\Source $citationSource)
+    {
+        $this->citationSources->removeElement($citationSource);
+    }
+
+    /**
+     * Get citationSources.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCitationSources()
+    {
+        return $this->citationSources;
+    }
 
     /**
      * Set createdBy user.
