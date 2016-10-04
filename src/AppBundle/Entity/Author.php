@@ -33,9 +33,9 @@ class Author
     /**
      * @var string
      *
-     * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
+     * @ORM\Column(name="short_name", type="string", length=255)
      */
-    private $fullName;
+    private $shortName;
 
     /**
      * @var string
@@ -43,6 +43,13 @@ class Author
      * @ORM\Column(name="last_name", type="string", length=255, nullable=true)
      */
     private $lastName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
+     */
+    private $fullName;
 
     /**
      * @var string
@@ -59,18 +66,21 @@ class Author
     private $linkUrl;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="short_name", type="string", length=255)
+     * @var \Doctrine\Common\Collections\Collection
+     * //port to contributor and delete
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="author")
      */
-    private $shortName;
+    private $attributions;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="author")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="author")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * })
      */
-    private $attributions;
+    private $source;
 
     /**
      * @var \DateTime
@@ -81,14 +91,6 @@ class Author
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -96,6 +98,14 @@ class Author
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -152,27 +162,27 @@ class Author
     }
 
     /**
-     * Set fullName.
+     * Set shortName.
      *
-     * @param string $fullName
+     * @param string $shortName
      *
      * @return Author
      */
-    public function setFullName($fullName)
+    public function setShortName($shortName)
     {
-        $this->fullName = $fullName;
+        $this->shortName = $shortName;
 
         return $this;
     }
 
     /**
-     * Get fullName.
+     * Get shortName.
      *
      * @return string
      */
-    public function getFullName()
+    public function getShortName()
     {
-        return $this->fullName;
+        return $this->shortName;
     }
 
     /**
@@ -197,6 +207,30 @@ class Author
     public function getLastName()
     {
         return $this->lastName;
+    }
+
+    /**
+     * Set fullName.
+     *
+     * @param string $fullName
+     *
+     * @return Author
+     */
+    public function setFullName($fullName)
+    {
+        $this->fullName = $fullName;
+
+        return $this;
+    }
+
+    /**
+     * Get fullName.
+     *
+     * @return string
+     */
+    public function getFullName()
+    {
+        return $this->fullName;
     }
 
     /**
@@ -248,30 +282,6 @@ class Author
     }
 
     /**
-     * Set shortName.
-     *
-     * @param string $shortName
-     *
-     * @return Author
-     */
-    public function setShortName($shortName)
-    {
-        $this->shortName = $shortName;
-
-        return $this;
-    }
-
-    /**
-     * Get shortName.
-     *
-     * @return string
-     */
-    public function getShortName()
-    {
-        return $this->shortName;
-    }
-
-    /**
      * Add attributions.
      *
      * @param \AppBundle\Entity\Attribution $attributions
@@ -306,6 +316,40 @@ class Author
     }
 
     /**
+     * Set source.
+     *
+     * @param \AppBundle\Entity\Source $source
+     *
+     * @return Author
+     */
+    public function setSource(\AppBundle\Entity\Source $source)
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Get source.
+     *
+     * @return \AppBundle\Entity\Source
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -313,6 +357,26 @@ class Author
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -326,16 +390,6 @@ class Author
     }
 
     /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -346,6 +400,16 @@ class Author
     }
 
     /**
+     * Set deleted at.
+     *
+     * @param \DateTime $deletedAt
+     */
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deletedAt = $deletedAt;
+    }
+
+    /**
      * Get deleted at.
      *
      * @return \DateTime
@@ -353,16 +417,6 @@ class Author
     public function getDeletedAt()
     {
         return $this->deletedAt;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param datetime $deletedAt ?????
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**
