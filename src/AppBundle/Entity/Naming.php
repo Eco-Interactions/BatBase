@@ -96,6 +96,14 @@ class Naming
     private $parentTaxon;
 
     /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $created;
+    
+    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
