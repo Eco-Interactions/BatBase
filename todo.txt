@@ -1,0 +1,228 @@
+DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
+
+TODO
+    ----Barro Island (dup??)
+    -- Consolidate migrations?
+
+    -- Create Contributor!!
+    ## stash: "Rewrite attributions" ##
+
+LOC DISPLYNAME~~
+
+
+Import Process::
+    Add SourceTypes
+
+    Start Importing Sources::
+        Publications->
+            New source. Type "Publication"
+                import issue, vol, pages
+
+                citations => set as parent;
+
+        Authors->
+            New source. Type "Author"
+                citations => set as parent;
+
+        Citations->
+            Add source type "Citation".
+            parent => should be set by now.
+
+            all attributions need to be updated with source ids
+            
+
+
+Unfinished db migrations: Foundations for the Source restructure and some reorganizing of db table columns.
+Building the new Source structure: Created new SourceType entity, renamed and refactored Citation into Source and have added a Citation entity for its special properties. Mass commit; my bad.
+
+
+
+Src types
+    Publisher
+    Publication
+    Citation
+    Author
+
+
+
+Questions::
+Notes::
+
+    location desc field not specified as a unique field.
+
+
+    deployment process
+        - file upload
+        - database schema update
+
+
+
+
+::EMAIL::
+
+Changes::
+    - USA -> United States
+    - Suriam -> Suriname
+    - Virgin Islands -> Virgin Islands, Britain
+    - Trinidad -> Trinidad and Tobago
+    - Central America, South America -> Central & South America
+
+
+
+
+
+
+
+-- Short Range TODO --
+##Delete comments from prod files##
+
+--Functional testing for search page and wysiwyg 
+---- create 'new data loading' popup for search page data updates
+-- add click event exit for menu
+-- add a site map to the ToS that would allow users to jump around the sections,
+    going directly to citation and other areas of interest.
+-- Alphabetize config 
+
+--add tips and search page static content to content blocks and wysiwyg
+
+
+--wysiwyg
+    --move save and cancel against the far right
+    --get that save svg working
+
+
+
+Best practices:
+    comments:
+        //right against the first letter to exclude uncommented instances of that word (consoles being the best ever to isolate)
+
+
+
+
+=========== EMAIL ==================
+
+
+
+----------------------------------------------------------------------------------
+---Next---
+
+
+--SHORTTERM--
+    --Editor
+        --Admin sign-in css is broken
+        --add invalid country and region check error handling (@checkCntryAndRegion & checkRegion)
+    --Site-
+        -- revisit tag constraint system 
+        -- add copy csv
+        -- fix csv exports??
+        -- t&c sitemap & presentation
+        -- css replacing and cleanup
+
+
+
+
+--LONGTERM--
+    --Editor-
+        --prog bar isn't updating as it should
+        --Add error handling to webview
+        --Parsing
+            --catch tags with single character??
+            --Create complex error catch
+        --Update code for new loc/source structures
+            --Remove '-Unspecified' locDesc concats 
+            --update autoGen LocDesc
+    --Site-
+        -- test for optimizations
+        -- responsive
+        -- wsyiwyg editor for content blocks
+        -- Taxonym need a collection of namings
+        -- update: domain = realm
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+Notes:
+
+
+
+    --Zenbol-
+        --PAYMENT PAGE FOR WHM
+        --CRON JOB BACKUPS
+
+    --Spctrm-
+        --CREATE JS SNIPPETS FILE
+            function sortProperties(obj) {
+                var sortable=[];
+                var returnObj = {};
+
+                for(var key in obj) {                   // convert object into array
+                    if(obj.hasOwnProperty(key))
+                        sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+                }
+                
+                sortable.sort(function(a, b) {          // sort items by value
+                    var x=a[1].toLowerCase(),
+                        y=b[1].toLowerCase();
+                    return x<y ? -1 : x>y ? 1 : 0;
+                });
+                sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+
+                return returnObj;
+
+                function rebuildObj(keyValAry) {
+                    var key = keyValAry[0];
+                    var val = keyValAry[1];
+                    returnObj[key] = val;
+                }
+            }
+-------------------------------------------------------------------------------------------------------
+Validation reporting notes:
+
+    make data set exercising all types of validation error reporting
+            --Null Refs:
+                citation:
+                    --authors
+                interaction:
+                    --citation
+
+            Conflicts:
+                --Author:
+
+                --Citation:
+                    ++Format cit information
+                        Show truncated full text (25char + ...) with cit id
+                            Include the data and phrase the formatting for other conflicting records
+
+                --Location:
+
+            invalid nulls:
+                location:
+                    --locDesc
+                author:
+                    shortname
+                            ++Now holding onto aturhor row numbers through adding tempIds.
+                interaction:
+                    citation
+                Citation:
+                    author
+
+
+
+=========================================================================
+
+READ ME
+
+HOW TO RUN TESTS
+    phpunit -c app/ tests   
+    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
+
+
+Deployment Steps:
+    >Cache busting:
+        config.yml:
+            "Framework:
+                assets:
+                    version: 'v%'"              
+
+
