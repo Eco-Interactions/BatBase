@@ -26,9 +26,16 @@ class Tag
     /**
      * @var text
      *
-     * @ORM\Column(name="tag", type="text", nullable=false)
+     * @ORM\Column(name="tag", type="string", length=255, unique=true, nullable=false)
      */
     private $tag;
+
+    /**
+     * @var text
+     *
+     * @ORM\Column(name="description", type="text")
+     */
+    private $description;
 
     /**
      * @ORM\ManyToMany(targetEntity="Interaction", inversedBy="tags")
@@ -43,6 +50,12 @@ class Tag
     private $citations;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Source", inversedBy="tags")
+     * @ORM\JoinTable(name="source_tag")
+     */
+    private $sources;
+
+    /**
      * @var text
      *
      * @ORM\Column(name="constrained_to_entity", type="text", nullable=true)
@@ -51,14 +64,9 @@ class Tag
 
     /**
      * @ORM\ManyToMany(targetEntity="InteractionType", inversedBy="validTags")
-     * @ORM\JoinTable(name="type_tag_contraints")
+     * @ORM\JoinTable(name="int_type_tag_contraints")
      */
-    private $constrainedToType;
-
-    /**
-     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
-     */
-    private $deletedAt;
+    private $intTypeConstraints;
 
     /**
      * @var \DateTime
@@ -68,6 +76,15 @@ class Tag
      */
     private $created;
 
+    /**
+     * @var User
+     *
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
+     */
+    private $createdBy;
+    
     /**
      * @var \DateTime
      *
@@ -79,20 +96,16 @@ class Tag
     /**
      * @var User
      *
-     * @Gedmo\Blameable(on="create")
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
-     */
-    private $createdBy;
-
-    /**
-     * @var User
-     *
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
+
+    /**
+     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
+     */
+    private $deletedAt;
 
     /**
      * Constructor.
@@ -101,7 +114,8 @@ class Tag
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->constrainedToType = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->sources = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->intTypeConstraints = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -137,13 +151,37 @@ class Tag
     }
 
     /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return Tag
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Add Interaction.
      *
      * @param \AppBundle\Entity\Interaction $interaction
      *
      * @return Tag
      */
-    public function setInteraction(\AppBundle\Entity\Interaction $interaction)
+    public function addInteraction(\AppBundle\Entity\Interaction $interaction)
     {
         $this->interactions[] = $interaction;
 
@@ -171,13 +209,13 @@ class Tag
     }
 
     /**
-     * Add Citations.
+     * Add Citation.
      *
      * @param \AppBundle\Entity\Citation $citation
      *
      * @return Tag
      */
-    public function setCitation(\AppBundle\Entity\Citation $citation)
+    public function addCitation(\AppBundle\Entity\Citation $citation)
     {
         $this->citations[] = $citation;
 
@@ -185,7 +223,7 @@ class Tag
     }
 
     /**
-     * Remove Citations.
+     * Remove Citation.
      *
      * @param \AppBundle\Entity\Citation $citation
      */
@@ -203,6 +241,41 @@ class Tag
     {
         return $this->citations;
     }
+
+    /**
+     * Add Source.
+     *
+     * @param \AppBundle\Entity\Source $source
+     *
+     * @return Tag
+     */
+    public function addSource(\AppBundle\Entity\Source $source)
+    {
+        $this->sources[] = $source;
+
+        return $this;
+    }
+
+    /**
+     * Remove Source.
+     *
+     * @param \AppBundle\Entity\Source $source
+     */
+    public function removeSource(\AppBundle\Entity\Source $source)
+    {
+        $this->sources->removeElement($source);
+    }
+
+    /**
+     * Get Sources.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSources()
+    {
+        return $this->sources;
+    }
+
     /**
      * Add ConstrainedToEntity.
      *
@@ -226,82 +299,50 @@ class Tag
     {
         return $this->constrainedToEntity;
     }
+
     /**
-     * Add ConstrainedToType.
+     * 
+     * Add intTypeConstraint.
      *
-     * @param \AppBundle\Entity\InteractionType $constrainedToType
+     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
      *
      * @return Tag
      */
-    public function setConstrainedToType(\AppBundle\Entity\InteractionType $constrainedToType)
+    public function addIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
     {
-        $this->constrainedToType[] = $constrainedToType;
+        $this->intTypeConstraints[] = $intTypeConstraint;
 
         return $this;
     }
 
     /**
-     * Remove ConstrainedToType.
+     * Remove intTypeConstraint.
      *
-     * @param \AppBundle\Entity\InteractionType $constrainedToType
+     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
      */
-    public function removeConstrainedToType(\AppBundle\Entity\InteractionType $constrainedToType)
+    public function removeIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
     {
-        $this->constrainedToType->removeElement($constrainedToType);
+        $this->intTypeConstraints->removeElement($intTypeConstraint);
     }
 
     /**
-     * Get constrainedToType.
+     * Get intTypeConstraints.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getConstrainedToType()
+    public function getIntTypeConstraints()
     {
-        return $this->constrainedToType;
+        return $this->intTypeConstraints;
     }
 
     /**
-     * Get deleted at.
+     * Set createdBy user.
      *
-     * @return \DateTime
+     * @return \AppBundle\Entity\User
      */
-    public function getDeletedAt()
+    public function setCreatedBy(\AppBundle\Entity\User $user)
     {
-        return $this->deletedAt;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param /DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
-    }
-
-    /**
-     * Set description.
-     *
-     * @param string $description
-     *
-     * @return Tag
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Get description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
+        $this->createdBy = $user;
     }
 
     /**
@@ -315,6 +356,26 @@ class Tag
     }
 
     /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+    }
+
+    /**
      * Get last updated datetime.
      *
      * @return \DateTime
@@ -322,16 +383,6 @@ class Tag
     public function getUpdated()
     {
         return $this->updated;
-    }
-
-    /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
     }
 
     /**
@@ -345,6 +396,26 @@ class Tag
     }
 
     /**
+     * Set deleted at.
+     *
+     * @param \DateTime $deletedAt
+     */
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deletedAt = $deletedAt;
+    }
+
+    /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
+    }
+
+    /**
      * Get string representation of object.
      *
      * @return string
@@ -352,96 +423,5 @@ class Tag
     public function __toString()
     {
         return $this->getTag();
-    }
-
-    /**
-     * Set created
-     *
-     * @param \DateTime $created
-     * @return Tag
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-
-        return $this;
-    }
-
-    /**
-     * Set updated
-     *
-     * @param \DateTime $updated
-     * @return Tag
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-
-        return $this;
-    }
-
-    /**
-     * Add interactions
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     * @return Tag
-     */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions[] = $interactions;
-
-        return $this;
-    }
-
-    /**
-     * Add citations
-     *
-     * @param \AppBundle\Entity\Citation $citations
-     * @return Tag
-     */
-    public function addCitation(\AppBundle\Entity\Citation $citations)
-    {
-        $this->citations[] = $citations;
-
-        return $this;
-    }
-
-    /**
-     * Add constrainedToType
-     *
-     * @param \AppBundle\Entity\InteractionType $constrainedToType
-     * @return Tag
-     */
-    public function addConstrainedToType(\AppBundle\Entity\InteractionType $constrainedToType)
-    {
-        $this->constrainedToType[] = $constrainedToType;
-
-        return $this;
-    }
-
-    /**
-     * Set createdBy
-     *
-     * @param \AppBundle\Entity\User $createdBy
-     * @return Tag
-     */
-    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    /**
-     * Set updatedBy
-     *
-     * @param \AppBundle\Entity\User $updatedBy
-     * @return Tag
-     */
-    public function setUpdatedBy(\AppBundle\Entity\User $updatedBy = null)
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
     }
 }
