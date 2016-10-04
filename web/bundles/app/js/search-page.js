@@ -29,7 +29,7 @@
 
 	function onDOMContentLoaded () {
 		clearLocalStorageCheck();
-		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	 console.log("curFocus = ", curFocus)
+		curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	//console.log("curFocus = ", curFocus)
 		addDomEventListeners();
 		authDependentInit();
 	    initSearchState();
@@ -50,36 +50,25 @@
 		$("#show-tips").click(showTips);
 	}
 	function authDependentInit() {
-		var userRole = $('body').data("user-role");  console.log("----userRole === visitor ", userRole === "visitor")
+		var userRole = $('body').data("user-role");  							//console.log("----userRole === visitor ", userRole === "visitor")
 		if (userRole === "visitor") {
 			$('button[name="csv"]').prop('disabled', true);
 			$('button[name="csv"]').prop('title', "Register to download.");
 			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
 		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
-	function selectSearchFocus(e) {  				console.log("select(ing)SearchFocus")
-	    showPopUpMsg();
-	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
-	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
-	    showWalkthroughIfFirstVisit();
-	}
-	function initSearchState() {
-		if (curFocus){ $('#search-focus').val(curFocus);
-		} else { $('#search-focus').val("taxa"); }
-		initNoFiltersStatus();		
-		selectSearchFocus();
-	} 
+/*=================Helper Methods=============================================*/
 	function showPopUpMsg(msg) {
-		var popUpMsg = msg || "Loading...";
+		var popUpMsg = msg || "Loading and updating data...";
 		$("#search-popUpDiv").text(popUpMsg);
-		$('#borderLayout_eRootPanel').fadeTo(100, .3);
+		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
 	    $('#search-popUpDiv, #search-overlay').show();
 	}
 	function hidePopUpMsg() {
-		$('#borderLayout_eRootPanel').fadeTo(100, 1);
+		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
 	    $('#search-popUpDiv, #search-overlay').hide();
 	}
-	function toggleExpandTree() {  												// console.log("toggleExpandTree")
+	function toggleExpandTree() {  												//console.log("toggleExpandTree")
   		var expanded = $(this).data('xpanded');
   		if (expanded) { 
   			gridOptions.api.collapseAll();
@@ -94,35 +83,49 @@
 		$('#xpand-tree').html("&nbspExpand Tree&nbsp");
 		$('#xpand-tree').data("xpanded", false);
 	}
+	/**
+	 * Hides the group "tree" column's filter button. Filtering on the group 
+	 * column doesn't work as expected.
+	 */
 	function hideGroupColFilterMenu() {
 		$('.ag-header-cell-menu-button.name').hide();
 	}
-/*=================Search Methods=============================================*/
+/*-------------------- Top "State" Managment Methods -------------------------*/
+	function initSearchState() {
+		if (curFocus){ $('#search-focus').val(curFocus);
+		} else { $('#search-focus').val("taxa"); }
+		initNoFiltersStatus();		
+		selectSearchFocus();
+	} 
+	function selectSearchFocus(e) {  							console.log("select(ing)SearchFocus")
+	    showPopUpMsg();
+	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
+	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
+	    showWalkthroughIfFirstVisit();
+	}
 	/**
 	 * Updates and resets the focus 'state' of the search, either 'taxa' or 'locs'.
 	 */
-	function ifChangedFocus(focus, buildGridFunc) { 							// console.log("ifChangedFocus called.")
-		var showingOpts = true;
+	function ifChangedFocus(focus, buildGridFunc) { 							//console.log("ifChangedFocus called.")
 		if (focus !== curFocus) {   
 			curFocus = focus;
 			populateStorage('curFocus', focus);
 			resetToggleTreeBttn();
 			clearPastHtmlOptions();
 		} else { buildGridFunc(); }
-
+		/** Called seperately so @emptySearchOpts is called once. */
 		function clearPastHtmlOptions() {    
-			$('#sort-opts, #opts-col2').fadeTo(100, 0, emptySearchOpts);
+			$('#opts-col2').fadeTo(100, 0);
+			$('#opts-col1').fadeTo(100, 0, emptySearchOpts);
 		}
-		function emptySearchOpts() {  											// console.log("emptying search options");
-			if (!showingOpts) {
-				$('#opts-col2').empty();
-				$('#sort-opts').empty();
-				$('#sort-opts, #opts-col2').fadeTo(0, 1);
-				buildGridFunc();
-			} else { showingOpts = false; } //This works while there are only two elems to fade
+		function emptySearchOpts() {  											//console.log("emptying search options");
+			$('#opts-col2').empty();
+			$('#sort-opts').empty();
+			$('#opts-col1, #opts-col2').fadeTo(0, 1);
+			buildGridFunc();
 		}
 	} /* End ifChangedFocus */
-/*------------------Interaction (Record Fill) Methods-----------------------------------*/
+/*------------------Interaction (Record Fill) Methods-------------------------*/
 	/**
 	 * Checks if interaction records have been saved in local storage. If not, sends 
 	 * ajax to get them with @storeInteractions as the success callback. If records 
@@ -164,13 +167,13 @@
 	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
 	     * as the top-most parent, and the first "sibling".
 	     */
-		function fillTaxaSetWithInteractionRcrds(treeObj) { 					// console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
+		function fillTaxaSetWithInteractionRcrds(treeObj) { 					//console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
 			for (var sibling in treeObj) {   
 				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds);
 				if (treeObj[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(treeObj[sibling].children) }
 			}
 		}
-		function replaceTaxaInteractions(interactionsObj) {   					// console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
+		function replaceTaxaInteractions(interactionsObj) {   					//console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
 			for (var role in interactionsObj) {
 				if (interactionsObj[role] !== null) { 
 					replaceInteractions(interactionsObj[role]) }
@@ -182,8 +185,8 @@
 		 * If a region has no countries, and for every country key, the location 
 		 * records are in array format.
 		 */
-		function fillLocsSetWithInteractionRcrds(treeObj) { 					// console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
-			for (var topKey in treeObj) {  										// console.log("topKey of treeObj = ", topKey);
+		function fillLocsSetWithInteractionRcrds(treeObj) { 					//console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
+			for (var topKey in treeObj) {  										//console.log("topKey of treeObj = ", topKey);
 				if (Array.isArray(treeObj[topKey])) {  
 					getArrayInteractions(treeObj[topKey]);
 				} else {
@@ -191,12 +194,12 @@
 				}
 			}
 		}
-		function getArrayInteractions(treeAry) { 								// console.log("treeAry = %O", treeAry)
+		function getArrayInteractions(treeAry) { 								//console.log("treeAry = %O", treeAry)
 			treeAry.forEach(function(locObj){
 				replaceInteractions(locObj.interactions, intRcrds)
 			});
 		}
-		function replaceInteractions(interactionsAry) {  						// console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+		function replaceInteractions(interactionsAry) {  						//console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
 			interactionsAry.forEach(function(intId, idx, orgAry){
 				if (typeof intId === "number") {	//If not, then the tree has already been 
 					orgAry[idx] = intRcrds[intId];	//filled with the interaction records
@@ -210,7 +213,7 @@
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
 		if( storedLocs ) {  //console.log("Stored Locations Loaded");
 			showLocSearch(JSON.parse(storedLocs));
-		} else { // console.log("Locations Not Found In Storage.");
+		} else { //console.log("Locations Not Found In Storage.");
 			sendAjaxQuery({}, 'search/location', storeAndLoadLocs);
 		}
 	}
@@ -224,12 +227,12 @@
 	 * sub-regions under their parent region.
 	 */
 	function sortLocTree(data) {
-		var locData = nestSubRegions(data);    console.log("----locData = %O", locData);
-		var sortedLocs = sortLocDataObj(locData);   console.log("sortedLocs = %O", sortedLocs)
+		var locData = nestSubRegions(data);    //console.log("----locData = %O", locData);
+		var sortedLocs = sortLocDataObj(locData);   //console.log("sortedLocs = %O", sortedLocs)
 		return sortedLocs;
 	}
 	/** Nests sub-regions under their parent regions. */
-	function nestSubRegions(data) {  									    console.log("nestSubRegions called. locData = %O", data);
+	function nestSubRegions(data) {  									    //console.log("nestSubRegions called. locData = %O", data);
 		var subRegionMap = {
 			"North Africa" : "Africa", 			"North Asia" : "Asia",
 			"Sub-Saharan Africa" : "Africa",	"West & Central Asia" : "Asia",
@@ -238,7 +241,7 @@
 		returnData["Africa"] = { "Africa-Unspecified": data["Africa"]["Africa-Unspecified"] };
 		returnData["Asia"] = {};
 
-		for (var region in data) {   console.log("region = ", region)
+		for (var region in data) {   //console.log("region = ", region)
 			if (region in subRegionMap) { //console.log("region in subRegion map = %s, %s", region, subRegionMap[region])
 				returnData[subRegionMap[region]][region] = data[region];  //console.log("returnData[%s] = %O", region, returnData[subRegionMap[region]])
 			} else if (region !== "Africa"){ returnData[region] = data[region]; } 
@@ -247,14 +250,14 @@
 	}
 	/** Alpabetizes all locations and sub-locations in the data object */
 	function sortLocDataObj(data) {
-		var keys = Object.keys(data).sort();  		console.log("keys = %O", keys)
+		var keys = Object.keys(data).sort();  		//console.log("keys = %O", keys)
 		var returnObj = {};
 		for (var i=0; i<keys.length; i++){ 
 			returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
 		}
 		return returnObj;
 	
-		function sortSubLocs(locObj) {   console.log("sortSubLocs locObj = %O", locObj)
+		function sortSubLocs(locObj) {   //console.log("sortSubLocs locObj = %O", locObj)
 			var subLocs = Object.keys(locObj).sort();
 			var returnObj = {};
 
@@ -329,7 +332,7 @@
 		return cnt;
 	}
 	function backfillSubInteractionsIntoCnt(rowData) {   //console.log("rowData = %O", rowData);
-		for (var treeNode in rowData) { // console.log("rowData[treeNode] = %O", rowData[treeNode]);
+		for (var treeNode in rowData) { //console.log("rowData[treeNode] = %O", rowData[treeNode]);
 			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
 			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
 			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
@@ -352,11 +355,11 @@
 	/*----------------- Location ---------------------------------------------*/
 	function loadLocGrid(locData) {
 		var topRegionRows = [];
-		var finalRowData = [];  // console.log("locData = %O", locData);
+		var finalRowData = [];  //console.log("locData = %O", locData);
 		curTree = locData;
 
 		addFutureDevMsg();
-		for (var region in locData) { // console.log("region = ", region)
+		for (var region in locData) { //console.log("region = ", region)
 			topRegionRows.push( [getLocRowData(locData[region], region)] );
 		}
 		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
@@ -384,7 +387,7 @@
 			interactions: locObj.interactions !== undefined,     /* Location objects have collections of interactions as children. */     
 		};		
 	}
-	function getLocRowDataForChildren(locObj) {// console.log("getLocRowDataForChildren called. locObj = %O", locObj)
+	function getLocRowDataForChildren(locObj) {//console.log("getLocRowDataForChildren called. locObj = %O", locObj)
 		var regionRows = [];
 		if (locObj.interactionType !== undefined) { return false; }
 		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
@@ -401,7 +404,7 @@
 		});
 	}
 	function getlocIntRowData(intRcrdAry) {
-		return intRcrdAry.map(function(intRcrd){ // console.log("intRcrd = %O", intRcrd);
+		return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
 			var intRcrdObj = { isParent: false };
 			return getIntData(intRcrd, intRcrdObj);
 		});
@@ -409,9 +412,9 @@
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
-		if( storedDomains ) { // console.log("Stored Domains Loaded");
+		if( storedDomains ) { //console.log("Stored Domains Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
-		} else { // console.log("Domains Not Found In Storage.");
+		} else { //console.log("Domains Not Found In Storage.");
 			sendAjaxQuery({props: ['slug', 'name']}, 'search/domain', storeAndLoadDomains);
 		}
 	}
@@ -424,7 +427,7 @@
 		initTaxaSearchState();
 		getAllTaxaRcrds();
 	}
-	function initTaxaSearchState() { // console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
+	function initTaxaSearchState() { //console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
 		if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
 	}
 	/** Ajax to get all interaction rcrds. */
@@ -437,7 +440,7 @@
 		if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else { //  console.log("taxaRcrds Not Found In Storage.");
+		} else { //console.log("taxaRcrds Not Found In Storage.");
 			sendAjaxQuery(params, 'search/taxa', recieveTaxaRcrds);
 		}
 	}
@@ -450,7 +453,7 @@
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
 	 */
-	function buildTaxaSearchHtml(data) { 	 									// console.log("buildTaxaSearchHtml called. ");
+	function buildTaxaSearchHtml(data) { 	 									//console.log("buildTaxaSearchHtml called. ");
 		var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
 		var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
 		var domainOpts = getDomainOpts(data); 	//	console.log("domainOpts = %O", domainOpts);
@@ -474,14 +477,14 @@
 		selectTaxaDomain();
 	}
 	function selectTaxaDomain(e) {	
-    	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					// console.log("domainTaxon = %O", domainTaxon)
+    	var domainTaxon = rcrdsById[$('#sel-domain').val() || 4]; 					//console.log("domainTaxon = %O", domainTaxon)
 		populateStorage('curDomain', $('#sel-domain').val());
 		resetToggleTreeBttn();
 		showDomainTree(domainTaxon);
 		getInteractionsAndBuildGrid();
 	}
 	/** Show all data for domain. */
-	function showDomainTree(domainTaxon) {							// console.log("domainTaxon=%O", domainTaxon)
+	function showDomainTree(domainTaxon) {							//console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		$('#sort-opts').fadeTo(150, 1);
@@ -496,7 +499,7 @@
 		var taxaTree = buildTaxaTree(topTaxon);
 		curTree = taxaTree;
 		openRows = [topTaxon.id.toString()];  									//console.log("openRows=", openRows)
-		taxaByLvl = separateByLevel(taxaTree, topTaxon.displayName); 				// console.log("taxaByLvl = %O", taxaByLvl)
+		taxaByLvl = separateByLevel(taxaTree, topTaxon.displayName); 				//console.log("taxaByLvl = %O", taxaByLvl)
 		buildBrowseSearchOptsndGrid(taxaTree);
 	}
 	/**
@@ -524,7 +527,7 @@
 	 * builds taxonomic heirarchy of taxa @buildTaxaTree(); 
 	 * transforms data into grid format and loads data grid @loadTaxaGrid().
 	 */
-	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					// console.log("taxaByLvl = %O", taxaByLvl)
+	function buildBrowseSearchOptsndGrid(taxaTree, curSet) {  					//console.log("taxaByLvl = %O", taxaByLvl)
 		var curTaxaByLvl = curSet || taxaByLvl;  
 		var levels = Object.keys(curTaxaByLvl);
 		var domainLvl = levels.shift();
@@ -545,10 +548,10 @@
 	 * as the top of the new tree. If the dropdowns are cleared, the taxa-grid is 
 	 * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
 	 */
-	function updateTaxaSearch() {  console.log("$(this).val() = ", $(this).val())
-		var selectedTaxa = $(this).val(); 										// console.log("selectedTaxa = %O", selectedTaxa);
+	function updateTaxaSearch() {  //console.log("$(this).val() = ", $(this).val())
+		var selectedTaxa = $(this).val(); 										//console.log("selectedTaxa = %O", selectedTaxa);
 		var selTaxonRcrd = rcrdsById[selectedTaxa]  
-		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				// console.log("selectedVals = %O", selectedVals);
+		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				//console.log("selectedVals = %O", selectedVals);
 
 		repopulateDropDowns(selTaxonRcrd, selectedVals);
 		updateFilterStatus();
@@ -580,9 +583,9 @@
 		selectEmptyAnscestors(selectedTaxaObj.level);
 		return selected;
 
-		function selectAncestorTaxa(taxon) {									// console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
+		function selectAncestorTaxa(taxon) {									//console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
 			if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-				selected[taxon.level] = taxon.id; 								// console.log("setting lvl = ", taxon.level)
+				selected[taxon.level] = taxon.id; 								//console.log("setting lvl = ", taxon.level)
 				selectAncestorTaxa(rcrdsById[taxon.parentTaxon])
 			}
 		}
@@ -594,13 +597,13 @@
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
-	function loadLevelSelectElems(levelOptsObj, lvls, selected) { 				// console.log("loadLevelSelectElems. arguments = %O", arguments)
+	function loadLevelSelectElems(levelOptsObj, lvls, selected) { 				//console.log("loadLevelSelectElems. arguments = %O", arguments)
 		var elems = buildSelects(levelOptsObj, lvls);
 		clearCol2();		
 		$('#opts-col2').append(elems);
 		setSelectedVals(selected);
 	}
-    function setSelectedVals(selected) {                   						// console.log("selected in setSelectedVals = %O", selected);
+    function setSelectedVals(selected) {                   						//console.log("selected in setSelectedVals = %O", selected);
     	Object.keys(taxaByLvl).forEach(function(lvl) {
 	        var selId = '#sel' + lvl;
 			$(selId).find('option[value="all"]').hide();
@@ -615,7 +618,7 @@
 	function clearPreviousGrid() {
 		if (gridOptions.api) { gridOptions.api.destroy(); }		
 	}
-	function buildTaxaLvlOptions(rcrds) {  										// console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
+	function buildTaxaLvlOptions(rcrds) {  										//console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
@@ -659,12 +662,12 @@
 
 		return tree;
 
-		function getChildTaxa(children) {										// console.log("get Child Taxa called. arguments = %O", arguments);
+		function getChildTaxa(children) {										//console.log("get Child Taxa called. arguments = %O", arguments);
 			if (children === null) { return null; }
 			return children.map(function(child){
 				if (typeof child === "object") { return child; }
 
-				var childRcrd = rcrdsById[child]; 								// console.log("child = %O", child);
+				var childRcrd = rcrdsById[child]; 								//console.log("child = %O", child);
 
 				if (childRcrd.children.length >= 1) { 
 					childRcrd.children = getChildTaxa(childRcrd.children);
@@ -682,11 +685,11 @@
 	 * @return {Boolean}             [description]
 	 */
 	function isTaxonymSelected(filterCheck) {
-        var filterSelections = {}; // console.log("filterSelections = %O", filterSelections)
+        var filterSelections = {}; //console.log("filterSelections = %O", filterSelections)
         var selected = false;
 
         levels.forEach(function(lvl){
-        	var selId = '#sel' + lvl;  console.log("level = %s, val = %s", lvl, $(selId).val());
+        	var selId = '#sel' + lvl;  //console.log("level = %s, val = %s", lvl, $(selId).val());
         	if ($(selId).val() !== undefined && $(selId).val() !== null && $(selId).val() !== 'all') { 
         		filterSelections[lvl] = $(selId).val();
         		selected = true;
@@ -731,36 +734,36 @@
 			if (selectedTaxon.children) { getChildren(selectedTaxon.children); }
 			initEmptyLowerLevels(selectedTaxon.level);
 			getAllTaxaInHigherLevels(selectedTaxon.level);
-			addEmptyLvls(selectedTaxon.level); console.log("relatedTaxaOpts = %O", relatedTaxaOpts)
+			addEmptyLvls(selectedTaxon.level); 									//console.log("relatedTaxaOpts = %O", relatedTaxaOpts)
 			return relatedTaxaOpts;
 	
-			function getChildren(directChildren) {  							// console.log("children = %O", directChildren)
+			function getChildren(directChildren) {  							//console.log("children = %O", directChildren)
 				directChildren.forEach(function(grandChild){
 					if (relatedTaxaOpts[grandChild.level] === undefined) { relatedTaxaOpts[grandChild.level] = {}; }
 					relatedTaxaOpts[grandChild.level][grandChild.displayName] = grandChild;
 					if (grandChild.children) { getChildren(grandChild.children); }
 				});
 			}
-			function getAllTaxaInHigherLevels(prevLvl) { 						console.log("--prevLvl = %s, lvls =%O", prevLvl, lvls)
+			function getAllTaxaInHigherLevels(prevLvl) { 						//console.log("--prevLvl = %s, lvls =%O", prevLvl, lvls)
 				var nextLvl = levels[ levels.indexOf(prevLvl) - 1 ];
-				var showLvl = lvls.indexOf(nextLvl);	console.log("showLvl = ", showLvl) 						
+				var showLvl = lvls.indexOf(nextLvl);	//console.log("showLvl = ", showLvl) 						
 				if (showLvl === -1 || nextLvl === localStorage.getItem('domainLvl')) {return;} 
-				relatedTaxaOpts[nextLvl] = taxaByLvl[nextLvl];  console.log("--higherLvl = ", nextLvl)
+				relatedTaxaOpts[nextLvl] = taxaByLvl[nextLvl];  //console.log("--higherLvl = ", nextLvl)
 				if (selectedVals[nextLvl] === "none") { relatedTaxaOpts[nextLvl]["None"] = { id: "none" }; }
 				getAllTaxaInHigherLevels(nextLvl);
 			}
-			function initEmptyLowerLevels(lastLvl) { 							// console.log("--lastLvl = ", lastLvl)
-				var lowerLvl = levels[ levels.indexOf(lastLvl) + 1 ];   		// console.log("--lowerLvl = ", lowerLvl)
+			function initEmptyLowerLevels(lastLvl) { 							//console.log("--lastLvl = ", lastLvl)
+				var lowerLvl = levels[ levels.indexOf(lastLvl) + 1 ];   		//console.log("--lowerLvl = ", lowerLvl)
 				if (lvls.indexOf[lowerLvl] !== -1 && relatedTaxaOpts[lowerLvl] === undefined){
 					relatedTaxaOpts[lowerLvl] = {};
 					relatedTaxaOpts[lowerLvl]["None"] = { id: 'none' };
 					selectedVals[lowerLvl] = "none";
 				};	
 			}
-			function addEmptyLvls(taxonLvl) {  									// console.log("relatedTaxaOpts before empty levels = %O", JSON.parse(JSON.stringify(relatedTaxaOpts)));
+			function addEmptyLvls(taxonLvl) {  									//console.log("relatedTaxaOpts before empty levels = %O", JSON.parse(JSON.stringify(relatedTaxaOpts)));
 				var selectedLvlIdx = lvls.indexOf(taxonLvl);
 				lvls.forEach(function(lvl) {
-					if (relatedTaxaOpts[lvl] === undefined) { console.log("lvl is undefined = ", lvl);
+					if (relatedTaxaOpts[lvl] === undefined) { //console.log("lvl is undefined = ", lvl);
 						var newLvlIdx = lvls.indexOf(taxonLvl);
 						if (newLvlIdx < selectedLvlIdx) { relatedTaxaOpts[lvl] = taxaByLvl[lvl]; 
 						} else { relatedTaxaOpts[lvl] = {}; }
@@ -954,7 +957,7 @@
 			return speciesName === null ? null : ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
 		}
     } /* End fillHiddenColumns */
-	function loadGrid(mainCol, gridOpts) {  // console.log("final rows = %O", rowData);
+	function loadGrid(mainCol, gridOpts) {  //console.log("final rows = %O", rowData);
 		var gridOptObj = gridOpts || gridOptions;
 		gridOptObj.rowData = rowData;
 		gridOptObj.columnDefs = getColumnDefs(mainCol),
@@ -971,7 +974,7 @@
 			} else {
 				intRcrdObj[field] = intRcrd[field];
 			}
-		}  																 		// console.log("getTaxaIntData called. intRowData = %O", intRowData);
+		}  																 		//console.log("getTaxaIntData called. intRowData = %O", intRowData);
 		return intRcrdObj;
 	}	
 	function getTags(tagAry) {
@@ -1035,10 +1038,10 @@
 			    {headerName: "Citation", field: "citation", width: 100,},
 			    {headerName: "Note", field: "note", width: 110,} ];
 	}
-	function innerCellRenderer(params) { 										// console.log("params in cell renderer = %O", params)
+	function innerCellRenderer(params) { 										//console.log("params in cell renderer = %O", params)
 		return params.data.name || null;
 	}
-	function getRowStyleClass(params) { 										// console.log("getRowStyleClass params = %O", params);
+	function getRowStyleClass(params) { 										//console.log("getRowStyleClass params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
@@ -1053,7 +1056,7 @@
 			return isTaxa || 'row-kingdom';
 		} 
 	}
-	function getCellStyleClass(params) {									//	 console.log("getCellStyleClass params = %O", params);
+	function getCellStyleClass(params) {									//console.log("getCellStyleClass params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
 			'Class': 'row-class',		'Order': 'row-order',
@@ -1080,7 +1083,7 @@
 	}
 	function afterFilterChanged() {} //console.log("afterFilterChange") 
 	/** Resets Grid Status' Active Filter display */
-	function beforeFilterChange() {  console.log("beforeFilterChange")
+	function beforeFilterChange() {  //console.log("beforeFilterChange")
 		// clearGridStatus();
         getActiveDefaultGridFilters();    
 	} 
@@ -1114,7 +1117,7 @@
 	 * Checks all filter models for any active filters. Sets grid-status with resulting 
 	 * active filters.
 	 */
-	function getActiveDefaultGridFilters() {									// console.log("getActiveDefaultGridFilters called.")
+	function getActiveDefaultGridFilters() {									//console.log("getActiveDefaultGridFilters called.")
 		var filterStatus;
 		var activeFilters = [];
 		if (gridOptions.api === undefined) { return; }
@@ -1142,7 +1145,7 @@
 			}
 		}
 	}
-	function setGridFilterStatus(status) {  console.log("setGridFilterStatus. status = ", status)
+	function setGridFilterStatus(status) {  //console.log("setGridFilterStatus. status = ", status)
 		$('#grid-filter-status').text(status);
 	}
 	function setLevelFilterStatus(status) {
@@ -1272,7 +1275,7 @@
     	var colFilterModel = this.model.getModel();								
     	if ( colFilterModel === null ) { return; }
     	var col = Object.keys(colFilterModel)[0];
-    	var colFilterIconName = col + 'ColFilterIcon'; 							// console.log("colFilterIconName = %O", colFilterIconName)
+    	var colFilterIconName = col + 'ColFilterIcon'; 							//console.log("colFilterIconName = %O", colFilterIconName)
     	var selectedStr = colFilterModel[col].length > 0 ? colFilterModel[col].join(', ') : "None";
 
     	$('a[name=' + colFilterIconName + ']').attr("title", "Showing:\n" + selectedStr);
@@ -1314,7 +1317,7 @@
         this.removeVirtualRows(rowsToRemove);
     };
     //takes array of row id's
-    UniqueValuesFilter.prototype.removeVirtualRows = function (rowsToRemove) {  // console.log("removeVirtualRows called. rows = %O", rowsToRemove)
+    UniqueValuesFilter.prototype.removeVirtualRows = function (rowsToRemove) {  //console.log("removeVirtualRows called. rows = %O", rowsToRemove)
         var _this = this;
         rowsToRemove.forEach(function (indexToRemove) {
             var eRowToRemove = _this.rowsInBodyContainer[indexToRemove];
@@ -1373,12 +1376,12 @@
 	};
 	/*------------------------UnqValsColumnFilterModel----------------------------------*/
 	/** Class Function */
-    function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { // console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
- 		this.colDef = colDef;			// console.log("colDef = %O", this.colDef);
-        this.rowModel = rowModel;		// console.log("rowModel = %O", this.rowModel);
-        this.valueGetter = valueGetter; // console.log("valueGetter = %O", this.valueGetter);
-        this.doesRowPassOtherFilters = doesRowPassOtherFilters; // console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
-        this.filterParams = this.colDef.filterParams;  // console.log("filterParams = %O", this.filterParams);
+    function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { //console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
+ 		this.colDef = colDef;			//console.log("colDef = %O", this.colDef);
+        this.rowModel = rowModel;		//console.log("rowModel = %O", this.rowModel);
+        this.valueGetter = valueGetter; //console.log("valueGetter = %O", this.valueGetter);
+        this.doesRowPassOtherFilters = doesRowPassOtherFilters; //console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
+        this.filterParams = this.colDef.filterParams;  //console.log("filterParams = %O", this.filterParams);
         this.usingProvidedSet = this.filterParams && this.filterParams.values;
         this.createAllUniqueValues();
         this.createAvailableUniqueValues();
@@ -1516,7 +1519,7 @@
 		gridOptions.columnApi.setColumnsVisible(getCurTaxaLvlCols(), true)
 
 	}
-	function getCurTaxaLvlCols() { console.log("taxaByLvl = %O", taxaByLvl)
+	function getCurTaxaLvlCols() { //console.log("taxaByLvl = %O", taxaByLvl)
 		var lvls = Object.keys(taxaByLvl);
 		return lvls.map(function(lvl){ return 'tree' + lvl; });
 	}
@@ -1546,12 +1549,12 @@
 	function showWalkthroughIfFirstVisit() {
 		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false; 	 //console.log("newVisit = ", newVisit)
 		if ( !prevVisit ) { 
-			startIntro(); 
+			window.setTimeout(startIntro, 250); 
 			populateStorage('prevVisit', true);
 		}	
 	}
 	function startIntro(startStep){
-		if (intro) { console.log("intro = %O", intro)
+		if (intro) { //console.log("intro = %O", intro)
 			intro.exit() 
 		} else { 
 			buildIntro();
@@ -1559,11 +1562,12 @@
 		setGridState();
 		intro.start();
 
-		function buildIntro() {  console.log("buildIntro called")
+		function buildIntro() {  //console.log("buildIntro called")
 			intro = introJs();
 			var startStep = startStep || 0; 
 
 			intro.onexit(function() { resetGridState(); });
+			intro.oncomplete(function() { resetGridState(); });
 
 			intro.setOptions({
 				showStepNumbers: false,
@@ -1670,7 +1674,7 @@
 		$('#base-overlayPopUp').html(searchTips());
 		bindEscEvents();
 	}
-	function showTips() {  console.log("show tips called.")
+	function showTips() {  //console.log("show tips called.")
 		if (!$('#tips-close-bttn').length) { initSearchTips(); }
 	    $('#base-overlay, #base-overlayPopUp').fadeIn(500);
         $('#show-tips').html("&nbsp&nbspHide Tips&nbsp&nbsp");
@@ -1683,7 +1687,7 @@
         $('#show-tips').off("click");
         $('#show-tips').click(showTips);
 	}
-	function removeTips() {  console.log("removeTips called.")
+	function removeTips() {  //console.log("removeTips called.")
 	   	$('#base-overlay, #base-overlayPopUp').css("display", "none");
 	}
 	function addPopUpStyles() {
@@ -1853,7 +1857,7 @@ function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 
 	   		return window['localStorage'];  									//console.log("Storage available. Setting now. localStorage = %O", localStorage);
 		} else { 
-			return false; 				      									// console.log("No Local Storage Available"); 
+			return false; 				      									//console.log("No Local Storage Available"); 
 		}
 	}
 	function storageAvailable(type) {
@@ -1870,7 +1874,7 @@ function setlocalStorage() {
 		}
 	}
 	function populateStorage(key, val) {
-		if (localStorage) { 													// console.log("localStorage active.");
+		if (localStorage) { 													//console.log("localStorage active.");
 			localStorage.setItem(key, val);
 		} else { console.log("No Local Storage Available"); }
 	}
