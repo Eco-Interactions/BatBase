@@ -60,14 +60,6 @@ class ContentBlock
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -75,6 +67,14 @@ class ContentBlock
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -195,6 +195,16 @@ class ContentBlock
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -202,6 +212,26 @@ class ContentBlock
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -215,16 +245,6 @@ class ContentBlock
     }
 
     /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -235,6 +255,16 @@ class ContentBlock
     }
 
     /**
+     * Set deleted at.
+     *
+     * @param \DateTime $deletedAt
+     */
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deletedAt = $deletedAt;
+    }
+
+    /**
      * Get deleted at.
      *
      * @return \DateTime
@@ -242,16 +272,6 @@ class ContentBlock
     public function getDeletedAt()
     {
         return $this->deletedAt;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param /DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**

@@ -33,16 +33,16 @@ class Taxon
     /**
      * @var string
      *
-     * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
+     * @ORM\Column(name="display_name", type="string", length=255)
      */
-    private $defaultGuid;
+    private $displayName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
      */
-    private $displayName;
+    private $defaultGuid;
 
     /**
      * @var bool
@@ -78,6 +78,16 @@ class Taxon
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Naming", mappedBy="taxon")
      */
     private $namings;
+
+    /**
+     * @var \AppBundle\Entity\Taxon
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="childTaxa")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
+     * })
+     */
+    private $parentTaxon;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -121,30 +131,12 @@ class Taxon
     private $level;
 
     /**
-     * @var \AppBundle\Entity\Taxon
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="childTaxa")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
-     * })
-     */
-    private $parentTaxon;
-
-    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
-
-    /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
 
     /**
      * @var User
@@ -154,6 +146,14 @@ class Taxon
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -214,30 +214,6 @@ class Taxon
     }
 
     /**
-     * Set defaultGuid.
-     *
-     * @param string $defaultGuid
-     *
-     * @return Taxon
-     */
-    public function setDefaultGuid($defaultGuid)
-    {
-        $this->defaultGuid = $defaultGuid;
-
-        return $this;
-    }
-
-    /**
-     * Get defaultGuid.
-     *
-     * @return string
-     */
-    public function getDefaultGuid()
-    {
-        return $this->defaultGuid;
-    }
-
-    /**
      * Set displayName.
      *
      * @param string $displayName
@@ -259,6 +235,30 @@ class Taxon
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    /**
+     * Set defaultGuid.
+     *
+     * @param string $defaultGuid
+     *
+     * @return Taxon
+     */
+    public function setDefaultGuid($defaultGuid)
+    {
+        $this->defaultGuid = $defaultGuid;
+
+        return $this;
+    }
+
+    /**
+     * Get defaultGuid.
+     *
+     * @return string
+     */
+    public function getDefaultGuid()
+    {
+        return $this->defaultGuid;
     }
 
     /**
@@ -365,6 +365,30 @@ class Taxon
     public function getNamings()
     {
         return $this->namings;
+    }
+
+    /**
+     * Set parentTaxon.
+     *
+     * @param \AppBundle\Entity\Taxon $parentTaxon
+     *
+     * @return Taxon
+     */
+    public function setParentTaxon(\AppBundle\Entity\Taxon $parentTaxon = null)
+    {
+        $this->parentTaxon = $parentTaxon;
+
+        return $this;
+    }
+
+    /**
+     * Get parentTaxon.
+     *
+     * @return \AppBundle\Entity\Taxon
+     */
+    public function getParentTaxon()
+    {
+        return $this->parentTaxon;
     }
 
     /**
@@ -528,30 +552,6 @@ class Taxon
     }
 
     /**
-     * Set parentTaxon.
-     *
-     * @param \AppBundle\Entity\Taxon $parentTaxon
-     *
-     * @return Taxon
-     */
-    public function setParentTaxon(\AppBundle\Entity\Taxon $parentTaxon = null)
-    {
-        $this->parentTaxon = $parentTaxon;
-
-        return $this;
-    }
-
-    /**
-     * Get parentTaxon.
-     *
-     * @return \AppBundle\Entity\Taxon
-     */
-    public function getParentTaxon()
-    {
-        return $this->parentTaxon;
-    }
-
-    /**
      * Set domain.
      *
      * @param \AppBundle\Entity\Domain $domain
@@ -576,6 +576,16 @@ class Taxon
     }
 
     /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
+    /**
      * Get created datetime.
      *
      * @return \DateTime
@@ -583,6 +593,26 @@ class Taxon
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -596,16 +626,6 @@ class Taxon
     }
 
     /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -613,16 +633,6 @@ class Taxon
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
     }
 
     /**
@@ -636,6 +646,16 @@ class Taxon
     }
 
     /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
+    }
+
+    /**
      * Get string representation of object.
      *
      * @return string
@@ -645,7 +665,6 @@ class Taxon
         if ($this->getDisplayName()) {
             return $this->getDisplayName();
         }
-
         return 'Unnamed Taxon';
     }
 }
