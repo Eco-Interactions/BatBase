@@ -17,64 +17,6 @@
         uploadData: recieveEntityData
     };
 /* -------------------------------Testing------------------------------------ */
-    document.addEventListener("DOMContentLoaded", onDomLoad);
-    function onDomLoad() { testNewLocShit(); }
-
-    function testNewLocShit() {  console.log("testNewLocShit called");
-    	testLocTypes()
-		// testComplexEntity('location');
-    }
-    function testLocTypes() {
-        var dataObj = { entityData: locTypeTestObj(), refData: {}, linkFields: [] };
-        return postEntityData('locationType', dataObj).then(testComplexEntity);
-    }
-    function testComplexEntity(data) {  console.log("data=%O", data)
-        var simplRelationships = getRelationships('location');
-        var cmplxRelationships = getComplexRelationships('location');
-        var dataObj = { entityData: returnLocTestObj(), refData: getTestlocRefs(data), 
-        	linkFields: simplRelationships, cmplxFields: cmplxRelationships };
-        console.log("newLocObj = %O", dataObj.entityData);
-        return postEntityData('location', dataObj, 'ajax/post/complex');
-    }
-    function locTypeTestObj() {
-    	return {
-    		"1": { name: "Region" },
-    		"2": { name: "Country" },
-    		"3": { name: "Area" },
-    		"4": { name: "Point" }
-    	};
-    }
-    function returnLocTestObj () {
-        return { 
-            "1": {
-            	region: 1,
-            	latitude: 22,
-            	longitude: 33,
-                description: "Test Location 1",
-                parentLoc: 1,
-                locationType: 2,
-            }, 
-            "2": {
-                description: "Test Location 2",
-                parentLoc: 2,
-                locationType: 1
-            },
-            "3": {
-                description: "Test Location 3",
-                parentLoc: 3,
-                locationType: 4,
-            },
-            "4": {
-                description: "Test Location 4",
-                parentLoc: 3,
-                locationType: 3,
-            }
-        };
-    }
-    function getTestlocRefs(locRefData) {
-    	locRefData["region"] = { "1": 1 };
-    	return locRefData;
-    }
 /*-----------------Message Methods--------------------------------------------*/
     window.addEventListener('message', webviewMsgHandler, false);
     function sendMsg(appId, appOrigin, msgData) {
