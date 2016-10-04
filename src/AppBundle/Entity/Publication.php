@@ -73,6 +73,13 @@ class Publication
     private $linkUrl;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="doi", type="string", length=255, nullable=true)
+     */
+    private $doi;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publication")
@@ -316,6 +323,30 @@ class Publication
     public function getLinkUrl()
     {
         return $this->linkUrl;
+    }
+
+    /**
+     * Set doi.
+     *
+     * @param string $doi
+     *
+     * @return Publication
+     */
+    public function setDoi($doi)
+    {
+        $this->doi = $doi;
+
+        return $this;
+    }
+
+    /**
+     * Get doi.
+     *
+     * @return string
+     */
+    public function getDoi()
+    {
+        return $this->doi;
     }
 
     /**
