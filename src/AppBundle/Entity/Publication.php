@@ -33,7 +33,7 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="displayName", type="string", length=255, unique=true)
+     * @ORM\Column(name="displayName", type="string", length=255)
      */
     private $displayName;
 
