@@ -61,27 +61,6 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="pub_issue", type="string", length=255, nullable=true)
-     */
-    private $publicationIssue;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pub_pages", type="string", length=255, nullable=true)
-     */
-    private $publicationPages;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="pub_volume", type="string", length=255, nullable=true)
-     */
-    private $publicationVolume;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      */
     private $linkDisplay;
@@ -289,77 +268,6 @@ class Publication
     public function getPublisher()
     {
         return $this->publisher;
-    }
-
-    /**
-     * Set publicationIssue.
-     *
-     * @param string $publicationIssue
-     *
-     * @return Publication
-     */
-    public function setPublicationIssue($publicationIssue)
-    {
-        $this->publicationIssue = $publicationIssue;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationIssue.
-     *
-     * @return string
-     */
-    public function getPublicationIssue()
-    {
-        return $this->publicationIssue;
-    }
-    /**
-     * Set publicationPages.
-     *
-     * @param string $publicationPages
-     *
-     * @return Publication
-     */
-    public function setPublicationPages($publicationPages)
-    {
-        $this->publicationPages = $publicationPages;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationPages.
-     *
-     * @return string
-     */
-    public function getPublicationPages()
-    {
-        return $this->publicationPages;
-    }
-
-    /**
-     * Set publicationVolume.
-     *
-     * @param string $publicationVolume
-     *
-     * @return Publication
-     */
-    public function setPublicationVolume($publicationVolume)
-    {
-        $this->publicationVolume = $publicationVolume;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationVolume.
-     *
-     * @return string
-     */
-    public function getPublicationVolume()
-    {
-        return $this->publicationVolume;
     }
 
     /**
