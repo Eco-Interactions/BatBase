@@ -45,7 +45,7 @@ class Contributor
     /**
      * @var \AppBundle\Entity\Source
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Author", inversedBy="citations")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citations")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      * })
