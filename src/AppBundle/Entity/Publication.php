@@ -356,7 +356,7 @@ class Publication
      *
      * @return Publication
      */
-    public function setSource(\AppBundle\Entity\Source $source)
+    public function setSource(\AppBundle\Entity\Source $source = null)
     {
         $this->source = $source;
 

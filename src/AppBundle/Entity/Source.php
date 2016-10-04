@@ -123,9 +123,6 @@ class Source
      * @var \AppBundle\Entity\Publication
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", inversedBy="source")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", nullable=true, unique=true)
-     * })
      */
     private $publication;
 
@@ -535,6 +532,7 @@ class Source
     public function setPublication(\AppBundle\Entity\Publication $publication = null)
     {
         $this->publication = $publication;
+        $publication->setSource = $this;
 
         return $this;
     }

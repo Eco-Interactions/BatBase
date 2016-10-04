@@ -4,14 +4,12 @@ TODO
     ----Barro Island (dup??)
     -- Consolidate migrations?
 
-    -- Create Contributor!!
-    ## stash: "Rewrite attributions" ##
-
-LOC DISPLYNAME~~
-
+  STOPPING POINT::
+    see what the chnge to the publication property in source did to the diff and rewrite
 
 Import Process::
     Add SourceTypes
+
 
 
     publication -> citationSources
@@ -19,7 +17,6 @@ Import Process::
     Start Importing Sources::
         Publications->
             New source. Type "Publication"
-                import issue, vol, pages
             pub"name"->"displayName"
 
                 citations => set as parent;
@@ -32,8 +29,11 @@ Import Process::
             Add source type "Citation".
             parent => should be set by now.
 
+            all interactions need to point to the "source"
             all attributions need to be updated with source ids
-            
+::AFTER::
+    -- add locType ordinals
+    add disply name and description to all lagging entities    
 
 
 Unfinished db migrations: Foundations for the Source restructure and some reorganizing of db table columns.
