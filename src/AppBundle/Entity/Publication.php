@@ -23,9 +23,16 @@ class Publication
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="displayName", type="string", length=255)
+     */
+    private $displayName;
 
     /**
-     * @Gedmo\Slug(fields={"name"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
@@ -33,9 +40,37 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="doi", type="string", length=255, nullable=true)
+     * @ORM\Column(name="publication_type", type="string", length=255, nullable=true)
      */
-    private $doi;
+    private $publicationType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
+     */
+    private $publisher;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="pub_issue", type="string", length=255, nullable=true)
+     */
+    private $publicationIssue;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="pub_pages", type="string", length=255, nullable=true)
+     */
+    private $publicationPages;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="pub_volume", type="string", length=255, nullable=true)
+     */
+    private $publicationVolume;
 
     /**
      * @var string
@@ -52,29 +87,19 @@ class Publication
     private $linkUrl;
 
     /**
-     * @var string
+     * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publication")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * })
      */
-    private $name;
+    private $source;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="publication_type", type="string", length=255, nullable=true)
-     */
-    private $publicationType;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
-     */
-    private $publisher;
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="publication")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="publication") 
      */
     private $citations;
 
@@ -135,6 +160,30 @@ class Publication
     }
 
     /**
+     * Set displayName.
+     *
+     * @param string $displayName
+     *
+     * @return Publication
+     */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+
+        return $this;
+    }
+
+    /**
+     * Get displayName.
+     *
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
+    
+    /**
      * Set slug.
      *
      * @return string
@@ -157,27 +206,122 @@ class Publication
     }
 
     /**
-     * Set doi.
+     * Set publicationType.
      *
-     * @param string $doi
+     * @param string $publicationType
      *
      * @return Publication
      */
-    public function setDoi($doi)
+    public function setPublicationType($publicationType)
     {
-        $this->doi = $doi;
+        $this->publicationType = $publicationType;
 
         return $this;
     }
 
     /**
-     * Get doi.
+     * Get publicationType.
      *
      * @return string
      */
-    public function getDoi()
+    public function getPublicationType()
     {
-        return $this->doi;
+        return $this->publicationType;
+    }
+
+    /**
+     * Set publisher.
+     *
+     * @param string $publisher
+     *
+     * @return Publication
+     */
+    public function setPublisher($publisher)
+    {
+        $this->publisher = $publisher;
+
+        return $this;
+    }
+
+    /**
+     * Get publisher.
+     *
+     * @return string
+     */
+    public function getPublisher()
+    {
+        return $this->publisher;
+    }
+
+    /**
+     * Set publicationIssue.
+     *
+     * @param string $publicationIssue
+     *
+     * @return Publication
+     */
+    public function setPublicationIssue($publicationIssue)
+    {
+        $this->publicationIssue = $publicationIssue;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationIssue.
+     *
+     * @return string
+     */
+    public function getPublicationIssue()
+    {
+        return $this->publicationIssue;
+    }
+    /**
+     * Set publicationPages.
+     *
+     * @param string $publicationPages
+     *
+     * @return Publication
+     */
+    public function setPublicationPages($publicationPages)
+    {
+        $this->publicationPages = $publicationPages;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationPages.
+     *
+     * @return string
+     */
+    public function getPublicationPages()
+    {
+        return $this->publicationPages;
+    }
+
+    /**
+     * Set publicationVolume.
+     *
+     * @param string $publicationVolume
+     *
+     * @return Publication
+     */
+    public function setPublicationVolume($publicationVolume)
+    {
+        $this->publicationVolume = $publicationVolume;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationVolume.
+     *
+     * @return string
+     */
+    public function getPublicationVolume()
+    {
+        return $this->publicationVolume;
     }
 
     /**
@@ -229,75 +373,27 @@ class Publication
     }
 
     /**
-     * Set name.
+     * Set source.
      *
-     * @param string $name
+     * @param \AppBundle\Entity\Source $source
      *
      * @return Publication
      */
-    public function setName($name)
+    public function setSource(\AppBundle\Entity\Source $source)
     {
-        $this->name = $name;
+        $this->source = $source;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get source.
      *
-     * @return string
+     * @return \AppBundle\Entity\Source
      */
-    public function getName()
+    public function getSource()
     {
-        return $this->name;
-    }
-    
-    /**
-     * Set publicationType.
-     *
-     * @param string $publicationType
-     *
-     * @return Citation
-     */
-    public function setPublicationType($publicationType)
-    {
-        $this->publicationType = $publicationType;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationType.
-     *
-     * @return string
-     */
-    public function getPublicationType()
-    {
-        return $this->publicationType;
-    }
-
-    /**
-     * Set publisher.
-     *
-     * @param string $publisher
-     *
-     * @return Citation
-     */
-    public function setPublisher($publisher)
-    {
-        $this->publisher = $publisher;
-
-        return $this;
-    }
-
-    /**
-     * Get publisher.
-     *
-     * @return string
-     */
-    public function getPublisher()
-    {
-        return $this->publisher;
+        return $this->source;
     }
 
     /**
@@ -334,6 +430,17 @@ class Publication
         return $this->citations;
     }
 
+
+    /**
+     * Set createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user)
+    {
+        $this->createdBy = $user;
+    }
+
     /**
      * Get created datetime.
      *
@@ -342,6 +449,26 @@ class Publication
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Get createdBy user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set last updated by user.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
     }
 
     /**
@@ -355,16 +482,6 @@ class Publication
     }
 
     /**
-     * Get created by user.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
      * Get last updated by user.
      *
      * @return \AppBundle\Entity\User
@@ -372,16 +489,6 @@ class Publication
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
     }
 
     /**
@@ -395,12 +502,22 @@ class Publication
     }
 
     /**
+     * Get deleted at.
+     *
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
+    }
+
+    /**
      * Get string representation of object.
      *
      * @return string
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }
