@@ -56,10 +56,10 @@ class Version201610042217150SrcStructure extends AbstractMigration
         
         $this->addSql('ALTER TABLE location_type ADD ordinal INT DEFAULT NULL');
    
-        $this->addSql('ALTER TABLE publication ADD source_id INT DEFAULT NULL, ADD displayName VARCHAR(255) NOT NULL, ADD pub_pages VARCHAR(255) DEFAULT NULL, ADD pub_volume VARCHAR(255) DEFAULT NULL, CHANGE doi pub_issue VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE publication ADD source_id INT DEFAULT NULL, ADD displayName VARCHAR(255) NOT NULL');
         $this->addSql('ALTER TABLE publication ADD CONSTRAINT FK_AF3C6779953C1C61 FOREIGN KEY (source_id) REFERENCES source (id)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_AF3C6779953C1C61 ON publication (source_id)');
-   
+           
         $this->addSql('ALTER TABLE tag ADD description LONGTEXT NOT NULL, CHANGE tag tag VARCHAR(255) NOT NULL');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_389B783389B783 ON tag (tag)');
     }
