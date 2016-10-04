@@ -104,27 +104,27 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="citation_source")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contributor", mappedBy="citationSource")
 
      * A collection of all Author sources for a Citation source.
      */
-    private $authorAttributions;
+    private $authors;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="author_source")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contributor", mappedBy="authorSource")
      *
      * A collection of all Citation sources for an Author source.
      */
-    private $citationAttributions;
+    private $citations;
 
     /**
      * @var \AppBundle\Entity\Publication
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", inversedBy="source")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", unique=true)
+     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", nullable=true, unique=true)
      * })
      */
     private $publication;
@@ -134,7 +134,7 @@ class Source
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Author", inversedBy="source")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id", unique=true)
+     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true, unique=true)
      * })
      */
     private $author;
@@ -144,7 +144,7 @@ class Source
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Citation", inversedBy="source")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", unique=true)
+     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", nullable=true, unique=true)
      * })
      */
     private $citation;
@@ -193,8 +193,8 @@ class Source
      */
     public function __construct()
     {
-        $this->authorAttributions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->citationAttributions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->authors = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childSources = new \Doctrine\Common\Collections\ArrayCollection();
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
@@ -458,71 +458,71 @@ class Source
     }
 
     /**
-     * Add an Author Attributions.
+     * Add an Author.
      *
-     * @param \AppBundle\Entity\Attribution $authorAttribution
+     * @param \AppBundle\Entity\Contributor $author
      *
      * @return Source
      */
-    public function addAuthorAttribution(\AppBundle\Entity\Attribution $authorAttribution)
+    public function addAuthor(\AppBundle\Entity\Contributor $author)
     {
-        $this->authorAttributions[] = $authorAttribution;
+        $this->authors[] = $author;
 
         return $this;
     }
 
     /**
-     * Remove an Author Attribution.
+     * Remove an Authors.
      *
-     * @param \AppBundle\Entity\Attribution $authorAttribution
+     * @param \AppBundle\Entity\Contributor $author
      */
-    public function removeAuthorAttribution(\AppBundle\Entity\Attribution $authorAttribution)
+    public function removeAuthor(\AppBundle\Entity\Contributor $author)
     {
-        $this->authorAttributions->removeElement($authorAttribution);
+        $this->authors->removeElement($author);
     }
 
     /**
-     * Get Author Attributions.
+     * Get Authors.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getAuthorAttributions()
+    public function getAuthors()
     {
-        return $this->authorAttributions;
+        return $this->authors;
     }
 
     /**
-     * Add a Citation Attribution.
+     * Add a Citation.
      *
-     * @param \AppBundle\Entity\Attribution $citationAttribution
+     * @param \AppBundle\Entity\Contributor $citation
      *
      * @return Source
      */
-    public function addCitationAttribution(\AppBundle\Entity\Attribution $citationAttribution)
+    public function addCitation(\AppBundle\Entity\Contributor $citation)
     {
-        $this->citationAttributions[] = $citationAttribution;
+        $this->citations[] = $citation;
 
         return $this;
     }
 
     /**
-     * Remove a Citation Attribution.
+     * Remove a Citation.
      *
-     * @param \AppBundle\Entity\Attribution $citationAttribution
+     * @param \AppBundle\Entity\Contributor $citation
      */
-    public function removeCitationAttribution(\AppBundle\Entity\Attribution $citationAttribution)
+    public function removeCitation(\AppBundle\Entity\Contributor $citation)
     {
-        $this->citationAttributions->removeElement($citationAttribution);
+        $this->citations->removeElement($citation);
     }
 
     /**
-     * Get Citation Attributions.
+     * Get Citations.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCitationAttributions()
+    public function getCitations()
     {
-        return $this->citationAttributions;
+        return $this->citations;
     }
 
     /**
