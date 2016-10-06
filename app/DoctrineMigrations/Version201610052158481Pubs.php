@@ -13,7 +13,7 @@ use AppBundle\Entity\Source;
  * @preUp creates all sourceType entities: Publisher, Publication, Citation, Author. 
  * @up Creates a new "Source" entity for each publication and rearranges related data.
  */
-class Version20161004230017Pubs extends AbstractMigration implements ContainerAwareInterface
+class Version201610052158481Pubs extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
@@ -35,13 +35,13 @@ class Version20161004230017Pubs extends AbstractMigration implements ContainerAw
         $em = $this->container->get('doctrine.orm.entity_manager');
         $srcTypes = ['Publisher' => '10', 'Citation' => '30', 'Publication' => '20', 'Author' => '25'];
 
-        foreach ($srcTypes as $srcType => $ordinal) {    print("\nsrcType = ".$srcType);
+        foreach ($srcTypes as $srcType => $ordinal) {   
             $entity = new SourceType();
             $entity->setName($srcType);
             $entity->setOrdinal($ordinal);
             $em->persist($entity);
         }
-        $em->flush();    
+        $em->flush();     print("\n Src Types created");
     }
 
     /**
@@ -55,31 +55,30 @@ class Version20161004230017Pubs extends AbstractMigration implements ContainerAw
         $em = $this->container->get('doctrine.orm.entity_manager');
         $publications = $em->getRepository('AppBundle:Publication')->findAll();
 
-        foreach ($publications as $pubEntity) {  print("\npubName = ".$pubEntity->getName());
+        foreach ($publications as $pubEntity) { 
             $this->buildSourceEntity($pubEntity, $em); 
         }
     }
     private function buildSourceEntity($pubEntity, $em)
     {
         $pubName = $pubEntity->getName();
-        $srcEntity = new Source(); print("\nNew Source");
+        $srcEntity = new Source();                                    
 
-        $srcType = $em->getRepository('AppBundle:SourceType')
-            ->findOneBy(array('id'=> 3));  print("\n Got sourceType -> publication");
-        $srcEntity->setSourceType($srcType);  print("\n setting sourceType");
-        $srcEntity->setDisplayName($pubName);   print("\n setDisplayName");
+        $srcEntity->setDisplayName($pubName);
+        $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
+            ->findOneBy(array('id'=> 3))); 
+        $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6'))); 
 
         $pubEntity->setDisplayName($pubName);
+        $pubEntity->setSource($srcEntity);
         $pubEntity->setUpdatedBy($em->getRepository('AppBundle:User')
-            ->findOneBy(array('id' => '6')));  print("\n Updated pub entity");
-        $em->persist($srcEntity);  print("\n Persisted source");
-        
-        $srcEntity->setPublication($pubEntity);  
+            ->findOneBy(array('id' => '6')));  
 
-        $em->persist($srcEntity);  print("\n Persisted source");
-        $em->persist($pubEntity);  print("\n Persisted publication");
+        $em->persist($srcEntity); 
+        $em->persist($pubEntity); 
 
-        $em->flush();      print("\n--------------------- Flushed");
+        $em->flush();     
     }
 
     /**
@@ -87,7 +86,6 @@ class Version20161004230017Pubs extends AbstractMigration implements ContainerAw
      */
     public function down(Schema $schema)
     {
-        // this down() migration is auto-generated, please modify it to your needs
 
     }
 }
