@@ -6,13 +6,13 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Contributor.
+ * Contribution.
  *
- * @ORM\Table(name="contributor")
+ * @ORM\Table(name="contribution")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  */
-class Contributor
+class Contribution
 {
     /**
      * @var int
@@ -34,9 +34,7 @@ class Contributor
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="authors")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
      *
      * Refers to a single citation source record.
      */
@@ -46,9 +44,7 @@ class Contributor
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citations")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      *
      * Refers to a single author source record.
      */
@@ -103,7 +99,7 @@ class Contributor
      *
      * @param string $citedAs
      *
-     * @return Contributor
+     * @return Contribution
      */
     public function setCitedAs($citedAs)
     {
@@ -127,7 +123,7 @@ class Contributor
      *
      * @param \AppBundle\Entity\Source $citationSource
      *
-     * @return Contributor
+     * @return Contribution
      */
     public function setCitationSource(\AppBundle\Entity\Source $citationSource = null)
     {
@@ -151,7 +147,7 @@ class Contributor
      *
      * @param \AppBundle\Entity\Source $authorSource
      *
-     * @return Contributor
+     * @return Contribution
      */
     public function setAuthorSource(\AppBundle\Entity\Source $authorSource = null)
     {
