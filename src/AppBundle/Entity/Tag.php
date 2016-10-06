@@ -38,19 +38,19 @@ class Tag
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Interaction", inversedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", inversedBy="tags")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $interactions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Citation", inversedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Citation", inversedBy="tags")
      * @ORM\JoinTable(name="citation_tag")
      */
     private $citations;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Source", inversedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", inversedBy="tags")
      * @ORM\JoinTable(name="source_tag")
      */
     private $sources;
@@ -63,7 +63,7 @@ class Tag
     private $constrainedToEntity;
 
     /**
-     * @ORM\ManyToMany(targetEntity="InteractionType", inversedBy="validTags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\InteractionType", inversedBy="validTags")
      * @ORM\JoinTable(name="int_type_tag_contraints")
      */
     private $intTypeConstraints;
