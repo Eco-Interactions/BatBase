@@ -62,9 +62,7 @@ class Source
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="childSources")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_src_id", referencedColumnName="id", onDelete="SET NULL")
-     * })
+     * @ORM\JoinColumn(name="parent_src_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $parentSource;
 
@@ -82,9 +80,7 @@ class Source
      * @var \AppBundle\Entity\SourceType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SourceType", inversedBy="sources")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="source_type_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="source_type_id", referencedColumnName="id")
      */
     private $sourceType;
 
@@ -104,7 +100,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contributor", mappedBy="citationSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="citationSource")
 
      * A collection of all Author sources for a Citation source.
      */
@@ -113,7 +109,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contributor", mappedBy="authorSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource")
      *
      * A collection of all Citation sources for an Author source.
      */
@@ -122,27 +118,21 @@ class Source
     /**
      * @var \AppBundle\Entity\Publication
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", inversedBy="source")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", mappedBy="source")
      */
     private $publication;
 
     /**
      * @var \AppBundle\Entity\Author
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Author", inversedBy="source")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true, unique=true)
-     * })
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Author", mappedBy="source")
      */
     private $author;
 
     /**
      * @var \AppBundle\Entity\Citation
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Citation", inversedBy="source")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="pub_id", referencedColumnName="id", nullable=true, unique=true)
-     * })
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Citation", mappedBy="source")
      */
     private $citation;
 
@@ -238,7 +228,7 @@ class Source
      *
      * @return Source
      */
-    public function setDescription($description = null)
+    public function setDescription($description)
     {
         $this->description = $description;
 
@@ -262,7 +252,7 @@ class Source
      *
      * @return Source
      */
-    public function setYear($year = null)
+    public function setYear($year)
     {
         $this->year = $year;
 
@@ -286,7 +276,7 @@ class Source
      *
      * @return Source
      */
-    public function setDoi($doi = null)
+    public function setDoi($doi)
     {
         $this->doi = $doi;
 
@@ -310,7 +300,7 @@ class Source
      *
      * @return Source
      */
-    public function setParentSource(\AppBundle\Entity\Source $parentSource = null)
+    public function setParentSource(\AppBundle\Entity\Source $parentSource)
     {
         $this->parentSource = $parentSource;
 
@@ -369,7 +359,7 @@ class Source
      *
      * @return Source
      */
-    public function setSourceType(\AppBundle\Entity\SourceType $sourceType = null)
+    public function setSourceType(\AppBundle\Entity\SourceType $sourceType)
     {
         $this->sourceType = $sourceType;
 
@@ -457,11 +447,11 @@ class Source
     /**
      * Add an Author.
      *
-     * @param \AppBundle\Entity\Contributor $author
+     * @param \AppBundle\Entity\Contribution $author
      *
      * @return Source
      */
-    public function addAuthor(\AppBundle\Entity\Contributor $author)
+    public function addAuthor(\AppBundle\Entity\Contribution $author)
     {
         $this->authors[] = $author;
 
@@ -471,9 +461,9 @@ class Source
     /**
      * Remove an Authors.
      *
-     * @param \AppBundle\Entity\Contributor $author
+     * @param \AppBundle\Entity\Contribution $author
      */
-    public function removeAuthor(\AppBundle\Entity\Contributor $author)
+    public function removeAuthor(\AppBundle\Entity\Contribution $author)
     {
         $this->authors->removeElement($author);
     }
@@ -491,11 +481,11 @@ class Source
     /**
      * Add a Citation.
      *
-     * @param \AppBundle\Entity\Contributor $citation
+     * @param \AppBundle\Entity\Contribution $citation
      *
      * @return Source
      */
-    public function addCitation(\AppBundle\Entity\Contributor $citation)
+    public function addCitation(\AppBundle\Entity\Contribution $citation)
     {
         $this->citations[] = $citation;
 
@@ -505,9 +495,9 @@ class Source
     /**
      * Remove a Citation.
      *
-     * @param \AppBundle\Entity\Contributor $citation
+     * @param \AppBundle\Entity\Contribution $citation
      */
-    public function removeCitation(\AppBundle\Entity\Contributor $citation)
+    public function removeCitation(\AppBundle\Entity\Contribution $citation)
     {
         $this->citations->removeElement($citation);
     }
@@ -529,10 +519,9 @@ class Source
      *
      * @return Source
      */
-    public function setPublication(\AppBundle\Entity\Publication $publication = null)
+    public function setPublication(\AppBundle\Entity\Publication $publication)
     {
         $this->publication = $publication;
-        $publication->setSource = $this;
 
         return $this;
     }
@@ -554,7 +543,7 @@ class Source
      *
      * @return Source
      */
-    public function setAuthor(\AppBundle\Entity\Author $author = null)
+    public function setAuthor(\AppBundle\Entity\Author $author)
     {
         $this->author = $author;
 
@@ -578,7 +567,7 @@ class Source
      *
      * @return Source
      */
-    public function setCitation(\AppBundle\Entity\Citation $citation = null)
+    public function setCitation(\AppBundle\Entity\Citation $citation)
     {
         $this->citation = $citation;
 
@@ -598,11 +587,15 @@ class Source
     /**
      * Set createdBy user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -628,11 +621,15 @@ class Source
     /**
      * Set last updated by user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
