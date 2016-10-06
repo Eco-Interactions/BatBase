@@ -83,9 +83,7 @@ class Taxon
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="childTaxa")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
      */
     private $parentTaxon;
 
@@ -124,9 +122,7 @@ class Taxon
      * @var \AppBundle\Entity\Level
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="level_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
      */
     private $level;
 

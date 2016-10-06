@@ -84,9 +84,7 @@ class Location
      * @var \AppBundle\Entity\Location
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="childLocs")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id", onDelete="SET NULL")
-     * })
+     * @ORM\JoinColumn(name="parent_loc_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $parentLoc;
 
@@ -104,9 +102,7 @@ class Location
      * @var \AppBundle\Entity\LocationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
      */
     private $locationType;
 
@@ -121,9 +117,7 @@ class Location
      * @var \AppBundle\Entity\HabitatType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\HabitatType", inversedBy="locations")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="habitat_type_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="habitat_type_id", referencedColumnName="id")
      */
     private $habitatType;
 

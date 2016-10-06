@@ -111,9 +111,7 @@ class Citation
      * @var \AppBundle\Entity\Publication
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Publication", inversedBy="citations")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="publication_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="publication_id", referencedColumnName="id")
      */
     private $publication;
 
@@ -121,9 +119,7 @@ class Citation
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citation")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
-     * })
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
      */
     private $source;
 
