@@ -33,7 +33,7 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="displayName", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
      */
     private $displayName;
 
@@ -74,7 +74,7 @@ class Publication
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="doi", type="string", length=255, nullable=true)
      */
     private $doi;
@@ -83,25 +83,16 @@ class Publication
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publication")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
-     * })
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
      */
     private $source;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
-     * //port to citatoinSources and delete
+     * //MAKE CHILDREN THEN DELETE
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="publication")
      */
     private $citations;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="publication") 
-     */
-    private $citationSources;
 
     /**
      * @var \DateTime
@@ -112,13 +103,6 @@ class Publication
     private $created;
 
     /**
-     * @var \DateTime
-     *
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime")
-     */
-    private $updated;
-    /**
      * @var User
      *
      * @Gedmo\Blameable(on="create")
@@ -126,6 +110,14 @@ class Publication
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+    
+    /**
+     * @var \DateTime
+     *
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
 
     /**
      * @var User
@@ -356,7 +348,7 @@ class Publication
      *
      * @return Publication
      */
-    public function setSource(\AppBundle\Entity\Source $source = null)
+    public function setSource(\AppBundle\Entity\Source $source)
     {
         $this->source = $source;
 
@@ -408,47 +400,17 @@ class Publication
     }
 
     /**
-     * Add citationSource.
-     *
-     * @param \AppBundle\Entity\Source $citationSource
-     *
-     * @return Publication
-     */
-    public function addCitationSource(\AppBundle\Entity\Source $citationSource)
-    {
-        $this->citationSources[] = $citationSource;
-
-        return $this;
-    }
-
-    /**
-     * Remove citationSource.
-     *
-     * @param \AppBundle\Entity\Source $citationSource
-     */
-    public function removeCitationSource(\AppBundle\Entity\Source $citationSource)
-    {
-        $this->citationSources->removeElement($citationSource);
-    }
-
-    /**
-     * Get citationSources.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCitationSources()
-    {
-        return $this->citationSources;
-    }
-
-    /**
      * Set createdBy user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Publication
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -474,11 +436,15 @@ class Publication
     /**
      * Set last updated by user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Publication
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
