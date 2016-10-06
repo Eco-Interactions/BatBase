@@ -47,10 +47,7 @@ class Domain
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="domain")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="taxon_id", referencedColumnName="id", unique=true)
-     * })
-     */
+     * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id", unique=true)
     private $taxon;
 
     /**

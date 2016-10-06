@@ -49,9 +49,7 @@ class Naming
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="namings")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="taxon_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id")
      */
     private $taxon;
 
@@ -59,9 +57,7 @@ class Naming
      * @var \AppBundle\Entity\Taxonym
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxonym")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="taxonym_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="taxonym_id", referencedColumnName="id")
      */
     private $taxonym;
 
@@ -69,9 +65,7 @@ class Naming
      * @var \AppBundle\Entity\NamingType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\NamingType")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="naming_type_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="naming_type_id", referencedColumnName="id")
      */
     private $namingType;
 
@@ -79,9 +73,7 @@ class Naming
      * @var \AppBundle\Entity\Authority
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Authority")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="authority_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="authority_id", referencedColumnName="id")
      */
     private $authority;
 
@@ -89,9 +81,7 @@ class Naming
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="childNamings")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="parent_taxon_id", referencedColumnName="id")
      */
     private $parentTaxon;
 

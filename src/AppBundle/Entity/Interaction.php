@@ -49,9 +49,7 @@ class Interaction
      * @var \AppBundle\Entity\Citation
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Citation", inversedBy="interactions")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
      */
     private $citation;
 
@@ -59,9 +57,7 @@ class Interaction
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="interactions")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="source_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="source_id", referencedColumnName="id")
      */
     private $source;
 
@@ -69,9 +65,7 @@ class Interaction
      * @var \AppBundle\Entity\InteractionType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\InteractionType", inversedBy="interactions")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="interaction_type_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="interaction_type_id", referencedColumnName="id")
      */
     private $interactionType;
 
@@ -79,9 +73,7 @@ class Interaction
      * @var \AppBundle\Entity\Location
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Location", inversedBy="interactions")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="location_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="location_id", referencedColumnName="id")
      */
     private $location;
 
@@ -89,9 +81,7 @@ class Interaction
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="subjectRoles")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="subject_taxon_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="subject_taxon_id", referencedColumnName="id")
      */
     private $subject;
 
@@ -99,9 +89,7 @@ class Interaction
      * @var \AppBundle\Entity\Taxon
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="objectRoles")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="object_taxon_id", referencedColumnName="id")
-     * })
+     * @ORM\JoinColumn(name="object_taxon_id", referencedColumnName="id")
      */
     private $object;
 
