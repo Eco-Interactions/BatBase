@@ -102,7 +102,7 @@ class Source
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="citationSource")
 
-     * A collection of all Author sources for a Citation source.
+     * A collection of all Authors that contributed to a source work.
      */
     private $authors;
 
@@ -111,9 +111,9 @@ class Source
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource")
      *
-     * A collection of all Citation sources for an Author source.
+     * A collection of all works an Author source contributed to.
      */
-    private $citations;
+    private $contributions;
 
     /**
      * @var \AppBundle\Entity\Publication

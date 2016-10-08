@@ -43,7 +43,7 @@ class Contribution
     /**
      * @var \AppBundle\Entity\Source
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citations")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributions")
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      *
      * Refers to a single author source record.
