@@ -111,7 +111,7 @@ class Version201610052259310Authors extends AbstractMigration implements Contain
                     "publication" => [ "Comparative Biochemistry and Physiology", null, "Journal"],  
                     "source" => ["publication" => [null]]
             ], 96 => [ 
-                    "publication" => [ "Bats. A natural history.", null, "Book"],  
+                    "publication" => [ "Bats. A natural history", null, "Book"],  
                     "source" => ["publication" => [null, null, "British Museum (Natural History)"],
                                         "publisher" => [null,null,null,null,"British Museum (Natural History)"]]
             ], 98 => [ 

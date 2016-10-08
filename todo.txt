@@ -1,14 +1,48 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 
+TAYLOR:
+    --update pub name to fullName or title
+    --remove year from citation
+
+        Downloading and caching #### interactions
+
+        --citations
+            -move descriptions into displayText
+                --delete description
+
+
+        --Contribution relatinoship with source
+            --remove citation depencency as authors can be contributors of many source types.
+                --prop: citations = contributions
+                    citationSource = workSource
+                --field: citation_id = work_id
+
+
 TODO
+    --move linkUrl and display to the source entity
+    --add pubtype entity
+        --go through pubs and assign pubtypes
+        --update pub name to description
+    -- update migration with new pub fieldname
+
+    --sourceType
+        -- definition : longtext
+
+    --swap @returns for params in annotations
+        --deletedAt -> deleted_at
+            --fix forensic set methods
+                pub
+                auth
+                src
+            --remove param = null from setters
+
     ----Barro Island (dup??)
     -- Consolidate migrations?
 
-  STOPPING POINT::
-    see what the chnge to the publication property in source did to the diff and rewrite
-
 Import Process::
-    Add SourceTypes
+
+
+
 
 
 
@@ -16,14 +50,10 @@ Import Process::
 
     Start Importing Sources::
         Publications->
-            New source. Type "Publication"
-            pub"name"->"displayName"
-
-                citations => set as parent;
+            ------setUpdatedBy not working------------
 
         Authors->
-            New source. Type "Author"
-                citations => set as parent;
+            ------setUpdatedBy not working------------
 
         Citations->
             Add source type "Citation".
@@ -34,12 +64,6 @@ Import Process::
 ::AFTER::
     -- add locType ordinals
     add disply name and description to all lagging entities    
-
-
-Unfinished db migrations: Foundations for the Source restructure and some reorganizing of db table columns.
-Building the new Source structure: Created new SourceType entity, renamed and refactored Citation into Source and have added a Citation entity for its special properties. Mass commit; my bad.
-
-
 
 Src types
     Publisher
@@ -55,6 +79,9 @@ Notes::
     location desc field not specified as a unique field.
 
 
+
+
+
     deployment process
         - file upload
         - database schema update
@@ -63,8 +90,20 @@ Notes::
 
 
 ::EMAIL::
+--------------------Missing pub search notes-----------
+-164 - Needs a book added as parent pub with two authors not in the db
+-176 - Not 100% sure Zool. === Zoologia
+- 42 and 254 are duplicates of the same book
+- 209 and 262 are duplicates
 
-Changes::
+
+    --Not sure of the publisher and the publication type::
+            ], 96 => [ "pub" => [ "Bats. A natural history.", null, "Book"],  
+                    "src" => [ null, null, "British Museum (Natural History)"],
+                    "publ" => ["British Museum (Natural History)"]
+
+-----------------------------------------------------------------
+Location Changes::
     - USA -> United States
     - Suriam -> Suriname
     - Virgin Islands -> Virgin Islands, Britain

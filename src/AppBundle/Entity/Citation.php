@@ -29,7 +29,7 @@ class Citation
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
      */
-    private $displayName;
+    private $displayText;
 
     /**
      * @var string
