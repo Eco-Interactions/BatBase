@@ -6,6 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use AppBundle\Entity\PublicationType;
 use AppBundle\Entity\SourceType;
 use AppBundle\Entity\Source;
 
@@ -24,7 +25,7 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
     }
 
     /**
-     * Creates all SourceType entities.
+     * Creates all SourceType and PublicationType entities.
      * 
      * @param Schema $schema
      */
@@ -33,15 +34,31 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $srcTypes = ['Publisher' => '10', 'Citation' => '30', 'Publication' => '20', 'Author' => '25'];
 
+        $this->createNewSrcTypes($em);
+        $this->createNewPubTypes($em);
+
+        $em->flush();     print("\n Src & Pub Types created");
+    }
+    private function createNewSrcTypes($entityProps, $entity)
+    {
+        $srcTypes = ['Publisher' => '10', 'Citation' => '30', 'Publication' => '20', 'Author' => '25'];
         foreach ($srcTypes as $srcType => $ordinal) {   
             $entity = new SourceType();
             $entity->setName($srcType);
             $entity->setOrdinal($ordinal);
             $em->persist($entity);
         }
-        $em->flush();     print("\n Src Types created");
+    }
+    private function createNewPubTypes($entityProps, $entity)
+    {
+        $pubTypes = ['Book', 'Journal', 'Ph.D Dissertation'];
+
+        foreach ($pubTypes as $pubType) {   
+            $entity = new PublicationType();
+            $entity->setName($pubType);
+            $em->persist($entity);
+        }
     }
 
     /**
@@ -58,6 +75,7 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
         foreach ($publications as $pubEntity) { 
             $this->buildSourceEntity($pubEntity, $em); 
         }
+
     }
     private function buildSourceEntity($pubEntity, $em)
     {
