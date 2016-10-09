@@ -140,8 +140,13 @@ span.lbl {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
 }
-.top-pgs p, .top-pgs ul li, .top-pgs ol li, #terms-div p {		/*Clean up all these old references and free the ids!*/
+.top-pgs p, #terms-div p {		/*Clean up all these old references and free the ids!*/
 	margin: .2em 0 0 1em;
+	padding: .3em 0 .3em 0;
+	font-size: 1.05em;
+}
+.top-pgs ul li, .top-pgs ol li {
+	margin: .2em 0 0 1.8em;
 	padding: .3em 0 .3em 0;
 	font-size: 1.05em;
 }
@@ -644,14 +649,16 @@ label[for=fos_user_registration_form_about_me] {
 	margin-left: 1em;
 }
 #about-db .first-col {
-	width: 54%;
+	width: 52%;
 }
 #about-db .second-col {
-	width: 46%;
+	width: 48%;
 }
-#data-map {
-	display: block;
-	margin: 40px auto 40px auto;
+.about-db-maps {
+	display: inline-block;
+}
+#db-new-data {
+	margin-left: 15px;
 }
 /*-- Sources --*/
 #src-pg p {
