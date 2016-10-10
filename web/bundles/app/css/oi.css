@@ -167,6 +167,7 @@ span.lbl {
 #footer-tos {
 	/*align-self: flex-end;*/
 }
+/* wysiwyg editor */
 .wysiwyg {
 	position: relative;
 }
@@ -194,7 +195,6 @@ span.lbl {
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
 /*-- Header --*/
-
 #logo-overlay {
 	position: absolute;
 	top: 80px;
@@ -501,7 +501,7 @@ a[role="button"], .tos-bttn {
     top: 25%;
     left: 50%;
     width: 300px;
-    height: 75px;
+    height: 100px;
     padding: 22px;
     margin-left: -150px;
     margin-top: -50px;

@@ -35,12 +35,21 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
-			localStorage.clear();
 		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-		if (localStorage && !localStorage.getItem('delta')){
+		if (localStorage && !localStorage.getItem('epsilon')){
+			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
-			populateStorage('delta', true);
+			populateStorage('epsilon', true);
+			showLoadingDataPopUp();
 		}
+	}
+	/** Gets total number of interactions in the database and shows a loading popup message. */
+	function showLoadingDataPopUp() {
+		sendAjaxQuery({}, 'search/interaction/count', storeIntRcrdTotal);
+	}
+	function storeIntRcrdTotal(data) {  
+		var ttlIntRcrds = data.rcrdCount; 
+	    showPopUpMsg("Downloading and Caching\n" + ttlIntRcrds + " records.");	
 	}
 	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
@@ -59,14 +68,20 @@
 	}
 /*=================Helper Methods=============================================*/
 	function showPopUpMsg(msg) {
-		var popUpMsg = msg || "Loading and updating data...";
+		var popUpMsg = msg || "Loading...";
 		$("#search-popUpDiv").text(popUpMsg);
-		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
 	    $('#search-popUpDiv, #search-overlay').show();
+	    fadeGrid();
+	}
+	function fadeGrid() {
+		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
+	}
+	function showGrid() {
+		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
 	}
 	function hidePopUpMsg() {
-		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
 	    $('#search-popUpDiv, #search-overlay').hide();
+	    showGrid();
 	}
 	function toggleExpandTree() {  												//console.log("toggleExpandTree")
   		var expanded = $(this).data('xpanded');
@@ -133,7 +148,7 @@
 	 */
 	function getInteractionsAndBuildGrid() {  												//console.log("getInteractionsAndBuildGrid called. ")
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
-		showPopUpMsg();
+		fadeGrid();
 		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
