@@ -29,11 +29,11 @@ class Citation
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
      */
-    private $displayText;
+    private $displayName;
 
     /**
      * @var string
-     *
+     * //-> displayName
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
     private $description;
@@ -82,7 +82,7 @@ class Citation
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="year", type="string", length=255, nullable=true)
      */
     private $year;
@@ -549,11 +549,15 @@ class Citation
     /**
      * Set createdBy user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Publication
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -579,11 +583,15 @@ class Citation
     /**
      * Set last updated by user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Publication
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -604,16 +612,6 @@ class Citation
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**
