@@ -34,17 +34,17 @@ class Contribution
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="authors")
-     * @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="work_src_id", referencedColumnName="id")
      *
-     * Refers to a single citation source record.
+     * Refers to a single work source record.
      */
-    private $citationSource;
+    private $workSource;
 
     /**
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributions")
-     * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="auth_src_id", referencedColumnName="id")
      *
      * Refers to a single author source record.
      */
@@ -119,27 +119,27 @@ class Contribution
     }
 
     /**
-     * Set Citation Source.
+     * Set workSource.
      *
-     * @param \AppBundle\Entity\Source $citationSource
+     * @param \AppBundle\Entity\Source $workSource
      *
      * @return Contribution
      */
-    public function setCitationSource(\AppBundle\Entity\Source $citationSource = null)
+    public function setWorkSource(\AppBundle\Entity\Source $workSource)
     {
-        $this->citationSource = $citationSource;
+        $this->workSource = $workSource;
 
         return $this;
     }
 
     /**
-     * Get Citation Source.
+     * Get workSource.
      *
      * @return \AppBundle\Entity\Source
      */
-    public function getCitationSource()
+    public function getWorkSource()
     {
-        return $this->citationSource;
+        return $this->workSource;
     }
 
     /**
@@ -149,7 +149,7 @@ class Contribution
      *
      * @return Contribution
      */
-    public function setAuthorSource(\AppBundle\Entity\Source $authorSource = null)
+    public function setAuthorSource(\AppBundle\Entity\Source $authorSource)
     {
         $this->authorSource = $authorSource;
 
@@ -201,7 +201,7 @@ class Contribution
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
     }
@@ -224,16 +224,6 @@ class Contribution
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**

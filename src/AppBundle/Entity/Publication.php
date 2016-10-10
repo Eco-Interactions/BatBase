@@ -40,7 +40,7 @@ class Publication
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
     private $description;
 
@@ -405,7 +405,7 @@ class Publication
      *
      * @param \AppBundle\Entity\User $user
      *
-     * @return  Publication
+     * @return Publication
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {

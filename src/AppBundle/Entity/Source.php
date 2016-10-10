@@ -118,7 +118,7 @@ class Source
 
      * A collection of all Authors that contributed to a source work.
      */
-    private $authors;
+    private $contributors;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -194,7 +194,7 @@ class Source
      */
     public function __construct()
     {
-        $this->authors = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->contributors = new \Doctrine\Common\Collections\ArrayCollection();
         $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childSources = new \Doctrine\Common\Collections\ArrayCollection();
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
@@ -507,47 +507,47 @@ class Source
     }
 
     /**
-     * Add an Author.
+     * Add an Contributor.
      *
-     * @param \AppBundle\Entity\Contribution $author
+     * @param \AppBundle\Entity\Contributon $contributor
      *
      * @return Source
      */
-    public function addAuthor(\AppBundle\Entity\Contribution $author)
+    public function addContributor(\AppBundle\Entity\Contribution $contributor)
     {
-        $this->authors[] = $author;
+        $this->contributors[] = $contributor;
 
         return $this;
     }
 
     /**
-     * Remove an Authors.
+     * Remove a Contributor.
      *
-     * @param \AppBundle\Entity\Contribution $author
+     * @param \AppBundle\Entity\Contribution $contributor
      */
-    public function removeAuthor(\AppBundle\Entity\Contribution $author)
+    public function removeContributor(\AppBundle\Entity\Contribution $contributor)
     {
-        $this->authors->removeElement($author);
+        $this->contributors->removeElement($contributor);
     }
 
     /**
-     * Get Authors.
+     * Get Contributors.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getAuthors()
+    public function getContributors()
     {
-        return $this->authors;
+        return $this->contributors;
     }
 
     /**
      * Add a Citation.
      *
-     * @param \AppBundle\Entity\Contribution $citation
+     * @param \AppBundle\Entity\Citation $citation
      *
      * @return Source
      */
-    public function addCitation(\AppBundle\Entity\Contribution $citation)
+    public function addCitation(\AppBundle\Entity\Citation $citation)
     {
         $this->citations[] = $citation;
 
@@ -557,9 +557,9 @@ class Source
     /**
      * Remove a Citation.
      *
-     * @param \AppBundle\Entity\Contribution $citation
+     * @param \AppBundle\Entity\Citation $citation
      */
-    public function removeCitation(\AppBundle\Entity\Contribution $citation)
+    public function removeCitation(\AppBundle\Entity\Citation $citation)
     {
         $this->citations->removeElement($citation);
     }
