@@ -193,7 +193,7 @@ class Version201610052259311Citations extends AbstractMigration implements Conta
                     225 => [ "src" => [  "doi" => "doi:10.1006/jare.1997.0267",
                                          "prnt" => "Journal of Arid Environments" ]],
                     227 => [ "src" => [  "doi" => "10.1111/j.1438-8677.1957.tb00577.x",
-                                         "prnt" => "Plant Biology" ]],
+                                         "prnt" => 59 ]],
                     228 => [ "src" => [  "doi" => "10.1111/j.1095-8339.2001.tb00563.x",
                                          "prnt" => 60 ]],
                     230 => [ "src" => [  "prnt" => "University of Kansas Natural History Museum" ]],

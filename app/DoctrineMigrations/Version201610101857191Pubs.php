@@ -12,9 +12,10 @@ use AppBundle\Entity\Source;
 
 /**
  * @preUp creates all sourceType entities: Publisher, Publication, Citation, Author. 
+ * @preUp creates all publicationType entities: Book, Journal, Ph. D. Dissertation. 
  * @up Creates a new "Source" entity for each publication and rearranges related data.
  */
-class Version201610052158481Pubs extends AbstractMigration implements ContainerAwareInterface
+class Version201610101857191Pubs extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
@@ -37,26 +38,29 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
 
         $this->createNewSrcTypes($em);
         $this->createNewPubTypes($em);
-
-        $em->flush();     print("\n Src & Pub Types created");
+        $em->flush();                                                           print("\n Src & Pub Types created\n");
     }
-    private function createNewSrcTypes($entityProps, $entity)
+    private function createNewSrcTypes(&$em)
     {
         $srcTypes = ['Publisher' => '10', 'Citation' => '30', 'Publication' => '20', 'Author' => '25'];
         foreach ($srcTypes as $srcType => $ordinal) {   
             $entity = new SourceType();
-            $entity->setName($srcType);
+            $entity->setDisplayName($srcType);
             $entity->setOrdinal($ordinal);
+            $entity->setCreatedBy($em->getRepository('AppBundle:User')
+                ->findOneBy(array('id' => '6'))); 
             $em->persist($entity);
         }
     }
-    private function createNewPubTypes($entityProps, $entity)
+    private function createNewPubTypes(&$em)
     {
-        $pubTypes = ['Book', 'Journal', 'Ph.D Dissertation'];
+        $pubTypes = ['Book', 'Journal', 'Ph.D. Dissertation'];
 
         foreach ($pubTypes as $pubType) {   
             $entity = new PublicationType();
-            $entity->setName($pubType);
+            $entity->setDisplayName($pubType);
+            $entity->setCreatedBy($em->getRepository('AppBundle:User')
+                ->findOneBy(array('id' => '6'))); 
             $em->persist($entity);
         }
     }
@@ -77,9 +81,9 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
         }
 
     }
-    private function buildSourceEntity($pubEntity, $em)
+    private function buildSourceEntity(&$pubEntity, &$em)
     {
-        $pubName = $pubEntity->getName();
+        $pubName = $pubEntity->getDisplayName();
         $srcEntity = new Source();                                    
 
         $srcEntity->setDisplayName($pubName);
@@ -88,14 +92,12 @@ class Version201610052158481Pubs extends AbstractMigration implements ContainerA
         $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6'))); 
 
-        $pubEntity->setDisplayName($pubName);
         $pubEntity->setSource($srcEntity);
         $pubEntity->setUpdatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6')));  
 
         $em->persist($srcEntity); 
         $em->persist($pubEntity); 
-
         $em->flush();     
     }
 

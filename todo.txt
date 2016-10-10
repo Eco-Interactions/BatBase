@@ -1,17 +1,35 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 
-TAYLOR:
-    --update pub name to fullName or title
-    --remove year from citation
+Publication type
+contribution
+source
+citation
 
-        Downloading and caching #### interactions
+~~~SQL update
+        pub field : name -> display_name
+        auth field : shortname -> display_name
+
+
+~~forensic field update
+    author
+    citation
+    source
+    SourceType
+    pub
+    pubtype
+
+TAYLOR:
+    --Change author short name -> display name? 
+    --updated pub name to description
+
+    --remove year from citation
 
         --citations
             -move descriptions into displayText
                 --delete description
 
 
-        --Contribution relatinoship with source
+        --Contribution relationship with source
             --remove citation depencency as authors can be contributors of many source types.
                 --prop: citations = contributions
                     citationSource = workSource
@@ -56,11 +74,10 @@ Import Process::
             ------setUpdatedBy not working------------
 
         Citations->
-            Add source type "Citation".
-            parent => should be set by now.
+            descr -> displyNm
 
             all interactions need to point to the "source"
-            all attributions need to be updated with source ids
+            all authors need to be updated with source relationship
 ::AFTER::
     -- add locType ordinals
     add disply name and description to all lagging entities    
@@ -71,14 +88,12 @@ Src types
     Citation
     Author
 
-
-
 Questions::
 Notes::
 
     location desc field not specified as a unique field.
-
-
+-----temp
+data.intRcrdCount
 
 
 
