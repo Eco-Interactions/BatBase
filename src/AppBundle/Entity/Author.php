@@ -33,9 +33,9 @@ class Author
     /**
      * @var string
      *
-     * @ORM\Column(name="short_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
      */
-    private $shortName;
+    private $displayName;
 
     /**
      * @var string
@@ -53,21 +53,21 @@ class Author
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      */
     private $linkDisplay;
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      */
     private $linkUrl;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
-     * //port to contributor and delete
+     * //REMOVE
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="author")
      */
     private $attributions;
@@ -160,27 +160,27 @@ class Author
     }
 
     /**
-     * Set shortName.
+     * Set displayName.
      *
-     * @param string $shortName
+     * @param string $displayName
      *
      * @return Author
      */
-    public function setShortName($shortName)
+    public function setDisplayName($displayName)
     {
-        $this->shortName = $shortName;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get shortName.
+     * Get displayName.
      *
      * @return string
      */
-    public function getShortName()
+    public function getDisplayName()
     {
-        return $this->shortName;
+        return $this->displayName;
     }
 
     /**
@@ -340,11 +340,15 @@ class Author
     /**
      * Set createdBy user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Author
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -370,11 +374,15 @@ class Author
     /**
      * Set last updated by user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  Author
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
@@ -395,16 +403,6 @@ class Author
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**
