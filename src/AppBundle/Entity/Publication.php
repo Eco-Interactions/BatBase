@@ -46,21 +46,21 @@ class Publication
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
      */
     private $publisher;
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      */
     private $linkDisplay;
 
     /**
      * @var string
-     *
+     * //REMOVE
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      */
     private $linkUrl;
@@ -466,16 +466,6 @@ class Publication
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**
