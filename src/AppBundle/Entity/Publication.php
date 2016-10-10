@@ -39,17 +39,10 @@ class Publication
 
     /**
      * @var string
-     * //port to displayName and delete
-     * @ORM\Column(name="name", type="string", length=255)
-     */
-    private $name;
-
-    /**
-     * @var string
      *
-     * @ORM\Column(name="publication_type", type="string", length=255, nullable=true)
+     * @ORM\Column(name="description", type="string", length=255)
      */
-    private $publicationType;
+    private $description;
 
     /**
      * @var string
@@ -78,6 +71,14 @@ class Publication
      * @ORM\Column(name="doi", type="string", length=255, nullable=true)
      */
     private $doi;
+
+    /**
+     * @var \AppBundle\Entity\PublicationType
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publication")
+     * @ORM\JoinColumn(name="pub_type_id", referencedColumnName="id")
+     */
+    private $publicationType;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -198,51 +199,27 @@ class Publication
     }
 
     /**
-     * Set name.
+     * Set description.
      *
-     * @param string $name
+     * @param string $description
      *
      * @return Publication
      */
-    public function setName($name)
+    public function setDescription($description)
     {
-        $this->name = $name;
+        $this->description = $description;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get description.
      *
      * @return string
      */
-    public function getName()
+    public function getDescription()
     {
-        return $this->name;
-    }
-    
-    /**
-     * Set publicationType.
-     *
-     * @param string $publicationType
-     *
-     * @return Publication
-     */
-    public function setPublicationType($publicationType)
-    {
-        $this->publicationType = $publicationType;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationType.
-     *
-     * @return string
-     */
-    public function getPublicationType()
-    {
-        return $this->publicationType;
+        return $this->description;
     }
 
     /**
@@ -339,6 +316,30 @@ class Publication
     public function getDoi()
     {
         return $this->doi;
+    }
+
+    /**
+     * Set publicationType.
+     *
+     * @param \AppBundle\Entity\PublicationType $publicationType
+     *
+     * @return Publication
+     */
+    public function setPublicationType(\AppBundle\Entity\PublicationType $publicationType)
+    {
+        $this->publicationType = $publicationType;
+
+        return $this;
+    }
+
+    /**
+     * Get publicationType.
+     *
+     * @return \AppBundle\Entity\PublicationType
+     */
+    public function getPublicationType()
+    {
+        return $this->publicationType;
     }
 
     /**
