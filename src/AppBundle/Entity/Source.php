@@ -59,6 +59,20 @@ class Source
     private $doi;
 
     /**
+     * @var string
+     * 
+     * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
+     */
+    private $linkDisplay;
+
+    /**
+     * @var string
+     * 
+     * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
+     */
+    private $linkUrl;
+
+    /**
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="childSources")
@@ -291,6 +305,54 @@ class Source
     public function getDoi()
     {
         return $this->doi;
+    }
+
+    /**
+     * Set linkDisplay.
+     *
+     * @param string $linkDisplay
+     *
+     * @return Source
+     */
+    public function setLinkDisplay($linkDisplay)
+    {
+        $this->linkDisplay = $linkDisplay;
+
+        return $this;
+    }
+
+    /**
+     * Get linkDisplay.
+     *
+     * @return string
+     */
+    public function getLinkDisplay()
+    {
+        return $this->linkDisplay;
+    }
+
+    /**
+     * Set linkUrl.
+     *
+     * @param string $linkUrl
+     *
+     * @return Source
+     */
+    public function setLinkUrl($linkUrl)
+    {
+        $this->linkUrl = $linkUrl;
+
+        return $this;
+    }
+
+    /**
+     * Get linkUrl.
+     *
+     * @return string
+     */
+    public function getLinkUrl()
+    {
+        return $this->linkUrl;
     }
 
     /**
@@ -650,16 +712,6 @@ class Source
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
     }
 
     /**
