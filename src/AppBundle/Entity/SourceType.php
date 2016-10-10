@@ -37,6 +37,13 @@ class SourceType
     private $name;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", length=255)
+     */
+    private $description;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="ordinal", type="integer", nullable=true)
@@ -149,6 +156,30 @@ class SourceType
     }
 
     /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return SourceType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set ordinal.
      *
      * @param int $ordinal
@@ -209,11 +240,15 @@ class SourceType
     /**
      * Set createdBy user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  SourceType
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -239,11 +274,15 @@ class SourceType
     /**
      * Set last updated by user.
      *
-     * @return \AppBundle\Entity\User
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return  SourceType
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
