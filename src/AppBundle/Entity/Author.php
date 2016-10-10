@@ -25,7 +25,7 @@ class Author
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"shortName"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;

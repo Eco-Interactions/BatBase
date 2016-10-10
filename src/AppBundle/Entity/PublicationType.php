@@ -32,14 +32,14 @@ class PublicationType
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      */
     private $displayName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
     private $description;
 
