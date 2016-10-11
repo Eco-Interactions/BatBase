@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+use AppBundle\Entity\Author;
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Publication;
 use AppBundle\Entity\SourceType;
@@ -103,7 +104,13 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "Mammalian Biology", null, "Journal"],  
                     "source" => ["publication" => [null, null, null, "http://www.journals.elsevier.com/mammalian-biology"],
                                  "publisher" => [null,null,null,null,"Urban & Fischerr"]] //name, url, parent
-            ], 191 => [ 
+            ], 164 => [ 
+                    "publication" => [ "Investigaciones sobre la regeneración de selvas altas en Veracruz, México", null, "Book"],  
+                    "source" => ["publication" => [1985, null, "Instituto Nacional de Investigaciones Sobre Recursos Bióticos", "https://www.researchgate.net/publication/44443198_Investigaciones_sobre_la_regeneracion_de_selvas_altas_en_Veracruz_Mexico_por_A_Gomez-Pompa_C_Vazquez_Yanes_A_Butanda_Cervera_y_otros", null, null, 
+                                                    [["Arturo Gómez-Pompa", "Gómez-Pompa"], ["Silvia del Amo R.", "del Amo R."]]],
+                                "publisher" => [null,null,null,null,"Instituto Nacional de Investigaciones Sobre Recursos Bióticos"]]
+            ],
+             191 => [ 
                     "publication" => [ "Revista Brasileira de Biologia", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Instituto Internacional de Ecologia"],
                                     "publisher" => [null,null,null,null,"Instituto Internacional de Ecologia"]]
@@ -194,17 +201,47 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
     }
     private function addContributor($authors, &$srcEntity, &$em) {              print("    addContributor ->");
         foreach ($authors as $authId) {
-            $contribEntity = new Contribution();
-            $author = $em->getRepository('AppBundle:Author')
-                ->findOneBy(array('id' => $authId));
+            if (is_int($authId)) {
+                $contribEntity = new Contribution();
+                $author = $em->getRepository('AppBundle:Author')
+                    ->findOneBy(array('id' => $authId));
 
-            $contribEntity->setAuthorSource($author->getSource());
-            $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
-                ->findOneBy(array('id' => '6'))); 
+                $contribEntity->setAuthorSource($author->getSource());
+                $contribEntity->setWorkSource($srcEntity);
+                $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+                    ->findOneBy(array('id' => '6'))); 
 
-            $em->persist($contribEntity);
+                $em->persist($contribEntity);
+            } else {
+                $this->createAuthor($authId, $srcEntity, $em);
+            }
         }
+    }
+    private function createAuthor($authAry, &$wrkSrcEntity, &$em)              
+    {                                                                            print("    --Adding new author---\n");
+        $authSrc = new Source();
+        $authSrc->setDisplayName($authAry[1]);
+        $authSrc->setDescription($authAry[0]);
+        $authSrc->setSourceType($em->getRepository('AppBundle:SourceType')
+            ->findOneBy(array('id'=> 4)));  
+
+        $authEntity = new Author();
+        $authEntity->setFullName($authAry[0]);
+        $authEntity->setDisplayName($authAry[1]);
+        $authEntity->setLastName($authAry[1]);
+        $authEntity->setSource($authSrc);
+        $authEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6'))); 
+
+        $contribEntity = new Contribution();
+        $contribEntity->setAuthorSource($authSrc);
+        $contribEntity->setWorkSource($wrkSrcEntity);
+        $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+            ->findOneBy(array('id' => '6'))); 
+
+        $em->persist($authSrc);
+        $em->persist($authEntity);
+        $em->persist($contribEntity);
     }
     private function addSrcEntity($sourceType, $valAry, &$pubEntity, &$em) {       
         $srcFields = ["Year", "Doi", "ParentSource", "LinkUrl", "DisplayName","Description", "Author"];
