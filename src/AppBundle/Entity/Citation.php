@@ -33,24 +33,17 @@ class Citation
 
     /**
      * @var string
-     * //-> displayName
-     * @ORM\Column(name="description", type="string", length=255, nullable=true)
-     */
-    private $description;
-
-    /**
-     * @var string
      *
      * @ORM\Column(name="full_text", type="text")
      */
     private $fullText;
 
     /**
-     * @var bool
+     * @var string
      *
-     * @ORM\Column(name="is_secondary", type="boolean", nullable=true)
+     * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
      */
-    private $isSecondary;
+    private $publicationVolume;
 
     /**
      * @var string
@@ -69,51 +62,15 @@ class Citation
     /**
      * @var string
      *
-     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
-     */
-    private $publicationVolume;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="title", type="string", length=255, nullable=true)
      */
     private $title;
-
-    /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="year", type="string", length=255, nullable=true)
-     */
-    private $year;
 
     /**
      * @ORM\ManyToMany(targetEntity="Tag", mappedBy="citations")
      * @ORM\JoinTable(name="citation_tag")
      */
     private $tags;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="citation")
-     */
-    private $interactions;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="citation")
-     */
-    private $attributions;
-
-    /**
-     * @var \AppBundle\Entity\Publication
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Publication", inversedBy="citations")
-     * @ORM\JoinColumn(name="publication_id", referencedColumnName="id")
-     */
-    private $publication;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -167,8 +124,6 @@ class Citation
      */
     public function __construct()
     {
-        $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->attributions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -207,30 +162,6 @@ class Citation
     }
 
     /**
-     * Set description.
-     *
-     * @param string $description
-     *
-     * @return Citation
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Get description.
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
-
-    /**
      * Set fullText.
      *
      * @param string $fullText
@@ -255,27 +186,27 @@ class Citation
     }
 
     /**
-     * Set isSecondary.
+     * Set publicationVolume.
      *
-     * @param bool $isSecondary
+     * @param string $publicationVolume
      *
      * @return Citation
      */
-    public function setIsSecondary($isSecondary)
+    public function setPublicationVolume($publicationVolume)
     {
-        $this->isSecondary = $isSecondary;
+        $this->publicationVolume = $publicationVolume;
 
         return $this;
     }
 
     /**
-     * Get isSecondary.
+     * Get publicationVolume.
      *
-     * @return bool
+     * @return string
      */
-    public function getIsSecondary()
+    public function getPublicationVolume()
     {
-        return $this->isSecondary;
+        return $this->publicationVolume;
     }
 
     /**
@@ -326,29 +257,6 @@ class Citation
     }
 
     /**
-     * Set publicationVolume.
-     *
-     * @param string $publicationVolume
-     *
-     * @return Citation
-     */
-    public function setPublicationVolume($publicationVolume)
-    {
-        $this->publicationVolume = $publicationVolume;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationVolume.
-     *
-     * @return string
-     */
-    public function getPublicationVolume()
-    {
-        return $this->publicationVolume;
-    }
-    /**
      * Set title.
      *
      * @param string $title
@@ -370,30 +278,6 @@ class Citation
     public function getTitle()
     {
         return $this->title;
-    }
-
-    /**
-     * Set year.
-     *
-     * @param string $year
-     *
-     * @return Citation
-     */
-    public function setYear($year)
-    {
-        $this->year = $year;
-
-        return $this;
-    }
-
-    /**
-     * Get year.
-     *
-     * @return string
-     */
-    public function getYear()
-    {
-        return $this->year;
     }
 
     /**
@@ -431,98 +315,6 @@ class Citation
     }
 
     /**
-     * Add interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     *
-     * @return Citation
-     */
-    public function addInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions[] = $interactions;
-
-        return $this;
-    }
-
-    /**
-     * Remove interactions.
-     *
-     * @param \AppBundle\Entity\Interaction $interactions
-     */
-    public function removeInteraction(\AppBundle\Entity\Interaction $interactions)
-    {
-        $this->interactions->removeElement($interactions);
-    }
-
-    /**
-     * Get interactions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getInteractions()
-    {
-        return $this->interactions;
-    }
-
-    /**
-     * Add attributions.
-     *
-     * @param \AppBundle\Entity\Attribution $attributions
-     *
-     * @return Citation
-     */
-    public function addAttribution(\AppBundle\Entity\Attribution $attributions)
-    {
-        $this->attributions[] = $attributions;
-
-        return $this;
-    }
-
-    /**
-     * Remove attributions.
-     *
-     * @param \AppBundle\Entity\Attribution $attributions
-     */
-    public function removeAttribution(\AppBundle\Entity\Attribution $attributions)
-    {
-        $this->attributions->removeElement($attributions);
-    }
-
-    /**
-     * Get attributions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getAttributions()
-    {
-        return $this->attributions;
-    }
-
-    /**
-     * Set publication.
-     *
-     * @param \AppBundle\Entity\Publication $publication
-     *
-     * @return Citation
-     */
-    public function setPublication(\AppBundle\Entity\Publication $publication = null)
-    {
-        $this->publication = $publication;
-
-        return $this;
-    }
-
-    /**
-     * Get publication.
-     *
-     * @return \AppBundle\Entity\Publication
-     */
-    public function getPublication()
-    {
-        return $this->publication;
-    }
-
-    /**
      * Set source.
      *
      * @param \AppBundle\Entity\Source $source
@@ -550,14 +342,10 @@ class Citation
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Publication
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -584,14 +372,10 @@ class Citation
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Publication
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**

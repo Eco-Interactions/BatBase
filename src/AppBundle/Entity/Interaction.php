@@ -46,14 +46,6 @@ class Interaction
     private $isOldWorld;
 
     /**
-     * @var \AppBundle\Entity\Citation
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Citation", inversedBy="interactions")
-     * @ORM\JoinColumn(name="citation_id", referencedColumnName="id")
-     */
-    private $citation;
-
-    /**
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="interactions")
@@ -235,7 +227,7 @@ class Interaction
      *
      * @return Interaction
      */
-    public function setSource(\AppBundle\Entity\Source $source = null)
+    public function setSource(\AppBundle\Entity\Source $source)
     {
         $this->source = $source;
 
@@ -253,37 +245,13 @@ class Interaction
     }
 
     /**
-     * Set citation.
-     *
-     * @param \AppBundle\Entity\Citation $citation
-     *
-     * @return Interaction
-     */
-    public function setCitation(\AppBundle\Entity\Citation $citation = null)
-    {
-        $this->citation = $citation;
-
-        return $this;
-    }
-
-    /**
-     * Get citation.
-     *
-     * @return \AppBundle\Entity\Citation
-     */
-    public function getCitation()
-    {
-        return $this->citation;
-    }
-
-    /**
      * Set interactionType.
      *
      * @param \AppBundle\Entity\InteractionType $interactionType
      *
      * @return Interaction
      */
-    public function setInteractionType(\AppBundle\Entity\InteractionType $interactionType = null)
+    public function setInteractionType(\AppBundle\Entity\InteractionType $interactionType)
     {
         $this->interactionType = $interactionType;
 
@@ -307,7 +275,7 @@ class Interaction
      *
      * @return Interaction
      */
-    public function setLocation(\AppBundle\Entity\Location $location = null)
+    public function setLocation(\AppBundle\Entity\Location $location)
     {
         $this->location = $location;
 
@@ -331,7 +299,7 @@ class Interaction
      *
      * @return Interaction
      */
-    public function setSubject(\AppBundle\Entity\Taxon $subject = null)
+    public function setSubject(\AppBundle\Entity\Taxon $subject)
     {
         $this->subject = $subject;
 
@@ -355,7 +323,7 @@ class Interaction
      *
      * @return Interaction
      */
-    public function setObject(\AppBundle\Entity\Taxon $object = null)
+    public function setObject(\AppBundle\Entity\Taxon $object)
     {
         $this->object = $object;
 
@@ -441,7 +409,7 @@ class Interaction
      *
      * @return \AppBundle\Entity\User
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
     }
@@ -465,17 +433,7 @@ class Interaction
     {
         return $this->updatedBy;
     }
-
-    /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
-    }
-
+    
     /**
      * Get deleted at.
      *

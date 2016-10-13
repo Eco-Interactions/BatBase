@@ -45,34 +45,6 @@ class Publication
     private $description;
 
     /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="publisher", type="string", length=255, nullable=true)
-     */
-    private $publisher;
-
-    /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
-     */
-    private $linkDisplay;
-
-    /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
-     */
-    private $linkUrl;
-
-    /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="doi", type="string", length=255, nullable=true)
-     */
-    private $doi;
-
-    /**
      * @var \AppBundle\Entity\PublicationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publication")
@@ -87,13 +59,6 @@ class Publication
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
      */
     private $source;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     * //MAKE CHILDREN THEN DELETE
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="publication")
-     */
-    private $citations;
 
     /**
      * @var \DateTime
@@ -133,14 +98,6 @@ class Publication
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
     private $deletedAt;
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
-    }
 
     /**
      * Get id.
@@ -223,102 +180,6 @@ class Publication
     }
 
     /**
-     * Set publisher.
-     *
-     * @param string $publisher
-     *
-     * @return Publication
-     */
-    public function setPublisher($publisher)
-    {
-        $this->publisher = $publisher;
-
-        return $this;
-    }
-
-    /**
-     * Get publisher.
-     *
-     * @return string
-     */
-    public function getPublisher()
-    {
-        return $this->publisher;
-    }
-
-    /**
-     * Set linkDisplay.
-     *
-     * @param string $linkDisplay
-     *
-     * @return Publication
-     */
-    public function setLinkDisplay($linkDisplay)
-    {
-        $this->linkDisplay = $linkDisplay;
-
-        return $this;
-    }
-
-    /**
-     * Get linkDisplay.
-     *
-     * @return string
-     */
-    public function getLinkDisplay()
-    {
-        return $this->linkDisplay;
-    }
-
-    /**
-     * Set linkUrl.
-     *
-     * @param string $linkUrl
-     *
-     * @return Publication
-     */
-    public function setLinkUrl($linkUrl)
-    {
-        $this->linkUrl = $linkUrl;
-
-        return $this;
-    }
-
-    /**
-     * Get linkUrl.
-     *
-     * @return string
-     */
-    public function getLinkUrl()
-    {
-        return $this->linkUrl;
-    }
-
-    /**
-     * Set doi.
-     *
-     * @param string $doi
-     *
-     * @return Publication
-     */
-    public function setDoi($doi)
-    {
-        $this->doi = $doi;
-
-        return $this;
-    }
-
-    /**
-     * Get doi.
-     *
-     * @return string
-     */
-    public function getDoi()
-    {
-        return $this->doi;
-    }
-
-    /**
      * Set publicationType.
      *
      * @param \AppBundle\Entity\PublicationType $publicationType
@@ -367,51 +228,13 @@ class Publication
     }
 
     /**
-     * Add citations.
-     *
-     * @param \AppBundle\Entity\Citation $citations
-     *
-     * @return Publication
-     */
-    public function addCitation(\AppBundle\Entity\Citation $citations)
-    {
-        $this->citations[] = $citations;
-
-        return $this;
-    }
-
-    /**
-     * Remove citations.
-     *
-     * @param \AppBundle\Entity\Citation $citations
-     */
-    public function removeCitation(\AppBundle\Entity\Citation $citations)
-    {
-        $this->citations->removeElement($citations);
-    }
-
-    /**
-     * Get citations.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCitations()
-    {
-        return $this->citations;
-    }
-
-    /**
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return Publication
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -438,14 +261,10 @@ class Publication
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Publication
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**

@@ -650,14 +650,10 @@ class Source
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Source
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -684,14 +680,10 @@ class Source
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Source
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**

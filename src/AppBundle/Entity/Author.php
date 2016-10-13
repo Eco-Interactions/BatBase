@@ -52,27 +52,6 @@ class Author
     private $fullName;
 
     /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
-     */
-    private $linkDisplay;
-
-    /**
-     * @var string
-     * //REMOVE
-     * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
-     */
-    private $linkUrl;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     * //REMOVE
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Attribution", mappedBy="author")
-     */
-    private $attributions;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="author")
@@ -232,88 +211,6 @@ class Author
     }
 
     /**
-     * Set linkDisplay.
-     *
-     * @param string $linkDisplay
-     *
-     * @return Author
-     */
-    public function setLinkDisplay($linkDisplay)
-    {
-        $this->linkDisplay = $linkDisplay;
-
-        return $this;
-    }
-
-    /**
-     * Get linkDisplay.
-     *
-     * @return string
-     */
-    public function getLinkDisplay()
-    {
-        return $this->linkDisplay;
-    }
-
-    /**
-     * Set linkUrl.
-     *
-     * @param string $linkUrl
-     *
-     * @return Author
-     */
-    public function setLinkUrl($linkUrl)
-    {
-        $this->linkUrl = $linkUrl;
-
-        return $this;
-    }
-
-    /**
-     * Get linkUrl.
-     *
-     * @return string
-     */
-    public function getLinkUrl()
-    {
-        return $this->linkUrl;
-    }
-
-    /**
-     * Add attributions.
-     *
-     * @param \AppBundle\Entity\Attribution $attributions
-     *
-     * @return Author
-     */
-    public function addAttribution(\AppBundle\Entity\Attribution $attributions)
-    {
-        $this->attributions[] = $attributions;
-
-        return $this;
-    }
-
-    /**
-     * Remove attributions.
-     *
-     * @param \AppBundle\Entity\Attribution $attributions
-     */
-    public function removeAttribution(\AppBundle\Entity\Attribution $attributions)
-    {
-        $this->attributions->removeElement($attributions);
-    }
-
-    /**
-     * Get attributions.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getAttributions()
-    {
-        return $this->attributions;
-    }
-
-    /**
      * Set source.
      *
      * @param \AppBundle\Entity\Source $source
@@ -341,14 +238,10 @@ class Author
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Author
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -375,8 +268,6 @@ class Author
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  Author
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
