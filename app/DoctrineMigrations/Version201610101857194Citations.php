@@ -8,13 +8,12 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use AppBundle\Entity\Contribution;
-use AppBundle\Entity\Publication;
 use AppBundle\Entity\Source;
 
 /**
  * @up Creates a new "Source" entity for each citation.
  */
-class Version201610101857195Citations extends AbstractMigration implements ContainerAwareInterface
+class Version201610101857194Citations extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
 
@@ -33,11 +32,11 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $citations = $em->getRepository('AppBundle:Citation')->findAll();
-        $edgeCases = [31, 40, 42, 96, 201, 248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
+        $edgeCases = [42, 96, 248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
 
         foreach ($citations as $citEntity) {  
             $citId = $citEntity->getID();                                       
-            if (!in_array($citId, $edgeCases)) {                                print("\nNew Source CitationID = ".$citId);
+            if (!in_array($citId, $edgeCases)) {                               //print("\nNew Source CitationID = ".$citId);
                 $this->buildSourceEntity($citEntity, $em); 
             }
         }
@@ -53,14 +52,14 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
         $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6'))); 
 
-        $this->transferInteractions($citEntity, $srcEntity, $em);               print("\n    Interaction-- records transfered to new Source citation.");
-        $this->transferAuthors($citEntity, $srcEntity, $em);                    print("\n    Authors-- contributed to the new Source citation.");
+        $this->transferInteractions($citEntity, $srcEntity, $em);              //print("\n    Interaction-- records transfered to new Source citation.");
+        $this->transferAuthors($citEntity, $srcEntity, $em);                   //print("\n    Authors-- contributed to the new Source citation.");
 
-        if ($citEntity->getPublication() === null){
+        if ($citEntity->getPublication() === null || $citEntity->getId() === 31){ // 31 has a parent update.
             $this->findAndFillMissingData($citEntity, $srcEntity, $em);
         } else {
             $srcEntity->setParentSource($citEntity->getPublication()->getSource());
-        }                                                                       print("\n    --ParentSource Added--");
+        }                                                                      //print("\n    --ParentSource Added--");
         $citEntity->setDisplayName($citEntity->getDescription());
         $citEntity->setSource($srcEntity);
         $citEntity->setUpdatedBy($em->getRepository('AppBundle:User')
@@ -75,8 +74,10 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
     {
         $interactions = $citEntity->getInteractions();
         foreach ($interactions as $interaction) {
+            $interaction->setSource($srcEntity);
             $srcEntity->addInteraction($interaction);
             $citEntity->removeInteraction($interaction);
+            $em->persist($interaction);
         }
     }
     /** Moves each author for this citation to it's new source entity.  */
@@ -103,6 +104,7 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
         $citData = [ 25 => [ "cit" => [  "PublicationPages" => "206-215"],
                             "src" => [  "Doi" => "10.1007/978-94-015-9821-7_19", 
                                         "ParentSource" => "Nouragues"]],
+                    31 => [ "src" => [  "ParentSource" => "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise"]],                                        
                     33 => [ "src" => [  "ParentSource" => "Ciência e Cultura"]],
                     35 => [ "src" => [  "Doi" => "10.1086/400668",
                                         "LinkUrl" => "https://hdl.handle.net/2027/uc1.31822011936077",
@@ -113,6 +115,7 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
                     37 => [ "src" => [  "LinkUrl" => "http://hdl.handle.net/2042/55177",
                                         "ParentSource" => 26 ]],
                     39 => [ "src" => [  "ParentSource" => 26 ]],
+                    40 => [ "src" => [  "ParentSource" => "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française"]],
                     44 => [ "src" => [  "ParentSource" => 30 ]],
                     49 => [ "cit" => [  "PublicationIssue" => "12"],
                             "src" => [  "ParentSource" => "Revista de la Facultad de Agronomía de la Universidad del Zulia" ]],
@@ -167,6 +170,7 @@ class Version201610101857195Citations extends AbstractMigration implements Conta
                     198 => [ "src" => [  "LinkUrl" => "https://www.researchgate.net/publication/11594298_Fig-eating_by_vertebrate_frugivores_A_global_review",
                                          "ParentSource" => "Biological Reviews" ]],
                     199 => [ "src" => [  "ParentSource" => 19 ]],
+                    201 => [ "src" => [  "ParentSource" => "Los murciélagos de Cuba" ]],
                     202 => [ "src" => [  "ParentSource" => "Columnar Cacti and Their Mutualists" ]],
                     203 => [ "src" => [  "ParentSource" => 4 ]],
                     205 => [ "src" => [  "ParentSource" => 11 ]],
