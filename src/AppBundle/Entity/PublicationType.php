@@ -210,14 +210,10 @@ class PublicationType
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  PublicationType
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -244,14 +240,10 @@ class PublicationType
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  PublicationType
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**
