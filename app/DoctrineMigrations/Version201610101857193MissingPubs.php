@@ -59,7 +59,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "source" => [ "publication" => [ 1985, null, "Waldemar Kramer", null, null],
                                         "publisher" => [null, null, null, null,"Waldemar Kramer"]]              
             ], 40 => [  
-                    "publication" => [ "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française.", null, "Ph.D. Dissertation"],  
+                    "publication" => [ "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française", null, "Ph.D. Dissertation"],  
                     "source" => [  "publication" => [2004, null, "University of Paris VI", null, null],
                                     "publisher" => [null, null, null, null, "University of Paris VI", "University of Paris VI (Pierre and Marie Curie University)"]]
             ], 31 => [ 
@@ -69,6 +69,9 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "Revista de la Facultad de Agronomía de la Universidad del Zulia", null, "Journal"],  
                     "source" => ["publication" => [ null, null, "Universidad del Zulia"],
                                     "publisher" => [null, null, null, null, "Universidad del Zulia"]]
+            ], 63 => [ 
+                    "publication" => [ "The short-tailed fruit bat", null, "Book"],  
+                    "source" => ["publication" => [ 1988, null, null, "The University of Chicago Press"]]            
             ], 65 => [ 
                     "publication" => [ "American Scientist", null, "Journal"],  
                     "source" => ["publication" => [ null, null, null, "http://www.americanscientist.org/"]]            
@@ -109,8 +112,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "source" => ["publication" => [1985, null, "Instituto Nacional de Investigaciones Sobre Recursos Bióticos", "https://www.researchgate.net/publication/44443198_Investigaciones_sobre_la_regeneracion_de_selvas_altas_en_Veracruz_Mexico_por_A_Gomez-Pompa_C_Vazquez_Yanes_A_Butanda_Cervera_y_otros", null, null, 
                                                     [["Arturo Gómez-Pompa", "Gómez-Pompa"], ["Silvia del Amo R.", "del Amo R."]]],
                                 "publisher" => [null,null,null,null,"Instituto Nacional de Investigaciones Sobre Recursos Bióticos"]]
-            ],
-             191 => [ 
+            ], 191 => [ 
                     "publication" => [ "Revista Brasileira de Biologia", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Instituto Internacional de Ecologia"],
                                     "publisher" => [null,null,null,null,"Instituto Internacional de Ecologia"]]
@@ -166,20 +168,20 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             $srcEntities = [];
             
             foreach ($newEntData as $entityName => $subAry) {  
-                if ($entityName === "publication") {                            print("\nNew Publication ->". $entityName);
+                if ($entityName === "publication") {                           //print("\nNew Publication ->". $entityName);
                     $pubEntity = $this->addPub($subAry, $em);
                     continue;
                 } 
-                if (array_key_exists("publisher", $subAry)) {                   print("\nNew Source Publisher");
+                if (array_key_exists("publisher", $subAry)) {                  //print("\nNew Source Publisher");
                     $this->addSrcEntity("publisher", $subAry["publisher"], $pubEntity, $em);
                 } 
-                if (array_key_exists("publication", $subAry)) {                 print("\nNew Source publication");
+                if (array_key_exists("publication", $subAry)) {                //print("\nNew Source publication");
                     $this->addSrcEntity("publication", $subAry["publication"], $pubEntity, $em);
                 }               
             }
         }
     }
-    private function addPub($pubVals, &$em) {                                   print("\n    add pub ->". $pubVals[0]);
+    private function addPub($pubVals, &$em) {                                  //print("\n    add pub ->". $pubVals[0]);
         $pubEntity = new Publication();
         $pubEntity->setCreatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6'))); 
@@ -192,14 +194,14 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
         $em->persist($pubEntity);
         return $pubEntity;
     }
-    private function addParentSource($parentName, &$srcEntity, $em) {           print("\n    addParentSource ->". $parentName);
+    private function addParentSource($parentName, &$srcEntity, $em) {          //print("\n    addParentSource ->". $parentName);
         if ($parentName !== null) {  
             $parentSrc = $em->getRepository("AppBundle:Source")
                 ->findOneBy(array('displayName' => $parentName));
             $srcEntity->setParentSource($parentSrc);
         }
     }
-    private function addContributor($authors, &$srcEntity, &$em) {              print("    addContributor ->");
+    private function addContributor($authors, &$srcEntity, &$em) {             //print("    addContributor ->");
         foreach ($authors as $authId) {
             if (is_int($authId)) {
                 $contribEntity = new Contribution();
@@ -218,7 +220,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
         }
     }
     private function createAuthor($authAry, &$wrkSrcEntity, &$em)              
-    {                                                                            print("    --Adding new author---\n");
+    {                                                                           //print("    --Adding new author---\n");
         $authSrc = new Source();
         $authSrc->setDisplayName($authAry[1]);
         $authSrc->setDescription($authAry[0]);
@@ -261,10 +263,10 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             $srcEntity->setSourceType($em->getRepository("AppBundle:SourceType")
                 ->findOneBy(array('id' => 1)));
         }
-        for ($i=0; $i < count($valAry); $i++) {                                 print("\n  field = ".$srcFields[$i]." val = ". $valAry[$i]);
+        for ($i=0; $i < count($valAry); $i++) {                                 //print("\n  field = ".$srcFields[$i]." val = ". $valAry[$i]);
             if ($i === 2 && $valAry[$i] !== null) { $this->addParentSource($valAry[$i], $srcEntity, $em); 
             } else if ($i === 6) { $this->addContributor($valAry[$i], $srcEntity, $em); 
-            } else if ($valAry[$i] !== null) {                                  print("\n    setting->". $srcFields[$i]);
+            } else if ($valAry[$i] !== null) {                                  //print("\n    setting->". $srcFields[$i]);
                 $setField = "set". $srcFields[$i];
                 $srcEntity->$setField($valAry[$i]);
             }
