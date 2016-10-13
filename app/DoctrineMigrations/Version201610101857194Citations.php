@@ -32,7 +32,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $citations = $em->getRepository('AppBundle:Citation')->findAll();
-        $edgeCases = [42, 96, 248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
+        $edgeCases = [96, 248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
 
         foreach ($citations as $citEntity) {  
             $citId = $citEntity->getID();                                       
@@ -116,6 +116,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                                         "ParentSource" => 26 ]],
                     39 => [ "src" => [  "ParentSource" => 26 ]],
                     40 => [ "src" => [  "ParentSource" => "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française"]],
+                    42 => [ "src" => [ "ParentSource" => "Blüten und fledermäuse. Blutenbestäubung durch fledermäuse und flughunde (chiropterophilie)"]],
                     44 => [ "src" => [  "ParentSource" => 30 ]],
                     49 => [ "cit" => [  "PublicationIssue" => "12"],
                             "src" => [  "ParentSource" => "Revista de la Facultad de Agronomía de la Universidad del Zulia" ]],
@@ -154,7 +155,8 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                     166 => [ "src" => [  "ParentSource" => 19 ]],
                     168 => [ "src" => [  "ParentSource" => 19 ]],
                     169 => [ "src" => [  "ParentSource" => 19 ]],
-                    172 => [ "src" => [ "LinkUrl" => "http://horizon.documentation.ird.fr/exl-doc/pleins_textes/pleins_textes_6/b_fdi_45-46/010006814.pdf"]],
+                    172 => [ "src" => [ "LinkUrl" => "http://horizon.documentation.ird.fr/exl-doc/pleins_textes/pleins_textes_6/b_fdi_45-46/010006814.pdf",
+                                        "ParentSource" => "Turrialba"]],
                     175 => [ "src" => [  "ParentSource" => 26 ]],
                     176 => [ "src" => [  "LinkUrl" => "http://r1.ufrrj.br/labmasto/publicacoes/27.pdf",
                                         "ParentSource" => "Zoologia" ]],

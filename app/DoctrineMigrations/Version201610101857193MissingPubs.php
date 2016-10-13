@@ -112,6 +112,9 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "source" => ["publication" => [1985, null, "Instituto Nacional de Investigaciones Sobre Recursos Bióticos", "https://www.researchgate.net/publication/44443198_Investigaciones_sobre_la_regeneracion_de_selvas_altas_en_Veracruz_Mexico_por_A_Gomez-Pompa_C_Vazquez_Yanes_A_Butanda_Cervera_y_otros", null, null, 
                                                     [["Arturo Gómez-Pompa", "Gómez-Pompa"], ["Silvia del Amo R.", "del Amo R."]]],
                                 "publisher" => [null,null,null,null,"Instituto Nacional de Investigaciones Sobre Recursos Bióticos"]]
+            ], 172 => [ 
+                    "publication" => [ "Turrialba", null, "Journal"],  
+                    "source" => ["publication" => [null ]]
             ], 191 => [ 
                     "publication" => [ "Revista Brasileira de Biologia", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Instituto Internacional de Ecologia"],
