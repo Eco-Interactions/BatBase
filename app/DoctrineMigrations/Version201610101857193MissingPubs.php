@@ -46,14 +46,18 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
          *                     publisher => [^same^]
          *                     ]
          *                ]
-         */ 
+         */
         $newEntities = [ 25 => ["publication" => [ "Nouragues",  "Nouragues. Dynamics and plant-animal interactions in a Neotropical rainforest", "Book"],                                               //year, doi, parentSrc, linkUrl  
                                 "source" => [   "publication" => ["2001", "10.1007/978-94-015-9821-7", "Kluwer Academic Publishers"],
                                                 "publisher" => [null, null, null, null, "Kluwer Academic Publishers"]]
             ], 33 => [  
                     "publication" => [ "Ciência e Cultura", null, "Journal"],   
                     "source" => [   "publication" => [ null, "10.18316/2236-6377.15.0", null, "http://cienciaecultura.bvs.br/scielo.php?script=sci_serial&pid=0009-6725&lng=pt&nrm=iso", null]]
-            ], 35 => [ "source" => [ "publisher" => [null, null, null, "http://lsupress.org/", "Louisiana State University Press"]]
+            ], 35 => [ 
+                    "publication" => ["Mammals of the Mexican state of San Luis Potosi", null, "Book"],
+                    "source" => [ "publication" => [1953, null, "Louisiana State University Press", "https://babel.hathitrust.org/cgi/pt?id=uc1.31822011936077;view=1up;seq=10", null, null, 
+                                                    [79]],
+                                  "publisher" => [null, null, null, "http://lsupress.org/", "Louisiana State University Press"]]
             ], 42 => [  
                     "publication" => [ "Blüten und fledermäuse. Blutenbestäubung durch fledermäuse und flughunde (chiropterophilie)", null, "Book"],  
                     "source" => [ "publication" => [ 1985, null, "Waldemar Kramer", null, null],
