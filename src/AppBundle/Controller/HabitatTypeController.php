@@ -28,7 +28,7 @@ class HabitatTypeController extends Controller
 
         $entities = $em->getRepository('AppBundle:HabitatType')->findAll();
 
-        return $this->render('habitattype/index.html.twig', array(
+        return $this->render('HabitatType/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class HabitatTypeController extends Controller
             return $this->redirect($this->generateUrl('app_habitat_type_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('habitattype/new.html.twig', array(
+        return $this->render('HabitatType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class HabitatTypeController extends Controller
         $entity = new HabitatType();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('habitattype/new.html.twig', array(
+        return $this->render('HabitatType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -111,7 +111,7 @@ class HabitatTypeController extends Controller
 
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('habitattype/show.html.twig', array(
+        return $this->render('HabitatType/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -135,7 +135,7 @@ class HabitatTypeController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('habitattype/edit.html.twig', array(
+        return $this->render('HabitatType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -187,7 +187,7 @@ class HabitatTypeController extends Controller
             return $this->redirect($this->generateUrl('app_habitat_type_edit', array('slug' => $slug)));
         }
 
-        return $this->render('habitattype/edit.html.twig', array(
+        return $this->render('HabitatType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),

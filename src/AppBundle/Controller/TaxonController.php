@@ -27,7 +27,7 @@ class TaxonController extends Controller
 
         $entities = $em->getRepository('AppBundle:Taxon')->findAll();
 
-        return $this->render('taxon/index.html.twig', array(
+        return $this->render('Taxon/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class TaxonController extends Controller
             return $this->redirect($this->generateUrl('app_taxon_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('taxon/new.html.twig', array(
+        return $this->render('Taxon/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class TaxonController extends Controller
         $entity = new Taxon();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('taxon/new.html.twig', array(
+        return $this->render('Taxon/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -110,7 +110,7 @@ class TaxonController extends Controller
 
         $ctx = $this->_getTaxonContext($entity);
 
-        return $this->render('taxon/show.html.twig', array(
+        return $this->render('Taxon/show.html.twig', array(
             'entity' => $entity,
             'isdomain' => $ctx['isdomain'],
             'ancestors' => $ctx['ancestors'],
@@ -138,7 +138,7 @@ class TaxonController extends Controller
 
         $editForm = $this->createEditForm($entity);
 
-        return $this->render('taxon/edit.html.twig', array(
+        return $this->render('Taxon/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'isdomain' => $ctx['isdomain'],
@@ -192,7 +192,7 @@ class TaxonController extends Controller
             return $this->redirect($this->generateUrl('app_taxon_edit', array('slug' => $slug)));
         }
 
-        return $this->render('taxon/edit.html.twig', array(
+        return $this->render('Taxon/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -298,7 +298,7 @@ class TaxonController extends Controller
             }
         }
 
-        return $this->render('taxon/index.html.twig', array(
+        return $this->render('Taxon/index.html.twig', array(
             'entities' => $entities,
         ));
     }

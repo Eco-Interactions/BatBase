@@ -27,7 +27,7 @@ class LevelController extends Controller
 
         $entities = $em->getRepository('AppBundle:Level')->findAll();
 
-        return $this->render('level/index.html.twig', array(
+        return $this->render('Level/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class LevelController extends Controller
             return $this->redirect($this->generateUrl('app_level_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('level/new.html.twig', array(
+        return $this->render('Level/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class LevelController extends Controller
         $entity = new Level();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('level/new.html.twig', array(
+        return $this->render('Level/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class LevelController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('level/show.html.twig', array(
+        return $this->render('Level/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -132,7 +132,7 @@ class LevelController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('level/edit.html.twig', array(
+        return $this->render('Level/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -183,7 +183,7 @@ class LevelController extends Controller
             return $this->redirect($this->generateUrl('app_level_edit', array('id' => $id)));
         }
 
-        return $this->render('level/edit.html.twig', array(
+        return $this->render('Level/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),

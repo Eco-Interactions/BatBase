@@ -28,7 +28,7 @@ class LocationController extends Controller
 
         $entities = $em->getRepository('AppBundle:Location')->findAll();
 
-        return $this->render('location/index.html.twig', array(
+        return $this->render('Location/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class LocationController extends Controller
             return $this->redirect($this->generateUrl('app_location_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('location/new.html.twig', array(
+        return $this->render('Location/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class LocationController extends Controller
         $entity = new Location();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('location/new.html.twig', array(
+        return $this->render('Location/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -110,7 +110,7 @@ class LocationController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('location/show.html.twig', array(
+        return $this->render('Location/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -133,7 +133,7 @@ class LocationController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('location/edit.html.twig', array(
+        return $this->render('Location/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -184,7 +184,7 @@ class LocationController extends Controller
             return $this->redirect($this->generateUrl('app_location_edit', array('id' => $id)));
         }
 
-        return $this->render('location/edit.html.twig', array(
+        return $this->render('Location/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
