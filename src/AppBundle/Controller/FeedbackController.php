@@ -29,7 +29,7 @@ class FeedbackController extends Controller
 
         $entities = $em->getRepository('AppBundle:Feedback')->findAll();
 
-        return $this->render('feedback/index.html.twig', array(
+        return $this->render('Feedback/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -188,7 +188,7 @@ class FeedbackController extends Controller
             return $this->redirect($this->generateUrl('feedback_edit', array('id' => $id)));
         }
 
-        return $this->render('feedback/edit.html.twig', array(
+        return $this->render('Feedback/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -215,7 +215,7 @@ class FeedbackController extends Controller
             return $this->redirect($this->generateUrl('feedback_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('feedback/new.html.twig', array(
+        return $this->render('Feedback/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -251,7 +251,7 @@ class FeedbackController extends Controller
         $entity = new Feedback();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('feedback/edit.html.twig', array(
+        return $this->render('Feedback/edit.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -275,7 +275,7 @@ class FeedbackController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('feedback/show.html.twig', array(
+        return $this->render('Feedback/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),
         ));
@@ -300,7 +300,7 @@ class FeedbackController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('feedback/edit.html.twig', array(
+        return $this->render('Feedback/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
