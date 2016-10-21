@@ -147,7 +147,7 @@ class AjaxController extends Controller
                     $entity->$setField($val);            //  $logger->info('SASSSSSSS:: val ->' . print_r($val, true));   
                 }
             }
-            $em->persist($entity);
+            $em->persist($entity);  //$logger->info('SASSSSSSS:: parent id ??->' . print_r($entity->getParentLoc()->getId(), true));    $logger->info('SASSSSSSS:: parent id ??->' . print_r($entity->getParentLoc()->getId(), true));   
             $em->flush();
         
                 $logger->error('SASSSSSSS:: parentLocId ->' . print_r($entity->getParentLoc()->getId(), true));
