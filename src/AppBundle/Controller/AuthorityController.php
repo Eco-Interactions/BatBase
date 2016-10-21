@@ -27,7 +27,7 @@ class AuthorityController extends Controller
 
         $entities = $em->getRepository('AppBundle:Authority')->findAll();
 
-        return $this->render('authority/index.html.twig', array(
+        return $this->render('Authority/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class AuthorityController extends Controller
             return $this->redirect($this->generateUrl('app_authority_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('authority/new.html.twig', array(
+        return $this->render('Authority/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class AuthorityController extends Controller
         $entity = new Authority();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('authority/new.html.twig', array(
+        return $this->render('Authority/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class AuthorityController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('authority/show.html.twig', array(
+        return $this->render('Authority/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -132,7 +132,7 @@ class AuthorityController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('authority/edit.html.twig', array(
+        return $this->render('Authority/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -183,7 +183,7 @@ class AuthorityController extends Controller
             return $this->redirect($this->generateUrl('app_authority_edit', array('id' => $id)));
         }
 
-        return $this->render('authority/edit.html.twig', array(
+        return $this->render('Authority/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),

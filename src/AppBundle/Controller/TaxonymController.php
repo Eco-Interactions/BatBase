@@ -29,7 +29,7 @@ class TaxonymController extends Controller
 
         $entities = $em->getRepository('AppBundle:Taxonym')->findAll();
 
-        return $this->render('taxonym/index.html.twig', array(
+        return $this->render('Taxonym/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -53,7 +53,7 @@ class TaxonymController extends Controller
             return $this->redirect($this->generateUrl('app_taxonym_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('taxonym/new.html.twig', array(
+        return $this->render('Taxonym/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -88,7 +88,7 @@ class TaxonymController extends Controller
         $entity = new Taxonym();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('taxonym/new.html.twig', array(
+        return $this->render('Taxonym/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -111,7 +111,7 @@ class TaxonymController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('taxonym/show.html.twig', array(
+        return $this->render('Taxonym/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -134,7 +134,7 @@ class TaxonymController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('taxonym/edit.html.twig', array(
+        return $this->render('Taxonym/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -185,7 +185,7 @@ class TaxonymController extends Controller
             return $this->redirect($this->generateUrl('app_taxonym_edit', array('id' => $id)));
         }
 
-        return $this->render('taxonym/edit.html.twig', array(
+        return $this->render('Taxonym/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
