@@ -98,8 +98,7 @@ class AjaxController extends Controller
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }   
-
+        }
         $em = $this->getDoctrine()->getManager();
         $logger = $this->get('logger');
         $requestContent = $request->getContent();

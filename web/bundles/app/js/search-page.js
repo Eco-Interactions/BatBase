@@ -452,8 +452,8 @@
 		if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
 			rcrdsById = JSON.parse(storedTaxa);
 			onTaxaSearchMethodChange();
-		} else { //console.log("taxaRcrds Not Found In Storage.");
-			sendAjaxQuery(params, 'search/taxa', recieveTaxaRcrds);
+		} else { //  console.log("taxaRcrds Not Found In Storage.");
+			sendAjaxQuery({domainIds: domainIds}, 'search/taxa', recieveTaxaRcrds);
 		}
 	}
 	function recieveTaxaRcrds(data) {  											 //console.log("taxaRcrds recieved. %O", data);
