@@ -27,7 +27,7 @@ class InteractionController extends Controller
 
         $entities = $em->getRepository('AppBundle:Interaction')->findAll();
 
-        return $this->render('interaction/index.html.twig', array(
+        return $this->render('Interaction/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class InteractionController extends Controller
             return $this->redirect($this->generateUrl('app_interaction_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('interaction/new.html.twig', array(
+        return $this->render('Interaction/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class InteractionController extends Controller
         $entity = new Interaction();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('interaction/new.html.twig', array(
+        return $this->render('Interaction/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class InteractionController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('interaction/show.html.twig', array(
+        return $this->render('Interaction/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -132,7 +132,7 @@ class InteractionController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('interaction/edit.html.twig', array(
+        return $this->render('Interaction/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -184,7 +184,7 @@ class InteractionController extends Controller
             return $this->redirect($this->generateUrl('app_interaction_edit', array('id' => $id)));
         }
 
-        return $this->render('interaction/edit.html.twig', array(
+        return $this->render('Interaction/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -243,7 +243,7 @@ class InteractionController extends Controller
 
         $entities = $em->getRepository('AppBundle:Interaction')->findAll();
 
-        return $this->render('interaction/export.html.twig', array(
+        return $this->render('Interaction/export.html.twig', array(
             'entities' => $entities,
 
         ));

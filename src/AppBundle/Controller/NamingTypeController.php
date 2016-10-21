@@ -27,7 +27,7 @@ class NamingTypeController extends Controller
 
         $entities = $em->getRepository('AppBundle:NamingType')->findAll();
 
-        return $this->render('namingtype/index.html.twig', array(
+        return $this->render('NamingType/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class NamingTypeController extends Controller
             return $this->redirect($this->generateUrl('app_naming_type_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('namingtype/new.html.twig', array(
+        return $this->render('NamingType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class NamingTypeController extends Controller
         $entity = new NamingType();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('namingtype/new.html.twig', array(
+        return $this->render('NamingType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class NamingTypeController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('namingtype/show.html.twig', array(
+        return $this->render('NamingType/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -132,7 +132,7 @@ class NamingTypeController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('namingtype/edit.html.twig', array(
+        return $this->render('NamingType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -183,7 +183,7 @@ class NamingTypeController extends Controller
             return $this->redirect($this->generateUrl('app_naming_type_edit', array('id' => $id)));
         }
 
-        return $this->render('namingtype/edit.html.twig', array(
+        return $this->render('NamingType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),

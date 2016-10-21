@@ -27,7 +27,7 @@ class NamingController extends Controller
 
         $entities = $em->getRepository('AppBundle:Naming')->findAll();
 
-        return $this->render('naming/index.html.twig', array(
+        return $this->render('Naming/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -51,7 +51,7 @@ class NamingController extends Controller
             return $this->redirect($this->generateUrl('app_naming_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('naming/new.html.twig', array(
+        return $this->render('Naming/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -86,7 +86,7 @@ class NamingController extends Controller
         $entity = new Naming();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('naming/new.html.twig', array(
+        return $this->render('Naming/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class NamingController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('naming/show.html.twig', array(
+        return $this->render('Naming/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -132,7 +132,7 @@ class NamingController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('naming/edit.html.twig', array(
+        return $this->render('Naming/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -183,7 +183,7 @@ class NamingController extends Controller
             return $this->redirect($this->generateUrl('app_naming_edit', array('id' => $id)));
         }
 
-        return $this->render('naming/edit.html.twig', array(
+        return $this->render('Naming/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),

@@ -27,7 +27,7 @@ class ImageUploadController extends Controller
 
         $entities = $em->getRepository('AppBundle:ImageUpload')->findAll();
 
-        return $this->render('imageupload/index.html.twig', array(
+        return $this->render('ImageUpload/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -53,7 +53,7 @@ class ImageUploadController extends Controller
             return $this->redirect($this->generateUrl('app_image_upload'));
         }
 
-        return $this->render('imageupload/new.html.twig', array(
+        return $this->render('ImageUpload/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -88,7 +88,7 @@ class ImageUploadController extends Controller
         $entity = new ImageUpload();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('imageupload/new.html.twig', array(
+        return $this->render('ImageUpload/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -111,7 +111,7 @@ class ImageUploadController extends Controller
 
         $editForm = $this->createEditForm($entity);
 
-        return $this->render('imageupload/edit.html.twig', array(
+        return $this->render('ImageUpload/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
         ));
@@ -161,7 +161,7 @@ class ImageUploadController extends Controller
             return $this->redirect($this->generateUrl('app_image_upload_edit', array('id' => $id)));
         }
 
-        return $this->render('imageupload/edit.html.twig', array(
+        return $this->render('ImageUpload/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
         ));
