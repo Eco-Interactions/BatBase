@@ -26,6 +26,11 @@ Notes::
                     width: 220px;
                     flex-shrink: 0;
                 }
+            -- Definition Pg
+                #def-frame .first-col {
+                    width: 550px;
+                    flex-shrink: 0;
+                }
         -- add click event exit for menu
         --add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
