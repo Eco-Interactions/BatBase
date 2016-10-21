@@ -28,7 +28,7 @@ class CitationController extends Controller
 
         $entities = $em->getRepository('AppBundle:Citation')->findAll();
 
-        return $this->render('citation/index.html.twig', array(
+        return $this->render('Citation/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class CitationController extends Controller
             return $this->redirect($this->generateUrl('app_citation_show', array('id' => $entity->getId())));
         }
 
-        return $this->render('citation/new.html.twig', array(
+        return $this->render('Citation/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class CitationController extends Controller
         $entity = new Citation();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('citation/new.html.twig', array(
+        return $this->render('Citation/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -110,7 +110,7 @@ class CitationController extends Controller
 
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('citation/show.html.twig', array(
+        return $this->render('Citation/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -133,7 +133,7 @@ class CitationController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('citation/edit.html.twig', array(
+        return $this->render('Citation/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -184,7 +184,7 @@ class CitationController extends Controller
             return $this->redirect($this->generateUrl('app_citation_edit', array('id' => $id)));
         }
 
-        return $this->render('citation/edit.html.twig', array(
+        return $this->render('Citation/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -243,7 +243,7 @@ class CitationController extends Controller
 
         $entities = $em->getRepository('AppBundle:Citation')->findAll();
 
-        return $this->render('citation/export.html.twig', array(
+        return $this->render('Citation/export.html.twig', array(
             'entities' => $entities,
         ));
     }

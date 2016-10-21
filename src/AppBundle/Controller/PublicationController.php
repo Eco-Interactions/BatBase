@@ -29,7 +29,7 @@ class PublicationController extends Controller
         $entities = $em->getRepository('AppBundle:Publication')
                 ->findAllOrderedByName();
 
-        return $this->render('publication/index.html.twig', array(
+        return $this->render('Publication/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -53,7 +53,7 @@ class PublicationController extends Controller
             return $this->redirect($this->generateUrl('app_publication_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('publication/new.html.twig', array(
+        return $this->render('Publication/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -88,7 +88,7 @@ class PublicationController extends Controller
         $entity = new Publication();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('publication/new.html.twig', array(
+        return $this->render('Publication/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -112,7 +112,7 @@ class PublicationController extends Controller
 
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('publication/show.html.twig', array(
+        return $this->render('Publication/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -136,7 +136,7 @@ class PublicationController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('publication/edit.html.twig', array(
+        return $this->render('Publication/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -188,7 +188,7 @@ class PublicationController extends Controller
             return $this->redirect($this->generateUrl('app_publication_edit', array('slug' => $slug)));
         }
 
-        return $this->render('publication/edit.html.twig', array(
+        return $this->render('Publication/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -257,7 +257,7 @@ class PublicationController extends Controller
             $em->flush();
         }
 
-        return $this->render('publication/index.html.twig', array(
+        return $this->render('Publication/index.html.twig', array(
             'entities' => $entities,
         ));
     }

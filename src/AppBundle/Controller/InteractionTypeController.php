@@ -28,7 +28,7 @@ class InteractionTypeController extends Controller
 
         $entities = $em->getRepository('AppBundle:InteractionType')->findAll();
 
-        return $this->render('interactiontype/index.html.twig', array(
+        return $this->render('InteractionType/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class InteractionTypeController extends Controller
             return $this->redirect($this->generateUrl('app_interaction_type_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('interactiontype/new.html.twig', array(
+        return $this->render('InteractionType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class InteractionTypeController extends Controller
         $entity = new InteractionType();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('interactiontype/new.html.twig', array(
+        return $this->render('InteractionType/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -111,7 +111,7 @@ class InteractionTypeController extends Controller
 
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('interactiontype/show.html.twig', array(
+        return $this->render('InteractionType/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -135,7 +135,7 @@ class InteractionTypeController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('interactiontype/edit.html.twig', array(
+        return $this->render('InteractionType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -187,7 +187,7 @@ class InteractionTypeController extends Controller
             return $this->redirect($this->generateUrl('app_interaction_type_edit', array('slug' => $slug)));
         }
 
-        return $this->render('interactiontype/edit.html.twig', array(
+        return $this->render('InteractionType/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -258,7 +258,7 @@ class InteractionTypeController extends Controller
             $em->flush();
         }
 
-        return $this->render('interactiontype/index.html.twig', array(
+        return $this->render('InteractionType/index.html.twig', array(
             'entities' => $entities,
         ));
     }

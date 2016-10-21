@@ -27,7 +27,7 @@ class DomainController extends Controller
 
         $entities = $em->getRepository('AppBundle:Domain')->findAll();
 
-        return $this->render('domain/index.html.twig', array(
+        return $this->render('Domain/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class DomainController extends Controller
             return $this->redirect($this->generateUrl('app_domain_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('domain/new.html.twig', array(
+        return $this->render('Domain/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class DomainController extends Controller
         $entity = new Domain();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('domain/new.html.twig', array(
+        return $this->render('Domain/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -111,7 +111,7 @@ class DomainController extends Controller
 
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('domain/show.html.twig', array(
+        return $this->render('Domain/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -135,7 +135,7 @@ class DomainController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('domain/edit.html.twig', array(
+        return $this->render('Domain/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -188,7 +188,7 @@ class DomainController extends Controller
             return $this->redirect($this->generateUrl('app_domain_edit', array('slug' => $slug)));
         }
 
-        return $this->render('domain/edit.html.twig', array(
+        return $this->render('Domain/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
