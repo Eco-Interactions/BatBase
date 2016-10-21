@@ -17,6 +17,15 @@ Notes::
         --add invalid country and region check error handling (@checkCntryAndRegion & checkRegion)
     --Site-
         --Firefox does not look the same as chrome. Spend a day fixing this!!!
+            --team section styles
+                #team-sect .second-col, #team-sect .first-col {
+                    width: 420px;
+                    flex-shrink: 0;
+                }
+                #team-sect .four-col-outer>div.fourth-col {
+                    width: 220px;
+                    flex-shrink: 0;
+                }
         -- add click event exit for menu
         --add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
