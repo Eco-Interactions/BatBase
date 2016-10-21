@@ -1,168 +1,14 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
+-- Short Range TODO --
 
-Publication type
-contribution
-source
-citation
-
-~~~SQL update
-        pub field : name -> display_name
-        auth field : shortname -> display_name
-
-
-~~forensic field update
-    author
-    citation
-    source
-    SourceType
-    pub
-    pubtype
 
 TAYLOR:
-    --Change author short name -> display name? 
-    --updated pub name to description
-
-    --remove year from citation
-
-        --citations
-            -move descriptions into displayText
-                --delete description
-
-
-        --Contribution relationship with source
-            --remove citation depencency as authors can be contributors of many source types.
-                --prop: citations = contributions
-                    citationSource = workSource
-                --field: citation_id = work_id
-
-
-TODO
-    --move linkUrl and display to the source entity
-    --add pubtype entity
-        --go through pubs and assign pubtypes
-        --update pub name to description
-    -- update migration with new pub fieldname
-
-    --sourceType
-        -- definition : longtext
-
-    --swap @returns for params in annotations
-        --deletedAt -> deleted_at
-            --fix forensic set methods
-                pub
-                auth
-                src
-            --remove param = null from setters
-
-    ----Barro Island (dup??)
-    -- Consolidate migrations?
-
-Import Process::
-
-
-
-
-
-
-    publication -> citationSources
-
-    Start Importing Sources::
-        Publications->
-            ------setUpdatedBy not working------------
-
-        Authors->
-            ------setUpdatedBy not working------------
-
-        Citations->
-            descr -> displyNm
-
-            all interactions need to point to the "source"
-            all authors need to be updated with source relationship
-::AFTER::
-    -- add locType ordinals
-    add disply name and description to all lagging entities    
-
-Src types
-    Publisher
-    Publication
-    Citation
-    Author
 
 Questions::
 Notes::
-
-    location desc field not specified as a unique field.
------temp
-data.intRcrdCount
-
-
-
-    deployment process
-        - file upload
-        - database schema update
-
-
-
-
-::EMAIL::
---------------------Missing pub search notes-----------
--164 - Needs a book added as parent pub with two authors not in the db
--176 - Not 100% sure Zool. === Zoologia
-- 42 and 254 are duplicates of the same book
-- 209 and 262 are duplicates
-
-
-    --Not sure of the publisher and the publication type::
-            ], 96 => [ "pub" => [ "Bats. A natural history.", null, "Book"],  
-                    "src" => [ null, null, "British Museum (Natural History)"],
-                    "publ" => ["British Museum (Natural History)"]
-
------------------------------------------------------------------
-Location Changes::
-    - USA -> United States
-    - Suriam -> Suriname
-    - Virgin Islands -> Virgin Islands, Britain
-    - Trinidad -> Trinidad and Tobago
-    - Central America, South America -> Central & South America
-
-
-
-
-
-
-
--- Short Range TODO --
-##Delete comments from prod files##
-
---Functional testing for search page and wysiwyg 
----- create 'new data loading' popup for search page data updates
--- add click event exit for menu
--- add a site map to the ToS that would allow users to jump around the sections,
-    going directly to citation and other areas of interest.
--- Alphabetize config 
-
---add tips and search page static content to content blocks and wysiwyg
-
-
---wysiwyg
-    --move save and cancel against the far right
-    --get that save svg working
-
-
-
-Best practices:
-    comments:
-        //right against the first letter to exclude uncommented instances of that word (consoles being the best ever to isolate)
-
-
-
-
 =========== EMAIL ==================
+---------------------Next-------------------------------------------------------
 
-
-
-----------------------------------------------------------------------------------
----Next---
 
 
 --SHORTTERM--
@@ -170,11 +16,15 @@ Best practices:
         --Admin sign-in css is broken
         --add invalid country and region check error handling (@checkCntryAndRegion & checkRegion)
     --Site-
+        --Firefox does not look the same as chrome. Spend a day fixing this!!!
+        -- add click event exit for menu
+        --add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
         -- add copy csv
         -- fix csv exports??
         -- t&c sitemap & presentation
         -- css replacing and cleanup
+        -- track down render func sudden case sensitivity
 
 
 
@@ -203,6 +53,9 @@ Best practices:
 Notes:
 
 
+Best practices:
+    comments:
+        //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
 
     --Zenbol-
         --PAYMENT PAGE FOR WHM
@@ -238,38 +91,6 @@ Notes:
             ++ When making massive changes with unforseeable consequences and side effects, break the changes 
                 into as many steps as possible- especially add and delete stages!!  
 -------------------------------------------------------------------------------------------------------
-Validation reporting notes:
-
-    make data set exercising all types of validation error reporting
-            --Null Refs:
-                citation:
-                    --authors
-                interaction:
-                    --citation
-
-            Conflicts:
-                --Author:
-
-                --Citation:
-                    ++Format cit information
-                        Show truncated full text (25char + ...) with cit id
-                            Include the data and phrase the formatting for other conflicting records
-
-                --Location:
-
-            invalid nulls:
-                location:
-                    --locDesc
-                author:
-                    shortname
-                            ++Now holding onto aturhor row numbers through adding tempIds.
-                interaction:
-                    citation
-                Citation:
-                    author
-
-
-
 =========================================================================
 
 READ ME
