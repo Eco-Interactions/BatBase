@@ -33,3 +33,4 @@
 
 # Composer PHAR
 /composer.phar
+/composer-setup.php
