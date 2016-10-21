@@ -28,7 +28,7 @@ class ContentBlockController extends Controller
 
         $entities = $em->getRepository('AppBundle:ContentBlock')->findAll();
 
-        return $this->render('contentblock/index.html.twig', array(
+        return $this->render('ContentBlock/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -52,7 +52,7 @@ class ContentBlockController extends Controller
             return $this->redirect($this->generateUrl('admin_content_block_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('contentblock/new.html.twig', array(
+        return $this->render('ContentBlock/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -87,7 +87,7 @@ class ContentBlockController extends Controller
         $entity = new ContentBlock();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('contentblock/new.html.twig', array(
+        return $this->render('ContentBlock/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -109,7 +109,7 @@ class ContentBlockController extends Controller
             throw $this->createNotFoundException('Unable to find Content Block entity.');
         }
 
-        return $this->render('contentblock/show.html.twig', array(
+        return $this->render('ContentBlock/show.html.twig', array(
             'entity' => $entity,        ));
     }
 
@@ -132,7 +132,7 @@ class ContentBlockController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('contentblock/edit.html.twig', array(
+        return $this->render('ContentBlock/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -259,7 +259,7 @@ class ContentBlockController extends Controller
             $em->flush();
         }
 
-        return $this->render('contentblock/index.html.twig', array(
+        return $this->render('ContentBlock/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -278,7 +278,7 @@ class ContentBlockController extends Controller
 
         $returnData = $this->getPageBlocks($contentBlocks);
 
-        return $this->render('contentblock/home.html.twig', array(
+        return $this->render('ContentBlock/home.html.twig', array(
             'entities' => $returnData
             )
         );
@@ -299,7 +299,7 @@ class ContentBlockController extends Controller
         $returnData = $this->getPageBlocks($contentBlocks);
 
 
-        return $this->render('contentblock/about.html.twig', array(
+        return $this->render('ContentBlock/about.html.twig', array(
                 "entities" => $returnData,
             )
         );
@@ -319,7 +319,7 @@ class ContentBlockController extends Controller
 
         $returnData = $this->getPageBlocks($contentBlocks);
 
-        return $this->render('contentblock/definitions.html.twig', array(
+        return $this->render('ContentBlock/definitions.html.twig', array(
             'entities' => $returnData,
             )
         );
@@ -340,7 +340,7 @@ class ContentBlockController extends Controller
         $returnData = $this->getPageBlocks($contentBlocks);
 
 
-        return $this->render('contentblock/sources.html.twig', array(
+        return $this->render('ContentBlock/sources.html.twig', array(
             "entities" => $returnData,
             )
         );
@@ -360,7 +360,7 @@ class ContentBlockController extends Controller
 
         $returnData = $this->getPageBlocks($contentBlocks);
 
-        return $this->render('contentblock/db_top.html.twig', array(
+        return $this->render('ContentBlock/db_top.html.twig', array(
             'entities' => $returnData,
             )
         );
@@ -380,7 +380,7 @@ class ContentBlockController extends Controller
 
         $returnData = $this->getPageBlocks($contentBlocks);
 
-        return $this->render('contentblock/future_dev.html.twig', array(
+        return $this->render('ContentBlock/future_dev.html.twig', array(
             'entities' => $returnData,
             )
         );

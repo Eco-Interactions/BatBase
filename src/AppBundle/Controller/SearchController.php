@@ -28,7 +28,7 @@ class SearchController extends Controller
 
         $repo = $em->getRepository('AppBundle:ContentBlock');
 
-        return $this->render('contentblock/search.html.twig', array());
+        return $this->render('ContentBlock/search.html.twig', array());
     }
     /**
      * Returns the total number of interaction records.

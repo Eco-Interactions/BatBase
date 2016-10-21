@@ -29,7 +29,7 @@ class AuthorController extends Controller
 
         $entities = $em->getRepository('AppBundle:Author')->findAll();
 
-        return $this->render('author/index.html.twig', array(
+        return $this->render('Author/index.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -53,7 +53,7 @@ class AuthorController extends Controller
             return $this->redirect($this->generateUrl('app_author_show', array('slug' => $entity->getSlug())));
         }
 
-        return $this->render('author/new.html.twig', array(
+        return $this->render('Author/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -88,7 +88,7 @@ class AuthorController extends Controller
         $entity = new Author();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('author/new.html.twig', array(
+        return $this->render('Author/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -105,7 +105,7 @@ class AuthorController extends Controller
 
         $entities = $em->getRepository('AppBundle:Author')->findAll();
 
-        return $this->render('author/export.html.twig', array(
+        return $this->render('Author/export.html.twig', array(
             'entities' => $entities,
         ));
     }
@@ -129,7 +129,7 @@ class AuthorController extends Controller
 
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('author/show.html.twig', array(
+        return $this->render('Author/show.html.twig', array(
             'entity' => $entity,
             'delete_form' => $deleteForm->createView(),        ));
     }
@@ -154,7 +154,7 @@ class AuthorController extends Controller
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($entity->getId());
 
-        return $this->render('author/edit.html.twig', array(
+        return $this->render('Author/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -206,7 +206,7 @@ class AuthorController extends Controller
             return $this->redirect($this->generateUrl('app_author_edit', array('slug' => $slug)));
         }
 
-        return $this->render('author/edit.html.twig', array(
+        return $this->render('Author/edit.html.twig', array(
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
