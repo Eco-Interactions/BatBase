@@ -35,7 +35,7 @@ class SearchController extends Controller
      *
      * @Route("/search/interaction/count", name="app_search_int_cnt")
      */
-    public function searchInteractionCountAction(Request $request)
+    public function getInteractionCountAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -51,7 +51,7 @@ class SearchController extends Controller
 
         return $response;
         }
-    /**------------------------Search By Taxa-------------------------------------*/
+    /**------------------------Search By Taxa---------------------------------*/
     /**
      * Get Domain Data.
      *
@@ -111,32 +111,32 @@ class SearchController extends Controller
                 ->findOneBy(array('id' => $domainTaxonId));
             $taxonName = $domainTaxonEntity->getDisplayName();
 
-            $returnObj->$taxonName = $this->getTaxonData($domainTaxonEntity, $em);
+            $returnObj->$taxonName = $this->getTaxonData($domainTaxonEntity);
         }  
 
         $response = new JsonResponse();
-        $response->setData(array(                                       //strval($taxonId);
+        $response->setData(array(                                       
             'results' => $returnObj
         ));
 
         return $response;
     }
-    private function getTaxonData($taxon, $em) 
+    private function getTaxonData($taxon) 
     {
         $data = new \stdClass;
 
         $data->id = $taxon->getId();
         $data->name = $taxon->getDisplayName();
         $data->slug = $taxon->getSlug();
-        $data->children = $this->getChildren($taxon);
+        $data->children = $this->getTaxaChildren($taxon);
         $data->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           
         $data->level = $taxon->getLevel()->getName();               
-        $data->interactions = $this->getTaxaInteractions($taxon, $params);
+        $data->interactions = $this->getTaxaInteractionsIds($taxon);
 
         return $data;
     }
-    private function getChildren($taxon)
+    private function getTaxaChildren($taxon)
     {
         $data = new \stdClass;
         $childEntities = $taxon->getChildTaxa();
@@ -144,11 +144,11 @@ class SearchController extends Controller
         foreach ($childEntities as $child)
         {
             $childName = $child->getDisplayName();
-            $data->$childName = getTaxonData($child);
+            $data->$childName =$this->getTaxonData($child);
         }
         return $data;
     }
-    private function getTaxaInteractions($taxon) 
+    private function getTaxaInteractionsIds($taxon) 
     {
         $intRcrds = new \stdClass;
         $roles = ['SubjectRoles', 'ObjectRoles'];
@@ -157,12 +157,11 @@ class SearchController extends Controller
         {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
-            $intRcrds->$role = $this->getInteractions($interactions, $params);
+            $intRcrds->$role = $this->getInteractions($interactions);
         }
         return $intRcrds;
     }
 /**------------------------Search By Location---------------------------------*/
-
     /**
      * Get Location Data organized by Parent Regions.
      *
@@ -184,7 +183,7 @@ class SearchController extends Controller
             $regionName = $regionLoc->getDescription(); 
 
             if ($regionLoc->getParentLoc() === null) { // Only top regions are handled here.
-                $intsByRegion->$regionName = $this->GetLocDataObj($regionLoc, $regionName);
+                $intsByRegion->$regionName = $this->getLocationData($regionLoc, $regionName);
             }
         }
         $response = new JsonResponse();
@@ -197,12 +196,11 @@ class SearchController extends Controller
     /**
      * Builds and returns Location Search Data object.
      */
-    private function GetLocDataObj($locEntity, $locDesc)
+    private function getLocationData($locEntity, $locDesc)
     {
         $data = new \stdClass; 
         $childLocs = $locEntity->getChildLocs();  
 
-        $data->childLocs = $this->GetChildSearchData($locEntity, $childLocs);
         $data->description = $locEntity->getDescription();
         $data->elevation = $locEntity->getElevation();
         $data->elevationMax = $locEntity->getElevationMax();
@@ -210,37 +208,58 @@ class SearchController extends Controller
         $data->latitude = $locEntity->getLatitude();
         $data->longitude = $locEntity->getLongitude();
         $data->locationType = $locEntity->getLocationType()->getName(); 
+        $data->childLocs = $this->getChildLocationData($locEntity, $childLocs);
         
-        $habitatType = $locEntity->getHabitatType();            //echo("\nhabitatType = ".gettype($habitatType)); 
+        $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
         $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
         
         $interactions = $locEntity->getInteractions();
         $data->interactions = $this->getInteractions($interactions);
 
-        if ($data->locationType !== "Region") {
-            $data->parentLoc = $locEntity->getParentLoc()->getId();
-        }
+        $parentLoc = $locEntity->getParentLoc();
+        if ($parentLoc !== null) { $parentLoc = $parentLoc->getId(); }
+        $data->parentLoc = $parentLoc;
+
         return $data;
     }
     /**
      * Returns an object keyed with child location descriptions and their data.
      */
-    private function GetChildSearchData($parentLoc, $childLocs)
+    private function getChildLocationData($parentLoc, $childLocs)
     {
         $data = new \stdClass;
 
         foreach ($childLocs as $childLoc) {
             $childName = $childLoc->getDescription();
-            $data->$childName = $this->GetLocDataObj($childLoc, $childName);
+            $data->$childName = $this->getLocationData($childLoc, $childName);
         }     
         return $data;
     }
+/**------------------------Search By Source-----------------------------------*/
+    /*
+     * Get Source Data.
+     *
+     * @Route("/search/interaction", name="app_ajax_search_interaction")
+     */
+    public function searchSourcesAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+        $em = $this->getDoctrine()->getManager();
+        $interactions = $em->getRepository('AppBundle:SourceTypes')->findAll();
+
+
+
+    }
+
+/**------------------------Search Interaction Actions-------------------------*/
     /*
      * Returns all interaction records.
      *
      * @Route("/search/interaction", name="app_ajax_search_interaction")
      */
-    public function searchInteractionAction(Request $request) 
+    public function getInteractionData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
