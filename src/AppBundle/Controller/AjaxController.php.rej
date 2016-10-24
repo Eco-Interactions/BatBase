@@ -1,9 +1,0 @@
-diff a/src/AppBundle/Controller/AjaxController.php b/src/AppBundle/Controller/AjaxController.php	(rejected hunks)
-@@ -99,6 +99,7 @@
-          if (!$request->isXmlHttpRequest()) {
-              return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-          }   
-++<<<<<<< d763bf30e62ac2d1f682afc5fc7aba6536c3f1c3
- +
- +=======
- +>>>>>>> Location self-join success.
