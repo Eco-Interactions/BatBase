@@ -1,4 +1,4 @@
-(function(){  //console.log("Anything you can do, you can do awesome...");
+(function(){  
 	/**
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
@@ -35,9 +35,9 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
+			localStorage.clear();
 		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
 		if (localStorage && !localStorage.getItem('epsilon')){
-			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
 			populateStorage('epsilon', true);
 			showLoadingDataPopUp();
@@ -73,15 +73,15 @@
 	    $('#search-popUpDiv, #search-overlay').show();
 	    fadeGrid();
 	}
+	function hidePopUpMsg() {
+	    $('#search-popUpDiv, #search-overlay').hide();
+	    showGrid();
+	}
 	function fadeGrid() {
 		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
 	}
 	function showGrid() {
 		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
-	}
-	function hidePopUpMsg() {
-	    $('#search-popUpDiv, #search-overlay').hide();
-	    showGrid();
 	}
 	function toggleExpandTree() {  												//console.log("toggleExpandTree")
   		var expanded = $(this).data('xpanded');
@@ -222,7 +222,6 @@
 			});
 		}
 	} /* End fillTreeWithInteractions */
-
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
@@ -242,37 +241,37 @@
 	 * sub-regions under their parent region.
 	 */
 	function sortLocTree(data) {
-		var locData = nestSubRegions(data);    //console.log("----locData = %O", locData);
-		var sortedLocs = sortLocDataObj(locData);   //console.log("sortedLocs = %O", sortedLocs)
+		// var locData = nestSubRegions(data);    //console.log("----locData = %O", locData);
+		var sortedLocs = sortLocDataObj(data);   //console.log("sortedLocs = %O", sortedLocs)
 		return sortedLocs;
 	}
 	/** Nests sub-regions under their parent regions. */
-	function nestSubRegions(data) {  									    //console.log("nestSubRegions called. locData = %O", data);
-		var subRegionMap = {
-			"North Africa" : "Africa", 			"North Asia" : "Asia",
-			"Sub-Saharan Africa" : "Africa",	"West & Central Asia" : "Asia",
-			"East Asia" : "Asia",				"South & Southeast Asia" : "Asia" };
-		var returnData = {};
-		returnData["Africa"] = { "Africa-Unspecified": data["Africa"]["Africa-Unspecified"] };
-		returnData["Asia"] = {};
+	// function nestSubRegions(data) {  									    //console.log("nestSubRegions called. locData = %O", data);
+	// 	var subRegionMap = {
+	// 		"North Africa" : "Africa", 			"North Asia" : "Asia",
+	// 		"Sub-Saharan Africa" : "Africa",	"West & Central Asia" : "Asia",
+	// 		"East Asia" : "Asia",				"South & Southeast Asia" : "Asia" };
+	// 	var returnData = {};
+	// 	returnData["Africa"] = { "Africa-Unspecified": data["Africa"]["Africa-Unspecified"] };
+	// 	returnData["Asia"] = {};
 
-		for (var region in data) {   //console.log("region = ", region)
-			if (region in subRegionMap) { //console.log("region in subRegion map = %s, %s", region, subRegionMap[region])
-				returnData[subRegionMap[region]][region] = data[region];  //console.log("returnData[%s] = %O", region, returnData[subRegionMap[region]])
-			} else if (region !== "Africa"){ returnData[region] = data[region]; } 
-		}
-		return returnData;
-	}
+	// 	for (var region in data) {   //console.log("region = ", region)
+	// 		if (region in subRegionMap) { //console.log("region in subRegion map = %s, %s", region, subRegionMap[region])
+	// 			returnData[subRegionMap[region]][region] = data[region];  //console.log("returnData[%s] = %O", region, returnData[subRegionMap[region]])
+	// 		} else if (region !== "Africa"){ returnData[region] = data[region]; } 
+	// 	}
+	// 	return returnData;
+	// }
 	/** Alpabetizes all locations and sub-locations in the data object */
 	function sortLocDataObj(data) {
-		var keys = Object.keys(data).sort();  		//console.log("keys = %O", keys)
+		var keys = Object.keys(data).sort();  									//console.log("keys = %O", keys)
 		var returnObj = {};
 		for (var i=0; i<keys.length; i++){ 
 			returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
 		}
 		return returnObj;
 	
-		function sortSubLocs(locObj) {   //console.log("sortSubLocs locObj = %O", locObj)
+		function sortSubLocs(locObj) {   										console.log("sortSubLocs locObj = %O", locObj)
 			var subLocs = Object.keys(locObj).sort();
 			var returnObj = {};
 
@@ -296,10 +295,67 @@
 	    var y=b.desc.toLowerCase();
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
-	function showLocSearch(locData) {  										//console.log("showLocSearch called. locData = %O", locData)
+	function showLocSearch(locData) {  											//console.log("showLocSearch called. locData = %O", locData)
 		clearPreviousGrid();
 		loadLocGrid(locData);
 		getInteractionsAndBuildGrid();		
+	}
+	/*----------------- Location Methods recently moved ---------------------------------------------*/
+	function loadLocGrid(locData) {
+		var topRegionRows = [];
+		var finalRowData = [];  //console.log("locData = %O", locData);
+		curTree = locData;
+
+		addFutureDevMsg();
+		for (var region in locData) { //console.log("region = ", region)
+			topRegionRows.push( [getLocRowData(locData[region], region)] );
+		}
+		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
+		backfillSubInteractionsIntoCnt(finalRowData);
+		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		loadGrid("Location Tree");
+	}
+	function addFutureDevMsg() {
+		$('#opts-col2').empty();
+		var div = document.createElement("div");
+		div.id = "loc-dev-msg";
+		$(div).text("We will soon be restructuring how location data is " +
+		 "stored in the database to be more flexible and more compatible with future " + 
+		 " additions such as map views. Once that is complete, this location view will " + 
+		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
+		$('#opts-col2').append(div);
+	}
+	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
+		return {
+			name: locName || null,	/* Interaction rows have no name to display. */
+			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
+			open: openRows.indexOf(locName) !== -1, 
+			children: getLocRowDataForChildren(locObj),
+			intCnt: locObj.interactions !== undefined ? locObj.interactions.length : null,
+			interactions: locObj.interactions !== undefined,     /* Location objects have collections of interactions as children. */     
+		};		
+	}
+	function getLocRowDataForChildren(locObj) {//console.log("getLocRowDataForChildren called. locObj = %O", locObj)
+		var regionRows = [];
+		if (locObj.interactionType !== undefined) { return false; }
+		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
+		if (locObj.interactions !== undefined) { return getlocIntRowData(locObj.interactions); }
+
+		for (var country in locObj) {
+			regionRows.push( getLocRowData( locObj[country], country ) );
+		}
+		return regionRows;
+	}
+	function handleUnspecifiedRegions(locAry) {
+		return locAry.map(function(locObj){
+			return getLocRowData(locObj, locObj.desc);
+		});
+	}
+	function getlocIntRowData(intRcrdAry) {
+		return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
+			var intRcrdObj = { isParent: false };
+			return getIntData(intRcrd, intRcrdObj);
+		});
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	/*----------------- Shared -----------------------------------------------*/
@@ -367,63 +423,6 @@
 		}
 		return cnt;
 	}
-	/*----------------- Location ---------------------------------------------*/
-	function loadLocGrid(locData) {
-		var topRegionRows = [];
-		var finalRowData = [];  //console.log("locData = %O", locData);
-		curTree = locData;
-
-		addFutureDevMsg();
-		for (var region in locData) { //console.log("region = ", region)
-			topRegionRows.push( [getLocRowData(locData[region], region)] );
-		}
-		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
-		backfillSubInteractionsIntoCnt(finalRowData);
-		rowData = finalRowData;													//console.log("rowData = %O", rowData);
-		loadGrid("Location Tree");
-	}
-	function addFutureDevMsg() {
-		$('#opts-col2').empty();
-		var div = document.createElement("div");
-		div.id = "loc-dev-msg";
-		$(div).text("We will soon be restructuring how location data is " +
-		 "stored in the database to be more flexible and more compatible with future " + 
-		 " additions such as map views. Once that is complete, this location view will " + 
-		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
-		$('#opts-col2').append(div);
-	}
-	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
-		return {
-			name: locName || null,	/* Interaction rows have no name to display. */
-			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
-			open: openRows.indexOf(locName) !== -1, 
-			children: getLocRowDataForChildren(locObj),
-			intCnt: locObj.interactions !== undefined ? locObj.interactions.length : null,
-			interactions: locObj.interactions !== undefined,     /* Location objects have collections of interactions as children. */     
-		};		
-	}
-	function getLocRowDataForChildren(locObj) {//console.log("getLocRowDataForChildren called. locObj = %O", locObj)
-		var regionRows = [];
-		if (locObj.interactionType !== undefined) { return false; }
-		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
-		if (locObj.interactions !== undefined) { return getlocIntRowData(locObj.interactions); }
-
-		for (var country in locObj) {
-			regionRows.push( getLocRowData( locObj[country], country ) );
-		}
-		return regionRows;
-	}
-	function handleUnspecifiedRegions(locAry) {
-		return locAry.map(function(locObj){
-			return getLocRowData(locObj, locObj.desc);
-		});
-	}
-	function getlocIntRowData(intRcrdAry) {
-		return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
-			var intRcrdObj = { isParent: false };
-			return getIntData(intRcrd, intRcrdObj);
-		});
-	}
 /*------------------Taxa Search Methods---------------------------------------*/
 	function getDomains() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
@@ -456,7 +455,7 @@
 			sendAjaxQuery({domainIds: domainIds}, 'search/taxa', recieveTaxaRcrds);
 		}
 	}
-	function recieveTaxaRcrds(data) {  											 //console.log("taxaRcrds recieved. %O", data);
+	function recieveTaxaRcrds(data) {  											console.log("taxaRcrds recieved. %O", data);
 		rcrdsById = data.results;
 		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
@@ -496,7 +495,7 @@
 		getInteractionsAndBuildGrid();
 	}
 	/** Show all data for domain. */
-	function showDomainTree(domainTaxon) {							//console.log("domainTaxon=%O", domainTaxon)
+	function showDomainTree(domainTaxon) {							console.log("domainTaxon=%O", domainTaxon)
 		storeDomainLevel();
 		getTaxaTreeAndBuildGrid(domainTaxon);
 		$('#sort-opts').fadeTo(150, 1);
@@ -674,10 +673,10 @@
 
 		return tree;
 
-		function getChildTaxa(children) {										//console.log("get Child Taxa called. arguments = %O", arguments);
+		function getChildTaxa(children) {										//console.log("get Child Taxa called. children = %O", children);
 			if (children === null) { return null; }
 			return children.map(function(child){
-				if (typeof child === "object") { return child; }
+				if (typeof child === "object") { console.log("taxa child object = %O", child); return child; }
 
 				var childRcrd = rcrdsById[child]; 								//console.log("child = %O", child);
 
