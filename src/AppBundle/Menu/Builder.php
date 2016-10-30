@@ -22,7 +22,7 @@ class Builder extends ContainerAware
 		$menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));
 			$menu->addChild('Database', array('uri' => '#'));
 			$menu['Database']->setAttribute('class', 'smtrigger arrow');
-   				$menu['Database']->addChild('Search', array('route' => 'app_search'));
+   				$menu['Database']->addChild('Search', array('route' => 'app_search_show'));
 				$menu['Database']->addChild('Explore', array('uri' => '#'));
 				$menu['Database']['Explore']->setAttribute('class', 'smtrigger arrow');				
 				$menu['Database']['Explore']->addChild('Citations', array('route' => 'app_sources'));

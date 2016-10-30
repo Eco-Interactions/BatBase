@@ -20,7 +20,7 @@ class SearchController extends Controller
     /**
      * Finds and displays Search Page content blocks.
      *
-     * @Route("/search", name="app_search")
+     * @Route("/search", name="app_search_show")
      */
     public function searchAction()
     {
