@@ -53,42 +53,7 @@ class SearchController extends Controller
         }
     /**------------------------Search By Taxa---------------------------------*/
     /**
-     * Get Domain Data.
-     *
-     * @Route("/search/domain", name="app_ajax_search_domain")
-     */
-    public function searchDomainAction(Request $request) 
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }  
-        $em = $this->getDoctrine()->getManager();
-        $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
-
-        $returnObj = new \stdClass;
-
-        foreach ($domainEntities as $entity) 
-        {                                                                 
-            $taxonId = strval($entity->getTaxon()->getId());
-            $returnObj->$taxonId = [];
-            $slug = $entity->getSlug();                               
-            $name = $entity->getPluralName();                              
-
-            $returnObj->$taxonId = array_merge( 
-                $returnObj->$taxonId, [ "slug" => $slug, "name" => $name ] 
-            );
-        }
-
-        $response = new JsonResponse();
-        $response->setData(array(
-            'results' => $returnObj
-        ));
-
-        return $response;
-    }
-
-    /**
-     * Get Taxa Data organized by parent taxa.
+     * Returns a Taxa data obj and Domain data obj organized by taxonb ID
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -97,58 +62,81 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-        $requestContent = $request->getContent();
-        $pushedParams = json_decode($requestContent); 
-        $domainTaxaIds = $pushedParams->domainIds;
-
         $em = $this->getDoctrine()->getManager();
 
-        $returnObj = new \stdClass;
+        $domainData = $this->getDomainData($em);
+        $domainTaxaIds = array_keys($domainData);
+
+        $taxaData = new \stdClass;
 
         foreach ($domainTaxaIds as $domainTaxonId) 
         {
             $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
                 ->findOneBy(array('id' => $domainTaxonId));
-            $taxonName = $domainTaxonEntity->getDisplayName();
+            $taxonId = $domainTaxonEntity->getId();
 
-            $returnObj->$taxonName = $this->getTaxonData($domainTaxonEntity);
+            $taxaData->$taxonId = $this->getTaxonData($domainTaxonEntity, $taxaData);
         }  
 
         $response = new JsonResponse();
         $response->setData(array(                                       
-            'results' => $returnObj
+            'results' => [ 'domainData' => $domainData, 'taxaData' => $taxaData]
         ));
 
         return $response;
     }
-    private function getTaxonData($taxon) 
+    /** Returns domain data by taxon ID */
+    private function getDomainData($em)
+    {
+        $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
+        $data = [];
+
+        foreach ($domainEntities as $entity) 
+        {                                                                 
+            $taxonId = strval($entity->getTaxon()->getId());
+            $data->$taxonId = [];
+            $slug = $entity->getSlug();                               
+            $name = $entity->getPluralName();                              
+
+            $data = array_merge( 
+                $data, [ $taxonId => [ "slug" => $slug, "name" => $name ]]
+            );
+        }
+        return $data;
+    }
+    /**
+     * Builds and returns Taxa Data object starting with the parent taxon for each domain.
+     */
+    private function getTaxonData($taxon, &$taxaData) 
     {
         $data = new \stdClass;
 
         $data->id = $taxon->getId();
         $data->name = $taxon->getDisplayName();
         $data->slug = $taxon->getSlug();
-        $data->children = $this->getTaxaChildren($taxon);
+        $data->children = $this->getTaxaChildren($taxon, $taxaData);
         $data->parentTaxon = $taxon->getParentTaxon() ?
             $taxon->getParentTaxon()->getId() : null ;           
         $data->level = $taxon->getLevel()->getName();               
-        $data->interactions = $this->getTaxaInteractionsIds($taxon);
+        $data->interactions = $this->getTaxaInteractionIds($taxon);
 
         return $data;
     }
-    private function getTaxaChildren($taxon)
+    /** Calls getTaxonData for each child and returns an array of all child Ids */
+    private function getTaxaChildren($taxon, &$taxaData)
     {
-        $data = new \stdClass;
+        $children = [];
         $childEntities = $taxon->getChildTaxa();
 
         foreach ($childEntities as $child)
         {
-            $childName = $child->getDisplayName();
-            $data->$childName =$this->getTaxonData($child);
+            $childId = $child->getId();
+            array_push($children, $childId);
+            $taxaData->$childId = $this->getTaxonData($child, $taxaData);
         }
-        return $data;
+        return $children;
     }
-    private function getTaxaInteractionsIds($taxon) 
+    private function getTaxaInteractionIds($taxon) 
     {
         $intRcrds = new \stdClass;
         $roles = ['SubjectRoles', 'ObjectRoles'];
@@ -157,7 +145,7 @@ class SearchController extends Controller
         {
             $getIntRcrds = 'get' . $role; 
             $interactions = $taxon->$getIntRcrds();
-            $intRcrds->$role = $this->getInteractions($interactions);
+            $intRcrds->$role = $this->getInteractionIds($interactions);
         }
         return $intRcrds;
     }
@@ -402,7 +390,7 @@ class SearchController extends Controller
         return $response;
     }
 /**------------------------Shared Search Methods------------------------------*/
-    private function getInteractions($interactions)
+    private function getInteractionIds($interactions)
     {
         if ( count($interactions) === 0 ) { return null; }
         $intRcrds = [];
