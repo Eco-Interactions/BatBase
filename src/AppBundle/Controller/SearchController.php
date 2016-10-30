@@ -237,22 +237,117 @@ class SearchController extends Controller
     }
 /**------------------------Search By Source-----------------------------------*/
     /*
-     * Get Source Data.
+     * Returns all Sources by Id.
      *
-     * @Route("/search/interaction", name="app_ajax_search_interaction")
+     * @Route("/search/source", name="app_ajax_search_source")
      */
-    public function searchSourcesAction(Request $request)
+    public function searchSourcesAction(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
+
         $em = $this->getDoctrine()->getManager();
-        $interactions = $em->getRepository('AppBundle:SourceTypes')->findAll();
+        $srcDataById = new \stdClass;
 
+        $srcEntities = $em->getRepository('AppBundle:Source')
+            ->findAll();
 
+        foreach ($srcEntities as $srcEntity) 
+        {                    
+            $id = $srcEntity->getId(); 
+            $srcDataById->$id = $this->getSourceData($srcEntity, $srcDataById);
+        }
 
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $srcDataById               
+        ));
+
+        return $response;
     }
+    /**
+     * Builds and returns Source Data object.
+     */
+    private function getSourceData($srcEntity, &$srcDataById)
+    {
+        $data = new \stdClass; 
 
+        $data->id = $srcEntity->getId();
+        $data->displayName = $srcEntity->getDisplayName();
+        $data->description = $srcEntity->getDescription();
+        $data->year = $srcEntity->getYear();
+        $data->doi = $srcEntity->getDoi();
+        $data->linkUrl = $srcEntity->getLinkUrl();
+        $data->linkDisplay = $srcEntity->getLinkDisplay();
+        $data->tags = $this->getSourceTags($srcEntity);
+
+        $parentSource = $srcEntity->getParentSource();
+        $data->parentSource = $parentSource == null ? null : $parentSource->getId();
+
+        $sourceType = $srcEntity->getSourceType()->getDisplayName();
+        $data->sourceType = $sourceType;
+
+        if ($sourceType === "Author") {
+            $data->author = $this->getAuthorData($srcEntity);
+        } else if ($sourceType === "Publication") {
+            $data->publication = $this->getPublicationData($srcEntity);
+        } else if ($sourceType === "Citation") {
+            $data->citation = $this->getCitationData($srcEntity);
+        }
+        return $data;
+    }    
+    /** Returns an array with the tags for the source. */
+    private function getSourceTags($srcEntity)
+    {
+        $tagAry = [];
+        $tags = $srcEntity->getTags();
+
+        foreach ($tags as $tag) { 
+            array_push($tagAry, $tag->getTag()); 
+        }
+        return $tagAry;
+    }
+    /** Returns an associative array with the author data. */
+    private function getAuthorData($srcEntity)
+    {
+        $author = $srcEntity->getAuthor();
+        $authData = [
+            'contributions' => [], 'displayName' => $author->getDisplayName(),
+            'fullName' => $author->getFullName()
+        ];
+        $contributions = $srcEntity->getContributions();
+        // Adds the work source id to the array of author contributions
+        foreach ($contributions as $contrib) {
+            array_push($data->author->contributions, $contrib->getWorkSource()->getId());
+        }
+        return $authData;
+    }
+    /** Returns an associative array with the publication data. */
+    private function getPublicationData($srcEntity)
+    {
+        $pub = $srcEntity->getPublication();
+
+        return [ 'description' => $pub->getDescription(), 
+                 'type' => $pub->getPublicationType() ];
+    }
+    /** Returns an associative array with the citation data. */
+    private function getCitationData($srcEntity)
+    {
+        $cit = $srcEntity->getCitation();
+        $tags = $cit->getTags();
+        $citData = [ 'fullText' => $cit->getFullText(), 
+                     'publicationVolume' => $cit->getPublicationVolume(),
+                     'publicationIssue' => $cit->getPublicationIssue(),
+                     'publicationPages' => $cit->getPublicationPages(),
+                     'title' => $cit->getTitle(), 'tags' => []
+                    ];
+        // Adds each tag to the array of citation tags
+        foreach ($tags as $tag) {
+            array_push($citData->tags, $tag->getTag());
+        }
+        return $citData;
+    }
 /**------------------------Search Interaction Actions-------------------------*/
     /*
      * Returns all interaction records.
