@@ -195,7 +195,7 @@ class Source
     public function __construct()
     {
         $this->contributors = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->contributions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childSources = new \Doctrine\Common\Collections\ArrayCollection();
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
@@ -538,6 +538,40 @@ class Source
     public function getContributors()
     {
         return $this->contributors;
+    }
+
+    /**
+     * Add an Contributor.
+     *
+     * @param \AppBundle\Entity\Contributon $contribution
+     *
+     * @return Source
+     */
+    public function addContribution(\AppBundle\Entity\Contribution $contribution)
+    {
+        $this->contributions[] = $contribution;
+
+        return $this;
+    }
+
+    /**
+     * Remove a Contribution.
+     *
+     * @param \AppBundle\Entity\Contribution $contribution
+     */
+    public function removeContribution(\AppBundle\Entity\Contribution $contribution)
+    {
+        $this->contributions->removeElement($contribution);
+    }
+
+    /**
+     * Get Contributions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getContributions()
+    {
+        return $this->contributions;
     }
 
     /**
