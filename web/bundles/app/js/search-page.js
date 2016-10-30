@@ -3,9 +3,7 @@
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
 	var gridDiv, rcrdsById, taxaByLvl, curTree, intro,
-		openRows = [], 
-		rowData = [], 
-		columnDefs = [];
+		openRows = [], rowData = [], columnDefs = [];
 	var curFocus = localStorage ? localStorage.getItem('curFocus') : false; 	
     var levels = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
 	var localStorage = setlocalStorage();
@@ -108,14 +106,15 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
-		} else { $('#search-focus').val("taxa"); }
+		} else { $('#search-focus').val("srcs"); }
 		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
 	function selectSearchFocus(e) {  							console.log("select(ing)SearchFocus")
 	    showPopUpMsg();
+	    if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
-	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getDomains);  }
+	    if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getTaxa);  }
 	    showWalkthroughIfFirstVisit();
 	}
 	/**
@@ -222,6 +221,20 @@
 			});
 		}
 	} /* End fillTreeWithInteractions */
+/*------------------Source Search Methods-----------------------------------*/
+	function getSources() {
+		var storedSrcs = localStorage ? localStorage.getItem('srcRcrds') : false; 
+		if( storedSrcs ) {  //console.log("Stored Source data Loaded");
+			showLocSearch(JSON.parse(storedLocs));
+		} else { //console.log("Sources Not Found In Storage.");
+			sendAjaxQuery({}, 'search/source', storeAndLoadSrcs);
+		}
+	}
+	function storeAndLoadSrcs(data) {											console.log("source data recieved. %O", data);
+		// var srcRcrds = sortSrcTree(data.results);
+		// populateStorage('locRcrds', JSON.stringify(locRcrds));
+		// showLocSearch(locRcrds);
+	}
 /*------------------Location Search Methods-----------------------------------*/
 	function getLocations() {
 		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
@@ -232,9 +245,9 @@
 		}
 	}
 	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
-		var locRcrds = sortLocTree(data.results);
-		populateStorage('locRcrds', JSON.stringify(locRcrds));
-		showLocSearch(locRcrds);
+		// var locRcrds = sortLocTree(data.results);
+		// populateStorage('locRcrds', JSON.stringify(locRcrds));
+		// showLocSearch(locRcrds);
 	}
 	/**
 	 * Alpabetizes all locations and sub-locations in the data object and nests 
@@ -424,42 +437,68 @@
 		return cnt;
 	}
 /*------------------Taxa Search Methods---------------------------------------*/
-	function getDomains() {  
+	/** Ajax to get all taxa and domain rcrds if not already stored. */
+	function getTaxa() {  
 		var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
-		if( storedDomains ) { //console.log("Stored Domains Loaded");
+		if( storedDomains ) { //console.log("Stored Taxa Loaded");
 			showTaxonSearch(JSON.parse(storedDomains));
-		} else { // console.log("Domains Not Found In Storage.");
-			sendAjaxQuery({}, 'search/domain', storeAndLoadDomains);
+		} else { // console.log("Taxa Not Found In Storage.");
+			sendAjaxQuery({}, 'search/taxa', storeAndLoadTaxa);
 		}
 	}
-	function storeAndLoadDomains(data) {										//console.log("domain data recieved. %O", data);
-		populateStorage('domainRcrds', JSON.stringify(data.results));
-		showTaxonSearch(data.results);
+	function storeAndLoadTaxa(data) {											console.log("taxa data recieved. %O", data);
+		populateStorage('domainRcrds', JSON.stringify(data.domainData));
+		populateStorage('taxaRcrds', JSON.stringify(data.taxaData));
+		showTaxonSearch(data);
 	}
 	function showTaxonSearch(data) {
-		if (!$("#sel-domain").length) { buildTaxaSearchHtml(data); } 	
-		initTaxaSearchState();
-		getAllTaxaRcrds(data);
+		if (!$("#sel-domain").length) { buildTaxaSearchHtml(data.domainData); } 	
+		// initTaxaSearchState();
+		// getAllTaxaRcrds(data);
 	}
 	function initTaxaSearchState() { //console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
+		var storedTaxa = localStorage.getItem('taxaRcrds'); 
+		rcrdsById = JSON.parse(storedTaxa);
+		
 		if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
-	}
-	/** Ajax to get all interaction rcrds. */
-	function getAllTaxaRcrds(domainData) {  
-		var domainIds = Object.keys(domainData);  console.log("domainData = %O", domainData);
-		var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
-		if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
-			rcrdsById = JSON.parse(storedTaxa);
-			onTaxaSearchMethodChange();
-		} else { //  console.log("taxaRcrds Not Found In Storage.");
-			sendAjaxQuery({domainIds: domainIds}, 'search/taxa', recieveTaxaRcrds);
-		}
-	}
-	function recieveTaxaRcrds(data) {  											console.log("taxaRcrds recieved. %O", data);
-		rcrdsById = data.results;
-		populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
 		onTaxaSearchMethodChange();
 	}
+	// function getTaxa() {  
+	// 	var storedDomains = localStorage ? localStorage.getItem('domainRcrds') : false; 
+	// 	if( storedDomains ) { //console.log("Stored Domains Loaded");
+	// 		showTaxonSearch(JSON.parse(storedDomains));
+	// 	} else { // console.log("Domains Not Found In Storage.");
+	// 		sendAjaxQuery({}, 'search/taxa', storeAndLoadTaxa);
+	// 	}
+	// }
+	// function storeAndLoadDomains(data) {										//console.log("domain data recieved. %O", data);
+	// 	populateStorage('domainRcrds', JSON.stringify(data.results));
+	// 	showTaxonSearch(data.results);
+	// }
+	// function showTaxonSearch(data) {
+	// 	if (!$("#sel-domain").length) { buildTaxaSearchHtml(data); } 	
+	// 	initTaxaSearchState();
+	// 	getAllTaxaRcrds(data);
+	// }
+	// function initTaxaSearchState() { //console.log("$('#sel-domain').val() = ", $('#sel-domain').val())
+	// 	if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
+	// }
+	// /** Ajax to get all interaction rcrds. */
+	// function getAllTaxaRcrds(domainData) {  
+	// 	var domainIds = Object.keys(domainData);  console.log("domainData = %O", domainData);
+	// 	var storedTaxa = localStorage ? localStorage.getItem('taxaRcrds') : false; 
+	// 	if( storedTaxa ) {  		//console.log("Stored taxaRcrds Loaded");
+	// 		rcrdsById = JSON.parse(storedTaxa);
+	// 		onTaxaSearchMethodChange();
+	// 	} else { //  console.log("taxaRcrds Not Found In Storage.");
+	// 		sendAjaxQuery({domainIds: domainIds}, 'search/taxa', recieveTaxaRcrds);
+	// 	}
+	// }
+	// function recieveTaxaRcrds(data) {  											console.log("taxaRcrds recieved. %O", data);
+	// 	// rcrdsById = data.results;
+	// 	// populateStorage('taxaRcrds', JSON.stringify(rcrdsById));	
+	// 	// onTaxaSearchMethodChange();
+	// }
 	/**
 	 * Builds the HTML for the search methods available for the taxa-focused search,
 	 * both text search and browsing through the taxa names by level.
