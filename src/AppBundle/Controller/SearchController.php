@@ -163,7 +163,7 @@ class SearchController extends Controller
     }
 /**------------------------Search By Location---------------------------------*/
     /**
-     * Get Location Data organized by Parent Regions.
+     * Returns Location Data organized by ID
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
@@ -174,66 +174,70 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $intsByRegion = new \stdClass;
-        $locRegions = $em->getRepository('AppBundle:Location')
+        $locDataById = new \stdClass;
+
+        $regionLocs = $em->getRepository('AppBundle:Location')
             ->findBy(array('locationType' => '1'));
 
-        foreach ($locRegions as $regionLoc) 
+        foreach ($regionLocs as $locEntity) 
         {                    
-            $regionName = $regionLoc->getDescription(); 
-
-            if ($regionLoc->getParentLoc() === null) { // Only top regions are handled here.
-                $intsByRegion->$regionName = $this->getLocationData($regionLoc, $regionName);
-            }
+            $locId = $locEntity->getId(); 
+            $locDataById->$locId = $this->getLocationData($locEntity, $locDataById);
         }
+
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $intsByRegion              
+            'results' => $locDataById               
         ));
 
         return $response;
     }
     /**
-     * Builds and returns Location Search Data object.
+     * Builds and returns Location Data object.
      */
-    private function getLocationData($locEntity, $locDesc)
+    private function getLocationData($locEntity, &$locDataById)
     {
         $data = new \stdClass; 
-        $childLocs = $locEntity->getChildLocs();  
 
+        $data->id = $locEntity->getId();
+        $data->displayName = $locEntity->displayName();
         $data->description = $locEntity->getDescription();
         $data->elevation = $locEntity->getElevation();
         $data->elevationMax = $locEntity->getElevationMax();
+        $data->elevUnitAbbrv = $locEntity->getElevUnitAbbrv();
         $data->gpsData = $locEntity->getGpsData();
         $data->latitude = $locEntity->getLatitude();
         $data->longitude = $locEntity->getLongitude();
+        $data->showOnMap = $locEntity->showOnMap();
         $data->locationType = $locEntity->getLocationType()->getName(); 
-        $data->childLocs = $this->getChildLocationData($locEntity, $childLocs);
+        $data->childLocs = $this->getChildLocationData($locEntity, $locDataById);
         
+        $parentLoc = $locEntity->getParentLoc();
+        $data->parentLoc = $parentLoc === null ? null : $parentLoc->getId();
+
         $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
         $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
         
         $interactions = $locEntity->getInteractions();
-        $data->interactions = $this->getInteractions($interactions);
-
-        $parentLoc = $locEntity->getParentLoc();
-        if ($parentLoc !== null) { $parentLoc = $parentLoc->getId(); }
-        $data->parentLoc = $parentLoc;
+        $data->interactions = $this->getInteractionIds($locEntity);
 
         return $data;
-    }
+    }    
     /**
      * Returns an object keyed with child location descriptions and their data.
      */
-    private function getChildLocationData($parentLoc, $childLocs)
+    private function getChildLocationData($parentLoc, &$locDataById)
     {
-        $data = new \stdClass;
+        $children = [];
+        $childLocs = $locEntity->getChildLocs();  
 
         foreach ($childLocs as $childLoc) {
-            $childName = $childLoc->getDescription();
-            $data->$childName = $this->getLocationData($childLoc, $childName);
+            $childId = $childLoc->getId();
+            array_push($children, $childId);
+
+            $locDataById->$childId = $this->getLocationData($childLoc, $locDataById);
         }     
-        return $data;
+        return $children;
     }
 /**------------------------Search By Source-----------------------------------*/
     /*
