@@ -50,10 +50,10 @@ class SearchController extends Controller
         ));
 
         return $response;
-        }
+    }
     /**------------------------Search By Taxa---------------------------------*/
     /**
-     * Returns a Taxa data obj and Domain data obj organized by taxonb ID
+     * Returns a Taxa data obj and Domain data obj organized by taxon ID
      *
      * @Route("/search/taxa", name="app_ajax_search_taxa")
      */
@@ -65,50 +65,45 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $domainData = $this->getDomainData($em);
-        $domainTaxaIds = array_keys($domainData);
+        $domainTaxaIds = array_keys(get_object_vars($domainData));  
 
         $taxaData = new \stdClass;
 
         foreach ($domainTaxaIds as $domainTaxonId) 
-        {
+        {                                     
             $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
                 ->findOneBy(array('id' => $domainTaxonId));
             $taxonId = $domainTaxonEntity->getId();
-
             $taxaData->$taxonId = $this->getTaxonData($domainTaxonEntity, $taxaData);
-        }  
+        } 
 
         $response = new JsonResponse();
-        $response->setData(array(                                       
-            'results' => [ 'domainData' => $domainData, 'taxaData' => $taxaData]
-        ));
-
+        $response->setData(array(                                    
+            'domainData' => $domainData, 'taxaData' => $taxaData
+        )); 
         return $response;
     }
     /** Returns domain data by taxon ID */
     private function getDomainData($em)
     {
         $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
-        $data = [];
+        $data = new \stdClass;
 
         foreach ($domainEntities as $entity) 
-        {                                                                 
-            $taxonId = strval($entity->getTaxon()->getId());
-            $data->$taxonId = [];
+        {                               
+            $taxonId = $entity->getTaxon()->getId();
             $slug = $entity->getSlug();                               
             $name = $entity->getPluralName();                              
 
-            $data = array_merge( 
-                $data, [ $taxonId => [ "slug" => $slug, "name" => $name ]]
-            );
-        }
+            $data->$taxonId = [ "slug" => $slug, "name" => $name ];
+        }  
         return $data;
     }
     /**
      * Builds and returns Taxa Data object starting with the parent taxon for each domain.
      */
     private function getTaxonData($taxon, &$taxaData) 
-    {
+    {           
         $data = new \stdClass;
 
         $data->id = $taxon->getId();
@@ -124,7 +119,7 @@ class SearchController extends Controller
     }
     /** Calls getTaxonData for each child and returns an array of all child Ids */
     private function getTaxaChildren($taxon, &$taxaData)
-    {
+    {   
         $children = [];
         $childEntities = $taxon->getChildTaxa();
 
@@ -188,7 +183,7 @@ class SearchController extends Controller
         $data = new \stdClass; 
 
         $data->id = $locEntity->getId();
-        $data->displayName = $locEntity->displayName();
+        $data->displayName = $locEntity->getDisplayName();
         $data->description = $locEntity->getDescription();
         $data->elevation = $locEntity->getElevation();
         $data->elevationMax = $locEntity->getElevationMax();
@@ -196,7 +191,7 @@ class SearchController extends Controller
         $data->gpsData = $locEntity->getGpsData();
         $data->latitude = $locEntity->getLatitude();
         $data->longitude = $locEntity->getLongitude();
-        $data->showOnMap = $locEntity->showOnMap();
+        $data->showOnMap = $locEntity->getShowOnMap();
         $data->locationType = $locEntity->getLocationType()->getName(); 
         $data->childLocs = $this->getChildLocationData($locEntity, $locDataById);
         
@@ -217,7 +212,7 @@ class SearchController extends Controller
     private function getChildLocationData($parentLoc, &$locDataById)
     {
         $children = [];
-        $childLocs = $locEntity->getChildLocs();  
+        $childLocs = $parentLoc->getChildLocs();  
 
         foreach ($childLocs as $childLoc) {
             $childId = $childLoc->getId();
@@ -228,7 +223,7 @@ class SearchController extends Controller
         return $children;
     }
 /**------------------------Search By Source-----------------------------------*/
-    /*
+    /**
      * Returns all Sources by Id.
      *
      * @Route("/search/source", name="app_ajax_search_source")
@@ -311,7 +306,7 @@ class SearchController extends Controller
         $contributions = $srcEntity->getContributions();
         // Adds the work source id to the array of author contributions
         foreach ($contributions as $contrib) {
-            array_push($data->author->contributions, $contrib->getWorkSource()->getId());
+            array_push($authData['contributions'], $contrib->getWorkSource()->getId());
         }
         return $authData;
     }
@@ -336,15 +331,15 @@ class SearchController extends Controller
                     ];
         // Adds each tag to the array of citation tags
         foreach ($tags as $tag) {
-            array_push($citData->tags, $tag->getTag());
+            array_push($citData['tags'], $tag->getTag());
         }
         return $citData;
     }
 /**------------------------Search Interaction Actions-------------------------*/
-    /*
+    /**
      * Returns all interaction records.
      *
-     * @Route("/search/interaction", name="app_ajax_search_interaction")
+     * @Route("/search/interaction", name="app_ajax_search_ints")
      */
     public function getInteractionData(Request $request) 
     {
