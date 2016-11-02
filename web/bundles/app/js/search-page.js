@@ -278,12 +278,10 @@
 	}
 	/**
 	 * Builds a tree of location data with regions at the top level, and sub-regions,
-	 * countries, areas, and points as nested children. Adds the tree to it's global 
-	 * 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue building location grid.
+	 * countries, areas, and points as nested children. Alphabetizes the tree and 
+	 * adds it to the global 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue.
 	 */	
 	function buildLocTree(topRegions) {
-		// var locData = fillChildLocRcrds(data.topRegions);    //console.log("----locData = %O", locData);
-		// var sortedLocs = sortLocDataObj(data);   //console.log("sortedLocs = %O", sortedLocs)
 		var region;
 		var locTree = {};
 		topRegions.forEach(function(regionId){  
@@ -291,54 +289,46 @@
 			locTree[region.displayName] = region;
 			region.children = fillChildLocRcrds(region.childLocs);
 		});  console.log("tree = %O", locTree);
-		curTree = locTree;
+		curTree = sortLocTree(locTree);
 		getInteractionsAndFillTree();
 	}
 	function fillChildLocRcrds(childLocIds) {
 		var locRcrd;
 		var branch = [];
 		childLocIds.forEach(function(locId){
-			locRcrd = rcrdsById[locId];
-			branch.push(locRcrd);
-			if (locRcrd.childLocs.length >= 1) {
-				locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
-			}
+			if (typeof locId === "number") {
+				locRcrd = rcrdsById[locId];
+				branch.push(locRcrd);
+				if (locRcrd.childLocs.length >= 1) {
+					locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
+				}
+			} else { console.log("~~~child location [object]~~~"); return locId; }
 		});
 		return branch;
 	}
-	// /** Alpabetizes all locations and sub-locations in the data object */
-	// function sortLocDataObj(data) {
-	// 	var keys = Object.keys(data).sort();  									//console.log("keys = %O", keys)
-	// 	var returnObj = {};
-	// 	for (var i=0; i<keys.length; i++){ 
-	// 		returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
-	// 	}
-	// 	return returnObj;
+	/** Sorts the location tree alphabetically. */
+	function sortLocTree(tree) {
+		var keys = Object.keys(tree).sort();    console.log("keys = %O", keys)
+		var sortedTree = {};
+		for (var i=0; i<keys.length; i++){ console.log("keys[i] = %s, tree[keys[i]] = %O",keys[i], tree[keys[i]] )
+			sortedTree[keys[i]] = sortChildLocs(tree[keys[i]]);
+		}
+		return sortedTree;
 	
-	// 	function sortSubLocs(locObj) {   										console.log("sortSubLocs locObj = %O", locObj)
-	// 		var subLocs = Object.keys(locObj).sort();
-	// 		var returnObj = {};
-
-	// 		for (var i=0; i<subLocs.length; i++){
-	// 			if (Array.isArray(locObj[subLocs[i]])) { 
-	// 				returnObj[subLocs[i]] = locObj[subLocs[i]].sort(alphaLocDesc);
-	// 			} else if (typeof locObj[subLocs[i]] === "object" && locObj[subLocs[i]] !== null) {  
-	// 				handleLocObj(locObj[subLocs[i]], subLocs[i]); }
-	// 		}		
-	// 		return returnObj;
-
-	// 		function handleLocObj(locObj, subLoc) {
-	// 			if (locObj.id === undefined) { returnObj[subLoc] = sortSubLocs(locObj); 
-	// 			} else { returnObj[subLoc] = locObj; }
-	// 		}
-	// 	} /* End sortSubLocs */
-	// } /* End sortLocDataObj */
-	// /** Alphabetizes array via sort method. */
-	// function alphaLocDesc(a, b) {
-	// 	var x=a.desc.toLowerCase();
-	//     var y=b.desc.toLowerCase();
-	//     return x<y ? -1 : x>y ? 1 : 0;
-	// }
+		function sortChildLocs(location) {  console.log("sortChildLocs location = %O", location)
+			if (location.children) {
+				location.children = location.children.sort(alphaLocNames);
+				location.children.forEach(sortChildLocs);
+			}
+			return location;
+		} /* End sortChildLocs */
+	} /* End sortLocTree */
+	/** Alphabetizes array via sort method. */
+	function alphaLocNames(a, b) {
+		var x=a.displayName.toLowerCase();
+	    var y=b.displayName.toLowerCase();
+	    return x<y ? -1 : x>y ? 1 : 0;
+	}
 	/**
 	 * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
 	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
