@@ -250,100 +250,172 @@
 	function storeAndLoadSrcs(data) {											console.log("source data recieved. %O", data);
 		// var srcRcrds = sortSrcTree(data.results);
 		// populateStorage('locRcrds', JSON.stringify(locRcrds));
-		// showLocSearch(locRcrds);
+		// buildLocSearchUiAndGrid(locRcrds);
 	}
 /*------------------Location Search Methods-----------------------------------*/
+	/**
+	 * If location data is already in local storage, the records and top regions are 
+	 * sent to @buildLocTree to begin building the data tree and grid. Otherwise, an
+	 * ajax call gets the records and they are stored @storeLocs before continuing 
+	 * to @buildLocTree.  
+	 */
 	function getLocations() {
-		var storedLocs = localStorage ? localStorage.getItem('locRcrds') : false; 
-		if( storedLocs ) {  //console.log("Stored Locations Loaded");
-			showLocSearch(JSON.parse(storedLocs));
+		var data = {};
+		data.locRcrds = localStorage ? JSON.parse(localStorage.getItem('locRcrds')) : false; 
+		if( data.locRcrds ) {  
+			rcrdsById = data.locRcrds;
+			data.topRegions = JSON.parse(localStorage.getItem('topRegions'));  console.log("Stored Locations Loaded = %O", data);
+			buildLocTree(data.topRegions);
 		} else { //console.log("Locations Not Found In Storage.");
-			sendAjaxQuery({}, 'search/location', storeAndLoadLocs);
+			sendAjaxQuery({}, 'search/location', storeLocs);
 		}
 	}
-	function storeAndLoadLocs(data) {											console.log("location data recieved. %O", data);
-		// var locRcrds = sortLocTree(data.results);
-		// populateStorage('locRcrds', JSON.stringify(locRcrds));
-		// showLocSearch(locRcrds);
+	function storeLocs(data) {													console.log("location data recieved. %O", data);
+		populateStorage('locRcrds', JSON.stringify(data.locRcrds));
+		populateStorage('topRegions', JSON.stringify(data.topRegions));
+		rcrdsById = data.locRcrds;   
+		buildLocTree(data.topRegions);
 	}
 	/**
-	 * Alpabetizes all locations and sub-locations in the data object and nests 
-	 * sub-regions under their parent region.
-	 */
-	function sortLocTree(data) {
-		// var locData = nestSubRegions(data);    //console.log("----locData = %O", locData);
-		var sortedLocs = sortLocDataObj(data);   //console.log("sortedLocs = %O", sortedLocs)
-		return sortedLocs;
+	 * Builds a tree of location data with regions at the top level, and sub-regions,
+	 * countries, areas, and points as nested children. Adds the tree to it's global 
+	 * 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue building location grid.
+	 */	
+	function buildLocTree(topRegions) {
+		// var locData = fillChildLocRcrds(data.topRegions);    //console.log("----locData = %O", locData);
+		// var sortedLocs = sortLocDataObj(data);   //console.log("sortedLocs = %O", sortedLocs)
+		var region;
+		var locTree = {};
+		topRegions.forEach(function(regionId){  
+			region = rcrdsById[regionId];
+			locTree[region.displayName] = region;
+			region.children = fillChildLocRcrds(region.childLocs);
+		});  console.log("tree = %O", locTree);
+		curTree = locTree;
+		getInteractionsAndFillTree();
 	}
-	/** Nests sub-regions under their parent regions. */
-	// function nestSubRegions(data) {  									    //console.log("nestSubRegions called. locData = %O", data);
-	// 	var subRegionMap = {
-	// 		"North Africa" : "Africa", 			"North Asia" : "Asia",
-	// 		"Sub-Saharan Africa" : "Africa",	"West & Central Asia" : "Asia",
-	// 		"East Asia" : "Asia",				"South & Southeast Asia" : "Asia" };
-	// 	var returnData = {};
-	// 	returnData["Africa"] = { "Africa-Unspecified": data["Africa"]["Africa-Unspecified"] };
-	// 	returnData["Asia"] = {};
-
-	// 	for (var region in data) {   //console.log("region = ", region)
-	// 		if (region in subRegionMap) { //console.log("region in subRegion map = %s, %s", region, subRegionMap[region])
-	// 			returnData[subRegionMap[region]][region] = data[region];  //console.log("returnData[%s] = %O", region, returnData[subRegionMap[region]])
-	// 		} else if (region !== "Africa"){ returnData[region] = data[region]; } 
-	// 	}
-	// 	return returnData;
-	// }
-	/** Alpabetizes all locations and sub-locations in the data object */
-	function sortLocDataObj(data) {
-		var keys = Object.keys(data).sort();  									//console.log("keys = %O", keys)
-		var returnObj = {};
-		for (var i=0; i<keys.length; i++){ 
-			returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
-		}
-		return returnObj;
-	
-		function sortSubLocs(locObj) {   										console.log("sortSubLocs locObj = %O", locObj)
-			var subLocs = Object.keys(locObj).sort();
-			var returnObj = {};
-
-			for (var i=0; i<subLocs.length; i++){
-				if (Array.isArray(locObj[subLocs[i]])) { 
-					returnObj[subLocs[i]] = locObj[subLocs[i]].sort(alphaLocDesc);
-				} else if (typeof locObj[subLocs[i]] === "object" && locObj[subLocs[i]] !== null) {  
-					handleLocObj(locObj[subLocs[i]], subLocs[i]); }
-			}		
-			return returnObj;
-
-			function handleLocObj(locObj, subLoc) {
-				if (locObj.id === undefined) { returnObj[subLoc] = sortSubLocs(locObj); 
-				} else { returnObj[subLoc] = locObj; }
+	function fillChildLocRcrds(childLocIds) {
+		var locRcrd;
+		var branch = [];
+		childLocIds.forEach(function(locId){
+			locRcrd = rcrdsById[locId];
+			branch.push(locRcrd);
+			if (locRcrd.childLocs.length >= 1) {
+				locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
 			}
-		} /* End sortSubLocs */
-	} /* End sortLocDataObj */
-	/** Alphabetizes array via sort method. */
-	function alphaLocDesc(a, b) {
-		var x=a.desc.toLowerCase();
-	    var y=b.desc.toLowerCase();
-	    return x<y ? -1 : x>y ? 1 : 0;
+		});
+		return branch;
 	}
-	function showLocSearch(locData) {  											//console.log("showLocSearch called. locData = %O", locData)
-		clearPreviousGrid();
-		loadLocGrid(locData);
-		getInteractionsAndBuildGrid();		
-	}
-	/*----------------- Location Methods recently moved ---------------------------------------------*/
-	function loadLocGrid(locData) {
-		var topRegionRows = [];
-		var finalRowData = [];  //console.log("locData = %O", locData);
-		curTree = locData;
+	// /** Alpabetizes all locations and sub-locations in the data object */
+	// function sortLocDataObj(data) {
+	// 	var keys = Object.keys(data).sort();  									//console.log("keys = %O", keys)
+	// 	var returnObj = {};
+	// 	for (var i=0; i<keys.length; i++){ 
+	// 		returnObj[keys[i]] = sortSubLocs(data[keys[i]]);
+	// 	}
+	// 	return returnObj;
+	
+	// 	function sortSubLocs(locObj) {   										console.log("sortSubLocs locObj = %O", locObj)
+	// 		var subLocs = Object.keys(locObj).sort();
+	// 		var returnObj = {};
 
-		addFutureDevMsg();
-		for (var region in locData) { //console.log("region = ", region)
-			topRegionRows.push( [getLocRowData(locData[region], region)] );
+	// 		for (var i=0; i<subLocs.length; i++){
+	// 			if (Array.isArray(locObj[subLocs[i]])) { 
+	// 				returnObj[subLocs[i]] = locObj[subLocs[i]].sort(alphaLocDesc);
+	// 			} else if (typeof locObj[subLocs[i]] === "object" && locObj[subLocs[i]] !== null) {  
+	// 				handleLocObj(locObj[subLocs[i]], subLocs[i]); }
+	// 		}		
+	// 		return returnObj;
+
+	// 		function handleLocObj(locObj, subLoc) {
+	// 			if (locObj.id === undefined) { returnObj[subLoc] = sortSubLocs(locObj); 
+	// 			} else { returnObj[subLoc] = locObj; }
+	// 		}
+	// 	} /* End sortSubLocs */
+	// } /* End sortLocDataObj */
+	// /** Alphabetizes array via sort method. */
+	// function alphaLocDesc(a, b) {
+	// 	var x=a.desc.toLowerCase();
+	//     var y=b.desc.toLowerCase();
+	//     return x<y ? -1 : x>y ? 1 : 0;
+	// }
+	/**
+	 * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
+	 * to transform tree data into grid format and load the data grid.
+	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
+	 * contained in taxa data tree.
+	 */
+	function buildLocSearchUiAndGrid(locData) {  console.log("buildLocSearchUiAndGrid called. locData = %O", locData)
+		curTree = locData;
+		clearPreviousGrid();
+		transformLocDataAndLoadGrid(locData);
+	}
+/*---------Loc Data Formatting------------------------------------------------*/
+	/**
+	 * Transforms the tree's location data into the grid format, adds to each 
+	 * location the total number of interactions for that location and it's children 
+	 * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
+	 * Calls @loadGrid to generate the grid.
+	 */
+	function transformLocDataAndLoadGrid(locTree) {
+		var finalRowData = [];  //console.log("locTree = %O", locTree);
+		curTree = locTree;
+
+		for (var region in locTree) { //console.log("region = ", region)
+			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
 		}
-		topRegionRows.forEach(function(regionRowAry){ $.merge(finalRowData, regionRowAry);	}); 
-		backfillSubInteractionsIntoCnt(finalRowData);
+		addTotalIntCntsToTreeNodes(finalRowData);
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		addFutureDevMsg();
 		loadGrid("Location Tree");
+	}
+	/**
+	 * Returns a row data object for the passed location and it's children. 
+	 */
+	function getLocRowData(locRcrd) {  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+		return {
+			name: locRcrd.displayName,	/* Interaction rows have no name to display. */
+			isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
+			open: openRows.indexOf(locRcrd.displayName) !== -1, 
+			children: getLocRowDataForRowChildren(locRcrd),
+			intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
+			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
+		};		
+	}
+	/**
+	 * Returns an array of the location's interaction records and any child location's 
+	 * row data objects. Each will be a row in the final grid nested directly under
+	 * the passed location.
+	 */
+	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+		var rowObjsAry = [];
+		var intRows = getLocInteractions(locRcrd.interactions);
+	
+		if (locRcrd.children) {
+			locRcrd.children.forEach(function(childLoc){
+				rowObjsAry.push( getLocRowData( childLoc ));
+			});
+		}
+		$.merge(rowObjsAry, intRows);
+		return rowObjsAry;
+	}
+	/**
+	 * Returns an array of interaction record objs. On the init pass for a new data
+	 * set, interactions in array are only their id. Once the interaction records have 
+	 * been filled in, interaction data objects are created and returned for each taxon.
+	 */
+	function getLocInteractions(intRcrdAry) {
+		if (intRcrdAry) {
+			return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
+				if (typeof intRcrd !== "number") {
+					var intRcrdObj = { isParent: false };
+					return buildIntDataObj(intRcrd, intRcrdObj);
+				}
+				return intRcrd;
+			});
+		}
+		return [];
 	}
 	function addFutureDevMsg() {
 		$('#opts-col2').empty();
@@ -354,38 +426,6 @@
 		 " additions such as map views. Once that is complete, this location view will " + 
 		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
 		$('#opts-col2').append(div);
-	}
-	function getLocRowData(locObj, locName) {  //console.log("getLocRowData. arguments = %O", arguments);
-		return {
-			name: locName || null,	/* Interaction rows have no name to display. */
-			isParent: locObj.interactionType === undefined,  /* Only interaction records return false. */
-			open: openRows.indexOf(locName) !== -1, 
-			children: getLocRowDataForChildren(locObj),
-			intCnt: locObj.interactions !== undefined ? locObj.interactions.length : null,
-			interactions: locObj.interactions !== undefined,     /* Location objects have collections of interactions as children. */     
-		};		
-	}
-	function getLocRowDataForChildren(locObj) {//console.log("getLocRowDataForChildren called. locObj = %O", locObj)
-		var regionRows = [];
-		if (locObj.interactionType !== undefined) { return false; }
-		if (Array.isArray(locObj)) { return handleUnspecifiedRegions(locObj); }
-		if (locObj.interactions !== undefined) { return getlocIntRowData(locObj.interactions); }
-
-		for (var country in locObj) {
-			regionRows.push( getLocRowData( locObj[country], country ) );
-		}
-		return regionRows;
-	}
-	function handleUnspecifiedRegions(locAry) {
-		return locAry.map(function(locObj){
-			return getLocRowData(locObj, locObj.desc);
-		});
-	}
-	function getlocIntRowData(intRcrdAry) {
-		return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
-			var intRcrdObj = { isParent: false };
-			return getIntData(intRcrd, intRcrdObj);
-		});
 	}
 	/*-----------------Grid Methods-------------------------------------------*/
 	/*----------------- Shared -----------------------------------------------*/
