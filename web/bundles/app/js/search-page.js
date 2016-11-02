@@ -241,9 +241,9 @@
 /*------------------Taxa Search Methods---------------------------------------*/
     /**
      * If taxa data is already in local storage, the domain and taxa records are 
-     * sent to @showTaxonSearchUi to begin building the data grid. Otherwise, an
+     * sent to @initTaxonSearchUi to begin building the data grid. Otherwise, an
      * ajax call gets the records and they are stored @storeTaxa before continuing 
-     * to @showTaxonSearchUi.  
+     * to @initTaxonSearchUi.  
      */
     function getTaxa() { 
         var rcrdData = {}; 
@@ -251,7 +251,7 @@
             JSON.parse(localStorage.getItem('domainRcrds')) : false; 
         if( rcrdData.domainRcrds ) { //console.log("Stored Taxa Loaded");
             rcrdData.taxaRcrds = JSON.parse(localStorage.getItem('taxaRcrds'));
-            showTaxonSearchUi(rcrdData);
+            initTaxonSearchUi(rcrdData);
         } else { // console.log("Taxa Not Found In Storage.");
             sendAjaxQuery({}, 'search/taxa', storeTaxa);
         }
@@ -259,14 +259,14 @@
     function storeTaxa(data) {                                          		//console.log("taxa data recieved. %O", data);
         populateStorage('domainRcrds', JSON.stringify(data.domainRcrds));
         populateStorage('taxaRcrds', JSON.stringify(data.taxaRcrds));
-        showTaxonSearchUi(data);
+        initTaxonSearchUi(data);
     }
     /**
      * If the taxa search html isn't already built and displayed, calls @buildTaxaSearchHtml
      * If no domain already selected, sets the default domain value for the taxa search grid 
      * and calls the select dropdown's change handler to build the grid @onTaxaSearchMethodChange.  
      */
-    function showTaxonSearchUi(data) {
+    function initTaxonSearchUi(data) {
         var domainTaxonRcrd;
         rcrdsById = data.taxaRcrds;
         if (!$("#sel-domain").length) { buildTaxaSearchHtml(data.domainRcrds); }    
@@ -275,7 +275,6 @@
         domainTaxonRcrd = storeAndReturnDomain();
         initTaxaTree(domainTaxonRcrd);
         getInteractionsAndFillTree();
-        // onTaxaSearchMethodChange();
     }
     /**
      * Builds the HTML for the search methods available for the taxa-focused search,
@@ -573,14 +572,14 @@
 	}
 	/** Sorts the location tree alphabetically. */
 	function sortLocTree(tree) {
-		var keys = Object.keys(tree).sort();    console.log("keys = %O", keys)
+		var keys = Object.keys(tree).sort();    
 		var sortedTree = {};
-		for (var i=0; i<keys.length; i++){ console.log("keys[i] = %s, tree[keys[i]] = %O",keys[i], tree[keys[i]] )
+		for (var i=0; i<keys.length; i++){ 
 			sortedTree[keys[i]] = sortChildLocs(tree[keys[i]]);
 		}
 		return sortedTree;
 	
-		function sortChildLocs(location) {  console.log("sortChildLocs location = %O", location)
+		function sortChildLocs(location) { 
 			if (location.children) {
 				location.children = location.children.sort(alphaLocNames);
 				location.children.forEach(sortChildLocs);
@@ -682,14 +681,12 @@
 		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
 		$('#opts-col2').append(div);
 	}
-	/*-----------------Grid Methods-------------------------------------------*/
-	/*----------------- Shared -----------------------------------------------*/
 	/**
 	 * When the grid rowModel is updated, the total interaction count for each 
 	 * tree node, displayed in the "count" column, is updated to count only displayed
 	 * interactions. Any rows filtered out will not be included in the totals.
 	 */
-    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+    function onModelUpdated() {// console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
 		updateSubInteractionCount( gridOptions.api.getModel().rootNode );
 	}
 	/**
