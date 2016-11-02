@@ -370,7 +370,7 @@ span.lbl {
 	padding: .3em;
 	height: 100%;
 	flex: 0 0 370px;  	 /*Don't grow or shrink, width.*/ 
-	justify-content: space-between;
+	justify-content: space-around;
 	align-items: flex-end;
 }
 
