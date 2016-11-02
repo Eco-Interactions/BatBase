@@ -158,6 +158,7 @@ class SearchController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $locDataById = new \stdClass;
+        $topRegions = [];
 
         $regionLocs = $em->getRepository('AppBundle:Location')
             ->findBy(array('locationType' => '1'));
@@ -165,12 +166,15 @@ class SearchController extends Controller
         foreach ($regionLocs as $locEntity) 
         {                    
             $locId = $locEntity->getId(); 
-            $locDataById->$locId = $this->getLocationData($locEntity, $locDataById);
+            if ($locEntity->getParentLoc() === null) {  /** Only top regions are handled here */
+                array_push($topRegions, $locId);
+                $locDataById->$locId = $this->getLocationData($locEntity, $locDataById);
+            }
         }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $locDataById               
+            'locRcrds' => $locDataById, 'topRegions' => $topRegions               
         ));
 
         return $response;
@@ -202,7 +206,7 @@ class SearchController extends Controller
         $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
         
         $interactions = $locEntity->getInteractions();
-        $data->interactions = $this->getInteractionIds($locEntity);
+        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
 
         return $data;
     }    
