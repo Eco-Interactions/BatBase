@@ -139,48 +139,48 @@
 			buildGridFunc();
 		}
 	} /* End ifChangedFocus */
-/*------------------Interaction (Record Fill) Methods-------------------------*/
+/*------------------Interaction Search Methods--------------------------------------*/
 	/**
-	 * Checks if interaction records have been saved in local storage. If not, sends 
-	 * ajax to get them with @storeInteractions as the success callback. If records 
-	 * are available in storage call @fillTreeWithInteraction. 
+	 * If interaction data is already in local storage, the data is sent to 
+	 * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, an
+	 * ajax call gets the data which is stored @storeTaxa before being sent to  
+	 * to @fillTreeWithInteractions.  	 
 	 */
-	function getInteractionsAndBuildGrid() {  												//console.log("getInteractionsAndBuildGrid called. ")
+	function getInteractionsAndFillTree() {  	console.log("getInteractionsAndFillTree called. ")
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		fadeGrid();
-		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
+		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data.results);
-		var intRcrds = JSON.stringify(data.results);
-		populateStorage('intRcrds', intRcrds);  
-		// fillTreeWithInteractions( data.results );
+	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data);
+		populateStorage('intRcrds', JSON.stringify(data.intRcrds));  
+		fillTreeWithInteractions( data.intRcrds );
 	}
 	/**
-	 * Back fills the displayed search focus' data tree with interaction records
-	 * and then rebuilds the displayed grid.
+	 * Fills the current data tree with interaction records and then rebuilds the 
+	 * displayed grid.
 	 */
-	function fillTreeWithInteractions(intRcrds) {   							//console.log("fillTreeWithInteractionscalled.");
+	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
 		var gridBuilder;
 		var focus = localStorage.getItem('curFocus'); 
 		clearPreviousGrid();
 
 		if (focus === "taxa"){  //console.log("focus = 'taxa'");
-			gridBuilder = buildBrowseSearchOptsndGrid;
+			gridBuilder = buildTaxaSearchUiAndGrid;
 			fillTaxaSetWithInteractionRcrds(curTree);  
 	    	fillHiddenTaxaColumns(curTree);
 		} else if (focus === "locs") { //console.log("focus = 'locs'");
-			gridBuilder = loadLocGrid;
-			fillLocsSetWithInteractionRcrds(curTree)
+			gridBuilder = buildLocSearchUiAndGrid;
+			fillLocSetWithInteractionRcrds(curTree)
 		}
 		gridBuilder(curTree);
 	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
-	    /**
-	     * The taxa tree is structured as a familial heirarchy, with the domain taxa
-	     * as the top-most parent, and the first "sibling".
-	     */
+		/**
+		 * Recurses through each taxon's 'children' property and replaces all 
+		 * interaction ids with the interaction records.
+		 */
 		function fillTaxaSetWithInteractionRcrds(treeObj) { 					//console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
 			for (var sibling in treeObj) {   
 				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds);
@@ -194,38 +194,55 @@
 			}
 		}
 		/**
-		 * The Location tree obj has regions as keys at the top-most level. If 
-		 * that region has countries, it is an object with it's countries as keys. 
-		 * If a region has no countries, and for every country key, the location 
-		 * records are in array format.
+		 * Recurses through each location's 'children' property and replaces all 
+		 * interaction ids with the interaction records.
 		 */
-		function fillLocsSetWithInteractionRcrds(treeObj) { 					//console.log("fillLocsSetWithInteractionRcrds. locsTree = %O", treeObj);
-			for (var topKey in treeObj) {  										//console.log("topKey of treeObj = ", topKey);
-				if (Array.isArray(treeObj[topKey])) {  
-					getArrayInteractions(treeObj[topKey]);
-				} else {
-					fillLocsSetWithInteractionRcrds(treeObj[topKey]);
-				}
+		function fillLocSetWithInteractionRcrds(treeObj) { 		//console.log("fillLocSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
+			for (var sibling in treeObj) {  //console.log("sibling = %O", treeObj[sibling]);
+				if (treeObj[sibling].interactions !== null) { 
+					treeObj[sibling].interactions = replaceInteractions(treeObj[sibling].interactions); }
+				if (treeObj[sibling].children) { 
+					fillLocSetWithInteractionRcrds(treeObj[sibling].children); }
 			}
 		}
-		function getArrayInteractions(treeAry) { 								//console.log("treeAry = %O", treeAry)
-			treeAry.forEach(function(locObj){
-				replaceInteractions(locObj.interactions, intRcrds)
-			});
-		}
-		function replaceInteractions(interactionsAry) {  						//console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-			interactionsAry.forEach(function(intId, idx, orgAry){
-				if (typeof intId === "number") {	//If not, then the tree has already been 
-					orgAry[idx] = intRcrds[intId];	//filled with the interaction records
-				}
+		function replaceInteractions(interactionsAry) { //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+			return interactionsAry.map(function(intId){
+				if (typeof intId === "number") {	//console.log("new record = %O", intRcrds[intId]);
+					return intRcrds[intId];	
+				}  console.log("####replacing interactions a second time?");
 			});
 		}
 	} /* End fillTreeWithInteractions */
+	/**
+	 * Returns an interaction record object with flat data in grid-ready format. 
+	 */
+	function buildIntDataObj(intRcrd, intRcrdObj){  
+		return {
+			id: intRcrd.id,
+			note: intRcrd.note, 
+			interactionType: intRcrd.interactionType,
+			source: intRcrd.source.name,
+			subject: getTaxonName(intRcrd.subject),
+			object: getTaxonName(intRcrd.object),
+			tags: getTags(intRcrd.tags),
+			habitatType: intRcrd.habitatType,
+			location: intRcrd.location ? intRcrd.location.name : null 
+		};
+	}
+	function getTags(tagAry) {
+		var tagStrAry = [];
+		tagAry.forEach(function(tagStr) { tagStrAry.push(tagStr); });
+		return tagStrAry.join(', ');
+	}
+	function getTaxonName(taxaData) { 											//console.log("taxaData = %O", taxaData)
+		return taxaData.level === "Species" ? 
+			taxaData.name : taxaData.level + ' ' + taxaData.name;
+	}	
 /*------------------Source Search Methods-----------------------------------*/
 	function getSources() {
 		var storedSrcs = localStorage ? localStorage.getItem('srcRcrds') : false; 
 		if( storedSrcs ) {  //console.log("Stored Source data Loaded");
-			showLocSearch(JSON.parse(storedLocs));
+			buildLocSearchUiAndGrid(JSON.parse(storedLocs));
 		} else { //console.log("Sources Not Found In Storage.");
 			sendAjaxQuery({}, 'search/source', storeAndLoadSrcs);
 		}
@@ -1032,13 +1049,6 @@
 		tagAry.forEach(function(tagStr) {
 			tagStrAry.push(tagStr);
 		});
-		return tagStrAry.join(', ');
-	}
-	function getTaxonName(taxaData) { 											//console.log("taxaData = %O", taxaData)
-		return taxaData.level == "Species" ? 
-				taxaData.name : 
-				taxaData.level + ' ' + taxaData.name;
-	}	
 	/**
 	 * Copied from agGrid's default template, with columnId added to create unique ID's
 	 * @param  {obj} params  {column, colDef, context, api}
