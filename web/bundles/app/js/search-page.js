@@ -675,23 +675,22 @@
      * to @initSrcSearchUi.  
      */
    	function getSources() {
-		var rcrdData = {};
-		rcrdData.storedSrcs = localStorage ? JSON.parse(localStorage.getItem('srcRcrds')) : false; 
-		if( rcrdData.storedSrcs ) {  //console.log("Stored Source data Loaded");
-			rcrdData.authRcrds = JSON.parse(localStorage.getItem('authRcrds'));
-			rcrdData.pubRcrds = JSON.parse(localStorage.getItem('pubRcrds'));
-			initSrcSearchUi(rcrdData);
+		var sortedSrcs = {};
+		var srcRcrdsById = localStorage ? JSON.parse(localStorage.getItem('srcRcrds')) : false; 
+		if( srcRcrdsById ) {  //console.log("Stored Source data Loaded");
+			sortedSrcs.authors = JSON.parse(localStorage.getItem('authRcrds'));
+			sortedSrcs.publications = JSON.parse(localStorage.getItem('pubRcrds'));
+			initSrcSearchUi(sortedSrcs, srcRcrdsById);
 		} else { //console.log("Sources Not Found In Storage.");
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
 		}
 	}
 	function seperateAndStoreSrcs(data) {						console.log("source data recieved. %O", data);
 		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 							//console.log("preppedData = %O", preppedData);
-		preppedData.srcRcrds = data.srcRcrds;
-		populateStorage('srcRcrds', JSON.stringify(preppedData.srcRcrds));
+		populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
 		populateStorage('authRcrds', JSON.stringify(preppedData.authRcrds));
 		populateStorage('pubRcrds', JSON.stringify(preppedData.pubRcrds));
-		initSrcSearchUi(preppedData);
+		initSrcSearchUi(preppedData, data.srcRcrds);
 	}
 	/**
 	 * Sources have two types of 'tree' data: Authors -> Interactions, and
@@ -709,17 +708,46 @@
 				pubs[srcRcrds[key].displayName] = srcRcrds[key];
 			}
 		}
-		return { authRcrds: authors, pubRcrds: pubs };
+		return { authors: authors, publications: pubs };
 	}
-    function initSrcSearchUi(data) {						console.log("preppedSrcDta = %O", data);
-
-
-
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {					console.log("init search ui");
+        rcrdsById = srcRcrdsById;
+        if (!$("#sel-src-domain").length) { buildSrcSearchHtml(sortedSrcDomains); }    
+        if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('authors'); }
+        storeSrcDomain();
+        initSrcTree(sortedSrcDomains, srcRcrdsById);
     }
+    /**
+     * Builds the select box for the source domain types that will become the data
+     * tree nodes displayed in the grid. 
+     */
+    function buildSrcSearchHtml(data) {                                        	//console.log("buildTaxaSearchHtml called. ");
+        var browseElems = createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
+        var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
+        $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-src-domain' }));
 
+        $('#sort-opts').append(browseElems);
+        $('#sel-src-domain').change(onSrcSearchMethodChange);
+        $('#sort-opts').fadeTo(0, 1);
 
-
-
+        function getDomainOpts(data) {
+            var sourceDomains = Object.keys(data);
+            var opts = sourceDomains.map(function(srcType){
+            	return { value: srcType, text: ucfirst(srcType) };
+            });
+            return opts;
+        }
+    } /* End buildTaxaSearchHtml */
+    /** Event fired when the source domain select box has been changed. */
+    function onSrcSearchMethodChange(e) {  
+    }
+    function storeSrcDomain(argument) {
+        var srcDomain = $('#sel-src-domain').val();
+        populateStorage('curDomain', srcDomain);
+    }
+    function initSrcTree(sortedSrcDomains, srcRcrdsById) {
+    	
+    }
 
 
 
