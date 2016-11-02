@@ -106,7 +106,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (curFocus){ $('#search-focus').val(curFocus);
-		} else { $('#search-focus').val("taxa"); }
+		} else { $('#search-focus').val("srcs"); }
 		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
@@ -502,20 +502,6 @@
         var intRowData = { isParent: false, taxaLvl: taxaLvl };
         return buildIntDataObj(intRcrd, intRowData);
     }
-/*------------------Source Search Methods-----------------------------------*/
-	function getSources() {
-		var storedSrcs = localStorage ? localStorage.getItem('srcRcrds') : false; 
-		if( storedSrcs ) {  //console.log("Stored Source data Loaded");
-			buildLocSearchUiAndGrid(JSON.parse(storedLocs));
-		} else { //console.log("Sources Not Found In Storage.");
-			sendAjaxQuery({}, 'search/source', storeAndLoadSrcs);
-		}
-	}
-	function storeAndLoadSrcs(data) {											console.log("source data recieved. %O", data);
-		// var srcRcrds = sortSrcTree(data.results);
-		// populateStorage('locRcrds', JSON.stringify(locRcrds));
-		// buildLocSearchUiAndGrid(locRcrds);
-	}
 /*------------------Location Search Methods-----------------------------------*/
 	/**
 	 * If location data is already in local storage, the records and top regions are 
@@ -681,6 +667,72 @@
 		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
 		$('#opts-col2').append(div);
 	}
+/*------------------Source Search Methods-----------------------------------*/
+    /**
+     * If source data is already in local storage, the author and publication records 
+     * are sent to @initSrcSearchUi to begin building the data grid. Otherwise, an
+     * ajax call gets the records and they are stored @seperateAndStoreSrcs before continuing 
+     * to @initSrcSearchUi.  
+     */
+   	function getSources() {
+		var rcrdData = {};
+		rcrdData.storedSrcs = localStorage ? JSON.parse(localStorage.getItem('srcRcrds')) : false; 
+		if( rcrdData.storedSrcs ) {  //console.log("Stored Source data Loaded");
+			rcrdData.authRcrds = JSON.parse(localStorage.getItem('authRcrds'));
+			rcrdData.pubRcrds = JSON.parse(localStorage.getItem('pubRcrds'));
+			initSrcSearchUi(rcrdData);
+		} else { //console.log("Sources Not Found In Storage.");
+			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
+		}
+	}
+	function seperateAndStoreSrcs(data) {						console.log("source data recieved. %O", data);
+		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 							//console.log("preppedData = %O", preppedData);
+		preppedData.srcRcrds = data.srcRcrds;
+		populateStorage('srcRcrds', JSON.stringify(preppedData.srcRcrds));
+		populateStorage('authRcrds', JSON.stringify(preppedData.authRcrds));
+		populateStorage('pubRcrds', JSON.stringify(preppedData.pubRcrds));
+		initSrcSearchUi(preppedData);
+	}
+	/**
+	 * Sources have two types of 'tree' data: Authors -> Interactions, and
+	 * (optional: Publisher->)Publications->Citations->Interactions. 
+	 * Each Author and Publication Source records are added to their respective 
+	 * objects and returned.
+	 */
+	function sortAuthAndPubRcrds(srcRcrds) {
+		var authors = {};
+		var pubs = {};
+		for (var key in srcRcrds) {
+			if ("author" in srcRcrds[key].sourceType) {
+				authors[srcRcrds[key].description] = srcRcrds[key];
+			} else if ("publication" in srcRcrds[key].sourceType) {
+				pubs[srcRcrds[key].displayName] = srcRcrds[key];
+			}
+		}
+		return { authRcrds: authors, pubRcrds: pubs };
+	}
+    function initSrcSearchUi(data) {						console.log("preppedSrcDta = %O", data);
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*-----------------Grid Methods-----------------------------------------------*/
 	/**
 	 * When the grid rowModel is updated, the total interaction count for each 
 	 * tree node, displayed in the "count" column, is updated to count only displayed
