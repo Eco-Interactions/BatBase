@@ -48,7 +48,6 @@ class SearchController extends Controller
         $response->setData(array(
             'rcrdCount' => count($interactions)
         ));
-
         return $response;
     }
     /**------------------------Search By Taxa---------------------------------*/
@@ -79,7 +78,7 @@ class SearchController extends Controller
 
         $response = new JsonResponse();
         $response->setData(array(                                    
-            'domainData' => $domainData, 'taxaData' => $taxaData
+            'domainRcrds' => $domainData, 'taxaRcrds' => $taxaData
         )); 
         return $response;
     }
@@ -107,7 +106,7 @@ class SearchController extends Controller
         $data = new \stdClass;
 
         $data->id = $taxon->getId();
-        $data->name = $taxon->getDisplayName();
+        $data->displayName = $taxon->getDisplayName();
         $data->slug = $taxon->getSlug();
         $data->children = $this->getTaxaChildren($taxon, $taxaData);
         $data->parentTaxon = $taxon->getParentTaxon() ?
