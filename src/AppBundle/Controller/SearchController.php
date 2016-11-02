@@ -359,34 +359,77 @@ class SearchController extends Controller
         {                     
             $rcrd = new \stdClass;
             $intId = $int->getId();
+            $intRcrds->$intId = $rcrd;
+            
             $rcrd->id = $intId;
             $rcrd->note = $int->getNote();
-            $rcrd->citation = $int->getCitation()->getDescription();
             $rcrd->interactionType = $int->getInteractionType()->getName();
+            $rcrd->source = array(
+                "name" => $int->getSource()->getDisplayName(),
+                "id" => $int->getSource()->getId());
             $rcrd->subject = array(
                 "name" => $int->getSubject()->getDisplayName(),
                 "level" => $int->getSubject()->getLevel()->getName(),
-                "id" => $int->getSubject()->getId() );  
+                "id" => $int->getSubject()->getId());  
             $rcrd->object = array(
                 "name" => $int->getObject()->getDisplayName(),
                 "level" => $int->getObject()->getLevel()->getName(),
-                "id" => $int->getObject()->getId() );
+                "id" => $int->getObject()->getId());
             $rcrd->tags = $this->getTagAry($int->getTags());  
 
             if ($int->getLocation() !== null) {
-                $rcrd->location = $int->getLocation()->getDescription();
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
-                    null : $int->getLocation()->getHabitatType()->getName() ;
+                    null : $int->getLocation()->getHabitatType()->getName();
+                $rcrd->location = $this->getInteractionLocData($int);
+            } else {
+                $rcrd->location = null;
+                $rcrd->habitatType = null;
             }
-            $intRcrds->$intId = $rcrd;
         }
-        
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $intRcrds
+            'intRcrds' => $intRcrds
         ));
-
         return $response;
+    }
+    private function getInteractionLocData($int)
+    {
+        $location = $int->getLocation();
+        $locData = new \stdClass;
+
+        $locData->name = $location->getDisplayName();
+        $locData->id = $location->getId();
+        $locData->type = $location->getLocationType()->getName(); 
+
+        if ($locData->type === "Area" || $locData->type === "Point" || $locData->type === "Habitat") { 
+            $parentType = $location->getParentLoc()->getLocationType()->getName();
+            $this->getCountryAndRegion($location->getParentLoc(), $parentType, $locData);
+        } else if ($locData->type === "Country") {  
+            $locData->country = $locData->name;
+            $parentType = $location->getParentLoc()->getLocationType()->getName();
+            $this->getRegion($location->getParentLoc(), $parentType, $locData);
+        } else if ($locData->type === "Region") {
+            $locData->country = null;
+            $locData->region = $locData->name;
+        }
+        return $locData;
+    }
+    private function getCountryAndRegion($parentLoc, $parentType, &$locData)
+    {
+        if ($parentType === "Country") {
+            $locData->country = $parentLoc->getDisplayName();
+            $grandParentType = $parentLoc->getParentLoc()->getLocationType()->getName();
+            $this->getRegion($parentLoc->getParentLoc(), $grandParentType, $locData);
+        } else {
+            $locData->country = null;
+            $this->getRegion($parentLoc, $parentType, $locData);
+        }
+    }
+    private function getRegion($parentLoc, $parentType, &$locData)
+    {
+        if ($parentType === "Region") {
+            $locData->region = $parentLoc->getDisplayName();
+        }
     }
 /**------------------------Shared Search Methods------------------------------*/
     private function getInteractionIds($interactions)
