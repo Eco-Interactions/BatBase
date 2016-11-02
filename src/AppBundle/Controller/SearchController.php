@@ -238,7 +238,7 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $srcDataById = new \stdClass;
+        $srcRcrds = new \stdClass;
 
         $srcEntities = $em->getRepository('AppBundle:Source')
             ->findAll();
@@ -246,12 +246,12 @@ class SearchController extends Controller
         foreach ($srcEntities as $srcEntity) 
         {                    
             $id = $srcEntity->getId(); 
-            $srcDataById->$id = $this->getSourceData($srcEntity, $srcDataById);
+            $srcRcrds->$id = $this->getSourceData($srcEntity, $srcRcrds);
         }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $srcDataById               
+            'srcRcrds' => $srcRcrds               
         ));
 
         return $response;
@@ -259,7 +259,7 @@ class SearchController extends Controller
     /**
      * Builds and returns Source Data object.
      */
-    private function getSourceData($srcEntity, &$srcDataById)
+    private function getSourceData($srcEntity, &$srcRcrds)
     {
         $data = new \stdClass; 
 
@@ -276,14 +276,14 @@ class SearchController extends Controller
         $data->parentSource = $parentSource == null ? null : $parentSource->getId();
 
         $sourceType = $srcEntity->getSourceType()->getDisplayName();
-        $data->sourceType = $sourceType;
+        $data->sourceType = new \stdClass;
 
         if ($sourceType === "Author") {
-            $data->author = $this->getAuthorData($srcEntity);
+            $data->sourceType->author = $this->getAuthorData($srcEntity);
         } else if ($sourceType === "Publication") {
-            $data->publication = $this->getPublicationData($srcEntity);
+            $data->sourceType->publication = $this->getPublicationData($srcEntity);
         } else if ($sourceType === "Citation") {
-            $data->citation = $this->getCitationData($srcEntity);
+            $data->sourceType->citation = $this->getCitationData($srcEntity);
         }
         return $data;
     }    
