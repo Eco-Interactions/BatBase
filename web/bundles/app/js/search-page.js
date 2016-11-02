@@ -238,251 +238,6 @@
 		return taxaData.level === "Species" ? 
 			taxaData.name : taxaData.level + ' ' + taxaData.name;
 	}	
-/*------------------Source Search Methods-----------------------------------*/
-	function getSources() {
-		var storedSrcs = localStorage ? localStorage.getItem('srcRcrds') : false; 
-		if( storedSrcs ) {  //console.log("Stored Source data Loaded");
-			buildLocSearchUiAndGrid(JSON.parse(storedLocs));
-		} else { //console.log("Sources Not Found In Storage.");
-			sendAjaxQuery({}, 'search/source', storeAndLoadSrcs);
-		}
-	}
-	function storeAndLoadSrcs(data) {											console.log("source data recieved. %O", data);
-		// var srcRcrds = sortSrcTree(data.results);
-		// populateStorage('locRcrds', JSON.stringify(locRcrds));
-		// buildLocSearchUiAndGrid(locRcrds);
-	}
-/*------------------Location Search Methods-----------------------------------*/
-	/**
-	 * If location data is already in local storage, the records and top regions are 
-	 * sent to @buildLocTree to begin building the data tree and grid. Otherwise, an
-	 * ajax call gets the records and they are stored @storeLocs before continuing 
-	 * to @buildLocTree.  
-	 */
-	function getLocations() {
-		var data = {};
-		data.locRcrds = localStorage ? JSON.parse(localStorage.getItem('locRcrds')) : false; 
-		if( data.locRcrds ) {  
-			rcrdsById = data.locRcrds;
-			data.topRegions = JSON.parse(localStorage.getItem('topRegions'));  console.log("Stored Locations Loaded = %O", data);
-			buildLocTree(data.topRegions);
-		} else { //console.log("Locations Not Found In Storage.");
-			sendAjaxQuery({}, 'search/location', storeLocs);
-		}
-	}
-	function storeLocs(data) {													console.log("location data recieved. %O", data);
-		populateStorage('locRcrds', JSON.stringify(data.locRcrds));
-		populateStorage('topRegions', JSON.stringify(data.topRegions));
-		rcrdsById = data.locRcrds;   
-		buildLocTree(data.topRegions);
-	}
-	/**
-	 * Builds a tree of location data with regions at the top level, and sub-regions,
-	 * countries, areas, and points as nested children. Alphabetizes the tree and 
-	 * adds it to the global 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue.
-	 */	
-	function buildLocTree(topRegions) {
-		var region;
-		var locTree = {};
-		topRegions.forEach(function(regionId){  
-			region = rcrdsById[regionId];
-			locTree[region.displayName] = region;
-			region.children = fillChildLocRcrds(region.childLocs);
-		});  console.log("tree = %O", locTree);
-		curTree = sortLocTree(locTree);
-		getInteractionsAndFillTree();
-	}
-	function fillChildLocRcrds(childLocIds) {
-		var locRcrd;
-		var branch = [];
-		childLocIds.forEach(function(locId){
-			if (typeof locId === "number") {
-				locRcrd = rcrdsById[locId];
-				branch.push(locRcrd);
-				if (locRcrd.childLocs.length >= 1) {
-					locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
-				}
-			} else { console.log("~~~child location [object]~~~"); return locId; }
-		});
-		return branch;
-	}
-	/** Sorts the location tree alphabetically. */
-	function sortLocTree(tree) {
-		var keys = Object.keys(tree).sort();    console.log("keys = %O", keys)
-		var sortedTree = {};
-		for (var i=0; i<keys.length; i++){ console.log("keys[i] = %s, tree[keys[i]] = %O",keys[i], tree[keys[i]] )
-			sortedTree[keys[i]] = sortChildLocs(tree[keys[i]]);
-		}
-		return sortedTree;
-	
-		function sortChildLocs(location) {  console.log("sortChildLocs location = %O", location)
-			if (location.children) {
-				location.children = location.children.sort(alphaLocNames);
-				location.children.forEach(sortChildLocs);
-			}
-			return location;
-		} /* End sortChildLocs */
-	} /* End sortLocTree */
-	/** Alphabetizes array via sort method. */
-	function alphaLocNames(a, b) {
-		var x=a.displayName.toLowerCase();
-	    var y=b.displayName.toLowerCase();
-	    return x<y ? -1 : x>y ? 1 : 0;
-	}
-	/**
-	 * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
-	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
-	 * to transform tree data into grid format and load the data grid.
-	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
-	 * contained in taxa data tree.
-	 */
-	function buildLocSearchUiAndGrid(locData) {  console.log("buildLocSearchUiAndGrid called. locData = %O", locData)
-		curTree = locData;
-		clearPreviousGrid();
-		transformLocDataAndLoadGrid(locData);
-	}
-/*---------Loc Data Formatting------------------------------------------------*/
-	/**
-	 * Transforms the tree's location data into the grid format, adds to each 
-	 * location the total number of interactions for that location and it's children 
-	 * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
-	 * Calls @loadGrid to generate the grid.
-	 */
-	function transformLocDataAndLoadGrid(locTree) {
-		var finalRowData = [];  //console.log("locTree = %O", locTree);
-		curTree = locTree;
-
-		for (var region in locTree) { //console.log("region = ", region)
-			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
-		}
-		addTotalIntCntsToTreeNodes(finalRowData);
-		rowData = finalRowData;													//console.log("rowData = %O", rowData);
-		addFutureDevMsg();
-		loadGrid("Location Tree");
-	}
-	/**
-	 * Returns a row data object for the passed location and it's children. 
-	 */
-	function getLocRowData(locRcrd) {  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
-		return {
-			name: locRcrd.displayName,	/* Interaction rows have no name to display. */
-			isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
-			open: openRows.indexOf(locRcrd.displayName) !== -1, 
-			children: getLocRowDataForRowChildren(locRcrd),
-			intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
-			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
-		};		
-	}
-	/**
-	 * Returns an array of the location's interaction records and any child location's 
-	 * row data objects. Each will be a row in the final grid nested directly under
-	 * the passed location.
-	 */
-	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
-		var rowObjsAry = [];
-		var intRows = getLocInteractions(locRcrd.interactions);
-	
-		if (locRcrd.children) {
-			locRcrd.children.forEach(function(childLoc){
-				rowObjsAry.push( getLocRowData( childLoc ));
-			});
-		}
-		$.merge(rowObjsAry, intRows);
-		return rowObjsAry;
-	}
-	/**
-	 * Returns an array of interaction record objs. On the init pass for a new data
-	 * set, interactions in array are only their id. Once the interaction records have 
-	 * been filled in, interaction data objects are created and returned for each taxon.
-	 */
-	function getLocInteractions(intRcrdAry) {
-		if (intRcrdAry) {
-			return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
-				if (typeof intRcrd !== "number") {
-					var intRcrdObj = { isParent: false };
-					return buildIntDataObj(intRcrd, intRcrdObj);
-				}
-				return intRcrd;
-			});
-		}
-		return [];
-	}
-	function addFutureDevMsg() {
-		$('#opts-col2').empty();
-		var div = document.createElement("div");
-		div.id = "loc-dev-msg";
-		$(div).text("We will soon be restructuring how location data is " +
-		 "stored in the database to be more flexible and more compatible with future " + 
-		 " additions such as map views. Once that is complete, this location view will " + 
-		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
-		$('#opts-col2').append(div);
-	}
-	/*-----------------Grid Methods-------------------------------------------*/
-	/*----------------- Shared -----------------------------------------------*/
-	/**
-	 * When the grid rowModel is updated, the total interaction count for each 
-	 * tree node, displayed in the "count" column, is updated to count only displayed
-	 * interactions. Any rows filtered out will not be included in the totals.
-	 */
-    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
-		updateSubInteractionCount( gridOptions.api.getModel().rootNode );
-	}
-	/**
-	 * Sets new interaction totals for each tree node @getChildrenCnt and then 
-	 * calls the grid's softRefresh method, which refreshes any rows with "volatile"
-	 * set "true" in the columnDefs - currently only "Count".
-	 */
-	function updateSubInteractionCount(rootNode) {
-		getChildrenCnt(rootNode.childrenAfterFilter);  
-		gridOptions.api.softRefreshView();
-	}
-	function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
-		var nodeCnt, ttl = 0;
-		nodeChildren.forEach(function(child) {
-			nodeCnt = 0;
-			nodeCnt += addSubNodeInteractions(child);
-			ttl += nodeCnt;
-			if (nodeCnt !== 0 && child.data.intCnt !== null) { 
-				child.data.intCnt = nodeCnt; }
-		});
-		return ttl;
-	}
-	/**
-	 * Interaction records are identified by their lack of any children, specifically 
-	 * their lack of a "childrenAfterFilter" property.
-	 */
-	function addSubNodeInteractions(child) {  
-		var cnt = 0;
-		if (child.childrenAfterFilter) {
-			cnt += getChildrenCnt(child.childrenAfterFilter);
-			if (cnt !== 0) { child.data.intCnt = cnt; }
-		} else { 
-			++cnt;
-			child.data.intCnt = null; 
-		}
-		return cnt;
-	}
-	function addTotalIntCntsToTreeNodes(rowData) {   //console.log("rowData = %O", rowData);
-		for (var treeNode in rowData) { //console.log("rowData[treeNode] = %O", rowData[treeNode]);
-			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
-			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
-			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
-			if (rowData[treeNode].children) { 
-				addTotalIntCntsToTreeNodes(rowData[treeNode].children); 
-			}
-		}
-	}
-	function addSubInteractions(treeNode) {  //console.log("addSubInteractions called. treeNode =%O", treeNode);
-		var cnt = 0;
-		for (var childNode in treeNode.children) {
-			if (treeNode.children[childNode].interactions) {
-				var childCnt = treeNode.children[childNode].intCnt || 0; //console.log("childCnt = ", childCnt)
-				cnt += childCnt;
-			}
-			if (treeNode.children[childNode].children) { cnt += addSubInteractions(treeNode.children[childNode]); }
-		}
-		return cnt;
-	}
 /*------------------Taxa Search Methods---------------------------------------*/
     /**
      * If taxa data is already in local storage, the domain and taxa records are 
@@ -748,6 +503,251 @@
         var intRowData = { isParent: false, taxaLvl: taxaLvl };
         return buildIntDataObj(intRcrd, intRowData);
     }
+/*------------------Source Search Methods-----------------------------------*/
+	function getSources() {
+		var storedSrcs = localStorage ? localStorage.getItem('srcRcrds') : false; 
+		if( storedSrcs ) {  //console.log("Stored Source data Loaded");
+			buildLocSearchUiAndGrid(JSON.parse(storedLocs));
+		} else { //console.log("Sources Not Found In Storage.");
+			sendAjaxQuery({}, 'search/source', storeAndLoadSrcs);
+		}
+	}
+	function storeAndLoadSrcs(data) {											console.log("source data recieved. %O", data);
+		// var srcRcrds = sortSrcTree(data.results);
+		// populateStorage('locRcrds', JSON.stringify(locRcrds));
+		// buildLocSearchUiAndGrid(locRcrds);
+	}
+/*------------------Location Search Methods-----------------------------------*/
+	/**
+	 * If location data is already in local storage, the records and top regions are 
+	 * sent to @buildLocTree to begin building the data tree and grid. Otherwise, an
+	 * ajax call gets the records and they are stored @storeLocs before continuing 
+	 * to @buildLocTree.  
+	 */
+	function getLocations() {
+		var data = {};
+		data.locRcrds = localStorage ? JSON.parse(localStorage.getItem('locRcrds')) : false; 
+		if( data.locRcrds ) {  
+			rcrdsById = data.locRcrds;
+			data.topRegions = JSON.parse(localStorage.getItem('topRegions'));  console.log("Stored Locations Loaded = %O", data);
+			buildLocTree(data.topRegions);
+		} else { //console.log("Locations Not Found In Storage.");
+			sendAjaxQuery({}, 'search/location', storeLocs);
+		}
+	}
+	function storeLocs(data) {													console.log("location data recieved. %O", data);
+		populateStorage('locRcrds', JSON.stringify(data.locRcrds));
+		populateStorage('topRegions', JSON.stringify(data.topRegions));
+		rcrdsById = data.locRcrds;   
+		buildLocTree(data.topRegions);
+	}
+	/**
+	 * Builds a tree of location data with regions at the top level, and sub-regions,
+	 * countries, areas, and points as nested children. Alphabetizes the tree and 
+	 * adds it to the global 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue.
+	 */	
+	function buildLocTree(topRegions) {
+		var region;
+		var locTree = {};
+		topRegions.forEach(function(regionId){  
+			region = rcrdsById[regionId];
+			locTree[region.displayName] = region;
+			region.children = fillChildLocRcrds(region.childLocs);
+		});  console.log("tree = %O", locTree);
+		curTree = sortLocTree(locTree);
+		getInteractionsAndFillTree();
+	}
+	function fillChildLocRcrds(childLocIds) {
+		var locRcrd;
+		var branch = [];
+		childLocIds.forEach(function(locId){
+			if (typeof locId === "number") {
+				locRcrd = rcrdsById[locId];
+				branch.push(locRcrd);
+				if (locRcrd.childLocs.length >= 1) {
+					locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
+				}
+			} else { console.log("~~~child location [object]~~~"); return locId; }
+		});
+		return branch;
+	}
+	/** Sorts the location tree alphabetically. */
+	function sortLocTree(tree) {
+		var keys = Object.keys(tree).sort();    console.log("keys = %O", keys)
+		var sortedTree = {};
+		for (var i=0; i<keys.length; i++){ console.log("keys[i] = %s, tree[keys[i]] = %O",keys[i], tree[keys[i]] )
+			sortedTree[keys[i]] = sortChildLocs(tree[keys[i]]);
+		}
+		return sortedTree;
+	
+		function sortChildLocs(location) {  console.log("sortChildLocs location = %O", location)
+			if (location.children) {
+				location.children = location.children.sort(alphaLocNames);
+				location.children.forEach(sortChildLocs);
+			}
+			return location;
+		} /* End sortChildLocs */
+	} /* End sortLocTree */
+	/** Alphabetizes array via sort method. */
+	function alphaLocNames(a, b) {
+		var x=a.displayName.toLowerCase();
+	    var y=b.displayName.toLowerCase();
+	    return x<y ? -1 : x>y ? 1 : 0;
+	}
+	/**
+	 * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
+	 * to transform tree data into grid format and load the data grid.
+	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
+	 * contained in taxa data tree.
+	 */
+	function buildLocSearchUiAndGrid(locData) {  console.log("buildLocSearchUiAndGrid called. locData = %O", locData)
+		curTree = locData;
+		clearPreviousGrid();
+		transformLocDataAndLoadGrid(locData);
+	}
+/*---------Loc Data Formatting------------------------------------------------*/
+	/**
+	 * Transforms the tree's location data into the grid format, adds to each 
+	 * location the total number of interactions for that location and it's children 
+	 * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
+	 * Calls @loadGrid to generate the grid.
+	 */
+	function transformLocDataAndLoadGrid(locTree) {
+		var finalRowData = [];  //console.log("locTree = %O", locTree);
+		curTree = locTree;
+
+		for (var region in locTree) { //console.log("region = ", region)
+			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
+		}
+		addTotalIntCntsToTreeNodes(finalRowData);
+		rowData = finalRowData;													//console.log("rowData = %O", rowData);
+		addFutureDevMsg();
+		loadGrid("Location Tree");
+	}
+	/**
+	 * Returns a row data object for the passed location and it's children. 
+	 */
+	function getLocRowData(locRcrd) {  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+		return {
+			name: locRcrd.displayName,	/* Interaction rows have no name to display. */
+			isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
+			open: openRows.indexOf(locRcrd.displayName) !== -1, 
+			children: getLocRowDataForRowChildren(locRcrd),
+			intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
+			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
+		};		
+	}
+	/**
+	 * Returns an array of the location's interaction records and any child location's 
+	 * row data objects. Each will be a row in the final grid nested directly under
+	 * the passed location.
+	 */
+	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+		var rowObjsAry = [];
+		var intRows = getLocInteractions(locRcrd.interactions);
+	
+		if (locRcrd.children) {
+			locRcrd.children.forEach(function(childLoc){
+				rowObjsAry.push( getLocRowData( childLoc ));
+			});
+		}
+		$.merge(rowObjsAry, intRows);
+		return rowObjsAry;
+	}
+	/**
+	 * Returns an array of interaction record objs. On the init pass for a new data
+	 * set, interactions in array are only their id. Once the interaction records have 
+	 * been filled in, interaction data objects are created and returned for each taxon.
+	 */
+	function getLocInteractions(intRcrdAry) {
+		if (intRcrdAry) {
+			return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
+				if (typeof intRcrd !== "number") {
+					var intRcrdObj = { isParent: false };
+					return buildIntDataObj(intRcrd, intRcrdObj);
+				}
+				return intRcrd;
+			});
+		}
+		return [];
+	}
+	function addFutureDevMsg() {
+		$('#opts-col2').empty();
+		var div = document.createElement("div");
+		div.id = "loc-dev-msg";
+		$(div).text("We will soon be restructuring how location data is " +
+		 "stored in the database to be more flexible and more compatible with future " + 
+		 " additions such as map views. Once that is complete, this location view will " + 
+		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
+		$('#opts-col2').append(div);
+	}
+	/*-----------------Grid Methods-------------------------------------------*/
+	/*----------------- Shared -----------------------------------------------*/
+	/**
+	 * When the grid rowModel is updated, the total interaction count for each 
+	 * tree node, displayed in the "count" column, is updated to count only displayed
+	 * interactions. Any rows filtered out will not be included in the totals.
+	 */
+    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+		updateSubInteractionCount( gridOptions.api.getModel().rootNode );
+	}
+	/**
+	 * Sets new interaction totals for each tree node @getChildrenCnt and then 
+	 * calls the grid's softRefresh method, which refreshes any rows with "volatile"
+	 * set "true" in the columnDefs - currently only "Count".
+	 */
+	function updateSubInteractionCount(rootNode) {
+		getChildrenCnt(rootNode.childrenAfterFilter);  
+		gridOptions.api.softRefreshView();
+	}
+	function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
+		var nodeCnt, ttl = 0;
+		nodeChildren.forEach(function(child) {
+			nodeCnt = 0;
+			nodeCnt += addSubNodeInteractions(child);
+			ttl += nodeCnt;
+			if (nodeCnt !== 0 && child.data.intCnt !== null) { 
+				child.data.intCnt = nodeCnt; }
+		});
+		return ttl;
+	}
+	/**
+	 * Interaction records are identified by their lack of any children, specifically 
+	 * their lack of a "childrenAfterFilter" property.
+	 */
+	function addSubNodeInteractions(child) {  
+		var cnt = 0;
+		if (child.childrenAfterFilter) {
+			cnt += getChildrenCnt(child.childrenAfterFilter);
+			if (cnt !== 0) { child.data.intCnt = cnt; }
+		} else { 
+			++cnt;
+			child.data.intCnt = null; 
+		}
+		return cnt;
+	}
+	function addTotalIntCntsToTreeNodes(rowData) {   //console.log("rowData = %O", rowData);
+		for (var treeNode in rowData) { //console.log("rowData[treeNode] = %O", rowData[treeNode]);
+			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
+			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
+			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
+			if (rowData[treeNode].children) { 
+				addTotalIntCntsToTreeNodes(rowData[treeNode].children); 
+			}
+		}
+	}
+	function addSubInteractions(treeNode) {  //console.log("addSubInteractions called. treeNode =%O", treeNode);
+		var cnt = 0;
+		for (var childNode in treeNode.children) {
+			if (treeNode.children[childNode].interactions) {
+				var childCnt = treeNode.children[childNode].intCnt || 0; //console.log("childCnt = ", childCnt)
+				cnt += childCnt;
+			}
+			if (treeNode.children[childNode].children) { cnt += addSubInteractions(treeNode.children[childNode]); }
+		}
+		return cnt;
+	}
  	/*----------------Apply Fitler Update Methods-----------------------------*/
 	/**
 	 * When a level dropdown is changed, the grid is updated with the selected taxon
