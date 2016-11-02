@@ -241,9 +241,9 @@
 /*------------------Taxa Search Methods---------------------------------------*/
     /**
      * If taxa data is already in local storage, the domain and taxa records are 
-     * sent to @initTaxonSearchUi to begin building the data grid. Otherwise, an
+     * sent to @initTaxaSearchUi to begin building the data grid. Otherwise, an
      * ajax call gets the records and they are stored @storeTaxa before continuing 
-     * to @initTaxonSearchUi.  
+     * to @initTaxaSearchUi.  
      */
     function getTaxa() { 
         var rcrdData = {}; 
@@ -251,7 +251,7 @@
             JSON.parse(localStorage.getItem('domainRcrds')) : false; 
         if( rcrdData.domainRcrds ) { //console.log("Stored Taxa Loaded");
             rcrdData.taxaRcrds = JSON.parse(localStorage.getItem('taxaRcrds'));
-            initTaxonSearchUi(rcrdData);
+            initTaxaSearchUi(rcrdData);
         } else { // console.log("Taxa Not Found In Storage.");
             sendAjaxQuery({}, 'search/taxa', storeTaxa);
         }
@@ -259,14 +259,14 @@
     function storeTaxa(data) {                                          		//console.log("taxa data recieved. %O", data);
         populateStorage('domainRcrds', JSON.stringify(data.domainRcrds));
         populateStorage('taxaRcrds', JSON.stringify(data.taxaRcrds));
-        initTaxonSearchUi(data);
+        initTaxaSearchUi(data);
     }
     /**
      * If the taxa search html isn't already built and displayed, calls @buildTaxaSearchHtml
      * If no domain already selected, sets the default domain value for the taxa search grid 
      * and calls the select dropdown's change handler to build the grid @onTaxaSearchMethodChange.  
      */
-    function initTaxonSearchUi(data) {
+    function initTaxaSearchUi(data) {
         var domainTaxonRcrd;
         rcrdsById = data.taxaRcrds;
         if (!$("#sel-domain").length) { buildTaxaSearchHtml(data.domainRcrds); }    
@@ -277,18 +277,17 @@
         getInteractionsAndFillTree();
     }
     /**
-     * Builds the HTML for the search methods available for the taxa-focused search,
-     * both text search and browsing through the taxa names by level.
+     * Builds the select box for the taxa domains that will become the data tree 
+     * nodes displayed in the grid.
      */
     function buildTaxaSearchHtml(data) {                                        //console.log("buildTaxaSearchHtml called. ");
         var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-        var filterBttnCntnr = createElem('div', { id: "filter-bttns", class: "flex-col" });
         var domainOpts = getDomainOpts(data);   //  console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
-        $('#sort-opts').append([browseElems, filterBttnCntnr]);
+        $('#sort-opts').append(browseElems);
         $('#sel-domain').change(onTaxaSearchMethodChange);
-        $('#sort-opts').fadeTo(0, .3);
+        $('#sort-opts').fadeTo(0, 1);
 
         function getDomainOpts(data) {
             var optsAry = [];
@@ -298,10 +297,7 @@
             return optsAry;
         }
     } /* End buildTaxaSearchHtml */
-    /**
-     * Event fired when the domain select has been changed. Top function wrapper
-     * for the creating the taxa search grid. 
-     */
+    /** Event fired when the taxa domain select box has been changed. */
     function onTaxaSearchMethodChange(e) {  
         var domainTaxonRcrd = storeAndReturnDomain();
         resetToggleTreeBttn();
@@ -393,7 +389,7 @@
         clearPreviousGrid();
         loadLevelSelectElems(lvlOptsObj, levels);
         transformTaxaDataAndLoadGrid(taxaTree);
-        $('#sort-opts').fadeTo(150, 1);
+        // $('#sort-opts').fadeTo(150, 1);
     } 
 /*---------Taxa Data Formatting------------------------------------------------*/
     /**
