@@ -221,7 +221,8 @@
 			id: intRcrd.id,
 			note: intRcrd.note, 
 			interactionType: intRcrd.interactionType,
-			source: intRcrd.source.name,
+			source: intRcrd.source.displayName,
+			citation: intRcrd.source.description,
 			subject: getTaxonName(intRcrd.subject),
 			object: getTaxonName(intRcrd.object),
 			tags: getTags(intRcrd.tags),
@@ -262,14 +263,14 @@
         initTaxaSearchUi(data);
     }
     /**
-     * If the taxa search html isn't already built and displayed, calls @buildTaxaSearchHtml
+     * If the taxa search html isn't already built and displayed, calls @buildTaxaDomainHtml
      * If no domain already selected, sets the default domain value for the taxa search grid 
      * and calls the select dropdown's change handler to build the grid @onTaxaSearchMethodChange.  
      */
     function initTaxaSearchUi(data) {
         var domainTaxonRcrd;
         rcrdsById = data.taxaRcrds;
-        if (!$("#sel-domain").length) { buildTaxaSearchHtml(data.domainRcrds); }    
+        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainRcrds); }    
         if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
         
         domainTaxonRcrd = storeAndReturnDomain();
@@ -280,7 +281,7 @@
      * Builds the select box for the taxa domains that will become the data tree 
      * nodes displayed in the grid.
      */
-    function buildTaxaSearchHtml(data) {                                        //console.log("buildTaxaSearchHtml called. ");
+    function buildTaxaDomainHtml(data) {                                        //console.log("buildTaxaDomainHtml called. ");
         var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
         var domainOpts = getDomainOpts(data);   //  console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
@@ -296,7 +297,7 @@
             }
             return optsAry;
         }
-    } /* End buildTaxaSearchHtml */
+    } /* End buildTaxaDomainHtml */
     /** Event fired when the taxa domain select box has been changed. */
     function onTaxaSearchMethodChange(e) {  
         var domainTaxonRcrd = storeAndReturnDomain();
@@ -684,8 +685,8 @@
 	function seperateAndStoreSrcs(data) {						console.log("source data recieved. %O", data);
 		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 							//console.log("preppedData = %O", preppedData);
 		populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-		populateStorage('authRcrds', JSON.stringify(preppedData.authRcrds));
-		populateStorage('pubRcrds', JSON.stringify(preppedData.pubRcrds));
+		populateStorage('authRcrds', JSON.stringify(preppedData.authors));
+		populateStorage('pubRcrds', JSON.stringify(preppedData.publications));
 		initSrcSearchUi(preppedData, data.srcRcrds);
 	}
 	/**
@@ -706,18 +707,25 @@
 		}
 		return { authors: authors, publications: pubs };
 	}
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {					console.log("init search ui");
+	/**
+	 * All source records are stored in 'rcrdsById'. Builds the source domain select 
+	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
+	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
+	 */
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		console.log("init search ui");
         rcrdsById = srcRcrdsById;
-        if (!$("#sel-src-domain").length) { buildSrcSearchHtml(sortedSrcDomains); }    
-        if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('authors'); }
-        storeSrcDomain();
+        if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
+        if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('auths'); }
+        // storeSrcDomain();
         initSrcTree(sortedSrcDomains, srcRcrdsById);
+        getInteractionsAndFillTree();
+		// buildSrcSearchUiAndGrid(curTree);
     }
     /**
      * Builds the select box for the source domain types that will become the data
      * tree nodes displayed in the grid. 
      */
-    function buildSrcSearchHtml(data) {                                        	//console.log("buildTaxaSearchHtml called. ");
+    function buildSrcDomainHtml(data) {                                        	//console.log("buildTaxaDomainHtml called. ");
         var browseElems = createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
         var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-src-domain' }));
