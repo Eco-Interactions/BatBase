@@ -162,57 +162,90 @@
 	 * displayed grid.
 	 */
 	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
-		var gridBuilder;
-		var focus = localStorage.getItem('curFocus'); 
-		clearPreviousGrid();
+		var focus = $('#search-focus').val(); 
+		var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
+		var gridBuilders = { taxa: buildTaxaSearchUiAndGrid, 
+			locs: buildLocSearchUiAndGrid, srcs: buildSrcSearchUiAndGrid };
 
-		if (focus === "taxa"){  //console.log("focus = 'taxa'");
-			gridBuilder = buildTaxaSearchUiAndGrid;
-			fillTaxaSetWithInteractionRcrds(curTree);  
-	    	fillHiddenTaxaColumns(curTree);
-		} else if (focus === "locs") { //console.log("focus = 'locs'");
-			gridBuilder = buildLocSearchUiAndGrid;
-			fillLocSetWithInteractionRcrds(curTree)
-		}
-		gridBuilder(curTree);
+		clearPreviousGrid();
+		fillMethods[focus](intRcrds);
+		gridBuilders[focus](curTree);
 	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
-		/**
-		 * Recurses through each taxon's 'children' property and replaces all 
-		 * interaction ids with the interaction records.
-		 */
-		function fillTaxaSetWithInteractionRcrds(treeObj) { 					//console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
-			for (var sibling in treeObj) {   
-				replaceTaxaInteractions(treeObj[sibling].interactions, intRcrds);
-				if (treeObj[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(treeObj[sibling].children) }
-			}
+	} 
+
+    function fillTaxaTree(intRcrds) {
+    	fillTaxaSetWithInteractionRcrds(intRcrds, curTree);  
+    	fillHiddenTaxaColumns(intRcrds, curTree);
+    }
+	/**
+	 * Recurses through each taxon's 'children' property and replaces all 
+	 * interaction ids with the interaction records.
+	 */
+	function fillTaxaSetWithInteractionRcrds(intRcrds, curTree) { 					//console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
+		for (var sibling in curTree) {   
+			replaceTaxaInteractions(curTree[sibling].interactions, intRcrds);
+			if (curTree[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(curTree[sibling].children) }
 		}
-		function replaceTaxaInteractions(interactionsObj) {   					//console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
-			for (var role in interactionsObj) {
-				if (interactionsObj[role] !== null) { 
-					replaceInteractions(interactionsObj[role]) }
-			}
+	}
+	function replaceTaxaInteractions(interactionsObj) {   					//console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
+		for (var role in interactionsObj) {
+			if (interactionsObj[role] !== null) { 
+				replaceInteractions(interactionsObj[role], intRcrds) }
 		}
-		/**
-		 * Recurses through each location's 'children' property and replaces all 
-		 * interaction ids with the interaction records.
-		 */
-		function fillLocSetWithInteractionRcrds(treeObj) { 		//console.log("fillLocSetWithInteractionRcrds called. taxaTree = %O", treeObj) 
-			for (var sibling in treeObj) {  //console.log("sibling = %O", treeObj[sibling]);
-				if (treeObj[sibling].interactions !== null) { 
-					treeObj[sibling].interactions = replaceInteractions(treeObj[sibling].interactions); }
-				if (treeObj[sibling].children) { 
-					fillLocSetWithInteractionRcrds(treeObj[sibling].children); }
-			}
+	}
+	/**
+	 * Recurses through each location's 'children' property and replaces all 
+	 * interaction ids with the interaction records.
+	 * 
+	 */
+	function fillLocTree(intRcrds) { 		//console.log("fillLocTree called. taxaTree = %O", curTree) 
+		for (var sibling in curTree) {  //console.log("sibling = %O", curTree[sibling]);
+			if (curTree[sibling].interactions !== null) { 
+				curTree[sibling].interactions = replaceInteractions(curTree[sibling].interactions, intRcrds); }
+			if (curTree[sibling].children) { 
+				fillLocTree(curTree[sibling].children); }
 		}
-		function replaceInteractions(interactionsAry) { //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-			return interactionsAry.map(function(intId){
-				if (typeof intId === "number") {	//console.log("new record = %O", intRcrds[intId]);
-					return intRcrds[intId];	
-				}  console.log("####replacing interactions a second time?");
-			});
-		}
-	} /* End fillTreeWithInteractions */
+	}
+	/**
+	 * Recurses through each source's 'children' property until it finds the citation
+	 * source, and fills it's children interaction id's with their interaction records.
+	 */
+    function fillSrcTree(intRcrds) { console.log("")
+    	var domain = $('#sel-src-domain').val();  console.log("src domain = ", domain);
+    	var fillMethod = { auths: fillAuthInteractions, pubs: fillPubTree };
+
+    	for (var srcName in curTree) { console.log("-----processing src = %O", curTree[srcName]);
+	    	curTree[srcName].children.forEach(function(childSrc){
+	    		fillMethod[domain](curTree[srcName]); 
+	    	});
+	    }
+
+	    function fillPubTree(srcRcrd) {
+	    	// body...
+	    }
+	    function fillAuthInteractions(srcRcrd) {   console.log("fillAuthInteractions. authChildren = %O", srcRcrd.children);
+	    	var type = Object.keys(srcRcrd.sourceType)[0];
+	    	if (type === "citation") {
+	    		srcRcrd.children = srcRcrd.interactions === null ? null : 
+	    			replaceInteractions(srcRcrd.interactions, intRcrds);
+	    	} else {
+		    	srcRcrd.children = srcRcrd.childSources.forEach(function(srcChild) {
+		    		fillAuthInteractions(srcChild);
+		    	});
+	    	}
+	    }
+	    // function fillCitInts(citSrc) { console.log("fillCitInts src = %O", citSrc);
+	    // 	citSrc.children = replaceInteractions(citSrc.children);
+	    // }
+    } /* End fillSrcTree */
+	function replaceInteractions(interactionsAry, intRcrds) { //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+		return interactionsAry.map(function(intId){
+			if (typeof intId === "number") {	//console.log("new record = %O", intRcrds[intId]);
+				return intRcrds[intId];	
+			}  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
+		});
+	}
 	/**
 	 * Returns an interaction record object with flat data in grid-ready format. 
 	 */
