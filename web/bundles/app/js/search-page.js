@@ -728,23 +728,100 @@
 
         function getDomainOpts(data) {
             var sourceDomains = Object.keys(data);
+            var srcTypeMap = { "authors": "auths", "publications": "pubs" };
             var opts = sourceDomains.map(function(srcType){
-            	return { value: srcType, text: ucfirst(srcType) };
+            	return { value: srcTypeMap[srcType], text: ucfirst(srcType) };
             });
             return opts;
         }
-    } /* End buildTaxaSearchHtml */
+    } /* End buildSrcDomainHtml */
     /** Event fired when the source domain select box has been changed. */
     function onSrcSearchMethodChange(e) {  
     }
-    function storeSrcDomain(argument) {
-        var srcDomain = $('#sel-src-domain').val();
-        populateStorage('curDomain', srcDomain);
-    }
+    // function storeSrcDomain() {							//May or may not need this
+    //     var srcDomain = $('#sel-src-domain').val();
+    //     populateStorage('curDomain', srcDomain);
+    // }
+    /**
+     * Builds a family tree of source data of the selected source domain: authors 
+     * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
+     * the global 'curTree', 
+     */
     function initSrcTree(sortedSrcDomains, srcRcrdsById) {
-    	
-    }
+    	var tree;
+        var srcTypeMap = { "auths": "authors", "pubs": "publications" };
+        var srcDomain = srcTypeMap[$('#sel-src-domain').val()];
+        var domainRcrds = sortedSrcDomains[srcDomain];  console.log("initSrcTree for %s = %O", srcDomain, domainRcrds);
 
+        if (srcDomain === "authors") { tree = buildAuthSrcTree(domainRcrds);
+        } else { tree = buildPubSrcTree(domainRcrds); }
+
+        curTree = tree;
+    }  
+/*-------------- Publication Source Tree -------------------------------------------*/
+    /**
+     * Returns a heirarchical tree with Authors as top nodes of the data tree. 
+     * Each interaction is attributed directly to a citation source, which currently 
+     * always has a 'parent' publication source.
+     * Publication Source Tree:
+     * ->Publication Title
+     * ->->Citation || Article Title
+     * ->->->Interactions Records
+     */
+    function buildPubSrcTree(pubRcrds) { console.log("buildPubSrcTree.");
+    	for (var pubName in pubRcrds) {
+    		pubRcrds[pubName] = getPubData(pubRcrds[pubName]);
+    	}
+    	return pubRcrds;
+    }
+    function getPubData(pubRcrd) {
+    	pubRcrd.children = getPubChildren(pubRcrd);
+    	return pubRcrd;
+    }
+    function getPubChildren(pubRcrd) {
+    	if (pubRcrd.childSources === null) { return null; }
+
+    	return pubRcrd.childSources.map(function(srcId) {
+    		return getPubChildData(rcrdsById[srcId]);
+    	});
+	}
+	function getPubChildData(childSrc) {
+  		var childType = Object.keys(childSrc.sourceType)[0];
+  		return childType === "citation" ? childSrc : getPubData(childSrc);
+  	}
+/*-------------- Author Source Tree -------------------------------------------*/
+    /**
+     * Returns a heirarchical tree with Authors as top nodes of the data tree, 
+     * with their contributibuted works and the interactions they contained nested within.
+     * Author Source Tree:
+     * ->Author
+     * ->->Citation || Article Title (Publication Title)
+     * ->->->Interactions Records
+     */
+    function buildAuthSrcTree(authSrcRcrds) { // console.log("buildAuthSrcTree");
+    	for (var authName in authSrcRcrds) {
+    		authSrcRcrds[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
+    	}
+    	return authSrcRcrds;
+    }  
+    /** For each source work contribution, return the source record   */
+    function getAuthChildren(authData) { 										//console.log("getAuthChildren rcrd = %O", authData);
+    	return authData.contributions.map(function(workSrcId){
+    		return rcrdsById[workSrcId];
+    	});
+    }
+    /**
+     * Will build the select elems for the source search options. Clears previous 
+     * grid. Calls @transformSrcDataAndLoadGrid to transform tree data into grid 
+     * format and load the data grid.
+     * NOTE: This is the entry point for source grid rebuilds as filters alter data
+     * contained in the data tree.
+     */
+    function buildSrcSearchUiAndGrid(srcTree) {                   	console.log("buildSrcSearchUiAndGrid called");
+        clearPreviousGrid();
+        // loadSelectElems();
+        transformSrcDataAndLoadGrid(srcTree);
+    } 
 
 
 
