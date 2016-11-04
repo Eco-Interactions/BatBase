@@ -271,6 +271,8 @@ class SearchController extends Controller
         $data->linkUrl = $srcEntity->getLinkUrl();
         $data->linkDisplay = $srcEntity->getLinkDisplay();
         $data->tags = $this->getSourceTags($srcEntity);
+        $data->interactions = $this->getInteractionIds($srcEntity->getInteractions());
+        $data->childSources = $this->getChildSources($srcEntity);
 
         $parentSource = $srcEntity->getParentSource();
         $data->parentSource = $parentSource == null ? null : $parentSource->getId();
@@ -297,6 +299,17 @@ class SearchController extends Controller
             array_push($tagAry, $tag->getTag()); 
         }
         return $tagAry;
+    }
+    /** Returns an array with the ids of each child source, or null if there are none. */
+    private function getChildSources($srcEntity)
+    {
+        $children = $srcEntity->getChildSources();
+        $childIds = [];
+
+        foreach ($children as $child) {
+            array_push($childIds, $child->getId());
+        }
+        return count($children) > 0 ? $childIds : null; 
     }
     /** Returns an associative array with the author data. */
     private function getAuthorData($srcEntity)
@@ -330,7 +343,8 @@ class SearchController extends Controller
                      'publicationVolume' => $cit->getPublicationVolume(),
                      'publicationIssue' => $cit->getPublicationIssue(),
                      'publicationPages' => $cit->getPublicationPages(),
-                     'title' => $cit->getTitle(), 'tags' => []
+                     'title' => $cit->getTitle(), 
+                     'tags' => []
                     ];
         // Adds each tag to the array of citation tags
         foreach ($tags as $tag) {
