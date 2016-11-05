@@ -7,7 +7,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\Author;
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Publication;
 use AppBundle\Entity\SourceType;
@@ -46,28 +45,23 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
          *                     publisher => [^same^]
          *                     ]
          *                ]
-         */
-        $newEntities = [ 25 => ["publication" => [ "Nouragues",  "Nouragues. Dynamics and plant-animal interactions in a Neotropical rainforest", "Book"],                                               //year, doi, parentSrc, linkUrl  
+         */ 
+        $newEntities = [ 25 => ["publication" => [ "Nouragues. Dynamics and plant-animal interactions in a Neotropical rainforest",  null, "Book"],                                               //year, doi, parentSrc, linkUrl  
                                 "source" => [   "publication" => ["2001", "10.1007/978-94-015-9821-7", "Kluwer Academic Publishers"],
                                                 "publisher" => [null, null, null, null, "Kluwer Academic Publishers"]]
             ], 33 => [  
-                    "publication" => [ "Ciência e Cultura", null, "Journal"],   
+                    "publication" => [ "Ciência e Cultura", "Ciencia e Cultura", "Journal"],   
                     "source" => [   "publication" => [ null, "10.18316/2236-6377.15.0", null, "http://cienciaecultura.bvs.br/scielo.php?script=sci_serial&pid=0009-6725&lng=pt&nrm=iso", null]]
-            ], 35 => [ 
-                    "publication" => ["Mammals of the Mexican state of San Luis Potosi", null, "Book"],
-                    "source" => [ "publication" => [1953, null, "Louisiana State University Press", "https://babel.hathitrust.org/cgi/pt?id=uc1.31822011936077;view=1up;seq=10", null, null, 
-                                                    [79]],
-                                  "publisher" => [null, null, null, "http://lsupress.org/", "Louisiana State University Press"]]
             ], 42 => [  
-                    "publication" => [ "Blüten und fledermäuse. Blutenbestäubung durch fledermäuse und flughunde (chiropterophilie)", null, "Book"],  
+                    "publication" => [ "Blüten und fledermäuse", "Bluten und fledermause", "Book"],  
                     "source" => [ "publication" => [ 1985, null, "Waldemar Kramer", null, null],
                                         "publisher" => [null, null, null, null,"Waldemar Kramer"]]              
             ], 40 => [  
-                    "publication" => [ "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française", null, "Ph.D. Dissertation"],  
+                    "publication" => [ "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française.", "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Francaise", "Ph.D. Dissertation"],  
                     "source" => [  "publication" => [2004, null, "University of Paris VI", null, null],
                                     "publisher" => [null, null, null, null, "University of Paris VI", "University of Paris VI (Pierre and Marie Curie University)"]]
             ], 31 => [ 
-                    "publication" => [ "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise", null, "Ph.D. Dissertation"],  
+                    "publication" => [ "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae et Philodendron) en forêt Guyanaise", "Modalites de dissemination et d'etablissement de lianes (Cyclanthaceae et Philodendron) en foret Guyanaise", "Ph.D. Dissertation"],  
                     "source" => ["publication" => [ 1997, null, "University of Paris VI"]]
             ], 49 => [ 
                     "publication" => [ "Revista de la Facultad de Agronomía de la Universidad del Zulia", null, "Journal"],  
@@ -75,7 +69,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                                     "publisher" => [null, null, null, null, "Universidad del Zulia"]]
             ], 63 => [ 
                     "publication" => [ "The short-tailed fruit bat", null, "Book"],  
-                    "source" => ["publication" => [ 1988, null, null, "The University of Chicago Press"]]            
+                    "source" => ["publication" => [ null, null, "The University of Chicago Press"]]            
             ], 65 => [ 
                     "publication" => [ "American Scientist", null, "Journal"],  
                     "source" => ["publication" => [ null, null, null, "http://www.americanscientist.org/"]]            
@@ -98,10 +92,10 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "American Naturalist", null, "Journal"],  
                     "source" => ["publication" => [null, null, "The University of Chicago Press"]]
             ], 106 => [ 
-                    "publication" => [ "Boletin de Museu Goeldi", null, "Journal"],  
+                    "publication" => [ "Boletim do Museu Paraense Para Emilio Goeldi de História Natural e Ethnographia", "Boletin de Museu Goeldi", "Journal"],  
                     "source" => ["publication" => [null]]
             ], 114 => [ 
-                    "publication" => [ "Zoologia", null, "Journal"],  
+                    "publication" => [ "Atas do Simposio sobre a Biota Amazonica", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Sociedade Brasileira de Zoologia", "http://www.sbzoologia.org.br/revista-zoologia.html"],
                                     "publisher" => [null,null,null,"http://www.sbzoologia.org.br/", "Sociedade Brasileira de Zoologia"]]
             ], 116 => [ 
@@ -113,14 +107,15 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                                  "publisher" => [null,null,null,null,"Urban & Fischerr"]] //name, url, parent
             ], 164 => [ 
                     "publication" => [ "Investigaciones sobre la regeneración de selvas altas en Veracruz, México", null, "Book"],  
-                    "source" => ["publication" => [1985, null, "Instituto Nacional de Investigaciones Sobre Recursos Bióticos", "https://www.researchgate.net/publication/44443198_Investigaciones_sobre_la_regeneracion_de_selvas_altas_en_Veracruz_Mexico_por_A_Gomez-Pompa_C_Vazquez_Yanes_A_Butanda_Cervera_y_otros", null, null, 
-                                                    [["Arturo Gómez-Pompa", "Gómez-Pompa"], ["Silvia del Amo R.", "del Amo R."]]],
-                                "publisher" => [null,null,null,null,"Instituto Nacional de Investigaciones Sobre Recursos Bióticos"]]
+                    "source" => ["publication" => [null]]
             ], 172 => [ 
                     "publication" => [ "Turrialba", null, "Journal"],  
-                    "source" => ["publication" => [null ]]
+                    "source" => ["publication" => [null]]
+            ], 180 => [ 
+                    "publication" => [ "Boletim do Museu de Biologia Mello Leitão", "Boletim do Museu de Biologia 'Prof. Mello-Leitao'", "Journal"],  
+                    "source" => ["publication" => [null, null, "Sociedade Brasileira de Zoologia"]]
             ], 191 => [ 
-                    "publication" => [ "Revista Brasileira de Biologia", null, "Journal"],  
+                    "publication" => [ "Revista Brasileira de Biologia", "Zoologia, Journal of the Sociedade Brasileira de Zoologia", "Journal"],  
                     "source" => ["publication" => [null, null, "Instituto Internacional de Ecologia"],
                                     "publisher" => [null,null,null,null,"Instituto Internacional de Ecologia"]]
             ], 198 => [ 
@@ -128,11 +123,11 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "source" => ["publication" => [null, null, "Cambridge Philosophical Society, Wiley"],
                                     "publisher" => [null,null,null,null,"Cambridge Philosophical Society, Wiley"]]
             ], 201 => [ 
-                    "publication" => [ "Los murciélagos de Cuba", null, "Book"],  
+                    "publication" => [ "Los murciélagos de Cuba", "Los murcielagos de Cuba", "Book"],  
                     "source" => ["publication" => [null, null, "Editorial Academia", "https://www.scribd.com/doc/131312963/Los-Murcielagos-de-Cuba"],
                                     "publisher" => [null,null,null,null,"Editorial Academia"]]
             ], 202 => [ 
-                    "publication" => [ "Columnar Cacti and Their Mutualists", "Columnar Cacti and Their Mutualists. Evolution, Ecology, and Conservation.", "Book"],  
+                    "publication" => [ "Columnar Cacti and Their Mutualists: Evolution, Ecology, and Conservation", null, "Book"],  
                     "source" => ["publication" => [ 2002, null, "The University of Arizona Press", null, null, null, [ 111, 357 ]],
                                     "publisher" => [null,null,null,null,"The University of Arizona Press"]]
             ], 207 => [ 
@@ -150,15 +145,24 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "Journal of Arid Environments", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Elsevier", "http://www.journals.elsevier.com/journal-of-arid-environments"],
                                     "publisher" => [null,null,null,"https://www.elsevier.com/","Elsevier"]]
-            ], 230 => ["source" => ["publisher" => [null,null,null,null,"University of Kansas Natural History Museum"]]
+            ], 227 => [ 
+                    "publication" => [ "Acta Botanica Neerlandica", null, "Journal"],  
+                    "source" => ["publication" => [null]]
+            ], 230 => [
+                    "publication" => [ "Algunos murcielagos del norte de Argentina", null, "Book"],  
+                    "source" => [ "publication" => [1969, null, "University of Kansas Natural History Museum"],
+                            "publisher" => [null,null,null,null,"University of Kansas Natural History Museum"]]
             ], 233 => [ 
-                    "publication" => [ "Österreichische Botanische Zeitschrift", null, "Journal"],  
+                    "publication" => [ "Österreichische Botanische Zeitschrift", "Osterreichische Botanische Zeitschrift", "Journal"],  
                     "source" => ["publication" => [null, null, "Springer", "https://www.jstor.org/journal/ostebotazeit"],
                                     "publisher" => [null,null,null,"http://www.springer.com/us/","Springer"]]
             ], 238 => [ 
                     "publication" => [ "The American Midland Naturalist", null, "Journal"],  
                     "source" => ["publication" => [null, null, "University of Notre Dame", "https://www3.nd.edu/~ammidnat/"],
                                     "publisher" => [null,null,null,null,"University of Notre Dame"]]
+            ], 240 => [ 
+                    "publication" => [ "The food web of a tropical rain forest", null, "Book"],  
+                    "source" => ["publication" => [null, null, "The University of Chicago Press" ]]
             ], 243 => [ 
                     "publication" => [ "Manu. The biodiversity of southeastern Peru.", null, "Book"],  
                     "source" => ["publication" => [null, null, "Editorial Horizonte"],
@@ -175,20 +179,20 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             $srcEntities = [];
             
             foreach ($newEntData as $entityName => $subAry) {  
-                if ($entityName === "publication") {                           //print("\nNew Publication ->". $entityName);
+                if ($entityName === "publication") {                            print("\nNew Publication ->". $entityName);
                     $pubEntity = $this->addPub($subAry, $em);
                     continue;
                 } 
-                if (array_key_exists("publisher", $subAry)) {                  //print("\nNew Source Publisher");
+                if (array_key_exists("publisher", $subAry)) {                   print("\nNew Source Publisher");
                     $this->addSrcEntity("publisher", $subAry["publisher"], $pubEntity, $em);
                 } 
-                if (array_key_exists("publication", $subAry)) {                //print("\nNew Source publication");
+                if (array_key_exists("publication", $subAry)) {                 print("\nNew Source publication");
                     $this->addSrcEntity("publication", $subAry["publication"], $pubEntity, $em);
                 }               
             }
         }
     }
-    private function addPub($pubVals, &$em) {                                  //print("\n    add pub ->". $pubVals[0]);
+    private function addPub($pubVals, &$em) {                                   print("\n    add pub ->". $pubVals[0]);
         $pubEntity = new Publication();
         $pubEntity->setCreatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6'))); 
@@ -201,56 +205,26 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
         $em->persist($pubEntity);
         return $pubEntity;
     }
-    private function addParentSource($parentName, &$srcEntity, $em) {          //print("\n    addParentSource ->". $parentName);
+    private function addParentSource($parentName, &$srcEntity, $em) {           print("\n    addParentSource ->". $parentName);
         if ($parentName !== null) {  
             $parentSrc = $em->getRepository("AppBundle:Source")
                 ->findOneBy(array('displayName' => $parentName));
             $srcEntity->setParentSource($parentSrc);
         }
     }
-    private function addContributor($authors, &$srcEntity, &$em) {             //print("    addContributor ->");
+    private function addContributor($authors, &$srcEntity, &$em) {              print("    addContributor ->");
         foreach ($authors as $authId) {
-            if (is_int($authId)) {
-                $contribEntity = new Contribution();
-                $author = $em->getRepository('AppBundle:Author')
-                    ->findOneBy(array('id' => $authId));
+            $contribEntity = new Contribution();
+            $author = $em->getRepository('AppBundle:Author')
+                ->findOneBy(array('id' => $authId));
 
-                $contribEntity->setAuthorSource($author->getSource());
-                $contribEntity->setWorkSource($srcEntity);
-                $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
-                    ->findOneBy(array('id' => '6'))); 
+            $contribEntity->setAuthorSource($author->getSource());
+            $contribEntity->setWorkSource($srcEntity);
+            $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
+                ->findOneBy(array('id' => '6'))); 
 
-                $em->persist($contribEntity);
-            } else {
-                $this->createAuthor($authId, $srcEntity, $em);
-            }
+            $em->persist($contribEntity);
         }
-    }
-    private function createAuthor($authAry, &$wrkSrcEntity, &$em)              
-    {                                                                           //print("    --Adding new author---\n");
-        $authSrc = new Source();
-        $authSrc->setDisplayName($authAry[1]);
-        $authSrc->setDescription($authAry[0]);
-        $authSrc->setSourceType($em->getRepository('AppBundle:SourceType')
-            ->findOneBy(array('id'=> 4)));  
-
-        $authEntity = new Author();
-        $authEntity->setFullName($authAry[0]);
-        $authEntity->setDisplayName($authAry[1]);
-        $authEntity->setLastName($authAry[1]);
-        $authEntity->setSource($authSrc);
-        $authEntity->setCreatedBy($em->getRepository('AppBundle:User')
-            ->findOneBy(array('id' => '6'))); 
-
-        $contribEntity = new Contribution();
-        $contribEntity->setAuthorSource($authSrc);
-        $contribEntity->setWorkSource($wrkSrcEntity);
-        $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
-            ->findOneBy(array('id' => '6'))); 
-
-        $em->persist($authSrc);
-        $em->persist($authEntity);
-        $em->persist($contribEntity);
     }
     private function addSrcEntity($sourceType, $valAry, &$pubEntity, &$em) {       
         $srcFields = ["Year", "Doi", "ParentSource", "LinkUrl", "DisplayName","Description", "Author"];
@@ -270,10 +244,10 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             $srcEntity->setSourceType($em->getRepository("AppBundle:SourceType")
                 ->findOneBy(array('id' => 1)));
         }
-        for ($i=0; $i < count($valAry); $i++) {                                 //print("\n  field = ".$srcFields[$i]." val = ". $valAry[$i]);
+        for ($i=0; $i < count($valAry); $i++) {                                 print("\n  field = ".$srcFields[$i]." val = ". $valAry[$i]);
             if ($i === 2 && $valAry[$i] !== null) { $this->addParentSource($valAry[$i], $srcEntity, $em); 
             } else if ($i === 6) { $this->addContributor($valAry[$i], $srcEntity, $em); 
-            } else if ($valAry[$i] !== null) {                                  //print("\n    setting->". $srcFields[$i]);
+            } else if ($valAry[$i] !== null) {                                  print("\n    setting->". $srcFields[$i]);
                 $setField = "set". $srcFields[$i];
                 $srcEntity->$setField($valAry[$i]);
             }

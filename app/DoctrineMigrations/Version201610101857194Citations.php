@@ -32,11 +32,11 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $citations = $em->getRepository('AppBundle:Citation')->findAll();
-        $edgeCases = [96, 248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
+        $duplicateCit = [248, 249, 251, 252, 253, 254, 255, 258, 259, 260, 261, 262, 263];
 
         foreach ($citations as $citEntity) {  
             $citId = $citEntity->getID();                                       
-            if (!in_array($citId, $edgeCases)) {                               //print("\nNew Source CitationID = ".$citId);
+            if (!in_array($citId, $duplicateCit)) {                               //print("\nNew Source CitationID = ".$citId);
                 $this->buildSourceEntity($citEntity, $em); 
             }
         }
@@ -46,6 +46,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
         $srcEntity = new Source();                                     
 
         $srcEntity->setDisplayName($citEntity->getDescription());   
+        $srcEntity->setDescription($citEntity->getFullText());   
         $srcEntity->setYear($citEntity->getYear());
         $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
             ->findOneBy(array('id'=> 2)));  
@@ -103,29 +104,31 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
          */
         $citData = [ 25 => [ "cit" => [  "PublicationPages" => "206-215"],
                             "src" => [  "Doi" => "10.1007/978-94-015-9821-7_19", 
-                                        "ParentSource" => "Nouragues"]],
-                    31 => [ "src" => [  "ParentSource" => "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise"]],                                        
+                                        "ParentSource" => "Nouragues. Dynamics and plant-animal interactions in a Neotropical rainforest"]],
+                     31 => [ "src" => [  "ParentSource" => "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae et Philodendron) en forêt Guyanaise"]],                                        
                     33 => [ "src" => [  "ParentSource" => "Ciência e Cultura"]],
                     35 => [ "src" => [  "Doi" => "10.1086/400668",
                                         "LinkUrl" => "https://hdl.handle.net/2027/uc1.31822011936077",
-                                        "ParentSource" => "Louisiana State University Press" ]],
+                                        "ParentSource" => 68 ]],
                     36 => [ "src" => [  "Doi" => "10.1590/S0101-81752005000200030",
                                         "LinkUrl" => "http://www.scielo.br/scielo.php?script=sci_arttext&pid=S0101-81752005000200030",
                                         "ParentSource" => 19]],
                     37 => [ "src" => [  "LinkUrl" => "http://hdl.handle.net/2042/55177",
                                         "ParentSource" => 26 ]],
                     39 => [ "src" => [  "ParentSource" => 26 ]],
-                    40 => [ "src" => [  "ParentSource" => "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française"]],
-                    42 => [ "src" => [ "ParentSource" => "Blüten und fledermäuse. Blutenbestäubung durch fledermäuse und flughunde (chiropterophilie)"]],
+                    40 => [ "src" => [  "ParentSource" => "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française."]],
+                    42 => [ "src" => [ "ParentSource" => "Blüten und fledermäuse"]],
                     44 => [ "src" => [  "ParentSource" => 30 ]],
                     49 => [ "cit" => [  "PublicationIssue" => "12"],
                             "src" => [  "ParentSource" => "Revista de la Facultad de Agronomía de la Universidad del Zulia" ]],
+                    63 => [ "src" => [  "ParentSource" => "The short-tailed fruit bat"]],  
                     65 => [ "src" => [  "ParentSource" => "American Scientist"]],  
                     68 => [ "src" => [  "ParentSource" => 30 ]],
                     70 => [ "src" => [  "Doi" => "10.2307/2395026",
                                         "ParentSource" => "Annals of the Missouri Botanical Garden" ]],
                     91 => [ "src" => [  "ParentSource" => 18 ]],
                     92 => [ "src" => [  "ParentSource" => "Comparative Biochemistry and Physiology" ]],
+                    96 => [ "src" => [  "ParentSource" => "Bats. A natural history" ]],
                     97 => [ "src" => [  "ParentSource" => "Annals of the Missouri Botanical Garden" ]],
                     98 => [ "src" => [  "ParentSource" => "Brittonia" ]],
                     100 => [ "src" => [  "Doi" => "10.1111/j.1469-7998.1998.tb00062.x",
@@ -134,10 +137,10 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                     103 => [ "cit" => [  "PublicationIssue" => "48A"],
                             "src" => [  "ParentSource" => "Comparative Biochemistry and Physiology" ]],
                     105 => [ "src" => [  "ParentSource" => "American Naturalist" ]],
-                    106 => [ "src" => [  "ParentSource" => "Boletin de Museu Goeldi" ]],
+                    106 => [ "src" => [  "ParentSource" => "Boletim do Museu Paraense Para Emilio Goeldi de História Natural e Ethnographia" ]],
                     107 => [ "src" => [  "ParentSource" => 4 ]],
                     111 => [ "src" => [  "ParentSource" => 29 ]],
-                    114 => [ "src" => [  "ParentSource" => "Zoologia" ]],
+                    114 => [ "src" => [  "ParentSource" => "Atas do Simposio sobre a Biota Amazonica" ]],
                     116 => [ "src" => [  "Doi" => "10.1111/j.1365-2699.1996.tb00018.x",
                                         "ParentSource" => "Journal of Biogeography" ]],
                     118 => [ "src" => [  "ParentSource" => "Brittonia" ]],
@@ -159,11 +162,11 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                                         "ParentSource" => "Turrialba"]],
                     175 => [ "src" => [  "ParentSource" => 26 ]],
                     176 => [ "src" => [  "LinkUrl" => "http://r1.ufrrj.br/labmasto/publicacoes/27.pdf",
-                                        "ParentSource" => "Zoologia" ]],
-                    180 => [ "src" => [  "ParentSource" => "Zoologia" ]],
-                    181 => [ "src" => [  "ParentSource" => "Zoologia" ]],
-                    182 => [ "src" => [  "ParentSource" => "Zoologia" ]],
-                    183 => [ "src" => [  "ParentSource" => "Zoologia" ]],
+                                        "ParentSource" => "Boletim do Museu Paraense Para Emilio Goeldi de História Natural e Ethnographia" ]],
+                    180 => [ "src" => [  "ParentSource" => "Boletim do Museu de Biologia Mello Leitão" ]],
+                    181 => [ "src" => [  "ParentSource" => "Boletim do Museu de Biologia Mello Leitão" ]],
+                    182 => [ "src" => [  "ParentSource" => "Boletim do Museu de Biologia Mello Leitão" ]],
+                    183 => [ "src" => [  "ParentSource" => "Boletim do Museu de Biologia Mello Leitão" ]],
                     184 => [ "src" => [  "ParentSource" => 4 ]],
                     185 => [ "src" => [  "ParentSource" => 45 ]],
                     186 => [ "src" => [  "ParentSource" => "Ciência e Cultura" ]],
@@ -173,7 +176,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                                          "ParentSource" => "Biological Reviews" ]],
                     199 => [ "src" => [  "ParentSource" => 19 ]],
                     201 => [ "src" => [  "ParentSource" => "Los murciélagos de Cuba" ]],
-                    202 => [ "src" => [  "ParentSource" => "Columnar Cacti and Their Mutualists" ]],
+                    202 => [ "src" => [  "ParentSource" => "Columnar Cacti and Their Mutualists: Evolution, Ecology, and Conservation" ]],
                     203 => [ "src" => [  "ParentSource" => 4 ]],
                     205 => [ "src" => [  "ParentSource" => 11 ]],
                     206 => [ "src" => [  "ParentSource" => 11 ]],
@@ -188,22 +191,21 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
                     225 => [ "src" => [  "Doi" => "10.1006/jare.1997.0267",
                                          "ParentSource" => "Journal of Arid Environments" ]],
                     227 => [ "src" => [  "Doi" => "10.1111/j.1438-8677.1957.tb00577.x",
-                                         "ParentSource" => 59 ]],
+                                         "ParentSource" => "Acta Botanica Neerlandica" ]],
                     228 => [ "src" => [  "Doi" => "10.1111/j.1095-8339.2001.tb00563.x",
                                          "ParentSource" => 60 ]],
-                    230 => [ "src" => [  "ParentSource" => "University of Kansas Natural History Museum" ]],
+                    230 => [ "src" => [  "ParentSource" => "Algunos murcielagos del norte de Argentina" ]],
                     232 => [ "src" => [  "ParentSource" => 62 ]],
                     233 => [ "src" => [  "ParentSource" => "Österreichische Botanische Zeitschrift" ]],
                     238 => [ "src" => [ "Doi" => "10.2307/2424624",
                                          "ParentSource" => "The American Midland Naturalist" ]],
-                    240 => [ "src" => [  "ParentSource" => 33 ]],
-                    242 => [ "src" => [  "ParentSource" => 6 ]],
+                    240 => [ "src" => [  "ParentSource" => "The food web of a tropical rain forest" ]],
+                    242 => [ "src" => [  "ParentSource" => "The American Midland Naturalist" ]],
                     243 => [ "src" => [  "ParentSource" => "Manu. The biodiversity of southeastern Peru." ]],
                     244 => [ "src" => [  "ParentSource" => 6 ]],
                     246 => [ "src" => [ "LinkUrl" => "http://www.srcosmos.gr/srcosmos/showpub.aspx?aa=4753",
                                          "ParentSource" => 38 ]],
                     256 => [ "src" => [  "ParentSource" => "Ecology of Bats" ]],
-                    258 => [ "src" => [  "ParentSource" => 11 ]]
         ];
         $citAry = $citData[$citEntity->getId()];
 
@@ -219,7 +221,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
             }
         }         
     }
-    private function setParentSource($prntSrcName, &$citEntity, &$srcEntity, &$em) {  //print("\n    prntSrcName = ".$prntSrcName);
+    private function setParentSource($prntSrcName, &$citEntity, &$srcEntity, &$em) {  print("\n    prntSrcName = ".$prntSrcName);
         $parent = null;
         if (is_int($prntSrcName)) {
             $parent = $em->getRepository("AppBundle:Publication")
