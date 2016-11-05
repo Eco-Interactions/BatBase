@@ -33,7 +33,6 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
         $citDelete = [];   //24 -> removed bcuz I can't remember why it was going to be deleted...
 
         $this->handleDups($citDelete, $em);
-        $this->handlePubs($citDelete, $em);    
 
         foreach ($citDelete as $citId) {
             $citEntity = $em->getRepository('AppBundle:Citation')
@@ -44,7 +43,7 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
     }
     private function handleDups(&$citDelete, &$em)
     {
-        $dupCits = [[10,248], [11,249], [12,251], [242,263], [209,262], [165,261], 
+        $dupCits = [[10,248], [11,249], [12,251], [42, 254], [242,263], [209,262], [165,261], 
             [151,260], [122,259], [101,258], [45,255], [29,253], [21,252]];
         foreach ($dupCits as $citPair) {
             $srcEntity = $em->getRepository("AppBundle:Citation")
@@ -67,6 +66,7 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
             $srcEntity->addInteraction($interaction);
             $citEntity->removeInteraction($interaction);
             $em->persist($interaction);
+            $em->persist($citEntity);
         }                                                                       //print("\n   AFter Source count = ". count($srcEntity->getInteractions()));
     }
     /** Moves each author for passed citation to it's source entity.  */
@@ -83,39 +83,6 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
                 ->findOneBy(array('id' => '6'))); 
 
             $em->persist($contribEntity);
-        }
-    }
-    private function handlePubs(&$citDelete, &$em)
-    {
-        $this->handleDeprcPubs($em);
-        $this->transferDeprcCits($citDelete, $em);
-    }
-    private function handleDeprcPubs(&$em)
-    {
-        $deletePubs = [33];
-        foreach ($deletePubs as $pubId) {
-            $em->remove($em->getRepository('AppBundle:Publication')
-                ->findOneBy(array('id' => $pubId)));
-            $em->flush();
-        }
-    }
-    private function transferDeprcCits(&$citDelete, &$em)
-    {
-        $pubs = [ "Blüten und fledermäuse. Blutenbestäubung durch fledermäuse und flughunde (chiropterophilie)" => [42, 254], 
-                  "Bats. A natural history" => [96], "The short-tailed fruit bat" => [63]];
-
-        foreach ($pubs as $pubName => $citIds) {                                //print("\nDeprcCits. Pub = ".$pubName);
-            $srcEntity = $em->getRepository('AppBundle:Source')
-                ->findOneBy(array('displayName' => $pubName));                 
-
-            foreach ($citIds as $citId) {
-                $citEntity = $em->getRepository("AppBundle:Citation")
-                    ->findOneBy(array('id' => $citId));
-                $this->transferInteractions($citEntity, $srcEntity, $em);
-                $this->transferAuthors($citEntity, $srcEntity, $em);
-                if ($citId !== 42) { array_push($citDelete, $citId); } // Keeping 42 because it has a citationTag
-            }
-            $em->persist($srcEntity);
         }
     }
 

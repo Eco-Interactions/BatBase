@@ -30,6 +30,7 @@ class Version201610132050460Columns extends AbstractMigration
 
         $this->addSql('ALTER TABLE citation MODIFY COLUMN source_id INT DEFAULT NULL AFTER id;');
         $this->addSql('ALTER TABLE citation MODIFY COLUMN display_name VARCHAR(255) DEFAULT NULL AFTER source_id;');
+        $this->addSql('ALTER TABLE citation MODIFY COLUMN title VARCHAR(255) DEFAULT NULL AFTER display_name;'); 
         $this->addSql('ALTER TABLE citation MODIFY COLUMN publication_volume VARCHAR(255) DEFAULT NULL AFTER full_text;');
         $this->addSql('ALTER TABLE citation MODIFY COLUMN created_by INT DEFAULT NULL AFTER created;');
         $this->addSql('ALTER TABLE citation MODIFY COLUMN updated_by INT DEFAULT NULL AFTER updated;');   

@@ -42,7 +42,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
     }
     private function createNewSrcTypes(&$em)
     {
-        $srcTypes = ['Publisher' => '10', 'Citation' => '30', 'Publication' => '20', 'Author' => '25'];
+        $srcTypes = ['Publisher' => '10', 'Citation' => '40', 'Publication' => '20', 'Author' => '30'];
         foreach ($srcTypes as $srcType => $ordinal) {   
             $entity = new SourceType();
             $entity->setDisplayName($srcType);
@@ -54,7 +54,7 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
     }
     private function createNewPubTypes(&$em)
     {
-        $pubTypes = ['Book', 'Journal', 'Ph.D. Dissertation'];
+        $pubTypes = ['Article', 'Book', 'Journal', 'Ph.D. Dissertation'];
 
         foreach ($pubTypes as $pubType) {   
             $entity = new PublicationType();
