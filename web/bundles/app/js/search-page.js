@@ -146,7 +146,7 @@
 	 * ajax call gets the data which is stored @storeTaxa before being sent to  
 	 * to @fillTreeWithInteractions.  	 
 	 */
-	function getInteractionsAndFillTree() {  	console.log("getInteractionsAndFillTree called. ")
+	function getInteractionsAndFillTree() {  	console.log("getInteractionsAndFillTree called. Tree = %O", curTree);
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		fadeGrid();
 		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
@@ -168,15 +168,15 @@
 			locs: buildLocSearchUiAndGrid, srcs: buildSrcSearchUiAndGrid };
 
 		clearPreviousGrid();
-		fillMethods[focus](intRcrds);
+		fillMethods[focus](curTree, intRcrds);
 		gridBuilders[focus](curTree);
 	    hidePopUpMsg();
 	    hideGroupColFilterMenu();
 	} 
 
-    function fillTaxaTree(intRcrds) {
+    function fillTaxaTree(curTree, intRcrds) {
     	fillTaxaSetWithInteractionRcrds(intRcrds, curTree);  
-    	fillHiddenTaxaColumns(intRcrds, curTree);
+    	fillHiddenTaxaColumns(curTree, intRcrds);
     }
 	/**
 	 * Recurses through each taxon's 'children' property and replaces all 
@@ -197,51 +197,54 @@
 	/**
 	 * Recurses through each location's 'children' property and replaces all 
 	 * interaction ids with the interaction records.
-	 * 
 	 */
-	function fillLocTree(intRcrds) { 		//console.log("fillLocTree called. taxaTree = %O", curTree) 
-		for (var sibling in curTree) {  //console.log("sibling = %O", curTree[sibling]);
-			if (curTree[sibling].interactions !== null) { 
-				curTree[sibling].interactions = replaceInteractions(curTree[sibling].interactions, intRcrds); }
-			if (curTree[sibling].children) { 
-				fillLocTree(curTree[sibling].children); }
+	function fillLocTree(curTreeBranch, intRcrds) { 		                    //console.log("fillLocTree called. taxaTree = %O", curTreeBranch) 
+		for (var sibling in curTreeBranch) {                                    //console.log("sibling = %O", curTreeBranch[sibling]);
+			if (curTreeBranch[sibling].interactions !== null) { 
+				curTreeBranch[sibling].interactions = replaceInteractions(curTreeBranch[sibling].interactions, intRcrds); }
+			if (curTreeBranch[sibling].children) { 
+				fillLocTree(curTreeBranch[sibling].children, intRcrds); }
 		}
 	}
 	/**
 	 * Recurses through each source's 'children' property until it finds the citation
 	 * source, and fills it's children interaction id's with their interaction records.
 	 */
-    function fillSrcTree(intRcrds) { console.log("")
-    	var domain = $('#sel-src-domain').val();  console.log("src domain = ", domain);
+    function fillSrcTree(curTree, intRcrds) { 
+    	var domain = $('#sel-src-domain').val();                                   
     	var fillMethod = { auths: fillAuthInteractions, pubs: fillPubTree };
 
-    	for (var srcName in curTree) { console.log("-----processing src = %O", curTree[srcName]);
+    	for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
 	    	curTree[srcName].children.forEach(function(childSrc){
-	    		fillMethod[domain](curTree[srcName]); 
+	    		fillMethod[domain](childSrc, curTree[srcName]); 
 	    	});
 	    }
 
 	    function fillPubTree(srcRcrd) {
 	    	// body...
 	    }
-	    function fillAuthInteractions(srcRcrd) {   console.log("fillAuthInteractions. authChildren = %O", srcRcrd.children);
-	    	var type = Object.keys(srcRcrd.sourceType)[0];
+
+        /**
+         * Recurses through each source's 'children' property until reaching the 
+         * citation record. All interactions for the record are filled in.
+         */
+        function fillAuthInteractions(curSrc, parentSrc) {                      //console.log("fillAuthInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+            var childRcrdAry;
+            var type = Object.keys(curSrc.sourceType)[0];                       //console.log("type = ", type)
 	    	if (type === "citation") {
-	    		srcRcrd.children = srcRcrd.interactions === null ? null : 
-	    			replaceInteractions(srcRcrd.interactions, intRcrds);
-	    	} else {
-		    	srcRcrd.children = srcRcrd.childSources.forEach(function(srcChild) {
-		    		fillAuthInteractions(srcChild);
-		    	});
-	    	}
+                curSrc.children = curSrc.interactions === null ? null : 
+                    replaceInteractions(curSrc.interactions, intRcrds);         //console.log("childRcrdAry = %O", childRcrdAry);
+            } else {
+                if (curSrc.children === null) { return } // Should be able to remove once the rouge citation without publication is fixed 
+                curSrc.children.forEach(function(srcChild) {  
+                    fillAuthInteractions(srcChild, curSrc);
+                });
+            }
 	    }
-	    // function fillCitInts(citSrc) { console.log("fillCitInts src = %O", citSrc);
-	    // 	citSrc.children = replaceInteractions(citSrc.children);
-	    // }
     } /* End fillSrcTree */
-	function replaceInteractions(interactionsAry, intRcrds) { //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+	function replaceInteractions(interactionsAry, intRcrds) {                   //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
 		return interactionsAry.map(function(intId){
-			if (typeof intId === "number") {	//console.log("new record = %O", intRcrds[intId]);
+			if (typeof intId === "number") {	                                //console.log("new record = %O", intRcrds[intId]);
 				return intRcrds[intId];	
 			}  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
 		});
@@ -708,51 +711,50 @@
 		var sortedSrcs = {};
 		var srcRcrdsById = localStorage ? JSON.parse(localStorage.getItem('srcRcrds')) : false; 
 		if( srcRcrdsById ) {  //console.log("Stored Source data Loaded");
-			sortedSrcs.authors = JSON.parse(localStorage.getItem('authRcrds'));
-			sortedSrcs.publications = JSON.parse(localStorage.getItem('pubRcrds'));
+			sortedSrcs.author = JSON.parse(localStorage.getItem('authRcrds'));
+			sortedSrcs.publication = JSON.parse(localStorage.getItem('pubRcrds'));
 			initSrcSearchUi(sortedSrcs, srcRcrdsById);
 		} else { //console.log("Sources Not Found In Storage.");
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
 		}
 	}
-	function seperateAndStoreSrcs(data) {						console.log("source data recieved. %O", data);
-		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 							//console.log("preppedData = %O", preppedData);
+	function seperateAndStoreSrcs(data) {						                //console.log("source data recieved. %O", data);
+		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 					//console.log("preppedData = %O", preppedData);
 		populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-		populateStorage('authRcrds', JSON.stringify(preppedData.authors));
-		populateStorage('pubRcrds', JSON.stringify(preppedData.publications));
+		populateStorage('authRcrds', JSON.stringify(preppedData.author));
+		populateStorage('pubRcrds', JSON.stringify(preppedData.publication));
 		initSrcSearchUi(preppedData, data.srcRcrds);
 	}
 	/**
 	 * Sources have two types of 'tree' data: Authors -> Interactions, and
-	 * (optional: Publisher->)Publications->Citations->Interactions. 
-	 * Each Author and Publication Source records are added to their respective 
-	 * objects and returned.
+	 * Publications->Citations->Interactions. The Author and Publication Source 
+     * records are added to their respective objects and returned.
 	 */
-	function sortAuthAndPubRcrds(srcRcrds) {
-		var authors = {};
-		var pubs = {};
+	function sortAuthAndPubRcrds(srcRcrds) {                                    //console.log("srcRcrds = %O", srcRcrds);
+        var type;
+        var sortedSrcs = { author: {}, publication: {} };
+		
 		for (var key in srcRcrds) {
-			if ("author" in srcRcrds[key].sourceType) {
-				authors[srcRcrds[key].description] = srcRcrds[key];
-			} else if ("publication" in srcRcrds[key].sourceType) {
-				pubs[srcRcrds[key].displayName] = srcRcrds[key];
-			}
+            type = Object.keys(srcRcrds[key].sourceType)[0];  
+
+            if (type === "author" || type === "publication") {
+                sortedSrcs[type][srcRcrds[key].displayName] = srcRcrds[key];
+            }
 		}
-		return { authors: authors, publications: pubs };
+		return sortedSrcs; 
 	}
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		console.log("init search ui");
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
         rcrdsById = srcRcrdsById;
         if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
         if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('auths'); }
         // storeSrcDomain();
         initSrcTree(sortedSrcDomains, srcRcrdsById);
         getInteractionsAndFillTree();
-		// buildSrcSearchUiAndGrid(curTree);
     }
     /**
      * Builds the select box for the source domain types that will become the data
@@ -769,9 +771,9 @@
 
         function getDomainOpts(data) {
             var sourceDomains = Object.keys(data);
-            var srcTypeMap = { "authors": "auths", "publications": "pubs" };
+            var srcTypeMap = { "author": "auths", "publication": "pubs" };
             var opts = sourceDomains.map(function(srcType){
-            	return { value: srcTypeMap[srcType], text: ucfirst(srcType) };
+            	return { value: srcTypeMap[srcType], text: ucfirst(srcType) + 's' };
             });
             return opts;
         }
@@ -788,13 +790,13 @@
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global 'curTree', 
      */
-    function initSrcTree(sortedSrcDomains, srcRcrdsById) {
+    function initSrcTree(sortedSrcDomains, srcRcrdsById) {                      //console.log("initSrcTree domainRcrds = %O. srcRcrds = %O", sortedSrcDomains, srcRcrdsById);
     	var tree;
-        var srcTypeMap = { "auths": "authors", "pubs": "publications" };
-        var srcDomain = srcTypeMap[$('#sel-src-domain').val()];
-        var domainRcrds = sortedSrcDomains[srcDomain];  console.log("initSrcTree for %s = %O", srcDomain, domainRcrds);
+        var srcTypeMap = { "auths": "author", "pubs": "publication" };
+        var srcDomain = srcTypeMap[$('#sel-src-domain').val()];  
+        var domainRcrds = sortedSrcDomains[srcDomain];                          //console.log("initSrcTree for %s = %O", srcDomain, domainRcrds);
 
-        if (srcDomain === "authors") { tree = buildAuthSrcTree(domainRcrds);
+        if (srcDomain === "author") { tree = buildAuthSrcTree(domainRcrds);   
         } else { tree = buildPubSrcTree(domainRcrds); }
 
         curTree = tree;
@@ -806,7 +808,7 @@
      * always has a 'parent' publication source.
      * Publication Source Tree:
      * ->Publication Title
-     * ->->Citation || Article Title
+     * ->->Citation Title
      * ->->->Interactions Records
      */
     function buildPubSrcTree(pubRcrds) { console.log("buildPubSrcTree.");
@@ -836,19 +838,21 @@
      * with their contributibuted works and the interactions they contained nested within.
      * Author Source Tree:
      * ->Author
-     * ->->Citation || Article Title (Publication Title)
+     * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
     function buildAuthSrcTree(authSrcRcrds) { // console.log("buildAuthSrcTree");
     	for (var authName in authSrcRcrds) {
     		authSrcRcrds[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
-    	}
-    	return authSrcRcrds;
+    	}  
+    	return authSrcRcrds;  
     }  
-    /** For each source work contribution, return the source record   */
-    function getAuthChildren(authData) { 										//console.log("getAuthChildren rcrd = %O", authData);
+    /** For each source work contribution, gets any additional publication children
+     * @getPubData and return's the source record.
+     */
+    function getAuthChildren(authData) { 		//console.log("getAuthChildren contribs = %O", authData.contributions);
     	return authData.contributions.map(function(workSrcId){
-    		return rcrdsById[workSrcId];
+    		return getPubData(rcrdsById[workSrcId]);
     	});
     }
     /**
@@ -858,12 +862,21 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                   	console.log("buildSrcSearchUiAndGrid called");
+    function buildSrcSearchUiAndGrid(srcTree) {                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         // loadSelectElems();
         transformSrcDataAndLoadGrid(srcTree);
     } 
-
+/*---------Source Data Formatting------------------------------------------------*/
+    /**
+     * Transforms the tree's source record data into the grid format, adds to each 
+     * taxon the total number of interactions for the taxon and it's children 
+     * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
+     * Calls @loadGrid to generate the grid.
+     */
+    function transformSrcDataAndLoadGrid(argument) {
+        // body...
+    }
 
 
 
