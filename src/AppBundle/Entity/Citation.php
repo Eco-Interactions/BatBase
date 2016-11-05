@@ -30,6 +30,13 @@ class Citation
      * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
      */
     private $displayName;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     */
+    private $title;
 
     /**
      * @var string
@@ -58,13 +65,6 @@ class Citation
      * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
      */
     private $publicationPages;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="title", type="string", length=255, nullable=true)
-     */
-    private $title;
 
     /**
      * @ORM\ManyToMany(targetEntity="Tag", mappedBy="citations")
@@ -162,6 +162,30 @@ class Citation
     }
 
     /**
+     * Set title.
+     *
+     * @param string $title
+     *
+     * @return Citation
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title.
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
      * Set fullText.
      *
      * @param string $fullText
@@ -254,30 +278,6 @@ class Citation
     public function getPublicationPages()
     {
         return $this->publicationPages;
-    }
-
-    /**
-     * Set title.
-     *
-     * @param string $title
-     *
-     * @return Citation
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    /**
-     * Get title.
-     *
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
     }
 
     /**
