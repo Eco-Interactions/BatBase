@@ -99,14 +99,6 @@ class Author
     private $deletedAt;
 
     /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->attributions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
      * Get id.
      *
      * @return int

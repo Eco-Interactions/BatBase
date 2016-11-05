@@ -25,12 +25,6 @@ class Source
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"displayName"})
-     * @ORM\Column(length=128, unique=true, nullable=true)
-     */
-    private $slug;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
