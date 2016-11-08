@@ -749,11 +749,12 @@
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
     function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
+        var domainRcrds;
         rcrdsById = srcRcrdsById;
         if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
         if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('auths'); }
-        // storeSrcDomain();
-        initSrcTree(sortedSrcDomains, srcRcrdsById);
+        domainRcrds = returnCurDomainRcrds();
+        initSrcTree(domainRcrds);
         getInteractionsAndFillTree();
     }
     /**
@@ -780,24 +781,34 @@
     } /* End buildSrcDomainHtml */
     /** Event fired when the source domain select box has been changed. */
     function onSrcSearchMethodChange(e) {  
+        var domainRcrds = returnCurDomainRcrds(); console.log("domainRcrds = %O", domainRcrds);
+        clearPreviousGrid();
+        resetToggleTreeBttn();
+        initSrcTree(domainRcrds);
     }
-    // function storeSrcDomain() {							//May or may not need this
-    //     var srcDomain = $('#sel-src-domain').val();
-    //     populateStorage('curDomain', srcDomain);
-    // }
+    /** Returns the records for the source domain currently selected. */
+    function returnCurDomainRcrds() {							//May or may not need this
+        var returnRcrds = {};
+        var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
+        var domainVal = $('#sel-src-domain').val();                           
+        var srcDomain = srcTransMap[domainVal][0];  
+        var storageProp = srcTransMap[domainVal][1];  
+
+        returnRcrds[srcDomain] = JSON.parse(localStorage.getItem(storageProp));     console.log("domainRcrds = %O",  domainRcrds);                     
+
+        return returnRcrds;
+    }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global 'curTree', 
      */
-    function initSrcTree(sortedSrcDomains, srcRcrdsById) {                      //console.log("initSrcTree domainRcrds = %O. srcRcrds = %O", sortedSrcDomains, srcRcrdsById);
+    function initSrcTree(domainRcrds) {                     console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
-        var srcTypeMap = { "auths": "author", "pubs": "publication" };
-        var srcDomain = srcTypeMap[$('#sel-src-domain').val()];  
-        var domainRcrds = sortedSrcDomains[srcDomain];                          //console.log("initSrcTree for %s = %O", srcDomain, domainRcrds);
+        var srcDomain = Object.keys(domainRcrds)[0];     console.log("%s", srcDomain);
 
-        if (srcDomain === "author") { tree = buildAuthSrcTree(domainRcrds);   
-        } else { tree = buildPubSrcTree(domainRcrds); }
+        if (srcDomain === "author") { tree = buildAuthSrcTree(domainRcrds.author);   
+        } else { tree = buildPubSrcTree(domainRcrds.publication); }
 
         curTree = tree;
     }  
@@ -2089,7 +2100,7 @@
 		});
 
 		$(selectElem).val(selected);
-		$(selectElem).change(updateTaxaSearch);
+		// $(selectElem).change(updateTaxaSearch);
 		// $(selectElem).click(hideones);
 		return selectElem;
 	}
