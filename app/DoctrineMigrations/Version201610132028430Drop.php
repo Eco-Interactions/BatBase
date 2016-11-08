@@ -22,13 +22,21 @@ class Version201610132028430Drop extends AbstractMigration
 
         $this->addSql('DROP TABLE attribution');
         $this->addSql('ALTER TABLE author DROP link_display, DROP link_url');
+
         $this->addSql('ALTER TABLE interaction DROP FOREIGN KEY FK_378DFDA7500A8AB7');
         $this->addSql('DROP INDEX IDX_378DFDA7500A8AB7 ON interaction');
         $this->addSql('ALTER TABLE interaction DROP citation_id');
+        
         $this->addSql('ALTER TABLE citation DROP FOREIGN KEY FK_FABD9C7E38B217A7');
         $this->addSql('DROP INDEX IDX_FABD9C7E38B217A7 ON citation');
         $this->addSql('ALTER TABLE citation ADD publication_volume VARCHAR(255) DEFAULT NULL, DROP publication_id, DROP is_secondary, DROP description, DROP publisher, DROP year');
+        
         $this->addSql('ALTER TABLE publication DROP doi, DROP link_display, DROP link_url, DROP publisher;');
+        $this->addSql('ALTER TABLE publication CHANGE description description VARCHAR(255) DEFAULT NULL');
+
+        $this->addSql('ALTER TABLE location ADD description VARCHAR(255) DEFAULT NULL AFTER display_name');
+
+        $this->addSql('ALTER TABLE source DROP slug');
 
         $this->addSql('SET FOREIGN_KEY_CHECKS=1;');
     }

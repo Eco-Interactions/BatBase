@@ -52,6 +52,9 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             ], 33 => [  
                     "publication" => [ "Ciência e Cultura", "Ciencia e Cultura", "Journal"],   
                     "source" => [   "publication" => [ null, "10.18316/2236-6377.15.0", null, "http://cienciaecultura.bvs.br/scielo.php?script=sci_serial&pid=0009-6725&lng=pt&nrm=iso", null]]
+            ], 35 => [  
+                    "publication" => [ "Mammals of the Mexican state of San Luis Potosi", null, "Book"],   
+                    "source" => [   "publication" => [ 1953]]
             ], 42 => [  
                     "publication" => [ "Blüten und fledermäuse", "Bluten und fledermause", "Book"],  
                     "source" => [ "publication" => [ 1985, null, "Waldemar Kramer", null, null],
