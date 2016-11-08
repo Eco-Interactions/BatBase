@@ -1309,20 +1309,27 @@
 			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
 			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
 			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count", volatile: true },
-			    {headerName: "Subject Taxon", field: "subject", width: 133 },
-			    {headerName: "Object Taxon", field: "object", width: 133  },
+			    {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: recordCellRenderer },
+			    {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: recordCellRenderer  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 146, filter: UniqueValuesFilter },
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 88, filter: UniqueValuesFilter },
-			    {headerName: "Location Description", field: "location", width: 175,},
-			    {headerName: "Source", field: "source", width: 100,},
-			    {headerName: "Note", field: "note", width: 110,} ];
+			    {headerName: "Location Description", field: "location", width: 175, cellRenderer: recordCellRenderer },
+			    {headerName: "Source", field: "source", width: 100, cellRenderer: recordCellRenderer},
+			    {headerName: "Note", field: "note", width: 110, cellRenderer: recordCellRenderer} ];
 	}
+    /** Adds tooltip to Tree cells */
 	function innerCellRenderer(params) { 										//console.log("params in cell renderer = %O", params)
-		return params.data.name || null;
+        var name = params.data.name || null;   
+        return name === null ? null : '<span title="'+name+'">'+name+'</span>';
 	}
+    /** Adds tooltip to Interaction row cells */
+    function recordCellRenderer(params) {
+        var value = params.value || null;
+        return value === null ? null : '<span title="'+value+'">'+value+'</span>';
+    }
 	function getRowStyleClass(params) { 										//console.log("getRowStyleClass params = %O", params);
 		var lvlClassMap = {
 			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
