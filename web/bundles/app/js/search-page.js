@@ -148,11 +148,11 @@
 	function getInteractionsAndFillTree() {  	                                console.log("getInteractionsAndFillTree called. Tree = %O", focusStorag.curTree);
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		fadeGrid();
-		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
+		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
 			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										console.log("Interaction success! rcrds = %O", data);
+	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data);
 		populateStorage('intRcrds', JSON.stringify(data.intRcrds));  
 		fillTreeWithInteractions( data.intRcrds );
 	}
@@ -160,7 +160,7 @@
 	 * Fills the current data tree with interaction records and then rebuilds the 
 	 * displayed grid.
 	 */
-	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
+	function fillTreeWithInteractions(intRcrds) {   							//console.log("fillTreeWithInteractionscalled.");
         var focus = focusStorag.curFocus; 
 		var curTree = focusStorag.curTree; 
 		var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
@@ -427,17 +427,14 @@
     } 
 /*---------Taxa Data Formatting------------------------------------------------*/
     /**
-     * Transforms the tree's taxa record data into the grid format, adds to each 
-     * taxon the total number of interactions for the taxon and it's children 
-     * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
-     * Calls @loadGrid to generate the grid.
+     * Transforms the tree's taxa record data into the grid format and sets the 
+     * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
     function transformTaxaDataAndLoadGrid(taxaTree) {  							//console.log("transformTaxaDataAndLoadGrid called. taxaTree = %O", taxaTree)
         var finalRowData = [];
         for (var topTaxon in taxaTree) {
             finalRowData.push( getTaxaRowData(taxaTree[topTaxon]) );
         }
-        addTotalIntCntsToTreeNodes(finalRowData);
         rowData = finalRowData;                                                 //console.log("rowData = %O", rowData);
         loadGrid("Taxa Tree");
     }
@@ -458,7 +455,7 @@
             children: getTaxaRowDataForChildren(taxon),
             taxaLvl: taxon.level,
             interactions: intCount !== null,          
-            intCnt: intCount,
+            intCnt: intCount,                               //used for adding counts to grid rows
         };  
     } 
     /**
@@ -623,10 +620,8 @@
 	}
 /*---------Loc Data Formatting------------------------------------------------*/
 	/**
-	 * Transforms the tree's location data into the grid format, adds to each 
-	 * location the total number of interactions for that location and it's children 
-	 * @addTotalIntCntsToTreeNodes, and sets the tree data in the focusStorag the global 'rowData'. 
-	 * Calls @loadGrid to generate the grid.
+	 * Transforms the tree's location data into the grid format and sets the row 
+     * data in the global focusStorage object as 'rowData'. Calls @loadGrid.
 	 */
 	function transformLocDataAndLoadGrid(locTree) {
 		var finalRowData = [];  //console.log("locTree = %O", locTree);
@@ -634,7 +629,6 @@
 		for (var region in locTree) { //console.log("region = ", region)
 			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
 		}
-		addTotalIntCntsToTreeNodes(finalRowData);
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		addFutureDevMsg();
 		loadGrid("Location Tree");
@@ -787,7 +781,8 @@
         clearPreviousGrid();
         resetToggleTreeBttn();
         initSrcTree(domainRcrds);
-        transformSrcDataAndLoadGrid(focusStorag.curTree);   
+        // transformSrcDataAndLoadGrid(focusStorag.curTree);
+        buildSrcSearchUiAndGrid(focusStorag.curTree);   
     }
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
@@ -803,8 +798,8 @@
      */
     function initSrcTree(domainRcrds) {                                         console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
-        if (focusStorag.curDomain === "author") { tree = buildAuthSrcTree(domainRcrds);   
-        } else { tree = buildPubSrcTree(domainRcrds); }
+        if (focusStorag.curDomain === "publication") { tree = buildPubSrcTree(domainRcrds);   
+        } else { tree = buildAuthSrcTree(domainRcrds); }
         focusStorag.curTree = sortSrcTree(tree);
     }  
     /** Sorts the Source tree nodes alphabetically. */
@@ -897,17 +892,15 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         // loadSelectElems();
         transformSrcDataAndLoadGrid(srcTree);
     } 
 /*---------Source Data Formatting------------------------------------------------*/
     /**
-     * Transforms the tree's source record data into the grid format, adds to each 
-     * taxon the total number of interactions for the taxon and it's children 
-     * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
-     * Calls @loadGrid to generate the grid.
+     * Transforms the tree's source record data into the grid format and sets the 
+     * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {
         var treeName = ucfirst(focusStorag.curDomain) + ' Tree';
@@ -916,11 +909,10 @@
         for (var topNode in srcTree) {
             finalRowData.push( getSrcRowData(srcTree[topNode], focusStorag.curDomain) );
         }
-        addTotalIntCntsToTreeNodes(finalRowData);
         rowData = finalRowData;                                                 console.log("rowData = %O", rowData);
         loadGrid(treeName);
     }
-    function getSrcRowData(src, type) {                                         console.log("getSrcRowData. source = %O, type = ", src, type);
+    function getSrcRowData(src, type) {                                         //console.log("getSrcRowData. source = %O, type = ", src, type);
         var childHandler = type === "citation" ?  getCitIntRowData : getChildSrcRowData;
         return {
             id: src.id,
@@ -942,7 +934,7 @@
         var childType;
         if (parent.children === null) { return []; }
         
-        return parent.children.map(function(childSrc) {
+        return parent.children.map(function(childSrc) { //console.log("childSrc = %O", childSrc);
             childType = Object.keys(childSrc.sourceType)[0];
             return getSrcRowData(childSrc, childType);
         });
