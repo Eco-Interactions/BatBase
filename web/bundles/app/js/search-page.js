@@ -109,7 +109,7 @@
 		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
-	function selectSearchFocus(e) {  							console.log("select(ing)SearchFocus")
+	function selectSearchFocus(e) {  							console.log("select(ing)SearchFocus = ", $('#search-focus').val())
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
@@ -145,7 +145,7 @@
 	 * ajax call gets the data which is stored @storeTaxa before being sent to  
 	 * to @fillTreeWithInteractions.  	 
 	 */
-	function getInteractionsAndFillTree() {  	console.log("getInteractionsAndFillTree called. Tree = %O", focusStorag.curTree);
+	function getInteractionsAndFillTree() {  	                                console.log("getInteractionsAndFillTree called. Tree = %O", focusStorag.curTree);
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		fadeGrid();
 		if ( intRcrds ) { console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
@@ -496,7 +496,7 @@
             if (parentInts !== null) { intData.push(parentInts); }
         }
         if (parent.children !== null) { 
-            parent.children = parent.children.map(function(child){  
+            parent.children.forEach(function(child){  
                 childData.push( getTaxaRowData(child));
             });  
         }
@@ -753,12 +753,12 @@
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            console.log("init search ui");
         var domainRcrds;
         rcrdsById = srcRcrdsById;
         if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
         if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('auths'); }
-        domainRcrds = returnCurDomainRcrds();
+        domainRcrds = storeAndReturnCurDomainRcrds();
         initSrcTree(domainRcrds);
         getInteractionsAndFillTree();
     }
@@ -786,38 +786,59 @@
     } /* End buildSrcDomainHtml */
     /** Event fired when the source domain select box has been changed. */
     function onSrcSearchMethodChange(e) {  
-        var domainRcrds = returnCurDomainRcrds();                               console.log("---Search Change. domainRcrds = %O", domainRcrds);
+        var domainRcrds = storeAndReturnCurDomainRcrds();                               console.log("---Search Change. domainRcrds = %O", domainRcrds);
         clearPreviousGrid();
         resetToggleTreeBttn();
         initSrcTree(domainRcrds);
         transformSrcDataAndLoadGrid(focusStorag.curTree);   
     }
     /** Returns the records for the source domain currently selected. */
-    function returnCurDomainRcrds() {							//May or may not need this
-        var returnRcrds = {};
+    function storeAndReturnCurDomainRcrds() {							//May or may not need this
         var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
         var domainVal = $('#sel-src-domain').val();                           
-        var srcDomain = srcTransMap[domainVal][0];  
-        var storageProp = srcTransMap[domainVal][1];  
-
-        returnRcrds[srcDomain] = JSON.parse(localStorage.getItem(storageProp));     
-
-        return returnRcrds;
+        focusStorag.curDomain = srcTransMap[domainVal][0]
+        return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
     }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global focusStorag obj as 'curTree', 
      */
-    function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
+    function initSrcTree(domainRcrds) {                                         console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
-        var srcDomain = Object.keys(domainRcrds)[0];                            //console.log("Domain = %s", srcDomain);
-
-        if (srcDomain === "author") { tree = buildAuthSrcTree(domainRcrds.author);   
-        } else { tree = buildPubSrcTree(domainRcrds.publication); }
-
-        focusStorag.curTree = tree;
+        if (focusStorag.curDomain === "author") { tree = buildAuthSrcTree(domainRcrds);   
+        } else { tree = buildPubSrcTree(domainRcrds); }
+        focusStorag.curTree = sortSrcTree(tree);
     }  
+    /** Sorts the Source tree nodes alphabetically. */
+    function sortSrcTree(tree) {
+        var keys = Object.keys(tree).sort();    
+        var sortedTree = {};
+        for (var i=0; i<keys.length; i++){ 
+            sortedTree[keys[i]] = sortChildSrcs(tree[keys[i]]);
+        }
+        return sortedTree;
+        /** Alphabetizes child source nodes. Skips interaction records. */
+        function sortChildSrcs(src) { 
+            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {
+                src.children = src.children.sort(alphaSrcNames);
+                src.children.forEach(sortChildSrcs);
+            }
+            return src;
+        } 
+    } /* End sortSrcTree */
+    /**
+     * Alphabetizes array via sort method.
+     * Display names are buried in the 'sourceType' object because citation display 
+     * names are, incorrectly and emporarily, their short-text rather than their title.
+     */
+    function alphaSrcNames(a, b) {  
+        var xName = a.sourceType[Object.keys(a.sourceType)[0]].displayName;
+        var yName = b.sourceType[Object.keys(b.sourceType)[0]].displayName;
+        var x = xName.toLowerCase();
+        var y = yName.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Authors as top nodes of the data tree. 
@@ -839,7 +860,7 @@
     	return pubRcrd;
     }
     function getPubChildren(pubRcrd) {
-    	if (pubRcrd.childSources === null) { return null; }
+    	if (pubRcrd.childSources === null) { return []; }
 
     	return pubRcrd.childSources.map(function(srcId) {
     		return getPubChildData(rcrdsById[srcId]);
@@ -858,7 +879,7 @@
      * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
-    function buildAuthSrcTree(authSrcRcrds) { // console.log("buildAuthSrcTree");
+    function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("buildAuthSrcTree");
     	for (var authName in authSrcRcrds) {
     		authSrcRcrds[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
     	}  
@@ -867,7 +888,7 @@
     /** For each source work contribution, gets any additional publication children
      * @getPubData and return's the source record.
      */
-    function getAuthChildren(authData) { 		//console.log("getAuthChildren contribs = %O", authData.contributions);
+    function getAuthChildren(authData) { 		                                //console.log("getAuthChildren contribs = %O", authData.contributions);
     	return authData.contributions.map(function(workSrcId){
     		return getPubData(rcrdsById[workSrcId]);
     	});
@@ -879,7 +900,7 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         // loadSelectElems();
         transformSrcDataAndLoadGrid(srcTree);
@@ -891,19 +912,51 @@
      * @addTotalIntCntsToTreeNodes, and sets the tree data as the global 'rowData'. 
      * Calls @loadGrid to generate the grid.
      */
-    function transformSrcDataAndLoadGrid(argument) {
-        // body...
+    function transformSrcDataAndLoadGrid(srcTree) {
+        var treeName = ucfirst(focusStorag.curDomain) + ' Tree';
+        var finalRowData = [];
+
+        for (var topNode in srcTree) {
+            finalRowData.push( getSrcRowData(srcTree[topNode], focusStorag.curDomain) );
+        }
+        addTotalIntCntsToTreeNodes(finalRowData);
+        rowData = finalRowData;                                                 console.log("rowData = %O", rowData);
+        loadGrid(treeName);
     }
-
-
-
-
-
-
-
-
-
-
+    function getSrcRowData(src, type) {                                         console.log("getSrcRowData. source = %O, type = ", src, type);
+        var childHandler = type === "citation" ?  getCitIntRowData : getChildSrcRowData;
+        return {
+            id: src.id,
+            name: type === "citation" ? src.description : src.displayName,
+            isParent: true,             
+            // parentTaxon: taxon.parentTaxon,
+            open: openRows.indexOf(src.id.toString()) !== -1, 
+            children: childHandler(src, type),
+            // taxaLvl: taxon.level,
+            // interactions: intCount !== null,          
+            // intCnt: intCount,
+        };  
+    } 
+    /**
+     * Recurses through each source's 'children' property and returns a row data obj 
+     * for each source node in the tree.
+     */
+    function getChildSrcRowData(parent) {
+        var childType;
+        if (parent.children === null) { return []; }
+        
+        return parent.children.map(function(childSrc) {
+            childType = Object.keys(childSrc.sourceType)[0];
+            return getSrcRowData(childSrc, childType);
+        });
+    }
+    /** Return an array of data objects for each Citation child, ie interaction record. */
+    function getCitIntRowData(citSrc) { 
+        if (citSrc.children === null) { return []; }
+        return citSrc.children.map(function(intRcrd) {
+            return buildIntDataObj(intRcrd, { isParent: false });
+        });
+    }
 /*-----------------Grid Methods-----------------------------------------------*/
 	/**
 	 * When the grid rowModel is updated, the total interaction count for each 
