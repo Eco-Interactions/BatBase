@@ -724,30 +724,36 @@
 		}
 	}
 	function seperateAndStoreSrcs(data) {						                //console.log("source data recieved. %O", data);
-		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 					//console.log("preppedData = %O", preppedData);
+		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 					console.log("preppedData = %O", preppedData);
 		populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
 		populateStorage('authRcrds', JSON.stringify(preppedData.author));
 		populateStorage('pubRcrds', JSON.stringify(preppedData.publication));
 		initSrcSearchUi(preppedData, data.srcRcrds);
 	}
-	/**
-	 * Sources have two types of 'tree' data: Authors -> Interactions, and
-	 * Publications->Citations->Interactions. The Author and Publication Source 
-     * records are added to their respective objects and returned.
-	 */
-	function sortAuthAndPubRcrds(srcRcrds) {                                    //console.log("srcRcrds = %O", srcRcrds);
-        var type;
+    /**
+     * Sources have two types of 'tree' data: Authors -> Interactions, and
+     * Publications->Citations->Interactions. Citations are identified and their  
+     * publication parents added to reduce redundant tree data.
+     */
+    function sortAuthAndPubRcrds(srcRcrds) {                                    console.log("srcRcrds = %O", srcRcrds);
+        var type, parentPub;
         var sortedSrcs = { author: {}, publication: {} };
-		
-		for (var key in srcRcrds) {
+        
+        for (var key in srcRcrds) {
             type = Object.keys(srcRcrds[key].sourceType)[0];  
-
-            if (type === "author" || type === "publication") {
+            if (type === "author") {
                 sortedSrcs[type][srcRcrds[key].displayName] = srcRcrds[key];
-            }
-		}
-		return sortedSrcs; 
-	}
+            } else if (type === "citation") { addNewParentPub(srcRcrds[key]); }
+        }
+        return sortedSrcs; 
+
+        function addNewParentPub(citSrc) {
+            parentPub = srcRcrds[citSrc.parentSource];
+            if (!sortedSrcs.publication.hasOwnProperty(parentPub.displayName)) {  
+               sortedSrcs.publication[parentPub.displayName] = parentPub; 
+           }
+        }
+    } /* End sortAuthAndPubRcrds */
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
