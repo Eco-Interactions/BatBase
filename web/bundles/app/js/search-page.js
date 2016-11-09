@@ -211,33 +211,24 @@
 	 * source, and fills it's children interaction id's with their interaction records.
 	 */
     function fillSrcTree(curTree, intRcrds) { 
-    	var domain = $('#sel-src-domain').val();                                   
-    	var fillMethod = { auths: fillAuthInteractions, pubs: fillPubTree };
-
     	for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
 	    	curTree[srcName].children.forEach(function(childSrc){
-	    		fillMethod[domain](childSrc, curTree[srcName]); 
+	    		fillInteractions(childSrc, curTree[srcName]); 
 	    	});
 	    }
-
-	    function fillPubTree(srcRcrd) {
-	    	// body...
-	    }
-
         /**
          * Recurses through each source's 'children' property until reaching the 
          * citation record. All interactions for the record are filled in.
          */
-        function fillAuthInteractions(curSrc, parentSrc) {                      //console.log("fillAuthInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+        function fillInteractions(curSrc, parentSrc) {                          //console.log("fillInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
             var childRcrdAry;
             var type = Object.keys(curSrc.sourceType)[0];                       //console.log("type = ", type)
 	    	if (type === "citation") {
-                curSrc.children = curSrc.interactions === null ? null : 
+                curSrc.children = curSrc.interactions === null ? [] : 
                     replaceInteractions(curSrc.interactions, intRcrds);         //console.log("childRcrdAry = %O", childRcrdAry);
             } else {
-                if (curSrc.children === null) { return } // Should be able to remove once the rouge citation without publication is fixed 
                 curSrc.children.forEach(function(srcChild) {  
-                    fillAuthInteractions(srcChild, curSrc);
+                    fillInteractions(srcChild, curSrc);
                 });
             }
 	    }
