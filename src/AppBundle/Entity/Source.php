@@ -114,7 +114,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="citationSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
 
      * A collection of all Authors that contributed to a source work.
      */
@@ -541,6 +541,40 @@ class Source
     }
 
     /**
+     * Add an Contribution.
+     *
+     * @param \AppBundle\Entity\Contributon $contribution
+     *
+     * @return Source
+     */
+    public function addContribution(\AppBundle\Entity\Contribution $contribution)
+    {
+        $this->contributions[] = $contribution;
+
+        return $this;
+    }
+
+    /**
+     * Remove a Contribution.
+     *
+     * @param \AppBundle\Entity\Contribution $contribution
+     */
+    public function removeContribution(\AppBundle\Entity\Contribution $contribution)
+    {
+        $this->contributions->removeElement($contribution);
+    }
+
+    /**
+     * Get Contributions.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getContributions()
+    {
+        return $this->contributions;
+    }
+    
+    /**
      * Add a Citation.
      *
      * @param \AppBundle\Entity\Citation $citation
@@ -650,10 +684,14 @@ class Source
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -680,10 +718,14 @@ class Source
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**

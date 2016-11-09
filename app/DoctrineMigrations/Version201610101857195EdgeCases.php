@@ -12,7 +12,7 @@ use AppBundle\Entity\Publication;
 use AppBundle\Entity\Source;
 
 /**
- * @up Handles duplicate citations, and citations that are now publication sources.
+ * Handles duplicate citations.
  */
 class Version201610101857195EdgeCases extends AbstractMigration implements ContainerAwareInterface
 {
@@ -69,15 +69,27 @@ class Version201610101857195EdgeCases extends AbstractMigration implements Conta
             $em->persist($citEntity);
         }                                                                       //print("\n   AFter Source count = ". count($srcEntity->getInteractions()));
     }
-    /** Moves each author for passed citation to it's source entity.  */
+    /**
+     * Adds any new attributions from the citation entity as new contributions of 
+     * the source entity.
+     */
     private function transferAuthors(&$citEntity, &$srcEntity, &$em)
     {                                                     
-        $attributions = $citEntity->getAttributions();
-    
-        foreach ($attributions as $attribution) {
+        $attribs = $citEntity->getAttributions();
+        $contribs = $srcEntity->getContributors();  print("\n   --existing contributions for source ".$srcEntity->getId()." = ".count($contribs));
+        
+        foreach ($attribs as $attribution) {
+            $attribAuthSrc = $attribution->getAuthor()->getSource();
+            $attribAuthSrcId = $attribAuthSrc->getAuthor()->getId();  print("\n    attribAuthSrcId = ".$attribAuthSrcId);
+            /* All authors source's have been created. These can thus be checked for redundancy. */
+            foreach ($contribs as $contrib) {
+                $contribAuthSrcId = $contrib->getAuthorSource()->getAuthor()->getId();  print("\n        contribAuthSrcId = ".$contribAuthSrcId);
+                /* Returns if this author has already been added as a contributor. */
+                if ($contribAuthSrcId === $attribAuthSrcId) { print("\n---skipping\n"); break 2; }
+            }
+         
             $contribEntity = new Contribution();
-
-            $contribEntity->setAuthorSource($attribution->getAuthor()->getSource());
+            $contribEntity->setAuthorSource($attribAuthSrc);
             $contribEntity->setWorkSource($srcEntity);
             $contribEntity->setCreatedBy($em->getRepository('AppBundle:User')
                 ->findOneBy(array('id' => '6'))); 

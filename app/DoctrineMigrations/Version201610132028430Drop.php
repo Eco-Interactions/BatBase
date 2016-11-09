@@ -34,7 +34,7 @@ class Version201610132028430Drop extends AbstractMigration
         $this->addSql('ALTER TABLE publication DROP doi, DROP link_display, DROP link_url, DROP publisher;');
         $this->addSql('ALTER TABLE publication CHANGE description description VARCHAR(255) DEFAULT NULL');
 
-        $this->addSql('ALTER TABLE location ADD description VARCHAR(255) DEFAULT NULL AFTER display_name');
+        $this->addSql('ALTER TABLE location CHANGE description display_name VARCHAR(255) NOT NULL');
 
         $this->addSql('ALTER TABLE source DROP slug');
 
