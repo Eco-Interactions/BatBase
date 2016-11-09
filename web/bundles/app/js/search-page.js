@@ -954,71 +954,6 @@
             return buildIntDataObj(intRcrd, { isParent: false });
         });
     }
-/*-----------------Grid Methods-----------------------------------------------*/
-	/**
-	 * When the grid rowModel is updated, the total interaction count for each 
-	 * tree node, displayed in the "count" column, is updated to count only displayed
-	 * interactions. Any rows filtered out will not be included in the totals.
-	 */
-    function onModelUpdated() {// console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
-		updateSubInteractionCount( gridOptions.api.getModel().rootNode );
-	}
-	/**
-	 * Sets new interaction totals for each tree node @getChildrenCnt and then 
-	 * calls the grid's softRefresh method, which refreshes any rows with "volatile"
-	 * set "true" in the columnDefs - currently only "Count".
-	 */
-	function updateSubInteractionCount(rootNode) {
-		getChildrenCnt(rootNode.childrenAfterFilter);  
-		gridOptions.api.softRefreshView();
-	}
-	function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
-		var nodeCnt, ttl = 0;
-		nodeChildren.forEach(function(child) {
-			nodeCnt = 0;
-			nodeCnt += addSubNodeInteractions(child);
-			ttl += nodeCnt;
-			if (nodeCnt !== 0 && child.data.intCnt !== null) { 
-				child.data.intCnt = nodeCnt; }
-		});
-		return ttl;
-	}
-	/**
-	 * Interaction records are identified by their lack of any children, specifically 
-	 * their lack of a "childrenAfterFilter" property.
-	 */
-	function addSubNodeInteractions(child) {  
-		var cnt = 0;
-		if (child.childrenAfterFilter) {
-			cnt += getChildrenCnt(child.childrenAfterFilter);
-			if (cnt !== 0) { child.data.intCnt = cnt; }
-		} else { 
-			++cnt;
-			child.data.intCnt = null; 
-		}
-		return cnt;
-	}
-	function addTotalIntCntsToTreeNodes(rowData) {   //console.log("rowData = %O", rowData);
-		for (var treeNode in rowData) { //console.log("rowData[treeNode] = %O", rowData[treeNode]);
-			var nodeIntCnt =  rowData[treeNode].intCnt || 0;
-			var allSubsIntCnt = nodeIntCnt + addSubInteractions(rowData[treeNode]);
-			rowData[treeNode].intCnt = allSubsIntCnt === 0 ? null : allSubsIntCnt;
-			if (rowData[treeNode].children) { 
-				addTotalIntCntsToTreeNodes(rowData[treeNode].children); 
-			}
-		}
-	}
-	function addSubInteractions(treeNode) {  //console.log("addSubInteractions called. treeNode =%O", treeNode);
-		var cnt = 0;
-		for (var childNode in treeNode.children) {
-			if (treeNode.children[childNode].interactions) {
-				var childCnt = treeNode.children[childNode].intCnt || 0; //console.log("childCnt = ", childCnt)
-				cnt += childCnt;
-			}
-			if (treeNode.children[childNode].children) { cnt += addSubInteractions(treeNode.children[childNode]); }
-		}
-		return cnt;
-	}
  	/*----------------Apply Fitler Update Methods-----------------------------*/
 	/**
 	 * When a level dropdown is changed, the grid is updated with the selected taxon
@@ -1092,9 +1027,6 @@
 	    	}
 	    });
     }
-	function clearPreviousGrid() {
-		if (gridOptions.api) { gridOptions.api.destroy(); }		
-	}
 	function buildTaxaLvlOptions(rcrds) {  										//console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
@@ -1233,6 +1165,52 @@
 		return vals;
 	}
 	/*===================Shared===============================================*/
+/*-----------------Grid Manipulation Methods-----------------------------------------------*/
+    function clearPreviousGrid() {  console.log("clearing grid");
+        if (gridOptions.api) { gridOptions.api.destroy(); }     
+    }
+    /**
+     * When the grid rowModel is updated, the total interaction count for each 
+     * tree node, displayed in the "count" column, is updated to count only displayed
+     * interactions. Any rows filtered out will not be included in the totals.
+     */
+    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+        updateTtlRowIntCount( gridOptions.api.getModel().rootNode );
+    }
+    /**
+     * Sets new interaction totals for each tree node @getChildrenCnt and then 
+     * calls the grid's softRefresh method, which refreshes any rows with "volatile"
+     * set "true" in the columnDefs - currently only "Count".
+     */
+    function updateTtlRowIntCount(rootNode) {
+        getChildrenCnt(rootNode.childrenAfterFilter);  
+        gridOptions.api.softRefreshView();
+    }
+    function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
+        var nodeCnt, ttl = 0;
+        nodeChildren.forEach(function(child) {
+            nodeCnt = 0;
+            nodeCnt += addSubNodeInteractions(child);
+            ttl += nodeCnt;
+            if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
+        });
+        return ttl;
+    }
+    /**
+     * Interaction records are identified by their lack of any children, specifically 
+     * their lack of a "childrenAfterFilter" property.
+     */
+    function addSubNodeInteractions(child) {  
+        var cnt = 0;
+        if (child.childrenAfterFilter) {
+            cnt += getChildrenCnt(child.childrenAfterFilter);
+            if (cnt !== 0) { child.data.intCnt = cnt; }
+        } else { /* Interaction record row */
+            ++cnt;
+            child.data.intCnt = null; 
+        }
+        return cnt;
+    }
 	/*-------------------Html Methods-----------------------------------------*/
 	function clearCol2() {
 		$('#opts-col2').empty();
