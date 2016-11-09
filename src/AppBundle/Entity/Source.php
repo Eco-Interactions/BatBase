@@ -629,7 +629,6 @@ class Source
     {
         return $this->contributions;
     }
-    
     /**
      * Add a Citation.
      *
