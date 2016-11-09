@@ -8,7 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Contribution.
  *
- * @ORM\Table(name="contribution")
+ * @ORM\Table(name="contribution", uniqueConstraints={
+ *     @ORM\UniqueConstraint(name="unq_contrib", columns={"work_src_id", "auth_src_id"})
+ * })
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  */
@@ -33,7 +35,7 @@ class Contribution
     /**
      * @var \AppBundle\Entity\Source
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="authors")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributors")
      * @ORM\JoinColumn(name="work_src_id", referencedColumnName="id")
      *
      * Refers to a single work source record.
@@ -163,7 +165,7 @@ class Contribution
      */
     public function getAuthorSource()
     {
-        return $this->source;
+        return $this->authorSource;
     }
 
     /**

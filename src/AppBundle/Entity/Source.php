@@ -108,7 +108,7 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="citationSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
 
      * A collection of all Authors that contributed to a source work.
      */
@@ -535,7 +535,7 @@ class Source
     }
 
     /**
-     * Add an Contributor.
+     * Add an Contribution.
      *
      * @param \AppBundle\Entity\Contributon $contribution
      *
@@ -567,7 +567,6 @@ class Source
     {
         return $this->contributions;
     }
-
     /**
      * Add a Citation.
      *
@@ -678,10 +677,14 @@ class Source
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
+
+        return $this;
     }
 
     /**
@@ -708,10 +711,14 @@ class Source
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
+     *
+     * @return  Source
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**

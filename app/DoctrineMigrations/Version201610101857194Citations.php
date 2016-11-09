@@ -46,7 +46,7 @@ class Version201610101857194Citations extends AbstractMigration implements Conta
         $srcEntity = new Source();                                     
 
         $srcEntity->setDisplayName($citEntity->getDescription());   
-        $srcEntity->setDescription($citEntity->getFullText());   
+        $srcEntity->setDescription($citEntity->getTitle());   
         $srcEntity->setYear($citEntity->getYear());
         $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
             ->findOneBy(array('id'=> 2)));  
