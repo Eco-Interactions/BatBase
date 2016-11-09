@@ -332,6 +332,7 @@ class SearchController extends Controller
         $pub = $srcEntity->getPublication();
 
         return [ 'description' => $pub->getDescription(), 
+                 'displayName' => $pub->getDisplayName(),
                  'type' => $pub->getPublicationType() ];
     }
     /** Returns an associative array with the citation data. */
@@ -340,10 +341,10 @@ class SearchController extends Controller
         $cit = $srcEntity->getCitation();
         $tags = $cit->getTags();
         $citData = [ 'fullText' => $cit->getFullText(), 
+                     'displayName' => $cit->getTitle(),
                      'publicationVolume' => $cit->getPublicationVolume(),
                      'publicationIssue' => $cit->getPublicationIssue(),
                      'publicationPages' => $cit->getPublicationPages(),
-                     'title' => $cit->getTitle(), 
                      'tags' => []
                     ];
         // Adds each tag to the array of citation tags
