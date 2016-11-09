@@ -1,39 +1,42 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
     ---migration::
-        --Source entity
-            --remove slug
-            --make author fullname's the source display name
-            --set citation title as cit src desc  
-            --ID538 - New parent (ID451)
-            --ID459 - New parent ID33
-            --ID566 move all interacctions -> ID459 (parent)
-
-
-        --Location
-            -duplicates
-                -weird '- duplicate entry'
-                -Oceania duplication
-            //-remove 'habitat' (id=3) location type
-        --Publication
-            -fix that one cit with a publisher (unv knsas?)
-            -tuli's pub updates
-        --Citation
-            --remove all deletedAts
-            --make title the displayName and bring back shortText
-            --make full text = description
-            
-
+        --If I end up going back to rebuild--
+        -Citations
+            make displayname -> title??
+                Could be difficult to keep source display names
+                    unique without appending something to the names...
+                    but what to use is 'shortText' shouldn't even ultimately be  
+                    stored in the database
+                 desc -> fullText
 
 
 
 
 TAYLOR:
+Questions:
 
-Questions::
 
 
 Notes::
+    ::data cleanup::
+        -Pubs
+            -Journal of Zoology: drop "(London)"
+            -Short-tailed fruit bat - pubSrcId 458 
+                Should be parent of citSrcId 614 (instead of srcId 33)
+        -Location 
+            -Oceania duplication
+            -weird '- duplicate entry'
+
+
+
+
+
+    ::Search Page Ideas::
+        -'Expand tree button': Expand one level per click.
+
+
+
 
 =========== EMAIL ==================
 ---------------------Next-------------------------------------------------------
