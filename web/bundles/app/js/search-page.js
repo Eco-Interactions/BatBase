@@ -213,14 +213,14 @@
     function fillSrcTree(curTree, intRcrds) { 
     	for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
 	    	curTree[srcName].children.forEach(function(childSrc){
-	    		fillInteractions(childSrc, curTree[srcName]); 
+	    		fillSrcInteractions(childSrc, curTree[srcName]); 
 	    	});
 	    }
         /**
          * Recurses through each source's 'children' property until reaching the 
          * citation record. All interactions for the record are filled in.
          */
-        function fillInteractions(curSrc, parentSrc) {                          //console.log("fillInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+        function fillSrcInteractions(curSrc, parentSrc) {                          //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
             var childRcrdAry;
             var type = Object.keys(curSrc.sourceType)[0];                       //console.log("type = ", type)
 	    	if (type === "citation") {
@@ -228,7 +228,7 @@
                     replaceInteractions(curSrc.interactions, intRcrds);         //console.log("childRcrdAry = %O", childRcrdAry);
             } else {
                 curSrc.children.forEach(function(srcChild) {  
-                    fillInteractions(srcChild, curSrc);
+                    fillSrcInteractions(srcChild, curSrc);
                 });
             }
 	    }
@@ -781,8 +781,7 @@
         clearPreviousGrid();
         resetToggleTreeBttn();
         initSrcTree(domainRcrds);
-        // transformSrcDataAndLoadGrid(focusStorag.curTree);
-        buildSrcSearchUiAndGrid(focusStorag.curTree);   
+        transformSrcDataAndLoadGrid(focusStorag.curTree);
     }
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
@@ -1329,16 +1328,16 @@
 			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
 			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
 			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count", volatile: true },
-			    {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: recordCellRenderer },
-			    {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: recordCellRenderer  },
+			    {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells },
+			    {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 146, filter: UniqueValuesFilter },
 			    {headerName: "Habitat Type", field: "habitatType", width: 125, filter: UniqueValuesFilter },
 			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
 			    {headerName: "Country", field: "country", width: 100, filter: UniqueValuesFilter },
 			    {headerName: "Region", field: "region", width: 88, filter: UniqueValuesFilter },
-			    {headerName: "Location Description", field: "location", width: 175, cellRenderer: recordCellRenderer },
-			    {headerName: "Source", field: "source", width: 100, cellRenderer: recordCellRenderer},
-			    {headerName: "Note", field: "note", width: 110, cellRenderer: recordCellRenderer} ];
+			    {headerName: "Location Description", field: "location", width: 175, cellRenderer: addToolTipToCells },
+			    {headerName: "Citation", field: "citation", width: 100, cellRenderer: addToolTipToCells},
+			    {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
 	}
     /** Adds tooltip to Tree cells */
 	function innerCellRenderer(params) { 										//console.log("params in cell renderer = %O", params)
@@ -1346,7 +1345,7 @@
         return name === null ? null : '<span title="'+name+'">'+name+'</span>';
 	}
     /** Adds tooltip to Interaction row cells */
-    function recordCellRenderer(params) {
+    function addToolTipToCells(params) {
         var value = params.value || null;
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
