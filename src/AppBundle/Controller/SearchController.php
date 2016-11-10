@@ -227,6 +227,7 @@ class SearchController extends Controller
         }     
         return $children;
     }
+    /** The only properties are those that later affect how this 'region' will be handled. */
     private function getUnspecifiedIntRcrds($em)
     {
         $interactions = $em->getRepository('AppBundle:Interaction')
@@ -234,10 +235,11 @@ class SearchController extends Controller
 
         $data = new \stdClass; 
         $data->id = 999;
-        $data->displayName = "Unspecified";
-        $data->interactions = $this->getInteractionIds($interactions);
         $data->childLocs = [];
-
+        $data->displayName = "Unspecified";
+        $data->locationType = "Region";
+        $data->interactions = $this->getInteractionIds($interactions);
+        $data->parentLoc = null;
         return $data;
     }
 /**------------------------Search By Source-----------------------------------*/
