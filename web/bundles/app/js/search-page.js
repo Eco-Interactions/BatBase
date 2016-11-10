@@ -1982,10 +1982,10 @@
 			$('#search-focus').off("change");
 		}
 		function resetGridState() {
-			$('#search-focus').val("taxa");
-			$('#search-grid').css("height", "888px");
-	        $('#show-tips').click(showTips);
-			$('#search-focus').change(selectSearchFocus);
+            $('#search-grid').css("height", "888px");
+            $('#show-tips').click(showTips);
+            $('#search-focus').change(selectSearchFocus);
+			$('#search-focus').val(focusStorag.curFocus);
 		}
 	} 	/* End startIntro */
 	function initSearchTips() { 
