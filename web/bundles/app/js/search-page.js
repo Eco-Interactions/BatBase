@@ -3,10 +3,10 @@
      * focusStorag = obj container for misc data used for each "focus" (eg taxa or locs) of the grid.
 	 * openRows = The identifier for the row in datagrid to be expanded on grid-load
 	 */
-	var rcrdsById, intro, openRows = [], rowData = [], columnDefs = []; 
-    var focusStorag = { curFocus: localStorage ? localStorage.getItem('curFocus') : false };
+    var rcrdsById, intro, openRows = [], rowData = [], columnDefs = []; 
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
-	var localStorage = setlocalStorage();
+    var localStorage = setlocalStorage();
+    var focusStorag = { curFocus: localStorage ? localStorage.getItem('curFocus') : false };  console.log("focusStorag = %O", focusStorag);
 	var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    rowSelection: 'multiple',	//Used for csv export
@@ -120,8 +120,9 @@
 	 * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
 	 */
 	function ifChangedFocus(focus, buildGridFunc) { 							//console.log("ifChangedFocus called.")
-		if (focus !== focusStorag.curFocus) {   
+        if (focus !== focusStorag.curFocus) {   
 			focusStorag = { curFocus: focus };
+            populateStorage("curFocus", focus);
             resetToggleTreeBttn();
             clearPastHtmlOptions();
         } else { buildGridFunc(); }
