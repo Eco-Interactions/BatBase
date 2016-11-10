@@ -199,12 +199,12 @@
 	 * Recurses through each location's 'children' property and replaces all 
 	 * interaction ids with the interaction records.
 	 */
-	function fillLocTree(curTreeBranch, intRcrds) { 		                    //console.log("fillLocTree called. taxaTree = %O", curTreeBranch) 
-		for (var sibling in curTreeBranch) {                                    //console.log("sibling = %O", curTreeBranch[sibling]);
-			if (curTreeBranch[sibling].interactions !== null) { 
-				curTreeBranch[sibling].interactions = replaceInteractions(curTreeBranch[sibling].interactions, intRcrds); }
-			if (curTreeBranch[sibling].children) { 
-				fillLocTree(curTreeBranch[sibling].children, intRcrds); }
+	function fillLocTree(treeBranch, intRcrds) { 		                    //console.log("fillLocTree called. taxaTree = %O", treeBranch) 
+		for (var sibling in treeBranch) {                                    //console.log("sibling = %O", treeBranch[sibling]);
+			if (treeBranch[sibling].interactions !== null) { 
+				treeBranch[sibling].interactions = replaceInteractions(treeBranch[sibling].interactions, intRcrds); }
+			if (treeBranch[sibling].children) { 
+				fillLocTree(treeBranch[sibling].children, intRcrds); }
 		}
 	}
 	/**
@@ -425,7 +425,6 @@
         clearPreviousGrid();
         loadLevelSelectElems(lvlOptsObj, levels);
         transformTaxaDataAndLoadGrid(taxaTree);
-        // $('#sort-opts').fadeTo(150, 1);
     } 
 /*---------Taxa Data Formatting------------------------------------------------*/
     /**
@@ -570,15 +569,18 @@
 	 * countries, areas, and points as nested children. Alphabetizes the tree and 
 	 * adds it to the global focusStorag obj as 'curTree'. Calls @buildTaxaSearchUiAndGrid to continue.
 	 */	
-	function buildLocTree(topRegions) {
+	function buildLocTree(topRegions) {  
 		var region;
-		var locTree = {};
-		topRegions.forEach(function(regionId){  
-			region = rcrdsById[regionId];
-			locTree[region.displayName] = region;
-			region.children = fillChildLocRcrds(region.childLocs);
-		});  console.log("tree = %O", locTree);
-		focusStorag.curTree = sortLocTree(locTree);
+		var locTree = {};   console.log("tree = %O", locTree);
+        focusStorag.topRegions = topRegions;
+
+        topRegions.forEach(function(regionId){  
+            region = rcrdsById[regionId];
+            locTree[region.displayName] = region;
+            region.children = fillChildLocRcrds(region.childLocs);
+        });  
+
+        focusStorag.curTree = sortLocTree(locTree);
 		getInteractionsAndFillTree();
 	}
 	function fillChildLocRcrds(childLocIds) {
@@ -619,7 +621,7 @@
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
 	/**
-	 * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+     * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
 	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
 	 * to transform tree data into grid format and load the data grid.
 	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
@@ -628,8 +630,67 @@
 	function buildLocSearchUiAndGrid(locData) {  console.log("buildLocSearchUiAndGrid called. locData = %O", locData)
 		focusStorag.curTree = locData;
 		clearPreviousGrid();
+        loadLocSearchHtml(locData);
 		transformLocDataAndLoadGrid(locData);
 	}
+    /**
+     * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+     */
+    function loadLocSearchHtml(curTree, selected) {  
+        var locOptsObj = buildLocSelectOpts(curTree);
+        var elems = buildLocSelects(locOptsObj, curTree);
+        clearCol2();        
+        $('#opts-col2').append(elems);
+        // setSelectedVals(selected);
+    }
+    /** Builds arrays of options objects for the dropdown html select elements */
+    function buildLocSelectOpts(curTree) {  //Regions, Countries, habitat types, 
+        var habTypes = [];
+        var optsObj = { region: [], country: [], habitat: [] }; //arys of sorted opt objs
+        for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
+        buildHabitatOpts();
+        return optsObj; 
+        
+        function buildLocOptsForNode(locNode) {  console.log("buildLocOptsForNode = %O", locNode)
+            var locType = locNode.locationType;
+            if (locType === "Region") { getRegionOpts(locNode) } 
+            if (locType === "Country") { getCountryOpts(locNode) }
+            if (locNode.children) { locNode.children.forEach(buildLocOptsForNode); }
+            getHabitatType(locNode);
+        }
+        function getRegionOpts(locNode) {  //val: id, txt: name
+            var isTopRegion = locNode.parentLoc === null;
+            var optName = isTopRegion ? locNode.displayName : '->' + locNode.displayName;
+            optsObj.region.push({ value: locNode.id, text: optName });
+        }
+        function getCountryOpts(locNode) {
+            optsObj.country.push({ value: locNode.id, text: locNode.displayName });
+        }
+        function getHabitatType(locNode) {
+            if (locNode.habitatType !== null && habTypes.indexOf(locNode.habitatType) === -1) {
+                habTypes.push(locNode.habitatType);
+            }
+        }
+        function buildHabitatOpts() {
+            optsObj.habitat = habTypes.map(function(habName) {
+                return { value: habName, text: habName };
+            });
+        }
+    } /* End buildLocSelectOpts */
+    /** Builds the dropdown html elements */
+    function buildLocSelects(locOptsObj) {  
+        var selElems = [];
+        for (var locSelName in locOptsObj) {
+            var selName = ucfirst(locSelName);
+            var labelElem = createElem('label', { class: "lvl-select flex-row" });
+            var spanElem = createElem('span', { text: selName + ': ' });
+            var selectElem = buildSelectElem(
+                locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName });
+            $(labelElem).append([spanElem, selectElem]);
+            selElems.push(labelElem);
+        }
+        return selElems;
+    }
 /*---------Loc Data Formatting------------------------------------------------*/
 	/**
 	 * Transforms the tree's location data into the grid format and sets the row 
@@ -642,7 +703,6 @@
 			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
 		}
 		rowData = finalRowData;													//console.log("rowData = %O", rowData);
-		addFutureDevMsg();
 		loadGrid("Location Tree");
 	}
 	/**
@@ -691,16 +751,6 @@
 			});
 		}
 		return [];
-	}
-	function addFutureDevMsg() {
-		$('#opts-col2').empty();
-		var div = document.createElement("div");
-		div.id = "loc-dev-msg";
-		$(div).text("We will soon be restructuring how location data is " +
-		 "stored in the database to be more flexible and more compatible with future " + 
-		 " additions such as map views. Once that is complete, this location view will " + 
-		 "have it's own hierarchy of filter dropdowns, similar to those currently on the taxon view.");
-		$('#opts-col2').append(div);
 	}
 /*------------------Source Search Methods-----------------------------------*/
     /**
@@ -1012,31 +1062,13 @@
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
-	function loadLevelSelectElems(levelOptsObj, lvls, selected) { 				//console.log("loadLevelSelectElems. arguments = %O", arguments)
-		var elems = buildSelects(levelOptsObj, lvls);
-		clearCol2();		
-		$('#opts-col2').append(elems);
-		setSelectedVals(selected);
-	}
-    function setSelectedVals(selected) {                   						//console.log("selected in setSelectedVals = %O", selected);
-    	Object.keys(focusStorag.taxaByLvl).forEach(function(lvl) {
-	        var selId = '#sel' + lvl;
-			$(selId).find('option[value="all"]').hide();
-    		if (selected !== undefined) {
-	            if (selected[lvl]) { 
-	            	$(selId).val(selected[lvl]); 
-					$(selId).find('option[value="none"]').hide();
-				}
-	    	}
-	    });
-    }
 	function buildTaxaLvlOptions(rcrds) {  										//console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
 		var optsObj = {};
 		for (var lvl in rcrds) {
 			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
 			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
 			if (taxaNames.length > 0 && taxaNames[0] !== "None") {
-				optsObj[lvl].unshift({value: 'all', text: '- All -                 '});
+				optsObj[lvl].unshift({value: 'all', text: '- All -'});
 			}
 		}
 		return optsObj;
@@ -1049,10 +1081,28 @@
 			};
 		});
 	}
-	function buildSelects(lvlOpts, levelAry) {
+    function loadLevelSelectElems(levelOptsObj, lvls, selected) {               //console.log("loadLevelSelectElems. arguments = %O", arguments)
+        var elems = buildSelects(levelOptsObj, lvls);
+        clearCol2();        
+        $('#opts-col2').append(elems);
+        setSelectedVals(selected);
+    }
+    function setSelectedVals(selected) {                                        //console.log("selected in setSelectedVals = %O", selected);
+        Object.keys(focusStorag.taxaByLvl).forEach(function(lvl) {
+            var selId = '#sel' + lvl;
+            $(selId).find('option[value="all"]').hide();
+            if (selected !== undefined) {
+                if (selected[lvl]) { 
+                    $(selId).val(selected[lvl]); 
+                    $(selId).find('option[value="none"]').hide();
+                }
+            }
+        });
+    }
+	function buildSelects(lvlOpts, levelAry) {  
 		var selElems = [];
 		levelAry.forEach(function(level){
-			var text = level + ': ';
+			var text = level + ': ';  //refact
 			var id = 'sel' + level;
 			var labelElem = createElem('label', { class: "lvl-select flex-row" });
 			var spanElem = createElem('span', { text: text });
