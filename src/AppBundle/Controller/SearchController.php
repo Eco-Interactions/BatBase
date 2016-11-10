@@ -158,6 +158,10 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $locDataById = new \stdClass;
         $topRegions = [];
+        /** Add all interactions with no location under one "Unspecified" top region. */
+        $unspecifiedLocId = 999;
+        $locDataById->$unspecifiedLocId = $this->getUnspecifiedIntRcrds($em);
+        array_push($topRegions, $unspecifiedLocId);
 
         $regionLocs = $em->getRepository('AppBundle:Location')
             ->findBy(array('locationType' => '1'));
@@ -170,7 +174,6 @@ class SearchController extends Controller
                 $locDataById->$locId = $this->getLocationData($locEntity, $locDataById);
             }
         }
-
         $response = new JsonResponse();
         $response->setData(array(
             'locRcrds' => $locDataById, 'topRegions' => $topRegions               
@@ -195,7 +198,9 @@ class SearchController extends Controller
         $data->latitude = $locEntity->getLatitude();
         $data->longitude = $locEntity->getLongitude();
         $data->showOnMap = $locEntity->getShowOnMap();
-        $data->locationType = $locEntity->getLocationType()->getName(); 
+        $data->locationType = $locEntity->getLocationType()->getName();
+
+        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
         $data->childLocs = $this->getChildLocationData($locEntity, $locDataById);
         
         $parentLoc = $locEntity->getParentLoc();
@@ -203,9 +208,6 @@ class SearchController extends Controller
 
         $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
         $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
-        
-        $interactions = $locEntity->getInteractions();
-        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
 
         return $data;
     }    
@@ -225,6 +227,19 @@ class SearchController extends Controller
         }     
         return $children;
     }
+    private function getUnspecifiedIntRcrds($em)
+    {
+        $interactions = $em->getRepository('AppBundle:Interaction')
+            ->findBy(array('location'=> null));   //print(count($interactions));
+
+        $data = new \stdClass; 
+        $data->id = 999;
+        $data->displayName = "Unspecified";
+        $data->interactions = $this->getInteractionIds($interactions);
+        $data->childLocs = [];
+
+        return $data;
+    }
 /**------------------------Search By Source-----------------------------------*/
     /**
      * Returns all Sources by Id.
@@ -240,8 +255,7 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $srcRcrds = new \stdClass;
 
-        $srcEntities = $em->getRepository('AppBundle:Source')
-            ->findAll();
+        $srcEntities = $em->getRepository('AppBundle:Source')->findAll();
 
         foreach ($srcEntities as $srcEntity) 
         {                    
@@ -379,7 +393,8 @@ class SearchController extends Controller
             $rcrd->note = $int->getNote();
             $rcrd->interactionType = $int->getInteractionType()->getName();
             $rcrd->source = array(
-                "name" => $int->getSource()->getDisplayName(),
+                "name" => $int->getSource()->getDescription(),
+                "fullText" => $int->getSource()->getCitation()->getFullText(),
                 "id" => $int->getSource()->getId());
             $rcrd->subject = array(
                 "name" => $int->getSubject()->getDisplayName(),
@@ -414,7 +429,7 @@ class SearchController extends Controller
         $locData->name = $location->getDisplayName();
         $locData->id = $location->getId();
         $locData->type = $location->getLocationType()->getName(); 
-
+        /** Deduce and set $locData->country and $locData->region */ 
         if ($locData->type === "Area" || $locData->type === "Point" || $locData->type === "Habitat") { 
             $parentType = $location->getParentLoc()->getLocationType()->getName();
             $this->getCountryAndRegion($location->getParentLoc(), $parentType, $locData);
