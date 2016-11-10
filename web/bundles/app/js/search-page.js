@@ -105,7 +105,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (focusStorag.curFocus){ $('#search-focus').val(focusStorag.curFocus);
-		} else { $('#search-focus').val("srcs"); }
+		} else { $('#search-focus').val("taxa"); }
 		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
@@ -472,28 +472,32 @@
         }
         return intCnt;
     } 
+    /**
+     * The child rows of each taxon sub interactions are processed and returned. 
+     */
     function getTaxaRowDataForChildren(parent) {
-        var parentInts;
-        var childData = [];
-        var intData = [];
         var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
+        var rowData = [];
 
-        if ( parent.id in domainMap ) { getDomainInteractions(parent, domainMap[parent.id]);   
-        } else { 
-            parentInts = getTaxaInteractions(parent);
-            if (parentInts !== null) { intData.push(parentInts); }
+        if ( parent.id in domainMap ) { 
+            getDomainInteractions(parent, domainMap[parent.id]);   
         }
-        if (parent.children !== null) { 
-            parent.children.forEach(function(child){  
-                childData.push( getTaxaRowData(child));
-            });  
-        }
-        $.merge(childData, intData); 
-        return childData;
-        /** Groups interactions attributed directly to a domain. */
+        getChildTaxaRowData();
+        getParentIntRcrdRows();
+
+        return rowData;
+
+        function getParentIntRcrdRows() {
+            var parentInts = getTaxaInteractions(parent);
+            parentInts.forEach(function(intRow) { rowData.push(parentInts); });
+         } 
+        /** 
+         * Domain taxa have their interactions grouped as the first child row. 
+         * This is especially useful for bats with their ~300 interaction records.
+         */
         function getDomainInteractions(taxon, domain) {
             if (getIntCount(taxon) !== null) { 
-                childData.push({
+                rowData.push({
                     id: taxon.id,
                     name: 'Unspecified ' + domain + ' Interactions',
                     isParent: true,
@@ -505,25 +509,31 @@
                 });
             }
         }
+        function getChildTaxaRowData() {
+            if (parent.children !== null) { 
+                parent.children.forEach(function(child){  
+                    rowData.push( getTaxaRowData(child));
+                });  
+            }
+        }
     } /* End getTaxaRowDataForChildren */
     /**
-     * Returns an array of interaction record objs. On the init pass for a new data
-     * set, interactions are only their id. Once the interaction records have been filled
-     * in, interaction data objects are created and returned for each taxon.
+     * Returns an array of row data objects, one for each interaction record.
      */
     function getTaxaInteractions(taxon) {  
         var ints = [];
-        var taxaLvl = taxon.level; 
+
         for (var role in taxon.interactions) {
             if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) { 
-                taxon.interactions[role].forEach(function(intRcrd){
-                    if (typeof intRcrd !== "number") {
-                        ints.push( getTaxaIntData(intRcrd, taxaLvl) );
-                    }
-                });
+                if (typeof taxon.interactions[role][0] !== "number") {
+                    ints = taxon.interactions[role].map(function(intRcrd){
+                        return getTaxaIntData(intRcrd, taxon.level)
+                    });
+                }
             }
         }
-        return ints.length > 0 ? ints : null;
+        // return ints.length > 0 ? ints : null;
+        return ints;
     }
     function getTaxaIntData(intRcrd, taxaLvl) {
         var intRowData = { isParent: false, taxaLvl: taxaLvl };
