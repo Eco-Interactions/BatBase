@@ -200,17 +200,27 @@ class SearchController extends Controller
         $data->showOnMap = $locEntity->getShowOnMap();
         $data->locationType = $locEntity->getLocationType()->getName();
 
-        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
+        $data->habitatType = $this->getHabType($locEntity);
         $data->childLocs = $this->getChildLocationData($locEntity, $locDataById);
+        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
         
         $parentLoc = $locEntity->getParentLoc();
         $data->parentLoc = $parentLoc === null ? null : $parentLoc->getId();
 
-        $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
-        $data->habitatType = $habitatType === null ? null : $habitatType->getName() ;
 
         return $data;
     }    
+    private function getHabType($locEntity)
+    {
+        $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
+        $habData = null;
+        if ($habitatType !== null) {
+            $habData = new \stdClass;
+            $habData->name = $habitatType->getName();
+            $habData->id = $habitatType->getId();
+        } 
+        return $habData;
+    }
     /**
      * Returns an object keyed with child location descriptions and their data.
      */
