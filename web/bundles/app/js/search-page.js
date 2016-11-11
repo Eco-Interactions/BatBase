@@ -32,11 +32,11 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
-		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-		if (localStorage && !localStorage.getItem('epsilon')){
+        var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
+        if (localStorage && !localStorage.getItem('zeta')){
 			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
-			populateStorage('epsilon', true);
+			populateStorage('zeta', true);
 			showLoadingDataPopUp();
 		}
 	}
@@ -688,24 +688,25 @@
 		transformLocDataAndLoadGrid(locData);
 	}
     /**
-     * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+     * Builds the options html for each level in the tree's select dropdown @buildTaxaSelectOpts
      */
     function loadLocSearchHtml(curTree, selected) {  
         var locOptsObj = buildLocSelectOpts(curTree);
         var elems = buildLocSelects(locOptsObj, curTree);
         clearCol2();        
         $('#opts-col2').append(elems);
-        // setSelectedVals(selected);
+        setSelectedLocVals(selected);
     }
     /** Builds arrays of options objects for the dropdown html select elements */
     function buildLocSelectOpts(curTree) {  //Regions, Countries, habitat types, 
-        var habTypes = [];
+        var habTypes = {};
         var optsObj = { region: [], country: [], habitat: [] }; //arys of sorted opt objs
         for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
         buildHabitatOpts();
+        addAllOption();
         return optsObj; 
         
-        function buildLocOptsForNode(locNode) {  console.log("buildLocOptsForNode = %O", locNode)
+        function buildLocOptsForNode(locNode) {  //console.log("buildLocOptsForNode = %O", locNode)
             var locType = locNode.locationType;
             if (locType === "Region") { getRegionOpts(locNode) } 
             if (locType === "Country") { getCountryOpts(locNode) }
@@ -730,6 +731,12 @@
                 optsObj.habitat.push( { value: habTypes[habName], text: habName });
             }
         }
+        function addAllOption() {
+            for (var selName in optsObj) {
+                if (optsObj[selName].length > 0 && optsObj[selName][0] !== "None") {
+                    optsObj[selName].unshift({value: 'all', text: '- All -'});
+                }
+            }
         }
     } /* End buildLocSelectOpts */
     /** Builds the dropdown html elements */
@@ -740,11 +747,24 @@
             var labelElem = createElem('label', { class: "lvl-select flex-row" });
             var spanElem = createElem('span', { text: selName + ': ' });
             var selectElem = buildSelectElem(
-                locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName });
+                locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
             $(labelElem).append([spanElem, selectElem]);
             selElems.push(labelElem);
         }
         return selElems;
+    }
+    function setSelectedLocVals(selected) {                                        //console.log("selected in setSelectedTaxaVals = %O", selected);
+        if (!selected) {return}
+        Object.keys(selected).forEach(function(selName) {
+            var selId = '#sel' + selName;
+            $(selId).find('option[value="all"]').hide();
+            if (selected !== undefined) {
+                if (selected[selName]) { 
+                    $(selId).val(selected[selName]); 
+                    // $(selId).find('option[value="none"]').hide();
+                }
+            }
+        });
     }
 /*---------Loc Data Formatting------------------------------------------------*/
 	/**
@@ -1118,20 +1138,32 @@
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
+    /*------------------ Location Filter Updates -----------------------------*/
+    /**
+     * When a level dropdown is changed, the grid is updated with the selected taxon
+     * as the top of the new tree. If the dropdowns are cleared, the taxa-grid is 
+     * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
+     */
+    function updateLocSearch() {                                                //console.log("updateLocSearch val = ", $(this).val());
+        var selectedOpt = $(this).val();
+        // var selectedVals = (typeof selectedOpt === "number") ?
+        //         getRelatedLocsToSelect(selectedOpt) : buildGridAroundHabType(selectedOpt);                 //console.log("selectedVals = %O", selectedVals);
     }
-	function buildSelects(lvlOpts, levelAry) {  
-		var selElems = [];
-		levelAry.forEach(function(level){
-			var text = level + ': ';  //refact
-			var id = 'sel' + level;
-			var labelElem = createElem('label', { class: "lvl-select flex-row" });
-			var spanElem = createElem('span', { text: text });
-			var selectElem = buildSelectElem(lvlOpts[level], { class: "opts-box", id: id });
-			$(labelElem).append([spanElem, selectElem]);
-			selElems.push(labelElem);
-		});
-		return selElems;
-	}
+    // function getRelatedLocsToSelect(selectedOpt) {   console.log("getRelatedLocsToSelect selected = ", selectedOpt);
+    //     // body...
+    // }
+    // function buildGridAroundHabType(selectedOpt) {   console.log("buildGridAroundHabType selected = ", selectedOpt);
+    //     // body...
+    // }
+
+
+
+
+
+
+
+
+
 /*---------------------------- Taxa Specific Filters-------------------------------- */
 	/**
 	 * Goes through allTaxaLvls from kingdom through species and checks if that level dropdown
