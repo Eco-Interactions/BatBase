@@ -168,7 +168,7 @@
 		var gridBuilders = { taxa: buildTaxaSearchUiAndGrid, 
 			locs: buildLocSearchUiAndGrid, srcs: buildSrcSearchUiAndGrid };
 
-		clearPreviousGrid();
+		// clearPreviousGrid();
 		fillMethods[focus](curTree, intRcrds);
 		gridBuilders[focus](curTree);
 	    hidePopUpMsg();
@@ -390,7 +390,7 @@
         }
     } /* End seperateTaxaTreeByLvl */
     /**
-     * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+     * Builds the options html for each level in the tree's select dropdown @buildTaxaSelectOpts
      * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
      * to transform tree data into grid format and load the data grid.
      * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
@@ -400,7 +400,7 @@
         var curTaxaByLvl = focusStorag.taxaByLvl;  
         var levels = Object.keys(curTaxaByLvl);
         var removesDomainLvl = levels.shift();
-        var lvlOptsObj = buildTaxaLvlOptions(curTaxaByLvl);
+        var lvlOptsObj = buildTaxaSelectOpts(curTaxaByLvl);
 
         clearPreviousGrid();
         loadLevelSelectElems(lvlOptsObj, levels);
@@ -431,7 +431,7 @@
     /**
      * For each level in the current  Build an object with level keys and arrays of option objects as values.
      */
-    function buildTaxaLvlOptions(rcrds) {                                       //console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
+    function buildTaxaSelectOpts(rcrds) {                                       //console.log("buildTaxaSelectOpts rcrds = %O", rcrds);
         var optsObj = {};
         for (var lvl in rcrds) {
             var taxaNames = Object.keys(rcrds[lvl]).sort();                     //console.log("taxaNames = %O", taxaNames);
@@ -675,7 +675,7 @@
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
 	/**
-     * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
+     * Builds the options html for each level in the tree's select dropdown @buildTaxaSelectOpts
 	 * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
 	 * to transform tree data into grid format and load the data grid.
 	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
@@ -1172,7 +1172,7 @@
 		lvls.shift(); 		// remove domain, 'group taxa by', level
 		var relatedTaxaOpts = buildTaxaOptsObj(selTaxonRcrd, selTaxonRcrd.level);
 		
-		var lvlOptsObj = buildTaxaLvlOptions(relatedTaxaOpts);
+		var lvlOptsObj = buildTaxaSelectOpts(relatedTaxaOpts);
 		loadLevelSelectElems(lvlOptsObj, lvls, selectedVals);
 
 		/**
@@ -2297,7 +2297,7 @@
 	 * Interactions are sent in sets of 1000, so the returns are collected in an array.
 	 */
 	function dataSubmitSucess(data, textStatus, jqXHR) { 
-		var entity = "Your Mom";												console.log("--%s Success! data = %O, textStatus = %s, jqXHR = %O", entity, data, textStatus, jqXHR);
+		console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
 	}
 	function ajaxError(jqXHR, textStatus, errorThrown) {
 		console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
