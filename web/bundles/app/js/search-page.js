@@ -253,7 +253,7 @@
 			subject: getTaxonName(intRcrd.subject),
 			object: getTaxonName(intRcrd.object),
 			tags: getTags(intRcrd.tags),
-			habitatType: intRcrd.habitatType ? intRcrd.habitatType.name : null,
+			habitatType: intRcrd.habitatType || null,
             location: intRcrd.location ? intRcrd.location.name : null,
             country: intRcrd.location ? intRcrd.location.country : null,
 			region: intRcrd.location ? intRcrd.location.region : null,
@@ -1140,21 +1140,31 @@
 	} /* End getRelatedTaxaToSelect */
     /*------------------ Location Filter Updates -----------------------------*/
     /**
-     * When a level dropdown is changed, the grid is updated with the selected taxon
-     * as the top of the new tree. If the dropdowns are cleared, the taxa-grid is 
-     * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
+     * When a level dropdown is changed, the grid is updated with the selected option
+     * as focus of the new tree. A selected Region or Country will update the grid with 
+     * the selected location at the top and the dropdowns will update to show realted
+     * locations. A selected habitat will filter all locations in the tree by habitat 
+     * type. When the dropdowns are cleared, the grid is reset to the domain-level tree. 
      */
-    function updateLocSearch() {                                                //console.log("updateLocSearch val = ", $(this).val());
-        var selectedOpt = $(this).val();
-        // var selectedVals = (typeof selectedOpt === "number") ?
-        //         getRelatedLocsToSelect(selectedOpt) : buildGridAroundHabType(selectedOpt);                 //console.log("selectedVals = %O", selectedVals);
+    function updateLocSearch() {               console.log("updateLocSearch 'this' = ", $(this));
+        var selElemId = $(this).attr("id");
+        var selVal = $(this).val();
+        var selTxt = $("#"+selElemId+" option:selected"). text();
+        if ( selElemId === 'selHabitat') { filterGridOnHab(selVal, selTxt); 
+        } else { updateRelatedLocData(selVal) }
     }
-    // function getRelatedLocsToSelect(selectedOpt) {   console.log("getRelatedLocsToSelect selected = ", selectedOpt);
-    //     // body...
-    // }
-    // function buildGridAroundHabType(selectedOpt) {   console.log("buildGridAroundHabType selected = ", selectedOpt);
-    //     // body...
-    // }
+    function updateRelatedLocData(selVal) {   console.log("getRelatedLocsToSelect selected = ", selVal);
+        // body...
+    }
+    /**
+     * Filter expects an array of strings to filter the column on or false to 
+     * clear filters on the column "habitatType".
+     */
+    function filterGridOnHab(selVal, selTxt) {  // console.log("filterGridOnHab selected (%s) = ", selVal, selTxt);
+        var habModel = selVal === "all" ? false : [selTxt];
+        // var habFilterModel = gridOptions.api.getFilterApi("habitatType").getModel(); console.log("habFilterModel = %O", habFilterModel);
+        gridOptions.api.getFilterApi("habitatType").setModel(habModel);
+    }
 
 
 
@@ -1681,7 +1691,8 @@
             setModel: function (dataModel) {
             	if (dataModel === null) { that.eSelectAll.checked = true; } 
             	model.setModel(dataModel);
-                that.refreshVirtualRows();
+                // that.refreshVirtualRows();
+                that.filterChangedCallback();
             }, 
             refreshHeader: function() {
 				gridOptions.api.refreshHeader();
@@ -1906,8 +1917,7 @@
                     this.selectValue(model[i]);
                 } else { console.warn('Value ' + newValue + ' is not a valid value for filter'); }
             }
-        }
-        else { this.selectEverything(); }
+        } else { this.selectEverything(); }
     };
 /*=================CSV Methods================================================*/
 	/**
