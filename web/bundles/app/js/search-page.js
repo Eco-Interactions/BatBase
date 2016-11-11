@@ -253,7 +253,7 @@
 			subject: getTaxonName(intRcrd.subject),
 			object: getTaxonName(intRcrd.object),
 			tags: getTags(intRcrd.tags),
-			habitatType: intRcrd.habitatType,
+			habitatType: intRcrd.habitatType ? intRcrd.habitatType.name : null,
             location: intRcrd.location ? intRcrd.location.name : null,
             country: intRcrd.location ? intRcrd.location.country : null,
 			region: intRcrd.location ? intRcrd.location.region : null,
@@ -720,15 +720,16 @@
         function getCountryOpts(locNode) {
             optsObj.country.push({ value: locNode.id, text: locNode.displayName });
         }
-        function getHabitatType(locNode) {
-            if (locNode.habitatType !== null && habTypes.indexOf(locNode.habitatType) === -1) {
-                habTypes.push(locNode.habitatType);
+        function getHabitatType(locNode) {  //console.log("getHabitatType called for node = %O", locNode);
+            if (locNode.habitatType && !habTypes[locNode.habitatType.name]) {
+                habTypes[locNode.habitatType.name] = locNode.habitatType.id; 
             }
         }
         function buildHabitatOpts() {
-            optsObj.habitat = habTypes.map(function(habName) {
-                return { value: habName, text: habName };
-            });
+            for (var habName in habTypes) {             //.map(function(habObj) {  console.log('building option out of habObj = %O', habObj);
+                optsObj.habitat.push( { value: habTypes[habName], text: habName });
+            }
+        }
         }
     } /* End buildLocSelectOpts */
     /** Builds the dropdown html elements */
