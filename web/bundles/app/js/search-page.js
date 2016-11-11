@@ -306,27 +306,6 @@
         initTaxaTree(domainTaxonRcrd);
         getInteractionsAndFillTree();
     }
-    /**
-     * Builds the select box for the taxa domains that will become the data tree 
-     * nodes displayed in the grid.
-     */
-    function buildTaxaDomainHtml(data) {                                        //console.log("buildTaxaDomainHtml called. ");
-        var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-        var domainOpts = getDomainOpts(data);   //  console.log("domainOpts = %O", domainOpts);
-        $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
-
-        $('#sort-opts').append(browseElems);
-        $('#sel-domain').change(onTaxaSearchMethodChange);
-        $('#sort-opts').fadeTo(0, 1);
-
-        function getDomainOpts(data) {
-            var optsAry = [];
-            for (var taxonId in data) {                                         //console.log("taxon = %O", data[taxonId]);
-                optsAry.push({ value: taxonId, text: data[taxonId].name });
-            }
-            return optsAry;
-        }
-    } /* End buildTaxaDomainHtml */
     /** Event fired when the taxa domain select box has been changed. */
     function onTaxaSearchMethodChange(e) {  
         var domainTaxonRcrd = storeAndReturnDomain();
@@ -361,17 +340,18 @@
         var taxaTree = buildTaxaTree(topTaxon);                                 console.log("taxaTree = %O", taxaTree);
         openRows = [topTaxon.id.toString()];                                    //console.log("openRows=", openRows)
         focusStorag.curTree = taxaTree;  
-        focusStorag.taxaByLvl = separateByLevel(taxaTree, topTaxon.displayName);            //console.log("taxaByLvl = %O", focusStorag.taxaByLvl)
     }
     /**
      * Returns a taxonomic family tree with taxa record data of the parent domain 
-     * taxon and all children.
+     * taxon and all children. Seperates taxa in current tree by level and stores in
+     * global focusStorag obj as 'taxaByLvl'.
      */
     function buildTaxaTree(topTaxon) { 
-        var tree = {};                  										//console.log("tree = %O", tree);
+        var tree = {};                                                          //console.log("tree = %O", tree);
         tree[topTaxon.displayName] = topTaxon;  
         topTaxon.children = getChildTaxa(topTaxon.children);    
 
+        focusStorag.taxaByLvl = seperateTaxaTreeByLvl(tree, topTaxon.displayName);            //console.log("taxaByLvl = %O", focusStorag.taxaByLvl)
         return tree;
         /**
          * Recurses through each taxon's 'children' property and returns a record 
@@ -395,7 +375,7 @@
      * Returns an object with taxa records keyed by their display name and organized 
      * under their respective levels.
      */
-    function separateByLevel(taxaTree, topTaxon) {
+    function seperateTaxaTreeByLvl(taxaTree, topTaxon) {
         var separated = {};
         separate(taxaTree[topTaxon]);
         return separated;
@@ -408,7 +388,7 @@
                 taxon.children.forEach(function(child){ separate(child); }); 
             }
         }
-    } /* End separateByLevel */
+    } /* End seperateTaxaTreeByLvl */
     /**
      * Builds the options html for each level in the tree's select dropdown @buildTaxaLvlOptions
      * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
@@ -416,8 +396,8 @@
      * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
      * contained in taxa data tree.
      */
-    function buildTaxaSearchUiAndGrid(taxaTree, curSet) {                   	//console.log("taxaByLvl = %O", focusStorag.taxaByLvl)
-        var curTaxaByLvl = curSet || focusStorag.taxaByLvl;  
+    function buildTaxaSearchUiAndGrid(taxaTree) {                   	//console.log("taxaByLvl = %O", focusStorag.taxaByLvl)
+        var curTaxaByLvl = focusStorag.taxaByLvl;  
         var levels = Object.keys(curTaxaByLvl);
         var removesDomainLvl = levels.shift();
         var lvlOptsObj = buildTaxaLvlOptions(curTaxaByLvl);
@@ -426,7 +406,81 @@
         loadLevelSelectElems(lvlOptsObj, levels);
         transformTaxaDataAndLoadGrid(taxaTree);
     } 
-/*---------Taxa Data Formatting------------------------------------------------*/
+    /*------------------ Build Taxa Search Ui --------------------------------*/
+    /**
+     * Builds the select box for the taxa domains that will become the data tree 
+     * nodes displayed in the grid.
+     */
+    function buildTaxaDomainHtml(data) {                                        console.log("buildTaxaDomainHtml called. ");
+        var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
+        var domainOpts = getDomainOpts(data);   //  console.log("domainOpts = %O", domainOpts);
+        $(browseElems).append(buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+
+        $('#sort-opts').append(browseElems);
+        $('#sel-domain').change(onTaxaSearchMethodChange);
+        $('#sort-opts').fadeTo(0, 1);
+
+        function getDomainOpts(data) {
+            var optsAry = [];
+            for (var taxonId in data) {                                         //console.log("taxon = %O", data[taxonId]);
+                optsAry.push({ value: taxonId, text: data[taxonId].name });
+            }
+            return optsAry;
+        }
+    } /* End buildTaxaDomainHtml */
+    /**
+     * For each level in the current  Build an object with level keys and arrays of option objects as values.
+     */
+    function buildTaxaLvlOptions(rcrds) {                                       //console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
+        var optsObj = {};
+        for (var lvl in rcrds) {
+            var taxaNames = Object.keys(rcrds[lvl]).sort();                     //console.log("taxaNames = %O", taxaNames);
+            optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
+            if (taxaNames.length > 0 && taxaNames[0] !== "None") {
+                optsObj[lvl].unshift({value: 'all', text: '- All -'});
+            }
+        }
+        return optsObj;
+    }
+    function buildTaxaOptions(taxaNames, taxaRcrds) {
+        return taxaNames.map(function(taxaKey){
+            return {
+                value: taxaRcrds[taxaKey].id,
+                text: taxaKey
+            };
+        });
+    }
+    function loadLevelSelectElems(levelOptsObj, lvls, selected) {               //console.log("loadLevelSelectElems. arguments = %O", arguments)
+        var elems = buildTaxaSelects(levelOptsObj, lvls);
+        clearCol2();        
+        $('#opts-col2').append(elems);
+        setSelectedTaxaVals(selected);
+    }
+    function setSelectedTaxaVals(selected) {                                        //console.log("selected in setSelectedTaxaVals = %O", selected);
+        Object.keys(focusStorag.taxaByLvl).forEach(function(lvl) {
+            var selId = '#sel' + lvl;
+            $(selId).find('option[value="all"]').hide();
+            if (selected !== undefined) {
+                if (selected[lvl]) { 
+                    $(selId).val(selected[lvl]); 
+                    $(selId).find('option[value="none"]').hide();
+                }
+            }
+        });
+    }
+    function buildTaxaSelects(lvlOpts, levelAry) {  
+        var selElems = [];
+        levelAry.forEach(function(level){
+            var labelElem = createElem('label', { class: "lvl-select flex-row" });
+            var spanElem = createElem('span', { text: level + ': ' });
+            var selectElem = buildSelectElem(
+                lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxaSearch);
+            $(labelElem).append([spanElem, selectElem]);
+            selElems.push(labelElem);
+        });
+        return selElems;
+    }
+    /*-------- Taxa Data Formatting ------------------------------------------*/
     /**
      * Transforms the tree's taxa record data into the grid format and sets the 
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
@@ -1007,13 +1061,14 @@
             return buildIntDataObj(intRcrd, { isParent: false });
         });
     }
- 	/*----------------Apply Fitler Update Methods-----------------------------*/
+ /*--------------- Data Filter Methods -----------------------------------------------------------*/
+    /*------------------ Taxa Filter Updates ---------------------------------*/
 	/**
 	 * When a level dropdown is changed, the grid is updated with the selected taxon
 	 * as the top of the new tree. If the dropdowns are cleared, the taxa-grid is 
 	 * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
 	 */
-	function updateTaxaSearch() {  //console.log("$(this).val() = ", $(this).val())
+	function updateTaxaSearch() {                              console.log("updateTaxaSearch val = ", $(this).val())
 		var selectedTaxa = $(this).val(); 										//console.log("selectedTaxa = %O", selectedTaxa);
 		var selTaxonRcrd = rcrdsById[selectedTaxa]  
 		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				//console.log("selectedVals = %O", selectedVals);
@@ -1062,42 +1117,6 @@
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
-	function buildTaxaLvlOptions(rcrds) {  										//console.log("buildTaxaLvlOptions rcrds = %O", rcrds);
-		var optsObj = {};
-		for (var lvl in rcrds) {
-			var taxaNames = Object.keys(rcrds[lvl]).sort(); 					//console.log("taxaNames = %O", taxaNames);
-			optsObj[lvl] = buildTaxaOptions(taxaNames, rcrds[lvl]);
-			if (taxaNames.length > 0 && taxaNames[0] !== "None") {
-				optsObj[lvl].unshift({value: 'all', text: '- All -'});
-			}
-		}
-		return optsObj;
-	}
-	function buildTaxaOptions(taxaNames, taxaRcrds) {
-		return taxaNames.map(function(taxaKey){
-			return {
-				value: taxaRcrds[taxaKey].id,
-				text: taxaKey
-			};
-		});
-	}
-    function loadLevelSelectElems(levelOptsObj, lvls, selected) {               //console.log("loadLevelSelectElems. arguments = %O", arguments)
-        var elems = buildSelects(levelOptsObj, lvls);
-        clearCol2();        
-        $('#opts-col2').append(elems);
-        setSelectedVals(selected);
-    }
-    function setSelectedVals(selected) {                                        //console.log("selected in setSelectedVals = %O", selected);
-        Object.keys(focusStorag.taxaByLvl).forEach(function(lvl) {
-            var selId = '#sel' + lvl;
-            $(selId).find('option[value="all"]').hide();
-            if (selected !== undefined) {
-                if (selected[lvl]) { 
-                    $(selId).val(selected[lvl]); 
-                    $(selId).find('option[value="none"]').hide();
-                }
-            }
-        });
     }
 	function buildSelects(lvlOpts, levelAry) {  
 		var selElems = [];
@@ -2182,8 +2201,12 @@
             callback(key, value);
         }
     };
-	/*------------ HTML Generators ---------------------------*/
-	function buildSelectElem(options, attrs, selected) {
+	/*------------ HTML Generators -------------------------------------------*/
+    /**
+     * Builds a select drop down with the options, attributes and change method 
+     * passed. Sets the selected option as the passed 'selected' or the default 'all'.
+     */
+	function buildSelectElem(options, attrs, changeFunc, selected) {
 		var selectElem = createElem('select', attrs); 
 		var selected = selected || 'all';
 		
@@ -2195,8 +2218,7 @@
 		});
 
 		$(selectElem).val(selected);
-		// $(selectElem).change(updateTaxaSearch);
-		// $(selectElem).click(hideones);
+        $(selectElem).change(changeFunc);
 		return selectElem;
 	}
 	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
