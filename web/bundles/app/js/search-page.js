@@ -31,6 +31,8 @@
     /**
      * Container for all data needed for a given search focus. Reset on focus change.
      * openRows = The identifier for the row in datagrid to be expanded on grid-load.
+     * Other properties stored: rcrdsById (all focus records), curTree (data tree 
+     * displayed in grid), selectedOpts (dropdown values to be selected for the current tree)
      */
     function resetFocusStorag() {
         focusStorage = {}; 
@@ -212,8 +214,8 @@
 	 * Recurses through each location's 'children' property and replaces all 
 	 * interaction ids with the interaction records.
 	 */
-	function fillLocTree(treeBranch, intRcrds) { 		                    console.log("fillLocTree called. taxaTree = %O", treeBranch) 
-		for (var sibling in treeBranch) {                                    //console.log("sibling = %O", treeBranch[sibling]);
+	function fillLocTree(treeBranch, intRcrds) { 		                        //console.log("fillLocTree called. taxaTree = %O", treeBranch) 
+		for (var sibling in treeBranch) {                                       //console.log("sibling = %O", treeBranch[sibling]);
 			if (treeBranch[sibling].interactions !== null) { 
 				treeBranch[sibling].interactions = replaceInteractions(treeBranch[sibling].interactions, intRcrds); }
 			if (treeBranch[sibling].children) { 
@@ -1131,7 +1133,7 @@
 		var selTaxonRcrd = rcrdsById[selectedTaxa]  
 		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				//console.log("selectedVals = %O", selectedVals);
 
-		repopulateDropDowns(selTaxonRcrd, selectedVals);
+		repopulateTaxaDropDowns(selTaxonRcrd, selectedVals);
 		updateFilterStatus();
 		loadGridForTaxon();
 
@@ -1246,7 +1248,7 @@
 	 * all taxa at levels above the selected taxa are included in the drop downs, 
 	 * drect ancestors will be selected as their dropdownsx 'value' later.
 	 */
-	function repopulateDropDowns(selTaxonRcrd, selectedVals) {
+	function repopulateTaxaDropDowns(selTaxonRcrd, selectedVals) {
 		var lvls = Object.keys(focusStorage.taxaByLvl);
 		lvls.shift(); 		// remove domain, 'group taxa by', level
 		var relatedTaxaOpts = buildTaxaOptsObj(selTaxonRcrd, selTaxonRcrd.level);
@@ -1308,7 +1310,7 @@
 				});
 			}
 		} /* End buildTaxaOptsObj */
-	} /* End repopulateDropDowns */
+	} /* End repopulateTaxaDropDowns */
 	function getSelectedVals(selected) {
 		var vals = {};
 		for (var lvl in selected) {
@@ -1317,6 +1319,27 @@
 		return vals;
 	}
 	/*===================Shared===============================================*/
+    function detachRcrd(id) {
+        return JSON.parse(JSON.stringify(rcrdsById[id]));
+    }
+    /**
+     * Resets grid state to top focus options: Taxa and source are reset at current
+     * domain; locations are reset to the top regions.
+     */
+    function resetDataGrid() {   console.log("---reseting grid---")
+        var resetMap = { taxa: onTaxaDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
+        var focus = focusStorage.curFocus; 
+        resetStorageProps();
+        resetMap[focus](); 
+        resetToggleTreeBttn();
+        getActiveDefaultGridFilters();
+        initNoFiltersStatus();
+    }
+    /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
+    function resetStorageProps() {
+        var props = ['curTree', 'selectedOpts'];
+        props.forEach(function(prop){ delete focusStorage[prop]; });
+    }
 /*-----------------Grid Manipulation Methods-----------------------------------------------*/
     function clearPreviousGrid() {  console.log("clearing grid");
         if (gridOptions.api) { gridOptions.api.destroy(); }     
@@ -1556,18 +1579,6 @@
 		// clearGridStatus();
         getActiveDefaultGridFilters();    
 	} 
-	/**
-	 * Resets grid state to top focus options: Taxa and source are reset at current
-     * domain; locations are reset to the top regions.
-	 */
-	function resetDataGrid() {
-        var resetMap = { taxa: onTaxaDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
-        var focus = focusStorage.curFocus; 
-        resetMap[focus](); 
-		resetToggleTreeBttn();
-		getActiveDefaultGridFilters();
-		initNoFiltersStatus();
-	}
 	/** Returns an obj with all filter models. */
 	function getAllFilterModels() {
 		return {
