@@ -191,7 +191,7 @@
 	    hideGroupColFilterMenu();
 	} 
 
-    function fillTaxaTree(curTree, intRcrds) {
+    function fillTaxaTree(curTree, intRcrds) {                                  //console.log("fillingTaxaTree")
     	fillTaxaSetWithInteractionRcrds(intRcrds, curTree);  
     	fillHiddenTaxaColumns(curTree, intRcrds);
     }
@@ -199,16 +199,16 @@
 	 * Recurses through each taxon's 'children' property and replaces all 
 	 * interaction ids with the interaction records.
 	 */
-	function fillTaxaSetWithInteractionRcrds(intRcrds, curTree) { 					//console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
-		for (var sibling in curTree) {   
-			replaceTaxaInteractions(curTree[sibling].interactions, intRcrds);
-			if (curTree[sibling].children !== null) { fillTaxaSetWithInteractionRcrds(curTree[sibling].children) }
+	function fillTaxaSetWithInteractionRcrds(intRcrds, curTree) { 	            //console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
+		for (var curNode in curTree) {   
+			replaceTaxaInteractions(curTree[curNode].interactions, intRcrds);
+			if (curTree[curNode].children !== null) { fillTaxaSetWithInteractionRcrds(intRcrds, curTree[curNode].children) }
 		}
 	}
-	function replaceTaxaInteractions(interactionsObj) {   					//console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
+	function replaceTaxaInteractions(interactionsObj, intRcrds) {   					    //console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
 		for (var role in interactionsObj) {
-			if (interactionsObj[role] !== null) { 
-				replaceInteractions(interactionsObj[role], intRcrds) }
+			if (interactionsObj[role] !== null) {                               //console.log("interactions found!")
+				interactionsObj[role] = replaceInteractions(interactionsObj[role], intRcrds) }
 		}
 	}
 	/**
@@ -341,11 +341,17 @@
 
         return domainTaxonRcrd;
     }
-    /** Rebuilds taxa tree for the selected domain taxon. */
+    /**
+     * Rebuilds taxa tree for the selected domain taxon.
+     * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
+     * contained in taxa data tree.
+     */
     function rebuildTaxaTree() {                                     //console.log("domainTaxon=%O", domainTaxon)
         var domainTaxonRcrd = storeAndReturnDomain();
-        initTaxaTree(domainTaxon);
-        buildTaxaSearchUiAndGrid(focusStorage.curTree);
+        clearPreviousGrid();
+        initTaxaTree(domainTaxonRcrd);
+        getInteractionsAndFillTree();
+        // buildTaxaSearchUiAndGrid(focusStorage.curTree);
     }
     /**
      * Builds a family tree of taxon data with passed taxon as the top of the tree. 
@@ -353,22 +359,21 @@
      * the tree is added as 'curTree', and all taxa sorted by level as'taxaByLvl'. 
      */
     function initTaxaTree(topTaxon) {
-        var taxaTree = buildTaxaTree(topTaxon);                                 console.log("taxaTree = %O", taxaTree);
+        buildTaxaTree(topTaxon);                                 
         focusStorage.openRows = [topTaxon.id.toString()];                                    //console.log("openRows=", openRows)
-        focusStorage.curTree = taxaTree;  
     }
     /**
      * Returns a taxonomic family tree with taxa record data of the parent domain 
-     * taxon and all children. Seperates taxa in current tree by level and stores in
-     * global focusStorage obj as 'taxaByLvl'.
+     * taxon and all children and stores it as 'curTree' in the global focusStorage obj. 
+     * Seperates taxa in current tree by level and stores in focusStorage as 'taxaByLvl'.
      */
-    function buildTaxaTree(topTaxon) { 
+    function buildTaxaTree(topTaxon) {                                          //console.log("buildTaxaTree called for topTaxon = %O", topTaxon);
         var tree = {};                                                          //console.log("tree = %O", tree);
         tree[topTaxon.displayName] = topTaxon;  
         topTaxon.children = getChildTaxa(topTaxon.children);    
 
-        focusStorage.taxaByLvl = seperateTaxaTreeByLvl(tree, topTaxon.displayName);            //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
-        return tree;
+        focusStorage.curTree = tree;  
+        focusStorage.taxaByLvl = seperateTaxaTreeByLvl(tree, topTaxon.displayName);                 //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
         /**
          * Recurses through each taxon's 'children' property and returns a record 
          * for each child ID found. 
@@ -409,16 +414,14 @@
      * Builds the options html for each level in the tree's select dropdown @buildTaxaSelectOpts
      * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
      * to transform tree data into grid format and load the data grid.
-     * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
-     * contained in taxa data tree.
      */
-    function buildTaxaSearchUiAndGrid(taxaTree) {                   	//console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
+    function buildTaxaSearchUiAndGrid(taxaTree) {                   	        //console.log("taxaByLvl = %O", focusStorage.taxaByLvl);
         var curTaxaByLvl = focusStorage.taxaByLvl;  
         var levels = Object.keys(curTaxaByLvl);
-        var removesDomainLvl = levels.shift();
+        var removedDomainLvl = levels.shift();
         var lvlOptsObj = buildTaxaSelectOpts(curTaxaByLvl);
 
-        clearPreviousGrid();
+        // clearPreviousGrid();
         loadLevelSelectElems(lvlOptsObj, levels);
         transformTaxaDataAndLoadGrid(taxaTree);
     } 
@@ -427,9 +430,9 @@
      * Builds the select box for the taxa domains that will become the data tree 
      * nodes displayed in the grid.
      */
-    function buildTaxaDomainHtml(data) {                                        console.log("buildTaxaDomainHtml called. ");
+    function buildTaxaDomainHtml(data) {                                        //console.log("buildTaxaDomainHtml called. ");
         var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-        var domainOpts = getDomainOpts(data);   //  console.log("domainOpts = %O", domainOpts);
+        var domainOpts = getDomainOpts(data);   //console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
         $('#sort-opts').append(browseElems);
@@ -501,109 +504,97 @@
      * Transforms the tree's taxa record data into the grid format and sets the 
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
-    function transformTaxaDataAndLoadGrid(taxaTree) {  							//console.log("transformTaxaDataAndLoadGrid called. taxaTree = %O", taxaTree)
+    function transformTaxaDataAndLoadGrid(taxaTree) {                           //console.log("transformTaxaDataAndLoadGrid called. taxaTree = %O", taxaTree)
         var finalRowData = [];
         for (var topTaxon in taxaTree) {
-            finalRowData.push( getTaxaRowData(taxaTree[topTaxon]) );
+            finalRowData.push( getTaxonRowData(taxaTree[topTaxon]) );
         }
-        focusStorage.rowData = finalRowData;                                                 //console.log("rowData = %O", rowData);
+        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", rowData);
         loadGrid("Taxa Tree");
     }
     /**
      * Recurses through each taxon's 'children' property and returns a row data obj 
      * for each taxon in the tree.
      */
-    function getTaxaRowData(taxon) { 											//console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
+    function getTaxonRowData(taxon) {                                           //console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
         var taxonName = taxon.level === "Species" ? 
-            taxon.displayName : taxon.level + " " + taxon.displayName;  
+            taxon.displayName : taxon.level + " " + taxon.displayName;
         var intCount = getIntCount(taxon); 
         return {
             id: taxon.id,
             name: taxonName,
-            isParent: true,             //taxon.interactions !== null || taxon.children !== null was the test, but I'm pretty sure this is always true with taxa
+            isParent: true,                     //taxon.interactions !== null || taxon.children !== null was the test, but I'm pretty sure this is always true with taxa
             parentTaxon: taxon.parentTaxon,
             open: focusStorage.openRows.indexOf(taxon.id.toString()) !== -1, 
-            children: getTaxaRowDataForChildren(taxon),
+            children: getTaxonChildRowData(taxon),
             taxaLvl: taxon.level,
             interactions: intCount !== null,          
-            intCnt: intCount,                               //used for adding counts to grid rows
-        };  
-    } 
+            intCnt: intCount,   
+        }; 
+    } /* End getTaxonRowData */
     /**
      * Checks whether this taxon has interactions in either the subject or object
      * roles. Returns the interaction count if any records are found, null otherwise. 
+     * NOTE: Only counting one role with interactions currently.
      */
     function getIntCount(taxon) {
         var intsFound = false;
         var intCnt = null;
         for ( var role in taxon.interactions ) {
-            if (intsFound) {continue}  /* Only counting one role with interactions currently. */
+            if (intsFound) {continue}  /* Only counting one role with interactions. */
             intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;    
             if (intsFound) { intCnt = taxon.interactions[role].length; }    
         }
         return intCnt;
     } 
-    /**
-     * The child rows of each taxon sub interactions are processed and returned. 
-     */
-    function getTaxaRowDataForChildren(parent) {
-        var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
-        var rowData = [];
+    function getTaxonChildRowData(curTaxon) {
+        var childRows = [];
+        var intRows = getTaxonInteractions();
+        if (curTaxon.children === null) { return intRows; }
 
-        if ( parent.id in domainMap ) { 
-            getDomainInteractions(parent, domainMap[parent.id]);   
+        for (var childKey in curTaxon.children) {
+            childRows.push( getTaxonRowData(curTaxon.children[childKey]));
         }
-        getChildTaxaRowData();
-        getParentIntRcrdRows();
+        if (intRows.length >= 1) { $.merge(childRows, intRows); }
 
-        return rowData;
+        return childRows;
 
-        function getParentIntRcrdRows() {
-            var parentInts = getTaxaInteractions(parent);
-            parentInts.forEach(function(intRow) { rowData.push(parentInts); });
-         } 
-        /** 
-         * Domain taxa have their interactions grouped as the first child row. 
-         * This is especially useful for bats with their ~300 interaction records.
+        function getTaxonInteractions() {
+            var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
+            return curTaxon.id in domainMap ? 
+                getDomainTaxonInts(domainMap[curTaxon.id]) : getTaxonIntRows(curTaxon);
+        }
+        /**
+         * Groups interactions attributed directly to a domain taxon and adds them 
+         * as it's first child row. Returns an empty array to the intRows array used for
+         * all other taxa.
          */
-        function getDomainInteractions(taxon, domain) {
-            if (getIntCount(taxon) !== null) { 
-                rowData.push({
-                    id: taxon.id,
-                    name: 'Unspecified ' + domain + ' Interactions',
+        function getDomainTaxonInts(domainName) {   
+            if (getIntCount(curTaxon) !== null) { 
+                childRows.push({
+                    id: curTaxon.id,
+                    name: 'Unspecified ' + domainName + ' Interactions',
                     isParent: true,
                     open: false,
-                    children: getTaxaInteractions(taxon),
-                    taxaLvl: taxon.level,
+                    children: getTaxonIntRows(curTaxon),
+                    taxaLvl: curTaxon.level,
                     interactions: true,
                     domainInts: true
                 });
             }
+            return [];
         }
-        function getChildTaxaRowData() {
-            if (parent.children !== null) { 
-                parent.children.forEach(function(child){  
-                    rowData.push( getTaxaRowData(child));
-                });  
-            }
-        }
-    } /* End getTaxaRowDataForChildren */
-    /**
-     * Returns an array of row data objects, one for each interaction record.
-     */
-    function getTaxaInteractions(taxon) {  
+    } /* End getTaxonChildRowData */
+    function getTaxonIntRows(taxon) {                                      //console.log("getTaxonInteractions for = %O", taxon);
         var ints = [];
-
+        var taxaLvl = taxon.level; 
         for (var role in taxon.interactions) {
-            if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) { 
-                if (typeof taxon.interactions[role][0] !== "number") {
-                    ints = taxon.interactions[role].map(function(intRcrd){
-                        return getTaxaIntData(intRcrd, taxon.level)
-                    });
-                }
+            if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
+                taxon.interactions[role].forEach(function(intRcrd){
+                    ints.push( getTaxaIntData(intRcrd, taxaLvl) );
+                });
             }
         }
-        // return ints.length > 0 ? ints : null;
         return ints;
     }
     function getTaxaIntData(intRcrd, taxaLvl) {
