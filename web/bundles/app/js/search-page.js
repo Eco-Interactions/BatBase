@@ -136,6 +136,7 @@
 	function ifChangedFocus(focus, buildGridFunc) { 							//console.log("ifChangedFocus called.")
         if (focus !== focusStorage.curFocus) {   
             populateStorage("curFocus", focus);
+            clearPreviousGrid();
             resetFocusStorag();
             resetToggleTreeBttn();
             clearPastHtmlOptions();
@@ -215,11 +216,11 @@
 	 * interaction ids with the interaction records.
 	 */
 	function fillLocTree(treeBranch, intRcrds) { 		                        //console.log("fillLocTree called. taxaTree = %O", treeBranch) 
-		for (var sibling in treeBranch) {                                       //console.log("sibling = %O", treeBranch[sibling]);
-			if (treeBranch[sibling].interactions !== null) { 
-				treeBranch[sibling].interactions = replaceInteractions(treeBranch[sibling].interactions, intRcrds); }
-			if (treeBranch[sibling].children) { 
-				fillLocTree(treeBranch[sibling].children, intRcrds); }
+		for (var curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
+			if (treeBranch[curNode].interactions !== null) { 
+				treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions, intRcrds); }
+			if (treeBranch[curNode].children) { 
+				fillLocTree(treeBranch[curNode].children, intRcrds); }
 		}
 	}
 	/**
@@ -259,7 +260,7 @@
 	/**
 	 * Returns an interaction record object with flat data in grid-ready format. 
 	 */
-	function buildIntDataObj(intRcrd, intRcrdObj){  //console.log("intRcrd = %O", intRcrd);
+	function buildIntDataObj(intRcrd, intRcrdObj){                              //console.log("intRcrd = %O", intRcrd);
 		return {
 			id: intRcrd.id,
 			note: intRcrd.note, 
@@ -297,7 +298,7 @@
         if( rcrdData.domainRcrds ) { //console.log("Stored Taxa Loaded");
             rcrdData.taxaRcrds = JSON.parse(localStorage.getItem('taxaRcrds'));
             initTaxaSearchUi(rcrdData);
-        } else { // console.log("Taxa Not Found In Storage.");
+        } else { //console.log("Taxa Not Found In Storage.");
             sendAjaxQuery({}, 'search/taxa', storeTaxa);
         }
     }
@@ -377,7 +378,7 @@
             return children.map(function(child){
                 if (typeof child === "object") { return child; }
 
-                var childRcrd = getDetachedRcrd(child);                               //console.log("child = %O", child);
+                var childRcrd = getDetachedRcrd(child);                         //console.log("child = %O", child);
                 if (childRcrd.children.length >= 1) { 
                     childRcrd.children = getChildTaxa(childRcrd.children);
                 } else { childRcrd.children = null; }
@@ -831,8 +832,8 @@
 	function transformLocDataAndLoadGrid(locTree) {
 		var finalRowData = [];  //console.log("locTree = %O", locTree);
 
-		for (var region in locTree) { //console.log("region = ", region)
-			finalRowData.push( getLocRowData(locTree[region]));  //, "Africa"
+		for (var topNode in locTree) { //console.log("topNode = ", topNode)
+			finalRowData.push( getLocRowData(locTree[topNode])); 
 		}
 		focusStorage.rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		loadGrid("Location Tree");
@@ -857,16 +858,16 @@
 	 * the passed location.
 	 */
 	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
-		var rowObjsAry = [];
+		var childRows = [];
 		var intRows = getLocInteractions(locRcrd.interactions);
 	
 		if (locRcrd.children) {
 			locRcrd.children.forEach(function(childLoc){
-				rowObjsAry.push( getLocRowData( childLoc ));
+				childRows.push( getLocRowData( childLoc ));
 			});
 		}
-		$.merge(rowObjsAry, intRows);
-		return rowObjsAry;
+		$.merge(childRows, intRows);
+		return childRows;
 	}
 	/**
 	 * Returns an array of interaction record objs. On the init pass for a new data
@@ -1138,13 +1139,13 @@
         });
     }
     /** Return an array of data objects for each Citation child, ie interaction record. */
-    function getCitIntRowData(citSrc) { console.log("getCitIntRowData citSrc = %O", citSrc);
+    function getCitIntRowData(citSrc) {                                         //console.log("getCitIntRowData citSrc = %O", citSrc);
         if (citSrc.children === null) { return []; }
         return citSrc.children.map(function(intRcrd) {
             return buildIntDataObj(intRcrd, { isParent: false });
         });
     }
- /*--------------- Data Filter Methods -----------------------------------------------------------*/
+/*--------------- Filter Methods ---------------------------------------------*/
     /*------------------ Taxa Filter Updates ---------------------------------*/
 	/**
 	 * When a level dropdown is changed, the grid is updated with the selected taxon
@@ -1212,7 +1213,6 @@
         var selVal = $(this).val();
         var selTypeMap = { selCountry: "country", selHabitat: "habitat", selRegion: "region" };
 
-        // focusStorage.openRows = isNaN(selVal) ? focusStorage.openRows : [selVal];
         focusStorage.selectedOpts = getSelectedVals(selVal, selElemId);
         filterGridOnLocCol(selVal, selTypeMap[selElemId]);
         /** Loops through all selElems and stores user selected values. */
@@ -1270,13 +1270,6 @@
             return locNode; 
         }
     } /* End buildFilteredLocTree */
-
-
-
- 
-
-
-
 /*---------------------------- Taxa Specific Filters-------------------------------- */
 	/**
 	 * Goes through allTaxaLvls from kingdom through species and checks if that level dropdown
@@ -1459,7 +1452,7 @@
 		return opts;
 	}	
 
-    /*--------------AG Grid Methods-------------------------------------------*/
+/*-------------- Grid Methods ------------------------------------------------*/
     /**
      * Fills additional columns with flattened taxa-tree parent chain data for csv exports.
      */
@@ -1480,7 +1473,7 @@
     	 * For each subsequent taxa, every level more specific that the parent 
     	 * lvl is cleared from the taxa-heirarchy @clearLowerLvls.  
     	 */
-    	function syncTaxaHeir(taxonName, lvl, parentTaxon) { console.log("syncTaxaHeir parentTaxon = ", parentTaxon);
+    	function syncTaxaHeir(taxonName, lvl, parentTaxon) { //console.log("syncTaxaHeir parentTaxon = ", parentTaxon);
     		if (parentTaxon === null || parentTaxon === 1) { fillInAvailableLevels(lvl);
     		} else { clearLowerLvls(rcrdsById[parentTaxon].level) }
 
