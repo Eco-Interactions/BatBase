@@ -332,8 +332,8 @@
      * the taxon's record.
      */
     function storeAndReturnDomain() {
-        var domainId = $('#sel-domain').val();
-        var domainTaxonRcrd = rcrdsById[domainId] || 4;                     	//console.log("domainTaxon = %O", domainTaxon)
+        var domainId = $('#sel-domain').val() || 4;
+        var domainTaxonRcrd = getDetachedRcrd(domainId);                     	//console.log("domainTaxon = %O", domainTaxon)
         var domainLvl = domainTaxonRcrd.level;
         focusStorage["curDomain"] = domainId;
         focusStorage["domainLvl"] = domainLvl;
@@ -377,7 +377,7 @@
             return children.map(function(child){
                 if (typeof child === "object") { return child; }
 
-                var childRcrd = rcrdsById[child];                               //console.log("child = %O", child);
+                var childRcrd = getDetachedRcrd(child);                               //console.log("child = %O", child);
                 if (childRcrd.children.length >= 1) { 
                     childRcrd.children = getChildTaxa(childRcrd.children);
                 } else { childRcrd.children = null; }
@@ -663,7 +663,7 @@
 		var locTree = {};                                                       console.log("tree = %O", locTree);
 
         topLocIds.forEach(function(topLocId){  
-            topLoc = detachRcrd(topLocId);                                      //console.log("--topLoc = %O", topLoc);
+            topLoc = getDetachedRcrd(topLocId);                                      //console.log("--topLoc = %O", topLoc);
             locTree[topLoc.displayName] = topLoc;   
             topLoc.children = fillChildLocRcrds(topLoc.childLocs);
         });  
@@ -674,7 +674,7 @@
 		var branch = [];
 		childLocIds.forEach(function(locId){
 			if (typeof locId === "number") {
-				locRcrd = detachRcrd(locId);   
+				locRcrd = getDetachedRcrd(locId);   
 				branch.push(locRcrd);
 				if (locRcrd.childLocs.length >= 1) { 
 					locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
@@ -912,8 +912,8 @@
 	}
     /**
      * Sources have two types of 'tree' data: Authors -> Interactions, and
-     * Publications->Citations->Interactions. Citations are identified and their  
-     * publication parents added to reduce redundant tree data.
+     * Publications->Citations->Interactions. Publications are collected by first 
+     * identifiying Citations and getting their direct publication parent to reduce redundant tree data.
      */
     function sortAuthAndPubRcrds(srcRcrds) {                                    console.log("srcRcrds = %O", srcRcrds);
         var type, parentPub;
@@ -939,7 +939,7 @@
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            console.log("init search ui");
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //onsole.log("init search ui");
         var domainRcrds;
         rcrdsById = srcRcrdsById;
         if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
@@ -975,14 +975,12 @@
         clearPreviousGrid();
         resetToggleTreeBttn();
         rebuildSrcTree();
-        // initSrcTree(domainRcrds);
-        // transformSrcDataAndLoadGrid(focusStorage.curTree);
     }
     /** Rebuilds source tree for the selected source domain. */
     function rebuildSrcTree() {
-        var domainRcrds = storeAndReturnCurDomainRcrds();                               console.log("---Search Change. domainRcrds = %O", domainRcrds);
+        var domainRcrds = storeAndReturnCurDomainRcrds();                       //console.log("---Search Change. domainRcrds = %O", domainRcrds);
         initSrcTree(domainRcrds);
-        transformSrcDataAndLoadGrid(focusStorage.curTree);
+        getInteractionsAndFillTree();
     }
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
@@ -996,7 +994,7 @@
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global focusStorage obj as 'curTree', 
      */
-    function initSrcTree(domainRcrds) {                                         console.log("initSrcTree domainRcrds = %O", domainRcrds);
+    function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
         if (focusStorage.curDomain === "publication") { tree = buildPubSrcTree(domainRcrds);   
         } else { tree = buildAuthSrcTree(domainRcrds); }
@@ -1055,7 +1053,7 @@
     	if (pubRcrd.childSources === null) { return []; }
 
     	return pubRcrd.childSources.map(function(srcId) {
-    		return getPubChildData(rcrdsById[srcId]);
+    		return getPubChildData(getDetachedRcrd(srcId));
     	});
 	}
 	function getPubChildData(childSrc) {
@@ -1082,7 +1080,7 @@
      */
     function getAuthChildren(authData) { 		                                //console.log("getAuthChildren contribs = %O", authData.contributions);
     	return authData.contributions.map(function(workSrcId){
-    		return getPubData(rcrdsById[workSrcId]);
+    		return getPubData(getDetachedRcrd(workSrcId));
     	});
     }
     /**
@@ -1118,7 +1116,7 @@
             id: src.id,
             name: type === "citation" ? src.description : src.displayName,
             isParent: true,             
-            // parentTaxon: taxon.parentTaxon,
+            parentSource: src.parentSource,
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
             children: childHandler(src, type),
             // taxaLvl: taxon.level,
@@ -1140,7 +1138,7 @@
         });
     }
     /** Return an array of data objects for each Citation child, ie interaction record. */
-    function getCitIntRowData(citSrc) { 
+    function getCitIntRowData(citSrc) { console.log("getCitIntRowData citSrc = %O", citSrc);
         if (citSrc.children === null) { return []; }
         return citSrc.children.map(function(intRcrd) {
             return buildIntDataObj(intRcrd, { isParent: false });
@@ -1154,8 +1152,8 @@
 	 * reset to the domain-level taxon. The level drop downs are updated to show related taxa.
 	 */
 	function updateTaxaSearch() {                              console.log("updateTaxaSearch val = ", $(this).val())
-		var selectedTaxa = $(this).val(); 										//console.log("selectedTaxa = %O", selectedTaxa);
-		var selTaxonRcrd = rcrdsById[selectedTaxa]  
+		var selectedTaxaId = $(this).val(); 										//console.log("selectedTaxaId = %O", selectedTaxaId);
+		var selTaxonRcrd = getDetachedRcrd(selectedTaxaId);  
 		var selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  				//console.log("selectedVals = %O", selectedVals);
 
 		repopulateTaxaDropDowns(selTaxonRcrd, selectedVals);
@@ -1191,7 +1189,7 @@
 		function selectAncestorTaxa(taxon) {									//console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
 			if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
 				selected[taxon.level] = taxon.id; 								//console.log("setting lvl = ", taxon.level)
-				selectAncestorTaxa(rcrdsById[taxon.parentTaxon])
+				selectAncestorTaxa(getDetachedRcrd(rcrdsById[taxon.parentTaxon]))
 			}
 		}
 		function selectEmptyAnscestors(prevLvl) { if (prevLvl === undefined) {return;}
@@ -1266,7 +1264,7 @@
         function getFilteredChildData(treeNode) {                                     //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
             if (!selNodeOpened) { addParentOpenRows(treeNode); }
-            var locNode = detachRcrd(treeNode.data.id); 
+            var locNode = getDetachedRcrd(treeNode.data.id); 
             var locNodeChildren = treeNode.childrenAfterFilter;
             if (locNodeChildren) { locNode.children = locNodeChildren.map(getFilteredChildData); }
             return locNode; 
@@ -1378,7 +1376,7 @@
 		} /* End buildTaxaOptsObj */
 	} /* End repopulateTaxaDropDowns */
 	/*===================Shared===============================================*/
-    function detachRcrd(id) {
+    function getDetachedRcrd(id) {
         return JSON.parse(JSON.stringify(rcrdsById[id]));
     }
     /**
@@ -1482,7 +1480,7 @@
     	 * For each subsequent taxa, every level more specific that the parent 
     	 * lvl is cleared from the taxa-heirarchy @clearLowerLvls.  
     	 */
-    	function syncTaxaHeir(taxonName, lvl, parentTaxon) { 
+    	function syncTaxaHeir(taxonName, lvl, parentTaxon) { console.log("syncTaxaHeir parentTaxon = ", parentTaxon);
     		if (parentTaxon === null || parentTaxon === 1) { fillInAvailableLevels(lvl);
     		} else { clearLowerLvls(rcrdsById[parentTaxon].level) }
 
