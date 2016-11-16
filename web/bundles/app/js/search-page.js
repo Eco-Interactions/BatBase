@@ -508,41 +508,46 @@
         }
         return intCnt;
     } 
+    /**
+     * Returns both interactions for the curTaxon and rowData for any children.
+     * If there are children, the interactions for the curTaxon are grouped as 
+     * the first child row under "Unspecified [taxonName] Interactions", otherwise
+     * any interactions are added as rows directly beneath the taxon.
+     */
     function getTaxonChildRowData(curTaxon) {
         var childRows = [];
-        var intRows = getTaxonInteractions();
-        if (curTaxon.children === null) { return intRows; }
 
-        for (var childKey in curTaxon.children) {
-            childRows.push( getTaxonRowData(curTaxon.children[childKey]));
-        }
-        if (intRows.length >= 1) { $.merge(childRows, intRows); }
+        if (curTaxon.children) {
+            getUnspecifiedInts();
+            curTaxon.children.forEach(function(childTaxon){
+                childRows.push( getTaxonRowData(childTaxon));
+            });
+        } else { childRows = getTaxonIntRows(curTaxon); }
 
         return childRows;
 
-        function getTaxonInteractions() {
+        function getUnspecifiedInts() {
             var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
-            return curTaxon.id in domainMap ? 
-                getDomainTaxonInts(domainMap[curTaxon.id]) : getTaxonIntRows(curTaxon);
+            var name = curTaxon.id in domainMap ?  
+                domainMap[curTaxon.id] : curTaxon.displayName;
+            getUnspecifiedTaxonInts(name);
         }
         /**
-         * Groups interactions attributed directly to a domain taxon and adds them 
-         * as it's first child row. Returns an empty array if there are none.
+         * Groups interactions attributed directly to a taxon with child-taxa
+         * and adds them as it's first child row. 
          */
-        function getDomainTaxonInts(domainName) {   
+        function getUnspecifiedTaxonInts(taxonName) {   
             if (getIntCount(curTaxon) !== null) { 
                 childRows.push({
                     id: curTaxon.id,
-                    name: 'Unspecified ' + domainName + ' Interactions',
+                    name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
                     open: false,
                     children: getTaxonIntRows(curTaxon),
                     taxaLvl: curTaxon.level,
-                    interactions: true,
-                    domainInts: true
+                    interactions: true
                 });
             }
-            return [];
         }
     } /* End getTaxonChildRowData */
     function getTaxonIntRows(taxon) {                                      //console.log("getTaxonInteractions for = %O", taxon);
