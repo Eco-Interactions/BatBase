@@ -180,15 +180,11 @@ span.lbl {
 	cursor: pointer;
 }
 #hdrtext>button {
-	/*border: 1px solid #1b3b1b;*/
 	background: #3399ff;
 	color: white;
-	/*font-weight: bold;*/
 	border-radius: 5px;
 	width: 135px;
 	box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
-	/*padding: .5em;*/
-	/*margin: .5em 1em 0 0;*/
 }
 #hdrtext>button:hover {
 	background: #1A80E6;
@@ -354,17 +350,6 @@ span.lbl {
 	width: 1500px;
 	border-radius: .5em;
 	font-size: 1.1em;
-	/*justify-content: space-between;*/
-}
-#tips-close-bttn {
-	position: absolute;
-	top: 630px;
-	left: 550px;
-}
-#loc-dev-msg {
-	margin: 20px 20px 0 50px;
-	width: 750px;
-	/*font-weight: bold;*/
 }
 .opts-col {
 	padding: .3em;
@@ -372,10 +357,6 @@ span.lbl {
 	flex: 0 0 370px;  	 /*Don't grow or shrink, width.*/ 
 	justify-content: space-around;
 	align-items: flex-end;
-}
-
-.margin-1-auto {
-	/*margin: 1em auto 1em auto;*/
 }
 .opts-box {
 	width: 130px;
@@ -396,28 +377,12 @@ span.lbl {
 	margin: .3em;
 	justify-content: space-between;
 }
-#filter-bttns {
-	display: inline-flex;
-	justify-content: space-between;
-	height: 44px;
-}
-#clearLvls {
-	width:125px;
-}
 #grid-tools {
 	margin: .7em auto .2em auto;
 	padding: .1em;
 	width: 1498px;
 	height: 28px;
 	font-size: 1.1em;
-}
-.grid-bttn, .tos-bttn {
-	margin: 0 .3em 0 .2em;/*
-	background: -webkit-linear-gradient(#fff, #d3d3/*d3);
-	background: -moz-linear-gradient(#fff, #d3d3d3);
-	background: -o-linear-gradient(#fff, #d3d3d3);
-	background: -ms-linear-gradient(#fff, #d3d3d3);*/
-	background: linear-gradient(#fff, #d3d3d3);
 }
 #grid-status {
 	margin: 0 0 0 .2em;
@@ -431,9 +396,6 @@ span.lbl {
 #grid-filter-status {
 	flex-grow: 1;
 }
-button[name="csv"], #close-tos-bttn {
-	align-self: flex-end;
-}
 #search-grid {
 	height: 868px;
 	border: black 1px solid;
@@ -441,26 +403,52 @@ button[name="csv"], #close-tos-bttn {
 .ag-menu{
 	z-index: 100;
 }
-.row-kingdom {
+.row-purple {
 	background-color: rgba(128,0,128,.08) !important; /* purple */
 }
-.row-phylum {
+.row-green {
 	background-color: rgba(0,128,0,.1) !important; /* green */
 }
-.row-class {
+.row-blue {
 	background-color: rgba(0,0,255,.1) !important; /* blue */
 }
-.row-order {
+.row-orange {
 	background-color: rgba(255,128,0,.1) !important; /* orange */
 }
-.row-family {
+.row-turquoise {
 	background-color: rgba(0,245,255,.1) !important; /* turquoise */
 }
-.row-genus {
+.row-yellow {
 	background-color: rgba(255,255,0,.1) !important; /* yellow */
 }
-.row-species {
+.row-red {
 	background-color: rgba(255,0,0,.1) !important; /* red */
+}
+
+/*---Buttons---*/
+#tips-close-bttn {
+	position: absolute;
+	top: 630px;
+	left: 550px;
+}
+#filter-bttns {
+	display: inline-flex;
+	justify-content: space-between;
+	height: 44px;
+}
+.grid-bttn, .tos-bttn {
+	margin: 0 .3em 0 .2em;/*
+	background: -webkit-linear-gradient(#fff, #d3d3/*d3);
+	background: -moz-linear-gradient(#fff, #d3d3d3);
+	background: -o-linear-gradient(#fff, #d3d3d3);
+	background: -ms-linear-gradient(#fff, #d3d3d3);*/
+	background: linear-gradient(#fff, #d3d3d3);
+}
+button[name="csv"], #close-tos-bttn {
+	align-self: flex-end;
+}
+button[name="xpand-tree"] {
+	width: 105px;
 }
 /*-- Walkthrough --*/
 #tut-opts {
