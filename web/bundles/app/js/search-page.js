@@ -527,8 +527,7 @@
         }
         /**
          * Groups interactions attributed directly to a domain taxon and adds them 
-         * as it's first child row. Returns an empty array to the intRows array used for
-         * all other taxa.
+         * as it's first child row. Returns an empty array if there are none.
          */
         function getDomainTaxonInts(domainName) {   
             if (getIntCount(curTaxon) !== null) { 
@@ -616,7 +615,7 @@
 		var locTree = {};                                                       console.log("tree = %O", locTree);
 
         topLocIds.forEach(function(topLocId){  
-            topLoc = getDetachedRcrd(topLocId);                                 eaefa92dbf5fc2ca8465f2e407e84a5104abcbb8html//console.log("--topLoc = %O", topLoc);
+            topLoc = getDetachedRcrd(topLocId);                                 //console.log("--topLoc = %O", topLoc);
             locTree[topLoc.displayName] = topLoc;   
             topLoc.children = fillChildLocRcrds(topLoc.childLocs);
         });  
@@ -804,36 +803,55 @@
 			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
 		};		
 	}
-	/**
-	 * Returns an array of the location's interaction records and any child location's 
-	 * row data objects. Each will be a row in the final grid nested directly under
-	 * the passed location.
-	 */
+    /**
+     * Returns rowData for both interactions for the current location and for any children.
+     * If there are children, the interactions for the current location are grouped as 
+     * the first child row under "Unspecified [locName] Interactions", otherwise
+     * any interactions are added as rows directly beneath the taxon.
+     */
 	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
 		var childRows = [];
-		var intRows = getLocInteractions(locRcrd.interactions);
-	
-		if (locRcrd.children) {
-			locRcrd.children.forEach(function(childLoc){
-				childRows.push( getLocRowData( childLoc ));
-			});
-		}
-		$.merge(childRows, intRows);
+    
+        if (locRcrd.children) {
+            getUnspecifiedLocInts(locRcrd.interactions);
+            locRcrd.children.forEach(function(childLoc){
+                childRows.push( getLocRowData( childLoc ));
+            });
+        } else { childRows = getLocIntRows(locRcrd.interactions); }
+
 		return childRows;
-	}
+        /**
+         * Groups interactions attributed directly to a location with child-locations
+         * and adds them as it's first child row. 
+         */
+        function getUnspecifiedLocInts(intsAry) {   
+            var locName = locRcrd.displayName === "Unspecified" ? 
+                "Location" : locRcrd.displayName;
+            if (intsAry !== null) { 
+                childRows.push({
+                    id: locRcrd.id,
+                    name: 'Unspecified ' + locName + ' Interactions',
+                    isParent: true,
+                    open: false,
+                    children: getLocIntRows(intsAry),
+                    interactions: true
+                });
+            }
+        }
+    } /* End getLocRowDataForChildren */
 	/**
 	 * Returns an array of interaction record objs. On the init pass for a new data
 	 * set, interactions in array are only their id. Once the interaction records have 
 	 * been filled in, interaction data objects are created and returned for each taxon.
 	 */
-	function getLocInteractions(intRcrdAry) {
+	function getLocIntRows(intRcrdAry) {
 		if (intRcrdAry) {
-			return intRcrdAry.map(function(intRcrd){ //console.log("intRcrd = %O", intRcrd);
-				if (typeof intRcrd !== "number") {
+			return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
+				// if (typeof intRcrd !== "number") {
 					var intRcrdObj = { isParent: false };
 					return buildIntDataObj(intRcrd, intRcrdObj);
-				}
-				return intRcrd;
+				// }
+				// return intRcrd;
 			});
 		}
 		return [];
