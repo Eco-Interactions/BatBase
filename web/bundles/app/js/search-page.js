@@ -77,45 +77,6 @@
 			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
 		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
-/*=================Helper Methods=============================================*/
-	function showPopUpMsg(msg) {
-		var popUpMsg = msg || "Loading...";
-		$("#search-popUpDiv").text(popUpMsg);
-	    $('#search-popUpDiv, #search-overlay').show();
-	    fadeGrid();
-	}
-	function hidePopUpMsg() {
-	    $('#search-popUpDiv, #search-overlay').hide();
-	    showGrid();
-	}
-	function fadeGrid() {
-		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
-	}
-	function showGrid() {
-		$('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
-	}
-	function toggleExpandTree() {  												//console.log("toggleExpandTree")
-  		var expanded = $(this).data('xpanded');
-  		if (expanded) { 
-  			gridOptions.api.collapseAll();
-			$('#xpand-tree').html("&nbspExpand Tree&nbsp");
-		} else { 
-			gridOptions.api.expandAll();	
-			$('#xpand-tree').html("Collapse Tree");
-  		}
-		$(this).data("xpanded", !expanded);
-	}
-	function resetToggleTreeBttn() {
-		$('#xpand-tree').html("&nbspExpand Tree&nbsp");
-		$('#xpand-tree').data("xpanded", false);
-	}
-	/**
-	 * Hides the group "tree" column's filter button. Filtering on the group 
-	 * column doesn't work as expected.
-	 */
-	function hideGroupColFilterMenu() {
-		$('.ag-header-cell-menu-button.name').hide();
-	}
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (focusStorage.curFocus){ $('#search-focus').val(focusStorage.curFocus);
@@ -655,7 +616,7 @@
 		var locTree = {};                                                       console.log("tree = %O", locTree);
 
         topLocIds.forEach(function(topLocId){  
-            topLoc = getDetachedRcrd(topLocId);                                      //console.log("--topLoc = %O", topLoc);
+            topLoc = getDetachedRcrd(topLocId);                                 eaefa92dbf5fc2ca8465f2e407e84a5104abcbb8html//console.log("--topLoc = %O", topLoc);
             locTree[topLoc.displayName] = topLoc;   
             topLoc.children = fillChildLocRcrds(topLoc.childLocs);
         });  
@@ -2277,7 +2238,50 @@
             `;;
 
 	}
-/*----------------------Util----------------------------------------------------------------------*/
+/*================= Utility ==================================================*/
+    function ucfirst(string) { 
+        return string.charAt(0).toUpperCase() + string.slice(1); 
+    }
+    function showPopUpMsg(msg) {
+        var popUpMsg = msg || "Loading...";
+        $("#search-popUpDiv").text(popUpMsg);
+        $('#search-popUpDiv, #search-overlay').show();
+        fadeGrid();
+    }
+    function hidePopUpMsg() {
+        $('#search-popUpDiv, #search-overlay').hide();
+        showGrid();
+    }
+    function fadeGrid() {
+        $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
+    }
+    function showGrid() {
+        $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
+    }
+    /**
+     * Hides the group "tree" column's filter button. Filtering on the group 
+     * column only filters the leaf nodes, by design. It is not useful.
+     */
+    function hideGroupColFilterMenu() {
+        $('.ag-header-cell-menu-button.name').hide();
+    }
+    /*--------------------- Grid Button Methods ------------------------------*/
+    function toggleExpandTree() {                                               //console.log("toggleExpandTree")
+        var expanded = $(this).data('xpanded');
+        if (expanded) { 
+            gridOptions.api.collapseAll();
+            $('#xpand-tree').html("&nbspExpand All&nbsp");
+        } else { 
+            gridOptions.api.expandAll();    
+            $('#xpand-tree').html("Collapse All");
+        }
+        $(this).data("xpanded", !expanded);
+    }
+    function resetToggleTreeBttn() {
+        $('#xpand-tree').html("&nbspExpand All&nbsp");
+        $('#xpand-tree').data("xpanded", false);
+    }
+    /*------- Style Manipulation ---------------------------------------------*/
 	function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);
         } else { removeCssClass(element, className); }
@@ -2302,7 +2306,7 @@
         }
         else { element.className = className; }
     };
-   /*---------Unique Values Filter Utils--------*/
+   /*---------Unique Values Filter Utils--------------------------------------*/
     function loadTemplate(template) {
         var tempDiv = document.createElement("div");
         tempDiv.innerHTML = template;
@@ -2373,11 +2377,7 @@
 		}
 	    return elem;
 	}
-	/* --------------------- General Helpers ---------------------------------*/
-	function ucfirst(string) { 
-		return string.charAt(0).toUpperCase() + string.slice(1); 
-	}
-/*------------------------------Storage Methods-------------------------------*/
+    /*--------------------------Storage Methods-------------------------------*/
 	function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 
 	   		return window['localStorage'];  									//console.log("Storage available. Setting now. localStorage = %O", localStorage);
@@ -2413,7 +2413,7 @@
 	function sizeOfString(string) {
 		return string.length;
 	}
-/*-----------------AJAX ------------------------------------------------------*/
+    /*-------------AJAX ------------------------------------------------------*/
 	function sendAjaxQuery(dataPkg, url, successCb) {  							console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
 		$.ajax({
 			method: "POST",
