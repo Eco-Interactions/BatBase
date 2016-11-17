@@ -3,12 +3,19 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
     ---migration::
         --If I end up going back to rebuild--
         -Citations
-            make displayname -> title??
+            make displayname -> title?? 
                 Could be difficult to keep source display names
                     unique without appending something to the names...
                     but what to use is 'shortText' shouldn't even ultimately be  
                     stored in the database
                  desc -> fullText
+                 ##lines to update with this change::
+                        search controller ~395~ rcrd->source creation
+        -Location
+            --Run fromm "Locations" on up again...
+                Line 98 : $em->persist($finalLocEntity); 
+                (cuz I forgot to persist before flushing, losing location 
+                and interaction relationships.)
 
 
 
@@ -35,6 +42,8 @@ Notes::
     ::Search Page Ideas::
         -'Expand tree button': Expand one level per click.
 
+    ::Checked data wonkiness::
+        'northern mariana islands' is the name from red list.
 
 
 
