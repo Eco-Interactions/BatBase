@@ -450,6 +450,9 @@ button[name="csv"], #close-tos-bttn {
 button[name="xpand-tree"] {
 	width: 105px;
 }
+#show-tips {
+	width: 95px;
+}
 /*-- Walkthrough --*/
 #tut-opts {
 	align-self: flex-start;

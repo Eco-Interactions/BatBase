@@ -64,7 +64,9 @@
 	}
 	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
-		$('button[name="xpand-tree"]').click(toggleExpandTree);
+        $('button[name="xpand-tree"]').click(toggleExpandTree);
+        $('button[name="xpand-1"]').click(expandTreeByOne);
+		$('button[name="collapse-1"]').click(collapseTreeByOne);
 		$('button[name="reset-grid"]').click(resetDataGrid);
 		$("#strt-tut").click(startIntro);
 		$("#show-tips").click(showTips);
@@ -99,7 +101,7 @@
             populateStorage("curFocus", focus);
             clearPreviousGrid();
             resetFocusStorag();
-            resetToggleTreeBttn();
+            resetToggleTreeBttn(false);
             clearPastHtmlOptions();
         } else { buildGridFunc(); }
         /** Called seperately so @emptySearchOpts is called once. */
@@ -285,7 +287,7 @@
     }
     /** Event fired when the taxa domain select box has been changed. */
     function onTaxaDomainChange(e) {  
-        resetToggleTreeBttn();
+        resetToggleTreeBttn(false);
         rebuildTaxaTree();
     }
     /**
@@ -949,7 +951,7 @@
     /** Event fired when the source domain select box has been changed. */
     function onSrcDomainChange(e) {  
         clearPreviousGrid();
-        resetToggleTreeBttn();
+        resetToggleTreeBttn(false);
         rebuildSrcTree();
     }
     /** Rebuilds source tree for the selected source domain. */
@@ -1356,7 +1358,7 @@
         var focus = focusStorage.curFocus; 
         resetStorageProps();
         resetMap[focus](); 
-        resetToggleTreeBttn();
+        resetToggleTreeBttn(false);
         getActiveDefaultGridFilters();
         initNoFiltersStatus();
     }
@@ -2183,7 +2185,7 @@
 	function showTips() {  //console.log("show tips called.")
 		if (!$('#tips-close-bttn').length) { initSearchTips(); }
 	    $('#base-overlay, #base-overlayPopUp').fadeIn(500);
-        $('#show-tips').html("&nbsp&nbspHide Tips&nbsp&nbsp");
+        $('#show-tips').html("Hide Tips");
         $('#show-tips').off("click");
         $('#show-tips').click(hideTips);
 	}
@@ -2290,20 +2292,74 @@
     }
     /*--------------------- Grid Button Methods ------------------------------*/
     function toggleExpandTree() {                                               //console.log("toggleExpandTree")
-        var expanded = $(this).data('xpanded');
+        var expanded = $('#xpand-tree').data('xpanded');
         if (expanded) { 
             gridOptions.api.collapseAll();
-            $('#xpand-tree').html("&nbspExpand All&nbsp");
+            $('#xpand-tree').html("Expand All");
         } else { 
             gridOptions.api.expandAll();    
             $('#xpand-tree').html("Collapse All");
         }
-        $(this).data("xpanded", !expanded);
+        $('#xpand-tree').data("xpanded", !expanded);
     }
-    function resetToggleTreeBttn() {
-        $('#xpand-tree').html("&nbspExpand All&nbsp");
-        $('#xpand-tree').data("xpanded", false);
+    /**
+     * Resets button based on passed boolean xpanded state. True for fully 
+     * expanded and false when collapsed.
+     */
+    function resetToggleTreeBttn(xpanded) {
+        var bttnText = xpanded ? "Collapse All" : "Expand All"; 
+        $('#xpand-tree').html(bttnText);
+        $('#xpand-tree').data("xpanded", xpanded);
     }
+    /** Events fired when clicking the + or - tree buttons.  */
+    function expandTreeByOne() {    
+        toggleTreeByOneLvl(true);
+    }
+    function collapseTreeByOne() {
+        toggleTreeByOneLvl(false);
+    }
+    /**
+     * Opens/closes one level of the displayed data tree. If there are no closed 
+     * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
+     */
+    function toggleTreeByOneLvl(opening) {
+        var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
+        gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", topNode)
+            if (!opening && !isNextOpenLeafRow(row)) { return; }
+            row.expanded = opening;
+            row.data.open = opening;
+        });
+        gridOptions.api.onGroupExpandedOrCollapsed();
+        updateToggleTreeButton();
+        /**
+         * Checks displayed rows against the root node's child count, (what I found 
+         * to be closest to a 'total rows' count in the grid row model), to determine
+         * if there are any closed rows remaining. The toggle tree button is updated 
+         * if necessary.
+         */
+        function updateToggleTreeButton() {
+            var bttXpandedAll = $("#xpand-tree").data('xpanded');
+            var shownRows = gridModel.rowsToDisplay.length; 
+            var rootChildRows = gridModel.rootNode.allChildrenCount + 1; 
+            var closedRows = shownRows < rootChildRows;                         //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, rootChildRows, closedRows, bttXpandedAll);
+
+            if (!closedRows) { resetToggleTreeBttn(true); 
+            } else if (bttXpandedAll === true) { resetToggleTreeBttn(false); }
+        }
+    } /* End toggleTreeByOneLvl */
+    /**
+     * If there are no child rows, or if the child rows are closed, this is the open leaf.
+     */
+    function isNextOpenLeafRow(node) {                                          //console.log("node = %O", node);
+        if (node.childrenAfterFilter) {
+            if (node.childrenAfterFilter.length > 0) {  //TODO: remove check after fixing location data
+                return node.childrenAfterFilter.every(function(childNode){
+                    return !childNode.expanded;
+                });
+            }
+        } 
+        return true;
+    }     
     /*------- Style Manipulation ---------------------------------------------*/
 	function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);
