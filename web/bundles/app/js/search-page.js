@@ -1345,90 +1345,6 @@
 			}
 		} /* End buildTaxaOptsObj */
 	} /* End repopulateTaxaDropDowns */
-	/*===================Shared===============================================*/
-    function getDetachedRcrd(id) {
-        return JSON.parse(JSON.stringify(rcrdsById[id]));
-    }
-    /**
-     * Resets grid state to top focus options: Taxa and source are reset at current
-     * domain; locations are reset to the top regions.
-     */
-    function resetDataGrid() {   console.log("---reseting grid---")
-        var resetMap = { taxa: onTaxaDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
-        var focus = focusStorage.curFocus; 
-        resetStorageProps();
-        resetMap[focus](); 
-        resetToggleTreeBttn(false);
-        getActiveDefaultGridFilters();
-        initNoFiltersStatus();
-    }
-    /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
-    function resetStorageProps() {
-        var props = ['curTree', 'selectedOpts'];
-        props.forEach(function(prop){ delete focusStorage[prop]; });
-    }
-/*-----------------Grid Manipulation Methods-----------------------------------------------*/
-    function clearPreviousGrid() {  console.log("clearing grid");
-        if (gridOptions.api) { gridOptions.api.destroy(); }     
-    }
-    /**
-     * When the grid rowModel is updated, the total interaction count for each 
-     * tree node, displayed in the "count" column, is updated to count only displayed
-     * interactions. Any rows filtered out will not be included in the totals.
-     */
-    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
-        updateTtlRowIntCount( gridOptions.api.getModel().rootNode );
-    }
-    /**
-     * Sets new interaction totals for each tree node @getChildrenCnt and then 
-     * calls the grid's softRefresh method, which refreshes any rows with "volatile"
-     * set "true" in the columnDefs - currently only "Count".
-     */
-    function updateTtlRowIntCount(rootNode) {
-        getChildrenCnt(rootNode.childrenAfterFilter);  
-        gridOptions.api.softRefreshView();
-    }
-    function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
-        var nodeCnt, ttl = 0;
-        nodeChildren.forEach(function(child) {
-            nodeCnt = 0;
-            nodeCnt += addSubNodeInteractions(child);
-            ttl += nodeCnt;
-            if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
-        });
-        return ttl;
-    }
-    /**
-     * Interaction records are identified by their lack of any children, specifically 
-     * their lack of a "childrenAfterFilter" property.
-     */
-    function addSubNodeInteractions(child) {  
-        var cnt = 0;
-        if (child.childrenAfterFilter) {
-            cnt += getChildrenCnt(child.childrenAfterFilter);
-            if (cnt !== 0) { child.data.intCnt = cnt; }
-        } else { /* Interaction record row */
-            ++cnt;
-            child.data.intCnt = null; 
-        }
-        return cnt;
-    }
-	/*-------------------Html Methods-----------------------------------------*/
-	function clearCol2() {
-		$('#opts-col2').empty();
-	}
-	/** Creates an opts obj for each 'item' in array with value and text as 'item' */
-	function buildSimpleOpts(optAry) {
-		var opts = []
-		optAry.forEach(function(option){
-			opts.push({
-				value: option,
-				text: option  });
-		});
-		opts.unshift({value: 'all', text: '- All -'});
-		return opts;
-	}	
-
 /*-------------- Grid Methods ------------------------------------------------*/
     /**
      * Fills additional columns with flattened taxa-tree parent chain data for csv exports.
@@ -2053,9 +1969,11 @@
 		if (rowNode.data.interactionType !== undefined) {  						
 			rowNode.setSelected(true);
 		}
-	}/*========================= Walkthrough Methods ==================================================*/
+	}
+/*========================= Walkthrough ======================================*/
 	function showWalkthroughIfFirstVisit() {
-		var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false; 	 //console.log("newVisit = ", newVisit)
+		var prevVisit = localStorage ? 
+            localStorage.getItem('prevVisit') || false : false; 	 //console.log("newVisit = ", newVisit)
 		if ( !prevVisit ) { 
 			window.setTimeout(startIntro, 250); 
 			populateStorage('prevVisit', true);
@@ -2264,6 +2182,12 @@
 
 	}
 /*================= Utility ==================================================*/
+    function clearCol2() {
+        $('#opts-col2').empty();
+    }
+    function getDetachedRcrd(id) {
+        return JSON.parse(JSON.stringify(rcrdsById[id]));
+    }
     function ucfirst(string) { 
         return string.charAt(0).toUpperCase() + string.slice(1); 
     }
@@ -2360,12 +2284,126 @@
         } 
         return true;
     }     
-    /*------- Style Manipulation ---------------------------------------------*/
-	function addOrRemoveCssClass(element, className, add) {
+/*-----------------Grid Manipulation------------------------------------------*/
+    function clearPreviousGrid() {  console.log("clearing grid");
+        if (gridOptions.api) { gridOptions.api.destroy(); }     
+    }
+    /**
+     * Resets grid state to top focus options: Taxa and source are reset at current
+     * domain; locations are reset to the top regions.
+     */
+    function resetDataGrid() {   console.log("---reseting grid---")
+        var resetMap = { taxa: onTaxaDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
+        var focus = focusStorage.curFocus; 
+        resetStorageProps();
+        resetMap[focus](); 
+        resetToggleTreeBttn(false);
+        getActiveDefaultGridFilters();
+        initNoFiltersStatus();
+    }
+    /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
+    function resetStorageProps() {
+        var props = ['curTree', 'selectedOpts', 'selectedVals'];
+        props.forEach(function(prop){ delete focusStorage[prop]; });
+    }
+    /**
+     * When the grid rowModel is updated, the total interaction count for each 
+     * tree node, displayed in the "count" column, is updated to count only displayed
+     * interactions. Any rows filtered out will not be included in the totals.
+     */
+    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+        updateTtlRowIntCount( gridOptions.api.getModel().rootNode );
+    }
+    /**
+     * Sets new interaction totals for each tree node @getChildrenCnt and then 
+     * calls the grid's softRefresh method, which refreshes any rows with "volatile"
+     * set "true" in the columnDefs - currently only "Count".
+     */
+    function updateTtlRowIntCount(rootNode) {
+        getChildrenCnt(rootNode.childrenAfterFilter);  
+        gridOptions.api.softRefreshView();
+    }
+    function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
+        var nodeCnt, ttl = 0;
+        nodeChildren.forEach(function(child) {
+            nodeCnt = 0;
+            nodeCnt += addSubNodeInteractions(child);
+            ttl += nodeCnt;
+            if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
+        });
+        return ttl;
+    }
+    /**
+     * Interaction records are identified by their lack of any children, specifically 
+     * their lack of a "childrenAfterFilter" property.
+     */
+    function addSubNodeInteractions(child) {  
+        var cnt = 0;
+        if (child.childrenAfterFilter) {
+            cnt += getChildrenCnt(child.childrenAfterFilter);
+            if (cnt !== 0) { child.data.intCnt = cnt; }
+        } else { /* Interaction record row */
+            ++cnt;
+            child.data.intCnt = null; 
+        }
+        return cnt;
+    }
+    /*------------ HTML Functions -------------------------------------------*/
+    /** Creates an opts obj for each 'item' in array with value and text as 'item' */
+    function buildSimpleOpts(optAry) {
+        var opts = []
+        optAry.forEach(function(option){
+            opts.push({
+                value: option,
+                text: option  });
+        });
+        opts.unshift({value: 'all', text: '- All -'});
+        return opts;
+    }   
+    /**
+     * Builds a select drop down with the options, attributes and change method 
+     * passed. Sets the selected option as the passed 'selected' or the default 'all'.
+     */
+	function buildSelectElem(options, attrs, changeFunc, selected) {
+		var selectElem = createElem('select', attrs); 
+		var selected = selected || 'all';
+		
+		options.forEach(function(opts){
+			$(selectElem).append($("<option/>", {
+			    value: opts.value,
+			    text: opts.text
+			}));
+		});
+
+		$(selectElem).val(selected);
+        $(selectElem).change(changeFunc);
+		return selectElem;
+	}
+	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
+	    var elem = document.createElement(tag);
+		if (attrs) {
+		    elem.id = attrs.id || '';
+		    elem.className = attrs.class || '';   //Space separated classNames
+
+		    if (attrs.text) { $(elem).text(attrs.text); }
+
+		    if (attrs.name || attrs.type || attrs.value ) { 
+		    	$(elem).attr({
+		    		name: attrs.name   || '', 
+		    		type: attrs.type   || '',
+		    		value: attrs.value || '',
+		    		placeholder: attrs.placeholder || '',
+		    	}); 
+		    }
+		}
+	    return elem;
+	}
+ /*------- Style Manipulation ---------------------------------------------*/
+    function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);
         } else { removeCssClass(element, className); }
-	}
-	function removeCssClass(element, className) {
+    }
+    function removeCssClass(element, className) {
         if (element.className && element.className.length > 0) {
             var cssClasses = element.className.split(' ');
             var index = cssClasses.indexOf(className);
@@ -2416,46 +2454,7 @@
             var value = object[key];
             callback(key, value);
         }
-    };
-	/*------------ HTML Generators -------------------------------------------*/
-    /**
-     * Builds a select drop down with the options, attributes and change method 
-     * passed. Sets the selected option as the passed 'selected' or the default 'all'.
-     */
-	function buildSelectElem(options, attrs, changeFunc, selected) {
-		var selectElem = createElem('select', attrs); 
-		var selected = selected || 'all';
-		
-		options.forEach(function(opts){
-			$(selectElem).append($("<option/>", {
-			    value: opts.value,
-			    text: opts.text
-			}));
-		});
-
-		$(selectElem).val(selected);
-        $(selectElem).change(changeFunc);
-		return selectElem;
-	}
-	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
-	    var elem = document.createElement(tag);
-		if (attrs) {
-		    elem.id = attrs.id || '';
-		    elem.className = attrs.class || '';   //Space separated classNames
-
-		    if (attrs.text) { $(elem).text(attrs.text); }
-
-		    if (attrs.name || attrs.type || attrs.value ) { 
-		    	$(elem).attr({
-		    		name: attrs.name   || '', 
-		    		type: attrs.type   || '',
-		    		value: attrs.value || '',
-		    		placeholder: attrs.placeholder || '',
-		    	}); 
-		    }
-		}
-	    return elem;
-	}
+    };    
     /*--------------------------Storage Methods-------------------------------*/
 	function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 
