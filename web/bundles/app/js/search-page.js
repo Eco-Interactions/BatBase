@@ -307,7 +307,7 @@
      */
     function storeAndReturnDomain() {
         var domainId = $('#sel-domain').val() || 4;
-        var domainTaxonRcrd = getDetachedRcrd(domainId);                        //console.log("domainTaxon = %O", domainTaxon)
+        var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);                        //console.log("domainTaxon = %O", domainTaxon)
         var domainLvl = domainTaxonRcrd.level;
         focusStorage["curDomain"] = domainId;
         focusStorage["domainLvl"] = domainLvl;
@@ -356,7 +356,7 @@
             return children.map(function(child){
                 if (typeof child === "object") { return child; }
 
-                var childRcrd = getDetachedRcrd(child);                         //console.log("child = %O", child);
+                var childRcrd = getDetachedRcrd(child, rcrdsById);                         //console.log("child = %O", child);
                 if (childRcrd.children.length >= 1) { 
                     childRcrd.children = getChildTaxa(childRcrd.children);
                 } else { childRcrd.children = null; }
@@ -642,7 +642,7 @@
 		var locTree = {};                                                       console.log("tree = %O", locTree);
 
         topLocIds.forEach(function(topLocId){  
-            topLoc = getDetachedRcrd(topLocId);                                 //console.log("--topLoc = %O", topLoc);
+            topLoc = getDetachedRcrd(topLocId, rcrdsById);                                 //console.log("--topLoc = %O", topLoc);
             locTree[topLoc.displayName] = topLoc;   
             topLoc.children = fillChildLocRcrds(topLoc.childLocs);
         });  
@@ -653,7 +653,7 @@
 		var branch = [];
 		childLocIds.forEach(function(locId){
 			if (typeof locId === "number") {
-				locRcrd = getDetachedRcrd(locId);   
+				locRcrd = getDetachedRcrd(locId, rcrdsById);   
 				branch.push(locRcrd);
 				if (locRcrd.childLocs.length >= 1) { 
 					locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
@@ -1051,7 +1051,7 @@
     	if (pubRcrd.childSources === null) { return []; }
 
     	return pubRcrd.childSources.map(function(srcId) {
-    		return getPubChildData(getDetachedRcrd(srcId));
+    		return getPubChildData(getDetachedRcrd(srcId, rcrdsById));
     	});
 	}
 	function getPubChildData(childSrc) {
@@ -1070,6 +1070,7 @@
     function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("buildAuthSrcTree");
     	for (var authName in authSrcRcrds) {
     		authSrcRcrds[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
+            tree[authName] = getDetachedRcrd(authName, authSrcRcrds);
     	}  
     	return authSrcRcrds;  
     }  
@@ -1152,7 +1153,7 @@
 	 */
 	function updateTaxaSearch() {                                               //console.log("updateTaxaSearch val = ", $(this).val())
 		var selectedTaxaId = $(this).val(); 									//console.log("selectedTaxaId = %O", selectedTaxaId);
-		var selTaxonRcrd = getDetachedRcrd(selectedTaxaId);  
+		var selTaxonRcrd = getDetachedRcrd(selectedTaxaId, rcrdsById);  
 		focusStorage.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);  		//console.log("selectedVals = %O", focusStorage.selectedVals);
 
 		updateFilterStatus();
@@ -1180,7 +1181,7 @@
 		function selectAncestorTaxa(taxon) {									//console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
 			if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
 				selected[taxon.level] = taxon.id; 								//console.log("setting lvl = ", taxon.level)
-				selectAncestorTaxa(getDetachedRcrd(taxon.parentTaxon))
+				selectAncestorTaxa(getDetachedRcrd(taxon.parentTaxon, rcrdsById))
 			}
 		}
 		function selectEmptyAnscestors(prevLvl) { if (prevLvl === undefined) {return;}
@@ -1254,7 +1255,7 @@
         function getFilteredChildData(treeNode) {                                     //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
             if (!selNodeOpened) { addParentOpenRows(treeNode); }
-            var locNode = getDetachedRcrd(treeNode.data.id); 
+            var locNode = getDetachedRcrd(treeNode.data.id, rcrdsById); 
             var locNodeChildren = treeNode.childrenAfterFilter;
             if (locNodeChildren) { locNode.children = locNodeChildren.map(getFilteredChildData); }
             return locNode; 
@@ -2100,8 +2101,8 @@
     function clearCol2() {
         $('#opts-col2').empty();
     }
-    function getDetachedRcrd(id) {
-        return JSON.parse(JSON.stringify(rcrdsById[id]));
+    function getDetachedRcrd(rcrdKey, orgnlRcrds) {
+        return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
     }
     function ucfirst(string) { 
         return string.charAt(0).toUpperCase() + string.slice(1); 
