@@ -1061,25 +1061,30 @@
 /*-------------- Author Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Authors as top nodes of the data tree, 
-     * with their contributibuted works and the interactions they contained nested within.
+     * with their contributibuted works and the interactions they contained nested 
+     * within. Authors with no contributions are not added to the tree.
      * Author Source Tree:
      * ->Author
      * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
     function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("buildAuthSrcTree");
-    	for (var authName in authSrcRcrds) {
-    		authSrcRcrds[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
+        var contribs;
+    	var tree = {};
+        for (var authName in authSrcRcrds) {                                    //console.log("rcrd = %O", authSrcRcrds[authName]);
+            contribs = authSrcRcrds[authName].sourceType.author.contributions;
+            if (contribs.length < 1) {continue;}
             tree[authName] = getDetachedRcrd(authName, authSrcRcrds);
+    		tree[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
     	}  
-    	return authSrcRcrds;  
+    	return tree;  
     }  
     /** For each source work contribution, gets any additional publication children
      * @getPubData and return's the source record.
      */
     function getAuthChildren(authData) { 		                                //console.log("getAuthChildren contribs = %O", authData.contributions);
     	return authData.contributions.map(function(workSrcId){
-    		return getPubData(getDetachedRcrd(workSrcId));
+    		return getPubData(getDetachedRcrd(workSrcId, rcrdsById));
     	});
     }
     /**
