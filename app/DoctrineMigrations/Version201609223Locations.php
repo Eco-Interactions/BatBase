@@ -95,6 +95,7 @@ class Version201609223Locations extends AbstractMigration implements ContainerAw
             $finalLocEntity->addInteraction($interaction);
         }
         $em->remove($orgLocEntity);
+        $em->persist($finalLocEntity);
         $em->flush();
     }
     private function SetLocTypeAndParent($entity, $em)
