@@ -223,8 +223,10 @@
 	/**
 	 * Returns an interaction record object with flat data in grid-ready format. 
 	 */
-	function buildIntDataObj(intRcrd, intRcrdObj){                              //console.log("intRcrd = %O", intRcrd);
-		return {
+	function buildIntDataObj(intRcrd, treeLvl){                            //console.log("intRcrd = %O", intRcrd);
+        return {
+            isParent: false,
+            treeLvl: treeLvl,
 			id: intRcrd.id,
 			note: intRcrd.note, 
 			interactionType: intRcrd.interactionType,
@@ -490,7 +492,7 @@
     function transformTaxaDataAndLoadGrid(taxaTree) {                           //console.log("transformTaxaDataAndLoadGrid called. taxaTree = %O", taxaTree)
         var finalRowData = [];
         for (var topTaxon in taxaTree) {
-            finalRowData.push( getTaxonRowData(taxaTree[topTaxon]) );
+            finalRowData.push( getTaxonRowData(taxaTree[topTaxon], 0) );
         }
         focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", rowData);
         loadGrid("Taxa Tree");
@@ -499,7 +501,7 @@
      * Recurses through each taxon's 'children' property and returns a row data obj 
      * for each taxon in the tree.
      */
-    function getTaxonRowData(taxon) {                                           //console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
+    function getTaxonRowData(taxon, treeLvl) {                                           //console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
         var taxonName = taxon.level === "Species" ? 
             taxon.displayName : taxon.level + " " + taxon.displayName;
         var intCount = getIntCount(taxon); 
@@ -509,8 +511,8 @@
             isParent: true,                     //taxon.interactions !== null || taxon.children !== null was the test, but I'm pretty sure this is always true with taxa
             parentTaxon: taxon.parentTaxon,
             open: focusStorage.openRows.indexOf(taxon.id.toString()) !== -1, 
-            children: getTaxonChildRowData(taxon),
-            taxaLvl: taxon.level,
+            children: getTaxonChildRowData(taxon, treeLvl),
+            treeLvl: treeLvl,
             interactions: intCount !== null,          
             intCnt: intCount,   
         }; 
@@ -536,57 +538,53 @@
      * the first child row under "Unspecified [taxonName] Interactions", otherwise
      * any interactions are added as rows directly beneath the taxon.
      */
-    function getTaxonChildRowData(curTaxon) {
+    function getTaxonChildRowData(curTaxon, curTreeLvl) {
         var childRows = [];
 
         if (curTaxon.children) {
-            getUnspecifiedInts();
+            getUnspecifiedInts(curTreeLvl);
             curTaxon.children.forEach(function(childTaxon){
-                childRows.push( getTaxonRowData(childTaxon));
+                childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1));
             });
-        } else { childRows = getTaxonIntRows(curTaxon); }
+        } else { childRows = getTaxonIntRows(curTaxon, curTreeLvl); }
 
         return childRows;
 
-        function getUnspecifiedInts() {
+        function getUnspecifiedInts(curTreeLvl) {
             var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
             var name = curTaxon.id in domainMap ?  
                 domainMap[curTaxon.id] : curTaxon.displayName;
-            getUnspecifiedTaxonInts(name);
+            getUnspecifiedTaxonInts(name, curTreeLvl);
         }
         /**
          * Groups interactions attributed directly to a taxon with child-taxa
          * and adds them as it's first child row. 
          */
-        function getUnspecifiedTaxonInts(taxonName) {   
+        function getUnspecifiedTaxonInts(taxonName, treeLvl) {   
             if (getIntCount(curTaxon) !== null) { 
                 childRows.push({
                     id: curTaxon.id,
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
                     open: false,
-                    children: getTaxonIntRows(curTaxon),
-                    taxaLvl: curTaxon.level,
-                    interactions: true
+                    children: getTaxonIntRows(curTaxon, treeLvl),
+                    treeLvl: treeLvl,
+                    interactions: true,
+                    groupedInts: true
                 });
             }
         }
     } /* End getTaxonChildRowData */
-    function getTaxonIntRows(taxon) {                                      //console.log("getTaxonInteractions for = %O", taxon);
+    function getTaxonIntRows(taxon, treeLvl) {                                      //console.log("getTaxonInteractions for = %O", taxon);
         var ints = [];
-        var taxaLvl = taxon.level; 
         for (var role in taxon.interactions) {
             if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
                 taxon.interactions[role].forEach(function(intRcrd){
-                    ints.push( getTaxaIntData(intRcrd, taxaLvl) );
+                    ints.push( buildIntDataObj(intRcrd, treeLvl));
                 });
             }
         }
         return ints;
-    }
-    function getTaxaIntData(intRcrd, taxaLvl) {
-        var intRowData = { isParent: false, taxaLvl: taxaLvl };
-        return buildIntDataObj(intRcrd, intRowData);
     }
 /*------------------Location Search Methods-----------------------------------*/
 	/**
@@ -811,7 +809,7 @@
 		var finalRowData = [];  //console.log("locTree = %O", locTree);
 
 		for (var topNode in locTree) { //console.log("topNode = ", topNode)
-			finalRowData.push( getLocRowData(locTree[topNode])); 
+			finalRowData.push( getLocRowData(locTree[topNode], 0)); 
 		}
 		focusStorage.rowData = finalRowData;													//console.log("rowData = %O", rowData);
 		loadGrid("Location Tree");
@@ -819,16 +817,17 @@
 	/**
 	 * Returns a row data object for the passed location and it's children. 
 	 */
-	function getLocRowData(locRcrd) { //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+	function getLocRowData(locRcrd, treeLvl) { //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
 		return {
             id: locRcrd.id,
 			name: locRcrd.displayName,	/* Interaction rows have no name to display. */
 			isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
 			open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
-			children: getLocRowDataForRowChildren(locRcrd),
-			intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
+			children: getLocRowDataForRowChildren(locRcrd, treeLvl),
+			// intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
 			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
-		};		
+		    treeLvl: treeLvl
+        };		
 	}
     /**
      * Returns rowData for both interactions for the current location and for any children.
@@ -836,22 +835,22 @@
      * the first child row under "Unspecified [locName] Interactions", otherwise
      * any interactions are added as rows directly beneath the taxon.
      */
-	function getLocRowDataForRowChildren(locRcrd) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+	function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
 		var childRows = [];
     
         if (locRcrd.children) {
-            getUnspecifiedLocInts(locRcrd.interactions);
+            getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl);
             locRcrd.children.forEach(function(childLoc){
-                childRows.push( getLocRowData( childLoc ));
+                childRows.push( getLocRowData(childLoc, pTreeLvl + 1));
             });
-        } else { childRows = getLocIntRows(locRcrd.interactions); }
+        } else { childRows = getLocIntRows(locRcrd.interactions, pTreeLvl); }
 
 		return childRows;
         /**
          * Groups interactions attributed directly to a location with child-locations
          * and adds them as it's first child row. 
          */
-        function getUnspecifiedLocInts(intsAry) {   
+        function getUnspecifiedLocInts(intsAry, treeLvl) {   
             var locName = locRcrd.displayName === "Unspecified" ? 
                 "Location" : locRcrd.displayName;
             if (intsAry !== null) { 
@@ -860,8 +859,10 @@
                     name: 'Unspecified ' + locName + ' Interactions',
                     isParent: true,
                     open: false,
-                    children: getLocIntRows(intsAry),
-                    interactions: true
+                    children: getLocIntRows(intsAry, treeLvl),
+                    interactions: true,
+                    treeLvl: treeLvl,
+                    groupedInts: true
                 });
             }
         }
@@ -871,14 +872,10 @@
 	 * set, interactions in array are only their id. Once the interaction records have 
 	 * been filled in, interaction data objects are created and returned for each taxon.
 	 */
-	function getLocIntRows(intRcrdAry) {
+	function getLocIntRows(intRcrdAry, treeLvl) {
 		if (intRcrdAry) {
 			return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
-				// if (typeof intRcrd !== "number") {
-					var intRcrdObj = { isParent: false };
-					return buildIntDataObj(intRcrd, intRcrdObj);
-				// }
-				// return intRcrd;
+				return buildIntDataObj(intRcrd, treeLvl);
 			});
 		}
 		return [];
@@ -1109,12 +1106,12 @@
         var finalRowData = [];
 
         for (var topNode in srcTree) {
-            finalRowData.push( getSrcRowData(srcTree[topNode], focusStorage.curDomain) );
+            finalRowData.push( getSrcRowData(srcTree[topNode], focusStorage.curDomain, 0) );
         }
         focusStorage.rowData = finalRowData;                                                 console.log("rowData = %O", focusStorage.rowData);
         loadGrid(treeName);
     }
-    function getSrcRowData(src, type) {                                         //console.log("getSrcRowData. source = %O, type = ", src, type);
+    function getSrcRowData(src, type, treeLvl) {                                         //console.log("getSrcRowData. source = %O, type = ", src, type);
         var childHandler = type === "citation" ?  getCitIntRowData : getChildSrcRowData;
         return {
             id: src.id,
@@ -1122,30 +1119,29 @@
             isParent: true,             
             parentSource: src.parentSource,
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
-            children: childHandler(src, type),
-            // taxaLvl: taxon.level,
-            // interactions: intCount !== null,          
-            // intCnt: intCount,
+            children: childHandler(src, type, treeLvl),
+            treeLvl: treeLvl,
+            interactions: type === "citation",          //Only rows with interaction are colored
         };  
     } 
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
      * for each source node in the tree.
      */
-    function getChildSrcRowData(parent) {
+    function getChildSrcRowData(parent, type, pTreeLvl) {
         var childType;
         if (parent.children === null) { return []; }
         
         return parent.children.map(function(childSrc) { //console.log("childSrc = %O", childSrc);
             childType = Object.keys(childSrc.sourceType)[0];
-            return getSrcRowData(childSrc, childType);
+            return getSrcRowData(childSrc, childType, pTreeLvl + 1);
         });
     }
     /** Return an array of data objects for each Citation child, ie interaction record. */
-    function getCitIntRowData(citSrc) {                                         //console.log("getCitIntRowData citSrc = %O", citSrc);
+    function getCitIntRowData(citSrc, type, treeLvl) {                                         //console.log("getCitIntRowData citSrc = %O", citSrc);
         if (citSrc.children === null) { return []; }
         return citSrc.children.map(function(intRcrd) {
-            return buildIntDataObj(intRcrd, { isParent: false });
+            return buildIntDataObj(intRcrd, treeLvl);
         });
     }
 /*--------------- Filter Methods ---------------------------------------------*/
@@ -1397,43 +1393,44 @@
         var value = params.value || null;
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
-	function getRowStyleClass(params) { 										//console.log("getRowStyleClass params = %O", params);
-		var lvlClassMap = {
-			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
-			'Class': 'row-class',		'Order': 'row-order',
-			'Family': 'row-family',		'Genus': 'row-genus',
-			'Species': 'row-species'
-		};
-		var lvlAry = [1, 2, 3, 4, 5, 6, 7];
-		if (params.data.name === undefined || params.data.name === null) {
-			var isTaxa = params.data.taxaLvl !== undefined ? lvlClassMap[params.data.taxaLvl] : false;
-			// var lvlIdx = lvlAry[Math.floor(Math.random() * lvlAry.length)];
-			// var lvlClass = lvlClassMap[Object.keys(lvlClassMap)[lvlIdx]];
-			return isTaxa || 'row-kingdom';
-		} 
-	}
-	function getCellStyleClass(params) {									//console.log("getCellStyleClass params = %O", params);
-		var lvlClassMap = {
-			'Kingdom': 'row-kingdom',	'Phylum': 'row-phylum',
-			'Class': 'row-class',		'Order': 'row-order',
-			'Family': 'row-family',		'Genus': 'row-genus',
-			'Species': 'row-species'
-		};
-		if ((params.node.expanded === true && params.data.interactions === true 
-					&& params.data.name !== undefined) || params.node.data.domainInts === true) {
-			return lvlClassMap[params.data.taxaLvl];
-		}
-	}
-	function getNodeChildDetails(rcrd) {										//	console.log("rcrd = %O", rcrd)	
-	    if (rcrd.isParent) {
-	        return {
-	            group: true,
-	            expanded: rcrd.open,
-	            children: rcrd.children
-	        };
-	    } else { return null; }
-  	}
- 	/*========================Filter Functions================================*/
+    /*================== Row Styling =========================================*/
+	/** Adds a css background-color class to interaction record rows. */
+    function getRowStyleClass(params) { 					                    //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
+        if (params.data.name === undefined || params.data.name === null) { 
+            return getRowColorClass(params.data.treeLvl);
+        } 
+    }
+    /**
+     * Adds a background-color to displayed cells with open child interaction rows, or 
+     * displayed cells with grouped interactions rows attributed directly to that 
+     * cell - eg, The tree cell for Africa is highlighted once Africa has been expanded,
+     * as well as the 'Unspecified Africa Interactions' cell the interaction record
+     * rows are still grouped underneath. 
+     */
+    function getCellStyleClass(params) {                                        //console.log("getCellStyleClass params = %O", params);
+        if (isOpenRowWithOpenChildInts(params) || isRowWithClosedGroupedInts(params)) {  //console.log("setting style class")
+            return getRowColorClass(params.data.treeLvl);
+        } 
+    }
+    function isOpenRowWithOpenChildInts(params) {
+        return params.node.expanded === true && 
+                params.data.interactions === true && params.data.name !== undefined;
+    }
+    function isRowWithClosedGroupedInts(params) {
+        return params.node.expanded === false && params.data.groupedInts === true;
+    }
+    /** Returns a color based on the tree level of the row. */
+    function getRowColorClass(treeLvl) {
+        var rowColorArray = ['purple', 'green', 'blue', 'yellow', 'turquoise', 'orange', 'red'];
+        var styleClass = 'row-' + rowColorArray[treeLvl];                       //console.log("styleClass = ", styleClass);
+        return styleClass;
+    }
+    function getNodeChildDetails(rcrd) {                                        //  console.log("rcrd = %O", rcrd)  
+        if (rcrd.isParent) {
+            return { group: true, expanded: rcrd.open, children: rcrd.children };
+        } else { return null; }
+    }
+ 	/*================== Filter Functions ====================================*/
 	function onFilterChange() {
 		gridOptions.api.onFilterChanged();
 	}
