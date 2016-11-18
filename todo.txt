@@ -1,22 +1,10 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
-    ---migration::
-        --If I end up going back to rebuild--
-        -Citations
-            make displayname -> title?? 
-                Could be difficult to keep source display names
-                    unique without appending something to the names...
-                    but what to use is 'shortText' shouldn't even ultimately be  
-                    stored in the database
-                 desc -> fullText
-                 ##lines to update with this change::
-                        search controller ~395~ rcrd->source creation
-        -Location
-            --Run fromm "Locations" on up again...
-                Line 98 : $em->persist($finalLocEntity); 
-                (cuz I forgot to persist before flushing, losing location 
-                and interaction relationships.)
-
+    --search pg--
+        -Add third sect to search opts
+            -fill with easy cols to filter on
+        -Set up hide/show columns options
+            -add columns for all additional interaction data
 
 
 
@@ -24,23 +12,42 @@ TAYLOR:
 Questions:
 
 
+About The Search Page:
+    --Authors with no citations have been removed from the tree. There are 
+    some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as Tullen check the data.
+
 
 Notes::
     ::data cleanup::
         -Pubs
             -Journal of Zoology: drop "(London)"
-            -Short-tailed fruit bat - pubSrcId 458 
-                Should be parent of citSrcId 614 (instead of srcId 33)
+            -Short-tailed fruit bat -  
+                citSrcId 614 parent -> pubSrcId 458 (instead of srcId 33)
+            //--food web of a tropical rain forest
+                add space in src(743) desc and in cit(240) title = (food webof a)
         -Location 
-            -Oceania duplication
             -weird '- duplicate entry'
+
+    ::migration::
+        Commits:
+            Regions, countries, locations: 
+                b6eba34742117a6e25123d6066a3166e0dfd7b0a
+            Drop:
+                29037cdd444afe6254f9a83315a634d6cd198e60
+            SrcStructure, Pub, Auth:
+                5300058c872a4f529dca059ffc6c535afcc58f0c
+            MissPub, Cit:
+                360e7e2506962f839778718ef8e1afc6d3dbb1b7
+            Drop and Cols: (could be done any point after really...)
+                a6439a86b45f56c95cf1ae155fcf0cead3047cbe
 
 
 
 
 
     ::Search Page Ideas::
-        -'Expand tree button': Expand one level per click.
+        --.Js
+            --Refactor usage of the global "allTaxaLvls" to return from a shared func.
 
     ::Checked data wonkiness::
         'northern mariana islands' is the name from red list.
