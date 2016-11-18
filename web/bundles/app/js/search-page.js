@@ -707,16 +707,16 @@
     }
     /** Builds arrays of options objects for the dropdown html select elements */
     function buildLocSelectOpts(curTree) {  
-        var proessedOpts = { region: [], country: [], habitat: [] };
-        var optsObj = { region: [], country: [], habitat: [] }; 
+        var proessedOpts = { region: [], country: [] };
+        var optsObj = { region: [], country: [] }; 
         for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
         sortLocOpts();
         addAllAndNoneOpts();
         return optsObj; 
         /**
          * Recurses through the current tree locs' 'children' and builds loc options
-         * for unique regions, countries and habitats found. Skips interaction records 
-         * which are identified by their "note" property.
+         * for unique regions and countries found. Skips interaction records, which 
+         * are identified by their "note" property.
          */
         function buildLocOptsForNode(locNode) {  
             if (locNode.hasOwnProperty("note")) {return;}                       //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
@@ -724,7 +724,6 @@
             if (locType === "Region") { getRegionOpts(locNode) } 
             if (locType === "Country") { getCountryOpts(locNode) }
             if (locNode.children) { locNode.children.forEach(buildLocOptsForNode); }
-            getHabitatOpts(locNode);
         }
         function getRegionOpts(locNode) {  //val: id, txt: name
             var isTopRegion = locNode.parentLoc === null;
@@ -740,19 +739,9 @@
                 proessedOpts.country.push(locNode.displayName);
             }
         }
-        /** Finds unique habitat types in current tree.  */
-        function getHabitatOpts(locNode) {  
-            if (locNode.habitatType && proessedOpts.habitat.indexOf(locNode.habitatType.name) === -1) {  //console.log("getHabitatOpts adding hab = %s from %O", locNode.habitatType.name,  locNode);
-                optsObj.habitat.push({ value: locNode.habitatType.name, text: locNode.habitatType.name });
-                proessedOpts.habitat.push(locNode.habitatType.name);
-            }
-        }
-        /** Sorts alphabetically the country and habitat optsObjs.  */
+        /** Sorts countries alphabetically. Regions were sorted earlier. */
         function sortLocOpts() { 
-            for (var type in optsObj) {
-                if (type === "region") { continue }
-                optsObj[type] = optsObj[type].sort(alphaLocObjs);
-            }  
+            optsObj["country"] = optsObj["country"].sort(alphaLocObjs);
         }
         /** If select options array is empty, add 'none' option, else add 'all'.  */
         function addAllAndNoneOpts() {
@@ -785,9 +774,9 @@
     }
     function selectNoneVals(locOptsObj) {
         var sel = focusStorage.selectedOpts;
-        if (locOptsObj.region[0].value === 'none') { sel.region = 'none'; }
-        if (locOptsObj.country[0].value === 'none') { sel.country = 'none'; }
-        if (locOptsObj.habitat[0].value === 'none') { sel.habitat = 'none'; }            
+        for (var selType in locOptsObj) {
+            if (locOptsObj[selType][0].value === 'none') { sel[selType] = 'none'; }
+        }          
     }
     function setSelectedLocVals() {                                             //console.log("openRows = %O", focusStorage.openRows);           
         var selId;
@@ -1197,15 +1186,14 @@
 	} /* End getRelatedTaxaToSelect */
     /*------------------ Location Filter Updates -----------------------------*/
     /**
-     * When a level dropdown is changed, the column for that dropdown is filtered 
+     * When a location dropdown is changed, the column for that dropdown is filtered 
      * and the grid is updated with the filtered data tree. Selected values are 
-     * derived and stored @getSelectedVals. 
-     * NOTE: Habitat values are strings.      
+     * derived and stored @getSelectedVals.      
      * */
     function updateLocSearch() {                                                console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
         var selElemId = $(this).attr("id");
         var selVal = $(this).val();
-        var selTypeMap = { selCountry: "country", selHabitat: "habitat", selRegion: "region" };
+        var selTypeMap = { selCountry: "country", selRegion: "region" };
 
         focusStorage.selectedOpts = getSelectedVals(selVal, selElemId);
         filterGridOnLocCol(selVal, selTypeMap[selElemId]);
