@@ -86,7 +86,7 @@
 		initNoFiltersStatus();		
 		selectSearchFocus();
 	} 
-	function selectSearchFocus(e) {  							console.log("select(ing)SearchFocus = ", $('#search-focus').val())
+	function selectSearchFocus(e) {  							                console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
@@ -124,7 +124,7 @@
 	 * ajax call gets the data which is stored @storeTaxa before being sent to  
 	 * to @fillTreeWithInteractions.  	 
 	 */
-	function getInteractionsAndFillTree() {  	                                console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
+	function getInteractionsAndFillTree() {  	                                //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
 		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
 		fadeGrid();
 		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
@@ -598,7 +598,7 @@
 		data.locRcrds = localStorage ? JSON.parse(localStorage.getItem('locRcrds')) : false; 
 		if( data.locRcrds ) {  
 			rcrdsById = data.locRcrds;
-			data.topRegions = JSON.parse(localStorage.getItem('topRegions'));  console.log("Stored Locations Loaded = %O", data);
+			data.topRegions = JSON.parse(localStorage.getItem('topRegions'));   //console.log("Stored Locations Loaded = %O", data);
 			buildLocTreeAndGrid(data.topRegions);
 		} else { //console.log("Locations Not Found In Storage.");
 			sendAjaxQuery({}, 'search/location', storeLocs);
@@ -624,7 +624,7 @@
      * top nodes of the new tree with all sub-locations nested beneath @buildLocTree.
      * Resets 'openRows' and clears grid. Continues @buildLocTreeAndGrid.
      */
-    function rebuildLocTree(topLoc) {                                           console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+    function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
         var topLocs = topLoc || JSON.parse(localStorage.getItem('topRegions'));
         focusStorage.openRows = topLocs.length === 1 ? topLocs[0] : [];
         clearPreviousGrid();
@@ -635,9 +635,9 @@
      * sub-locations as nested children. Alphabetizes the tree @sortLocTree and 
 	 * adds tree to the global focusStorage obj as 'curTree'. 
 	 */	
-	function buildLocTree(topLocIds) {                                          console.log("passed 'top' locIds = %O", topLocIds)
+	function buildLocTree(topLocIds) {                                          //console.log("passed 'top' locIds = %O", topLocIds)
 		var topLoc;
-		var locTree = {};                                                       console.log("tree = %O", locTree);
+		var locTree = {};                                                       //console.log("tree = %O", locTree);
 
         topLocIds.forEach(function(topLocId){  
             topLoc = getDetachedRcrd(topLocId, rcrdsById);                                 //console.log("--topLoc = %O", topLoc);
@@ -690,7 +690,7 @@
 	 * NOTE: This is the entry point for taxa grid rebuilds as filters alter data
 	 * contained in taxa data tree.
 	 */
-	function buildLocSearchUiAndGrid(locTree) {                                 console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
+	function buildLocSearchUiAndGrid(locTree) {                                 //console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
         loadLocSearchHtml(locTree);
 		transformLocDataAndLoadGrid(locTree);
 	}
@@ -756,7 +756,7 @@
         }
         /** If select options array is empty, add 'none' option, else add 'all'.  */
         function addAllAndNoneOpts() {
-            for (var selName in optsObj) {  console.log("addAllAndNoneOpts for %s = %O", selName, optsObj[selName])
+            for (var selName in optsObj) {                                      //console.log("addAllAndNoneOpts for %s = %O", selName, optsObj[selName])
                 var option = optsObj[selName].length === 0 ?
                     {value: 'none', text: '- None -'} : {value: 'all', text: '- All -'};   
                 optsObj[selName].unshift(option);
@@ -789,9 +789,9 @@
         if (locOptsObj.country[0].value === 'none') { sel.country = 'none'; }
         if (locOptsObj.habitat[0].value === 'none') { sel.habitat = 'none'; }            
     }
-    function setSelectedLocVals() {                  console.log("openRows = %O", focusStorage.openRows);           
+    function setSelectedLocVals() {                                             //console.log("openRows = %O", focusStorage.openRows);           
         var selId;
-        var selected = focusStorage.selectedOpts;                               console.log("selected in setSelectedLocVals = %O", selected);
+        var selected = focusStorage.selectedOpts;                               //console.log("selected in setSelectedLocVals = %O", selected);
         if (!selected) {return}
         Object.keys(selected).forEach(function(selName) {
             selId = '#sel' + ucfirst(selName);
@@ -894,6 +894,7 @@
 			sortedSrcs.author = JSON.parse(localStorage.getItem('authRcrds'));
 			sortedSrcs.publication = JSON.parse(localStorage.getItem('pubRcrds'));
 			initSrcSearchUi(sortedSrcs, srcRcrdsById);
+            // seperateAndStoreSrcs({srcRcrds: srcRcrdsById}); 
 		} else { //console.log("Sources Not Found In Storage.");
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
 		}
@@ -918,15 +919,16 @@
             type = Object.keys(srcRcrds[key].sourceType)[0];  
             if (type === "author") {
                 sortedSrcs[type][srcRcrds[key].displayName] = srcRcrds[key];
-            } else if (type === "citation") { addNewParentPub(srcRcrds[key]); }
+            } else if (type === "citation") { 
+                addNewParentPub(srcRcrds[key]); }
         }
         return sortedSrcs; 
-
+        /** Adds unique parent pubs to the sortedSrcs obj. */
         function addNewParentPub(citSrc) {
             parentPub = srcRcrds[citSrc.parentSource];
             if (!sortedSrcs.publication.hasOwnProperty(parentPub.displayName)) {  
                sortedSrcs.publication[parentPub.displayName] = parentPub; 
-           }
+            }
         }
     } /* End sortAuthAndPubRcrds */
 	/**
@@ -934,7 +936,7 @@
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //onsole.log("init search ui");
+    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
         var domainRcrds;
         rcrdsById = srcRcrdsById;
         if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
@@ -1224,7 +1226,7 @@
      * Uses column filter to rebuild the grid. Rebuilds tree and the location
      * search option dropdowns from the displayed tree data in the grid after filter.
      */
-    function filterGridOnLocCol(selVal, colName) {                             console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
+    function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
         var filterVal = isNaN(selVal) ? selVal : rcrdsById[selVal].displayName;
         var colModel = [filterVal];
         gridOptions.api.getFilterApi(colName).setModel(colModel);
@@ -1309,12 +1311,9 @@
     		}
     	} 
 		function addTaxaTreeFields(intRcrdObj) {
-    		var lvlMap = {
-    			'Kingdom': 'treeKingdom', 'Phylum': 'treePhylum', 'Class': 'treeClass', 'Order': 'treeOrder', 
-    			'Family': 'treeFamily', 'Genus': 'treeGenus', 'Species': 'treeSpecies' 
-    		};
 			for (var lvl in curTaxaHeirarchy) { 
-				intRcrdObj[lvlMap[lvl]] = lvl === 'Species' ? 
+                colName = 'tree' + lvl; 
+				intRcrdObj[colName] = lvl === 'Species' ? 
 					getSpeciesName(curTaxaHeirarchy[lvl]) : curTaxaHeirarchy[lvl];
 			}
 		}
@@ -2233,7 +2232,7 @@
      * tree node, displayed in the "count" column, is updated to count only displayed
      * interactions. Any rows filtered out will not be included in the totals.
      */
-    function onModelUpdated() { console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+    function onModelUpdated() {                                                 //console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
         updateTtlRowIntCount( gridOptions.api.getModel().rootNode );
     }
     /**
