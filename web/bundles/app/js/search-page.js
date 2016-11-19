@@ -126,10 +126,10 @@
 	 * to @fillTreeWithInteractions.  	 
 	 */
 	function getInteractionsAndFillTree() {  	                                //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
-		var intRcrds = localStorage ? localStorage.getItem('intRcrds') : false; 
+		var intRcrds = localStorage ? JSON.parse(localStorage.getItem('intRcrds')) : false; 
 		fadeGrid();
 		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
-			fillTreeWithInteractions( JSON.parse(intRcrds) ); 
+			fillTreeWithInteractions(intRcrds); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
 	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data);
@@ -323,8 +323,8 @@
         var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);                        //console.log("domainTaxon = %O", domainTaxon)
         var domainLvl = domainTaxonRcrd.level;
         populateStorage('curDomain', domainId);
-        focusStorage["curDomain"] = domainId;
-        focusStorage["domainLvl"] = domainLvl;
+        focusStorage.curDomain = domainId;
+        focusStorage.domainLvl = domainLvl;
 
         return domainTaxonRcrd;
     }
@@ -711,7 +711,7 @@
      */
     function loadLocSearchHtml(curTree) {  
         var locOptsObj = buildLocSelectOpts(curTree);
-        var elems = buildLocSelects(locOptsObj, curTree);
+        var elems = buildLocSelects(locOptsObj);
         clearCol2();        
         selectNoneVals(locOptsObj);
         $('#opts-col2').append(elems);
@@ -1421,7 +1421,7 @@
 	 * taxa-tree data. The role is set to subject for 'bats' exports, object for plants and bugs.
 	 */
 	function getColumnDefs(mainCol) { 
-		var domain = focusStorage["curDomain"] || false;  
+		var domain = focusStorage.curDomain || false;  
 		var taxaRole = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
@@ -1465,7 +1465,7 @@
     }
     /**
      * Adds a background-color to displayed cells with open child interaction rows, or 
-     * displayed cells with grouped interactions rows attributed directly to that 
+     * displayed cells of grouped interactions rows attributed directly to an expanded 
      * cell - eg, The tree cell for Africa is highlighted once Africa has been expanded,
      * as well as the 'Unspecified Africa Interactions' cell the interaction record
      * rows are still grouped underneath. 
