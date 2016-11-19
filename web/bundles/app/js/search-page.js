@@ -228,6 +228,7 @@
         return {
             isParent: false,
             treeLvl: treeLvl,
+            type: "intRcrd", 
 			id: intRcrd.id,
 			note: intRcrd.note, 
 			interactionType: intRcrd.interactionType,
@@ -899,9 +900,10 @@
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
 		}
 	}
-	function seperateAndStoreSrcs(data) {						                //console.log("source data recieved. %O", data);
+	function seperateAndStoreSrcs(data) {						                console.log("source data recieved. %O", data);
 		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 					console.log("preppedData = %O", preppedData);
-		populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
+        populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
+		populateStorage('pubTypes', JSON.stringify(data.pubTypes));
 		populateStorage('authRcrds', JSON.stringify(preppedData.author));
 		populateStorage('pubRcrds', JSON.stringify(preppedData.publication));
 		initSrcSearchUi(preppedData, data.srcRcrds);
@@ -945,12 +947,12 @@
         initSrcTree(domainRcrds);
         getInteractionsAndFillTree();
     }
-    /** Restores stored domain from previous session or sets the default 'Authors'. */
+    /** Restores stored domain from previous session or sets the default 'Publications'. */
     function setSrcDomain() {
         var srcDomainVal;
         var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
         if ($('#sel-src-domain').val() === null) { 
-            srcDomainVal = storedDomain !== null ? storedDomain : "auths";  
+            srcDomainVal = storedDomain !== null ? storedDomain : "pubs";  
             $('#sel-src-domain').val(srcDomainVal);
         }
     }
@@ -992,7 +994,7 @@
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
         var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
         var domainVal = $('#sel-src-domain').val();      console.log("domainVal = ", domainVal)                     
-        focusStorage.curDomain = srcTransMap[domainVal][0];
+        focusStorage.curDomain = domainVal;
         populateStorage('curDomain', domainVal);
         return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
     }
@@ -1003,7 +1005,7 @@
      */
     function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
-        if (focusStorage.curDomain === "publication") { tree = buildPubSrcTree(domainRcrds);   
+        if (focusStorage.curDomain === "pubs") { tree = buildPubSrcTree(domainRcrds);   
         } else { tree = buildAuthSrcTree(domainRcrds); }
         focusStorage.curTree = sortSrcTree(tree);
     }  
@@ -1105,10 +1107,40 @@
      */
     function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
-        // loadSelectElems();
+        if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); }
         transformSrcDataAndLoadGrid(srcTree);
-    } 
-/*---------Source Data Formatting------------------------------------------------*/
+    }
+    function loadPubSearchHtml(srcTree) {
+        var pubTypeOpts = buildPubSelectOpts();
+        var pubSelElem = buildPubSelects(pubTypeOpts);
+        clearCol2();        
+        $('#opts-col2').append(pubSelElem);
+    }
+    function buildPubSelectOpts() {
+        var pubTypes = JSON.parse(localStorage.getItem('pubTypes'));
+        var pubOpts = [{value: 'all', text: '- All -'}];  console.log("pubTypes = %O", pubTypes);
+        for (var typeId in pubTypes) {
+            pubOpts.push({ value: typeId, text: pubTypes[typeId] });
+        }
+        return pubOpts.sort(alphaPubTypes);
+    }
+    function alphaPubTypes(a, b) {
+        var x = a.text.toLowerCase();
+        var y = b.text.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+    /** Builds the dropdown html elements */
+    function buildPubSelects(pubTypeOpts) {   console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+        var labelElem = createElem('label', { class: "lvl-select flex-row" });
+        var spanElem = createElem('span', { text: 'Publication Types: ' });
+        var selectElem = buildSelectElem(
+            pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
+        );
+        $(spanElem).css('width', '150px');
+        $(labelElem).append([spanElem, selectElem]);
+        return labelElem;
+    }
+    /*--------- Source Data Formatting ---------------------------------------*/
     /**
      * Transforms the tree's source record data into the grid format and sets the 
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
@@ -1123,12 +1155,13 @@
         focusStorage.rowData = finalRowData;                                                 console.log("rowData = %O", focusStorage.rowData);
         loadGrid(treeName);
     }
-    function getSrcRowData(src, type, treeLvl) {                                         //console.log("getSrcRowData. source = %O, type = ", src, type);
+    function getSrcRowData(src, type, treeLvl) {                                //console.log("getSrcRowData. source = %O, type = ", src, type);
         var childHandler = type === "citation" ?  getCitIntRowData : getChildSrcRowData;
         return {
             id: src.id,
             name: type === "citation" ? src.description : src.displayName,
-            isParent: true,             
+            isParent: true,      
+            type: type === "pubs" ? getPubType(src) : null,
             parentSource: src.parentSource,
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
             children: childHandler(src, type, treeLvl),
@@ -1156,7 +1189,10 @@
             return buildIntDataObj(intRcrd, treeLvl);
         });
     }
-/*--------------- Filter Methods ---------------------------------------------*/
+    function getPubType(srcRcrd) {  
+        return srcRcrd.sourceType.publication.type;
+    }
+/*================== Filter Functions ========================================*/
     /*------------------ Taxa Filter Updates ---------------------------------*/
 	/**
 	 * When a level dropdown is changed, the grid is updated with the selected taxon
@@ -1273,7 +1309,26 @@
             return locNode; 
         }
     } /* End buildFilteredLocTree */
-/*-------------- Grid Methods ------------------------------------------------*/
+    /*------------------ Source Filter Updates -------------------------------*/
+    /**
+     * When the publication type dropdown is changed, the grid is rebuilt with data 
+     * filtered by the selected type. 
+     */
+    function updatePubSearch() {                                                console.log("\n-----updatePubSearch");
+        var selElemId = $(this).attr("id");
+        var selVal = $(this).val();
+        var newRows = selVal === "all" ?
+            focusStorage.rowData : getPubTypeRows(focusStorage.rowData, selVal);
+        gridOptions.api.setRowData(newRows);
+    } 
+    function getPubTypeRows(rowAry, selVal) {                                           
+        var rows = [];
+        rowAry.forEach(function(row) {  
+            if (row.type == selVal) { rows.push(row); }
+        });  
+        return rows;
+    }
+/*================ Grid Methods ==============================================*/
     /**
      * Fills additional columns with flattened taxa-tree parent chain data for csv exports.
      */
