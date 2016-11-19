@@ -99,6 +99,7 @@
 	function ifChangedFocus(focus, buildGridFunc) { 							//console.log("ifChangedFocus called.")
         if (focus !== focusStorage.curFocus) {   
             populateStorage("curFocus", focus);
+            localStorage.removeItem("curDomain");
             clearPreviousGrid();
             resetFocusStorag();
             resetToggleTreeBttn(false);
@@ -281,13 +282,22 @@
     function initTaxaSearchUi(data) {
         var domainTaxonRcrd;
         rcrdsById = data.taxaRcrds;
-        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainRcrds); }    
-        if ($('#sel-domain').val() === null) { $('#sel-domain').val('3'); }
+        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainRcrds); }  
+        setTaxaDomain();  
         
         domainTaxonRcrd = storeAndReturnDomain();
         initTaxaTree(domainTaxonRcrd);
         storeCurDomainLvls();
         getInteractionsAndFillTree();
+    }
+    /** Restores stored domain from previous session or sets the default 'Plants'. */
+    function setTaxaDomain() {
+        var domainVal;
+        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
+        if ($('#sel-domain').val() === null) { 
+            domainVal = storedDomain !== null ? storedDomain : "3";  
+            $('#sel-domain').val(domainVal);
+        }
     }
     /**
      * Saves all present levels with data in the default domain tree in the 
@@ -308,9 +318,10 @@
      * the taxon's record.
      */
     function storeAndReturnDomain() {
-        var domainId = $('#sel-domain').val() || 4;
+        var domainId = $('#sel-domain').val();
         var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);                        //console.log("domainTaxon = %O", domainTaxon)
         var domainLvl = domainTaxonRcrd.level;
+        populateStorage('curDomain', domainId);
         focusStorage["curDomain"] = domainId;
         focusStorage["domainLvl"] = domainLvl;
 
@@ -928,11 +939,20 @@
     function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
         var domainRcrds;
         rcrdsById = srcRcrdsById;
-        if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }    
-        if ($('#sel-src-domain').val() === null) { $('#sel-src-domain').val('auths'); }
+        if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }  
+        setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
         initSrcTree(domainRcrds);
         getInteractionsAndFillTree();
+    }
+    /** Restores stored domain from previous session or sets the default 'Authors'. */
+    function setSrcDomain() {
+        var srcDomainVal;
+        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
+        if ($('#sel-src-domain').val() === null) { 
+            srcDomainVal = storedDomain !== null ? storedDomain : "auths";  
+            $('#sel-src-domain').val(srcDomainVal);
+        }
     }
     /**
      * Builds the select box for the source domain types that will become the data
@@ -971,8 +991,9 @@
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
         var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
-        var domainVal = $('#sel-src-domain').val();                           
-        focusStorage.curDomain = srcTransMap[domainVal][0]
+        var domainVal = $('#sel-src-domain').val();      console.log("domainVal = ", domainVal)                     
+        focusStorage.curDomain = srcTransMap[domainVal][0];
+        populateStorage('curDomain', domainVal);
         return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
     }
     /**
