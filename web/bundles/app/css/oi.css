@@ -369,6 +369,8 @@ span.lbl {
 }
 #opts-col2 {
 	margin-left: .5em;
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 #sort-opts {
 	justify-content: space-between;
