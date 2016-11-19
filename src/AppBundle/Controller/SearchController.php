@@ -266,6 +266,7 @@ class SearchController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $srcRcrds = new \stdClass;
+        $pubTypes = $this->getPubTypes($em);
 
         $srcEntities = $em->getRepository('AppBundle:Source')->findAll();
 
@@ -277,10 +278,22 @@ class SearchController extends Controller
 
         $response = new JsonResponse();
         $response->setData(array(
-            'srcRcrds' => $srcRcrds               
+            'srcRcrds' => $srcRcrds, 'pubTypes' => $pubTypes            
         ));
 
         return $response;
+    }
+
+    private function getPubTypes($em)
+    {
+        $pubTypes = $em->getRepository('AppBundle:PublicationType')->findAll();
+        $pubTypeAry = [ "0" => "Unspecified"];
+        
+        foreach ($pubTypes as $pubType) {  
+            $typeAry = [strval($pubType->getId()) => $pubType->getDisplayName()];
+            $pubTypeAry = array_merge($pubTypeAry, $typeAry);
+        }
+        return $pubTypeAry;
     }
     /**
      * Builds and returns Source Data object.
@@ -356,10 +369,13 @@ class SearchController extends Controller
     private function getPublicationData($srcEntity)
     {
         $pub = $srcEntity->getPublication();
+        $pubType = $pub->getPublicationType() ? 
+            $pub->getPublicationType()->getId() : 0;
 
         return [ 'description' => $pub->getDescription(), 
                  'displayName' => $pub->getDisplayName(),
-                 'type' => $pub->getPublicationType() ];
+                 'type' => $pubType 
+        ];
     }
     /** Returns an associative array with the citation data. */
     private function getCitationData($srcEntity)
