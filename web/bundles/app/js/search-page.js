@@ -224,23 +224,28 @@
 	/**
 	 * Returns an interaction record object with flat data in grid-ready format. 
 	 */
-	function buildIntDataObj(intRcrd, treeLvl){                            //console.log("intRcrd = %O", intRcrd);
+	function buildIntRowData(intRcrd, treeLvl){                            //console.log("intRcrd = %O", intRcrd);
         return {
             isParent: false,
             treeLvl: treeLvl,
             type: "intRcrd", 
 			id: intRcrd.id,
-			note: intRcrd.note, 
-			interactionType: intRcrd.interactionType,
-			citation: intRcrd.source.fullText,
-			subject: getTaxonName(intRcrd.subject),
-			object: getTaxonName(intRcrd.object),
-			tags: getTags(intRcrd.tags),
-			habitat: intRcrd.habitatType || null,
+            subject: getTaxonName(intRcrd.subject),
+            object: getTaxonName(intRcrd.object),
+            interactionType: intRcrd.interactionType,
+            habitat: intRcrd.habitatType || null,
+            citation: intRcrd.source.fullText,
+            tags: getTags(intRcrd.tags),
             location: intRcrd.location ? intRcrd.location.name : null,
             country: intRcrd.location ? intRcrd.location.country : null,
-			region: intRcrd.location ? intRcrd.location.region : null,
-		};
+            region: intRcrd.location ? intRcrd.location.region : null,
+            elev: intRcrd.elevation,
+            elevMax: intRcrd.elevationMax,
+            lat: intRcrd.latitude,
+            long: intRcrd.longitude,
+            gps: intRcrd.gpsData,
+			note: intRcrd.note, 
+        };
 	}
 	function getTags(tagAry) {
 		var tagStrAry = [];
@@ -592,7 +597,7 @@
         for (var role in taxon.interactions) {
             if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
                 taxon.interactions[role].forEach(function(intRcrd){
-                    ints.push( buildIntDataObj(intRcrd, treeLvl));
+                    ints.push( buildIntRowData(intRcrd, treeLvl));
                 });
             }
         }
@@ -876,7 +881,7 @@
 	function getLocIntRows(intRcrdAry, treeLvl) {
 		if (intRcrdAry) {
 			return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
-				return buildIntDataObj(intRcrd, treeLvl);
+				return buildIntRowData(intRcrd, treeLvl);
 			});
 		}
 		return [];
@@ -1186,7 +1191,7 @@
     function getCitIntRowData(citSrc, type, treeLvl) {                                         //console.log("getCitIntRowData citSrc = %O", citSrc);
         if (citSrc.children === null) { return []; }
         return citSrc.children.map(function(intRcrd) {
-            return buildIntDataObj(intRcrd, treeLvl);
+            return buildIntRowData(intRcrd, treeLvl);
         });
     }
     function getPubType(srcRcrd) {  
@@ -1422,28 +1427,33 @@
 	 */
 	function getColumnDefs(mainCol) { 
 		var domain = focusStorage.curDomain || false;  
-		var taxaRole = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
+		var taxaLvlPrefix = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
 		return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
 					cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
 					cellClass: getCellStyleClass },		//cellClassRules: getCellStyleClass
-			    {headerName: taxaRole + " Kingdom", field: "treeKingdom", width: 150, hide: true },
-			    {headerName: taxaRole + " Phylum", field: "treePhylum", width: 150, hide: true },
-			    {headerName: taxaRole + " Class", field: "treeClass", width: 150, hide: true },
-			    {headerName: taxaRole + " Order", field: "treeOrder", width: 150, hide: true },
-			    {headerName: taxaRole + " Family", field: "treeFamily", width: 150, hide: true },
-			    {headerName: taxaRole + " Genus", field: "treeGenus", width: 150, hide: true },
-			    {headerName: taxaRole + " Species", field: "treeSpecies", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Phylum", field: "treePhylum", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Class", field: "treeClass", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Order", field: "treeOrder", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
+			    {headerName: taxaLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
 			    {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count", volatile: true },
 			    {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells },
 			    {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells  },
 			    {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-			    {headerName: "Habitat", field: "habitat", width: 125, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+			    {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
 			    {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
-			    {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-			    {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-			    {headerName: "Location Description", field: "location", width: 175, cellRenderer: addToolTipToCells },
 			    {headerName: "Citation", field: "citation", width: 100, cellRenderer: addToolTipToCells},
+                {headerName: "Location Description", field: "location", width: 175, cellRenderer: addToolTipToCells },
+                {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+                {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+                {headerName: "Elevation", field: "elev", width: 150, hide: true },
+                {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
+                {headerName: "Latitude", field: "lat", width: 150, hide: true },
+                {headerName: "Longitude", field: "long", width: 150, hide: true },
+                // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
 			    {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
 	}
     /** Adds tooltip to Tree cells */
