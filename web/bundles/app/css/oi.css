@@ -344,39 +344,52 @@ span.lbl {
 	margin-right: 0;
 }
 /*-------- Search --------------*/
-#search-opts {
+#search-opts {  /* .flex-row also on elem */
 	margin: 1em auto 0 auto;
-	height: 90px;
+	height: 100px;
 	width: 1500px;
-	border-radius: .5em;
 	font-size: 1.1em;
 }
 .opts-col {
 	padding: .3em;
 	height: 100%;
-	flex: 0 0 370px;  	 /*Don't grow or shrink, width.*/ 
 	justify-content: space-around;
-	align-items: flex-end;
 }
 .opts-box {
+	flex: 0 0 auto;  	  
+	height: 20px;
 	width: 130px;
-	height: 25px;
 	margin: 0 .7em 0 .5em;
 	z-index: 20;
 }
 #opts-col1 {
 	border-right: black 1px solid;
+	flex: 0 0 345px;  	  
+	align-items: flex-end;
+}
+#search-focus, #sel-domain {
+	height: 25px;
+}
+#opts-col2, #opts-col3 {
+	font-size: .9em;
+	padding: 5px;
+	border-right: black 1px solid;
+	justify-content: flex-start;
 }
 #opts-col2 {
-	margin-left: .5em;
-	padding-top: 5px;
-	padding-bottom: 5px;
+	flex: 0 0 460px;  	  
 }
-#sort-opts {
-	justify-content: space-between;
+#opts-col3 {
+	flex: 0 0 575px;  	 /*Don't grow or shrink, width.*/ 
 }
-.lvl-select {
+#show-tips, #strt-tut {
+	width: 95px;
+	margin: 5px 5px 5px 15px;
+}
+.lbl-sel-opts {   /* .flex-row also on elems */
 	margin: .3em;
+	flex: 0 0 auto;
+	width: 205px;  	 
 	justify-content: space-between;
 }
 #grid-tools {
@@ -452,19 +465,7 @@ button[name="csv"], #close-tos-bttn {
 button[name="xpand-tree"] {
 	width: 105px;
 }
-#show-tips {
-	width: 95px;
-}
 /*-- Walkthrough --*/
-#tut-opts {
-	align-self: flex-start;
-}
-#tut-spacer, #tut-cntnr {
-	flex-grow: 1;
-}
-#tggl-hints, #strt-tut{
-	margin: 5px;
-}
 .intro-tips {
 	width: 420px;
 	text-align: justify;
