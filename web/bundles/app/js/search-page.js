@@ -1277,10 +1277,14 @@
     /**
      * Uses column filter to rebuild the grid. Rebuilds tree and the location
      * search option dropdowns from the displayed tree data in the grid after filter.
+     * Note: There are no records with "Asia" as the region, thus the unique values grid filter
+     * is only aware of Asia's sub-regions
      */
     function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-        var filterVal = isNaN(selVal) ? selVal : rcrdsById[selVal].displayName;
-        var colModel = [filterVal];
+        var filterVal = rcrdsById[selVal].displayName;
+        var colModel = filterVal !== "Asia" ? 
+            [filterVal] : ["East Asia", "South & Southeast Asia", "West & Central Asia"];
+        
         gridOptions.api.getFilterApi(colName).setModel(colModel);
         buildFilteredLocTree(selVal, colName);
         loadLocSearchHtml(focusStorage.curTree);
