@@ -828,11 +828,11 @@
             id: locRcrd.id,
 			name: locRcrd.displayName,	/* Interaction rows have no name to display. */
 			isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
-			open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
-			children: getLocRowDataForRowChildren(locRcrd, treeLvl),
-			// intCnt: locRcrd.interactions !== null ? locRcrd.interactions.length : null,
-			interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
-		    treeLvl: treeLvl
+            open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
+            children: getLocRowDataForRowChildren(locRcrd, treeLvl),
+		    treeLvl: treeLvl,
+            interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
+            locGroupedInts: locRcrd.children && locRcrd.interactions !== null
         };		
 	}
     /**
@@ -1487,16 +1487,26 @@
      * rows are still grouped underneath. 
      */
     function getCellStyleClass(params) {                                        //console.log("getCellStyleClass params = %O", params);
-        if (isOpenRowWithOpenChildInts(params) || isRowWithClosedGroupedInts(params)) {  //console.log("setting style class")
+        if (params.node.expanded === true && isOpenRowWithChildInts(params) || 
+            isNameRowforClosedGroupedInts(params)) {                            //console.log("setting style class")
             return getRowColorClass(params.data.treeLvl);
         } 
     }
-    function isOpenRowWithOpenChildInts(params) {
-        return params.node.expanded === true && 
-                params.data.interactions === true && params.data.name !== undefined;
+    function isOpenRowWithChildInts(params) {
+        if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); }
+        return params.data.interactions === true && params.data.name !== undefined;
     }
-    function isRowWithClosedGroupedInts(params) {
-        return params.node.expanded === false && params.data.groupedInts === true;
+    /**
+     * Returns true only if the location row's child interactions are present in 
+     * data tree after filtering.
+     */
+    function hasIntsAfterFilters(params) {
+        return params.node.childrenAfterFilter.some(function(childRow) {
+            return childRow.data.name.split(" ")[0] === "Unspecified";
+        });
+    }
+    function isNameRowforClosedGroupedInts(params) {  
+        return params.data.groupedInts === true;
     }
     /** Returns a color based on the tree level of the row. */
     function getRowColorClass(treeLvl) {
