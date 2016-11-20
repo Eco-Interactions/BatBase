@@ -555,10 +555,10 @@
      * the first child row under "Unspecified [taxonName] Interactions", otherwise
      * any interactions are added as rows directly beneath the taxon.
      */
-    function getTaxonChildRowData(curTaxon, curTreeLvl) {
+    function getTaxonChildRowData(curTaxon, curTreeLvl) {  if (curTaxon.level === "Species") { console.log("species in getTaxonChildRowData for = %O", curTaxon)}
         var childRows = [];
 
-        if (curTaxon.children) {
+        if (curTaxon.children !== null && curTaxon.children.length > 0) {
             getUnspecifiedInts(curTreeLvl);
             curTaxon.children.forEach(function(childTaxon){
                 childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1));
@@ -583,7 +583,7 @@
                     id: curTaxon.id,
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
-                    open: false,
+                    open: focusStorage.openRows.indexOf(curTaxon.id.toString()) !== -1,
                     children: getTaxonIntRows(curTaxon, treeLvl),
                     treeLvl: treeLvl,
                     interactions: true,
