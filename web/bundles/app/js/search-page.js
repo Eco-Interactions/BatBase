@@ -100,6 +100,7 @@
         if (focus !== focusStorage.curFocus) {   
             populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
+            initNoFiltersStatus();
             clearPreviousGrid();
             resetFocusStorag();
             resetToggleTreeBttn(false);

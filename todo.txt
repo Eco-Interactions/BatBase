@@ -1,10 +1,24 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
     --search pg--
-        -Add third sect to search opts
+        -Expand/collapse
+            -Don't allow expansions beyond max - causes 'delay' in collapsing. 
+        +Add third sect to search opts
+            -Add futureDevMsg
             -fill with easy cols to filter on
         -Set up hide/show columns options
-            -add columns for all additional interaction data
+            +add columns for all additional interaction data
+            -Config colDefs
+            -Pop up with col selects 
+        -Use new type prop for interaction row checks
+        ##TODO##
+            ++Clear filters on search focus change
+
+        ###Bugs###
+            ++Why is the 'class Arachnida' tree cell shaded?
+            --Search tips background is black??
+            ++When filtering on taxa - interactions are grouping when there are no siblings ('childrenAfterFilter') at that level.
+
 
 
 
@@ -14,7 +28,21 @@ Questions:
 
 About The Search Page:
     --Authors with no citations have been removed from the tree. There are 
-    some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as Tullen check the data.
+    some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as such until Tullen checks the data.
+    --Locations
+
+
+
+
+
+
+
+
+
+    --Future Ui additions
+        --Show/hide Columns 
+        --Popup panel with additional data about selected tree item
+
 
 
 Notes::
@@ -23,8 +51,6 @@ Notes::
             -Journal of Zoology: drop "(London)"
             -Short-tailed fruit bat -  
                 citSrcId 614 parent -> pubSrcId 458 (instead of srcId 33)
-            //--food web of a tropical rain forest
-                add space in src(743) desc and in cit(240) title = (food webof a)
         -Location 
             -weird '- duplicate entry'
 
@@ -106,7 +132,6 @@ Notes::
     --Site-
         -- test for optimizations
         -- responsive
-        -- wsyiwyg editor for content blocks
         -- Taxonym need a collection of namings
         -- update: domain = realm
 
