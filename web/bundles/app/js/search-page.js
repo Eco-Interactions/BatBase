@@ -492,7 +492,7 @@
     function buildTaxaSelects(lvlOpts, levels) {  
         var selElems = [];
         levels.forEach(function(level) {
-            var labelElem = createElem('label', { class: "lvl-select flex-row" });
+            var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
             var spanElem = createElem('span', { text: level + ': ' });
             var selectElem = buildSelectElem(
                 lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxaSearch);
@@ -780,7 +780,7 @@
         var selElems = [];
         for (var locSelName in locOptsObj) {
             var selName = ucfirst(locSelName);
-            var labelElem = createElem('label', { class: "lvl-select flex-row" });
+            var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
             var spanElem = createElem('span', { text: selName + ': ' });
             var selectElem = buildSelectElem(
                 locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
@@ -946,7 +946,7 @@
     function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
         var domainRcrds;
         rcrdsById = srcRcrdsById;
-        if (!$("#sel-src-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }  
+        if (!$("#sel-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }  
         setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
         initSrcTree(domainRcrds);
@@ -956,9 +956,9 @@
     function setSrcDomain() {
         var srcDomainVal;
         var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
-        if ($('#sel-src-domain').val() === null) { 
+        if ($('#sel-domain').val() === null) { 
             srcDomainVal = storedDomain !== null ? storedDomain : "pubs";  
-            $('#sel-src-domain').val(srcDomainVal);
+            $('#sel-domain').val(srcDomainVal);
         }
     }
     /**
@@ -968,10 +968,10 @@
     function buildSrcDomainHtml(data) {                                        	//console.log("buildTaxaDomainHtml called. ");
         var browseElems = createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
         var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
-        $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-src-domain' }));
+        $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
         $('#sort-opts').append(browseElems);
-        $('#sel-src-domain').change(onSrcDomainChange);
+        $('#sel-domain').change(onSrcDomainChange);
         $('#sort-opts').fadeTo(0, 1);
 
         function getDomainOpts(data) {
@@ -986,6 +986,7 @@
     /** Event fired when the source domain select box has been changed. */
     function onSrcDomainChange(e) {  
         clearPreviousGrid();
+        clearCol2();
         resetToggleTreeBttn(false);
         rebuildSrcTree();
     }
@@ -998,7 +999,7 @@
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {							//May or may not need this
         var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
-        var domainVal = $('#sel-src-domain').val();      console.log("domainVal = ", domainVal)                     
+        var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
         focusStorage.curDomain = domainVal;
         populateStorage('curDomain', domainVal);
         return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
@@ -1136,12 +1137,13 @@
     }
     /** Builds the dropdown html elements */
     function buildPubSelects(pubTypeOpts) {   console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        var labelElem = createElem('label', { class: "lvl-select flex-row" });
-        var spanElem = createElem('span', { text: 'Publication Types: ' });
+        var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
+        var spanElem = createElem('span', { text: 'Publication Type:' });
         var selectElem = buildSelectElem(
             pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
         );
-        $(spanElem).css('width', '150px');
+        $(labelElem).css('width', '255px');
+        $(selectElem).css('width', '115px');
         $(labelElem).append([spanElem, selectElem]);
         return labelElem;
     }
@@ -1993,7 +1995,7 @@
 				tooltipClass: "intro-tips", 
 				steps: [
 					{
-						element: "#tut-opts", 
+						element: "#opts-col4", 
 						intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
 							"<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
 							"clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +

@@ -17,27 +17,23 @@
 {% endblock headline %}
 
 {% block detail %}
-    <div id="search-opts" class="flex-row ">
-        <div id="grid-opts" class="flex-row">
-            <div id="opts-col1" class="opts-col flex-col">
-                <label id="filter-opts" class="">
-                    <span>Group Interactions by: </span>
-                    <select id="search-focus" class="opts-box">
-                        <option value="locs">Location</option>
-                        <option value="taxa" selected>Taxon</option>
-                        <option value="srcs">Source</option>
-                    </select>
-                </label>
-                <div id="sort-opts" class="flex-row"></div>
-            </div>
-            <div id="opts-col2" class="flex-col flex-wrap"></div>
+    <div id="search-opts" class="flex-row">
+        <div id="opts-col1" class="opts-col flex-col">
+            <label id="filter-opts">
+                <span>Group Interactions by: </span>
+                <select id="search-focus" class="opts-box">
+                    <option value="locs">Location</option>
+                    <option value="taxa" selected>Taxon</option>
+                    <option value="srcs">Source</option>
+                </select>
+            </label>
+            <div id="sort-opts" class="flex-row"></div>
         </div>
-        <div id="tut-cntnr" class="flex-row">
-            <div id="tut-spacer"></div>
-            <div id="tut-opts" class="flex-col">
-                <button id="strt-tut" class="ag-fresh grid-bttn">Tutorial</button>
-                <button id="show-tips" class="ag-fresh grid-bttn">Search Tips</button>
-            </div>
+        <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
+        <div id="opts-col3" class="opts-col flex-col flex-wrap"></div>
+        <div id="opts-col4" class="flex-col">
+            <button id="strt-tut" class="ag-fresh grid-bttn">Tutorial</button>
+            <button id="show-tips" class="ag-fresh grid-bttn">Search Tips</button>
         </div>
     </div>
     <div id="grid-tools" class="flex-row">
