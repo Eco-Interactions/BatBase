@@ -2271,6 +2271,9 @@
      */
     function toggleTreeByOneLvl(opening) {
         var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
+        var bttXpandedAll = $("#xpand-tree").data('xpanded');
+        if (opening && bttXpandedAll === true) {return;}
+
         gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", topNode)
             if (!opening && !isNextOpenLeafRow(row)) { return; }
             row.expanded = opening;
@@ -2285,7 +2288,6 @@
          * if necessary.
          */
         function updateToggleTreeButton() {
-            var bttXpandedAll = $("#xpand-tree").data('xpanded');
             var shownRows = gridModel.rowsToDisplay.length; 
             var rootChildRows = gridModel.rootNode.allChildrenCount + 1; 
             var closedRows = shownRows < rootChildRows;                         //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, rootChildRows, closedRows, bttXpandedAll);
