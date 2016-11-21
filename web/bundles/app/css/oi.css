@@ -382,6 +382,9 @@ span.lbl {
 #opts-col3 {
 	flex: 0 0 575px;  	 /*Don't grow or shrink, width.*/ 
 }
+#futrDevMsg {
+	margin: 0 5px 0 5px;
+}
 #show-tips, #strt-tut {
 	width: 95px;
 	margin: 5px 5px 5px 15px;
