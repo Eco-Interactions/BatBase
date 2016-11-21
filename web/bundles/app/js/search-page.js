@@ -84,8 +84,23 @@
 		if (focusStorage.curFocus){ $('#search-focus').val(focusStorage.curFocus);
 		} else { $('#search-focus').val("taxa"); }
 		initNoFiltersStatus();		
+        setUpFutureDevUi();
 		selectSearchFocus();
 	} 
+    function setUpFutureDevUi() {
+        $('button[name="show-hide-col"]').prop('disabled', true);
+        $('button[name="show-hide-col"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
+        addFutureDevMsg();
+    }
+    function addFutureDevMsg() {
+        var $msgDiv = $('<div/>', { id: 'futrDevMsg' })
+        $msgDiv.html("<p><b>This is where the search options available for all views will go. </b>" + 
+        "Such as year and elevation range, habitat and interaction type, " +
+        " as well as any other criteria that would be helpful to focus the data." +
+        "</p><br><p>Below is a 'Show/Hide Columns' button that will allow users to select " +
+        "the data they want to see in the grid.</p>");
+        $msgDiv.appendTo('#opts-col3');
+    }
 	function selectSearchFocus(e) {  							                console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
@@ -556,7 +571,7 @@
      * the first child row under "Unspecified [taxonName] Interactions", otherwise
      * any interactions are added as rows directly beneath the taxon.
      */
-    function getTaxonChildRowData(curTaxon, curTreeLvl) {  if (curTaxon.level === "Species") { console.log("species in getTaxonChildRowData for = %O", curTaxon)}
+    function getTaxonChildRowData(curTaxon, curTreeLvl) { 
         var childRows = [];
 
         if (curTaxon.children !== null && curTaxon.children.length > 0) {
