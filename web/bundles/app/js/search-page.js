@@ -92,13 +92,13 @@
         $('button[name="show-hide-col"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
         addFutureDevMsg();
     }
-    function addFutureDevMsg() {
+    function addFutureDevMsg() { console.log("addFutureDevMsg")
         var $msgDiv = $('<div/>', { id: 'futrDevMsg' })
         $msgDiv.html("<p><b>This is where the search options available for all views will go. </b>" + 
         "Such as year and elevation range, habitat and interaction type, " +
         " as well as any other criteria that would be helpful to focus the data." +
         "</p><br><p>Below is a 'Show/Hide Columns' button that will allow users to select " +
-        "the data they want to see in the grid.</p>");
+        "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
     }
 	function selectSearchFocus(e) {  							                console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
