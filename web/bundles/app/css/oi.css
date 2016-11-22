@@ -273,8 +273,8 @@ span.lbl {
     bottom: 0;
     background: #000;
     background: -webkit-radial-gradient(center,ellipse cover,
-    	rgba(0,0,0,0.4) 0, 
-    	rgba(0,0,0,0.9) 100%);
+    	rgba(0,0,0,0.1) 0, 
+    	rgba(0,0,0,0.7) 100%);
     width: 100vw;
     height: 100vh;
     /*opacity: .3;*/
