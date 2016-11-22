@@ -1,24 +1,10 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
-    --search pg--
-        -Expand/collapse
-            -Don't allow expansions beyond max - causes 'delay' in collapsing. 
-        +Add third sect to search opts
-            -Add futureDevMsg
-            -fill with easy cols to filter on
+    --search pg-- 
+        +Fill search opts-col3 with easy cols to filter on
         -Set up hide/show columns options
-            +add columns for all additional interaction data
             -Config colDefs
             -Pop up with col selects 
-        -Use new type prop for interaction row checks
-        ##TODO##
-            ++Clear filters on search focus change
-
-        ###Bugs###
-            ++Why is the 'class Arachnida' tree cell shaded?
-            --Search tips background is black??
-            ++When filtering on taxa - interactions are grouping when there are no siblings ('childrenAfterFilter') at that level.
-
 
 
 
@@ -27,8 +13,7 @@ Questions:
 
 
 About The Search Page:
-    --Authors with no citations have been removed from the tree. There are 
-    some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as such until Tullen checks the data.
+    --Authors with no citations have been removed from the tree. There are some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as such until Tullen checks the data.
     --Locations
 
 
