@@ -25,12 +25,6 @@ class Source
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"displayName"})
-     * @ORM\Column(length=128, unique=true, nullable=true)
-     */
-    private $slug;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
@@ -71,6 +65,20 @@ class Source
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      */
     private $linkUrl;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_citation", type="boolean", nullable=true)
+     */
+    private $isCitation;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_direct", type="boolean", nullable=true)
+     */
+    private $isDirect;
 
     /**
      * @var \AppBundle\Entity\Source
@@ -195,7 +203,7 @@ class Source
     public function __construct()
     {
         $this->contributors = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->contributions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->childSources = new \Doctrine\Common\Collections\ArrayCollection();
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
@@ -353,6 +361,54 @@ class Source
     public function getLinkUrl()
     {
         return $this->linkUrl;
+    }
+
+    /**
+     * Set isCitation.
+     *
+     * @param bool $isCitation
+     *
+     * @return Source
+     */
+    public function setIsCitation($isCitation)
+    {
+        $this->isCitation = $isCitation;
+
+        return $this;
+    }
+
+    /**
+     * Get isCitation.
+     *
+     * @return bool
+     */
+    public function getIsCitation()
+    {
+        return $this->isCitation;
+    }
+
+    /**
+     * Set isDirect.
+     *
+     * @param bool $isDirect
+     *
+     * @return Interaction
+     */
+    public function setIsDirect($isDirect)
+    {
+        $this->isDirect = $isDirect;
+
+        return $this;
+    }
+
+    /**
+     * Get isDirect.
+     *
+     * @return bool
+     */
+    public function getIsDirect()
+    {
+        return $this->isDirect;
     }
 
     /**
@@ -573,7 +629,6 @@ class Source
     {
         return $this->contributions;
     }
-    
     /**
      * Add a Citation.
      *

@@ -57,6 +57,8 @@ class Version201610132050460Columns extends AbstractMigration
         $this->addSql('ALTER TABLE level MODIFY COLUMN created_by INT DEFAULT NULL AFTER created;');
         $this->addSql('ALTER TABLE level MODIFY COLUMN updated_by INT DEFAULT NULL AFTER updated;');  
 
+        $this->addSql('ALTER TABLE location CHANGE description display_name VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE location_type ADD description VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE location MODIFY COLUMN parent_loc_id INT DEFAULT NULL AFTER id;');
         $this->addSql('ALTER TABLE location ADD description VARCHAR(255) DEFAULT NULL AFTER display_name');
         $this->addSql('ALTER TABLE location MODIFY COLUMN location_type_id INT DEFAULT NULL AFTER parent_loc_id;');  

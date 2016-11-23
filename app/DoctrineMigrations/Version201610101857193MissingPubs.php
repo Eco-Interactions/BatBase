@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Publication;
-use AppBundle\Entity\SourceType;
+// use AppBundle\Entity\SourceType;
 use AppBundle\Entity\Source;
 
 /**
@@ -46,33 +46,15 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
          *                     ]
          *                ]
          */ 
-        $newEntities = [ 25 => ["publication" => [ "Nouragues. Dynamics and plant-animal interactions in a Neotropical rainforest",  null, "Book"],                                               //year, doi, parentSrc, linkUrl  
-                                "source" => [   "publication" => ["2001", "10.1007/978-94-015-9821-7", "Kluwer Academic Publishers"],
-                                                "publisher" => [null, null, null, null, "Kluwer Academic Publishers"]]
+        $newEntities = [ 25 => ["source" => [ "publisher" => [null, null, null, null, "Kluwer Academic Publishers"]]
+            ], 31 => [ "source" => [ "publisher" => [null, null, null, null, "University of Paris VI", "University of Paris VI (Pierre and Marie Curie University)"]]
             ], 33 => [  
                     "publication" => [ "Ciência e Cultura", "Ciencia e Cultura", "Journal"],   
                     "source" => [   "publication" => [ null, "10.18316/2236-6377.15.0", null, "http://cienciaecultura.bvs.br/scielo.php?script=sci_serial&pid=0009-6725&lng=pt&nrm=iso", null]]
-            ], 35 => [  
-                    "publication" => [ "Mammals of the Mexican state of San Luis Potosi", null, "Book"],   
-                    "source" => [   "publication" => [ 1953]]
-            ], 42 => [  
-                    "publication" => [ "Blüten und fledermäuse", "Bluten und fledermause", "Book"],  
-                    "source" => [ "publication" => [ 1985, null, "Waldemar Kramer", null, null],
-                                        "publisher" => [null, null, null, null,"Waldemar Kramer"]]              
-            ], 40 => [  
-                    "publication" => [ "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Française.", "Impacts des perturbations d'origine anthropique sur les peuplements de chauves-souris en Guyane Francaise", "Ph.D. Dissertation"],  
-                    "source" => [  "publication" => [2004, null, "University of Paris VI", null, null],
-                                    "publisher" => [null, null, null, null, "University of Paris VI", "University of Paris VI (Pierre and Marie Curie University)"]]
-            ], 31 => [ 
-                    "publication" => [ "Modalités de dissemination et d'etablissement de lianes (Cyclanthaceae et Philodendron) en forêt Guyanaise", "Modalites de dissemination et d'etablissement de lianes (Cyclanthaceae et Philodendron) en foret Guyanaise", "Ph.D. Dissertation"],  
-                    "source" => ["publication" => [ 1997, null, "University of Paris VI"]]
             ], 49 => [ 
                     "publication" => [ "Revista de la Facultad de Agronomía de la Universidad del Zulia", null, "Journal"],  
                     "source" => ["publication" => [ null, null, "Universidad del Zulia"],
                                     "publisher" => [null, null, null, null, "Universidad del Zulia"]]
-            ], 63 => [ 
-                    "publication" => [ "The short-tailed fruit bat", null, "Book"],  
-                    "source" => ["publication" => [ null, null, "The University of Chicago Press"]]            
             ], 65 => [ 
                     "publication" => [ "American Scientist", null, "Journal"],  
                     "source" => ["publication" => [ null, null, null, "http://www.americanscientist.org/"]]            
@@ -83,10 +65,6 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             ], 92 => [ 
                     "publication" => [ "Comparative Biochemistry and Physiology", null, "Journal"],  
                     "source" => ["publication" => [null]]
-            ], 96 => [ 
-                    "publication" => [ "Bats. A natural history", null, "Book"],  
-                    "source" => ["publication" => [null, null, "British Museum (Natural History)"],
-                                        "publisher" => [null,null,null,null,"British Museum (Natural History)"]]
             ], 98 => [ 
                     "publication" => [ "Brittonia", null, "Journal"],  
                     "source" => ["publication" => [null, null, "New York Botanical Garden Press", "http://link.springer.com/journal/12228"],
@@ -108,9 +86,6 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "Mammalian Biology", null, "Journal"],  
                     "source" => ["publication" => [null, null, null, "http://www.journals.elsevier.com/mammalian-biology"],
                                  "publisher" => [null,null,null,null,"Urban & Fischerr"]] //name, url, parent
-            ], 164 => [ 
-                    "publication" => [ "Investigaciones sobre la regeneración de selvas altas en Veracruz, México", null, "Book"],  
-                    "source" => ["publication" => [null]]
             ], 172 => [ 
                     "publication" => [ "Turrialba", null, "Journal"],  
                     "source" => ["publication" => [null]]
@@ -125,14 +100,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "Biological Reviews", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Cambridge Philosophical Society, Wiley"],
                                     "publisher" => [null,null,null,null,"Cambridge Philosophical Society, Wiley"]]
-            ], 201 => [ 
-                    "publication" => [ "Los murciélagos de Cuba", "Los murcielagos de Cuba", "Book"],  
-                    "source" => ["publication" => [null, null, "Editorial Academia", "https://www.scribd.com/doc/131312963/Los-Murcielagos-de-Cuba"],
-                                    "publisher" => [null,null,null,null,"Editorial Academia"]]
-            ], 202 => [ 
-                    "publication" => [ "Columnar Cacti and Their Mutualists: Evolution, Ecology, and Conservation", null, "Book"],  
-                    "source" => ["publication" => [ 2002, null, "The University of Arizona Press", null, null, null, [ 111, 357 ]],
-                                    "publisher" => [null,null,null,null,"The University of Arizona Press"]]
+            ], 202 => [ "source" => ["publisher" => [null,null,null,null,"The University of Arizona Press"]]
             ], 207 => [ 
                     "publication" => [ "Contributions in Science", null, "Journal"],  
                     "source" => ["publication" => [null, null, "Los Angeles County Museum", "http://www.nhm.org/site/research-collections/research-tools/publications"],
@@ -151,10 +119,6 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             ], 227 => [ 
                     "publication" => [ "Acta Botanica Neerlandica", null, "Journal"],  
                     "source" => ["publication" => [null]]
-            ], 230 => [
-                    "publication" => [ "Algunos murcielagos del norte de Argentina", null, "Book"],  
-                    "source" => [ "publication" => [1969, null, "University of Kansas Natural History Museum"],
-                            "publisher" => [null,null,null,null,"University of Kansas Natural History Museum"]]
             ], 233 => [ 
                     "publication" => [ "Österreichische Botanische Zeitschrift", "Osterreichische Botanische Zeitschrift", "Journal"],  
                     "source" => ["publication" => [null, null, "Springer", "https://www.jstor.org/journal/ostebotazeit"],
@@ -163,18 +127,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
                     "publication" => [ "The American Midland Naturalist", null, "Journal"],  
                     "source" => ["publication" => [null, null, "University of Notre Dame", "https://www3.nd.edu/~ammidnat/"],
                                     "publisher" => [null,null,null,null,"University of Notre Dame"]]
-            ], 240 => [ 
-                    "publication" => [ "The food web of a tropical rain forest", null, "Book"],  
-                    "source" => ["publication" => [null, null, "The University of Chicago Press" ]]
-            ], 243 => [ 
-                    "publication" => [ "Manu. The biodiversity of southeastern Peru.", null, "Book"],  
-                    "source" => ["publication" => [null, null, "Editorial Horizonte"],
-                                    "publisher" => [null,null,null,null,"Editorial Horizonte"]]
-            ], 256 => [ 
-                    "publication" => [ "Ecology of Bats", null, "Book"],  
-                    "source" => ["publication" => [null, null, "Plenum Press", null, null, null, [197]],
-                                    "publisher" => [null,null,null,null,"Plenum Press"]]                    
-            ]
+            ], 256 => [ "source" => ["publisher" => [null,null,null,null,"Plenum Press"]]]
         ];
 
         foreach ($newEntities as $citId => $newEntData) {

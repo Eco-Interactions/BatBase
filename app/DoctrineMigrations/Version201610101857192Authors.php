@@ -41,7 +41,7 @@ class Version201610101857192Authors extends AbstractMigration implements Contain
         $srcEntity = new Source();                                 
         $srcEntity->setDisplayName($authEntity->getFullName());  
         $srcEntity->setSourceType($em->getRepository('AppBundle:SourceType')
-            ->findOneBy(array('id'=> 4)));  
+            ->findOneBy(array('id'=> 3)));  
         $srcEntity->setCreatedBy($em->getRepository('AppBundle:User')
             ->findOneBy(array('id' => '6'))); 
 
