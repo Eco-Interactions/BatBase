@@ -305,6 +305,6 @@ class Author
      */
     public function __toString()
     {
-        return $this->getShortName();
+        return $this->getDisplayName();
     }
 }

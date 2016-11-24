@@ -193,7 +193,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             $srcEntity->setDisplayName($pubEntity->getDisplayName());
             $srcEntity->setDescription($pubEntity->getDescription());
             $srcEntity->setSourceType($em->getRepository("AppBundle:SourceType")
-                ->findOneBy(array('id' => 3)));
+                ->findOneBy(array('id' => 2)));
             $pubEntity->setSource($srcEntity);
             $em->persist($pubEntity);
         } else { //Publisher
@@ -209,6 +209,7 @@ class Version201610101857193MissingPubs extends AbstractMigration implements Con
             }
         }
         $em->persist($srcEntity);
+        $em->persist($pubEntity);
         $em->flush();
     }
         /**

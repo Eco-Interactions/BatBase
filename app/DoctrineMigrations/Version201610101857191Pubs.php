@@ -100,6 +100,14 @@ class Version201610101857191Pubs extends AbstractMigration implements ContainerA
         $em->persist($pubEntity); 
         $em->flush();     
     }
+    private function updateSourceType($pubEntity, &$em)
+    {
+        $src = $pubEntity->getSource();  print("\npub = ". $pubEntity. " src = ". $src);
+        $src->setSourceType($em->getRepository('AppBundle:SourceType')
+            ->findOneBy(array('id'=> 2))); 
+
+        $em->persist($src); 
+    }
 
     /**
      * @param Schema $schema

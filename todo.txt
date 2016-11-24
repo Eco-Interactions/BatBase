@@ -32,6 +32,9 @@ About The Search Page:
 
 Notes::
     ::data cleanup::
+        -Citation
+            -copy paste issue with 'Tschapka, M. 2005' - title seems to have been miscopied
+                -Reproduction of the bat Glossophaga commissarisi (Phyllostomidae: Glossophaginae) in the Costa Rican rain forest during frugivorous and nectarivorous periods
         -Pubs
             -Journal of Zoology: drop "(London)"
             -Short-tailed fruit bat -  
