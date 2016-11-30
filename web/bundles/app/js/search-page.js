@@ -1195,7 +1195,8 @@
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
-        var treeName = ucfirst(focusStorage.curDomain) + ' Tree';
+        var prefix = focusStorage.curDomain === "pubs" ? "Publication" : "Author";
+        var treeName = prefix + ' Tree';
         var finalRowData = [];
 
         for (var topNode in srcTree) {

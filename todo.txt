@@ -1,22 +1,12 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
     --search pg-- 
-        +Fill search opts-col3 with easy cols to filter on
-        -Set up hide/show columns options
-            -Config colDefs
-            -Pop up with col selects 
+
 
 
 
 TAYLOR:
 Questions:
-
-
-About The Search Page:
-    --Authors with no citations have been removed from the tree. There are some with citations that have no interactions in the database. I can remove these as well for prod, but see the value in the tree remaining as such until Tullen checks the data.
-    --Locations
-
-
 
 
 
@@ -25,15 +15,18 @@ About The Search Page:
 
 
     --Future Ui additions
-        --Show/hide Columns 
         --Popup panel with additional data about selected tree item
-
+        --sticky column headers for search page
+        --Fill search opts-col3 with easy cols to filter on
+        --Set up hide/show columns options
+            -Config colDefs
+            -Pop up with col selects 
 
 
 Notes::
     ::data cleanup::
         -Citation
-            -copy paste issue with 'Tschapka, M. 2005' - title seems to have been miscopied
+            -copy paste issue with 'Tschapka, M. 2005' (cit#220) - title seems to have been miscopied
                 -Reproduction of the bat Glossophaga commissarisi (Phyllostomidae: Glossophaginae) in the Costa Rican rain forest during frugivorous and nectarivorous periods
         -Pubs
             -Journal of Zoology: drop "(London)"

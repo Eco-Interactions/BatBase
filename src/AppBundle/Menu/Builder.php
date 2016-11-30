@@ -20,13 +20,7 @@ class Builder extends ContainerAware
 		$menu['About']->addChild('Database', array('route' => 'app_db_top'));  //Citations
 		$menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
 		$menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));
-			$menu->addChild('Database', array('uri' => '#'));
-			$menu['Database']->setAttribute('class', 'smtrigger arrow');
-   				$menu['Database']->addChild('Search', array('route' => 'app_search_show'));
-				$menu['Database']->addChild('Explore', array('uri' => '#'));
-				$menu['Database']['Explore']->setAttribute('class', 'smtrigger arrow');				
-				$menu['Database']['Explore']->addChild('Citations', array('route' => 'app_sources'));
-				$menu['Database']['Explore']->addChild('Interaction Types', array('route' => 'app_interaction_type'));
+		$menu->addChild('Database', array('route' => 'app_search_show'));
 		if ($this->_isLoggedInUser($options['usrrole'])) {
 			$menu->addChild($user_name, array('uri' => '#'));
 			$menu[$user_name]->setAttribute('class', 'smtrigger arrow');

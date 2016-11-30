@@ -102,9 +102,6 @@ span.lbl {
 .flex-wrap {
 	flex-wrap: wrap;
 }
-/*.flex-grow {
-	flex-grow: 2;
-}*/
 .flex-row {
 	display: flex;
 	flex-direction: row;
@@ -159,7 +156,6 @@ span.lbl {
 #footer {
 	font-size: 1em;
 	width:100%;
-	/*margin-top: 3px;*/
 	padding: 1em 0 3em 0;
 	border-top:1px solid #000;
 	justify-content: space-between;
