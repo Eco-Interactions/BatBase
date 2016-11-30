@@ -509,7 +509,7 @@
         var selElems = [];
         levels.forEach(function(level) {
             var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = createElem('span', { text: level + ': ' });
+            var spanElem = createElem('span', { text: level + ': ', class: "opts-span" });
             var selectElem = buildSelectElem(
                 lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxaSearch);
             $(labelElem).append([spanElem, selectElem]);
@@ -797,7 +797,7 @@
         for (var locSelName in locOptsObj) {
             var selName = ucfirst(locSelName);
             var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = createElem('span', { text: selName + ': ' });
+            var spanElem = createElem('span', { text: selName + ': ', class: "opts-span" });
             var selectElem = buildSelectElem(
                 locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
             $(labelElem).append([spanElem, selectElem]);
@@ -1152,9 +1152,9 @@
         return x<y ? -1 : x>y ? 1 : 0;
     }
     /** Builds the dropdown html elements */
-    function buildPubSelects(pubTypeOpts) {   console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+    function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
         var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = createElem('span', { text: 'Publication Type:' });
+        var spanElem = createElem('span', { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = buildSelectElem(
             pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
         );
@@ -1162,6 +1162,18 @@
         $(selectElem).css('width', '115px');
         $(labelElem).append([spanElem, selectElem]);
         return labelElem;
+    }
+    /** Builds a text input for searching author names. */
+    function loadAuthSearchHtml(srcTree) {
+        var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
+        var inputElem = createElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
+        var bttn = createElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        $(inputElem).onEnter(updateAuthSearch);
+        $(bttn).css('margin-left', '5px');
+        $(bttn).click(updateAuthSearch);
+        $(labelElem).append([inputElem, bttn]);
+        clearCol2();        
+        $('#opts-col2').append(labelElem);
     }
     /*--------- Source Data Formatting ---------------------------------------*/
     /**
@@ -1236,7 +1248,7 @@
 			var taxonName = selTaxonRcrd.displayName;
 			var status = "Filtering on: " + curLevel + " " + taxonName; 
 			clearGridStatus();
-			setLevelFilterStatus(status);
+			setExternalFilterStatus(status);
 		}
 	} /* End updateTaxaSearch */
 	/** Selects ancestors of the selected taxa to set as value of their levels dropdown. */
@@ -1341,12 +1353,14 @@
      * When the publication type dropdown is changed, the grid is rebuilt with data 
      * filtered by the selected type. 
      */
-    function updatePubSearch() {                                                console.log("\n-----updatePubSearch");
+    function updatePubSearch() {                                                //console.log("\n-----updatePubSearch");
         var selElemId = $(this).attr("id");
         var selVal = $(this).val();
+        var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ?
             focusStorage.rowData : getPubTypeRows(focusStorage.rowData, selVal);
         gridOptions.api.setRowData(newRows);
+        updateSrcFilterStatus(selVal, selText+'s');
     } 
     function getPubTypeRows(rowAry, selVal) {                                           
         var rows = [];
@@ -1354,6 +1368,35 @@
             if (row.type == selVal) { rows.push(row); }
         });  
         return rows;
+    }
+    /**
+     * When the input author search box is submitted, by either pressing 'enter' or
+     * by clicking on the 'search' button, the author tree is rebuilt with only 
+     * authors that contain the case insensitive substring.
+     */
+    function updateAuthSearch() {                                               //console.log("\n-----updateAuthSearch");
+        var authNameStr = $('input[name="authNameSrch"]').val().trim().toLowerCase();       
+        var newRows = authNameStr === "" ?
+            focusStorage.rowData : getAuthRows(focusStorage.rowData, authNameStr);
+        gridOptions.api.setRowData(newRows);
+        updateSrcFilterStatus(authNameStr, '"' + authNameStr + '"');
+    }
+    function getAuthRows(rowAry, authNameStr) {
+        var rowAuthName;
+        var rows = [];
+        rowAry.forEach(function(row) {  
+            if (row.name.toLowerCase().indexOf(authNameStr) >= 0) {
+                rows.push(row);
+            }
+        });  
+        return rows;
+    }
+    function updateSrcFilterStatus(selVal, selText) {  
+        var status = "Filtering on: " + selText;
+        clearGridStatus();
+        if (selVal === "all" || selVal === "") {
+            initNoFiltersStatus();
+        } else { setExternalFilterStatus(status); }
     }
 /*================ Grid Methods ==============================================*/
     /**
@@ -1586,7 +1629,7 @@
 				} else {
 					tempStatusTxt = $('#xtrnl-filter-status').text();
 					if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-						setLevelFilterStatus(tempStatusTxt + ', ');
+						setExternalFilterStatus(tempStatusTxt + ', ');
 					}
 					return activeFilters.join(', ') + '.'; }
 			}
@@ -1595,7 +1638,7 @@
 	function setGridFilterStatus(status) {  //console.log("setGridFilterStatus. status = ", status)
 		$('#grid-filter-status').text(status);
 	}
-	function setLevelFilterStatus(status) {
+	function setExternalFilterStatus(status) {
 		$('#xtrnl-filter-status').text(status);
 	}
 	function clearGridStatus() {
