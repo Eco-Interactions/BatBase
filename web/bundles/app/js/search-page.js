@@ -42,6 +42,7 @@
 	function onDOMContentLoaded () {
 		clearLocalStorageCheck();
 		addDomEventListeners();
+        extendJquery();
 		authDependentInit();
 	    initSearchState();
 	}
@@ -237,7 +238,7 @@
 	/**
 	 * Returns an interaction record object with flat data in grid-ready format. 
 	 */
-	function buildIntRowData(intRcrd, treeLvl){                            //console.log("intRcrd = %O", intRcrd);
+	function buildIntRowData(intRcrd, treeLvl){                                 //console.log("intRcrd = %O", intRcrd);
         return {
             isParent: false,
             treeLvl: treeLvl,
@@ -917,7 +918,7 @@
 			sortedSrcs.author = JSON.parse(localStorage.getItem('authRcrds'));
 			sortedSrcs.publication = JSON.parse(localStorage.getItem('pubRcrds'));
 			initSrcSearchUi(sortedSrcs, srcRcrdsById);
-            // seperateAndStoreSrcs({srcRcrds: srcRcrdsById}); 
+            // seperateAndStoreSrcs({srcRcrds: srcRcrdsById, pubTypes: JSON.parse(localStorage.getItem('pubTypes')) }); 
 		} else { //console.log("Sources Not Found In Storage.");
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
 		}
@@ -995,7 +996,7 @@
     /** Event fired when the source domain select box has been changed. */
     function onSrcDomainChange(e) {  
         clearPreviousGrid();
-        clearCol2();
+        resetCurTreeState();
         resetToggleTreeBttn(false);
         rebuildSrcTree();
     }
@@ -2518,6 +2519,18 @@
             callback(key, value);
         }
     };    
+    /*--------------------------Jquery Extensions-----------------------------*/
+        function extendJquery() {
+            addOnEnterEvent();
+        }
+        function addOnEnterEvent() {
+            $.fn.onEnter = function(func) {
+                this.bind('keypress', function(e) {
+                    if (e.keyCode == 13) func.apply(this, [e]);    
+                });               
+                return this; 
+             };
+        }
     /*--------------------------Storage Methods-------------------------------*/
 	function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 

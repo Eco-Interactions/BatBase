@@ -395,6 +395,9 @@ span.lbl {
 	width: 205px;  	 
 	justify-content: space-between;
 }
+.opts-span {
+	padding-top: 3px;
+}
 #grid-tools {
 	margin: .7em auto .2em auto;
 	padding: .1em;
