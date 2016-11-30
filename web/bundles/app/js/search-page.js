@@ -1170,52 +1170,49 @@
      * Transforms the tree's source record data into the grid format and sets the 
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
-    function transformSrcDataAndLoadGrid(srcTree) {
+    function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
         var treeName = ucfirst(focusStorage.curDomain) + ' Tree';
         var finalRowData = [];
 
         for (var topNode in srcTree) {
-            finalRowData.push( getSrcRowData(srcTree[topNode], focusStorage.curDomain, 0) );
+            finalRowData.push( getSrcRowData(srcTree[topNode], 0) );
         }
-        focusStorage.rowData = finalRowData;                                                 console.log("rowData = %O", focusStorage.rowData);
+        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", focusStorage.rowData);
         loadGrid(treeName);
     }
-    function getSrcRowData(src, type, treeLvl) {                                //console.log("getSrcRowData. source = %O, type = ", src, type);
-        var childHandler = type === "citation" ?  getCitIntRowData : getChildSrcRowData;
+    function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O, type = ", src, type);
         return {
             id: src.id,
-            name: type === "citation" ? src.description : src.displayName,
+            name: src.displayName,
             isParent: true,      
-            type: type === "pubs" ? getPubType(src) : null,
+            type: getPubType(src),
             parentSource: src.parentSource,
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
-            children: childHandler(src, type, treeLvl),
+            children: getChildSrcRowData(src, treeLvl),
             treeLvl: treeLvl,
-            interactions: type === "citation",          //Only rows with interaction are colored
+            interactions: src.isDirect,          //Only rows with interaction are colored
         };  
     } 
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
      * for each source node in the tree.
      */
-    function getChildSrcRowData(parent, type, pTreeLvl) {
-        var childType;
-        if (parent.children === null) { return []; }
+    function getChildSrcRowData(curSrc, treeLvl) {
+        if (curSrc.isDirect) { return getIntRowChildren(curSrc, treeLvl); }
+        if (curSrc.children === null) { return []; }
         
-        return parent.children.map(function(childSrc) { //console.log("childSrc = %O", childSrc);
-            childType = Object.keys(childSrc.sourceType)[0];
-            return getSrcRowData(childSrc, childType, pTreeLvl + 1);
+        return curSrc.children.map(function(childSrc) {                         //console.log("childSrc = %O", childSrc);
+            return getSrcRowData(childSrc, treeLvl + 1);
         });
     }
-    /** Return an array of data objects for each Citation child, ie interaction record. */
-    function getCitIntRowData(citSrc, type, treeLvl) {                                         //console.log("getCitIntRowData citSrc = %O", citSrc);
-        if (citSrc.children === null) { return []; }
-        return citSrc.children.map(function(intRcrd) {
+    function getIntRowChildren(curSrc, treeLvl) {
+        return curSrc.interactions.map(function(intRcrd) {
             return buildIntRowData(intRcrd, treeLvl);
         });
     }
-    function getPubType(srcRcrd) {  
-        return srcRcrd.sourceType.publication.type;
+    function getPubType(srcRcrd) {                                                                                              
+        return srcRcrd.sourceType && srcRcrd.sourceType.publication ? 
+            srcRcrd.sourceType.publication.type : null;
     }
 /*================== Filter Functions ========================================*/
     /*------------------ Taxa Filter Updates ---------------------------------*/
