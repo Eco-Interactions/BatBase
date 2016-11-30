@@ -48,10 +48,10 @@
 	}
 	function clearLocalStorageCheck() {
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-        if (localStorage && !localStorage.getItem('eta')){
+        if (localStorage && !localStorage.getItem('theta')){
 			localStorage.clear();
 			if ( prevVisit ) { populateStorage('prevVisit', true); }
-			populateStorage('eta', true);
+			populateStorage('theta', true);
 			showLoadingDataPopUp();
 		}
 	}
