@@ -457,25 +457,31 @@
      * If there is no data after filtering at a level, a 'none' option obj is built
      * and that value added to the global focusStorage.selectedVals obj.
      */
-    function buildTaxaSelectOpts(rcrdsByLvl) {           console.log("buildTaxaSelectOpts rcrds = %O", rcrdsByLvl);
+    function buildTaxaSelectOpts(rcrdsByLvl) {                                  //console.log("buildTaxaSelectOpts rcrds = %O", rcrdsByLvl);
         var optsObj = {};
-        var domainLvls = focusStorage.allDomainLvls.slice(1); console.log("domainLvls = %O", domainLvls) //Skips domain lvl 
-        domainLvls.forEach(function(lvl) {
+        var curDomainLvls = focusStorage.allDomainLvls.slice(1);                //console.log("curDomainLvls = %O", curDomainLvls) //Skips domain lvl 
+        curDomainLvls.forEach(function(lvl) {
             if (lvl in rcrdsByLvl) { getLvlOptsObjs(rcrdsByLvl[lvl], lvl);
-            } else { fillInEmptyDomainLvlOpts(lvl); }
+            } else { fillInLvlOpts(lvl); }
         });
         return optsObj;
 
         function getLvlOptsObjs(rcrds, lvl) {
-            var taxaNames = Object.keys(rcrdsByLvl[lvl]).sort();                     //console.log("taxaNames = %O", taxaNames);
+            var taxaNames = Object.keys(rcrdsByLvl[lvl]).sort();                //console.log("taxaNames = %O", taxaNames);
             optsObj[lvl] = buildTaxaOptions(taxaNames, rcrdsByLvl[lvl]);
             if (taxaNames.length > 0 && taxaNames[0] !== "None") {
                 optsObj[lvl].unshift({value: 'all', text: '- All -'});
             }
         }
-        function fillInEmptyDomainLvlOpts(lvl) {  console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-            optsObj[lvl] = [{value: 'none', text: '- None -'}];
-            focusStorage.selectedVals[lvl] = "none";
+        function fillInLvlOpts(lvl) {                                           //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
+            var taxon;
+            if (lvl in focusStorage.selectedVals) {
+                taxon = getDetachedRcrd(focusStorage.selectedVals[lvl], rcrdsById);
+                optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];    
+            } else {
+                optsObj[lvl] = [{value: 'none', text: '- None -'}];
+                focusStorage.selectedVals[lvl] = "none";
+            }
         }
     } /* End buildTaxaSelectOpts */
     function buildTaxaOptions(taxaNames, taxaRcrds) {
@@ -492,17 +498,6 @@
         $('#opts-col2').append(elems);
         setSelectedTaxaVals(focusStorage.selectedVals);
     }
-    function setSelectedTaxaVals(selected) {                                  console.log("selected in setSelectedTaxaVals = %O", selected);
-        if (selected === undefined) {return;}
-        focusStorage.allDomainLvls.forEach(function(lvl) {  console.log("lvl ", lvl)
-            var selId = '#sel' + lvl;
-            $(selId).find('option[value="all"]').hide();
-            if (selected[lvl]) { console.log("selecting = ", lvl, selected[lvl])
-                $(selId).val(selected[lvl]); 
-                $(selId).find('option[value="none"]').hide();
-            }
-        });
-    }
     function buildTaxaSelects(lvlOpts, levels) {  
         var selElems = [];
         levels.forEach(function(level) {
@@ -514,6 +509,17 @@
             selElems.push(labelElem);
         });
         return selElems;
+    }
+    function setSelectedTaxaVals(selected) {                                    //console.log("selected in setSelectedTaxaVals = %O", selected);
+        if (selected === undefined) {return;}
+        focusStorage.allDomainLvls.forEach(function(lvl) {                      //console.log("lvl ", lvl)
+            var selId = '#sel' + lvl;
+            $(selId).find('option[value="all"]').hide();
+            if (selected[lvl]) {                                                //console.log("selecting = ", lvl, selected[lvl])
+                $(selId).val(selected[lvl]); 
+                $(selId).find('option[value="none"]').hide();
+            }
+        });
     }
     /*-------- Taxa Data Formatting ------------------------------------------*/
     /**
@@ -1240,27 +1246,19 @@
 		}
 	} /* End updateTaxaSearch */
 	/** Selects ancestors of the selected taxa to set as value of their levels dropdown. */
-	function getRelatedTaxaToSelect(selectedTaxaObj) {                          //console.log("getRelatedTaxaToSelect called for %O", selectedTaxaObj);
+	function getRelatedTaxaToSelect(selTaxonObj) {                              //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
 		var topTaxaIds = [1, 2, 3, 4]; //Animalia, chiroptera, plantae, arthropoda 
-		var selected = {};
+		var selected = {};                                                      //console.log("selected = %O", selected)
 		var lvls = Object.keys(focusStorage.taxaByLvl);
-		lvls.shift(); 		// remove domain, 'group taxa by', level
+		lvls.shift(); //removes domain, 'group taxa by', level
 
-		selectAncestorTaxa(selectedTaxaObj);
-		selectEmptyAnscestors(selectedTaxaObj.level);
+		selectAncestorTaxa(selTaxonObj);
 		return selected;
 
-		function selectAncestorTaxa(taxon) {									//console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
+		function selectAncestorTaxa(taxon) {	                                //console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
 			if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
 				selected[taxon.level] = taxon.id; 								//console.log("setting lvl = ", taxon.level)
 				selectAncestorTaxa(getDetachedRcrd(taxon.parentTaxon, rcrdsById))
-			}
-		}
-		function selectEmptyAnscestors(prevLvl) { if (prevLvl === undefined) {return;}
-			var curLvl = allTaxaLvls[ allTaxaLvls.indexOf(prevLvl) - 1 ]; 
-			if (lvls.indexOf(curLvl) !== -1) {  
-				if (selected[curLvl] === undefined) { selected[curLvl] = "none"; }
-				selectEmptyAnscestors(curLvl);
 			}
 		}
 	} /* End getRelatedTaxaToSelect */
