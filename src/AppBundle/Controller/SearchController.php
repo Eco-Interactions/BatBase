@@ -359,7 +359,7 @@ class SearchController extends Controller
         $author = $srcEntity->getAuthor();  //print("\n    srcEntity = ". $srcEntity."  author = ". $author);
         $authData = [
             'contributions' => [], 'displayName' => $author->getDisplayName(),
-            'fullName' => $author->getFullName()
+            'fullName' => $author->getFullName(), 'lastName' => $author->getLastName()
         ];
         $contributions = $srcEntity->getContributions();
         // Adds the work source id to the array of author contributions

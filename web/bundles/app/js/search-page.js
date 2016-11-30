@@ -720,8 +720,8 @@
 	} /* End sortLocTree */
 	/** Alphabetizes array via sort method. */
 	function alphaLocNames(a, b) { 
-		var x=a.displayName.toLowerCase();
-	    var y=b.displayName.toLowerCase();
+		var x = a.displayName.toLowerCase();
+	    var y = b.displayName.toLowerCase();
 	    return x<y ? -1 : x>y ? 1 : 0;
 	}
 	/**
@@ -795,8 +795,8 @@
     } /* End buildLocSelectOpts */
     /** Alphabetizes array via sort method. */
     function alphaLocObjs(a, b) { 
-        var x=a.text.toLowerCase();
-        var y=b.text.toLowerCase();
+        var x = a.text.toLowerCase();
+        var y = b.text.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
     /** Builds the dropdown html elements */
@@ -1033,7 +1033,9 @@
     }  
     /** Sorts the Source tree nodes alphabetically. */
     function sortSrcTree(tree) {
-        var keys = Object.keys(tree).sort();    
+        var orgKeys = Object.keys(tree); 
+        var keys =  focusStorage.curDomain === "pubs" ?
+            orgKeys.sort() : orgKeys;    
         var sortedTree = {};
         for (var i=0; i<keys.length; i++){ 
             sortedTree[keys[i]] = sortChildSrcs(tree[keys[i]]);
@@ -1097,16 +1099,17 @@
      * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
-    function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("buildAuthSrcTree");
-        var contribs;
-    	var tree = {};
+    function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("----buildAuthSrcTree");
+        var contribs, author;
+    	var authorTreeAry = [];
         for (var authName in authSrcRcrds) {                                    //console.log("rcrd = %O", authSrcRcrds[authName]);
             contribs = authSrcRcrds[authName].sourceType.author.contributions;
             if (contribs.length < 1) {continue;}
-            tree[authName] = getDetachedRcrd(authName, authSrcRcrds);
-    		tree[authName].children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
+            author = getDetachedRcrd(authName, authSrcRcrds);
+    		author.children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
+            authorTreeAry.push(author);
     	}  
-    	return tree;  
+    	return sortAuthTree(authorTreeAry);  
     }  
     /** For each source work contribution, gets any additional publication children
      * @getPubData and return's the source record.
@@ -1115,6 +1118,20 @@
     	return authData.contributions.map(function(workSrcId){
     		return getPubData(getDetachedRcrd(workSrcId, rcrdsById));
     	});
+    }
+    function sortAuthTree(authTreeAry) {  
+        var tree = {};  
+        var sortedAuths = authTreeAry.sort(alphaLastName);                      
+        sortedAuths.forEach(function(auth) {
+            tree[auth.displayName] = auth;
+        });
+        return tree;
+    }
+    /** Alphabetizes array via sort method. */
+    function alphaLastName(authA, authB) {
+        var x = authA.sourceType.author.lastName.toLowerCase();
+        var y = authB.sourceType.author.lastName.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
     }
     /**
      * Will build the select elems for the source search options. Clears previous 
