@@ -209,26 +209,23 @@
 	 */
     function fillSrcTree(curTree, intRcrds) { 
     	for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
-	    	curTree[srcName].children.forEach(function(childSrc){
-	    		fillSrcInteractions(childSrc, curTree[srcName]); 
-	    	});
+            fillSrcInteractions(curTree[srcName]);
 	    }
         /**
-         * Recurses through each source's 'children' property until reaching the 
-         * citation record. All interactions for the record are filled in.
+         * Recurses through each source's 'children' property until all sources in 
+         * curTree have interaction record refs replaced with the records. 
          */
-        function fillSrcInteractions(curSrc, parentSrc) {                          //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
-            var childRcrdAry;
-            var type = Object.keys(curSrc.sourceType)[0];                       //console.log("type = ", type)
-	    	if (type === "citation") {
-                curSrc.children = curSrc.interactions === null ? [] : 
-                    replaceInteractions(curSrc.interactions, intRcrds);         //console.log("childRcrdAry = %O", childRcrdAry);
-            } else {
-                curSrc.children.forEach(function(srcChild) {  
-                    fillSrcInteractions(srcChild, curSrc);
-                });
-            }
-	    }
+        function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+           var srcChildren = [];
+            if (curSrc.isDirect) { replaceSrcInts(curSrc);}
+            curSrc.children.forEach(function(childSrc){
+                fillSrcInteractions(childSrc); 
+            });
+        }
+        function replaceSrcInts(curSrc) {
+            curSrc.interactions = replaceInteractions(curSrc.interactions, intRcrds); 
+        }
+
     } /* End fillSrcTree */
 	function replaceInteractions(interactionsAry, intRcrds) {                   //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
 		return interactionsAry.map(function(intId){
@@ -944,19 +941,11 @@
         
         for (var key in srcRcrds) {
             type = Object.keys(srcRcrds[key].sourceType)[0];  
-            if (type === "author") {
+            if (type === "author" || type === "publication") {
                 sortedSrcs[type][srcRcrds[key].displayName] = srcRcrds[key];
-            } else if (type === "citation") { 
-                addNewParentPub(srcRcrds[key]); }
+            } 
         }
         return sortedSrcs; 
-        /** Adds unique parent pubs to the sortedSrcs obj. */
-        function addNewParentPub(citSrc) {
-            parentPub = srcRcrds[citSrc.parentSource];
-            if (!sortedSrcs.publication.hasOwnProperty(parentPub.displayName)) {  
-               sortedSrcs.publication[parentPub.displayName] = parentPub; 
-            }
-        }
     } /* End sortAuthAndPubRcrds */
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 
@@ -1088,13 +1077,9 @@
     	if (pubRcrd.childSources === null) { return []; }
 
     	return pubRcrd.childSources.map(function(srcId) {
-    		return getPubChildData(getDetachedRcrd(srcId, rcrdsById));
+    		return getPubData(getDetachedRcrd(srcId, rcrdsById));
     	});
 	}
-	function getPubChildData(childSrc) {
-  		var childType = Object.keys(childSrc.sourceType)[0];
-  		return childType === "citation" ? childSrc : getPubData(childSrc);
-  	}
 /*-------------- Author Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Authors as top nodes of the data tree, 
@@ -1131,11 +1116,12 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
-        if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); }
+        if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
+        } else { loadAuthSearchHtml(srcTree); }
         transformSrcDataAndLoadGrid(srcTree);
-    }
+    } 
     function loadPubSearchHtml(srcTree) {
         var pubTypeOpts = buildPubSelectOpts();
         var pubSelElem = buildPubSelects(pubTypeOpts);
@@ -1144,7 +1130,7 @@
     }
     function buildPubSelectOpts() {
         var pubTypes = JSON.parse(localStorage.getItem('pubTypes'));
-        var pubOpts = [{value: 'all', text: '- All -'}];  console.log("pubTypes = %O", pubTypes);
+        var pubOpts = [{value: 'all', text: '- All -'}];                        //console.log("pubTypes = %O", pubTypes);
         for (var typeId in pubTypes) {
             pubOpts.push({ value: typeId, text: pubTypes[typeId] });
         }
@@ -1155,7 +1141,7 @@
         var y = b.text.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
-    /** Builds the dropdown html elements */
+    /** Builds the publication type dropdown */
     function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
         var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
         var spanElem = createElem('span', { text: 'Publication Type:', class: 'opts-span'});
