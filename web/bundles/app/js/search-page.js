@@ -592,14 +592,18 @@
         /**
          * Groups interactions attributed directly to a taxon with child-taxa
          * and adds them as it's first child row. 
+         * Note: Domain interactions are built closed, otherwise they would be expanded
+         * by default
          */
-        function getUnspecifiedTaxonInts(taxonName, treeLvl) {   
+        function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
+            var domainIds = ["2", "3", "4"];  
             if (getIntCount(curTaxon) !== null) { 
                 childRows.push({
                     id: curTaxon.id,
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
-                    open: focusStorage.openRows.indexOf(curTaxon.id.toString()) !== -1,
+                    open: domainIds.indexOf(curTaxon.id) === -1 ? false : 
+                        focusStorage.openRows.indexOf(curTaxon.id.toString()) !== -1,
                     children: getTaxonIntRows(curTaxon, treeLvl),
                     treeLvl: treeLvl,
                     interactions: true,
