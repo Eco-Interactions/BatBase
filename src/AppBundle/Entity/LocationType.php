@@ -44,6 +44,14 @@ class LocationType
     private $ordinal;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     */
+    private $description;
+
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Location", mappedBy="locationType")
@@ -170,6 +178,30 @@ class LocationType
     public function getOrdinal()
     {
         return $this->ordinal;
+    }
+
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return LocationType
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 
     /**
