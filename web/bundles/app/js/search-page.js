@@ -2274,7 +2274,7 @@
         var bttXpandedAll = $("#xpand-tree").data('xpanded');
         if (opening && bttXpandedAll === true) {return;}
 
-        gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", topNode)
+        gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", row)
             if (!opening && !isNextOpenLeafRow(row)) { return; }
             row.expanded = opening;
             row.data.open = opening;
@@ -2282,20 +2282,24 @@
         gridOptions.api.onGroupExpandedOrCollapsed();
         updateToggleTreeButton();
         /**
-         * Checks displayed rows against the root node's child count, (what I found 
-         * to be closest to a 'total rows' count in the grid row model), to determine
+         * Checks displayed rows against total rows after filters to determine
          * if there are any closed rows remaining. The toggle tree button is updated 
          * if necessary.
          */
         function updateToggleTreeButton() {
             var shownRows = gridModel.rowsToDisplay.length; 
-            var rootChildRows = gridModel.rootNode.allChildrenCount + 1; 
-            var closedRows = shownRows < rootChildRows;                         //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, rootChildRows, closedRows, bttXpandedAll);
+            var allRows = getCurTreeRowCount();
+            var closedRows = shownRows < allRows;                               //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
 
             if (!closedRows) { resetToggleTreeBttn(true); 
             } else if (bttXpandedAll === true) { resetToggleTreeBttn(false); }
         }
     } /* End toggleTreeByOneLvl */
+    function getCurTreeRowCount() {
+        var cnt = 0;
+        gridOptions.api.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
+        return cnt;
+    }
     /**
      * If there are no child rows, or if the child rows are closed, this is the open leaf.
      */
