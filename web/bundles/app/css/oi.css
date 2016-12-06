@@ -176,13 +176,16 @@ span.lbl {
 	cursor: pointer;
 }
 #hdrtext>button {
+	width: 135px;
+}
+.adminbttn {
 	background: #3399ff;
 	color: white;
 	border-radius: 5px;
-	width: 135px;
+	/*width: 135px;*/
 	box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
 }
-#hdrtext>button:hover {
+.adminbttn:hover {
 	background: #1A80E6;
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
@@ -466,6 +469,11 @@ button[name="csv"], #close-tos-bttn {
 }
 button[name="xpand-tree"] {
 	width: 105px;
+}
+button[name="createbttn"] {
+	width: 75px;
+	align-self: flex-end;
+	margin-right: 7px;
 }
 /*-- Walkthrough --*/
 .intro-tips {

@@ -17,6 +17,7 @@ $(document).ready(function(){
         var button = $('<button/>', {
             text: "Edit Content", 
             id: 'editContentBttn',
+            class: 'adminbttn',
             click: toggleContentBlockEditing
         });  //console.log("button = %O", button)
         button.css({
