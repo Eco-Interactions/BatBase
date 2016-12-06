@@ -7,6 +7,7 @@
      * focusStorage = obj container for misc data used for each focus of the grid.
 	 */
     var intro, columnDefs = [], focusStorage = {}; 
+    var eif = ECO_INT_FMWK;
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
     var localStorage = setlocalStorage();
     var gridOptions = {
@@ -42,7 +43,6 @@
 	function onDOMContentLoaded () {
 		clearLocalStorageCheck();
 		addDomEventListeners();
-        extendJquery();
 		authDependentInit();
 	    initSearchState();
 	}
@@ -436,7 +436,7 @@
      * nodes displayed in the grid.
      */
     function buildTaxaDomainHtml(data) {                                        //console.log("buildTaxaDomainHtml called. ");
-        var browseElems = createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
+        var browseElems = eif.util.createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
         var domainOpts = getDomainOpts(data);   //console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
@@ -501,8 +501,8 @@
     function buildTaxaSelects(lvlOpts, levels) {  
         var selElems = [];
         levels.forEach(function(level) {
-            var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = createElem('span', { text: level + ': ', class: "opts-span" });
+            var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
+            var spanElem = eif.util.createElem('span', { text: level + ': ', class: "opts-span" });
             var selectElem = buildSelectElem(
                 lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxaSearch);
             $(labelElem).append([spanElem, selectElem]);
@@ -803,9 +803,9 @@
     function buildLocSelects(locOptsObj) {  
         var selElems = [];
         for (var locSelName in locOptsObj) {
-            var selName = ucfirst(locSelName);
-            var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = createElem('span', { text: selName + ': ', class: "opts-span" });
+            var selName = eif.util.ucfirst(locSelName);
+            var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
+            var spanElem = eif.util.createElem('span', { text: selName + ': ', class: "opts-span" });
             var selectElem = buildSelectElem(
                 locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
             $(labelElem).append([spanElem, selectElem]);
@@ -824,7 +824,7 @@
         var selected = focusStorage.selectedOpts;                               //console.log("selected in setSelectedLocVals = %O", selected);
         if (!selected) {return}
         Object.keys(selected).forEach(function(selName) {
-            selId = '#sel' + ucfirst(selName);
+            selId = '#sel' + eif.util.ucfirst(selName);
             $(selId).val(selected[selName]); 
             $(selId).find('option[value="all"]').hide();
             $(selId).find('option[value="none"]').hide();
@@ -982,7 +982,7 @@
      * tree nodes displayed in the grid. 
      */
     function buildSrcDomainHtml(data) {                                        	//console.log("buildTaxaDomainHtml called. ");
-        var browseElems = createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
+        var browseElems = eif.util.createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
         var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
@@ -994,7 +994,7 @@
             var sourceDomains = Object.keys(data);
             var srcTypeMap = { "author": "auths", "publication": "pubs" };
             var opts = sourceDomains.map(function(srcType){
-            	return { value: srcTypeMap[srcType], text: ucfirst(srcType) + 's' };
+            	return { value: srcTypeMap[srcType], text: eif.util.ucfirst(srcType) + 's' };
             });
             return opts;
         }
@@ -1167,8 +1167,8 @@
     }
     /** Builds the publication type dropdown */
     function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = createElem('span', { text: 'Publication Type:', class: 'opts-span'});
+        var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
+        var spanElem = eif.util.createElem('span', { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = buildSelectElem(
             pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
         );
@@ -1179,9 +1179,9 @@
     }
     /** Builds a text input for searching author names. */
     function loadAuthSearchHtml(srcTree) {
-        var labelElem = createElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = createElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
-        var bttn = createElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
+        var inputElem = eif.util.createElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
+        var bttn = eif.util.createElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
         $(inputElem).onEnter(updateAuthSearch);
         $(bttn).css('margin-left', '5px');
         $(bttn).click(updateAuthSearch);
@@ -1456,7 +1456,7 @@
 			}
 		}
 		function getSpeciesName(speciesName) {
-			return speciesName === null ? null : ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
+			return speciesName === null ? null : eif.util.ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
 		}
     } /* End fillHiddenColumns */
     /**
@@ -2258,9 +2258,6 @@
     function getDetachedRcrd(rcrdKey, orgnlRcrds) {
         return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
     }
-    function ucfirst(string) { 
-        return string.charAt(0).toUpperCase() + string.slice(1); 
-    }
     function showPopUpMsg(msg) {
         var popUpMsg = msg || "Loading...";
         $("#search-popUpDiv").text(popUpMsg);
@@ -2445,7 +2442,7 @@
      * passed. Sets the selected option as the passed 'selected' or the default 'all'.
      */
 	function buildSelectElem(options, attrs, changeFunc, selected) {
-		var selectElem = createElem('select', attrs); 
+		var selectElem = eif.util.createElem('select', attrs); 
 		var selected = selected || 'all';
 		
 		options.forEach(function(opts){
@@ -2458,25 +2455,6 @@
 		$(selectElem).val(selected);
         $(selectElem).change(changeFunc);
 		return selectElem;
-	}
-	function createElem(tag, attrs) {   //console.log("createElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
-	    var elem = document.createElement(tag);
-		if (attrs) {
-		    elem.id = attrs.id || '';
-		    elem.className = attrs.class || '';   //Space separated classNames
-
-		    if (attrs.text) { $(elem).text(attrs.text); }
-
-		    if (attrs.name || attrs.type || attrs.value ) { 
-		    	$(elem).attr({
-		    		name: attrs.name   || '', 
-		    		type: attrs.type   || '',
-		    		value: attrs.value || '',
-		    		placeholder: attrs.placeholder || '',
-		    	}); 
-		    }
-		}
-	    return elem;
 	}
  /*------- Style Manipulation ---------------------------------------------*/
     function addOrRemoveCssClass(element, className, add) {
@@ -2534,19 +2512,7 @@
             var value = object[key];
             callback(key, value);
         }
-    };    
-    /*--------------------------Jquery Extensions-----------------------------*/
-        function extendJquery() {
-            addOnEnterEvent();
-        }
-        function addOnEnterEvent() {
-            $.fn.onEnter = function(func) {
-                this.bind('keypress', function(e) {
-                    if (e.keyCode == 13) func.apply(this, [e]);    
-                });               
-                return this; 
-             };
-        }
+    };
     /*--------------------------Storage Methods-------------------------------*/
 	function setlocalStorage() {
 		if (storageAvailable('localStorage')) { 
