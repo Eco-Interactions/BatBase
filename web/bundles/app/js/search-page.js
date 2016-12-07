@@ -2166,57 +2166,49 @@
 		}
 	} 	/* End startIntro */
 	function initSearchTips() { 
-		addPopUpStyles();
-		$('#base-overlayPopUp').html(searchTips());
-		bindEscEvents();
-	}
-	function showTips() {  //console.log("show tips called.")
-		if (!$('#tips-close-bttn').length) { initSearchTips(); }
-	    $('#base-overlay, #base-overlayPopUp').fadeIn(500);
+		setPopUpPos();
+        $('#b-overlay-popup').html(searchTips());
+        bindEscEvents();
+    }
+    function showTips() {  //console.log("show tips called.")
+        if (!$('#tips-close-bttn').length) { initSearchTips(); }
+        // addPopUpStyles();
+        $('#b-overlay-popup').addClass("tips-popup");
+        $('#b-overlay, #b-overlay-popup').fadeIn(500);
         $('#show-tips').html("Hide Tips");
         $('#show-tips').off("click");
         $('#show-tips').click(hideTips);
-	}
-	function hideTips() {
-	    $('#base-overlay').fadeOut(500, removeTips);
+    }
+    function hideTips() {
+        $('#b-overlay').fadeOut(500, removeTips);
         $('#show-tips').html("Search Tips");
         $('#show-tips').off("click");
         $('#show-tips').click(showTips);
-	}
-	function removeTips() {  //console.log("removeTips called.")
-	   	$('#base-overlay, #base-overlayPopUp').css("display", "none");
-	}
-	function addPopUpStyles() {
-		$('#base-overlayPopUp').css({
-			"font-size": "1.1em",
-			"height": "666px",
-			"width": "650px",
-			"padding": "2.2em", 
-			"text-align": "left",
-			"margin": "auto"
-		});
-		setPopUpPos();
-	}
+    }
+    function removeTips() {  //console.log("removeTips called.")
+        $('#b-overlay, #b-overlay-popup').css("display", "none");
+        $('#b-overlay-popup').removeClass("tips-popup");
+    }
 	/**
 	 * Finds top position of fixed parent overlay and then sets the popUp  position accordingly.
 	 */
 	function setPopUpPos() {
-		var parentPos = $('#base-overlay').offset();
-		$('#base-overlayPopUp').offset(
-			{ top: (parentPos.top + 88)});  		//, left: 1000
+		var parentPos = $('#b-overlay').offset();  
+		$('#b-overlay-popup').offset(
+			{ top: (parentPos.top + 88)});  		
 	}
     function bindEscEvents() {
     	addCloseButton();
         $(document).on('keyup',function(evt) {
             if (evt.keyCode == 27) { hideTips(); }
         });
-        $("#base-overlay").click(hideTips);
+        $("#b-overlay").click(hideTips);
         $('#show-tips').off("click");
         $('#show-tips').click(hideTips);
-        $("#base-overlayPopUp").click(function(e) { e.stopPropagation(); });
+        $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
     }
     function addCloseButton() {
-        $("#base-overlayPopUp").append(`
+        $("#b-overlay-popup").append(`
             <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
         $('#tips-close-bttn').click(hideTips)
     }
@@ -2260,12 +2252,12 @@
     }
     function showPopUpMsg(msg) {
         var popUpMsg = msg || "Loading...";
-        $("#search-popUpDiv").text(popUpMsg);
-        $('#search-popUpDiv, #search-overlay').show();
+        $("#grid-popup").text(popUpMsg);
+        $('#grid-popup, #grid-overlay').show();
         fadeGrid();
     }
     function hidePopUpMsg() {
-        $('#search-popUpDiv, #search-overlay').hide();
+        $('#grid-popup, #grid-overlay').hide();
         showGrid();
     }
     function fadeGrid() {

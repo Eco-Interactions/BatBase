@@ -18,48 +18,43 @@ $(document).ready(function() {
         addCloseButton();
     }
     function addCloseButton() {
-        $("#base-overlayPopUp").append(`
+        $("#b-overlay-popup").append(`
             <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
         $('#close-tos-bttn').click(closeTosWindow)
     }
     function showTosWindow() {  console.log("showTosWindow called")
-        $("#base-overlayPopUp").html(getTosHtml);
-        addTosStyles();
+        $("#b-overlay-popup").html(getTosHtml);
+        $("#b-overlay-popup").addClass("tos-popup");
         bindEscEvents();
-        function addTosStyles() {
-            $("#base-overlayPopUp").css({
-                "height": "90%",
-                "width": "63%",
-                "margin": "auto",
-                "overflow-y": "scroll",
-                "padding": "2em",
-            });
-            $("#base-overlay").css({
-                "display": "flex"
-            });
-        }
+        $('#b-overlay, #b-overlay-popup').fadeIn(500);
+
         function bindEscEvents() {
             $(document).on('keyup',function(evt) {
                 if (evt.keyCode == 27) { closeTosWindow(); }
             });
-            $("#base-overlay").click(closeTosWindow);
-            $("#base-overlayPopUp").click(function(e) { e.stopPropagation(); });
+            $("#b-overlay").click(closeTosWindow);
+            $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
         }
     } /* End showTosWindow */
     function unbindEscEvents() {
         $(document).on('keyup',function(){});
-        $("#base-overlay").click(function(){});
+        $("#b-overlay").click(function(){});
     }
     function closeTosWindow() {
-        $("#base-overlay").css({ "display": "none" });
+        $("#b-overlay").css({ "display": "none" });
         unbindEscEvents();
+        removeTosStyles();
+    }
+    function removeTosStyles() {
+        $("#b-overlay-popup").removeClass("tos-popup");
+        $("#b-overlay").removeClass("flex-col");
     }
     function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
         var acceptDiv = document.createElement("div");
         acceptDiv.id = "accept-tos-cntnr";
         acceptDiv.className = "flex-col";
         $(acceptDiv).append(acceptTosHtml());
-        $("#base-overlayPopUp").append(acceptDiv);
+        $("#b-overlay-popup").append(acceptDiv);
 
         $("#accept-tos").click(acceptTos);
     }

@@ -32,7 +32,26 @@ $(document).ready(function(){
     function buildCreateBttn() {
         var bttn = eif.util.createElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
+        $(bttn).click(createCrudPopup);
         $("#opts-col1").append(bttn);
+    }
+    function createCrudPopup() {
+        showSearchCrudPopup();
+    }
+
+
+
+    function showSearchCrudPopup() {
+        // var popUpMsg = msg || "Loading...";
+        $("#b-overlay-popup").addClass("crud-popup");
+        $("#b-overlay").addClass("crud-ovrly");
+        $("#b-overlay-popup").html(getCrudHtml());
+        $('#b-overlay-popup, #b-overlay').show();
+        // fadeGrid();
+    }
+    function hideSearchCrudPopup() {
+        $('#b-overlay-popup, #b-overlay').hide();
+        // showGrid();
     }
 
 
@@ -47,13 +66,23 @@ $(document).ready(function(){
 
 
 
-
-
-
-
-
-
-
+function getCrudHtml() {
+    return `
+        <div id="crud-cntnr">
+            <div id="crud-top"></div>
+            <div id="crud-hdline"></div>
+            <div id="crud-hdr-sect"></div>
+            <div id="crud-main">
+                <iframe id="crud-lft" width="300" height="300">
+                    <p>Your browser does not support iframes.</p>
+                </iframe>
+                <iframe id="crud-rght" width="300" height="300">
+                    <p>Your browser does not support iframes.</p>
+                </iframe>
+            </div>
+            <div id="crud-bttm"></div>
+        </div>`;
+}
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
