@@ -6,19 +6,20 @@
  * container. When clicked, a wysiwyg interface will encapsulate that block and 
  * allow editing and saving of the content within using the trumbowyg library.
  */
-$(document).ready(function(){
-    var userRole;
+$(document).ready(function(){  
+    var userRole, envUrl;
     var eif = ECO_INT_FMWK;
     // eif.crud = {};
     
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     function onDOMContentLoaded() { 
-        userRole = $('body').data("user-role");                                 console.log("----userRole =", userRole)
+        userRole = $('body').data("user-role");   console.log("crud.js role = ", userRole);                               console.log("----userRole =", userRole)
+        envUrl = $('body').data("ajax-target-url");
         authDependentInit(); 
     }
 
     function authDependentInit() {   
-        if (userRole === "admin" || userRole === "super") {        console.log("admin CRUD ACTIVATE!! ");
+        if (userRole === "admin" || userRole === "super") {                     console.log("admin CRUD ACTIVATE!! ");
             if ($('body').data("this-url") === "/search") {
                 buildSearchPgCrudUi();
             } 
@@ -32,57 +33,70 @@ $(document).ready(function(){
     function buildCreateBttn() {
         var bttn = eif.util.createElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(createCrudPopup);
+        $(bttn).click(initEntityCrud);
         $("#opts-col1").append(bttn);
     }
-    function createCrudPopup() {
-        showSearchCrudPopup();
+    function initEntityCrud() {
+        var entityName = getFocusEntityName();
+        var entityURL = getFocusEntityUrl(entityName);                          //console.log("entityURL = ", entityURL)
+        showSearchCrudPopup(entityName);
+        loadIFrameSrc(entityURL, 0);
     }
-
-
-
-    function showSearchCrudPopup() {
-        // var popUpMsg = msg || "Loading...";
+    function getFocusEntityName() {
+        var nameMap = { "locs": "location", "srcs": "source", "taxa": "taxon" };
+        var focus = $('#search-focus').val();
+        return nameMap[focus];
+    }
+    function getFocusEntityUrl(entityName) {
+        return envUrl + entityName + "/new";
+    }
+    function showSearchCrudPopup(entityName) {
+        var newEntityTitle = "New " + eif.util.ucfirst(entityName); 
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").html(getCrudHtml());
+        $("#b-overlay-popup").html(getCrudHtml(newEntityTitle));
+        setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
-        // fadeGrid();
+    }
+    /**
+     * Finds top position of fixed parent overlay and then sets the popup position accordingly.
+     */
+    function setPopUpPos() {
+        var parentPos = $('#b-overlay').offset();  
+        $('#b-overlay-popup').offset(
+            { top: (parentPos.top + 88)});          
     }
     function hideSearchCrudPopup() {
         $('#b-overlay-popup, #b-overlay').hide();
-        // showGrid();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-function getCrudHtml() {
-    return `
-        <div id="crud-cntnr">
-            <div id="crud-top"></div>
-            <div id="crud-hdline"></div>
-            <div id="crud-hdr-sect"></div>
-            <div id="crud-main">
-                <iframe id="crud-lft" width="300" height="300">
-                    <p>Your browser does not support iframes.</p>
-                </iframe>
-                <iframe id="crud-rght" width="300" height="300">
-                    <p>Your browser does not support iframes.</p>
-                </iframe>
-            </div>
-            <div id="crud-bttm"></div>
-        </div>`;
-}
+    function getCrudHtml(title) {
+        return `
+            <div id="crud-cntnr">
+                <div id="crud-top"></div>
+                <div id="crud-hdline">`+ title +`</div>
+                <div id="crud-hdr-sect"></div>
+                <div id="crud-main">
+                    <iframe id="crud-lft" width="411" height="555">
+                        <p>Your browser does not support iframes.</p>
+                    </iframe>
+                    <iframe id="crud-rght" width="411" height="555">
+                        <p>Your browser does not support iframes.</p>
+                    </iframe>
+                </div>
+                <div id="crud-bttm"></div>
+            </div>`;
+    }
+    function loadIFrameSrc(url, frame) {  console.log("loadIFrameSrc. url = %s, frame = %s", url, frame);
+        var frames = ['crud-lft', 'crud-rght'];
+        var $iFrame = $('#' + frames[frame]);
+        $iFrame.attr('src', url);
+        $iFrame.load(sendInitMsg);
+    }
+    function sendInitMsg(e) {
+        var iFrameElem = e.target;    console.log("finishView. iFrameElem = %O", iFrameElem);
+        var curFocus = $('#search-focus').val();
+        iFrameElem.contentWindow.postMessage(curFocus, envUrl);
+    }
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
