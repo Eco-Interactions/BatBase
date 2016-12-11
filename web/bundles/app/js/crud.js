@@ -10,16 +10,16 @@ $(document).ready(function(){
     var userRole, envUrl;
     var eif = ECO_INT_FMWK;
     // eif.crud = {};
-    
+
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
+  
     function onDOMContentLoaded() { 
-        userRole = $('body').data("user-role");   console.log("crud.js role = ", userRole);                               console.log("----userRole =", userRole)
+        userRole = $('body').data("user-role");                                 //console.log("crud.js role = ", userRole);                               console.log("----userRole =", userRole)
         envUrl = $('body').data("ajax-target-url");
         authDependentInit(); 
     }
-
     function authDependentInit() {   
-        if (userRole === "admin" || userRole === "super") {                     console.log("admin CRUD ACTIVATE!! ");
+        if (userRole === "admin" || userRole === "super") {                     //console.log("admin CRUD ACTIVATE!! ");
             if ($('body').data("this-url") === "/search") {
                 buildSearchPgCrudUi();
             } 
@@ -27,44 +27,41 @@ $(document).ready(function(){
         }
     }
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
-    function buildSearchPgCrudUi() {                                            console.log("updateCrudUi");
-        buildCreateBttn();   
-    }
-    function buildCreateBttn() {
+    /*---------- CRUD Window Funcs -------------------------------------------*/
+    /** Adds a "New" button under the top grid focus options. */
+    function buildSearchPgCrudUi() {
         var bttn = eif.util.createElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
         $(bttn).click(initEntityCrud);
         $("#opts-col1").append(bttn);
     }
+    /**
+     * Gets the selected grid focus, either taxa, locations, or sources, and loads
+     * its 'create' form in the crud window popup @showEntityCrudPopup.
+     */
     function initEntityCrud() {
         var entityName = getFocusEntityName();
-        var entityURL = getFocusEntityUrl(entityName);                          //console.log("entityURL = ", entityURL)
-        showSearchCrudPopup(entityName);
-        loadIFrameSrc(entityURL, 0);
+        var entityURL = getEntityUrl(entityName, "new");                        //console.log("entityURL = ", entityURL)
+        showEntityCrudPopup("New", entityName);
     }
     function getFocusEntityName() {
         var nameMap = { "locs": "location", "srcs": "source", "taxa": "taxon" };
         var focus = $('#search-focus').val();
         return nameMap[focus];
     }
-    function getFocusEntityUrl(entityName) {
-        return envUrl + entityName + "/new";
-    }
-    function showSearchCrudPopup(entityName) {
-        var newEntityTitle = "New " + eif.util.ucfirst(entityName); 
+    /** Builds and shows the crud popup from @getCrudHtml */
+    function showEntityCrudPopup(action, entityName) {
+        var newEntityTitle = action + " " + eif.util.ucfirst(entityName); 
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
         $("#b-overlay-popup").html(getCrudHtml(newEntityTitle));
         setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
     }
-    /**
-     * Finds top position of fixed parent overlay and then sets the popup position accordingly.
-     */
+    /** Sets popup top using parent position. */
     function setPopUpPos() {
         var parentPos = $('#b-overlay').offset();  
-        $('#b-overlay-popup').offset(
-            { top: (parentPos.top + 88)});          
+        $('#b-overlay-popup').offset({ top: (parentPos.top + 88)});          
     }
     function hideSearchCrudPopup() {
         $('#b-overlay-popup, #b-overlay').hide();
@@ -75,34 +72,44 @@ $(document).ready(function(){
                 <div id="crud-top"></div>
                 <div id="crud-hdline">`+ title +`</div>
                 <div id="crud-hdr-sect"></div>
-                <div id="crud-main">
-                    <iframe id="crud-lft" width="411" height="555">
-                        <p>Your browser does not support iframes.</p>
-                    </iframe>
-                    <iframe id="crud-rght" width="411" height="555">
-                        <p>Your browser does not support iframes.</p>
-                    </iframe>
-                </div>
+                <div id="crud-main"></div>
                 <div id="crud-bttm"></div>
             </div>`;
     }
-    function loadIFrameSrc(url, frame) {  console.log("loadIFrameSrc. url = %s, frame = %s", url, frame);
-        var frames = ['crud-lft', 'crud-rght'];
-        var $iFrame = $('#' + frames[frame]);
-        $iFrame.attr('src', url);
-        $iFrame.load(sendInitMsg);
+    /*---------------------------- Source Funcs ------------------------------*/
+    /**
+     * Show for crud ui for selected source type.
+     * Note >> Citations are not technically a 'source
+     * type' but, as a detail table for Source, are handled very similarly. 
+     */
+    function loadSrcType(typeData) {                                            console.log("typeData = %O", typeData)
+
     }
-    function sendInitMsg(e) {
-        var iFrameElem = e.target;    console.log("finishView. iFrameElem = %O", iFrameElem);
-        var curFocus = $('#search-focus').val();
-        iFrameElem.contentWindow.postMessage(curFocus, envUrl);
+    /*----------------------- Helpers ----------------------------------------*/
+    /** Returns the full, contextual url for the passed entity and action.  */
+    function getEntityUrl(entityName, action) {
+        return envUrl + entityName + "/" + action;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
      */
     function initWysiwyg() {
-        var contentBlocks = $('.wysiwyg');  console.log("contentBlocks = %O", contentBlocks);
+        var contentBlocks = $('.wysiwyg');                                      //console.log("contentBlocks = %O", contentBlocks);
         if (contentBlocks.length > 0) { addEditContentButton(); }
     } /* End initWysiwyg */
     function addEditContentButton() {
@@ -159,7 +166,7 @@ $(document).ready(function(){
                                     $.ajax({
                                         method: "POST",
                                         url: "admin/contentblock/" + blkId + "/update",
-                                        success: dataSubmitSucess,
+                                        success: wysiwygSubmitSuccess,
                                         error: ajaxError,
                                         data: JSON.stringify({
                                             content: content
@@ -232,11 +239,12 @@ $(document).ready(function(){
     }
 /*-----------------AJAX Callbacks---------------------------------------------*/
     /** Reloads the page on content block update success */
-    function dataSubmitSucess(data, textStatus, jqXHR) { 
+    function wysiwygSubmitSuccess(data, textStatus, jqXHR) { 
         console.log("Success is yours!! = %O", data);
         location.reload(true);
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
     }
+
 }());  /* End of namespacing anonymous function */
