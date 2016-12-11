@@ -9,6 +9,7 @@
 $(document).ready(function(){  
     var userRole, envUrl;
     var eif = ECO_INT_FMWK;
+    var util = eif.util;
     // eif.crud = {};
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -30,7 +31,7 @@ $(document).ready(function(){
     /*---------- CRUD Window Funcs -------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
     function buildSearchPgCrudUi() {
-        var bttn = eif.util.createElem('button', { 
+        var bttn = util.createElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
         $(bttn).click(initEntityCrud);
         $("#opts-col1").append(bttn);
@@ -51,10 +52,10 @@ $(document).ready(function(){
     }
     /** Builds and shows the crud popup from @getCrudHtml */
     function showEntityCrudPopup(action, entityName) {
-        var newEntityTitle = action + " " + eif.util.ucfirst(entityName); 
+        var newEntityTitle = action + " " + util.ucfirst(entityName); 
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").html(getCrudHtml(newEntityTitle));
+        $("#b-overlay-popup").append(getCrudWindowElems(newEntityTitle));
         setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
     }
@@ -66,16 +67,32 @@ $(document).ready(function(){
     function hideSearchCrudPopup() {
         $('#b-overlay-popup, #b-overlay').hide();
     }
-    function getCrudHtml(title) {
-        return `
-            <div id="crud-cntnr">
-                <div id="crud-top"></div>
-                <div id="crud-hdline">`+ title +`</div>
-                <div id="crud-hdr-sect"></div>
-                <div id="crud-main"></div>
-                <div id="crud-bttm"></div>
-            </div>`;
+    /**
+     * Builds the main crud window elements.
+     * section>(header, div#crud-main, footer)
+     */
+    function getCrudWindowElems(title) {
+        var cntnr = util.createElem("section");
+        cntnr.append(getHeaderHtml(title));
+        cntnr.append(util.createElem("div", { "id": "crud-main" }));        
+        cntnr.append(util.createElem("footer"));
+        return cntnr;        
     }
+
+    function getHeaderHtml(title) {
+        var hdrSect = util.createElem("header", { "id": "crud-hdr" });
+        hdrSect.append(util.createElem("h1", { "text": title }));
+        hdrSect.append(util.createElem("p"));
+        return hdrSect;
+    }
+
+
+
+
+
+
+
+
     /*---------------------------- Source Funcs ------------------------------*/
     /**
      * Show for crud ui for selected source type.
