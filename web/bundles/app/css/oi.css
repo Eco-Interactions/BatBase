@@ -508,17 +508,64 @@ a[role="button"], .tos-bttn {
     height: 85%;
     opacity: 0;
 }
-/*-- Search CRUD Popup --*/
+/*----- Search CRUD Popup -----*/
 .crud-popup {
-    top: 100px;
-	height: 666px;
-	width: 650px;
-	padding: 2.2em;
+    /*top: 100px;*/
+	height: 555px;
+	width: 911px;
+	padding: 20px;
 	text-align: left;
 	margin: auto;
+	background: #a2dadd !important;
 }
 .crud-ovrly {
     top: 75px;
+}
+#crud-hdr>h1 {
+	text-align: center;  
+	margin-bottom: 50px;
+}
+#crud-main {
+
+}
+/* -- Form Styles -- */
+.crud-form {
+	font-size: 1.2em;
+	/*height: 300px;*/
+}
+#form-errors {
+	
+}
+.crud-row-cntnr {
+	margin: .2em;
+}
+.crud-row-cntnr input, .crud-row-cntnr select, .crud-row-cntnr textarea {
+	padding: 0;
+	margin: 0;
+}
+.crud-row {
+	justify-content: space-between;
+}
+.crud-form button {
+	font-size: 1.05em;
+	margin: 0;
+}
+.crud-form label {
+	font-size: 1em;
+	margin-right: .6em;
+	padding-bottom: 2px;
+	width: 140px;
+}
+.crud-form select {
+	font-size: .9em;
+	margin: 0;
+}
+.crud-submit {
+	/*margin-top: 2em;*/
+}
+.form-txtarea {
+	height: 55px;
+	width: 245px
 }
 /*-- Search Tips Popup --*/
 .tips-popup {
