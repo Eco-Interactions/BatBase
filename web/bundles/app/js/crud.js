@@ -119,19 +119,68 @@ $(document).ready(function(){
         return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
     }
     /**
-     * Shows crud ui for selected source type.
+     * Shows crud ui, all related form fields in labeled rows, for selected source type.
      * Note >> Citations are not technically a 'source type' but, as a detail table 
      * for Source, are handled very similarly. 
      */
     function initSrcTypeForm(e) {                                        
         var srcTypes = ["author", "citation", "publication", "publisher"];
         var selectedType = srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
-        createSrcTypeFields(selectedType);
-
+        var srcFieldElems = createSrcTypeFields(selectedType);
+        $('.crud-form').append(srcFieldElems);
     }
+    /** Builds all fields for selected source type and returns the row elems. */
     function createSrcTypeFields(srcType) {
-
+        var srcFields = { "displayName": "txt", "description": "area", 
+            "year": "txt", "doi": "txt", "linkDisplay": "txt", "linkUrl": "txt"};
+        var typeFieldObj = getSrcTypeFields(srcType);  console.log("typeFieldObj = %O", typeFieldObj)
+        return getFormFieldRows(typeFieldObj, srcFields);
     }
+    /**
+     * Returns an object for the selected source type with the fields to add to 
+     * and exclude from the default source fields.
+     */
+    function getSrcTypeFields(type) {
+        var fieldMap = { 
+            "author": { 
+                "add": { "First name": "txt", "Middle name": "txt", "Last name": "txt"}, 
+                "exclude": ["displayName", "year", "doi"]
+            },
+            "citation": {
+                "add": { "Publication": "txt", "Volume": "txt", "Issue": "txt", 
+                    "Pages": "txt", "Tags": "radio"},
+                "exclude": "all"
+            },
+            "publication": {
+                "add": { "Publisher": "txt" },
+                "exclude": false
+            },
+            "publisher": { "add": false, "exclude": false }
+        };
+        return fieldMap[type];
+    }
+    /**
+     * Builds all fields for the passed field obj, adding to or excluding from the 
+     * default fields as indicated. Returns an array of rows for each field.
+     */
+    function getFormFieldRows(fieldObj, defaultFields) {
+        var defaultFieldRows = buildDefaultFields(defaultFields, fieldObj.exclude);
+        var additionalRows = buildAdditionalRows(fieldObj.add);
+    }
+    function buildDefaultRows(defaultFieldsObj, excludedFieldsAry) {
+        // body...
+    }
+    function buildAdditionalRows(addRowsObj) {
+        // body...
+    }
+
+
+
+
+
+
+
+
 
 
 
