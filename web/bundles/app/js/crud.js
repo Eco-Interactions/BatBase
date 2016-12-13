@@ -12,6 +12,7 @@ $(document).ready(function(){
     var _util = eif.util;
     // eif.crud = {};    
 
+    // window.addEventListener('message', searchPgMsgHandler, false);
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
     function onDOMContentLoaded() { 
@@ -27,6 +28,13 @@ $(document).ready(function(){
             initWysiwyg();
         }
     }
+/*-------------------- CRUD Communication Functions --------------------------*/
+    /** Recieves messages from the Search pg and executes the sent tag's handler. */
+    function searchPgMsgHandler(msg) {                                          console.log('--crud msg recieved. %O', msg);
+        msgMap[msg.data.tag](msg.data.data);
+    }
+    // To Send:  contentWindow.postMessage(msgData, envUrl);
+    
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
     /*---------- CRUD Window Funcs -------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */

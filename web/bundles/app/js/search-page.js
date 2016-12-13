@@ -3,10 +3,13 @@
      * The search grid is built to display the eco-interaction records organized by
      * a selected "focus": taxa (grouped then by domain: bat, plant, arthropod), 
      * locations, or sources (grouped by either publications or authors). 
-     * 
+     *
+     * intro = Stores an active tutorial/walk-through instance.
+     * sendCrudPgMsg = Bound sendMsg function to communicate with the CRUD window.
+     * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
 	 */
-    var intro, columnDefs = [], focusStorage = {}; 
+    var intro, sendCrudPgMsg, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
@@ -28,6 +31,7 @@
         rowHeight: 26
 	};
 
+    // window.addEventListener('message', crudMsgHandler, false);
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     resetFocusStorag();
     /**
@@ -81,6 +85,19 @@
 			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
 		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
+/*-------------------- CRUD Communication Functions --------------------------*/
+    /**
+     * Recieves messages from the CRUD popup window, binds the origin/source to a 
+     * global sendCrudPgMsg func and executes the sent tag's handler.
+     */
+    function crudMsgHandler(msg) {                                              console.log("Msg recieved = %O", msg);
+        var msgHandlers = {};
+        sendCrudPgMsg = sendMsg.bind(null, msg.source, msg.origin);
+        msgHandlers[msg.data.tag](msg.data.data);
+    }
+    function sendMsg(appId, appOrigin, msgData) {
+        appId.postMessage(msgData, appOrigin)
+    }
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (focusStorage.curFocus){ $('#search-focus').val(focusStorage.curFocus);
@@ -97,10 +114,10 @@
     function addFutureDevMsg() { console.log("addFutureDevMsg")
         var $msgDiv = $('<div/>', { id: 'futrDevMsg' })
         $msgDiv.html("<p><b>This is where the search options available for all views will go. </b>" + 
-        "Such as year and elevation range, habitat and interaction type, " +
-        " as well as any other criteria that would be helpful to focus the data." +
-        "</p><br><p>Below is a 'Show/Hide Columns' button that will allow users to select " +
-        "the data that will be shown in the grid and/or csv exported.</p>");
+            "Such as year and elevation range, habitat and interaction type, " +
+            " as well as any other criteria that would be helpful to focus the data." +
+            "</p><br><p>Below is a 'Show/Hide Columns' button that will allow users to select " +
+            "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
     }
 	function selectSearchFocus(e) {  							                console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
