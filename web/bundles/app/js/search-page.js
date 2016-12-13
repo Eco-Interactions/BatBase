@@ -8,6 +8,7 @@
 	 */
     var intro, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
+    var _util = eif.util;
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
     var localStorage = setlocalStorage();
     var gridOptions = {
@@ -436,9 +437,9 @@
      * nodes displayed in the grid.
      */
     function buildTaxaDomainHtml(data) {                                        //console.log("buildTaxaDomainHtml called. ");
-        var browseElems = eif.util.createElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
+        var browseElems = _util.buildElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
         var domainOpts = getDomainOpts(data);   //console.log("domainOpts = %O", domainOpts);
-        $(browseElems).append(buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+        $(browseElems).append(_util.buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
         $('#sort-opts').append(browseElems);
         $('#sel-domain').change(onTaxaDomainChange);
@@ -501,9 +502,9 @@
     function buildTaxaSelects(lvlOpts, levels) {  
         var selElems = [];
         levels.forEach(function(level) {
-            var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = eif.util.createElem('span', { text: level + ': ', class: "opts-span" });
-            var selectElem = buildSelectElem(
+            var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+            var spanElem = _util.buildElem('span', { text: level + ': ', class: "opts-span" });
+            var selectElem = _util.buildSelectElem(
                 lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxaSearch);
             $(labelElem).append([spanElem, selectElem]);
             selElems.push(labelElem);
@@ -803,10 +804,10 @@
     function buildLocSelects(locOptsObj) {  
         var selElems = [];
         for (var locSelName in locOptsObj) {
-            var selName = eif.util.ucfirst(locSelName);
-            var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
-            var spanElem = eif.util.createElem('span', { text: selName + ': ', class: "opts-span" });
-            var selectElem = buildSelectElem(
+            var selName = _util.ucfirst(locSelName);
+            var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+            var spanElem = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
+            var selectElem = _util.buildSelectElem(
                 locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
             $(labelElem).append([spanElem, selectElem]);
             selElems.push(labelElem);
@@ -824,7 +825,7 @@
         var selected = focusStorage.selectedOpts;                               //console.log("selected in setSelectedLocVals = %O", selected);
         if (!selected) {return}
         Object.keys(selected).forEach(function(selName) {
-            selId = '#sel' + eif.util.ucfirst(selName);
+            selId = '#sel' + _util.ucfirst(selName);
             $(selId).val(selected[selName]); 
             $(selId).find('option[value="all"]').hide();
             $(selId).find('option[value="none"]').hide();
@@ -982,9 +983,9 @@
      * tree nodes displayed in the grid. 
      */
     function buildSrcDomainHtml(data) {                                        	//console.log("buildTaxaDomainHtml called. ");
-        var browseElems = eif.util.createElem('span', { id:"sort-srcs-by", text: "Source Type: " });
+        var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
         var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
-        $(browseElems).append(buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+        $(browseElems).append(_util.buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
         $('#sort-opts').append(browseElems);
         $('#sel-domain').change(onSrcDomainChange);
@@ -994,7 +995,7 @@
             var sourceDomains = Object.keys(data);
             var srcTypeMap = { "author": "auths", "publication": "pubs" };
             var opts = sourceDomains.map(function(srcType){
-            	return { value: srcTypeMap[srcType], text: eif.util.ucfirst(srcType) + 's' };
+            	return { value: srcTypeMap[srcType], text: _util.ucfirst(srcType) + 's' };
             });
             return opts;
         }
@@ -1167,9 +1168,9 @@
     }
     /** Builds the publication type dropdown */
     function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = eif.util.createElem('span', { text: 'Publication Type:', class: 'opts-span'});
-        var selectElem = buildSelectElem(
+        var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        var spanElem = _util.buildElem('span', { text: 'Publication Type:', class: 'opts-span'});
+        var selectElem = _util.buildSelectElem(
             pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
         );
         $(labelElem).css('width', '255px');
@@ -1179,9 +1180,9 @@
     }
     /** Builds a text input for searching author names. */
     function loadAuthSearchHtml(srcTree) {
-        var labelElem = eif.util.createElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = eif.util.createElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
-        var bttn = eif.util.createElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        var inputElem = _util.buildElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
+        var bttn = _util.buildElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
         $(inputElem).onEnter(updateAuthSearch);
         $(bttn).css('margin-left', '5px');
         $(bttn).click(updateAuthSearch);
@@ -1456,7 +1457,7 @@
 			}
 		}
 		function getSpeciesName(speciesName) {
-			return speciesName === null ? null : eif.util.ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
+			return speciesName === null ? null : _util.ucfirst(curTaxaHeirarchy['Species'].split(' ')[1]);
 		}
     } /* End fillHiddenColumns */
     /**
@@ -2417,37 +2418,6 @@
         }
         return cnt;
     }
-    /*------------ HTML Functions -------------------------------------------*/
-    /** Creates an opts obj for each 'item' in array with value and text as 'item' */
-    function buildSimpleOpts(optAry) {
-        var opts = []
-        optAry.forEach(function(option){
-            opts.push({
-                value: option,
-                text: option  });
-        });
-        opts.unshift({value: 'all', text: '- All -'});
-        return opts;
-    }   
-    /**
-     * Builds a select drop down with the options, attributes and change method 
-     * passed. Sets the selected option as the passed 'selected' or the default 'all'.
-     */
-	function buildSelectElem(options, attrs, changeFunc, selected) {
-		var selectElem = eif.util.createElem('select', attrs); 
-		var selected = selected || 'all';
-		
-		options.forEach(function(opts){
-			$(selectElem).append($("<option/>", {
-			    value: opts.value,
-			    text: opts.text
-			}));
-		});
-
-		$(selectElem).val(selected);
-        $(selectElem).change(changeFunc);
-		return selectElem;
-	}
  /*------- Style Manipulation ---------------------------------------------*/
     function addOrRemoveCssClass(element, className, add) {
         if (add) { addCssClass(element, className);

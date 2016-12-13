@@ -9,8 +9,8 @@
 $(document).ready(function(){  
     var userRole, envUrl;
     var eif = ECO_INT_FMWK;
-    var util = eif.util;
-    // eif.crud = {};
+    var _util = eif.util;
+    // eif.crud = {};    
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
@@ -31,7 +31,7 @@ $(document).ready(function(){
     /*---------- CRUD Window Funcs -------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
     function buildSearchPgCrudUi() {
-        var bttn = util.createElem('button', { 
+        var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
         $(bttn).click(initEntityCrud);
         $("#opts-col1").append(bttn);
@@ -52,7 +52,7 @@ $(document).ready(function(){
     }
     /** Builds and shows the crud popup from @getCrudHtml */
     function showEntityCrudPopup(action, entityName) {
-        var newEntityTitle = action + " " + util.ucfirst(entityName); 
+        var newEntityTitle = action + " " + _util.ucfirst(entityName); 
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
         $("#b-overlay-popup").append(getCrudWindowElems(newEntityTitle));
@@ -72,17 +72,17 @@ $(document).ready(function(){
      * section>(header, div#crud-main, footer)
      */
     function getCrudWindowElems(title) {
-        var cntnr = util.createElem("section");
+        var cntnr = _util.buildElem("section");
         cntnr.append(getHeaderHtml(title));
-        cntnr.append(util.createElem("div", { "id": "crud-main" }));        
-        cntnr.append(util.createElem("footer"));
+        cntnr.append(_util.buildElem("div", { "id": "crud-main" }));        
+        cntnr.append(_util.buildElem("footer"));
         return cntnr;        
     }
 
     function getHeaderHtml(title) {
-        var hdrSect = util.createElem("header", { "id": "crud-hdr" });
-        hdrSect.append(util.createElem("h1", { "text": title }));
-        hdrSect.append(util.createElem("p"));
+        var hdrSect = _util.buildElem("header", { "id": "crud-hdr" });
+        hdrSect.append(_util.buildElem("h1", { "text": title }));
+        hdrSect.append(_util.buildElem("p"));
         return hdrSect;
     }
 
