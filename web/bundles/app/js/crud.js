@@ -41,9 +41,10 @@ $(document).ready(function(){
      * its 'create' form in the crud window popup @showEntityCrudPopup.
      */
     function initEntityCrud() {
-        var entityName = getFocusEntityName();
-        var entityURL = getEntityUrl(entityName, "new");                        //console.log("entityURL = ", entityURL)
+        var entityName = getFocusEntityName();                                  console.log("***initEntityCrud for ", entityName)
+        var initCrudViewMap = { "source": initSrcCrudView };                        
         showEntityCrudPopup("New", entityName);
+        initCrudViewMap[entityName]();
     }
     function getFocusEntityName() {
         var nameMap = { "locs": "location", "srcs": "source", "taxa": "taxon" };
@@ -85,29 +86,65 @@ $(document).ready(function(){
         hdrSect.append(_util.buildElem("p"));
         return hdrSect;
     }
-
-
-
-
-
-
-
-
-    /*---------------------------- Source Funcs ------------------------------*/
+/*-------------------------------- Source Funcs ------------------------------*/
     /**
-     * Show for crud ui for selected source type.
-     * Note >> Citations are not technically a 'source
-     * type' but, as a detail table for Source, are handled very similarly. 
+     * Creates the source form with relevant fields for the Source entity and the
+     * selected Source Type. On init, only the Source Type select row is shown.
+     * Once selected, the full source form is initialized @initSrcTypeForm.
      */
-    function loadSrcType(typeData) {                                            console.log("typeData = %O", typeData)
+    function initSrcCrudView() {
+        var formCntnr = _util.buildElem("div", {class: "crud-form"});
+        formCntnr.append(buildSrcTypeRow());
+        $('#crud-main').append(formCntnr);
+    }
+    /** Builds the row for the Source Type field. */
+    function buildSrcTypeRow() {
+        var selElem = buildSrcTypeSelect();
+        $(selElem).val("placeholder");
+        $(selElem).find('option[value="placeholder"]').hide();
+        return buildFormRow("Source Type", selElem);
+    }
+    /** Creates the Source Type select dropdown. */
+    function buildSrcTypeSelect() {
+        var srcTypes = ["Author", "Citation", "Publication", "Publisher"];
+        var srcOpts = _util.buildSimpleOpts(srcTypes, "-- Select type --");     
+        return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
+    }
+    /**
+     * Shows crud ui for selected source type.
+     * Note >> Citations are not technically a 'source type' but, as a detail table 
+     * for Source, are handled very similarly. 
+     */
+    function initSrcTypeForm(e) {                                        
+        var srcTypes = ["author", "citation", "publication", "publisher"];
+        var selectedType = srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
+        createSrcTypeFields(selectedType);
 
     }
+    function createSrcTypeFields(srcType) {
+
+    }
+
+
+
+
+
+
+
+
+
     /*----------------------- Helpers ----------------------------------------*/
     /** Returns the full, contextual url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         return envUrl + entityName + "/" + action;
     }
 
+    function buildFormRow(lblTxt, formInputElem) {
+        var rowDiv = _util.buildElem("div", { class: "form-row flex-row"});
+        var label = _util.buildElem("label", {text: "Source type"});
+        $(rowDiv).append([label, formInputElem]);
+        return rowDiv;
+    }
 
 
 
