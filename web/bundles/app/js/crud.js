@@ -106,6 +106,7 @@ $(document).ready(function(){
         var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
         var srcTypeFieldRow = buildSrcTypeRow();
         $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer]);
+        ajaxSrcData();
         $('#crud-main').append(formCntnr);
     }
     /** Builds the row for the Source Type field. */
@@ -120,6 +121,9 @@ $(document).ready(function(){
         var srcTypes = ["Author", "Citation", "Publication", "Publisher"];
         var srcOpts = _util.buildSimpleOpts(srcTypes, "-- Select type --");     
         return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
+    }
+    function ajaxSrcData() {
+        // body...
     }
     /**
      * Shows crud ui, all related form fields in labeled rows, for selected source type.
@@ -316,16 +320,16 @@ $(document).ready(function(){
                                 hasIcon: false,
                                 fn: function() {                            // console.log("saving. trumbowyg = %O", trumbowyg );
                                     var blkId = trumbowyg.o.plugins.save.id;
-                                    var content = $('#' + blkId ).trumbowyg('html');            // console.log("blkId = ", blkId)
-                                    $.ajax({
-                                        method: "POST",
-                                        url: "admin/contentblock/" + blkId + "/update",
-                                        success: wysiwygSubmitSuccess,
-                                        error: ajaxError,
-                                        data: JSON.stringify({
-                                            content: content
-                                        })
-                                    });
+                                    var data = { content: $('#' + blkId ).trumbowyg('html')};            // console.log("blkId = ", blkId)
+                                    var url = "admin/contentblock/" + blkId + "/update";
+                                    sendAjaxQuery(data, url, wysiwygSubmitSuccess);
+                                    // $.ajax({
+                                    //     method: "POST",
+                                    //     url: "admin/contentblock/" + blkId + "/update",
+                                    //     success: wysiwygSubmitSuccess,
+                                    //     error: ajaxError,
+                                    //     data: JSON.stringify()
+                                    // });
                                 }
                             };
                             trumbowyg.addBtnDef('save', btnDef);
@@ -335,6 +339,11 @@ $(document).ready(function(){
             });
         })(jQuery);
     } /* End addButtons */
+    /** Reloads the page on content block update success */
+    function wysiwygSubmitSuccess(data, textStatus, jqXHR) { 
+        console.log("Success is yours!! = %O", data);
+        location.reload(true);
+    }
     /** Returns the block container id by removing '-edit' from the passed editId */
     function getBlockContainerId(editId) {
         var elemIdAry = editId.split('-'); 
@@ -392,10 +401,22 @@ $(document).ready(function(){
         $('.wsywigEdit').remove();  
     }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-    /** Reloads the page on content block update success */
-    function wysiwygSubmitSuccess(data, textStatus, jqXHR) { 
-        console.log("Success is yours!! = %O", data);
-        location.reload(true);
+    function sendAjaxQuery(dataPkg, url, successCb) {                           console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+        $.ajax({
+            method: "POST",
+            url: url,
+            success: successCb || dataSubmitSucess,
+            error: ajaxError,
+            data: JSON.stringify(dataPkg)
+        });
+    }
+    /**
+     * Stores reference objects for posted entities with each record's temporary 
+     * reference id and the new database id.     
+     * Interactions are sent in sets of 1000, so the returns are collected in an array.
+     */
+    function dataSubmitSucess(data, textStatus, jqXHR) { 
+        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
