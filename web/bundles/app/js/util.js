@@ -22,9 +22,9 @@
         return elem;
     }
     function addAttributes(elem, attrs) {
-        elem.id = attrs.id || '';
-        elem.className = attrs.class || '';   //Space separated classNames
-
+        if (attrs.id) { elem.id = attrs.id; }
+        if (attrs.class) { elem.className = attrs.class; }
+        
         if (attrs.text) { $(elem).text(attrs.text); }
 
         if (attrs.name || attrs.type || attrs.value ) { 
