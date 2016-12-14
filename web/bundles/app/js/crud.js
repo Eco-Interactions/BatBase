@@ -175,9 +175,12 @@ $(document).ready(function(){
         return fieldMap[type];
     }
     /*----------------------- Helpers ----------------------------------------*/
-    /** Builds container div for the crud forms. */
+    /** Builds the form elem container. */
     function buildCrudFormCntnr() {
-        return _util.buildElem("div", {class: "crud-form"});
+        var form = document.createElement("form");
+        $(form).attr({"action": "", "method": "POST", name: "crud-form"});
+        form.className = "crud-form";
+        return form;
     }
     /**
      * Builds all rows for the form according to the passed formConfig obj. 
