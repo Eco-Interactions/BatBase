@@ -98,11 +98,14 @@ $(document).ready(function(){
     /**
      * Creates the source form with relevant fields for the Source entity and the
      * selected Source Type. On init, only the Source Type select row is shown.
-     * Once selected, the full source form is initialized @initSrcTypeForm.
+     * Once selected, the source form is built @initSrcTypeForm. Note: The 
+     * volatileFieldsContainer holds all source-type specific fields.
      */
     function initSrcCrudView() {
-        var formCntnr = _util.buildElem("div", {class: "crud-form"});
-        formCntnr.append(buildSrcTypeRow());
+        var formCntnr = buildCrudFormCntnr();
+        var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
+        var srcTypeFieldRow = buildSrcTypeRow();
+        $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer]);
         $('#crud-main').append(formCntnr);
     }
     /** Builds the row for the Source Type field. */
@@ -110,7 +113,7 @@ $(document).ready(function(){
         var selElem = buildSrcTypeSelect();
         $(selElem).val("placeholder");
         $(selElem).find('option[value="placeholder"]').hide();
-        return buildFormRow("Source Type", selElem);
+        return buildFormRow("Source Type", selElem, true);
     }
     /** Creates the Source Type select dropdown. */
     function buildSrcTypeSelect() {
@@ -126,80 +129,122 @@ $(document).ready(function(){
     function initSrcTypeForm(e) {                                        
         var srcTypes = ["author", "citation", "publication", "publisher"];
         var selectedType = srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
-        var srcFieldElems = createSrcTypeFields(selectedType);
-        $('.crud-form').append(srcFieldElems);
+        $('#field-rows').empty().append(createSrcTypeFields(selectedType));
     }
     /** Builds all fields for selected source type and returns the row elems. */
     function createSrcTypeFields(srcType) {
-        var srcFields = { "displayName": "txt", "description": "area", 
-            "year": "txt", "doi": "txt", "linkDisplay": "txt", "linkUrl": "txt"};
-        var typeFieldObj = getSrcTypeFields(srcType);  console.log("typeFieldObj = %O", typeFieldObj)
-        return getFormFieldRows(typeFieldObj, srcFields);
+        var srcFields = { "display name": "text", "description": "textArea", 
+            "year": "text", "doi": "text", "link text": "text", "link url": "text"};
+        var formConfg = getSrcTypeFieldConfig(srcType);  console.log("formConfg = %O", formConfg)
+        return getFormFieldRows(formConfg, srcFields);
     }
     /**
-     * Returns an object for the selected source type with the fields to add to 
-     * and exclude from the default source fields.
+     * Returns a config object for the form of the selected source type with the 
+     * fields to add to and exclude from the default source fields, the required
+     * fields, and the final order of the fields.
      */
-    function getSrcTypeFields(type) {
+    function getSrcTypeFieldConfig(type) {
         var fieldMap = { 
             "author": { 
-                "add": { "First name": "txt", "Middle name": "txt", "Last name": "txt"}, 
-                "exclude": ["displayName", "year", "doi"]
+                "add": { "First name": "text", "Middle name": "text", "Last name": "text"}, 
+                "exclude": ["display name", "year", "doi"],
+                "required": ["Last name"], 
+                "order": ["Last name", "First name", "Middle name", "Description", 
+                    "Link url", "Link text"]
             },
             "citation": {
-                "add": { "Publication": "txt", "Volume": "txt", "Issue": "txt", 
-                    "Pages": "txt", "Tags": "radio"},
-                "exclude": "all"
+                "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
+                    "Pages": "text", "Tags": "radio", "Citation": "textArea"},
+                "exclude": true,
+                "required": ["Publication", "Citation"],
+                "order": ["Publication", "Volume", "Issue", "Pages", "Citation", "Tags"]
             },
             "publication": {
-                "add": { "Publisher": "txt" },
-                "exclude": false
+                "add": { "Publisher": "text", "Title" : "text"},
+                "exclude": ["display name"],
+                "required": ["Display name"],
+                "order": ["Title", "Description", "Publisher", "Year", "Doi", 
+                    "Link url", "Link text"]
             },
-            "publisher": { "add": false, "exclude": false }
+            "publisher": { 
+                "add": [], 
+                "exclude": ["Year", "Doi"],
+                "required": ["Display name"],
+                "order": ["Display name", "Description", "Link url", "Link text"] }
         };
         return fieldMap[type];
     }
-    /**
-     * Builds all fields for the passed field obj, adding to or excluding from the 
-     * default fields as indicated. Returns an array of rows for each field.
-     */
-    function getFormFieldRows(fieldObj, defaultFields) {
-        var defaultFieldRows = buildDefaultFields(defaultFields, fieldObj.exclude);
-        var additionalRows = buildAdditionalRows(fieldObj.add);
-    }
-    function buildDefaultRows(defaultFieldsObj, excludedFieldsAry) {
-        // body...
-    }
-    function buildAdditionalRows(addRowsObj) {
-        // body...
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*----------------------- Helpers ----------------------------------------*/
-    /** Returns the full, contextual url for the passed entity and action.  */
-    function getEntityUrl(entityName, action) {
-        return envUrl + entityName + "/" + action;
+    /** Builds container div for the crud forms. */
+    function buildCrudFormCntnr() {
+        return _util.buildElem("div", {class: "crud-form"});
     }
+    /**
+     * Builds all rows for the form according to the passed formConfig obj. 
+     * Returns a container div with the rows ready to be appended to the form window.
+     */
+    function getFormFieldRows(formCnfg, dfltFields) {                           console.log("  Building Form rows");
+        var buildFieldType = { "text": buildTextInput, "radio": buildRadioInput,
+            "textArea": buildTextArea };  
+        var defaultRows = buildDefaultRows(formCnfg.exclude, formCnfg.required);
+        var additionalRows = buildAdditionalRows(formCnfg.add, formCnfg.required);
+        return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
 
-    function buildFormRow(lblTxt, formInputElem) {
-        var rowDiv = _util.buildElem("div", { class: "form-row flex-row"});
-        var label = _util.buildElem("label", {text: "Source type"});
-        $(rowDiv).append([label, formInputElem]);
+        /**
+         * Builds a row for each default field not explicitly excluded. If exclude
+         * is set to true, all default fields are excluded. 
+         */
+        function buildDefaultRows(exclude, reqFields) {               console.log("    Building default rows");
+            var fieldInput, rows = [];
+            for (var field in dfltFields) {  
+                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }      //console.log("      field = ", field);
+                fieldInput = buildFieldType[dfltFields[field]]();      
+                isReq = reqFields.indexOf(field) === -1 ? false : true;
+                rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
+            }
+            return rows;
+        }
+        function buildAdditionalRows(xtraFields, reqFields) {                   console.log("    Building additional rows");
+            var fieldInput, isReq, rows = [];
+            for (var field in xtraFields) {                                     //console.log("      field = ", field);
+                fieldInput = buildFieldType[xtraFields[field]]();      
+                isReq = reqFields.indexOf(field) === -1 ? false : true;
+                rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
+            }
+            return rows;
+        }
+    } /* End getFormFieldRows */
+    /** Reorders the rows into the order set in the form config obj. */
+    function orderRows(rows, order) {                                           console.log("    ordering rows = %O, order = %O", rows, order);
+        var field, idx;
+        rows.forEach(function(row) {
+            field = row.id.split("_row")[0];
+            idx = order.indexOf(field);
+            order.splice(idx, 1, row);
+        });
+        return order;
+    }
+    function buildTextInput(fieldName) {                                        console.log("            buildTextInput");
+        return _util.buildElem("input", { "type": "text" });
+    }
+    function buildTextArea(fieldName) {                                         console.log("            buildTextArea");
+        return _util.buildElem("textarea");
+    }
+    function buildRadioInput(fieldName) {                                       console.log("            buildRadioInput");
+        return _util.buildElem("input", { "type": "radio" });
+    }
+    /**
+     * Each element is built, nested, and returned as a completed row. 
+     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
+     */
+    function buildFormRow(lblTxt, formInputElem, isReq) {
+        var rowDiv = _util.buildElem("div", { class: "form-row", id: lblTxt + "_row"});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: lblTxt+"_errs"});
+        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
+        var label = _util.buildElem("label", {text: lblTxt});
+        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
+        $(fieldRow).append([label, formInputElem]);
+        $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
     }
 
@@ -209,12 +254,10 @@ $(document).ready(function(){
 
 
 
-
-
-
-
-
-
+    /** Returns the full, contextual url for the passed entity and action.  */
+    function getEntityUrl(entityName, action) {
+        return envUrl + entityName + "/" + action;
+    }
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
