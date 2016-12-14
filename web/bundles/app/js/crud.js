@@ -199,7 +199,7 @@ $(document).ready(function(){
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }      //console.log("      field = ", field);
                 fieldInput = buildFieldType[dfltFields[field]]();      
-                isReq = reqFields.indexOf(field) === -1 ? false : true;
+                isReq = ifRequiredField(field, fieldInput, reqFields);
                 rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
             }
             return rows;
@@ -207,8 +207,8 @@ $(document).ready(function(){
         function buildAdditionalRows(xtraFields, reqFields, entity) {           console.log("    Building additional rows");
             var fieldInput, isReq, rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                isReq = reqFields.indexOf(field) === -1 ? false : true;
                 fieldInput = buildFieldType[xtraFields[field]](entity);      
+                isReq = ifRequiredField(field, fieldInput, reqFields);
                 rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
             }
             return rows;
@@ -223,6 +223,17 @@ $(document).ready(function(){
             order.splice(idx, 1, row);
         });
         return order;
+    }
+    /**
+     * Returns true, and sets the fieldElem's required' property, if the field is 
+     * in the array of required fields. 
+     */
+    function ifRequiredField(field, fieldElem, reqFields) {
+        if (reqFields.indexOf(field) !== -1) {
+            $(fieldElem).prop("required", "required");
+            return true;
+        } 
+        return false;
     }
     function buildTextInput(entity) {                                           console.log("            buildTextInput");
         return elem = _util.buildElem("input", { "type": "text", class:"txt-input" });
