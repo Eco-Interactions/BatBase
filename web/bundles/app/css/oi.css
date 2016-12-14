@@ -526,29 +526,37 @@ a[role="button"], .tos-bttn {
 	margin-bottom: 50px;
 }
 #crud-main {
+	padding: 25px;
 
 }
 /* -- Form Styles -- */
 .crud-form {
-	font-size: 1.2em;
-	/*height: 300px;*/
+	font-size: 1.1em;
+	width: 375px;
+}
+.required:after {
+  content: "*";
 }
 #form-errors {
 	
 }
-.crud-row-cntnr {
-	margin: .2em;
-}
-.crud-row-cntnr input, .crud-row-cntnr select, .crud-row-cntnr textarea {
-	padding: 0;
+.crud-form input, .crud-form select, .crud-form textarea, .crud-form button {
+	padding: .1em;
 	margin: 0;
+	font-size: .95em;
 }
-.crud-row {
+.form-row {
+	margin-bottom: 1em;
+}
+.field-row {
 	justify-content: space-between;
 }
+.row-errors {
+	color: red;
+}
 .crud-form button {
-	font-size: 1.05em;
-	margin: 0;
+	/*font-size: 1.05em;*/
+	/*margin: 0;*/
 }
 .crud-form label {
 	font-size: 1em;
@@ -556,16 +564,17 @@ a[role="button"], .tos-bttn {
 	padding-bottom: 2px;
 	width: 140px;
 }
-.crud-form select {
-	font-size: .9em;
-	margin: 0;
+.crud-form select,  {
+	/*font-size: .9em;*/
+	/*margin: 0;*/
 }
-.crud-submit {
-	/*margin-top: 2em;*/
+.crud-form input {
+	/*height: 23px;*/
+	width: 250px;
 }
-.form-txtarea {
+.crud-form textarea {
 	height: 55px;
-	width: 245px
+	width: 255px
 }
 /*-- Search Tips Popup --*/
 .tips-popup {
