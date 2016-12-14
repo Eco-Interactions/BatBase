@@ -154,7 +154,7 @@ $(document).ready(function(){
             },
             "citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
-                    "Pages": "text", "Tags": "radio", "Citation text": "textArea"},
+                    "Pages": "text", "Tags": "checkbox", "Citation text": "textArea"},
                 "exclude": true,
                 "required": ["Publication", "Citation text"],
                 "order": ["Citation text", "Publication", "Volume", "Issue", "Pages", "Tags"]
@@ -230,8 +230,24 @@ $(document).ready(function(){
     function buildTextArea(fieldName) {                                         console.log("            buildTextArea");
         return _util.buildElem("textarea");
     }
-    function buildRadioInput(fieldName) {                                       console.log("            buildRadioInput");
-        return _util.buildElem("input", { "type": "radio" });
+    /**
+     * Returns a div containing a checkbox, span-wrapped with associated label, 
+     * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
+     * interactions have tags currently. Eventually tags will be pulled from the server.
+     */
+    function buildCheckboxInput(entity) {                                          console.log("            entity = %s buildCheckboxInput", entity);
+        var span, lbl;
+        var opts = { "citation": ["Secondary"] }; 
+        var divCntnr = document.createElement("div");
+        opts[entity].forEach(function(opt) {
+            span = document.createElement("span");
+            span.append(_util.buildElem("input", { "type": "checkbox", id: opt+"_check"}));
+            lbl = _util.buildElem("label", { "text": opt });
+            lbl.htmlFor = opt+"_check";
+            span.append(lbl);
+            $(divCntnr).append(span);
+        });
+        return divCntnr;
     }
     /**
      * Each element is built, nested, and returned as a completed row. 
