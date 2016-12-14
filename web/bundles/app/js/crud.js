@@ -150,7 +150,7 @@ $(document).ready(function(){
     function createSrcTypeFields(srcType) {
         var srcFields = { "display name": "text", "description": "textArea", 
             "year": "text", "doi": "text", "link text": "text", "link url": "text"};
-        var formConfg = getSrcTypeFieldConfig(srcType);  console.log("formConfg = %O", formConfg)
+        var formConfg = getSrcTypeFieldConfig(srcType);                         //console.log("formConfg = %O", formConfg)
         return getFormFieldRows(srcType, formConfg, srcFields);
     }
     /**
@@ -201,7 +201,7 @@ $(document).ready(function(){
      * Builds all rows for the form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(entity, formCnfg, dfltFields) {                           console.log("  Building Form rows");
+    function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
         var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
             "textArea": buildTextArea };  
         var defaultRows = buildDefaultRows(formCnfg.exclude, formCnfg.required);
@@ -212,7 +212,7 @@ $(document).ready(function(){
          * Builds a row for each default field not explicitly excluded. If exclude
          * is set to true, all default fields are excluded. 
          */
-        function buildDefaultRows(exclude, reqFields) {               console.log("    Building default rows");
+        function buildDefaultRows(exclude, reqFields) {                         //console.log("    Building default rows");
             var fieldInput, rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }      //console.log("      field = ", field);
@@ -222,7 +222,7 @@ $(document).ready(function(){
             }
             return rows;
         }
-        function buildAdditionalRows(xtraFields, reqFields, entity) {           console.log("    Building additional rows");
+        function buildAdditionalRows(xtraFields, reqFields, entity) {           //console.log("    Building additional rows");
             var fieldInput, isReq, rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
                 fieldInput = buildFieldType[xtraFields[field]](entity);      
@@ -233,7 +233,7 @@ $(document).ready(function(){
         }
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
-    function orderRows(rows, order) {                                           console.log("    ordering rows = %O, order = %O", rows, order);
+    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
         var field, idx;
         rows.forEach(function(row) {
             field = row.id.split("_row")[0];
@@ -253,10 +253,10 @@ $(document).ready(function(){
         } 
         return false;
     }
-    function buildTextInput(entity) {                                           console.log("            buildTextInput");
+    function buildTextInput(entity) {                                           //console.log("            buildTextInput");
         return elem = _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
-    function buildTextArea(entity) {                                            console.log("            buildTextArea");
+    function buildTextArea(entity) {                                            //console.log("            buildTextArea");
         return _util.buildElem("textarea");
     }
     /**
@@ -264,7 +264,7 @@ $(document).ready(function(){
      * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
      * interactions have tags currently. Eventually tags will be pulled from the server.
      */
-    function buildCheckboxInput(entity) {                                          console.log("            entity = %s buildCheckboxInput", entity);
+    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
         var span, lbl;
         var opts = { "citation": ["Secondary"] }; 
         var divCntnr = document.createElement("div");
@@ -282,13 +282,13 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(lblTxt, formInputElem, isReq) {
+    function buildFormRow(lblTxt, fieldInput, isReq) {
         var rowDiv = _util.buildElem("div", { class: "form-row", id: lblTxt + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: lblTxt+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: lblTxt});
         if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
-        $(fieldRow).append([label, formInputElem]);
+        $(fieldRow).append([label, fieldInput]);
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
     }

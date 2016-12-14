@@ -22,6 +22,8 @@ a:hover {
 }
 a:active {
 }
+/**-----------Find and fix these super leaky styles-----------------**/
+/** Commented out styles, hopefully unused, that are affecting the crud form */
 button {
 	border: 1px solid;
     border-radius: 2px;
@@ -32,7 +34,7 @@ form input, form select, form textarea {
     margin: .5em;
 }
 form input[type=text], form input[type=email] {
-    width: 500px;
+    /*width: 500px;*/
 }
 form textarea {
     vertical-align: top;
@@ -51,6 +53,7 @@ form button:hover {
 	border: 1.5px solid;
 	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
+/*----End leak----*/
 .two-col-outer, .three-col-outer, .four-col-outer {
 	margin-top: 10px;
 	display: flex;
@@ -532,7 +535,7 @@ a[role="button"], .tos-bttn {
 /* -- Form Styles -- */
 .crud-form {
 	font-size: 1.1em;
-	width: 375px;
+	width: 350px;
 }
 .required:after {
   content: "*";
@@ -540,7 +543,7 @@ a[role="button"], .tos-bttn {
 #form-errors {
 	
 }
-.crud-form input, .crud-form select, .crud-form textarea, .crud-form button {
+.crud-form input, .crud-form select, .crud-form textarea {
 	padding: .1em;
 	margin: 0;
 	font-size: .95em;
@@ -554,21 +557,13 @@ a[role="button"], .tos-bttn {
 .row-errors {
 	color: red;
 }
-.crud-form button {
-	/*font-size: 1.05em;*/
-	/*margin: 0;*/
-}
 .crud-form label {
 	font-size: 1em;
 	margin-right: .6em;
 	padding-bottom: 2px;
 	width: 140px;
 }
-.crud-form select,  {
-	/*font-size: .9em;*/
-	/*margin: 0;*/
-}
-.crud-form input {
+.crud-form input[type=text] {
 	/*height: 23px;*/
 	width: 250px;
 }
@@ -649,7 +644,9 @@ label[for=fos_user_registration_form_about_me] {
 }
 #reg-tos {
 	margin-top: 1em;
-    /*background-color: buttonface;*/
+}
+#reg-submit, #reg-tos, #crud-submit {
+    cursor: pointer;
 }
 /*------- Feedback ----------------*/
 #feedback-popup {
