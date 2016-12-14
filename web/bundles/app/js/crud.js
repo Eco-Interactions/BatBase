@@ -106,7 +106,6 @@ $(document).ready(function(){
         var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
         var srcTypeFieldRow = buildSrcTypeRow();
         $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer]);
-        ajaxSrcData();
         $('#crud-main').append(formCntnr);
     }
     /** Builds the row for the Source Type field. */
@@ -121,9 +120,6 @@ $(document).ready(function(){
         var srcTypes = ["Author", "Citation", "Publication", "Publisher"];
         var srcOpts = _util.buildSimpleOpts(srcTypes, "-- Select type --");     
         return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
-    }
-    function ajaxSrcData() {
-        // body...
     }
     /**
      * Shows crud ui, all related form fields in labeled rows, for selected source type.
@@ -158,22 +154,22 @@ $(document).ready(function(){
             },
             "citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
-                    "Pages": "text", "Tags": "radio", "Citation": "textArea"},
+                    "Pages": "text", "Tags": "radio", "Citation text": "textArea"},
                 "exclude": true,
-                "required": ["Publication", "Citation"],
-                "order": ["Publication", "Volume", "Issue", "Pages", "Citation", "Tags"]
+                "required": ["Publication", "Citation text"],
+                "order": ["Citation text", "Publication", "Volume", "Issue", "Pages", "Tags"]
             },
             "publication": {
                 "add": { "Publisher": "text", "Title" : "text"},
                 "exclude": ["display name"],
-                "required": ["Display name"],
+                "required": ["Title"],
                 "order": ["Title", "Description", "Publisher", "Year", "Doi", 
                     "Link url", "Link text"]
             },
             "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi"],
-                "required": ["Display name"],
+                "required": ["display name"],
                 "order": ["Display name", "Description", "Link url", "Link text"] }
         };
         return fieldMap[type];
