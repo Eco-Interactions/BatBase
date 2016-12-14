@@ -136,7 +136,7 @@ $(document).ready(function(){
         var srcFields = { "display name": "text", "description": "textArea", 
             "year": "text", "doi": "text", "link text": "text", "link url": "text"};
         var formConfg = getSrcTypeFieldConfig(srcType);  console.log("formConfg = %O", formConfg)
-        return getFormFieldRows(formConfg, srcFields);
+        return getFormFieldRows(srcType, formConfg, srcFields);
     }
     /**
      * Returns a config object for the form of the selected source type with the 
@@ -183,11 +183,11 @@ $(document).ready(function(){
      * Builds all rows for the form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(formCnfg, dfltFields) {                           console.log("  Building Form rows");
-        var buildFieldType = { "text": buildTextInput, "radio": buildRadioInput,
+    function getFormFieldRows(entity, formCnfg, dfltFields) {                           console.log("  Building Form rows");
+        var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
             "textArea": buildTextArea };  
         var defaultRows = buildDefaultRows(formCnfg.exclude, formCnfg.required);
-        var additionalRows = buildAdditionalRows(formCnfg.add, formCnfg.required);
+        var additionalRows = buildAdditionalRows(formCnfg.add, formCnfg.required, entity);
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
 
         /**
@@ -204,11 +204,11 @@ $(document).ready(function(){
             }
             return rows;
         }
-        function buildAdditionalRows(xtraFields, reqFields) {                   console.log("    Building additional rows");
+        function buildAdditionalRows(xtraFields, reqFields, entity) {           console.log("    Building additional rows");
             var fieldInput, isReq, rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                fieldInput = buildFieldType[xtraFields[field]]();      
                 isReq = reqFields.indexOf(field) === -1 ? false : true;
+                fieldInput = buildFieldType[xtraFields[field]](entity);      
                 rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
             }
             return rows;
@@ -224,10 +224,10 @@ $(document).ready(function(){
         });
         return order;
     }
-    function buildTextInput(fieldName) {                                        console.log("            buildTextInput");
-        return _util.buildElem("input", { "type": "text" });
+    function buildTextInput(entity) {                                           console.log("            buildTextInput");
+        return elem = _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
-    function buildTextArea(fieldName) {                                         console.log("            buildTextArea");
+    function buildTextArea(entity) {                                            console.log("            buildTextArea");
         return _util.buildElem("textarea");
     }
     /**
