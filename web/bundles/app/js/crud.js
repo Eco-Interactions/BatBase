@@ -105,8 +105,22 @@ $(document).ready(function(){
         var formCntnr = buildCrudFormCntnr();
         var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
         var srcTypeFieldRow = buildSrcTypeRow();
-        $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer]);
+        var submit = initSubmitBttn();
+        $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer, submit]);
         $('#crud-main').append(formCntnr);
+    }       
+    function initSubmitBttn() {
+        var submit = _util.buildElem("input", {
+            id: "crud-submit", type:"submit", value: "Create Source"});
+        $(submit).css("display", "none").click(valSrcCrud);
+        return submit;
+    }
+    function valSrcCrud(e) {  console.log("e = %O", e)
+        e.preventDefault();
+        return false;
+    }
+    function enableSubmitBttn() {
+        $("#crud-submit").css("display", "initial"); 
     }
     /** Builds the row for the Source Type field. */
     function buildSrcTypeRow() {
@@ -130,6 +144,7 @@ $(document).ready(function(){
         var srcTypes = ["author", "citation", "publication", "publisher"];
         var selectedType = srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
+        enableSubmitBttn();
     }
     /** Builds all fields for selected source type and returns the row elems. */
     function createSrcTypeFields(srcType) {
