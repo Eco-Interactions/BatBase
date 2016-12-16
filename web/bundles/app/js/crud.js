@@ -112,12 +112,8 @@ $(document).ready(function(){
     function initSubmitBttn() {
         var submit = _util.buildElem("input", {
             id: "crud-submit", type:"submit", value: "Create Source"});
-        $(submit).css("display", "none").click(valSrcCrud);
+        $(submit).hide().click(valSrcCrud);
         return submit;
-    }
-    function valSrcCrud(e) {  console.log("e = %O", e)
-        e.preventDefault();
-        return false;
     }
     function enableSubmitBttn() {
         $("#crud-submit").css("display", "initial"); 
@@ -189,6 +185,20 @@ $(document).ready(function(){
         };
         return fieldMap[type];
     }
+    /*----------------------- Validation -------------------------------------*/
+    /**
+     * Form submit handler executed after all required elements have passed html5
+     * verification. Builds a form data object  @buildFormData and 
+     * sends to the server @sendFormData.
+     * 
+     */
+    function valSrcCrud(e) {  console.log("e = %O", e)
+        var formData = buildJsonData();
+    }
+    function buildJsonData() {
+        // body...
+    }
+
     /*----------------------- Helpers ----------------------------------------*/
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
