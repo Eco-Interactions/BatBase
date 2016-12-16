@@ -145,7 +145,8 @@ $(document).ready(function(){
     /** Builds all fields for selected source type and returns the row elems. */
     function createSrcTypeFields(srcType) {
         var srcFields = { "display name": "text", "description": "textArea", 
-            "year": "text", "doi": "text", "link text": "text", "link url": "text"};
+            "year": "text", "doi": "text", "link text": "text", "link url": "text", 
+            "author": "dynamicText" };
         var formConfg = getSrcTypeFieldConfig(srcType);                         //console.log("formConfg = %O", formConfg)
         return getFormFieldRows(srcType, formConfg, srcFields);
     }
@@ -158,7 +159,7 @@ $(document).ready(function(){
         var fieldMap = { 
             "author": { 
                 "add": { "First name": "text", "Middle name": "text", "Last name": "text"}, 
-                "exclude": ["display name", "year", "doi"],
+                "exclude": ["display name", "year", "doi", "author"],
                 "required": ["Last name"], 
                 "order": ["Last name", "First name", "Middle name", "Description", 
                     "Link url", "Link text"]
@@ -166,7 +167,7 @@ $(document).ready(function(){
             "citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
                     "Pages": "text", "Tags": "checkbox", "Citation text": "textArea"},
-                "exclude": true,
+                "exclude": true, //Refigure after source changes.
                 "required": ["Publication", "Citation text"],
                 "order": ["Citation text", "Publication", "Volume", "Issue", "Pages", "Tags"]
             },
@@ -179,7 +180,7 @@ $(document).ready(function(){
             },
             "publisher": { 
                 "add": [], 
-                "exclude": ["Year", "Doi"],
+                "exclude": ["Year", "Doi", "author"],
                 "required": ["display name"],
                 "order": ["Display name", "Description", "Link url", "Link text"] }
         };
