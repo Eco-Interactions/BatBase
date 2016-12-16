@@ -73,6 +73,14 @@ class Citation
     private $tags;
 
     /**
+     * @var \AppBundle\Entity\CitationType
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CitationType", inversedBy="publication")
+     * @ORM\JoinColumn(name="cit_type_id", referencedColumnName="id")
+     */
+    private $citationType;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citation")
@@ -313,6 +321,31 @@ class Citation
     {
         return $this->tags;
     }
+
+    /**
+     * Set citationType.
+     *
+     * @param \AppBundle\Entity\CitationType $citationType
+     *
+     * @return Citation
+     */
+    public function setCitationType(\AppBundle\Entity\CitationType $citationType)
+    {
+        $this->citationType = $citationType;
+
+        return $this;
+    }
+
+    /**
+     * Get citationType.
+     *
+     * @return \AppBundle\Entity\CitationType
+     */
+    public function getCitationType()
+    {
+        return $this->citationType;
+    }
+
 
     /**
      * Set source.
