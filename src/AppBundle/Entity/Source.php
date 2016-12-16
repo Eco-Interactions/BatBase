@@ -364,30 +364,6 @@ class Source
     }
 
     /**
-     * Set isCitation.
-     *
-     * @param bool $isCitation
-     *
-     * @return Source
-     */
-    public function setIsCitation($isCitation)
-    {
-        $this->isCitation = $isCitation;
-
-        return $this;
-    }
-
-    /**
-     * Get isCitation.
-     *
-     * @return bool
-     */
-    public function getIsCitation()
-    {
-        return $this->isCitation;
-    }
-
-    /**
      * Set isDirect.
      *
      * @param bool $isDirect
