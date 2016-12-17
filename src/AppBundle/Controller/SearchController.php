@@ -263,37 +263,73 @@ class SearchController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
-
         $em = $this->getDoctrine()->getManager();
-        $srcRcrds = new \stdClass;
-        $pubTypes = $this->getPubTypes($em);
-
         $srcEntities = $em->getRepository('AppBundle:Source')->findAll();
+        $srcData = $this->buildSrcDataObj($em);
 
         foreach ($srcEntities as $srcEntity) 
         {                    
             $id = $srcEntity->getId(); 
-            $srcRcrds->$id = $this->getSrcRcrd($srcEntity);
+            $type = $srcEntity->getSourceType()->getSlug();
+            array_push($srcData->$type->ids, $id);
+            $srcData->srcRcrds->$id = $this->getSrcRcrd($srcEntity);
         }
 
         $response = new JsonResponse();
         $response->setData(array(
-            'srcRcrds' => $srcRcrds, 'pubTypes' => $pubTypes            
+            'srcData' => $srcData
         ));
-
         return $response;
     }
+    /**
+     * Builds a Source Data Object with an array of all Source Types (srcTypes), 
+     * an object for all source records to be stored by id (srcRcrds), nested objects 
+     * for each source type ($type) which contain an array of (ids) for all 
+     * source records of the type and, if they exist, an array of their (types).
+     */
+    private function buildSrcDataObj($em)
+    {
+        $dataObj = new \stdClass;
+        $dataObj->srcTypes = $this->getSrcTypes($em);
+        $dataObj->srcRcrds = new \stdClass;
+        
+        foreach ($dataObj->srcTypes as $typeId => $type) {
+            $dataObj->$type = new \stdClass;
+            $dataObj->$type->ids = [];
+        }
+        $dataObj->citation->types = $this->getCitTypes($em);
+        $dataObj->publication->types = $this->getPubTypes($em);
 
+        return $dataObj;
+    }
+    private function getSrcTypes($em)
+    {
+        $srcTypes = $em->getRepository('AppBundle:SourceType')->findAll();
+        $ary = [];
+        return $this->buildTypeAry($srcTypes, $ary);
+    }
     private function getPubTypes($em)
     {
         $pubTypes = $em->getRepository('AppBundle:PublicationType')->findAll();
-        $pubTypeAry = [ "0" => "Unspecified"];
-        
-        foreach ($pubTypes as $pubType) {  
-            $typeAry = [strval($pubType->getId()) => $pubType->getDisplayName()];
-            $pubTypeAry = array_merge($pubTypeAry, $typeAry);
+        $ary = [ "0" => "unspecified"];
+        return $this->buildTypeAry($pubTypes, $ary);
+    }
+    private function getCitTypes($em)
+    {
+        $citTypes = $em->getRepository('AppBundle:CitationType')->findAll();
+        $ary = [ "0" => "unspecified"];
+        return $this->buildTypeAry($citTypes, $ary);
+    }
+    /**
+     * Returns an associative array of Type ids and their lowercased names.
+     */
+    private function buildTypeAry($types, $ary)
+    {
+        foreach ($types as $type) {
+            $subAry = [strval($type->getId()) => $type->getSlug()];
+            $ary = array_merge($ary, $subAry);
         }
-        return $pubTypeAry;
+        return $ary;
     }
     private function getSrcRcrd($srcEntity)
     {
@@ -307,8 +343,6 @@ class SearchController extends Controller
         $data->linkDisplay = $srcEntity->getLinkDisplay();
         $data->isDirect = $srcEntity->getIsDirect();
 
-        $data->citation = $srcEntity->getIsCitation() ? 
-            $this->getCitationData($srcEntity) : null;
         $data->interactions = $this->getInteractionIds($srcEntity->getInteractions());
         $data->sourceType = $this->getSourceTypeData($srcEntity);
         $data->tags = $this->getSourceTags($srcEntity);
@@ -322,12 +356,15 @@ class SearchController extends Controller
     private function getSourceTypeData($srcEntity)
     {
         $data = new \stdClass;
+        $sourceType = $srcEntity->getSourceType()->getSlug();            //print("\nsourceType = ".$sourceType);
+        $getTypeData = [ 
+            "author" => function($entity){ $this->getAuthorData($entity); },
+            "citation" => function($entity){ $this->getCitationData($entity); },
+            "publication" => function($entity){ $this->getPublicationData($entity); }
+        ];
 
-        $sourceType = $srcEntity->getSourceType()->getDisplayName();            //print("\nsourceType = ".$sourceType);
-        if ($sourceType === "Author") {
-            $data->author = $this->getAuthorData($srcEntity);
-        } else if ($sourceType === "Publication") {
-            $data->publication = $this->getPublicationData($srcEntity);
+        if (array_key_exists($sourceType, $getTypeData)) {
+            $data->$sourceType = call_user_func($getTypeData[$sourceType], $srcEntity);
         }
         return $data;
     }
