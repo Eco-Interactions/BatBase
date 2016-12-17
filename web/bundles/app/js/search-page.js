@@ -981,31 +981,22 @@
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
 	 * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
 	 */
-    function initSrcSearchUi(sortedSrcDomains, srcRcrdsById) {		            //console.log("init search ui");
+    function initSrcSearchUi(srcDomainRcrds, srcRcrds) {                        //console.log("init search ui");
         var domainRcrds;
-        rcrdsById = srcRcrdsById;
-        if (!$("#sel-domain").length) { buildSrcDomainHtml(sortedSrcDomains); }  
+        rcrdsById = srcRcrds;
+        if (!$("#sel-domain").length) { buildSrcDomainHtml(srcDomainRcrds); }  
         setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
         initSrcTree(domainRcrds);
         getInteractionsAndFillTree();
     }
-    /** Restores stored domain from previous session or sets the default 'Publications'. */
-    function setSrcDomain() {
-        var srcDomainVal;
-        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
-        if ($('#sel-domain').val() === null) { 
-            srcDomainVal = storedDomain !== null ? storedDomain : "pubs";  
-            $('#sel-domain').val(srcDomainVal);
-        }
-    }
     /**
      * Builds the select box for the source domain types that will become the data
      * tree nodes displayed in the grid. 
      */
-    function buildSrcDomainHtml(data) {                                        	//console.log("buildTaxaDomainHtml called. ");
+    function buildSrcDomainHtml(data) {                                         //console.log("buildTaxaDomainHtml called. ");
         var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
-        var domainOpts = getDomainOpts(data);   								//console.log("domainOpts = %O", domainOpts);
+        var domainOpts = getDomainOpts(data);                                   //console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(_util.buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
 
         $('#sort-opts').append(browseElems);
@@ -1016,11 +1007,20 @@
             var sourceDomains = Object.keys(data);
             var srcTypeMap = { "author": "auths", "publication": "pubs" };
             var opts = sourceDomains.map(function(srcType){
-            	return { value: srcTypeMap[srcType], text: _util.ucfirst(srcType) + 's' };
+                return { value: srcTypeMap[srcType], text: _util.ucfirst(srcType) + 's' };
             });
             return opts;
         }
     } /* End buildSrcDomainHtml */
+    /** Restores stored domain from previous session or sets the default 'Publications'. */
+    function setSrcDomain() {
+        var srcDomainVal;
+        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
+        if ($('#sel-domain').val() === null) { 
+            srcDomainVal = storedDomain !== null ? storedDomain : "pubs";  
+            $('#sel-domain').val(srcDomainVal);
+        }
+    }
     /** Event fired when the source domain select box has been changed. */
     function onSrcDomainChange(e) {  
         clearPreviousGrid();
@@ -1047,7 +1047,7 @@
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global focusStorage obj as 'curTree', 
      */
-    function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
+    function initSrcTree(domainRcrds) {                                         console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
         if (focusStorage.curDomain === "pubs") { tree = buildPubSrcTree(domainRcrds);   
         } else { tree = buildAuthSrcTree(domainRcrds); }
@@ -1065,7 +1065,7 @@
         return sortedTree;
         /** Alphabetizes child source nodes. Skips interaction records. */
         function sortChildSrcs(src) { 
-            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {
+            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {      //console.log("src.children = %O", src.children);
                 src.children = src.children.sort(alphaSrcNames);
                 src.children.forEach(sortChildSrcs);
             }
@@ -1077,7 +1077,7 @@
      * Display names are buried in the 'sourceType' object because citation display 
      * names are, incorrectly and emporarily, their short-text rather than their title.
      */
-    function alphaSrcNames(a, b) {  
+    function alphaSrcNames(a, b) {                                              //console.log("alphaSrcNames a = %O b = %O", a, b);
         var xName = a.sourceType[Object.keys(a.sourceType)[0]].displayName;
         var yName = b.sourceType[Object.keys(b.sourceType)[0]].displayName;
         var x = xName.toLowerCase();
