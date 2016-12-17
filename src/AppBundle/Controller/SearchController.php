@@ -353,21 +353,6 @@ class SearchController extends Controller
 
         return $data;
     }
-    private function getSourceTypeData($srcEntity)
-    {
-        $data = new \stdClass;
-        $sourceType = $srcEntity->getSourceType()->getSlug();            //print("\nsourceType = ".$sourceType);
-        $getTypeData = [ 
-            "author" => function($entity){ $this->getAuthorData($entity); },
-            "citation" => function($entity){ $this->getCitationData($entity); },
-            "publication" => function($entity){ $this->getPublicationData($entity); }
-        ];
-
-        if (array_key_exists($sourceType, $getTypeData)) {
-            $data->$sourceType = call_user_func($getTypeData[$sourceType], $srcEntity);
-        }
-        return $data;
-    }
     /** Returns an array with the tags for the source. */
     private function getSourceTags($srcEntity)
     {
@@ -389,6 +374,21 @@ class SearchController extends Controller
             array_push($childIds, $child->getId());
         }
         return count($children) > 0 ? $childIds : null; 
+    }
+    private function getSourceTypeData($srcEntity)
+    {
+        $data = new \stdClass;
+        $sourceType = $srcEntity->getSourceType()->getSlug();                   //print("\nsourceType = ".$sourceType);
+        $getTypeData = [ 
+            "author" => function($entity){ return $this->getAuthorData($entity); },
+            "citation" => function($entity){ return $this->getCitationData($entity); },
+            "publication" => function($entity){ return $this->getPublicationData($entity); }
+        ];
+
+        if (array_key_exists($sourceType, $getTypeData)) {
+            $data->$sourceType = call_user_func($getTypeData[$sourceType], $srcEntity);
+        }
+        return $data;
     }
     /** Returns an associative array with the author data. */
     private function getAuthorData($srcEntity)
