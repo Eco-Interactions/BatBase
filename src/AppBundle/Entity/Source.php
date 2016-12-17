@@ -69,13 +69,6 @@ class Source
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_citation", type="boolean", nullable=true)
-     */
-    private $isCitation;
-
-    /**
-     * @var bool
-     *
      * @ORM\Column(name="is_direct", type="boolean", nullable=true)
      */
     private $isDirect;
