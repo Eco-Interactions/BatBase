@@ -1,6 +1,6 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
-    --search pg-- 
+    --crud--
 
 
 
@@ -71,31 +71,34 @@ Notes::
         --Admin sign-in css is broken
         --add invalid country and region check error handling (@checkCntryAndRegion & checkRegion)
     --Site-
-        !! Add citation editing back !!
-
-        --Firefox does not look the same as chrome. Spend a day fixing this!!!
-            --team section styles
-                #team-sect .second-col, #team-sect .first-col {
-                    width: 420px;
-                    flex-shrink: 0;
-                }
-                #team-sect .four-col-outer>div.fourth-col {
-                    width: 220px;
-                    flex-shrink: 0;
-                }
-            -- Definition Pg
-                #def-frame .first-col {
-                    width: 550px;
-                    flex-shrink: 0;
-                }
+        --CSS
+            --Find and fix leaky styles (see file)
+            --CSS replacing/optimizing/refactoring
+            --Firefox does not look the same as chrome. Spend a day fixing this!!!
+                --team section styles
+                    #team-sect .second-col, #team-sect .first-col {
+                        width: 420px;
+                        flex-shrink: 0;
+                    }
+                    #team-sect .four-col-outer>div.fourth-col {
+                        width: 220px;
+                        flex-shrink: 0;
+                    }
+                -- Definition Pg
+                    #def-frame .first-col {
+                        width: 550px;
+                        flex-shrink: 0;
+                    }
+        --ENTITIES
+            -- Rename deletedAt field to deleted_at
         --add exit click event for menu
         --add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
         -- add copy csv
         -- fix csv exports??
         -- t&c sitemap & presentation
-        -- css replacing and cleanup
         -- track down render func sudden case sensitivity
+
 
 
 
