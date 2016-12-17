@@ -936,42 +936,46 @@
      * to @initSrcSearchUi.  
      */
    	function getSources() {
-		var sortedSrcs = {};
-		var srcRcrdsById = localStorage ? JSON.parse(localStorage.getItem('srcRcrds')) : false; 
-		if( srcRcrdsById ) {  //console.log("Stored Source data Loaded");
-			sortedSrcs.author = JSON.parse(localStorage.getItem('authRcrds'));
-			sortedSrcs.publication = JSON.parse(localStorage.getItem('pubRcrds'));
-			initSrcSearchUi(sortedSrcs, srcRcrdsById);
+		var domainRcrds = {};
+		var srcRcrds = localStorage ? 
+            JSON.parse(localStorage.getItem('srcRcrds')) : false; 
+		if( srcRcrds ) {                                                        console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
+			domainRcrds.author = JSON.parse(localStorage.getItem('authRcrds'));
+			domainRcrds.publication = JSON.parse(localStorage.getItem('pubRcrds'));
+			initSrcSearchUi(domainRcrds, srcRcrds);
             // seperateAndStoreSrcs({srcRcrds: srcRcrdsById, pubTypes: JSON.parse(localStorage.getItem('pubTypes')) }); 
 		} else { //console.log("Sources Not Found In Storage.");
-			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcs);
+			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcData);
 		}
 	}
-	function seperateAndStoreSrcs(data) {						                console.log("source data recieved. %O", data);
-		var preppedData = sortAuthAndPubRcrds(data.srcRcrds); 					console.log("preppedData = %O", preppedData);
+	function seperateAndStoreSrcData(dataObj) {						            console.log("~~~Source data recieved. %O", dataObj);
+        var data = dataObj.srcData;
+        var domainRcrds = getDomainRcrds(data);                                 //console.log("domainRcrds = %O", domainRcrds);
         populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-		populateStorage('pubTypes', JSON.stringify(data.pubTypes));
-		populateStorage('authRcrds', JSON.stringify(preppedData.author));
-		populateStorage('pubRcrds', JSON.stringify(preppedData.publication));
-		initSrcSearchUi(preppedData, data.srcRcrds);
+        populateStorage('pubTypes', JSON.stringify(data.publication.types));
+        populateStorage('srcTypes', JSON.stringify(data.srcTypes));
+		populateStorage('citTypes', JSON.stringify(data.citation.types));
+		populateStorage('authRcrds', JSON.stringify(domainRcrds.author));
+		populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication));
+		initSrcSearchUi(domainRcrds, data.srcRcrds);
 	}
     /**
-     * Sources have two types of 'tree' data: Authors -> Interactions, and
-     * Publications->Citations->Interactions. Publications are collected by first 
-     * identifiying Citations and getting their direct publication parent to reduce redundant tree data.
+     * Sources have two domains, i.e. types of 'tree' data: 
+     * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
-    function sortAuthAndPubRcrds(srcRcrds) {                                    console.log("srcRcrds = %O", srcRcrds);
-        var type, parentPub;
-        var sortedSrcs = { author: {}, publication: {} };
+    function getDomainRcrds(srcData) {                                          //console.log("srcData = %O", srcData);
+        var curRcrd, parentPub;
+        var domains = { author: {}, publication: {} };
         
-        for (var key in srcRcrds) {
-            type = Object.keys(srcRcrds[key].sourceType)[0];  
-            if (type === "author" || type === "publication") {
-                sortedSrcs[type][srcRcrds[key].displayName] = srcRcrds[key];
-            } 
+        for (var key in domains) {
+            srcData[key].ids.forEach(function(id){
+                curRcrd = getDetachedRcrd(id, srcData.srcRcrds);
+                domains[key][curRcrd.displayName] = curRcrd;
+            });
         }
-        return sortedSrcs; 
+        return domains; 
     } /* End sortAuthAndPubRcrds */
+    
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 
 	 * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
