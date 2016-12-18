@@ -206,25 +206,81 @@ $(document).ready(function(){
         };
         return fieldMap[type];
     }
-    /*----------------------- Validation -------------------------------------*/
+    /*----------------------- Validation ---------------------------------------------------------*/
     /**
-     * Form submit handler executed after all required elements have passed html5
-     * verification. Builds a form data object  @buildFormData and 
-     * sends to the server @sendFormData.
-     * 
+     * Form submit handler calls @buildFormData to validate required fields have 
+     * values and return a json-ready object of form data to send to the server 
+     * @sendFormData.
      */
     function valSrcCrud(e) {  console.log("e = %O", e)
-        var formData = buildJsonData();
+        var formData = buildSrcFormData();
+        // sendFormData(formData);
     }
-    function buildJsonData() {
-        // body...
+    function buildSrcFormData() {
+        var formElems = $('form[name=crud]')[0].elements;                       
+        return getFieldData(formElems);
     }
+    /**
+     * If all required fields have values, an object is returned source type as 
+     * the top key for an object with the data from the form keyed under server-ready 
+     * field names.
+     */
+    function getFieldData(formElems) {
+        var returnObj = {};
+        var data = {};
+        var type = crudParams.srcTypes[$(formElems[0]).val()];                  //console.log("SourceType selected = ", type);
+        /* skips source type select and submit button */
+        for (var i = 1; i < formElems.length-2; i++) {                          
+            valAndStoreFieldData(formElems[i]);
+        }        
+        returnObj[type] = data;                                                 console.log("***__dataObj = %O", returnObj);
+        return returnObj;
+        /**
+         * Gets field name from the parent label's innerText prop and the field value.
+         * If value is empty, @isEmptyRequiredField is checked and any error reported.
+         * Else, @addFormFieldData.
+         */
+        function valAndStoreFieldData(formElem) {                               //console.log("valAndStoreFieldData for formElem = %O", formElem);
+            var fieldName = formElem.parentNode.innerText.trim();               
+            var fieldVal = $(formElem).val();  
 
+            if (fieldVal === "") { ifIsEmptyRequiredField(formElem, fieldName);  
+            } else { addFieldData(formElem, fieldName, fieldVal); }
+        }
+        /** Adds the field value keyed under the server-ready field name. */
+        function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
+            var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
+            data[dbField] = fieldVal;
+        }
+    } /* End getFieldData */
+    /**
+     * If field name is in the form config's required array, show an error on
+     * that field to the user: "Please fill out [fieldName]."
+     */
+    function ifIsEmptyRequiredField(formElem, fieldName) {
+        if (crudParams.typeFormConfg.required.indexOf(fieldName) !== -1) {
+            crudFieldError(fieldName, formElem, "emptyRequiredField");
+        }
+    }
     /*----------------------- Helpers ----------------------------------------*/
+    /** Shows the user an error message above the field row using the tag's handler. */
+    function crudFieldError(fieldName, fieldElem, errorTag) {
+        var errorHandlers = {
+            "emptyRequiredField" : emptyRequiredFieldError
+        };
+        errorHandlers[errorTag](fieldName, fieldElem);
+    }
+    /** Error: Empty required field. Message: "Please fill out [field]." */
+    function emptyRequiredFieldError(fieldName, fieldElem) {                    //console.log("####emptyRequiredFieldError>>> %s = %O", fieldName, fieldElem);
+        var msg = "<p>Please fill in "+fieldName+".</p>";
+        var field = fieldName.split(' ').join('');
+        var fieldErrorElem = $('#'+field+'_errs')[0];       
+        fieldErrorElem.innerHTML = msg;
+    }
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
         var form = document.createElement("form");
-        $(form).attr({"action": "", "method": "POST", name: "crud-form"});
+        $(form).attr({"action": "", "method": "POST", "name": "crud"});
         form.className = "crud-form";
         return form;
     }
@@ -246,7 +302,7 @@ $(document).ready(function(){
         function buildDefaultRows(exclude, reqFields) {                         //console.log("    Building default rows");
             var fieldInput, rows = [];
             for (var field in dfltFields) {  
-                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }      //console.log("      field = ", field);
+                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
                 fieldInput = buildFieldType[dfltFields[field]]();      
                 isReq = ifRequiredField(field, fieldInput, reqFields);
                 rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));

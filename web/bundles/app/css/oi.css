@@ -556,6 +556,7 @@ a[role="button"], .tos-bttn {
 }
 .row-errors {
 	color: red;
+	font-size: .9em;
 }
 .crud-form label {
 	font-size: 1em;
