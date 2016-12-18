@@ -96,10 +96,10 @@ class SourceController extends Controller
     /**
      * Ajax action to create a new Source entity.
      *
-     * @Route("/post", name="app_source_post")
+     * @Route("/post", name="app_source_ajax_post")
      * @Method("POST")
      */
-    public function postAction(Request $request)            // postNewAction
+    public function ajaxPostAction(Request $request)            // postNewAction
     {
         // $requestContent = $request->getContent();
         // $pushedData = json_decode($requestContent);

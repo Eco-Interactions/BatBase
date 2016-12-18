@@ -90,7 +90,7 @@
      * Recieves messages from the CRUD popup window, binds the origin/source to a 
      * global sendCrudPgMsg func and executes the sent tag's handler.
      */
-    function crudMsgHandler(msg) {                                              console.log("Msg recieved = %O", msg);
+    function crudMsgHandler(msg) {                                              //console.log("Msg recieved = %O", msg);
         var msgHandlers = {};
         sendCrudPgMsg = sendMsg.bind(null, msg.source, msg.origin);
         msgHandlers[msg.data.tag](msg.data.data);
@@ -111,7 +111,7 @@
         $('button[name="show-hide-col"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
         addFutureDevMsg();
     }
-    function addFutureDevMsg() { console.log("addFutureDevMsg")
+    function addFutureDevMsg() { //console.log("addFutureDevMsg")
         var $msgDiv = $('<div/>', { id: 'futrDevMsg' })
         $msgDiv.html("<p><b>This is where the search options available for all views will go. </b>" + 
             "Such as year and elevation range, habitat and interaction type, " +
@@ -120,7 +120,7 @@
             "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
     }
-	function selectSearchFocus(e) {  							                console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
+	function selectSearchFocus(e) {  							                //console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
 	    showPopUpMsg();
 	    if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
 	    if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
@@ -510,7 +510,7 @@
             };
         });
     }
-    function loadLevelSelectElems(levelOptsObj, levels) {             console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
+    function loadLevelSelectElems(levelOptsObj, levels) {                       //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
         var elems = buildTaxaSelects(levelOptsObj, levels);
         clearCol2();        
         $('#opts-col2').append(elems);
@@ -939,7 +939,7 @@
 		var domainRcrds = {};
 		var srcRcrds = localStorage ? 
             JSON.parse(localStorage.getItem('srcRcrds')) : false; 
-		if( srcRcrds ) {                                                        console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
+		if( srcRcrds ) {                                                        //console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
 			domainRcrds.author = JSON.parse(localStorage.getItem('authRcrds'));
 			domainRcrds.publication = JSON.parse(localStorage.getItem('pubRcrds'));
 			initSrcSearchUi(domainRcrds, srcRcrds);
@@ -948,7 +948,7 @@
 			sendAjaxQuery({}, 'search/source', seperateAndStoreSrcData);
 		}
 	}
-	function seperateAndStoreSrcData(dataObj) {						            console.log("~~~Source data recieved. %O", dataObj);
+	function seperateAndStoreSrcData(dataObj) {						            //console.log("~~~Source data recieved. %O", dataObj);
         var data = dataObj.srcData;
         var domainRcrds = getDomainRcrds(data);                                 //console.log("domainRcrds = %O", domainRcrds);
         populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
@@ -1047,7 +1047,7 @@
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global focusStorage obj as 'curTree', 
      */
-    function initSrcTree(domainRcrds) {                                         console.log("initSrcTree domainRcrds = %O", domainRcrds);
+    function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
     	var tree;
         if (focusStorage.curDomain === "pubs") { tree = buildPubSrcTree(domainRcrds);   
         } else { tree = buildAuthSrcTree(domainRcrds); }
@@ -1094,7 +1094,7 @@
      * ->->Citation Title
      * ->->->Interactions Records
      */
-    function buildPubSrcTree(pubRcrds) {                                        console.log("buildPubSrcTree. Tree = %O", pubRcrds);
+    function buildPubSrcTree(pubRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
     	for (var pubName in pubRcrds) {
     		pubRcrds[pubName] = getPubData(pubRcrds[pubName]);
     	}
@@ -1162,7 +1162,7 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
         } else { loadAuthSearchHtml(srcTree); }
@@ -1308,7 +1308,7 @@
      * and the grid is updated with the filtered data tree. Selected values are 
      * derived and stored @getSelectedVals.      
      * */
-    function updateLocSearch() {                                                console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
+    function updateLocSearch() {                                                //console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
         var selElemId = $(this).attr("id");
         var selVal = $(this).val();
         var selTypeMap = { selCountry: "country", selRegion: "region" };
