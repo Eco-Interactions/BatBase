@@ -159,45 +159,50 @@ $(document).ready(function(){
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
         enableSubmitBttn();
     }
-    /** Builds all fields for selected source-type and returns the row elems. */
+    /** 
+     * Builds all fields for selected source-type and returns the row elems.
+     * Also adds the source-type form config obj to the global crudParams obj.
+     */
     function createSrcTypeFields(srcType) {
-        var typeFormConfg = getSrcTypeFieldConfig(srcType);                         //console.log("formConfg = %O", formConfg)
-        crudParams.typeFormConfg = formConfg;
-        return getFormFieldRows(srcType, formConfg, srcFields);
+        var typeFormConfg = getSrcTypeFieldConfig(srcType);                     //console.log("typeFormConfg = %O", typeFormConfg)
+        crudParams.typeFormConfg = typeFormConfg;
+        return getFormFieldRows(srcType, typeFormConfg, crudParams.srcFields);
     }
     /**
      * Returns a config object for the form of the selected source-type with the 
      * fields to add to and exclude from the default source fields, the required
      * fields, and the final order of the fields.
+     * Note: 'order' and 'required' arrays are used to matched the form elements' 
+     * id, which has no spaces. 
      */
     function getSrcTypeFieldConfig(type) {
         var fieldMap = { 
-            "author": { 
-                "add": { "First name": "text", "Middle name": "text", "Last name": "text"}, 
-                "exclude": ["display name", "year", "doi", "author"],
-                "required": ["Last name"], 
-                "order": ["Last name", "First name", "Middle name", "Description", 
-                    "Link url", "Link text"]
+            "Author": { 
+                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
+                "exclude": ["display Name", "Year", "Doi", "Author"],
+                "required": ["Last Name"], 
+                "order": [ "LastName", "FirstName", "MiddleName", "Description", 
+                    "LinkUrl", "LinkText"]
             },
-            "citation": {
+            "Citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
-                    "Pages": "text", "Tags": "checkbox", "Citation text": "textArea"},
+                    "Pages": "text", "Tags": "checkbox", "Citation Text": "textArea"},
                 "exclude": true, //Refigure after source changes.
-                "required": ["Publication", "Citation text"],
-                "order": ["Citation text", "Publication", "Volume", "Issue", "Pages", "Tags"]
+                "required": ["Publication", "Citation Text"],
+                "order": ["CitationText", "Publication", "Volume", "Issue", "Pages", "Tags"]
             },
-            "publication": {
+            "Publication": {
                 "add": { "Publisher": "text", "Title" : "text"},
-                "exclude": ["display name"],
+                "exclude": ["Display Name"],
                 "required": ["Title"],
                 "order": ["Title", "Description", "Publisher", "Year", "Doi", 
-                    "Link url", "Link text"]
+                    "LinkUrl", "LinkText"]
             },
-            "publisher": { 
+            "Publisher": { 
                 "add": [], 
-                "exclude": ["Year", "Doi", "author"],
-                "required": ["display name"],
-                "order": ["Display name", "Description", "Link url", "Link text"] }
+                "exclude": ["Year", "Doi", "Author"],
+                "required": ["DisplayName"],
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
         };
         return fieldMap[type];
     }
@@ -229,7 +234,7 @@ $(document).ready(function(){
      */
     function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
         var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
-            "textArea": buildTextArea };  
+            "textArea": buildTextArea, "dynamicText": buildDynamicTextInput };  
         var defaultRows = buildDefaultRows(formCnfg.exclude, formCnfg.required);
         var additionalRows = buildAdditionalRows(formCnfg.add, formCnfg.required, entity);
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -253,10 +258,11 @@ $(document).ready(function(){
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
                 fieldInput = buildFieldType[xtraFields[field]](entity);      
                 isReq = ifRequiredField(field, fieldInput, reqFields);
-                rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
+                rows.push(buildFormRow(field, fieldInput, isReq));
             }
             return rows;
         }
+        function buildDynamicTextInput() {}
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -290,9 +296,9 @@ $(document).ready(function(){
      * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
      * interactions have tags currently. Eventually tags will be pulled from the server.
      */
-    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
+    function buildCheckboxInput(entity) {                                       console.log("            entity = %s buildCheckboxInput", entity);
         var span, lbl;
-        var opts = { "citation": ["Secondary"] }; 
+        var opts = { "Citation": ["Secondary"] }; 
         var divCntnr = document.createElement("div");
         opts[entity].forEach(function(opt) {
             span = document.createElement("span");
@@ -308,11 +314,12 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(lblTxt, fieldInput, isReq) {
-        var rowDiv = _util.buildElem("div", { class: "form-row", id: lblTxt + "_row"});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: lblTxt+"_errs"});
+    function buildFormRow(fieldName, fieldInput, isReq) {
+        var field = fieldName.split(' ').join('');
+        var rowDiv = _util.buildElem("div", { class: "form-row", id: field + "_row"});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
-        var label = _util.buildElem("label", {text: lblTxt});
+        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
         if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
         $(fieldRow).append([label, fieldInput]);
         $(rowDiv).append([errorDiv, fieldRow]);
