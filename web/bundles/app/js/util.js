@@ -4,18 +4,21 @@
         buildElem: buildElem,
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
+        lcfirst: lcfirst, 
         ucfirst: ucfirst, 
     };
 
     extendJquery();
 
-    /*---------- Helpers -----------------------------------------------------*/
-    function ucfirst(string) { 
-        return string.charAt(0).toUpperCase() + string.slice(1); 
+    /*---------- String Helpers ----------------------------------------------*/
+    function ucfirst(str) { 
+        return str.charAt(0).toUpperCase() + str.slice(1); 
     }
-
-    /*------------ HTML ------------------------------------------------------*/
-    /*------------ HTML Functions -------------------------------------------*/
+    function lcfirst(str) {
+        var f = str.charAt(0).toLowerCase();
+        return f + str.substr(1);
+    }
+    /*-------- - HTML Helpers ------------------------------------------------*/
     function buildElem(tag, attrs) {                                           //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
         var elem = document.createElement(tag);
         if (attrs) { addAttributes(elem, attrs); }
@@ -60,7 +63,7 @@
      * Creates an opts obj for each 'item' in array with the index as the value and 
      * the 'item' as the text.
      */
-    function buildSimpleOpts(optAry, placeholder) {   console.log("buildSimpleOpts(optAry= %O, placeholder= %s)", optAry, placeholder);
+    function buildSimpleOpts(optAry, placeholder) {                             //console.log("buildSimpleOpts(optAry= %O, placeholder= %s)", optAry, placeholder);
         var opts = []
         optAry.forEach(function(option, idx){
             opts.push({
