@@ -7,7 +7,7 @@
  * allow editing and saving of the content within using the trumbowyg library.
  */
 $(document).ready(function(){  
-    var userRole, envUrl;
+    var userRole, envUrl, crudParams = {};
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     // eif.crud = {};    
@@ -96,12 +96,31 @@ $(document).ready(function(){
     }
 /*-------------------------------- Source Funcs ------------------------------*/
     /**
-     * Creates the source form with relevant fields for the Source entity and the
-     * selected Source Type. On init, only the Source Type select row is shown.
-     * Once selected, the source form is built @initSrcTypeForm. Note: The 
-     * volatileFieldsContainer holds all source-type specific fields.
+     * Resets and fills the global crudParams obj with the basic universal src 
+     * params @buildBaicSrcCrudParams. Creates the source form @initCrudSrcForm.
      */
     function initSrcCrudView() {
+        buildBasicSrcCrudParams();
+        initSrcCrudForm();
+    }       
+    /**
+     * Resets and fills the global crudParams obj with the src params necessary for
+     * all source crud views.
+     */
+    function buildBasicSrcCrudParams() {
+        crudParams = {};
+        crudParams.srcTypes = ["Author", "Citation", "Publication", "Publisher"];
+        crudParams.srcFields = { "display name": "text", "description": "textArea", 
+            "year": "text", "doi": "text", "link text": "text", "link url": "text", 
+            "author": "dynamicText" };
+    }     
+    /**
+     * Creates the source form with relevant fields for the selected source-type. 
+     * On init, only the source-type select row is shown. Once selected, the source 
+     * form is built @initSrcTypeForm. Note: The volatileFieldsContainer holds 
+     * all source-type specific fields.
+     */
+    function initSrcCrudForm() {
         var formCntnr = buildCrudFormCntnr();
         var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
         var srcTypeFieldRow = buildSrcTypeRow();
@@ -118,40 +137,34 @@ $(document).ready(function(){
     function enableSubmitBttn() {
         $("#crud-submit").css("display", "initial"); 
     }
-    /** Builds the row for the Source Type field. */
+    /** Builds the row for the source-type field. */
     function buildSrcTypeRow() {
         var selElem = buildSrcTypeSelect();
         $(selElem).val("placeholder");
         $(selElem).find('option[value="placeholder"]').hide();
         return buildFormRow("Source Type", selElem, true);
     }
-    /** Creates the Source Type select dropdown. */
+    /** Creates the source-type select dropdown. */
     function buildSrcTypeSelect() {
-        var srcTypes = ["Author", "Citation", "Publication", "Publisher"];
-        var srcOpts = _util.buildSimpleOpts(srcTypes, "-- Select type --");     
+        var srcOpts = _util.buildSimpleOpts(crudParams.srcTypes, "-- Select type --");     
         return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
     }
     /**
-     * Shows crud ui, all related form fields in labeled rows, for selected source type.
-     * Note >> Citations are not technically a 'source type' but, as a detail table 
-     * for Source, are handled very similarly. 
+     * Shows crud ui, all related form fields in labeled rows, for selected source-type.
      */
     function initSrcTypeForm(e) {                                        
-        var srcTypes = ["author", "citation", "publication", "publisher"];
-        var selectedType = srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
+        var selectedType = crudParams.srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
         enableSubmitBttn();
     }
-    /** Builds all fields for selected source type and returns the row elems. */
+    /** Builds all fields for selected source-type and returns the row elems. */
     function createSrcTypeFields(srcType) {
-        var srcFields = { "display name": "text", "description": "textArea", 
-            "year": "text", "doi": "text", "link text": "text", "link url": "text", 
-            "author": "dynamicText" };
-        var formConfg = getSrcTypeFieldConfig(srcType);                         //console.log("formConfg = %O", formConfg)
+        var typeFormConfg = getSrcTypeFieldConfig(srcType);                         //console.log("formConfg = %O", formConfg)
+        crudParams.typeFormConfg = formConfg;
         return getFormFieldRows(srcType, formConfg, srcFields);
     }
     /**
-     * Returns a config object for the form of the selected source type with the 
+     * Returns a config object for the form of the selected source-type with the 
      * fields to add to and exclude from the default source fields, the required
      * fields, and the final order of the fields.
      */
