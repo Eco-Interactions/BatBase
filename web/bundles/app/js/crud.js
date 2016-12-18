@@ -100,19 +100,21 @@ $(document).ready(function(){
      * params @buildBaicSrcCrudParams. Creates the source form @initCrudSrcForm.
      */
     function initSrcCrudView() {
-        buildBasicSrcCrudParams();
+        buildBasicSrcCrudParams("create");
         initSrcCrudForm();
     }       
     /**
      * Resets and fills the global crudParams obj with the src params necessary for
      * all source crud views.
      */
-    function buildBasicSrcCrudParams() {
+    function buildBasicSrcCrudParams(action) {
         crudParams = {};
+        crudParams.view = "source";
+        crudParams.action = action;
         crudParams.srcTypes = ["Author", "Citation", "Publication", "Publisher"];
-        crudParams.srcFields = { "display name": "text", "description": "textArea", 
-            "year": "text", "doi": "text", "link text": "text", "link url": "text", 
-            "author": "dynamicText" };
+        crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
+            "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+            "Author": "dynamicText" };
     }     
     /**
      * Creates the source form with relevant fields for the selected source-type. 
