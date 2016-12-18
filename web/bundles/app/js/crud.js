@@ -129,10 +129,10 @@ $(document).ready(function(){
         var submit = initSubmitBttn();
         $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer, submit]);
         $('#crud-main').append(formCntnr);
-    }       
+    }
     function initSubmitBttn() {
-        var submit = _util.buildElem("input", {
-            id: "crud-submit", type:"submit", value: "Create Source"});
+        var submit = _util.buildElem("input", { id: "crud-submit", 
+            class: "ag-fresh grid-bttn", type: "button", value: "Create Source"});
         $(submit).hide().click(valSrcCrud);
         return submit;
     }
