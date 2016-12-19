@@ -1196,6 +1196,7 @@
         );
         $(labelElem).css('width', '255px');
         $(selectElem).css('width', '115px');
+        $(spanElem).css('width', '124px');
         $(labelElem).append([spanElem, selectElem]);
         return labelElem;
     }

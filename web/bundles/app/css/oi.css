@@ -391,11 +391,12 @@ span.lbl {
 .lbl-sel-opts {   /* .flex-row also on elems */
 	margin: .3em;
 	flex: 0 0 auto;
-	width: 205px;  	 
+	width: 208px;  	 
 	justify-content: space-between;
 }
 .opts-span {
 	padding-top: 3px;
+	width: 65px;
 }
 #grid-tools {
 	margin: .7em auto .2em auto;
