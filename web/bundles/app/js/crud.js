@@ -187,9 +187,10 @@ $(document).ready(function(){
             "Citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
                     "Pages": "text", "Tags": "checkbox", "Citation Text": "textArea"},
-                "exclude": true, //Refigure after source changes.
+                "exclude": [], //Refigure after source changes.
                 "required": ["Publication", "Citation Text"],
-                "order": ["CitationText", "Publication", "Volume", "Issue", "Pages", "Tags"]
+                "order": ["DisplayName", "CitationText", "Publication", "Year", 
+                    "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", "Tags"]
             },
             "Publication": {
                 "add": { "Publisher": "text", "Title" : "text"},
