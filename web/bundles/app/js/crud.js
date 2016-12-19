@@ -219,41 +219,77 @@ $(document).ready(function(){
     }
     function buildSrcFormData() {
         var formElems = $('form[name=crud]')[0].elements;                       
-        return getFieldData(formElems);
+        return getFieldData(formElems, "source");
     }
     /**
-     * If all required fields have values, an object is returned source type as 
-     * the top key for an object with the data from the form keyed under server-ready 
-     * field names.
+     * If all required fields have values, an object is returned with a form data 
+     * object for both the main entity fields and detail entity fields, if they exist.
+     * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
      */
-    function getFieldData(formElems) {
-        var returnObj = {};
-        var data = {};
-        var type = crudParams.srcTypes[$(formElems[0]).val()];                  //console.log("SourceType selected = ", type);
+    function getFieldData(formElems, mainEntity) {
+        var detailType = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
+        var formData = {};
+        formData[mainEntity] = {};
+        formData[detailType] = {};
         /* skips source type select and submit button */
         for (var i = 1; i < formElems.length-2; i++) {                          
             valAndStoreFieldData(formElems[i]);
-        }        
-        returnObj[type] = data;                                                 console.log("***__dataObj = %O", returnObj);
-        return returnObj;
+        }                                                                       console.log("***__dataObj = %O", formData);
+        return formData;                                                 
         /**
-         * Gets field name from the parent label's innerText prop and the field value.
-         * If value is empty, @isEmptyRequiredField is checked and any error reported.
-         * Else, @addFormFieldData.
+         * Gets the field name, from the parent label, and the field value. If the 
+         * value is not empty call @addFieldData, else check if @isEmptyRequiredField.
          */
         function valAndStoreFieldData(formElem) {                               //console.log("valAndStoreFieldData for formElem = %O", formElem);
             var fieldName = formElem.parentNode.innerText.trim();               
             var fieldVal = $(formElem).val();  
 
-            if (fieldVal === "") { ifIsEmptyRequiredField(formElem, fieldName);  
-            } else { addFieldData(formElem, fieldName, fieldVal); }
+            if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
+            } else { ifIsEmptyRequiredField(formElem, fieldName); }
         }
-        /** Adds the field value keyed under the server-ready field name. */
+        /**
+         * Adds the field value, keyed under the server-ready field name, to the 
+         * appropriate entity object in formData.
+         */
         function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
             var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
-            data[dbField] = fieldVal;
+            if (fieldName in crudParams.srcFields) { 
+                addMainEntityFieldData(dbField, fieldVal); 
+            } else {
+                addDetailEntityFieldData(dbField, fieldVal); 
+            }
+        }
+        function addMainEntityFieldData(field, val) {
+            formData[mainEntity][field] = val;
+        }
+        /**
+         * Stores data from the detail entity fields, translating them as needed 
+         * into the correct properties for both entities, the main and the detail.
+         *  
+         */
+        function addDetailEntityFieldData(field, val) {
+            var fieldTransMap = {
+                "publication": { 
+                    "title": { "source": "displayName", "publication": "displayName" },
+                    "publisher": { "source": "parentSource" }
+                },
+                "citation": { 
+                    "publication": { "source": "parentSource"}
+            }};
+            if (detailType in fieldTransMap) {
+                if (field in fieldTransMap[detailType]) {  
+                    addToFormData(field, val, fieldTransMap[detailType][field]);
+                }
+            }
+        }
+        /** Set field and value into formData for each entity passed in the fieldTrans object. */
+        function addToFormData(field, val, fieldTrans) {                        //console.log("addToFormData %s, val = %s. trans = %O", field, val, fieldTrans);
+            for (var entity in fieldTrans) {            
+                formData[entity][fieldTrans[entity]] = val;
+            }
         }
     } /* End getFieldData */
+
     /**
      * If field name is in the form config's required array, show an error on
      * that field to the user: "Please fill out [fieldName]."
