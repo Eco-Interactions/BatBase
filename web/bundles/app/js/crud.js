@@ -124,7 +124,8 @@ $(document).ready(function(){
      */
     function initSrcCrudForm() {
         var formCntnr = buildCrudFormCntnr();
-        var volatileFieldsContainer = _util.buildElem('div', {id: 'field-rows'}); 
+        var volatileFieldsContainer = _util.buildElem('div', {
+            id: 'field-rows', class: "flex-col flex-wrap"}); 
         var srcTypeFieldRow = buildSrcTypeRow();
         var submit = initSubmitBttn();
         $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer, submit]);
@@ -389,7 +390,7 @@ $(document).ready(function(){
      * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
      * interactions have tags currently. Eventually tags will be pulled from the server.
      */
-    function buildCheckboxInput(entity) {                                       console.log("            entity = %s buildCheckboxInput", entity);
+    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
         var span, lbl;
         var opts = { "Citation": ["Secondary"] }; 
         var divCntnr = document.createElement("div");

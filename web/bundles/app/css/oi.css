@@ -537,6 +537,11 @@ a[role="button"], .tos-bttn {
 	font-size: 1.1em;
 	width: 350px;
 }
+#field-rows {
+	/*justify-content: space-between;*/
+    width: 350px;
+    max-height: 350px;
+}
 .required:after {
   content: "*";
 }
@@ -549,7 +554,8 @@ a[role="button"], .tos-bttn {
 	font-size: .95em;
 }
 .form-row {
-	margin-bottom: 1em;
+	margin: .2em 1.5em .3em  1.5em;
+	width: 330px;
 }
 .field-row {
 	justify-content: space-between;
@@ -565,8 +571,10 @@ a[role="button"], .tos-bttn {
 	width: 140px;
 }
 .crud-form input[type=text] {
-	/*height: 23px;*/
 	width: 250px;
+}
+.crud-form input[type=button] {
+	margin-top: 1em;
 }
 .crud-form textarea {
 	height: 55px;
