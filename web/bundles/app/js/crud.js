@@ -315,6 +315,7 @@ $(document).ready(function(){
         var fieldErrorElem = $('#'+field+'_errs')[0];       
         fieldErrorElem.innerHTML = msg;
     }
+    /*------------------- Form Builders --------------------------------------*/
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
         var form = document.createElement("form");
@@ -329,34 +330,41 @@ $(document).ready(function(){
     function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
         var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
             "textArea": buildTextArea, "dynamicText": buildDynamicTextInput };  
-        var defaultRows = buildDefaultRows(formCnfg.exclude, formCnfg.required);
-        var additionalRows = buildAdditionalRows(formCnfg.add, formCnfg.required, entity);
+        var defaultRows = buildDefaultRows();
+        var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
 
         /**
          * Builds a row for each default field not explicitly excluded. If exclude
          * is set to true, all default fields are excluded. 
          */
-        function buildDefaultRows(exclude, reqFields) {                         //console.log("    Building default rows");
-            var fieldInput, rows = [];
+        function buildDefaultRows() {                                           //console.log("    Building default rows");
+            var exclude = crudParams.typeFormConfg.exclude;
+            var rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
-                fieldInput = buildFieldType[dfltFields[field]]();      
-                isReq = ifRequiredField(field, fieldInput, reqFields);
-                rows.push(buildFormRow(_util.ucfirst(field), fieldInput, isReq));
+                rows.push(buildRow(field, dfltFields));
             }
             return rows;
         }
-        function buildAdditionalRows(xtraFields, reqFields, entity) {           //console.log("    Building additional rows");
-            var fieldInput, isReq, rows = [];
+        function buildAdditionalRows() {                                        //console.log("    Building additional rows");
+            var xtraFields = crudParams.typeFormConfg.add;
+            var rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                fieldInput = buildFieldType[xtraFields[field]](entity);      
-                isReq = ifRequiredField(field, fieldInput, reqFields);
-                rows.push(buildFormRow(field, fieldInput, isReq));
+                rows.push(buildRow(field, xtraFields));
             }
             return rows;
         }
-        function buildDynamicTextInput() {}
+        /**
+         * Builds field input @buildFieldType, stores whether field is required, 
+         * and sends both to @buildFormRow, returning the completed row elem.
+         */
+        function buildRow(field, fieldsObj) {
+            var fieldInput = buildFieldType[fieldsObj[field]](entity);      
+            var reqFields = crudParams.typeFormConfg.required;
+            var isReq = reqFields.indexOf(field) !== -1;
+            return buildFormRow(_util.ucfirst(field), fieldInput, isReq);
+        }
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -368,17 +376,7 @@ $(document).ready(function(){
         });
         return order;
     }
-    /**
-     * Returns true, and sets the fieldElem's required' property, if the field is 
-     * in the array of required fields. 
-     */
-    function ifRequiredField(field, fieldElem, reqFields) {
-        if (reqFields.indexOf(field) !== -1) {
-            $(fieldElem).prop("required", "required");
-            return true;
-        } 
-        return false;
-    }
+    function buildDynamicTextInput() {}
     function buildTextInput(entity) {                                           //console.log("            buildTextInput");
         return elem = _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
