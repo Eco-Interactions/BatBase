@@ -25,18 +25,25 @@
         return elem;
     }
     function addAttributes(elem, attrs) {
-        if (attrs.id) { elem.id = attrs.id; }
-        if (attrs.class) { elem.className = attrs.class; }
+        addElemProps();
+        addAttrProps();
         
-        if (attrs.text) { $(elem).text(attrs.text); }
-
-        if (attrs.name || attrs.type || attrs.value ) { 
-            $(elem).attr({
-                name: attrs.name   || '', 
-                type: attrs.type   || '',
-                value: attrs.value || '',
-                placeholder: attrs.placeholder || '',
-            }); 
+        function addElemProps() {
+            var elemProps = [ "id", "class", "title", "text"];
+            var transProps = { "class": "className", "text": "textContent" };
+            elemProps.forEach(function(orgProp) {
+               if (orgProp in attrs) { 
+                prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
+                elem[prop] = attrs[orgProp]; } 
+            });
+        }
+        function addAttrProps() {
+            var attrProps = [ "name", "type", "value", "placeholder" ];
+            var attrsToAdd = {};
+            attrProps.forEach(function(prop) {
+               if (prop in attrs) { attrsToAdd[prop] = attrs[prop]; } 
+            });                                                                 //console.log("attrsToAdd = %O", attrsToAdd);
+            $(elem).attr(attrsToAdd);
         }
     }
     /**
