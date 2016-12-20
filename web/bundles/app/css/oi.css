@@ -105,6 +105,9 @@ span.lbl {
 .flex-wrap {
 	flex-wrap: wrap;
 }
+.flex-grow {
+	flex-grow: 1;
+}
 .flex-row {
 	display: flex;
 	flex-direction: row;
@@ -580,6 +583,13 @@ a[role="button"], .tos-bttn {
 .crud-form textarea {
 	height: 55px;
 	width: 255px
+}
+.auth-fields input[type=text] {
+	width: 120px;
+	margin: .2em .3em .2em 0;
+}
+.auth-sufx {
+	width: 63px !important;
 }
 /*-- Search Tips Popup --*/
 .tips-popup {

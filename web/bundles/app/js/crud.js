@@ -114,7 +114,7 @@ $(document).ready(function(){
         crudParams.srcTypes = ["Author", "Citation", "Publication", "Publisher"];
         crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
             "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
-            "Author": "dynamicText" };
+            "Authors": "dynamic" };
     }     
     /**
      * Creates the source form with relevant fields for the selected source-type. 
@@ -159,7 +159,14 @@ $(document).ready(function(){
         var selectedType = crudParams.srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
         crudParams.type = {};
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
+        initFirstDynmcRow();
         enableSubmitBttn();
+    }
+    /** If form view contains a dynamic row, init the first instance of the row. */
+    function initFirstDynmcRow() {
+        if (crudParams.type.dynmcFormRowFunc) { 
+            crudParams.type.dynmcFormRowFunc();
+        }
     }
     /** 
      * Builds all fields for selected source-type and returns the row elems.
@@ -181,7 +188,7 @@ $(document).ready(function(){
         var fieldMap = { 
             "Author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["display Name", "Year", "Doi", "Author"],
+                "exclude": ["display Name", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
                 "order": [ "LastName", "FirstName", "MiddleName", "Description", 
                     "LinkUrl", "LinkText"]
@@ -190,20 +197,21 @@ $(document).ready(function(){
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
                     "Pages": "text", "Tags": "checkbox", "Citation Text": "textArea"},
                 "exclude": [], //Refigure after source changes.
-                "required": ["Publication", "Citation Text"],
+                "required": ["Display Name", "Publication", "Citation Text"],
                 "order": ["DisplayName", "CitationText", "Publication", "Year", 
-                    "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", "Tags"]
+                    "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
+                    "Tags", "Authors" ]
             },
             "Publication": {
                 "add": { "Publisher": "text", "Title" : "text"},
                 "exclude": ["Display Name"],
                 "required": ["Title"],
                 "order": ["Title", "Description", "Publisher", "Year", "Doi", 
-                    "LinkUrl", "LinkText"]
+                    "LinkUrl", "LinkText", "Authors" ]
             },
             "Publisher": { 
                 "add": [], 
-                "exclude": ["Year", "Doi", "Author"],
+                "exclude": ["Year", "Doi", "Authors"],
                 "required": ["DisplayName"],
                 "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
         };
@@ -330,7 +338,7 @@ $(document).ready(function(){
      */
     function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
         var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
-            "textArea": buildTextArea, "dynamicText": buildDynamicTextInput };  
+            "textArea": buildTextArea, "dynamic": buildDynamcFieldGenBttn };  
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -377,11 +385,10 @@ $(document).ready(function(){
         });
         return order;
     }
-    function buildDynamicTextInput() {}
-    function buildTextInput(entity) {                                           //console.log("            buildTextInput");
-        return elem = _util.buildElem("input", { "type": "text", class:"txt-input" });
+    function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
+        return _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
-    function buildTextArea(entity) {                                            //console.log("            buildTextArea");
+    function buildTextArea(entity, field) {                                            //console.log("            buildTextArea");
         return _util.buildElem("textarea");
     }
     /**
@@ -402,6 +409,46 @@ $(document).ready(function(){
             $(divCntnr).append(span);
         });
         return divCntnr;
+    }
+    /**
+     * Sets the dynamic field row generator method into the global prop that will 
+     * later be used to init the first row. Builds and returns the add, '+', button
+     * that will generate new field rows @creteFieldRowFunc[field] on click.  
+     */
+    function buildDynamcFieldGenBttn(entity, field) {  console.log("buildDynamcFieldGenBttn. entity = %s. field = %s.", entity, field);
+        var createFieldRowFunc = {
+            "Authors": addAuthorFieldRow
+        };
+        crudParams.type.dynmcFormRowFunc = createFieldRowFunc[field];
+        return buildAddFieldInputBttn(field, createFieldRowFunc[field]); 
+    }
+    /** Add '+' button next to field label bound to the passed field's generation func. */
+    function buildAddFieldInputBttn(field, dynmcFieldGenFunc) {  console.log("buildAddFieldInputBttn. args = %O", arguments);
+        var cntnr =  _util.buildElem("div", { class: "flex-grow"});
+        var addBttn = _util.buildElem("input", { type: "button", value: '+',
+            class: "grid-bttn", id: field + "_add", title: "Add Author"});
+        $(addBttn).click(dynmcFieldGenFunc);
+        cntnr.append(addBttn);
+        return cntnr;
+    }
+    /**
+     * Creates and appends a new author field row. Keeps tracks the number of author 
+     * field rows in form using a 'cnt' data property on the field's parent container. 
+     * rowDiv>(errorDiv, nameDiv>(first, middle, last, suffix))
+     */
+    function addAuthorFieldRow() {  
+        var authRowCnt = ($('#Authors_row').data("cnt") || 0) + 1;              //console.log("addAuthorFieldRow #", authRowCnt);
+        var rowDiv = _util.buildElem("div", { id: "auth-" + authRowCnt});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: "auth_"+authRowCnt+"_errs"});
+        var nameDiv =  _util.buildElem("div", { class:"flex-row auth-fields" });
+        var first = _util.buildElem("input", { type: "text", placeholder: '-First Name-'});
+        var middle = _util.buildElem("input", { type: "text", placeholder: '-Middle Name-'});
+        var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name*-'});
+        var sufx = _util.buildElem("input", { class:"auth-sufx", type: "text", placeholder: '-Suffix-'});
+        $(nameDiv).append([first, middle, last, sufx]);
+        $(rowDiv).append([errorDiv, nameDiv])
+        $('#Authors_row').data("cnt", authRowCnt);
+        $('#Authors_row').append(rowDiv);
     }
     /**
      * Each element is built, nested, and returned as a completed row. 
