@@ -1,0 +1,13 @@
+{% extends "layout.html.twig" %}
+
+{% set taxonyms = entities %}
+
+{% block detail %}
+    <ul>
+    {% for taxonym in taxonyms %}
+    <li>
+        <a href="{{ path('app_taxonym_show', { 'id': taxonym.id }) }}">{{ taxonym }}</a>
+    </li>
+    {% endfor %}
+    </ul>
+{% endblock detail %}

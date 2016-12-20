@@ -1,0 +1,26 @@
+{% extends "layout.html.twig" %}
+
+{% set naming = entity %}
+
+{% block detail %}
+    <ul>
+        <li>Taxonym: {{ naming.taxonym }}</li>
+        <li>Parent Taxon: {{ naming.parenttaxon }}</li>
+        <li>Naming Type: {{ naming.namingtype }}</li>
+        <li>Authority: {{ naming.authority }}</li>
+        <li>From: {{ naming.fromdate | date('Y-m-d') }}</li>
+        <li>To: {{ naming.todate | date('Y-m-d') }}</li>
+    </ul>
+{% endblock detail %}
+
+
+{% block adminlnks %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <h3>Admin Links</h3>
+        <a href="{{ path('app_naming_edit', { 'id': naming.id }) }}">Edit Naming</a>
+    {% endif %}
+{% endblock adminlnks %}
+
+{% block sidebar %}
+    <h3><a href="{{ path('app_naming') }}">View All Namings</a></h3>
+{% endblock sidebar %}

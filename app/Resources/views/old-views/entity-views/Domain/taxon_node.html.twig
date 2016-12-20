@@ -1,0 +1,13 @@
+{% set childCnt = taxon.childtaxa | length %}
+{% set subjectRoleCnt = taxon.subjectRoles | length %}
+{% set objectRoleCnt = taxon.objectRoles | length %}
+{% set roleCnt = subjectRoleCnt + objectRoleCnt %}
+<li>
+	{{ taxon.level.name }} <a href="{{ path('app_taxon_show', { 'slug': taxon.slug }) }}">{{ taxon.displayname }}</a>
+	{% if roleCnt > 0 %}
+		({{ roleCnt }} interaction{{ roleCnt > 1 ? 's' : '' }})
+	{% endif %}
+</li>
+{% if childCnt > 0 %}
+	{{ include('domain/child_list.html.twig') }}
+{% endif %}

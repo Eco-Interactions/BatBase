@@ -1,0 +1,16 @@
+{% extends "layout.html.twig" %}
+
+{% set author = entity %}
+
+{% block headline %}
+	Editing {{ entity }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+	</ul>
+    <p><a href="{{ path('app_author_show', { 'slug': author.slug }) }}"> Return to {{ author }}</a></p>
+	<h4><a href="{{ path('app_author') }}">View All Authors</a></h4>
+{% endblock detail %}
+

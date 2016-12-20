@@ -1,0 +1,19 @@
+{% extends "layout.html.twig" %}
+
+{% set interactiontype = entity %}
+{% set view_all_route = path('app_interaction_type') %}
+{% set view_all_ent_plural = 'Interaction Types' %}
+
+{% block headline %}
+		{{ include('view_all_uplink.html.twig') }}
+		Editing Type: {{ entity }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <h5><a href="{{ path('app_interaction_type_show', { 'slug': interactiontype.slug }) }}"> Return to {{ interactiontype }}</a></h5>
+{% endblock detail %}
+
+

@@ -1,0 +1,55 @@
+{% extends "layout.html.twig" %}
+
+{% set taxon = entity %}
+{% set entity_class = 'Taxon' %}
+{% set childCnt = taxon.childtaxa | length %}
+{% set achild = taxon.childtaxa | first %}
+{% set edit_route_name = 'app_taxon_edit' %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'invis', 'olvl': 'invis', 'cit': 'vis', 'pub': 'vis'} %}
+	{% if is_granted('ROLE_ADMIN') %}
+		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+	{% endif %}
+
+{% block datatable %}interaction_list{% endblock datatable %}
+
+{% block headline %}
+	{{ taxon }}
+{% endblock headline %}
+
+{% block detail %}
+	<h4>Details for {{ taxon.level }} {{ taxon }}</h4>
+	{% embed 'two_cols_sect.html.twig' %}
+		{% block firstcol %}
+			{% if not taxon.domain %}
+				<h5>Ancestors</h5>
+				{{include('taxon/ancestor.html.twig',{ 'taxon': taxon }) }}
+			{% endif %}
+		{% endblock firstcol %}
+		{% block secondcol %}
+			{% if childCnt > 0 %}
+				<h5>Child Taxa</h5>
+				{{ include('domain/child_list.html.twig') }}
+			{% else %}
+				<p>{{ taxon.level }} {{ taxon }} has no child taxa.</p>
+			{% endif %}
+		{% endblock secondcol%}
+	{% endembed %}
+
+	{% if taxon.objectroles is not empty %}
+		<h4>Interactions on  {{ taxon.level }} {{ taxon }}</h4>
+		{% set interactions = taxon.objectroles %}
+		{{ include('interaction_tbl.html.twig') }}
+	{% endif %}
+	{% if taxon.subjectroles is not empty %}
+		<h4>Interactions by  {{ taxon.level }} {{ taxon }}</h4>
+		{% set interactions = taxon.subjectroles %}
+		{% set colclass = colclass|merge({'subj': 'invis'}) %}
+		{% set colclass = colclass|merge({'slvl': 'invis'}) %}
+		{% set colclass = colclass|merge({'obj': 'vis'}) %}
+		{% set colclass = colclass|merge({'olvl': 'vis'}) %}
+		{% set objtxn = true %}
+		{{ include('interaction_tbl.html.twig') }}
+	{% endif %}
+{% endblock %}
+
+

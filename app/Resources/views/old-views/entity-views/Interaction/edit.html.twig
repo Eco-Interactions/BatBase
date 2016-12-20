@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% set interaction = entity %}
+{% set view_all_route = path('app_interaction') %}
+{% set view_all_ent_plural = 'Interactions' %}
+
+{% block headline %}
+		{{ include('view_all_uplink.html.twig') }}
+		Editing: {{ entity }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+	</ul>
+    <h5><a href="{{ path('app_interaction_show', { 'id': interaction.id }) }}"> Return to {{ interaction }}</a></h5>
+{% endblock detail %}

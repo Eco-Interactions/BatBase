@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set taxonym = entity %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <p><a href="{{ path('app_taxonym_show', { 'id': taxonym.id }) }}"> Return to {{ taxonym }}</a></p>
+{% endblock detail %}
+
+{% block sidebar %}
+    <h3><a href="{{ path('app_taxonym') }}">View All Taxonyms</a></h3>
+{% endblock sidebar %}
+

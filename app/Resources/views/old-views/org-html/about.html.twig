@@ -1,0 +1,33 @@
+{% extends "layout.html.twig" %}
+
+{% block headline %}About BatPlant.org{% endblock %}
+
+{% block detail %}
+	<div id="top-pgs">
+	{% embed 'two_cols_sect.html.twig' %}
+	{% block firstcol %}
+		<h3>History</h3>
+		<p>The project began in 2002 at the New York Botanical Garden and was used as background research for
+		the book <a href="http://www.amazon.com/Dispersal-Neotropics-Memoris-Botanical-Garden/dp/0893275018" target="_blank">Seed Dispersal by Bats in the Neotropics</a>
+		 by Tatyana Lobova, Cullen Geiselman, and Scott
+		Mori and to prepare the list of bat-pollinated plants in the Annals of Botany article
+		"<a href="http://aob.oxfordjournals.org/content/104/6/1017.full" target="_blank">The evolution of bat pollination: a phylogenetic perspective</a>"
+		 by Theodore Fleming, Cullen Geiselman, and W. John Kress.</p>
+		<h3>How to get involved</h3>
+                <p>This is an on-going project with the goal of capturing all <em>published</em> interactions observed between bats and plants and bats and arthropods to facilitate additional studies on the subject. We invite your help with this project. We are starting our beta testing phase where enthusiastic collaborators and experts can contribute  to our ongoing development and expansion. Please sign up to get more information or to become a beta tester <a href="{{ path('fos_user_registration_register')}}">here</a>.</p>
+	{% endblock %}
+	{% block secondcol %}
+	<div id="constrained-col">
+		<h3>Contact us</h3>
+		<p>If you have suggestions or questions, please contact us at <a href="mailto:info@batplant.org?subject=Contact%20Batplant.org">info@batplant.org</a>. </p><br>
+		<h3>Acknowledgements</h3>
+		<ul>
+			<li><a href="http://www.batcon.org/" target="_blank">Bat Conservation International</a></li>
+			<li><a href="http://www.nybg.org/botany/tlobova/mori/batsplants/introduction/intro_frameset.htm" target="_blank">New York Botanical Garden</a></li>
+			<li><a href="http://www.amnh.org/our-research/vertebrate-zoology/mammalogy" target="_blank">American Museum of Natural History</a></li></ul>
+	</div>
+	{% endblock %}
+
+	{% endembed %}
+	</div>
+{% endblock detail %}

@@ -1,0 +1,54 @@
+{% extends "layout.html.twig" %}
+
+{% set citation = entity %}
+{% set interactions = citation.interactions %}
+{% set view_all_route = path('app_citation') %}
+{% set view_all_ent_plural = 'Citations' %}
+{% set entity_class = 'Citation' %}
+{% set edit_route_name = 'app_citation_edit' %}
+{% set colclass = {'ico': 'vis', 'intrtype': 'vis', 'tags':'vis', 'loc': 'vis', 'subj': 'vis', 'slvl': 'vis', 'obj': 'vis', 'olvl': 'vis', 'cit': 'invis', 'pub': 'i`nvis'} %}
+	{% if is_granted('ROLE_ADMIN') %}
+		{% set colclass = colclass|merge({ 'admin': 'vis' }) %}
+	{% endif %}
+
+{% block datatable %}interaction_list{% endblock datatable %}
+
+{# {% block pagedata %}data-frames="citFrames"{% endblock %} #}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	{{ citation }}
+{% endblock headline %}
+
+{% block detail %}
+	<h4>Details for Citation: {{ citation }}</h4>
+	{% embed 'three_cols_sect.html.twig' %}
+		{% block firstcol %}
+		<ul>
+			<li><span class="lbl">Title:</span> {{ citation.title }}</li>
+			<li><span class="lbl">Full Text:</span> {{ citation.fullText }}</li>
+			<li><span class="lbl">Description:</span> {{ citation.description }}</li>
+		</ul>
+		{% endblock firstcol %}
+		{% block secondcol %}
+		<ul>
+			<li><span class="lbl">Publication:</span> <a href="{{ path('app_publication_show', { 'slug': citation.publication.slug }) }}">{{ citation.publication.name }}</a></li>
+			<li><span class="lbl">Volume:</span> {{ citation.publicationVolume }}</li>
+			<li><span class="lbl">Issue:</span> {{ citation.publicationIssue }}</li>
+			<li><span class="lbl">Pages:</span> {{ citation.publicationPages }}</li>
+
+		</ul>
+		{% endblock secondcol%}
+		{% block thirdcol %}
+			<li><span class="lbl">Type: </span>{{ citation.isSecondary == 1 ? 'Secondary Citation' : 'Direct Citation' }}</li>
+			<span class="lbl">Authors:</span>
+			<ul>
+			{% for attribution in citation.attributions %}
+				<li><a href="{{ path('app_author_show', { 'slug': attribution.author.slug }) }}">{{ attribution.author.shortName }}</a></li>
+			{% endfor %}
+			</ul>
+		{% endblock thirdcol %}
+	{% endembed %}
+	<h4>Interactions for {{ citation }}</h4>
+	{{ include('interaction_tbl.html.twig') }}
+{% endblock detail %}

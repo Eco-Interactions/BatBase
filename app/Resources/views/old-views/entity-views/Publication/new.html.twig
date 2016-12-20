@@ -1,0 +1,15 @@
+{% extends "layout.html.twig" %}
+
+{% set view_all_route = path('app_publication') %}
+{% set view_all_ent_plural = 'Publications' %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	Creating New Publication
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(form) }}
+	</ul>
+{% endblock detail %}

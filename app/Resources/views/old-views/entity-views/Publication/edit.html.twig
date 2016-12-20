@@ -1,0 +1,17 @@
+{% extends "layout.html.twig" %}
+
+{% set publication = entity %}
+{% set view_all_route = path('app_publication') %}
+{% set view_all_ent_plural = 'Publications' %}
+
+{% block headline %}
+	{{ include('view_all_uplink.html.twig') }}
+	Editing Publication: {{ entity }}
+{% endblock headline %}
+
+{% block detail %}
+    <ul class="record_actions">
+        {{ form(edit_form) }}
+    </ul>
+    <h5><a href="{{ path('app_publication_show', { 'slug': publication.slug }) }}"> Return to {{ publication }}</a></h5>
+{% endblock detail %}
