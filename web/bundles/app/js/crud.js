@@ -157,6 +157,7 @@ $(document).ready(function(){
      */
     function initSrcTypeForm(e) {                                        
         var selectedType = crudParams.srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
+        crudParams.type = {};
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
         enableSubmitBttn();
     }
@@ -166,7 +167,7 @@ $(document).ready(function(){
      */
     function createSrcTypeFields(srcType) {
         var typeFormConfg = getSrcTypeFieldConfig(srcType);                     //console.log("typeFormConfg = %O", typeFormConfg)
-        crudParams.typeFormConfg = typeFormConfg;
+        crudParams.type.formConfg = typeFormConfg;
         return getFormFieldRows(srcType, typeFormConfg, crudParams.srcFields);
     }
     /**
@@ -296,7 +297,7 @@ $(document).ready(function(){
      * that field to the user: "Please fill out [fieldName]."
      */
     function ifIsEmptyRequiredField(formElem, fieldName) {
-        if (crudParams.typeFormConfg.required.indexOf(fieldName) !== -1) {
+        if (crudParams.type.formConfg.required.indexOf(fieldName) !== -1) {
             crudFieldError(fieldName, formElem, "emptyRequiredField");
         }
     }
@@ -339,7 +340,7 @@ $(document).ready(function(){
          * is set to true, all default fields are excluded. 
          */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var exclude = crudParams.typeFormConfg.exclude;
+            var exclude = crudParams.type.formConfg.exclude;
             var rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
@@ -348,7 +349,7 @@ $(document).ready(function(){
             return rows;
         }
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var xtraFields = crudParams.typeFormConfg.add;
+            var xtraFields = crudParams.type.formConfg.add;
             var rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
                 rows.push(buildRow(field, xtraFields));
@@ -360,8 +361,8 @@ $(document).ready(function(){
          * and sends both to @buildFormRow, returning the completed row elem.
          */
         function buildRow(field, fieldsObj) {
-            var fieldInput = buildFieldType[fieldsObj[field]](entity);      
-            var reqFields = crudParams.typeFormConfg.required;
+            var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
+            var reqFields = crudParams.type.formConfg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             return buildFormRow(_util.ucfirst(field), fieldInput, isReq);
         }
