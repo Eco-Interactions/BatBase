@@ -1,9 +1,0 @@
-<div>
-	<ul>
-		{% for taxon in ancestors %}
-			<li>
-			<span class="lbl">{{ taxon.level.name }}</span> <a href="{{ path('app_taxon_show', { 'slug': taxon.slug }) }}">{{ taxon.displayname }}</a>
-			</li>
-		{% endfor %}
-	</ul>
-</div>
