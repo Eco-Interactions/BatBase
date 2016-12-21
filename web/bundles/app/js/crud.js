@@ -415,21 +415,31 @@ $(document).ready(function(){
      * later be used to init the first row. Builds and returns the add, '+', button
      * that will generate new field rows @creteFieldRowFunc[field] on click.  
      */
-    function buildDynamcFieldGenBttn(entity, field) {  console.log("buildDynamcFieldGenBttn. entity = %s. field = %s.", entity, field);
+    function buildDynamcFieldGenBttn(entity, field) {                           //console.log("buildDynamcFieldGenBttn. entity = %s. field = %s.", entity, field);
         var createFieldRowFunc = {
-            "Authors": addAuthorFieldRow
+            "Authors": { add: addAuthorFieldRow, rmv: removeAuthorFieldRow }
         };
-        crudParams.type.dynmcFormRowFunc = createFieldRowFunc[field];
-        return buildAddFieldInputBttn(field, createFieldRowFunc[field]); 
+        crudParams.type.dynmcFormRowFunc = createFieldRowFunc[field].add;
+        return buildFieldGenBttns(field, createFieldRowFunc[field]); 
     }
-    /** Add '+' button next to field label bound to the passed field's generation func. */
-    function buildAddFieldInputBttn(field, dynmcFieldGenFunc) {  console.log("buildAddFieldInputBttn. args = %O", arguments);
+    /**
+     * Add '+' and '-' button next to field label bound to the field's passed 
+     * generation and destruction functions.
+     */
+    function buildFieldGenBttns(field, dynmcFieldGenFuncs) {                    //console.log("buildFieldGenBttns. field = %s, funcs = %O", field, dynmcFieldGenFuncs);
         var cntnr =  _util.buildElem("div", { class: "flex-grow"});
-        var addBttn = _util.buildElem("input", { type: "button", value: '+',
-            class: "grid-bttn", id: field + "_add", title: "Add Author"});
-        $(addBttn).click(dynmcFieldGenFunc);
-        cntnr.append(addBttn);
+        var addBttn = buildDynmcRowBttn("add", field, dynmcFieldGenFuncs.add);
+        var rmvBttn = buildDynmcRowBttn("rmv", field, dynmcFieldGenFuncs.rmv);
+        $(cntnr).append([addBttn, rmvBttn]);
         return cntnr;
+    }
+    function buildDynmcRowBttn(action, field, func) {
+        var text = action === "add" ? '+' : '-';
+        var title = (action === "add" ? "Add" : "Remove") + ' ' + field;
+        var bttn = _util.buildElem("input", { type: "button", value: text,
+            class: "grid-bttn dynmc-bttns", id: field + "_"+ action, title: title });
+        $(bttn).click(func);
+        return bttn;
     }
     /**
      * Creates and appends a new author field row. Keeps tracks the number of author 
@@ -449,6 +459,11 @@ $(document).ready(function(){
         $(rowDiv).append([errorDiv, nameDiv])
         $('#Authors_row').data("cnt", authRowCnt);
         $('#Authors_row').append(rowDiv);
+    }
+    function removeAuthorFieldRow() {
+        var authRowCnt = $('#Authors_row').data("cnt");              //console.log("addAuthorFieldRow #", authRowCnt);
+        $('#auth-'+authRowCnt).remove();
+        $('#Authors_row').data("cnt", --authRowCnt);
     }
     /**
      * Each element is built, nested, and returned as a completed row. 
