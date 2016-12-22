@@ -290,41 +290,23 @@ class SearchController extends Controller
     private function buildSrcDataObj($em)
     {
         $dataObj = new \stdClass;
-        $dataObj->srcTypes = $this->getSrcTypes($em);
+        $dataObj->srcTypes = $this->buildTypeAry("SourceType", $em);;
         $dataObj->srcRcrds = new \stdClass;
         
         foreach ($dataObj->srcTypes as $typeId => $type) {
             $dataObj->$type = new \stdClass;
             $dataObj->$type->ids = [];
         }
-        $dataObj->citation->types = $this->getCitTypes($em);
-        $dataObj->publication->types = $this->getPubTypes($em);
+        $dataObj->citation->types = $this->buildTypeAry("CitationType", $em);
+        $dataObj->publication->types = $this->buildTypeAry("PublicationType", $em);
 
         return $dataObj;
     }
-    private function getSrcTypes($em)
+    /** Returns an associative array of Type ids and their lowercased names. */
+    private function buildTypeAry($entityType, $em)
     {
-        $srcTypes = $em->getRepository('AppBundle:SourceType')->findAll();
+        $types = $em->getRepository('AppBundle:'.$entityType)->findAll();
         $ary = [];
-        return $this->buildTypeAry($srcTypes, $ary);
-    }
-    private function getPubTypes($em)
-    {
-        $pubTypes = $em->getRepository('AppBundle:PublicationType')->findAll();
-        $ary = [ "0" => "unspecified"];
-        return $this->buildTypeAry($pubTypes, $ary);
-    }
-    private function getCitTypes($em)
-    {
-        $citTypes = $em->getRepository('AppBundle:CitationType')->findAll();
-        $ary = [ "0" => "unspecified"];
-        return $this->buildTypeAry($citTypes, $ary);
-    }
-    /**
-     * Returns an associative array of Type ids and their lowercased names.
-     */
-    private function buildTypeAry($types, $ary)
-    {
         foreach ($types as $type) {
             $subAry = [strval($type->getId()) => lcfirst($type->getDisplayName())];
             $ary = array_merge($ary, $subAry);
