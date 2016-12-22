@@ -102,7 +102,7 @@ $(document).ready(function(){
         crudParams = {};
         crudParams.view = "source";
         crudParams.action = action;
-        crudParams.srcTypes = ["Author", "Citation", "Publication", "Publisher"];
+        crudParams.srcTypes = JSON.parse(localStorage.getItem('srcTypes'));
         crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
             "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
             "Authors": "dynamic" };
