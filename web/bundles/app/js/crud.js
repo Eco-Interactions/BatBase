@@ -12,7 +12,6 @@ $(document).ready(function(){
     var _util = eif.util;
     // eif.crud = {};    
 
-    // window.addEventListener('message', searchPgMsgHandler, false);
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
     function onDOMContentLoaded() { 
@@ -28,13 +27,6 @@ $(document).ready(function(){
             initWysiwyg();
         }
     }
-/*-------------------- CRUD Communication Functions --------------------------*/
-    /** Recieves messages from the Search pg and executes the sent tag's handler. */
-    function searchPgMsgHandler(msg) {                                          console.log('--crud msg recieved. %O', msg);
-        msgMap[msg.data.tag](msg.data.data);
-    }
-    // To Send:  contentWindow.postMessage(msgData, envUrl);
-    
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
     /*---------- CRUD Window Funcs -------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
@@ -87,7 +79,6 @@ $(document).ready(function(){
         cntnr.append(_util.buildElem("footer"));
         return cntnr;        
     }
-
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "crud-hdr" });
         hdrSect.append(_util.buildElem("h1", { "text": title }));
@@ -271,7 +262,7 @@ $(document).ready(function(){
          * fields, and sent to be processed with the appropriate handler.
          */
         function processMultiInputData(formElem) {                              
-            if (formElem.value !== "") {                                        console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
+            if (formElem.value !== "") {                                        //console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
                 if (formElem.parentElement.className.includes("auth-fields")) { 
                     processAuthorNameFields(formElem); 
                 }
@@ -320,7 +311,7 @@ $(document).ready(function(){
          * @addFieldData is called to store the form data, else @isEmptyRequiredField
          * is checked for invalid nulls and, if so, an error is shown to the user.
          */
-        function processSimpleInputFields(formElem) {                           console.log("processSimpleInputFields for formElem = %O", formElem);
+        function processSimpleInputFields(formElem) {                           //console.log("processSimpleInputFields for formElem = %O", formElem);
             var fieldName = formElem.parentNode.innerText.trim();               
             var fieldVal = $(formElem).val();  
             if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
