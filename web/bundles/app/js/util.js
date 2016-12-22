@@ -5,6 +5,9 @@
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
         lcfirst: lcfirst, 
+        setlocalStorage: setlocalStorage,
+        populateStorage: populateStorage,
+        removeFromStorage: removeFromStorage,
         ucfirst: ucfirst, 
     };
 
@@ -94,5 +97,39 @@
                 return this; 
              };
         }
+
+    /*--------------------------Storage Methods-------------------------------*/
+    function setlocalStorage() {
+        if (storageAvailable('localStorage')) { 
+            return window['localStorage'];                                      //console.log("Storage available. Setting now. localStorage = %O", localStorage);
+        } else { 
+            return false;                                                       //console.log("No Local Storage Available"); 
+        }
+    }
+    function storageAvailable(type) {
+        try {
+            var storage = window[type];
+            var x = '__storage_test__';
+
+            storage.setItem(x, x);
+            storage.removeItem(x);
+            return true;
+        }
+        catch(e) {
+            return false;
+        }
+    }
+    function populateStorage(key, val) {
+        if (localStorage) {                                                     //console.log("localStorage active.");
+            localStorage.setItem(key, val);
+        } else { console.log("No Local Storage Available"); }
+    }
+    function removeFromStorage(key) {
+        localStorage.removeItem(key);
+    }
+    function getRemainingStorageSpace() {
+         var limit = 1024 * 1024 * 5; // 5 MB
+         return limit - unescape(encodeURIComponent(JSON.stringify(localStorage))).length;
+    }
     
 }());  /* End of namespacing anonymous function */

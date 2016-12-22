@@ -13,7 +13,7 @@
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
-    var localStorage = setlocalStorage();
+    var localStorage = _util.setlocalStorage();
     var gridOptions = {
 	    columnDefs: getColumnDefs(),
 	    rowSelection: 'multiple',	//Used for csv export
@@ -55,8 +55,8 @@
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
         if (localStorage && !localStorage.getItem('theta')){
 			localStorage.clear();
-			if ( prevVisit ) { populateStorage('prevVisit', true); }
-			populateStorage('theta', true);
+			if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
+			_util.populateStorage('theta', true);
 			showLoadingDataPopUp();
 		}
 	}
@@ -132,7 +132,7 @@
 	 */
 	function ifChangedFocus(focus, buildGridFunc) { 							//console.log("ifChangedFocus called.")
         if (focus !== focusStorage.curFocus) {   
-            populateStorage("curFocus", focus);
+            _util.populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();
             clearPreviousGrid();
@@ -168,7 +168,7 @@
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
 	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data);
-		populateStorage('intRcrds', JSON.stringify(data.intRcrds));  
+		_util.populateStorage('intRcrds', JSON.stringify(data.intRcrds));  
 		fillTreeWithInteractions( data.intRcrds );
 	}
 	/**
@@ -307,8 +307,8 @@
         }
     }
     function storeTaxa(data) {                                          		//console.log("taxa data recieved. %O", data);
-        populateStorage('domainRcrds', JSON.stringify(data.domainRcrds));
-        populateStorage('taxaRcrds', JSON.stringify(data.taxaRcrds));
+        _util.populateStorage('domainRcrds', JSON.stringify(data.domainRcrds));
+        _util.populateStorage('taxaRcrds', JSON.stringify(data.taxaRcrds));
         initTaxaSearchUi(data);
     }
     /**
@@ -359,7 +359,7 @@
         var domainId = $('#sel-domain').val();
         var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);                        //console.log("domainTaxon = %O", domainTaxon)
         var domainLvl = domainTaxonRcrd.level;
-        populateStorage('curDomain', domainId);
+        _util.populateStorage('curDomain', domainId);
         focusStorage.curDomain = domainId;
         focusStorage.domainLvl = domainLvl;
 
@@ -669,8 +669,8 @@
      * countries, areas, and points as nested children.
      */
 	function storeLocs(data) {													console.log("location data recieved. %O", data);
-		populateStorage('locRcrds', JSON.stringify(data.locRcrds));
-		populateStorage('topRegions', JSON.stringify(data.topRegions));
+		_util.populateStorage('locRcrds', JSON.stringify(data.locRcrds));
+		_util.populateStorage('topRegions', JSON.stringify(data.topRegions));
 		rcrdsById = data.locRcrds;   
 		buildLocTreeAndGrid(data.topRegions);
 	}
@@ -951,12 +951,12 @@
 	function seperateAndStoreSrcData(dataObj) {						            //console.log("~~~Source data recieved. %O", dataObj);
         var data = dataObj.srcData;
         var domainRcrds = getDomainRcrds(data);                                 //console.log("domainRcrds = %O", domainRcrds);
-        populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-        populateStorage('pubTypes', JSON.stringify(data.publication.types));
-        populateStorage('srcTypes', JSON.stringify(data.srcTypes));
-		populateStorage('citTypes', JSON.stringify(data.citation.types));
-		populateStorage('authRcrds', JSON.stringify(domainRcrds.author));
-		populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication));
+        _util.populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
+        _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
+        _util.populateStorage('srcTypes', JSON.stringify(data.srcTypes));
+		_util.populateStorage('citTypes', JSON.stringify(data.citation.types));
+		_util.populateStorage('authRcrds', JSON.stringify(domainRcrds.author));
+		_util.populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication));
 		initSrcSearchUi(domainRcrds, data.srcRcrds);
 	}
     /**
@@ -1039,7 +1039,7 @@
         var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
         var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
         focusStorage.curDomain = domainVal;
-        populateStorage('curDomain', domainVal);
+        _util.populateStorage('curDomain', domainVal);
         return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
     }
     /**
@@ -2069,7 +2069,7 @@
             localStorage.getItem('prevVisit') || false : false; 	 //console.log("newVisit = ", newVisit)
 		if ( !prevVisit ) { 
 			window.setTimeout(startIntro, 250); 
-			populateStorage('prevVisit', true);
+			_util.populateStorage('prevVisit', true);
 		}	
 	}
 	function startIntro(startStep){
@@ -2497,42 +2497,6 @@
             callback(key, value);
         }
     };
-    /*--------------------------Storage Methods-------------------------------*/
-	function setlocalStorage() {
-		if (storageAvailable('localStorage')) { 
-	   		return window['localStorage'];  									//console.log("Storage available. Setting now. localStorage = %O", localStorage);
-		} else { 
-			return false; 				      									//console.log("No Local Storage Available"); 
-		}
-	}
-	function storageAvailable(type) {
-		try {
-			var storage = window[type];
-			var x = '__storage_test__';
-
-			storage.setItem(x, x);
-			storage.removeItem(x);
-			return true;
-		}
-		catch(e) {
-			return false;
-		}
-	}
-	function populateStorage(key, val) {
-		if (localStorage) { 													//console.log("localStorage active.");
-			localStorage.setItem(key, val);
-		} else { console.log("No Local Storage Available"); }
-	}
-	function removeFromStorage(key) {
-		localStorage.removeItem(key);
-	}
-	function getRemainingStorageSpace() {
-		 var limit = 1024 * 1024 * 5; // 5 MB
-		 return limit - unescape(encodeURIComponent(JSON.stringify(localStorage))).length;
-	}
-	function sizeOfString(string) {
-		return string.length;
-	}
     /*-------------AJAX ------------------------------------------------------*/
 	function sendAjaxQuery(dataPkg, url, successCb) {  							console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
 		$.ajax({
