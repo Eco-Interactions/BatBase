@@ -1,6 +1,9 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
+    --misc--
+        --rearrange author name cols in db table
     --crud--
+        --Source's have full name as display name and authors are using last name...
 
 
 
@@ -21,6 +24,7 @@ Questions:
         --Set up hide/show columns options
             -Config colDefs
             -Pop up with col selects 
+        --Save filters through changes in the view options
 
 
 Notes::

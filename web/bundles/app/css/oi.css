@@ -49,7 +49,7 @@ form button {
     padding: .25em .5em .25em .5em;
     font-size: 1.5em;
 }
-form button:hover {
+#reg-form-cntnr button:hover {
 	border: 1.5px solid;
 	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
@@ -544,7 +544,7 @@ a[role="button"], .tos-bttn {
 #field-rows {
 	/*justify-content: space-between;*/
     width: 350px;
-    max-height: 350px;
+    max-height: 333px;
 }
 .required:after {
   content: "*";
@@ -558,8 +558,8 @@ a[role="button"], .tos-bttn {
 	font-size: .95em;
 }
 .form-row {
-	margin: .2em 1.5em .3em  1.5em;
-	width: 330px;
+	margin: .2em .75em .3em  .75em;
+	width: 340px;
 }
 .field-row {
 	justify-content: space-between;
@@ -570,19 +570,27 @@ a[role="button"], .tos-bttn {
 }
 .crud-form label {
 	font-size: 1em;
-	margin-right: .6em;
-	padding-bottom: 2px;
-	width: 140px;
+	padding: 4px 0 2px 0;
+	width: 133px;
+}
+.form-input {
+	/*width: 250px;*/
+	padding-left: 2px;
 }
 .crud-form input[type=text] {
-	width: 250px;
+	width: 211px;
 }
-.crud-form input[type=button] {
+#crud-submit {
 	margin-top: 1em;
+    font-size: 1em;
+    padding: 3px;
+}
+.checkbox-lbl {
+	margin-left: .2em;
 }
 .crud-form textarea {
 	height: 55px;
-	width: 255px
+	width: 211px
 }
 .auth-fields input[type=text] {
 	width: 120px;
@@ -590,6 +598,16 @@ a[role="button"], .tos-bttn {
 }
 .auth-sufx {
 	width: 63px !important;
+}
+button.dynmc-bttns {
+	margin-right: .5em;
+	font-size: 1em;
+	padding: .1em;
+	border-radius: 0;
+    border-width: 2px;
+    border-style: outset;
+    border-color: buttonface;
+    border-image: initial;
 }
 /*-- Search Tips Popup --*/
 .tips-popup {
