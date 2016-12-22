@@ -31,7 +31,6 @@
         rowHeight: 26
 	};
 
-    // window.addEventListener('message', crudMsgHandler, false);
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     resetFocusStorag();
     /**
@@ -85,19 +84,6 @@
 			$('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
 		} else { $('button[name="csv"]').click(exportCsvData); }
 	}
-/*-------------------- CRUD Communication Functions --------------------------*/
-    /**
-     * Recieves messages from the CRUD popup window, binds the origin/source to a 
-     * global sendCrudPgMsg func and executes the sent tag's handler.
-     */
-    function crudMsgHandler(msg) {                                              //console.log("Msg recieved = %O", msg);
-        var msgHandlers = {};
-        sendCrudPgMsg = sendMsg.bind(null, msg.source, msg.origin);
-        msgHandlers[msg.data.tag](msg.data.data);
-    }
-    function sendMsg(appId, appOrigin, msgData) {
-        appId.postMessage(msgData, appOrigin)
-    }
 /*-------------------- Top "State" Managment Methods -------------------------*/
 	function initSearchState() {
 		if (focusStorage.curFocus){ $('#search-focus').val(focusStorage.curFocus);
