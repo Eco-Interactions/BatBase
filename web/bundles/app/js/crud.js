@@ -243,7 +243,7 @@ $(document).ready(function(){
         formData[mainEntity] = {};
         formData[detailType] = {};
         /* skips source type select and submit button */
-        for (var i = 1; i < formElems.length-2; i++) {     
+        for (var i = 1; i < formElems.length-1; i++) {     
             processFormElem(formElems[i]);
         }                                                                       console.log("***__dataObj = %O", formData);
         postProcessing();
@@ -311,7 +311,7 @@ $(document).ready(function(){
          * Adds the field value, keyed under the server-ready field name, to the 
          * appropriate entity object in formData.
          */
-        function addFieldData(formElem, fieldName, fieldVal) {                  console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
+        function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
             var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
             if (fieldName in crudParams.srcFields) { 
                 addMainEntityFieldData(dbField, fieldVal); 
@@ -325,7 +325,6 @@ $(document).ready(function(){
         /**
          * Stores data from the detail entity fields, translating them as needed 
          * into the correct properties for both entities, the main and the detail.
-         *  
          */
         function addDetailEntityFieldData(field, val) {
             var fieldTransMap = {
