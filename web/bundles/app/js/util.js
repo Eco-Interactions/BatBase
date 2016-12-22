@@ -67,7 +67,13 @@
         if (attrs) { addAttributes(selectElem, attrs); }
         $(selectElem).val(selected);
         $(selectElem).change(changeFunc);
+        hidePlaceholder(selectElem);
         return selectElem;
+    }
+    function hidePlaceholder(selectElem) {
+        if ($(selectElem).find("option[value='placeholder']")) {
+            $(selectElem).find("option[value='placeholder']").hide();
+        }
     }
     /**
      * Creates an opts obj for each 'item' in array with the index as the value and 
@@ -78,7 +84,7 @@
         optAry.forEach(function(option, idx){
             opts.push({
                 value: idx.toString(),
-                text: option  });
+                text: ucfirst(option)  });
         });
         if (placeholder) {
             opts.unshift({ value: "placeholder", text: placeholder });
