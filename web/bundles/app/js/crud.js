@@ -102,10 +102,14 @@ $(document).ready(function(){
         crudParams = {};
         crudParams.view = "source";
         crudParams.action = action;
-        crudParams.srcTypes = JSON.parse(localStorage.getItem('srcTypes'));
         crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
             "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
             "Authors": "dynamic" };
+        crudParams.types = {
+            "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
+            "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
+            "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
+        }
     }     
     /**
      * Creates the source form with relevant fields for the selected source-type. 
@@ -140,14 +144,14 @@ $(document).ready(function(){
     }
     /** Creates the source-type select dropdown. */
     function buildSrcTypeSelect() {
-        var srcOpts = _util.buildSimpleOpts(crudParams.srcTypes, "-- Select type --");     
+        var srcOpts = _util.buildSimpleOpts(crudParams.types.source, "-- Select type --");     
         return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
     }
     /**
      * Shows crud ui, all related form fields in labeled rows, for selected source-type.
      */
     function initSrcTypeForm(e) {                                        
-        var selectedType = crudParams.srcTypes[$(this).val()];                             console.log("--Init srcType (%s) view", selectedType);
+        var selectedType = crudParams.types.source[$(this).val()];                  //console.log("--Init srcType (%s) view", selectedType);
         crudParams.type = {};
         $('#field-rows').empty().append(createSrcTypeFields(selectedType));
         initFirstDynmcRow();
@@ -228,7 +232,7 @@ $(document).ready(function(){
      * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
      */
     function valAndProcessFormData(formElems, mainEntity) {
-        var detailEntity = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
+        var detailEntity = _util.lcfirst(crudParams.types.source[$(formElems[0]).val()]);               //console.log("SourceType selected = ", type);
         var formData = {};
         var authors = [];
         formData[mainEntity] = {};
