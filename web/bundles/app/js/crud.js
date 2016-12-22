@@ -246,6 +246,7 @@ $(document).ready(function(){
         for (var i = 1; i < formElems.length-2; i++) {     
             processFormElem(formElems[i]);
         }                                                                       console.log("***__dataObj = %O", formData);
+        postProcessing();
         return formData;    
         /** Sends form elems to appropriate handler.  */
         function processFormElem(formElem) {
@@ -346,6 +347,28 @@ $(document).ready(function(){
             for (var entity in fieldTrans) {            
                 formData[entity][fieldTrans[entity]] = val;
             }
+        }
+        /**
+         * After all input elements in the form have been processed, special case
+         * handling and post-processing of complex data can happen here. Ex: Authors,
+         * i.e. multi-input fields, are checked for empty required fields and added 
+         * to the form data object @valAuthorFields. 
+         */
+        function postProcessing() {
+            if (authors.length) { valAuthorFields(); }
+        }
+        /**
+         * For each author name row with data, checks to ensure the required field, 
+         * last name, has a value. If not, an error is shown to the user. The authors
+         * array is then added to the formData object.
+         */
+        function valAuthorFields() {
+            authors.forEach(function(authObj, idx) {
+                if (!authObj.lastName) {             
+                    crudFieldErrorHandler("Last Name", "emptyRequiredField", $('#auth_'+(idx+1)+'_errs')[0]);
+                }
+            });
+            formData[mainEntity].authors = authors;
         }
     } /* End valAndProcessFormData */
     /**
@@ -515,7 +538,7 @@ $(document).ready(function(){
         var nameDiv =  _util.buildElem("div", { class:"flex-row auth-fields" });
         var first = _util.buildElem("input", { type: "text", placeholder: '-First Name-'});
         var middle = _util.buildElem("input", { type: "text", placeholder: '-Middle Name-'});
-        var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name*-'});
+        var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name-*'});
         var sufx = _util.buildElem("input", { class:"auth-sufx", type: "text", placeholder: '-Suffix-'});
         $(nameDiv).append([first, middle, last, sufx]);
         $([first, middle, last, sufx]).data("valType", "multiInput");
