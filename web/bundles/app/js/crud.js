@@ -237,11 +237,11 @@ $(document).ready(function(){
      * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
      */
     function valAndProcessFormData(formElems, mainEntity) {
-        var detailType = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
+        var detailEntity = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
         var formData = {};
         var authors = [];
         formData[mainEntity] = {};
-        formData[detailType] = {};
+        formData[detailEntity] = {};
         /* skips source type select and submit button */
         for (var i = 1; i < formElems.length-1; i++) {     
             processFormElem(formElems[i]);
@@ -333,7 +333,7 @@ $(document).ready(function(){
         function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
             var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
             if (fieldName in crudParams.srcFields) { 
-                addMainEntityFieldData(dbField, fieldVal); 
+                addFieldToFormData(dbField, fieldVal, mainEntity);
             } else {
                 addDetailEntityFieldData(dbField, fieldVal); 
             }
@@ -352,19 +352,37 @@ $(document).ready(function(){
                     "publisher": { "source": "parentSource" }
                 },
                 "citation": { 
-                    "publication": { "source": "parentSource"}
+                    "publication": { "source": "parentSource" },
+                    "citationText": { "source": "description", "citation": "fullText" }
             }};
-            if (detailType in fieldTransMap) {
-                if (field in fieldTransMap[detailType]) {  
-                    addToFormData(field, val, fieldTransMap[detailType][field]);
-                }
+            if (detailEntity in fieldTransMap) {
+                processFieldTranslation(field, val, fieldTransMap[detailEntity]);
+            } else {
+                addFieldToFormData(field, val, detailEntity);
             }
         }
-        /** Set field and value into formData for each entity passed in the fieldTrans object. */
-        function addToFormData(field, val, fieldTrans) {                        //console.log("addToFormData %s, val = %s. trans = %O", field, val, fieldTrans);
+        /**
+         * If field is in translation map, @addTransFieldToFormData handles storing 
+         * the data, otherwise @addFieldToFormData does.
+         */
+        function processFieldTranslation(field, val, fieldTrans) {
+            if (field in fieldTrans) {  
+                addTransFieldToFormData(field, val, fieldTrans[field]);
+            } else {
+                addFieldToFormData(field, val, detailEntity);
+            }
+        }
+        /**
+         * Adds the field data under the correct entity's property name(s) to formData.
+         * Eg. 'citationText' becomes source's 'description' and citation's 'fullText'.
+         */
+        function addTransFieldToFormData(field, val, fieldTrans) {              //console.log("addToFormData %s, val = %s. trans = %O", field, val, fieldTrans);
             for (var entity in fieldTrans) {            
                 formData[entity][fieldTrans[entity]] = val;
             }
+        }
+        function addFieldToFormData(field, val, entity) {
+            formData[entity][field] = val;
         }
         /**
          * After all input elements in the form have been processed, special case
