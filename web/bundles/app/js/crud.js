@@ -255,14 +255,14 @@ $(document).ready(function(){
             } else { processSimpleInputFields(formElem); }
         }
         /**
-         * For form fields with complex processing, such as checkbox option or 
+         * For form fields with complex processing, such as checkbox options or 
          * multi-input fields, the 'valType' data tag on the element triggers 
          * specific validation handlers for the field type.
          */
         function processComplexInputs(formElem) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
             var fieldType = $(formElem).data("valType");
             var cmplxFieldHndlr = { 
-                "checkbox": valCheckboxData, "multiInput": valMultiInputData 
+                "checkbox": processCheckboxData, "multiInput": processMultiInputData 
             }; 
             cmplxFieldHndlr[fieldType](formElem);
         }
@@ -293,6 +293,28 @@ $(document).ready(function(){
             authors[rowNum-1][dbField] =  formElem.value;
         }
         /**
+         * If option is checked, the form elem and the field name, @getCheckboxFieldName, 
+         * are sent to handler to be added to the formData obj.
+         */
+        function processCheckboxData(formElem) {                                    //console.log("valCheckboxData called for elem = %O, val = %s", formElem, formElem.checked)
+            var fieldName = getCheckboxFieldName(formElem);
+            if (formElem.checked) {
+                if (fieldName === "tags") { addTagsToFormData(formElem, fieldName); }
+            }  
+        }
+        /** Returns the lower-cased field name from the option's field container id. */
+        function getCheckboxFieldName(formElem) {
+            var fieldCntnr = formElem.parentElement.parentElement.parentElement.parentElement;
+            var fieldName = _util.lcfirst(fieldCntnr.id.split("_row")[0]);       //console.log("fieldName = ", fieldName); 
+            return fieldName;
+       }
+        /** Adds the tag to a tag's array in the main entity obj of formData. */
+        function addTagsToFormData(formElem, fieldName) {
+            var tag = formElem.id.split("_check")[0];
+            if (!formData[mainEntity][fieldName]) { formData[mainEntity][fieldName] = []; }
+            formData[mainEntity][fieldName].push(tag);
+        }
+        /**
          * Processes fields where all that is required is to get the field name, 
          * from the parent label, and the field value. If the value is not empty 
          * @addFieldData is called to store the form data, else @isEmptyRequiredField
@@ -303,9 +325,6 @@ $(document).ready(function(){
             var fieldVal = $(formElem).val();  
             if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
             } else { ifIsEmptyRequiredField(formElem, fieldName); }
-        }
-        function valCheckboxData(argument) {
-            // body...
         }
         /**
          * Adds the field value, keyed under the server-ready field name, to the 
