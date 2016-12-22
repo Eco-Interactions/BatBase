@@ -196,7 +196,7 @@ $(document).ready(function(){
             "Citation": {
                 "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
                     "Pages": "text", "Tags": "checkbox", "Citation Text": "textArea"},
-                "exclude": [], //Refigure after source changes.
+                "exclude": [], 
                 "required": ["Display Name", "Publication", "Citation Text"],
                 "order": ["DisplayName", "CitationText", "Publication", "Year", 
                     "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
@@ -333,7 +333,8 @@ $(document).ready(function(){
             crudFieldError(fieldName, formElem, "emptyRequiredField");
         }
     }
-    /*----------------------- Helpers ----------------------------------------*/
+/*--------------------------- Helpers ----------------------------------------*/
+    /*------------------- Error Handlers -------------------------------------*/
     /** Shows the user an error message above the field row using the tag's handler. */
     function crudFieldError(fieldName, fieldElem, errorTag) {
         var errorHandlers = {
@@ -421,18 +422,25 @@ $(document).ready(function(){
      * interactions have tags currently. Eventually tags will be pulled from the server.
      */
     function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
-        var span, lbl;
         var opts = { "Citation": ["Secondary"] }; 
-        var divCntnr = document.createElement("div");
+        var optCntnr = _util.buildElem("div", { "class": "flex-grow form-input" });
         opts[entity].forEach(function(opt) {
-            span = document.createElement("span");
-            span.append(_util.buildElem("input", { "type": "checkbox", id: opt+"_check"}));
-            lbl = _util.buildElem("label", { "text": opt });
-            lbl.htmlFor = opt+"_check";
-            span.append(lbl);
-            $(divCntnr).append(span);
+            $(optCntnr).append(buildOptsElem(opt));
         });
-        return divCntnr;
+        return optCntnr;
+    }
+    /**
+     * Builds the checkbox elem and it's label. Adds a valType data property for 
+     * use during validation.
+     */
+    function buildOptsElem(opt) {
+        var span = document.createElement("span");
+        var input = _util.buildElem("input", { "type": "checkbox", id: opt+"_check"});
+        var lbl = _util.buildElem("label", { "text": opt, "class": "checkbox-lbl" });
+        $(input).data("valType", "checkbox");
+        lbl.htmlFor = opt+"_check";
+        $(span).append([input, lbl]);
+        return span;
     }
     /**
      * Sets the dynamic field row generator method into the global prop that will 
@@ -464,8 +472,8 @@ $(document).ready(function(){
     function buildDynmcRowBttn(action, field, func) {
         var text = action === "add" ? '+' : '-';
         var title = (action === "add" ? "Add" : "Remove") + ' ' + field;
-        var bttn = _util.buildElem("input", { type: "button", value: text,
-            class: "grid-bttn dynmc-bttns", id: field + "_"+ action, title: title });
+        var bttn = _util.buildElem("button", { class: "grid-bttn dynmc-bttns", 
+            id: field + "_"+ action, text: text, title: title, type: "button"});
         $(bttn).data("noVal", true);
         $(bttn).click(func);
         return bttn;
@@ -511,13 +519,6 @@ $(document).ready(function(){
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
     }
-
-
-
-
-
-
-
     /** Returns the full, contextual url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         return envUrl + entityName + "/" + action;
