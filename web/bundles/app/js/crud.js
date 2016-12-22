@@ -223,45 +223,70 @@ $(document).ready(function(){
      * values and return a json-ready object of form data to send to the server 
      * @sendFormData.
      */
-    function valSrcCrud(e) {  console.log("e = %O", e)
+    function valSrcCrud(e) {                                                        
         var formData = buildSrcFormData();
         // sendFormData(formData);
     }
     function buildSrcFormData() {
-        var formElems = $('form[name=crud]')[0].elements;                       
-        return getFieldData(formElems, "source");
+        var formElems = $('form[name=crud]')[0].elements;                       console.log("formElems = %O", formElems);     
+        return valAndProcessFormData(formElems, "source");
     }
     /**
      * If all required fields have values, an object is returned with a form data 
      * object for both the main entity fields and detail entity fields, if they exist.
      * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
      */
-    function getFieldData(formElems, mainEntity) {
+    function valAndProcessFormData(formElems, mainEntity) {
         var detailType = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
         var formData = {};
         formData[mainEntity] = {};
         formData[detailType] = {};
         /* skips source type select and submit button */
-        for (var i = 1; i < formElems.length-2; i++) {                          
-            valAndStoreFieldData(formElems[i]);
+        for (var i = 1; i < formElems.length-2; i++) {     
+            processFormElem(formElems[i]);
         }                                                                       console.log("***__dataObj = %O", formData);
-        return formData;                                                 
+        return formData;    
+        /** Sends form elems to appropriate handler.  */
+        function processFormElem(formElem) {
+            if ($(formElem).data("noVal")) { return; } /* No validation for this elem */
+            if ($(formElem).data("valType")) { processComplexInputs(formElem); 
+            } else { processSimpleInputFields(formElem); }
+        }
         /**
-         * Gets the field name, from the parent label, and the field value. If the 
-         * value is not empty call @addFieldData, else check if @isEmptyRequiredField.
+         * For form fields with complex processing, such as checkbox option or 
+         * multi-input fields, the 'valType' data tag on the element triggers 
+         * specific validation handlers for the field type.
          */
-        function valAndStoreFieldData(formElem) {                               //console.log("valAndStoreFieldData for formElem = %O", formElem);
+        function processComplexInputs(formElem) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
+            var fieldType = $(formElem).data("valType");
+            var cmplxFieldHndlr = { 
+                "checkbox": valCheckboxData, "multiInput": valMultiInputData 
+            }; 
+            cmplxFieldHndlr[fieldType](formElem);
+        }                                             
+        /**
+         * Processes fields where all that is required is to get the field name, 
+         * from the parent label, and the field value. If the value is not empty 
+         * @addFieldData is called to store the form data, else @isEmptyRequiredField
+         * is checked for invalid nulls and, if so, an error is shown to the user.
+         */
+        function processSimpleInputFields(formElem) {                           console.log("processSimpleInputFields for formElem = %O", formElem);
             var fieldName = formElem.parentNode.innerText.trim();               
             var fieldVal = $(formElem).val();  
-
             if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
             } else { ifIsEmptyRequiredField(formElem, fieldName); }
+        }
+        function valMultiInputData(formElem, fieldVal) {                        console.log("handleDynamicField called for elem = %O, val = %s", formElem, fieldVal)
+            // body...
+        }
+        function valCheckboxData(argument) {
+            // body...
         }
         /**
          * Adds the field value, keyed under the server-ready field name, to the 
          * appropriate entity object in formData.
          */
-        function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
+        function addFieldData(formElem, fieldName, fieldVal) {                  console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
             var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
             if (fieldName in crudParams.srcFields) { 
                 addMainEntityFieldData(dbField, fieldVal); 
@@ -298,8 +323,7 @@ $(document).ready(function(){
                 formData[entity][fieldTrans[entity]] = val;
             }
         }
-    } /* End getFieldData */
-
+    } /* End valAndProcessFormData */
     /**
      * If field name is in the form config's required array, show an error on
      * that field to the user: "Please fill out [fieldName]."
@@ -433,17 +457,23 @@ $(document).ready(function(){
         $(cntnr).append([addBttn, rmvBttn]);
         return cntnr;
     }
+    /**
+     * Builds a button to either add or remove a field row using the passed func.
+     * Adds a 'noVal' data property so these elems are skipped during validation.
+     */
     function buildDynmcRowBttn(action, field, func) {
         var text = action === "add" ? '+' : '-';
         var title = (action === "add" ? "Add" : "Remove") + ' ' + field;
         var bttn = _util.buildElem("input", { type: "button", value: text,
             class: "grid-bttn dynmc-bttns", id: field + "_"+ action, title: title });
+        $(bttn).data("noVal", true);
         $(bttn).click(func);
         return bttn;
     }
     /**
      * Creates and appends a new author field row. Keeps tracks the number of author 
      * field rows in form using a 'cnt' data property on the field's parent container. 
+     * Each name input field has a data property "valType" set for later validation.
      * rowDiv>(errorDiv, nameDiv>(first, middle, last, suffix))
      */
     function addAuthorFieldRow() {  
@@ -456,7 +486,8 @@ $(document).ready(function(){
         var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name*-'});
         var sufx = _util.buildElem("input", { class:"auth-sufx", type: "text", placeholder: '-Suffix-'});
         $(nameDiv).append([first, middle, last, sufx]);
-        $(rowDiv).append([errorDiv, nameDiv])
+        $([first, middle, last, sufx]).data("valType", "multiInput");
+        $(rowDiv).append([errorDiv, nameDiv]);
         $('#Authors_row').data("cnt", authRowCnt);
         $('#Authors_row').append(rowDiv);
     }
