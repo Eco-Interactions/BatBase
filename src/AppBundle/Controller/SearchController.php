@@ -270,7 +270,7 @@ class SearchController extends Controller
         foreach ($srcEntities as $srcEntity) 
         {                    
             $id = $srcEntity->getId(); 
-            $type = $srcEntity->getSourceType()->getSlug();
+            $type = lcfirst($srcEntity->getSourceType()->getDisplayName());
             array_push($srcData->$type->ids, $id);
             $srcData->srcRcrds->$id = $this->getSrcRcrd($srcEntity);
         }
@@ -326,7 +326,7 @@ class SearchController extends Controller
     private function buildTypeAry($types, $ary)
     {
         foreach ($types as $type) {
-            $subAry = [strval($type->getId()) => $type->getSlug()];
+            $subAry = [strval($type->getId()) => lcfirst($type->getDisplayName())];
             $ary = array_merge($ary, $subAry);
         }
         return $ary;
