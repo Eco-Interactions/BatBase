@@ -54,7 +54,7 @@
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
         if (localStorage && !localStorage.getItem('theta')){
 			localStorage.clear();
-			if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
+            if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
 			_util.populateStorage('theta', true);
 			showLoadingDataPopUp();
 		}
@@ -1164,7 +1164,7 @@
         var pubTypes = JSON.parse(localStorage.getItem('pubTypes'));
         var pubOpts = [{value: 'all', text: '- All -'}];                        //console.log("pubTypes = %O", pubTypes);
         for (var typeId in pubTypes) {
-            pubOpts.push({ value: typeId, text: pubTypes[typeId] });
+            pubOpts.push({ value: typeId, text: _util.ucfirst(pubTypes[typeId]) });
         }
         return pubOpts.sort(alphaPubTypes);
     }

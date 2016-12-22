@@ -557,6 +557,9 @@ a[role="button"], .tos-bttn {
 	margin: 0;
 	font-size: .95em;
 }
+.crud-sel {
+	width: 142px;
+}
 .form-row {
 	margin: .2em .75em .3em  .75em;
 	width: 340px;
@@ -571,7 +574,7 @@ a[role="button"], .tos-bttn {
 .crud-form label {
 	font-size: 1em;
 	padding: 4px 0 2px 0;
-	width: 133px;
+	width: 136px;
 }
 .form-input {
 	/*width: 250px;*/
