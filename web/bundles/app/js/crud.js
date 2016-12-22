@@ -10,7 +10,6 @@ $(document).ready(function(){
     var userRole, envUrl, crudParams = {};
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
-    // eif.crud = {};    
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
@@ -109,7 +108,7 @@ $(document).ready(function(){
             "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
             "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
             "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
-        }
+        };
     }     
     /**
      * Creates the source form with relevant fields for the selected source-type. 
@@ -176,35 +175,35 @@ $(document).ready(function(){
      * Returns a config object for the form of the selected source-type with the 
      * fields to add to and exclude from the default source fields, the required
      * fields, and the final order of the fields.
-     * Note: 'order' and 'required' arrays are used to matched the form elements' 
-     * id, which has no spaces. 
+     * Note: 'order' is used to matched the form elements' id, which has no spaces. 
      */
     function getSrcTypeFieldConfig(type) {
         var fieldMap = { 
-            "Author": { 
+            "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
                 "exclude": ["display Name", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
-                "order": [ "LastName", "FirstName", "MiddleName", "Description", 
+                "order": [ "FirstName", "MiddleName", "LastName", "Description", 
                     "LinkUrl", "LinkText"]
             },
-            "Citation": {
-                "add": { "Publication": "text", "Volume": "text", "Issue": "text", 
-                    "Pages": "text", "Tags": "checkbox", "Citation Text": "textArea"},
-                "exclude": [], 
-                "required": ["Display Name", "Publication", "Citation Text"],
-                "order": ["DisplayName", "CitationText", "Publication", "Year", 
-                    "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
+            "citation": {
+                "add": { "Publication": "text", "Title": "text", "Volume": "text", 
+                    "Issue": "text", "Pages": "text", "Tags": "checkbox", 
+                    "Citation Text": "textArea", "Citation Type": "select"},
+                "exclude": ["Display Name"], 
+                "required": ["Publication", "Citation Text", "Citation Type"],
+                "order": ["CitationType", "CitationText", "Publication", "Title",    
+                    "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
                     "Tags", "Authors" ]
             },
-            "Publication": {
-                "add": { "Publisher": "text", "Title" : "text"},
+            "publication": {
+                "add": { "Publisher": "text", "Title" : "text", "Publication Type": "select"},
                 "exclude": ["Display Name"],
-                "required": ["Title"],
-                "order": ["Title", "Description", "Publisher", "Year", "Doi", 
+                "required": ["Publication Type", "Title"],
+                "order": ["PublicationType", "Title", "Description", "Publisher", "Year", "Doi", 
                     "LinkUrl", "LinkText", "Authors" ]
             },
-            "Publisher": { 
+            "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["DisplayName"],
@@ -239,34 +238,47 @@ $(document).ready(function(){
         formData[detailEntity] = {};
         /* skips source type select and submit button */
         for (var i = 1; i < formElems.length-1; i++) {     
+            if ($(formElems[i]).data("noVal")) { continue; } /* No validation for this elem */
             processFormElem(formElems[i]);
         }                                                                       console.log("***__dataObj = %O", formData);
         postProcessing();
         return formData;    
         /** Sends form elems to appropriate handler.  */
         function processFormElem(formElem) {
-            if ($(formElem).data("noVal")) { return; } /* No validation for this elem */
-            if ($(formElem).data("valType")) { processComplexInputs(formElem); 
-            } else { processSimpleInputFields(formElem); }
+            var fieldName = formElem.parentNode.innerText.trim();     
+            var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
+            if ($(formElem).data("valType")) { 
+                processComplexInputs(formElem, fieldName, dbField); 
+            } else { 
+                processSimpleInputFields(formElem, fieldName, dbField); }
         }
         /**
          * For form fields with complex processing, such as checkbox options or 
          * multi-input fields, the 'valType' data tag on the element triggers 
          * specific validation handlers for the field type.
          */
-        function processComplexInputs(formElem) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
+        function processComplexInputs(formElem, fieldName, dbField) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
             var fieldType = $(formElem).data("valType");
             var cmplxFieldHndlr = { 
-                "checkbox": processCheckboxData, "multiInput": processMultiInputData 
+                "checkbox": processCheckboxData, "multiInput": processMultiInputData,
+                "select": processSelectData
             }; 
-            cmplxFieldHndlr[fieldType](formElem);
+            cmplxFieldHndlr[fieldType](formElem, fieldName, dbField);
+        }
+        function processSelectData(formElem, fieldName, dbField) {
+            var selTypes = crudParams.types[detailEntity];
+            var val = $(formElem).val();  console.log("val = ", val)
+            if (val === "placeholder") { crudFieldErrorHandler(fieldName, "emptyRequiredField"); 
+            } else {
+                formData[detailEntity][dbField] = selTypes[val];
+            }
         }
         /**
          * If this input elem has a value, the elem type is identified, e.g. author 
          * fields, and sent to be processed with the appropriate handler.
          */
         function processMultiInputData(formElem) {                              
-            if (formElem.value !== "") {                                        //console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
+            if ($(formElem).val() !== "") {                                        //console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
                 if (formElem.parentElement.className.includes("auth-fields")) { 
                     processAuthorNameFields(formElem); 
                 }
@@ -285,7 +297,7 @@ $(document).ready(function(){
             var fieldName = formElem.placeholder.split("-")[1]; 
             var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
             if (!authors[rowNum-1]) { authors[rowNum-1] = {}; }
-            authors[rowNum-1][dbField] =  formElem.value;
+            authors[rowNum-1][dbField] = $(formElem).val();
         }
         /**
          * If option is checked, the form elem and the field name, @getCheckboxFieldName, 
@@ -315,18 +327,16 @@ $(document).ready(function(){
          * @addFieldData is called to store the form data, else @isEmptyRequiredField
          * is checked for invalid nulls and, if so, an error is shown to the user.
          */
-        function processSimpleInputFields(formElem) {                           //console.log("processSimpleInputFields for formElem = %O", formElem);
-            var fieldName = formElem.parentNode.innerText.trim();               
+        function processSimpleInputFields(formElem, fieldName, dbField) {                           //console.log("processSimpleInputFields for formElem = %O", formElem);
             var fieldVal = $(formElem).val();  
-            if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
+            if (fieldVal !== "") { addFieldData(formElem, fieldName, dbField, fieldVal);
             } else { ifIsEmptyRequiredField(formElem, fieldName); }
         }
         /**
          * Adds the field value, keyed under the server-ready field name, to the 
          * appropriate entity object in formData.
          */
-        function addFieldData(formElem, fieldName, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
-            var dbField = _util.lcfirst(fieldName).split(' ').join('');         //console.log("  dbField = ", dbField);
+        function addFieldData(formElem, fieldName, dbField, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
             if (fieldName in crudParams.srcFields) { 
                 addFieldToFormData(dbField, fieldVal, mainEntity);
             } else {
@@ -348,7 +358,10 @@ $(document).ready(function(){
                 },
                 "citation": { 
                     "publication": { "source": "parentSource" },
-                    "citationText": { "source": "description", "citation": "fullText" }
+                    "citationText": { "source": "description", "citation": "fullText" },
+                    "title": { "source": "displayName", "citation": "displayName",
+                        "citation": "title" 
+                    }
             }};
             if (detailEntity in fieldTransMap) {
                 processFieldTranslation(field, val, fieldTransMap[detailEntity]);
@@ -441,7 +454,8 @@ $(document).ready(function(){
      */
     function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
         var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
-            "textArea": buildTextArea, "dynamic": buildDynamcFieldGenBttn };  
+            "textArea": buildTextArea, "dynamic": buildDynamcFieldGenBttn, 
+            "select": buildSelectElem };  
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -500,7 +514,7 @@ $(document).ready(function(){
      * interactions have tags currently. Eventually tags will be pulled from the server.
      */
     function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
-        var opts = { "Citation": ["Secondary"] }; 
+        var opts = { "citation": ["Secondary"] }; 
         var optCntnr = _util.buildElem("div", { "class": "flex-grow form-input" });
         opts[entity].forEach(function(opt) {
             $(optCntnr).append(buildOptsElem(opt));
@@ -555,6 +569,17 @@ $(document).ready(function(){
         $(bttn).data("noVal", true);
         $(bttn).click(func);
         return bttn;
+    }
+    /**
+     * Creates a select dropdown with the detail entities sub-types. Adds a data 
+     * property "valType" for later validation.
+     */
+    function buildSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
+        var entityTypes = crudParams.types[entity];
+        var opts = _util.buildSimpleOpts(entityTypes, "-Select Type-");
+        var sel = _util.buildSelectElem(opts, {class: "crud-sel"}, null, "placeholder");
+        $(sel).data("valType", "select");
+        return sel;
     }
     /**
      * Creates and appends a new author field row. Keeps tracks the number of author 
