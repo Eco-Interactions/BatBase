@@ -239,6 +239,7 @@ $(document).ready(function(){
     function valAndProcessFormData(formElems, mainEntity) {
         var detailType = _util.lcfirst(crudParams.srcTypes[$(formElems[0]).val()]);            //console.log("SourceType selected = ", type);
         var formData = {};
+        var authors = [];
         formData[mainEntity] = {};
         formData[detailType] = {};
         /* skips source type select and submit button */
@@ -263,7 +264,33 @@ $(document).ready(function(){
                 "checkbox": valCheckboxData, "multiInput": valMultiInputData 
             }; 
             cmplxFieldHndlr[fieldType](formElem);
-        }                                             
+        }
+        /**
+         * If this input elem has a value, the elem type is identified, e.g. author 
+         * fields, and sent to be processed with the appropriate handler.
+         */
+        function processMultiInputData(formElem) {                              
+            if (formElem.value !== "") {                                        console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
+                if (formElem.parentElement.className.includes("auth-fields")) { 
+                    processAuthorNameFields(formElem); 
+                }
+            }
+        }
+        /**
+         * As authors can be dynamically added, the current row number is the unique 
+         * identifier used for each author name row. After getting the row number,
+         * the field name, and the entity proprty name (dbField), the field value is 
+         * stored under the dbField name inside of an author object in the authors 
+         * array at the index of [row number minus one]. Each author object will 
+         * later be checked for invalid nulls and added to the formData object.
+         */
+        function processAuthorNameFields(formElem) {
+            var rowNum = formElem.parentElement.parentElement.id.split("-").pop();              
+            var fieldName = formElem.placeholder.split("-")[1]; 
+            var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
+            if (!authors[rowNum-1]) { authors[rowNum-1] = {}; }
+            authors[rowNum-1][dbField] =  formElem.value;
+        }
         /**
          * Processes fields where all that is required is to get the field name, 
          * from the parent label, and the field value. If the value is not empty 
@@ -275,9 +302,6 @@ $(document).ready(function(){
             var fieldVal = $(formElem).val();  
             if (fieldVal !== "") { addFieldData(formElem, fieldName, fieldVal);
             } else { ifIsEmptyRequiredField(formElem, fieldName); }
-        }
-        function valMultiInputData(formElem, fieldVal) {                        console.log("handleDynamicField called for elem = %O, val = %s", formElem, fieldVal)
-            // body...
         }
         function valCheckboxData(argument) {
             // body...
