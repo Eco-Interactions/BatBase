@@ -330,24 +330,24 @@ $(document).ready(function(){
      */
     function ifIsEmptyRequiredField(formElem, fieldName) {
         if (crudParams.type.formConfg.required.indexOf(fieldName) !== -1) {
-            crudFieldError(fieldName, formElem, "emptyRequiredField");
+            crudFieldErrorHandler(fieldName, "emptyRequiredField");
         }
     }
 /*--------------------------- Helpers ----------------------------------------*/
     /*------------------- Error Handlers -------------------------------------*/
-    /** Shows the user an error message above the field row using the tag's handler. */
-    function crudFieldError(fieldName, fieldElem, errorTag) {
-        var errorHandlers = {
-            "emptyRequiredField" : emptyRequiredFieldError
+    /** Shows the user an error message above the field row. */
+    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+        var errMsgMap = {
+            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>"
         };
-        errorHandlers[errorTag](fieldName, fieldElem);
+        var msg = errMsgMap[errorTag];
+        var errElem = fieldErrElem || getErrElem(fieldName);
+        errElem.innerHTML = msg;
     }
-    /** Error: Empty required field. Message: "Please fill out [field]." */
-    function emptyRequiredFieldError(fieldName, fieldElem) {                    //console.log("####emptyRequiredFieldError>>> %s = %O", fieldName, fieldElem);
-        var msg = "<p>Please fill in "+fieldName+".</p>";
+    /** Returns the error div for the passed field. */
+    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
-        var fieldErrorElem = $('#'+field+'_errs')[0];       
-        fieldErrorElem.innerHTML = msg;
+        return $('#'+field+'_errs')[0];    
     }
     /*------------------- Form Builders --------------------------------------*/
     /** Builds the form elem container. */
