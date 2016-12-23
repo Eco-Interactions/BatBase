@@ -52,10 +52,10 @@
 	}
 	function clearLocalStorageCheck() {
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-        if (localStorage && !localStorage.getItem('iota')){
+        if (localStorage && !localStorage.getItem('kappa')){
 			localStorage.clear();
             if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
-			_util.populateStorage('iota', true);
+			_util.populateStorage('kappa', true);
 			showLoadingDataPopUp();
 		}
 	}
