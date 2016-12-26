@@ -32,30 +32,21 @@ $(document).ready(function(){
     function buildSearchPgCrudUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initEntityCrud);
+        $(bttn).click(initInteractionCrud);
         $("#opts-col1").append(bttn);
     }
     /**
-     * Gets the selected grid focus, either taxa, locations, or sources, and loads
-     * its 'create' form in the crud window popup @showEntityCrudPopup.
+     * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
-    function initEntityCrud() {
-        var entityName = getFocusEntityName();                                  console.log("***initEntityCrud for ", entityName)
-        var initCrudViewMap = { "source": initSrcCrudView };                        
-        showEntityCrudPopup("New", entityName);
-        initCrudViewMap[entityName]();
-    }
-    function getFocusEntityName() {
-        var nameMap = { "locs": "location", "srcs": "source", "taxa": "taxon" };
-        var focus = $('#search-focus').val();
-        return nameMap[focus];
+    function initInteractionCrud() {                                            console.log("***initInteractionCrud***")
+        showEntityCrudPopup();
+        initCrudView();
     }
     /** Builds and shows the crud popup from @getCrudHtml */
-    function showEntityCrudPopup(action, entityName) {
-        var newEntityTitle = action + " " + _util.ucfirst(entityName); 
+    function showEntityCrudPopup() {
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").append(getCrudWindowElems(newEntityTitle));
+        $("#b-overlay-popup").append(getCrudWindowElems("New Interaction"));
         setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
     }
@@ -84,22 +75,22 @@ $(document).ready(function(){
         hdrSect.append(_util.buildElem("p"));
         return hdrSect;
     }
-/*-------------------------------- Source Funcs ------------------------------*/
+/*------------------- Form Functions -------------------------------------------------------------*/
     /**
-     * Resets and fills the global crudParams obj with the basic universal src 
-     * params @buildBaicSrcCrudParams. Creates the source form @initCrudSrcForm.
+     * Fills the global crudParams obj with the basic crud params @initCrudParams. 
+     * Init the crud form and append into the crud window @initCrudForm. 
      */
-    function initSrcCrudView() {
-        buildBasicSrcCrudParams("create");
-        initSrcCrudForm();
+    function initCrudView() {
+        initCrudParams("create");
+        initCrudForm();
     }       
     /**
-     * Resets and fills the global crudParams obj with the src params necessary for
-     * all source crud views.
+     * Resets and fills the global crudParams obj with the params necessary throughout
+     * the crud form interface.
      */
-    function buildBasicSrcCrudParams(action) {
+    function initCrudParams(action) {
         crudParams = {};
-        crudParams.view = "source";
+        // crudParams.view = "source";
         crudParams.action = action;
         crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
             "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
@@ -109,43 +100,83 @@ $(document).ready(function(){
             "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
             "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
         };
-    }     
+    }
     /**
-     * Creates the source form with relevant fields for the selected source-type. 
-     * On init, only the source-type select row is shown. Once selected, the source 
-     * form is built @initSrcTypeForm. Note: The volatileFieldsContainer holds 
-     * all source-type specific fields.
+     * Inits the interaction form with only two elements- a publication dropdown 
+     * available for selection and a disabled citation title dropdown that will become 
+     * active upon publication selection. Upon citation selection the form will 
+     * continue to generate fields and inputs as the user input's indicate neccessary. 
      */
-    function initSrcCrudForm() {
+    function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
-        var volatileFieldsContainer = _util.buildElem('div', {
-            id: 'field-rows', class: "flex-col flex-wrap"}); 
-        var srcTypeFieldRow = buildSrcTypeRow();
-        var submit = initSubmitBttn();
-        $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer, submit]);
+        // var srcFields = initSrcFields();
+        // var volatileFieldsContainer = _util.buildElem('div', {
+        //     id: 'field-rows', class: "flex-col flex-wrap"}); 
+        // var submit = initSubmitBttn();
+        // $(formCntnr).append(srcFields);
         $('#crud-main').append(formCntnr);
+    }      
+    /** Builds the form elem container. */
+    function buildCrudFormCntnr() {
+        var form = document.createElement("form");
+        $(form).attr({"action": "", "method": "POST", "name": "crud"});
+        form.className = "crud-form";
+        return form;
     }
-    function initSubmitBttn() {
-        var submit = _util.buildElem("input", { id: "crud-submit", 
-            class: "ag-fresh grid-bttn", type: "button", value: "Create Source"});
-        $(submit).hide().click(valSrcCrud);
-        return submit;
-    }
-    function enableSubmitBttn() {
-        $("#crud-submit").css("display", "initial"); 
-    }
-    /** Builds the row for the source-type field. */
-    function buildSrcTypeRow() {
-        var selElem = buildSrcTypeSelect();
-        $(selElem).val("placeholder");
-        $(selElem).find('option[value="placeholder"]').hide();
-        return buildFormRow("Source Type", selElem, true);
-    }
-    /** Creates the source-type select dropdown. */
-    function buildSrcTypeSelect() {
-        var srcOpts = _util.buildSimpleOpts(crudParams.types.source, "-- Select type --");     
-        return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
-    }
+
+    // function initSubmitBttn() {
+    //     var submit = _util.buildElem("input", { id: "crud-submit", 
+    //         class: "ag-fresh grid-bttn", type: "button", value: "Create Source"});
+    //     $(submit).hide().click(valSrcCrud);
+    //     return submit;
+    // }
+    // function enableSubmitBttn() {
+    //     $("#crud-submit").css("display", "initial"); 
+    // }
+    // /**
+    //  * Resets and fills the global crudParams obj with the src params necessary for
+    //  * all source crud views.
+    //  */
+    // function initCrudParams(action) {
+    //     crudParams = {};
+    //     // crudParams.view = "source";
+    //     crudParams.action = action;
+    //     crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
+    //         "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+    //         "Authors": "dynamic" };
+    //     crudParams.types = {
+    //         "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
+    //         "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
+    //         "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
+    //     };
+    // }
+    // /**
+    //  * Creates the source form with relevant fields for the selected source-type. 
+    //  * On init, only the source-type select row is shown. Once selected, the source 
+    //  * form is built @initSrcTypeForm. Note: The volatileFieldsContainer holds 
+    //  * all source-type specific fields.
+    //  */
+    // function initCrudForm() {
+    //     var formCntnr = buildCrudFormCntnr();
+    //     var volatileFieldsContainer = _util.buildElem('div', {
+    //         id: 'field-rows', class: "flex-col flex-wrap"}); 
+    //     var srcTypeFieldRow = buildSrcTypeRow();
+    //     var submit = initSubmitBttn();
+    //     $(formCntnr).append([srcTypeFieldRow, volatileFieldsContainer, submit]);
+    //     $('#crud-main').append(formCntnr);
+    // }
+    // /** Builds the row for the source-type field. */
+    // function buildSrcTypeRow() {
+    //     var selElem = buildSrcTypeSelect();
+    //     $(selElem).val("placeholder");
+    //     $(selElem).find('option[value="placeholder"]').hide();
+    //     return buildFormRow("Source Type", selElem, true);
+    // }
+    // /** Creates the source-type select dropdown. */
+    // function buildSrcTypeSelect() {
+    //     var srcOpts = _util.buildSimpleOpts(crudParams.types.source, "-- Select type --");     
+    //     return _util.buildSelectElem(srcOpts, null, initSrcTypeForm)
+    // }
     /**
      * Shows crud ui, all related form fields in labeled rows, for selected source-type.
      */
@@ -211,6 +242,170 @@ $(document).ready(function(){
         };
         return fieldMap[type];
     }
+    /**
+     * Builds all rows for the form according to the passed formConfig obj. 
+     * Returns a container div with the rows ready to be appended to the form window.
+     */
+    function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
+        var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
+            "textArea": buildTextArea, "dynamic": buildDynamcFieldGenBttn, 
+            "select": buildSelectElem };  
+        var defaultRows = buildDefaultRows();
+        var additionalRows = buildAdditionalRows();
+        return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
+
+        /**
+         * Builds a row for each default field not explicitly excluded. If exclude
+         * is set to true, all default fields are excluded. 
+         */
+        function buildDefaultRows() {                                           //console.log("    Building default rows");
+            var exclude = crudParams.type.formConfg.exclude;
+            var rows = [];
+            for (var field in dfltFields) {  
+                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
+                rows.push(buildRow(field, dfltFields));
+            }
+            return rows;
+        }
+        function buildAdditionalRows() {                                        //console.log("    Building additional rows");
+            var xtraFields = crudParams.type.formConfg.add;
+            var rows = [];
+            for (var field in xtraFields) {                                     //console.log("      field = ", field);
+                rows.push(buildRow(field, xtraFields));
+            }
+            return rows;
+        }
+        /**
+         * Builds field input @buildFieldType, stores whether field is required, 
+         * and sends both to @buildFormRow, returning the completed row elem.
+         */
+        function buildRow(field, fieldsObj) {
+            var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
+            var reqFields = crudParams.type.formConfg.required;
+            var isReq = reqFields.indexOf(field) !== -1;
+            return buildFormRow(_util.ucfirst(field), fieldInput, isReq);
+        }
+    } /* End getFormFieldRows */
+    /** Reorders the rows into the order set in the form config obj. */
+    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
+        var field, idx;
+        rows.forEach(function(row) {
+            field = row.id.split("_row")[0];
+            idx = order.indexOf(field);
+            order.splice(idx, 1, row);
+        });
+        return order;
+    }
+    function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
+        return _util.buildElem("input", { "type": "text", class:"txt-input" });
+    }
+    function buildTextArea(entity, field) {                                            //console.log("            buildTextArea");
+        return _util.buildElem("textarea");
+    }
+    /**
+     * Returns a div containing a checkbox, span-wrapped with associated label, 
+     * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
+     * interactions have tags currently. Eventually tags will be pulled from the server.
+     */
+    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
+        var opts = { "citation": ["Secondary"] }; 
+        var optCntnr = _util.buildElem("div", { "class": "flex-grow form-input" });
+        opts[entity].forEach(function(opt) {
+            $(optCntnr).append(buildOptsElem(opt));
+        });
+        return optCntnr;
+    }
+    /**
+     * Builds the checkbox elem and it's label. Adds a valType data property for 
+     * use during validation.
+     */
+    function buildOptsElem(opt) {
+        var span = document.createElement("span");
+        var input = _util.buildElem("input", { "type": "checkbox", id: opt+"_check"});
+        var lbl = _util.buildElem("label", { "text": opt, "class": "checkbox-lbl" });
+        $(input).data("valType", "checkbox");
+        lbl.htmlFor = opt+"_check";
+        $(span).append([input, lbl]);
+        return span;
+    }
+    /**
+     * Sets the dynamic field row generator method into the global prop that will 
+     * later be used to init the first row. Builds and returns the add, '+', button
+     * that will generate new field rows @creteFieldRowFunc[field] on click.  
+     */
+    function buildDynamcFieldGenBttn(entity, field) {                           //console.log("buildDynamcFieldGenBttn. entity = %s. field = %s.", entity, field);
+        var createFieldRowFunc = {
+            "Authors": { add: addAuthorFieldRow, rmv: removeAuthorFieldRow }
+        };
+        crudParams.type.dynmcFormRowFunc = createFieldRowFunc[field].add;
+        return buildFieldGenBttns(field, createFieldRowFunc[field]); 
+    }
+    /**
+     * Add '+' and '-' button next to field label bound to the field's passed 
+     * generation and destruction functions.
+     */
+    function buildFieldGenBttns(field, dynmcFieldGenFuncs) {                    //console.log("buildFieldGenBttns. field = %s, funcs = %O", field, dynmcFieldGenFuncs);
+        var cntnr =  _util.buildElem("div", { class: "flex-grow"});
+        var addBttn = buildDynmcRowBttn("add", field, dynmcFieldGenFuncs.add);
+        var rmvBttn = buildDynmcRowBttn("rmv", field, dynmcFieldGenFuncs.rmv);
+        $(cntnr).append([addBttn, rmvBttn]);
+        return cntnr;
+    }
+    /**
+     * Builds a button to either add or remove a field row using the passed func.
+     * Adds a 'noVal' data property so these elems are skipped during validation.
+     */
+    function buildDynmcRowBttn(action, field, func) {
+        var text = action === "add" ? '+' : '-';
+        var title = (action === "add" ? "Add" : "Remove") + ' ' + field;
+        var bttn = _util.buildElem("button", { class: "grid-bttn dynmc-bttns", 
+            id: field + "_"+ action, text: text, title: title, type: "button"});
+        $(bttn).data("noVal", true);
+        $(bttn).click(func);
+        return bttn;
+    }
+    /**
+     * Creates a select dropdown with the detail entities sub-types. Adds a data 
+     * property "valType" for later validation.
+     */
+    function buildSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
+        var entityTypes = crudParams.types[entity];
+        var opts = _util.buildSimpleOpts(entityTypes, "-Select Type-");
+        var sel = _util.buildSelectElem(opts, {class: "crud-sel"}, null, "placeholder");
+        $(sel).data("valType", "select");
+        return sel;
+    }
+    /**
+     * Creates and appends a new author field row. Keeps tracks the number of author 
+     * field rows in form using a 'cnt' data property on the field's parent container. 
+     * Each name input field has a data property "valType" set for later validation.
+     * rowDiv>(errorDiv, nameDiv>(first, middle, last, suffix))
+     */
+    function addAuthorFieldRow() {  
+        var authRowCnt = ($('#Authors_row').data("cnt") || 0) + 1;              //console.log("addAuthorFieldRow #", authRowCnt);
+        var rowDiv = _util.buildElem("div", { id: "auth-" + authRowCnt});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: "auth_"+authRowCnt+"_errs"});
+        var nameDiv =  _util.buildElem("div", { class:"flex-row auth-fields" });
+        var first = _util.buildElem("input", { type: "text", placeholder: '-First Name-'});
+        var middle = _util.buildElem("input", { type: "text", placeholder: '-Middle Name-'});
+        var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name-*'});
+        var sufx = _util.buildElem("input", { class:"auth-sufx", type: "text", placeholder: '-Suffix-'});
+        $(nameDiv).append([first, middle, last, sufx]);
+        $([first, middle, last, sufx]).data("valType", "multiInput");
+        $(rowDiv).append([errorDiv, nameDiv]);
+        $('#Authors_row').data("cnt", authRowCnt);
+        $('#Authors_row').append(rowDiv);
+    }
+    function removeAuthorFieldRow() {
+        var authRowCnt = $('#Authors_row').data("cnt");                         //console.log("addAuthorFieldRow #", authRowCnt);
+        $('#auth-'+authRowCnt).remove();
+        $('#Authors_row').data("cnt", --authRowCnt);
+    }
+    /** Returns the full, contextual url for the passed entity and action.  */
+    function getEntityUrl(entityName, action) {
+        return envUrl + entityName + "/" + action;
+    }
+
     /*----------------------- Validation ---------------------------------------------------------*/
     /**
      * Form submit handler calls @buildFormData to validate required fields have 
@@ -439,192 +634,6 @@ $(document).ready(function(){
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
         return $('#'+field+'_errs')[0];    
-    }
-    /*------------------- Form Builders --------------------------------------*/
-    /** Builds the form elem container. */
-    function buildCrudFormCntnr() {
-        var form = document.createElement("form");
-        $(form).attr({"action": "", "method": "POST", "name": "crud"});
-        form.className = "crud-form";
-        return form;
-    }
-    /**
-     * Builds all rows for the form according to the passed formConfig obj. 
-     * Returns a container div with the rows ready to be appended to the form window.
-     */
-    function getFormFieldRows(entity, formCnfg, dfltFields) {                   //console.log("  Building Form rows");
-        var buildFieldType = { "text": buildTextInput, "checkbox": buildCheckboxInput,
-            "textArea": buildTextArea, "dynamic": buildDynamcFieldGenBttn, 
-            "select": buildSelectElem };  
-        var defaultRows = buildDefaultRows();
-        var additionalRows = buildAdditionalRows();
-        return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
-
-        /**
-         * Builds a row for each default field not explicitly excluded. If exclude
-         * is set to true, all default fields are excluded. 
-         */
-        function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var exclude = crudParams.type.formConfg.exclude;
-            var rows = [];
-            for (var field in dfltFields) {  
-                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, dfltFields));
-            }
-            return rows;
-        }
-        function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var xtraFields = crudParams.type.formConfg.add;
-            var rows = [];
-            for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                rows.push(buildRow(field, xtraFields));
-            }
-            return rows;
-        }
-        /**
-         * Builds field input @buildFieldType, stores whether field is required, 
-         * and sends both to @buildFormRow, returning the completed row elem.
-         */
-        function buildRow(field, fieldsObj) {
-            var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = crudParams.type.formConfg.required;
-            var isReq = reqFields.indexOf(field) !== -1;
-            return buildFormRow(_util.ucfirst(field), fieldInput, isReq);
-        }
-    } /* End getFormFieldRows */
-    /** Reorders the rows into the order set in the form config obj. */
-    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
-        var field, idx;
-        rows.forEach(function(row) {
-            field = row.id.split("_row")[0];
-            idx = order.indexOf(field);
-            order.splice(idx, 1, row);
-        });
-        return order;
-    }
-    function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
-        return _util.buildElem("input", { "type": "text", class:"txt-input" });
-    }
-    function buildTextArea(entity, field) {                                            //console.log("            buildTextArea");
-        return _util.buildElem("textarea");
-    }
-    /**
-     * Returns a div containing a checkbox, span-wrapped with associated label, 
-     * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
-     * interactions have tags currently. Eventually tags will be pulled from the server.
-     */
-    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
-        var opts = { "citation": ["Secondary"] }; 
-        var optCntnr = _util.buildElem("div", { "class": "flex-grow form-input" });
-        opts[entity].forEach(function(opt) {
-            $(optCntnr).append(buildOptsElem(opt));
-        });
-        return optCntnr;
-    }
-    /**
-     * Builds the checkbox elem and it's label. Adds a valType data property for 
-     * use during validation.
-     */
-    function buildOptsElem(opt) {
-        var span = document.createElement("span");
-        var input = _util.buildElem("input", { "type": "checkbox", id: opt+"_check"});
-        var lbl = _util.buildElem("label", { "text": opt, "class": "checkbox-lbl" });
-        $(input).data("valType", "checkbox");
-        lbl.htmlFor = opt+"_check";
-        $(span).append([input, lbl]);
-        return span;
-    }
-    /**
-     * Sets the dynamic field row generator method into the global prop that will 
-     * later be used to init the first row. Builds and returns the add, '+', button
-     * that will generate new field rows @creteFieldRowFunc[field] on click.  
-     */
-    function buildDynamcFieldGenBttn(entity, field) {                           //console.log("buildDynamcFieldGenBttn. entity = %s. field = %s.", entity, field);
-        var createFieldRowFunc = {
-            "Authors": { add: addAuthorFieldRow, rmv: removeAuthorFieldRow }
-        };
-        crudParams.type.dynmcFormRowFunc = createFieldRowFunc[field].add;
-        return buildFieldGenBttns(field, createFieldRowFunc[field]); 
-    }
-    /**
-     * Add '+' and '-' button next to field label bound to the field's passed 
-     * generation and destruction functions.
-     */
-    function buildFieldGenBttns(field, dynmcFieldGenFuncs) {                    //console.log("buildFieldGenBttns. field = %s, funcs = %O", field, dynmcFieldGenFuncs);
-        var cntnr =  _util.buildElem("div", { class: "flex-grow"});
-        var addBttn = buildDynmcRowBttn("add", field, dynmcFieldGenFuncs.add);
-        var rmvBttn = buildDynmcRowBttn("rmv", field, dynmcFieldGenFuncs.rmv);
-        $(cntnr).append([addBttn, rmvBttn]);
-        return cntnr;
-    }
-    /**
-     * Builds a button to either add or remove a field row using the passed func.
-     * Adds a 'noVal' data property so these elems are skipped during validation.
-     */
-    function buildDynmcRowBttn(action, field, func) {
-        var text = action === "add" ? '+' : '-';
-        var title = (action === "add" ? "Add" : "Remove") + ' ' + field;
-        var bttn = _util.buildElem("button", { class: "grid-bttn dynmc-bttns", 
-            id: field + "_"+ action, text: text, title: title, type: "button"});
-        $(bttn).data("noVal", true);
-        $(bttn).click(func);
-        return bttn;
-    }
-    /**
-     * Creates a select dropdown with the detail entities sub-types. Adds a data 
-     * property "valType" for later validation.
-     */
-    function buildSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
-        var entityTypes = crudParams.types[entity];
-        var opts = _util.buildSimpleOpts(entityTypes, "-Select Type-");
-        var sel = _util.buildSelectElem(opts, {class: "crud-sel"}, null, "placeholder");
-        $(sel).data("valType", "select");
-        return sel;
-    }
-    /**
-     * Creates and appends a new author field row. Keeps tracks the number of author 
-     * field rows in form using a 'cnt' data property on the field's parent container. 
-     * Each name input field has a data property "valType" set for later validation.
-     * rowDiv>(errorDiv, nameDiv>(first, middle, last, suffix))
-     */
-    function addAuthorFieldRow() {  
-        var authRowCnt = ($('#Authors_row').data("cnt") || 0) + 1;              //console.log("addAuthorFieldRow #", authRowCnt);
-        var rowDiv = _util.buildElem("div", { id: "auth-" + authRowCnt});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: "auth_"+authRowCnt+"_errs"});
-        var nameDiv =  _util.buildElem("div", { class:"flex-row auth-fields" });
-        var first = _util.buildElem("input", { type: "text", placeholder: '-First Name-'});
-        var middle = _util.buildElem("input", { type: "text", placeholder: '-Middle Name-'});
-        var last = _util.buildElem("input", { type: "text", placeholder: '-Last Name-*'});
-        var sufx = _util.buildElem("input", { class:"auth-sufx", type: "text", placeholder: '-Suffix-'});
-        $(nameDiv).append([first, middle, last, sufx]);
-        $([first, middle, last, sufx]).data("valType", "multiInput");
-        $(rowDiv).append([errorDiv, nameDiv]);
-        $('#Authors_row').data("cnt", authRowCnt);
-        $('#Authors_row').append(rowDiv);
-    }
-    function removeAuthorFieldRow() {
-        var authRowCnt = $('#Authors_row').data("cnt");              //console.log("addAuthorFieldRow #", authRowCnt);
-        $('#auth-'+authRowCnt).remove();
-        $('#Authors_row').data("cnt", --authRowCnt);
-    }
-    /**
-     * Each element is built, nested, and returned as a completed row. 
-     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
-     */
-    function buildFormRow(fieldName, fieldInput, isReq) {
-        var field = fieldName.split(' ').join('');
-        var rowDiv = _util.buildElem("div", { class: "form-row", id: field + "_row"});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
-        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
-        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
-        $(fieldRow).append([label, fieldInput]);
-        $(rowDiv).append([errorDiv, fieldRow]);
-        return rowDiv;
-    }
-    /** Returns the full, contextual url for the passed entity and action.  */
-    function getEntityUrl(entityName, action) {
-        return envUrl + entityName + "/" + action;
     }
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
