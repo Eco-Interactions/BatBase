@@ -937,12 +937,15 @@
 	function seperateAndStoreSrcData(dataObj) {						            //console.log("~~~Source data recieved. %O", dataObj);
         var data = dataObj.srcData;
         var domainRcrds = getDomainRcrds(data);                                 //console.log("domainRcrds = %O", domainRcrds);
-        _util.populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-        _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
         _util.populateStorage('srcTypes', JSON.stringify(data.srcTypes));
-		_util.populateStorage('citTypes', JSON.stringify(data.citation.types));
-		_util.populateStorage('authRcrds', JSON.stringify(domainRcrds.author));
-		_util.populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication));
+        _util.populateStorage('citTypes', JSON.stringify(data.citation.types));
+        _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
+        _util.populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
+		_util.populateStorage('authRcrds', JSON.stringify(domainRcrds.author.rcrds));
+		_util.populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication.rcrds));
+        _util.populateStorage('authNames', JSON.stringify(domainRcrds.author.names));
+        _util.populateStorage('pubNames', JSON.stringify(domainRcrds.publication.names));
+
 		initSrcSearchUi(domainRcrds, data.srcRcrds);
 	}
     /**
@@ -951,12 +954,14 @@
      */
     function getDomainRcrds(srcData) {                                          //console.log("srcData = %O", srcData);
         var curRcrd, parentPub;
-        var domains = { author: {}, publication: {} };
+        var domains = { 
+            author: { rcrds: {}, names: {} }, publication: { rcrds: {}, names: {} } };
         
         for (var key in domains) {
             srcData[key].ids.forEach(function(id){
                 curRcrd = getDetachedRcrd(id, srcData.srcRcrds);
-                domains[key][curRcrd.displayName] = curRcrd;
+                domains[key].rcrds[curRcrd.displayName] = curRcrd;
+                domains[key].names[curRcrd.displayName] = id;
             });
         }
         return domains; 
