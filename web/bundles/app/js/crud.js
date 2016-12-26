@@ -109,11 +109,11 @@ $(document).ready(function(){
      */
     function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
-        // var srcFields = initSrcFields();
+        var srcFields = initSrcFields();
         // var volatileFieldsContainer = _util.buildElem('div', {
         //     id: 'field-rows', class: "flex-col flex-wrap"}); 
         // var submit = initSubmitBttn();
-        // $(formCntnr).append(srcFields);
+        $(formCntnr).append(srcFields);
         $('#crud-main').append(formCntnr);
     }      
     /** Builds the form elem container. */
@@ -123,6 +123,57 @@ $(document).ready(function(){
         form.className = "crud-form";
         return form;
     }
+    /** Inits the main source fields, publication and citation. */
+    function initSrcFields() {
+        var pubSel = buildPubSelect();
+        var citSel = initCitSelect();
+        return [pubSel, citSel];
+    }
+    /** Creates the publication select dropdown populated with all current publication titles. */
+    function buildPubSelect() {
+        var selElem;
+        var pubObj = JSON.parse(localStorage.getItem('pubNames'));
+        var opts = Object.keys(pubObj).map(function(name) {
+            return { value: pubObj[name], text: name };
+        });
+        opts.push({ value: "placeholder", text: "- Select Publication -"});
+        selElem = _util.buildSelectElem(opts, {}, onPubSelection)
+        $(selElem).val("placeholder");
+        $(selElem).find('option[value="placeholder"]').hide();
+        return buildFormRow("Publication", selElem, true);
+    }
+    /** Inits an empty and disabled citation select dropdown. */
+    function initCitSelect() {
+        var opts = [{value: "placeholder", text: "- Select Citation -"}];
+        var selElem = _util.buildSelectElem(opts, {}, onCitSelection)
+        $(selElem).attr("disabled", true);
+        return buildFormRow("Citation Title", selElem, true);
+    }
+    function onPubSelection() { console.log("pub selcection = %s", $(this).val());
+
+    }
+    function onCitSelection() {  console.log("cit selcection = %s", $(this).val());
+
+    }
+
+
+    /*------------------- Form Builders --------------------------------------*/
+    /**
+     * Each element is built, nested, and returned as a completed row. 
+     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
+     */
+    function buildFormRow(fieldName, fieldInput, isReq) {
+        var field = fieldName.split(' ').join('');
+        var rowDiv = _util.buildElem("div", { class: "form-row", id: field + "_row"});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
+        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
+        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
+        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
+        $(fieldRow).append([label, fieldInput]);
+        $(rowDiv).append([errorDiv, fieldRow]);
+        return rowDiv;
+    }
+
 
     // function initSubmitBttn() {
     //     var submit = _util.buildElem("input", { id: "crud-submit", 
