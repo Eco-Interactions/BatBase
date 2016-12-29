@@ -6,9 +6,15 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         --Source's have full name as display name and authors are using last name...
 
 
-
-
 TAYLOR:
+    -- How to show details about a pub/cit selection in form. 
+        -- More info could be needed to ensure correct selections, especially for citations.
+
+    --Citation display names
+        -- Currently title is used
+        -- Should we prompt for display name or title?
+        -- How to generate  
+
 Questions:
 
 
