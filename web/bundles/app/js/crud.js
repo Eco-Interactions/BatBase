@@ -103,59 +103,93 @@ $(document).ready(function(){
     }
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
-     * available for selection and a disabled citation title dropdown that will become 
-     * active upon publication selection. Upon citation selection the form will 
-     * continue to generate fields and inputs as the user input's indicate neccessary. 
+     * and a disabled citation title dropdown that will become active upon publication 
+     * selection. Both dropdowns will display create forms when the user enters a title 
+     * not currently in the database. Upon citation selection the form will continue 
+     * to generate fields and sub-forms as the user's input indicates neccessary. 
      */
     function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
-        var srcFields = initSrcFields();
+        var srcFields = buildSrcFields();
         // var volatileFieldsContainer = _util.buildElem('div', {
         //     id: 'field-rows', class: "flex-col flex-wrap"}); 
         // var submit = initSubmitBttn();
         $(formCntnr).append(srcFields);
         $('#crud-main').append(formCntnr);
+        initComboSelects();
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
         var form = document.createElement("form");
         $(form).attr({"action": "", "method": "POST", "name": "crud"});
-        form.className = "crud-form";
+        form.className = "crud-form flex-row";
         return form;
     }
-    /** Inits the main source fields, publication and citation. */
-    function initSrcFields() {
-        var pubSel = buildPubSelect();
-        var citSel = initCitSelect();
+    /** Inits the main source form fields: publication and citation. */
+    function buildSrcFields() {
+        var pubSel = buildPubField();
+        var citSel = buildCitField();
         return [pubSel, citSel];
     }
-    /** Creates the publication select dropdown populated with all current publication titles. */
-    function buildPubSelect() {
+    /**
+     * Returns a form row with a publication select dropdown populated with all 
+     * current publication titles.
+     */
+    function buildPubField() {
         var selElem;
         var pubObj = JSON.parse(localStorage.getItem('pubNames'));
-        var opts = Object.keys(pubObj).map(function(name) {
-            return { value: pubObj[name], text: name };
-        });
-        opts.push({ value: "placeholder", text: "- Select Publication -"});
-        selElem = _util.buildSelectElem(opts, {}, onPubSelection)
-        $(selElem).val("placeholder");
-        $(selElem).find('option[value="placeholder"]').hide();
+        var opts = Object.keys(pubObj).sort().map(function(name) {
+            return { value: pubObj[name].toString(), text: name };
+        });  
+        selElem = _util.buildSelectElem(opts, {id: "pub-sel", class: "crud-sel"});
         return buildFormRow("Publication", selElem, true);
     }
-    /** Inits an empty and disabled citation select dropdown. */
-    function initCitSelect() {
+    /** Returns a form row with an empty and disabled citation select dropdown. */
+    function buildCitField() {
         var opts = [{value: "placeholder", text: "- Select Citation -"}];
-        var selElem = _util.buildSelectElem(opts, {}, onCitSelection)
+        var selElem = _util.buildSelectElem(
+            opts, {id: "cit-sel", class: "crud-sel"}, onCitSelection)
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, true);
     }
-    function onPubSelection() { console.log("pub selcection = %s", $(this).val());
+    /**
+     * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
+     * that allow users to search by typing and add new options not in the list, 
+     * by triggering a sub-form for that entity.
+     */
+    function initComboSelects() {
+        var selMap = { 
+            "pub": { name: "Publication", change: onPubSelection, add: initPubForm },
+            "cit": { name: "Citation", change: onCitSelection, add: initCitForm }
+        };
+        for (var selType in selMap) {
+            $('#'+selType+'-sel').selectize({
+                create: true,
+                onChange: selMap[selType].change,
+                onItemAdd: selMap[selType].add,
+                placeholder: 'Select ' + selMap[selType].name
+            });
+        }
+    }
+    /*-------------- Publication Functions -----------------------------------*/
+    function onPubSelection(val) { 
+        if (typeof val !== "number") { return; }                                
+        initCitField(pubId);
+    }
+    function initPubForm(val, data) {  console.log("Adding new pub! val = %s, data = %O", val, data);
+        // body...
+    }
+
+    /*-------------- Citation Functions --------------------------------------*/
+    function initCitField(pubId) {  console.log("initCitSelect for publication = ", pubId);
+        var pubRcrd
+    }
+    function onCitSelection() {  console.log("cit selection = %s", $(this).val());
 
     }
-    function onCitSelection() {  console.log("cit selcection = %s", $(this).val());
-
+    function initCitForm(val, data) {  console.log("Adding new cit! val = %s, data = %O", val, data);
+        // body...
     }
-
 
     /*------------------- Form Builders --------------------------------------*/
     /**

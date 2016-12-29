@@ -516,41 +516,48 @@ a[role="button"], .tos-bttn {
     opacity: 0;
 }
 /*----- Search CRUD Popup -----*/
-.crud-popup {
-    /*top: 100px;*/
-	height: 555px;
-	width: 911px;
-	padding: 20px;
-	text-align: left;
-	margin: auto;
-	background: #a2dadd !important;
-}
 .crud-ovrly {
     top: 75px;
 }
+.crud-popup {
+    /*top: 100px;*/
+	height: 555px;
+	width: 1111px;
+	padding: 20px;
+	text-align: left;
+	margin: auto;
+	/*background: #a2dadd !important;*/
+}
 #crud-hdr>h1 {
 	text-align: center;  
-	margin-bottom: 50px;
+	margin-bottom: 10px;
 }
 #crud-main {
 	padding: 25px;
-
 }
 /* -- Form Styles -- */
 .crud-form {
 	font-size: 1.1em;
-	width: 350px;
+	/*width: 350px;*/
+	flex-wrap: wrap;
 }
-#field-rows {
-	/*justify-content: space-between;*/
+.form-row {
+	margin: .2em .75em .3em  .75em;
+	width: 470px;
+}
+.row-errors {
+	color: red;
+	font-size: .9em;
+}
+.field-row {
+	justify-content: space-between;
+}
+/*#field-rows {
     width: 350px;
     max-height: 333px;
-}
+}*/
 .required:after {
   content: "*";
-}
-#form-errors {
-	
 }
 .crud-form input, .crud-form select, .crud-form textarea {
 	padding: .1em;
@@ -558,22 +565,11 @@ a[role="button"], .tos-bttn {
 	font-size: .95em;
 }
 .crud-sel {
-	width: 142px;
-}
-.form-row {
-	margin: .2em .75em .3em  .75em;
-	width: 340px;
-}
-.field-row {
-	justify-content: space-between;
-}
-.row-errors {
-	color: red;
-	font-size: .9em;
+	width: 333px;
 }
 .crud-form label {
 	font-size: 1em;
-	padding: 4px 0 2px 0;
+	padding: 9px 0 2px 0;
 	width: 136px;
 }
 .form-input {
