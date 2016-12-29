@@ -100,6 +100,9 @@ $(document).ready(function(){
             "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
             "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
         };
+        crudParams.records = {
+            "source": JSON.parse(localStorage.getItem('srcRcrds'))
+        }
     }
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
@@ -146,9 +149,8 @@ $(document).ready(function(){
     }
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitField() {
-        var opts = [{value: "placeholder", text: "- Select Citation -"}];
         var selElem = _util.buildSelectElem(
-            opts, {id: "cit-sel", class: "crud-sel"}, onCitSelection)
+            [], {id: "cit-sel", class: "crud-sel"}, onCitSelection)
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, true);
     }
@@ -164,30 +166,45 @@ $(document).ready(function(){
         };
         for (var selType in selMap) {
             $('#'+selType+'-sel').selectize({
-                create: true,
+                create: selMap[selType].add,
                 onChange: selMap[selType].change,
-                onItemAdd: selMap[selType].add,
                 placeholder: 'Select ' + selMap[selType].name
             });
         }
     }
     /*-------------- Publication Functions -----------------------------------*/
+    /** When a publication is selected fill citation dropdown @initCitField.  */
     function onPubSelection(val) { 
-        if (typeof val !== "number") { return; }                                
-        initCitField(pubId);
+        if (val === "" || parseInt(val) === NaN) { return; }                                
+        initCitField(val);
     }
-    function initPubForm(val, data) {  console.log("Adding new pub! val = %s, data = %O", val, data);
+    function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
         // body...
     }
 
     /*-------------- Citation Functions --------------------------------------*/
-    function initCitField(pubId) {  console.log("initCitSelect for publication = ", pubId);
-        var pubRcrd
+    /**
+     * Fills the citation field combobox with all citations for the selected publication.
+     * Clears any previous options and enables the dropdown.
+     */
+    function initCitField(pubId) {                                              console.log("initCitSelect for publication = ", pubId);
+        var pubRcrd = crudParams.records.source[pubId];  
+        var citOpts = getPubCitationOpts(pubRcrd);  
+        var sel = $('#cit-sel')[0].selectize;
+        sel.clearOptions();
+        sel.addOption(citOpts);
+        sel.enable();
     }
-    function onCitSelection() {  console.log("cit selection = %s", $(this).val());
-
+    /** Returns an array of option objects with citations for this publication.  */
+    function getPubCitationOpts(pubRcrd) {
+        return pubRcrd.childSources.map(function(citId) {
+            return { value: citId, text: crudParams.records.source[citId].displayName };
+        });
     }
-    function initCitForm(val, data) {  console.log("Adding new cit! val = %s, data = %O", val, data);
+    function onCitSelection(val) {  
+        if (val === "") { return; }  console.log("cit selection = ", parseInt(val));
+    }
+    function initCitForm(val) {  console.log("Adding new cit! val = %s", val);
         // body...
     }
 
