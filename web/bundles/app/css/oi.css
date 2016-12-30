@@ -182,7 +182,7 @@ span.lbl {
 	cursor: pointer;
 }
 #hdrtext>button {
-	width: 135px;
+	width: 148px;
 }
 .adminbttn {
 	background: #3399ff;
@@ -275,10 +275,7 @@ span.lbl {
     position: fixed;
     top: 0;
     bottom: 0;
-    background: #000;
-    background: -webkit-radial-gradient(center,ellipse cover,
-    	rgba(0,0,0,0.1) 0, 
-    	rgba(0,0,0,0.7) 100%);
+    background: rgba(0,0,0,.8);
     width: 100vw;
     height: 100vh;
     z-index: 10000;
@@ -348,7 +345,7 @@ span.lbl {
 /*-------- Search --------------*/
 #search-opts {  /* .flex-row also on elem */
 	margin: 1em auto 0 auto;
-	height: 100px;
+	height: 115px;
 	width: 1500px;
 	font-size: 1.1em;
 }
@@ -359,18 +356,15 @@ span.lbl {
 }
 .opts-box {
 	flex: 0 0 auto;  	  
-	height: 20px;
+	height: 25px;
 	width: 130px;
 	margin: 0 .7em 0 .5em;
 	z-index: 20;
 }
 #opts-col1 {
 	border-right: black 1px solid;
-	flex: 0 0 345px;  	  
+	flex: 0 0 366px;
 	align-items: flex-end;
-}
-#search-focus, #sel-domain {
-	height: 25px;
 }
 #opts-col2, #opts-col3 {
 	font-size: .9em;

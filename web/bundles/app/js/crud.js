@@ -64,15 +64,15 @@ $(document).ready(function(){
      */
     function getCrudWindowElems(title) {
         var cntnr = _util.buildElem("section");
-        cntnr.append(getHeaderHtml(title));
-        cntnr.append(_util.buildElem("div", { "id": "crud-main" }));        
-        cntnr.append(_util.buildElem("footer"));
         return cntnr;        
+        $(cntnr).append(getHeaderHtml(title));
+        $(cntnr).append(_util.buildElem("div", { "id": "crud-main" }));
+        $(cntnr).append(_util.buildElem("footer"));
     }
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "crud-hdr" });
-        hdrSect.append(_util.buildElem("h1", { "text": title }));
-        hdrSect.append(_util.buildElem("p"));
+        $(hdrSect).append(_util.buildElem("h1", { "text": title }));
+        $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
