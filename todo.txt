@@ -5,6 +5,8 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
     --crud--
         --Source's have full name as display name and authors are using last name...
 
+    --FORM--
+        -- fix tabs on selectize: https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
 
 TAYLOR:
     -- How to show details about a pub/cit selection in form. 
@@ -16,8 +18,12 @@ TAYLOR:
         -- How to generate  
 
 Questions:
-
-
+    -- Leave publisher field out?? In?? 
+    -- The list of authors is problematic:
+        -- How to edit when selected? 
+        -- When the user enters a new name, I have added it into the 'display name'
+            field. If this is how we want to handle this, as it seems to be straightforward,
+            we could add a tooltip describing the format for 'display name'.
 
 
 

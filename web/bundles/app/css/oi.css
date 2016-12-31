@@ -49,7 +49,7 @@ form button {
     padding: .25em .5em .25em .5em;
     font-size: 1.5em;
 }
-#reg-form-cntnr button:hover {
+#reg-form-cntnr button:hover, .bttn-cntnr button:hover {
 	border: 1.5px solid;
 	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
@@ -522,22 +522,45 @@ a[role="button"], .tos-bttn {
 	margin: auto;
 	/*background: #a2dadd !important;*/
 }
-#crud-hdr>h1 {
+.crud-popup h1, .crud-popup h3 {
 	text-align: center;  
+	padding-bottom: 8px;
+}
+#crud-hdr>h1 {
 	margin-bottom: 10px;
 }
 #crud-main {
-	padding: 25px;
+	padding: 25px 25px 75px 25px;
+	height: 488px;
+	overflow: scroll;
 }
 /* -- Form Styles -- */
 .crud-form {
-	font-size: 1.1em;
+	font-size: 1em;
 	/*width: 350px;*/
 	flex-wrap: wrap;
 }
+#sub-form {
+	/*border: 1px solid;*/
+	/*padding-top: 11px;*/
+	/*border-radius: 5px;*/
+    width: 455px;
+    margin-left: 11px;
+}
+#sub-sub-form {
+	/*border: 1px solid;*/
+	/*padding-top: 11px;*/
+	/*border-radius: 5px;*/
+    /*width: 444px;*/
+    margin-left: 11px;
+}
 .form-row {
-	margin: .2em .75em .3em  .75em;
+	padding: .2em .75em .3em  .75em;
 	width: 470px;
+}
+.sub-form-row {
+	padding: .2em .75em .3em  .75em;
+	width: 400px;
 }
 .row-errors {
 	color: red;
@@ -546,10 +569,6 @@ a[role="button"], .tos-bttn {
 .field-row {
 	justify-content: space-between;
 }
-/*#field-rows {
-    width: 350px;
-    max-height: 333px;
-}*/
 .required:after {
   content: "*";
 }
@@ -558,39 +577,41 @@ a[role="button"], .tos-bttn {
 	margin: 0;
 	font-size: .95em;
 }
-.crud-sel {
+.lrg-crud-sel {
 	width: 333px;
+}
+.sml-crud-sel {
+	width: 255px;
 }
 .crud-form label {
 	font-size: 1em;
 	padding: 9px 0 2px 0;
-	width: 136px;
+	width: 122px;
 }
 .form-input {
 	/*width: 250px;*/
 	padding-left: 2px;
 }
-.crud-form input[type=text] {
-	width: 211px;
-}
-#crud-submit {
-	margin-top: 1em;
-    font-size: 1em;
-    padding: 3px;
+.txt-input {
+	width: 255px;
 }
 .checkbox-lbl {
 	margin-left: .2em;
 }
 .crud-form textarea {
 	height: 55px;
-	width: 211px
+	width: 255px
 }
-.auth-fields input[type=text] {
-	width: 120px;
-	margin: .2em .3em .2em 0;
+.multi-sel-ul{
+	list-style: square inside;
 }
-.auth-sufx {
-	width: 63px !important;
+.bttn-cntnr {
+	align-self: flex-end;
+}
+.bttn-cntnr button {
+	margin-top: 1em;
+    font-size: 1em;
+    padding: 3px;
 }
 button.dynmc-bttns {
 	margin-right: .5em;
@@ -676,7 +697,7 @@ label[for=fos_user_registration_form_about_me] {
 #reg-tos {
 	margin-top: 1em;
 }
-#reg-submit, #reg-tos, #crud-submit {
+#reg-submit, #reg-tos {
     cursor: pointer;
 }
 /*------- Feedback ----------------*/
