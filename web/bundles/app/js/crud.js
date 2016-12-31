@@ -119,7 +119,7 @@ $(document).ready(function(){
         // var submit = initSubmitBttn();
         $(formCntnr).append(srcFields);
         $('#crud-main').append(formCntnr);
-        initComboSelects();
+        initSrcComboboxes();
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -134,6 +134,7 @@ $(document).ready(function(){
         var citSel = buildCitField();
         return [pubSel, citSel];
     }
+    /*-------------- Publication Helpers -----------------------------------*/
     /**
      * Returns a form row with a publication select dropdown populated with all 
      * current publication titles.
@@ -144,33 +145,8 @@ $(document).ready(function(){
         var opts = Object.keys(pubObj).sort().map(function(name) {
             return { value: pubObj[name].toString(), text: name };
         });  
-        selElem = _util.buildSelectElem(opts, {id: "pub-sel", class: "crud-sel"});
-        return buildFormRow("Publication", selElem, true);
-    }
-    /** Returns a form row with an empty and disabled citation select dropdown. */
-    function buildCitField() {
-        var selElem = _util.buildSelectElem(
-            [], {id: "cit-sel", class: "crud-sel"}, onCitSelection)
-        $(selElem).attr("disabled", true);
-        return buildFormRow("Citation Title", selElem, true);
-    }
-    /**
-     * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
-     * that allow users to search by typing and add new options not in the list, 
-     * by triggering a sub-form for that entity.
-     */
-    function initComboSelects() {
-        var selMap = { 
-            "pub": { name: "Publication", change: onPubSelection, add: initPubForm },
-            "cit": { name: "Citation", change: onCitSelection, add: initCitForm }
-        };
-        for (var selType in selMap) {
-            $('#'+selType+'-sel').selectize({
-                create: selMap[selType].add,
-                onChange: selMap[selType].change,
-                placeholder: 'Select ' + selMap[selType].name
-            });
-        }
+        selElem = _util.buildSelectElem(opts, {id: "pub-sel", class: "lrg-crud-sel"});
+        return buildFormRow("Publication", selElem, false, true);
     }
     /*-------------- Publication Functions -----------------------------------*/
     /** When a publication is selected fill citation dropdown @initCitField.  */
@@ -180,9 +156,14 @@ $(document).ready(function(){
     }
     function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
         // body...
+    /*-------------- Citation Helpers --------------------------------------*/
+    /** Returns a form row with an empty and disabled citation select dropdown. */
+    function buildCitField() {
+        var selElem = _util.buildSelectElem(
+            [], {id: "cit-sel", class: "lrg-crud-sel"}, onCitSelection)
+        $(selElem).attr("disabled", true);
+        return buildFormRow("Citation Title", selElem, false, true);
     }
-
-    /*-------------- Citation Functions --------------------------------------*/
     /**
      * Fills the citation field combobox with all citations for the selected publication.
      * Clears any previous options and enables the dropdown.
@@ -207,22 +188,26 @@ $(document).ready(function(){
     function initCitForm(val) {  console.log("Adding new cit! val = %s", val);
         // body...
     }
-
-    /*------------------- Form Builders --------------------------------------*/
+    /*------------------- Shared Methods --------------------------------------*/
     /**
-     * Each element is built, nested, and returned as a completed row. 
-     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
+     * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
+     * that allow users to search by typing and add new options not in the list-
+     * by triggering a sub-form for that entity.
      */
-    function buildFormRow(fieldName, fieldInput, isReq) {
-        var field = fieldName.split(' ').join('');
-        var rowDiv = _util.buildElem("div", { class: "form-row", id: field + "_row"});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
-        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
-        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
-        $(fieldRow).append([label, fieldInput]);
-        $(rowDiv).append([errorDiv, fieldRow]);
-        return rowDiv;
+    function initSrcComboboxes() {
+        var selMap = { 
+            'pub': { name: 'Publication',field: 'pub', change: onPubSelection, add: initPubForm },
+            'cit': { name: 'Citation', field: 'cit', change: onCitSelection, add: initCitForm }
+        };
+        for (var selType in selMap) { initSelectCombobox(selMap[selType]); }
+    }
+    /** Inits the combobox, using 'selectize', according to the passed conifg. */
+    function initSelectCombobox(confg) {
+        $('#'+confg.field+'-sel').selectize({
+            create: confg.add,
+            onChange: confg.change,
+            placeholder: 'Select ' + confg.name
+        });
     }
 
 
@@ -506,6 +491,17 @@ $(document).ready(function(){
     /** Returns the full, contextual url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         return envUrl + entityName + "/" + action;
+    function buildFormRow(fieldName, fieldInput, isSubForm, isReq) {
+        var field = fieldName.split(' ').join('');
+        var rowClass = isSubForm ? 'sub-form-row' : 'form-row';
+        var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
+        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
+        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
+        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
+        $(fieldRow).append([label, fieldInput]);
+        $(rowDiv).append([errorDiv, fieldRow]);
+        return rowDiv;
     }
 
     /*----------------------- Validation ---------------------------------------------------------*/
