@@ -270,35 +270,42 @@ $(document).ready(function(){
     function exitSubForm() {
         $('#sub-form').remove();
     }
+    /** Enables passed submit button */
+    function enableSubmitBttn(bttnId) {
+        $("#"+bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
+    }    
+    /**
      * Returns a config object for the form of the selected source-type with the 
      * fields to add to and exclude from the default source fields, the required
      * fields, and the final order of the fields.
-     * Note: 'order' is used to matched the form elements' id, which has no spaces. 
+     * Notes: 
+     * >> 'order' is used to matched the form elements' id, which has no spaces. 
+     * >> The publisher form is currenty non-existant
      */
-    function getSrcTypeFieldConfig(type) {
+    function getSrcTypeFormConfg(type) {
         var fieldMap = { 
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["display Name", "Year", "Doi", "Authors"],
+                "exclude": ["Description", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
-                "order": [ "FirstName", "MiddleName", "LastName", "Description", 
+                "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
                     "LinkUrl", "LinkText"]
             },
             "citation": {
                 "add": { "Publication": "text", "Title": "text", "Volume": "text", 
                     "Issue": "text", "Pages": "text", "Tags": "checkbox", 
                     "Citation Text": "textArea", "Citation Type": "select"},
-                "exclude": ["Display Name"], 
+                "exclude": ["Display Name", "Description"], 
                 "required": ["Publication", "Citation Text", "Citation Type"],
                 "order": ["CitationType", "CitationText", "Publication", "Title",    
                     "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
                     "Tags", "Authors" ]
             },
             "publication": {
-                "add": { "Publisher": "text", "Title" : "text", "Publication Type": "select"},
+                "add": { "Title" : "text", "Publication Type": "select"},  //"Publisher": "text", 
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
-                "order": ["PublicationType", "Title", "Description", "Publisher", "Year", "Doi", 
+                "order": ["PublicationType", "Title", "Description", "Year", "Doi",  //"Publisher", 
                     "LinkUrl", "LinkText", "Authors" ]
             },
             "publisher": { 
