@@ -166,7 +166,13 @@ $(document).ready(function(){
         return { "value": "", "text": val };
     }
     /*-------------- Author Helpers ----------------------------------------*/
-    function addExistingAuthor(val) {  console.log("Add existing author = ", val)
+    function addExistingAuthor(val) {  console.log("Add existing author = %s. args = %O", val, arguments);
+        var cnt = $("#Authors_sel-cntnr").data("cnt"); console.log("this - ", $(this))
+        $("#Authors_sel-cntnr").append(
+            addMultiSelectElem(
+                crudParams.subForm.entity, "Authors", "#Authors_sel-cntnr", cnt));
+        initSubFormComboboxes();
+        return { value: val, text: $(this)[0].options[val] };
     }
     function initAuthorForm (val) {        console.log("Adding new auth! val = %s", val);
     }
@@ -233,7 +239,7 @@ $(document).ready(function(){
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", change: addExistingAuthor, add: initAuthorForm }
         };
-        crudParams.subForm.selElems.forEach(function(field) {
+        crudParams.subForm.selElems.forEach(function(field) {   console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.field = field;
             initSelectCombobox(confg);
@@ -244,12 +250,13 @@ $(document).ready(function(){
      * Builds all fields for sub-form and returns the row elems.
      * Also adds the sub-form config obj to the global crudParams obj.
      */
-    function buildSubForm(srcType, fieldVals) {
-        var formConfg = getSrcTypeFormConfg(srcType);                     //console.log("typeFormConfg = %O", typeFormConfg)
+    function buildSubForm(entity, fieldVals) {
+        var formConfg = getSrcTypeFormConfg(entity);                     //console.log("typeFormConfg = %O", typeFormConfg)
         crudParams.subForm = {};
+        crudParams.subForm.entity = entity;
         crudParams.subForm.selElems = []; 
         crudParams.subForm.confg = formConfg;
-        return getFormFieldRows(srcType, formConfg, crudParams.srcFields, fieldVals, true);
+        return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
     }
     /**
      * Returns a container with 'Create Entity' and 'Cancel' buttons.
@@ -373,10 +380,11 @@ $(document).ready(function(){
      * fieldName to the subForm's 'selElem' array to later init 'selectize' combobox. 
      * Adds a data property "valType" for later validation.
      */
-    function buildSelectElem(entity, field) {                                   console.log("entity = %s. field = ", entity, field);
+    function buildSelectElem(entity, field, cnt) {                                   console.log("entity = %s. field = ", entity, field);
         var fieldName = field.split(" ").join("_");
         var opts = getSelectOpts(entity, fieldName);
-        var sel = _util.buildSelectElem(opts, { id: fieldName+"-sel" , class: 'sml-crud-sel'});
+        var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
+        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-crud-sel'});
         crudParams.subForm.selElems.push(fieldName);
         $(sel).data("valType", "select");
         return sel;
@@ -403,6 +411,25 @@ $(document).ready(function(){
         return sortedNameKeys.map(function (name) {
             return { value: authors[name], text: name }
         });    
+    }
+    /**
+     * Creates a select dropdown field wrapped in a div container that will
+     * be reaplced inline upon selection. Either with an existing Author's name, 
+     * or the Author create form when the user enters a new Author's name. 
+     */
+    function buildMultiSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
+       var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
+       var selElem = buildSelectElem(entity, field);
+       $(cntnr).data("cnt", 1);
+       $(selElem).data("valType", "multiSelect");
+       $(cntnr).append(selElem);
+       return cntnr;
+    }
+    function addMultiSelectElem(entity, field, cntnrId, cnt) {
+       var selElem = buildSelectElem(entity, field, cnt);
+       $(cntnrId).data("cnt", ++cnt);
+       $(selElem).data("valType", "multiSelect");
+       return selElem;
     }
     /**
      * Returns a div containing a checkbox, span-wrapped with associated label, 
@@ -439,19 +466,6 @@ $(document).ready(function(){
             order.splice(idx, 1, row);
         });
         return order;
-    }
-    /**
-     * Creates a select dropdown field wrapped in a div container that will
-     * be reaplced inline upon selection. Either with an existing Author's name, 
-     * or the Author create form when the user enters a new Author's name. 
-     */
-    function buildMultiSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
-       var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
-       var selElem = buildSelectElem(entity, field);
-       $(selElem).data("valType", "multiSelect");
-       $(cntnr).append('<ul id="'+field+'_sel-ul" class="multi-sel-ul"></ul>');
-       $(cntnr).append(selElem);
-       return cntnr;
     }
 
 
@@ -868,4 +882,4 @@ $(document).ready(function(){
         console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
     }
 
-}());  /* End of namespacing anonymous function */
+}());  // End of namespacing anonymous function 
