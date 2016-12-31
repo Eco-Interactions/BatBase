@@ -358,7 +358,7 @@ $(document).ready(function(){
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
             var reqFields = crudParams.subForm.confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
-            if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); 
+            if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
             return buildFormRow(_util.ucfirst(field), fieldInput, isSubForm, isReq);
         }
     } /* End getFormFieldRows */
