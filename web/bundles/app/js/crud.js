@@ -165,6 +165,14 @@ $(document).ready(function(){
         initSubFormComboboxes();
         return { "value": "", "text": val };
     }
+    /*-------------- Publisher Helpers -----------------------------------*/
+    function addExistingPublisher(val) {  console.log("Add existing publisher = %s. args = %O", val, arguments);
+        return { value: val, text: $(this)[0].options[val] };
+    }
+    function initPublisherForm (val) {        console.log("Adding new publisher! val = %s", val);
+
+    }
+
     /*-------------- Author Helpers ----------------------------------------*/
     function addExistingAuthor(val) {  console.log("Add existing author = %s. args = %O", val, arguments);
         var cnt = $("#Authors_sel-cntnr").data("cnt"); console.log("this - ", $(this))
@@ -238,6 +246,7 @@ $(document).ready(function(){
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", change: addExistingAuthor, add: initAuthorForm },
+            "Publisher": { name: "Publisher", change: addExistingPublisher, add: initPublisherForm },
         };
         crudParams.subForm.selElems.forEach(function(field) {   console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -309,11 +318,11 @@ $(document).ready(function(){
                     "Tags", "Authors" ]
             },
             "publication": {
-                "add": { "Title" : "text", "Publication Type": "select"},  //"Publisher": "text", 
+                "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
-                "order": ["PublicationType", "Title", "Description", "Year", "Doi",  //"Publisher", 
-                    "LinkUrl", "LinkText", "Authors" ]
+                "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
+                    "LinkUrl", "LinkText", "Publisher", "Authors" ]
             },
             "publisher": { 
                 "add": [], 
