@@ -174,15 +174,22 @@ $(document).ready(function(){
     }
 
     /*-------------- Author Helpers ----------------------------------------*/
-    function addExistingAuthor(val) {  console.log("Add existing author = %s. args = %O", val, arguments);
-        var cnt = $("#Authors_sel-cntnr").data("cnt"); console.log("this - ", $(this))
+    /**
+     * When an author is selected, a new author combobox is initialized underneath
+     * 'this' author combobox.
+     */
+    function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
+        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+        var selConfg = { 
+            name: "Author", id: "#Authors-sel"+cnt, 
+            change: onAuthSelection, add: initAuthForm 
+        };
         $("#Authors_sel-cntnr").append(
-            addMultiSelectElem(
-                crudParams.subForm.entity, "Authors", "#Authors_sel-cntnr", cnt));
-        initSubFormComboboxes();
-        return { value: val, text: $(this)[0].options[val] };
+            buildSelectElem( crudParams.subForm.entity, "Authors", cnt ));   
+        $("#Authors_sel-cntnr").data("cnt", cnt);
+        initSelectCombobox(selConfg);
     }
-    function initAuthorForm (val) {        console.log("Adding new auth! val = %s", val);
+    function initAuthForm (val) {        console.log("Adding new auth! val = %s", val);
     }
     /*-------------- Citation Helpers --------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
@@ -245,10 +252,10 @@ $(document).ready(function(){
         var confg;
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
-            "Authors": { name: "Authors", change: addExistingAuthor, add: initAuthorForm },
+            "Authors": { name: "Authors", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: addExistingPublisher, add: initPublisherForm },
         };
-        crudParams.subForm.selElems.forEach(function(field) {   console.log("Initializing --%s-- select", field);
+        crudParams.subForm.selElems.forEach(function(field) {                   //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg);
@@ -385,9 +392,10 @@ $(document).ready(function(){
         return _util.buildElem("textarea");
     }
     /**
-     * Creates and returns a select dropdown for the passed field. Adds the sel's 
-     * fieldName to the subForm's 'selElem' array to later init 'selectize' combobox. 
-     * Adds a data property "valType" for later validation.
+     * Creates and returns a select dropdown for the passed field. If it is one of 
+     * a larger set of select elems, the current count is appended to the id. Adds 
+     * the sel's fieldName to the subForm's 'selElem' array to later init 'selectize' 
+     * combobox. Adds a data property "valType" for use later during validation.
      */
     function buildSelectElem(entity, field, cnt) {                                   
         var fieldName = field.split(" ").join("_");
@@ -433,12 +441,6 @@ $(document).ready(function(){
        $(selElem).data("valType", "multiSelect");
        $(cntnr).append(selElem);
        return cntnr;
-    }
-    function addMultiSelectElem(entity, field, cntnrId, cnt) {
-       var selElem = buildSelectElem(entity, field, cnt);
-       $(cntnrId).data("cnt", ++cnt);
-       $(selElem).data("valType", "multiSelect");
-       return selElem;
     }
     /**
      * Returns a div containing a checkbox, span-wrapped with associated label, 
