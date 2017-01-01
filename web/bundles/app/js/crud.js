@@ -152,8 +152,8 @@ $(document).ready(function(){
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
-     * form is built and appended to the publication field row. An option object is 
-     * returned to be selected in the publication combobox
+     * form is built and appended to the crud form. An option object is 
+     * returned and thus selected in the combobox
      */
     function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
         var subFormContainer = _util.buildElem('div', {
@@ -166,11 +166,18 @@ $(document).ready(function(){
         return { "value": "", "text": val };
     }
     /*-------------- Publisher Helpers -----------------------------------*/
-    function addExistingPublisher(val) {  console.log("Add existing publisher = %s. args = %O", val, arguments);
+    function addExistingPublisher(val) {  
+        if (val = "" || parseInt(val) === NaN) { return; }  console.log("Add existing publisher = %s. args = %O", val, arguments);
         return { value: val, text: $(this)[0].options[val] };
     }
     function initPublisherForm (val) {        console.log("Adding new publisher! val = %s", val);
-
+        var subFormContainer = _util.buildElem('div', {
+            id: 'sub-form', class: 'flex-col flex-wrap'}); 
+        var subForm = buildSubForm('publisher', {"Display Name": val});
+        subForm.push(buildSubFormBttns("Publisher"));
+        $(subFormContainer).append(subForm);
+        $('#Publisher_row').append(subFormContainer);
+        return { "value": "", "text": val };
     }
 
     /*-------------- Author Helpers ----------------------------------------*/
@@ -189,7 +196,13 @@ $(document).ready(function(){
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg);
     }
-    function initAuthForm (val) {        console.log("Adding new auth! val = %s", val);
+    /**
+     * When a user enters a new author into the combobox, a create-author
+     * form is built and appended to the author field row. An option object is 
+     * returned to be selected in the combobox
+     */
+    function initAuthForm (val) {        console.log("Adding new auth! val = %s, this = %O", val, $(this));
+
     }
     /*-------------- Citation Helpers --------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
@@ -267,7 +280,7 @@ $(document).ready(function(){
      * Also adds the sub-form config obj to the global crudParams obj.
      */
     function buildSubForm(entity, fieldVals) {
-        var formConfg = getSrcTypeFormConfg(entity);                     //console.log("typeFormConfg = %O", typeFormConfg)
+        var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
         crudParams.subForm = {};
         crudParams.subForm.entity = entity;
         crudParams.subForm.selElems = []; 
@@ -275,7 +288,7 @@ $(document).ready(function(){
         return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
     }
     /**
-     * Returns a container with 'Create Entity' and 'Cancel' buttons.
+     * Returns a container with 'Create [Entity]' and 'Cancel' buttons.
      * NOTE: Currently specific to sub-forms. 
      */
     function buildSubFormBttns(entity) {

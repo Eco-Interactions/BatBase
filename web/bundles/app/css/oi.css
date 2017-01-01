@@ -588,22 +588,12 @@ a[role="button"], .tos-bttn {
 	padding: 9px 0 2px 0;
 	width: 122px;
 }
-.form-input {
-	/*width: 250px;*/
-	padding-left: 2px;
-}
 .txt-input {
 	width: 255px;
-}
-.checkbox-lbl {
-	margin-left: .2em;
 }
 .crud-form textarea {
 	height: 55px;
 	width: 255px
-}
-.multi-sel-ul{
-	list-style: square inside;
 }
 .bttn-cntnr {
 	align-self: flex-end;
