@@ -389,9 +389,9 @@ $(document).ready(function(){
      * fieldName to the subForm's 'selElem' array to later init 'selectize' combobox. 
      * Adds a data property "valType" for later validation.
      */
-    function buildSelectElem(entity, field, cnt) {                                   console.log("entity = %s. field = ", entity, field);
+    function buildSelectElem(entity, field, cnt) {                                   
         var fieldName = field.split(" ").join("_");
-        var opts = getSelectOpts(entity, fieldName);
+        var opts = getSelectOpts(entity, fieldName);                            //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-crud-sel'});
         crudParams.subForm.selElems.push(fieldName);
@@ -402,8 +402,9 @@ $(document).ready(function(){
     function getSelectOpts(entity, field) {
         var optMap = {
             "publication": { 
+                "Authors": buildOptsObj(JSON.parse(localStorage.getItem('authors'))),
                 "Publication_Type": getTypeOpts('publication'),
-                "Authors": getAuthorOpts() },
+                "Publisher": buildOptsObj(JSON.parse(localStorage.getItem('publishers'))) },
             "citation": { "Citation_Type": getTypeOpts('citation') },
         };
         return optMap[entity][field];
@@ -413,12 +414,11 @@ $(document).ready(function(){
         var typeAry = crudParams.types[entityType];
         return _util.buildSimpleOpts(typeAry);
     }
-    /** Builds options out of the author names objects with id as 'value'. */
-    function getAuthorOpts() {
-        var authors = JSON.parse(localStorage.getItem('authors'));
-        var sortedNameKeys = Object.keys(authors).sort();
+    /** Builds options out of the entity object, with id as 'value'. */
+    function buildOptsObj(entityObj) {
+        var sortedNameKeys = Object.keys(entityObj).sort();
         return sortedNameKeys.map(function (name) {
-            return { value: authors[name], text: name }
+            return { value: entityObj[name], text: name }
         });    
     }
     /**
