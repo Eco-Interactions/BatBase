@@ -157,11 +157,11 @@ $(document).ready(function(){
      */
     function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
         var subFormContainer = _util.buildElem('div', {
-            id: 'sub-form', class: 'flex-col flex-wrap'}); 
+            id: 'sub-form', class: 'flex-row flex-wrap'}); 
         var subForm = buildSubForm('publication', {"Title": val});
         subForm.push(buildSubFormBttns("Publication"));
         $(subFormContainer).append(subForm);
-        $("#Publication_row").append(subFormContainer);
+        $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes();
         return { "value": "", "text": val };
     }
