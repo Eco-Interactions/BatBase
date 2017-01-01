@@ -216,14 +216,14 @@ $(document).ready(function(){
      */
     function initSrcComboboxes() {
         var selMap = { 
-            'pub': { name: 'Publication',field: 'pub', change: onPubSelection, add: initPubForm },
-            'cit': { name: 'Citation', field: 'cit', change: onCitSelection, add: initCitForm }
+            'pub': { name: 'Publication', id: '#pub-sel', change: onPubSelection, add: initPubForm },
+            'cit': { name: 'Citation', id: '#cit-sel', change: onCitSelection, add: initCitForm }
         };
         for (var selType in selMap) { initSelectCombobox(selMap[selType]); }
     }
     /** Inits the combobox, using 'selectize', according to the passed conifg. */
     function initSelectCombobox(confg) {
-        $('#'+confg.field+'-sel').selectize({
+        $(confg.id).selectize({
             create: confg.add,
             onChange: confg.change,
             placeholder: 'Select ' + confg.name
@@ -237,11 +237,11 @@ $(document).ready(function(){
         var confg;
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
-            "Authors": { name: "Authors", change: addExistingAuthor, add: initAuthorForm }
+            "Authors": { name: "Authors", change: addExistingAuthor, add: initAuthorForm },
         };
         crudParams.subForm.selElems.forEach(function(field) {   console.log("Initializing --%s-- select", field);
             confg = selMap[field];
-            confg.field = field;
+            confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg);
         });
         crudParams.subForm.selElems = [];
