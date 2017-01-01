@@ -936,36 +936,42 @@
 	}
 	function seperateAndStoreSrcData(dataObj) {						            //console.log("~~~Source data recieved. %O", dataObj);
         var data = dataObj.srcData;
-        var domainRcrds = getDomainRcrds(data);                                 //console.log("domainRcrds = %O", domainRcrds);
+        var srcData = getSrcData(data);                                         //console.log("srcData = %O", srcData);
         _util.populateStorage('srcTypes', JSON.stringify(data.srcTypes));
         _util.populateStorage('citTypes', JSON.stringify(data.citation.types));
         _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
         _util.populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-		_util.populateStorage('authRcrds', JSON.stringify(domainRcrds.author.rcrds));
-		_util.populateStorage('pubRcrds', JSON.stringify(domainRcrds.publication.rcrds));
-        _util.populateStorage('authNames', JSON.stringify(domainRcrds.author.names));
-        _util.populateStorage('pubNames', JSON.stringify(domainRcrds.publication.names));
+		_util.populateStorage('authRcrds', JSON.stringify(srcData.author.rcrds));
+		_util.populateStorage('pubRcrds', JSON.stringify(srcData.publication.rcrds));
+        _util.populateStorage('authors', JSON.stringify(srcData.author.names));
+        _util.populateStorage('publications', JSON.stringify(srcData.publication.names));
+        _util.populateStorage('publishers', JSON.stringify(srcData.publisher.names));
 
-		initSrcSearchUi(domainRcrds, data.srcRcrds);
+		initSrcSearchUi(srcData, data.srcRcrds);
 	}
     /**
-     * Sources have two domains, i.e. types of 'tree' data: 
+     * Source data for each source-type is sorted into an object of records and 
+     * an object of ids, both keyed by the source's display name.
+     * NOTE: Sources have two domains, i.e. types of 'tree' data: 
      * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
-    function getDomainRcrds(srcData) {                                          //console.log("srcData = %O", srcData);
-        var curRcrd, parentPub;
-        var domains = { 
-            author: { rcrds: {}, names: {} }, publication: { rcrds: {}, names: {} } };
+    function getSrcData(data) {                                                 //console.log("srcData = %O", data);
+        var curRcrd;
+        var srcData = { 
+            author: { rcrds: {}, names: {} }, 
+            publication: { rcrds: {}, names: {} },
+            publisher: { rcrds: {}, names: {} } 
+        };
         
-        for (var key in domains) {
-            srcData[key].ids.forEach(function(id){
-                curRcrd = getDetachedRcrd(id, srcData.srcRcrds);
-                domains[key].rcrds[curRcrd.displayName] = curRcrd;
-                domains[key].names[curRcrd.displayName] = id;
+        for (var key in srcData) {
+            data[key].ids.forEach(function(id){
+                curRcrd = getDetachedRcrd(id, data.srcRcrds);
+                srcData[key].rcrds[curRcrd.displayName] = curRcrd;
+                srcData[key].names[curRcrd.displayName] = id;
             });
         }
-        return domains; 
-    } /* End sortAuthAndPubRcrds */
+        return srcData; 
+    } /* End getSrcData */
     
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 

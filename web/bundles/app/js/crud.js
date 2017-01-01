@@ -138,7 +138,7 @@ $(document).ready(function(){
      */
     function buildPubField() {
         var selElem;
-        var pubObj = JSON.parse(localStorage.getItem('pubNames'));
+        var pubObj = JSON.parse(localStorage.getItem('publications'));
         var opts = Object.keys(pubObj).sort().map(function(name) {
             return { value: pubObj[name].toString(), text: name };
         });  
@@ -406,7 +406,7 @@ $(document).ready(function(){
     }
     /** Builds options out of the author names objects with id as 'value'. */
     function getAuthorOpts() {
-        var authors = JSON.parse(localStorage.getItem('authNames'));
+        var authors = JSON.parse(localStorage.getItem('authors'));
         var sortedNameKeys = Object.keys(authors).sort();
         return sortedNameKeys.map(function (name) {
             return { value: authors[name], text: name }
