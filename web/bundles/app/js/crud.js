@@ -92,6 +92,7 @@ $(document).ready(function(){
         crudParams = {};
         // crudParams.view = "source";
         crudParams.action = action;
+        crudParams.subForms = {};
         crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
             "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
             "Authors": "multiSelect" };
@@ -159,11 +160,11 @@ $(document).ready(function(){
         var subFormContainer = _util.buildElem('div', {
             id: 'sub-form', class: 'flex-row flex-wrap'}); 
         var hdr = _util.buildElem("p", { "text": "New Publication", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('publication', {"Title": val});
+        var subForm = buildSubForm('publication', {"Title": val}, "sub");
         subForm.push(buildFormBttns("Publication", "sub"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('form[name="crud"]').append(subFormContainer);
-        initSubFormComboboxes();
+        initSubFormComboboxes("publication");
         return { "value": "", "text": val };
     }
     /*-------------- Publisher Helpers ---------------------------------------*/
@@ -176,7 +177,7 @@ $(document).ready(function(){
         var subFormContainer = _util.buildElem('div', {
             id: 'sub2-form', class: 'flex-col flex-wrap sub2-right'}); 
         var hdr = _util.buildElem("p", { "text": "New Publisher", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('publisher', {"Display Name": val});
+        var subForm = buildSubForm('publisher', {"Display Name": val}, "sub2");
         subForm.push(buildFormBttns("Publisher", "sub2"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
@@ -191,12 +192,13 @@ $(document).ready(function(){
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+        var parentFormEntity = crudParams.subForms.sub;
         var selConfg = { 
             name: "Author", id: "#Authors-sel"+cnt, 
             change: onAuthSelection, add: initAuthForm 
         };
         $("#Authors_sel-cntnr").append(
-            buildSelectElem( crudParams.subForm.entity, "Authors", cnt ));   
+            buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg);
     }
@@ -209,7 +211,7 @@ $(document).ready(function(){
         var subFormContainer = _util.buildElem('div', {
             id: 'sub2-form', class: 'flex-col flex-wrap sub2-left'}); 
         var hdr = _util.buildElem("p", { "text": "New Author", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('author', {"Display Name": val});
+        var subForm = buildSubForm('author', {"Display Name": val}, "sub2");
         subForm.push(buildFormBttns("Author", "sub2"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Authors_row').append(subFormContainer);
@@ -272,31 +274,38 @@ $(document).ready(function(){
      * Inits 'selectize' for each select elem in the subForm's 'selElems' array
      * according to the 'selMap' config. Empties array after intializing.
      */
-    function initSubFormComboboxes() {
+    function initSubFormComboboxes(entity) {
         var confg;
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
         };
-        crudParams.subForm.selElems.forEach(function(field) {                   //console.log("Initializing --%s-- select", field);
+        crudParams.subForms[entity].selElems.forEach(function(field) {          //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg);
         });
-        crudParams.subForm.selElems = [];
+        crudParams.subForms[entity].selElems = [];
     }
     /** 
-     * Builds all fields for sub-form and returns the row elems.
-     * Also adds the sub-form config obj to the global crudParams obj.
+     * Builds all fields for sub-form and returns the completed row elems.
+     * Also inits the crud params for the sub-form in the global crudParams obj.
      */
-    function buildSubForm(entity, fieldVals) {
+    function buildSubForm(entity, fieldVals, level) {
         var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
-        crudParams.subForm = {};
-        crudParams.subForm.entity = entity;
-        crudParams.subForm.selElems = []; 
-        crudParams.subForm.confg = formConfg;
+        initSubFormCrudParams(entity, level, formConfg);
         return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
+    }
+    /**
+     * Adds, to the global crudParams obj, the properties and confg that will be 
+     * used throughout for generating, validating and submitting sub-form. 
+     */
+    function initSubFormCrudParams(entity, level, formConfg) {                  //console.log("crudParams = %O", crudParams)
+        crudParams.subForms[level] = entity;
+        crudParams.subForms[entity] = {};
+        crudParams.subForms[entity].selElems = []; 
+        crudParams.subForms[entity].confg = formConfg;      
     }
     /**
      * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
@@ -304,7 +313,7 @@ $(document).ready(function(){
      * pushes the buttons to the bottom right of their form container.
      */
     function buildFormBttns(entity, level) {
-        var events = getEventHandlers(entity, level);  console.log("events = %O", events);
+        var events = getEventHandlers(entity, level);                           //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: "crud-submit", 
@@ -395,7 +404,7 @@ $(document).ready(function(){
          * is set to true, all default fields are excluded. 
          */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var exclude = crudParams.subForm.confg.exclude;
+            var exclude = crudParams.subForms[entity].confg.exclude;
             var rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
@@ -404,7 +413,7 @@ $(document).ready(function(){
             return rows;
         }
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var xtraFields = crudParams.subForm.confg.add;
+            var xtraFields = crudParams.subForms[entity].confg.add;
             var rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
                 rows.push(buildRow(field, xtraFields, isSubForm));
@@ -418,7 +427,7 @@ $(document).ready(function(){
          */
         function buildRow(field, fieldsObj, isSubForm) {
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = crudParams.subForm.confg.required;
+            var reqFields = crudParams.subForms[entity].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
             return buildFormRow(_util.ucfirst(field), fieldInput, isSubForm, isReq);
@@ -441,12 +450,12 @@ $(document).ready(function(){
         var opts = getSelectOpts(entity, fieldName);                            //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-crud-sel'});
-        crudParams.subForm.selElems.push(fieldName);
+        crudParams.subForms[entity].selElems.push(fieldName);
         $(sel).data("valType", "select");
         return sel;
     }
     /** Returns and array of options for the passed field type. */
-    function getSelectOpts(entity, field) {
+    function getSelectOpts(entity, field) {  console.log("getSelectOpts. entity = %s, field = %s", entity, field);
         var optMap = {
             "publication": { 
                 "Authors": buildOptsObj(JSON.parse(localStorage.getItem('authors'))),
@@ -752,7 +761,7 @@ $(document).ready(function(){
      * that field to the user: "Please fill out [fieldName]."
      */
     function ifIsEmptyRequiredField(formElem, fieldName) {
-        if (crudParams.subForm.confg.required.indexOf(fieldName) !== -1) {
+        if (crudParams.subForms[entity].confg.required.indexOf(fieldName) !== -1) {
             crudFieldErrorHandler(fieldName, "emptyRequiredField");
         }
     }
