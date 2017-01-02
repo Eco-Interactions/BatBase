@@ -186,6 +186,7 @@ $(document).ready(function(){
      * 'this' author combobox.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
+        if (val === "" || parseInt(val) === NaN) { return; }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
         var selConfg = { 
             name: "Author", id: "#Authors-sel"+cnt, 
@@ -202,7 +203,14 @@ $(document).ready(function(){
      * returned to be selected in the combobox
      */
     function initAuthForm (val) {        console.log("Adding new auth! val = %s, this = %O", val, $(this));
-
+        var subFormContainer = _util.buildElem('div', {
+            id: 'sub2-form', class: 'flex-col flex-wrap sub2-left'}); 
+        var hdr = _util.buildElem("p", { "text": "New Author", "class": "sub-form-hdr" });
+        var subForm = buildSubForm('author', {"Display Name": val});
+        subForm.push(buildSubFormBttns("Author", "sub2"));
+        $(subFormContainer).append([hdr].concat(subForm));
+        $('#Authors_row').append(subFormContainer);
+        return { "value": "", "text": val };
     }
     /*-------------- Citation Helpers --------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
