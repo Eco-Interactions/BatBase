@@ -159,8 +159,8 @@ $(document).ready(function(){
         var subFormContainer = _util.buildElem('div', {
             id: 'sub-form', class: 'flex-row flex-wrap'}); 
         var subForm = buildSubForm('publication', {"Title": val});
-        subForm.push(buildSubFormBttns("Publication"));
         $(subFormContainer).append(subForm);
+        subForm.push(buildFormBttns("Publication", "sub"));
         $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes();
         return { "value": "", "text": val };
@@ -207,7 +207,7 @@ $(document).ready(function(){
             id: 'sub2-form', class: 'flex-col flex-wrap sub2-left'}); 
         var hdr = _util.buildElem("p", { "text": "New Author", "class": "sub-form-hdr" });
         var subForm = buildSubForm('author', {"Display Name": val});
-        subForm.push(buildSubFormBttns("Author", "sub2"));
+        subForm.push(buildFormBttns("Author", "sub2"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Authors_row').append(subFormContainer);
         return { "value": "", "text": val };
@@ -296,23 +296,38 @@ $(document).ready(function(){
         return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
     }
     /**
-     * Returns a container with 'Create [Entity]' and 'Cancel' buttons.
-     * NOTE: Currently specific to sub-forms. 
+     * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
+     * specific to their form container @getEventHandlers, and a left spacer that 
+     * pushes the buttons to the bottom right of their form container.
      */
-    function buildSubFormBttns(entity) {
-        var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" })
+    function buildFormBttns(entity, level) {
+        var events = getEventHandlers(entity, level);  console.log("events = %O", events);
+        var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
+        var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: "crud-submit", 
             class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
         var cancel = _util.buildElem("input", { id: "crud-cancel", 
             class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
-        $(submit).attr("disabled", true).css("opacity", ".6").click(Function.prototype);
-        $(cancel).css("cursor", "pointer").click(exitSubForm);
-        $(cntnr).append([submit, cancel]);
+        $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
+        $(cancel).css("cursor", "pointer").click(events.cancel);
+        $(cntnr).append([spacer, submit, cancel]);
         return cntnr;
     }
-    /** Removes the sub-form. */
-    function exitSubForm() {
-        $('#sub-form').remove();
+    /**
+     * Returns an object with 'submit' and 'cancel' events bound to the passed level's
+     * form container.  
+     */
+    function getEventHandlers(entity, level) {
+        var idMap = {
+            // "top": "#crud-main",
+            "sub": "#sub-form",
+            "sub2": "#sub2-form"
+        };
+        return { submit: Function.prototype, cancel: exitForm.bind(null, idMap[level]) };
+    }
+    /** Removes the form container with the passed id. */
+    function exitForm(id) {
+        $(id).remove();
     }
     /** Enables passed submit button */
     function enableSubmitBttn(bttnId) {
