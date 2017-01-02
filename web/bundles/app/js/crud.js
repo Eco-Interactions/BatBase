@@ -158,9 +158,10 @@ $(document).ready(function(){
     function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
         var subFormContainer = _util.buildElem('div', {
             id: 'sub-form', class: 'flex-row flex-wrap'}); 
+        var hdr = _util.buildElem("p", { "text": "New Publication", "class": "sub-form-hdr" });
         var subForm = buildSubForm('publication', {"Title": val});
-        $(subFormContainer).append(subForm);
         subForm.push(buildFormBttns("Publication", "sub"));
+        $(subFormContainer).append([hdr].concat(subForm));
         $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes();
         return { "value": "", "text": val };

@@ -522,12 +522,11 @@ a[role="button"], .tos-bttn {
 	margin: auto;
 	/*background: #a2dadd !important;*/
 }
-.crud-popup h1, .crud-popup h3 {
-	text-align: center;  
-	padding-bottom: 8px;
-}
 #crud-hdr>h1 {
+	font-size: 1.3em;
 	margin-bottom: 10px;
+	/*text-decoration: underline;*/
+	text-align: center;
 }
 #crud-main {
 	padding: 25px 25px 75px 25px;
@@ -614,6 +613,7 @@ a[role="button"], .tos-bttn {
 }
 .bttn-cntnr {
 	align-self: flex-end;
+	padding: 10px;
 }
 .bttn-cntnr button {
 	margin-top: 1em;
