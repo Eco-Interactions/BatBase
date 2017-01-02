@@ -165,17 +165,19 @@ $(document).ready(function(){
         initSubFormComboboxes();
         return { "value": "", "text": val };
     }
-    /*-------------- Publisher Helpers -----------------------------------*/
-    function addExistingPublisher(val) {  
-        if (val = "" || parseInt(val) === NaN) { return; }  console.log("Add existing publisher = %s. args = %O", val, arguments);
-        return { value: val, text: $(this)[0].options[val] };
-    }
-    function initPublisherForm (val) {        console.log("Adding new publisher! val = %s", val);
+    /*-------------- Publisher Helpers ---------------------------------------*/
+    /**
+     * When a user enters a new publisher into the combobox, a create-publisher
+     * form is built and appended to the publisher field row. An option object is 
+     * returned to be selected in the combobox
+     */
+    function initPublisherForm (val) {                                          console.log("Adding new publisher! val = %s", val);
         var subFormContainer = _util.buildElem('div', {
-            id: 'sub-form', class: 'flex-col flex-wrap'}); 
+            id: 'sub2-form', class: 'flex-col flex-wrap sub2-right'}); 
+        var hdr = _util.buildElem("p", { "text": "New Publisher", "class": "sub-form-hdr" });
         var subForm = buildSubForm('publisher', {"Display Name": val});
-        subForm.push(buildSubFormBttns("Publisher"));
-        $(subFormContainer).append(subForm);
+        subForm.push(buildFormBttns("Publisher", "sub2"));
+        $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
         return { "value": "", "text": val };
     }
@@ -274,7 +276,7 @@ $(document).ready(function(){
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", change: onAuthSelection, add: initAuthForm },
-            "Publisher": { name: "Publisher", change: addExistingPublisher, add: initPublisherForm },
+            "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
         };
         crudParams.subForm.selElems.forEach(function(field) {                   //console.log("Initializing --%s-- select", field);
             confg = selMap[field];

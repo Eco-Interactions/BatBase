@@ -537,22 +537,39 @@ a[role="button"], .tos-bttn {
 /* -- Form Styles -- */
 .crud-form {
 	font-size: 1em;
-	/*width: 350px;*/
 	flex-wrap: wrap;
 }
 #sub-form {
-	/*border: 1px solid;*/
-	/*padding-top: 11px;*/
-	/*border-radius: 5px;*/
-    width: 800px;
+	border: 1px solid grey;
+	border-radius: 5px;
+    width: 808px;
     margin: 11px 0 0 66px;
 }
-#sub-sub-form {
-	/*border: 1px solid;*/
-	/*padding-top: 11px;*/
-	/*border-radius: 5px;*/
-    /*width: 444px;*/
-    margin-left: 11px;
+#sub2-form {
+	border: 1px solid grey;
+	border-radius: 5px;
+    width: 408px;
+    /*position: absolute;*/
+}
+.sub2-left {
+    margin: 4px 0 0 11px;
+}
+.sub2-right {
+	position: relative;
+	right: 33px;
+}
+.sub-form-hdr {
+	font-size: 1.1em;
+	/*text-decoration: underline;*/
+	text-align: center;
+	padding-top: 4px;
+	margin: 0 auto 8px auto;
+}
+#sub-form p, #sub-form>.bttn-cntnr {
+	width: 804px;
+}
+#sub2-form p, #sub2-form>.bttn-cntnr  {
+	width: 404px;
 }
 .form-row {
 	padding: .2em .75em .3em  .75em;
