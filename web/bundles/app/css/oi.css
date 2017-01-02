@@ -548,7 +548,7 @@ a[role="button"], .tos-bttn {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 408px;
-    /*position: absolute;*/
+    margin-top: .5em;
 }
 .sub2-left {
     margin: 4px 0 0 11px;
@@ -615,20 +615,9 @@ a[role="button"], .tos-bttn {
 	align-self: flex-end;
 	padding: 10px;
 }
-.bttn-cntnr button {
-	margin-top: 1em;
-    font-size: 1em;
+.bttn-cntnr input {
     padding: 3px;
-}
-button.dynmc-bttns {
-	margin-right: .5em;
-	font-size: 1em;
-	padding: .1em;
-	border-radius: 0;
-    border-width: 2px;
-    border-style: outset;
-    border-color: buttonface;
-    border-image: initial;
+    margin: 3px;
 }
 /*-- Search Tips Popup --*/
 .tips-popup {

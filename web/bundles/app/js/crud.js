@@ -298,6 +298,48 @@ $(document).ready(function(){
         return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
     }
     /**
+     * Returns a config object for the form of the selected source-type with the 
+     * fields to add to and exclude from the default source fields, the required
+     * fields, and the final order of the fields.
+     * Notes: 
+     * >> 'order' is used to matched the form elements' id, which has no spaces. 
+     * >> The publisher form is currenty non-existant
+     */
+    function getSrcTypeFormConfg(type) {
+        var fieldMap = { 
+            "author": { 
+                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
+                "exclude": ["Description", "Year", "Doi", "Authors"],
+                "required": ["Last Name"], 
+                "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
+                    "LinkUrl", "LinkText"]
+            },
+            "citation": {
+                "add": { "Publication": "text", "Title": "text", "Volume": "text", 
+                    "Issue": "text", "Pages": "text", "Tags": "checkbox", 
+                    "Citation Text": "textArea", "Citation Type": "select"},
+                "exclude": ["Display Name", "Description"], 
+                "required": ["Publication", "Citation Text", "Citation Type"],
+                "order": ["CitationType", "CitationText", "Publication", "Title",    
+                    "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
+                    "Tags", "Authors" ]
+            },
+            "publication": {
+                "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
+                "exclude": ["Display Name"],
+                "required": ["Publication Type", "Title"],
+                "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
+                    "LinkUrl", "LinkText", "Publisher", "Authors" ]
+            },
+            "publisher": { 
+                "add": [], 
+                "exclude": ["Year", "Doi", "Authors"],
+                "required": ["Display Name"],
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
+        };
+        return fieldMap[type];
+    }
+    /**
      * Adds, to the global crudParams obj, the properties and confg that will be 
      * used throughout for generating, validating and submitting sub-form. 
      */
@@ -345,48 +387,6 @@ $(document).ready(function(){
     function enableSubmitBttn(bttnId) {
         $("#"+bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
     }    
-    /**
-     * Returns a config object for the form of the selected source-type with the 
-     * fields to add to and exclude from the default source fields, the required
-     * fields, and the final order of the fields.
-     * Notes: 
-     * >> 'order' is used to matched the form elements' id, which has no spaces. 
-     * >> The publisher form is currenty non-existant
-     */
-    function getSrcTypeFormConfg(type) {
-        var fieldMap = { 
-            "author": { 
-                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["Description", "Year", "Doi", "Authors"],
-                "required": ["Last Name"], 
-                "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkText"]
-            },
-            "citation": {
-                "add": { "Publication": "text", "Title": "text", "Volume": "text", 
-                    "Issue": "text", "Pages": "text", "Tags": "checkbox", 
-                    "Citation Text": "textArea", "Citation Type": "select"},
-                "exclude": ["Display Name", "Description"], 
-                "required": ["Publication", "Citation Text", "Citation Type"],
-                "order": ["CitationType", "CitationText", "Publication", "Title",    
-                    "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
-                    "Tags", "Authors" ]
-            },
-            "publication": {
-                "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
-                "exclude": ["Display Name"],
-                "required": ["Publication Type", "Title"],
-                "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
-                    "LinkUrl", "LinkText", "Publisher", "Authors" ]
-            },
-            "publisher": { 
-                "add": [], 
-                "exclude": ["Year", "Doi", "Authors"],
-                "required": ["DisplayName"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
-        };
-        return fieldMap[type];
-    }
     /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
