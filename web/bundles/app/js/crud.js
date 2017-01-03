@@ -401,73 +401,6 @@ $(document).ready(function(){
         };      
     }
     /**
-     * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
-     * specific to their form container @getEventHandlers, and a left spacer that 
-     * pushes the buttons to the bottom right of their form container.
-     */
-    function buildFormBttns(entity, level, parentElemId) {
-        var events = getEventHandlers(entity, level, parentElemId);             //console.log("events = %O", events);
-        var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
-        var spacer = $('<div></div>').css("flex-grow", 2);
-        var submit = _util.buildElem("input", { id: level + "_submit", 
-            class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
-        var cancel = _util.buildElem("input", { id: level +"_cancel", 
-            class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
-        $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
-        $(cancel).css("cursor", "pointer").click(events.cancel);
-        $(cntnr).append([spacer, submit, cancel]);
-        return cntnr;
-    }
-    /**
-     * Returns an object with 'submit' and 'cancel' events bound to the passed level's
-     * form container.  
-     */
-    function getEventHandlers(entity, level, parentElemId) {
-        var idMap = {
-            // "top": "#crud-main",
-            "sub": "#sub-form",
-            "sub2": "#sub2-form"
-        };
-        return { 
-            submit: Function.prototype, 
-            cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
-        };
-    }
-    /**
-     * Removes the form container with the passed id, clears and enables the combobox,
-     * and contextually enables to parent form's submit button @ifParentFormValid. 
-     */
-    function exitForm(id, formLevel, parentElemId) {                            //console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
-        var parentLvl = getNextFormLevel('parent', formLevel);
-        var selectized = crudParams.selectizeApi[parentLvl][parentElemId];      
-        selectized.clear();
-        selectized.enable();
-        $(id).remove();
-        ifParentFormValid(parentLvl);
-    }
-    /** Returns the 'next' form level- either the parent or child. */
-    function getNextFormLevel(nextLvl, curLvl) {
-        var formLevels = crudParams.formLevels;
-        var nextLvl = nextLvl === "parent" ? 
-            formLevels[formLevels.indexOf(curLvl) - 1] : 
-            formLevels[formLevels.indexOf(curLvl) + 1] ;
-        return nextLvl;
-    }
-    /** Enables the parent form's submit button if all required fields have values. */
-    function ifParentFormValid(parentLvl) {
-        if (ifRequiredFieldsFilled(parentLvl)) {
-            enableSubmitBttn('#'+parentLvl+'_submit');
-        }
-    }
-    /** Enables passed submit button */
-    function enableSubmitBttn(bttnId) {  
-        $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
-    }  
-    /** Enables passed submit button */
-    function disableSubmitBttn(bttnId) {
-        $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
-    }    
-    /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
@@ -478,25 +411,25 @@ $(document).ready(function(){
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
-
-        /**
-         * Builds a row for each default field not explicitly excluded. If exclude
-         * is set to true, all default fields are excluded. 
-         */
+        /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
             var exclude = crudParams.subForms[formLevel].confg.exclude;
-            var rows = [];
-            for (var field in dfltFields) {  
-                if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, dfltFields, formLevel));
-            }
-            return rows;
+            return buildRows(dfltFields, exclude);
         }
+        /** Adds fields specific to a sub-entity. */
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var xtraFields = crudParams.subForms[formLevel].confg.add;
+            var addedFields = crudParams.subForms[formLevel].confg.add;
+            return buildRows(addedFields);
+        }
+        /**
+         * Builds a row for each field not explicitly excluded from the fieldGroup. 
+         * If exclude is set to true, all default fields are excluded. 
+         */
+        function buildRows(fieldGroup, exclude) {
             var rows = [];
-            for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                rows.push(buildRow(field, xtraFields, formLevel));
+            for (var field in fieldGroup) {                                     //console.log("      field = ", field);
+                if (exclude && (exclude === true || exclude.indexOf(field) !== -1)) { continue; }                //console.log("      field = ", field);
+                rows.push(buildRow(field, fieldGroup, formLevel));
             }
             return rows;
         }
@@ -513,6 +446,17 @@ $(document).ready(function(){
             return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq);
         }
     } /* End getFormFieldRows */
+    /** Reorders the rows into the order set in the form config obj. */
+    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
+        var field, idx;
+        rows.forEach(function(row) {
+            field = row.id.split("_row")[0];
+            idx = order.indexOf(field);
+            order.splice(idx, 1, row);
+        });
+        return order;
+    }
+
     function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
         return _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
@@ -536,7 +480,7 @@ $(document).ready(function(){
         return sel;
     }
     /** Returns and array of options for the passed field type. */
-    function getSelectOpts(entity, field) {  console.log("getSelectOpts. entity = %s, field = %s", entity, field);
+    function getSelectOpts(entity, field) {                                     //console.log("getSelectOpts. entity = %s, field = %s", entity, field);
         var optMap = {
             "publication": { 
                 "Authors": buildOptsObj(JSON.parse(localStorage.getItem('authors'))),
@@ -597,25 +541,6 @@ $(document).ready(function(){
     //     $(span).append([input, lbl]);
     //     return span;
     // }
-    /** Reorders the rows into the order set in the form config obj. */
-    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
-        var field, idx;
-        rows.forEach(function(row) {
-            field = row.id.split("_row")[0];
-            idx = order.indexOf(field);
-            order.splice(idx, 1, row);
-        });
-        return order;
-    }
-
-
-
-
-
-    // /** Returns the full, contextual url for the passed entity and action.  */
-    // function getEntityUrl(entityName, action) {
-    //     return envUrl + entityName + "/" + action;
-    // }
     /**
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
@@ -668,6 +593,81 @@ $(document).ready(function(){
         var childFormLvl = getNextFormLevel('child', formLvl);
         return $('#'+childFormLvl+'-form').length > 0;
     }
+    /**
+     * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
+     * specific to their form container @getBttnEvents, and a left spacer that 
+     * pushes the buttons to the bottom right of their form container.
+     */
+    function buildFormBttns(entity, level, parentElemId) {
+        var events = getBttnEvents(entity, level, parentElemId);             //console.log("events = %O", events);
+        var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
+        var spacer = $('<div></div>').css("flex-grow", 2);
+        var submit = _util.buildElem("input", { id: level + "_submit", 
+            class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
+        var cancel = _util.buildElem("input", { id: level +"_cancel", 
+            class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
+        $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
+        $(cancel).css("cursor", "pointer").click(events.cancel);
+        $(cntnr).append([spacer, submit, cancel]);
+        return cntnr;
+    }
+    /**
+     * Returns an object with 'submit' and 'cancel' events bound to the passed level's
+     * form container.  
+     */
+    function getBttnEvents(entity, level, parentElemId) {
+        var idMap = {
+            // "top": "#crud-main",
+            "sub": "#sub-form",
+            "sub2": "#sub2-form"
+        };
+        return { 
+            submit: Function.prototype, 
+            cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
+        };
+    }
+    /**
+     * Removes the form container with the passed id, clears and enables the combobox,
+     * and contextually enables to parent form's submit button @ifParentFormValid. 
+     */
+    function exitForm(id, formLevel, parentElemId) {                            //console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
+        var parentLvl = getNextFormLevel('parent', formLevel);
+        var selectized = crudParams.selectizeApi[parentLvl][parentElemId];      
+        selectized.clear();
+        selectized.enable();
+        $(id).remove();
+        ifParentFormValid(parentLvl);
+    }
+    /** Returns the 'next' form level- either the parent or child. */
+    function getNextFormLevel(nextLvl, curLvl) {
+        var formLevels = crudParams.formLevels;
+        var nextLvl = nextLvl === "parent" ? 
+            formLevels[formLevels.indexOf(curLvl) - 1] : 
+            formLevels[formLevels.indexOf(curLvl) + 1] ;
+        return nextLvl;
+    }
+    /** Enables the parent form's submit button if all required fields have values. */
+    function ifParentFormValid(parentLvl) {
+        if (ifRequiredFieldsFilled(parentLvl)) {
+            enableSubmitBttn('#'+parentLvl+'_submit');
+        }
+    }
+    /** Enables passed submit button */
+    function enableSubmitBttn(bttnId) {  
+        $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
+    }  
+    /** Enables passed submit button */
+    function disableSubmitBttn(bttnId) {
+        $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
+    }    
+
+
+
+
+    // /** Returns the full, contextual url for the passed entity and action.  */
+    // function getEntityUrl(entityName, action) {
+    //     return envUrl + entityName + "/" + action;
+    // }
 /*--------------------------- Helpers ----------------------------------------*/
     /*------------------- Error Handlers -------------------------------------*/
     /**

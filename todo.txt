@@ -18,12 +18,7 @@ TAYLOR:
         -- How to generate  
 
 Questions:
-    -- Leave publisher field out?? In?? 
-    -- The list of authors is problematic:
-        -- How to edit when selected? 
-        -- When the user enters a new name, I have added it into the 'display name'
-            field. If this is how we want to handle this, as it seems to be straightforward,
-            we could add a tooltip describing the format for 'display name'.
+    -- 
 
 
 
