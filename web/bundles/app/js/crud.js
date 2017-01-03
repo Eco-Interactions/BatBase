@@ -155,7 +155,7 @@ $(document).ready(function(){
         var opts = Object.keys(pubObj).sort().map(function(name) {
             return { value: pubObj[name].toString(), text: name };
         });  
-        selElem = _util.buildSelectElem(opts, {id: "pub-sel", class: "lrg-crud-sel"});
+        selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-crud-sel"});
         return buildFormRow("Publication", selElem, false, true);
     }
     /** When a publication is selected fill citation dropdown @initCitField.  */
@@ -173,7 +173,7 @@ $(document).ready(function(){
             id: 'sub-form', class: 'flex-row flex-wrap'}); 
         var hdr = _util.buildElem("p", { "text": "New Publication", "class": "sub-form-hdr" });
         var subForm = buildSubForm('publication', {"Title": val}, "sub");
-        subForm.push(buildFormBttns("Publication", "sub"));
+        subForm.push(buildFormBttns("Publication", "sub", "#Publication-sel"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes("publication");
@@ -233,7 +233,7 @@ $(document).ready(function(){
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitField() {
         var selElem = _util.buildSelectElem(
-            [], {id: "cit-sel", class: "lrg-crud-sel"}, onCitSelection)
+            [], {id: "Citation-sel", class: "lrg-crud-sel"}, onCitSelection)
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, false, true);
     }
@@ -244,7 +244,7 @@ $(document).ready(function(){
     function initCitField(pubId) {                                              console.log("initCitSelect for publication = ", pubId);
         var pubRcrd = crudParams.records.source[pubId];  
         var citOpts = getPubCitationOpts(pubRcrd);  
-        var sel = $('#cit-sel')[0].selectize;
+        var sel = $('#Citation-sel')[0].selectize;
         sel.clearOptions();
         sel.addOption(citOpts);
         sel.enable();
@@ -283,8 +283,8 @@ $(document).ready(function(){
      */
     function initSrcComboboxes() {
         var selMap = { 
-            'pub': { name: 'Publication', id: '#pub-sel', change: onPubSelection, add: initPubForm },
-            'cit': { name: 'Citation', id: '#cit-sel', change: onCitSelection, add: initCitForm }
+            'pub': { name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
+            'cit': { name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm }
         };
         for (var selType in selMap) { initSelectCombobox(selMap[selType]); }
     }
