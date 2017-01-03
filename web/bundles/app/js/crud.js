@@ -794,14 +794,28 @@ $(document).ready(function(){
     }
 /*--------------------------- Helpers ----------------------------------------*/
     /*------------------- Error Handlers -------------------------------------*/
+    /**
+     * When the user attempts to create an entity that uses the sub2-form and
+     * there is already a sub2-form instance, show the user an error message and 
+     * reset the select elem. 
+     */
+    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = ", selElemId)
+        var selectizedElem = crudParams.selectizeApi["sub"][selElemId];
+        crudFieldErrorHandler(field, 'openSub2Form');
+        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
+        return { "value": "", "text": "Select " + field };
+    }
     /** Shows the user an error message above the field row. */
     function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
         var errMsgMap = {
-            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>"
+            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
+            "openSub2Form": "<p>Please finish the open "+ 
+                _util.ucfirst(crudParams.subForms.sub2) + " form.</p>",
         };
         var msg = errMsgMap[errorTag];
         var errElem = fieldErrElem || getErrElem(fieldName);
         errElem.innerHTML = msg;
+        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
     }
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
