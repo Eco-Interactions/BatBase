@@ -215,19 +215,19 @@ $(document).ready(function(){
         initSelectCombobox(selConfg);
     }
     /**
-     * When a user enters a new author into the combobox, a create-author
-     * form is built and appended to the author field row. An option object is 
-     * returned to be selected in the combobox
+     * When a user enters a new author into the combobox, a create-author form is 
+     * built, appended to the author field row, and an option object is returned 
+     * to be selected in the combobox. Unless there is already a sub2Form, where 
+     * a message will be shown telling the user to complete the open sub2 form
+     * and the form init canceled.
      */
-    function initAuthForm (val) {        console.log("Adding new auth! val = %s, this = %O", val, $(this));
-        var subFormContainer = _util.buildElem('div', {
-            id: 'sub2-form', class: 'flex-col flex-wrap sub2-left'}); 
-        var hdr = _util.buildElem("p", { "text": "New Author", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('author', {"Display Name": val}, "sub2");
-        subForm.push(buildFormBttns("Author", "sub2"));
-        $(subFormContainer).append([hdr].concat(subForm));
-        $('#Authors_row').append(subFormContainer);
-        return { "value": "", "text": val };
+    function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
+        var authCnt = $("#Authors_sel-cntnr").data("cnt") === 1 ? "" : $("#Authors_sel-cntnr").data("cnt");
+        var parentSelId = "#Authors-sel"+authCnt;
+        if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
+        $('#Authors_row').append(buildSubFormHtml(
+            "author", "sub2", "left", "Authors", {"Display Name": val}, parentSelId));
+        return { "value": "", "text": "Creating Author..." };
     }
     /*-------------- Citation Helpers --------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
