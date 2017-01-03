@@ -172,14 +172,9 @@ $(document).ready(function(){
      * form is built and appended to the crud form. An option object is 
      * returned and thus selected in the combobox
      */
-    function initPubForm(val) {  console.log("Adding new pub! val = %s", val);
-        var subFormContainer = _util.buildElem('div', {
-            id: 'sub-form', class: 'flex-row flex-wrap'}); 
-        var hdr = _util.buildElem("p", { "text": "New Publication", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('publication', {"Title": val}, "sub");
-        subForm.push(buildFormBttns("Publication", "sub", "#Publication-sel"));
-        $(subFormContainer).append([hdr].concat(subForm));
-        $('form[name="crud"]').append(subFormContainer);
+    function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
+        $('#Publication_row').append(buildSubFormHtml(
+            "publication", "sub", "flex-row", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         disableCombobox("#Publication-sel", "top");
         return { "value": "", "text": "Creating Publication..." };
@@ -196,13 +191,8 @@ $(document).ready(function(){
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
-        var subFormContainer = _util.buildElem('div', {
-            id: 'sub2-form', class: 'flex-col flex-wrap sub2-right'}); 
-        var hdr = _util.buildElem("p", { "text": "New Publisher", "class": "sub-form-hdr" });
-        var subForm = buildSubForm('publisher', {"Display Name": val}, "sub2");
-        subForm.push(buildFormBttns("Publisher", "sub2", "#Publisher-sel"));
-        $(subFormContainer).append([hdr].concat(subForm));
-        $('#Publisher_row').append(subFormContainer);
+        $('#Publisher_row').append(buildSubFormHtml(
+            "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
         disableCombobox("#Publisher-sel", "sub");
         enableSubmitBttn("#sub2_submit");
         disableSubmitBttn("#sub_submit");
@@ -232,13 +222,14 @@ $(document).ready(function(){
      * to be selected in the combobox. Unless there is already a sub2Form, where 
      * a message will be shown telling the user to complete the open sub2 form
      * and the form init canceled.
+     * Note: The first author select doesn't have a number appended to it's id. 
      */
     function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
         var authCnt = $("#Authors_sel-cntnr").data("cnt") === 1 ? "" : $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
         $('#Authors_row').append(buildSubFormHtml(
-            "author", "sub2", "left", "Authors", {"Display Name": val}, parentSelId));
+            "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
         disableCombobox(parentSelId, "sub");
         disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Author..." };
@@ -280,19 +271,16 @@ $(document).ready(function(){
      * Builds and returns the subForm according to the passed params. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function buildSubFormHtml(formEntity, formLevel, frmStyleDir, field, fieldVals, pElemId) {
-        var formClass = frmStyleDir ? formLevel+'-'+frmStyleDir : "";
+    function buildSubFormHtml(formEntity, formLevel, formClasses, fieldVals, selElemId) {
         var subFormContainer = _util.buildElem('div', {
-            id: formLevel+'-form', class: 'flex-col flex-wrap '+formClass}); 
+            id: formLevel+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
             "p", { "text": "New "+_util.ucfirst(formEntity), "class": "sub-form-hdr" });
         var subForm = buildSubForm(formEntity, fieldVals, formLevel);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, pElemId));
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, selElemId));
         $(subFormContainer).append([hdr].concat(subForm));
         return subFormContainer;
     }
-    /*------------------- Helper Methods --------------------------------------*/
-
     /*------------------- Combobox (selectize) Methods -----------------------*/
     /**
      * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
