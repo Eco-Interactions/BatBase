@@ -209,7 +209,7 @@ $(document).ready(function(){
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
-        var parentFormEntity = crudParams.subForms.sub;
+        var parentFormEntity = crudParams.subForms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
 
@@ -316,17 +316,18 @@ $(document).ready(function(){
      */
     function initSubFormComboboxes(entity) {
         var confg;
+        var formLvl = crudParams.subForms[entity];
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
         };
-        crudParams.subForms[entity].selElems.forEach(function(field) {          //console.log("Initializing --%s-- select", field);
+        crudParams.subForms[formLvl].selElems.forEach(function(field) {         //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg, "sub");
         });
-        crudParams.subForms[entity].selElems = [];
+        crudParams.subForms[formLvl].selElems = [];
     } 
     function disableCombobox(selId, formLvl) {
         var selectized = crudParams.selectizeApi[formLvl][selId];
@@ -394,10 +395,13 @@ $(document).ready(function(){
      * used throughout for generating, validating and submitting sub-form. 
      */
     function initSubFormCrudParams(entity, level, formConfg) {                  //console.log("crudParams = %O", crudParams)
-        crudParams.subForms[level] = entity;
-        crudParams.subForms[entity] = {};
-        crudParams.subForms[entity].selElems = []; 
-        crudParams.subForms[entity].confg = formConfg;      
+        crudParams.subForms[entity] = level;
+        crudParams.subForms[level] = {
+            entity: entity,
+            selElems: [], 
+            reqElems: [],
+            confg: formConfg,
+        };      
     }
     /**
      * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
@@ -462,7 +466,7 @@ $(document).ready(function(){
          * is set to true, all default fields are excluded. 
          */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var exclude = crudParams.subForms[entity].confg.exclude;
+            var exclude = crudParams.subForms[formLevel].confg.exclude;
             var rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
@@ -471,7 +475,7 @@ $(document).ready(function(){
             return rows;
         }
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var xtraFields = crudParams.subForms[entity].confg.add;
+            var xtraFields = crudParams.subForms[formLevel].confg.add;
             var rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
                 rows.push(buildRow(field, xtraFields, isSubForm));
@@ -485,7 +489,7 @@ $(document).ready(function(){
          */
         function buildRow(field, fieldsObj, isSubForm) {
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = crudParams.subForms[entity].confg.required;
+            var reqFields = crudParams.subForms[formLevel].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
             return buildFormRow(_util.ucfirst(field), fieldInput, isSubForm, isReq);
@@ -504,11 +508,12 @@ $(document).ready(function(){
      * combobox. Adds a data property "valType" for use later during validation.
      */
     function buildSelectElem(entity, field, cnt) {                                   
+        var formLvl = crudParams.subForms[entity];
         var fieldName = field.split(" ").join("_");
         var opts = getSelectOpts(entity, fieldName);                            //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-crud-sel'});
-        crudParams.subForms[entity].selElems.push(fieldName);
+        crudParams.subForms[formLvl].selElems.push(fieldName);
         $(sel).data("valType", "select");
         return sel;
     }
@@ -840,7 +845,7 @@ $(document).ready(function(){
         var errMsgMap = {
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
             "openSub2Form": "<p>Please finish the open "+ 
-                _util.ucfirst(crudParams.subForms.sub2) + " form.</p>",
+                _util.ucfirst(crudParams.subForms.sub2.entity) + " form.</p>",
         };
         var msg = errMsgMap[errorTag];
         var errElem = fieldErrElem || getErrElem(fieldName);
