@@ -191,6 +191,8 @@ $(document).ready(function(){
      * returned to be selected in the combobox. Unless there is already a sub2Form,
      * where a message will be shown telling the user to complete the open sub2 form
      * and the form init canceled.
+     * Note: The publisher form inits with the submit button enabled, as display 
+     *     name, aka val, is it's only required field.
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
@@ -202,6 +204,8 @@ $(document).ready(function(){
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
         disableCombobox("#Publisher-sel", "sub");
+        enableSubmitBttn("#sub2_submit");
+        disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Publisher..." };
     }
 
@@ -236,6 +240,7 @@ $(document).ready(function(){
         $('#Authors_row').append(buildSubFormHtml(
             "author", "sub2", "left", "Authors", {"Display Name": val}, parentSelId));
         disableCombobox(parentSelId, "sub");
+        disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Author..." };
     }
     /*-------------- Citation Helpers --------------------------------------*/
@@ -416,9 +421,9 @@ $(document).ready(function(){
         var events = getEventHandlers(entity, level, parentElemId);             //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
-        var submit = _util.buildElem("input", { id: "crud-submit", 
+        var submit = _util.buildElem("input", { id: level + "_submit", 
             class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
-        var cancel = _util.buildElem("input", { id: "crud-cancel", 
+        var cancel = _util.buildElem("input", { id: level +"_cancel", 
             class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
         $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
         $(cancel).css("cursor", "pointer").click(events.cancel);
@@ -440,18 +445,39 @@ $(document).ready(function(){
             cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
         };
     }
-    /** Removes the form container with the passed id, clears and enables the combobox. */
-    function exitForm(id, formLevel, parentElemId) {            console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
-        var formLevels = ["top", "sub", "sub2"];
-        var parentLvl = formLevels[formLevels.indexOf(formLevel) - 1];
-        var selectized = crudParams.selectizeApi[parentLvl][parentElemId];  console.log("crudParams.selectizeApi = %O", crudParams.selectizeApi);
+    /**
+     * Removes the form container with the passed id, clears and enables the combobox,
+     * and contextually enables to parent form's submit button @ifParentFormValid. 
+     */
+    function exitForm(id, formLevel, parentElemId) {                            //console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
+        var parentLvl = getNextFormLevel('parent', formLevel);
+        var selectized = crudParams.selectizeApi[parentLvl][parentElemId];      
         selectized.clear();
         selectized.enable();
         $(id).remove();
+        ifParentFormValid(parentLvl);
+    }
+    /** Returns the 'next' form level- either the parent or child. */
+    function getNextFormLevel(nextLvl, curLvl) {
+        var formLevels = crudParams.formLevels;
+        var nextLvl = nextLvl === "parent" ? 
+            formLevels[formLevels.indexOf(curLvl) - 1] : 
+            formLevels[formLevels.indexOf(curLvl) + 1] ;
+        return nextLvl;
+    }
+    /** Enables the parent form's submit button if all required fields have values. */
+    function ifParentFormValid(parentLvl) {
+        if (ifRequiredFieldsFilled(parentLvl)) {
+            enableSubmitBttn('#'+parentLvl+'_submit');
+        }
     }
     /** Enables passed submit button */
-    function enableSubmitBttn(bttnId) {
-        $("#"+bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
+    function enableSubmitBttn(bttnId) {  
+        $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
+    }  
+    /** Enables passed submit button */
+    function disableSubmitBttn(bttnId) {
+        $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }    
     /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
@@ -613,29 +639,26 @@ $(document).ready(function(){
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        if (isReq) { $(label).addClass('required'); } //Adds "*" after the label (with css)
+        if (isReq) { handleRequiredField(label, fieldInput, formLevel); } 
         $(fieldRow).append([label, fieldInput]);
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
     }
-    /*----------------------- Validation ---------------------------------------------------------*/
     /**
-     * Form submit handler calls @buildFormData to validate required fields have 
-     * values and return a json-ready object of form data to send to the server 
-     * @sendFormData.
+     * Required field's have a 'required' class added which appends '*' to their 
+     * label. Added to the input elem is a change event reponsible for enabling/
+     * disabling the submit button and a form-level data property. The input elem
+     * is added to the form param's reqElems property. 
      */
-    function valSrcCrud(e) {           console.log("valSrcCrud called. NoOp.")                                             
-        // var formData = buildSrcFormData();
-        // sendFormData(formData);
-    }
-    function buildSrcFormData() {
-        var formElems = $('form[name=crud]')[0].elements;                       console.log("formElems = %O", formElems);     
-        return valAndProcessFormData(formElems, "source");
+    function handleRequiredField(label, input, formLevel) {
+        $(label).addClass('required');  
+        $(input).change(checkRequiredFields);
+        $(input).data("formLvl", formLevel);
+        crudParams.subForms[formLevel].reqElems.push(input);
     }
     /**
-     * If all required fields have values, an object is returned with a form data 
-     * object for both the main entity fields and detail entity fields, if they exist.
-     * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
+     * On a required field's change event, the submit button for the element's form 
+     * is enabled if all of it's required fields have values and it has no open child forms. 
      */
     function valAndProcessFormData(formElems, mainEntity) {
         var detailEntity = _util.lcfirst(crudParams.types.source[$(formElems[0]).val()]);               //console.log("SourceType selected = ", type);
@@ -829,7 +852,25 @@ $(document).ready(function(){
     function ifIsEmptyRequiredField(formElem, fieldName) {
         if (crudParams.subForms[entity].confg.required.indexOf(fieldName) !== -1) {
             crudFieldErrorHandler(fieldName, "emptyRequiredField");
+    function checkRequiredFields(e) {  
+        var input = e.currentTarget;
+        var formLvl = $(input).data("formLvl");  
+        var subBttnId = '#'+formLvl+'_submit';
+        if (!input.value || hasOpenSubForm(formLvl)) { 
+            disableSubmitBttn(subBttnId); 
+        } else if (ifRequiredFieldsFilled(formLvl)) { 
+            enableSubmitBttn(subBttnId);
         }
+    }
+    /** Returns true if all the required elements for the current form have a value. */
+    function ifRequiredFieldsFilled(formLvl) {
+        var reqElems = crudParams.subForms[formLvl].reqElems;
+        return reqElems.every(function(reqElem){ return reqElem.value; }); 
+    }
+    /** Returns true if the next sub-level form exists in the dom. */
+    function hasOpenSubForm(formLvl) {
+        var childFormLvl = getNextFormLevel('child', formLvl);
+        return $('#'+childFormLvl+'-form').length > 0;
     }
 /*--------------------------- Helpers ----------------------------------------*/
     /*------------------- Error Handlers -------------------------------------*/
