@@ -85,17 +85,29 @@ $(document).ready(function(){
         initCrudForm();
     }       
     /**
-     * Resets and fills the global crudParams obj with the params necessary throughout
-     * the crud form interface.
+     * Sets the global crudParams obj with the params necessary throughout the 
+     * crud form interface.
+     * @param action - eg, Create, Edit.
+     * @param subForms - Container for subform-specific params 
+     * @param selectizeApi - Contains the selectize libray's api organized by 
+     *    form-level and the select elem parent for each selectized combobox elem. 
+     *     organized by form level and the parent select's id. 
+     * @param fields - Contains an object of the fields and field-types for each 
+     *     of the root entities- Interaction, Location, Source and Taxa. 
+     * @param types - Contains a sorted array of 'types' for each field (key)
+     * @param records - An object of all records, with id keys, for each of the 
+     *     root entities.
      */
     function initCrudParams(action) {
         crudParams = {};
-        // crudParams.view = "source";
         crudParams.action = action;
         crudParams.subForms = {};
-        crudParams.srcFields = { "Display Name": "text", "Description": "textArea", 
-            "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
-            "Authors": "multiSelect" };
+        crudParams.selectizeApi = { "top": {}, "sub": {}, "sub2": {} };
+        crudParams.fields = {
+            "source": { "Display Name": "text", "Description": "textArea", 
+                "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+                "Authors": "multiSelect" }
+        };
         crudParams.types = {
             "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
             "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
@@ -103,7 +115,7 @@ $(document).ready(function(){
         };
         crudParams.records = {
             "source": JSON.parse(localStorage.getItem('srcRcrds'))
-        }
+        };
     }
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
@@ -269,6 +281,7 @@ $(document).ready(function(){
             onChange: confg.change,
             placeholder: 'Select ' + confg.name
         });
+        crudParams.selectizeApi[formLevel][confg.id] = $(confg.id)[0].selectize;
     }
     /**
      * Inits 'selectize' for each select elem in the subForm's 'selElems' array
@@ -295,7 +308,7 @@ $(document).ready(function(){
     function buildSubForm(entity, fieldVals, level) {
         var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
         initSubFormCrudParams(entity, level, formConfg);
-        return getFormFieldRows(entity, formConfg, crudParams.srcFields, fieldVals, true);
+        return getFormFieldRows(entity, formConfg, crudParams.fields.source, fieldVals, true);
     }
     /**
      * Returns a config object for the form of the selected source-type with the 
