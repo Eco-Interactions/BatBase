@@ -660,198 +660,6 @@ $(document).ready(function(){
      * On a required field's change event, the submit button for the element's form 
      * is enabled if all of it's required fields have values and it has no open child forms. 
      */
-    function valAndProcessFormData(formElems, mainEntity) {
-        var detailEntity = _util.lcfirst(crudParams.types.source[$(formElems[0]).val()]);               //console.log("SourceType selected = ", type);
-        var formData = {};
-        var authors = [];
-        formData[mainEntity] = {};
-        formData[detailEntity] = {};
-        /* skips source type select and submit button */
-        for (var i = 1; i < formElems.length-1; i++) {     
-            if ($(formElems[i]).data("noVal")) { continue; } /* No validation for this elem */
-            processFormElem(formElems[i]);
-        }                                                                       console.log("***__dataObj = %O", formData);
-        postProcessing();
-        return formData;    
-        /** Sends form elems to appropriate handler.  */
-        function processFormElem(formElem) {
-            var fieldName = formElem.parentNode.innerText.trim();     
-            var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
-            if ($(formElem).data("valType")) { 
-                processComplexInputs(formElem, fieldName, dbField); 
-            } else { 
-                processSimpleInputFields(formElem, fieldName, dbField); }
-        }
-        /**
-         * For form fields with complex processing, such as checkbox options or 
-         * multi-input fields, the 'valType' data tag on the element triggers 
-         * specific validation handlers for the field type.
-         */
-        function processComplexInputs(formElem, fieldName, dbField) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
-            var fieldType = $(formElem).data("valType");
-            var cmplxFieldHndlr = { 
-                "checkbox": processCheckboxData, "multiInput": processMultiInputData,
-                "select": processSelectData
-            }; 
-            cmplxFieldHndlr[fieldType](formElem, fieldName, dbField);
-        }
-        function processSelectData(formElem, fieldName, dbField) {
-            var selTypes = crudParams.types[detailEntity];
-            var val = $(formElem).val();  console.log("val = ", val)
-            if (val === "placeholder") { crudFieldErrorHandler(fieldName, "emptyRequiredField"); 
-            } else {
-                formData[detailEntity][dbField] = selTypes[val];
-            }
-        }
-        /**
-         * If this input elem has a value, the elem type is identified, e.g. author 
-         * fields, and sent to be processed with the appropriate handler.
-         */
-        function processMultiInputData(formElem) {                              
-            if ($(formElem).val() !== "") {                                        //console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
-                if (formElem.parentElement.className.includes("auth-fields")) { 
-                    processAuthorNameFields(formElem); 
-                }
-            }
-        }
-        /**
-         * As authors can be dynamically added, the current row number is the unique 
-         * identifier used for each author name row. After getting the row number,
-         * the field name, and the entity proprty name (dbField), the field value is 
-         * stored under the dbField name inside of an author object in the authors 
-         * array at the index of [row number minus one]. Each author object will 
-         * later be checked for invalid nulls and added to the formData object.
-         */
-        function processAuthorNameFields(formElem) {
-            var rowNum = formElem.parentElement.parentElement.id.split("-").pop();              
-            var fieldName = formElem.placeholder.split("-")[1]; 
-            var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
-            if (!authors[rowNum-1]) { authors[rowNum-1] = {}; }
-            authors[rowNum-1][dbField] = $(formElem).val();
-        }
-        /**
-         * If option is checked, the form elem and the field name, @getCheckboxFieldName, 
-         * are sent to handler to be added to the formData obj.
-         */
-        function processCheckboxData(formElem) {                                    //console.log("valCheckboxData called for elem = %O, val = %s", formElem, formElem.checked)
-            var fieldName = getCheckboxFieldName(formElem);
-            if (formElem.checked) {
-                if (fieldName === "tags") { addTagsToFormData(formElem, fieldName); }
-            }  
-        }
-        /** Returns the lower-cased field name from the option's field container id. */
-        function getCheckboxFieldName(formElem) {
-            var fieldCntnr = formElem.parentElement.parentElement.parentElement.parentElement;
-            var fieldName = _util.lcfirst(fieldCntnr.id.split("_row")[0]);       //console.log("fieldName = ", fieldName); 
-            return fieldName;
-       }
-        /** Adds the tag to a tag's array in the main entity obj of formData. */
-        function addTagsToFormData(formElem, fieldName) {
-            var tag = formElem.id.split("_check")[0];
-            if (!formData[mainEntity][fieldName]) { formData[mainEntity][fieldName] = []; }
-            formData[mainEntity][fieldName].push(tag);
-        }
-        /**
-         * Processes fields where all that is required is to get the field name, 
-         * from the parent label, and the field value. If the value is not empty 
-         * @addFieldData is called to store the form data, else @isEmptyRequiredField
-         * is checked for invalid nulls and, if so, an error is shown to the user.
-         */
-        function processSimpleInputFields(formElem, fieldName, dbField) {                           //console.log("processSimpleInputFields for formElem = %O", formElem);
-            var fieldVal = $(formElem).val();  
-            if (fieldVal !== "") { addFieldData(formElem, fieldName, dbField, fieldVal);
-            } else { ifIsEmptyRequiredField(formElem, fieldName); }
-        }
-        /**
-         * Adds the field value, keyed under the server-ready field name, to the 
-         * appropriate entity object in formData.
-         */
-        function addFieldData(formElem, fieldName, dbField, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
-            if (fieldName in crudParams.srcFields) { 
-                addFieldToFormData(dbField, fieldVal, mainEntity);
-            } else {
-                addDetailEntityFieldData(dbField, fieldVal); 
-            }
-        }
-        function addMainEntityFieldData(field, val) {
-            formData[mainEntity][field] = val;
-        }
-        /**
-         * Stores data from the detail entity fields, translating them as needed 
-         * into the correct properties for both entities, the main and the detail.
-         */
-        function addDetailEntityFieldData(field, val) {
-            var fieldTransMap = {
-                "publication": { 
-                    "title": { "source": "displayName", "publication": "displayName" },
-                    "publisher": { "source": "parentSource" }
-                },
-                "citation": { 
-                    "publication": { "source": "parentSource" },
-                    "citationText": { "source": "description", "citation": "fullText" },
-                    "title": { "source": "displayName", "citation": "displayName",
-                        "citation": "title" 
-                    }
-            }};
-            if (detailEntity in fieldTransMap) {
-                processFieldTranslation(field, val, fieldTransMap[detailEntity]);
-            } else {
-                addFieldToFormData(field, val, detailEntity);
-            }
-        }
-        /**
-         * If field is in translation map, @addTransFieldToFormData handles storing 
-         * the data, otherwise @addFieldToFormData does.
-         */
-        function processFieldTranslation(field, val, fieldTrans) {
-            if (field in fieldTrans) {  
-                addTransFieldToFormData(field, val, fieldTrans[field]);
-            } else {
-                addFieldToFormData(field, val, detailEntity);
-            }
-        }
-        /**
-         * Adds the field data under the correct entity's property name(s) to formData.
-         * Eg. 'citationText' becomes source's 'description' and citation's 'fullText'.
-         */
-        function addTransFieldToFormData(field, val, fieldTrans) {              //console.log("addToFormData %s, val = %s. trans = %O", field, val, fieldTrans);
-            for (var entity in fieldTrans) {            
-                formData[entity][fieldTrans[entity]] = val;
-            }
-        }
-        function addFieldToFormData(field, val, entity) {
-            formData[entity][field] = val;
-        }
-        /**
-         * After all input elements in the form have been processed, special case
-         * handling and post-processing of complex data can happen here. Ex: Authors,
-         * i.e. multi-input fields, are checked for empty required fields and added 
-         * to the form data object @valAuthorFields. 
-         */
-        function postProcessing() {
-            if (authors.length) { valAuthorFields(); }
-        }
-        /**
-         * For each author name row with data, checks to ensure the required field, 
-         * last name, has a value. If not, an error is shown to the user. The authors
-         * array is then added to the formData object.
-         */
-        function valAuthorFields() {
-            authors.forEach(function(authObj, idx) {
-                if (!authObj.lastName) {             
-                    crudFieldErrorHandler("Last Name", "emptyRequiredField", $('#auth_'+(idx+1)+'_errs')[0]);
-                }
-            });
-            formData[mainEntity].authors = authors;
-        }
-    } /* End valAndProcessFormData */
-    /**
-     * If field name is in the form config's required array, show an error on
-     * that field to the user: "Please fill out [fieldName]."
-     */
-    function ifIsEmptyRequiredField(formElem, fieldName) {
-        if (crudParams.subForms[entity].confg.required.indexOf(fieldName) !== -1) {
-            crudFieldErrorHandler(fieldName, "emptyRequiredField");
     function checkRequiredFields(e) {  
         var input = e.currentTarget;
         var formLvl = $(input).data("formLvl");  
@@ -901,7 +709,220 @@ $(document).ready(function(){
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
         return $('#'+field+'_errs')[0];    
-    }
+    }    
+    /*----------------------- Validation ---------------------------------------------------------*/
+    /**
+     * Form submit handler calls @buildFormData to validate required fields have 
+     * values and return a json-ready object of form data to send to the server 
+     * @sendFormData.
+     */
+    // function valSrcCrud(e) {           console.log("valSrcCrud called. NoOp.")                                             
+    //     // var formData = buildSrcFormData();
+    //     // sendFormData(formData);
+    // }
+    // function buildSrcFormData() {
+    //     var formElems = $('form[name=crud]')[0].elements;                       console.log("formElems = %O", formElems);     
+    //     return valAndProcessFormData(formElems, "source");
+    // }
+    // /**
+    //  * If all required fields have values, an object is returned with a form data 
+    //  * object for both the main entity fields and detail entity fields, if they exist.
+    //  * eg: { source: { year: ####, displayName: XXXX}, publication: { displayName: XXXX }}
+    //  */
+    // function valAndProcessFormData(formElems, mainEntity) {
+    //     var detailEntity = _util.lcfirst(crudParams.types.source[$(formElems[0]).val()]);               //console.log("SourceType selected = ", type);
+    //     var formData = {};
+    //     var authors = [];
+    //     formData[mainEntity] = {};
+    //     formData[detailEntity] = {};
+    //     /* skips source type select and submit button */
+    //     for (var i = 1; i < formElems.length-1; i++) {     
+    //         if ($(formElems[i]).data("noVal")) { continue; } /* No validation for this elem */
+    //         processFormElem(formElems[i]);
+    //     }                                                                       console.log("***__dataObj = %O", formData);
+    //     postProcessing();
+    //     return formData;    
+    //     /** Sends form elems to appropriate handler.  */
+    //     function processFormElem(formElem) {
+    //         var fieldName = formElem.parentNode.innerText.trim();     
+    //         var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
+    //         if ($(formElem).data("valType")) { 
+    //             processComplexInputs(formElem, fieldName, dbField); 
+    //         } else { 
+    //             processSimpleInputFields(formElem, fieldName, dbField); }
+    //     }
+    //     /**
+    //      * For form fields with complex processing, such as checkbox options or 
+    //      * multi-input fields, the 'valType' data tag on the element triggers 
+    //      * specific validation handlers for the field type.
+    //      */
+    //     function processComplexInputs(formElem, fieldName, dbField) {                               console.log("!!!__processComplexInputs for formElem = %O", formElem);
+    //         var fieldType = $(formElem).data("valType");
+    //         var cmplxFieldHndlr = { 
+    //             "checkbox": processCheckboxData, "multiInput": processMultiInputData,
+    //             "select": processSelectData
+    //         }; 
+    //         cmplxFieldHndlr[fieldType](formElem, fieldName, dbField);
+    //     }
+    //     function processSelectData(formElem, fieldName, dbField) {
+    //         var selTypes = crudParams.types[detailEntity];
+    //         var val = $(formElem).val();  console.log("val = ", val)
+    //         if (val === "placeholder") { crudFieldErrorHandler(fieldName, "emptyRequiredField"); 
+    //         } else {
+    //             formData[detailEntity][dbField] = selTypes[val];
+    //         }
+    //     }
+    //     /**
+    //      * If this input elem has a value, the elem type is identified, e.g. author 
+    //      * fields, and sent to be processed with the appropriate handler.
+    //      */
+    //     function processMultiInputData(formElem) {                              
+    //         if ($(formElem).val() !== "") {                                        //console.log("processing MultiInputData for elem = %O, val = %s", formElem, formElem.value);
+    //             if (formElem.parentElement.className.includes("auth-fields")) { 
+    //                 processAuthorNameFields(formElem); 
+    //             }
+    //         }
+    //     }
+    //     /**
+    //      * As authors can be dynamically added, the current row number is the unique 
+    //      * identifier used for each author name row. After getting the row number,
+    //      * the field name, and the entity proprty name (dbField), the field value is 
+    //      * stored under the dbField name inside of an author object in the authors 
+    //      * array at the index of [row number minus one]. Each author object will 
+    //      * later be checked for invalid nulls and added to the formData object.
+    //      */
+    //     function processAuthorNameFields(formElem) {
+    //         var rowNum = formElem.parentElement.parentElement.id.split("-").pop();              
+    //         var fieldName = formElem.placeholder.split("-")[1]; 
+    //         var dbField = _util.lcfirst(fieldName.split(" ").join("")); 
+    //         if (!authors[rowNum-1]) { authors[rowNum-1] = {}; }
+    //         authors[rowNum-1][dbField] = $(formElem).val();
+    //     }
+    //     /**
+    //      * If option is checked, the form elem and the field name, @getCheckboxFieldName, 
+    //      * are sent to handler to be added to the formData obj.
+    //      */
+    //     function processCheckboxData(formElem) {                                    //console.log("valCheckboxData called for elem = %O, val = %s", formElem, formElem.checked)
+    //         var fieldName = getCheckboxFieldName(formElem);
+    //         if (formElem.checked) {
+    //             if (fieldName === "tags") { addTagsToFormData(formElem, fieldName); }
+    //         }  
+    //     }
+    //     /** Returns the lower-cased field name from the option's field container id. */
+    //     function getCheckboxFieldName(formElem) {
+    //         var fieldCntnr = formElem.parentElement.parentElement.parentElement.parentElement;
+    //         var fieldName = _util.lcfirst(fieldCntnr.id.split("_row")[0]);       //console.log("fieldName = ", fieldName); 
+    //         return fieldName;
+    //    }
+    //     /** Adds the tag to a tag's array in the main entity obj of formData. */
+    //     function addTagsToFormData(formElem, fieldName) {
+    //         var tag = formElem.id.split("_check")[0];
+    //         if (!formData[mainEntity][fieldName]) { formData[mainEntity][fieldName] = []; }
+    //         formData[mainEntity][fieldName].push(tag);
+    //     }
+    //     /**
+    //      * Processes fields where all that is required is to get the field name, 
+    //      * from the parent label, and the field value. If the value is not empty 
+    //      * @addFieldData is called to store the form data, else @isEmptyRequiredField
+    //      * is checked for invalid nulls and, if so, an error is shown to the user.
+    //      */
+    //     function processSimpleInputFields(formElem, fieldName, dbField) {                           //console.log("processSimpleInputFields for formElem = %O", formElem);
+    //         var fieldVal = $(formElem).val();  
+    //         if (fieldVal !== "") { addFieldData(formElem, fieldName, dbField, fieldVal);
+    //         } else { ifIsEmptyRequiredField(formElem, fieldName); }
+    //     }
+    //     /**
+    //      * Adds the field value, keyed under the server-ready field name, to the 
+    //      * appropriate entity object in formData.
+    //      */
+    //     function addFieldData(formElem, fieldName, dbField, fieldVal) {                  //console.log("addFieldDataToObj called for field = %s, val = %s", fieldName, fieldVal)
+    //         if (fieldName in crudParams.srcFields) { 
+    //             addFieldToFormData(dbField, fieldVal, mainEntity);
+    //         } else {
+    //             addDetailEntityFieldData(dbField, fieldVal); 
+    //         }
+    //     }
+    //     function addMainEntityFieldData(field, val) {
+    //         formData[mainEntity][field] = val;
+    //     }
+    //     /**
+    //      * Stores data from the detail entity fields, translating them as needed 
+    //      * into the correct properties for both entities, the main and the detail.
+    //      */
+    //     function addDetailEntityFieldData(field, val) {
+    //         var fieldTransMap = {
+    //             "publication": { 
+    //                 "title": { "source": "displayName", "publication": "displayName" },
+    //                 "publisher": { "source": "parentSource" }
+    //             },
+    //             "citation": { 
+    //                 "publication": { "source": "parentSource" },
+    //                 "citationText": { "source": "description", "citation": "fullText" },
+    //                 "title": { "source": "displayName", "citation": "displayName",
+    //                     "citation": "title" 
+    //                 }
+    //         }};
+    //         if (detailEntity in fieldTransMap) {
+    //             processFieldTranslation(field, val, fieldTransMap[detailEntity]);
+    //         } else {
+    //             addFieldToFormData(field, val, detailEntity);
+    //         }
+    //     }
+    //     /**
+    //      * If field is in translation map, @addTransFieldToFormData handles storing 
+    //      * the data, otherwise @addFieldToFormData does.
+    //      */
+    //     function processFieldTranslation(field, val, fieldTrans) {
+    //         if (field in fieldTrans) {  
+    //             addTransFieldToFormData(field, val, fieldTrans[field]);
+    //         } else {
+    //             addFieldToFormData(field, val, detailEntity);
+    //         }
+    //     }
+    //     /**
+    //      * Adds the field data under the correct entity's property name(s) to formData.
+    //      * Eg. 'citationText' becomes source's 'description' and citation's 'fullText'.
+    //      */
+    //     function addTransFieldToFormData(field, val, fieldTrans) {              //console.log("addToFormData %s, val = %s. trans = %O", field, val, fieldTrans);
+    //         for (var entity in fieldTrans) {            
+    //             formData[entity][fieldTrans[entity]] = val;
+    //         }
+    //     }
+    //     function addFieldToFormData(field, val, entity) {
+    //         formData[entity][field] = val;
+    //     }
+    //     /**
+    //      * After all input elements in the form have been processed, special case
+    //      * handling and post-processing of complex data can happen here. Ex: Authors,
+    //      * i.e. multi-input fields, are checked for empty required fields and added 
+    //      * to the form data object @valAuthorFields. 
+    //      */
+    //     function postProcessing() {
+    //         if (authors.length) { valAuthorFields(); }
+    //     }
+    //     /**
+    //      * For each author name row with data, checks to ensure the required field, 
+    //      * last name, has a value. If not, an error is shown to the user. The authors
+    //      * array is then added to the formData object.
+    //      */
+    //     function valAuthorFields() {
+    //         authors.forEach(function(authObj, idx) {
+    //             if (!authObj.lastName) {             
+    //                 crudFieldErrorHandler("Last Name", "emptyRequiredField", $('#auth_'+(idx+1)+'_errs')[0]);
+    //             }
+    //         });
+    //         formData[mainEntity].authors = authors;
+    //     }
+    // } /* End valAndProcessFormData */
+    // /**
+    //  * If field name is in the form config's required array, show an error on
+    //  * that field to the user: "Please fill out [fieldName]."
+    //  */
+    // function ifIsEmptyRequiredField(formElem, fieldName) {
+    //     if (crudParams.subForms[formLevel].confg.required.indexOf(fieldName) !== -1) {
+    //         crudFieldErrorHandler(fieldName, "emptyRequiredField");
+    //     }
+    // }
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
