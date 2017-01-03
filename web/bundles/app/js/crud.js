@@ -190,7 +190,7 @@ $(document).ready(function(){
             id: 'sub2-form', class: 'flex-col flex-wrap sub2-right'}); 
         var hdr = _util.buildElem("p", { "text": "New Publisher", "class": "sub-form-hdr" });
         var subForm = buildSubForm('publisher', {"Display Name": val}, "sub2");
-        subForm.push(buildFormBttns("Publisher", "sub2"));
+        subForm.push(buildFormBttns("Publisher", "sub2", "#Publisher-sel"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
         return { "value": "", "text": val };
@@ -381,8 +381,8 @@ $(document).ready(function(){
      * specific to their form container @getEventHandlers, and a left spacer that 
      * pushes the buttons to the bottom right of their form container.
      */
-    function buildFormBttns(entity, level) {
-        var events = getEventHandlers(entity, level);                           //console.log("events = %O", events);
+    function buildFormBttns(entity, level, parentElemId) {
+        var events = getEventHandlers(entity, level, parentElemId);             //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: "crud-submit", 
@@ -398,16 +398,23 @@ $(document).ready(function(){
      * Returns an object with 'submit' and 'cancel' events bound to the passed level's
      * form container.  
      */
-    function getEventHandlers(entity, level) {
+    function getEventHandlers(entity, level, parentElemId) {
         var idMap = {
             // "top": "#crud-main",
             "sub": "#sub-form",
             "sub2": "#sub2-form"
         };
-        return { submit: Function.prototype, cancel: exitForm.bind(null, idMap[level]) };
+        return { 
+            submit: Function.prototype, 
+            cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
+        };
     }
-    /** Removes the form container with the passed id. */
-    function exitForm(id) {
+    /** Removes the form container with the passed id and clears the combobox. */
+    function exitForm(id, formLevel, parentElemId) {            console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
+        var formLevels = ["top", "sub", "sub2"];
+        var parentLvl = formLevels[formLevels.indexOf(formLevel) - 1];
+        var selectized = crudParams.selectizeApi[parentLvl][parentElemId];  console.log("crudParams.selectizeApi = %O", crudParams.selectizeApi);
+        selectized.clear();
         $(id).remove();
     }
     /** Enables passed submit button */
