@@ -160,7 +160,7 @@ $(document).ready(function(){
             return { value: pubObj[name].toString(), text: name };
         });  
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-crud-sel"});
-        return buildFormRow("Publication", selElem, false, true);
+        return buildFormRow("Publication", selElem, "top", true);
     }
     /** When a publication is selected fill citation dropdown @initCitField.  */
     function onPubSelection(val) { 
@@ -244,7 +244,7 @@ $(document).ready(function(){
         var selElem = _util.buildSelectElem(
             [], {id: "Citation-sel", class: "lrg-crud-sel"}, onCitSelection)
         $(selElem).attr("disabled", true);
-        return buildFormRow("Citation Title", selElem, false, true);
+        return buildFormRow("Citation Title", selElem, "top", true);
     }
     /**
      * Fills the citation field combobox with all citations for the selected publication.
@@ -349,8 +349,8 @@ $(document).ready(function(){
      */
     function buildSubForm(entity, fieldVals, level) {
         var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
-        initSubFormCrudParams(entity, level, formConfg);
-        return getFormFieldRows(entity, formConfg, crudParams.fields.source, fieldVals, true);
+        initFormLevelParamsObj(entity, level, formConfg);
+        return getFormFieldRows(entity, formConfg, crudParams.fields.source, fieldVals, level);
     }
     /**
      * Returns a config object for the form of the selected source-type with the 
@@ -398,7 +398,7 @@ $(document).ready(function(){
      * Adds, to the global crudParams obj, the properties and confg that will be 
      * used throughout for generating, validating and submitting sub-form. 
      */
-    function initSubFormCrudParams(entity, level, formConfg) {                  //console.log("crudParams = %O", crudParams)
+    function initFormLevelParamsObj(entity, level, formConfg) {                 //console.log("crudParams = %O", crudParams)
         crudParams.subForms[entity] = level;
         crudParams.subForms[level] = {
             entity: entity,
@@ -457,7 +457,7 @@ $(document).ready(function(){
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(entity, formCnfg, dfltFields, fieldVals, isSubForm) {                   //console.log("  Building Form rows. arguemnts = %O", arguments);
+    function getFormFieldRows(entity, formCnfg, dfltFields, fieldVals, formLevel) {                   //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "textArea": buildTextArea, 
             "select": buildSelectElem, "checkbox": buildCheckboxInput, 
             "multiSelect": buildMultiSelectElem };
@@ -474,7 +474,7 @@ $(document).ready(function(){
             var rows = [];
             for (var field in dfltFields) {  
                 if (exclude === true || exclude.indexOf(field) !== -1) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, dfltFields, isSubForm));
+                rows.push(buildRow(field, dfltFields, formLevel));
             }
             return rows;
         }
@@ -482,7 +482,7 @@ $(document).ready(function(){
             var xtraFields = crudParams.subForms[formLevel].confg.add;
             var rows = [];
             for (var field in xtraFields) {                                     //console.log("      field = ", field);
-                rows.push(buildRow(field, xtraFields, isSubForm));
+                rows.push(buildRow(field, xtraFields, formLevel));
             }
             return rows;
         }
@@ -491,12 +491,12 @@ $(document).ready(function(){
          * and sends both to @buildFormRow, returning the completed row elem.
          * Sets the value for the field if it is in the passed 'fieldVals' obj. 
          */
-        function buildRow(field, fieldsObj, isSubForm) {
+        function buildRow(field, fieldsObj, formLevel) {
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
             var reqFields = crudParams.subForms[formLevel].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
-            return buildFormRow(_util.ucfirst(field), fieldInput, isSubForm, isReq);
+            return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq);
         }
     } /* End getFormFieldRows */
     function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
@@ -606,9 +606,9 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(fieldName, fieldInput, isSubForm, isReq) {
+    function buildFormRow(fieldName, fieldInput, formLevel, isReq) {
         var field = fieldName.split(' ').join('');
-        var rowClass = isSubForm ? 'sub-form-row' : 'form-row';
+        var rowClass = formLevel === "top" ? 'form-row' : 'sub-form-row';
         var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
