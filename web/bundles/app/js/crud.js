@@ -89,6 +89,7 @@ $(document).ready(function(){
      * crud form interface.
      * @param action - eg, Create, Edit.
      * @param subForms - Container for subform-specific params 
+     * @param formLevels - An array of the form level names/tags/prefixes/etc.
      * @param selectizeApi - Contains the selectize libray's api organized by 
      *    form-level and the select elem parent for each selectized combobox elem. 
      *     organized by form level and the parent select's id. 
@@ -99,23 +100,26 @@ $(document).ready(function(){
      *     root entities.
      */
     function initCrudParams(action) {
-        crudParams = {};
-        crudParams.action = action;
-        crudParams.subForms = {};
-        crudParams.selectizeApi = { "top": {}, "sub": {}, "sub2": {} };
-        crudParams.fields = {
-            "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
-                "Authors": "multiSelect" }
+        crudParams = {
+            action: action,
+            subForms: {},
+            formLevels: ["top", "sub", "sub2"],
+            selectizeApi: { "top": {}, "sub": {}, "sub2": {} },
+            fields: {
+                "source": { "Display Name": "text", "Description": "textArea", 
+                    "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+                    "Authors": "multiSelect" }
+            },
+            types: {
+                "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
+                "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
+                "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
+            },
+            records: {
+                "source": JSON.parse(localStorage.getItem('srcRcrds'))
+            }
         };
-        crudParams.types = {
-            "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
-            "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
-            "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
-        };
-        crudParams.records = {
-            "source": JSON.parse(localStorage.getItem('srcRcrds'))
-        };
+        initFormLevelParamsObj("interaction", "top", null);
     }
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
