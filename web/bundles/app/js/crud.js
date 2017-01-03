@@ -177,6 +177,7 @@ $(document).ready(function(){
         $(subFormContainer).append([hdr].concat(subForm));
         $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes("publication");
+        disableCombobox("#Publication-sel", "top");
         return { "value": "", "text": "Creating Publication..." };
     }
     /*-------------- Publisher Helpers ---------------------------------------*/
@@ -196,7 +197,7 @@ $(document).ready(function(){
         subForm.push(buildFormBttns("Publisher", "sub2", "#Publisher-sel"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
-        disableCombobox("#Publisher-sel", "sub2");
+        disableCombobox("#Publisher-sel", "sub");
         return { "value": "", "text": "Creating Publisher..." };
     }
 
@@ -230,6 +231,7 @@ $(document).ready(function(){
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
         $('#Authors_row').append(buildSubFormHtml(
             "author", "sub2", "left", "Authors", {"Display Name": val}, parentSelId));
+        disableCombobox(parentSelId, "sub");
         return { "value": "", "text": "Creating Author..." };
     }
     /*-------------- Citation Helpers --------------------------------------*/
@@ -280,6 +282,10 @@ $(document).ready(function(){
         $(subFormContainer).append([hdr].concat(subForm));
         return subFormContainer;
     }
+    /*------------------- Helper Methods --------------------------------------*/
+
+    /*------------------- Combobox (selectize) Methods -----------------------*/
+    /**
      * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
      * that allow users to search by typing and add new options not in the list-
      * by triggering a sub-form for that entity.
@@ -321,7 +327,17 @@ $(document).ready(function(){
             initSelectCombobox(confg, "sub");
         });
         crudParams.subForms[entity].selElems = [];
-    }
+    } 
+    function disableCombobox(selId, formLvl) {
+        var selectized = crudParams.selectizeApi[formLvl][selId];
+        selectized.disable();
+    }      
+    /** Reset the passed selectized element */ 
+    function clearCombobox(elem) {
+        elem.clear();
+        elem.updatePlaceholder();
+    }    
+    /*------------------- Form Builders --------------------------------------*/
     /** 
      * Builds all fields for sub-form and returns the completed row elems.
      * Also inits the crud params for the sub-form in the global crudParams obj.
@@ -416,12 +432,13 @@ $(document).ready(function(){
             cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
         };
     }
-    /** Removes the form container with the passed id and clears the combobox. */
+    /** Removes the form container with the passed id, clears and enables the combobox. */
     function exitForm(id, formLevel, parentElemId) {            console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
         var formLevels = ["top", "sub", "sub2"];
         var parentLvl = formLevels[formLevels.indexOf(formLevel) - 1];
         var selectized = crudParams.selectizeApi[parentLvl][parentElemId];  console.log("crudParams.selectizeApi = %O", crudParams.selectizeApi);
         selectized.clear();
+        selectized.enable();
         $(id).remove();
     }
     /** Enables passed submit button */
@@ -576,7 +593,6 @@ $(document).ready(function(){
     // function getEntityUrl(entityName, action) {
     //     return envUrl + entityName + "/" + action;
     // }
-    /*------------------- Form Builders --------------------------------------*/
     /**
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
