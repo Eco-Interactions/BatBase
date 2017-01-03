@@ -263,6 +263,20 @@ $(document).ready(function(){
     }
     /*------------------- Shared Methods --------------------------------------*/
     /**
+     * Builds and returns the subForm according to the passed params. 
+     * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
+     */
+    function buildSubFormHtml(formEntity, formLevel, frmStyleDir, field, fieldVals, pElemId) {
+        var formClass = frmStyleDir ? formLevel+'-'+frmStyleDir : "";
+        var subFormContainer = _util.buildElem('div', {
+            id: formLevel+'-form', class: 'flex-col flex-wrap '+formClass}); 
+        var hdr = _util.buildElem(
+            "p", { "text": "New "+_util.ucfirst(formEntity), "class": "sub-form-hdr" });
+        var subForm = buildSubForm(formEntity, fieldVals, formLevel);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, pElemId));
+        $(subFormContainer).append([hdr].concat(subForm));
+        return subFormContainer;
+    }
      * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
      * that allow users to search by typing and add new options not in the list-
      * by triggering a sub-form for that entity.
