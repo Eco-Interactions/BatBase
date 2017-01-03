@@ -177,15 +177,18 @@ $(document).ready(function(){
         $(subFormContainer).append([hdr].concat(subForm));
         $('form[name="crud"]').append(subFormContainer);
         initSubFormComboboxes("publication");
-        return { "value": "", "text": val };
+        return { "value": "", "text": "Creating Publication..." };
     }
     /*-------------- Publisher Helpers ---------------------------------------*/
     /**
      * When a user enters a new publisher into the combobox, a create-publisher
-     * form is built and appended to the publisher field row. An option object is 
-     * returned to be selected in the combobox
+     * form is built, appended to the publisher field row and an option object is 
+     * returned to be selected in the combobox. Unless there is already a sub2Form,
+     * where a message will be shown telling the user to complete the open sub2 form
+     * and the form init canceled.
      */
-    function initPublisherForm (val) {                                          console.log("Adding new publisher! val = %s", val);
+    function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
+        if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
         var subFormContainer = _util.buildElem('div', {
             id: 'sub2-form', class: 'flex-col flex-wrap sub2-right'}); 
         var hdr = _util.buildElem("p", { "text": "New Publisher", "class": "sub-form-hdr" });
@@ -193,7 +196,8 @@ $(document).ready(function(){
         subForm.push(buildFormBttns("Publisher", "sub2", "#Publisher-sel"));
         $(subFormContainer).append([hdr].concat(subForm));
         $('#Publisher_row').append(subFormContainer);
-        return { "value": "", "text": val };
+        disableCombobox("#Publisher-sel", "sub2");
+        return { "value": "", "text": "Creating Publisher..." };
     }
 
     /*-------------- Author Helpers ----------------------------------------*/
@@ -205,14 +209,13 @@ $(document).ready(function(){
         if (val === "" || parseInt(val) === NaN) { return; }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
         var parentFormEntity = crudParams.subForms.sub;
-        var selConfg = { 
-            name: "Author", id: "#Authors-sel"+cnt, 
-            change: onAuthSelection, add: initAuthForm 
-        };
+        var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
+                         change: onAuthSelection, add: initAuthForm };
+
         $("#Authors_sel-cntnr").append(
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
-        initSelectCombobox(selConfg);
+        initSelectCombobox(selConfg, "sub");
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
@@ -286,15 +289,19 @@ $(document).ready(function(){
             'pub': { name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
             'cit': { name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm }
         };
-        for (var selType in selMap) { initSelectCombobox(selMap[selType]); }
+        for (var selType in selMap) { initSelectCombobox(selMap[selType], "top"); }
     }
-    /** Inits the combobox, using 'selectize', according to the passed conifg. */
-    function initSelectCombobox(confg) {
+    /**
+     * Inits the combobox, using 'selectize', according to the passed conifg. 
+     * Stores each element's selectize object in the global crudParams.selectizeApi
+     * by form-level and the selectized elem's id.
+     */
+    function initSelectCombobox(confg, formLevel) {                             //console.log("formLevel = ", formLevel)
         $(confg.id).selectize({
             create: confg.add,
             onChange: confg.change,
             placeholder: 'Select ' + confg.name
-        });
+        });  
         crudParams.selectizeApi[formLevel][confg.id] = $(confg.id)[0].selectize;
     }
     /**
@@ -311,7 +318,7 @@ $(document).ready(function(){
         crudParams.subForms[entity].selElems.forEach(function(field) {          //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
-            initSelectCombobox(confg);
+            initSelectCombobox(confg, "sub");
         });
         crudParams.subForms[entity].selElems = [];
     }
