@@ -706,12 +706,12 @@ $(document).ready(function(){
         var fieldName, input;
         var elems = $(id)[0].children;   
         var formElems = {};
-        for (var i = 1; i < elems.length-1; i++) {     //console.log("elems[i] = %O", elems[i])
+        for (var i = 1; i < elems.length-1; i++) {                              //console.log("elems[i] = %O", elems[i])
             fieldName = _util.lcfirst(elems[i].children[1].children[0].innerText.trim().split(" ").join("")); 
             input = elems[i].children[1].children[1];
             if ($(input).data("valType") == "multiSelect") { getMultiSelectVals(fieldName, input); }
             if (input.value) { formElems[fieldName] = input.value; }
-        }                                                                       //console.log("formElems = %O", formElems);
+        }                                                                       
         submitFormVals(formLvl, formElems);
         /** Adds an array of selected values in the passed select container. */
         function getMultiSelectVals(fieldName, cntnr) {
@@ -724,10 +724,104 @@ $(document).ready(function(){
         }
     } /* End getFormValuesAndSubmit */
     /**
-     * Form submit handler calls @buildFormData to validate required fields have 
-     * values and return a json-ready object of form data to send to the server 
-     * @sendFormData.
+     * Builds a form data object @buildFormData. Sends it to the server @ajaxFormData
      */
+    function submitFormVals(formLvl, formVals) {  
+        var entity = crudParams.subForms[formLvl].entity;                       console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
+        var fieldTrans = getFieldTranslations(entity);
+        var formData = buildFormDataObj(entity, formVals);
+        ajaxFormData(formData);
+    }                
+    /**
+     * Returns a form data object with the server entity names' as keys for their 
+     * data, field-val, objects. Field translations are handled @addTransFormData. 
+     * If the passed entity is a detail entity for a 'parent' entity, eg Source or 
+     * Location, that entity is added to a 'type' field of the parent. 
+     */
+    function buildFormDataObj(entity, formVals) { 
+        var data = {}
+        var pEntity = getParentEntity(entity);
+        var parentFields = pEntity === false || getParentFields(pEntity);   
+        var fieldTrans = getFieldTranslations(entity);                          //console.log("buildFormDataObj. formVals = %O, fieldTrans = %O, parentFields = %O", formVals, fieldTrans, parentFields);
+        data[pEntity] = {};
+        data[entity] = {};
+
+        for (var field in formVals) {                                           //console.log("processing field = ", field)
+            if (fieldTrans && field in fieldTrans) { addTransFormData(field, formVals[field]); 
+            } else { addFormData(field, formVals[field]); }
+        }                                                                       //console.log("formData = %O", data);
+        if (pEntity) { data[pEntity][pEntity+"Type"] = entity; }    
+        return data;
+        /** Translates the passed field into it's server-ready equivalent. */
+        function addTransFormData(field, val) {
+            var transMap = fieldTrans[field];
+            for (var ent in transMap) { data[ent][transMap[ent]] = val; }
+        }
+        /** Adds the passed field and value to the appropriate entity data object. */
+        function addFormData(field, val) {
+            var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
+            data[ent][field] = val;
+        }
+    } /* End buildFormDataObj */
+    /**
+     * If the passed entity is a detail, child, entity, the parent entity name is returned.
+     */
+    function getParentEntity(entity) {
+        var parentEntities = {
+            "author": "source",         "citation": "source",
+            "publication": "source",    "publisher": "source",
+        };
+        return parentEntities[entity] || false;
+    }
+    /** Returns an array of the parent entity's field names. */
+    function getParentFields(parent) {
+        var parentFields = Object.keys(crudParams.fields[parent]);
+        return  parentFields.map(function(field) {
+            return _util.lcfirst(field.split(" ").join(""));
+        });
+    }
+    /** 
+     * Returns a object with the form's field names as keys for field translation objects
+     * with the appropraite entity name key and the field name translation. 
+     */
+    function getFieldTranslations(entity) {  
+        var fieldTrans = {
+            "publication": { 
+                "authors": { "source": "contributor" },
+                "publisher": { "source": "parentSource" }, 
+                "title": { "source": "displayName", "publication": "displayName" },
+            },
+            "citation": { 
+                "authors": { "source": "contributor" },
+                "citationText": { "source": "description", "citation": "fullText" },
+                "publication": { "source": "parentSource" },
+                "title": { "source": "displayName", "citation": "displayName",
+                    "citation": "title" },
+            },
+            "author": {
+                "displayName": { "source": "displayName", "author": "displayName" }
+            }
+        };
+        return fieldTrans[entity] || false;
+    }
+    function ajaxFormData(formData) {  console.log("ajaxFormData = %O", formData);
+        // body...
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // function valSrcCrud(e) {           console.log("valSrcCrud called. NoOp.")                                             
     //     // var formData = buildSrcFormData();
     //     // sendFormData(formData);
