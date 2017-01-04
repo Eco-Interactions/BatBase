@@ -621,7 +621,7 @@ $(document).ready(function(){
             "sub2": "#sub2-form"
         };
         return { 
-            submit: Function.prototype, 
+            submit: getFormValuesAndSubmit.bind(null, idMap[level], level), 
             cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
         };
     }
@@ -698,6 +698,31 @@ $(document).ready(function(){
         return $('#'+field+'_errs')[0];    
     }    
     /*----------------------- Validation ---------------------------------------------------------*/
+    /**
+     * Loops through all rows in the form with the passed id and builds an object of 
+     * filled field values keyed under server-ready field names to submit @submitFormVals.
+     */
+    function getFormValuesAndSubmit(id, formLvl) {
+        var fieldName, input;
+        var elems = $(id)[0].children;   
+        var formElems = {};
+        for (var i = 1; i < elems.length-1; i++) {     //console.log("elems[i] = %O", elems[i])
+            fieldName = _util.lcfirst(elems[i].children[1].children[0].innerText.trim().split(" ").join("")); 
+            input = elems[i].children[1].children[1];
+            if ($(input).data("valType") == "multiSelect") { getMultiSelectVals(fieldName, input); }
+            if (input.value) { formElems[fieldName] = input.value; }
+        }                                                                       //console.log("formElems = %O", formElems);
+        submitFormVals(formLvl, formElems);
+        /** Adds an array of selected values in the passed select container. */
+        function getMultiSelectVals(fieldName, cntnr) {
+            var vals = [];
+            var elems = cntnr.children;  
+            for (var i = 0; i <= elems.length-1; i+= 2) { 
+                if (elems[i].value) { vals.push(elems[i].value); }
+            }
+            formElems[fieldName] = vals;
+        }
+    } /* End getFormValuesAndSubmit */
     /**
      * Form submit handler calls @buildFormData to validate required fields have 
      * values and return a json-ready object of form data to send to the server 
