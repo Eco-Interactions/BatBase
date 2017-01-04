@@ -222,10 +222,9 @@ $(document).ready(function(){
      * to be selected in the combobox. Unless there is already a sub2Form, where 
      * a message will be shown telling the user to complete the open sub2 form
      * and the form init canceled.
-     * Note: The first author select doesn't have a number appended to it's id. 
      */
     function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
-        var authCnt = $("#Authors_sel-cntnr").data("cnt") === 1 ? "" : $("#Authors_sel-cntnr").data("cnt");
+        var authCnt = $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
         $('#Authors_row').append(buildSubFormHtml(
@@ -316,7 +315,7 @@ $(document).ready(function(){
         var formLvl = crudParams.subForms[entity];
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
-            "Authors": { name: "Authors", change: onAuthSelection, add: initAuthForm },
+            "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
         };
         crudParams.subForms[formLvl].selElems.forEach(function(field) {         //console.log("Initializing --%s-- select", field);
@@ -509,9 +508,9 @@ $(document).ready(function(){
      */
     function buildMultiSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
        var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
-       var selElem = buildSelectElem(entity, field);
+       var selElem = buildSelectElem(entity, field, 1);
        $(cntnr).data("cnt", 1);
-       $(selElem).data("valType", "multiSelect");
+       $(cntnr).data("valType", "multiSelect");
        $(cntnr).append(selElem);
        return cntnr;
     }
