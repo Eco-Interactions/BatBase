@@ -75,15 +75,7 @@ $(document).ready(function(){
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
     }
-/*------------------- Form Functions -------------------------------------------------------------*/
-    /**
-     * Fills the global cParams obj with the basic crud params @initCrudParams. 
-     * Init the crud form and append into the crud window @initCrudForm. 
-     */
-    function initCrudView() {
-        initCrudParams("create");
-        initCrudForm();
-    }       
+    /*--------------- CRUD Params Object -------------------------------------*/
     /**
      * Sets the global cParams obj with the params necessary throughout the 
      * crud form interface.
@@ -121,6 +113,29 @@ $(document).ready(function(){
         };
         initFormLevelParamsObj("interaction", "top", null, null);
     }
+    /**
+     * Adds the properties and confg that will be used throughout the code for 
+     * generating, validating, and submitting sub-form. 
+     */
+    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
+        cParams.subForms[entity] = level;
+        cParams.subForms[level] = {
+            entity: entity,
+            pSelElem: pSel,
+            selElems: [], 
+            reqElems: [],
+            confg: formConfg,
+        };      
+    }
+/*------------------- Form Functions -------------------------------------------------------------*/
+    /**
+     * Fills the global cParams obj with the basic crud params @initCrudParams. 
+     * Init the crud form and append into the crud window @initCrudForm. 
+     */
+    function initCrudView() {
+        initCrudParams("create");
+        initCrudForm();
+    }       
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
      * and a disabled citation title dropdown that will become active upon publication 
@@ -387,20 +402,6 @@ $(document).ready(function(){
                 "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
         };
         return fieldMap[type];
-    }
-    /**
-     * Adds, to the global cParams obj, the properties and confg that will be 
-     * used throughout for generating, validating and submitting sub-form. 
-     */
-    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
-        cParams.subForms[entity] = level;
-        cParams.subForms[level] = {
-            entity: entity,
-            pSelElem: pSel,
-            selElems: [], 
-            reqElems: [],
-            confg: formConfg,
-        };      
     }
     /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
