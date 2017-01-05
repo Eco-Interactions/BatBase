@@ -174,7 +174,7 @@ $(document).ready(function(){
         var opts = Object.keys(pubObj).sort().map(function(name) {
             return { value: pubObj[name].toString(), text: name };
         });  
-        selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-crud-sel"});
+        selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
     /** When a publication is selected fill citation dropdown @initCitField.  */
@@ -249,7 +249,7 @@ $(document).ready(function(){
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitField() {
         var selElem = _util.buildSelectElem(
-            [], {id: "Citation-sel", class: "lrg-crud-sel"}, onCitSelection)
+            [], {id: "Citation-sel", class: "lrg-field"}, onCitSelection)
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, "top", true);
     }
@@ -462,10 +462,10 @@ $(document).ready(function(){
     }
 
     function buildTextInput(entity, field) {                                    //console.log("            buildTextInput");
-        return _util.buildElem("input", { "type": "text", class:"txt-input" });
+        return _util.buildElem("input", { "type": "text", class:"sml-field" });
     }
     function buildTextArea(entity, field) {                                     //console.log("            buildTextArea");
-        return _util.buildElem("textarea");
+        return _util.buildElem("textarea", {class: "sml-field"});
     }
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -478,7 +478,7 @@ $(document).ready(function(){
         var fieldName = field.split(" ").join("_");
         var opts = getSelectOpts(entity, fieldName);                            //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
-        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-crud-sel'});
+        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-field'});
         cParams.subForms[formLvl].selElems.push(fieldName);
         $(sel).data("valType", "select");
         return sel;

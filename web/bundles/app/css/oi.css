@@ -559,7 +559,6 @@ a[role="button"], .tos-bttn {
 }
 .sub-form-hdr {
 	font-size: 1.1em;
-	/*text-decoration: underline;*/
 	text-align: center;
 	padding-top: 4px;
 	margin: 0 auto 8px auto;
@@ -576,7 +575,7 @@ a[role="button"], .tos-bttn {
 }
 .sub-form-row {
 	padding: .2em .75em .3em  .75em;
-	width: 400px;
+	/*width: 400px;*/
 }
 .row-errors {
 	color: red;
@@ -593,23 +592,22 @@ a[role="button"], .tos-bttn {
 	margin: 0;
 	font-size: .95em;
 }
-.lrg-crud-sel {
+.xlrg-field {
+	width: 655px;
+}
+.lrg-field {
 	width: 333px;
 }
-.sml-crud-sel {
+.sml-field {
 	width: 255px;
+}
+.crud-form textarea {
+	height: 55px;
 }
 .crud-form label {
 	font-size: 1em;
 	padding: 9px 0 2px 0;
 	width: 122px;
-}
-.txt-input {
-	width: 255px;
-}
-.crud-form textarea {
-	height: 55px;
-	width: 255px
 }
 .bttn-cntnr {
 	align-self: flex-end;
