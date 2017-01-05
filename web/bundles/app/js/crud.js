@@ -117,11 +117,11 @@ $(document).ready(function(){
      * Adds the properties and confg that will be used throughout the code for 
      * generating, validating, and submitting sub-form. 
      */
-    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
+    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
         cParams.subForms[entity] = level;
         cParams.subForms[level] = {
             entity: entity,
-            pSelElem: pSel,
+            pSelElemId: pSel,
             selElems: [], 
             reqElems: [],
             confg: formConfg,
@@ -267,6 +267,7 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubRcrd) {
+        if (!pubRcrd) { return []; }
         return pubRcrd.childSources.map(function(citId) {
             return { value: citId, text: cParams.records.source[citId].displayName };
         });
@@ -316,7 +317,7 @@ $(document).ready(function(){
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
         };
-        cParams.subForms[formLvl].selElems.forEach(function(field) {         //console.log("Initializing --%s-- select", field);
+        cParams.subForms[formLvl].selElems.forEach(function(field) {            //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg, "sub");
@@ -324,7 +325,7 @@ $(document).ready(function(){
         cParams.subForms[formLvl].selElems = [];
     } 
     function disableFormParentSelectElem(selElemId, formLevel) {
-        disableCombobox(selElemId, cParams.formLevels[cParams.formLevels.indexOf(formLevel)-1]);
+        disableCombobox(selElemId, getNextFormLevel("parent", formLevel));
     }
     function disableCombobox(selId, formLvl) {                                  //console.log("selId = %s, lvl = %s", selId, formLvl)
         var selectized = cParams.selectizeApi[formLvl][selId];
@@ -460,10 +461,10 @@ $(document).ready(function(){
         return order;
     }
 
-    function buildTextInput(entity, field) {                                           //console.log("            buildTextInput");
+    function buildTextInput(entity, field) {                                    //console.log("            buildTextInput");
         return _util.buildElem("input", { "type": "text", class:"txt-input" });
     }
-    function buildTextArea(entity, field) {                                            //console.log("            buildTextArea");
+    function buildTextArea(entity, field) {                                     //console.log("            buildTextArea");
         return _util.buildElem("textarea");
     }
     /**
@@ -510,7 +511,7 @@ $(document).ready(function(){
      * be reaplced inline upon selection. Either with an existing Author's name, 
      * or the Author create form when the user enters a new Author's name. 
      */
-    function buildMultiSelectElem(entity, field) {                                   //console.log("entity = %s. field = ", entity, field);
+    function buildMultiSelectElem(entity, field) {                              //console.log("entity = %s. field = ", entity, field);
        var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
        var selElem = buildSelectElem(entity, field, 1);
        $(cntnr).data("cnt", 1);
@@ -602,7 +603,7 @@ $(document).ready(function(){
      * pushes the buttons to the bottom right of their form container.
      */
     function buildFormBttns(entity, level, parentElemId) {
-        var events = getBttnEvents(entity, level, parentElemId);             //console.log("events = %O", events);
+        var events = getBttnEvents(entity, level, parentElemId);                //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: level + "_submit", 
@@ -633,7 +634,7 @@ $(document).ready(function(){
      * Removes the form container with the passed id, clears and enables the combobox,
      * and contextually enables to parent form's submit button @ifParentFormValid. 
      */
-    function exitForm(id, formLevel, parentElemId) {                            //console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
+    function exitForm(id, formLevel, parentElemId) {                            //  console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
         var parentLvl = getNextFormLevel('parent', formLevel);
         var selectized = cParams.selectizeApi[parentLvl][parentElemId];      
         selectized.clear();
@@ -722,11 +723,11 @@ $(document).ready(function(){
     /**
      * Builds a form data object @buildFormData. Sends it to the server @ajaxFormData
      */
-    function submitFormVals(formLvl, formVals) {  
-        var entity = cParams.subForms[formLvl].entity;                       console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
+    function submitFormVals(formLvl, formVals) {                        
+        var entity = cParams.subForms[formLvl].entity;                          //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
         var fieldTrans = getFieldTranslations(entity);
         var formData = buildFormDataObj(entity, formVals);
-        ajaxFormData(formData);
+        ajaxFormData(formData, formLvl);
     }                
     /**
      * Returns a form data object with the server entity names' as keys for their 
@@ -800,9 +801,36 @@ $(document).ready(function(){
         };
         return fieldTrans[entity] || false;
     }
-    function ajaxFormData(formData) {  console.log("ajaxFormData = %O", formData);
-        // body...
+
+    /*------------- AJAX -----------------------------------------------------*/
+    /** Sends the passed form data object via ajax to the appropriate controller. */
+    function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
+        var stubData = {};
+        stubData[cParams.subForms[formLvl].entity] = "123456";
+        cParams.ajaxFormLvl = formLvl;
+        // sendAjaxQuery(dataPkg, url, successCb);
+        window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
     }
+    /** Returns the full url for the passed entity and action.  */
+    function getEntityUrl(entityName, action) {
+        return envUrl + entityName + "/" + action;
+    }
+    /**
+     * Ajax success callback. Exit's the successfully submitted form, adds and 
+     * selects an option with the new entities id (val) and display name (text).
+     * Potential format for response: {[pEntity] : {[formEntity] => [id]} }
+     */
+    function formSubmitSucess(data, textStatus, jqXHR) {                        //console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+        var formLvl = cParams.ajaxFormLvl;
+        var pFormLvl = getNextFormLevel("parent", formLvl);
+        var formSelId = cParams.subForms[formLvl].pSelElemId;  
+        var selElemApi = cParams.selectizeApi[pFormLvl][formSelId]; 
+
+        exitForm("#"+formLvl+"-form", formLvl, formSelId); 
+        selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
+        selElemApi.addItem("123456");
+    }
+    
 
 
 
@@ -813,11 +841,7 @@ $(document).ready(function(){
 
 
 
-
-
-
-
-
+ 
 /*--------------------- Content Block WYSIWYG --------------------------------*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
