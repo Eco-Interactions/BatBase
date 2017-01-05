@@ -119,7 +119,7 @@ $(document).ready(function(){
                 "source": JSON.parse(localStorage.getItem('srcRcrds'))
             }
         };
-        initFormLevelParamsObj("interaction", "top", null);
+        initFormLevelParamsObj("interaction", "top", null, null);
     }
     /**
      * Inits the interaction form with only two elements- a publication dropdown 
@@ -320,14 +320,30 @@ $(document).ready(function(){
         elem.clear();
         elem.updatePlaceholder();
     }    
-    /*------------------- Form Builders --------------------------------------*/
+    /*------------------- Form Builders --------------------------------------*/    
+    /**
+     * Builds and returns the subForm according to the passed params. 
+     * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
+     */
+    function buildSubFormHtml(formEntity, formLevel, formClasses, fieldVals, selElemId) {
+        var subFormContainer = _util.buildElem('div', {
+            id: formLevel+'-form', class: formClasses + ' flex-wrap'}); 
+        var hdr = _util.buildElem(
+            "p", { "text": "New "+_util.ucfirst(formEntity), "class": "sub-form-hdr" });
+        var subForm = buildSubForm(formEntity, fieldVals, formLevel, selElemId);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, selElemId));
+        $(subFormContainer).append([hdr].concat(subForm));
+        cParams.subForms[formLevel].pSelElemId = selElemId;
+        disableFormParentSelectElem(selElemId, formLevel);
+        return subFormContainer;
+    }
     /** 
      * Builds all fields for sub-form and returns the completed row elems.
      * Also inits the crud params for the sub-form in the global cParams obj.
      */
-    function buildSubForm(entity, fieldVals, level) {
+    function buildSubForm(entity, fieldVals, level, pSel) {
         var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
-        initFormLevelParamsObj(entity, level, formConfg);
+        initFormLevelParamsObj(entity, level, pSel, formConfg);
         return getFormFieldRows(entity, formConfg, cParams.fields.source, fieldVals, level);
     }
     /**
@@ -376,10 +392,11 @@ $(document).ready(function(){
      * Adds, to the global cParams obj, the properties and confg that will be 
      * used throughout for generating, validating and submitting sub-form. 
      */
-    function initFormLevelParamsObj(entity, level, formConfg) {                 //console.log("crudParams = %O", crudParams)
+    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
         cParams.subForms[entity] = level;
         cParams.subForms[level] = {
             entity: entity,
+            pSelElem: pSel,
             selElems: [], 
             reqElems: [],
             confg: formConfg,
