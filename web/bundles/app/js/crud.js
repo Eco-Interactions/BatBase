@@ -188,7 +188,7 @@ $(document).ready(function(){
      * returned and thus selected in the combobox
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
-        $('#Publication_row').append(buildSubFormHtml(
+        $('form[name="crud"]').append(initSubForm(
             "publication", "sub", "flex-row", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
@@ -205,7 +205,7 @@ $(document).ready(function(){
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
-        $('#Publisher_row').append(buildSubFormHtml(
+        $('#Publisher_row').append(initSubForm(
             "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
         enableSubmitBttn("#sub2_submit");
         disableSubmitBttn("#sub_submit");
@@ -240,7 +240,7 @@ $(document).ready(function(){
         var authCnt = $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
-        $('#Authors_row').append(buildSubFormHtml(
+        $('#Authors_row').append(initSubForm(
             "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
         disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Author..." };
@@ -273,7 +273,7 @@ $(document).ready(function(){
         });
     }
     function onCitSelection(val) {  
-        if (val === "") { return; }  console.log("cit selection = ", parseInt(val));
+        if (val === "") { return; }                                             console.log("cit selection = ", parseInt(val));
     }
     function initCitForm(val) {  console.log("Adding new cit! val = %s", val);
         // body...
@@ -341,7 +341,7 @@ $(document).ready(function(){
      * Builds and returns the subForm according to the passed params. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function buildSubFormHtml(formEntity, formLevel, formClasses, fieldVals, selElemId) {
+    function initSubForm(formEntity, formLevel, formClasses, fieldVals, selElemId) {
         var subFormContainer = _util.buildElem('div', {
             id: formLevel+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
@@ -484,15 +484,20 @@ $(document).ready(function(){
         return sel;
     }
     /** Returns and array of options for the passed field type. */
-    function getSelectOpts(entity, field) {                                     //console.log("getSelectOpts. entity = %s, field = %s", entity, field);
+    function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
-            "publication": { 
-                "Authors": buildOptsObj(JSON.parse(localStorage.getItem('authors'))),
-                "Publication_Type": getTypeOpts('publication'),
-                "Publisher": buildOptsObj(JSON.parse(localStorage.getItem('publishers'))) },
-            "citation": { "Citation_Type": getTypeOpts('citation') },
+            "Authors": [ getOptsFromStoredData, 'authors'],
+            "Citation_Type": [ getTypeOpts, 'citation'],
+            "Publication_Type": [ getTypeOpts, 'publication'],
+            "Publisher": [ getOptsFromStoredData, 'publishers'],
         };
-        return optMap[entity][field];
+        var getOpts = optMap[field][0];
+        var fieldKey = optMap[field][1];
+        return getOpts(fieldKey);
+    }
+    /** Builds options out of a stored entity collection object. */
+    function getOptsFromStoredData(prop) {  console.log("prop = ", prop)
+        return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
     }
     /** Builds options out of the entity's types array */
     function getTypeOpts(entityType) {
