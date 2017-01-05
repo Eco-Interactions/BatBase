@@ -116,7 +116,7 @@ class Source
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
-
+     *
      * A collection of all Authors that contributed to a source work.
      */
     private $contributors;

@@ -2504,11 +2504,6 @@
 			data: JSON.stringify(dataPkg)
 		});
 	}
-	/**
-	 * Stores reference objects for posted entities with each record's temporary 
-	 * reference id and the new database id.     
-	 * Interactions are sent in sets of 1000, so the returns are collected in an array.
-	 */
 	function dataSubmitSucess(data, textStatus, jqXHR) { 
 		console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
 	}
