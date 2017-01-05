@@ -176,7 +176,6 @@ $(document).ready(function(){
         $('#Publication_row').append(buildSubFormHtml(
             "publication", "sub", "flex-row", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
-        disableCombobox("#Publication-sel", "top");
         return { "value": "", "text": "Creating Publication..." };
     }
     /*-------------- Publisher Helpers ---------------------------------------*/
@@ -193,7 +192,6 @@ $(document).ready(function(){
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
         $('#Publisher_row').append(buildSubFormHtml(
             "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
-        disableCombobox("#Publisher-sel", "sub");
         enableSubmitBttn("#sub2_submit");
         disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Publisher..." };
@@ -229,7 +227,6 @@ $(document).ready(function(){
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
         $('#Authors_row').append(buildSubFormHtml(
             "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
-        disableCombobox(parentSelId, "sub");
         disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Author..." };
     }
@@ -311,6 +308,9 @@ $(document).ready(function(){
         });
         cParams.subForms[formLvl].selElems = [];
     } 
+    function disableFormParentSelectElem(selElemId, formLevel) {
+        disableCombobox(selElemId, cParams.formLevels[cParams.formLevels.indexOf(formLevel)-1]);
+    }
     function disableCombobox(selId, formLvl) {                                  //console.log("selId = %s, lvl = %s", selId, formLvl)
         var selectized = cParams.selectizeApi[formLvl][selId];
         selectized.disable();
