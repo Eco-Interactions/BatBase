@@ -532,6 +532,7 @@ a[role="button"], .tos-bttn {
 	padding: 25px 25px 75px 25px;
 	height: 488px;
 	overflow: scroll;
+	postion: absolute;
 }
 /* -- Form Styles -- */
 .crud-form {
@@ -547,42 +548,50 @@ a[role="button"], .tos-bttn {
 #sub2-form {
 	border: 1px solid grey;
 	border-radius: 5px;
-    width: 408px;
+    padding: 5px;
     margin-top: .5em;
 }
 .sub2-left {
-    margin: 4px 0 0 11px;
+	position: relative;
+	left: 15px;
 }
 .sub2-right {
 	position: relative;
-	right: 33px;
+	right: 15px;
 }
 .sub-form-hdr {
 	font-size: 1.1em;
 	text-align: center;
 	padding-top: 4px;
 	margin: 0 auto 8px auto;
+	align-self: center;
 }
-#sub-form p, #sub-form>.bttn-cntnr {
-	width: 804px;
-}
-#sub2-form p, #sub2-form>.bttn-cntnr  {
-	width: 404px;
+form[name="crud"] p, form[name="crud"] .bttn-cntnr {
+	width: 100%;
 }
 .form-row {
 	padding: .2em .75em .3em  .75em;
 	width: 470px;
+	margin-right: 1em;
 }
-.sub-form-row {
+.field-row {
+	justify-content: space-between;
+}
+.sub-row {
 	padding: .2em .75em .3em  .75em;
-	/*width: 400px;*/
+	width: 400px;
+}
+.sub2-row {
+	padding: .2em .75em .3em  .75em;
+	width: 372px;
+}
+.long-sub-row {
+	padding: .2em .75em .3em  .75em;
+	width: 802px;
 }
 .row-errors {
 	color: red;
 	font-size: .9em;
-}
-.field-row {
-	justify-content: space-between;
 }
 .required:after {
   content: "*";
@@ -598,8 +607,11 @@ a[role="button"], .tos-bttn {
 .lrg-field {
 	width: 333px;
 }
-.sml-field {
+.med-field {
 	width: 255px;
+}
+.sml-field {
+	width: 200px;
 }
 .crud-form textarea {
 	height: 55px;

@@ -35,9 +35,10 @@
             var elemProps = [ "id", "class", "title", "text"];
             var transProps = { "class": "className", "text": "textContent" };
             elemProps.forEach(function(orgProp) {
-               if (orgProp in attrs) { 
-                prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
-                elem[prop] = attrs[orgProp]; } 
+                if (orgProp in attrs) { 
+                    prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
+                    elem[prop] = attrs[orgProp]; 
+                } 
             });
         }
         function addAttrProps() {
