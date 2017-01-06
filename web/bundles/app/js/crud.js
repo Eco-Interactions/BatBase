@@ -91,7 +91,7 @@ $(document).ready(function(){
      * @param records - An object of all records, with id keys, for each of the 
      *     root entities.
      */
-    function initCrudParams(action) {
+    function initCrudParams(action) {                                           //console.log("####cPs = %O", cParams)
         cParams = {
             action: action,
             subForms: {},
@@ -264,6 +264,7 @@ $(document).ready(function(){
         sel.clearOptions();
         sel.addOption(citOpts);
         sel.enable();
+        sel.focus();
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubRcrd) {
@@ -275,8 +276,11 @@ $(document).ready(function(){
     function onCitSelection(val) {  
         if (val === "") { return; }                                             console.log("cit selection = ", parseInt(val));
     }
-    function initCitForm(val) {  console.log("Adding new cit! val = %s", val);
-        // body...
+    function initCitForm(val) {                                                 console.log("Adding new cit! val = %s", val);
+        $('form[name="crud"]').append(initSubForm(
+            "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
+         initSubFormComboboxes("citation");
+        return { "value": "", "text": "Creating Citation..." };
     }
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
@@ -391,12 +395,12 @@ $(document).ready(function(){
                     "LinkUrl", "LinkText"]
             },
             "citation": {
-                "add": { "Publication": "text", "Title": "text", "Volume": "text", 
-                    "Issue": "text", "Pages": "text", "Tags": "checkbox", 
-                    "Citation Text": "textArea", "Citation Type": "select"},
+                "add": { "Title": "text", "Volume": "text", 
+                    "Issue": "text", "Pages": "text", "Tags": "tags", 
+                    "Citation Text": "fullTextArea", "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
-                "required": ["Publication", "Citation Text", "Citation Type"],
-                "order": ["CitationType", "CitationText", "Publication", "Title",    
+                "required": ["Title", "Publication", "Citation Text", "Citation Type"],
+                "order": ["CitationText", "Title", "CitationType",    
                     "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
                     "Tags", "Authors" ]
             },
@@ -457,8 +461,9 @@ $(document).ready(function(){
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
             var reqFields = cParams.subForms[formLevel].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
+            var rowClass = fieldsObj[field] === "fullTextArea" ? "long-sub-row" : "";
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
-            return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq);
+            return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq, rowClass);
         }
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
@@ -478,7 +483,7 @@ $(document).ready(function(){
     function buildTextArea(entity, field) {                                     
         return _util.buildElem("textarea", {class: "med-field" });
     }
-    function buildLongtextArea(entity, field) {
+    function buildLongTextArea(entity, field) {
         return _util.buildElem("textarea", {class: "xlrg-field"});
     }
     /**
@@ -490,9 +495,9 @@ $(document).ready(function(){
     function buildSelectElem(entity, field, cnt) {                                   
         var formLvl = cParams.subForms[entity];
         var fieldName = field.split(" ").join("_");
-        var opts = getSelectOpts(entity, fieldName);                            //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
+        var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
-        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'sml-field'});
+        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'med-field'});
         cParams.subForms[formLvl].selElems.push(fieldName);
         $(sel).data("valType", "select");
         return sel;
@@ -511,7 +516,7 @@ $(document).ready(function(){
         return getOpts(fieldKey);
     }
     /** Builds options out of a stored entity collection object. */
-    function getOptsFromStoredData(prop) {  console.log("prop = ", prop)
+    function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
         return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
     }
     /** Builds options out of the entity's types array */
@@ -555,9 +560,10 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(fieldName, fieldInput, formLevel, isReq) {
+    function buildFormRow(fieldName, fieldInput, formLevel, isReq, rowClss) {
+        var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
+        var rowClass = rowClasses[formLevel] + " " + rowClss;
         var field = fieldName.split(' ').join('');
-        var rowClass = formLevel === "top" ? 'form-row' : 'sub-form-row';
         var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
