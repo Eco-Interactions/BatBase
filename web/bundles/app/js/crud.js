@@ -293,18 +293,26 @@ $(document).ready(function(){
         for (var selType in selMap) { initSelectCombobox(selMap[selType], "top"); }
     }
     /**
-     * Inits the combobox, using 'selectize', according to the passed conifg. 
+     * Inits the combobox, using 'selectize', according to the passed config. 
      * Stores each element's selectize object in the global cParams.selectizeApi
      * by form-level and the selectized elem's id.
      */
-    function initSelectCombobox(confg, formLevel) {                             //console.log("formLevel = ", formLevel)
-        $(confg.id).selectize({
+    function initSelectCombobox(confg, formLevel) {                             //console.log("initSelectCombobox. CONFG = %O. formLevel = ", confg, formLevel)
+        var options = {
             create: confg.add,
             onChange: confg.change,
             placeholder: 'Select ' + confg.name
-        });  
+        };
+        if (confg.options) { addAdditionalOptions(); }
+        $(confg.id).selectize(options);  
         cParams.selectizeApi[formLevel][confg.id] = $(confg.id)[0].selectize;
-    }
+        /** All non-standard options are added to this 'options' prop. */ 
+        function addAdditionalOptions() {
+            for (var opt in confg.options) {
+                options[opt] = confg.options[opt];
+            }
+        }
+    } /* End initSelectCombobox */
     /**
      * Inits 'selectize' for each select elem in the subForm's 'selElems' array
      * according to the 'selMap' config. Empties array after intializing.
@@ -316,6 +324,9 @@ $(document).ready(function(){
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
+            "Tags":  { name: "Tag", change: false, add: false, 
+                "options": { "delimiter": ",", "maxItems": null, "persist": false }},
+            "Citation_Type": { name: "Citation Type", change: false, add: false },
         };
         cParams.subForms[formLvl].selElems.forEach(function(field) {            //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
