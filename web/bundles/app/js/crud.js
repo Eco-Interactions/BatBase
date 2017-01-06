@@ -420,9 +420,9 @@ $(document).ready(function(){
      * Returns a container div with the rows ready to be appended to the form window.
      */
     function getFormFieldRows(entity, formCnfg, dfltFields, fieldVals, formLevel) {                   //console.log("  Building Form rows. arguemnts = %O", arguments);
-        var buildFieldType = { "text": buildTextInput, "textArea": buildTextArea, 
-            "select": buildSelectElem, "checkbox": buildCheckboxInput, 
-            "multiSelect": buildMultiSelectElem };
+        var buildFieldType = { "text": buildTextInput, "tags": buildSelectElem, 
+            "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
+            "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -472,11 +472,14 @@ $(document).ready(function(){
         return order;
     }
 
-    function buildTextInput(entity, field) {                                    //console.log("            buildTextInput");
-        return _util.buildElem("input", { "type": "text", class:"sml-field" });
+    function buildTextInput(entity, field) {                         
+        return _util.buildElem("input", { "type": "text", class: "med-field" });
     }
-    function buildTextArea(entity, field) {                                     //console.log("            buildTextArea");
-        return _util.buildElem("textarea", {class: "sml-field"});
+    function buildTextArea(entity, field) {                                     
+        return _util.buildElem("textarea", {class: "med-field" });
+    }
+    function buildLongtextArea(entity, field) {
+        return _util.buildElem("textarea", {class: "xlrg-field"});
     }
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -501,6 +504,7 @@ $(document).ready(function(){
             "Citation_Type": [ getTypeOpts, 'citation'],
             "Publication_Type": [ getTypeOpts, 'publication'],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
+            "Tags": [ getTagOpts, 'citation' ],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -523,6 +527,18 @@ $(document).ready(function(){
         });    
     }
     /**
+     * Returns an array of options objects for tags of the passed entity.
+     * Note: Hardcoded temporarily. 
+     */
+    function getTagOpts(entity) {
+        var tags = {
+            "citation": ["Secondary"],
+        };
+        return tags[entity].map(function(tag) {
+            return { "value": tag, "text": tag };
+        });
+    }
+    /**
      * Creates a select dropdown field wrapped in a div container that will
      * be reaplced inline upon selection. Either with an existing Author's name, 
      * or the Author create form when the user enters a new Author's name. 
@@ -535,32 +551,6 @@ $(document).ready(function(){
        $(cntnr).append(selElem);
        return cntnr;
     }
-    /**
-     * Returns a div containing a checkbox, span-wrapped with associated label, 
-     * for each of the hard-coded tags in the opts-obj. NOTE: Only citations and 
-     * interactions have tags currently. Eventually tags will be pulled from the server.
-     */
-    function buildCheckboxInput(entity) {                                       //console.log("            entity = %s buildCheckboxInput", entity);
-        // var opts = { "citation": ["Secondary"] }; 
-        // var optCntnr = _util.buildElem("div", { "class": "flex-grow form-input" });
-        // opts[entity].forEach(function(opt) {
-        //     $(optCntnr).append(buildOptsElem(opt));
-        // });
-        // return optCntnr;
-    }
-    /**
-     * Builds the checkbox elem and it's label. Adds a valType data property for 
-     * use during validation.
-     */
-    // function buildOptsElem(opt) {
-    //     var span = document.createElement("span");
-    //     var input = _util.buildElem("input", { "type": "checkbox", id: opt+"_check"});
-    //     var lbl = _util.buildElem("label", { "text": opt, "class": "checkbox-lbl" });
-    //     $(input).data("valType", "checkbox");
-    //     lbl.htmlFor = opt+"_check";
-    //     $(span).append([input, lbl]);
-    //     return span;
-    // }
     /**
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
