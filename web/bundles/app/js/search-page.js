@@ -650,15 +650,16 @@
 		}
 	}
     /**
-     * Stores location records and the topmost-region location ids. @buildLocTree 
-     * Builds a tree of location data with regions at the top level, and sub-regions,
-     * countries, areas, and points as nested children.
+     * Stores location records by id, an array of top-region ids and all country 
+     * names by id. Builds a tree of location data with regions at the top level, 
+     * and sub-regions, countries, areas, and points as nested children @buildLocTree.
      */
-	function storeLocs(data) {													console.log("location data recieved. %O", data);
-		_util.populateStorage('locRcrds', JSON.stringify(data.locRcrds));
-		_util.populateStorage('topRegions', JSON.stringify(data.topRegions));
-		rcrdsById = data.locRcrds;   
-		buildLocTreeAndGrid(data.topRegions);
+	function storeLocs(data) {												console.log("location data recieved. %O", data);
+        _util.populateStorage('locRcrds', JSON.stringify(data.locRcrds));
+        _util.populateStorage('topRegions', JSON.stringify(data.topRegions));
+	    _util.populateStorage('countries', JSON.stringify(data.countries));
+	    rcrdsById = data.locRcrds;   
+	    buildLocTreeAndGrid(data.topRegions);
 	}
     function buildLocTreeAndGrid(topLocs) {
         buildLocTree(topLocs);
@@ -936,7 +937,7 @@
 	}
 	function seperateAndStoreSrcData(dataObj) {						            //console.log("~~~Source data recieved. %O", dataObj);
         var data = dataObj.srcData;
-        var srcData = getSrcData(data);                                         //console.log("srcData = %O", srcData);
+        var srcData = seperateSrcData(data);                                         //console.log("srcData = %O", srcData);
         _util.populateStorage('srcTypes', JSON.stringify(data.srcTypes));
         _util.populateStorage('citTypes', JSON.stringify(data.citation.types));
         _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
@@ -955,7 +956,7 @@
      * NOTE: Sources have two domains, i.e. types of 'tree' data: 
      * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
-    function getSrcData(data) {                                                 //console.log("srcData = %O", data);
+    function seperateSrcData(data) {                                                 //console.log("srcData = %O", data);
         var curRcrd;
         var srcData = { 
             author: { rcrds: {}, names: {} }, 
@@ -971,7 +972,7 @@
             });
         }
         return srcData; 
-    } /* End getSrcData */
+    } /* End seperateSrcData */
     
 	/**
 	 * All source records are stored in 'rcrdsById'. Builds the source domain select 

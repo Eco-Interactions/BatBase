@@ -145,7 +145,8 @@ class SearchController extends Controller
     }
 /**------------------------Search By Location---------------------------------*/
     /**
-     * Returns Location Data organized by ID
+     * Returns Location Records organized by ID, an array of top-region ids, and 
+     * all country names by id.
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
@@ -158,6 +159,7 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $locDataById = new \stdClass;
         $topRegions = [];
+        $countries = [];
         /** Add all interactions with no location under one "Unspecified" top region. */
         $unspecifiedLocId = 999;
         $locDataById->$unspecifiedLocId = $this->getUnspecifiedIntRcrds($em);
@@ -171,12 +173,14 @@ class SearchController extends Controller
             $locId = $locEntity->getId(); 
             if ($locEntity->getParentLoc() === null) {  /** Only top regions are handled here */
                 array_push($topRegions, $locId);
-                $locDataById->$locId = $this->getLocationData($locEntity, $locDataById);
+                $locDataById->$locId = $this
+                    ->getLocationData($locEntity, $locDataById, $countries);
             }
         }
         $response = new JsonResponse();
         $response->setData(array(
-            'locRcrds' => $locDataById, 'topRegions' => $topRegions               
+            'locRcrds' => $locDataById, 'topRegions' => $topRegions, 
+            'countries' => $countries            
         ));
 
         return $response;
@@ -184,7 +188,7 @@ class SearchController extends Controller
     /**
      * Builds and returns Location Data object.
      */
-    private function getLocationData($locEntity, &$locDataById)
+    private function getLocationData($locEntity, &$locDataById, &$countries)
     {
         $data = new \stdClass; 
 
@@ -201,7 +205,7 @@ class SearchController extends Controller
         $data->locationType = $locEntity->getLocationType()->getName();
 
         $data->habitatType = $this->getHabType($locEntity);
-        $data->childLocs = $this->getChildLocationData($locEntity, $locDataById);
+        $data->childLocs = $this->getChildLocationData($locEntity, $locDataById, $countries);
         $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
         
         $parentLoc = $locEntity->getParentLoc();
@@ -223,17 +227,20 @@ class SearchController extends Controller
     }
     /**
      * Returns an object keyed with child location descriptions and their data.
+     * Adds all country locations to the return $countries array.
      */
-    private function getChildLocationData($parentLoc, &$locDataById)
+    private function getChildLocationData($parentLoc, &$locDataById, &$countries)
     {
         $children = [];
         $childLocs = $parentLoc->getChildLocs();  
 
         foreach ($childLocs as $childLoc) {
-            $childId = $childLoc->getId();
+            $childId = $childLoc->getId();  //print("\nlocType = ".$childLoc->getLocationType());
             array_push($children, $childId);
-
-            $locDataById->$childId = $this->getLocationData($childLoc, $locDataById);
+            if ($childLoc->getLocationType()->getId() === 2) {
+                $countries = array_merge($countries, [ $childId => $childLoc->getDisplayName() ]); 
+            }
+            $locDataById->$childId = $this->getLocationData($childLoc, $locDataById, $countries);
         }     
         return $children;
     }
