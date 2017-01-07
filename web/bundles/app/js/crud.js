@@ -159,16 +159,17 @@ $(document).ready(function(){
     }
     /** Inits the main source form fields: publication and citation. */
     function buildSrcFields() {
-        var pubSel = buildPubField();
-        var citSel = buildCitField();
+        var pubSel = buildPubFieldRow();
+        var citSel = buildCitFieldRow();
         return [pubSel, citSel];
     }
-    /*-------------- Publication Helpers -----------------------------------*/
+    /*-------------- Top Form Helpers ----------------------------------------------------------*/
+    /*-------------- Publication  --------------------------------------------*/
     /**
      * Returns a form row with a publication select dropdown populated with all 
      * current publication titles.
      */
-    function buildPubField() {
+    function buildPubFieldRow() {
         var selElem;
         var pubObj = JSON.parse(localStorage.getItem('publications'));
         var opts = Object.keys(pubObj).sort().map(function(name) {
@@ -193,61 +194,9 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
-    /*-------------- Publisher Helpers ---------------------------------------*/
-    /**
-     * When a user enters a new publisher into the combobox, a create-publisher
-     * form is built, appended to the publisher field row and an option object is 
-     * returned to be selected in the combobox. Unless there is already a sub2Form,
-     * where a message will be shown telling the user to complete the open sub2 form
-     * and the form init canceled.
-     * Note: The publisher form inits with the submit button enabled, as display 
-     *     name, aka val, is it's only required field.
-     */
-    function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
-        if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
-        $('#Publisher_row').append(initSubForm(
-            "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
-        enableSubmitBttn("#sub2_submit");
-        disableSubmitBttn("#sub_submit");
-        return { "value": "", "text": "Creating Publisher..." };
-    }
-
-    /*-------------- Author Helpers ----------------------------------------*/
-    /**
-     * When an author is selected, a new author combobox is initialized underneath
-     * 'this' author combobox.
-     */
-    function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
-        if (val === "" || parseInt(val) === NaN) { return; }
-        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
-        var parentFormEntity = cParams.subForms.sub.entity;
-        var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
-                         change: onAuthSelection, add: initAuthForm };
-
-        $("#Authors_sel-cntnr").append(
-            buildSelectElem( parentFormEntity, "Authors", cnt ));   
-        $("#Authors_sel-cntnr").data("cnt", cnt);
-        initSelectCombobox(selConfg, "sub");
-    }
-    /**
-     * When a user enters a new author into the combobox, a create-author form is 
-     * built, appended to the author field row, and an option object is returned 
-     * to be selected in the combobox. Unless there is already a sub2Form, where 
-     * a message will be shown telling the user to complete the open sub2 form
-     * and the form init canceled.
-     */
-    function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
-        var authCnt = $("#Authors_sel-cntnr").data("cnt");
-        var parentSelId = "#Authors-sel"+authCnt;
-        if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
-        $('#Authors_row').append(initSubForm(
-            "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
-        disableSubmitBttn("#sub_submit");
-        return { "value": "", "text": "Creating Author..." };
-    }
-    /*-------------- Citation Helpers --------------------------------------*/
+    /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
-    function buildCitField() {
+    function buildCitFieldRow() {
         var selElem = _util.buildSelectElem(
             [], {id: "Citation-sel", class: "lrg-field"}, onCitSelection)
         $(selElem).attr("disabled", true);
@@ -282,6 +231,60 @@ $(document).ready(function(){
          initSubFormComboboxes("citation");
         return { "value": "", "text": "Creating Citation..." };
     }
+    /*-------------- Sub Form Helpers ----------------------------------------------------------*/
+    /*-------------- Publisher -----------------------------------------------*/
+    /**
+     * When a user enters a new publisher into the combobox, a create-publisher
+     * form is built, appended to the publisher field row and an option object is 
+     * returned to be selected in the combobox. Unless there is already a sub2Form,
+     * where a message will be shown telling the user to complete the open sub2 form
+     * and the form init canceled.
+     * Note: The publisher form inits with the submit button enabled, as display 
+     *     name, aka val, is it's only required field.
+     */
+    function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
+        if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
+        $('#Publisher_row').append(initSubForm(
+            "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
+        enableSubmitBttn("#sub2_submit");
+        disableSubmitBttn("#sub_submit");
+        return { "value": "", "text": "Creating Publisher..." };
+    }
+
+    /*-------------- Author --------------------------------------------------*/
+    /**
+     * When an author is selected, a new author combobox is initialized underneath
+     * 'this' author combobox.
+     */
+    function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
+        if (val === "" || parseInt(val) === NaN) { return; }
+        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+        var parentFormEntity = cParams.subForms.sub.entity;
+        var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
+                         change: onAuthSelection, add: initAuthForm };
+
+        $("#Authors_sel-cntnr").append(
+            buildSelectElem( parentFormEntity, "Authors", cnt ));   
+        $("#Authors_sel-cntnr").data("cnt", cnt);
+        initSelectCombobox(selConfg, "sub");
+    }
+    /**
+     * When a user enters a new author into the combobox, a create-author form is 
+     * built, appended to the author field row, and an option object is returned 
+     * to be selected in the combobox. Unless there is already a sub2Form, where 
+     * a message will be shown telling the user to complete the open sub2 form
+     * and the form init canceled.
+     */
+    function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
+        var authCnt = $("#Authors_sel-cntnr").data("cnt");
+        var parentSelId = "#Authors-sel"+authCnt;
+        if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
+        $('#Authors_row').append(initSubForm(
+            "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
+        disableSubmitBttn("#sub_submit");
+        return { "value": "", "text": "Creating Author..." };
+    }
+
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
     /**
@@ -631,15 +634,10 @@ $(document).ready(function(){
      * Returns an object with 'submit' and 'cancel' events bound to the passed level's
      * form container.  
      */
-    function getBttnEvents(entity, level, parentElemId) {
-        var idMap = {
-            // "top": "#crud-main",
-            "sub": "#sub-form",
-            "sub2": "#sub2-form"
-        };
+    function getBttnEvents(entity, level, parentElemId) { 
         return { 
-            submit: getFormValuesAndSubmit.bind(null, idMap[level], level), 
-            cancel: exitForm.bind(null, idMap[level], level, parentElemId) 
+            submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level), 
+            cancel: exitForm.bind(null, '#'+level+'-form', level, parentElemId) 
         };
     }
     /**
