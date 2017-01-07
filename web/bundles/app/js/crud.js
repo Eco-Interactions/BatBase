@@ -181,7 +181,7 @@ $(document).ready(function(){
     }
     /** When a publication is selected fill citation dropdown @initCitField.  */
     function onPubSelection(val) { 
-        if (val === "" || parseInt(val) === NaN) { return; }                                
+        if (val === "" || !isNaN(parseInt(val)) ) { return; }                                
         initCitField(val);
     }
     /**
@@ -223,8 +223,11 @@ $(document).ready(function(){
             return { value: citId, text: cParams.records.source[citId].displayName };
         });
     }
+    /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
-        if (val === "") { return; }                                             console.log("cit selection = ", parseInt(val));
+        if (val === "" || !isNaN(parseInt(val))) { return; }                    console.log("cit selection = ", parseInt(val));                          
+        buildCountryFieldRow();
+        // buildLocationFieldRow();        
     }
     function initCitForm(val) {                                                 console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
@@ -232,6 +235,27 @@ $(document).ready(function(){
          initSubFormComboboxes("citation");
         return { "value": "", "text": "Creating Citation..." };
     }
+    /*-------------- Country -------------------------------------------------*/
+    /**
+     * Returns a form row with a country select dropdown populated with all 
+     * available countries.
+     */
+    function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
+        var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  console.log("cntryOpts = %O", cntryOpts)
+        var selElem = _util.buildSelectElem(
+            cntryOpts, {id: "Country-sel", class: "lrg-field"}, onCntrySelection);
+        $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
+        initTopFormCombobox("country");
+    }
+    function onCntrySelection(e) {  console.log("country selected 'e'= %O", e);
+        // body...
+    }
+
+
+
+
+
+
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
     /**

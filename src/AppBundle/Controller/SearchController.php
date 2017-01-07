@@ -238,7 +238,7 @@ class SearchController extends Controller
             $childId = $childLoc->getId();  //print("\nlocType = ".$childLoc->getLocationType());
             array_push($children, $childId);
             if ($childLoc->getLocationType()->getId() === 2) {
-                $countries = array_merge($countries, [ $childId => $childLoc->getDisplayName() ]); 
+                $countries = array_merge($countries, [ $childLoc->getDisplayName() => $childId ]); 
             }
             $locDataById->$childId = $this->getLocationData($childLoc, $locDataById, $countries);
         }     
