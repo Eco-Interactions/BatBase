@@ -148,7 +148,8 @@ $(document).ready(function(){
         var srcFields = buildSrcFields();
         $(formCntnr).append(srcFields);
         $('#crud-main').append(formCntnr);
-        initSrcComboboxes();
+        initTopFormCombobox("publication");
+        initTopFormCombobox("citation");
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -288,21 +289,30 @@ $(document).ready(function(){
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
     /**
-     * Uses the 'selectize' library to turn the select dropdowns into input comboboxes
-     * that allow users to search by typing and add new options not in the list-
-     * by triggering a sub-form for that entity.
+     * Inits the passed entity's combobox in the 'top' interaction form @initSelectCombobox. 
      */
-    function initSrcComboboxes() {
+    function initTopFormCombobox(entity) {
         var selMap = { 
-            'pub': { name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
-            'cit': { name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm }
+            'publication': { 
+                name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
+            'citation': { 
+                name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm },
+            'country': { 
+                name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
+            // 'location': { 
+                // name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
+
         };
-        for (var selType in selMap) { initSelectCombobox(selMap[selType], "top"); }
+        initSelectCombobox(selMap[entity], "top"); 
     }
     /**
      * Inits the combobox, using 'selectize', according to the passed config. 
-     * Stores each element's selectize object in the global cParams.selectizeApi
+     * Stores each element's selectize api in the global cParams.selectizeApi
      * by form-level and the selectized elem's id.
+     *
+     * Note: The 'selectize' library turns select dropdowns into input comboboxes
+     * that allow users to search by typing and, when configured, add new options 
+     * not in the list by triggering a sub-form for that entity.
      */
     function initSelectCombobox(confg, formLevel) {                             //console.log("initSelectCombobox. CONFG = %O. formLevel = ", confg, formLevel)
         var options = {
