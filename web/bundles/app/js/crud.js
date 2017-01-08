@@ -244,8 +244,10 @@ $(document).ready(function(){
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
     }
-    function onCntrySelection(e) {  console.log("country selected 'e'= %O", e);
-        // body...
+    function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
+        if (val === "" || isNaN(parseInt(val))) { return; }          
+        var cntryRcrd = cParams.records.location[val];
+        fillLocationSelect(cntryRcrd);
     }
     /*-------------- Location ------------------------------------------------*/
     /**
@@ -261,14 +263,27 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
-        var curRcrd;
         var opts = [];
-
-        for (var rcrd in cParams.records.location) {
-            curRcrd = cParams.records.location[rcrd];   
-            opts.push({ value: curRcrd.id, text: curRcrd.displayName });
+        for (var id in cParams.records.location) {
+            opts.push({ 
+                value: id, text: cParams.records.location[id].displayName });
         }
         return opts;
+    }
+    /**
+     * When a country is selected, the location combobox is repopulated with the 
+     * country's child-locations.  
+     */ 
+    function fillLocationSelect(cntry) {                                        //console.log("fillLocationSelect for cntry = %O", cntry);
+        var opts = getChildLocOpts(cntry);    
+        var selApi = cParams.selectizeApi.top['#Location-sel'];
+        updateComboboxOptions(selApi, opts);
+    }
+    /** Returns an array of options for the child-locations of the passed country. */
+    function getChildLocOpts(cntry) {
+        return cntry.childLocs.map(function(id) {  
+            return { value: id, text: cParams.records.location[id].displayName };
+        });
     }
     function onLocSelection(e) {  console.log("location selected 'e'= %O", e);
         // body...
@@ -276,8 +291,6 @@ $(document).ready(function(){
     function initLocForm(val) {        console.log("Adding new loc! val = %s", val);
         // body...
     }
-
-
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
     /**
