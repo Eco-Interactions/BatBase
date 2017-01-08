@@ -108,7 +108,8 @@ $(document).ready(function(){
                 "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
             },
             records: {
-                "source": JSON.parse(localStorage.getItem('srcRcrds'))
+                "source": JSON.parse(localStorage.getItem('srcRcrds')),
+                "location": JSON.parse(localStorage.getItem('locRcrds')),
             }
         };
         initFormLevelParamsObj("interaction", "top", null, null);
@@ -181,7 +182,7 @@ $(document).ready(function(){
     }
     /** When a publication is selected fill citation dropdown @initCitField.  */
     function onPubSelection(val) { 
-        if (val === "" || !isNaN(parseInt(val)) ) { return; }                                
+        if (val === "" || isNaN(parseInt(val)) ) { return; }                                
         initCitField(val);
     }
     /**
@@ -198,8 +199,7 @@ $(document).ready(function(){
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
-        var selElem = _util.buildSelectElem(
-            [], {id: "Citation-sel", class: "lrg-field"}, onCitSelection)
+        var selElem = _util.buildSelectElem([], {id: "Citation-sel", class: "lrg-field"});
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, "top", true);
     }
@@ -225,9 +225,9 @@ $(document).ready(function(){
     }
     /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
-        if (val === "" || !isNaN(parseInt(val))) { return; }                    console.log("cit selection = ", parseInt(val));                          
+        if (val === "" || isNaN(parseInt(val))) { return; }                    console.log("cit selection = ", parseInt(val));                          
         buildCountryFieldRow();
-        // buildLocationFieldRow();        
+        buildLocationFieldRow();        
     }
     function initCitForm(val) {                                                 console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
@@ -242,18 +242,42 @@ $(document).ready(function(){
      */
     function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
         var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  console.log("cntryOpts = %O", cntryOpts)
-        var selElem = _util.buildSelectElem(
-            cntryOpts, {id: "Country-sel", class: "lrg-field"}, onCntrySelection);
+        var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
     }
     function onCntrySelection(e) {  console.log("country selected 'e'= %O", e);
         // body...
     }
+    /*-------------- Location ------------------------------------------------*/
+    /**
+     * Returns a form row with a country select dropdown populated with all 
+     * available countries.
+     */
+    function buildLocationFieldRow() {   console.log("buildingLocationFieldRow. ");
+        var locOpts = getLocationOpts();  console.log("locOpts = %O", locOpts)
+        var selElem = _util.buildSelectElem(
+            locOpts, {id: "Location-sel", class: "lrg-field"});
+        $('form[name="crud"]').append(buildFormRow("Location", selElem, "top", true));
+        initTopFormCombobox("location");
+    }
+    /** Returns an array of option objects with all unique locations.  */
+    function getLocationOpts() {
+        var curRcrd;
+        var opts = [];
 
-
-
-
+        for (var rcrd in cParams.records.location) {
+            curRcrd = cParams.records.location[rcrd];   
+            opts.push({ value: curRcrd.id, text: curRcrd.displayName });
+        }
+        return opts;
+    }
+    function onLocSelection(e) {  console.log("location selected 'e'= %O", e);
+        // body...
+    }
+    function initLocForm(val) {        console.log("Adding new loc! val = %s", val);
+        // body...
+    }
 
 
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
@@ -323,9 +347,8 @@ $(document).ready(function(){
                 name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm },
             'country': { 
                 name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
-            // 'location': { 
-                // name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
-
+            'location': { 
+                name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
         };
         initSelectCombobox(selMap[entity], "top"); 
     }
