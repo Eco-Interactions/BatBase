@@ -211,10 +211,8 @@ $(document).ready(function(){
         var pubRcrd = cParams.records.source[pubId];  
         var citOpts = getPubCitationOpts(pubRcrd);  
         var sel = $('#Citation-sel')[0].selectize;
-        sel.clearOptions();
-        sel.addOption(citOpts);
+        updateComboboxOptions(sel, citOpts);
         sel.enable();
-        sel.focus();
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubRcrd) {
@@ -225,11 +223,11 @@ $(document).ready(function(){
     }
     /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return; }                    console.log("cit selection = ", parseInt(val));                          
+        if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
         buildCountryFieldRow();
         buildLocationFieldRow();        
     }
-    function initCitForm(val) {                                                 console.log("Adding new cit! val = %s", val);
+    function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
             "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
          initSubFormComboboxes("citation");
@@ -241,7 +239,7 @@ $(document).ready(function(){
      * available countries.
      */
     function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
-        var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  console.log("cntryOpts = %O", cntryOpts)
+        var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
@@ -254,8 +252,8 @@ $(document).ready(function(){
      * Returns a form row with a country select dropdown populated with all 
      * available countries.
      */
-    function buildLocationFieldRow() {   console.log("buildingLocationFieldRow. ");
-        var locOpts = getLocationOpts();  console.log("locOpts = %O", locOpts)
+    function buildLocationFieldRow() {                                          //console.log("buildingLocationFieldRow. ");
+        var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Location", selElem, "top", true));
@@ -336,6 +334,12 @@ $(document).ready(function(){
 
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
+    /** Clears previous options, adds the new opts, and brings the select into focus. */
+    function updateComboboxOptions(selApi, opts) {
+        selApi.clearOptions();
+        selApi.addOption(opts);
+        selApi.focus()
+    }
     /**
      * Inits the passed entity's combobox in the 'top' interaction form @initSelectCombobox. 
      */
