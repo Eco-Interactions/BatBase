@@ -654,10 +654,13 @@
      * names by id. Builds a tree of location data with regions at the top level, 
      * and sub-regions, countries, areas, and points as nested children @buildLocTree.
      */
-	function storeLocs(data) {												console.log("location data recieved. %O", data);
+	function storeLocs(locData) {												
+        var data = locData.locData;                                             //console.log("location data recieved. %O", data);
         _util.populateStorage('locRcrds', JSON.stringify(data.locRcrds));
         _util.populateStorage('topRegions', JSON.stringify(data.topRegions));
 	    _util.populateStorage('countries', JSON.stringify(data.countries));
+        _util.populateStorage('locTypes', JSON.stringify(data.locTypes));
+        _util.populateStorage('habTypes', JSON.stringify(data.habTypes));
 	    rcrdsById = data.locRcrds;   
 	    buildLocTreeAndGrid(data.topRegions);
 	}

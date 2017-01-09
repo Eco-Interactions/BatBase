@@ -157,13 +157,12 @@ class SearchController extends Controller
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $locDataById = new \stdClass;
-        $topRegions = [];
-        $countries = [];
-        /** Add all interactions with no location under one "Unspecified" top region. */
+        $locData = $this->buildLocDataObj($em);
+
+        /** All interactions with no location are added under an "Unspecified" top region. */
         $unspecifiedLocId = 999;
-        $locDataById->$unspecifiedLocId = $this->getUnspecifiedIntRcrds($em);
-        array_push($topRegions, $unspecifiedLocId);
+        $locData->locRcrds->$unspecifiedLocId = $this->getUnspecifiedIntRcrds($em);
+        array_push($locData->topRegions, $unspecifiedLocId);
 
         $regionLocs = $em->getRepository('AppBundle:Location')
             ->findBy(array('locationType' => '1'));
@@ -172,18 +171,32 @@ class SearchController extends Controller
         {                    
             $locId = $locEntity->getId(); 
             if ($locEntity->getParentLoc() === null) {  /** Only top regions are handled here */
-                array_push($topRegions, $locId);
-                $locDataById->$locId = $this
-                    ->getLocationData($locEntity, $locDataById, $countries);
+                array_push($locData->topRegions, $locId);
+                $locData->locRcrds->$locId = $this
+                    ->getLocationData($locEntity, $locData->locRcrds, $locData->countries);
             }
         }
         $response = new JsonResponse();
-        $response->setData(array(
-            'locRcrds' => $locDataById, 'topRegions' => $topRegions, 
-            'countries' => $countries            
-        ));
+        $response->setData(array( 'locData' => $locData ));
 
         return $response;
+    }
+    /**
+     * Builds a Location Data Object with an object for all location records to be 
+     * stored by id (locRcrds), an array for all 'top' regions and their ids (topRegions), 
+     * and arrays for all countries (countries), of all Location Types (locTypes) 
+     * and of all Habitat Types (habTypes) and their ids.
+     */
+    private function buildLocDataObj($em)
+    {
+        $dataObj = new \stdClass;
+        $dataObj->locRcrds = new \stdClass;
+        $dataObj->topRegions = [];
+        $dataObj->countries = [];
+        $dataObj->locTypes = $this->buildTypeAry("LocationType", $em);;
+        $dataObj->habTypes = $this->buildTypeAry("HabitatType", $em);
+
+        return $dataObj;
     }
     /**
      * Builds and returns Location Data object.
@@ -202,7 +215,7 @@ class SearchController extends Controller
         $data->latitude = $locEntity->getLatitude();
         $data->longitude = $locEntity->getLongitude();
         $data->showOnMap = $locEntity->getShowOnMap();
-        $data->locationType = $locEntity->getLocationType()->getName();
+        $data->locationType = $locEntity->getLocationType()->getDisplayName();
 
         $data->habitatType = $this->getHabType($locEntity);
         $data->childLocs = $this->getChildLocationData($locEntity, $locDataById, $countries);
@@ -220,7 +233,7 @@ class SearchController extends Controller
         $habData = null;
         if ($habitatType !== null) {
             $habData = new \stdClass;
-            $habData->name = $habitatType->getName();
+            $habData->name = $habitatType->getDisplayName();
             $habData->id = $habitatType->getId();
         } 
         return $habData;
@@ -283,9 +296,7 @@ class SearchController extends Controller
         }
 
         $response = new JsonResponse();
-        $response->setData(array(
-            'srcData' => $srcData
-        ));
+        $response->setData(array( 'srcData' => $srcData ));
         return $response;
     }
     /**
@@ -308,17 +319,6 @@ class SearchController extends Controller
         $dataObj->publication->types = $this->buildTypeAry("PublicationType", $em);
 
         return $dataObj;
-    }
-    /** Returns an associative array of Type ids and their lowercased names. */
-    private function buildTypeAry($entityType, $em)
-    {
-        $types = $em->getRepository('AppBundle:'.$entityType)->findAll();
-        $ary = [];
-        foreach ($types as $type) {
-            $subAry = [strval($type->getId()) => lcfirst($type->getDisplayName())];
-            $ary = array_merge($ary, $subAry);
-        }
-        return $ary;
     }
     private function getSrcRcrd($srcEntity)
     {
@@ -486,14 +486,14 @@ class SearchController extends Controller
 
         $locData->name = $location->getDisplayName();
         $locData->id = $location->getId();
-        $locData->type = $location->getLocationType()->getName(); 
+        $locData->type = $location->getLocationType()->getDisplayName(); 
         /** Deduce and set $locData->country and $locData->region */ 
         if ($locData->type === "Area" || $locData->type === "Point" || $locData->type === "Habitat") { 
-            $parentType = $location->getParentLoc()->getLocationType()->getName();
+            $parentType = $location->getParentLoc()->getLocationType()->getDisplayName();
             $this->getCountryAndRegion($location->getParentLoc(), $parentType, $locData);
         } else if ($locData->type === "Country") {  
             $locData->country = $locData->name;
-            $parentType = $location->getParentLoc()->getLocationType()->getName();
+            $parentType = $location->getParentLoc()->getLocationType()->getDisplayName();
             $this->getRegion($location->getParentLoc(), $parentType, $locData);
         } else if ($locData->type === "Region") {
             $locData->country = null;
@@ -505,7 +505,7 @@ class SearchController extends Controller
     {
         if ($parentType === "Country") {
             $locData->country = $parentLoc->getDisplayName();
-            $grandParentType = $parentLoc->getParentLoc()->getLocationType()->getName();
+            $grandParentType = $parentLoc->getParentLoc()->getLocationType()->getDisplayName();
             $this->getRegion($parentLoc->getParentLoc(), $grandParentType, $locData);
         } else {
             $locData->country = null;
@@ -519,6 +519,17 @@ class SearchController extends Controller
         }
     }
 /**------------------------Shared Search Methods------------------------------*/
+    /** Returns an associative array of Type ids and their lowercased names. */
+    private function buildTypeAry($entityType, $em)
+    {
+        $types = $em->getRepository('AppBundle:'.$entityType)->findAll();
+        $ary = [];
+        foreach ($types as $type) {
+            $subAry = [strval($type->getId()) => lcfirst($type->getDisplayName())];
+            $ary = array_merge($ary, $subAry);
+        }
+        return $ary;
+    }
     private function getInteractionIds($interactions)
     {
         if ( count($interactions) === 0 ) { return null; }
