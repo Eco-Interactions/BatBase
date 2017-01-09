@@ -276,7 +276,10 @@ $(document).ready(function(){
         // body...
     }
     function initLocForm(val) {        console.log("Adding new loc! val = %s", val);
-        // body...
+        $('form[name="crud"]').append(initSubForm(
+            "location", "sub", "flex-row", {"Display Name": val}, "#Location-sel"));
+         initSubFormComboboxes("location");
+        return { "value": "", "text": "Creating Location..." };
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
@@ -395,6 +398,8 @@ $(document).ready(function(){
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
             "Citation_Type": { name: "Citation Type", change: false, add: false },
+            "Habitat_Type":  { name: "Habitat Type", change: false, add: false },
+            "Location_Type":  { name: "Location Type", change: false, add: false },
         };
         cParams.subForms[formLvl].selElems.forEach(function(field) {            //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -467,6 +472,13 @@ $(document).ready(function(){
                 "order": ["CitationText", "Title", "CitationType",    
                     "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
                     "Tags", "Authors" ]
+            },
+            "location": {
+                "add": {},  
+                "exclude": [],
+                "required": ["Display Name", "Location Type"],
+                "order": ["DisplayName", "Description", "LocationType", "HabitatType", 
+                    "Elevation", "ElevationMax", "Latitude", "Longitude" ]
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
@@ -593,10 +605,12 @@ $(document).ready(function(){
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
             "Authors": [ getOptsFromStoredData, 'authors'],
-            "Citation_Type": [ getTypeOpts, 'citation'],
-            "Publication_Type": [ getTypeOpts, 'publication'],
+            "Citation_Type": [ getTypeOpts, 'citTypes'],
+            "Publication_Type": [ getTypeOpts, 'pubTypes'],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
             "Tags": [ getTagOpts, 'citation' ],
+            "Location_Type": [ getTypeOpts, 'locTypes'],
+            "Habitat_Type": [ getTypeOpts, 'habTypes'],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -607,12 +621,8 @@ $(document).ready(function(){
         return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
     }
     /** Builds options out of the entity's stored 'types' array. */
-    function getTypeOpts(entity) {
-        var types = {
-            "citation": 'citTypes',     "publication": 'pubTypes',
-            "source": 'srcTypes',
-        };
-        var typeAry = JSON.parse(localStorage.getItem(types[entity])).sort()
+    function getTypeOpts(typeKey) {
+        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort()
         return _util.buildSimpleOpts(typeAry);
     }
     /** Builds options out of the entity object, with id as 'value'. */
