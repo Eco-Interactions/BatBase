@@ -85,11 +85,8 @@ $(document).ready(function(){
      * @param selectizeApi - Contains the selectize libray's api organized by 
      *    form-level and the select elem parent for each selectized combobox elem. 
      *     organized by form level and the parent select's id. 
-     * @param fields - Contains an object of the fields and field-types for each 
-     *     of the root entities- Interaction, Location, Source and Taxa. 
-     * @param types - Contains a sorted array of 'types' for each field (key)
      * @param records - An object of all records, with id keys, for each of the 
-     *     root entities.
+     *     root entities- Interaction, Location, Source and Taxa.
      */
     function initCrudParams(action) {                                           //console.log("####cPs = %O", cParams)
         cParams = {
@@ -97,16 +94,6 @@ $(document).ready(function(){
             subForms: {},
             formLevels: ["top", "sub", "sub2"],
             selectizeApi: { "top": {}, "sub": {}, "sub2": {} },
-            fields: {
-                "source": { "Display Name": "text", "Description": "textArea", 
-                    "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
-                    "Authors": "multiSelect" }
-            },
-            types: {
-                "source": JSON.parse(localStorage.getItem('srcTypes')).sort(),
-                "citation": JSON.parse(localStorage.getItem('citTypes')).sort(),
-                "publication": JSON.parse(localStorage.getItem('pubTypes')).sort(),
-            },
             records: {
                 "source": JSON.parse(localStorage.getItem('srcRcrds')),
                 "location": JSON.parse(localStorage.getItem('locRcrds')),
@@ -450,9 +437,9 @@ $(document).ready(function(){
      * Also inits the crud params for the sub-form in the global cParams obj.
      */
     function buildSubForm(entity, fieldVals, level, pSel) {
-        var formConfg = getSrcTypeFormConfg(entity);                            //console.log("typeFormConfg = %O", typeFormConfg)
+        var formConfg = getSubFormConfg(entity);                                //console.log("typeFormConfg = %O", typeFormConfg)
         initFormLevelParamsObj(entity, level, pSel, formConfg);
-        return getFormFieldRows(entity, formConfg, cParams.fields.source, fieldVals, level);
+        return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
     /**
      * Returns a config object for the form of the selected source-type with the 
@@ -462,7 +449,7 @@ $(document).ready(function(){
      * >> 'order' is used to matched the form elements' id, which has no spaces. 
      * >> The publisher form is currenty non-existant
      */
-    function getSrcTypeFormConfg(type) {
+    function getSubFormConfg(type) {
         var fieldMap = { 
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
@@ -497,10 +484,32 @@ $(document).ready(function(){
         return fieldMap[type];
     }
     /**
+     * Returns an object of fields and field types for the passed detail-entity's
+     * parent entity.
+     */
+    function getParentEntityFields(entity) {
+        var topEntity = {
+            "author": "source",         "citation": "source",
+            "publication": "source",    "publisher": "source",
+            "location": "location"            
+        };
+        var fields = {
+            "location": { "Display Name": "text", "Description": "textArea", 
+                "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
+                "Latitude": "text", "Habitat Type": "select", "Location Type": "select"
+            },
+            "source": { "Display Name": "text", "Description": "textArea", 
+                "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+                "Authors": "multiSelect" 
+            }
+        };
+        return fields[topEntity[entity]];
+    }
+    /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(entity, formCnfg, dfltFields, fieldVals, formLevel) {                   //console.log("  Building Form rows. arguemnts = %O", arguments);
+    function getFormFieldRows(entity, formCnfg, fieldVals, formLevel) {         //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "tags": buildSelectElem, 
             "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
@@ -509,6 +518,7 @@ $(document).ready(function(){
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
         /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
+            var dfltFields = getParentEntityFields(entity);
             var exclude = cParams.subForms[formLevel].confg.exclude;
             return buildRows(dfltFields, exclude);
         }
@@ -596,9 +606,13 @@ $(document).ready(function(){
     function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
         return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
     }
-    /** Builds options out of the entity's types array */
-    function getTypeOpts(entityType) {
-        var typeAry = cParams.types[entityType];
+    /** Builds options out of the entity's stored 'types' array. */
+    function getTypeOpts(entity) {
+        var types = {
+            "citation": 'citTypes',     "publication": 'pubTypes',
+            "source": 'srcTypes',
+        };
+        var typeAry = JSON.parse(localStorage.getItem(types[entity])).sort()
         return _util.buildSimpleOpts(typeAry);
     }
     /** Builds options out of the entity object, with id as 'value'. */
@@ -822,7 +836,7 @@ $(document).ready(function(){
     function buildFormDataObj(entity, formVals) { 
         var data = {}
         var pEntity = getParentEntity(entity);
-        var parentFields = pEntity === false || getParentFields(pEntity);   
+        var parentFields = pEntity === false || getParentFields(entity);   
         var fieldTrans = getFieldTranslations(entity);                          //console.log("buildFormDataObj. formVals = %O, fieldTrans = %O, parentFields = %O", formVals, fieldTrans, parentFields);
         data[pEntity] = {};
         data[entity] = {};
@@ -855,8 +869,8 @@ $(document).ready(function(){
         return parentEntities[entity] || false;
     }
     /** Returns an array of the parent entity's field names. */
-    function getParentFields(parent) {
-        var parentFields = Object.keys(cParams.fields[parent]);
+    function getParentFields(entity) {
+        var parentFields = Object.keys(getParentEntityFields(entity));
         return  parentFields.map(function(field) {
             return _util.lcfirst(field.split(" ").join(""));
         });
