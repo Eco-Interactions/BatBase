@@ -13,7 +13,7 @@ use AppBundle\Entity\Source;
  * Adds a citation source for publications that were functioning as both citation
  * and publication source before we added back Citation as a source-type. 
  */
-class VersionFixCitations extends AbstractMigration implements ContainerAwareInterface
+class Version20161218175055FixCitations extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
 
