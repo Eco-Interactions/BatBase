@@ -24,7 +24,7 @@ class HabitatType
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"name"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
      */
     private $slug;
@@ -32,9 +32,9 @@ class HabitatType
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
      */
-    private $name;
+    private $displayName;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -118,27 +118,27 @@ class HabitatType
     }
 
     /**
-     * Set name.
+     * Set displayName.
      *
-     * @param string $name
+     * @param string $displayName
      *
      * @return HabitatType
      */
-    public function setName($name)
+    public function setDisplayName($displayName)
     {
-        $this->name = $name;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get displayName.
      *
      * @return string
      */
-    public function getName()
+    public function getDisplayName()
     {
-        return $this->name;
+        return $this->displayName;
     }
 
     /**
