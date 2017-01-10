@@ -609,7 +609,7 @@ $(document).ready(function(){
             "Publication_Type": [ getTypeOpts, 'pubTypes'],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
             "Tags": [ getTagOpts, 'citation' ],
-            "Location_Type": [ getTypeOpts, 'locTypes'],
+            "Location_Type": [ getLocationTypeOpts, 'locTypes'],
             "Habitat_Type": [ getTypeOpts, 'habTypes'],
         };
         var getOpts = optMap[field][0];
@@ -631,6 +631,16 @@ $(document).ready(function(){
         return sortedNameKeys.map(function (name) {
             return { value: entityObj[name], text: name }
         });    
+    }
+    /**
+     * Returns options for the location types that can be created by a general editor. 
+     * Regions and Countries will be available for a higher-level access editor.
+     */
+    function getLocationTypeOpts(typeKey) {
+        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort(); 
+        typeAry.splice(typeAry.indexOf("region"), 1); 
+        typeAry.splice(typeAry.indexOf("country"), 1); 
+        return _util.buildSimpleOpts(typeAry);    
     }
     /**
      * Returns an array of options objects for tags of the passed entity.
