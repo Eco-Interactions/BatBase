@@ -466,7 +466,7 @@ class SearchController extends Controller
 
             if ($int->getLocation() !== null) {
                 $rcrd->habitatType = $int->getLocation()->getHabitatType() === null ?
-                    null : $int->getLocation()->getHabitatType()->getName();
+                    null : $int->getLocation()->getHabitatType()->getDisplayName();
                 $rcrd->location = $this->getInteractionLocData($int);
             } else {
                 $rcrd->location = null;
