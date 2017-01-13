@@ -457,8 +457,6 @@ $(document).ready(function(){
      * > required - Required fields for the entity.
      * > order - Order of the fields in the form. This is matched to the field elems' 
      *   id, which has no spaces.
-     * > relFields - Fields that are relationships with other entities. This is 
-     *   matched to the entity's property name, which is camel cased.
      */
     function getSubFormConfg(entity) {
         var fieldMap = { 
@@ -468,7 +466,6 @@ $(document).ready(function(){
                 "required": ["Last Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
                     "LinkUrl", "LinkText"],
-                "relFields": []
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", 
@@ -477,9 +474,8 @@ $(document).ready(function(){
                 "exclude": ["Display Name", "Description"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
                 "order": ["CitationText", "Title", "CitationType",    
-                    "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
+                    "Year", "Volume", "Issue", "Pages", "LinkUrl", "LinkText", "Doi", 
                     "Tags", "Authors" ],
-                "relFields": ["citationType", "authors", "tags", "publication"]
             },
             "location": {
                 "add": {},  
@@ -487,7 +483,6 @@ $(document).ready(function(){
                 "required": ["Display Name", "Location Type"],
                 "order": ["DisplayName", "Description", "LocationType", "HabitatType", 
                     "Elevation", "ElevationMax", "Latitude", "Longitude" ],
-                "relFields": ["locationType", "habitatType"]
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
@@ -495,14 +490,12 @@ $(document).ready(function(){
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
                     "LinkUrl", "LinkText", "Publisher", "Authors" ],
-                "relFields": ["publicationType", "authors", "publisher"]
             },
             "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["Display Name"],
                 "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] },
-                "relFields": []
         };
         return fieldMap[entity];
     }
@@ -866,38 +859,57 @@ $(document).ready(function(){
     function submitFormVals(formLvl, formVals) {                        
         var entity = cParams.subForms[formLvl].entity;                          //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
         var fieldTrans = getFieldTranslations(entity);
-        var formData = buildFormDataObj(entity, formVals);
+        var formData = buildFormData(entity, formVals);
         ajaxFormData(formData, formLvl);
     }                
     /**
-     * Returns a form data object with the server entity names' as keys for their 
-     * data, field-val, objects. Field translations are handled @addTransFormData. 
-     * If the passed entity is a detail entity for a 'parent' entity, eg Source or 
-     * Location, that entity is added to a 'type' field of the parent. 
+     * Returns an object with the entity names' as keys for their field-val objects, 
+     * which are grouped into flat data and related-entity data objects. 
      */
-    function buildFormDataObj(entity, formVals) { 
-        var data = {}
-        var pEntity = getParentEntity(entity);
+    function buildFormData(entity, formVals) { 
+        var pEntity = getParentEntity(entity);                                  //console.log("buildFormDataObj. formVals = %O, parentFields = %O", formVals, parentFields);
         var parentFields = pEntity === false || getParentFields(entity);   
-        var fieldTrans = getFieldTranslations(entity);                          //console.log("buildFormDataObj. formVals = %O, fieldTrans = %O, parentFields = %O", formVals, fieldTrans, parentFields);
-        data[pEntity] = {};
-        data[entity] = {};
+        var fieldTrans = getFieldTranslations(entity); 
+        var rels = getRelationshipFields(entity);
+        var data = buildFormDataObj();
 
         for (var field in formVals) {                                           //console.log("processing field = ", field)
-            if (fieldTrans && field in fieldTrans) { addTransFormData(field, formVals[field]); 
-            } else { addFormData(field, formVals[field]); }
+            getFormFieldData(field, formVals[field]);
         }                                                                       //console.log("formData = %O", data);
-        if (pEntity) { data[pEntity][pEntity+"Type"] = entity; }    
+        handleDetailTypeField();
         return data;
-        /** Translates the passed field into it's server-ready equivalent. */
-        function addTransFormData(field, val) {
-            var transMap = fieldTrans[field];
-            for (var ent in transMap) { data[ent][transMap[ent]] = val; }
+
+        function buildFormDataObj() {
+            var data = {};
+            data[pEntity] = { flat: {}, rel: {} };
+            data[entity] = { flat: {}, rel: {} };
+            return data;
         }
-        /** Adds the passed field and value to the appropriate entity data object. */
-        function addFormData(field, val) {
-            var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
-            data[ent][field] = val;
+        /** 
+         * Adds the field's value to the appropriate entity's form data-group object. 
+         * Field name translations are handled @addTransFormData. 
+         */
+        function getFormFieldData(field, val) {
+            var dataGroup = rels.indexOf(field) !== -1 ? 'rel' : 'flat';
+            if (field in fieldTrans) { addTransFormData(); 
+            } else { addFormData(); }
+            /** Translates the passed field into it's server-ready equivalent. */
+            function addTransFormData() {
+                var transMap = fieldTrans[field];                               
+                for (var ent in transMap) { data[ent][dataGroup][transMap[ent]] = val; }
+            }
+            /** Adds the passed field and value to the appropriate entity data object. */
+            function addFormData() {
+                var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
+                data[ent][dataGroup][field] = val;
+            }
+        } /* End getFormFieldData */
+        /**
+         * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
+         * or author are to Source), that entity is added as the 'type' of it's parent. 
+         */
+        function handleDetailTypeField() {
+            if (pEntity) { data[pEntity][pEntity+"Type"] = entity; }    
         }
     } /* End buildFormDataObj */
     /**
@@ -939,9 +951,19 @@ $(document).ready(function(){
                 "displayName": { "source": "displayName", "author": "displayName" }
             }
         };
-        return fieldTrans[entity] || false;
+        return fieldTrans[entity] || {};
     }
-
+    /** Returns an array of fields that are relationships with other entities. */
+    function getRelationshipFields(entity) {
+        var relationships = {
+            "author": [], 
+            "citation": ["citationType", "authors", "tags", "publication"], 
+            "location": ["locationType", "habitatType"],
+            "publication": ["publicationType", "authors", "publisher"],
+            "publisher": []
+        };
+        return relationships[entity];
+    }
     /*------------- AJAX -----------------------------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
