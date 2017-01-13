@@ -78,15 +78,16 @@ $(document).ready(function(){
     /*--------------- CRUD Params Object -------------------------------------*/
     /**
      * Sets the global cParams obj with the params necessary throughout the 
-     * crud form interface.
-     * @param action - eg, Create, Edit.
-     * @param subForms - Container for subform-specific params 
-     * @param formLevels - An array of the form level names/tags/prefixes/etc.
-     * @param selectizeApi - Contains the selectize libray's api organized by 
-     *    form-level and the select elem parent for each selectized combobox elem. 
-     *     organized by form level and the parent select's id. 
-     * @param records - An object of all records, with id keys, for each of the 
-     *     root entities- Interaction, Location, Source and Taxa.
+     * crud form interface. 
+     * -- Property descriptions:
+     * > action - eg, Create, Edit.
+     * > subForms - Container for subform-specific params 
+     * > formLevels - An array of the form level names/tags/prefixes/etc.
+     * > selectizeApi - Contains the selectize libray's api organized by 
+     *   form-level and the select elem parent for each selectized combobox elem. 
+     *   organized by form level and the parent select's id. 
+     * > records - An object of all records, with id keys, for each of the 
+     *   root entities- Interaction, Location, Source and Taxa.
      */
     function initCrudParams(action) {                                           //console.log("####cPs = %O", cParams)
         cParams = {
@@ -447,53 +448,63 @@ $(document).ready(function(){
         return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
     /**
-     * Returns a config object for the form of the selected source-type with the 
-     * fields to add to and exclude from the default source fields, the required
-     * fields, and the final order of the fields.
-     * Notes: 
-     * >> 'order' is used to matched the form elements' id, which has no spaces. 
-     * >> The publisher form is currenty non-existant
+     * Returns a form-config object for the passed entity. 
+     * -- Property descriptions:  
+     * > add - Additonal fields for a detail-entity. E.g. Citation is a detail-entity
+     *   of Source with a unique combination of fields from Source and itself.
+     * > exclude - Fields to exclude in a detail-entity form. E.g. Citation doesn't 
+     *   use Source's 'displayName' field as it's 'title' is it's display name. 
+     * > required - Required fields for the entity.
+     * > order - Order of the fields in the form. This is matched to the field elems' 
+     *   id, which has no spaces.
+     * > relFields - Fields that are relationships with other entities. This is 
+     *   matched to the entity's property name, which is camel cased.
      */
-    function getSubFormConfg(type) {
+    function getSubFormConfg(entity) {
         var fieldMap = { 
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
                 "exclude": ["Description", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkText"]
+                    "LinkUrl", "LinkText"],
+                "relFields": []
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", 
                     "Issue": "text", "Pages": "text", "Tags": "tags", 
                     "Citation Text": "fullTextArea", "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
-                "required": ["Title", "Publication", "Citation Text", "Citation Type"],
+                "required": ["Title", "Citation Text", "Citation Type"],
                 "order": ["CitationText", "Title", "CitationType",    
                     "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
-                    "Tags", "Authors" ]
+                    "Tags", "Authors" ],
+                "relFields": ["citationType", "authors", "tags", "publication"]
             },
             "location": {
                 "add": {},  
                 "exclude": [],
                 "required": ["Display Name", "Location Type"],
                 "order": ["DisplayName", "Description", "LocationType", "HabitatType", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude" ]
+                    "Elevation", "ElevationMax", "Latitude", "Longitude" ],
+                "relFields": ["locationType", "habitatType"]
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
-                    "LinkUrl", "LinkText", "Publisher", "Authors" ]
+                    "LinkUrl", "LinkText", "Publisher", "Authors" ],
+                "relFields": ["publicationType", "authors", "publisher"]
             },
             "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["Display Name"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] },
+                "relFields": []
         };
-        return fieldMap[type];
+        return fieldMap[entity];
     }
     /**
      * Returns an object of fields and field types for the passed detail-entity's
@@ -923,30 +934,32 @@ $(document).ready(function(){
     /*------------- AJAX -----------------------------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
-        var stubData = {};
-        stubData[cParams.subForms[formLvl].entity] = "123456";
+        // var stubData = {};
+        // stubData[cParams.subForms[formLvl].entity] = "123456";
+        var topEntity = getParentEntity(cParams.subForms[formLvl].entity);  console.log("entity = ", topEntity);
+        var url = getEntityUrl(topEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;
-        // sendAjaxQuery(dataPkg, url, successCb);
-        window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
+        sendAjaxQuery(formData, url, formSubmitSucess);
+        // window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
-        return envUrl + entityName + "/" + action;
+        return envUrl + "admin/crud/" + entityName + "/" + action;
     }
     /**
      * Ajax success callback. Exit's the successfully submitted form, adds and 
      * selects an option with the new entities id (val) and display name (text).
      * Potential format for response: {[pEntity] : {[formEntity] => [id]} }
      */
-    function formSubmitSucess(data, textStatus, jqXHR) {                        //console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+    function formSubmitSucess(data, textStatus, jqXHR) {                        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
         var formLvl = cParams.ajaxFormLvl;
         var pFormLvl = getNextFormLevel("parent", formLvl);
         var formSelId = cParams.subForms[formLvl].pSelElemId;  
         var selElemApi = cParams.selectizeApi[pFormLvl][formSelId]; 
 
-        exitForm("#"+formLvl+"-form", formLvl, formSelId); 
-        selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
-        selElemApi.addItem("123456");
+        // exitForm("#"+formLvl+"-form", formLvl, formSelId); 
+        // selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
+        // selElemApi.addItem("123456");
     }
     
 
