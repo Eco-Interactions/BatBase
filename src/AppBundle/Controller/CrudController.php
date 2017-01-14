@@ -31,43 +31,37 @@ class CrudController extends Controller
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }                                                                       //print("\nCreating Source.\n");
-
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
         $srcData = $formData->source;
+        $detailEntity = false;
 
         if ($srcData->hasDetail) {                                              //print("\nHas Detail.\n");
             $detailEntName = $srcData->rel->sourceType;
             $detailData = $formData->$detailEntName;
             $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
             $detailEntity = new $detailEntClass();
-            $this->setEntityData($detailData, $detailEntity, $em);
+            $this->setEntityData($detailEntName, $detailData, $detailEntity, $em);  
         }
         $srcEntity = new Source();
-        $this->setEntityData($srcData, $srcEntity, $em);
+        $this->setEntityData("Source", $srcData, $srcEntity, $em);
 
         if ($srcData->hasDetail) { $detailEntity->setSource($srcEntity); } 
         
-        $em->flush();
-
-        $response = new JsonResponse();
-        $response->setData(array(
-            'YouRock' => 'SuperDuper'
-        ));
-        return $response;
+        return $this->attemptFlushAndSendResponse($srcEntity, $detailEntity, $em);
     }
     /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.
      */
-    private function setEntityData($formData, &$entity, &$em)
+    private function setEntityData($entName, $formData, &$entity, &$em)
     {
         $this->setFlatData($formData->flat, $entity, $em);
         $this->setRelatedEntityData($formData->rel, $entity, $em);
         $em->persist($entity);
     }
+    /** Sets all scalar data. */ 
     private function setFlatData($formData, &$entity, &$em)
     {
         foreach ($formData as $field => $val) {
@@ -76,13 +70,12 @@ class CrudController extends Controller
         }
     }
     /** Sets all realtional-data. */
-    private function setRelatedEntityData($formData, &$entity, $em)
+    private function setRelatedEntityData($formData, &$entity, &$em)
     {
         $edgeCases = [
-            "contributor" => function($ary) use ($entity, $em) { 
+            "contributor" => function($ary) use ($entity, &$em) { 
                 $this->addContributors($ary, $entity, $em); },
         ];
-
         foreach ($formData as $rEntityName => $val) {  
             $setField = 'set'. ucfirst($rEntityName);                           
             if (array_key_exists($rEntityName, $edgeCases)) {
@@ -111,12 +104,47 @@ class CrudController extends Controller
         foreach ($ary as $contributorId) {
             $authSrc = $em->getRepository("AppBundle:Source")
                 ->findOneBy(['id' => $contributorId]);
-
             $contribEntity = new Contribution();
             $contribEntity->setWorkSource($srcEntity);
             $contribEntity->setAuthorSource($authSrc);
-            
             $em->persist($contribEntity);
+        }  
+    }
+    /**
+     * Attempts to flush all persisted data. If there are no errors, the created/updated 
+     * data is sent back to the crud form; otherise, an error message is sent back.
+     */
+    private function attemptFlushAndSendResponse($entity, $subEntity, &$em)
+    {        
+        try {
+            $em->flush();
+        } catch (\Doctrine\DBAL\DBALException $e) {                             
+            return $this->sendErrorResponse($e, "DBALException");
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e, "\Exception");
         }
+        return $this->sendDataAndResponse($em, $entity, $subEntity);
+    }
+    /**
+     * Sends an object with all created/updated data back to the crud form. 
+     */
+    private function sendDataAndResponse($em, $entity, $subEntity)
+    {
+        $response = new JsonResponse();
+        $response->setData(array(
+            'YouRock' => 'SuperDuper'
+        ));
+        return $response;
+    }
+    /** Logs the error message and returns an error response message. */
+    private function sendErrorResponse($e, $tag)
+    {   
+        $this->get('logger')->error($e->getMessage());
+        $response = new JsonResponse();
+        $response->setStatusCode(500);
+        $response->setData(array(
+            $tag => $e->getMessage()
+        ));
+        return $response;
     }
 }
