@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use AppBundle\Entity\Source;
+use AppBundle\Entity\Contribution;
 
 
 /**
@@ -38,7 +39,7 @@ class CrudController extends Controller
         $srcData = $formData->source;
 
         if ($srcData->hasDetail) {                                              //print("\nHas Detail.\n");
-            $detailEntName = $srcData->sourceType;
+            $detailEntName = $srcData->rel->sourceType;
             $detailData = $formData->$detailEntName;
             $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
             $detailEntity = new $detailEntClass();
@@ -47,7 +48,9 @@ class CrudController extends Controller
         $srcEntity = new Source();
         $this->setEntityData($srcData, $srcEntity, $em);
 
-        print($detailEntity->getDisplayName());
+        if ($srcData->hasDetail) { $detailEntity->setSource($srcEntity); } 
+        
+        $em->flush();
 
         $response = new JsonResponse();
         $response->setData(array(
@@ -62,15 +65,58 @@ class CrudController extends Controller
     private function setEntityData($formData, &$entity, &$em)
     {
         $this->setFlatData($formData->flat, $entity, $em);
+        $this->setRelatedEntityData($formData->rel, $entity, $em);
         $em->persist($entity);
     }
     private function setFlatData($formData, &$entity, &$em)
     {
         foreach ($formData as $field => $val) {
-            $setField = 'set'. ucfirst($field);
+            $setField = 'set'. ucfirst($field);                                 //print("\nsetFlatField = ".$setField."\n");
             $entity->$setField($val);
         }
-
     }
+    /** Sets all realtional-data. */
+    private function setRelatedEntityData($formData, &$entity, $em)
+    {
+        $edgeCases = [
+            "contributor" => function($ary) use ($entity, $em) { 
+                $this->addContributors($ary, $entity, $em); },
+        ];
 
+        foreach ($formData as $rEntityName => $val) {  
+            $setField = 'set'. ucfirst($rEntityName);                           
+            if (array_key_exists($rEntityName, $edgeCases)) {
+                call_user_func($edgeCases[$rEntityName], $val);
+            } else {
+                $relEntity = $this->getRelatedEntity($rEntityName, $val, $em);
+                $entity->$setField($relEntity);
+            }
+        }
+    }
+    /** Returns the related entity object after deriving the class and prop to use. */
+    private function getRelatedEntity($rEntityName, $val, $em)
+    {
+        $relClass = $rEntityName === 'parentSource' ? 'Source' : ucfirst($rEntityName);
+        $prop = is_numeric($val) ? 'id'  : 'displayName';                       
+        return $this->returnRelatedEntity($relClass, $prop, $val, $em);
+    }
+    private function returnRelatedEntity($class, $prop, $val, $em)
+    {
+        return $em->getRepository("AppBundle:".$class)
+            ->findOneBy([$prop => $val]);
+    }
+    /** Creates a new Contribution for each author source in the array. */
+    private function addContributors($ary, &$srcEntity, &$em)
+    {
+        foreach ($ary as $contributorId) {
+            $authSrc = $em->getRepository("AppBundle:Source")
+                ->findOneBy(['id' => $contributorId]);
+
+            $contribEntity = new Contribution();
+            $contribEntity->setWorkSource($srcEntity);
+            $contribEntity->setAuthorSource($authSrc);
+            
+            $em->persist($contribEntity);
+        }
+    }
 }
