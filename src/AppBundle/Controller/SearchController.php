@@ -311,7 +311,7 @@ class SearchController extends Controller
         $dataObj->srcTypes = $this->buildTypeAry("SourceType", $em);;
         $dataObj->srcRcrds = new \stdClass;
         
-        foreach ($dataObj->srcTypes as $typeId => $type) {
+        foreach ($dataObj->srcTypes as $type => $typeId) {
             $dataObj->$type = new \stdClass;
             $dataObj->$type->ids = [];
         }
@@ -525,7 +525,7 @@ class SearchController extends Controller
         $types = $em->getRepository('AppBundle:'.$entityType)->findAll();
         $ary = [];
         foreach ($types as $type) {
-            $subAry = [strval($type->getId()) => lcfirst($type->getDisplayName())];
+            $subAry = [lcfirst($type->getDisplayName()) => strval($type->getId())];
             $ary = array_merge($ary, $subAry);
         }
         return $ary;
