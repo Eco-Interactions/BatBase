@@ -609,12 +609,12 @@ $(document).ready(function(){
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
             "Authors": [ getOptsFromStoredData, 'authors'],
-            "Citation_Type": [ getTypeOpts, 'citTypes'],
-            "Publication_Type": [ getTypeOpts, 'pubTypes'],
+            "Citation_Type": [ getOptsFromStoredData, 'citTypes'],
+            "Publication_Type": [ getOptsFromStoredData, 'pubTypes'],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
             "Tags": [ getTagOpts, 'citation' ],
             "Location_Type": [ getLocationTypeOpts, 'locTypes'],
-            "Habitat_Type": [ getTypeOpts, 'habTypes'],
+            "Habitat_Type": [ getOptsFromStoredData, 'habTypes'],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -622,18 +622,14 @@ $(document).ready(function(){
     }
     /** Builds options out of a stored entity collection object. */
     function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
-        return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
-    }
-    /** Builds options out of the entity's stored 'types' array. */
-    function getTypeOpts(typeKey) {
-        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort()
-        return _util.buildSimpleOpts(typeAry);
+        var dataObj = JSON.parse(localStorage.getItem(prop));
+        var sortedNameKeys = Object.keys(dataObj).sort();
+        return buildOptsObj(dataObj, sortedNameKeys);
     }
     /** Builds options out of the entity object, with id as 'value'. */
-    function buildOptsObj(entityObj) {
-        var sortedNameKeys = Object.keys(entityObj).sort();
-        return sortedNameKeys.map(function (name) {
-            return { value: entityObj[name], text: name }
+    function buildOptsObj(entityObj, sortedKeys) {
+        return sortedKeys.map(function (name) {
+            return { value: entityObj[name], text: _util.ucfirst(name) }
         });    
     }
     /**
