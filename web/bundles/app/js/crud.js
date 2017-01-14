@@ -902,15 +902,15 @@ $(document).ready(function(){
         } /* End getFormFieldData */
         /**
          * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
-         * or author are to Source), that entity is added as the 'type' of it's parent. 
+         * or author are to Source), that entity is added as the 'type' of it's parent and 
          * 'hasDetail' is added to trigger detail entity processing on the server.
          */
         function handleDetailTypeField() {
-            var notDetailEntity = ["Publisher"];
+            var nonDetailEntities = ["Publisher"];
             if (pEntity) { 
-                data[pEntity][pEntity+"Type"] = entity; 
+                data[pEntity].rel[pEntity+"Type"] = entity; 
+                data[pEntity].hasDetail = nonDetailEntities.indexOf(entity) === -1;
             }    
-            data[pEntity].hasDetail = notDetailEntity.indexOf(entity) === -1;
         }
     } /* End buildFormDataObj */
     /**
@@ -939,6 +939,7 @@ $(document).ready(function(){
             "publication": { 
                 "authors": { "source": "contributor" },
                 "publisher": { "source": "parentSource" }, 
+                "description": { "source": "description", "publication": "description" },
                 "title": { "source": "displayName", "publication": "displayName" },
             },
             "citation": { 
@@ -957,7 +958,7 @@ $(document).ready(function(){
     /** Returns an array of fields that are relationships with other entities. */
     function getRelationshipFields(entity) {
         var relationships = {
-            "author": [], 
+            "author": ["sourceType"], 
             "citation": ["citationType", "authors", "tags", "publication"], 
             "location": ["locationType", "habitatType"],
             "publication": ["publicationType", "authors", "publisher"],
