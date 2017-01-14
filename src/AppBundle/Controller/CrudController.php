@@ -10,8 +10,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use AppBundle\Entity\Source;
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Author;
 
 
 /**
@@ -31,20 +29,21 @@ class CrudController extends Controller
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }  print("\nCreating Source.\n");
+        }                                                                       //print("\nCreating Source.\n");
 
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
 
-        $formData = json_decode($requestContent);  //print("\nForm data =");print_r($formData);
+        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
         $srcData = $formData->source;
-        $detailEntName = $srcData->sourceType;
-        $detailData = $formData->$detailEntName;
-        $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
 
+        if ($srcData->hasDetail) {                                              //print("\nHas Detail.\n");
+            $detailEntName = $srcData->sourceType;
+            $detailData = $formData->$detailEntName;
+            $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
+            $detailEntity = new $detailEntClass();
+        }
         $srcEntity = new Source();
-        $detailEntity = new $detailEntClass();
-        $detailEntity->setDisplayName($detailData->displayName);
 
         print($detailEntity->getDisplayName());
 

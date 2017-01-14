@@ -465,7 +465,7 @@ $(document).ready(function(){
                 "exclude": ["Description", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkText"],
+                    "LinkUrl", "LinkDisplay"],
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", 
@@ -474,7 +474,7 @@ $(document).ready(function(){
                 "exclude": ["Display Name", "Description"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
                 "order": ["CitationText", "Title", "CitationType",    
-                    "Year", "Volume", "Issue", "Pages", "LinkUrl", "LinkText", "Doi", 
+                    "Year", "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
                     "Tags", "Authors" ],
             },
             "location": {
@@ -489,13 +489,13 @@ $(document).ready(function(){
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
-                    "LinkUrl", "LinkText", "Publisher", "Authors" ],
+                    "LinkUrl", "LinkDisplay", "Publisher", "Authors" ],
             },
             "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["Display Name"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] },
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] },
         };
         return fieldMap[entity];
     }
@@ -515,7 +515,7 @@ $(document).ready(function(){
                 "Latitude": "text", "Habitat Type": "select", "Location Type": "select"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+                "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
                 "Authors": "multiSelect" 
             }
         };
@@ -903,9 +903,14 @@ $(document).ready(function(){
         /**
          * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
          * or author are to Source), that entity is added as the 'type' of it's parent. 
+         * 'hasDetail' is added to trigger detail entity processing on the server.
          */
         function handleDetailTypeField() {
-            if (pEntity) { data[pEntity][pEntity+"Type"] = entity; }    
+            var notDetailEntity = ["Publisher"];
+            if (pEntity) { 
+                data[pEntity][pEntity+"Type"] = entity; 
+            }    
+            data[pEntity].hasDetail = notDetailEntity.indexOf(entity) === -1;
         }
     } /* End buildFormDataObj */
     /**
