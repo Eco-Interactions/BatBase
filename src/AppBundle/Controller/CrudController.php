@@ -42,8 +42,10 @@ class CrudController extends Controller
             $detailData = $formData->$detailEntName;
             $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
             $detailEntity = new $detailEntClass();
+            $this->setEntityData($detailData, $detailEntity, $em);
         }
         $srcEntity = new Source();
+        $this->setEntityData($srcData, $srcEntity, $em);
 
         print($detailEntity->getDisplayName());
 
@@ -52,6 +54,23 @@ class CrudController extends Controller
             'YouRock' => 'SuperDuper'
         ));
         return $response;
+    }
+    /**
+     * Calls the set method for both types of entity data, flat and relational, 
+     * and persists the entity.
+     */
+    private function setEntityData($formData, &$entity, &$em)
+    {
+        $this->setFlatData($formData->flat, $entity, $em);
+        $em->persist($entity);
+    }
+    private function setFlatData($formData, &$entity, &$em)
+    {
+        foreach ($formData as $field => $val) {
+            $setField = 'set'. ucfirst($field);
+            $entity->$setField($val);
+        }
+
     }
 
 }
