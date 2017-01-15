@@ -1002,12 +1002,17 @@ $(document).ready(function(){
         var topEntity = getParentEntity(cParams.subForms[formLvl].entity);  console.log("entity = ", topEntity);
         var url = getEntityUrl(topEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;
-        sendAjaxQuery(formData, url, formSubmitSucess);
+        sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
         // window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         return envUrl + "admin/crud/" + entityName + "/" + action;
+    }
+    function formSubmitError(jqXHR, textStatus, errorThrown) {  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+        var formLvl = cParams.ajaxFormLvl;  console.log("formLvl = ", formLvl)
+        $('#'+formLvl+'-hdr').after(
+            '<p class="form-errors"">There was an error during form submission.</p>');        
     }
     /**
      * Ajax success callback. Exit's the successfully submitted form, adds and 
@@ -1175,12 +1180,12 @@ $(document).ready(function(){
         $('.wsywigEdit').remove();  
     }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-    function sendAjaxQuery(dataPkg, url, successCb) {                           console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+    function sendAjaxQuery(dataPkg, url, successCb, errCb) {                    console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
         $.ajax({
             method: "POST",
             url: url,
             success: successCb || dataSubmitSucess,
-            error: ajaxError,
+            error: errCb || ajaxError,
             data: JSON.stringify(dataPkg)
         });
     }
@@ -1193,7 +1198,7 @@ $(document).ready(function(){
         console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
-        console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
+        console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 
 }());  // End of namespacing anonymous function 
