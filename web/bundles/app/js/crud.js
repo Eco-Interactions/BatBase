@@ -781,37 +781,7 @@ $(document).ready(function(){
     /** Enables passed submit button */
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
-    }    
-/*--------------------------- Helpers ----------------------------------------*/
-    /*------------------- Error Handlers -------------------------------------*/
-    /**
-     * When the user attempts to create an entity that uses the sub2-form and
-     * there is already a sub2-form instance, show the user an error message and 
-     * reset the select elem. 
-     */
-    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = %s, cP = %O ", selElemId, cParams)
-        var selectizedElem = cParams.selectizeApi["sub"][selElemId];
-        crudFieldErrorHandler(field, 'openSub2Form');
-        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
-        return { "value": "", "text": "Select " + field };
-    }
-    /** Shows the user an error message above the field row. */
-    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
-        var errMsgMap = {
-            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
-            "openSub2Form": "<p>Please finish the open "+ 
-                _util.ucfirst(cParams.subForms.sub2.entity) + " form.</p>",
-        };
-        var msg = errMsgMap[errorTag];
-        var errElem = fieldErrElem || getErrElem(fieldName);
-        errElem.innerHTML = msg;
-        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
-    }
-    /** Returns the error div for the passed field. */
-    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
-        var field = fieldName.split(' ').join('');
-        return $('#'+field+'_errs')[0];    
-    }    
+    }  
     /*----------------------- Form Submission -----------------------------------------------------*/
     /**
      * Loops through all rows in the form with the passed id and builds an object of 
@@ -998,6 +968,7 @@ $(document).ready(function(){
         };
         return relationships[entity];
     }
+/*--------------------------- Helpers ----------------------------------------*/ 
     /*------------- AJAX -----------------------------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
@@ -1033,8 +1004,35 @@ $(document).ready(function(){
         // selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
         // selElemApi.addItem("123456");
     }
-    
-
+    /*------------------- Form Error Handlers --------------------------------*/
+    /**
+     * When the user attempts to create an entity that uses the sub2-form and
+     * there is already a sub2-form instance, show the user an error message and 
+     * reset the select elem. 
+     */
+    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = %s, cP = %O ", selElemId, cParams)
+        var selectizedElem = cParams.selectizeApi["sub"][selElemId];
+        crudFieldErrorHandler(field, 'openSub2Form');
+        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
+        return { "value": "", "text": "Select " + field };
+    }
+    /** Shows the user an error message above the field row. */
+    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+        var errMsgMap = {
+            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
+            "openSub2Form": "<p>Please finish the open "+ 
+                _util.ucfirst(cParams.subForms.sub2.entity) + " form.</p>",
+        };
+        var msg = errMsgMap[errorTag];
+        var errElem = fieldErrElem || getErrElem(fieldName);
+        errElem.innerHTML = msg;
+        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
+    }
+    /** Returns the error div for the passed field. */
+    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
+        var field = fieldName.split(' ').join('');
+        return $('#'+field+'_errs')[0];    
+    }   
 
 
 
@@ -1045,7 +1043,7 @@ $(document).ready(function(){
 
 
  
-/*--------------------- Content Block WYSIWYG --------------------------------*/
+/*=================== Content Block WYSIWYG ======================================================*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
      */
