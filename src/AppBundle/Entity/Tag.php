@@ -26,9 +26,9 @@ class Tag
     /**
      * @var text
      *
-     * @ORM\Column(name="tag", type="string", length=255, unique=true, nullable=false)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      */
-    private $tag;
+    private $displayName;
 
     /**
      * @var text
@@ -50,7 +50,7 @@ class Tag
     private $citations;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", inversedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags")
      * @ORM\JoinTable(name="source_tag")
      */
     private $sources;
@@ -129,25 +129,25 @@ class Tag
     }
 
     /**
-     * Set tag.
+     * Set displayName.
      *
      * @return string
      */
-    public function setTag($tag)
+    public function setDisplayName($displayName)
     {
-        $this->tag = $tag;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get tag.
+     * Get displayName.
      *
      * @return string
      */
-    public function getTag()
+    public function getDisplayName()
     {
-        return $this->tag;
+        return $this->displayName;
     }
 
     /**

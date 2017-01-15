@@ -100,7 +100,7 @@ class Source
     private $sourceType;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="sources")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="sources")
      * @ORM\JoinTable(name="source_tag")
      */
     private $tags;
@@ -361,7 +361,7 @@ class Source
      *
      * @param bool $isDirect
      *
-     * @return Interaction
+     * @return Source
      */
     public function setIsDirect($isDirect)
     {
@@ -468,7 +468,7 @@ class Source
      *
      * @param \AppBundle\Entity\Tag $tag
      *
-     * @return Interaction
+     * @return Source
      */
     public function addTag(\AppBundle\Entity\Tag $tag)
     {
