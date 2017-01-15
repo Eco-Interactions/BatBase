@@ -862,10 +862,14 @@ $(document).ready(function(){
         /** Entity fields not included in the form are added here. */
         function ifHasAdditionalFields(entity) {
             var getFields = {
-                "Author": getAuthFullName
+                "Author": getAuthFullName, "Citation": addCitDisplayName
             };
             if (Object.keys(getFields).indexOf(entity) === -1) { return; }
             getFields[entity]();
+        }
+        /** Adds 'displayName', which will be added to both the form data objects. */
+        function addCitDisplayName() {
+            formVals.displayName = formVals.title;
         }
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
         function getAuthFullName() { 
@@ -897,10 +901,8 @@ $(document).ready(function(){
         var rels = getRelationshipFields(entity);
         var data = buildFormDataObj();
 
-        for (var field in formVals) {                                           //console.log("processing field = ", field)
-            getFormFieldData(field, formVals[field]);
-        }                                                                       //console.log("formData = %O", data);
-        handleDetailTypeField();
+        for (var field in formVals) { getFormFieldData(field, formVals[field]); }
+        handleDetailTypeField();                                                //console.log("formData = %O", data);
         return data;
 
         function buildFormDataObj() {
@@ -974,8 +976,10 @@ $(document).ready(function(){
                 "authors": { "source": "contributor" },
                 "citationText": { "source": "description", "citation": "fullText" },
                 "publication": { "source": "parentSource" },
-                "title": { "source": "displayName", "citation": "displayName",
-                    "citation": "title" },
+                "displayName": { "source": "displayName", "citation": "displayName" },
+                "volume": { "citation": "publicationVolume" },
+                "issue": { "citation": "publicationIssue" },
+                "pages": { "citation": "publicationPages" },
             },
             "author": {
                 "displayName": { "source": "displayName", "author": "displayName" }
