@@ -530,7 +530,7 @@ $(document).ready(function(){
      * Returns a container div with the rows ready to be appended to the form window.
      */
     function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
-        var buildFieldType = { "text": buildTextInput, "tags": buildSelectElem, 
+        var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
         var defaultRows = buildDefaultRows();
@@ -646,6 +646,15 @@ $(document).ready(function(){
         return _util.buildSimpleOpts(typeAry);    
     }
     /**
+     * Creates and returns a select dropdown that will be initialized with 'selectize'
+     * to allow multiple selections. A data property is added for use form submission.
+     */
+    function buildTagsElem(entity, field) {
+        var tagSel = buildSelectElem(entity, field);
+        $(tagSel).data("inputType", "tags");
+        return tagSel;
+    }
+    /**
      * Returns an array of options objects for tags of the passed entity.
      * Note: Hardcoded temporarily. 
      */
@@ -666,7 +675,7 @@ $(document).ready(function(){
        var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
        var selElem = buildSelectElem(entity, field, 1);
        $(cntnr).data("cnt", 1);
-       $(cntnr).data("valType", "multiSelect");
+       $(cntnr).data("inputType", "multiSelect");
        $(cntnr).append(selElem);
        return cntnr;
     }
@@ -789,7 +798,7 @@ $(document).ready(function(){
     /**
      * Loops through all rows in the form with the passed id and builds an object of 
      * filled field values keyed under server-ready field names to submit @submitFormVals.
-     * Realted parent-form field values are handled @ifHasParentFormVals   
+     * Entity data not contained in an input on the form is added @addAdditionalEntityData.
      */
     function getFormValuesAndSubmit(id, formLvl, entity) {  
         var elems = $(id)[0].children;   
@@ -797,20 +806,25 @@ $(document).ready(function(){
         
         for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
 
-        ifHasParentFormVals(entity);
-        ifHasAdditionalFields(entity);
-
+        addAdditionalEntityData(entity);
         submitFormVals(formLvl, formVals);
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
             var input = elem.children[1].children[1];
-            if ($(input).data("valType") == "multiSelect") { 
-                getMultiSelectVals(fieldName, input); 
+            if ($(input).data("inputType")) { 
+                getInputVals(fieldName, input, $(input).data("inputType")); 
             }
             if (input.value) { formVals[fieldName] = input.value; }
         }
-        /** Adds an array of selected values in the passed select container. */
+        /** Edge case input type values are processed via their type handlers. */
+        function getInputVals(fieldName, input, type) {
+            var typeHandlers = {
+                "multiSelect": getMultiSelectVals, "tags": getTagVals
+            };
+            typeHandlers[type](fieldName, input);
+        }
+        /** Adds an array of selected values from the passed select container.*/
         function getMultiSelectVals(fieldName, cntnr) {
             var vals = [];
             var elems = cntnr.children;  
@@ -819,10 +833,21 @@ $(document).ready(function(){
             }
             formVals[fieldName] = vals;
         }
+        /** Adds an array of tag values. */
+        function getTagVals(fieldName, input) {                                 
+            var selId = '#'+_util.ucfirst(fieldName)+'-sel';
+            var selApi = cParams.forms[formLvl].selApi[selId];
+            formVals[fieldName] = selApi.getValue();            
+        }
         /**
-         * Form entities that need data from a form element at the parent form level
-         * are handled here. 
+         * Realted parent-form field values are added @ifHasParentFormVals.
+         * Additional field values are added at @ifHasAdditionalFields.
          */
+        function addAdditionalEntityData(entity) {
+            ifHasParentFormVals(entity);
+            ifHasAdditionalFields(entity);  
+        }
+        /** Adds data from a form element at the parent form level, if needed. */
         function ifHasParentFormVals(entity) {
             var newField;
             var relFormFields = {
@@ -832,7 +857,7 @@ $(document).ready(function(){
             newField = relFormFields[entity];                               //console.log("new fieldName = ", newField)
             formVals[newField] = $('#'+_util.ucfirst(newField)+'-sel').val();
         }
-        /** Entity fields not included in the form are added here. */
+        /** Adds entity field values not included as inputs in the form. */
         function ifHasAdditionalFields(entity) {
             var getFields = {
                 "Author": getAuthFullName, "Citation": addCitDisplayName
