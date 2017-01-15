@@ -816,21 +816,27 @@ $(document).ready(function(){
     /**
      * Loops through all rows in the form with the passed id and builds an object of 
      * filled field values keyed under server-ready field names to submit @submitFormVals.
-     * Realted parent-form field values are handled @getParentFormVals   
+     * Realted parent-form field values are handled @ifHasParentFormVals   
      */
     function getFormValuesAndSubmit(id, formLvl, entity) {  
-        var fieldName, input;
         var elems = $(id)[0].children;   
-        var needsParentVals = ["Citation", "Location"];  
         var formVals = {};
-        for (var i = 1; i < elems.length-1; i++) {                              //console.log("elems[i] = %O", elems[i])
-            fieldName = _util.lcfirst(elems[i].children[1].children[0].innerText.trim().split(" ").join("")); 
-            input = elems[i].children[1].children[1];
-            if ($(input).data("valType") == "multiSelect") { getMultiSelectVals(fieldName, input); }
-            if (input.value) { formVals[fieldName] = input.value; }
-        }            
-        if (needsParentVals.indexOf(entity) !== -1) { getParentFormVals(); }                                                           
+        
+        for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
+
+        ifHasParentFormVals(entity);
+        ifHasAdditionalFields(entity);
+
         submitFormVals(formLvl, formVals);
+        /** Get's the value from the form elem and set it into formVals. */
+        function getInputData(elem) {
+            var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
+            var input = elem.children[1].children[1];
+            if ($(input).data("valType") == "multiSelect") { 
+                getMultiSelectVals(fieldName, input); 
+            }
+            if (input.value) { formVals[fieldName] = input.value; }
+        }
         /** Adds an array of selected values in the passed select container. */
         function getMultiSelectVals(fieldName, cntnr) {
             var vals = [];
@@ -840,13 +846,35 @@ $(document).ready(function(){
             }
             formVals[fieldName] = vals;
         }
-        /** Get's the value of a realted form field elem in the parent form. */
-        function getParentFormVals() {
+        /**
+         * Form entities that need data from a form element at the parent form level
+         * are handled here. 
+         */
+        function ifHasParentFormVals(entity) {
+            var newField;
             var relFormFields = {
                 "Citation": "publication", "Location": "country"
             };
-            var newField = relFormFields[entity];  console.log("new fieldName = ", newField)
+            if (["Citation", "Location"].indexOf(entity) === -1) { return; }
+            newField = relFormFields[entity];                               //console.log("new fieldName = ", newField)
             formVals[newField] = $('#'+_util.ucfirst(newField)+'-sel').val();
+        }
+        /** Entity fields not included in the form are added here. */
+        function ifHasAdditionalFields(entity) {
+            var getFields = {
+                "Author": getAuthFullName
+            };
+            if (Object.keys(getFields).indexOf(entity) === -1) { return; }
+            getFields[entity]();
+        }
+        /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
+        function getAuthFullName() { 
+            var nameFields = ["firstName", "middleName", "lastName"];
+            var fullName = [];
+            nameFields.forEach(function(field) {
+                if (formVals[field]) { fullName.push(formVals[field]) };
+            });
+            formVals.fullName = fullName.join(" ");
         }
     } /* End getFormValuesAndSubmit */
     /**
