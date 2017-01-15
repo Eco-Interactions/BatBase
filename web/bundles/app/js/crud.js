@@ -369,7 +369,7 @@ $(document).ready(function(){
      * that allow users to search by typing and, when configured, add new options 
      * not in the list by triggering a sub-form for that entity.
      */
-    function initSelectCombobox(confg, formLevel) {                             //console.log("initSelectCombobox. CONFG = %O. formLevel = ", confg, formLevel)
+    function initSelectCombobox(confg, formLvl) {                               //console.log("initSelectCombobox. CONFG = %O. formLvl = ", confg, formLvl)
         var options = {
             create: confg.add,
             onChange: confg.change,
@@ -377,7 +377,7 @@ $(document).ready(function(){
         };
         if (confg.options) { addAdditionalOptions(); }
         $(confg.id).selectize(options);  
-        cParams.selectizeApi[formLevel][confg.id] = $(confg.id)[0].selectize;
+        cParams.selectizeApi[formLvl][confg.id] = $(confg.id)[0].selectize;
         /** All non-standard options are added to this 'options' prop. */ 
         function addAdditionalOptions() {
             for (var opt in confg.options) {
@@ -409,8 +409,8 @@ $(document).ready(function(){
         });
         cParams.subForms[formLvl].selElems = [];
     } 
-    function disableFormParentSelectElem(selElemId, formLevel) {
-        disableCombobox(selElemId, getNextFormLevel("parent", formLevel));
+    function disableFormParentSelectElem(selElemId, formLvl) {
+        disableCombobox(selElemId, getNextFormLevel("parent", formLvl));
     }
     function disableCombobox(selId, formLvl) {                                  //console.log("selId = %s, lvl = %s", selId, formLvl)
         var selectized = cParams.selectizeApi[formLvl][selId];
@@ -426,16 +426,16 @@ $(document).ready(function(){
      * Builds and returns the subForm according to the passed params. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLevel, formClasses, fieldVals, selElemId) {
+    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selElemId) {
         var subFormContainer = _util.buildElem('div', {
-            id: formLevel+'-form', class: formClasses + ' flex-wrap'}); 
+            id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
-            "p", { "text": "New "+_util.ucfirst(formEntity), "class": "sub-form-hdr" });
-        var subForm = buildSubForm(formEntity, fieldVals, formLevel, selElemId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, selElemId));
+            "p", { "text": "New "+_util.ucfirst(formEntity), "id": formLvl+"-hdr" });
+        var subForm = buildSubForm(formEntity, fieldVals, formLvl, selElemId);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, selElemId));
         $(subFormContainer).append([hdr].concat(subForm));
-        cParams.subForms[formLevel].pSelElemId = selElemId;
-        disableFormParentSelectElem(selElemId, formLevel);
+        cParams.subForms[formLvl].pSelElemId = selElemId;
+        disableFormParentSelectElem(selElemId, formLvl);
         return subFormContainer;
     }
     /** 
@@ -525,7 +525,7 @@ $(document).ready(function(){
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(entity, formCnfg, fieldVals, formLevel) {         //console.log("  Building Form rows. arguemnts = %O", arguments);
+    function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "tags": buildSelectElem, 
             "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
@@ -535,12 +535,12 @@ $(document).ready(function(){
         /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
             var dfltFields = getParentEntityFields(entity);
-            var exclude = cParams.subForms[formLevel].confg.exclude;
+            var exclude = cParams.subForms[formLvl].confg.exclude;
             return buildRows(dfltFields, exclude);
         }
         /** Adds fields specific to a sub-entity. */
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var addedFields = cParams.subForms[formLevel].confg.add;
+            var addedFields = cParams.subForms[formLvl].confg.add;
             return buildRows(addedFields);
         }
         /**
@@ -551,7 +551,7 @@ $(document).ready(function(){
             var rows = [];
             for (var field in fieldGroup) {                                     //console.log("      field = ", field);
                 if (exclude && (exclude === true || exclude.indexOf(field) !== -1)) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, fieldGroup, formLevel));
+                rows.push(buildRow(field, fieldGroup, formLvl));
             }
             return rows;
         }
@@ -560,13 +560,13 @@ $(document).ready(function(){
          * and sends both to @buildFormRow, returning the completed row elem.
          * Sets the value for the field if it is in the passed 'fieldVals' obj. 
          */
-        function buildRow(field, fieldsObj, formLevel) {
+        function buildRow(field, fieldsObj, formLvl) {
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = cParams.subForms[formLevel].confg.required;
+            var reqFields = cParams.subForms[formLvl].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             var rowClass = fieldsObj[field] === "fullTextArea" ? "long-sub-row" : "";
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
-            return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq, rowClass);
+            return buildFormRow(_util.ucfirst(field), fieldInput, formLvl, isReq, rowClass);
         }
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
@@ -671,15 +671,15 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(fieldName, fieldInput, formLevel, isReq, rowClss) {
+    function buildFormRow(fieldName, fieldInput, formLvl, isReq, rowClss) {
         var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
-        var rowClass = rowClasses[formLevel] + " " + rowClss;
+        var rowClass = rowClasses[formLvl] + " " + rowClss;
         var field = fieldName.split(' ').join('');
         var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        if (isReq) { handleRequiredField(label, fieldInput, formLevel); } 
+        if (isReq) { handleRequiredField(label, fieldInput, formLvl); } 
         $(fieldRow).append([label, fieldInput]);
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
@@ -690,11 +690,11 @@ $(document).ready(function(){
      * disabling the submit button and a form-level data property. The input elem
      * is added to the form param's reqElems property. 
      */
-    function handleRequiredField(label, input, formLevel) {
+    function handleRequiredField(label, input, formLvl) {
         $(label).addClass('required');  
         $(input).change(checkRequiredFields);
-        $(input).data("formLvl", formLevel);
-        cParams.subForms[formLevel].reqElems.push(input);
+        $(input).data("formLvl", formLvl);
+        cParams.subForms[formLvl].reqElems.push(input);
     }
     /**
      * On a required field's change event, the submit button for the element's form 
@@ -752,8 +752,8 @@ $(document).ready(function(){
      * Removes the form container with the passed id, clears and enables the combobox,
      * and contextually enables to parent form's submit button @ifParentFormValid. 
      */
-    function exitForm(id, formLevel, parentElemId) {                            //  console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
-        var parentLvl = getNextFormLevel('parent', formLevel);
+    function exitForm(id, formLvl, parentElemId) {                              //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
+        var parentLvl = getNextFormLevel('parent', formLvl);
         var selectized = cParams.selectizeApi[parentLvl][parentElemId];      
         selectized.clear();
         selectized.enable();
@@ -762,10 +762,10 @@ $(document).ready(function(){
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
-        var formLevels = cParams.formLevels;
+        var formLvls = cParams.formLevels;
         var nextLvl = nextLvl === "parent" ? 
-            formLevels[formLevels.indexOf(curLvl) - 1] : 
-            formLevels[formLevels.indexOf(curLvl) + 1] ;
+            formLvls[formLvls.indexOf(curLvl) - 1] : 
+            formLvls[formLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
     }
     /** Enables the parent form's submit button if all required fields have values. */
@@ -933,8 +933,8 @@ $(document).ready(function(){
          * or author are to Source), that entity is added as the 'type' of it's parent and 
          * 'hasDetail' is added to trigger detail entity processing on the server.
          */
-        function handleDetailTypeField() {
-            var nonDetailEntities = ["Publisher"];
+        function handleDetailTypeField() {  
+            var nonDetailEntities = ["publisher"];
             if (pEntity) { 
                 data[pEntity].rel[pEntity+"Type"] = entity; 
                 data[pEntity].hasDetail = nonDetailEntities.indexOf(entity) === -1;
