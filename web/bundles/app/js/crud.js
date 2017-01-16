@@ -1009,7 +1009,9 @@ $(document).ready(function(){
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
         // var stubData = {};
-        // stubData[cParams.forms[formLvl].entity] = "123456";
+        // var stubName = formData[cParams.forms[formLvl].entity].flat.displayName;
+        // stubData[cParams.forms[formLvl].entity] = {};
+        // stubData[cParams.forms[formLvl].entity][stubName] = "123456";
         var topEntity = getParentEntity(cParams.forms[formLvl].entity);         //console.log("entity = ", topEntity);
         var url = getEntityUrl(topEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;

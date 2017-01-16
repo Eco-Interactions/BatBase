@@ -6,16 +6,15 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         --Source's have full name as display name and authors are using last name...
 
     --FORM--
-        -- fix tabs on selectize: https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
+        -- Bring focus to first field on form open
+        -- fix tabs on selectize (test whether firefox bug only??): https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
+
+    --Asac---
+        -- Import all citation_tags into source_tags.
+        --Create service for building entity data objects.
+            --For use in search and crud controllers
 
 TAYLOR:
-    -- How to show details about a pub/cit selection in form. 
-        -- More info could be needed to ensure correct selections, especially for citations.
-
-    --Citation display names
-        -- Currently title is used
-        -- Should we prompt for display name or title?
-        -- How to generate  
 
 Questions:
     -- 
