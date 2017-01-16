@@ -1021,9 +1021,10 @@ $(document).ready(function(){
         return envUrl + "admin/crud/" + entityName + "/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = cParams.ajaxFormLvl;  console.log("formLvl = ", formLvl)
+        var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)
         $('#'+formLvl+'-hdr').after(
-            '<p class="form-errors"">There was an error during form submission.</p>');        
+            '<p class="form-errors"">There was an error during form submission.</p>');
+        window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
     }
     /**
      * Ajax success callback. Exit's the successfully submitted form, adds and 
