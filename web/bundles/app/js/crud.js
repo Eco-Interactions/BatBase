@@ -144,6 +144,7 @@ $(document).ready(function(){
         $('#crud-main').append(formCntnr);
         initTopFormCombobox("publication");
         initTopFormCombobox("citation");
+        cParams.forms.top.selApi['#Publication-sel'].focus();
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -206,6 +207,7 @@ $(document).ready(function(){
         var sel = $('#Citation-sel')[0].selectize;
         updateComboboxOptions(sel, citOpts);
         sel.enable();
+        sel.focus();
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubRcrd) {
@@ -236,6 +238,7 @@ $(document).ready(function(){
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
+        cParams.forms.top.selApi['#Country-sel'].focus();
     }
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }          
@@ -271,6 +274,7 @@ $(document).ready(function(){
         var opts = getChildLocOpts(cntry);    
         var selApi = cParams.forms.top.selApi['#Location-sel'];
         updateComboboxOptions(selApi, opts);
+        cParams.forms.top.selApi['#Location-sel'].focus();
     }
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
@@ -323,6 +327,7 @@ $(document).ready(function(){
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, "sub");
+        cParams.forms.sub.selApi['#Authors-sel'+cnt].focus();
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
