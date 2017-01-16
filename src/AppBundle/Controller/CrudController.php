@@ -49,7 +49,9 @@ class CrudController extends Controller
 
         if ($srcData->hasDetail) { $detailEntity->setSource($srcEntity); } 
         
-        return $this->attemptFlushAndSendResponse($srcEntity, $detailEntity, $em);
+        return $this->attemptFlushAndSendResponse(
+            $srcEntity, $detailEntity, $formData, $em
+        );
     }
     /**
      * Calls the set method for both types of entity data, flat and relational, 
@@ -125,7 +127,7 @@ class CrudController extends Controller
      * Attempts to flush all persisted data. If there are no errors, the created/updated 
      * data is sent back to the crud form; otherise, an error message is sent back.
      */
-    private function attemptFlushAndSendResponse($entity, $subEntity, &$em)
+    private function attemptFlushAndSendResponse($entity, $subEntity, $formData, &$em)
     {        
         try {
             $em->flush();
@@ -134,18 +136,7 @@ class CrudController extends Controller
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e, "\Exception");
         }
-        return $this->sendDataAndResponse($em, $entity, $subEntity);
-    }
-    /**
-     * Sends an object with all created/updated data back to the crud form. 
-     */
-    private function sendDataAndResponse($em, $entity, $subEntity)
-    {
-        $response = new JsonResponse();
-        $response->setData(array(
-            'YouRock' => 'SuperDuper'
-        ));
-        return $response;
+        return $this->sendDataAndResponse($entity, $subEntity, $formData, $em);
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e, $tag)
@@ -157,5 +148,35 @@ class CrudController extends Controller
             $tag => $e->getMessage()
         ));
         return $response;
+    }
+    /**
+     * Sends an object with all created/updated data back to the crud form. 
+     */
+    private function sendDataAndResponse($entity, $subEntity, $formData, $em)
+    {
+        $returnData = $this->buildUpdatedDataObj($formData, $entity, $subEntity);
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'results' => $returnData
+        ));
+        return $response;
+    }
+    /**
+     * Returns an object with the form entity's display name and the main entity's id 
+     */
+    private function buildUpdatedDataObj($formData, $entity, $subEntity)
+    {
+        //Stub Methods
+        $displayName = "";
+        $id = "";
+
+        if ($subEntity !== false) { 
+            $displayName = $subEntity->getDisplayName(); 
+        } else { 
+            $displayName = $entity->getDisplayName(); 
+        }
+        $id = $entity->getId();
+        return [ $displayName => $id ];
     }
 }

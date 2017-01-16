@@ -1035,9 +1035,11 @@ $(document).ready(function(){
         var formSelId = cParams.forms[formLvl].pSelElemId;  
         var selElemApi = cParams.forms[pFormLvl].selApi[formSelId]; 
 
-        // exitForm("#"+formLvl+"-form", formLvl, formSelId); 
-        // selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
-        // selElemApi.addItem("123456");
+        /* Stubby */
+        var displayName = Object.keys(data.results)[0];  console.log("displayName = ", displayName)
+        exitForm("#"+formLvl+"-form", formLvl, formSelId); 
+        selElemApi.addOption({ "value": data.results[displayName], "text": displayName });
+        selElemApi.addItem(data.results[displayName]);
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**
