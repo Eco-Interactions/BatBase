@@ -978,6 +978,7 @@ $(document).ready(function(){
                 "volume": { "citation": "publicationVolume" },
                 "issue": { "citation": "publicationIssue" },
                 "pages": { "citation": "publicationPages" },
+                "tags": { "source": "tags" }
             },
             "author": {
                 "displayName": { "source": "displayName", "author": "displayName" }

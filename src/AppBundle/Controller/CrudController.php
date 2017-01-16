@@ -75,6 +75,8 @@ class CrudController extends Controller
         $edgeCases = [
             "contributor" => function($ary) use ($entity, &$em) { 
                 $this->addContributors($ary, $entity, $em); },
+            "tags" => function($ary) use ($entity, &$em) { 
+                $this->addTags($ary, $entity, $em); },
         ];
         foreach ($formData as $rEntityName => $val) {  
             $setField = 'set'. ucfirst($rEntityName);                           
@@ -108,6 +110,15 @@ class CrudController extends Controller
             $contribEntity->setWorkSource($srcEntity);
             $contribEntity->setAuthorSource($authSrc);
             $em->persist($contribEntity);
+        }  
+    }
+    /** Creates a new Contribution for each author source in the array. */
+    private function addTags($ary, &$srcEntity, &$em)
+    {
+        foreach ($ary as $tag) {
+            $tagEnt = $em->getRepository("AppBundle:Tag")
+                ->findOneBy(['displayName' => $tag]);
+            $srcEntity->addTag($tagEnt);
         }  
     }
     /**
