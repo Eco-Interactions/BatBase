@@ -234,7 +234,8 @@ $(document).ready(function(){
      * available countries.
      */
     function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
-        var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  
+        var cntryObj = JSON.parse(localStorage.getItem('countries'));
+        var cntryOpts = buildOptsObj(cntryObj, Object.keys(cntryObj).sort());  
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
@@ -645,10 +646,10 @@ $(document).ready(function(){
      * Regions and Countries will be available for a higher-level access editor.
      */
     function getLocationTypeOpts(typeKey) {
-        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort(); 
-        typeAry.splice(typeAry.indexOf("region"), 1); 
-        typeAry.splice(typeAry.indexOf("country"), 1); 
-        return _util.buildSimpleOpts(typeAry);    
+        var typeObj = JSON.parse(localStorage.getItem(typeKey));  console.log("locTypes = %O", typeObj)
+        delete typeObj.region;
+        delete typeObj.country;
+        return buildOptsObj(typeObj, Object.keys(typeObj).sort());
     }
     /**
      * Creates and returns a select dropdown that will be initialized with 'selectize'
