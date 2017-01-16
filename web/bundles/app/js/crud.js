@@ -78,22 +78,19 @@ $(document).ready(function(){
     /*--------------- CRUD Params Object -------------------------------------*/
     /**
      * Sets the global cParams obj with the params necessary throughout the 
-     * crud form interface.
-     * @param action - eg, Create, Edit.
-     * @param subForms - Container for subform-specific params 
-     * @param formLevels - An array of the form level names/tags/prefixes/etc.
-     * @param selectizeApi - Contains the selectize libray's api organized by 
-     *    form-level and the select elem parent for each selectized combobox elem. 
-     *     organized by form level and the parent select's id. 
-     * @param records - An object of all records, with id keys, for each of the 
-     *     root entities- Interaction, Location, Source and Taxa.
+     * crud form interface. 
+     * -- Property descriptions:
+     * > action - eg, Create, Edit.
+     * > forms - Container for form-specific params 
+     * > formLevels - An array of the form level names/tags/prefixes/etc.
+     * > records - An object of all records, with id keys, for each of the 
+     *   root entities- Interaction, Location, Source and Taxa.
      */
     function initCrudParams(action) {                                           //console.log("####cPs = %O", cParams)
         cParams = {
             action: action,
-            subForms: {},
+            forms: {},
             formLevels: ["top", "sub", "sub2"],
-            selectizeApi: { "top": {}, "sub": {}, "sub2": {} },
             records: {
                 "source": JSON.parse(localStorage.getItem('srcRcrds')),
                 "location": JSON.parse(localStorage.getItem('locRcrds')),
@@ -104,15 +101,24 @@ $(document).ready(function(){
     /**
      * Adds the properties and confg that will be used throughout the code for 
      * generating, validating, and submitting sub-form. 
+     * -- Property descriptions:
+     * > entity - Name of this form's entity
+     * > pSelElemId - The id of the parent select of the form.
+     * > selElems - Contains all selElems until they are initialized with selectize
+     * > reqElems - All required elements in the form.
+     * > confg - The form config object used during form building.          
+     * > selApi - Contains the selectize apis for each select elem keyed by 
+     *   the select field's id. 
      */
     function initFormLevelParamsObj(entity, level, pSel, formConfg) {           //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
-        cParams.subForms[entity] = level;
-        cParams.subForms[level] = {
+        cParams.forms[entity] = level;
+        cParams.forms[level] = {
             entity: entity,
             pSelElemId: pSel,
             selElems: [], 
             reqElems: [],
             confg: formConfg,
+            selApi: {}
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
@@ -138,6 +144,7 @@ $(document).ready(function(){
         $('#crud-main').append(formCntnr);
         initTopFormCombobox("publication");
         initTopFormCombobox("citation");
+        cParams.forms.top.selApi['#Publication-sel'].focus();
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -200,6 +207,7 @@ $(document).ready(function(){
         var sel = $('#Citation-sel')[0].selectize;
         updateComboboxOptions(sel, citOpts);
         sel.enable();
+        sel.focus();
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubRcrd) {
@@ -226,10 +234,12 @@ $(document).ready(function(){
      * available countries.
      */
     function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
-        var cntryOpts = buildOptsObj(JSON.parse(localStorage.getItem('countries')));  
+        var cntryObj = JSON.parse(localStorage.getItem('countries'));
+        var cntryOpts = buildOptsObj(cntryObj, Object.keys(cntryObj).sort());  
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
+        cParams.forms.top.selApi['#Country-sel'].focus();
     }
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }          
@@ -263,8 +273,9 @@ $(document).ready(function(){
      */ 
     function fillLocationSelect(cntry) {                                        //console.log("fillLocationSelect for cntry = %O", cntry);
         var opts = getChildLocOpts(cntry);    
-        var selApi = cParams.selectizeApi.top['#Location-sel'];
+        var selApi = cParams.forms.top.selApi['#Location-sel'];
         updateComboboxOptions(selApi, opts);
+        cParams.forms.top.selApi['#Location-sel'].focus();
     }
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
@@ -309,7 +320,7 @@ $(document).ready(function(){
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
-        var parentFormEntity = cParams.subForms.sub.entity;
+        var parentFormEntity = cParams.forms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
 
@@ -317,6 +328,7 @@ $(document).ready(function(){
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, "sub");
+        cParams.forms.sub.selApi['#Authors-sel'+cnt].focus();
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
@@ -361,14 +373,13 @@ $(document).ready(function(){
     }
     /**
      * Inits the combobox, using 'selectize', according to the passed config. 
-     * Stores each element's selectize api in the global cParams.selectizeApi
-     * by form-level and the selectized elem's id.
-     *
+     * Stores each element's selectize api in the global cParams.forms[formLvl].selApi
+     * by the selectized elem's id.
      * Note: The 'selectize' library turns select dropdowns into input comboboxes
      * that allow users to search by typing and, when configured, add new options 
      * not in the list by triggering a sub-form for that entity.
      */
-    function initSelectCombobox(confg, formLevel) {                             //console.log("initSelectCombobox. CONFG = %O. formLevel = ", confg, formLevel)
+    function initSelectCombobox(confg, formLvl) {                               //console.log("initSelectCombobox. CONFG = %O. formLvl = ", confg, formLvl)
         var options = {
             create: confg.add,
             onChange: confg.change,
@@ -376,7 +387,7 @@ $(document).ready(function(){
         };
         if (confg.options) { addAdditionalOptions(); }
         $(confg.id).selectize(options);  
-        cParams.selectizeApi[formLevel][confg.id] = $(confg.id)[0].selectize;
+        cParams.forms[formLvl].selApi[confg.id] = $(confg.id)[0].selectize;
         /** All non-standard options are added to this 'options' prop. */ 
         function addAdditionalOptions() {
             for (var opt in confg.options) {
@@ -390,7 +401,7 @@ $(document).ready(function(){
      */
     function initSubFormComboboxes(entity) {
         var confg;
-        var formLvl = cParams.subForms[entity];
+        var formLvl = cParams.forms[entity];
         var selMap = { 
             "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
@@ -401,18 +412,18 @@ $(document).ready(function(){
             "Habitat_Type":  { name: "Habitat Type", change: false, add: false },
             "Location_Type":  { name: "Location Type", change: false, add: false },
         };
-        cParams.subForms[formLvl].selElems.forEach(function(field) {            //console.log("Initializing --%s-- select", field);
+        cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg, "sub");
         });
-        cParams.subForms[formLvl].selElems = [];
+        cParams.forms[formLvl].selElems = [];
     } 
-    function disableFormParentSelectElem(selElemId, formLevel) {
-        disableCombobox(selElemId, getNextFormLevel("parent", formLevel));
+    function disableFormParentSelectElem(selElemId, formLvl) {
+        disableCombobox(selElemId, getNextFormLevel("parent", formLvl));
     }
     function disableCombobox(selId, formLvl) {                                  //console.log("selId = %s, lvl = %s", selId, formLvl)
-        var selectized = cParams.selectizeApi[formLvl][selId];
+        var selectized = cParams.forms[formLvl].selApi[selId];
         selectized.disable();
     }      
     /** Reset the passed selectized element */ 
@@ -425,16 +436,16 @@ $(document).ready(function(){
      * Builds and returns the subForm according to the passed params. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLevel, formClasses, fieldVals, selElemId) {
+    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selElemId) {
         var subFormContainer = _util.buildElem('div', {
-            id: formLevel+'-form', class: formClasses + ' flex-wrap'}); 
+            id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
-            "p", { "text": "New "+_util.ucfirst(formEntity), "class": "sub-form-hdr" });
-        var subForm = buildSubForm(formEntity, fieldVals, formLevel, selElemId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLevel, selElemId));
+            "p", { "text": "New "+_util.ucfirst(formEntity), "id": formLvl+"-hdr" });
+        var subForm = buildSubForm(formEntity, fieldVals, formLvl, selElemId);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, selElemId));
         $(subFormContainer).append([hdr].concat(subForm));
-        cParams.subForms[formLevel].pSelElemId = selElemId;
-        disableFormParentSelectElem(selElemId, formLevel);
+        cParams.forms[formLvl].pSelElemId = selElemId;
+        disableFormParentSelectElem(selElemId, formLvl);
         return subFormContainer;
     }
     /** 
@@ -447,53 +458,56 @@ $(document).ready(function(){
         return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
     /**
-     * Returns a config object for the form of the selected source-type with the 
-     * fields to add to and exclude from the default source fields, the required
-     * fields, and the final order of the fields.
-     * Notes: 
-     * >> 'order' is used to matched the form elements' id, which has no spaces. 
-     * >> The publisher form is currenty non-existant
+     * Returns a form-config object for the passed entity. 
+     * -- Property descriptions:  
+     * > add - Additonal fields for a detail-entity. E.g. Citation is a detail-entity
+     *   of Source with a unique combination of fields from Source and itself.
+     * > exclude - Fields to exclude in a detail-entity form. E.g. Citation doesn't 
+     *   use Source's 'displayName' field as it's 'title' is it's display name. 
+     * > required - Required fields for the entity.
+     * > order - Order of the fields in the form. This is matched to the field elems' 
+     *   id, which has no spaces.
      */
-    function getSubFormConfg(type) {
+    function getSubFormConfg(entity) {
         var fieldMap = { 
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
                 "exclude": ["Description", "Year", "Doi", "Authors"],
                 "required": ["Last Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkText"]
+                    "LinkUrl", "LinkDisplay"],
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", 
                     "Issue": "text", "Pages": "text", "Tags": "tags", 
                     "Citation Text": "fullTextArea", "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
-                "required": ["Title", "Publication", "Citation Text", "Citation Type"],
+                "required": ["Title", "Citation Text", "Citation Type"],
                 "order": ["CitationText", "Title", "CitationType",    
-                    "Year", "Volume", "Issue", "Pages", "Doi", "LinkUrl", "LinkText", 
-                    "Tags", "Authors" ]
+                    "Year", "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
+                    "Tags", "Authors" ],
             },
             "location": {
                 "add": {},  
                 "exclude": [],
                 "required": ["Display Name", "Location Type"],
                 "order": ["DisplayName", "Description", "LocationType", "HabitatType", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude" ]
+                    "Elevation", "ElevationMax", "Latitude", "Longitude" ],
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
-                    "LinkUrl", "LinkText", "Publisher", "Authors" ]
+                    "LinkUrl", "LinkDisplay", "Publisher", "Authors" ],
             },
             "publisher": { 
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["Display Name"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkText"] }
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] },
         };
-        return fieldMap[type];
+        return fieldMap[entity];
     }
     /**
      * Returns an object of fields and field types for the passed detail-entity's
@@ -511,7 +525,7 @@ $(document).ready(function(){
                 "Latitude": "text", "Habitat Type": "select", "Location Type": "select"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Text": "text", "Link Url": "text", 
+                "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
                 "Authors": "multiSelect" 
             }
         };
@@ -521,8 +535,8 @@ $(document).ready(function(){
      * Builds all rows for the sub-form according to the passed formConfig obj. 
      * Returns a container div with the rows ready to be appended to the form window.
      */
-    function getFormFieldRows(entity, formCnfg, fieldVals, formLevel) {         //console.log("  Building Form rows. arguemnts = %O", arguments);
-        var buildFieldType = { "text": buildTextInput, "tags": buildSelectElem, 
+    function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
+        var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
         var defaultRows = buildDefaultRows();
@@ -531,12 +545,12 @@ $(document).ready(function(){
         /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
             var dfltFields = getParentEntityFields(entity);
-            var exclude = cParams.subForms[formLevel].confg.exclude;
+            var exclude = cParams.forms[formLvl].confg.exclude;
             return buildRows(dfltFields, exclude);
         }
         /** Adds fields specific to a sub-entity. */
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var addedFields = cParams.subForms[formLevel].confg.add;
+            var addedFields = cParams.forms[formLvl].confg.add;
             return buildRows(addedFields);
         }
         /**
@@ -547,7 +561,7 @@ $(document).ready(function(){
             var rows = [];
             for (var field in fieldGroup) {                                     //console.log("      field = ", field);
                 if (exclude && (exclude === true || exclude.indexOf(field) !== -1)) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, fieldGroup, formLevel));
+                rows.push(buildRow(field, fieldGroup, formLvl));
             }
             return rows;
         }
@@ -556,13 +570,13 @@ $(document).ready(function(){
          * and sends both to @buildFormRow, returning the completed row elem.
          * Sets the value for the field if it is in the passed 'fieldVals' obj. 
          */
-        function buildRow(field, fieldsObj, formLevel) {
+        function buildRow(field, fieldsObj, formLvl) {
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = cParams.subForms[formLevel].confg.required;
+            var reqFields = cParams.forms[formLvl].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             var rowClass = fieldsObj[field] === "fullTextArea" ? "long-sub-row" : "";
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
-            return buildFormRow(_util.ucfirst(field), fieldInput, formLevel, isReq, rowClass);
+            return buildFormRow(_util.ucfirst(field), fieldInput, formLvl, isReq, rowClass);
         }
     } /* End getFormFieldRows */
     /** Reorders the rows into the order set in the form config obj. */
@@ -588,29 +602,28 @@ $(document).ready(function(){
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
      * a larger set of select elems, the current count is appended to the id. Adds 
-     * the sel's fieldName to the subForm's 'selElem' array to later init 'selectize' 
-     * combobox. Adds a data property "valType" for use later during validation.
+     * the select's fieldName to the subForm config's 'selElem' array to later 
+     * init the 'selectize' combobox. 
      */
     function buildSelectElem(entity, field, cnt) {                                   
-        var formLvl = cParams.subForms[entity];
+        var formLvl = cParams.forms[entity];
         var fieldName = field.split(" ").join("_");
         var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'med-field'});
-        cParams.subForms[formLvl].selElems.push(fieldName);
-        $(sel).data("valType", "select");
+        cParams.forms[formLvl].selElems.push(fieldName);
         return sel;
     }
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
             "Authors": [ getOptsFromStoredData, 'authors'],
-            "Citation_Type": [ getTypeOpts, 'citTypes'],
-            "Publication_Type": [ getTypeOpts, 'pubTypes'],
+            "Citation_Type": [ getOptsFromStoredData, 'citTypes'],
+            "Publication_Type": [ getOptsFromStoredData, 'pubTypes'],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
             "Tags": [ getTagOpts, 'citation' ],
             "Location_Type": [ getLocationTypeOpts, 'locTypes'],
-            "Habitat_Type": [ getTypeOpts, 'habTypes'],
+            "Habitat_Type": [ getOptsFromStoredData, 'habTypes'],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -618,18 +631,14 @@ $(document).ready(function(){
     }
     /** Builds options out of a stored entity collection object. */
     function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
-        return buildOptsObj(JSON.parse(localStorage.getItem(prop)));
-    }
-    /** Builds options out of the entity's stored 'types' array. */
-    function getTypeOpts(typeKey) {
-        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort()
-        return _util.buildSimpleOpts(typeAry);
+        var dataObj = JSON.parse(localStorage.getItem(prop));
+        var sortedNameKeys = Object.keys(dataObj).sort();
+        return buildOptsObj(dataObj, sortedNameKeys);
     }
     /** Builds options out of the entity object, with id as 'value'. */
-    function buildOptsObj(entityObj) {
-        var sortedNameKeys = Object.keys(entityObj).sort();
-        return sortedNameKeys.map(function (name) {
-            return { value: entityObj[name], text: name }
+    function buildOptsObj(entityObj, sortedKeys) {
+        return sortedKeys.map(function (name) {
+            return { value: entityObj[name], text: _util.ucfirst(name) }
         });    
     }
     /**
@@ -637,10 +646,19 @@ $(document).ready(function(){
      * Regions and Countries will be available for a higher-level access editor.
      */
     function getLocationTypeOpts(typeKey) {
-        var typeAry = JSON.parse(localStorage.getItem(typeKey)).sort(); 
-        typeAry.splice(typeAry.indexOf("region"), 1); 
-        typeAry.splice(typeAry.indexOf("country"), 1); 
-        return _util.buildSimpleOpts(typeAry);    
+        var typeObj = JSON.parse(localStorage.getItem(typeKey));  console.log("locTypes = %O", typeObj)
+        delete typeObj.region;
+        delete typeObj.country;
+        return buildOptsObj(typeObj, Object.keys(typeObj).sort());
+    }
+    /**
+     * Creates and returns a select dropdown that will be initialized with 'selectize'
+     * to allow multiple selections. A data property is added for use form submission.
+     */
+    function buildTagsElem(entity, field) {
+        var tagSel = buildSelectElem(entity, field);
+        $(tagSel).data("inputType", "tags");
+        return tagSel;
     }
     /**
      * Returns an array of options objects for tags of the passed entity.
@@ -663,7 +681,7 @@ $(document).ready(function(){
        var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
        var selElem = buildSelectElem(entity, field, 1);
        $(cntnr).data("cnt", 1);
-       $(cntnr).data("valType", "multiSelect");
+       $(cntnr).data("inputType", "multiSelect");
        $(cntnr).append(selElem);
        return cntnr;
     }
@@ -671,15 +689,15 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
      */
-    function buildFormRow(fieldName, fieldInput, formLevel, isReq, rowClss) {
+    function buildFormRow(fieldName, fieldInput, formLvl, isReq, rowClss) {
         var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
-        var rowClass = rowClasses[formLevel] + " " + rowClss;
+        var rowClass = rowClasses[formLvl] + " " + rowClss;
         var field = fieldName.split(' ').join('');
         var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        if (isReq) { handleRequiredField(label, fieldInput, formLevel); } 
+        if (isReq) { handleRequiredField(label, fieldInput, formLvl); } 
         $(fieldRow).append([label, fieldInput]);
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
@@ -690,11 +708,11 @@ $(document).ready(function(){
      * disabling the submit button and a form-level data property. The input elem
      * is added to the form param's reqElems property. 
      */
-    function handleRequiredField(label, input, formLevel) {
+    function handleRequiredField(label, input, formLvl) {
         $(label).addClass('required');  
         $(input).change(checkRequiredFields);
-        $(input).data("formLvl", formLevel);
-        cParams.subForms[formLevel].reqElems.push(input);
+        $(input).data("formLvl", formLvl);
+        cParams.forms[formLvl].reqElems.push(input);
     }
     /**
      * On a required field's change event, the submit button for the element's form 
@@ -712,7 +730,7 @@ $(document).ready(function(){
     }
     /** Returns true if all the required elements for the current form have a value. */
     function ifRequiredFieldsFilled(formLvl) {
-        var reqElems = cParams.subForms[formLvl].reqElems;
+        var reqElems = cParams.forms[formLvl].reqElems;
         return reqElems.every(function(reqElem){ return reqElem.value; }); 
     }
     /** Returns true if the next sub-level form exists in the dom. */
@@ -744,7 +762,7 @@ $(document).ready(function(){
      */
     function getBttnEvents(entity, level, parentElemId) { 
         return { 
-            submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level), 
+            submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
             cancel: exitForm.bind(null, '#'+level+'-form', level, parentElemId) 
         };
     }
@@ -752,9 +770,9 @@ $(document).ready(function(){
      * Removes the form container with the passed id, clears and enables the combobox,
      * and contextually enables to parent form's submit button @ifParentFormValid. 
      */
-    function exitForm(id, formLevel, parentElemId) {                            //  console.log("id = %s, formLevel = %s, id = %s", id, formLevel, parentElemId)      
-        var parentLvl = getNextFormLevel('parent', formLevel);
-        var selectized = cParams.selectizeApi[parentLvl][parentElemId];      
+    function exitForm(id, formLvl, parentElemId) {                              //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
+        var parentLvl = getNextFormLevel('parent', formLvl);
+        var selectized = cParams.forms[parentLvl].selApi[parentElemId];      
         selectized.clear();
         selectized.enable();
         $(id).remove();
@@ -762,10 +780,10 @@ $(document).ready(function(){
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
-        var formLevels = cParams.formLevels;
+        var formLvls = cParams.formLevels;
         var nextLvl = nextLvl === "parent" ? 
-            formLevels[formLevels.indexOf(curLvl) - 1] : 
-            formLevels[formLevels.indexOf(curLvl) + 1] ;
+            formLvls[formLvls.indexOf(curLvl) - 1] : 
+            formLvls[formLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
     }
     /** Enables the parent form's submit button if all required fields have values. */
@@ -781,101 +799,153 @@ $(document).ready(function(){
     /** Enables passed submit button */
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
-    }    
-/*--------------------------- Helpers ----------------------------------------*/
-    /*------------------- Error Handlers -------------------------------------*/
-    /**
-     * When the user attempts to create an entity that uses the sub2-form and
-     * there is already a sub2-form instance, show the user an error message and 
-     * reset the select elem. 
-     */
-    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = %s, cP = %O ", selElemId, cParams)
-        var selectizedElem = cParams.selectizeApi["sub"][selElemId];
-        crudFieldErrorHandler(field, 'openSub2Form');
-        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
-        return { "value": "", "text": "Select " + field };
-    }
-    /** Shows the user an error message above the field row. */
-    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
-        var errMsgMap = {
-            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
-            "openSub2Form": "<p>Please finish the open "+ 
-                _util.ucfirst(cParams.subForms.sub2.entity) + " form.</p>",
-        };
-        var msg = errMsgMap[errorTag];
-        var errElem = fieldErrElem || getErrElem(fieldName);
-        errElem.innerHTML = msg;
-        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
-    }
-    /** Returns the error div for the passed field. */
-    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
-        var field = fieldName.split(' ').join('');
-        return $('#'+field+'_errs')[0];    
-    }    
+    }  
     /*----------------------- Form Submission -----------------------------------------------------*/
     /**
      * Loops through all rows in the form with the passed id and builds an object of 
      * filled field values keyed under server-ready field names to submit @submitFormVals.
+     * Entity data not contained in an input on the form is added @addAdditionalEntityData.
      */
-    function getFormValuesAndSubmit(id, formLvl) {
-        var fieldName, input;
+    function getFormValuesAndSubmit(id, formLvl, entity) {  
         var elems = $(id)[0].children;   
-        var formElems = {};
-        for (var i = 1; i < elems.length-1; i++) {                              //console.log("elems[i] = %O", elems[i])
-            fieldName = _util.lcfirst(elems[i].children[1].children[0].innerText.trim().split(" ").join("")); 
-            input = elems[i].children[1].children[1];
-            if ($(input).data("valType") == "multiSelect") { getMultiSelectVals(fieldName, input); }
-            if (input.value) { formElems[fieldName] = input.value; }
-        }                                                                       
-        submitFormVals(formLvl, formElems);
-        /** Adds an array of selected values in the passed select container. */
+        var formVals = {};
+        
+        for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
+
+        addAdditionalEntityData(entity);
+        submitFormVals(formLvl, formVals);  
+        /** Get's the value from the form elem and set it into formVals. */
+        function getInputData(elem) {
+            var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
+            var input = elem.children[1].children[1];
+            if ($(input).data("inputType")) { 
+                getInputVals(fieldName, input, $(input).data("inputType")); 
+            } else if (input.value) {
+                formVals[fieldName] = input.value; 
+            }
+        }
+        /** Edge case input type values are processed via their type handlers. */
+        function getInputVals(fieldName, input, type) {
+            var typeHandlers = {
+                "multiSelect": getMultiSelectVals, "tags": getTagVals
+            };
+            typeHandlers[type](fieldName, input);
+        }
+        /** Adds an array of selected values from the passed select container.*/
         function getMultiSelectVals(fieldName, cntnr) {
             var vals = [];
             var elems = cntnr.children;  
             for (var i = 0; i <= elems.length-1; i+= 2) { 
                 if (elems[i].value) { vals.push(elems[i].value); }
             }
-            formElems[fieldName] = vals;
+            formVals[fieldName] = vals;
+        }
+        /** Adds an array of tag values. */
+        function getTagVals(fieldName, input) {                                 
+            var selId = '#'+_util.ucfirst(fieldName)+'-sel';
+            var selApi = cParams.forms[formLvl].selApi[selId];
+            formVals[fieldName] = selApi.getValue();            
+        }
+        /**
+         * Realted parent-form field values are added @ifHasParentFormVals.
+         * Additional field values are added at @ifHasAdditionalFields.
+         */
+        function addAdditionalEntityData(entity) {
+            ifHasParentFormVals(entity);
+            ifHasAdditionalFields(entity);  
+        }
+        /** Adds data from a form element at the parent form level, if needed. */
+        function ifHasParentFormVals(entity) {
+            var newField;
+            var relFormFields = {
+                "Citation": "publication", "Location": "country"
+            };
+            if (["Citation", "Location"].indexOf(entity) === -1) { return; }
+            newField = relFormFields[entity];                               //console.log("new fieldName = ", newField)
+            formVals[newField] = $('#'+_util.ucfirst(newField)+'-sel').val();
+        }
+        /** Adds entity field values not included as inputs in the form. */
+        function ifHasAdditionalFields(entity) {
+            var getFields = {
+                "Author": getAuthFullName, "Citation": addCitDisplayName
+            };
+            if (Object.keys(getFields).indexOf(entity) === -1) { return; }
+            getFields[entity]();
+        }
+        /** Adds 'displayName', which will be added to both the form data objects. */
+        function addCitDisplayName() {
+            formVals.displayName = formVals.title;
+        }
+        /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
+        function getAuthFullName() { 
+            var nameFields = ["firstName", "middleName", "lastName"];
+            var fullName = [];
+            nameFields.forEach(function(field) {
+                if (formVals[field]) { fullName.push(formVals[field]) };
+            });
+            formVals.fullName = fullName.join(" ");
         }
     } /* End getFormValuesAndSubmit */
     /**
      * Builds a form data object @buildFormData. Sends it to the server @ajaxFormData
      */
     function submitFormVals(formLvl, formVals) {                        
-        var entity = cParams.subForms[formLvl].entity;                          //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
+        var entity = cParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
         var fieldTrans = getFieldTranslations(entity);
-        var formData = buildFormDataObj(entity, formVals);
+        var formData = buildFormData(entity, formVals);
         ajaxFormData(formData, formLvl);
     }                
     /**
-     * Returns a form data object with the server entity names' as keys for their 
-     * data, field-val, objects. Field translations are handled @addTransFormData. 
-     * If the passed entity is a detail entity for a 'parent' entity, eg Source or 
-     * Location, that entity is added to a 'type' field of the parent. 
+     * Returns an object with the entity names' as keys for their field-val objects, 
+     * which are grouped into flat data and related-entity data objects. 
      */
-    function buildFormDataObj(entity, formVals) { 
-        var data = {}
-        var pEntity = getParentEntity(entity);
+    function buildFormData(entity, formVals) { 
+        var pEntity = getParentEntity(entity);                                  //console.log("buildFormDataObj. formVals = %O, parentFields = %O", formVals, parentFields);
         var parentFields = pEntity === false || getParentFields(entity);   
-        var fieldTrans = getFieldTranslations(entity);                          //console.log("buildFormDataObj. formVals = %O, fieldTrans = %O, parentFields = %O", formVals, fieldTrans, parentFields);
-        data[pEntity] = {};
-        data[entity] = {};
+        var fieldTrans = getFieldTranslations(entity); 
+        var rels = getRelationshipFields(entity);
+        var data = buildFormDataObj();
 
-        for (var field in formVals) {                                           //console.log("processing field = ", field)
-            if (fieldTrans && field in fieldTrans) { addTransFormData(field, formVals[field]); 
-            } else { addFormData(field, formVals[field]); }
-        }                                                                       //console.log("formData = %O", data);
-        if (pEntity) { data[pEntity][pEntity+"Type"] = entity; }    
+        for (var field in formVals) { getFormFieldData(field, formVals[field]); }
+        handleDetailTypeField();                                                //console.log("formData = %O", data);
         return data;
-        /** Translates the passed field into it's server-ready equivalent. */
-        function addTransFormData(field, val) {
-            var transMap = fieldTrans[field];
-            for (var ent in transMap) { data[ent][transMap[ent]] = val; }
+
+        function buildFormDataObj() {
+            var data = {};
+            data[pEntity] = { flat: {}, rel: {} };
+            data[entity] = { flat: {}, rel: {} };
+            return data;
         }
-        /** Adds the passed field and value to the appropriate entity data object. */
-        function addFormData(field, val) {
-            var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
-            data[ent][field] = val;
+        /** 
+         * Adds the field's value to the appropriate entity's form data-group object. 
+         * Field name translations are handled @addTransFormData. 
+         */
+        function getFormFieldData(field, val) {
+            var dataGroup = rels.indexOf(field) !== -1 ? 'rel' : 'flat';
+            if (field in fieldTrans) { addTransFormData(); 
+            } else { addFormData(); }
+            /** Translates the passed field into it's server-ready equivalent. */
+            function addTransFormData() {
+                var transMap = fieldTrans[field];                               
+                for (var ent in transMap) { data[ent][dataGroup][transMap[ent]] = val; }
+            }
+            /** Adds the passed field and value to the appropriate entity data object. */
+            function addFormData() {
+                var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
+                data[ent][dataGroup][field] = val;
+            }
+        } /* End getFormFieldData */
+        /**
+         * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
+         * or author are to Source), that entity is added as the 'type' of it's parent and 
+         * 'hasDetail' is added to trigger detail entity processing on the server.
+         */
+        function handleDetailTypeField() {  
+            var nonDetailEntities = ["publisher"];
+            if (pEntity) { 
+                data[pEntity].rel[pEntity+"Type"] = entity; 
+                data[pEntity].hasDetail = nonDetailEntities.indexOf(entity) === -1;
+            }    
         }
     } /* End buildFormDataObj */
     /**
@@ -904,52 +974,106 @@ $(document).ready(function(){
             "publication": { 
                 "authors": { "source": "contributor" },
                 "publisher": { "source": "parentSource" }, 
+                "description": { "source": "description", "publication": "description" },
                 "title": { "source": "displayName", "publication": "displayName" },
             },
             "citation": { 
                 "authors": { "source": "contributor" },
                 "citationText": { "source": "description", "citation": "fullText" },
                 "publication": { "source": "parentSource" },
-                "title": { "source": "displayName", "citation": "displayName",
-                    "citation": "title" },
+                "displayName": { "source": "displayName", "citation": "displayName" },
+                "volume": { "citation": "publicationVolume" },
+                "issue": { "citation": "publicationIssue" },
+                "pages": { "citation": "publicationPages" },
+                "tags": { "source": "tags" }
             },
             "author": {
                 "displayName": { "source": "displayName", "author": "displayName" }
             }
         };
-        return fieldTrans[entity] || false;
+        return fieldTrans[entity] || {};
     }
-
+    /** Returns an array of fields that are relationships with other entities. */
+    function getRelationshipFields(entity) {
+        var relationships = {
+            "author": ["sourceType"], 
+            "citation": ["citationType", "authors", "tags", "publication"], 
+            "location": ["locationType", "habitatType"],
+            "publication": ["publicationType", "authors", "publisher"],
+            "publisher": []
+        };
+        return relationships[entity];
+    }
+/*--------------------------- Helpers ----------------------------------------*/ 
     /*------------- AJAX -----------------------------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
-        var stubData = {};
-        stubData[cParams.subForms[formLvl].entity] = "123456";
+        // var stubData = {};
+        // var stubName = formData[cParams.forms[formLvl].entity].flat.displayName;
+        // stubData[cParams.forms[formLvl].entity] = {};
+        // stubData[cParams.forms[formLvl].entity][stubName] = "123456";
+        var topEntity = getParentEntity(cParams.forms[formLvl].entity);         //console.log("entity = ", topEntity);
+        var url = getEntityUrl(topEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;
-        // sendAjaxQuery(dataPkg, url, successCb);
-        window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
+        sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
+        // window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
-        return envUrl + entityName + "/" + action;
+        return envUrl + "admin/crud/" + entityName + "/" + action;
+    }
+    function formSubmitError(jqXHR, textStatus, errorThrown) {  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+        var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)
+        $('#'+formLvl+'-hdr').after(
+            '<p class="form-errors"">There was an error during form submission.</p>');
+        window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
     }
     /**
      * Ajax success callback. Exit's the successfully submitted form, adds and 
      * selects an option with the new entities id (val) and display name (text).
      * Potential format for response: {[pEntity] : {[formEntity] => [id]} }
      */
-    function formSubmitSucess(data, textStatus, jqXHR) {                        //console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+    function formSubmitSucess(data, textStatus, jqXHR) {                        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
         var formLvl = cParams.ajaxFormLvl;
         var pFormLvl = getNextFormLevel("parent", formLvl);
-        var formSelId = cParams.subForms[formLvl].pSelElemId;  
-        var selElemApi = cParams.selectizeApi[pFormLvl][formSelId]; 
+        var formSelId = cParams.forms[formLvl].pSelElemId;  
+        var selElemApi = cParams.forms[pFormLvl].selApi[formSelId]; 
 
+        /* Stubby */
+        var displayName = Object.keys(data.results)[0];  console.log("displayName = ", displayName)
         exitForm("#"+formLvl+"-form", formLvl, formSelId); 
-        selElemApi.addOption({ "value": "123456", "text": "Testing Successful" });
-        selElemApi.addItem("123456");
+        selElemApi.addOption({ "value": data.results[displayName], "text": displayName });
+        selElemApi.addItem(data.results[displayName]);
     }
-    
-
+    /*------------------- Form Error Handlers --------------------------------*/
+    /**
+     * When the user attempts to create an entity that uses the sub2-form and
+     * there is already a sub2-form instance, show the user an error message and 
+     * reset the select elem. 
+     */
+    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = %s, cP = %O ", selElemId, cParams)
+        var selectizedElem = cParams.forms["sub"].selApi[selElemId];
+        crudFieldErrorHandler(field, 'openSub2Form');
+        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
+        return { "value": "", "text": "Select " + field };
+    }
+    /** Shows the user an error message above the field row. */
+    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+        var errMsgMap = {
+            "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
+            "openSub2Form": "<p>Please finish the open "+ 
+                _util.ucfirst(cParams.forms.sub2.entity) + " form.</p>",
+        };
+        var msg = errMsgMap[errorTag];
+        var errElem = fieldErrElem || getErrElem(fieldName);
+        errElem.innerHTML = msg;
+        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
+    }
+    /** Returns the error div for the passed field. */
+    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
+        var field = fieldName.split(' ').join('');
+        return $('#'+field+'_errs')[0];    
+    }   
 
 
 
@@ -960,7 +1084,7 @@ $(document).ready(function(){
 
 
  
-/*--------------------- Content Block WYSIWYG --------------------------------*/
+/*=================== Content Block WYSIWYG ======================================================*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
      */
@@ -1099,12 +1223,12 @@ $(document).ready(function(){
         $('.wsywigEdit').remove();  
     }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-    function sendAjaxQuery(dataPkg, url, successCb) {                           console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+    function sendAjaxQuery(dataPkg, url, successCb, errCb) {                    console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
         $.ajax({
             method: "POST",
             url: url,
             success: successCb || dataSubmitSucess,
-            error: ajaxError,
+            error: errCb || ajaxError,
             data: JSON.stringify(dataPkg)
         });
     }
@@ -1117,7 +1241,7 @@ $(document).ready(function(){
         console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
-        console.log("ajaxError = %s - jqXHR:%O", errorThrown, jqXHR);
+        console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 
 }());  // End of namespacing anonymous function 

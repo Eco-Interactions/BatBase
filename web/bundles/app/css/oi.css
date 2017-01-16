@@ -22,7 +22,7 @@ a:hover {
 }
 a:active {
 }
-/**-----------Find and fix these super leaky styles-----------------**/
+/**-----------Find and fix these leaky styles--------------------------------*/
 /** Commented out styles, hopefully unused, that are affecting the crud form */
 button {
 	border: 1px solid;
@@ -543,7 +543,7 @@ a[role="button"], .tos-bttn {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 808px;
-    margin: 11px 0 0 66px;
+    margin: 11px 0 0 100px;
 }
 #sub2-form {
 	border: 1px solid grey;
@@ -559,7 +559,7 @@ a[role="button"], .tos-bttn {
 	position: relative;
 	right: 15px;
 }
-.sub-form-hdr {
+#sub-hdr, #sub2-hdr {
 	font-size: 1.1em;
 	text-align: center;
 	padding-top: 4px;
@@ -589,9 +589,10 @@ form[name="crud"] p, form[name="crud"] .bttn-cntnr {
 	padding: .2em .75em .3em  .75em;
 	width: 802px;
 }
-.row-errors {
+.form-errors, .row-errors {
 	color: red;
 	font-size: .9em;
+	text-align: center;
 }
 .required:after {
   content: "*";
