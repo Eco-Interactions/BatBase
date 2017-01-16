@@ -807,15 +807,16 @@ $(document).ready(function(){
         for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
 
         addAdditionalEntityData(entity);
-        submitFormVals(formLvl, formVals);
+        submitFormVals(formLvl, formVals);  
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
             var input = elem.children[1].children[1];
             if ($(input).data("inputType")) { 
                 getInputVals(fieldName, input, $(input).data("inputType")); 
+            } else if (input.value) {
+                formVals[fieldName] = input.value; 
             }
-            if (input.value) { formVals[fieldName] = input.value; }
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {
