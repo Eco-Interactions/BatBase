@@ -51,11 +51,12 @@
 	    initSearchState();
 	}
 	function clearLocalStorageCheck() {
+        var curDataKey = 'mu';
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-        if (localStorage && !localStorage.getItem('lambda')){
+        if (localStorage && !localStorage.getItem(curDataKey)){
 			localStorage.clear();
             if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
-			_util.populateStorage('lambda', true);
+			_util.populateStorage(curDataKey, true);
 			showLoadingDataPopUp();
 		}
 	}
