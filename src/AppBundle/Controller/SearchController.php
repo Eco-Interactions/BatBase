@@ -349,7 +349,7 @@ class SearchController extends Controller
         $tags = $srcEntity->getTags();
 
         foreach ($tags as $tag) { 
-            array_push($tagAry, $tag->getTag()); 
+            array_push($tagAry, $tag->getDisplayName()); 
         }
         return $tagAry;
     }
@@ -421,7 +421,7 @@ class SearchController extends Controller
         ];
         // Adds each tag to the array of citation tags
         foreach ($tags as $tag) {
-            array_push($citData['tags'], $tag->getTag());
+            array_push($citData['tags'], $tag->getDisplayName());
         }
         return $citData;
     }
@@ -546,7 +546,7 @@ class SearchController extends Controller
         $ary = [];
         foreach ($tags as $tag) 
         {
-            array_push($ary, $tag->getTag());
+            array_push($ary, $tag->getDisplayName());
         }
         return $ary;
     }
