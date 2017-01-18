@@ -6,13 +6,18 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         --Source's have full name as display name and authors are using last name...
 
     --FORM--
-        -- Bring focus to first field on form open
-        -- fix tabs on selectize (test whether firefox bug only??): https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
-
+        -- Disable previously filled fields while dependent fields filled
+            -- Unlock Country field when location field is empty.
+            -- Lock previously filled fields that have dependent fields further in the form
+        -- Scroll to below where sub-form select dropdowns expand
+        --Bugs-
+            -- fix tabs on selectize (test whether firefox bug only??): https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
         -- Import all citation_tags into source_tags.
-        --Create service for building entity data objects.
+        -- Create service for building entity data objects.
             --For use in search and crud controllers
+        -- Add close button to form
+    --Asap--
 
 TAYLOR:
 

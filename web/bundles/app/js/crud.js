@@ -233,9 +233,8 @@ $(document).ready(function(){
      * Returns a form row with a country select dropdown populated with all 
      * available countries.
      */
-    function buildCountryFieldRow() {                                           //console.log("buildingCountryFieldRow. ");
-        var cntryObj = JSON.parse(localStorage.getItem('countries'));
-        var cntryOpts = buildOptsObj(cntryObj, Object.keys(cntryObj).sort());  
+    function buildCountryFieldRow() {  
+        var cntryOpts = getCountryOpts();                                       //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
@@ -284,7 +283,8 @@ $(document).ready(function(){
         });
     }
     function onLocSelection(e) {  console.log("location selected 'e'= %O", e);
-        // body...
+        cParams.forms.top.selApi['#Country-sel'].disable();
+
     }
     function initLocForm(val) {        console.log("Adding new loc! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
@@ -403,14 +403,16 @@ $(document).ready(function(){
         var confg;
         var formLvl = cParams.forms[entity];
         var selMap = { 
-            "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
+            "Citation_Type": { name: "Citation Type", change: false, add: false },
+            "Country": { name: "Country", id: "#subCountry-sel", change: false, add: false },
+            "Habitat_Type":  { name: "Habitat Type", change: false, add: false },
+            "Elevation_Units": { name: "Elevation Units", change: false, add: false },
+            "Location_Type":  { name: "Location Type", change: false, add: false },
+            "Publication_Type": { name: "Publication Type", change: false, add: false },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
-            "Citation_Type": { name: "Citation Type", change: false, add: false },
-            "Habitat_Type":  { name: "Habitat Type", change: false, add: false },
-            "Location_Type":  { name: "Location Type", change: false, add: false },
         };
         cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -483,23 +485,24 @@ $(document).ready(function(){
                     "Citation Text": "fullTextArea", "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
-                "order": ["CitationText", "Title", "CitationType",    
-                    "Year", "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
-                    "Tags", "Authors" ],
+                "order": ["CitationText", "Title", "CitationType", "Year", "Volume", 
+                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
+                    "Authors" ],
             },
             "location": {
                 "add": {},  
                 "exclude": [],
-                "required": ["Display Name", "Location Type"],
-                "order": ["DisplayName", "Description", "LocationType", "HabitatType", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude" ],
+                "required": ["Display Name", "Location Type", "Country"],
+                "order": ["DisplayName", "LocationType", "Country", "Description", 
+                    "Elevation", "ElevationMax", "ElevationUnits", "HabitatType", 
+                    "Latitude", "Longitude" ],
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
                 "required": ["Publication Type", "Title"],
-                "order": ["Title", "Description", "PublicationType", "Year", "Doi",  
-                    "LinkUrl", "LinkDisplay", "Publisher", "Authors" ],
+                "order": ["Title", "Description", "PublicationType", "Year",  
+                    "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
             },
             "publisher": { 
                 "add": [], 
@@ -522,7 +525,8 @@ $(document).ready(function(){
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
-                "Latitude": "text", "Habitat Type": "select", "Location Type": "select"
+                "Latitude": "text", "Habitat Type": "select", "Location Type": "select",
+                "Country": "edgeCase", "Elevation Units": "select"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
                 "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
@@ -538,7 +542,8 @@ $(document).ready(function(){
     function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
-            "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
+            "textArea": buildTextArea, "fullTextArea": buildLongTextArea,
+            "edgeCase": buildEdgeCaseElem };
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -619,11 +624,13 @@ $(document).ready(function(){
         var optMap = {
             "Authors": [ getOptsFromStoredData, 'authors'],
             "Citation_Type": [ getOptsFromStoredData, 'citTypes'],
+            "Country": [ getCountryOpts ],
+            "Elevation_Units": [ getElevUnitOpts ],
+            "Habitat_Type": [ getOptsFromStoredData, 'habTypes'],
             "Publication_Type": [ getOptsFromStoredData, 'pubTypes'],
+            "Location_Type": [ getLocationTypeOpts ],
             "Publisher": [ getOptsFromStoredData, 'publishers'],
             "Tags": [ getTagOpts, 'citation' ],
-            "Location_Type": [ getLocationTypeOpts, 'locTypes'],
-            "Habitat_Type": [ getOptsFromStoredData, 'habTypes'],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -641,15 +648,45 @@ $(document).ready(function(){
             return { value: entityObj[name], text: _util.ucfirst(name) }
         });    
     }
+    /** Builds and returns Country options. */
+    function getCountryOpts() {
+        var cntryObj = JSON.parse(localStorage.getItem('countries'));
+        return buildOptsObj(cntryObj, Object.keys(cntryObj).sort());  
+    }
     /**
      * Returns options for the location types that can be created by a general editor. 
      * Regions and Countries will be available for a higher-level access editor.
      */
-    function getLocationTypeOpts(typeKey) {
-        var typeObj = JSON.parse(localStorage.getItem(typeKey));  console.log("locTypes = %O", typeObj)
+    function getLocationTypeOpts() {
+        var typeObj = JSON.parse(localStorage.getItem('locTypes'));             //console.log("locTypes = %O", typeObj)
         delete typeObj.region;
         delete typeObj.country;
         return buildOptsObj(typeObj, Object.keys(typeObj).sort());
+    }
+    /** Returns an array of elevation unit options objects. */
+    function getElevUnitOpts() {
+        return [ { value: "ft", text: "Feet" }, 
+                 { value: "m", text: "Meters"} ];
+    }
+    /** Routes edge case fields to its field-builder method. */
+    function buildEdgeCaseElem(entity, field) {
+        var caseMap = {
+            "Country": buildSubCountryElem
+        };
+        return caseMap[field](entity, field);
+    }
+    /**
+     * Modifies the Country select elem to be used in the location sub-form by 
+     * giving it a unique id. If there is a selected value in the top-form country 
+     * field, it is set in this sub-form field. The top-form country field is 
+     * disabled while the sub-form is open, or a location has been selected. 
+     */
+    function buildSubCountryElem(entity, field) {
+        var subCntrySel = buildSelectElem(entity, field);
+        subCntrySel.id = "subCountry-sel";
+        if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
+        cParams.forms.top.selApi['#Country-sel'].disable();
+        return subCntrySel;
     }
     /**
      * Creates and returns a select dropdown that will be initialized with 'selectize'
