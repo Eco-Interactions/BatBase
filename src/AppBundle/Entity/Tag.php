@@ -44,12 +44,6 @@ class Tag
     private $interactions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Citation", inversedBy="tags")
-     * @ORM\JoinTable(name="citation_tag")
-     */
-    private $citations;
-
-    /**
      * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags")
      * @ORM\JoinTable(name="source_tag")
      */
@@ -113,7 +107,6 @@ class Tag
     public function __construct()
     {
         $this->interactions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sources = new \Doctrine\Common\Collections\ArrayCollection();
         $this->intTypeConstraints = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -206,40 +199,6 @@ class Tag
     public function getInteractions()
     {
         return $this->interactions;
-    }
-
-    /**
-     * Add Citation.
-     *
-     * @param \AppBundle\Entity\Citation $citation
-     *
-     * @return Tag
-     */
-    public function addCitation(\AppBundle\Entity\Citation $citation)
-    {
-        $this->citations[] = $citation;
-
-        return $this;
-    }
-
-    /**
-     * Remove Citation.
-     *
-     * @param \AppBundle\Entity\Citation $citation
-     */
-    public function removeCitation(\AppBundle\Entity\Citation $citation)
-    {
-        $this->citations->removeElement($citation);
-    }
-
-    /**
-     * Get citations.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCitations()
-    {
-        return $this->citations;
     }
 
     /**
