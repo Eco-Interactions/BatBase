@@ -410,19 +410,13 @@ class SearchController extends Controller
     private function getCitationData($srcEntity)
     {
         $cit = $srcEntity->getCitation();
-        $tags = $cit->getTags();
         $citData = [ 'displayName' => $cit->getDisplayName(),
                      'fullText' => $cit->getFullText(), 
                      'publicationIssue' => $cit->getPublicationIssue(),
                      'publicationPages' => $cit->getPublicationPages(),
                      'publicationVolume' => $cit->getPublicationVolume(),
-                     'tags' => [],
                      'title' => $cit->getTitle(),
         ];
-        // Adds each tag to the array of citation tags
-        foreach ($tags as $tag) {
-            array_push($citData['tags'], $tag->getDisplayName());
-        }
         return $citData;
     }
 /**------------------------Search Interaction Actions-------------------------*/
