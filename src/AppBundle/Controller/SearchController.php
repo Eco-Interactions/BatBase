@@ -62,40 +62,42 @@ class SearchController extends Controller
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
         $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
 
-        $domainData = $this->getDomainData($em);
-        $domainTaxaIds = array_keys(get_object_vars($domainData));  
+        $domainData = $this->getDomainData($serializer, $em);
+        // $domainTaxaIds = array_keys(get_object_vars($domainData));  
 
-        $taxaData = new \stdClass;
+        // $taxaData = new \stdClass;
 
-        foreach ($domainTaxaIds as $domainTaxonId) 
-        {                                     
-            $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
-                ->findOneBy(array('id' => $domainTaxonId));
-            $taxonId = $domainTaxonEntity->getId();
-            $taxaData->$taxonId = $this->getTaxonData($domainTaxonEntity, $taxaData);
-        } 
+        // foreach ($domainTaxaIds as $domainTaxonId) 
+        // // {                                     
+        // //     $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
+        // //         ->findOneBy(array('id' => $domainTaxonId));
+        // //     $taxonId = $domainTaxonEntity->getId();
+        // //     $taxaData->$taxonId = $serializer->serialize($domainTaxonEntity, 'json');                                               
+        // //     //$serializer->serialize($domainTaxonEntity, 'json');
+            
+        // }
 
-        $response = new JsonResponse();
+
+        $response = new JsonResponse();  //, 'taxaRcrds' => $taxaData
         $response->setData(array(                                    
-            'domainRcrds' => $domainData, 'taxaRcrds' => $taxaData
+            'domainRcrds' => $domainData
         )); 
         return $response;
     }
-    /** Returns domain data by taxon ID */
-    private function getDomainData($em)
+    /**
+     * Returns serialized domain data.
+     */
+    private function getDomainData($serializer, $em)
     {
-        $domainEntities = $em->getRepository('AppBundle:Domain')->findAll();
-        $data = new \stdClass;
+        $domains = $em->getRepository('AppBundle:Domain')->findAll();
+        $data = new \stdClass;   
 
-        foreach ($domainEntities as $entity) 
-        {                               
-            $taxonId = $entity->getTaxon()->getId();
-            $slug = $entity->getSlug();                               
-            $name = $entity->getPluralName();                              
-
-            $data->$taxonId = [ "slug" => $slug, "name" => $name ];
-        }  
+        foreach ($domains as $domain) {  
+            $id = $domain->getId();
+            $data->$id = $serializer->serialize($domain, 'json');
+        }
         return $data;
     }
     /**
