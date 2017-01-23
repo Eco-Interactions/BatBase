@@ -73,6 +73,14 @@ class Taxon
     private $domain;
 
     /**
+     * @var \AppBundle\Entity\Level
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
+     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
+     */
+    private $level;
+    
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Naming", mappedBy="taxon")
@@ -117,14 +125,6 @@ class Taxon
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object")
      */
     private $objectRoles;
-
-    /**
-     * @var \AppBundle\Entity\Level
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
-     */
-    private $level;
 
     /**
      * @var \DateTime
@@ -330,6 +330,54 @@ class Taxon
     }
 
     /**
+     * Set domain.
+     *
+     * @param \AppBundle\Entity\Domain $domain
+     *
+     * @return Taxon
+     */
+    public function setDomain(\AppBundle\Entity\Domain $domain = null)
+    {
+        $this->domain = $domain;
+
+        return $this;
+    }
+
+    /**
+     * Get domain.
+     *
+     * @return \AppBundle\Entity\Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+    
+    /**
+     * Set level.
+     *
+     * @param \AppBundle\Entity\Level $level
+     *
+     * @return Taxon
+     */
+    public function setLevel(\AppBundle\Entity\Level $level = null)
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    /**
+     * Get level.
+     *
+     * @return \AppBundle\Entity\Level
+     */
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    /**
      * Add namings.
      *
      * @param \AppBundle\Entity\Naming $namings
@@ -521,54 +569,6 @@ class Taxon
     public function getObjectRoles()
     {
         return $this->objectRoles;
-    }
-
-    /**
-     * Set level.
-     *
-     * @param \AppBundle\Entity\Level $level
-     *
-     * @return Taxon
-     */
-    public function setLevel(\AppBundle\Entity\Level $level = null)
-    {
-        $this->level = $level;
-
-        return $this;
-    }
-
-    /**
-     * Get level.
-     *
-     * @return \AppBundle\Entity\Level
-     */
-    public function getLevel()
-    {
-        return $this->level;
-    }
-
-    /**
-     * Set domain.
-     *
-     * @param \AppBundle\Entity\Domain $domain
-     *
-     * @return Taxon
-     */
-    public function setDomain(\AppBundle\Entity\Domain $domain = null)
-    {
-        $this->domain = $domain;
-
-        return $this;
-    }
-
-    /**
-     * Get domain.
-     *
-     * @return \AppBundle\Entity\Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
     }
 
     /**
