@@ -134,19 +134,14 @@ class SearchController extends Controller
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
         $em = $this->getDoctrine()->getManager();
-        $srcEntities = $em->getRepository('AppBundle:Source')->findAll();
-        $srcData = $this->buildSrcDataObj($em);
+        $serializer = $this->container->get('jms_serializer');
 
-        foreach ($srcEntities as $srcEntity) 
-        {                    
-            $id = $srcEntity->getId(); 
-            $type = lcfirst($srcEntity->getSourceType()->getDisplayName());
-            array_push($srcData->$type->ids, $id);
-            $srcData->srcRcrds->$id = $this->getSrcRcrd($srcEntity);
-        }
+        $sourceData = $this->getEntityData('Source', $serializer, $em);
 
         $response = new JsonResponse();
-        $response->setData(array( 'srcData' => $srcData ));
+        $response->setData(array( 
+            'sourceData' => $sourceData, 
+        ));
         return $response;
     }
     /**
