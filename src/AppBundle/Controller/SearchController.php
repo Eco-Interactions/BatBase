@@ -69,7 +69,8 @@ class SearchController extends Controller
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domainData' => $domainData, 'levelData' => $levelData,
+            'domainData' => $domainData, 
+            'levelData' => $levelData,
             'taxonData' => $taxonData            
         )); 
         return $response;
@@ -86,12 +87,10 @@ class SearchController extends Controller
         }
         return $data;
     }
-/**------------------------Search By Location---------------------------------*/
     /**
-     * Returns Location Records organized by ID, an array of top-region ids, and 
-     * all country names by id.
+     * Returns serialized data objects for Habitat Type, Location Type, and Location. 
      *
-     * @Route("/search/location", name="app_ajax_search_location")
+     * @Route("/search/location", name="app_serialize_location")
      */
     public function serializeLocationDataAction(Request $request) 
     {
@@ -101,108 +100,27 @@ class SearchController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
+
         $habitatTypeData = $this->getEntityData('HabitatType', $serializer, $em);
         $locationData = $this->getEntityData('Location', $serializer, $em);
         $locTypeData = $this->getEntityData('LocationType', $serializer, $em);
+        $unspecifiedLocInts = $this->getNoLocInteractionIds($em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'habitatTypeData' => $habitatTypeData, 'locationData' => $locationData, 
-            'locationTypeData' => $locTypeData
+            'habitatTypeData' => $habitatTypeData, 
+            'locationData' => $locationData, 
+            'locationTypeData' => $locTypeData, 
+            'noLocIntIds' => $unspecifiedLocInts
         ));
-
         return $response;
     }
-    /**
-     * Builds a Location Data Object with an object for all location records to be 
-     * stored by id (locRcrds), an array for all 'top' regions and their ids (topRegions), 
-     * and arrays for all countries (countries), of all Location Types (locTypes) 
-     * and of all Habitat Types (habTypes) and their ids.
-     */
-    private function buildLocDataObj($em)
-    {
-        $dataObj = new \stdClass;
-        $dataObj->locRcrds = new \stdClass;
-        $dataObj->topRegions = [];
-        $dataObj->countries = [];
-        $dataObj->locTypes = $this->buildTypeAry("LocationType", $em);;
-        $dataObj->habTypes = $this->buildTypeAry("HabitatType", $em);
-
-        return $dataObj;
-    }
-    /**
-     * Builds and returns Location Data object.
-     */
-    private function getLocationData($locEntity, &$locDataById, &$countries)
-    {
-        $data = new \stdClass; 
-
-        $data->id = $locEntity->getId();
-        $data->displayName = $locEntity->getDisplayName();
-        $data->description = $locEntity->getDescription();
-        $data->elevation = $locEntity->getElevation();
-        $data->elevationMax = $locEntity->getElevationMax();
-        $data->elevUnitAbbrv = $locEntity->getElevUnitAbbrv();
-        $data->gpsData = $locEntity->getGpsData();
-        $data->latitude = $locEntity->getLatitude();
-        $data->longitude = $locEntity->getLongitude();
-        $data->showOnMap = $locEntity->getShowOnMap();
-        $data->locationType = $locEntity->getLocationType()->getDisplayName();
-
-        $data->habitatType = $this->getHabType($locEntity);
-        $data->childLocs = $this->getChildLocationData($locEntity, $locDataById, $countries);
-        $data->interactions = $this->getInteractionIds($locEntity->getInteractions());
-        
-        $parentLoc = $locEntity->getParentLoc();
-        $data->parentLoc = $parentLoc === null ? null : $parentLoc->getId();
-
-
-        return $data;
-    }    
-    private function getHabType($locEntity)
-    {
-        $habitatType = $locEntity->getHabitatType();                            //echo("\nhabitatType = ".gettype($habitatType)); 
-        $habData = null;
-        if ($habitatType !== null) {
-            $habData = new \stdClass;
-            $habData->name = $habitatType->getDisplayName();
-            $habData->id = $habitatType->getId();
-        } 
-        return $habData;
-    }
-    /**
-     * Returns an object keyed with child location descriptions and their data.
-     * Adds all country locations to the return $countries array.
-     */
-    private function getChildLocationData($parentLoc, &$locDataById, &$countries)
-    {
-        $children = [];
-        $childLocs = $parentLoc->getChildLocs();  
-
-        foreach ($childLocs as $childLoc) {
-            $childId = $childLoc->getId();  //print("\nlocType = ".$childLoc->getLocationType());
-            array_push($children, $childId);
-            if ($childLoc->getLocationType()->getId() === 2) {
-                $countries = array_merge($countries, [ $childLoc->getDisplayName() => $childId ]); 
-            }
-            $locDataById->$childId = $this->getLocationData($childLoc, $locDataById, $countries);
-        }     
-        return $children;
-    }
     /** The only properties are those that later affect how this 'region' will be handled. */
-    private function getUnspecifiedIntRcrds($em)
+    private function getNoLocInteractionIds($em)
     {
         $interactions = $em->getRepository('AppBundle:Interaction')
-            ->findBy(array('location'=> null));   //print(count($interactions));
-
-        $data = new \stdClass; 
-        $data->id = 999;
-        $data->childLocs = [];
-        $data->displayName = "Unspecified";
-        $data->locationType = "Region";
-        $data->interactions = $this->getInteractionIds($interactions);
-        $data->parentLoc = null;
-        return $data;
+            ->findBy(array('location'=> null));   
+        return $this->getInteractionIds($interactions);
     }
 /**------------------------Search By Source-----------------------------------*/
     /**
