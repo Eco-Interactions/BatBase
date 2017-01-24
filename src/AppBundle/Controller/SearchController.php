@@ -93,34 +93,20 @@ class SearchController extends Controller
      *
      * @Route("/search/location", name="app_ajax_search_location")
      */
-    public function searchLocationsAction(Request $request) 
+    public function serializeLocationDataAction(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
         }  
 
         $em = $this->getDoctrine()->getManager();
-        $locData = $this->buildLocDataObj($em);
+        $serializer = $this->container->get('jms_serializer');
+        $locationData = $this->getEntityData('Location', $serializer, $em);
 
-        /** All interactions with no location are added under an "Unspecified" top region. */
-        $unspecifiedLocId = 999;
-        $locData->locRcrds->$unspecifiedLocId = $this->getUnspecifiedIntRcrds($em);
-        array_push($locData->topRegions, $unspecifiedLocId);
-
-        $regionLocs = $em->getRepository('AppBundle:Location')
-            ->findBy(array('locationType' => '1'));
-
-        foreach ($regionLocs as $locEntity) 
-        {                    
-            $locId = $locEntity->getId(); 
-            if ($locEntity->getParentLoc() === null) {  /** Only top regions are handled here */
-                array_push($locData->topRegions, $locId);
-                $locData->locRcrds->$locId = $this
-                    ->getLocationData($locEntity, $locData->locRcrds, $locData->countries);
-            }
-        }
         $response = new JsonResponse();
-        $response->setData(array( 'locData' => $locData ));
+        $response->setData(array( 
+            'locationData' => $locationData,  
+        ));
 
         return $response;
     }

@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Location.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Location
 {
@@ -28,6 +30,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -35,6 +38,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -42,6 +46,7 @@ class Location
      * @var int
      *
      * @ORM\Column(name="elevation", type="integer", nullable=true)
+     * @JMS\Expose
      */
     private $elevation;
 
@@ -49,6 +54,7 @@ class Location
      * @var int
      *
      * @ORM\Column(name="elevation_max", type="integer", nullable=true)
+     * @JMS\Expose
      */
     private $elevationMax;
 
@@ -56,6 +62,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="elev_unit_abbrv", type="string", length=3, nullable=true)
+     * @JMS\Expose
      */
     private $elevUnitAbbrv;
 
@@ -63,6 +70,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="gps_data", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $gpsData;
 
@@ -70,6 +78,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="latitude", type="decimal", precision=18, scale=14, nullable=true)
+     * @JMS\Expose
      */
     private $latitude;
 
@@ -77,6 +86,7 @@ class Location
      * @var string
      *
      * @ORM\Column(name="longitude", type="decimal", precision=18, scale=14, nullable=true)
+     * @JMS\Expose
      */
     private $longitude;
 
@@ -178,6 +188,8 @@ class Location
     
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -379,6 +391,30 @@ class Location
     }
 
     /**
+     * Set showOnMap.
+     *
+     * @param bool $showOnMap
+     *
+     * @return Location
+     */
+    public function setShowOnMap($showOnMap)
+    {
+        $this->showOnMap = $showOnMap;
+
+        return $this;
+    }
+
+    /**
+     * Get showOnMap.
+     *
+     * @return bool
+     */
+    public function getShowOnMap()
+    {
+        return $this->showOnMap;
+    }
+
+    /**
      * Set parentLoc.
      *
      * @param \AppBundle\Entity\Location $parentLoc
@@ -400,6 +436,18 @@ class Location
     public function getParentLoc()
     {
         return $this->parentLoc;
+    }
+
+    /**
+     * Get the parent Location's id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("parent")
+     *
+     * @return int
+     */
+    public function getParentLocId()
+    {
+        return $this->parentLoc ? $this->parentLoc->getId() : null;
     }
 
     /**
@@ -438,6 +486,24 @@ class Location
     }
 
     /**
+     * Get an array of child Location ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("children")
+     *
+     * @return int
+     */
+    public function getChildLocIds()
+    {
+        $childLocs = $this->getChildLocs();
+        $children = [];
+        if ($childLocs === null) { return; }
+        foreach ($childLocs as $child) {
+            array_push($children, $child->getId());
+        }
+        return $children;
+    }
+
+    /**
      * Set locationType.
      *
      * @param \AppBundle\Entity\LocationType $locationType
@@ -459,6 +525,18 @@ class Location
     public function getLocationType()
     {
         return $this->locationType;
+    }
+
+    /**
+     * Get locationType id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("locationType")
+     *
+     * @return int
+     */
+    public function getLocationTypeId()
+    {
+        return $this->locationType->getId();
     }
 
     /**
@@ -497,6 +575,21 @@ class Location
     }
 
     /**
+     * Returns an array of interaction ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactions") 
+     */
+    public function getInteractionids()
+    {
+        $interactions = $this->getInteractions();
+        $allIntIds = [];
+        foreach ($interactions as $interaction) {
+            array_push($allIntIds, $interaction->getId());
+        }
+        return $allIntIds;
+    }
+
+    /**
      * Set habitatType.
      *
      * @param \AppBundle\Entity\HabitatType $habitatType
@@ -521,27 +614,15 @@ class Location
     }
 
     /**
-     * Set showOnMap.
+     * Get habitatType id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("habitatType")
      *
-     * @param bool $showOnMap
-     *
-     * @return Location
+     * @return int
      */
-    public function setShowOnMap($showOnMap)
+    public function getHabitatTypeId()
     {
-        $this->showOnMap = $showOnMap;
-
-        return $this;
-    }
-
-    /**
-     * Get showOnMap.
-     *
-     * @return bool
-     */
-    public function getShowOnMap()
-    {
-        return $this->showOnMap;
+        return $this->habitatType ? $this->habitatType->getId() : null;
     }
 
     public function getPlural()
