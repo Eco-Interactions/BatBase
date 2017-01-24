@@ -21,6 +21,31 @@
         var f = str.charAt(0).toLowerCase();
         return f + str.substr(1);
     }
+    /*---------- Object Helpers ----------------------------------------------*/
+    function sortProperties(obj) {
+        var sortable=[];
+        var returnObj = {};
+
+        for(var key in obj) {                   // convert object into array
+            if(obj.hasOwnProperty(key))
+                sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+        }
+        
+        sortable.sort(function(a, b) {          // sort items by value
+            var x=a[1].toLowerCase(),
+                y=b[1].toLowerCase();
+            return x<y ? -1 : x>y ? 1 : 0;
+        });
+        sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+
+        return returnObj;
+
+        function rebuildObj(keyValAry) {
+            var key = keyValAry[0];
+            var val = keyValAry[1];
+            returnObj[key] = val;
+        }
+    }
     /*-------- - HTML Helpers ------------------------------------------------*/
     function buildElem(tag, attrs) {                                           //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
         var elem = document.createElement(tag);
@@ -104,7 +129,6 @@
                 return this; 
              };
         }
-
     /*--------------------------Storage Methods-------------------------------*/
     function setlocalStorage() {
         if (storageAvailable('localStorage')) { 

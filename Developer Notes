@@ -1,0 +1,32 @@
+Developer Notes:
+
+
+::JMS Serializer:
+	-- Issues worked-around --
+		-- Problem: Null properties are left out of serialized data, as that is the JMS default and the 'context' is set this way when AppKernel inits the bundle.
+          An error is thrown when attempting to create and pass a new context into the 'serialize' method. (Error: 'This context was already initialized, and cannot be re-used.') Looking at the JMS serialize method I can see that when no context is passed, one is created and the code continues... I replicated the method chain creating that context in the controller, but the same error is thrown upon passing it in.
+            The context created inside the 'serialize' method can be modified to allow nulls, but any updates to the bundle would erase these changes.
+              I have not found a way to access the 'context' the error insists exists. 
+            -- Journey: Attempted to track down api solutions, but all SOverflow posts and answers are specific to the FOSRest Bundles's use of JMS. 
+            -- Solution?: A potential solution is to remove the JMSSerializerBundle init from  AppKernel and instead init ther serializer and set the context from in the controller before serialization. For now, the code will expect the absence of properties to be equivalent to a null.
+
+::Checked data wonkiness::
+    'northern mariana islands' is the name from red list.
+
+
+
+::data cleanup::
+    -Location 
+        -weird '- duplicate entry'
+    > Restructure Migration Commits:
+        Regions, countries, locations: 
+            b6eba34742117a6e25123d6066a3166e0dfd7b0a
+        Drop:
+            29037cdd444afe6254f9a83315a634d6cd198e60
+        SrcStructure, Pub, Auth:
+            5300058c872a4f529dca059ffc6c535afcc58f0c
+        MissPub, Cit:
+            360e7e2506962f839778718ef8e1afc6d3dbb1b7
+        Drop and Cols: (could be done any point after really...)
+            a6439a86b45f56c95cf1ae155fcf0cead3047cbe
+
