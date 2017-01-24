@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Author.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Author
 {
@@ -27,6 +29,7 @@ class Author
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -34,6 +37,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -41,6 +45,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="first_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $firstName;
 
@@ -48,6 +53,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="middle_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $middleName;
 
@@ -55,6 +61,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="last_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $lastName;
 
@@ -62,6 +69,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $fullName;
 
@@ -114,6 +122,8 @@ class Author
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -287,6 +297,17 @@ class Author
     {
         return $this->source;
     }
+
+    /**
+     * Get the Source id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("source")
+     */
+    public function getSourceId()
+    {
+        return $this->getSource()->getId();
+    }
+
 
     /**
      * Set createdBy user.

@@ -136,6 +136,7 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
+        $authorData = $this->getEntityData('Author', $serializer, $em);
         $sourceData = $this->getEntityData('Source', $serializer, $em);
         $srcTypeData = $this->getEntityData('SourceType', $serializer, $em);
         $citationData = $this->getEntityData('Citation', $serializer, $em);
@@ -147,6 +148,7 @@ class SearchController extends Controller
         $response = new JsonResponse();
         $response->setData(array( 
             'tagData' => $tagData, 
+            'authorData' => $authorData, 
             'sourceData' => $sourceData, 
             'sourceTypeData' => $srcTypeData, 
             'citationData' => $citationData,
