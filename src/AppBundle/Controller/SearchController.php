@@ -50,13 +50,12 @@ class SearchController extends Controller
         ));
         return $response;
     }
-    /**------------------------Search By Taxa---------------------------------*/
     /**
-     * Returns a Taxa data obj and Domain data obj organized by taxon ID
+     * Returns serialized data objects for the Domain, Level, and Taxon entities.
      *
-     * @Route("/search/taxa", name="app_ajax_search_taxa")
+     * @Route("/search/taxa", name="app_serialize_taxa")
      */
-    public function searchTaxaAction(Request $request) 
+    public function serializeTaxonDataAction(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -64,97 +63,28 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $domainData = $this->getDomainData($serializer, $em);
-        $levelData = $this->getLevelData($serializer, $em);
-
-        $taxonData = new \stdClass;
-        $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
-
-        foreach ($taxa as $taxon) 
-        {   
-            $taxonId = $taxon->getId();
-            $taxonData->$taxonId = $serializer->serialize($taxon, 'json');            
-        }
+        $domainData = $this->getEntityData('Domain', $serializer, $em);
+        $levelData = $this->getEntityData('Level', $serializer, $em);
+        $taxonData = $this->getEntityData('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domainData' => $domainData, 'taxonData' => $taxonData,
-            'levelData' => $levelData
+            'domainData' => $domainData, 'levelData' => $levelData,
+            'taxonData' => $taxonData            
         )); 
         return $response;
     }
-    /**
-     * Returns serialized domain data.
-     */
-    private function getDomainData($serializer, $em)
+    /** Returns serialized Entity data. */
+    private function getEntityData($entity, $serializer, $em)
     {
-        $domains = $em->getRepository('AppBundle:Domain')->findAll();
+        $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
         $data = new \stdClass;   
 
-        foreach ($domains as $domain) {  
-            $id = $domain->getId();
-            $data->$id = $serializer->serialize($domain, 'json');
+        foreach ($entities as $entity) {  
+            $id = $entity->getId();
+            $data->$id = $serializer->serialize($entity, 'json');
         }
         return $data;
-    }
-
-    /**
-     * Returns serialized level data.
-     */
-    private function getLevelData($serializer, $em)
-    {
-        $levels = $em->getRepository('AppBundle:Level')->findAll();
-        $data = new \stdClass;   
-
-        foreach ($levels as $level) {  
-            $id = $level->getId();
-            $data->$id = $serializer->serialize($level, 'json');
-        }
-        return $data;
-    }
-     * Builds and returns Taxa Data object starting with the parent taxon for each domain.
-     */
-    private function getTaxonData($taxon, &$taxaData) 
-    {           
-        $data = new \stdClass;
-
-        $data->id = $taxon->getId();
-        $data->displayName = $taxon->getDisplayName();
-        $data->slug = $taxon->getSlug();
-        $data->children = $this->getTaxaChildren($taxon, $taxaData);
-        $data->parentTaxon = $taxon->getParentTaxon() ?
-            $taxon->getParentTaxon()->getId() : null ;           
-        $data->level = $taxon->getLevel()->getName();               
-        $data->interactions = $this->getTaxaInteractionIds($taxon);
-
-        return $data;
-    }
-    /** Calls getTaxonData for each child and returns an array of all child Ids */
-    private function getTaxaChildren($taxon, &$taxaData)
-    {   
-        $children = [];
-        $childEntities = $taxon->getChildTaxa();
-
-        foreach ($childEntities as $child)
-        {
-            $childId = $child->getId();
-            array_push($children, $childId);
-            $taxaData->$childId = $this->getTaxonData($child, $taxaData);
-        }
-        return $children;
-    }
-    private function getTaxaInteractionIds($taxon) 
-    {
-        $intRcrds = new \stdClass;
-        $roles = ['SubjectRoles', 'ObjectRoles'];
-
-        foreach ($roles as $role) 
-        {
-            $getIntRcrds = 'get' . $role; 
-            $interactions = $taxon->$getIntRcrds();
-            $intRcrds->$role = $this->getInteractionIds($interactions);
-        }
-        return $intRcrds;
     }
 /**------------------------Search By Location---------------------------------*/
     /**

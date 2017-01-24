@@ -14,7 +14,6 @@ use JMS\Serializer\Annotation as JMS;
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  * @JMS\ExclusionPolicy("all")
- * @JMS\AccessorOrder("alphabetical")
  */
 class Taxon
 {
@@ -507,7 +506,7 @@ class Taxon
      *
      * @return array
      */
-    public function getChildTaxaIds()
+    public function getChildTaxonIds()
     {
         $childTaxa = $this->getChildTaxa();
         $children = [];

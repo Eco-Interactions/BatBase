@@ -13,7 +13,6 @@ use JMS\Serializer\Annotation as JMS;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
- * @JMS\AccessorOrder("alphabetical")
  */
 class Domain
 {
