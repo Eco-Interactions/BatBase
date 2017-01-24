@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Level.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="level")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class Level
 {
@@ -27,6 +29,7 @@ class Level
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255)
+     * @JMS\Expose
      */
     private $name;
 
@@ -34,6 +37,7 @@ class Level
      * @var int
      *
      * @ORM\Column(name="ordinal", type="integer", nullable=true)
+     * @JMS\Expose
      */
     private $ordinal;
 
@@ -41,6 +45,7 @@ class Level
      * @var string
      *
      * @ORM\Column(name="plural_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $pluralName;
 

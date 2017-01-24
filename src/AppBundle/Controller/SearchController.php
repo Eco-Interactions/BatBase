@@ -65,6 +65,7 @@ class SearchController extends Controller
         $serializer = $this->container->get('jms_serializer');
 
         $domainData = $this->getDomainData($serializer, $em);
+        $levelData = $this->getLevelData($serializer, $em);
 
         $taxonData = new \stdClass;
         $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
@@ -77,7 +78,8 @@ class SearchController extends Controller
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domainData' => $domainData, 'taxonData' => $taxonData
+            'domainData' => $domainData, 'taxonData' => $taxonData,
+            'levelData' => $levelData
         )); 
         return $response;
     }
@@ -95,7 +97,21 @@ class SearchController extends Controller
         }
         return $data;
     }
+
     /**
+     * Returns serialized level data.
+     */
+    private function getLevelData($serializer, $em)
+    {
+        $levels = $em->getRepository('AppBundle:Level')->findAll();
+        $data = new \stdClass;   
+
+        foreach ($levels as $level) {  
+            $id = $level->getId();
+            $data->$id = $serializer->serialize($level, 'json');
+        }
+        return $data;
+    }
      * Builds and returns Taxa Data object starting with the parent taxon for each domain.
      */
     private function getTaxonData($taxon, &$taxaData) 
