@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * HabitatType.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="habitat_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class HabitatType
 {
@@ -26,6 +28,7 @@ class HabitatType
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -33,6 +36,7 @@ class HabitatType
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -87,6 +91,8 @@ class HabitatType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -173,6 +179,24 @@ class HabitatType
     public function getLocations()
     {
         return $this->locations;
+    }
+
+    /**
+     * Get an array of Location ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("locations")
+     *
+     * @return array
+     */
+    public function getLocationIds()
+    {
+        $locs = $this->getLocations();
+        $locations = [];
+        if ($locs === null) { return; }
+        foreach ($locs as $loc) {
+            array_push($locations, $loc->getId());
+        }
+        return $locations;
     }
 
     /**

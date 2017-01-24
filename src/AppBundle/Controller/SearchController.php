@@ -101,11 +101,14 @@ class SearchController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
+        $habitatTypeData = $this->getEntityData('HabitatType', $serializer, $em);
         $locationData = $this->getEntityData('Location', $serializer, $em);
+        $locTypeData = $this->getEntityData('LocationType', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'locationData' => $locationData,  
+            'habitatTypeData' => $habitatTypeData, 'locationData' => $locationData, 
+            'locationTypeData' => $locTypeData
         ));
 
         return $response;
