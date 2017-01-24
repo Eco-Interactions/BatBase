@@ -142,9 +142,11 @@ class SearchController extends Controller
         $citTypeData = $this->getEntityData('CitationType', $serializer, $em);
         $publicationData = $this->getEntityData('Publication', $serializer, $em);
         $pubTypeData = $this->getEntityData('PublicationType', $serializer, $em);
+        $tagData = $this->getEntityData('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
+            'tagData' => $tagData, 
             'sourceData' => $sourceData, 
             'sourceTypeData' => $srcTypeData, 
             'citationData' => $citationData,

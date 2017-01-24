@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Tag.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="tag")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class Tag
 {
@@ -27,6 +29,7 @@ class Tag
      * @var text
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -34,8 +37,17 @@ class Tag
      * @var text
      *
      * @ORM\Column(name="description", type="text")
+     * @JMS\Expose
      */
     private $description;
+
+    /**
+     * @var text
+     *
+     * @ORM\Column(name="constrained_to_entity", type="text", nullable=true)
+     * @JMS\Expose
+     */
+    private $constrainedToEntity;
 
     /**
      * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", inversedBy="tags")
@@ -44,23 +56,16 @@ class Tag
     private $interactions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags")
-     * @ORM\JoinTable(name="source_tag")
-     */
-    private $sources;
-
-    /**
-     * @var text
-     *
-     * @ORM\Column(name="constrained_to_entity", type="text", nullable=true)
-     */
-    private $constrainedToEntity;
-
-    /**
      * @ORM\ManyToMany(targetEntity="AppBundle\Entity\InteractionType", inversedBy="validTags")
      * @ORM\JoinTable(name="int_type_tag_contraints")
      */
     private $intTypeConstraints;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Source", mappedBy="tags")
+     * @ORM\JoinTable(name="source_tag")
+     */
+    private $sources;
 
     /**
      * @var \DateTime
@@ -113,6 +118,8 @@ class Tag
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -168,6 +175,30 @@ class Tag
     }
 
     /**
+     * Add ConstrainedToEntity.
+     *
+     * @param string $constrainedToEntity
+     *
+     * @return Tag
+     */
+    public function setConstrainedToEntity($constrainedToEntity)
+    {
+        $this->constrainedToEntity = $constrainedToEntity;
+
+        return $this;
+    }
+
+    /**
+     * Get ConstrainedToEntity.
+     *
+     * @return string
+     */
+    public function getConstrainedToEntity()
+    {
+        return $this->constrainedToEntity;
+    }
+
+    /**
      * Add Interaction.
      *
      * @param \AppBundle\Entity\Interaction $interaction
@@ -199,6 +230,56 @@ class Tag
     public function getInteractions()
     {
         return $this->interactions;
+    }
+
+    /**
+     * Returns an array of interactions ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactions")
+     */
+    public function getInteractionids()
+    {
+        $interactions = $this->getInteractions();
+        $allIntIds = [];
+        foreach ($interactions as $interaction) {
+            array_push($allIntIds, $interaction->getId());
+        }
+        return $allIntIds;
+    }
+
+    /**
+     * 
+     * Add intTypeConstraint.
+     *
+     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
+     *
+     * @return Tag
+     */
+    public function addIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
+    {
+        $this->intTypeConstraints[] = $intTypeConstraint;
+
+        return $this;
+    }
+
+    /**
+     * Remove intTypeConstraint.
+     *
+     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
+     */
+    public function removeIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
+    {
+        $this->intTypeConstraints->removeElement($intTypeConstraint);
+    }
+
+    /**
+     * Get intTypeConstraints.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getIntTypeConstraints()
+    {
+        return $this->intTypeConstraints;
     }
 
     /**
@@ -236,62 +317,18 @@ class Tag
     }
 
     /**
-     * Add ConstrainedToEntity.
-     *
-     * @param string $constrainedToEntity
-     *
-     * @return Tag
+     * Returns an array of Source ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("sources")
      */
-    public function setConstrainedToEntity($constrainedToEntity)
+    public function getSourceIds()
     {
-        $this->constrainedToEntity = $constrainedToEntity;
-
-        return $this;
-    }
-
-    /**
-     * Get ConstrainedToEntity.
-     *
-     * @return string
-     */
-    public function getConstrainedToEntity()
-    {
-        return $this->constrainedToEntity;
-    }
-
-    /**
-     * 
-     * Add intTypeConstraint.
-     *
-     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
-     *
-     * @return Tag
-     */
-    public function addIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
-    {
-        $this->intTypeConstraints[] = $intTypeConstraint;
-
-        return $this;
-    }
-
-    /**
-     * Remove intTypeConstraint.
-     *
-     * @param \AppBundle\Entity\InteractionType $intTypeConstraint
-     */
-    public function removeIntTypeConstraint(\AppBundle\Entity\InteractionType $intTypeConstraint)
-    {
-        $this->intTypeConstraints->removeElement($intTypeConstraint);
-    }
-
-    /**
-     * Get intTypeConstraints.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getIntTypeConstraints()
-    {
-        return $this->intTypeConstraints;
+        $sources = $this->getSources();
+        $srcs = [];
+        foreach ($sources as $source) {
+            array_push($srcs, $source->getId());
+        }
+        return $srcs;
     }
 
     /**
