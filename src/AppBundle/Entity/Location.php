@@ -530,7 +530,7 @@ class Location
     /**
      * Get locationType id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("locationType")
+     * @JMS\SerializedName("location_type")
      *
      * @return int
      */
@@ -616,7 +616,7 @@ class Location
     /**
      * Get habitatType id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("habitatType")
+     * @JMS\SerializedName("habitat_type")
      *
      * @return int
      */

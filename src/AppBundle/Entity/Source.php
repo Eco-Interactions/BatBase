@@ -505,7 +505,7 @@ class Source
     /**
      * Get Source Type id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("sourceType")
+     * @JMS\SerializedName("source_type")
      *
      * @return int
      */

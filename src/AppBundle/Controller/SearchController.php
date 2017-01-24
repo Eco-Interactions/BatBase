@@ -22,7 +22,7 @@ class SearchController extends Controller
      *
      * @Route("/search", name="app_search_show")
      */
-    public function searchAction()
+    public function showSearchAction()
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -74,18 +74,6 @@ class SearchController extends Controller
             'taxonData' => $taxonData            
         )); 
         return $response;
-    }
-    /** Returns serialized Entity data. */
-    private function getEntityData($entity, $serializer, $em)
-    {
-        $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
-        $data = new \stdClass;   
-
-        foreach ($entities as $entity) {  
-            $id = $entity->getId();
-            $data->$id = $serializer->serialize($entity, 'json');
-        }
-        return $data;
     }
     /**
      * Returns serialized data objects for Habitat Type, Location Type, and Location. 
@@ -179,5 +167,17 @@ class SearchController extends Controller
             'interactionTypeData' => $intTypeData
         ));
         return $response;
+    }
+    /** Returns serialized Entity data. */
+    private function getEntityData($entity, $serializer, $em)
+    {
+        $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
+        $data = new \stdClass;   
+
+        foreach ($entities as $entity) {  
+            $id = $entity->getId();
+            $data->$id = $serializer->serialize($entity, 'json');
+        }
+        return $data;
     }
 }

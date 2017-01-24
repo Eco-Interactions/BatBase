@@ -251,7 +251,7 @@ class SourceType
      * @JMS\VirtualProperty
      * @JMS\SerializedName("sources")
      */
-    public function getSourceids()
+    public function getSourceIds()
     {
         $sources = $this->getSources();
         $srcs = [];

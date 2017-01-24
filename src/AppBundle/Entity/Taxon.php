@@ -500,7 +500,7 @@ class Taxon
     }
 
     /**
-     * Get an array of child Taxa ids.   
+     * Get an array of child Taxon ids.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
      *
