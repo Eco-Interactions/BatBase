@@ -13,6 +13,7 @@ use JMS\Serializer\Annotation as JMS;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
+ * @JMS\AccessorOrder("alphabetical")
  */
 class Domain
 {
@@ -53,8 +54,6 @@ class Domain
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Taxon", inversedBy="domain")
      * @ORM\JoinColumn(name="taxon_id", referencedColumnName="id", unique=true)
-     * @JMS\Expose
-     * @JMS\Accessor(getter="getTaxonId", setter="setTaxon")
      */
     private $taxon;
 
@@ -199,15 +198,13 @@ class Domain
     }
 
     /**
-     * Get taxon id object for serialized 'taxon' property.
-     *
-     * @return int
+     * Get the domain Taxon's id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("taxon")
      */
     public function getTaxonId()
     {
-        $taxon = new \stdClass;
-        $taxon->id = $this->taxon->getId(); 
-        return $taxon;
+        return $this->taxon->getId();
     }
 
     /**

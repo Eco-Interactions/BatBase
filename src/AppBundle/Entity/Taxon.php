@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Taxon.
@@ -11,7 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="taxon")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\TaxonRepository")
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)z
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
+ * @JMS\AccessorOrder("alphabetical")
  */
 class Taxon
 {
@@ -27,6 +30,7 @@ class Taxon
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -34,6 +38,7 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -41,6 +46,7 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $defaultGuid;
 
@@ -48,6 +54,7 @@ class Taxon
      * @var bool
      *
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
+     * @JMS\Expose
      */
     private $isOldWorld;
 
@@ -55,6 +62,7 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $linkDisplay;
 
@@ -62,6 +70,7 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $linkUrl;
 
@@ -179,6 +188,8 @@ class Taxon
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -378,6 +389,16 @@ class Taxon
     }
 
     /**
+     * Get level id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("level")
+     */
+    public function getLevelId()
+    {
+        return $this->level->getId();
+    }
+
+    /**
      * Add namings.
      *
      * @param \AppBundle\Entity\Naming $namings
@@ -436,6 +457,16 @@ class Taxon
     }
 
     /**
+     * Get the Parent Taxon's id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("parent")
+     */
+    public function getParentTaxonId()
+    {
+        return $this->parentTaxon ? $this->parentTaxon->getId() : null;
+    }
+
+    /**
      * Add childTaxa.
      *
      * @param \AppBundle\Entity\Taxon $childTaxa
@@ -467,6 +498,24 @@ class Taxon
     public function getChildTaxa()
     {
         return $this->childTaxa;
+    }
+
+    /**
+     * Get an array of child Taxa ids.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("children")
+     *
+     * @return array
+     */
+    public function getChildTaxaIds()
+    {
+        $childTaxa = $this->getChildTaxa();
+        $children = [];
+        if ($childTaxa === null) { return; }
+        foreach ($childTaxa as $child) {
+            array_push($children, $child->getId());
+        }
+        return $children;
     }
 
     /**
@@ -538,6 +587,17 @@ class Taxon
     }
 
     /**
+     * Returns an array of ids for all interactions where the taxon was the subject. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("subjectRoles")     
+     */
+    public function getSubjectRoleIds()
+    {
+        $interactions = $this->subjectRoles;
+        return $this->getInteractionids($interactions);
+    }
+
+    /**
      * Add objectRoles.
      *
      * @param \AppBundle\Entity\Interaction $objectRoles
@@ -569,6 +629,29 @@ class Taxon
     public function getObjectRoles()
     {
         return $this->objectRoles;
+    }
+
+    /**
+     * Returns an array of ids for all interactions where the taxon was the object. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("objectRoles")
+     */
+    public function getObjectRoleIds()
+    {
+        $interactions = $this->objectRoles;
+        return $this->getInteractionids($interactions);
+    }
+
+    /**
+     * Returns an array of ids for all passed interactions. 
+     */
+    public function getInteractionids($interactions)
+    {
+        $allIntIds = [];
+        foreach ($interactions as $interaction) {
+            array_push($allIntIds, $interaction->getId());
+        }
+        return $allIntIds;
     }
 
     /**

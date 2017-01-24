@@ -65,24 +65,19 @@ class SearchController extends Controller
         $serializer = $this->container->get('jms_serializer');
 
         $domainData = $this->getDomainData($serializer, $em);
-        // $domainTaxaIds = array_keys(get_object_vars($domainData));  
 
-        // $taxaData = new \stdClass;
+        $taxonData = new \stdClass;
+        $taxa = $em->getRepository('AppBundle:Taxon')->findAll();
 
-        // foreach ($domainTaxaIds as $domainTaxonId) 
-        // // {                                     
-        // //     $domainTaxonEntity = $em->getRepository('AppBundle:Taxon')
-        // //         ->findOneBy(array('id' => $domainTaxonId));
-        // //     $taxonId = $domainTaxonEntity->getId();
-        // //     $taxaData->$taxonId = $serializer->serialize($domainTaxonEntity, 'json');                                               
-        // //     //$serializer->serialize($domainTaxonEntity, 'json');
-            
-        // }
+        foreach ($taxa as $taxon) 
+        {   
+            $taxonId = $taxon->getId();
+            $taxonData->$taxonId = $serializer->serialize($taxon, 'json');            
+        }
 
-
-        $response = new JsonResponse();  //, 'taxaRcrds' => $taxaData
+        $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domainRcrds' => $domainData
+            'domainData' => $domainData, 'taxonData' => $taxonData
         )); 
         return $response;
     }
