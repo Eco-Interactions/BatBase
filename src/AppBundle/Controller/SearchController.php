@@ -122,13 +122,12 @@ class SearchController extends Controller
             ->findBy(array('location'=> null));   
         return $this->getInteractionIds($interactions);
     }
-/**------------------------Search By Source-----------------------------------*/
     /**
-     * Returns all Sources by Id.
+     * Returns serialized data objects for all entities related to Source. 
      *
-     * @Route("/search/source", name="app_ajax_search_source")
+     * @Route("/search/source", name="app_serialize_source")
      */
-    public function searchSourcesAction(Request $request) 
+    public function serializeSourceDataAction(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -137,146 +136,26 @@ class SearchController extends Controller
         $serializer = $this->container->get('jms_serializer');
 
         $authorData = $this->getEntityData('Author', $serializer, $em);
-        $sourceData = $this->getEntityData('Source', $serializer, $em);
-        $srcTypeData = $this->getEntityData('SourceType', $serializer, $em);
         $citationData = $this->getEntityData('Citation', $serializer, $em);
         $citTypeData = $this->getEntityData('CitationType', $serializer, $em);
         $publicationData = $this->getEntityData('Publication', $serializer, $em);
         $pubTypeData = $this->getEntityData('PublicationType', $serializer, $em);
+        $sourceData = $this->getEntityData('Source', $serializer, $em);
+        $srcTypeData = $this->getEntityData('SourceType', $serializer, $em);
         $tagData = $this->getEntityData('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'tagData' => $tagData, 
             'authorData' => $authorData, 
-            'sourceData' => $sourceData, 
-            'sourceTypeData' => $srcTypeData, 
             'citationData' => $citationData,
             'citationTypeData' => $citTypeData, 
             'publicationData' => $publicationData, 
             'publicationTypeData' => $pubTypeData, 
+            'sourceData' => $sourceData, 
+            'sourceTypeData' => $srcTypeData, 
+            'tagData' => $tagData, 
         ));
         return $response;
-    }
-    /**
-     * Builds a Source Data Object with an array of all Source Types (srcTypes), 
-     * an object for all source records to be stored by id (srcRcrds), nested objects 
-     * for each source type ($type) which contain an array of (ids) for all 
-     * source records of the type and, if they exist, an array of their (types).
-     */
-    private function buildSrcDataObj($em)
-    {
-        $dataObj = new \stdClass;
-        $dataObj->srcTypes = $this->buildTypeAry("SourceType", $em);;
-        $dataObj->srcRcrds = new \stdClass;
-        
-        foreach ($dataObj->srcTypes as $type => $typeId) {
-            $dataObj->$type = new \stdClass;
-            $dataObj->$type->ids = [];
-        }
-        $dataObj->citation->types = $this->buildTypeAry("CitationType", $em);
-        $dataObj->publication->types = $this->buildTypeAry("PublicationType", $em);
-
-        return $dataObj;
-    }
-    private function getSrcRcrd($srcEntity)
-    {
-        $data = new \stdClass; 
-        $data->id = $srcEntity->getId();
-        $data->displayName = $srcEntity->getDisplayName();
-        $data->description = $srcEntity->getDescription();
-        $data->year = $srcEntity->getYear();
-        $data->doi = $srcEntity->getDoi();
-        $data->linkUrl = $srcEntity->getLinkUrl();
-        $data->linkDisplay = $srcEntity->getLinkDisplay();
-        $data->isDirect = $srcEntity->getIsDirect();
-
-        $data->interactions = $this->getInteractionIds($srcEntity->getInteractions());
-        $data->sourceType = $this->getSourceTypeData($srcEntity);
-        $data->tags = $this->getSourceTags($srcEntity);
-        $data->childSources = $this->getChildSources($srcEntity);
-
-        $parentSource = $srcEntity->getParentSource();
-        $data->parentSource = $parentSource === null ? null : $parentSource->getId();
-
-        return $data;
-    }
-    /** Returns an array with the tags for the source. */
-    private function getSourceTags($srcEntity)
-    {
-        $tagAry = [];
-        $tags = $srcEntity->getTags();
-
-        foreach ($tags as $tag) { 
-            array_push($tagAry, $tag->getDisplayName()); 
-        }
-        return $tagAry;
-    }
-    /** Returns an array with the ids of each child source, or null if there are none. */
-    private function getChildSources($srcEntity)
-    {
-        $children = $srcEntity->getChildSources();
-        $childIds = [];
-
-        foreach ($children as $child) {
-            array_push($childIds, $child->getId());
-        }
-        return count($children) > 0 ? $childIds : null; 
-    }
-    private function getSourceTypeData($srcEntity)
-    {
-        $data = new \stdClass;
-        $sourceType = $srcEntity->getSourceType()->getSlug();                   //print("\nsourceType = ".$sourceType);
-        $getTypeData = [ 
-            "author" => function($entity){ return $this->getAuthorData($entity); },
-            "citation" => function($entity){ return $this->getCitationData($entity); },
-            "publication" => function($entity){ return $this->getPublicationData($entity); }
-        ];
-
-        if (array_key_exists($sourceType, $getTypeData)) {
-            $data->$sourceType = call_user_func($getTypeData[$sourceType], $srcEntity);
-        }
-        return $data;
-    }
-    /** Returns an associative array with the author data. */
-    private function getAuthorData($srcEntity)
-    {
-        $author = $srcEntity->getAuthor();  //print("\n    srcEntity = ". $srcEntity."  author = ". $author);
-        $authData = [
-            'contributions' => [], 'displayName' => $author->getDisplayName(),
-            'fullName' => $author->getFullName(), 'lastName' => $author->getLastName()
-        ];
-        $contributions = $srcEntity->getContributions();
-        // Adds the work source id to the array of author contributions
-        foreach ($contributions as $contrib) {
-            array_push($authData['contributions'], $contrib->getWorkSource()->getId());
-        }
-        return $authData;
-    }
-    /** Returns an associative array with the publication data. */
-    private function getPublicationData($srcEntity)
-    {
-        $pub = $srcEntity->getPublication();
-        $pubType = $pub->getPublicationType() ? 
-            $pub->getPublicationType()->getId() : 0;
-
-        return [ 'description' => $pub->getDescription(), 
-                 'displayName' => $pub->getDisplayName(),
-                 'type' => $pubType 
-        ];
-    }
-    /** Returns an associative array with the citation data. */
-    private function getCitationData($srcEntity)
-    {
-        $cit = $srcEntity->getCitation();
-        $citData = [ 'displayName' => $cit->getDisplayName(),
-                     'fullText' => $cit->getFullText(), 
-                     'publicationIssue' => $cit->getPublicationIssue(),
-                     'publicationPages' => $cit->getPublicationPages(),
-                     'publicationVolume' => $cit->getPublicationVolume(),
-                     'title' => $cit->getTitle(),
-        ];
-        return $citData;
     }
 /**------------------------Search Interaction Actions-------------------------*/
     /**
