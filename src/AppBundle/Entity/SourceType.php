@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * SourceType.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="source_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class SourceType
 {
@@ -26,6 +28,7 @@ class SourceType
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -33,6 +36,7 @@ class SourceType
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -40,6 +44,7 @@ class SourceType
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -47,6 +52,7 @@ class SourceType
      * @var int
      *
      * @ORM\Column(name="ordinal", type="integer", nullable=true)
+     * @JMS\Expose
      */
     private $ordinal;
 
@@ -101,6 +107,8 @@ class SourceType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -236,6 +244,21 @@ class SourceType
     public function getSources()
     {
         return $this->sources;
+    }
+
+    /**
+     * Returns an array of Source ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("sources")
+     */
+    public function getSourceids()
+    {
+        $sources = $this->getSources();
+        $srcs = [];
+        foreach ($sources as $source) {
+            array_push($srcs, $source->getId());
+        }
+        return $srcs;
     }
 
     /**

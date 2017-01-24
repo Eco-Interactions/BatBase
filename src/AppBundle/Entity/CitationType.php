@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * CitationType.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="citation_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class CitationType
 {
@@ -26,6 +28,7 @@ class CitationType
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -33,6 +36,7 @@ class CitationType
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @JMS\Expose
      */
     private $displayName;
 
@@ -40,6 +44,7 @@ class CitationType
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -94,6 +99,8 @@ class CitationType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */

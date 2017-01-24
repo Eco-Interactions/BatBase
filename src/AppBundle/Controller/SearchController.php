@@ -137,10 +137,14 @@ class SearchController extends Controller
         $serializer = $this->container->get('jms_serializer');
 
         $sourceData = $this->getEntityData('Source', $serializer, $em);
+        $srcTypeData = $this->getEntityData('SourceType', $serializer, $em);
+        $citTypeData = $this->getEntityData('CitationType', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'sourceData' => $sourceData, 
+            'sourceTypeData' => $srcTypeData, 
+            'citationTypeData' => $citTypeData, 
         ));
         return $response;
     }
