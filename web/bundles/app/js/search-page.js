@@ -216,11 +216,9 @@
             }
         }
         function replaceTaxaInteractions(taxon) {                               //console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
-            var prop = ['subjectRoles', 'objectRoles'];
-            for (var p in prop) {
-                if (taxon[prop[p]].length > 0) {                                //console.log("interactions found!")
-                    taxon[prop[p]] = replaceInteractions(taxon[prop[p]], intRcrds); 
-                }
+            var roles = ['subjectRoles', 'objectRoles'];
+            for (var r in roles) {
+                taxon[roles[r]] = replaceInteractions(taxon[roles[r]], intRcrds); 
             }
         }
     } /* End fillTaxaTree */
@@ -592,15 +590,16 @@
      * Recurses through each taxon's 'children' property and returns a row data obj 
      * for each taxon in the tree.
      */
-    function getTaxonRowData(taxon, treeLvl) {                                           //console.log("taxonRowData. taxon = %O. rcrdsById = %O", taxon, rcrdsById)
-        var taxonName = taxon.level === "Species" ? 
-            taxon.displayName : taxon.level + " " + taxon.displayName;
+    function getTaxonRowData(taxon, treeLvl) {                                  console.log("taxonRowData. taxon = %O", taxon);
+        var levelName = focusStorage.allTaxaLvls[taxon.level-1];
+        var taxonName = levelName === "Species" ? 
+            taxon.displayName : levelName + " " + taxon.displayName;
         var intCount = getIntCount(taxon); 
         return {
             id: taxon.id,
             name: taxonName,
-            isParent: true,                     //taxon.interactions !== null || taxon.children !== null was the test, but I'm pretty sure this is always true with taxa
-            parentTaxon: taxon.parentTaxon,
+            isParent: true,                     
+            parentTaxon: taxon.parent,
             open: focusStorage.openRows.indexOf(taxon.id.toString()) !== -1, 
             children: getTaxonChildRowData(taxon, treeLvl),
             treeLvl: treeLvl,
@@ -611,17 +610,12 @@
     /**
      * Checks whether this taxon has interactions in either the subject or object
      * roles. Returns the interaction count if any records are found, null otherwise. 
-     * NOTE: Only counting one role with interactions currently.
      */
     function getIntCount(taxon) {
-        var intsFound = false;
-        var intCnt = null;
-        for ( var role in taxon.interactions ) {
-            if (intsFound) {continue}  /* Only counting one role with interactions. */
-            intsFound = taxon.interactions[role] === null ? false : taxon.interactions[role].length > 0;    
-            if (intsFound) { intCnt = taxon.interactions[role].length; }    
-        }
-        return intCnt;
+        var roles = ["subjectRoles", "objectRoles"];
+        var intCnt = 0;
+        roles.forEach(function(role) { intCnt += taxon[role].length; });
+        return intCnt > 0 ? intCnt : null;
     } 
     /**
      * Returns both interactions for the curTaxon and rowData for any children.
@@ -671,14 +665,15 @@
         }
     } /* End getTaxonChildRowData */
     function getTaxonIntRows(taxon, treeLvl) {                                      //console.log("getTaxonInteractions for = %O", taxon);
+        var roles = ["subjectRoles", "objectRoles"];
         var ints = [];
-        for (var role in taxon.interactions) {
-            if ( taxon.interactions[role] !== null && taxon.interactions[role].length >= 1 ) {
-                taxon.interactions[role].forEach(function(intRcrd){
+        roles.forEach(function(role) {
+            if (taxon[role].length > 0) {
+                taxon[role].forEach(function(intRcrd){
                     ints.push( buildIntRowData(intRcrd, treeLvl));
                 });
-            }
-        }
+            } 
+        });
         return ints;
     }
 /*------------------Location Search Methods-----------------------------------*/
@@ -1350,7 +1345,7 @@
         function selectAncestorTaxa(taxon) {                                    //console.log("selectedTaxaid = %s, obj = %O", taxon.id, taxon)
             if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
                 selected[taxon.level] = taxon.id;                               //console.log("setting lvl = ", taxon.level)
-                selectAncestorTaxa(getDetachedRcrd(taxon.parentTaxon, rcrdsById))
+                selectAncestorTaxa(getDetachedRcrd(taxon.parent, rcrdsById))
             }
         }
     } /* End getRelatedTaxaToSelect */
@@ -1486,7 +1481,7 @@
 
         function getNextLvlTaxaData(treeObj) {
             for(var topTaxon in treeObj) {  
-                syncTaxaHeir( treeObj[topTaxon].displayName, treeObj[topTaxon].level, treeObj[topTaxon].parentTaxon);
+                syncTaxaHeir( treeObj[topTaxon].displayName, treeObj[topTaxon].level, treeObj[topTaxon].parent);
                 fillInteractionRcrdsWithTaxaTreeData( treeObj[topTaxon].interactions );
                 if (treeObj[topTaxon].children) { 
                     getNextLvlTaxaData( treeObj[topTaxon].children ); }             
@@ -1497,9 +1492,9 @@
          * For each subsequent taxa, every level more specific that the parent 
          * lvl is cleared from the taxa-heirarchy @clearLowerLvls.  
          */
-        function syncTaxaHeir(taxonName, lvl, parentTaxon) { //console.log("syncTaxaHeir parentTaxon = ", parentTaxon);
-            if (parentTaxon === null || parentTaxon === 1) { fillInAvailableLevels(lvl);
-            } else { clearLowerLvls(rcrdsById[parentTaxon].level) }
+        function syncTaxaHeir(taxonName, lvl, parent) { //console.log("syncTaxaHeir parent = ", parent);
+            if (parent === null || parent === 1) { fillInAvailableLevels(lvl);
+            } else { clearLowerLvls(rcrdsById[parent].level) }
 
             curTaxaHeirarchy[lvl] = taxonName;
         }
