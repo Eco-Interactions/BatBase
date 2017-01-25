@@ -186,20 +186,17 @@
         fillTreeWithInteractions( data.interactionData );
     }
     /**
-     * Fills the current tree data with interaction records and calls the grid- 
-     * building method for the current focus. Hides popup message and the filter 
-     * button on the tree column.
+     * Fills the current tree data with interaction records @fillTree and starts 
+     * the grid-building method chain for the current focus @buildGrid. Finally, 
+     * calls @finishGridAndUiLoad for the final stage of the grid build. 
      */
     function fillTreeWithInteractions(intRcrds) {                               console.log("fillTreeWithInteractionscalled.");
         var focus = focusStorage.curFocus; 
         var curTree = focusStorage.curTree; 
-        var gridBuilderMap = { taxa: buildTaxaSearchUiAndGrid, 
-            locs: buildLocSearchUiAndGrid, srcs: buildSrcSearchUiAndGrid };    
 
         fillTree(focus, curTree, intRcrds);
-        gridBuilderMap[focus](curTree);
-        hidePopUpMsg();
-        hideGroupColFilterMenu();
+        buildGrid(focus, curTree);
+        finishGridAndUiLoad();
     } 
     /** Replaces all interaction ids with records for every node in the tree.  */
     function fillTree(focus, curTree, intRcrds) {
@@ -270,9 +267,15 @@
             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
         });
     }
-    /**
-     * Returns an interaction record object with flat data in grid-ready format. 
-     */
+    /** Calls the start of the grid-building method chain for the current focus. */
+    function buildGrid(focus, curTree) {
+        var gridBuilderMap = { 
+            locs: buildLocSearchUiAndGrid,  srcs: buildSrcSearchUiAndGrid,
+            taxa: buildTaxaSearchUiAndGrid 
+        };    
+        gridBuilderMap[focus](curTree);
+    }
+    /** Returns an interaction record object with flat data in grid-ready format. */
     function buildIntRowData(intRcrd, treeLvl){                                 //console.log("intRcrd = %O", intRcrd);
         return {
             isParent: false,
@@ -2328,9 +2331,13 @@
     function showGrid() {
         $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
     }
+    function finishGridAndUiLoad() {
+        hidePopUpMsg();
+        hideGroupColFilterMenu();
+    } 
     /**
      * Hides the group "tree" column's filter button. Filtering on the group 
-     * column only filters the leaf nodes, by design. It is not useful.
+     * column only filters the leaf nodes, by design. It is not useful here.
      */
     function hideGroupColFilterMenu() {
         $('.ag-header-cell-menu-button.name').hide();
