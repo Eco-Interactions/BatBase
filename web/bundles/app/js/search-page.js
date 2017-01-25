@@ -135,7 +135,39 @@
             buildGridFunc();
         }
     } /* End ifChangedFocus */
-
+/*------------------Shared Methods--------------------------------------------*/
+    /**
+     * Loops through the data object returned from the server, parsing and storing
+     * the entity data.
+     */
+    function storeEntityData(data) {
+        var rcrdData;
+        for (var entityData in data) {
+            rcrdData = parseData(data[entityData]);                             //console.log("entity = %s, data = %O", entityData, rcrdData);
+             _util.populateStorage(entityData, JSON.stringify(rcrdData));
+        }
+    }
+    /**
+     * Loops through the passed data object to parse the nested objects. This is 
+     * because the data comes back from the server having been double JSON-encoded,
+     * due to the 'serialize' library and the JSONResponse object. 
+     */
+    function parseData(data) {
+        for (var id in data) { data[id] = JSON.parse(data[id]); }
+        return data;
+    }
+    /**
+     * Gets all related entity data from local storage. If an entity is not found,
+     * false is returned and an ajax call will fetch the data from the server. 
+     */
+    function getRelatedEntityData(relEntityNames) {
+        var data = {};
+        var allFound = relEntityNames.every(function(entity){
+            data[entity+'Data'] = JSON.parse(localStorage.getItem(entity+'Data'));
+            return data[entity+'Data'] || false;
+        });  
+        return allFound ? data : false;
+    }
 /*------------------Interaction Search Methods--------------------------------------*/
 	/**
 	 * If interaction data is already in local storage, the data is sent to 
@@ -279,35 +311,20 @@
      * to @initTaxaSearchUi.  
      */
     function getTaxa() { 
-        var rcrdData = {}; 
-        rcrdData.domainData = localStorage ? 
-            JSON.parse(localStorage.getItem('domainData')) : false; 
-        if( rcrdData.domainData ) {                                             //console.log("Stored Taxa Loaded");
-            rcrdData.taxonData = JSON.parse(localStorage.getItem('taxonData'));
-            initTaxaSearchUi(rcrdData);
+        var entityData = {}; 
+        var relEntities = ['domain', 'taxon', 'level'];
+        entityData = getRelatedEntityData(relEntities); 
+        if( entityData ) {                                                      console.log("Stored Taxa Loaded");
+            initTaxaSearchUi(entityData);
         } else {                                                                //console.log("Taxa Not Found In Storage.");
-            sendAjaxQuery({}, 'search/taxa', storeTaxa);
-        }
+            sendAjaxQuery({}, 'search/taxa', storeTaxa); }
     }
     /**
      * Stores the json data objects for all Taxon, Domain, and Level entity data. 
      */
-    function storeTaxa(data) {                                                  //console.log("taxa data recieved. %O", data);
-        var rcrdData;
-        for (var entityData in data) {
-            rcrdData = parseData(data[entityData]);                             //console.log("entity = %s, data = %O", entityData, rcrdData);
-             _util.populateStorage(entityData, JSON.stringify(rcrdData));
-        }
+    function storeTaxa(data) {                                                  console.log("taxa data recieved. %O", data);
+        storeEntityData(data);
         initTaxaSearchUi(data);
-    }
-    /**
-     * Loops through the passed data object to parse the nested objects. This is 
-     * because the data comes back from the server having been double JSON-encoded,
-     * due to the 'serialize' library and the JSONResponse object. 
-     */
-    function parseData(data) {
-        for (var id in data) { data[id] = JSON.parse(data[id]); }
-        return data;
     }
     /**
      * If the taxa search html isn't already built and displayed, calls @buildTaxaDomainHtml
