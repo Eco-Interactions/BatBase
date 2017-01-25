@@ -31,26 +31,6 @@ class SearchController extends Controller
         return $this->render('ContentBlock/search.html.twig', array());
     }
     /**
-     * Returns the total number of interaction records.
-     *
-     * @Route("/search/interaction/count", name="app_search_int_cnt")
-     */
-    public function getInteractionCountAction(Request $request)
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }  
-        $em = $this->getDoctrine()->getManager();
-
-        $interactions = $em->getRepository('AppBundle:Interaction')->findAll();
-
-        $response = new JsonResponse();
-        $response->setData(array(
-            'rcrdCount' => count($interactions)
-        ));
-        return $response;
-    }
-    /**
      * Returns serialized data objects for the Domain, Level, and Taxon entities.
      *
      * @Route("/search/taxa", name="app_serialize_taxa")

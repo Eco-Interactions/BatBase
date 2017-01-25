@@ -60,14 +60,11 @@
 			showLoadingDataPopUp();
 		}
 	}
-	/** Gets total number of interactions in the database and shows a loading popup message. */
+	/** Shows a loading popup message for the inital data-download wait. */
 	function showLoadingDataPopUp() {
-		sendAjaxQuery({}, 'search/interaction/count', storeIntRcrdTotal);
-	}
-	function storeIntRcrdTotal(data) {  
-		var ttlIntRcrds = data.rcrdCount; 
-	    showPopUpMsg("Downloading and Caching\n" + ttlIntRcrds + " records.");	
-	}
+	    showPopUpMsg("Downloading and Caching\n all interaction records.\nPlease allow for a "+
+            "one-time ~20 second download.");	
+    }
 	function addDomEventListeners() {
 		$("#search-focus").change(selectSearchFocus);
         $('button[name="xpand-tree"]').click(toggleExpandTree);
