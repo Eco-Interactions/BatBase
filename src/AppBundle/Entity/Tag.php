@@ -30,6 +30,7 @@ class Tag
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true, nullable=false)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -46,6 +47,7 @@ class Tag
      *
      * @ORM\Column(name="constrained_to_entity", type="text", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("constrainedToEntity")
      */
     private $constrainedToEntity;
 

@@ -31,6 +31,7 @@ class Location
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -55,6 +56,7 @@ class Location
      *
      * @ORM\Column(name="elevation_max", type="integer", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("elevationMax")
      */
     private $elevationMax;
 
@@ -63,6 +65,7 @@ class Location
      *
      * @ORM\Column(name="elev_unit_abbrv", type="string", length=3, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("elevUnitAbbrv")
      */
     private $elevUnitAbbrv;
 
@@ -71,6 +74,7 @@ class Location
      *
      * @ORM\Column(name="gps_data", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("gpsData")
      */
     private $gpsData;
 
@@ -530,7 +534,7 @@ class Location
     /**
      * Get locationType id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("location_type")
+     * @JMS\SerializedName("locationType")
      *
      * @return int
      */
@@ -616,7 +620,7 @@ class Location
     /**
      * Get habitatType id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("habitat_type")
+     * @JMS\SerializedName("habitatType")
      *
      * @return int
      */

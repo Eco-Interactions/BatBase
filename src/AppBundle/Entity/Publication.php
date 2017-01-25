@@ -38,6 +38,7 @@ class Publication
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -213,7 +214,7 @@ class Publication
     /**
      * Get the Publication Type id.   
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("publication_type")
+     * @JMS\SerializedName("publicationType")
      */
     public function getPublicationTypeId()
     {

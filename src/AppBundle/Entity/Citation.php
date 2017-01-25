@@ -31,6 +31,7 @@ class Citation
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")    
      */
     private $displayName;
     
@@ -47,6 +48,7 @@ class Citation
      *
      * @ORM\Column(name="full_text", type="text")
      * @JMS\Expose
+     * @JMS\SerializedName("fullText")
      */
     private $fullText;
 
@@ -55,6 +57,7 @@ class Citation
      *
      * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("publicationVolume")
      */
     private $publicationVolume;
 
@@ -63,6 +66,7 @@ class Citation
      *
      * @ORM\Column(name="publication_issue", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("publicationIssue")
      */
     private $publicationIssue;
 
@@ -71,6 +75,7 @@ class Citation
      *
      * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("publicationPages")
      */
     private $publicationPages;
 
@@ -319,7 +324,7 @@ class Citation
     /**
      * Get the Citation Type id.   
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("citation_type")
+     * @JMS\SerializedName("citationType")
      */
     public function getCitationTypeId()
     {

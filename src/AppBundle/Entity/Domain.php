@@ -37,6 +37,7 @@ class Domain
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")     
      */
     private $displayName;
 
@@ -45,6 +46,7 @@ class Domain
      *
      * @ORM\Column(name="plural_name", type="string", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("pluralName")
      */
     private $pluralName;
 

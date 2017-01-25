@@ -39,6 +39,7 @@ class Interaction
      *
      * @ORM\Column(name="is_likely", type="boolean", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("isLikely")
      */
     private $isLikely;
 
@@ -47,6 +48,7 @@ class Interaction
      *
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("isOldWorld")
      */
     private $isOldWorld;
 
@@ -288,7 +290,7 @@ class Interaction
     /**
      * Get the Interaction Type id.   
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("interaction_type")
+     * @JMS\SerializedName("interactionType")
      */
     public function getInteractionTypeId()
     {

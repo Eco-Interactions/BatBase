@@ -38,6 +38,7 @@ class Author
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -46,6 +47,7 @@ class Author
      *
      * @ORM\Column(name="first_name", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("firstName")
      */
     private $firstName;
 
@@ -54,6 +56,7 @@ class Author
      *
      * @ORM\Column(name="middle_name", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("middleName")
      */
     private $middleName;
 
@@ -62,6 +65,7 @@ class Author
      *
      * @ORM\Column(name="last_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("lastName")
      */
     private $lastName;
 
@@ -70,6 +74,7 @@ class Author
      *
      * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("fullName")
      */
     private $fullName;
 

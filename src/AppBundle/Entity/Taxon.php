@@ -38,6 +38,7 @@ class Taxon
      *
      * @ORM\Column(name="display_name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -46,6 +47,7 @@ class Taxon
      *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("defaultGuid")
      */
     private $defaultGuid;
 
@@ -54,6 +56,7 @@ class Taxon
      *
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("isOldWorld")
      */
     private $isOldWorld;
 
@@ -62,6 +65,7 @@ class Taxon
      *
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("linkDisplay")
      */
     private $linkDisplay;
 
@@ -70,6 +74,7 @@ class Taxon
      *
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("linkUrl")
      */
     private $linkUrl;
 

@@ -31,6 +31,7 @@ class Source
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -63,6 +64,7 @@ class Source
      * 
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("linkDisplay")
      */
     private $linkDisplay;
 
@@ -71,6 +73,7 @@ class Source
      * 
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("linkUrl")
      */
     private $linkUrl;
 
@@ -505,7 +508,7 @@ class Source
     /**
      * Get Source Type id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("source_type")
+     * @JMS\SerializedName("sourceType")
      *
      * @return int
      */

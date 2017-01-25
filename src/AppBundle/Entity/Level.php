@@ -30,6 +30,7 @@ class Level
      *
      * @ORM\Column(name="name", type="string", length=255)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $name;
 
@@ -46,6 +47,7 @@ class Level
      *
      * @ORM\Column(name="plural_name", type="string", length=255, nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("pluralName")
      */
     private $pluralName;
 
