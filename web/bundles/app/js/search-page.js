@@ -5,11 +5,10 @@
      * locations, or sources (grouped by either publications or authors). 
      *
      * intro = Stores an active tutorial/walk-through instance.
-     * sendCrudPgMsg = Bound sendMsg function to communicate with the CRUD window.
      * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
 	 */
-    var intro, sendCrudPgMsg, columnDefs = [], focusStorage = {}; 
+    var intro, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var allTaxaLvls = ['Kingdom', 'Phylum', 'Class', 'Order', 'Family', 'Genus', 'Species'];
@@ -32,14 +31,14 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
-    resetFocusStorag();
+    resetFocusStorage();
     /**
      * Container for all data needed for a given search focus. Reset on focus change.
      * openRows = The identifier for the row in datagrid to be expanded on grid-load.
      * Other properties stored: rcrdsById (all focus records), curTree (data tree 
      * displayed in grid), selectedOpts (dropdown values to be selected for the current tree)
      */
-    function resetFocusStorag() {
+    function resetFocusStorage() {
         focusStorage = {}; 
         focusStorage.curFocus = localStorage ? localStorage.getItem('curFocus') : false ;  
         focusStorage.openRows = focusStorage.curFocus === "taxa" ? [$('#sel-domain').val()] : [];
@@ -120,7 +119,7 @@
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();
             clearPreviousGrid();
-            resetFocusStorag();
+            resetFocusStorage();
             resetToggleTreeBttn(false);
             clearPastHtmlOptions();
         } else { buildGridFunc(); }
@@ -281,30 +280,45 @@
      */
     function getTaxa() { 
         var rcrdData = {}; 
-        rcrdData.domainRcrds = localStorage ? 
-            JSON.parse(localStorage.getItem('domainRcrds')) : false; 
-        if( rcrdData.domainRcrds ) { //console.log("Stored Taxa Loaded");
-            rcrdData.taxaRcrds = JSON.parse(localStorage.getItem('taxaRcrds'));
+        rcrdData.domainData = localStorage ? 
+            JSON.parse(localStorage.getItem('domainData')) : false; 
+        if( rcrdData.domainData ) {                                             //console.log("Stored Taxa Loaded");
+            rcrdData.taxonData = JSON.parse(localStorage.getItem('taxonData'));
             initTaxaSearchUi(rcrdData);
-        } else { //console.log("Taxa Not Found In Storage.");
+        } else {                                                                //console.log("Taxa Not Found In Storage.");
             sendAjaxQuery({}, 'search/taxa', storeTaxa);
         }
     }
-    function storeTaxa(data) {                                          		//console.log("taxa data recieved. %O", data);
-        _util.populateStorage('domainRcrds', JSON.stringify(data.domainRcrds));
-        _util.populateStorage('taxaRcrds', JSON.stringify(data.taxaRcrds));
+    /**
+     * Stores the json data objects for all Taxon, Domain, and Level entity data. 
+     */
+    function storeTaxa(data) {                                                  //console.log("taxa data recieved. %O", data);
+        var rcrdData;
+        for (var entityData in data) {
+            rcrdData = parseData(data[entityData]);                             //console.log("entity = %s, data = %O", entityData, rcrdData);
+             _util.populateStorage(entityData, JSON.stringify(rcrdData));
+        }
         initTaxaSearchUi(data);
+    }
+    /**
+     * Loops through the passed data object to parse the nested objects. This is 
+     * because the data comes back from the server having been double JSON-encoded,
+     * due to the 'serialize' library and the JSONResponse object. 
+     */
+    function parseData(data) {
+        for (var id in data) { data[id] = JSON.parse(data[id]); }
+        return data;
     }
     /**
      * If the taxa search html isn't already built and displayed, calls @buildTaxaDomainHtml
      * If no domain already selected, sets the default domain value for the taxa search grid. 
      * Builds domain tree @initTaxaTree and saves all present levels with data 
-     * @storeCurDomainlvls and continues @getInteractionsAndFillTree.  
+     * @storeCurDomainlvls. Continues @getInteractionsAndFillTree.  
      */
     function initTaxaSearchUi(data) {
         var domainTaxonRcrd;
-        rcrdsById = data.taxaRcrds;
-        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainRcrds); }  
+        rcrdsById = data.taxonData;
+        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainData); }  
         setTaxaDomain();  
         
         domainTaxonRcrd = storeAndReturnDomain();
@@ -486,10 +500,10 @@
             }
         }
     } /* End buildTaxaSelectOpts */
-    function buildTaxaOptions(taxaNames, taxaRcrds) {
+    function buildTaxaOptions(taxaNames, taxonData) {
         return taxaNames.map(function(taxaKey){
             return {
-                value: taxaRcrds[taxaKey].id,
+                value: taxonData[taxaKey].id,
                 text: taxaKey
             };
         });
