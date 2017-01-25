@@ -296,6 +296,6 @@ class PublicationType
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }

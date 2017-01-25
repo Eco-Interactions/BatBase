@@ -20,6 +20,7 @@ class Version20170123180120Names extends AbstractMigration
 
         $this->addSql('ALTER TABLE domain CHANGE name display_name VARCHAR(255) NOT NULL');
         $this->addSql('ALTER TABLE interaction_type CHANGE name display_name VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE level CHANGE name display_name VARCHAR(255) NOT NULL');
     }
 
     /**
