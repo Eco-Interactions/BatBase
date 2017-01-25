@@ -72,7 +72,7 @@ class SearchController extends Controller
         $habitatTypeData = $this->getEntityData('HabitatType', $serializer, $em);
         $locationData = $this->getEntityData('Location', $serializer, $em);
         $locTypeData = $this->getEntityData('LocationType', $serializer, $em);
-        $unspecifiedLocInts = $this->getNoLocInteractionIds($em);
+        $unspecifiedLocInts = $this->getInteractionsWithNoLocation($em);
 
         $response = new JsonResponse();
         $response->setData(array( 
@@ -84,11 +84,19 @@ class SearchController extends Controller
         return $response;
     }
     /** The only properties are those that later affect how this 'region' will be handled. */
-    private function getNoLocInteractionIds($em)
+    private function getInteractionsWithNoLocation($em)
     {
+        $intRcrdIds = []; 
         $interactions = $em->getRepository('AppBundle:Interaction')
             ->findBy(array('location'=> null));   
-        return $this->getInteractionIds($interactions);
+        if ( count($interactions) === 0 ) { return null; } 
+        
+        foreach ($interactions as $int)  
+        { 
+            array_push( $intRcrdIds, $int->getId() ); 
+        } 
+
+        return $intRcrdIds; 
     }
     /**
      * Returns serialized data objects for all entities related to Source. 
