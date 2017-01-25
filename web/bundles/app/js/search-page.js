@@ -355,12 +355,11 @@
      */
     function storeAndReturnDomain() {
         var domainId = $('#sel-domain').val();
-        var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);                        //console.log("domainTaxon = %O", domainTaxon)
+        var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);             //console.log("domainTaxon = %O", domainTaxonRcrd);
         var domainLvl = domainTaxonRcrd.level;
         _util.populateStorage('curDomain', domainId);
         focusStorage.curDomain = domainId;
         focusStorage.domainLvl = domainLvl;
-
         return domainTaxonRcrd;
     }
     /**
@@ -460,10 +459,10 @@
         $('#sel-domain').change(onTaxaDomainChange);
         $('#sort-opts').fadeTo(0, 1);
 
-        function getDomainOpts(data) {
+        function getDomainOpts(data) {  
             var optsAry = [];
-            for (var taxonId in data) {                                         //console.log("taxon = %O", data[taxonId]);
-                optsAry.push({ value: taxonId, text: data[taxonId].name });
+            for (var id in data) {                                              //console.log("taxon = %O", data[taxonId]);
+                optsAry.push({ value: data[id].taxon, text: data[id].display_name });
             }
             return optsAry;
         }
