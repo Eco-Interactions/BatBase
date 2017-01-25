@@ -159,7 +159,7 @@
      * Gets all related entity data from local storage. If an entity is not found,
      * false is returned and an ajax call will fetch the data from the server. 
      */
-    function getRelatedEntityData(relEntityNames) {
+    function getEntityData(relEntityNames) {
         var data = {};
         var allFound = relEntityNames.every(function(entity){
             data[entity+'Data'] = JSON.parse(localStorage.getItem(entity+'Data'));
@@ -170,60 +170,63 @@
 /*------------------Interaction Search Methods--------------------------------------*/
 	/**
 	 * If interaction data is already in local storage, the data is sent to 
-	 * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, an
-	 * ajax call gets the data which is stored @storeTaxa before being sent to  
-	 * to @fillTreeWithInteractions.  	 
+	 * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, 
+	 * an ajax call gets the data which is stored @storeInteractions before being
+     * sent to @fillTreeWithInteractions.  	 
 	 */
-	function getInteractionsAndFillTree() {  	                                //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
-		var intRcrds = localStorage ? JSON.parse(localStorage.getItem('intRcrds')) : false; 
+	function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
+		var entityData = getEntityData(['interaction']);
 		fadeGrid();
-		if ( intRcrds ) { //console.log("Stored interactions loaded = %O", JSON.parse(intRcrds));
-			fillTreeWithInteractions(intRcrds); 
+		if ( entityData ) {                                                     //console.log("Stored interactions loaded = %O", entityData);
+			fillTreeWithInteractions(entityData.interactionData); 
 		} else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
 	}
-	function storeInteractions(data) {  										//console.log("Interaction success! rcrds = %O", data);
-		_util.populateStorage('intRcrds', JSON.stringify(data.intRcrds));  
-		fillTreeWithInteractions( data.intRcrds );
+	function storeInteractions(data) { 
+        storeEntityData(data); 										            //console.log("Interaction success! rcrds = %O", data);
+		fillTreeWithInteractions( data.interactionData );
 	}
 	/**
-	 * Fills the current tree data with interaction records and calls the= grid 
-     * build method for the current focus. Hides popup message and the filter 
-     * button on the tree column - as it, by design, only filters on leaf nodes.
+	 * Fills the current tree data with interaction records and calls the grid- 
+     * building method for the current focus. Hides popup message and the filter 
+     * button on the tree column.
 	 */
-	function fillTreeWithInteractions(intRcrds) {   							//console.log("fillTreeWithInteractionscalled.");
+	function fillTreeWithInteractions(intRcrds) {   							console.log("fillTreeWithInteractionscalled.");
         var focus = focusStorage.curFocus; 
 		var curTree = focusStorage.curTree; 
-        var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
         var gridBuilderMap = { taxa: buildTaxaSearchUiAndGrid, 
             locs: buildLocSearchUiAndGrid, srcs: buildSrcSearchUiAndGrid };    
 
-		// clearPreviousGrid();
-		fillMethods[focus](curTree, intRcrds);
-		gridBuilderMap[focus](curTree);
-	    hidePopUpMsg();
-	    hideGroupColFilterMenu();
-	} 
-
-    function fillTaxaTree(curTree, intRcrds) {                                  //console.log("fillingTaxaTree")
-    	fillTaxaSetWithInteractionRcrds(intRcrds, curTree);  
-    	fillHiddenTaxaColumns(curTree, intRcrds);
+        fillTree(focus, curTree, intRcrds);
+        gridBuilderMap[focus](curTree);
+        hidePopUpMsg();
+        hideGroupColFilterMenu();
+    } 
+	/** Replaces all interaction ids with records for every node in the tree.  */
+    function fillTree(focus, curTree, intRcrds) {
+        var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
+        fillMethods[focus](curTree, intRcrds);
     }
-	/**
-	 * Recurses through each taxon's 'children' property and replaces all 
-	 * interaction ids with the interaction records.
-	 */
-	function fillTaxaSetWithInteractionRcrds(intRcrds, curTree) { 	            //console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
-		for (var curNode in curTree) {   
-			replaceTaxaInteractions(curTree[curNode].interactions, intRcrds);
-			if (curTree[curNode].children !== null) { fillTaxaSetWithInteractionRcrds(intRcrds, curTree[curNode].children) }
-		}
-	}
-	function replaceTaxaInteractions(interactionsObj, intRcrds) {   					    //console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
-		for (var role in interactionsObj) {
-			if (interactionsObj[role] !== null) {                               //console.log("interactions found!")
-				interactionsObj[role] = replaceInteractions(interactionsObj[role], intRcrds) }
-		}
-	}
+    function fillTaxaTree(curTree, intRcrds) {                                  console.log("fillingTaxaTree. curTree = %O", curTree);
+        fillTaxaSetWithInteractionRcrds(curTree);  
+        fillHiddenTaxaColumns(curTree, intRcrds);
+    	
+        function fillTaxaSetWithInteractionRcrds(treeLvl) { 	                //console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
+            for (var taxon in treeLvl) {   
+                replaceTaxaInteractions(treeLvl[taxon]);
+                if (treeLvl[taxon].children !== null) { 
+                    fillTaxaSetWithInteractionRcrds(treeLvl[taxon].children); 
+                }
+            }
+        }
+        function replaceTaxaInteractions(taxon) {                               //console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
+    		var prop = ['subjectRoles', 'objectRoles'];
+    		for (var p in prop) {
+    			if (taxon[prop[p]].length > 0) {                                //console.log("interactions found!")
+    				taxon[prop[p]] = replaceInteractions(taxon[prop[p]], intRcrds); 
+                }
+    		}
+    	}
+    } /* End fillTaxaTree */
 	/**
 	 * Recurses through each location's 'children' property and replaces all 
 	 * interaction ids with the interaction records.
@@ -311,9 +314,9 @@
      */
     function getTaxa() { 
         var entityData = {}; 
-        var relEntities = ['domain', 'taxon', 'level'];
-        entityData = getRelatedEntityData(relEntities); 
-        if( entityData ) {                                                      console.log("Stored Taxa Loaded");
+        var entities = ['domain', 'taxon', 'level'];
+        entityData = getEntityData(entities); 
+        if( entityData ) {                                                      //console.log("Stored Taxa Loaded");
             initTaxaSearchUi(entityData);
         } else {                                                                //console.log("Taxa Not Found In Storage.");
             sendAjaxQuery({}, 'search/taxa', storeTaxa); }
@@ -321,7 +324,7 @@
     /**
      * Stores the json data objects for all Taxon, Domain, and Level entity data. 
      */
-    function storeTaxa(data) {                                                  console.log("taxa data recieved. %O", data);
+    function storeTaxa(data) {                                                  //console.log("taxa data recieved. %O", data);
         storeEntityData(data);
         initTaxaSearchUi(data);
     }
@@ -331,7 +334,7 @@
      * Builds domain tree @initTaxaTree and saves all present levels with data 
      * @storeCurDomainlvls. Continues @getInteractionsAndFillTree.  
      */
-    function initTaxaSearchUi(data) {
+    function initTaxaSearchUi(data) {                                           //console.log("initTaxaSearchUi. data = %O", data);
         var domainTaxonRcrd;
         rcrdsById = data.taxonData;
         if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainData); }  
@@ -339,8 +342,8 @@
         
         domainTaxonRcrd = storeAndReturnDomain();
         initTaxaTree(domainTaxonRcrd);
-        getInteractionsAndFillTree();
         storeLevelData(domainTaxonRcrd, data.levelData);
+        getInteractionsAndFillTree();
     }
     /** Restores stored domain from previous session or sets the default 'Plants'. */
     function setTaxaDomain() {
