@@ -462,17 +462,11 @@
         }
     } /* End buildTaxaTree */
     /**
-     * Builds the options html for each level in the tree's select dropdown @buildTaxaSelectOpts
-     * Creates and appends the dropdowns @loadLevelSelectElems; @transformTaxaDataAndLoadGrid 
-     * to transform tree data into grid format and load the data grid.
+     * Initialize a search-combobox for each level in the tree @buildTaxaComboboxes.
+     * Transform data into grid format and load the data grid @transformTaxaDataAndLoadGrid.
      */
     function buildTaxaSearchUiAndGrid(taxaTree) {                               //console.log("taxaByLvl = %O", focusStorage.taxaByLvl);
-        var curTaxaByLvl = focusStorage.taxaByLvl;                              //console.log("curTaxaByLvl = %O", curTaxaByLvl);
-        var lvlOptsObj = buildTaxaSelectOpts(curTaxaByLvl);
-        var levels = Object.keys(lvlOptsObj);
-        if (levels.indexOf(focusStorage.domainLvl) !== -1) { levels.shift(); } //Removes domain level
-
-        loadLevelSelectElems(lvlOptsObj, levels);
+        buildTaxaComboboxes();
         transformTaxaDataAndLoadGrid(taxaTree);
     } 
     /*------------------ Build Taxa Search Ui --------------------------------*/
@@ -498,9 +492,24 @@
         }
     } /* End buildTaxaDomainHtml */
     /**
-     * Builds select option objs for each level with data in the current taxa domain.
+     * Builds and initializes a search-combobox for each level present in the 
+     * the unfiltered domain tree. Each level's box is populated with the names 
+     * of every taxon at that level in the displayed, filtered, grid-tree. After 
+     * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
+     */
+    function buildTaxaComboboxes() {
+        var curTaxaByLvl = focusStorage.taxaByLvl;                              //console.log("curTaxaByLvl = %O", curTaxaByLvl);
+        var lvlOptsObj = buildTaxaSelectOpts(curTaxaByLvl);
+        var levels = Object.keys(lvlOptsObj);
+        if (levels.indexOf(focusStorage.domainLvl) !== -1) { levels.shift(); } //Removes domain level
+
+        loadLevelSelects(lvlOptsObj, levels);
+        // initComboboxes();
+    }
+    /**
+     * Builds select options for each level with taxon data in the current domain.
      * If there is no data after filtering at a level, a 'none' option obj is built
-     * and that value added to the global focusStorage.selectedVals obj.
+     * and will be selected.
      */
     function buildTaxaSelectOpts(rcrdsByLvl) {                                  //console.log("buildTaxaSelectOpts rcrds = %O", rcrdsByLvl);
         var optsObj = {};
@@ -537,7 +546,7 @@
             };
         });
     }
-    function loadLevelSelectElems(levelOptsObj, levels) {                       //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
+    function loadLevelSelects(levelOptsObj, levels) {                           //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
         var elems = buildTaxaSelects(levelOptsObj, levels);
         clearCol2();        
         $('#opts-col2').append(elems);
