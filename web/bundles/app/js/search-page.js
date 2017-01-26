@@ -312,12 +312,23 @@
                 }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
             });
         }
+        /** Returns a filled record with all references replaced with entity records. */
         function fillIntRcrd(intRcrd) {
-            for (var prop in intRcrd) { //console.log("prop = %s, val = ", prop, intRcrd[prop]);
-                if (prop in entityData) { //console.log("prop in entityData = %s", prop);
+            for (var prop in intRcrd) { 
+                if (prop in entityData) { 
+                    intRcrd[prop] = entityData[prop][intRcrd[prop]];
+                } else if (prop === "subject" || prop === "object") {
+                    intRcrd[prop] = entityData.taxon[intRcrd[prop]];
+                } else if (prop === "tags") {
+                    intRcrd[prop] = intRcrd[prop].length > 0 ? 
+                        getIntTags(intRcrd[prop]) : null;
                 }
             }
             return intRcrd;
+        }
+        function getIntTags(tagAry) { 
+            var tags = tagAry.map(function(tag){ return tag.displayName; });
+            return tags.join(", ");
         }
     } /* End fillTree */
     /** Calls the start of the grid-building method chain for the current focus. */
