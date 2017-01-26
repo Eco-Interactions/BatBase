@@ -2,6 +2,9 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
     --misc--
 
+    --Search--
+        --Refactor gridOptions declaration to an empty global object and fill it with something like a 'getGridOptions' @loadGrid 
+
     --FORM--
         -- Disable previously filled fields while dependent fields filled
             -- Unlock Country field when location field is empty.
@@ -10,8 +13,13 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
-        -- Add close button to form
+        --form
+            -- Add close button to form
+        --search
+            -- build initComboboxes
+            -- fix updateTaxaSearch
     --Asap--
+        * update fillHiddenTaxaColumns *
 
 
 ##### Serialization #####
