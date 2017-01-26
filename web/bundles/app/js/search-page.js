@@ -57,7 +57,7 @@
             } else { showWalkthroughIfFirstVisit(); }
             _util.populateStorage(curDataKey, true);
             showLoadingDataPopUp();
-            getAllEntityData();
+            ajaxAndStoreAllEntityData();
         }
     }
     /** Shows a loading popup message for the inital data-download wait. */
@@ -151,12 +151,12 @@
      *       Source, SourceType, Tag
      *   /interaction - Interaction, InteractionType  
      */
-    function getAllEntityData() {
+    function ajaxAndStoreAllEntityData() {                                               console.log("ajaxAndStoreAllEntityData");
         $.when(
             $.ajax("search/taxon"), $.ajax("search/location"), 
             $.ajax("search/source"), $.ajax("search/interaction")
-        ).then(function(a1, a2, a3, a4) {                                       //console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
-            $.each([a1, a2, a3, a4], function(idx, a) { storeEntityData(a[0]); });
+        ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
+            $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
             _util.populateStorage("storedData", true); 
             selectSearchFocus();
         });
@@ -165,12 +165,15 @@
      * Loops through the data object returned from the server, parsing and storing
      * the entity data.
      */
-    function storeEntityData(data) {                                            //console.log("data received = %O", data);
+    function storeServerData(data) {                                            //console.log("data received = %O", data);
         var rcrdData;
-        for (var entity in data) {
-            rcrdData = parseData(data[entity]);                                 //console.log("entity = %s, data = %O", entity, rcrdData);
-             _util.populateStorage(entity, JSON.stringify(rcrdData));
+        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
+            storeData(entity, parseData(data[entity]));
         }
+    }
+    /** Stores passed data under the key in localStorage. */
+    function storeData(key, data) {
+        _util.populateStorage(key, JSON.stringify(data));
     }
     /**
      * Loops through the passed data object to parse the nested objects. This is 
@@ -184,6 +187,9 @@
     /**
      * Gets all related entity data from local storage. If an entity is not found,
      * false is returned and an ajax call will fetch the data from the server. 
+    /**
+     * Gets all related entity data from local storage. 
+     * If an entity is not found, false is returned. 
      */
     function getEntityData(relEntityNames) {
         var data = {};
