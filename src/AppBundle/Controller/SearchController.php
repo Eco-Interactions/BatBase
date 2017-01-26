@@ -33,7 +33,7 @@ class SearchController extends Controller
     /**
      * Returns serialized data objects for the Domain, Level, and Taxon entities.
      *
-     * @Route("/search/taxa", name="app_serialize_taxa")
+     * @Route("/search/taxon", name="app_serialize_taxon")
      */
     public function serializeTaxonDataAction(Request $request) 
     {
@@ -43,15 +43,14 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $domainData = $this->getEntityData('Domain', $serializer, $em);
-        $levelData = $this->getEntityData('Level', $serializer, $em);
-        $taxonData = $this->getEntityData('Taxon', $serializer, $em);
+        $domain = $this->serializeEntity('Domain', $serializer, $em);
+        $level = $this->serializeEntity('Level', $serializer, $em);
+        $taxon = $this->serializeEntity('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domainData' => $domainData, 
-            'levelData' => $levelData,
-            'taxonData' => $taxonData            
+            'domain' => $domain,    'level' => $level,
+            'taxon' => $taxon            
         )); 
         return $response;
     }
@@ -69,17 +68,15 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $habitatTypeData = $this->getEntityData('HabitatType', $serializer, $em);
-        $locationData = $this->getEntityData('Location', $serializer, $em);
-        $locTypeData = $this->getEntityData('LocationType', $serializer, $em);
+        $habitatType = $this->serializeEntity('HabitatType', $serializer, $em);
+        $location = $this->serializeEntity('Location', $serializer, $em);
+        $locType = $this->serializeEntity('LocationType', $serializer, $em);
         $unspecifiedLocInts = $this->getInteractionsWithNoLocation($em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'habitatTypeData' => $habitatTypeData, 
-            'locationData' => $locationData, 
-            'locationTypeData' => $locTypeData, 
-            'noLocIntIds' => $unspecifiedLocInts
+            'location' => $location,    'habitatType' => $habitatType,   
+            'locationType' => $locType, 'noLocIntIds' => $unspecifiedLocInts
         ));
         return $response;
     }
@@ -111,25 +108,21 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $authorData = $this->getEntityData('Author', $serializer, $em);
-        $citationData = $this->getEntityData('Citation', $serializer, $em);
-        $citTypeData = $this->getEntityData('CitationType', $serializer, $em);
-        $publicationData = $this->getEntityData('Publication', $serializer, $em);
-        $pubTypeData = $this->getEntityData('PublicationType', $serializer, $em);
-        $sourceData = $this->getEntityData('Source', $serializer, $em);
-        $srcTypeData = $this->getEntityData('SourceType', $serializer, $em);
-        $tagData = $this->getEntityData('Tag', $serializer, $em);
+        $author = $this->serializeEntity('Author', $serializer, $em);
+        $citation = $this->serializeEntity('Citation', $serializer, $em);
+        $citType = $this->serializeEntity('CitationType', $serializer, $em);
+        $publication = $this->serializeEntity('Publication', $serializer, $em);
+        $pubType = $this->serializeEntity('PublicationType', $serializer, $em);
+        $source = $this->serializeEntity('Source', $serializer, $em);
+        $srcType = $this->serializeEntity('SourceType', $serializer, $em);
+        $tag = $this->serializeEntity('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'authorData' => $authorData, 
-            'citationData' => $citationData,
-            'citationTypeData' => $citTypeData, 
-            'publicationData' => $publicationData, 
-            'publicationTypeData' => $pubTypeData, 
-            'sourceData' => $sourceData, 
-            'sourceTypeData' => $srcTypeData, 
-            'tagData' => $tagData, 
+            'author' => $author,        'citation' => $citation,
+            'source' => $source,        'citationType' => $citType, 
+            'sourceType' => $srcType,   'publication' => $publication,  
+            'tag' => $tag,              'publicationType' => $pubType
         ));
         return $response;
     }
@@ -146,18 +139,17 @@ class SearchController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $interactionData = $this->getEntityData('Interaction', $serializer, $em);
-        $intTypeData = $this->getEntityData('InteractionType', $serializer, $em);
+        $interaction = $this->serializeEntity('Interaction', $serializer, $em);
+        $intType = $this->serializeEntity('InteractionType', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array(
-            'interactionData' => $interactionData,
-            'interactionTypeData' => $intTypeData
+            'interaction' => $interaction,  'interactionType' => $intType
         ));
         return $response;
     }
     /** Returns serialized Entity data. */
-    private function getEntityData($entity, $serializer, $em)
+    private function serializeEntity($entity, $serializer, $em)
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
         $data = new \stdClass;   
