@@ -339,7 +339,7 @@
         };    
         gridBuilderMap[focus](curTree);
     }
-    /** Returns an interaction record object with flat data in grid-ready format. */
+    /** Returns an interaction rowData object with flat data in grid-ready format. */
     function buildIntRowData(intRcrd, treeLvl){                                 //console.log("intRcrd = %O", intRcrd);
         var rowData = {
             isParent: false,
@@ -353,23 +353,35 @@
             tags: intRcrd.tags,
             note: intRcrd.note, 
         };
-        if (intRcrd.location) { getLocationData(); }
-
+        if (intRcrd.location) { getLocationData(intRcrd.location); }
         return rowData;
-        /** Adds any location properties present in the interaction data. */
-        function getLocationData() {
-            var locObj = intRcrd.location;
-            var props = {
-                location: 'displayName',    gps: 'gpsData',
-                elev: 'elevation',          elevMax: 'elevationMax',
-                lat: 'latitude',            long: 'longitude',
-                // country: "country",         region: "region"          
-            };
-            for (var p in props) {
-               if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
+        /** Adds to 'rowData' any location properties present in the intRcrd. */
+        function getLocationData(locObj) {
+            getSimpleLocData();
+            getOtherLocData();
+            /** Add any present scalar data. */
+            function getSimpleLocData() {
+                var props = {
+                    location: 'displayName',    gps: 'gpsData',
+                    elev: 'elevation',          elevMax: 'elevationMax',
+                    lat: 'latitude',            long: 'longitude',
+                };
+                for (var p in props) {
+                   if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
+                }
             }
-            if (locObj.habitatType) { rowData.habitat = locObj.habitatType.displayName; }
-        }
+            /** Add data from property objects. */
+            function getOtherLocData() {
+                var props = {
+                    country: "country",         region: "region",
+                    habitat: "habitatType"          
+                };
+                for (var p in props) {
+                    if (locObj[props[p]]) { 
+                        rowData[p] = locObj[props[p]].displayName; } 
+                }                
+            }
+        } /* End getLocationData */
     } /* End buildIntRowData */
     function getTaxonName(taxon) {                                           
         var lvl = taxon.level.displayName;  
