@@ -163,7 +163,7 @@
             $.ajax("search/source"), $.ajax("search/interaction")
         ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
             $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
-            deriveAndStoreData(a1[0]);
+            deriveAndStoreData(a1[0], a3[0]);
             _util.populateStorage("storedData", true); 
             selectSearchFocus();
         });
@@ -195,8 +195,9 @@
      * Store derived data from the raw entity data returned from the server. 
      * > taxonLevelNames - array of level names - Kingdom, Family, Order, etc.
      */
-    function deriveAndStoreData(taxonData) {
+    function deriveAndStoreData(taxonData, sourceData) {
         storeData('levelNames', getTaxonLvls(taxonData.level));
+        storeDerivedSourceData(sourceData);
     }
     /** Returns an array of all Taxa level names. */
     function getTaxonLvls(lvlData) {
@@ -204,6 +205,46 @@
         for (var lvl in lvlData) { levels.push(lvlData[lvl].displayName); }
         return levels;
     }
+    /** Separates and stores name and record objects for specific source-types. */
+    function storeDerivedSourceData(srcData) {
+        var derivedData = separateSrcData(srcData);  console.log("dervied source data = %O", derivedData);
+        storeData('authNames', derivedData.names.Author);
+        storeData('pubNames', derivedData.names.Publication);
+        storeData('publisherNames', derivedData.names.Publisher);         
+        storeData('authSources', derivedData.rcrds.author);         
+        storeData('pubSources', derivedData.rcrds.publication);         
+    }
+    /**
+     * Adds the id of the source keyed under the displayName to it's 'type' obj, 
+     * which will be used later to populate its type's dropdown.
+     */
+    function separateSrcData(data) {   
+        return {
+            names: buildSourceTypeObjs(data),
+            rcrds: buildSourceTypeRcrdObjs(data)
+        };
+    } /* End separateSrcData */
+    function buildSourceTypeObjs(data) {
+        var srcData = { Author: {}, Publication: {}, Publisher: {} };
+        for (var rcrd in data.source) {
+            sortSourceRcrd(data.source[rcrd]);
+        }
+        function sortSourceRcrd(source) {
+            var type = source.sourceType.displayName;  //console.log("type = ", type)
+            if (srcData[type]) { srcData[type][source.displayName] = source.id; }
+        }
+        return srcData; 
+    }
+    /** Returns an array with all records of a particular source-type. */
+    function buildSourceTypeRcrdObjs(data) {
+        return {
+            author: getSourceRcrds(data.sourceType[3].sources),
+            publication: getSourceRcrds(data.sourceType[2].sources)
+        };
+        function getSourceRcrds(sourceIdAry) {
+            return sourceIdAry.map(function(srcId) { return data.source[srcId]; });
+        }
+    } /* End buildSourceTypeObjs */
     /**
      * Gets all related entity data from local storage. 
      * If an entity is not found, false is returned. 
@@ -1026,29 +1067,6 @@
             // seperateAndStoreSrcs({srcRcrds: srcRcrdsById, pubTypes: JSON.parse(localStorage.getItem('pubTypes')) }); 
         } else { console.log("Error loading source data from storage."); }
     }
-    /**
-     * Source data for each source-type is sorted into an object of records and 
-     * an object of ids, both keyed by the source's display name.
-     * NOTE: Sources have two domains, i.e. types of 'tree' data: 
-     * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
-     */
-    function seperateSrcData(data) {                                                 //console.log("srcData = %O", data);
-        var curRcrd;
-        var srcData = { 
-            author: { rcrds: {}, names: {} }, 
-            publication: { rcrds: {}, names: {} },
-            publisher: { rcrds: {}, names: {} } 
-        };
-        
-        for (var key in srcData) {
-            data[key].ids.forEach(function(id){
-                curRcrd = getDetachedRcrd(id, data.srcRcrds);
-                srcData[key].rcrds[curRcrd.displayName] = curRcrd;
-                srcData[key].names[curRcrd.displayName] = id;
-            });
-        }
-        return srcData; 
-    } /* End seperateSrcData */
     
     /**
      * All source records are stored in 'rcrdsById'. Builds the source domain select 
