@@ -53,15 +53,17 @@
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
         if (localStorage && !localStorage.getItem(curDataKey)){
             localStorage.clear();
-            if ( prevVisit ) { _util.populateStorage('prevVisit', true); }
+            if ( prevVisit ) { _util.populateStorage('prevVisit', true); 
+            } else { showWalkthroughIfFirstVisit(); }
             _util.populateStorage(curDataKey, true);
             showLoadingDataPopUp();
+            getAllEntityData();
         }
     }
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
-        showPopUpMsg("Downloading and Caching\n all interaction records.\nPlease allow for a "+
-            "one-time ~20 second download.");   
+        showPopUpMsg("Downloading and caching all interaction records. Please " +
+            "allow for a one-time ~20 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
@@ -102,12 +104,15 @@
             "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
     }
-    function selectSearchFocus(e) {                                             //console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
-        showPopUpMsg();
-        if ( $('#search-focus').val() == 'srcs' ) { ifChangedFocus("srcs", getSources);  }
-        if ( $('#search-focus').val() == 'locs' ) { ifChangedFocus("locs", getLocations);  }
-        if ( $('#search-focus').val() == 'taxa' ) { ifChangedFocus("taxa", getTaxa);  }
-        showWalkthroughIfFirstVisit();
+    function selectSearchFocus() {                                              console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
+        var focus = $('#search-focus').val();         
+        var builderMap = { 
+            "locs": buildLocationGrid, "srcs": buildSourceGrid,
+            "taxa": buildTaxonGrid 
+        };  
+        if (localStorage.getItem('storedData')) { 
+            ifChangedFocus(focus, builderMap[focus]); 
+        }
     }
     /**
      * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
@@ -136,14 +141,35 @@
     } /* End ifChangedFocus */
 /*------------------Shared Methods--------------------------------------------*/
     /**
+     * The first time a browser visits the search page, all entity data is downloaded
+     * from the server and stored locally @storeEntityData. The grid building 
+     * begins @selectSearchFocus.
+     * Entities downloaded with each ajax call:
+     *   /taxon - Taxon, Domain, Level 
+     *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
+     *   /source - Author, Citation, CitationType, Publication, PublicationType, 
+     *       Source, SourceType, Tag
+     *   /interaction - Interaction, InteractionType  
+     */
+    function getAllEntityData() {
+        $.when(
+            $.ajax("search/taxon"), $.ajax("search/location"), 
+            $.ajax("search/source"), $.ajax("search/interaction")
+        ).then(function(a1, a2, a3, a4) {                                       //console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
+            $.each([a1, a2, a3, a4], function(idx, a) { storeEntityData(a[0]); });
+            _util.populateStorage("storedData", true); 
+            selectSearchFocus();
+        });
+    }
+    /**
      * Loops through the data object returned from the server, parsing and storing
      * the entity data.
      */
-    function storeEntityData(data) {
+    function storeEntityData(data) {                                            //console.log("data received = %O", data);
         var rcrdData;
-        for (var entityData in data) {
-            rcrdData = parseData(data[entityData]);                             //console.log("entity = %s, data = %O", entityData, rcrdData);
-             _util.populateStorage(entityData, JSON.stringify(rcrdData));
+        for (var entity in data) {
+            rcrdData = parseData(data[entity]);                                 //console.log("entity = %s, data = %O", entity, rcrdData);
+             _util.populateStorage(entity, JSON.stringify(rcrdData));
         }
     }
     /**
@@ -162,8 +188,8 @@
     function getEntityData(relEntityNames) {
         var data = {};
         var allFound = relEntityNames.every(function(entity){
-            data[entity+'Data'] = JSON.parse(localStorage.getItem(entity+'Data'));
-            return data[entity+'Data'] || false;
+            data[entity] = JSON.parse(localStorage.getItem(entity));            //console.log("data for %s - %O", entity, data[entity]);
+            return data[entity] || false;
         });  
         return allFound ? data : false;
     }
@@ -177,13 +203,8 @@
     function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
         var entityData = getEntityData(['interaction']);
         fadeGrid();
-        if ( entityData ) {                                                     //console.log("Stored interactions loaded = %O", entityData);
-            fillTreeWithInteractions(entityData.interactionData); 
-        } else { sendAjaxQuery({}, 'search/interaction', storeInteractions); }
-    }
-    function storeInteractions(data) { 
-        storeEntityData(data);                                                  //console.log("Interaction success! rcrds = %O", data);
-        fillTreeWithInteractions( data.interactionData );
+        if (entityData) { fillTreeWithInteractions(entityData.interaction); 
+        } else { console.log("Error loading interaction data from storage."); }
     }
     /**
      * Fills the current tree data with interaction records @fillTree and starts 
@@ -199,72 +220,83 @@
         finishGridAndUiLoad();
     } 
     /** Replaces all interaction ids with records for every node in the tree.  */
-    function fillTree(focus, curTree, intRcrds) {
+    function fillTree(focus, curTree, intRcrds) {  
+        var intEntities = ['taxon', 'location', 'source', 'tag', 'interactionType'];
+        var entityData = getEntityData(intEntities);
         var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
         fillMethods[focus](curTree, intRcrds);
-    }
-    function fillTaxaTree(curTree, intRcrds) {                                  console.log("fillingTaxaTree. curTree = %O", curTree);
-        fillTaxaSetWithInteractionRcrds(curTree);  
-        fillHiddenTaxaColumns(curTree, intRcrds);
-        
-        function fillTaxaSetWithInteractionRcrds(treeLvl) {                     //console.log("fillTaxaSetWithInteractionRcrds called. taxaTree = %O", curTree) 
-            for (var taxon in treeLvl) {   
-                replaceTaxaInteractions(treeLvl[taxon]);
-                if (treeLvl[taxon].children !== null) { 
-                    fillTaxaSetWithInteractionRcrds(treeLvl[taxon].children); 
+
+        function fillTaxaTree(curTree) {                                        //console.log("fillingTaxaTree. curTree = %O", curTree);
+            fillTaxaInteractions(curTree);  
+            // fillHiddenTaxaColumns(curTree, intRcrds);
+            
+            function fillTaxaInteractions(treeLvl) {                            //console.log("fillTaxaInteractions called. taxaTree = %O", curTree) 
+                for (var taxon in treeLvl) {   
+                    fillTaxonInteractions(treeLvl[taxon]);
+                    if (treeLvl[taxon].children !== null) { 
+                        fillTaxaInteractions(treeLvl[taxon].children); 
+                    }
                 }
             }
-        }
-        function replaceTaxaInteractions(taxon) {                               //console.log("replaceTaxaInteractions called. interactionsObj = %O", interactionsObj);
-            var roles = ['subjectRoles', 'objectRoles'];
-            for (var r in roles) {
-                taxon[roles[r]] = replaceInteractions(taxon[roles[r]], intRcrds); 
+            function fillTaxonInteractions(taxon) {                             //console.log("fillTaxonInteractions called. interactionsObj = %O", interactionsObj);
+                var roles = ['subjectRoles', 'objectRoles'];
+                for (var r in roles) {
+                    taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
+                }
+            }
+        } /* End fillTaxaTree */
+        /**
+         * Recurses through each location's 'children' property and replaces all 
+         * interaction ids with the interaction records.
+         */
+        function fillLocTree(treeBranch) {                                      //console.log("fillLocTree called. taxaTree = %O", treeBranch) 
+            for (var curNode in treeBranch) {                                   //console.log("curNode = %O", treeBranch[curNode]);
+                if (treeBranch[curNode].interactions.length > 0) { 
+                    treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
+                if (treeBranch[curNode].children) { 
+                    fillLocTree(treeBranch[curNode].children); }
             }
         }
-    } /* End fillTaxaTree */
-    /**
-     * Recurses through each location's 'children' property and replaces all 
-     * interaction ids with the interaction records.
-     */
-    function fillLocTree(treeBranch, intRcrds) {                                //console.log("fillLocTree called. taxaTree = %O", treeBranch) 
-        for (var curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
-            if (treeBranch[curNode].interactions !== null) { 
-                treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions, intRcrds); }
-            if (treeBranch[curNode].children) { 
-                fillLocTree(treeBranch[curNode].children, intRcrds); }
-        }
-    }
-    /**
-     * Recurses through each source's 'children' property until it finds the citation
-     * source, and fills it's children interaction id's with their interaction records.
-     */
-    function fillSrcTree(curTree, intRcrds) { 
-        for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
-            fillSrcInteractions(curTree[srcName]);
-        }
         /**
-         * Recurses through each source's 'children' property until all sources in 
-         * curTree have interaction record refs replaced with the records. 
+         * Recurses through each source's 'children' property until it finds the citation
+         * source, and fills it's children interaction id's with their interaction records.
          */
-        function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
-           var srcChildren = [];
-            if (curSrc.isDirect) { replaceSrcInts(curSrc);}
-            curSrc.children.forEach(function(childSrc){
-                fillSrcInteractions(childSrc); 
+        function fillSrcTree(curTree) { 
+            for (var srcName in curTree) {                                      //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
+                fillSrcInteractions(curTree[srcName]);
+            }
+            /**
+             * Recurses through each source's 'children' property until all sources in 
+             * curTree have interaction record refs replaced with the records. 
+             */
+            function fillSrcInteractions(curSrc) {                              //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+               var srcChildren = [];
+                if (curSrc.isDirect) { replaceSrcInts(curSrc);}
+                curSrc.children.forEach(function(childSrc){
+                    fillSrcInteractions(childSrc); 
+                });
+            }
+            function replaceSrcInts(curSrc) {
+                curSrc.interactions = replaceInteractions(curSrc.interactions); 
+            }
+
+        } /* End fillSrcTree */
+        function replaceInteractions(interactionsAry) {                         //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+            var rcrd;
+            return interactionsAry.map(function(intId){
+                if (typeof intId === "number") {                                //console.log("new record = %O", intRcrds[intId]);
+                    return fillIntRcrd(intRcrds[intId]); 
+                }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
             });
         }
-        function replaceSrcInts(curSrc) {
-            curSrc.interactions = replaceInteractions(curSrc.interactions, intRcrds); 
+        function fillIntRcrd(intRcrd) {
+            for (var prop in intRcrd) { //console.log("prop = %s, val = ", prop, intRcrd[prop]);
+                if (prop in entityData) { //console.log("prop in entityData = %s", prop);
+                }
+            }
+            return intRcrd;
         }
-
-    } /* End fillSrcTree */
-    function replaceInteractions(interactionsAry, intRcrds) {                   //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-        return interactionsAry.map(function(intId){
-            if (typeof intId === "number") {                                    //console.log("new record = %O", intRcrds[intId]);
-                return intRcrds[intId]; 
-            }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
-        });
-    }
+    } /* End fillTree */
     /** Calls the start of the grid-building method chain for the current focus. */
     function buildGrid(focus, curTree) {
         var gridBuilderMap = { 
@@ -308,26 +340,13 @@
     }   
 /*------------------Taxa Search Methods---------------------------------------*/
     /**
-     * If taxa data is already in local storage, the domain and taxa records are 
-     * sent to @initTaxaSearchUi to begin building the data grid. Otherwise, an
-     * ajax call gets the records and they are stored @storeTaxa before continuing 
-     * to @initTaxaSearchUi.  
+     * Get taxa data from local storage and send to @initTaxaSearchUi to begin the
+     * data grid build.  
      */
-    function getTaxa() { 
-        var entityData = {}; 
-        var entities = ['domain', 'taxon', 'level'];
-        entityData = getEntityData(entities); 
-        if( entityData ) {                                                      //console.log("Stored Taxa Loaded");
-            initTaxaSearchUi(entityData);
-        } else {                                                                //console.log("Taxa Not Found In Storage.");
-            sendAjaxQuery({}, 'search/taxa', storeTaxa); }
-    }
-    /**
-     * Stores the json data objects for all Taxon, Domain, and Level entity data. 
-     */
-    function storeTaxa(data) {                                                  //console.log("taxa data recieved. %O", data);
-        storeEntityData(data);
-        initTaxaSearchUi(data);
+    function buildTaxonGrid() {                                                 console.log("Building Taxa Grid.");
+        var entityData = getEntityData(['domain', 'taxon', 'level']); 
+        if( entityData ) { initTaxaSearchUi(entityData);
+        } else { console.log("Error loading taxa data from storage."); }
     }
     /**
      * If the taxa search html isn't already built and displayed, calls @buildTaxaDomainHtml
@@ -335,15 +354,15 @@
      * Builds domain tree @initTaxaTree and saves all present levels with data 
      * @storeCurDomainlvls. Continues @getInteractionsAndFillTree.  
      */
-    function initTaxaSearchUi(data) {                                           //console.log("initTaxaSearchUi. data = %O", data);
+    function initTaxaSearchUi(data) {                                           console.log("initTaxaSearchUi. data = %O", data);
         var domainTaxonRcrd;
-        rcrdsById = data.taxonData;
-        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domainData); }  
+        rcrdsById = data.taxon;
+        if (!$("#sel-domain").length) { buildTaxaDomainHtml(data.domain); }  
         setTaxaDomain();  
         
         domainTaxonRcrd = storeAndReturnDomain();
         initTaxaTree(domainTaxonRcrd);
-        storeLevelData(domainTaxonRcrd, data.levelData);
+        storeLevelData(domainTaxonRcrd, data.level);
         getInteractionsAndFillTree();
     }
     /** Restores stored domain from previous session or sets the default 'Plants'. */
@@ -583,14 +602,14 @@
         for (var topTaxon in taxaTree) {
             finalRowData.push( getTaxonRowData(taxaTree[topTaxon], 0) );
         }
-        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", rowData);
+        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", finalRowData);
         loadGrid("Taxa Tree");
     }
     /**
      * Recurses through each taxon's 'children' property and returns a row data obj 
      * for each taxon in the tree.
      */
-    function getTaxonRowData(taxon, treeLvl) {                                  console.log("taxonRowData. taxon = %O", taxon);
+    function getTaxonRowData(taxon, treeLvl) {                                  //console.log("taxonRowData. taxon = %O", taxon);
         var levelName = focusStorage.allTaxaLvls[taxon.level-1];
         var taxonName = levelName === "Species" ? 
             taxon.displayName : levelName + " " + taxon.displayName;
@@ -678,37 +697,23 @@
     }
 /*------------------Location Search Methods-----------------------------------*/
     /**
-     * If location data is already in local storage, the records and top regions are 
-     * sent to @buildLocTree to begin building the data tree and grid. Otherwise, an
-     * ajax call gets the records and they are stored @storeLocs before continuing 
-     * to @buildLocTree.  
+     * Get location data from local storage. Store the records in the global 'rcrdsById'.
+     * Get 'top' regions @getTopRegions and send to @buildLocTree to build the grid. 
      */
-    function getLocations() {
-        var data = {};
-        data.locRcrds = localStorage ? JSON.parse(localStorage.getItem('locRcrds')) : false; 
-        if( data.locRcrds ) {  
-            rcrdsById = data.locRcrds;
-            data.topRegions = JSON.parse(localStorage.getItem('topRegions'));   //console.log("Stored Locations Loaded = %O", data);
-            buildLocTreeAndGrid(data.topRegions);
-        } else { //console.log("Locations Not Found In Storage.");
-            sendAjaxQuery({}, 'search/location', storeLocs);
-        }
+    function buildLocationGrid() {
+        var topRegions;
+        var entityData = getEntityData(['location', 'locationType']);
+        if( entityData ) {  
+            rcrdsById = entityData.location;
+            // topRegions = getTopRegions(entityData.locationType);        //console.log("Stored Locations Loaded = %O", entityData);
+            // buildLocTreeAndGrid(topRegions);
+        } else { console.log("Error loading location data from storage."); }
     }
-    /**
-     * Stores location records by id, an array of top-region ids and all country 
-     * names by id. Builds a tree of location data with regions at the top level, 
-     * and sub-regions, countries, areas, and points as nested children @buildLocTree.
+    /** 
+     * Builds a tree of location data with regions at the top level, and sub-regions, 
+     * countries, areas, and points as nested children @buildLocTree. Fills tree
+     * with interactions and continues building the grid @getInteractionsAndFillTree.
      */
-    function storeLocs(locData) {                                               
-        var data = locData.locData;                                             //console.log("location data recieved. %O", data);
-        _util.populateStorage('locRcrds', JSON.stringify(data.locRcrds));
-        _util.populateStorage('topRegions', JSON.stringify(data.topRegions));
-        _util.populateStorage('countries', JSON.stringify(data.countries));
-        _util.populateStorage('locTypes', JSON.stringify(data.locTypes));
-        _util.populateStorage('habTypes', JSON.stringify(data.habTypes));
-        rcrdsById = data.locRcrds;   
-        buildLocTreeAndGrid(data.topRegions);
-    }
     function buildLocTreeAndGrid(topLocs) {
         buildLocTree(topLocs);
         getInteractionsAndFillTree();
@@ -970,33 +975,17 @@
      * ajax call gets the records and they are stored @seperateAndStoreSrcs before continuing 
      * to @initSrcSearchUi.  
      */
-    function getSources() {
+    function buildSourceGrid() {
         var domainRcrds = {};
-        var srcRcrds = localStorage ? 
-            JSON.parse(localStorage.getItem('srcRcrds')) : false; 
-        if( srcRcrds ) {                                                        //console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
-            domainRcrds.author = JSON.parse(localStorage.getItem('authRcrds'));
-            domainRcrds.publication = JSON.parse(localStorage.getItem('pubRcrds'));
-            initSrcSearchUi(domainRcrds, srcRcrds);
+        var entities = ['author', 'citation', 'citationType', 'publication', 
+            'publicationType', 'source', 'sourceType', 'ag'];
+        var entityData = getEntityData(entities);
+        if( entityData ) {                                                        //console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
+            // domainRcrds.author = JSON.parse(localStorage.getItem('authRcrds'));
+            // domainRcrds.publication = JSON.parse(localStorage.getItem('pubRcrds'));
+            // initSrcSearchUi(domainRcrds, srcRcrds);
             // seperateAndStoreSrcs({srcRcrds: srcRcrdsById, pubTypes: JSON.parse(localStorage.getItem('pubTypes')) }); 
-        } else { //console.log("Sources Not Found In Storage.");
-            sendAjaxQuery({}, 'search/source', seperateAndStoreSrcData);
-        }
-    }
-    function seperateAndStoreSrcData(dataObj) {                                 //console.log("~~~Source data recieved. %O", dataObj);
-        var data = dataObj.srcData;
-        var srcData = seperateSrcData(data);                                         //console.log("srcData = %O", srcData);
-        _util.populateStorage('srcTypes', JSON.stringify(data.srcTypes));
-        _util.populateStorage('citTypes', JSON.stringify(data.citation.types));
-        _util.populateStorage('pubTypes', JSON.stringify(data.publication.types));
-        _util.populateStorage('srcRcrds', JSON.stringify(data.srcRcrds));
-        _util.populateStorage('authRcrds', JSON.stringify(srcData.author.rcrds));
-        _util.populateStorage('pubRcrds', JSON.stringify(srcData.publication.rcrds));
-        _util.populateStorage('authors', JSON.stringify(srcData.author.names));
-        _util.populateStorage('publications', JSON.stringify(srcData.publication.names));
-        _util.populateStorage('publishers', JSON.stringify(srcData.publisher.names));
-
-        initSrcSearchUi(srcData, data.srcRcrds);
+        } else { console.log("Error loading source data from storage."); }
     }
     /**
      * Source data for each source-type is sorted into an object of records and 
@@ -1471,7 +1460,7 @@
             initNoFiltersStatus();
         } else { setExternalFilterStatus(status); }
     }
-/*================ Grid Methods ==============================================*/
+/*================ Grid Build Methods ==============================================*/
     /**
      * Fills additional columns with flattened taxa-tree parent chain data for csv exports.
      */
@@ -2111,12 +2100,8 @@
     }
 /*========================= Walkthrough ======================================*/
     function showWalkthroughIfFirstVisit() {
-        var prevVisit = localStorage ? 
-            localStorage.getItem('prevVisit') || false : false;      //console.log("newVisit = ", newVisit)
-        if ( !prevVisit ) { 
-            window.setTimeout(startIntro, 250); 
-            _util.populateStorage('prevVisit', true);
-        }   
+        window.setTimeout(startIntro, 250); 
+        _util.populateStorage('prevVisit', true);
     }
     function startIntro(startStep){
         if (intro) { //console.log("intro = %O", intro)
@@ -2316,10 +2301,10 @@
     function clearCol2() {
         $('#opts-col2').empty();
     }
-    function getDetachedRcrd(rcrdKey, orgnlRcrds) {
+    function getDetachedRcrd(rcrdKey, orgnlRcrds) {                             //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
         return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
     }
-    function showPopUpMsg(msg) {
+    function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
         var popUpMsg = msg || "Loading...";
         $("#grid-popup").text(popUpMsg);
         $('#grid-popup, #grid-overlay').show();
