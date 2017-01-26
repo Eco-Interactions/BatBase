@@ -32,15 +32,21 @@
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     resetFocusStorage();
     /**
-     * Container for all data needed for a given search focus. Reset on focus change.
-     * openRows = The identifier for the row in datagrid to be expanded on grid-load.
-     * Other properties stored: rcrdsById (all focus records), curTree (data tree 
-     * displayed in grid), selectedOpts (dropdown values to be selected for the current tree)
+     * Container for param data needed for a given focus. Resets on focus change.
+     * - curFocus: Top grid sort - Taxa (taxa), Locations (locs), or Sources (srcs).
+     * - levels: An array of all taxon level names.  
+     * - openRows: Entity ids whose grid rows will be expanded on grid load.
+     * Notable properties stored later: 
+     * rcrdsById - all records for the current focus.
+     * curDomain - focus' domain-level sort (eg, Taxa domains: Bat, Plant, Arthropod).
+     * curTree - data 'tree' object to be displayed in grid.
+     * selectedOpts - search combobox values 'selected' for the current tree.
      */
     function resetFocusStorage() {
         focusStorage = {}; 
         focusStorage.curFocus = localStorage ? localStorage.getItem('curFocus') : false ;  
-        focusStorage.openRows = focusStorage.curFocus === "taxa" ? [$('#sel-domain').val()] : [];
+        focusStorage.levels = localStorage ? JSON.parse(localStorage.getItem('levelNames')) : false ;  
+        focusStorage.openRows = focusStorage.curFocus === "taxa" ? [$('#sel-domain').val()] : [];   console.log("focusStorage = %O", focusStorage)     
     }
     function onDOMContentLoaded () {
         clearLocalStorageCheck();
@@ -157,6 +163,7 @@
             $.ajax("search/source"), $.ajax("search/interaction")
         ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
             $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
+            deriveAndStoreData(a1[0]);
             _util.populateStorage("storedData", true); 
             selectSearchFocus();
         });
@@ -185,8 +192,18 @@
         return data;
     }
     /**
-     * Gets all related entity data from local storage. If an entity is not found,
-     * false is returned and an ajax call will fetch the data from the server. 
+     * Store derived data from the raw entity data returned from the server. 
+     * > taxonLevelNames - array of level names - Kingdom, Family, Order, etc.
+     */
+    function deriveAndStoreData(taxonData) {
+        storeData('levelNames', getTaxonLvls(taxonData.level));
+    }
+    /** Returns an array of all Taxa level names. */
+    function getTaxonLvls(lvlData) {
+        var levels = [];
+        for (var lvl in lvlData) { levels.push(lvlData[lvl].displayName); }
+        return levels;
+    }
     /**
      * Gets all related entity data from local storage. 
      * If an entity is not found, false is returned. 
@@ -382,21 +399,13 @@
     }
     /**
      * Stores in the global focusStorage obj:
-     * > allTaxaLvls - array of all taxa level names. 
      * > taxaByLvl - object with taxa records in the current tree organized by 
      *   level and keyed under their display name.
      * > allDomainLvls - array of all levels present in the current domain tree.
      */
     function storeLevelData(topTaxon, levelData) {
-        focusStorage["allTaxaLvls"] = getAllTaxaLevels(levelData);
-        focusStorage["taxaByLvl"] = seperateTaxaTreeByLvl(topTaxon);                 //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
+        focusStorage["taxaByLvl"] = seperateTaxaTreeByLvl(topTaxon);            //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
         focusStorage["allDomainLvls"] = Object.keys(focusStorage.taxaByLvl);
-    }
-    /** Returns an array of all Taxa level names. */
-    function getAllTaxaLevels(lvlData) {
-        var levels = [];
-        for (var lvl in lvlData) { levels.push(lvlData[lvl].displayName); }
-        return levels;
     }
     /** Returns an object with taxa records by level and keyed with display names. */
     function seperateTaxaTreeByLvl(topTaxon) {
@@ -405,7 +414,7 @@
         return separated;
 
         function separate(taxon) {
-            var lvl = focusStorage.allTaxaLvls[taxon.level-1];
+            var lvl = focusStorage.levels[taxon.level-1];
             if (separated[lvl] === undefined) { separated[lvl] = {}; }
             separated[lvl][taxon.displayName] = taxon;
             
@@ -616,7 +625,7 @@
      * for each taxon in the tree.
      */
     function getTaxonRowData(taxon, treeLvl) {                                  //console.log("taxonRowData. taxon = %O", taxon);
-        var levelName = focusStorage.allTaxaLvls[taxon.level-1];
+        var levelName = focusStorage.levels[taxon.level-1];
         var taxonName = levelName === "Species" ? 
             taxon.displayName : levelName + " " + taxon.displayName;
         var intCount = getIntCount(taxon); 
@@ -1498,14 +1507,14 @@
          * parent chain of each taxon being processed. 
          */
         function fillInAvailableLevels(topLvl) { 
-            var topIdx = focusStorage.allTaxaLvls.indexOf(topLvl);
-            for (var i = topIdx; i < focusStorage.allTaxaLvls.length; i++) { 
-                curTaxaHeirarchy[focusStorage.allTaxaLvls[i]] = null;
+            var topIdx = focusStorage.levels.indexOf(topLvl);
+            for (var i = topIdx; i < focusStorage.levels.length; i++) { 
+                curTaxaHeirarchy[focusStorage.levels[i]] = null;
             }  
         }
         function clearLowerLvls(parentLvl) {
-            var topIdx = focusStorage.allTaxaLvls.indexOf(parentLvl);
-            for (var i = ++topIdx; i < focusStorage.allTaxaLvls.length; i++) { curTaxaHeirarchy[focusStorage.allTaxaL[i]] = null; }
+            var topIdx = focusStorage.levels.indexOf(parentLvl);
+            for (var i = ++topIdx; i < focusStorage.levels.length; i++) { curTaxaHeirarchy[focusStorage.allTaxaL[i]] = null; }
         }
         function fillInteractionRcrdsWithTaxaTreeData(intObj) {
             for (var role in intObj) {
