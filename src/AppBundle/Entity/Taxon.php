@@ -393,13 +393,16 @@ class Taxon
     }
 
     /**
-     * Get level id.
+     * Get level id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("level")
      */
-    public function getLevelId()
+    public function getLevelData()
     {
-        return $this->level->getId();
+        return [ 
+            "id" => $this->level->getId(), 
+            "displayName" => $this->level->getDisplayName() 
+        ];
     }
 
     /**
@@ -513,13 +516,13 @@ class Taxon
      */
     public function getChildTaxonIds()
     {
-        $childTaxa = $this->getChildTaxa();
-        $children = [];
-        if ($childTaxa === null) { return; }
-        foreach ($childTaxa as $child) {
-            array_push($children, $child->getId());
+        if ($this->childTaxa) {
+            $childIds = [];
+            foreach ($this->childTaxa as $child) {
+                array_push($childIds, $child->getId());
+            }
+            return $childIds;
         }
-        return $children;
     }
 
     /**

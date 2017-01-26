@@ -322,13 +322,19 @@ class Citation
     }
 
     /**
-     * Get the Citation Type id.   
+     * Get the Citation Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("citationType")
      */
-    public function getCitationTypeId()
+    public function getCitationTypeData()
     {
-        return $this->getCitationType() ? $this->getCitationType()->getId() : null;
+        if ($this->citationType) {
+            return [ 
+                "id" => $this->citationType->getId(), 
+                "displayName" => $this->citationType->getDisplayName() 
+            ];
+        }
+        return null;
     }
 
     /**
@@ -362,7 +368,7 @@ class Citation
      */
     public function getSourceId()
     {
-        return $this->getSource()->getId();
+        return $this->source->getId();
     }
 
     /**

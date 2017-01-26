@@ -260,7 +260,7 @@ class Interaction
      */
     public function getSourceId()
     {
-        return $this->getSource()->getId();
+        return $this->source->getId();
     }
 
     /**
@@ -288,13 +288,19 @@ class Interaction
     }
 
     /**
-     * Get the Interaction Type id.   
+     * Get the Interaction Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("interactionType")
      */
-    public function getInteractionTypeId()
+    public function getInteractionTypeData()
     {
-        return $this->getInteractionType() ? $this->getInteractionType()->getId() : null;
+        if ($this->interactionType) {
+            return [ 
+                "id" => $this->interactionType->getId(), 
+                "displayName" => $this->interactionType->getDisplayName() 
+            ];
+        }
+        return null;    
     }
 
     /**
@@ -328,7 +334,7 @@ class Interaction
      */
     public function getLocationId()
     {
-        return $this->getLocation() ? $this->getLocation()->getId() : null;
+        return $this->location ? $this->location->getId() : null;
     }
 
     /**
@@ -362,7 +368,7 @@ class Interaction
      */
     public function getSubjectId()
     {
-        return $this->getSubject()->getId();
+        return $this->subject->getId();
     }
 
     /**
@@ -396,7 +402,7 @@ class Interaction
      */
     public function getObjectId()
     {
-        return $this->getObject()->getId();
+        return $this->object->getId();
     }
 
     /**
@@ -434,21 +440,22 @@ class Interaction
     }
 
     /**
-     * Get an array of tag ids.
+     * Get an array of tag ids and displayNames.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("tags")
-     *
-     * @return array 
      */
-    public function getTagIds()
+    public function getTagData()
     {
-        $tags = $this->getTags();
-        $tagIds = [];
-        if ($tags === null) { return; }
-        foreach ($tags as $tag) {
-            array_push($tagIds, $tag->getId());
+        if ($this->tags) {
+            $tagIds = [];
+            foreach ($this->tags as $tag) {
+                array_push(
+                    $tagIds, 
+                    ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
+                );
+            }
+            return $tagIds;
         }
-        return $tagIds;
     }
 
     /**

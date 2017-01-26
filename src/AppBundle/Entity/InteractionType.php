@@ -229,9 +229,8 @@ class InteractionType
      */
     public function getInteractionids()
     {
-        $interactions = $this->getInteractions();
         $allIntIds = [];
-        foreach ($interactions as $interaction) {
+        foreach ($this->interactions as $interaction) {
             array_push($allIntIds, $interaction->getId());
         }
         return $allIntIds;

@@ -254,12 +254,11 @@ class SourceType
      */
     public function getSourceIds()
     {
-        $sources = $this->getSources();
-        $srcs = [];
-        foreach ($sources as $source) {
-            array_push($srcs, $source->getId());
+        $srcIds = [];
+        foreach ($this->sources as $source) {
+            array_push($srcIds, $source->getId());
         }
-        return $srcs;
+        return $srcIds;
     }
 
     /**

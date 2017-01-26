@@ -241,12 +241,11 @@ class Tag
      */
     public function getInteractionids()
     {
-        $interactions = $this->getInteractions();
-        $allIntIds = [];
-        foreach ($interactions as $interaction) {
-            array_push($allIntIds, $interaction->getId());
+        $intIds = [];
+        foreach ($this->interactions as $interaction) {
+            array_push($intIds, $interaction->getId());
         }
-        return $allIntIds;
+        return $intIds;
     }
 
     /**
@@ -325,12 +324,11 @@ class Tag
      */
     public function getSourceIds()
     {
-        $sources = $this->getSources();
-        $srcs = [];
-        foreach ($sources as $source) {
-            array_push($srcs, $source->getId());
+        $srcIds = [];
+        foreach ($this->sources as $source) {
+            array_push($srcIds, $source->getId());
         }
-        return $srcs;
+        return $srcIds;
     }
 
     /**

@@ -472,13 +472,13 @@ class Source
      */
     public function getChildSourceIds()
     {
-        $childSrcs = $this->getChildSources();
-        $children = [];
-        if ($childSrcs === null) { return; }
-        foreach ($childSrcs as $child) {
-            array_push($children, $child->getId());
+        if ($this->childSources) {
+            $childIds = [];
+            foreach ($this->childSources as $child) {
+                array_push($childIds, $child->getId());
+            }
+            return $childIds;
         }
-        return $children;
     }
 
     /**
@@ -506,15 +506,18 @@ class Source
     }
 
     /**
-     * Get Source Type id.
+     * Get Source Type id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("sourceType")
      *
      * @return int
      */
-    public function getSourceTypeId()
+    public function getSourceTypeData()
     {
-        return $this->sourceType->getId();
+        return [ 
+            "id" => $this->sourceType->getId(),  
+            "displayName" => $this->sourceType->getDisplayName() 
+        ];
     }
 
     /**
@@ -552,7 +555,7 @@ class Source
     }
 
     /**
-     * Get an array of tag ids.
+     * Get an array of tag ids and displayNames.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("tags")
      *
@@ -560,13 +563,16 @@ class Source
      */
     public function getTagIds()
     {
-        $tags = $this->getTags();
-        $tagIds = [];
-        if ($tags === null) { return; }
-        foreach ($tags as $tag) {
-            array_push($tagIds, $tag->getId());
+        if ($this->tags) {
+            $tagIds = [];
+            foreach ($this->tags as $tag) {
+                array_push(
+                    $tagIds, 
+                    ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
+                );
+            }
+            return $tagIds;
         }
-        return $tagIds;
     }
 
     /**
@@ -610,12 +616,11 @@ class Source
      */
     public function getInteractionids()
     {
-        $interactions = $this->getInteractions();
-        $allIntIds = [];
-        foreach ($interactions as $interaction) {
-            array_push($allIntIds, $interaction->getId());
+        $intIds = [];
+        foreach ($this->interactions as $interaction) {
+            array_push($intIds, $interaction->getId());
         }
-        return $allIntIds;
+        return $intIds;
     }
 
     /**
@@ -661,9 +666,8 @@ class Source
      */
     public function getContributorIds()
     {
-        $contributors = $this->getContributors();
         $contribIds = [];
-        foreach ($contributors as $contributor) {
+        foreach ($this->contributors as $contributor) {
             array_push($contribIds, $contributor->getId());
         }
         return $contribIds;
@@ -712,9 +716,8 @@ class Source
      */
     public function getContributonIds()
     {
-        $contributions = $this->getContributions();
         $contribIds = [];
-        foreach ($contributions as $contribution) {
+        foreach ($this->contributions as $contribution) {
             array_push($contribIds, $contribution->getId());
         }
         return $contribIds;

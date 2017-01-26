@@ -221,12 +221,11 @@ class PublicationType
      */
     public function getPublicationIds()
     {
-        $publications = $this->getPublications();
-        $pubs = [];
-        foreach ($publications as $publication) {
-            array_push($pubs, $publication->getId());
+        $pubIds = [];
+        foreach ($this->publications as $publication) {
+            array_push($pubIds, $publication->getId());
         }
-        return $pubs;
+        return $pubIds;
     }
 
     /**

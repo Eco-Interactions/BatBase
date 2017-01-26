@@ -191,13 +191,13 @@ class HabitatType
      */
     public function getLocationIds()
     {
-        $locs = $this->getLocations();
-        $locations = [];
-        if ($locs === null) { return; }
-        foreach ($locs as $loc) {
-            array_push($locations, $loc->getId());
+        if ($this->locations) {
+            $locIds = [];
+            foreach ($this->locations as $loc) {
+                array_push($locIds, $loc->getId());
+            }
+            return $locIds;
         }
-        return $locations;
     }
 
     /**

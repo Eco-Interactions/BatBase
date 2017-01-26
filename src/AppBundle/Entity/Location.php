@@ -446,8 +446,6 @@ class Location
      * Get the parent Location's id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
-     *
-     * @return int
      */
     public function getParentLocId()
     {
@@ -493,18 +491,16 @@ class Location
      * Get an array of child Location ids.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("children")
-     *
-     * @return int
      */
     public function getChildLocIds()
     {
-        $childLocs = $this->getChildLocs();
-        $children = [];
-        if ($childLocs === null) { return; }
-        foreach ($childLocs as $child) {
-            array_push($children, $child->getId());
+        if ($this->childLocs) {
+            $children = [];
+            foreach ($this->childLocs as $child) {
+                array_push($children, $child->getId());
+            }
+            return $children;
         }
-        return $children;
     }
 
     /**
@@ -532,15 +528,16 @@ class Location
     }
 
     /**
-     * Get locationType id.
+     * Get locationType id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("locationType")
-     *
-     * @return int
      */
-    public function getLocationTypeId()
-    {
-        return $this->locationType->getId();
+    public function getLocationTypeData()
+    {   
+        return [ 
+            "id" => $this->locationType->getId(),  
+            "displayName" => $this->locationType->getDisplayName() 
+        ];
     }
 
     /**
@@ -585,9 +582,8 @@ class Location
      */
     public function getInteractionids()
     {
-        $interactions = $this->getInteractions();
         $allIntIds = [];
-        foreach ($interactions as $interaction) {
+        foreach ($this->interactions as $interaction) {
             array_push($allIntIds, $interaction->getId());
         }
         return $allIntIds;
@@ -618,15 +614,18 @@ class Location
     }
 
     /**
-     * Get habitatType id.
+     * Get habitatType id and displayName.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("habitatType")
-     *
-     * @return int
      */
-    public function getHabitatTypeId()
+    public function getHabitatTypeData()
     {
-        return $this->habitatType ? $this->habitatType->getId() : null;
+        if ($this->habitatType) {
+            return [ 
+                "id" => $this->habitatType->getId(), 
+                "displayName" => $this->habitatType->getDisplayName() 
+            ];
+        }
     }
 
     public function getPlural()

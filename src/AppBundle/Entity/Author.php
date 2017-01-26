@@ -310,7 +310,7 @@ class Author
      */
     public function getSourceId()
     {
-        return $this->getSource()->getId();
+        return $this->source->getId();
     }
 
 

@@ -244,7 +244,7 @@
     } 
     /** Replaces all interaction ids with records for every node in the tree.  */
     function fillTree(focus, curTree, intRcrds) {  
-        var intEntities = ['taxon', 'location', 'source', 'tag', 'interactionType'];
+        var intEntities = ['taxon', 'location', 'source'];
         var entityData = getEntityData(intEntities);
         var fillMethods = { taxa: fillTaxaTree, locs: fillLocTree, srcs: fillSrcTree };
         fillMethods[focus](curTree, intRcrds);
@@ -414,7 +414,7 @@
         return separated;
 
         function separate(taxon) {
-            var lvl = focusStorage.levels[taxon.level-1];
+            var lvl = taxon.level.displayName;
             if (separated[lvl] === undefined) { separated[lvl] = {}; }
             separated[lvl][taxon.displayName] = taxon;
             
@@ -473,7 +473,6 @@
         var tree = {};                                                          //console.log("tree = %O", tree);
         tree[topTaxon.displayName] = topTaxon;  
         topTaxon.children = getChildTaxa(topTaxon.children);    
-
         focusStorage.curTree = tree;  
         /**
          * Recurses through each taxon's 'children' property and returns a record 
@@ -625,13 +624,12 @@
      * for each taxon in the tree.
      */
     function getTaxonRowData(taxon, treeLvl) {                                  //console.log("taxonRowData. taxon = %O", taxon);
-        var levelName = focusStorage.levels[taxon.level-1];
-        var taxonName = levelName === "Species" ? 
-            taxon.displayName : levelName + " " + taxon.displayName;
+        var lvl = taxon.level.displayName;
+        var name = lvl === "Species" ? taxon.displayName : lvl+" "+taxon.displayName;
         var intCount = getIntCount(taxon); 
         return {
             id: taxon.id,
-            name: taxonName,
+            name: name,
             isParent: true,                     
             parentTaxon: taxon.parent,
             open: focusStorage.openRows.indexOf(taxon.id.toString()) !== -1, 

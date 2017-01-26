@@ -212,13 +212,18 @@ class Publication
     }
 
     /**
-     * Get the Publication Type id.   
+     * Get the Publication Type id and displayName.   
      * @JMS\VirtualProperty
      * @JMS\SerializedName("publicationType")
      */
-    public function getPublicationTypeId()
+    public function getPublicationTypeData()
     {
-        return $this->getPublicationType() ? $this->getPublicationType()->getId() : null;
+        if ($this->publicationType) {
+            return [ 
+                "id" => $this->publicationType->getId(),  
+                "displayName" => $this->publicationType->getDisplayName() 
+            ];
+        }
     }
 
     /**
@@ -252,7 +257,7 @@ class Publication
      */
     public function getSourceId()
     {
-        return $this->getSource()->getId();
+        return $this->source->getId();
     }
 
     /**
