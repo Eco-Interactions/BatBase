@@ -541,6 +541,48 @@ class Location
     }
 
     /**
+     * Get the Region of this Location.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("region")
+     */
+    public function getRegionData()
+    {   
+        $locType = $this->locationType; // print("Region loc Type = ".$locType->getId());
+        if ($locType->getId() === 1) { return $this->getLocObj($this); }
+        return $this->findParentLocType($this, 1);
+    }
+
+    /**
+     * Get the Country of this Location.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("country")
+     */
+    public function getCountryData()
+    {   
+        $locType = $this->locationType; //print("Country loc Type = ".$locType->getId()." for ".$this->displayName);
+        if ($locType->getId() === 1) { return null; }
+        if ($locType->getId() === 2) { return $this->getLocObj($this); }
+        return $this->findParentLocType($this, 2);
+    }
+    
+    /** Get the parent location of the passed type, region or country, if it exists. */
+    private function findParentLocType($loc, $locTypeId)
+    {
+        $parent = $loc->getParentLoc();
+        if (!$parent || $parent->getLocationType()->getId() < $locTypeId) { return null; }
+        if ($parent->getLocationType()->getId() === $locTypeId) { 
+            return $this->getLocObj($parent); 
+        }
+        return $this->findParentLocType($parent, $locTypeId);
+    }
+    
+    /** Get the Location id and displayName. */
+    private function getLocObj($loc)
+    {
+        return [ "id" => $loc->getId(), "displayName" => $loc->getDisplayName() ]; 
+    }
+
+    /**
      * Add interactions.
      *
      * @param \AppBundle\Entity\Interaction $interactions
