@@ -341,36 +341,39 @@
     }
     /** Returns an interaction record object with flat data in grid-ready format. */
     function buildIntRowData(intRcrd, treeLvl){                                 //console.log("intRcrd = %O", intRcrd);
-        return {
+        var rowData = {
             isParent: false,
             treeLvl: treeLvl,
             type: "intRcrd", 
             id: intRcrd.id,
+            interactionType: intRcrd.interactionType.displayName,
+            citation: intRcrd.source.description,
             subject: getTaxonName(intRcrd.subject),
             object: getTaxonName(intRcrd.object),
-            interactionType: intRcrd.interactionType,
-            habitat: intRcrd.habitatType || null,
-            citation: intRcrd.source.fullText,
-            tags: getTags(intRcrd.tags),
-            location: intRcrd.location ? intRcrd.location.name : null,
-            country: intRcrd.location ? intRcrd.location.country : null,
-            region: intRcrd.location ? intRcrd.location.region : null,
-            elev: intRcrd.elevation,
-            elevMax: intRcrd.elevationMax,
-            lat: intRcrd.latitude,
-            long: intRcrd.longitude,
-            gps: intRcrd.gpsData,
+            tags: intRcrd.tags,
             note: intRcrd.note, 
         };
-    }
-    function getTags(tagAry) {
-        var tagStrAry = [];
-        tagAry.forEach(function(tagStr) { tagStrAry.push(tagStr); });
-        return tagStrAry.join(', ');
-    }
-    function getTaxonName(taxaData) {                                           //console.log("taxaData = %O", taxaData)
-        return taxaData.level === "Species" ? 
-            taxaData.name : taxaData.level + ' ' + taxaData.name;
+        if (intRcrd.location) { getLocationData(); }
+
+        return rowData;
+        /** Adds any location properties present in the interaction data. */
+        function getLocationData() {
+            var locObj = intRcrd.location;
+            var props = {
+                location: 'displayName',    gps: 'gpsData',
+                elev: 'elevation',          elevMax: 'elevationMax',
+                lat: 'latitude',            long: 'longitude',
+                // country: "country",         region: "region"          
+            };
+            for (var p in props) {
+               if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
+            }
+            if (locObj.habitatType) { rowData.habitat = locObj.habitatType.displayName; }
+        }
+    } /* End buildIntRowData */
+    function getTaxonName(taxon) {                                           
+        var lvl = taxon.level.displayName;  
+        return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
     }   
 /*------------------Taxa Search Methods---------------------------------------*/
     /**
