@@ -322,20 +322,20 @@
             }
         }
         /**
-         * Recurses through each source's 'children' property until it finds the citation
-         * source, and fills it's children interaction id's with their interaction records.
+         * Recurses through each source's 'children' property until finding the
+         * direct source, then replacing its interaction id's with their records.
          */
         function fillSrcTree(curTree) { 
             for (var srcName in curTree) {                                      //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
                 fillSrcInteractions(curTree[srcName]);
             }
             /**
-             * Recurses through each source's 'children' property until all sources in 
-             * curTree have interaction record refs replaced with the records. 
+             * Recurses through each source's 'children' property until all sources 
+             * have any interaction ids replaced with the interaction records. 
              */
             function fillSrcInteractions(curSrc) {                              //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
                var srcChildren = [];
-                if (curSrc.isDirect) { replaceSrcInts(curSrc);}
+                if (curSrc.isDirect) { replaceSrcInts(curSrc); }
                 curSrc.children.forEach(function(childSrc){
                     fillSrcInteractions(childSrc); 
                 });
@@ -1056,15 +1056,9 @@
      * to @initSrcSearchUi.  
      */
     function buildSourceGrid() {
-        var domainRcrds = {};
-        var entities = ['author', 'citation', 'citationType', 'publication', 
-            'publicationType', 'source', 'sourceType', 'ag'];
+        var entities = ['source', 'authSources', 'pubSources'];
         var entityData = getEntityData(entities);
-        if( entityData ) {                                                        //console.log("~~~Stored Source rcrds loaded. %O", srcRcrds);
-            // domainRcrds.author = JSON.parse(localStorage.getItem('authRcrds'));
-            // domainRcrds.publication = JSON.parse(localStorage.getItem('pubRcrds'));
-            // initSrcSearchUi(domainRcrds, srcRcrds);
-            // seperateAndStoreSrcs({srcRcrds: srcRcrdsById, pubTypes: JSON.parse(localStorage.getItem('pubTypes')) }); 
+        if( entityData ) { initSrcSearchUi(entityData);
         } else { console.log("Error loading source data from storage."); }
     }
     
@@ -1073,45 +1067,34 @@
      * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
      * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
      */
-    function initSrcSearchUi(srcDomainRcrds, srcRcrds) {                        //console.log("init search ui");
+    function initSrcSearchUi(srcData) {                                         //console.log("init search ui");
         var domainRcrds;
-        rcrdsById = srcRcrds;
-        if (!$("#sel-domain").length) { buildSrcDomainHtml(srcDomainRcrds); }  
+        rcrdsById = srcData.source;
+        if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
         setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
-        initSrcTree(domainRcrds);
+        initSrcTree(focusStorage.curDomain, domainRcrds); 
         getInteractionsAndFillTree();
     }
-    /**
-     * Builds the select box for the source domain types that will become the data
-     * tree nodes displayed in the grid. 
-     */
-    function buildSrcDomainHtml(data) {                                         //console.log("buildTaxaDomainHtml called. ");
+    /** Builds the combobox for the source domain types. */
+    function buildSrcDomainHtml() {                                             //console.log("buildTaxaDomainHtml called. ");
         var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
-        var domainOpts = getDomainOpts(data);                                   //console.log("domainOpts = %O", domainOpts);
+        var domainOpts = getDomainOpts();                                       //console.log("domainOpts = %O", domainOpts);
         $(browseElems).append(_util.buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
-
         $('#sort-opts').append(browseElems);
+        //initComboboxes
         $('#sel-domain').change(onSrcDomainChange);
         $('#sort-opts').fadeTo(0, 1);
-
-        function getDomainOpts(data) {
-            var sourceDomains = Object.keys(data);
-            var srcTypeMap = { "author": "auths", "publication": "pubs" };
-            var opts = sourceDomains.map(function(srcType){
-                return { value: srcTypeMap[srcType], text: _util.ucfirst(srcType) + 's' };
-            });
-            return opts;
+        function getDomainOpts() {
+            return [{ value: "auths", text: "Authors" },
+                    { value: "pubs", text: "Publications" }];
         }
     } /* End buildSrcDomainHtml */
     /** Restores stored domain from previous session or sets the default 'Publications'. */
     function setSrcDomain() {
-        var srcDomainVal;
         var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
-        if ($('#sel-domain').val() === null) { 
-            srcDomainVal = storedDomain !== null ? storedDomain : "pubs";  
-            $('#sel-domain').val(srcDomainVal);
-        }
+        var srcDomain = storedDomain || "pubs";
+        if ($('#sel-domain').val() === null) { $('#sel-domain').val(srcDomain); }
     }
     /** Event fired when the source domain select box has been changed. */
     function onSrcDomainChange(e) {  
@@ -1123,35 +1106,34 @@
     /** Rebuilds source tree for the selected source domain. */
     function rebuildSrcTree() {
         var domainRcrds = storeAndReturnCurDomainRcrds();                       //console.log("---Search Change. domainRcrds = %O", domainRcrds);
-        initSrcTree(domainRcrds);
+        initSrcTree(focusStorage.curDomain, domainRcrds);
         getInteractionsAndFillTree();
     }
     /** Returns the records for the source domain currently selected. */
-    function storeAndReturnCurDomainRcrds() {                           //May or may not need this
-        var srcTransMap = { "auths": ["author", "authRcrds"], "pubs": ["publication", "pubRcrds"] };
+    function storeAndReturnCurDomainRcrds() {
+        var valMap = { "auths": "authSources", "pubs": "pubSources" };
         var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
         focusStorage.curDomain = domainVal;
         _util.populateStorage('curDomain', domainVal);
-        return JSON.parse(localStorage.getItem(srcTransMap[domainVal][1]));
+        return JSON.parse(localStorage.getItem([valMap[domainVal]]));
     }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
      * the global focusStorage obj as 'curTree', 
+     * NOTE: Sources have two domains, or types of 'tree' data: 
+     * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
-    function initSrcTree(domainRcrds) {                                         //console.log("initSrcTree domainRcrds = %O", domainRcrds);
-        var tree;
-        if (focusStorage.curDomain === "pubs") { tree = buildPubSrcTree(domainRcrds);   
-        } else { tree = buildAuthSrcTree(domainRcrds); }
+    function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree domainRcrds = %O", domainRcrds);
+        var tree = focus === "pubs" ? buildPubTree(rcrds) : buildAuthTree(rcrds);
         focusStorage.curTree = sortSrcTree(tree);
     }  
     /** Sorts the Source tree nodes alphabetically. */
     function sortSrcTree(tree) {
-        var orgKeys = Object.keys(tree); 
-        var keys =  focusStorage.curDomain === "pubs" ?
-            orgKeys.sort() : orgKeys;    
         var sortedTree = {};
-        for (var i=0; i<keys.length; i++){ 
+        var orgKeys = Object.keys(tree); 
+        var keys =  focusStorage.curDomain === "pubs" ? orgKeys.sort() : orgKeys;    
+        for (var i=0; i < keys.length; i++){ 
             sortedTree[keys[i]] = sortChildSrcs(tree[keys[i]]);
         }
         return sortedTree;
@@ -1164,21 +1146,15 @@
             return src;
         } 
     } /* End sortSrcTree */
-    /**
-     * Alphabetizes array via sort method.
-     * Display names are buried in the 'sourceType' object because citation display 
-     * names are, incorrectly and emporarily, their short-text rather than their title.
-     */
+    /** Alphabetizes array via sort method. */
     function alphaSrcNames(a, b) {                                              //console.log("alphaSrcNames a = %O b = %O", a, b);
-        var xName = a.sourceType[Object.keys(a.sourceType)[0]].displayName;
-        var yName = b.sourceType[Object.keys(b.sourceType)[0]].displayName;
-        var x = xName.toLowerCase();
-        var y = yName.toLowerCase();
+        var x = a.displayName.toLowerCase();
+        var y = b.displayName.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
-     * Returns a heirarchical tree with Authors as top nodes of the data tree. 
+     * Returns a heirarchical tree with Publications as top nodes of the data tree. 
      * Each interaction is attributed directly to a citation source, which currently 
      * always has a 'parent' publication source.
      * Publication Source Tree:
@@ -1186,21 +1162,19 @@
      * ->->Citation Title
      * ->->->Interactions Records
      */
-    function buildPubSrcTree(pubRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
-        for (var pubName in pubRcrds) {
-            pubRcrds[pubName] = getPubData(pubRcrds[pubName]);
-        }
-        return pubRcrds;
+    function buildPubTree(pubRcrds) {                                           //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
+        var tree = {};
+        pubRcrds.forEach(function(pub) { tree[pub.displayName] = getPubData(pub); });
+        return tree;
     }
-    function getPubData(pubRcrd) {
-        pubRcrd.children = getPubChildren(pubRcrd);
-        return pubRcrd;
+    function getPubData(rcrd) {
+        rcrd.children = getPubChildren(rcrd);
+        return rcrd;
     }
-    function getPubChildren(pubRcrd) {
-        if (pubRcrd.childSources === null) { return []; }
-
-        return pubRcrd.childSources.map(function(srcId) {
-            return getPubData(getDetachedRcrd(srcId, rcrdsById));
+    function getPubChildren(rcrd) { //console.log("getPubChildren rcrd = %O", rcrd)
+        if (rcrd.children === null) { return []; }
+        return rcrd.children.map(function(id) {
+            return getPubData(getDetachedRcrd(id, rcrdsById));
         });
     }
 /*-------------- Author Source Tree -------------------------------------------*/
