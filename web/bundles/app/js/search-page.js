@@ -41,6 +41,7 @@
      * curDomain - focus' domain-level sort (eg, Taxon domains: Bat, Plant, Arthropod).
      * curTree - data 'tree' object to be displayed in grid.
      * selectedOpts - search combobox values 'selected' for the current tree.
+     * rowData - array of rows displayed in the grid.
      */
     function resetFocusStorage() {
         focusStorage = {}; 
@@ -343,11 +344,11 @@
             }
 
         } /* End fillSrcTree */
+        /** Replace the interaction ids with their interaction records. */
         function replaceInteractions(interactionsAry) {                         //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-            var rcrd;
             return interactionsAry.map(function(intId){
-                if (typeof intId === "number") {                                //console.log("new record = %O", intRcrds[intId]);
-                    return fillIntRcrd(intRcrds[intId]); 
+                if (typeof intId === "number") {                                //console.log("new record = %O",  JSON.parse(JSON.stringify(intRcrds[intId])));
+                    return fillIntRcrd(getDetachedRcrd(intId, intRcrds)); 
                 }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
             });
         }
@@ -1279,8 +1280,8 @@
     }
     /*--------- Source Data Formatting ---------------------------------------*/
     /**
-     * Transforms the tree's source record data into the grid format and sets the 
-     * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
+     * Transforms the tree's source record data into grid row format and set as 
+     * 'rowData' in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
         var prefix = focusStorage.curDomain === "pubs" ? "Publication" : "Author";
@@ -1293,13 +1294,15 @@
         focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", focusStorage.rowData);
         loadGrid(treeName);
     }
-    function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O, type = ", src, type);
+    function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
+        var detailId = focusStorage.curDomain === "pubs" && src.publication ? 
+            src.publication.id : null;  
         return {
             id: src.id,
+            pubId: detailId,
             name: src.displayName,
             isParent: true,      
-            type: getPubType(src),
-            parentSource: src.parentSource,
+            parentSource: src.parent,
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
             children: getChildSrcRowData(src, treeLvl),
             treeLvl: treeLvl,
@@ -1444,17 +1447,16 @@
         var selElemId = $(this).attr("id");
         var selVal = $(this).val();
         var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
-        var newRows = selVal === "all" ?
-            focusStorage.rowData : getPubTypeRows(focusStorage.rowData, selVal);
+        var newRows = selVal === "all" ? focusStorage.rowData : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
         updateSrcFilterStatus(selVal, selText+'s');
     } 
     /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows(rowAry, selVal) {  
-        var pubIds = focusStorage.publicationType[selVal].publications;         //console.log("getPubTypeRows. pubIds = %O", pubIds)                                 
+    function getPubTypeRows(selVal) { 
+        var pubIds = focusStorage.pubTypes[selVal].publications;         
         var rows = [];
-        rowAry.forEach(function(row) {  
-            if (pubIds.indexOf(row.id) !== -1) { rows.push(row); }
+        focusStorage.rowData.forEach(function(row) { 
+            if (pubIds.indexOf(row.pubId) !== -1) { rows.push(row); }
         });  
         return rows;
     }

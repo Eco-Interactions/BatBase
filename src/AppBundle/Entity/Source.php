@@ -82,6 +82,7 @@ class Source
      *
      * @ORM\Column(name="is_direct", type="boolean", nullable=true)
      * @JMS\Expose
+     * @JMS\SerializedName("isDirect")
      */
     private $isDirect;
 
