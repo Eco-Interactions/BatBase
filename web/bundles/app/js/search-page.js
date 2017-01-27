@@ -1046,36 +1046,38 @@
     }
 /*------------------Source Search Methods-----------------------------------*/
     /**
-     * If source data is already in local storage, the author and publication records 
-     * are sent to @initSrcSearchUi to begin building the data grid. Otherwise, an
-     * ajax call gets the records and they are stored @seperateAndStoreSrcs before continuing 
-     * to @initSrcSearchUi.  
+     * Get all data needed for the Source-focused grid from local storage and send  
+     * to @initSrcSearchUi to begin the data-grid build.  
      */
     function buildSourceGrid() {
-        var entities = ['source', 'authSources', 'pubSources'];
+        var entities = [
+            'source', 'authSources', 'pubSources', 'author', 'publication', 
+            'publicationType'
+        ];
         var entityData = getEntityData(entities);
         if( entityData ) { initSrcSearchUi(entityData);
         } else { console.log("Error loading source data from storage."); }
     }
     
     /**
-     * All source records are stored in 'rcrdsById'. Builds the source domain select 
-     * box @buildSrcDomainHtml and sets the default domain. Builds the selected domain's
-     * source tree @initSrcTree. Continues building grid @buildSrcSearchUiAndGrid. 
+     * If the source-domain combobox isn't displayed, build it @buildSrcDomainHtml.
+     * If no domain selected, set the default domain value. Builds the source-domain 
+     * tree @initSrcTree and continue grid build @getInteractionsAndFillTree.  
      */
-    function initSrcSearchUi(srcData) {                                         //console.log("init search ui");
+    function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
         var domainRcrds;
         rcrdsById = srcData.source;
         if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
         setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
+        addSrcDataToFocusStorage(srcData);
         initSrcTree(focusStorage.curDomain, domainRcrds); 
         getInteractionsAndFillTree();
     }
     /** Builds the combobox for the source domain types. */
-    function buildSrcDomainHtml() {                                             //console.log("buildTaxaDomainHtml called. ");
+    function buildSrcDomainHtml() {                                             
         var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
-        var domainOpts = getDomainOpts();                                       //console.log("domainOpts = %O", domainOpts);
+        var domainOpts = getDomainOpts();                                       
         $(browseElems).append(_util.buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
         $('#sort-opts').append(browseElems);
         //initComboboxes
@@ -1113,6 +1115,12 @@
         _util.populateStorage('curDomain', domainVal);
         return JSON.parse(localStorage.getItem([valMap[domainVal]]));
     }
+    /** Add source data to focusStorage to be available while in a source focus. */
+    function addSrcDataToFocusStorage(srcData) {
+        focusStorage.author = srcData.author;
+        focusStorage.publication = srcData.publication;
+        focusStorage.pubTypes = srcData.publicationType;
+    }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
@@ -1135,19 +1143,13 @@
         return sortedTree;
         /** Alphabetizes child source nodes. Skips interaction records. */
         function sortChildSrcs(src) { 
-            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {      //console.log("src.children = %O", src.children);
-                src.children = src.children.sort(alphaSrcNames);
+            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {      
+                src.children = src.children.sort(alphaEntityNames);             //console.log("src.children = %O", src.children);
                 src.children.forEach(sortChildSrcs);
             }
             return src;
         } 
     } /* End sortSrcTree */
-    /** Alphabetizes array via sort method. */
-    function alphaSrcNames(a, b) {                                              //console.log("alphaSrcNames a = %O b = %O", a, b);
-        var x = a.displayName.toLowerCase();
-        var y = b.displayName.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
-    }
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Publications as top nodes of the data tree. 
@@ -1158,16 +1160,21 @@
      * ->->Citation Title
      * ->->->Interactions Records
      */
-    function buildPubTree(pubRcrds) {                                           //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
+    function buildPubTree(pubSrcRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
         var tree = {};
-        pubRcrds.forEach(function(pub) { tree[pub.displayName] = getPubData(pub); });
+        pubSrcRcrds.forEach(function(pub) { 
+            tree[pub.displayName] = getPubData(pub); 
+        });
         return tree;
     }
     function getPubData(rcrd) {
         rcrd.children = getPubChildren(rcrd);
+        if (rcrd.publication) {                                                 //console.log("rcrd with pub = %O", rcrd)
+            rcrd.publication = getDetachedRcrd(rcrd.publication, focusStorage.publication);
+        }
         return rcrd;
     }
-    function getPubChildren(rcrd) { //console.log("getPubChildren rcrd = %O", rcrd)
+    function getPubChildren(rcrd) {                                             //console.log("getPubChildren rcrd = %O", rcrd)
         if (rcrd.children === null) { return []; }
         return rcrd.children.map(function(id) {
             return getPubData(getDetachedRcrd(id, rcrdsById));
@@ -1183,7 +1190,7 @@
      * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
-    function buildAuthSrcTree(authSrcRcrds) {                                   //console.log("----buildAuthSrcTree");
+    function buildAuthTree(authSrcRcrds) {                                      //console.log("----buildAuthSrcTree");
         var contribs, author;
         var authorTreeAry = [];
         for (var authName in authSrcRcrds) {                                    //console.log("rcrd = %O", authSrcRcrds[authName]);
@@ -1235,19 +1242,15 @@
         var pubSelElem = buildPubSelects(pubTypeOpts);
         clearCol2();        
         $('#opts-col2').append(pubSelElem);
+        //initComboboxes
     }
     function buildPubSelectOpts() {
-        var pubTypes = JSON.parse(localStorage.getItem('pubTypes'));
-        var pubOpts = [{value: 'all', text: '- All -'}];                        //console.log("pubTypes = %O", pubTypes);
-        for (var typeId in pubTypes) {
-            pubOpts.push({ value: typeId, text: _util.ucfirst(pubTypes[typeId]) });
+        var pubTypes = getEntityData(["publicationType"]).publicationType;
+        var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
+        for (var t in pubTypes) {
+            opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
         }
-        return pubOpts.sort(alphaPubTypes);
-    }
-    function alphaPubTypes(a, b) {
-        var x = a.text.toLowerCase();
-        var y = b.text.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
+        return opts.sort(alphaOptionObjs);  
     }
     /** Builds the publication type dropdown */
     function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
@@ -1319,10 +1322,6 @@
         return curSrc.interactions.map(function(intRcrd) {
             return buildIntRowData(intRcrd, treeLvl);
         });
-    }
-    function getPubType(srcRcrd) {                                                                                              
-        return srcRcrd.sourceType && srcRcrd.sourceType.publication ? 
-            srcRcrd.sourceType.publication.type : null;
     }
 /*================== Filter Functions ========================================*/
     /*------------------ Taxon Filter Updates ---------------------------------*/
@@ -1450,10 +1449,12 @@
         gridOptions.api.setRowData(newRows);
         updateSrcFilterStatus(selVal, selText+'s');
     } 
-    function getPubTypeRows(rowAry, selVal) {                                           
+    /** Returns the rows for publications with their id in the selected type's array */
+    function getPubTypeRows(rowAry, selVal) {  
+        var pubIds = focusStorage.publicationType[selVal].publications;         //console.log("getPubTypeRows. pubIds = %O", pubIds)                                 
         var rows = [];
         rowAry.forEach(function(row) {  
-            if (row.type == selVal) { rows.push(row); }
+            if (pubIds.indexOf(row.id) !== -1) { rows.push(row); }
         });  
         return rows;
     }
@@ -2357,6 +2358,18 @@
      */
     function hideGroupColFilterMenu() {
         $('.ag-header-cell-menu-button.name').hide();
+    }
+    /** Sorts an array of options via sort method. */
+    function alphaOptionObjs(a, b) {
+        var x = a.text.toLowerCase();
+        var y = b.text.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+    /** Alphabetizes array via sort method. */
+    function alphaEntityNames(a, b) {                                           //console.log("alphaSrcNames a = %O b = %O", a, b);
+        var x = a.displayName.toLowerCase();
+        var y = b.displayName.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
     }
     /*--------------------- Grid Button Methods ------------------------------*/
     function toggleExpandTree() {                                               //console.log("toggleExpandTree")
