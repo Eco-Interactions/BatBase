@@ -111,7 +111,7 @@
             "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
     }
-    function selectSearchFocus() {                                              console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
+    function selectSearchFocus() {                                              //console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
         var focus = $('#search-focus').val();         
         var builderMap = { 
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
@@ -428,9 +428,9 @@
      * Get all data needed for the Taxon-focused grid from local storage and send 
      * to @initTaxonSearchUi to begin the data-grid build.  
      */
-    function buildTaxonGrid() {                                                 console.log("Building Taxon Grid.");
-        var entityData = getEntityData(['domain', 'taxon', 'level']); 
-        if( entityData ) { initTaxonSearchUi(entityData);
+    function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
+        var data = getEntityData(['domain', 'taxon', 'level']); 
+        if( data ) { initTaxonSearchUi(data);
         } else { console.log("Error loading taxon data from storage."); }
     }
     /**
@@ -439,9 +439,9 @@
      * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
      * Continues grid build @getInteractionsAndFillTree.  
      */
-    function initTaxonSearchUi(data) {                                           console.log("initTaxonSearchUi. data = %O", data);
+    function initTaxonSearchUi(data) {                                          //console.log("initTaxonSearchUi. data = %O", data);
         var domainTaxonRcrd;
-        rcrdsById = data.taxon;
+        focusStorage.rcrdsById = data.taxon;
         if (!$("#sel-domain").length) { buildTaxonDomainHtml(data.domain); }  
         setTaxonDomain();  
         
@@ -498,7 +498,7 @@
      */
     function storeAndReturnDomain() {
         var domainId = $('#sel-domain').val();
-        var domainTaxonRcrd = getDetachedRcrd(domainId, rcrdsById);             //console.log("domainTaxon = %O", domainTaxonRcrd);
+        var domainTaxonRcrd = getDetachedRcrd(domainId);                        //console.log("domainTaxon = %O", domainTaxonRcrd);
         var domainLvl = domainTaxonRcrd.level;
         _util.populateStorage('curDomain', domainId);
         focusStorage.curDomain = domainId;
@@ -544,7 +544,7 @@
             return children.map(function(child){
                 if (typeof child === "object") { return child; }
 
-                var childRcrd = getDetachedRcrd(child, rcrdsById);                         //console.log("child = %O", child);
+                var childRcrd = getDetachedRcrd(child);                         //console.log("child = %O", child);
                 if (childRcrd.children.length >= 1) { 
                     childRcrd.children = getChildTaxa(childRcrd.children);
                 } else { childRcrd.children = null; }
@@ -622,7 +622,7 @@
         function fillInLvlOpts(lvl) {                                           //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
             var taxon;
             if (lvl in focusStorage.selectedVals) {
-                taxon = getDetachedRcrd(focusStorage.selectedVals[lvl], rcrdsById);
+                taxon = getDetachedRcrd(focusStorage.selectedVals[lvl]);
                 optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];    
             } else {
                 optsObj[lvl] = [{value: 'none', text: '- None -'}];
@@ -1063,7 +1063,7 @@
      */
     function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
         var domainRcrds;
-        rcrdsById = srcData.source;
+        focusStorage.rcrdsById = srcData.source;
         if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
         setSrcDomain();  
         domainRcrds = storeAndReturnCurDomainRcrds();
@@ -1173,7 +1173,7 @@
     function getPubChildren(rcrd) {                                             //console.log("getPubChildren rcrd = %O", rcrd)
         if (rcrd.children === null) { return []; }
         return rcrd.children.map(function(id) {
-            return getPubData(getDetachedRcrd(id, rcrdsById));
+            return getPubData(getDetachedRcrd(id));
         });
     }
 /*-------------- Author Source Tree -------------------------------------------*/
@@ -1193,7 +1193,7 @@
         }  
         return tree;  
 
-        function getAuthData(authSrc) {                                         console.log("rcrd = %O", authSrc);
+        function getAuthData(authSrc) {                                         //console.log("rcrd = %O", authSrc);
             if (authSrc.contributions.length > 0) {
                 authSrc.author = getDetachedRcrd(authSrc.author, focusStorage.author);
                 authSrc.children = getAuthChildren(authSrc.contributions); 
@@ -1206,7 +1206,7 @@
      */
     function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", authData.contributions);
         return contribs.map(function(workSrcId){
-            return getPubData(getDetachedRcrd(workSrcId, rcrdsById));
+            return getPubData(getDetachedRcrd(workSrcId));
         });
     }
     /**
@@ -1321,7 +1321,7 @@
      */
     function updateTaxonSearch() {                                               //console.log("updateTaxonSearch val = ", $(this).val())
         var selectedTaxonId = $(this).val();                                     //console.log("selectedTaxonId = %O", selectedTaxonId);
-        var selTaxonRcrd = getDetachedRcrd(selectedTaxonId, rcrdsById);  
+        var selTaxonRcrd = getDetachedRcrd(selectedTaxonId);  
         focusStorage.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);       //console.log("selectedVals = %O", focusStorage.selectedVals);
         updateFilterStatus();
         rebuildTaxonTree(selTaxonRcrd);
@@ -1347,7 +1347,7 @@
         function selectAncestorTaxa(taxon) {                                    //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
             if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
                 selected[taxon.level] = taxon.id;                               //console.log("setting lvl = ", taxon.level)
-                selectAncestorTaxa(getDetachedRcrd(taxon.parent, rcrdsById))
+                selectAncestorTaxa(getDetachedRcrd(taxon.parent))
             }
         }
     } /* End getRelatedTaxaToSelect */
@@ -1384,7 +1384,7 @@
      * is only aware of Asia's sub-regions
      */
     function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-        var filterVal = rcrdsById[selVal].displayName;
+        var filterVal = focusStorage.rcrdsById[selVal].displayName;
         var colModel = filterVal !== "Asia" ? 
             [filterVal] : ["East Asia", "South & Southeast Asia", "West & Central Asia"];
         
@@ -1417,7 +1417,7 @@
         function getFilteredChildData(treeNode) {                                     //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
             if (!selNodeOpened) { addParentOpenRows(treeNode); }
-            var locNode = getDetachedRcrd(treeNode.data.id, rcrdsById); 
+            var locNode = getDetachedRcrd(treeNode.data.id); 
             var locNodeChildren = treeNode.childrenAfterFilter;
             if (locNodeChildren) { locNode.children = locNodeChildren.map(getFilteredChildData); }
             return locNode; 
@@ -1497,7 +1497,7 @@
          */
         function syncTaxonHeir(taxonName, lvl, parent) { //console.log("syncTaxonHeir parent = ", parent);
             if (parent === null || parent === 1) { fillInAvailableLevels(lvl);
-            } else { clearLowerLvls(rcrdsById[parent].level) }
+            } else { clearLowerLvls(focusStorage.rcrdsById[parent].level) }
 
             curTaxonHeirarchy[lvl] = taxonName;
         }
@@ -2309,14 +2309,18 @@
             <p style="font-size: 1.1em text-align: justify"> Note: "csv" stands for comma seperated values. The interaction
             data in the grid can be downloaded in this format, as a plain-text file containing tabular 
             data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
-            `;;
-
+        `;
     }
 /*================= Utility ==================================================*/
     function clearCol2() {
         $('#opts-col2').empty();
     }
-    function getDetachedRcrd(rcrdKey, orgnlRcrds) {                             //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+    /** 
+     * Returns a record detached from the original. If no records are passed, the 
+     * focus' records are used.
+     */
+    function getDetachedRcrd(rcrdKey, rcrds) {                                  //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+        orgnlRcrds = rcrds || focusStorage.rcrdsById;
         return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
