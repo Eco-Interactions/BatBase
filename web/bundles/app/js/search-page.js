@@ -32,7 +32,7 @@
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     resetFocusStorage();
     /**
-     * Container for param data needed for a given focus. Resets on focus change.
+     * Container for param data needed for a selected focus. Resets on focus change.
      * - curFocus: Top grid sort - Taxa (taxa), Locations (locs), or Sources (srcs).
      * - levels: An array of all taxon level names.  
      * - openRows: Entity ids whose grid rows will be expanded on grid load.
@@ -164,7 +164,7 @@
             $.ajax("search/source"), $.ajax("search/interaction")
         ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
             $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
-            deriveAndStoreData(a1[0], a3[0]);
+            deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
             _util.populateStorage("storedData", true); 
             selectSearchFocus();
         });
@@ -192,67 +192,63 @@
         for (var id in data) { data[id] = JSON.parse(data[id]); }
         return data;
     }
-    /**
-     * Store derived data from the raw entity data returned from the server. 
-     * > taxonLevelNames - array of level names - Kingdom, Family, Order, etc.
-     */
-    function deriveAndStoreData(taxonData, sourceData) {
-        storeData('levelNames', getTaxonLvls(taxonData.level));
-        storeDerivedSourceData(sourceData);
+    /** Adds to localStorage data derived from the serialized entity data. */
+    function deriveAndStoreData(data) {
+        deriveAndStoreTaxonData(data[0]);
+        deriveAndStoreLocationData(data[1]);
+        deriveAndStoreSourceData(data[2]);
+        // deriveInteractionData(data[3]);
     }
-    /** Returns an array of all Taxon level names. */
-    function getTaxonLvls(lvlData) {
+    /** levels - an array of all Taxon level names - Kingdom, Family, Order, etc. */
+    function deriveAndStoreTaxonData(data) {
         var levels = [];
-        for (var lvl in lvlData) { levels.push(lvlData[lvl].displayName); }
-        return levels;
+        for (var lvl in data.level) { 
+            levels.push(data.level[lvl].displayName); 
+        }
+        storeData('levels', levels);
     }
-    /** Separates and stores name and record objects for specific source-types. */
-    function storeDerivedSourceData(srcData) {
-        var derivedData = separateSrcData(srcData);  console.log("dervied source data = %O", derivedData);
-        storeData('authNames', derivedData.names.Author);
-        storeData('pubNames', derivedData.names.Publication);
-        storeData('publisherNames', derivedData.names.Publisher);         
-        storeData('authSources', derivedData.rcrds.author);         
-        storeData('pubSources', derivedData.rcrds.publication);         
+    /** [entity]Names - an object with each entity's displayName (key) and id. */
+    function deriveAndStoreLocationData(data) {  
+        storeData('cntryNames', getNameDataObj(data.locationType[2].locations, data.location));
+        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
+        storeData('topRegionNames', getTopRegionNameData(data));
+        // storeData('habTypeNames', getNameDataObj());  //Add when data is needed.
+    }
+    function getTopRegionNameData(locData) {  
+        var data = {};
+        var regions = locData.locationType[1].locations;
+        var regionRcrds = getEntityRcrds(regions, locData.location);
+        regionRcrds.forEach(function(region) {
+            if (!region.parent) { data[region.displayName] = region.id; }
+        });  
+        return data;
     }
     /**
-     * Adds the id of the source keyed under the displayName to it's 'type' obj, 
-     * which will be used later to populate its type's dropdown.
+     * [entity]Names - an object with each entity's displayName (key) and id.
+     * [entity]Sources - an array with of all source records for the entity type.
      */
-    function separateSrcData(data) {   
-        return {
-            names: buildSourceTypeObjs(data),
-            rcrds: buildSourceTypeRcrdObjs(data)
-        };
-    } /* End separateSrcData */
-    function buildSourceTypeObjs(data) {
-        var srcData = { Author: {}, Publication: {}, Publisher: {} };
-        for (var rcrd in data.source) {
-            sortSourceRcrd(data.source[rcrd]);
-        }
-        function sortSourceRcrd(source) {
-            var type = source.sourceType.displayName;  //console.log("type = ", type)
-            if (srcData[type]) { srcData[type][source.displayName] = source.id; }
-        }
-        return srcData; 
+    function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
+        storeData('authSources', getEntityRcrds(data.sourceType[3].sources, data.source));         
+        storeData('pubSources', getEntityRcrds(data.sourceType[2].sources, data.source));         
+        storeData('pubNames', getNameDataObj(data.sourceType[2].sources, data.source));
+        storeData('authNames', getNameDataObj(data.sourceType[3].sources, data.source));
+        storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
     }
-    /** Returns an array with all records of a particular source-type. */
-    function buildSourceTypeRcrdObjs(data) {
-        return {
-            author: getSourceRcrds(data.sourceType[3].sources),
-            publication: getSourceRcrds(data.sourceType[2].sources)
-        };
-        function getSourceRcrds(sourceIdAry) {
-            return sourceIdAry.map(function(srcId) { return data.source[srcId]; });
-        }
-    } /* End buildSourceTypeObjs */
+    function getNameDataObj(ids, rcrds) {
+        var data = {};
+        ids.forEach(function(id) { data[rcrds[id].displayName] = id; });        //console.log("nameDataObj = %O", data);
+        return data;
+    }
+    function getEntityRcrds(ids, rcrds) {
+        return ids.map(function(id) { return rcrds[id]; });
+    }
     /**
      * Gets all related entity data from local storage. 
      * If an entity is not found, false is returned. 
      */
     function getEntityData(relEntityNames) {
         var data = {};
-        var allFound = relEntityNames.every(function(entity){
+        var allFound = relEntityNames.every(function(entity){                   //console.log("getting [%s] data", entity)
             data[entity] = JSON.parse(localStorage.getItem(entity));            //console.log("data for %s - %O", entity, data[entity]);
             return data[entity] || false;
         });  
