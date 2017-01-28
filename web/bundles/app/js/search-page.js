@@ -1124,9 +1124,9 @@
     }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
-     * @buildAuthSrcTree and publications @buildPubSrcTree. Adds the tree to 
+     * @buildAuthSrcTree and publications @buildPubSrcTree, and adds it to 
      * the global focusStorage obj as 'curTree', 
-     * NOTE: Sources have two domains, or types of 'tree' data: 
+     * NOTE: Sources have two domains, or types of tree data: 
      * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
     function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree domainRcrds = %O", domainRcrds);
@@ -1136,8 +1136,7 @@
     /** Sorts the Source tree nodes alphabetically. */
     function sortSrcTree(tree) {
         var sortedTree = {};
-        var orgKeys = Object.keys(tree); 
-        var keys =  focusStorage.curDomain === "pubs" ? orgKeys.sort() : orgKeys;    
+        var keys = Object.keys(tree).sort();
         for (var i=0; i < keys.length; i++){ 
             sortedTree[keys[i]] = sortChildSrcs(tree[keys[i]]);
         }
@@ -1184,7 +1183,7 @@
 /*-------------- Author Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Authors as top nodes of the data tree, 
-     * with their contributibuted works and the interactions they contained nested 
+     * with their contributibuted works and the interactions they contain nested 
      * within. Authors with no contributions are not added to the tree.
      * Author Source Tree:
      * ->Author
@@ -1192,38 +1191,27 @@
      * ->->->Interactions Records
      */
     function buildAuthTree(authSrcRcrds) {                                      //console.log("----buildAuthSrcTree");
-        var contribs, author;
-        var authorTreeAry = [];
-        for (var authName in authSrcRcrds) {                                    //console.log("rcrd = %O", authSrcRcrds[authName]);
-            contribs = authSrcRcrds[authName].sourceType.author.contributions;
-            if (contribs.length < 1) {continue;}
-            author = getDetachedRcrd(authName, authSrcRcrds);
-            author.children = getAuthChildren(authSrcRcrds[authName].sourceType.author); 
-            authorTreeAry.push(author);
+        var tree = {};
+        for (var id in authSrcRcrds) { 
+            getAuthData(getDetachedRcrd(id, authSrcRcrds)); 
         }  
-        return sortAuthTree(authorTreeAry);  
-    }  
+        return tree;  
+
+        function getAuthData(authSrc) {                                         console.log("rcrd = %O", authSrc);
+            if (authSrc.contributions.length > 0) {
+                authSrc.author = getDetachedRcrd(authSrc.author, focusStorage.author);
+                authSrc.children = getAuthChildren(authSrc.contributions); 
+                tree[authSrc.displayName] = authSrc;
+            }
+        }
+    } /* End buildAuthTree */
     /** For each source work contribution, gets any additional publication children
      * @getPubData and return's the source record.
      */
-    function getAuthChildren(authData) {                                        //console.log("getAuthChildren contribs = %O", authData.contributions);
-        return authData.contributions.map(function(workSrcId){
+    function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", authData.contributions);
+        return contribs.map(function(workSrcId){
             return getPubData(getDetachedRcrd(workSrcId, rcrdsById));
         });
-    }
-    function sortAuthTree(authTreeAry) {  
-        var tree = {};  
-        var sortedAuths = authTreeAry.sort(alphaLastName);                      
-        sortedAuths.forEach(function(auth) {
-            tree[auth.displayName] = auth;
-        });
-        return tree;
-    }
-    /** Alphabetizes array via sort method. */
-    function alphaLastName(authA, authB) {
-        var x = authA.sourceType.author.lastName.toLowerCase();
-        var y = authB.sourceType.author.lastName.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
     }
     /**
      * Will build the select elems for the source search options. Clears previous 
@@ -1277,6 +1265,7 @@
         $(labelElem).append([inputElem, bttn]);
         clearCol2();        
         $('#opts-col2').append(labelElem);
+        //initComboboxes
     }
     /*--------- Source Data Formatting ---------------------------------------*/
     /**

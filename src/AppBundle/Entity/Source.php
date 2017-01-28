@@ -669,7 +669,7 @@ class Source
     {
         $contribIds = [];
         foreach ($this->contributors as $contributor) {
-            array_push($contribIds, $contributor->getId());
+            array_push($contribIds, $contributor->getAuthorSource()->getId());
         }
         return $contribIds;
     }
@@ -719,7 +719,7 @@ class Source
     {
         $contribIds = [];
         foreach ($this->contributions as $contribution) {
-            array_push($contribIds, $contribution->getId());
+            array_push($contribIds, $contribution->getWorkSource()->getId());
         }
         return $contribIds;
     }
