@@ -40,8 +40,8 @@
      * rcrdsById - all records for the current focus.
      * curDomain - focus' domain-level sort (eg, Taxon domains: Bat, Plant, Arthropod).
      * curTree - data 'tree' object to be displayed in grid.
-     * selectedOpts - search combobox values 'selected' for the current tree.
      * rowData - array of rows displayed in the grid.
+     * selectedOpts - search combobox values 'selected' for the current tree.
      */
     function resetFocusStorage() {
         focusStorage = {}; 
@@ -210,8 +210,8 @@
     /** [entity]Names - an object with each entity's displayName (key) and id. */
     function deriveAndStoreLocationData(data) {  
         addUnspecifiedLocation(data.noLocIntIds);
-        storeData('cntryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getRegionNames(data.locationType[1].locations, data.location));
+        storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
+        storeDatca('regionNames', getRegionNames(data.locationType[1].locations, data.location));
         storeData('topRegionNames', getTopRegionNameData(data));
         // storeData('habTypeNames', getNameDataObj());  //Add when data is needed.
     }
@@ -222,7 +222,8 @@
             id: 9999,
             displayName: 'Unspecified',
             children: [],
-            interactions: noLocInts
+            interactions: noLocInts,
+            locationType: {displayName: 'Region'}
         };
         storeData('location', locRcrds);
     }
@@ -401,6 +402,7 @@
     function buildIntRowData(intRcrd, treeLvl){                                 //console.log("intRcrd = %O", intRcrd);
         var rowData = {
             isParent: false,
+            name: "",
             treeLvl: treeLvl,
             type: "intRcrd", 
             id: intRcrd.id,
@@ -548,11 +550,11 @@
         focusStorage.openRows = [topTaxon.id.toString()];                                    //console.log("openRows=", openRows)
     }
     /**
-     * Returns a taxonomic family tree of taxon record data from the top, parent, 
+     * Returns a heirarchical tree of taxon record data from the top, parent, 
      * domain taxon through all children. The tree is stored as 'curTree' in the 
      * global focusStorage obj. 
      */
-    function buildTaxonTree(topTaxon) {                                          //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
+    function buildTaxonTree(topTaxon) {                                         //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
         var tree = {};                                                          //console.log("tree = %O", tree);
         tree[topTaxon.displayName] = topTaxon;  
         topTaxon.children = getChildTaxa(topTaxon.children);    
@@ -799,7 +801,7 @@
      */
     function buildLocationGrid() {
         var locDataStorageProps = [
-            'location', 'locationType', 'topRegionNames', 'cntryNames', 'regionNames'
+            'location', 'locationType', 'topRegionNames', 'countryNames', 'regionNames'
         ];
         var data = getDataFromStorage(locDataStorageProps);
         if( data ) {                                                            //console.log("Stored Locations Loaded = %O", data);
@@ -844,7 +846,7 @@
         var tree = {};                                                          //console.log("tree = %O", tree);
         topLocs.forEach(function(id){  
             topLoc = getDetachedRcrd(id);  
-            locTree[topLoc.displayName] = getLocData(topLoc);
+            tree[topLoc.displayName] = getLocData(topLoc);
         });  
         focusStorage.curTree = sortDataTree(tree);
     }
@@ -872,66 +874,60 @@
      * set any previously 'selected' values.
      */
     function loadLocComboboxes(curTree) {  
-        var locOptsObj = buildLocSelectOpts(curTree);
-        var elems = buildLocSelects(locOptsObj);
+        var locOpts = buildLocSelectOpts(curTree);
+        var selElems = buildLocSelects(locOpts);
         clearCol2();        
-        selectNoneVals(locOptsObj);
-        $('#opts-col2').append(elems);
+        selectNoneVals(locOpts);
+        $('#opts-col2').append(selElems);
         setSelectedLocVals();
     }
     /** Builds arrays of options objects for the location comboboxes. */
-    function buildLocSelectOpts(curTree) {  
-        var proessedOpts = { region: [], country: [] };
-        var optsObj = { region: [], country: [] }; 
+    function buildLocSelectOpts(curTree) {
+        var processedOpts = { region: [], country: [] };
+        var opts = { region: [], country: [] };
         for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
         sortLocOpts();
         addAllAndNoneOpts();
-        return optsObj; 
+        return opts; 
         /**
-         * Recurses through the current tree locs' 'children' and builds loc options
-         * for unique regions and countries found. Skips interaction records, which 
+         * Recurses through the tree and builds a option object for each unique 
+         * country and region in the current tree. Skips interaction records, which 
          * are identified by their "note" property.
          */
-        function buildLocOptsForNode(locNode) {  
+        function buildLocOptsForNode(locNode) {                                 //console.log("locNode = %O", locNode)
             if (locNode.hasOwnProperty("note")) {return;}                       //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
-            var locType = locNode.locationType;  
-            if (locType === "Region") { getRegionOpts(locNode) } 
-            if (locType === "Country") { getCountryOpts(locNode) }
+            var locType = locNode.locationType.id;
+            if (locType === 1 || locType === 2) { 
+                getLocOpts(locNode.displayName, locNode.locationType.displayName); 
+            }
             if (locNode.children) { locNode.children.forEach(buildLocOptsForNode); }
         }
-        function getRegionOpts(locNode) {  //val: id, txt: name
-            var isTopRegion = locNode.parentLoc === null;
-            var optName = isTopRegion ? locNode.displayName : '->' + locNode.displayName;
-            if (proessedOpts.region.indexOf(locNode.displayName) === -1) {  //console.log("getRegionOpts adding hab = %s from %O", locNode.habitatType.name,  locNode);
-                optsObj.region.push({ value: locNode.id, text: optName });
-                proessedOpts.region.push(locNode.displayName);
+        /** Adds an option object, if one has not already been added for this location. */
+        function getLocOpts(name, type) {
+            var lcType = _util.lcfirst(type);
+            if (processedOpts[lcType].indexOf(name) === -1) {
+                var id = focusStorage.data[lcType + "Names"][name];             
+                opts[lcType].push({ value: id, text: name }); 
+                processedOpts[lcType].push(name);
             }
         }
-        function getCountryOpts(locNode) {
-            if (proessedOpts.country.indexOf(locNode.displayName) === -1) {  //console.log("getCountryOpts adding hab = %s from %O", locNode.habitatType.name,  locNode);
-                optsObj.country.push({ value: locNode.id, text: locNode.displayName });
-                proessedOpts.country.push(locNode.displayName);
+        function sortLocOpts() {
+            for (var type in opts) {
+                opts[type] = opts[type].sort(alphaOptionObjs); 
             }
         }
-        /** Sorts countries alphabetically. Regions were sorted earlier. */
-        function sortLocOpts() { 
-            optsObj["country"] = optsObj["country"].sort(alphaLocObjs);
-        }
-        /** If select options array is empty, add 'none' option, else add 'all'.  */
+        /**
+         * If there are no options for a location type, add a 'none' option. 
+         * Otherwise, add one for 'all'. 
+         */
         function addAllAndNoneOpts() {
-            for (var selName in optsObj) {                                      //console.log("addAllAndNoneOpts for %s = %O", selName, optsObj[selName])
-                var option = optsObj[selName].length === 0 ?
+            for (var type in opts) {                                            //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
+                var option = opts[type].length === 0 ?
                     {value: 'none', text: '- None -'} : {value: 'all', text: '- All -'};   
-                optsObj[selName].unshift(option);
+                opts[type].unshift(option);
             }
-        }
+        } 
     } /* End buildLocSelectOpts */
-    /** Alphabetizes array via sort method. */
-    function alphaLocObjs(a, b) { 
-        var x = a.text.toLowerCase();
-        var y = b.text.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
-    }
     /** Builds the dropdown html elements */
     function buildLocSelects(locOptsObj) {  
         var selElems = [];
@@ -946,16 +942,20 @@
         }
         return selElems;
     }
-    function selectNoneVals(locOptsObj) {
-        var sel = focusStorage.selectedOpts;
-        for (var selType in locOptsObj) {
-            if (locOptsObj[selType][0].value === 'none') { sel[selType] = 'none'; }
+    function selectNoneVals(locOpts) {
+        var sel = focusStorage.selectedOpts || createSelectedOptsObj();
+        for (var type in locOpts) {
+            if (locOpts[type][0].value === 'none') { sel[type] = 'none'; }
         }          
+    }
+    /** If selectedOpts is undefined, add it as an empty object. */
+    function createSelectedOptsObj() {
+        focusStorage.selectedOpts = {};
+        return focusStorage.selectedOpts;
     }
     function setSelectedLocVals() {                                             //console.log("openRows = %O", focusStorage.openRows);           
         var selId;
         var selected = focusStorage.selectedOpts;                               //console.log("selected in setSelectedLocVals = %O", selected);
-        if (!selected) {return}
         Object.keys(selected).forEach(function(selName) {
             selId = '#sel' + _util.ucfirst(selName);
             $(selId).val(selected[selName]); 
@@ -963,15 +963,14 @@
             $(selId).find('option[value="none"]').hide();
         });
     }
-/*---------Loc Data Formatting------------------------------------------------*/
+/*--------- Location Data Formatting -----------------------------------------*/
     /**
      * Transforms the tree's location data into the grid format and sets the row 
      * data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
     function transformLocDataAndLoadGrid(locTree) {
-        var finalRowData = [];  //console.log("locTree = %O", locTree);
-
-        for (var topNode in locTree) { //console.log("topNode = ", topNode)
+        var finalRowData = [];                                                  //console.log("locTree = %O", locTree);
+        for (var topNode in locTree) {                                          //console.log("topNode = ", topNode)
             finalRowData.push( getLocRowData(locTree[topNode], 0)); 
         }
         focusStorage.rowData = finalRowData;                                                    //console.log("rowData = %O", rowData);
@@ -980,7 +979,7 @@
     /**
      * Returns a row data object for the passed location and it's children. 
      */
-    function getLocRowData(locRcrd, treeLvl) { //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+    function getLocRowData(locRcrd, treeLvl) {                                  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
         return {
             id: locRcrd.id,
             name: locRcrd.displayName,  /* Interaction rows have no name to display. */
@@ -989,7 +988,8 @@
             children: getLocRowDataForRowChildren(locRcrd, treeLvl),
             treeLvl: treeLvl,
             interactions: locRcrd.interactions ? true : false,     /* Location objects have collections of interactions as children. */     
-            locGroupedInts: locRcrd.children && locRcrd.interactions
+            locGroupedInts: locRcrd.children && locRcrd.interactions,
+            type: locRcrd.locationType.displayName
         };      
     }
     /**
@@ -998,16 +998,12 @@
      * the first child row under "Unspecified [locName] Interactions", otherwise
      * any interactions are added as rows directly beneath the taxon.
      */
-    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {                   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
         var childRows = [];
-    
-        if (locRcrd.children) {
+        if (locRcrd.children.length > 0) {
             getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl);
-            locRcrd.children.forEach(function(childLoc){
-                childRows.push( getLocRowData(childLoc, pTreeLvl + 1));
-            });
-        } else { childRows = getLocIntRows(locRcrd.interactions, pTreeLvl); }
-
+            locRcrd.children.forEach(getChildLocData);
+        } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
         return childRows;
         /**
          * Groups interactions attributed directly to a location with child-locations
@@ -1022,27 +1018,17 @@
                     name: 'Unspecified ' + locName + ' Interactions',
                     isParent: true,
                     open: false,
-                    children: getLocIntRows(intsAry, treeLvl),
+                    children: getIntRowData(intsAry, treeLvl),
                     interactions: true,
                     treeLvl: treeLvl,
                     groupedInts: true
                 });
             }
         }
-    } /* End getLocRowDataForChildren */
-    /**
-     * Returns an array of interaction record objs. On the init pass for a new data
-     * set, interactions in array are only their id. Once the interaction records have 
-     * been filled in, interaction data objects are created and returned for each taxon.
-     */
-    function getLocIntRows(intRcrdAry, treeLvl) {
-        if (intRcrdAry) {
-            return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
-                return buildIntRowData(intRcrd, treeLvl);
-            });
+        function getChildLocData(childLoc) {
+            childRows.push(getLocRowData(childLoc, pTreeLvl + 1));
         }
-        return [];
-    }
+    } /* End getLocRowDataForChildren */
 /*------------------Source Search Methods-----------------------------------*/
     /**
      * Get all data needed for the Source-focused grid from local storage and send  
@@ -1201,7 +1187,7 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
         } else { loadAuthSearchHtml(srcTree); }
@@ -1284,16 +1270,12 @@
      * for each source node in the tree.
      */
     function getChildSrcRowData(curSrc, treeLvl) {
-        if (curSrc.isDirect) { return getIntRowChildren(curSrc, treeLvl); }
-        if (curSrc.children === null) { return []; }
-        
-        return curSrc.children.map(function(childSrc) {                         //console.log("childSrc = %O", childSrc);
-            return getSrcRowData(childSrc, treeLvl + 1);
-        });
+        if (curSrc.isDirect) { return getIntRowData(curSrc.interactions, treeLvl); }
+        return curSrc.children === null ? [] : getChildSrcData(curSrc, treeLvl);
     }
-    function getIntRowChildren(curSrc, treeLvl) {
-        return curSrc.interactions.map(function(intRcrd) {
-            return buildIntRowData(intRcrd, treeLvl);
+    function getChildSrcData(src, treeLvl) {
+        return src.children.map(function(childSrc) {                         //console.log("childSrc = %O", childSrc);
+            return getSrcRowData(childSrc, treeLvl + 1);
         });
     }
 /*================== Filter Functions ========================================*/
@@ -1350,17 +1332,18 @@
         focusStorage.selectedOpts = getSelectedVals(selVal, selElemId);
         filterGridOnLocCol(selVal, selTypeMap[selElemId]);
         /** Loops through all selElems and stores user selected values. */
-        function getSelectedVals(selVal, selElemId) {
-            var val, type;
-            var sel = {};
+        function getSelectedVals(selVal, selElemId) {                           //console.log("getSelectedVals. selVal = %s, selElemId = ", selVal, selElemId)
+            var selected = {};
             var selType = selTypeMap[selElemId];
-            for (var selElem in selTypeMap) {
-                val = $('#' + selElem).val();
-                type = selTypeMap[selElem];
-                if (val !== 'none' && val !== 'all') { sel[type] = val; }
-            }
-            return sel;    
-        }
+            for (var selId in selTypeMap) { getSelected(selId); }               //console.log("selected = %O", selected)
+            return selected;  
+
+            function getSelected(selId) {
+                var val = $('#' + selId).val();
+                var type = selTypeMap[selId];
+                if (val !== 'none' && val !== 'all') { selected[type] = val; }
+             } 
+        } /* End getSelectedVals */
     } /* End updateLocSearch */
     /**
      * Uses column filter to rebuild the grid. Rebuilds tree and the location
@@ -1372,40 +1355,39 @@
         var filterVal = focusStorage.rcrdsById[selVal].displayName;
         var colModel = filterVal !== "Asia" ? 
             [filterVal] : ["East Asia", "South & Southeast Asia", "West & Central Asia"];
-        
         gridOptions.api.getFilterApi(colName).setModel(colModel);
         buildFilteredLocTree(selVal, colName);
         loadLocComboboxes(focusStorage.curTree);
         gridOptions.api.onGroupExpandedOrCollapsed();
     }
     /**
-     * Builds new tree out of displayed rows after filter. If a location type has been 
-     * selected, add each parent row displayed to the openRows collection so the 
-     * grid is displayed with the selected location already opened.
+     * Builds new tree out of displayed rows after filter. When a location has been 
+     * selected, each parent row is added to the openRows collection so that the 
+     * grid is displayed opened to the selected row.
      */
     function buildFilteredLocTree(selVal, colName) {
         var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
         var tree = {};
-        var selNodeOpened = isNaN(selVal);
+        var selectedOpened = isNaN(selVal);
 
         gridModel.rowsToDisplay.forEach(function(topNode) {                     //console.log("rowToDisplay = %O", topNode)
             tree[topNode.data.name] = getFilteredChildData(topNode);
         });
         focusStorage.curTree = tree;
-        /** [addParentOpenRows description] */
-        function addParentOpenRows(node) {
-            node.expanded = true;
-            node.data.open = true;
-            if (node.data.id == selVal) { selNodeOpened = true; }
-        }
         /** Recurses through displayed children until finding the leaf interaction records. */
         function getFilteredChildData(treeNode) {                                     //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
-            if (!selNodeOpened) { addParentOpenRows(treeNode); }
+            if (!selectedOpened) { addParentOpenRows(treeNode); }
             var locNode = getDetachedRcrd(treeNode.data.id); 
             var locNodeChildren = treeNode.childrenAfterFilter;
             if (locNodeChildren) { locNode.children = locNodeChildren.map(getFilteredChildData); }
             return locNode; 
+        }
+        /** Expands the parent rows of a selected location. */
+        function addParentOpenRows(node) {
+            node.expanded = true;
+            node.data.open = true;
+            if (node.data.id == selVal) { selectedOpened = true; }
         }
     } /* End buildFilteredLocTree */
     /*------------------ Source Filter Updates -------------------------------*/
@@ -2365,6 +2347,15 @@
         var y = b.text.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
+    /** Returns an array with grid-row objects for each interaction record.  */
+    function getIntRowData(intRcrdAry, treeLvl) {
+        if (intRcrdAry) {
+            return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
+                return buildIntRowData(intRcrd, treeLvl);
+            });
+        }
+        return [];
+    }
     /*--------------------- Grid Button Methods ------------------------------*/
     function toggleExpandTree() {                                               //console.log("toggleExpandTree")
         var expanded = $('#xpand-tree').data('xpanded');
@@ -2464,8 +2455,9 @@
     }
     /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
     function resetCurTreeStorageProps() {
-        var props = ['curTree', 'selectedOpts', 'selectedVals'];
+        var props = ['curTree', 'selectedVals'];
         props.forEach(function(prop){ delete focusStorage[prop]; });
+        focusStorage.selectedOpts = {};
     }
     /**
      * When the grid rowModel is updated, the total interaction count for each 
