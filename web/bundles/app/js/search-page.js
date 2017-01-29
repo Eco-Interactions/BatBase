@@ -793,17 +793,26 @@
     }
 /*------------------Location Search Methods-----------------------------------*/
     /**
-     * Get location data from local storage. Store the records in the global 'rcrdsById'.
-     * Get 'top' regions @getTopRegions and send to @buildLocTree to build the grid. 
+     * Get location data from local storage. Store the location records as 'rcrdsById' 
+     * in the global focusStorage object. Get top region ids @getTopLocIds and send 
+     * them to @buildLocTree to build the grid. 
      */
     function buildLocationGrid() {
-        var topRegions;
-        var entityData = getEntityData(['location', 'locationType']);
-        if( entityData ) {  
-            rcrdsById = entityData.location;
-            // topRegions = getTopRegions(entityData.locationType);        //console.log("Stored Locations Loaded = %O", entityData);
-            // buildLocTreeAndGrid(topRegions);
+        var locDataStorageProps = [
+            'location', 'locationType', 'topRegionNames', 'cntryNames', 'regionNames'
+        ];
+        var data = getDataFromStorage(locDataStorageProps);
+        if( data ) {                                                            //console.log("Stored Locations Loaded = %O", data);
+            focusStorage.rcrdsById = data.location;                                    
+            focusStorage.data = data;
+            buildLocTreeAndGrid(getTopRegionIds());
         } else { console.log("Error loading location data from storage."); }
+    }
+    function getTopRegionIds() {
+        var ids = [];
+        var regions = focusStorage.data.topRegionNames;
+        for (var name in regions) { ids.push(regions[name]); } 
+        return ids;
     }
     /** 
      * Builds a tree of location data with regions at the top level, and sub-regions, 
@@ -816,67 +825,38 @@
     }
     /**
      * Rebuilds loc tree with passed location, or the default top regions, as the
-     * top nodes of the new tree with all sub-locations nested beneath @buildLocTree.
+     * top node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
      * Resets 'openRows' and clears grid. Continues @buildLocTreeAndGrid.
      */
     function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
-        var topLocs = topLoc || JSON.parse(localStorage.getItem('topRegions'));
+        var topLocs = topLoc || getTopRegionIds();
         focusStorage.openRows = topLocs.length === 1 ? topLocs[0] : [];
         clearPreviousGrid();
         buildLocTreeAndGrid(topLocs);
     }
     /**
      * Builds a tree of location data with passed locations at the top level, and 
-     * sub-locations as nested children. Alphabetizes the tree @sortLocTree and 
-     * adds tree to the global focusStorage obj as 'curTree'. 
+     * sub-locations as nested children. Adds the alphabetized tree to the global 
+     * focusStorage obj as 'curTree'. 
      */ 
-    function buildLocTree(topLocIds) {                                          //console.log("passed 'top' locIds = %O", topLocIds)
+    function buildLocTree(topLocs) {                                            //console.log("passed 'top' locIds = %O", topLocs)
         var topLoc;
-        var locTree = {};                                                       //console.log("tree = %O", locTree);
-
-        topLocIds.forEach(function(topLocId){  
-            topLoc = getDetachedRcrd(topLocId, rcrdsById);                                 //console.log("--topLoc = %O", topLoc);
-            locTree[topLoc.displayName] = topLoc;   
-            topLoc.children = fillChildLocRcrds(topLoc.childLocs);
+        var tree = {};                                                          //console.log("tree = %O", tree);
+        topLocs.forEach(function(id){  
+            topLoc = getDetachedRcrd(id);  
+            locTree[topLoc.displayName] = getLocData(topLoc);
         });  
-        focusStorage.curTree = sortLocTree(locTree);
+        focusStorage.curTree = sortDataTree(tree);
     }
-    function fillChildLocRcrds(childLocIds) {
-        var locRcrd;
-        var branch = [];
-        childLocIds.forEach(function(locId){
-            if (typeof locId === "number") {
-                locRcrd = getDetachedRcrd(locId, rcrdsById);   
-                branch.push(locRcrd);
-                if (locRcrd.childLocs.length >= 1) { 
-                    locRcrd.children = fillChildLocRcrds(locRcrd.childLocs);
-                }
-            } else { console.log("~~~child location [object]~~~"); return locId; }
-        });
-        return branch;
-    }
-    /** Sorts the location tree alphabetically. */
-    function sortLocTree(tree) {
-        var keys = Object.keys(tree).sort();    
-        var sortedTree = {};
-        for (var i=0; i<keys.length; i++){ 
-            sortedTree[keys[i]] = sortChildLocs(tree[keys[i]]);
+    /** Returns the location record with all child ids replaced with their records. */
+    function getLocData(rcrd) {     
+        if (rcrd.children.length > 0) { 
+            rcrd.children = rcrd.children.map(getLocChildData);
         }
-        return sortedTree;
-    
-        function sortChildLocs(loc) { 
-            if (loc.children) {  
-                loc.children = loc.children.sort(alphaLocNames);
-                loc.children.forEach(sortChildLocs);
-            }
-            return loc;
-        } 
-    } /* End sortLocTree */
-    /** Alphabetizes array via sort method. */
-    function alphaLocNames(a, b) { 
-        var x = a.displayName.toLowerCase();
-        var y = b.displayName.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
+        return rcrd;
+    }
+    function getLocChildData(childId) {  
+        return getLocData(getDetachedRcrd(childId));
     }
     /**
      * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
@@ -1008,8 +988,8 @@
             open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
             children: getLocRowDataForRowChildren(locRcrd, treeLvl),
             treeLvl: treeLvl,
-            interactions: locRcrd.interactions !== null,     /* Location objects have collections of interactions as children. */     
-            locGroupedInts: locRcrd.children && locRcrd.interactions !== null
+            interactions: locRcrd.interactions ? true : false,     /* Location objects have collections of interactions as children. */     
+            locGroupedInts: locRcrd.children && locRcrd.interactions
         };      
     }
     /**
@@ -1149,25 +1129,8 @@
      */
     function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree domainRcrds = %O", domainRcrds);
         var tree = focus === "pubs" ? buildPubTree(rcrds) : buildAuthTree(rcrds);
-        focusStorage.curTree = sortSrcTree(tree);
+        focusStorage.curTree = sortDataTree(tree);
     }  
-    /** Sorts the Source tree nodes alphabetically. */
-    function sortSrcTree(tree) {
-        var sortedTree = {};
-        var keys = Object.keys(tree).sort();
-        for (var i=0; i < keys.length; i++){ 
-            sortedTree[keys[i]] = sortChildSrcs(tree[keys[i]]);
-        }
-        return sortedTree;
-        /** Alphabetizes child source nodes. Skips interaction records. */
-        function sortChildSrcs(src) { 
-            if (src.children && src.children.length > 0 && !src.children[0].interactionType) {      
-                src.children = src.children.sort(alphaEntityNames);             //console.log("src.children = %O", src.children);
-                src.children.forEach(sortChildSrcs);
-            }
-            return src;
-        } 
-    } /* End sortSrcTree */
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
      * Returns a heirarchical tree with Publications as top nodes of the data tree. 
@@ -2372,16 +2335,34 @@
     function hideGroupColFilterMenu() {
         $('.ag-header-cell-menu-button.name').hide();
     }
-    /** Sorts an array of options via sort method. */
-    function alphaOptionObjs(a, b) {
-        var x = a.text.toLowerCase();
-        var y = b.text.toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
-    }
+    /** Sorts the all levels of the data tree alphabetically. */
+    function sortDataTree(tree) {
+        var sortedTree = {};
+        var keys = Object.keys(tree).sort();    
+
+        for (var i=0; i<keys.length; i++){ 
+            sortedTree[keys[i]] = sortNodeChildren(tree[keys[i]]);
+        }
+        return sortedTree;
+    
+        function sortNodeChildren(node) { 
+            if (node.children) {  
+                node.children = node.children.sort(alphaEntityNames);
+                node.children.forEach(sortNodeChildren);
+            }
+            return node;
+        } 
+    } /* End sortDataTree */
     /** Alphabetizes array via sort method. */
     function alphaEntityNames(a, b) {                                           //console.log("alphaSrcNames a = %O b = %O", a, b);
         var x = a.displayName.toLowerCase();
         var y = b.displayName.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+    /** Sorts an array of options via sort method. */
+    function alphaOptionObjs(a, b) {
+        var x = a.text.toLowerCase();
+        var y = b.text.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
     /*--------------------- Grid Button Methods ------------------------------*/
