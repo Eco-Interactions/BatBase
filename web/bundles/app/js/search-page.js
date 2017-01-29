@@ -490,8 +490,11 @@
      * > allDomainLvls - array of all levels present in the current domain tree.
      */
     function storeLevelData(topTaxon) {
-        focusStorage["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);            //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
+        focusStorage["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);           //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
         focusStorage["allDomainLvls"] = Object.keys(focusStorage.taxaByLvl);
+    }
+    function updateTaxaByLvl(topTaxon) {
+        focusStorage["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);           //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
     }
     /** Returns an object with taxon records by level and keyed with display names. */
     function seperateTaxonTreeByLvl(topTaxon) {
@@ -530,14 +533,15 @@
         return domainTaxonRcrd;
     }
     /**
-     * Builds a taxon-data-tree for the passed taxon. On domain-tree init, the 
-     * taxon levels present in the tree are stored @storeLevelData. 
-     * Note: This is also the entry point for filter-related taxon-grid rebuilds.
+     * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
+     * the tree are stored or updated before continuing @getInteractionsAndFillTree.. 
+     * Note: This is the entry point for filter-related taxon-grid rebuilds.
      */
     function rebuildTaxonTree(topTaxon, domainInit) {                           //console.log("domainTaxon=%O", domainTaxon)
         clearPreviousGrid();
         initTaxonTree(topTaxon);
-        if (domainInit) { storeLevelData(topTaxon); }
+        if (domainInit) { storeLevelData(topTaxon); 
+        } else { updateTaxaByLvl(topTaxon); }
         getInteractionsAndFillTree();
     }
     /**
@@ -1281,20 +1285,19 @@
 /*================== Filter Functions ========================================*/
     /*------------------ Taxon Filter Updates ---------------------------------*/
     /**
-     * When a level dropdown is changed, the grid is updated with the selected taxon
-     * as the top of the new tree. If the dropdowns are cleared, the taxon-grid is 
-     * reset to the domain-level taxon. The level drop downs are updated to show 
-     * related taxa .
+     * When a taxon is selected from one of the taxon-level comboboxes, the grid 
+     * is updated with the taxon as the top of the new tree. The remaining level 
+     * comboboxes are populated with realted taxa, with ancestors selected.
      */
-    function updateTaxonSearch() {                                               //console.log("updateTaxonSearch val = ", $(this).val())
-        var selectedTaxonId = $(this).val();                                     //console.log("selectedTaxonId = %O", selectedTaxonId);
+    function updateTaxonSearch() {                                              //console.log("updateTaxonSearch val = ", $(this).val())
+        var selectedTaxonId = $(this).val();                                    //console.log("selectedTaxonId = %O", selectedTaxonId);
         var selTaxonRcrd = getDetachedRcrd(selectedTaxonId);  
         focusStorage.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);       //console.log("selectedVals = %O", focusStorage.selectedVals);
         updateFilterStatus();
         rebuildTaxonTree(selTaxonRcrd);
 
         function updateFilterStatus() {
-            var curLevel = selTaxonRcrd.level;
+            var curLevel = selTaxonRcrd.level.displayName;
             var taxonName = selTaxonRcrd.displayName;
             var status = "Filtering on: " + curLevel + " " + taxonName; 
             clearGridStatus();
@@ -1305,15 +1308,12 @@
     function getRelatedTaxaToSelect(selTaxonObj) {                              //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
         var topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
         var selected = {};                                                      //console.log("selected = %O", selected)
-        var lvls = Object.keys(focusStorage.taxaByLvl);
-        lvls.shift(); //removes the domain level
-
         selectAncestorTaxa(selTaxonObj);
         return selected;
-
+        /** Adds parent taxa to selected object, until the domain parent. */
         function selectAncestorTaxa(taxon) {                                    //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
             if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-                selected[taxon.level] = taxon.id;                               //console.log("setting lvl = ", taxon.level)
+                selected[taxon.level.displayName] = taxon.id;                   //console.log("setting lvl = ", taxon.level)
                 selectAncestorTaxa(getDetachedRcrd(taxon.parent))
             }
         }
