@@ -209,11 +209,30 @@
     }
     /** [entity]Names - an object with each entity's displayName (key) and id. */
     function deriveAndStoreLocationData(data) {  
+        addUnspecifiedLocation(data.noLocIntIds);
         storeData('cntryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
+        storeData('regionNames', getRegionNames(data.locationType[1].locations, data.location));
         storeData('topRegionNames', getTopRegionNameData(data));
         // storeData('habTypeNames', getNameDataObj());  //Add when data is needed.
     }
+    /** Adds a location object for interactions with no location specified. */
+    function addUnspecifiedLocation(noLocInts) {
+        var locRcrds = getDataFromStorage(['location']).location;
+        locRcrds[9999] = {
+            id: 9999,
+            displayName: 'Unspecified',
+            children: [],
+            interactions: noLocInts
+        };
+        storeData('location', locRcrds);
+    }
+    /** Note: Adds a region for interactions with no location specified. */
+    function getRegionNames(regionIds, locRcrds) {
+        var nameData = getNameDataObj(regionIds, locRcrds);
+        nameData['Unspecified'] = 9999;
+        return nameData;
+    }
+    /** Note: Adds a top region for interactions with no location specified. */
     function getTopRegionNameData(locData) {  
         var data = {};
         var regions = locData.locationType[1].locations;
@@ -221,6 +240,7 @@
         regionRcrds.forEach(function(region) {
             if (!region.parent) { data[region.displayName] = region.id; }
         });  
+        data['Unspecified'] = 9999; 
         return data;
     }
     /**
