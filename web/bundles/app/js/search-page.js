@@ -263,14 +263,16 @@
         return ids.map(function(id) { return rcrds[id]; });
     }
     /**
-     * Gets all related entity data from local storage. 
-     * If an entity is not found, false is returned. 
+     * Gets data from local storage for each storage property in passed array. 
+     * If a property is not found, false is returned. 
      */
-    function getEntityData(relEntityNames) {
-        var data = {};
-        var allFound = relEntityNames.every(function(entity){                   //console.log("getting [%s] data", entity)
-            data[entity] = JSON.parse(localStorage.getItem(entity));            //console.log("data for %s - %O", entity, data[entity]);
-            return data[entity] || false;
+    function getDataFromStorage(storageProps) {
+        var jsonData, data = {};
+        var allFound = storageProps.every(function(prop){                       //console.log("getting [%s] data", prop)
+            jsonData = localStorage.getItem(prop);                              
+            if (!jsonData || jsonData === "undefined") { return false; }
+            data[prop] = JSON.parse(jsonData);                                  //console.log("data for %s - %O", entity, data[entity]);
+            return true;   
         });  
         return allFound ? data : false;
     }
@@ -282,7 +284,7 @@
      * sent to @fillTreeWithInteractions.    
      */
     function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
-        var entityData = getEntityData(['interaction']);
+        var entityData = getDataFromStorage(['interaction']);
         fadeGrid();
         if (entityData) { fillTreeWithInteractions(entityData.interaction); 
         } else { console.log("Error loading interaction data from storage."); }
@@ -303,7 +305,7 @@
     /** Replaces all interaction ids with records for every node in the tree.  */
     function fillTree(focus, curTree, intRcrds) {  
         var intEntities = ['taxon', 'location', 'source'];
-        var entityData = getEntityData(intEntities);
+        var entityData = getDataFromStorage(intEntities);
         var fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
         fillMethods[focus](curTree, intRcrds);
 
@@ -449,7 +451,7 @@
      * to @initTaxonSearchUi to begin the data-grid build.  
      */
     function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
-        var data = getEntityData(['domain', 'taxon', 'level']); 
+        var data = getDataFromStorage(['domain', 'taxon', 'level']); 
         if( data ) { initTaxonSearchUi(data);
         } else { console.log("Error loading taxon data from storage."); }
     }
@@ -1071,7 +1073,7 @@
             'source', 'authSources', 'pubSources', 'author', 'publication', 
             'publicationType'
         ];
-        var entityData = getEntityData(entities);
+        var entityData = getDataFromStorage(entities);
         if( entityData ) { initSrcSearchUi(entityData);
         } else { console.log("Error loading source data from storage."); }
     }
@@ -1250,7 +1252,7 @@
         //initComboboxes
     }
     function buildPubSelectOpts() {
-        var pubTypes = getEntityData(["publicationType"]).publicationType;
+        var pubTypes = getDataFromStorage(["publicationType"]).publicationType;
         var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
         for (var t in pubTypes) {
             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
