@@ -422,25 +422,25 @@ span.lbl {
 	z-index: 100;
 }
 .row-purple {
-	background-color: rgba(128,0,128,.07) !important; /* purple */
+	background-color: rgba(128,0,128,.13) !important; /* purple */
 }
 .row-green {
-	background-color: rgba(0,128,0,.07) !important; /* green */
+	background-color: rgba(0,128,0,.15) !important; /* green */
 }
 .row-blue {
-	background-color: rgba(0,0,255,.07) !important; /* blue */
+	background-color: rgba(0,0,255,.15) !important; /* blue */
 }
 .row-orange {
-	background-color: rgba(255,128,0,.07) !important; /* orange */
+	background-color: rgba(255,128,0,.17) !important; /* orange */
 }
 .row-turquoise {
-	background-color: rgba(0,245,255,.07) !important; /* turquoise */
+	background-color: rgba(0,245,255,.11) !important; /* turquoise */
 }
 .row-yellow {
-	background-color: rgba(255,255,0,.07) !important; /* yellow */
+	background-color: rgba(255,255,0,.2) !important; /* yellow */
 }
 .row-red {
-	background-color: rgba(255,0,0,.07) !important; /* red */
+	background-color: rgba(255,0,0,.15) !important; /* red */
 }
 
 /*---Buttons---*/

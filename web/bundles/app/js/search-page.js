@@ -211,7 +211,7 @@
     function deriveAndStoreLocationData(data) {  
         addUnspecifiedLocation(data.noLocIntIds);
         storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeDatca('regionNames', getRegionNames(data.locationType[1].locations, data.location));
+        storeData('regionNames', getRegionNames(data.locationType[1].locations, data.location));
         storeData('topRegionNames', getTopRegionNameData(data));
         // storeData('habTypeNames', getNameDataObj());  //Add when data is needed.
     }
@@ -991,20 +991,24 @@
             open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
             children: getLocRowDataForRowChildren(locRcrd, treeLvl),
             treeLvl: treeLvl,
-            interactions: locRcrd.interactions ? true : false,     /* Location objects have collections of interactions as children. */     
-            locGroupedInts: locRcrd.children && locRcrd.interactions,
+            interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
+            locGroupedInts: hasGroupedInteractionsRow(locRcrd),
             type: locRcrd.locationType.displayName
         };      
     }
+    function hasGroupedInteractionsRow(locRcrd) {
+        return locRcrd.children.length > 0 && locRcrd.interactions.length > 0;
+    }
     /**
-     * Returns rowData for both interactions for the current location and for any children.
-     * If there are children, the interactions for the current location are grouped as 
-     * the first child row under "Unspecified [locName] Interactions", otherwise
-     * any interactions are added as rows directly beneath the taxon.
+     * Returns rowData for interactions at this location and for any children.
+     * If there are both interactions and children, the interactions rows are 
+     * grouped under the first child row as "Unspecified [locName] Interactions", 
+     * otherwise interaction rows are added directly beneath the taxon.
      */
     function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {                   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
         var childRows = [];
-        if (locRcrd.children.length > 0) {
+        var locType = locRcrd.locationType.displayName; 
+        if (locType === "Region" || locType === "Country") {
             getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl);
             locRcrd.children.forEach(getChildLocData);
         } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
@@ -1016,7 +1020,7 @@
         function getUnspecifiedLocInts(intsAry, treeLvl) {   
             var locName = locRcrd.displayName === "Unspecified" ? 
                 "Location" : locRcrd.displayName;
-            if (intsAry !== null) { 
+            if (intsAry.length > 0) { 
                 childRows.push({
                     id: locRcrd.id,
                     name: 'Unspecified ' + locName + ' Interactions',
@@ -1576,34 +1580,44 @@
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
     /*================== Row Styling =========================================*/
-    /** Adds a css background-color class to interaction record rows. */
+    /**
+     * Adds a css background-color class to interaction record rows. Source-focused 
+     * interaction rows are not colored, their name rows are colored instead. 
+     */
     function getRowStyleClass(params) {                                         //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
-        if (params.data.name === undefined || params.data.name === null) { 
+        if (focusStorage.curFocus === "srcs") { return sourceRowStyleClass(params); }
+        if (params.data.name === "") { 
+            return getRowColorClass(params.data.treeLvl);
+        } 
+    }
+    /** Adds coloring to source tree-name rows to separate interaction rows visually. */
+    function sourceRowStyleClass(params) {  
+        if (params.node.expanded === true && params.data.name !== "" && 
+            params.data.interactions) { 
             return getRowColorClass(params.data.treeLvl);
         } 
     }
     /**
-     * Adds a background-color to displayed cells with open child interaction rows, or 
-     * displayed cells of grouped interactions rows attributed directly to an expanded 
-     * cell - eg, The tree cell for Africa is highlighted once Africa has been expanded,
-     * as well as the 'Unspecified Africa Interactions' cell the interaction record
-     * rows are still grouped underneath. 
+     * Adds a background-color to cells with open child interaction rows, or cells 
+     * with their grouped interactions row displayed - eg, Expanding the tree cell 
+     * for Africa will be highlighted, as well as the 'Unspecified Africa Interactions'
+     * cell Africa's interaction record rows are still grouped within. 
      */
-    function getCellStyleClass(params) {                                        //console.log("getCellStyleClass params = %O", params);
-        if (params.node.expanded === true && isOpenRowWithChildInts(params) || 
+    function getCellStyleClass(params) {                                        //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
+        if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
             isNameRowforClosedGroupedInts(params)) {                            //console.log("setting style class")
             return getRowColorClass(params.data.treeLvl);
         } 
     }
     function isOpenRowWithChildInts(params) {
-        if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); }
-        return params.data.interactions === true && params.data.name !== undefined;
+        if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); } //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
+        return params.data.interactions === true && params.data.name !== "";
     }
     /**
-     * Returns true only if the location row's child interactions are present in 
+     * Returns true if the location row's child interactions are present in 
      * data tree after filtering.
      */
-    function hasIntsAfterFilters(params) {
+    function hasIntsAfterFilters(params) {  
         return params.node.childrenAfterFilter.some(function(childRow) {
             return childRow.data.name.split(" ")[0] === "Unspecified";
         });
@@ -1613,11 +1627,11 @@
     }
     /** Returns a color based on the tree level of the row. */
     function getRowColorClass(treeLvl) {
-        var rowColorArray = ['purple', 'green', 'blue', 'yellow', 'turquoise', 'orange', 'red'];
+        var rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
         var styleClass = 'row-' + rowColorArray[treeLvl];                       //console.log("styleClass = ", styleClass);
         return styleClass;
     }
-    function getNodeChildDetails(rcrd) {                                        //  console.log("rcrd = %O", rcrd)  
+    function getNodeChildDetails(rcrd) {                                        //console.log("rcrd = %O", rcrd)  
         if (rcrd.isParent) {
             return { group: true, expanded: rcrd.open, children: rcrd.children };
         } else { return null; }
