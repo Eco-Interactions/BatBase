@@ -4,6 +4,7 @@
         buildElem: buildElem,
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
+        getDataFromStorage: getDataFromStorage,
         lcfirst: lcfirst, 
         setlocalStorage: setlocalStorage,
         populateStorage: populateStorage,
@@ -130,6 +131,34 @@
              };
         }
     /*--------------------------Storage Methods-------------------------------*/
+
+    /**
+     * Gets data from local storage for each storage property passed. If an array
+     * is passed, an object with each prop as the key for it's data is returned. 
+     * If a property is not found, false is returned. 
+     */
+    function getDataFromStorage(props) {
+        if (!Array.isArray(props)) { return getStoredData(); }
+        return getStoredDataObj(props);
+
+        function getStoredData() {
+            var data = localStorage.getItem(props);
+            return data ? JSON.parse(data) : false;
+        }
+        function getStoredDataObj() {
+            var data = {};
+            var allFound = props.every(function(prop){                          //console.log("getting [%s] data", prop)
+                return getPropData(prop);                             
+            });  
+            return allFound ? data : false;
+            function getPropData(prop) {
+                    var jsonData = localStorage.getItem(prop) || false;                              
+                    if (!jsonData) { return false; }
+                    data[prop] = JSON.parse(jsonData);                          //console.log("data for %s - %O", entity, data[entity]);
+                    return true;   
+            }
+        } /* End getDataObj */
+    } /* End getDataFromStorage */
     function setlocalStorage() {
         if (storageAvailable('localStorage')) { 
             return window['localStorage'];                                      //console.log("Storage available. Setting now. localStorage = %O", localStorage);

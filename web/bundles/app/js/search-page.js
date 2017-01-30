@@ -217,7 +217,7 @@
     }
     /** Adds a location object for interactions with no location specified. */
     function addUnspecifiedLocation(noLocInts) {
-        var locRcrds = getDataFromStorage(['location']).location;
+        var locRcrds = _util.getDataFromStorage('location');
         locRcrds[9999] = {
             id: 9999,
             displayName: 'Unspecified',
@@ -285,9 +285,9 @@
      * sent to @fillTreeWithInteractions.    
      */
     function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
-        var entityData = getDataFromStorage(['interaction']);
+        var entityData = _util.getDataFromStorage('interaction');
         fadeGrid();
-        if (entityData) { fillTreeWithInteractions(entityData.interaction); 
+        if (entityData) { fillTreeWithInteractions(entityData); 
         } else { console.log("Error loading interaction data from storage."); }
     }
     /**
@@ -295,7 +295,7 @@
      * the grid-building method chain for the current focus @buildGrid. Finally, 
      * calls @finishGridAndUiLoad for the final stage of the grid build. 
      */
-    function fillTreeWithInteractions(intRcrds) {                               console.log("fillTreeWithInteractionscalled.");
+    function fillTreeWithInteractions(intRcrds) {                               //console.log("fillTreeWithInteractionscalled.");
         var focus = focusStorage.curFocus; 
         var curTree = focusStorage.curTree; 
 
@@ -306,7 +306,7 @@
     /** Replaces all interaction ids with records for every node in the tree.  */
     function fillTree(focus, curTree, intRcrds) {  
         var intEntities = ['taxon', 'location', 'source'];
-        var entityData = getDataFromStorage(intEntities);
+        var entityData = _util.getDataFromStorage(intEntities);
         var fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
         fillMethods[focus](curTree, intRcrds);
 
@@ -453,7 +453,7 @@
      * to @initTaxonSearchUi to begin the data-grid build.  
      */
     function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
-        var data = getDataFromStorage(['domain', 'taxon', 'level']); 
+        var data = _util.getDataFromStorage(['domain', 'taxon', 'level']); 
         if( data ) { initTaxonSearchUi(data);
         } else { console.log("Error loading taxon data from storage."); }
     }
@@ -700,7 +700,7 @@
      * Transforms the tree's taxon record data into the grid format and sets the 
      * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
      */
-    function transformTaxonDataAndLoadGrid(taxonTree) {                           console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
+    function transformTaxonDataAndLoadGrid(taxonTree) {                         //console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
         var finalRowData = [];
         for (var topTaxon in taxonTree) {
             finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
@@ -785,7 +785,7 @@
             }
         }
     } /* End getTaxonChildRowData */
-    function getTaxonIntRows(taxon, treeLvl) {                                      //console.log("getTaxonInteractions for = %O", taxon);
+    function getTaxonIntRows(taxon, treeLvl) {                                  //console.log("getTaxonInteractions for = %O", taxon);
         var roles = ["subjectRoles", "objectRoles"];
         var ints = [];
         roles.forEach(function(role) {
@@ -807,7 +807,7 @@
         var locDataStorageProps = [
             'location', 'locationType', 'topRegionNames', 'countryNames', 'regionNames'
         ];
-        var data = getDataFromStorage(locDataStorageProps);
+        var data = _util.getDataFromStorage(locDataStorageProps);
         if( data ) {                                                            //console.log("Stored Locations Loaded = %O", data);
             focusStorage.rcrdsById = data.location;                                    
             focusStorage.data = data;
@@ -1047,7 +1047,7 @@
             'source', 'authSources', 'pubSources', 'author', 'publication', 
             'publicationType'
         ];
-        var entityData = getDataFromStorage(entities);
+        var entityData = _util.getDataFromStorage(entities);
         if( entityData ) { initSrcSearchUi(entityData);
         } else { console.log("Error loading source data from storage."); }
     }
@@ -1195,7 +1195,7 @@
      * NOTE: This is the entry point for source grid rebuilds as filters alter data
      * contained in the data tree.
      */
-    function buildSrcSearchUiAndGrid(srcTree) {                                 console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+    function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
         } else { loadAuthSearchHtml(srcTree); }
@@ -1209,7 +1209,7 @@
         //initComboboxes
     }
     function buildPubSelectOpts() {
-        var pubTypes = getDataFromStorage(["publicationType"]).publicationType;
+        var pubTypes = _util.getDataFromStorage("publicationType");
         var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
         for (var t in pubTypes) {
             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
@@ -2083,7 +2083,7 @@
         gridOptions.api.expandAll();
         curDisplayedRows = gridOptions.api.getModel().rowsToDisplay;            
         curDisplayedRows.forEach(selectInteractions);
-        console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
+        //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
     }
     /**
      * A row is identified as an interaction row by the 'interactionType' property
@@ -2447,14 +2447,14 @@
         return true;
     }     
 /*-----------------Grid Manipulation------------------------------------------*/
-    function clearPreviousGrid() {  console.log("clearing grid");
+    function clearPreviousGrid() {                                              //console.log("clearing grid");
         if (gridOptions.api) { gridOptions.api.destroy(); }     
     }
     /**
      * Resets grid state to top focus options: Taxon and source are reset at current
      * domain; locations are reset to the top regions.
      */
-    function resetDataGrid() {   console.log("---reseting grid---")
+    function resetDataGrid() {                                                  //console.log("---reseting grid---")
         var resetMap = { taxa: onTaxonDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
         var focus = focusStorage.curFocus; 
         resetCurTreeState();
