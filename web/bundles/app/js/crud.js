@@ -91,10 +91,7 @@ $(document).ready(function(){
             action: action,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
-            records: {
-                "source": JSON.parse(localStorage.getItem('srcRcrds')),
-                "location": JSON.parse(localStorage.getItem('locRcrds')),
-            }
+            records: _util.getDataFromStorage(["source", "location"])
         };
         initFormLevelParamsObj("interaction", "top", null, null);
     }
@@ -167,10 +164,7 @@ $(document).ready(function(){
      */
     function buildPubFieldRow() {
         var selElem;
-        var pubObj = JSON.parse(localStorage.getItem('publications'));
-        var opts = Object.keys(pubObj).sort().map(function(name) {
-            return { value: pubObj[name].toString(), text: name };
-        });  
+        var opts = getOptsFromStoredData("pubNames");
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
@@ -202,19 +196,17 @@ $(document).ready(function(){
      * Clears any previous options and enables the dropdown.
      */
     function initCitField(pubId) {                                              console.log("initCitSelect for publication = ", pubId);
-        var pubRcrd = cParams.records.source[pubId];  
-        var citOpts = getPubCitationOpts(pubRcrd);  
+        var citOpts = getPubCitationOpts(pubId);  
         var sel = $('#Citation-sel')[0].selectize;
         updateComboboxOptions(sel, citOpts);
         sel.enable();
         sel.focus();
     }
     /** Returns an array of option objects with citations for this publication.  */
-    function getPubCitationOpts(pubRcrd) {
+    function getPubCitationOpts(pubId) {
+        var pubRcrd = cParams.records.source[pubId];  
         if (!pubRcrd) { return []; }
-        return pubRcrd.childSources.map(function(citId) {
-            return { value: citId, text: cParams.records.source[citId].displayName };
-        });
+        return getRcrdOpts(pubRcrd.children, cParams.records.source);
     }
     /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
@@ -234,7 +226,7 @@ $(document).ready(function(){
      * available countries.
      */
     function buildCountryFieldRow() {  
-        var cntryOpts = getCountryOpts();                                       //console.log("buildingCountryFieldRow. ");
+        var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
@@ -278,11 +270,11 @@ $(document).ready(function(){
     }
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
-        return cntry.childLocs.map(function(id) {  
+        return cntry.children.map(function(id) {  
             return { value: id, text: cParams.records.location[id].displayName };
         });
     }
-    function onLocSelection(e) {  console.log("location selected 'e'= %O", e);
+    function onLocSelection(e) {  
         cParams.forms.top.selApi['#Country-sel'].disable();
 
     }
@@ -594,7 +586,7 @@ $(document).ready(function(){
         });
         return order;
     }
-
+    /*----------------------- Form Input Builders ----------------------------*/
     function buildTextInput(entity, field) {                         
         return _util.buildElem("input", { "type": "text", class: "med-field" });
     }
@@ -619,54 +611,27 @@ $(document).ready(function(){
         cParams.forms[formLvl].selElems.push(fieldName);
         return sel;
     }
-    /** Returns and array of options for the passed field type. */
-    function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
-        var optMap = {
-            "Authors": [ getOptsFromStoredData, 'authors'],
-            "Citation_Type": [ getOptsFromStoredData, 'citTypes'],
-            "Country": [ getCountryOpts ],
-            "Elevation_Units": [ getElevUnitOpts ],
-            "Habitat_Type": [ getOptsFromStoredData, 'habTypes'],
-            "Publication_Type": [ getOptsFromStoredData, 'pubTypes'],
-            "Location_Type": [ getLocationTypeOpts ],
-            "Publisher": [ getOptsFromStoredData, 'publishers'],
-            "Tags": [ getTagOpts, 'citation' ],
-        };
-        var getOpts = optMap[field][0];
-        var fieldKey = optMap[field][1];
-        return getOpts(fieldKey);
-    }
-    /** Builds options out of a stored entity collection object. */
-    function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
-        var dataObj = JSON.parse(localStorage.getItem(prop));
-        var sortedNameKeys = Object.keys(dataObj).sort();
-        return buildOptsObj(dataObj, sortedNameKeys);
-    }
-    /** Builds options out of the entity object, with id as 'value'. */
-    function buildOptsObj(entityObj, sortedKeys) {
-        return sortedKeys.map(function (name) {
-            return { value: entityObj[name], text: _util.ucfirst(name) }
-        });    
-    }
-    /** Builds and returns Country options. */
-    function getCountryOpts() {
-        var cntryObj = JSON.parse(localStorage.getItem('countries'));
-        return buildOptsObj(cntryObj, Object.keys(cntryObj).sort());  
+    /**
+     * Creates a select dropdown field wrapped in a div container that will
+     * be reaplced inline upon selection. Either with an existing Author's name, 
+     * or the Author create form when the user enters a new Author's name. 
+     */
+    function buildMultiSelectElem(entity, field) {                              //console.log("entity = %s. field = ", entity, field);
+       var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
+       var selElem = buildSelectElem(entity, field, 1);
+       $(cntnr).data("cnt", 1);
+       $(cntnr).data("inputType", "multiSelect");
+       $(cntnr).append(selElem);
+       return cntnr;
     }
     /**
-     * Returns options for the location types that can be created by a general editor. 
-     * Regions and Countries will be available for a higher-level access editor.
+     * Creates and returns a select dropdown that will be initialized with 'selectize'
+     * to allow multiple selections. A data property is added for use form submission.
      */
-    function getLocationTypeOpts() {
-        var typeObj = JSON.parse(localStorage.getItem('locTypes'));             //console.log("locTypes = %O", typeObj)
-        delete typeObj.region;
-        delete typeObj.country;
-        return buildOptsObj(typeObj, Object.keys(typeObj).sort());
-    }
-    /** Returns an array of elevation unit options objects. */
-    function getElevUnitOpts() {
-        return [ { value: "ft", text: "Feet" }, 
-                 { value: "m", text: "Meters"} ];
+    function buildTagsElem(entity, field) {
+        var tagSel = buildSelectElem(entity, field);
+        $(tagSel).data("inputType", "tags");
+        return tagSel;
     }
     /** Routes edge case fields to its field-builder method. */
     function buildEdgeCaseElem(entity, field) {
@@ -688,40 +653,74 @@ $(document).ready(function(){
         cParams.forms.top.selApi['#Country-sel'].disable();
         return subCntrySel;
     }
-    /**
-     * Creates and returns a select dropdown that will be initialized with 'selectize'
-     * to allow multiple selections. A data property is added for use form submission.
-     */
-    function buildTagsElem(entity, field) {
-        var tagSel = buildSelectElem(entity, field);
-        $(tagSel).data("inputType", "tags");
-        return tagSel;
+    /* ---------- Option Builders ---------------------------------------------*/
+    /** Returns and array of options for the passed field type. */
+    function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
+        var optMap = {
+            "Authors": [ getOptsFromStoredData, 'authNames'],
+            "Citation_Type": [ getOptsFromStoredData, 'citTypeNames'],
+            "Country": [ getOptsFromStoredData, 'countryNames' ],
+            "Elevation_Units": [ getElevUnitOpts ],
+            "Habitat_Type": [ getOptsFromStoredData, 'habTypeNames'],
+            "Publication_Type": [ getOptsFromStoredData, 'pubTypeNames'],
+            "Location_Type": [ getLocationTypeOpts ],
+            "Publisher": [ getOptsFromStoredData, 'publisherNames'],
+            "Tags": [ getTagOpts, 'source' ],
+        };
+        var getOpts = optMap[field][0];
+        var fieldKey = optMap[field][1];
+        return getOpts(fieldKey);
     }
     /**
-     * Returns an array of options objects for tags of the passed entity.
-     * Note: Hardcoded temporarily. 
+     * Returns options for the location types that can be created by a general editor. 
+     * Regions and Countries will be available for a higher-level access editor.
      */
-    function getTagOpts(entity) {
-        var tags = {
-            "citation": ["Secondary"],
-        };
-        return tags[entity].map(function(tag) {
-            return { "value": tag, "text": tag };
+    function getLocationTypeOpts() {
+        var typeObj = _util.getDataFromStorage('locTypeNames');                 
+        delete typeObj.Region;
+        delete typeObj.Country;
+        return buildOptsObj(typeObj, Object.keys(typeObj).sort());
+    }
+    /** Returns an array of elevation unit options objects. */
+    function getElevUnitOpts() {
+        return [ { value: "ft", text: "Feet" }, 
+                 { value: "m", text: "Meters"} ];
+    }
+    /** Sorts an array of options via sort method. */
+    function alphaOptionObjs(a, b) {
+        var x = a.text.toLowerCase();
+        var y = b.text.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+    /** Builds options out of the passed ids and their entity records. */
+    function getRcrdOpts(ids, rcrds) {
+        var idAry = ids || Object.keys(rcrds);
+        return idAry.map(function(id) {
+            return { value: id, text: rcrds[id].displayName };
         });
     }
-    /**
-     * Creates a select dropdown field wrapped in a div container that will
-     * be reaplced inline upon selection. Either with an existing Author's name, 
-     * or the Author create form when the user enters a new Author's name. 
-     */
-    function buildMultiSelectElem(entity, field) {                              //console.log("entity = %s. field = ", entity, field);
-       var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
-       var selElem = buildSelectElem(entity, field, 1);
-       $(cntnr).data("cnt", 1);
-       $(cntnr).data("inputType", "multiSelect");
-       $(cntnr).append(selElem);
-       return cntnr;
+    function getOptsFromStoredRcrds(prop) {
+        var rcrds = _util.getDataFromStorage(prop); 
+        var opts = getRcrdOpts(null, rcrds);
+        return opts.sort(alphaOptionObjs);
     }
+    /** Builds options out of a stored entity-name object. */
+    function getOptsFromStoredData(prop) {                                      //console.log("prop = ", prop)
+        var dataObj = _util.getDataFromStorage(prop);
+        var sortedNameKeys = Object.keys(dataObj).sort();
+        return buildOptsObj(dataObj, sortedNameKeys);
+    }
+    /** Builds options out of the entity-name  object, with id as 'value'. */
+    function buildOptsObj(entityObj, sortedKeys) {
+        return sortedKeys.map(function(name) {
+            return { value: entityObj[name], text: _util.ucfirst(name) }
+        });    
+    }
+    /** Returns an array of options objects for tags of the passed entity. */
+    function getTagOpts(entity) {
+        return getOptsFromStoredData(entity+"Tags");
+    }
+    /* -----------------------------------------------------------------------*/
     /**
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
@@ -814,6 +813,7 @@ $(document).ready(function(){
         selectized.enable();
         $(id).remove();
         ifParentFormValid(parentLvl);
+        selectized.focus();
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
@@ -823,6 +823,7 @@ $(document).ready(function(){
             formLvls[formLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
     }
+    /*----------------------- Form Submission -----------------------------------------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
     function ifParentFormValid(parentLvl) {
         if (ifRequiredFieldsFilled(parentLvl)) {
@@ -837,7 +838,6 @@ $(document).ready(function(){
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }  
-    /*----------------------- Form Submission -----------------------------------------------------*/
     /**
      * Loops through all rows in the form with the passed id and builds an object of 
      * filled field values keyed under server-ready field names to submit @submitFormVals.

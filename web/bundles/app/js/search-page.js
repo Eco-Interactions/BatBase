@@ -158,7 +158,7 @@
      *       Source, SourceType, Tag
      *   /interaction - Interaction, InteractionType  
      */
-    function ajaxAndStoreAllEntityData() {                                               console.log("ajaxAndStoreAllEntityData");
+    function ajaxAndStoreAllEntityData() {                                      console.log("ajaxAndStoreAllEntityData");
         $.when(
             $.ajax("search/taxon"), $.ajax("search/location"), 
             $.ajax("search/source"), $.ajax("search/interaction")
@@ -213,7 +213,8 @@
         storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
         storeData('regionNames', getRegionNames(data.locationType[1].locations, data.location));
         storeData('topRegionNames', getTopRegionNameData(data));
-        // storeData('habTypeNames', getNameDataObj());  //Add when data is needed.
+        storeData('habTypeNames', getTypeNameData(data.habitatType));
+        storeData('locTypeNames', getTypeNameData(data.locationType));
     }
     /** Adds a location object for interactions with no location specified. */
     function addUnspecifiedLocation(noLocInts) {
@@ -247,6 +248,7 @@
     /**
      * [entity]Names - an object with each entity's displayName (key) and id.
      * [entity]Sources - an array with of all source records for the entity type.
+     * [entity]Tags - an object with each entity tag's displayName (key) and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
         storeData('authSources', getEntityRcrds(data.sourceType[3].sources, data.source));         
@@ -254,14 +256,38 @@
         storeData('pubNames', getNameDataObj(data.sourceType[2].sources, data.source));
         storeData('authNames', getNameDataObj(data.sourceType[3].sources, data.source));
         storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
+        storeData('citTypeNames', getTypeNameData(data.citationType));        
+        storeData('pubTypeNames', getTypeNameData(data.publicationType));        
+        storeData('sourceTags', getTagData(data.tag, "Source"));        
+        storeData('interactionTags', getTagData(data.tag, "Interaction"));        
     }
+    /** Returns an array of records for each id in passed array. */
+    function getEntityRcrds(ids, rcrds) {
+        return ids.map(function(id) { return rcrds[id]; });
+    }
+    /** Returns an object with each entity record's displayName (key) and id. */
     function getNameDataObj(ids, rcrds) {
         var data = {};
         ids.forEach(function(id) { data[rcrds[id].displayName] = id; });        //console.log("nameDataObj = %O", data);
         return data;
     }
-    function getEntityRcrds(ids, rcrds) {
-        return ids.map(function(id) { return rcrds[id]; });
+    /** Returns an object with each entity types's displayName (key) and id. */
+    function getTypeNameData(typeObj) {
+        var data = {};
+        for (var id in typeObj) {
+            data[typeObj[id].displayName] = id;
+        }  
+        return data;
+    }
+    /** Returns an object with each entity tag's displayName (key) and id. */
+    function getTagData(tags, entity) {
+        var data = {};
+        for (var id in tags) {
+            if ( tags[id].constrainedToEntity === entity ) {
+                data[tags[id].displayName] = id;
+            }
+        }  
+        return data;
     }
     /**
      * Gets data from local storage for each storage property in passed array. 
@@ -908,11 +934,11 @@
         }
         /** Adds an option object, if one has not already been added for this location. */
         function getLocOpts(name, type) {
-            var lcType = _util.lcfirst(type);
-            if (processedOpts[lcType].indexOf(name) === -1) {
-                var id = focusStorage.data[lcType + "Names"][name];             
-                opts[lcType].push({ value: id, text: name }); 
-                processedOpts[lcType].push(name);
+            var locType = _util.lcfirst(type);
+            if (processedOpts[locType].indexOf(name) === -1) {
+                var id = focusStorage.data[locType + "Names"][name];             
+                opts[locType].push({ value: id, text: name }); 
+                processedOpts[locType].push(name);
             }
         }
         function sortLocOpts() {
@@ -926,13 +952,13 @@
          */
         function addAllAndNoneOpts() {
             for (var type in opts) {                                            //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
-                var option = opts[type].length === 0 ?
-                    {value: 'none', text: '- None -'} : {value: 'all', text: '- All -'};   
-                opts[type].unshift(option);
+                var option = opts[type].length === 0 ? {value: 'none', text: '- None -'} 
+                    : (opts[type].length > 1 ? {value: 'all', text: '- All -'} : null);   
+                if (option) { opts[type].unshift(option); }
             }
         } 
     } /* End buildLocSelectOpts */
-    /** Builds the dropdown html elements */
+    /** Builds the location select elements */
     function buildLocSelects(locOptsObj) {  
         var selElems = [];
         for (var locSelName in locOptsObj) {
@@ -1332,21 +1358,21 @@
         var selElemId = $(this).attr("id");
         var selVal = $(this).val();
         var selTypeMap = { selCountry: "country", selRegion: "region" };
+        var selType = selTypeMap[selElemId];
 
-        focusStorage.selectedOpts = getSelectedVals(selVal, selElemId);
-        filterGridOnLocCol(selVal, selTypeMap[selElemId]);
-        /** Loops through all selElems and stores user selected values. */
-        function getSelectedVals(selVal, selElemId) {                           //console.log("getSelectedVals. selVal = %s, selElemId = ", selVal, selElemId)
+        focusStorage.selectedOpts = getSelectedVals(selVal, selType);
+        filterGridOnLocCol(selVal, selType);
+        /** Retuns the vals to select. If 'country' was selected, add it's region. */
+        function getSelectedVals(val, type) {                                   //console.log("getSelectedVals. val = %s, selType = ", val, type)
             var selected = {};
-            var selType = selTypeMap[selElemId];
-            for (var selId in selTypeMap) { getSelected(selId); }               //console.log("selected = %O", selected)
+            if (type === "country") { selectRegion(val); }
+            if (val !== 'none' && val !== 'all') { selected[type] = val; }
             return selected;  
 
-            function getSelected(selId) {
-                var val = $('#' + selId).val();
-                var type = selTypeMap[selId];
-                if (val !== 'none' && val !== 'all') { selected[type] = val; }
-             } 
+            function selectRegion(val) {
+                var loc = getDetachedRcrd(val);
+                selected["region"] = loc.region.id;
+            }
         } /* End getSelectedVals */
     } /* End updateLocSearch */
     /**
