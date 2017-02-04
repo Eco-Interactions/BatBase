@@ -28,8 +28,13 @@ class Version20170203170024SystemDate extends AbstractMigration implements Conta
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => '6']);
-        $entities = ["System", "Author", "Citation", "Interaction", "Location", "Publication",
-            "Source", "Tag", "Taxon"];
+        $entities = ["System", "Author", "Authority", "Citation", "CitationType", "ContentBlock",
+            "Contribution", "Domain", "Feedback", "HabitatType", "ImageUpload", 
+            "Interaction", "InteractionType", "Level", "Location", "LocationType", 
+            "Naming", "NamingType", "Publication", "PublicationType", "Source", 
+            "SourceType", "Tag", "Taxon", "Taxonym"];
+
+        $this->removeTestEntities($em);
 
         foreach ($entities as $entityName) {
             $entity = new SystemDate();
@@ -37,6 +42,17 @@ class Version20170203170024SystemDate extends AbstractMigration implements Conta
             $date = new \DateTime();
             $entity->setDateVal($date);
             $entity->setUpdatedBy($admin);
+            $em->persist($entity);
+        }
+        $em->flush();
+    }
+    /** Removes any entities created in previous testing rounds.  */
+    private function removeTestEntities($em)
+    {
+        $entities = $em->getRepository('AppBundle:SystemDate')->findAll();
+
+        foreach ($entities as $entity) {
+            $em->remove($entity);
             $em->persist($entity);
         }
         $em->flush();
