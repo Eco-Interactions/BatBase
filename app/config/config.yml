@@ -109,3 +109,7 @@ services:
         class: AppBundle\Form\ProfileFormType
         tags:
             - { name: form.type, alias: appbundle_profile }
+    app.listener:
+        class: AppBundle\EventListener\UpdateSystemDates
+        tags:
+            - { name: doctrine.event_listener, event: postPersist }
