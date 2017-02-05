@@ -12,22 +12,7 @@
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
-    var gridOptions = {
-        columnDefs: getColumnDefs(),
-        rowSelection: 'multiple',   //Used for csv export
-        getHeaderCellTemplate: getHeaderCellTemplate, 
-        getNodeChildDetails: getNodeChildDetails,
-        getRowClass: getRowStyleClass,
-        onRowGroupOpened: softRefresh,
-        onBeforeFilterChanged: beforeFilterChange, 
-        onAfterFilterChanged: afterFilterChanged,
-        onModelUpdated: onModelUpdated,
-        enableColResize: true,
-        enableSorting: true,
-        unSortIcon: true,
-        enableFilter: true,
-        rowHeight: 26
-    };
+    var gridOptions = getDefaultGridOptions();
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     resetFocusStorage();
@@ -1528,6 +1513,24 @@
             return speciesName === null ? null : _util.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
         }
     } /* End fillHiddenColumns */
+    function getDefaultGridOptions() {
+        return {
+            columnDefs: getColumnDefs(),
+            rowSelection: 'multiple',   //Used for csv export
+            getHeaderCellTemplate: getHeaderCellTemplate, 
+            getNodeChildDetails: getNodeChildDetails,
+            getRowClass: getRowStyleClass,
+            onRowGroupOpened: softRefresh,
+            onBeforeFilterChanged: beforeFilterChange, 
+            onAfterFilterChanged: afterFilterChanged,
+            onModelUpdated: onModelUpdated,
+            enableColResize: true,
+            enableSorting: true,
+            unSortIcon: true,
+            enableFilter: true,
+            rowHeight: 26
+        };
+    }
     /**
      * Builds the grid options object and passes everyting into agGrid, which 
      * creates and shows the grid.
