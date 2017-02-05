@@ -17,6 +17,32 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 class AjaxController extends Controller
 {
     /**
+     * Returns an object with the lastUpdated datetime for the system and for 
+     * each entity.
+     *
+     * @Route("/data-state", name="app_ajax_data_state")
+     * @Method("POST")
+     */
+    public function getDataLastUpdatedState(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+        $em = $this->getDoctrine()->getManager();
+        $entities = $em->getRepository('AppBundle:SystemDate')->findAll();
+        $state = new \stdClass;
+        
+        foreach ($entities as $entity) {
+            $entityClass = $entity->getDescription();
+            $state->$entityClass = $entity->getDateVal()->format('Y-m-d H:i:s');
+        }
+        $response = new JsonResponse();
+        $response->setData(array(
+            'dataState' => $state,
+        ));
+        return $response;
+    }
+    /**
      * Post to entity.
      *
      * @Route("/post", name="app_ajax_post")
