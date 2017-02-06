@@ -14,15 +14,14 @@ use AppBundle\Entity\Contribution;
 
 
 /**
- * Search Page controller.
+ * Crud-form controller.
  *
  * @Route("/admin/crud")
  */
 class CrudController extends Controller
 {
     /**
-     * Creates a new Source, and any new detail-entities, according to 
-     * the submitted form data object. 
+     * Creates a new Source, and any new detail-entities, from the form data. 
      *
      * @Route("/source/create", name="app_crud_source_create")
      */
@@ -35,23 +34,30 @@ class CrudController extends Controller
         $requestContent = $request->getContent();
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
         $srcData = $formData->source;
-        $detailEntity = false;
+        $entityData = new \stdClass; 
 
-        if ($srcData->hasDetail) {                                              //print("\nHas Detail.\n");
-            $detailEntName = $srcData->rel->sourceType;
-            $detailData = $formData->$detailEntName;
-            $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailEntName);
-            $detailEntity = new $detailEntClass();
-            $this->setEntityData($detailEntName, $detailData, $detailEntity, $em);  
-        }
         $srcEntity = new Source();
         $this->setEntityData("Source", $srcData, $srcEntity, $em);
+        $entityData->main = "source";
+        $entityData->mainEntity = $srcEntity;
 
-        if ($srcData->hasDetail) { $detailEntity->setSource($srcEntity); } 
-        
-        return $this->attemptFlushAndSendResponse(
-            $srcEntity, $detailEntity, $formData, $em
-        );
+        $entityData->detailEntity = !$srcData->hasDetail ? false : 
+            $this->setDetailEntityData($srcData, $formData, $entityData, $em);
+
+        return $this->attemptFlushAndSendResponse($entityData, $em);
+    }
+    /** Sets all detail-entity data and adds entity to entityData object. */
+    private function setDetailEntityData($srcData, $formData, &$entityData, $em)
+    {
+        $detailName = $srcData->rel->sourceType;
+        $detailData = $formData->$detailName;
+        $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
+        $detailEntity = new $detailEntClass();
+        $detailEntity->setSource($entityData->mainEntity);
+        $this->setEntityData($detailName, $detailData, $detailEntity, $em);  
+
+        $entityData->detail = $detailName;
+        return $detailEntity;
     }
     /**
      * Calls the set method for both types of entity data, flat and relational, 
@@ -71,7 +77,7 @@ class CrudController extends Controller
             $entity->$setField($val);
         }
     }
-    /** Sets all realtional-data. */
+    /** Sets all realtional data. */
     private function setRelatedEntityData($formData, &$entity, &$em)
     {
         $edgeCases = [
@@ -90,7 +96,7 @@ class CrudController extends Controller
             }
         }
     }
-    /** Returns the related entity object after deriving the class and prop to use. */
+    /** Returns the related-entity object after deriving the class and prop to use. */
     private function getRelatedEntity($rEntityName, $val, $em)
     {
         $relClass = $rEntityName === 'parentSource' ? 'Source' : ucfirst($rEntityName);
@@ -127,7 +133,7 @@ class CrudController extends Controller
      * Attempts to flush all persisted data. If there are no errors, the created/updated 
      * data is sent back to the crud form; otherise, an error message is sent back.
      */
-    private function attemptFlushAndSendResponse($entity, $subEntity, $formData, &$em)
+    private function attemptFlushAndSendResponse($entityData, &$em)
     {        
         try {
             $em->flush();
@@ -136,7 +142,7 @@ class CrudController extends Controller
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e, "\Exception");
         }
-        return $this->sendDataAndResponse($entity, $subEntity, $formData, $em);
+        return $this->sendDataAndResponse($entityData);
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e, $tag)
@@ -149,34 +155,18 @@ class CrudController extends Controller
         ));
         return $response;
     }
-    /**
-     * Sends an object with all created/updated data back to the crud form. 
-     */
-    private function sendDataAndResponse($entity, $subEntity, $formData, $em)
+    /** Sends an object with the entities' serialized data back to the crud form. */
+    private function sendDataAndResponse($entityData)
     {
-        $returnData = $this->buildUpdatedDataObj($formData, $entity, $subEntity);
+        $serializer = $this->container->get('jms_serializer');
+        $entityData->mainEntity = $serializer->serialize($entityData->mainEntity, 'json');
+        $entityData->detailEntity = $entityData->detailEntity ? 
+            $serializer->serialize($entityData->detailEntity, 'json') : false;
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $returnData
+            'results' => $entityData
         ));
         return $response;
-    }
-    /**
-     * Returns an object with the form entity's display name and the main entity's id 
-     */
-    private function buildUpdatedDataObj($formData, $entity, $subEntity)
-    {
-        //Stub Methods
-        $displayName = "";
-        $id = "";
-
-        if ($subEntity !== false) { 
-            $displayName = $subEntity->getDisplayName(); 
-        } else { 
-            $displayName = $entity->getDisplayName(); 
-        }
-        $id = $entity->getId();
-        return [ $displayName => $id ];
     }
 }
