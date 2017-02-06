@@ -1081,6 +1081,7 @@ $(document).ready(function(){
         exitForm("#"+formLvl+"-form", formLvl, formSelId); 
         selElemApi.addOption({ "value": data.results[displayName], "text": displayName });
         selElemApi.addItem(data.results[displayName]);
+        eif.syncData.update(data.results);
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**
