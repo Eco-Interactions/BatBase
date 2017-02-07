@@ -164,7 +164,7 @@ $(document).ready(function(){
      */
     function buildPubFieldRow() {
         var selElem;
-        var opts = getOptsFromStoredData("pubNames");
+        var opts = getOptsFromStoredRcrds("pubSources");
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
@@ -657,7 +657,7 @@ $(document).ready(function(){
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
-            "Authors": [ getOptsFromStoredData, 'authNames'],
+            "Authors": [ getOptsFromStoredRcrds, 'authSources'],
             "Citation_Type": [ getOptsFromStoredData, 'citTypeNames'],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
             "Elevation_Units": [ getElevUnitOpts ],

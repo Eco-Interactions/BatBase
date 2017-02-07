@@ -112,10 +112,10 @@
     function getTopRegionNameData(locData) {  
         var data = {};
         var regions = locData.locationType[1].locations;
-        var regionRcrds = getEntityRcrds(regions, locData.location);
-        regionRcrds.forEach(function(region) {
-            if (!region.parent) { data[region.displayName] = region.id; }
-        });  
+        var rcrds = getEntityRcrds(regions, locData.location);
+        for (var id in rcrds) {
+            if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
+        }
         data['Unspecified'] = 9999; 
         return data;
     }
@@ -127,17 +127,17 @@
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
         storeData('authSources', getEntityRcrds(data.sourceType[3].sources, data.source));         
         storeData('pubSources', getEntityRcrds(data.sourceType[2].sources, data.source));         
-        storeData('pubNames', getNameDataObj(data.sourceType[2].sources, data.source));
-        storeData('authNames', getNameDataObj(data.sourceType[3].sources, data.source));
         storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         storeData('sourceTags', getTagData(data.tag, "Source"));        
         storeData('interactionTags', getTagData(data.tag, "Interaction"));        
     }
-    /** Returns an array of records for each id in passed array. */
+    /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {
-        return ids.map(function(id) { return rcrds[id]; });
+        var data = {};
+        ids.forEach(function(id) { data[id] = rcrds[id]; });        
+        return data;
     }
     /** Returns an object with each entity record's displayName (key) and id. */
     function getNameDataObj(ids, rcrds) {

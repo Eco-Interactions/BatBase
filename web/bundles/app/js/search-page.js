@@ -34,7 +34,7 @@
     function resetFocusStorage() {
         focusStorage = {}; 
         focusStorage.curFocus = localStorage ? localStorage.getItem('curFocus') : false ;  
-        focusStorage.levels = localStorage ? JSON.parse(localStorage.getItem('levelNames')) : false ;  
+        focusStorage.levels = localStorage ? _util.getDataFromStorage('levelNames') : false ;  
         focusStorage.openRows = focusStorage.curFocus === "taxa" ? [$('#sel-domain').val()] : [];   console.log("focusStorage = %O", focusStorage)     
     }
     function onDOMContentLoaded () {
@@ -963,7 +963,14 @@
         var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
         focusStorage.curDomain = domainVal;
         _util.populateStorage('curDomain', domainVal);
-        return JSON.parse(localStorage.getItem([valMap[domainVal]]));
+        return getTreeRcrdAry(valMap[domainVal]);
+    }
+    /** Returns an array with all records from the stored record object. */
+    function getTreeRcrdAry(prop) {
+        var rcrdObj = _util.getDataFromStorage(prop);
+        var rcrdAry = [];
+        for (var id in rcrdObj) { rcrdAry.push(rcrdObj[id]); }
+        return rcrdAry;
     }
     /** Add source data to focusStorage to be available while in a source focus. */
     function addSrcDataToFocusStorage(srcData) {
@@ -1055,7 +1062,7 @@
     function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
         if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
-        } else { loadAuthSearchHtml(srcTree); }
+        } else { loadAuthSearchHtml(); }
         transformSrcDataAndLoadGrid(srcTree);
     } 
     function loadPubSearchHtml(srcTree) {
@@ -1087,7 +1094,7 @@
         return labelElem;
     }
     /** Builds a text input for searching author names. */
-    function loadAuthSearchHtml(srcTree) {
+    function loadAuthSearchHtml() {
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         var inputElem = _util.buildElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
         var bttn = _util.buildElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
