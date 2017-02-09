@@ -1014,7 +1014,7 @@
         return rcrd;
     }
     function getPubChildren(rcrd) {                                             //console.log("getPubChildren rcrd = %O", rcrd)
-        if (rcrd.children === null) { return []; }
+        if (rcrd.children.length === 0) { return []; }
         return rcrd.children.map(function(id) {
             return getPubData(getDetachedRcrd(id));
         });

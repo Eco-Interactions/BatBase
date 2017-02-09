@@ -424,7 +424,7 @@ class Source
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
      */
-    public function getParentTaxonId()
+    public function getParentSourceSId()
     {
         return $this->parentSource ? $this->parentSource->getId() : null;
     }

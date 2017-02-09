@@ -125,6 +125,10 @@ class CrudController extends Controller
             $contribEntity->setWorkSource($srcEntity);
             $contribEntity->setAuthorSource($authSrc);
             $em->persist($contribEntity);
+
+            $srcEntity->addContributor($contribEntity);  //$srcEntity persisted later
+            $authSrc->addContribution($contribEntity);
+            $em->persist($authSrc);
         }  
     }
     /** Creates a new Contribution for each author source in the array. */
