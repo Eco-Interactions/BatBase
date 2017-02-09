@@ -966,7 +966,7 @@
     /** Returns an array with all records from the stored record object. */
     function getTreeRcrdAry(domain) {
         var rcrdIdAry = _util.getDataFromStorage(domain);
-        return rcrdIdAry.map(function(id) { return focusStorage.rcrdsById[id]; });
+        return rcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
     }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
@@ -996,7 +996,7 @@
         });
         return tree;
     }
-    function getPubData(rcrd) {
+    function getPubData(rcrd) {                                                 //console.log("getPubData. rcrd = %O", rcrd);
         rcrd.children = getPubChildren(rcrd);
         if (rcrd.publication) {                                                 //console.log("rcrd with pub = %O", rcrd)
             rcrd.publication = getDetachedRcrd(rcrd.publication, focusStorage.publication);
@@ -1037,7 +1037,7 @@
     /** For each source work contribution, gets any additional publication children
      * @getPubData and return's the source record.
      */
-    function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", authData.contributions);
+    function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", contribs);
         return contribs.map(function(workSrcId){
             return getPubData(getDetachedRcrd(workSrcId));
         });
@@ -2173,8 +2173,8 @@
      * Returns a record detached from the original. If no records are passed, the 
      * focus' records are used.
      */
-    function getDetachedRcrd(rcrdKey, rcrds) {                                  //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
-        orgnlRcrds = rcrds || focusStorage.rcrdsById;
+    function getDetachedRcrd(rcrdKey, rcrds) {                                  
+        var orgnlRcrds = rcrds || focusStorage.rcrdsById;                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
         return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
