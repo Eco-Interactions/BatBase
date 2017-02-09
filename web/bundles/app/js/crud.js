@@ -164,7 +164,8 @@ $(document).ready(function(){
      */
     function buildPubFieldRow() {
         var selElem;
-        var opts = getOptsFromStoredRcrds("pubSources");
+        var pubIds = _util.getDataFromStorage("pubSources");
+        var opts = getRcrdOpts(pubIds, cParams.records.source);
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
@@ -657,7 +658,7 @@ $(document).ready(function(){
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
-            "Authors": [ getOptsFromStoredRcrds, 'authSources'],
+            "Authors": [ getAuthOpts, 'authSources'],
             "Citation_Type": [ getOptsFromStoredData, 'citTypeNames'],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
             "Elevation_Units": [ getElevUnitOpts ],
@@ -719,6 +720,11 @@ $(document).ready(function(){
     /** Returns an array of options objects for tags of the passed entity. */
     function getTagOpts(entity) {
         return getOptsFromStoredData(entity+"Tags");
+    }
+    /** Returns an array of author-source options objects. */
+    function getAuthOpts(prop) {
+        var ids = _util.getDataFromStorage(prop);
+        return getRcrdOpts(ids, cParams.records.source);
     }
     /* -----------------------------------------------------------------------*/
     /**

@@ -38,9 +38,9 @@
     function updateCoreEntityData(entity, type, rcrd) {                         //console.log("Updating Core entity. %s. [%s]. %O", entity, type, rcrd);
         var update = {
             'source': {
-                'author': { 'authSources': addToRcrdProp },
+                'author': { 'authSources': addToRcrdAryProp },
                 'citation': { 'author': addContribData },
-                'publication': { 'pubSources': addToRcrdProp, 'author': addContribData },
+                'publication': { 'pubSources': addToRcrdAryProp, 'author': addContribData },
                 'publisher': { 'publisherNames': addToNameProp }
             },
         };
@@ -66,8 +66,7 @@
     function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
-            'publication': { 
-                'publication': addToRcrdProp, 'publicationType': addToTypeProp },
+            'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
             'publisher': { 'publisherNames': addToNameProp }
         };
         updateDataProps(update[entity], entity, rcrd)
@@ -77,6 +76,12 @@
         var rcrdObj = _util.getDataFromStorage(prop);                           //console.log("addToRcrdProp. [%s] = %O. rcrd = %O", prop, rcrdObj, rcrd);
         rcrdObj[rcrd.id] = rcrd;
         storeData(prop, rcrdObj);
+    }
+    /** Add the new record to the prop's stored records object.  */
+    function addToRcrdAryProp(prop, rcrd, entity) {  
+        var rcrdAry = _util.getDataFromStorage(prop);                           //console.log("addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrdAry, rcrd);
+        addIfNewRcrd(rcrdAry, rcrd.id);
+        storeData(prop, rcrdAry);
     }
     /** Add the new entity's display name and id to the prop's stored names object.  */
     function addToNameProp(prop, rcrd, entity) {
@@ -88,25 +93,24 @@
     function addToTypeProp(prop, rcrd, entity) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("addToTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
         var typeId = rcrd[prop].id;                                             
-        typeObj[typeId][entity+'s'].push(typeId);
+        typeObj[typeId][entity+'s'].push(rcrd.id);
         storeData(prop, typeObj);
+    }
+    function addIfNewRcrd(ary, id) {
+        if (ary.indexOf(id) === -1) { ary.push(id); }                           //console.log("Pushing id %s to array.", id);
     }
     /*----------------- Entity Specific Update Methods -----------------------*/
     /** When a Publication or Citation have been updated, update contribution data. */
-    function addContribData(prop, rcrd, entity) {  console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
+    function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
         if (rcrd.contributors.length > 0) { 
             addContributionData(rcrd.contributors, rcrd); 
         }
     }
     /** Adds the new work-source to each contributor's contributions array. */
     function addContributionData(contributors, rcrd) {
-        var contribAry;
         var srcObj = _util.getDataFromStorage('source');
         contributors.forEach(function(authId) {
-            contribAry = srcObj[authId].contributions;
-            if (contribAry.indexOf(rcrd.id) === -1 ) {
-                contribAry.push(rcrd.id);
-            }
+            addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
         });
         storeData('source', srcObj);
     }
@@ -217,8 +221,8 @@
      * [entity]Tags - an object with each entity tag's displayName (key) and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        storeData('authSources', getEntityRcrds(data.sourceType[3].sources, data.source));         
-        storeData('pubSources', getEntityRcrds(data.sourceType[2].sources, data.source));         
+        storeData('authSources', data.sourceType[3].sources);         
+        storeData('pubSources', data.sourceType[2].sources);         
         storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        

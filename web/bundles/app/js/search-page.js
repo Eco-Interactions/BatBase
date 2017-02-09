@@ -900,10 +900,7 @@
      * to @initSrcSearchUi to begin the data-grid build.  
      */
     function buildSourceGrid() {
-        var entities = [
-            'source', 'authSources', 'pubSources', 'author', 'publication', 
-            'publicationType'
-        ];
+        var entities = [ 'source', 'author', 'publication' ];
         var entityData = _util.getDataFromStorage(entities);
         if( entityData ) { initSrcSearchUi(entityData);
         } else { console.log("Error loading source data from storage."); }
@@ -911,18 +908,19 @@
     
     /**
      * If the source-domain combobox isn't displayed, build it @buildSrcDomainHtml.
-     * If no domain selected, set the default domain value. Builds the source-domain 
-     * tree @initSrcTree and continue grid build @getInteractionsAndFillTree.  
+     * If no domain selected, set the default domain value. Start grid build @buildSrcTree.
      */
     function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
-        var domainRcrds;
-        focusStorage.rcrdsById = srcData.source;
+        addSrcDataToFocusStorage(srcData);
         if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
         setSrcDomain();  
-        domainRcrds = storeAndReturnCurDomainRcrds();
-        addSrcDataToFocusStorage(srcData);
-        initSrcTree(focusStorage.curDomain, domainRcrds); 
-        getInteractionsAndFillTree();
+        buildSrcTree();
+    }
+    /** Add source data to focusStorage to be available while in a source focus. */
+    function addSrcDataToFocusStorage(srcData) {
+        focusStorage.rcrdsById = srcData.source;
+        focusStorage.author = srcData.author;
+        focusStorage.publication = srcData.publication;
     }
     /** Builds the combobox for the source domain types. */
     function buildSrcDomainHtml() {                                             
@@ -949,10 +947,10 @@
         clearPreviousGrid();
         resetCurTreeState();
         resetToggleTreeBttn(false);
-        rebuildSrcTree();
+        buildSrcTree();
     }
-    /** Rebuilds source tree for the selected source domain. */
-    function rebuildSrcTree() {
+    /** (Re)builds source tree for the selected source domain. */
+    function buildSrcTree() {
         var domainRcrds = storeAndReturnCurDomainRcrds();                       //console.log("---Search Change. domainRcrds = %O", domainRcrds);
         initSrcTree(focusStorage.curDomain, domainRcrds);
         getInteractionsAndFillTree();
@@ -966,17 +964,9 @@
         return getTreeRcrdAry(valMap[domainVal]);
     }
     /** Returns an array with all records from the stored record object. */
-    function getTreeRcrdAry(prop) {
-        var rcrdObj = _util.getDataFromStorage(prop);
-        var rcrdAry = [];
-        for (var id in rcrdObj) { rcrdAry.push(rcrdObj[id]); }
-        return rcrdAry;
-    }
-    /** Add source data to focusStorage to be available while in a source focus. */
-    function addSrcDataToFocusStorage(srcData) {
-        focusStorage.author = srcData.author;
-        focusStorage.publication = srcData.publication;
-        focusStorage.pubTypes = srcData.publicationType;
+    function getTreeRcrdAry(domain) {
+        var rcrdIdAry = _util.getDataFromStorage(domain);
+        return rcrdIdAry.map(function(id) { return focusStorage.rcrdsById[id]; });
     }
     /**
      * Builds a family tree of source data of the selected source domain: authors 
@@ -1272,8 +1262,9 @@
         updateSrcFilterStatus(selVal, selText+'s');
     } 
     /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows(selVal) { 
-        var pubIds = focusStorage.pubTypes[selVal].publications;         
+    function getPubTypeRows(selVal) {
+        var pubTypes = _util.getDataFromStorage('publicationType'); 
+        var pubIds = pubTypes[selVal].publications;         
         var rows = [];
         focusStorage.rowData.forEach(function(row) { 
             if (pubIds.indexOf(row.pubId) !== -1) { rows.push(row); }
