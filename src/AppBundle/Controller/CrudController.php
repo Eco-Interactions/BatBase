@@ -41,8 +41,9 @@ class CrudController extends Controller
         $entityData->main = "source";
         $entityData->mainEntity = $srcEntity;
 
-        $entityData->detailEntity = !$srcData->hasDetail ? false : 
-            $this->setDetailEntityData($srcData, $formData, $entityData, $em);
+        $entityData->detailEntity = $this->setDetailEntityData(
+            $srcData, $formData, $entityData, $em
+        );
 
         return $this->attemptFlushAndSendResponse($entityData, $em);
     }
@@ -50,6 +51,7 @@ class CrudController extends Controller
     private function setDetailEntityData($srcData, $formData, &$entityData, $em)
     {
         $detailName = $srcData->rel->sourceType;
+        if (!$srcData->hasDetail) { return $this->noDetailEntity($detailName, $entityData); }
         $detailData = $formData->$detailName;
         $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
         $detailEntity = new $detailEntClass();
@@ -58,6 +60,11 @@ class CrudController extends Controller
 
         $entityData->detail = $detailName;
         return $detailEntity;
+    }
+    private function noDetailEntity($detailName, &$entityData)
+    {
+        $entityData->detail = $detailName;
+        return false;
     }
     /**
      * Calls the set method for both types of entity data, flat and relational, 
