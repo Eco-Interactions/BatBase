@@ -91,6 +91,26 @@
         typeObj[typeId][entity+'s'].push(typeId);
         storeData(prop, typeObj);
     }
+    /*----------------- Entity Specific Update Methods -----------------------*/
+    /** When a Publication or Citation have been updated, update contribution data. */
+    function addContribData(prop, rcrd, entity) {  console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
+        if (rcrd.contributors.length > 0) { 
+            addContributionData(rcrd.contributors, rcrd); 
+        }
+    }
+    /** Adds the new work-source to each contributor's contributions array. */
+    function addContributionData(contributors, rcrd) {
+        var contribAry;
+        var srcObj = _util.getDataFromStorage('source');
+        contributors.forEach(function(authId) {
+            contribAry = srcObj[authId].contributions;
+            if (contribAry.indexOf(rcrd.id) === -1 ) {
+                contribAry.push(rcrd.id);
+            }
+        });
+        storeData('source', srcObj);
+    }
+    /*------------------Init Stored Data Methods----------------------------*/
     function initStoredData() {
         ajaxAndStoreAllEntityData();
     }
