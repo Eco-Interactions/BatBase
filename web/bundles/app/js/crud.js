@@ -39,21 +39,22 @@ $(document).ready(function(){
      * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
     function initInteractionCrud() {                                            console.log("***initInteractionCrud***")
-        showEntityCrudPopup();
+        showCrudFormPopup();
         initCrudView();
     }
-    /** Builds and shows the crud popup from @getCrudHtml */
-    function showEntityCrudPopup() {
+    /** Builds and shows the popup crud-form's structural elements. */
+    function showCrudFormPopup() {
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
         $("#b-overlay-popup").append(getCrudWindowElems("New Interaction"));
         setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
     }
-    /** Sets popup top using parent position. */
-    function setPopUpPos() {
+    /** Sets popup top using parent position. If 'reset', sets original position. */
+    function setPopUpPos(reset) {
         var parentPos = $('#b-overlay').offset();  
-        $('#b-overlay-popup').offset({ top: (parentPos.top + 88)});          
+        var newTopPos = { top: reset ? (parentPos.top - 88) : (parentPos.top + 88) };
+        $('#b-overlay-popup').offset(newTopPos);          
     }
     function hideSearchCrudPopup() {
         $('#b-overlay-popup, #b-overlay').hide();
@@ -70,10 +71,26 @@ $(document).ready(function(){
         return cntnr;        
     }
     function getHeaderHtml(title) {
-        var hdrSect = _util.buildElem("header", { "id": "crud-hdr" });
+        var hdrSect = _util.buildElem("header", { "id": "crud-hdr", "class":"flex-col" });
+        $(hdrSect).append(getExitButton());
         $(hdrSect).append(_util.buildElem("h1", { "text": title }));
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
+    }
+    function getExitButton() {
+        var bttn = _util.buildElem("input", {
+           "id":"exit-form", "class":"grid-bttn", "type":"button", "value":"X" });
+        $(bttn).click(exitCrudFormPopup);
+        return bttn;
+    }
+    /** Returns popup and overlay to their original/default state. */
+    function exitCrudFormPopup() {
+        hideSearchCrudPopup();
+        eif.search.initSearchPage();
+        setPopUpPos(true);
+        $("#b-overlay").removeClass("crud-ovrly");
+        $("#b-overlay-popup").removeClass("crud-popup");
+        $("#b-overlay-popup").empty();
     }
     /*--------------- CRUD Params Object -------------------------------------*/
     /**

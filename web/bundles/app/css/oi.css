@@ -478,7 +478,7 @@ button[name="createbttn"] {
 	width: 420px;
 	text-align: justify;
 }
-a[role="button"], .tos-bttn {
+a[role="button"], .tos-bttn, #exit-form {
 	cursor: pointer;
 }
 /*-- Search Grid Popup --*/
@@ -538,6 +538,13 @@ a[role="button"], .tos-bttn {
 .crud-form {
 	font-size: 1em;
 	flex-wrap: wrap;
+}
+#exit-form {
+	position: relative;
+	left: 1035px;
+	width: 22px;
+	height: 20px;
+	font-weight: bold;
 }
 #sub-form {
 	border: 1px solid grey;
