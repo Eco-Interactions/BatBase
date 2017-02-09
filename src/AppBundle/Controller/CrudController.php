@@ -56,6 +56,7 @@ class CrudController extends Controller
         $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
         $detailEntity = new $detailEntClass();
         $detailEntity->setSource($entityData->mainEntity);
+        $this->addDetailToCoreEntity($entityData->mainEntity, $detailEntity, $detailName, $em);
         $this->setEntityData($detailName, $detailData, $detailEntity, $em);  
 
         $entityData->detail = $detailName;
@@ -65,6 +66,12 @@ class CrudController extends Controller
     {
         $entityData->detail = $detailName;
         return false;
+    }
+    private function addDetailToCoreEntity(&$coreEntity, &$detailEntity, $detailName, &$em)
+    {
+        $setMethod = 'set'. ucfirst($detailName);
+        $coreEntity->$setMethod($detailEntity);
+        $em->persist($coreEntity);
     }
     /**
      * Calls the set method for both types of entity data, flat and relational, 
