@@ -1,13 +1,13 @@
 (function(){
-	var dataLastUpdated;
+    var dataLastUpdated;
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.syncData = {
-    	initStoredData: initStoredData,
-    	update: updateStoredData,
-    	// sync: syncStoredData
+        initStoredData: initStoredData,
+        update: updateStoredData,
+        // sync: syncStoredData
     };
-
+    /*------------------Current Data State Methods ----------------------------*/
     getServerDataLastUpdatedTimes();
     /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
     function getServerDataLastUpdatedTimes() {
@@ -15,12 +15,84 @@
     }
     /** Stores the datetime object in the global ECO_ECO_INT_FMWK object. */
     function storeDataUpdatedTimes(ajaxData) {
-        dataLastUpdated = ajaxData.dataState;                                    //console.log("dataState = %O", eif.data_state);
+        dataLastUpdated = ajaxData.dataState;                                   //console.log("dataState = %O", eif.data_state);
     }
 
 /*-------------- Stored Data Methods -----------------------------------------*/
+    /*------------------Update Stored Data Methods----------------------------*/
+    /**
+     * On crud-form submit success, the returned data is added to, or updated in, 
+     * all relevant stored data. The main-entity data is processed @updateCoreEntityData. 
+     * Then any detail-entity data is processed @updateDetailEntityData. 
+     */
+    function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
+        updateCoreEntityData(data.main, data.detail, JSON.parse(data.mainEntity));
+        if (data.detailEntity) { 
+            updateDetailEntityData(data.detail, JSON.parse(data.detailEntity))
+        }
+    }
+    /**
+     * Updates stored-data props related to a core-entity record with new data.
+     * NOTE: Only including source for now, as only source returns data atm.  
+     */
+    function updateCoreEntityData(entity, type, rcrd) {                         //console.log("Updating Core entity. %s. [%s]. %O", entity, type, rcrd);
+        var update = {
+            'source': {
+                'author': { 'authSources': addToRcrdProp },
+                'citation': { 'author': addContribData },
+                'publication': { 'pubSources': addToRcrdProp, 'author': addContribData },
+                'publisher': { 'publisherNames': addToNameProp }
+            },
+        };
+        updateDataProps(update[entity][type], entity, rcrd);
+        updateCoreData(entity, rcrd);
+    }
+    /** Sends entity-record data to each storage property-type handler. */
+    function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
+        for (var prop in propHndlrs) {
+            propHndlrs[prop](prop, rcrd, entity);
+        }
+    }
+    /** 
+     * Updates the stored core-records array and the stored entityType array. 
+     * Note: Taxa are the only core entity without 'types'.
+     */
+    function updateCoreData(entity, rcrd) {                                     //console.log("Updating Core data");
+        addToRcrdProp(entity, rcrd);
+        if (entity === "taxon") { return; }
+        addToTypeProp(entity+"Type", rcrd, entity); 
+    } 
+    /** Updates stored-data props related to a detail-entity record with new data. */
+    function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+        var update = {
+            'author': { 'author': addToRcrdProp },
+            'publication': { 
+                'publication': addToRcrdProp, 'publicationType': addToTypeProp },
+            'publisher': { 'publisherNames': addToNameProp }
+        };
+        updateDataProps(update[entity], entity, rcrd)
+    }
+    /** Add the new record to the prop's stored records object.  */
+    function addToRcrdProp(prop, rcrd, entity) {  
+        var rcrdObj = _util.getDataFromStorage(prop);                           //console.log("addToRcrdProp. [%s] = %O. rcrd = %O", prop, rcrdObj, rcrd);
+        rcrdObj[rcrd.id] = rcrd;
+        storeData(prop, rcrdObj);
+    }
+    /** Add the new entity's display name and id to the prop's stored names object.  */
+    function addToNameProp(prop, rcrd, entity) {
+        var nameObj = _util.getDataFromStorage(prop);                           //console.log("addToNameProp. [%s] = %O. rcrd = %O", prop, nameObj, rcrd);
+        nameObj[rcrd.displayName] = rcrd.id;
+        storeData(prop, nameObj);
+    }
+    /** Add the new record's id to the entity-type's stored id array.  */
+    function addToTypeProp(prop, rcrd, entity) {
+        var typeObj = _util.getDataFromStorage(prop);                           //console.log("addToTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+        var typeId = rcrd[prop].id;                                             
+        typeObj[typeId][entity+'s'].push(typeId);
+        storeData(prop, typeObj);
+    }
     function initStoredData() {
-    	ajaxAndStoreAllEntityData();
+        ajaxAndStoreAllEntityData();
     }
     /**
      * The first time a browser visits the search page, all entity data is downloaded
@@ -163,11 +235,6 @@
         }  
         return data;
     }
-    /*------------------Update Stored Data Methods----------------------------*/
-    function updateStoredData(data) {  console.log("updated/created data recieved on search page - %O", data);
-        // body...
-    }
-
 
 
 
