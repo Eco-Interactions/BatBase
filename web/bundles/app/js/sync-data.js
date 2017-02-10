@@ -26,9 +26,9 @@
      * Then any detail-entity data is processed @updateDetailEntityData. 
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
-        updateCoreEntityData(data.main, data.detail, JSON.parse(data.mainEntity));
+        updateCoreEntityData(data.main, data.detail, data.mainEntity);
         if (data.detailEntity) { 
-            updateDetailEntityData(data.detail, JSON.parse(data.detailEntity))
+            updateDetailEntityData(data.detail, data.detailEntity);
         }
     }
     /**
@@ -39,7 +39,8 @@
         var update = {
             'source': {
                 'author': { 'authSources': addToRcrdAryProp },
-                'citation': { 'author': addContribData },
+                'citation': { 'author': addContribData, 'source': addToParentRcrd,
+                    'tag': addToTagProp },
                 'publication': { 'pubSources': addToRcrdAryProp, 'author': addContribData },
                 'publisher': { 'publisherNames': addToNameProp }
             },
@@ -99,6 +100,22 @@
     function addIfNewRcrd(ary, id) {
         if (ary.indexOf(id) === -1) { ary.push(id); }                           //console.log("Pushing id %s to array.", id);
     }
+    /** Adds a new child record's id to it's parent's 'children' array. */ 
+    function addToParentRcrd(prop, rcrd, entity) {                              
+        var parentObj = _util.getDataFromStorage(prop);                         //console.log("addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
+        var parent = parentObj[rcrd.parent];
+        addIfNewRcrd(parent.children, rcrd.id);
+        storeData(prop, parentObj);
+    }
+    /** Adds a new tagged record to the tag's array of record ids. */
+    function addToTagProp(prop, rcrd, entity) {                                 
+        var tagObj = _util.getDataFromStorage(prop);                            //console.log("addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+        if (rcrd.tags.length > 0) {
+            rcrd.tags.forEach(function(tagId){
+                addIfNewRcrd(tagObj[tagId][entity+'s'], tagId);                
+            });
+        }
+    }
     /*----------------- Entity Specific Update Methods -----------------------*/
     /** When a Publication or Citation have been updated, update contribution data. */
     function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
@@ -107,7 +124,7 @@
         }
     }
     /** Adds the new work-source to each contributor's contributions array. */
-    function addContributionData(contributors, rcrd) {
+    function addContributionData(contributors, rcrd) {                          //console.log("contributors = %O", contributors);
         var srcObj = _util.getDataFromStorage('source');
         contributors.forEach(function(authId) {
             addIfNewRcrd(srcObj[authId].contributions, rcrd.id);

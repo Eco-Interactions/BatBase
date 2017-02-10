@@ -110,7 +110,7 @@ $(document).ready(function(){
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location"])
         };
-        initFormLevelParamsObj("interaction", "top", null, null);
+        initFormLevelParamsObj("interaction", "top", null, {});
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -216,9 +216,8 @@ $(document).ready(function(){
     function initCitField(pubId) {                                              console.log("initCitSelect for publication = ", pubId);
         var citOpts = getPubCitationOpts(pubId);  
         var sel = $('#Citation-sel')[0].selectize;
-        updateComboboxOptions(sel, citOpts);
         sel.enable();
-        sel.focus();
+        updateComboboxOptions(sel, citOpts);
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -229,8 +228,7 @@ $(document).ready(function(){
     /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
-        buildCountryFieldRow();
-        buildLocationFieldRow();        
+        initTopLocationFields(); 
     }
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
@@ -239,6 +237,11 @@ $(document).ready(function(){
         return { "value": "", "text": "Creating Citation..." };
     }
     /*-------------- Country -------------------------------------------------*/
+    /** Inits both the Country and Location form-fields for the 'top' interaction form. */
+    function initTopLocationFields() {
+        buildCountryFieldRow();
+        buildLocationFieldRow();        
+    }
     /**
      * Returns a form row with a country select dropdown populated with all 
      * available countries.
@@ -822,21 +825,21 @@ $(document).ready(function(){
     function getBttnEvents(entity, level, parentElemId) { 
         return { 
             submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-            cancel: exitForm.bind(null, '#'+level+'-form', level, parentElemId) 
+            cancel: exitForm.bind(null, '#'+level+'-form', level, parentElemId, true) 
         };
     }
     /**
      * Removes the form container with the passed id, clears and enables the combobox,
      * and contextually enables to parent form's submit button @ifParentFormValid. 
      */
-    function exitForm(id, formLvl, parentElemId) {                              //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
+    function exitForm(id, formLvl, parentElemId, focusParent) {                 //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
         var parentLvl = getNextFormLevel('parent', formLvl);
         var selectized = cParams.forms[parentLvl].selApi[parentElemId];      
         selectized.clear();
         selectized.enable();
         $(id).remove();
+        if (focusParent) { selectized.focus(); }
         ifParentFormValid(parentLvl);
-        selectized.focus();
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
@@ -1089,22 +1092,43 @@ $(document).ready(function(){
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
     }
     /**
-     * Ajax success callback. Exit's the successfully submitted form, adds and 
-     * selects an option with the new entities id (val) and display name (text).
-     * Potential format for response: {[pEntity] : {[formEntity] => [id]} }
+     * Ajax success callback. Exit's the successfully submitted form @exitFormAndSelectNewEntity. 
+     * Updates stored data @eif.syncData.update. Calls the @exitHandler, if set for this form-field.  
      */
-    function formSubmitSucess(data, textStatus, jqXHR) {                        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+    function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    
+        var data = parseData(ajaxData.results);                                 console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+        eif.syncData.update(data);
+        exitFormAndSelectNewEntity(data);
+    }
+    /**
+     * Exits the successfully submitted form @exitForm. Adds and selects the new 
+     * entity in the form's parent elem @addAndSelectEntity.
+     */
+    function exitFormAndSelectNewEntity(data) {
         var formLvl = cParams.ajaxFormLvl;
         var pFormLvl = getNextFormLevel("parent", formLvl);
         var formSelId = cParams.forms[formLvl].pSelElemId;  
         var selElemApi = cParams.forms[pFormLvl].selApi[formSelId]; 
-
-        /* Stubby */
-        var displayName = Object.keys(data.results)[0];  console.log("displayName = ", displayName)
+        var displayName = data.mainEntity.displayName;                          
         exitForm("#"+formLvl+"-form", formLvl, formSelId); 
-        selElemApi.addOption({ "value": data.results[displayName], "text": displayName });
-        selElemApi.addItem(data.results[displayName]);
-        eif.syncData.update(data.results);
+        addAndSelectEntity(data, selElemApi);
+    }
+    /**
+     * Parses the nested objects in the returned JSON data. This is because the 
+     * data comes back from the server having been double JSON-encoded, due to the 
+     * 'serialize' library and the JSONResponse object. 
+     */
+    function parseData(data) {  
+        data.mainEntity = JSON.parse(data.mainEntity);
+        data.detailEntity = JSON.parse(data.detailEntity);
+        return data;
+    }
+    /** Adds, to the form's parent elem, and selects an option for the new entity. */
+    function addAndSelectEntity(data, selElemApi) {
+        selElemApi.addOption({ 
+            "value": data.mainEntity.id, "text": data.mainEntity.displayName 
+        });
+        selElemApi.addItem(data.mainEntity.id);
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**

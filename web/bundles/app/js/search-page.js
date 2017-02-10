@@ -105,9 +105,8 @@
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
             "taxa": buildTaxonGrid 
         };  
-        if (localStorage.getItem('storedData')) { 
-            ifChangedFocus(focus, builderMap[focus]); 
-        }
+        if (!localStorage.getItem('storedData')) { return; } 
+        ifChangedFocus(focus, builderMap[focus]); 
     }
     /**
      * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
@@ -120,7 +119,7 @@
             clearPreviousGrid();
             resetFocusStorage();
             resetToggleTreeBttn(false);
-            clearPastHtmlOptions();
+            clearPastHtmlOptions(); //buildGridFunc called here. 
         } else { buildGridFunc(); }
         /** Called seperately so @emptySearchOpts is called once. */
         function clearPastHtmlOptions() {    

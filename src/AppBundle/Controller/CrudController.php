@@ -143,7 +143,7 @@ class CrudController extends Controller
     {
         foreach ($ary as $tag) {
             $tagEnt = $em->getRepository("AppBundle:Tag")
-                ->findOneBy(['displayName' => $tag]);
+                ->findOneBy(['id' => $tag]);
             $srcEntity->addTag($tagEnt);
         }  
     }
