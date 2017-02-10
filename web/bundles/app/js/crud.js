@@ -1109,7 +1109,7 @@ $(document).ready(function(){
         var pFormLvl = getNextFormLevel("parent", formLvl);
         var formSelId = cParams.forms[formLvl].pSelElemId;  
         var selElemApi = cParams.forms[pFormLvl].selApi[formSelId]; 
-        var displayName = data.mainEntity.displayName;                          
+        var displayName = data.coreEntity.displayName;                          
         exitForm("#"+formLvl+"-form", formLvl, formSelId); 
         addAndSelectEntity(data, selElemApi);
     }
@@ -1119,16 +1119,16 @@ $(document).ready(function(){
      * 'serialize' library and the JSONResponse object. 
      */
     function parseData(data) {  
-        data.mainEntity = JSON.parse(data.mainEntity);
+        data.coreEntity = JSON.parse(data.coreEntity);
         data.detailEntity = JSON.parse(data.detailEntity);
         return data;
     }
     /** Adds, to the form's parent elem, and selects an option for the new entity. */
     function addAndSelectEntity(data, selElemApi) {
         selElemApi.addOption({ 
-            "value": data.mainEntity.id, "text": data.mainEntity.displayName 
+            "value": data.coreEntity.id, "text": data.coreEntity.displayName 
         });
-        selElemApi.addItem(data.mainEntity.id);
+        selElemApi.addItem(data.coreEntity.id);
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**

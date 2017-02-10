@@ -38,8 +38,8 @@ class CrudController extends Controller
 
         $srcEntity = new Source();
         $this->setEntityData("Source", $srcData, $srcEntity, $em);
-        $entityData->main = "source";
-        $entityData->mainEntity = $srcEntity;
+        $entityData->core = "source";
+        $entityData->coreEntity = $srcEntity;
 
         $entityData->detailEntity = $this->setDetailEntityData(
             $srcData, $formData, $entityData, $em
@@ -55,8 +55,8 @@ class CrudController extends Controller
         $detailData = $formData->$detailName;
         $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
         $detailEntity = new $detailEntClass();
-        $detailEntity->setSource($entityData->mainEntity);
-        $this->addDetailToCoreEntity($entityData->mainEntity, $detailEntity, $detailName, $em);
+        $detailEntity->setSource($entityData->coreEntity);
+        $this->addDetailToCoreEntity($entityData->coreEntity, $detailEntity, $detailName, $em);
         $this->setEntityData($detailName, $detailData, $detailEntity, $em);  
 
         $entityData->detail = $detailName;
@@ -177,7 +177,7 @@ class CrudController extends Controller
     private function sendDataAndResponse($entityData)
     {
         $serializer = $this->container->get('jms_serializer');
-        $entityData->mainEntity = $serializer->serialize($entityData->mainEntity, 'json');
+        $entityData->coreEntity = $serializer->serialize($entityData->coreEntity, 'json');
         $entityData->detailEntity = $entityData->detailEntity ? 
             $serializer->serialize($entityData->detailEntity, 'json') : false;
 

@@ -22,11 +22,11 @@
     /*------------------Update Stored Data Methods----------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
-     * all relevant stored data. The main-entity data is processed @updateCoreEntityData. 
+     * all relevant stored data. The core-entity data is processed @updateCoreEntityData. 
      * Then any detail-entity data is processed @updateDetailEntityData. 
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
-        updateCoreEntityData(data.main, data.detail, data.mainEntity);
+        updateCoreEntityData(data.core, data.detail, data.coreEntity);
         if (data.detailEntity) { 
             updateDetailEntityData(data.detail, data.detailEntity);
         }
