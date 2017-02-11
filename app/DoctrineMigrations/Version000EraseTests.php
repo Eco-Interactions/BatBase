@@ -26,16 +26,21 @@ class Version000EraseTests extends AbstractMigration implements ContainerAwareIn
     public function up(Schema $schema)
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
+        $this->removeAllTestEntities($em);
+    }
+    /** Removes test entities created after a certain datetime for specified entites. */
+    private function removeAllTestEntities(&$em)
+    {
         $classes = ['Source', 'Publication', 'Author', 'Citation', 'Contribution'];
+        $date = '2017-02-04 00:00:00';
 
         foreach ($classes as $className) { print("className = ". $className."\n");
             $repo = $em->getRepository('AppBundle:'.$className);
-            $this->getAndRemoveTestEntities($repo, $em);
+            $this->getAndRemoveTestEntities($repo, $date, $em);
         }
     }
-    private function getAndRemoveTestEntities($repo, &$em)
+    private function getAndRemoveTestEntities($repo, $date, &$em)
     {
-        $date = '2017-02-04 00:00:00';
         $query = $repo->createQueryBuilder('e')
             ->where('e.created > :date')
             ->setParameter('date', $date)

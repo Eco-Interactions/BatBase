@@ -6,6 +6,7 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
     --FORM--
+        -- refactor out selApi prop to $(id)[0].selectize
         -- Disable previously filled fields while dependent fields filled
             -- Unlock Country field when location field is empty.
             -- Lock previously filled fields that have dependent fields further 
@@ -29,7 +30,6 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
                 grid column filters are used to update to grid, not the selection 
                 of those regions... fix this.
     --Asap--
-            -- Add close button to form
 
 
 
@@ -50,6 +50,8 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 TAYLOR:
 Notes::
 Questions:
+    -- Should the authors attributed to a new publication be also attributed to the
+        new citation everytime?
 ---------------------Next-------------------------------------------------------
 
 --SHORTTERM--

@@ -1,18 +1,12 @@
 Developer Notes:
 
-
-::JMS Serializer:
-	-- Issues worked-around --
-		-- Problem: Null properties are left out of serialized data, as that is the JMS default and the 'context' is set this way when AppKernel inits the bundle.
-          An error is thrown when attempting to create and pass a new context into the 'serialize' method. (Error: 'This context was already initialized, and cannot be re-used.') Looking at the JMS serialize method I can see that when no context is passed, one is created and the code continues... I replicated the method chain creating that context in the controller, but the same error is thrown upon passing it in.
-            The context created inside the 'serialize' method can be modified to allow nulls, but any updates to the bundle would erase these changes.
-              I have not found a way to access the 'context' the error insists exists. 
-            -- Journey: Attempted to track down api solutions, but all SOverflow posts and answers are specific to the FOSRest Bundles's use of JMS. 
-            -- Solution?: A potential solution is to remove the JMSSerializerBundle init from  AppKernel and instead init ther serializer and set the context from in the controller before serialization. For now, the code will expect the absence of properties to be equivalent to a null.
-
 ::Checked data wonkiness::
-    'northern mariana islands' is the name from red list.
-
+    -'northern mariana islands' is the name from red list.
+    - Id inconsistencies in the Citation, Publication, and Source table are from 
+      early testing with the interaction form before Sarah was conscious of the 
+      need to 'remove' entities via doctrine, rather than just deleting test rows 
+      from the db. There is now a db-migration, 000EraseTests, that removes test 
+      entities so they can be safely deleted from the db without remaining in memory.
 
 
 ::data cleanup::
