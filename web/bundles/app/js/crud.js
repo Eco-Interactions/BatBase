@@ -117,23 +117,20 @@ $(document).ready(function(){
      * generating, validating, and submitting sub-form. 
      * -- Property descriptions:
      * > entity - Name of this form's entity
-     * > pSelElemId - The id of the parent select of the form.
+     * > pSelId - The id of the parent select of the form.
      * > selElems - Contains all selElems until they are initialized with selectize
      * > reqElems - All required elements in the form.
-     * > confg - The form config object used during form building.          
-     * > selApi - Contains the selectize apis for each select elem keyed by 
-     *   the select field's id. 
+     * > confg - The form config object used during form building.
      */
     function initFormLevelParamsObj(entity, level, pSel, formConfg) {           //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
         cParams.forms[entity] = level;
         cParams.forms[level] = {
             entity: entity,
-            pSelElemId: pSel,
+            pSelId: pSel,
             selElems: [], 
             reqElems: [],
             confg: formConfg,
-            selApi: {}, 
-            exitHandler: formConfg.exitHandler || Function.prototypes
+            exitHandler: formConfg.exitHandler || Function.prototype
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
@@ -146,11 +143,14 @@ $(document).ready(function(){
         initCrudForm();
     }       
     /**
-     * Inits the interaction form with only two elements- a publication dropdown 
-     * and a disabled citation title dropdown that will become active upon publication 
-     * selection. Both dropdowns will display create forms when the user enters a title 
-     * not currently in the database. Upon citation selection the form will continue 
-     * to generate fields and sub-forms as the user's input indicates neccessary. 
+     * Inits the interaction form with the first two form fields- a publication dropdown  
+     * and a disabled citation title dropdown that will become active when a publication 
+     * is selected. After citation selection the form will continue on to generate the
+     * location fields, country and location. With location selection, the taxon fields, 
+     * subject and object, are generated. Finally, after the taxa are selected, the 
+     * remaining interaction fields are displayed and the interaction form is complete. 
+     * Note: Many of the interaction-form dropdowns allow the user to enters a new 
+     * option, which triggers a sub-form to create the new entity with its available fields. 
      */
     function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
@@ -159,7 +159,7 @@ $(document).ready(function(){
         $('#crud-main').append(formCntnr);
         initTopFormCombobox("publication");
         initTopFormCombobox("citation");
-        cParams.forms.top.selApi['#Publication-sel'].focus();
+        focusCombobox('#Publication-sel');
     }      
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -203,6 +203,7 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
+    /** Exit handler for the Citation sub-form, reenables the Publication combobox */
     function enablePubField() {
         $('#Publication-sel')[0].selectize.enable();
     }
@@ -214,14 +215,13 @@ $(document).ready(function(){
         return buildFormRow("Citation Title", selElem, "top", true);
     }
     /**
-     * Fills the citation field combobox with all citations for the selected publication.
-     * Clears any previous options and enables the dropdown.
+     * Fills the citation field combobox with all citations for the selected publication
+     * and enables the dropdown.
      */
-    function initCitField(pubId) {                                              console.log("initCitSelect for publication = ", pubId);
+    function initCitField(pubId) {                                              //console.log("initCitSelect for publication = ", pubId);
         var citOpts = getPubCitationOpts(pubId);  
-        var sel = $('#Citation-sel')[0].selectize;
-        sel.enable();
-        updateComboboxOptions(sel, citOpts, true);
+        enableCombobox('#Citation-sel');
+        updateComboboxOptions('#Citation-sel', citOpts, true);
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -229,23 +229,30 @@ $(document).ready(function(){
         if (!pubRcrd) { return []; }
         return getRcrdOpts(pubRcrd.children, cParams.records.source);
     }
-    /** When a Citation is selected, both 'top' location fields are initialized. */    
+    /** 
+     * When a Citation is selected, both 'top' location fields are initialized
+     * and the publication combobox is disabled. 
+     */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return enablePubAndRemoveLocFields(); }
-        initTopLocationFields();                                                //console.log("cit selection = ", parseInt(val));                          
-        $('#Publication-sel')[0].selectize.disable();
+        if (val === "" || isNaN(parseInt(val))) { return handleCitCleared(); }
+        initTopLocationFields();                  
+        enableCombobox('#Publication-sel', false);                              //console.log("cit selection = ", parseInt(val));                          
     }
-    /** When the citation field is cleared, remove the country and location form fields.  */
-    function enablePubAndRemoveLocFields() {
+    /**
+     * When Citation is cleared, the publication combobox is enabled and the 
+     * country and location form fields are removed.  
+     */
+    function handleCitCleared() {
         if (!$('#Country-sel').length) { return; }
-        enablePubField();
+        enableCombobox('#Publication-sel');
         removeLocFields();
     }
+    /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
             "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
         initSubFormComboboxes("citation");
-        $('#Publication-sel')[0].selectize.disable();        
+        enableCombobox('#Publication-sel', false);
         return { "value": "", "text": "Creating Citation..." };
     }
     /*-------------- Country -------------------------------------------------*/
@@ -259,15 +266,13 @@ $(document).ready(function(){
         $('#Country_row').remove();
         $('#Location_row').remove();
     }
-    /**
-     * Returns a form row with a country select dropdown populated with all available countries.
-     */
+    /** Returns a form row with a country combobox populated with all countries. */
     function buildCountryFieldRow() {  
         var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
-        cParams.forms.top.selApi['#Country-sel'].focus();
+        focusCombobox('#Country-sel');
     }
     /** 
      * When a country is selected, the location dropdown is repopulated with it's 
@@ -305,8 +310,7 @@ $(document).ready(function(){
      */ 
     function fillLocationSelect(cntry, focus) {                                 //console.log("fillLocationSelect for cntry = %O", cntry);
         var opts = cntry ? getChildLocOpts(cntry) : getLocationOpts();    
-        var selApi = cParams.forms.top.selApi['#Location-sel'];
-        updateComboboxOptions(selApi, opts, focus);
+        updateComboboxOptions('#Location-sel', opts, focus);
     }          
 
     /** Returns an array of options for the child-locations of the passed country. */
@@ -316,27 +320,27 @@ $(document).ready(function(){
         });
     }
     /** 
-     * When a location is selected, its country is selected here and the country
-     * combobox is disabled. If the location was cleared, restore country's combobox. 
+     * When a location is selected, its country is selected in the country combobox, 
+     * which is then disabled. If the location was cleared, restores the country combobox. 
      */
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return enableCountryField(); }          
         var locRcrd = cParams.records.location[val];
-        $('#Country-sel')[0].selectize.disable();
+        enableCombobox('#Country-sel', false);
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
     }
-    /** Enables and clears the country combobox. */
+    /** When Location is cleared, the country combobox is reenabled and cleared. */
     function enableCountryField() {  
-        if ($('#sub-form').length) { return; }  //if sub-form is open.
-        $('#Country-sel')[0].selectize.enable();
+        if ($('#sub-form').length) { return; }  //if sub-form is open, do nothing.
+        enableCombobox('#Country-sel');
         $('#Country-sel')[0].selectize.clear(true);
     }
-    /** Inits the location form and disables the country combobox while it is open. */
+    /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
             "location", "sub", "flex-row", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
-        $('#Country-sel')[0].selectize.disable();
+        enableCombobox('#Country-sel', false);
         return { "value": "", "text": "Creating Location..." };
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
@@ -362,7 +366,7 @@ $(document).ready(function(){
     /*-------------- Author --------------------------------------------------*/
     /**
      * When an author is selected, a new author combobox is initialized underneath
-     * 'this' author combobox.
+     * 'this' author combobox. The total count of authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
@@ -370,12 +374,11 @@ $(document).ready(function(){
         var parentFormEntity = cParams.forms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
-
         $("#Authors_sel-cntnr").append(
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, "sub");
-        cParams.forms.sub.selApi['#Authors-sel'+cnt].focus();
+        focusCombobox('#Authors-sel'+cnt);
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
@@ -397,7 +400,8 @@ $(document).ready(function(){
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
     /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
-    function updateComboboxOptions(selApi, opts, focus) {
+    function updateComboboxOptions(selId, opts, focus) {
+        var selApi = $(selId)[0].selectize;
         selApi.clearOptions();
         selApi.addOption(opts);
         if (focus === true) { selApi.focus(); }
@@ -417,9 +421,7 @@ $(document).ready(function(){
         initSelectCombobox(selMap[entity], "top"); 
     }
     /**
-     * Inits the combobox, using 'selectize', according to the passed config. 
-     * Stores each element's selectize api in the global cParams.forms[formLvl].selApi
-     * by the selectized elem's id.
+     * Inits the combobox, using 'selectize', according to the passed config.
      * Note: The 'selectize' library turns select dropdowns into input comboboxes
      * that allow users to search by typing and, when configured, add new options 
      * not in the list by triggering a sub-form for that entity.
@@ -432,7 +434,6 @@ $(document).ready(function(){
         };
         if (confg.options) { addAdditionalOptions(); }
         $(confg.id).selectize(options);  
-        cParams.forms[formLvl].selApi[confg.id] = $(confg.id)[0].selectize;
         /** All non-standard options are added to this 'options' prop. */ 
         function addAdditionalOptions() {
             for (var opt in confg.options) {
@@ -466,33 +467,34 @@ $(document).ready(function(){
         });
         cParams.forms[formLvl].selElems = [];
     } 
-    function disableFormParentSelectElem(selElemId, formLvl) {
-        disableCombobox(selElemId, getNextFormLevel("parent", formLvl));
+    function enableCombobox(selId, enable) {
+        if (enable === false) { return $(selId)[0].selectize.disable(); }
+        $(selId)[0].selectize.enable();
     }
-    function disableCombobox(selId, formLvl) {                                  //console.log("selId = %s, lvl = %s", selId, formLvl)
-        var selectized = cParams.forms[formLvl].selApi[selId];
-        selectized.disable();
-    }      
-    /** Reset the passed selectized element */ 
-    function clearCombobox(elem) {
-        elem.clear();
-        elem.updatePlaceholder();
+    function focusCombobox(selId) {
+        $(selId)[0].selectize.focus();
+    }
+    function clearCombobox(selId) {
+        var selApi = $(selId)[0].selectize;
+        selApi.clear();
+        selApi.updatePlaceholder();
     }    
     /*------------------- Form Builders --------------------------------------*/    
     /**
-     * Builds and returns the subForm according to the passed params. 
+     * Builds and returns the subForm according to the passed params. Disables the 
+     * select elem 'parent' of the sub-form. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selElemId) {
+    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selId) {
         var subFormContainer = _util.buildElem('div', {
             id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
             "p", { "text": "New "+_util.ucfirst(formEntity), "id": formLvl+"-hdr" });
-        var subForm = buildSubForm(formEntity, fieldVals, formLvl, selElemId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, selElemId));
+        var subForm = buildSubForm(formEntity, fieldVals, formLvl, selId);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl));
         $(subFormContainer).append([hdr].concat(subForm));
-        cParams.forms[formLvl].pSelElemId = selElemId;
-        disableFormParentSelectElem(selElemId, formLvl);
+        cParams.forms[formLvl].pSelId = selId; 
+        enableCombobox(selId, false)
         return subFormContainer;
     }
     /** 
@@ -695,16 +697,15 @@ $(document).ready(function(){
         return caseMap[field](entity, field);
     }
     /**
-     * Modifies the Country select elem to be used in the location sub-form by 
-     * giving it a unique id. If there is a selected value in the top-form country 
-     * field, it is set in this sub-form field. The top-form country field is 
-     * disabled while the sub-form is open, or a location has been selected. 
+     * Modifies the Country combobox used in the location sub-form by giving it a 
+     * unique id. If there is a selected value in the top-form country combobox, 
+     * it is set in this sub-field. The top-form country combobox is disabled. 
      */
     function buildSubCountryElem(entity, field) {
         var subCntrySel = buildSelectElem(entity, field);
         subCntrySel.id = "subCountry-sel";
         if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
-        cParams.forms.top.selApi['#Country-sel'].disable();
+        enableCombobox('#Country-sel', false);
         return subCntrySel;
     }
     /* ---------- Option Builders ---------------------------------------------*/
@@ -838,8 +839,8 @@ $(document).ready(function(){
      * specific to their form container @getBttnEvents, and a left spacer that 
      * pushes the buttons to the bottom right of their form container.
      */
-    function buildFormBttns(entity, level, parentElemId) {
-        var events = getBttnEvents(entity, level, parentElemId);                //console.log("events = %O", events);
+    function buildFormBttns(entity, level) {
+        var events = getBttnEvents(entity, level);                              //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: level + "_submit", 
@@ -855,26 +856,33 @@ $(document).ready(function(){
      * Returns an object with 'submit' and 'cancel' events bound to the passed level's
      * form container.  
      */
-    function getBttnEvents(entity, level, parentElemId) { 
+    function getBttnEvents(entity, level) { 
         return { 
             submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-            cancel: exitForm.bind(null, '#'+level+'-form', level, parentElemId, true) 
+            cancel: exitForm.bind(null, '#'+level+'-form', level, true) 
         };
     }
     /**
      * Removes the form container with the passed id, clears and enables the combobox,
-     * and contextually enables to parent form's submit button @ifParentFormValid. 
+     * and contextually enables to parent form's submit button. Calls the exit 
+     * handler stored in the form's params object.
      */
-    function exitForm(id, formLvl, parentElemId, focusParent) {                 //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
-        var parentLvl = getNextFormLevel('parent', formLvl);
-        var selectized = cParams.forms[parentLvl].selApi[parentElemId];    
-        var exitHandler = cParams.forms[formLvl].confg.exitHandler;  
-        selectized.clear();
-        selectized.enable();
-        $(id).remove();
-        if (focusParent) { selectized.focus(); }
-        ifParentFormValid(parentLvl);
-        exitHandler();
+    function exitForm(formId, formLvl, focus) {                                 //console.log("id = %s, formLvl = %s", id, formLvl)      
+        $(formId).remove();
+        resetFormCombobox(formLvl);
+        ifParentFormValidEnableSubmit(formLvl);
+        cParams.forms[formLvl].exitHandler();
+    }
+    /**
+     * Clears and enables the parent combobox for the exited form. Removes any 
+     * placeholder options and, optionally, brings it into focus.
+     */
+    function resetFormCombobox(formLvl, focus) {        
+        var combobox = $(cParams.forms[formLvl].pSelId)[0].selectize;   
+        combobox.clear();
+        combobox.enable();
+        combobox.removeOption(""); //Removes the "Creating [entity]..." placeholder.
+        if (focus) { combobox.focus(); }
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
@@ -886,7 +894,8 @@ $(document).ready(function(){
     }
     /*----------------------- Form Submission -----------------------------------------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
-    function ifParentFormValid(parentLvl) {
+    function ifParentFormValidEnableSubmit(formLvl) {
+        var parentLvl = getNextFormLevel('parent', formLvl);
         if (ifRequiredFieldsFilled(parentLvl)) {
             enableSubmitBttn('#'+parentLvl+'_submit');
         }
@@ -941,8 +950,7 @@ $(document).ready(function(){
         /** Adds an array of tag values. */
         function getTagVals(fieldName, input) {                                 
             var selId = '#'+_util.ucfirst(fieldName)+'-sel';
-            var selApi = cParams.forms[formLvl].selApi[selId];
-            formVals[fieldName] = selApi.getValue();            
+            formVals[fieldName] = $(selId)[0].selectize.getValue();       
         }
         /**
          * Realted parent-form field values are added @ifHasParentFormVals.
@@ -990,7 +998,7 @@ $(document).ready(function(){
     function submitFormVals(formLvl, formVals) {                        
         var entity = cParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
         var fieldTrans = getFieldTranslations(entity);
-        var formData = buildFormData(entity, formVals);
+        var formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
         ajaxFormData(formData, formLvl);
     }                
     /**
@@ -1140,13 +1148,9 @@ $(document).ready(function(){
      * entity in the form's parent elem @addAndSelectEntity.
      */
     function exitFormAndSelectNewEntity(data) {
-        var formLvl = cParams.ajaxFormLvl;
-        var pFormLvl = getNextFormLevel("parent", formLvl);
-        var formSelId = cParams.forms[formLvl].pSelElemId;  
-        var selElemApi = cParams.forms[pFormLvl].selApi[formSelId]; 
-        var displayName = data.coreEntity.displayName;                          
-        exitForm("#"+formLvl+"-form", formLvl, formSelId); 
-        addAndSelectEntity(data, selElemApi);
+        var formLvl = cParams.ajaxFormLvl;                         
+        exitForm("#"+formLvl+"-form", formLvl); 
+        addAndSelectEntity(data, formLvl);
     }
     /**
      * Parses the nested objects in the returned JSON data. This is because the 
@@ -1158,12 +1162,13 @@ $(document).ready(function(){
         data.detailEntity = JSON.parse(data.detailEntity);
         return data;
     }
-    /** Adds, to the form's parent elem, and selects an option for the new entity. */
-    function addAndSelectEntity(data, selElemApi) {
-        selElemApi.addOption({ 
+    /** Adds and option for the new entity to the form's parent elem, and selects it. */
+    function addAndSelectEntity(data, formLvl) {
+        var selApi = $(cParams.forms[formLvl].pSelId)[0].selectize;        
+        selApi.addOption({ 
             "value": data.coreEntity.id, "text": data.coreEntity.displayName 
         });
-        selElemApi.addItem(data.coreEntity.id);
+        selApi.addItem(data.coreEntity.id);
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**
@@ -1171,10 +1176,9 @@ $(document).ready(function(){
      * there is already a sub2-form instance, show the user an error message and 
      * reset the select elem. 
      */
-    function openSub2FormError(field, selElemId) {                              //console.log("selElemId = %s, cP = %O ", selElemId, cParams)
-        var selectizedElem = cParams.forms["sub"].selApi[selElemId];
+    function openSub2FormError(field, selId) {                                  //console.log("selId = %s, cP = %O ", selId, cParams)
         crudFieldErrorHandler(field, 'openSub2Form');
-        window.setTimeout(function() {clearCombobox(selectizedElem)}, 10);
+        window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
     /** Shows the user an error message above the field row. */
