@@ -132,7 +132,8 @@ $(document).ready(function(){
             selElems: [], 
             reqElems: [],
             confg: formConfg,
-            selApi: {}
+            selApi: {}, 
+            exitHandler: formConfg.exitHandler || Function.prototypes
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
@@ -202,6 +203,9 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
+    function enablePubField() {
+        $('#Publication-sel')[0].selectize.enable();
+    }
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
@@ -217,7 +221,7 @@ $(document).ready(function(){
         var citOpts = getPubCitationOpts(pubId);  
         var sel = $('#Citation-sel')[0].selectize;
         sel.enable();
-        updateComboboxOptions(sel, citOpts);
+        updateComboboxOptions(sel, citOpts, true);
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -227,13 +231,21 @@ $(document).ready(function(){
     }
     /** When a Citation is selected, both 'top' location fields are initialized. */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
-        initTopLocationFields(); 
+        if (val === "" || isNaN(parseInt(val))) { return enablePubAndRemoveLocFields(); }
+        initTopLocationFields();                                                //console.log("cit selection = ", parseInt(val));                          
+        $('#Publication-sel')[0].selectize.disable();
+    }
+    /** When the citation field is cleared, remove the country and location form fields.  */
+    function enablePubAndRemoveLocFields() {
+        if (!$('#Country-sel').length) { return; }
+        enablePubField();
+        removeLocFields();
     }
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
             "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
-         initSubFormComboboxes("citation");
+        initSubFormComboboxes("citation");
+        $('#Publication-sel')[0].selectize.disable();        
         return { "value": "", "text": "Creating Citation..." };
     }
     /*-------------- Country -------------------------------------------------*/
@@ -242,9 +254,13 @@ $(document).ready(function(){
         buildCountryFieldRow();
         buildLocationFieldRow();        
     }
+    /** Removes the country and location form-fields.  */
+    function removeLocFields() {
+        $('#Country_row').remove();
+        $('#Location_row').remove();
+    }
     /**
-     * Returns a form row with a country select dropdown populated with all 
-     * available countries.
+     * Returns a form row with a country select dropdown populated with all available countries.
      */
     function buildCountryFieldRow() {  
         var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
@@ -253,10 +269,14 @@ $(document).ready(function(){
         initTopFormCombobox("country");
         cParams.forms.top.selApi['#Country-sel'].focus();
     }
+    /** 
+     * When a country is selected, the location dropdown is repopulated with it's 
+     * child-locations. When cleared, the combobox is repopulated with all locations. 
+     */
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return; }          
+        if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(); }          
         var cntryRcrd = cParams.records.location[val];
-        fillLocationSelect(cntryRcrd);
+        fillLocationSelect(cntryRcrd, true);
     }
     /*-------------- Location ------------------------------------------------*/
     /**
@@ -280,29 +300,43 @@ $(document).ready(function(){
         return opts;
     }
     /**
-     * When a country is selected, the location combobox is repopulated with the 
-     * country's child-locations.  
+     * When a country is selected, the location combobox is repopulated with its 
+     * child-locations. When cleared, the combobox is repopulated with all locations. 
      */ 
-    function fillLocationSelect(cntry) {                                        //console.log("fillLocationSelect for cntry = %O", cntry);
-        var opts = getChildLocOpts(cntry);    
+    function fillLocationSelect(cntry, focus) {                                 //console.log("fillLocationSelect for cntry = %O", cntry);
+        var opts = cntry ? getChildLocOpts(cntry) : getLocationOpts();    
         var selApi = cParams.forms.top.selApi['#Location-sel'];
-        updateComboboxOptions(selApi, opts);
-        cParams.forms.top.selApi['#Location-sel'].focus();
-    }
+        updateComboboxOptions(selApi, opts, focus);
+    }          
+
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
         return cntry.children.map(function(id) {  
             return { value: id, text: cParams.records.location[id].displayName };
         });
     }
-    function onLocSelection(e) {  
-        cParams.forms.top.selApi['#Country-sel'].disable();
-
+    /** 
+     * When a location is selected, its country is selected here and the country
+     * combobox is disabled. If the location was cleared, restore country's combobox. 
+     */
+    function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
+        if (val === "" || isNaN(parseInt(val))) { return enableCountryField(); }          
+        var locRcrd = cParams.records.location[val];
+        $('#Country-sel')[0].selectize.disable();
+        $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
     }
-    function initLocForm(val) {        console.log("Adding new loc! val = %s", val);
+    /** Enables and clears the country combobox. */
+    function enableCountryField() {  
+        if ($('#sub-form').length) { return; }  //if sub-form is open.
+        $('#Country-sel')[0].selectize.enable();
+        $('#Country-sel')[0].selectize.clear(true);
+    }
+    /** Inits the location form and disables the country combobox while it is open. */
+    function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
             "location", "sub", "flex-row", {"Display Name": val}, "#Location-sel"));
-         initSubFormComboboxes("location");
+        initSubFormComboboxes("location");
+        $('#Country-sel')[0].selectize.disable();
         return { "value": "", "text": "Creating Location..." };
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
@@ -362,15 +396,13 @@ $(document).ready(function(){
 
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
-    /** Clears previous options, adds the new opts, and brings the select into focus. */
-    function updateComboboxOptions(selApi, opts) {
+    /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
+    function updateComboboxOptions(selApi, opts, focus) {
         selApi.clearOptions();
         selApi.addOption(opts);
-        selApi.focus()
+        if (focus === true) { selApi.focus(); }
     }
-    /**
-     * Inits the passed entity's combobox in the 'top' interaction form @initSelectCombobox. 
-     */
+    /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
     function initTopFormCombobox(entity) {
         var selMap = { 
             'publication': { 
@@ -501,6 +533,7 @@ $(document).ready(function(){
                 "order": ["CitationText", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
                     "Authors" ],
+                "exitHandler": enablePubField
             },
             "location": {
                 "add": {},  
@@ -834,12 +867,14 @@ $(document).ready(function(){
      */
     function exitForm(id, formLvl, parentElemId, focusParent) {                 //console.log("id = %s, formLvl = %s, id = %s", id, formLvl, parentElemId)      
         var parentLvl = getNextFormLevel('parent', formLvl);
-        var selectized = cParams.forms[parentLvl].selApi[parentElemId];      
+        var selectized = cParams.forms[parentLvl].selApi[parentElemId];    
+        var exitHandler = cParams.forms[formLvl].confg.exitHandler;  
         selectized.clear();
         selectized.enable();
         $(id).remove();
         if (focusParent) { selectized.focus(); }
         ifParentFormValid(parentLvl);
+        exitHandler();
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
