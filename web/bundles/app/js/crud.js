@@ -1128,20 +1128,26 @@ $(document).ready(function(){
     function getEntityUrl(entityName, action) {
         return envUrl + "admin/crud/" + entityName + "/" + action;
     }
-    function formSubmitError(jqXHR, textStatus, errorThrown) {  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)
         $('#'+formLvl+'-hdr').after(
             '<p class="form-errors"">There was an error during form submission.</p>');
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
     }
     /**
-     * Ajax success callback. Exit's the successfully submitted form @exitFormAndSelectNewEntity. 
-     * Updates stored data @eif.syncData.update. Calls the @exitHandler, if set for this form-field.  
+     * Ajax success callback. Updates the stored data @eif.syncData.update and the 
+     * stored core records in the cParams object. Exit's the successfully submitted 
+     * form @exitFormAndSelectNewEntity.  
      */
     function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    
         var data = parseData(ajaxData.results);                                 console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
         eif.syncData.update(data);
+        updateStoredCrudParamsData(data);
         exitFormAndSelectNewEntity(data);
+    }
+    /** Updates the core records in the global crud params object. */
+    function updateStoredCrudParamsData(data) {
+        cParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /**
      * Exits the successfully submitted form @exitForm. Adds and selects the new 
