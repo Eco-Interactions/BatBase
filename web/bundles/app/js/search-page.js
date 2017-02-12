@@ -14,51 +14,49 @@
     var localStorage = _util.setlocalStorage();
     var gridOptions = getDefaultGridOptions();
     eif.search = {
-        initSearchPage: selectSearchFocus,
+        initSearchGrid: selectSearchFocus,
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
-    resetFocusStorage();
-    /**
-     * Container for param data needed for a selected focus. Resets on focus change.
-     * - curFocus: Top grid sort - Taxa (taxa), Locations (locs), or Sources (srcs).
-     * - levels: An array of all taxon level names.  
-     * - openRows: Entity ids whose grid rows will be expanded on grid load.
-     * Notable properties stored later: 
-     * rcrdsById - all records for the current focus.
-     * curDomain - focus' domain-level sort (eg, Taxon domains: Bat, Plant, Arthropod).
-     * curTree - data 'tree' object to be displayed in grid.
-     * rowData - array of rows displayed in the grid.
-     * selectedOpts - search combobox values 'selected' for the current tree.
-     */
-    function resetFocusStorage() {
-        focusStorage = {}; 
-        focusStorage.curFocus = localStorage ? localStorage.getItem('curFocus') : false ;  
-        focusStorage.levels = localStorage ? _util.getDataFromStorage('levelNames') : false ;  
-        focusStorage.openRows = focusStorage.curFocus === "taxa" ? [$('#sel-domain').val()] : [];   console.log("focusStorage = %O", focusStorage)     
-    }
+    // clearLocalStorage();
     function onDOMContentLoaded () {
-        clearLocalStorageCheck();
+        updateStoredData();
         addDomEventListeners();
         authDependentInit();
         initSearchState();
     }
-    function clearLocalStorageCheck() {
-        var curDataKey = 'selfCare';
-        var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
-        if (localStorage && !localStorage.getItem(curDataKey)){
-            localStorage.clear();
-            if ( prevVisit ) { _util.populateStorage('prevVisit', true); 
-            } else { showWalkthroughIfFirstVisit(); }
-            _util.populateStorage(curDataKey, true);
-            showLoadingDataPopUp();
-            eif.syncData.initStoredData();
-        }
+    function clearLocalStorage() {
+        localStorage.clear();
+    }
+    /**
+     * When the search page loads, the data locally stored is updated with any 
+     * modified data since the last load. On first visit, all data is downloaded 
+     * and a walkthrough-tutorial is initialized for the user @initSearchPage.
+     */
+    function updateStoredData() {
+        var pgDataUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');
+        if (!pgDataUpdatedAt) { initSearchPage(); 
+        } else { syncStoredData(pgDataUpdatedAt); }
+    }
+    /**
+     * The first time a browser visits the search page, all data is downloaded
+     * from the server and stored in LocalStorage. The intro-walkthrough is shown 
+     * for the user @showIntroWalkthrough.
+     */
+    function initSearchPage() {
+        showLoadingDataPopUp();
+        eif.syncData.initStoredData();
+        showIntroWalkthrough();
+    }
+    /** Updates locally stored data with any modified data since the last page load. */
+    function syncStoredData(pgDataUpdatedAt) {
+        var dataUpdatedAt = _util.getDataFromStorage('dataUpdatedAt');          //console.log("dataUpdatedAt = %O", dataUpdatedAt);
+        eif.syncData.sync(pgDataUpdatedAt);
     }
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
         showPopUpMsg("Downloading and caching all interaction records. Please " +
-            "allow for a one-time ~20 second download.");   
+            "allow for a one-time ~25 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
@@ -66,7 +64,7 @@
         $('button[name="xpand-1"]').click(expandTreeByOne);
         $('button[name="collapse-1"]').click(collapseTreeByOne);
         $('button[name="reset-grid"]').click(resetDataGrid);
-        $("#strt-tut").click(startIntro);
+        $("#strt-tut").click(startIntroWalkthrough);
         $("#show-tips").click(showTips);
     }
     function authDependentInit() {
@@ -79,18 +77,40 @@
     }
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
-        if (focusStorage.curFocus){ $('#search-focus').val(focusStorage.curFocus);
-        } else { $('#search-focus').val("taxa"); }
+        resetFocusStorage();
+        selectInitSearchFocus();
         initNoFiltersStatus();      
         setUpFutureDevUi();
         selectSearchFocus();
     } 
+    /**
+     * Container for param data needed for a selected focus. Resets on focus change.
+     * - curFocus: Top grid sort - Taxon (taxa), Location (locs), or Source (srcs).
+     * - levels: An array of all taxon level names used in various places throughout. 
+     * - openRows: Array of entity ids whose grid rows will be expanded on grid load.
+     * Notable properties stored later: 
+     * rcrdsById - all records for the current focus.
+     * curDomain - focus' domain-level sort (eg, Taxon domains: Bat, Plant, Arthropod).
+     * curTree - data 'tree' object to be displayed in grid.
+     * rowData - array of rows displayed in the grid.
+     * selectedOpts - search combobox values 'selected' for the current tree.
+     */
+    function resetFocusStorage() {                                              
+        focusStorage = {}; 
+        focusStorage.curFocus =  localStorage.getItem('curFocus') || "taxa";  
+        focusStorage.levels = _util.getDataFromStorage('levelNames') || false;  
+        focusStorage.openRows = [];                                             //console.log("focusStorage = %O", focusStorage);
+    }
+    /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
+    function selectInitSearchFocus() {
+        $('#search-focus').val(focusStorage.curFocus);
+    }
     function setUpFutureDevUi() {
         $('button[name="show-hide-col"]').prop('disabled', true);
         $('button[name="show-hide-col"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
         addFutureDevMsg();
     }
-    function addFutureDevMsg() { //console.log("addFutureDevMsg")
+    function addFutureDevMsg() {                                                //console.log("addFutureDevMsg")
         var $msgDiv = $('<div/>', { id: 'futrDevMsg' })
         $msgDiv.html("<p><b>This is where the search options available for all views will go. </b>" + 
             "Such as year and elevation range, habitat and interaction type, " +
@@ -105,7 +125,7 @@
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
             "taxa": buildTaxonGrid 
         };  
-        if (!localStorage.getItem('storedData')) { return; } 
+        if (!localStorage.getItem('pgDataUpdatedAt')) { return; } 
         ifChangedFocus(focus, builderMap[focus]); 
     }
     /**
@@ -1967,12 +1987,12 @@
         }
     }
 /*========================= Walkthrough ======================================*/
-    function showWalkthroughIfFirstVisit() {
-        window.setTimeout(startIntro, 250); 
+    function showIntroWalkthrough() {
+        window.setTimeout(startIntroWalkthrough, 250); 
         _util.populateStorage('prevVisit', true);
     }
-    function startIntro(startStep){
-        if (intro) { //console.log("intro = %O", intro)
+    function startIntroWalkthrough(startStep){
+        if (intro) {                                                            //console.log("intro = %O", intro)
             intro.exit() 
         } else { 
             buildIntro();
@@ -1980,7 +2000,7 @@
         setGridState();
         intro.start();
 
-        function buildIntro() {  //console.log("buildIntro called")
+        function buildIntro() {                                                 //console.log("buildIntro called")
             intro = introJs();
             var startStep = startStep || 0; 
 
@@ -2086,7 +2106,7 @@
             $('#search-focus').change(selectSearchFocus);
             $('#search-focus').val(focusStorage.curFocus);
         }
-    }   /* End startIntro */
+    }   /* End startIntroWalkthrough */
     function initSearchTips() { 
         setPopUpPos();
         $('#b-overlay-popup').html(searchTips());

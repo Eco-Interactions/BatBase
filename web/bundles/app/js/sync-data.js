@@ -1,13 +1,12 @@
 (function(){
-    var dataLastUpdated;
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.syncData = {
         initStoredData: initStoredData,
         update: updateStoredData,
-        // sync: syncStoredData
+        sync: syncStoredData
     };
-    /*------------------Current Data State Methods ----------------------------*/
+
     getServerDataLastUpdatedTimes();
     /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
     function getServerDataLastUpdatedTimes() {
@@ -15,21 +14,35 @@
     }
     /** Stores the datetime object in the global ECO_ECO_INT_FMWK object. */
     function storeDataUpdatedTimes(ajaxData) {
-        dataLastUpdated = ajaxData.dataState;                                   //console.log("dataState = %O", eif.data_state);
+        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", eif.data_state);
+    }
+    /** Returns the current date time in the format: Y-m-d H:i:s */
+    function getCurrentDate() {
+        return new Date().today() + " " + new Date().timeNow();
+    }
+/*-------------- Stored Data Methods -----------------------------------------*/
+    /*------------------Sync Data --------------------------------------------*/
+    /**
+     * When the search page loads, the data locally stored is updated with any 
+     * modified data since the last load.
+     */
+    function syncStoredData(pgDataUpdatedAt) {                                  console.log("syncStoredData updated since - ", pgDataUpdatedAt);
+           
     }
 
-/*-------------- Stored Data Methods -----------------------------------------*/
     /*------------------Update Stored Data Methods----------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
      * all relevant stored data. The core-entity data is processed @updateCoreEntityData. 
      * Then any detail-entity data is processed @updateDetailEntityData. 
+     * The stored data's lastUpdated flag, 'pgDataUpdatedAt', is updated. 
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateCoreEntityData(data.core, data.detail, data.coreEntity);
         if (data.detailEntity) { 
             updateDetailEntityData(data.detail, data.detailEntity);
         }
+        storeData('pgDataUpdatedAt', getCurrentDate());
     }
     /**
      * Updates stored-data props related to a core-entity record with new data.
@@ -136,9 +149,10 @@
         ajaxAndStoreAllEntityData();
     }
     /**
-     * The first time a browser visits the search page, all entity data is downloaded
-     * from the server and stored locally @storeEntityData. The Search page grid-build 
-     * begins @initSearchPage.
+     * The first time a browser visits the search page all entity data is downloaded
+     * from the server and stored locally @storeEntityData. The stored data's 
+     * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Search page 
+     * grid-build begins @eif.search.initSearchGrid.
      * Entities downloaded with each ajax call:
      *   /taxon - Taxon, Domain, Level 
      *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
@@ -153,8 +167,8 @@
         ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
             $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
             deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
-            _util.populateStorage("storedData", true); 
-            eif.search.initSearchPage();
+            storeData('pgDataUpdatedAt', getCurrentDate());
+            eif.search.initSearchGrid();
         });
     }
     /**
