@@ -44,7 +44,7 @@
         initSearchState();
     }
     function clearLocalStorageCheck() {
-        var curDataKey = 'mu';
+        var curDataKey = 'selfCare';
         var prevVisit = localStorage ? localStorage.getItem('prevVisit') || false : false;
         if (localStorage && !localStorage.getItem(curDataKey)){
             localStorage.clear();
@@ -112,11 +112,11 @@
      * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
      */
     function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called.")
+        clearPreviousGrid();
         if (focus !== focusStorage.curFocus) {   
             _util.populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();
-            clearPreviousGrid();
             resetFocusStorage();
             resetToggleTreeBttn(false);
             clearPastHtmlOptions(); //buildGridFunc called here. 
