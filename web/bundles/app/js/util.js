@@ -12,7 +12,7 @@
         ucfirst: ucfirst, 
     };
 
-    extendJquery();
+    extendPrototypes();
 
     /*---------- String Helpers ----------------------------------------------*/
     function ucfirst(str) { 
@@ -118,18 +118,36 @@
         }
         return opts;
     }   
-    /*--------------------------Jquery Extensions-----------------------------*/
-        function extendJquery() {
-            addOnEnterEvent();
+    /*--------------------- Extend Prototypes/Libraries ----------------------*/
+    function extendPrototypes() {
+        extendDate();
+        extendJquery();
+    }
+    function extendDate() {
+        /** Y-m-d  */
+        Date.prototype.today = function () { 
+            return this.getFullYear() +"-"+
+                (((this.getMonth()+1) < 10)?"0":"") + (this.getMonth()+1) +"-"+ 
+                ((this.getDate() < 10)?"0":"") + this.getDate() ;
         }
-        function addOnEnterEvent() {
-            $.fn.onEnter = function(func) {
-                this.bind('keypress', function(e) {
-                    if (e.keyCode == 13) func.apply(this, [e]);    
-                });               
-                return this; 
-             };
+        /** H:i:s */
+        Date.prototype.timeNow = function () {
+             return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ 
+             ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ 
+             ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
         }
+    }
+    function extendJquery() {
+        addOnEnterEvent();
+    }
+    function addOnEnterEvent() {
+        $.fn.onEnter = function(func) {
+            this.bind('keypress', function(e) {
+                if (e.keyCode == 13) func.apply(this, [e]);    
+            });               
+            return this; 
+         };
+    }
     /*--------------------------Storage Methods-------------------------------*/
 
     /**
