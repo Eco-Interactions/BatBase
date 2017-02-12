@@ -111,8 +111,8 @@
     function addToTagProp(prop, rcrd, entity) {                                 
         var tagObj = _util.getDataFromStorage(prop);                            //console.log("addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
         if (rcrd.tags.length > 0) {
-            rcrd.tags.forEach(function(tagId){
-                addIfNewRcrd(tagObj[tagId][entity+'s'], tagId);                
+            rcrd.tags.forEach(function(tag){
+                addIfNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id);                
             });
         }
     }
