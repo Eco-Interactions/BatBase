@@ -31,6 +31,56 @@ class SearchController extends Controller
         return $this->render('ContentBlock/search.html.twig', array());
     }
     /**
+     * Serializes and returns all entities of the passed class that have been 
+     * updated since the passed 'lastUpdatedAt' time.
+     *
+     * @Route("/search/update", name="app_ajax_updated_data")
+     */
+    public function getUpdatedEntityData(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+        $em = $this->getDoctrine()->getManager(); 
+
+        $pushedData = json_decode($request->getContent());
+        $entity = $pushedData->entity;                                          //print("getAllUpdatedData for ".$coreEntity);
+        $lastUpdatedAt = $pushedData->updatedAt;
+
+        $data = $this->getAllUpdatedData($entity, $lastUpdatedAt, $em);
+
+        $response = new JsonResponse(); 
+        $response->setData(array( $entity => $data )); 
+        return $response;        
+    }
+    /**
+     * All entities updated since the lastUpdatedAt time are serialized and 
+     * returned in a data object keyed by id.  
+     */
+    private function getAllUpdatedData($entity, $lastUpdatedAt, &$em)
+    {  
+        $serializer = $this->container->get('jms_serializer');
+        $data = new \stdClass;
+
+        $entities = $this->getEntitiesWithUpdates($entity, $lastUpdatedAt, $em);
+
+        foreach ($entities as $entity) {
+            $id = $entity->getId();
+            $data->$id = $serializer->serialize($entity, 'json');
+        }
+        return $data;
+    }
+    /** Queries for all entities updated since the lastUpdatedAt time. */
+    private function getEntitiesWithUpdates($entity, $lastUpdatedAt, &$em)
+    {
+        $repo = $em->getRepository('AppBundle:'.$entity);
+        $query = $repo->createQueryBuilder('e')
+            ->where('e.updated > :lastUpdated')
+            ->setParameter('lastUpdated', $lastUpdatedAt)
+            ->getQuery();
+        return $query->getResult();
+    }
+    /**
      * Returns serialized data objects for the Domain, Level, and Taxon entities.
      *
      * @Route("/search/taxon", name="app_serialize_taxon")
