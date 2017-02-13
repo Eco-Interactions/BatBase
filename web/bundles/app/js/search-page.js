@@ -14,13 +14,14 @@
     var localStorage = _util.setlocalStorage();
     var gridOptions = getDefaultGridOptions();
     eif.search = {
+        initSearchPage: initSearchPage,
         initSearchGrid: selectSearchFocus,
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
     // clearLocalStorage();
     function onDOMContentLoaded () {
-        updateStoredData();
+        showPopUpMsg('Loading...');
         addDomEventListeners();
         authDependentInit();
         initSearchState();
@@ -29,23 +30,12 @@
         localStorage.clear();
     }
     /**
-     * When the search page loads, the data locally stored is updated with any 
-     * modified data since the last load. On first visit, all data is downloaded 
-     * and a walkthrough-tutorial is initialized for the user @initSearchPage.
-     */
-    function updateStoredData() {
-        var pgDataUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');
-        if (!pgDataUpdatedAt) { initSearchPage(); 
-        } else { syncStoredData(pgDataUpdatedAt); }
-    }
-    /**
      * The first time a browser visits the search page, all data is downloaded
      * from the server and stored in LocalStorage. The intro-walkthrough is shown 
      * for the user @showIntroWalkthrough.
      */
     function initSearchPage() {
         showLoadingDataPopUp();
-        eif.syncData.initStoredData();
         showIntroWalkthrough();
     }
     /** Updates locally stored data with any modified data since the last page load. */

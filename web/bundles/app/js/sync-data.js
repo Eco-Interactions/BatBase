@@ -2,9 +2,7 @@
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.syncData = {
-        initStoredData: initStoredData,
         update: updateStoredData,
-        sync: syncStoredData
     };
 
     getServerDataLastUpdatedTimes();
@@ -12,9 +10,10 @@
     function getServerDataLastUpdatedTimes() {
         sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes);
     }
-    /** Stores the datetime object in the global ECO_ECO_INT_FMWK object. */
+    /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
     function storeDataUpdatedTimes(ajaxData) {
-        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", eif.data_state);
+        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", ajaxData.dataState);
+        addNewDataToStorage(ajaxData.dataState);
     }
     /** Returns the current date time in the format: Y-m-d H:i:s */
     function getCurrentDate() {
@@ -23,11 +22,61 @@
 /*-------------- Stored Data Methods -----------------------------------------*/
     /*------------------Sync Data --------------------------------------------*/
     /**
+     * >When the search page loads, the system updatedAt flag is compared against
+     * the page's. If there they system data has updated more recently than the 
+     * locally stored data, the stored data is updated @syncUpdatedData. 
+     * >On a browser's first visit to the page, all data is downloaded and the 
+     * search page ui is initialized @initStoredData.
+     */
+    function addNewDataToStorage(dataUpdatedAt) {  
+        var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          //console.log("pgUpdatedAt = ", pgUpdatedAt)
+        if (!pgUpdatedAt) { return initStoredData(); } 
+        if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
+        syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
+    }
+    /**
+     * Returns true if the first datetime is more recent than the second. 
+     * Note: for cross-browser date comparisson, dashes must be replaced with slashes.
+     */
+    function firstTimeIsMoreRecent(timeOne, timeTwo) {  
+        var time1 = timeOne.replace(/-/g,'/');  
+        var time2 = timeTwo.replace(/-/g,'/');                                  //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
+        return Date.parse(time1) > Date.parse(time2);
+    }
+    /**
      * When the search page loads, the data locally stored is updated with any 
      * modified data since the last load.
      */
-    function syncStoredData(pgDataUpdatedAt) {                                  console.log("syncStoredData updated since - ", pgDataUpdatedAt);
-           
+    function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
+        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
+        var withUpdates = coreEntities.filter(function(entity){
+            return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
+        });
+        if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
+        ajaxNewData(withUpdates, pgUpdatedAt);
+    }
+    /** 
+     * Sends an ajax call for each entity with updates. When all have returned, 
+     * the new data is stored @addUpdatedEntityData. 
+     */
+    function ajaxNewData(entities, lastUpdated) {
+        var updatedData = {};
+        var promises = entities.map(ajaxUpdatedEntityData);
+        $.when.apply($, promises).done(addUpdatedEntityData);
+ 
+        function ajaxUpdatedEntityData(entity) {                                console.log("ajax for ", entity);
+            return $.ajax({
+                url: "search/update",
+                data: JSON.stringify({ 
+                    updatedAt: lastUpdated,
+                    entity: entity 
+                })
+            });
+        }
+    } /* End ajaxNewData */
+    function addUpdatedEntityData(data) {  console.log("updated data returned from server = %O", arguments);
+        
+
     }
 
     /*------------------Update Stored Data Methods----------------------------*/
@@ -146,6 +195,7 @@
     }
     /*------------------Init Stored Data Methods----------------------------*/
     function initStoredData() {
+        eif.search.initSearchPage();
         ajaxAndStoreAllEntityData();
     }
     /**
