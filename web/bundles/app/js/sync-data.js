@@ -20,18 +20,19 @@
         return new Date().today() + " " + new Date().timeNow();
     }
 /*-------------- Stored Data Methods -----------------------------------------*/
-    /*------------------Sync Data --------------------------------------------*/
+    /*------------------Sync Updated Data ------------------------------------*/
     /**
-     * >When the search page loads, the system updatedAt flag is compared against
-     * the page's. If there they system data has updated more recently than the 
-     * locally stored data, the stored data is updated @syncUpdatedData. 
-     * >On a browser's first visit to the page, all data is downloaded and the 
+     * On search page load, the system updatedAt flag is compared against the page's. 
+     * If there they system data has updates more recent than the last sync, the 
+     * updated data is ajaxed and stored @syncUpdatedData. 
+     * On a browser's first visit to the page, all data is downloaded and the 
      * search page ui is initialized @initStoredData.
      */
     function addNewDataToStorage(dataUpdatedAt) {  
         var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          //console.log("pgUpdatedAt = ", pgUpdatedAt)
         if (!pgUpdatedAt) { return initStoredData(); } 
         if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
+        delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
         syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
     }
     /**
@@ -43,43 +44,52 @@
         var time2 = timeTwo.replace(/-/g,'/');                                  //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
         return Date.parse(time1) > Date.parse(time2);
     }
-    /**
-     * When the search page loads, the data locally stored is updated with any 
-     * modified data since the last load.
-     */
+    /** Filter updatedAt entities and send those with updates to @ajaxNewData. */
     function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
-        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
-        var withUpdates = coreEntities.filter(function(entity){
+        var withUpdates = Object.keys(updatedAt).filter(function(entity){
             return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
         });
         if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
     /** 
-     * Sends an ajax call for each entity with updates. When all have returned, 
-     * the new data is stored @addUpdatedEntityData. 
+     * Sends an ajax call for each entity with updates. On return, the new data 
+     * is stored @processUpdatedData. 
      */
     function ajaxNewData(entities, lastUpdated) {
-        var updatedData = {};
-        var promises = entities.map(ajaxUpdatedEntityData);
-        $.when.apply($, promises).done(addUpdatedEntityData);
- 
-        function ajaxUpdatedEntityData(entity) {                                console.log("ajax for ", entity);
-            return $.ajax({
+        entities.forEach(function(entity) {
+            $.ajax({
+                method: "POST",
                 url: "search/update",
                 data: JSON.stringify({ 
                     updatedAt: lastUpdated,
                     entity: entity 
                 })
-            });
-        }
+            }).done(processUpdatedData);
+        });
     } /* End ajaxNewData */
-    function addUpdatedEntityData(data) {  console.log("updated data returned from server = %O", arguments);
-        
-
+    /**
+     * Parses and sends the returned data to @storeUpdatedData. The stored data's 
+     * lastUpdated flag, 'pgDataUpdatedAt', is updated and the search-page grid
+     * is reinitialized with the updated data @initSearchGrid.
+     */
+    function processUpdatedData(results) {                                      console.log("updated data returned from server = %O", arguments);
+        var entity = Object.keys(results)[0];
+        var data = parseData(results[entity]);
+        storeUpdatedData(data, entity);
+        storeData('pgDataUpdatedAt', getCurrentDate());
+        eif.search.initSearchGrid();
     }
-
-    /*------------------Update Stored Data Methods----------------------------*/
+    /** Sends the each updated record to the update handler for the entity. */
+    function storeUpdatedData(rcrds, entity) {
+        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
+        var entityHndlr = coreEntities.indexOf(entity) !== -1 ? 
+            updateCoreEntityData : updateDetailEntityData;
+        for (var id in rcrds) {
+            entityHndlr(_util.lcfirst(entity), rcrds[id]);
+        }
+    }
+    /*------------------ Update Form-Data  -----------------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
      * all relevant stored data. The core-entity data is processed @updateCoreEntityData. 
@@ -87,17 +97,19 @@
      * The stored data's lastUpdated flag, 'pgDataUpdatedAt', is updated. 
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
-        updateCoreEntityData(data.core, data.detail, data.coreEntity);
+        updateCoreEntityData(data.core, data.coreEntity);
         if (data.detailEntity) { 
             updateDetailEntityData(data.detail, data.detailEntity);
         }
         storeData('pgDataUpdatedAt', getCurrentDate());
     }
+    /*------------------ Entity Storage Methods ------------------------------*/
     /**
      * Updates stored-data props related to a core-entity record with new data.
      * NOTE: Only including source for now, as only source returns data atm.  
      */
-    function updateCoreEntityData(entity, type, rcrd) {                         //console.log("Updating Core entity. %s. [%s]. %O", entity, type, rcrd);
+    function updateCoreEntityData(entity, rcrd) {                               //console.log("Updating Core entity. %s. %O", entity, rcrd);
+        var type = getEntityType(entity, rcrd);                                 //console.log("type = ", type);
         var update = {
             'source': {
                 'author': { 'authSources': addToRcrdAryProp },
@@ -109,6 +121,15 @@
         };
         updateDataProps(update[entity][type], entity, rcrd);
         updateCoreData(entity, rcrd);
+    }
+    /** 
+     * Returns the record's entity'Type', eg SourceType Author or Publication.
+     * Note Taxon are the only core entity without types.
+     */
+    function getEntityType(entity, rcrd) {
+        if (entity === "Taxon") { return false; }
+        var type = _util.lcfirst(entity)+"Type";
+        return _util.lcfirst(rcrd[type].displayName);
     }
     /** Sends entity-record data to each storage property-type handler. */
     function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
@@ -126,7 +147,7 @@
         addToTypeProp(entity+"Type", rcrd, entity); 
     } 
     /** Updates stored-data props related to a detail-entity record with new data. */
-    function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    function updateDetailEntityData(entity, rcrd) {                             console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
@@ -194,9 +215,15 @@
         storeData('source', srcObj);
     }
     /*------------------Init Stored Data Methods----------------------------*/
+    /**
+     * The first time a browser visits the search page all entity data is downloaded
+     * from the server and stored locally @ajaxAndStoreAllEntityData. The stored 
+     * data's lastUpdated flag, 'pgDataUpdatedAt', is created. A data-loading 
+     * popup message and intro-walkthrough are shown on the Search page @initSearchPage.
+     */
     function initStoredData() {
-        eif.search.initSearchPage();
         ajaxAndStoreAllEntityData();
+        eif.search.initSearchPage();
     }
     /**
      * The first time a browser visits the search page all entity data is downloaded
