@@ -2184,7 +2184,12 @@
      */
     function getDetachedRcrd(rcrdKey, rcrds) {                                  
         var orgnlRcrds = rcrds || focusStorage.rcrdsById;                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
-        return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
+        try {
+           return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
+        }
+        catch (e) { 
+           console.log("#########-ERROR- getting record [%s] from %O", rcrdKey, rcrds);
+        }
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
         var popUpMsg = msg || "Loading...";
