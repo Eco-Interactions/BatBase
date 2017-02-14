@@ -19,15 +19,21 @@
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
-    // clearLocalStorage();
+
     function onDOMContentLoaded () {
+        clearLocalStorageCheck();
         showPopUpMsg('Loading...');
         addDomEventListeners();
         authDependentInit();
         initSearchState();
     }
-    function clearLocalStorage() {
-        localStorage.clear();
+    /** If local storage needs to be cleared, the datakey is updated */ 
+    function clearLocalStorageCheck() {
+        var dataKey = 'alpha';
+        if (localStorage && !localStorage.getItem(dataKey)) {
+            localStorage.clear();
+            _util.populateStorage(dataKey, true);
+        }
     }
     /**
      * The first time a browser visits the search page, all data is downloaded
