@@ -57,15 +57,10 @@
      * is stored @processUpdatedData. 
      */
     function ajaxNewData(entities, lastUpdated) {
+        var data = { updatedAt: lastUpdated };
         entities.forEach(function(entity) {
-            $.ajax({
-                method: "POST",
-                url: "search/update",
-                data: JSON.stringify({ 
-                    updatedAt: lastUpdated,
-                    entity: entity 
-                })
-            }).done(processUpdatedData);
+            data.entity = entity;
+            sendAjaxQuery(data, "ajax/update", processUpdatedData);
         });
     } /* End ajaxNewData */
     /**
@@ -147,7 +142,7 @@
         addToTypeProp(entity+"Type", rcrd, entity); 
     } 
     /** Updates stored-data props related to a detail-entity record with new data. */
-    function updateDetailEntityData(entity, rcrd) {                             console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
@@ -239,8 +234,8 @@
      */
     function ajaxAndStoreAllEntityData() {                                      console.log("ajaxAndStoreAllEntityData");
         $.when(
-            $.ajax("search/taxon"), $.ajax("search/location"), 
-            $.ajax("search/source"), $.ajax("search/interaction")
+            $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
+            $.ajax("ajax/source"), $.ajax("ajax/interaction")
         ).then(function(a1, a2, a3, a4) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
             $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
             deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);

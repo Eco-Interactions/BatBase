@@ -242,29 +242,6 @@ class ContentBlockController extends Controller
     }
 
     /**
-     * Sluggify existing entities.
-     *
-     * @Route("/slug")
-     */
-    public function sluggifyAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $entities = $em->getRepository('AppBundle:ContentBlock')->findAll();
-
-        foreach ($entities as $entity) {
-            $name = $entity->getName();
-            $entity->setSlug($name);
-            $em->persist($entity);
-            $em->flush();
-        }
-
-        return $this->render('ContentBlock/index.html.twig', array(
-            'entities' => $entities,
-        ));
-    }
-
-    /**
      * Finds and displays Definition page content blocks.
      *
      * @Route("/", name="app_home")
@@ -323,6 +300,20 @@ class ContentBlockController extends Controller
             'entities' => $returnData,
             )
         );
+    }
+
+    /**
+     * Finds and displays Search Page content blocks.
+     *
+     * @Route("/search", name="app_search_show")
+     */
+    public function searchAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+
+        return $this->render('ContentBlock/search.html.twig', array());
     }
 
     /**

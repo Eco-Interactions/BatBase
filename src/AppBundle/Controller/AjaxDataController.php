@@ -9,32 +9,44 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
-
 /**
- * Search Page controller.
+ * Ajax Data controller.
  *
- * @Route("/")
+ * @Route("/ajax")
  */
-class SearchController extends Controller
+class AjaxDataController extends Controller
 {
     /**
-     * Finds and displays Search Page content blocks.
+     * Returns an object with the lastUpdated datetime for the system and for 
+     * each entity.
      *
-     * @Route("/search", name="app_search_show")
+     * @Route("/data-state", name="app_ajax_data_state")
+     * @Method("POST")
      */
-    public function showSearchAction()
+    public function getDataLastUpdatedState(Request $request)
     {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
         $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-
-        return $this->render('ContentBlock/search.html.twig', array());
+        $entities = $em->getRepository('AppBundle:SystemDate')->findAll();
+        $state = new \stdClass;
+        
+        foreach ($entities as $entity) {
+            $entityClass = $entity->getDescription();
+            $state->$entityClass = $entity->getDateVal()->format('Y-m-d H:i:s');
+        }
+        $response = new JsonResponse();
+        $response->setData(array(
+            'dataState' => $state,
+        ));
+        return $response;
     }
     /**
      * Serializes and returns all entities of the passed class that have been 
      * updated since the passed 'lastUpdatedAt' time.
      *
-     * @Route("/search/update", name="app_ajax_updated_data")
+     * @Route("/update", name="app_ajax_updated_data")
      */
     public function getUpdatedEntityData(Request $request)
     {
@@ -83,7 +95,7 @@ class SearchController extends Controller
     /**
      * Returns serialized data objects for the Domain, Level, and Taxon entities.
      *
-     * @Route("/search/taxon", name="app_serialize_taxon")
+     * @Route("/taxon", name="app_serialize_taxon")
      */
     public function serializeTaxonDataAction(Request $request) 
     {
@@ -107,7 +119,7 @@ class SearchController extends Controller
     /**
      * Returns serialized data objects for Habitat Type, Location Type, and Location. 
      *
-     * @Route("/search/location", name="app_serialize_location")
+     * @Route("/location", name="app_serialize_location")
      */
     public function serializeLocationDataAction(Request $request) 
     {
@@ -148,7 +160,7 @@ class SearchController extends Controller
     /**
      * Returns serialized data objects for all entities related to Source. 
      *
-     * @Route("/search/source", name="app_serialize_source")
+     * @Route("/source", name="app_serialize_source")
      */
     public function serializeSourceDataAction(Request $request) 
     {
@@ -179,7 +191,7 @@ class SearchController extends Controller
     /**
      * Returns serialized data objects for Interaction and Interaction Type. 
      *
-     * @Route("/search/interaction", name="app_serialize_interactions")
+     * @Route("/interaction", name="app_serialize_interactions")
      */
     public function serializeInteractionDataAction(Request $request) 
     {
