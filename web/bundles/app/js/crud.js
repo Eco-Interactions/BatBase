@@ -561,11 +561,11 @@ $(document).ready(function(){
         return fieldMap[entity];
     }
     /**
-     * Returns an object of fields and field types for the passed detail-entity's
-     * parent entity.
+     * Returns an object of core fields and field types for the passed entity.
+     * Note: source's have sub-entities that will return the core source fields.
      */
-    function getParentEntityFields(entity) {
-        var topEntity = {
+    function getCoreFieldDefs(entity) {  
+        var coreEntityMap = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
             "location": "location"            
@@ -581,7 +581,7 @@ $(document).ready(function(){
                 "Authors": "multiSelect" 
             }
         };
-        return fields[topEntity[entity]];
+        return fields[coreEntityMap[entity]];
     }
     /**
      * Builds all rows for the sub-form according to the passed formConfig obj. 
@@ -597,7 +597,7 @@ $(document).ready(function(){
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
         /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var dfltFields = getParentEntityFields(entity);
+            var dfltFields = getCoreFieldDefs(entity);
             var exclude = cParams.forms[formLvl].confg.exclude;
             return buildRows(dfltFields, exclude);
         }
@@ -963,10 +963,8 @@ $(document).ready(function(){
         /** Adds data from a form element at the parent form level, if needed. */
         function ifHasParentFormVals(entity) {
             var newField;
-            var relFormFields = {
-                "Citation": "publication", "Location": "country"
-            };
-            if (["Citation", "Location"].indexOf(entity) === -1) { return; }
+            var relFormFields = { "Citation": "publication" };
+            if (Object.keys(relFormFields).indexOf(entity) === -1) { return; }
             newField = relFormFields[entity];                               //console.log("new fieldName = ", newField)
             formVals[newField] = $('#'+_util.ucfirst(newField)+'-sel').val();
         }
@@ -997,7 +995,6 @@ $(document).ready(function(){
      */
     function submitFormVals(formLvl, formVals) {                        
         var entity = cParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
-        var fieldTrans = getFieldTranslations(entity);
         var formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
         ajaxFormData(formData, formLvl);
     }                
@@ -1006,14 +1003,14 @@ $(document).ready(function(){
      * which are grouped into flat data and related-entity data objects. 
      */
     function buildFormData(entity, formVals) { 
-        var pEntity = getParentEntity(entity);                                  //console.log("buildFormDataObj. formVals = %O, parentFields = %O", formVals, parentFields);
-        var parentFields = pEntity === false || getParentFields(entity);   
+        var pEntity = getParentEntity(entity);                                  
+        var parentFields = !pEntity || getParentFields(entity);                 //console.log("buildFormDataObj. pEntity = %s, formVals = %O, parentFields = %O", pEntity, formVals, parentFields);
         var fieldTrans = getFieldTranslations(entity); 
         var rels = getRelationshipFields(entity);
         var data = buildFormDataObj();
 
         for (var field in formVals) { getFormFieldData(field, formVals[field]); }
-        handleDetailTypeField();                                                //console.log("formData = %O", data);
+        if (pEntity === "Source") { handleDetailTypeField(); }                  //console.log("formData = %O", data);
         return data;
 
         function buildFormDataObj() {
@@ -1031,12 +1028,12 @@ $(document).ready(function(){
             if (field in fieldTrans) { addTransFormData(); 
             } else { addFormData(); }
             /** Translates the passed field into it's server-ready equivalent. */
-            function addTransFormData() {
+            function addTransFormData() {  
                 var transMap = fieldTrans[field];                               
                 for (var ent in transMap) { data[ent][dataGroup][transMap[ent]] = val; }
             }
             /** Adds the passed field and value to the appropriate entity data object. */
-            function addFormData() {
+            function addFormData() { 
                 var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
                 data[ent][dataGroup][field] = val;
             }
@@ -1054,19 +1051,22 @@ $(document).ready(function(){
             }    
         }
     } /* End buildFormDataObj */
-    /**
-     * If the passed entity is a detail, child, entity, the parent entity name is returned.
-     */
-    function getParentEntity(entity) {
-        var parentEntities = {
+    /** Returns the core entity. (eg, Source is returned when Author is passed.) */
+    function getCoreFormEntity(entity) {
+        var coreEntities = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
+            "location": "location",     "taxon": "taxon"
         };
-        return parentEntities[entity] || false;
+        return coreEntities[entity];
+    }
+    function getParentEntity(entity) {                                          //console.log("hasParentEntity. entity = %s", entity)
+        var detailEntities = ["author", "citation", "publication"];
+        return detailEntities.indexOf(entity) !== -1 ? "source" : false;
     }
     /** Returns an array of the parent entity's field names. */
     function getParentFields(entity) {
-        var parentFields = Object.keys(getParentEntityFields(entity));
+        var parentFields = Object.keys(getCoreFieldDefs(entity));
         return  parentFields.map(function(field) {
             return _util.lcfirst(field.split(" ").join(""));
         });
@@ -1095,6 +1095,9 @@ $(document).ready(function(){
             },
             "author": {
                 "displayName": { "source": "displayName", "author": "displayName" }
+            },
+            "location": {
+                "country": { "location": "parentLoc" }                
             }
         };
         return fieldTrans[entity] || {};
@@ -1104,7 +1107,7 @@ $(document).ready(function(){
         var relationships = {
             "author": ["sourceType"], 
             "citation": ["citationType", "authors", "tags", "publication"], 
-            "location": ["locationType", "habitatType"],
+            "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher"],
             "publisher": []
         };
@@ -1114,15 +1117,10 @@ $(document).ready(function(){
     /*------------- AJAX -----------------------------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
-        // var stubData = {};
-        // var stubName = formData[cParams.forms[formLvl].entity].flat.displayName;
-        // stubData[cParams.forms[formLvl].entity] = {};
-        // stubData[cParams.forms[formLvl].entity][stubName] = "123456";
-        var topEntity = getParentEntity(cParams.forms[formLvl].entity);         //console.log("entity = ", topEntity);
-        var url = getEntityUrl(topEntity, cParams.action);
+        var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      console.log("entity = ", coreEntity);
+        var url = getEntityUrl(coreEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
-        // window.setTimeout(function() { formSubmitSucess({ "source": stubData }) }, 500);
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
