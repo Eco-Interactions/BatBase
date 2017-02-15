@@ -11,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use AppBundle\Entity\Source;
 use AppBundle\Entity\Contribution;
+use AppBundle\Entity\Location;
 
 
 /**
@@ -23,7 +24,7 @@ class CrudController extends Controller
     /**
      * Creates a new Source, and any new detail-entities, from the form data. 
      *
-     * @Route("/source/create", name="app_crud_source_create")
+     * @Route("/source/create", name="app_source_create")
      */
     public function sourceCreateAction(Request $request)
     {
@@ -73,6 +74,35 @@ class CrudController extends Controller
         $coreEntity->$setMethod($detailEntity);
         $em->persist($coreEntity);
     }
+
+    /**
+     * Creates a new Location from the submitted form data. 
+     *
+     * @Route("/location/create", name="app_location_create")
+     */
+    public function locationCreateAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       //print("\nCreating Location.\n");
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
+        $locData = $formData->location;
+
+        $entityData = new \stdClass; 
+
+        $locEntity = new Location();
+        $this->setEntityData("Location", $locData, $locEntity, $em);
+
+        $entityData->detailEntity = false;
+        $entityData->core = "location";
+        $entityData->coreEntity = $locEntity;
+
+        return $this->attemptFlushAndSendResponse($entityData, $em);
+    }
+
+
     /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.
@@ -111,11 +141,17 @@ class CrudController extends Controller
         }
     }
     /** Returns the related-entity object after deriving the class and prop to use. */
-    private function getRelatedEntity($rEntityName, $val, $em)
+    private function getRelatedEntity($relField, $val, $em)
     {
-        $relClass = $rEntityName === 'parentSource' ? 'Source' : ucfirst($rEntityName);
+        $relClass = $this->getRelatedEntityClass($relField);
         $prop = is_numeric($val) ? 'id'  : 'displayName';                       
         return $this->returnRelatedEntity($relClass, $prop, $val, $em);
+    }
+    private function getRelatedEntityClass($relField)
+    {
+        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location" ];
+        return array_key_exists($relField, $classMap) ? 
+            $classMap[$relField] : ucfirst($relField);
     }
     private function returnRelatedEntity($class, $prop, $val, $em)
     {
