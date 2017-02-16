@@ -668,21 +668,26 @@
         return ints;
     }
 /*------------------Location Search Methods-----------------------------------*/
-    /**
-     * Get location data from local storage. Store the location records as 'rcrdsById' 
-     * in the global focusStorage object. Get top region ids @getTopLocIds and send 
-     * them to @buildLocTree to build the grid. 
-     */
+    /** Get location data from local storage and sends it to @startLocGridBuild. */
     function buildLocationGrid() {
+        var data = getLocData();
+        if( data ) {  startLocGridBuild(data);
+        } else { console.log("Error loading location data from storage."); }
+    }
+    function getLocData() {
         var locDataStorageProps = [
             'location', 'locationType', 'topRegionNames', 'countryNames', 'regionNames'
         ];
-        var data = _util.getDataFromStorage(locDataStorageProps);
-        if( data ) {                                                            //console.log("Stored Locations Loaded = %O", data);
-            focusStorage.rcrdsById = data.location;                                    
-            focusStorage.data = data;
-            buildLocTreeAndGrid(getTopRegionIds());
-        } else { console.log("Error loading location data from storage."); }
+        return _util.getDataFromStorage(locDataStorageProps);
+    }
+    /**
+     * Store the location records as 'rcrdsById' in focusStorage. Gets top region 
+     * ids and sends them to @buildLocTreeAndGrid.
+     */ 
+    function startLocGridBuild(data) {                   
+        focusStorage.rcrdsById = data.location;                                    
+        focusStorage.data = data;
+        buildLocTreeAndGrid(getTopRegionIds());
     }
     function getTopRegionIds() {
         var ids = [];
@@ -720,19 +725,19 @@
         var tree = {};                                                          //console.log("tree = %O", tree);
         topLocs.forEach(function(id){  
             topLoc = getDetachedRcrd(id);  
-            tree[topLoc.displayName] = getLocData(topLoc);
+            tree[topLoc.displayName] = getLocChildren(topLoc);
         });  
         focusStorage.curTree = sortDataTree(tree);
     }
     /** Returns the location record with all child ids replaced with their records. */
-    function getLocData(rcrd) {     
+    function getLocChildren(rcrd) {     
         if (rcrd.children.length > 0) { 
             rcrd.children = rcrd.children.map(getLocChildData);
         }
         return rcrd;
     }
     function getLocChildData(childId) {  
-        return getLocData(getDetachedRcrd(childId));
+        return getLocChildren(getDetachedRcrd(childId));
     }
     /**
      * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
@@ -1224,8 +1229,8 @@
      */
     function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
         var filterVal = focusStorage.rcrdsById[selVal].displayName;
-        var colModel = filterVal !== "Asia" ? 
-            [filterVal] : ["East Asia", "South & Southeast Asia", "West & Central Asia"];
+        var colModel = filterVal === "Asia" ? 
+            ["East Asia", "South & Southeast Asia", "West & Central Asia"] : [filterVal];
         gridOptions.api.getFilterApi(colName).setModel(colModel);
         buildFilteredLocTree(selVal, colName);
         loadLocComboboxes(focusStorage.curTree);
@@ -1246,7 +1251,7 @@
         });
         focusStorage.curTree = tree;
         /** Recurses through displayed children until finding the leaf interaction records. */
-        function getFilteredChildData(treeNode) {                                     //console.log("getHabTreeData. node = %O", treeNode);
+        function getFilteredChildData(treeNode) {                               //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
             if (!selectedOpened) { addParentOpenRows(treeNode); }
             var locNode = getDetachedRcrd(treeNode.data.id); 
@@ -1334,7 +1339,7 @@
          * For each subsequent taxon, each level more specific that the parent 
          * lvl is cleared from the taxon-heirarchy @clearLowerLvls.  
          */
-        function syncTaxonHeir(taxonName, lvl, parent) { //console.log("syncTaxonHeir parent = ", parent);
+        function syncTaxonHeir(taxonName, lvl, parent) {                        //console.log("syncTaxonHeir parent = ", parent);
             var lvls = _util.getDataFromStorage('levelNames');
             if (parent === null || parent === 1) { fillInAvailableLevels(lvl, lvls);
             } else { clearLowerLvls(focusStorage.rcrdsById[parent].level) }
@@ -1347,13 +1352,13 @@
          */
         function fillInAvailableLevels(topLvl, lvls) { 
             var topIdx = lvls.indexOf(topLvl);
-            for (var i = topIdx; i < lvlsH.length; i++) { 
-                curTaxonHeirarchy[lvlsH[i]] = null;
+            for (var i = topIdx; i < lvls.length; i++) { 
+                curTaxonHeirarchy[lvls[i]] = null;
             }  
         }
         function clearLowerLvls(parentLvl, lvls) {
-            var topIdx = lvlsH.indexOf(parentLvl);
-            for (var i = ++topIdx; i < lvlsH.length; i++) { curTaxonHeirarchy[lvlsH[i]] = null; }
+            var topIdx = lvls.indexOf(parentLvl);
+            for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
         }
         function fillInteractionRcrdsWithTaxonTreeData(intObj) {
             for (var role in intObj) {
@@ -1984,7 +1989,6 @@
 /*========================= Walkthrough ======================================*/
     function showIntroWalkthrough() {
         window.setTimeout(startIntroWalkthrough, 250); 
-        _util.populateStorage('prevVisit', true);
     }
     function startIntroWalkthrough(startStep){
         if (intro) {                                                            //console.log("intro = %O", intro)
@@ -2096,10 +2100,11 @@
             $('#search-focus').off("change");
         }
         function resetGridState() {
+            var focus = focusStorage.curFocus || "taxa";
             $('#search-grid').css("height", "888px");
             $('#show-tips').click(showTips);
             $('#search-focus').change(selectSearchFocus);
-            $('#search-focus').val(focusStorage.curFocus);
+            $('#search-focus').val(focus);
         }
     }   /* End startIntroWalkthrough */
     function initSearchTips() { 
