@@ -45,10 +45,6 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 TAYLOR:
 Notes::
 Questions:
-    -- Should the authors attributed to a new publication (ie, book) be added 
-        to its new citation? Users could empty the citation's author field if
-        there was perhaps an author that wrote the book but not an article being
-        cited within it.
 ---------------------Next-------------------------------------------------------
 
 --SHORTTERM--

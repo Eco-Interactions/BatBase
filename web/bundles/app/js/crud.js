@@ -253,7 +253,31 @@ $(document).ready(function(){
             "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
+        addExistingPubContribs();
+        $('#CitationText_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
+    }
+    /**
+     * If the parent publication has existing contributors, add them to the new 
+     * citation form's author field(s). 
+     */
+    function addExistingPubContribs(val) {  
+        var pubRcrd = cParams.records.source[$('#Publication-sel').val()]; console.log('pubRcrd = %O', pubRcrd) 
+        if (pubRcrd.contributors.length > 0) {
+            selectExistingAuthors(pubRcrd.contributors);
+        }
+    }
+    /** Loops through author array and selects each author in the form */ 
+    function selectExistingAuthors(authAry) {
+        $.each(authAry, function(i, authId) {  
+            selectAuthor(i, authId);
+        });
+    }
+    /** Select the passed author and builds a new, empty author combobox. */
+    function selectAuthor(cnt, authId) {
+        var selId = '#Authors-sel'+ ++cnt; 
+        $(selId)[0].selectize.addItem(authId, true);
+        buildNewAuthorSelect();
     }
     /*-------------- Country -------------------------------------------------*/
     /** Inits both the Country and Location form-fields for the 'top' interaction form. */
@@ -370,6 +394,11 @@ $(document).ready(function(){
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
+        buildNewAuthorSelect();
+        focusCombobox('#Authors-sel'+cnt);
+    }
+    /** Builds a new, empty author combobox */
+    function buildNewAuthorSelect() {
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
         var parentFormEntity = cParams.forms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
@@ -378,7 +407,6 @@ $(document).ready(function(){
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, "sub");
-        focusCombobox('#Authors-sel'+cnt);
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
