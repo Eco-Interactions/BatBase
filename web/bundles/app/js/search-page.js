@@ -82,7 +82,6 @@
     /**
      * Container for param data needed for a selected focus. Resets on focus change.
      * - curFocus: Top grid sort - Taxon (taxa), Location (locs), or Source (srcs).
-     * - levels: An array of all taxon level names used in various places throughout. 
      * - openRows: Array of entity ids whose grid rows will be expanded on grid load.
      * Notable properties stored later: 
      * rcrdsById - all records for the current focus.
@@ -94,7 +93,6 @@
     function resetFocusStorage() {                                              
         focusStorage = {}; 
         focusStorage.curFocus =  localStorage.getItem('curFocus') || "taxa";  
-        focusStorage.levels = _util.getDataFromStorage('levelNames') || false;  
         focusStorage.openRows = [];                                             //console.log("focusStorage = %O", focusStorage);
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
@@ -1337,7 +1335,8 @@
          * lvl is cleared from the taxon-heirarchy @clearLowerLvls.  
          */
         function syncTaxonHeir(taxonName, lvl, parent) { //console.log("syncTaxonHeir parent = ", parent);
-            if (parent === null || parent === 1) { fillInAvailableLevels(lvl);
+            var lvls = _util.getDataFromStorage('levelNames');
+            if (parent === null || parent === 1) { fillInAvailableLevels(lvl, lvls);
             } else { clearLowerLvls(focusStorage.rcrdsById[parent].level) }
 
             curTaxonHeirarchy[lvl] = taxonName;
@@ -1346,15 +1345,15 @@
          * Inits the taxon-heirarchy object that will be used to track of the current
          * parent chain of each taxon being processed. 
          */
-        function fillInAvailableLevels(topLvl) { 
-            var topIdx = focusStorage.levels.indexOf(topLvl);
-            for (var i = topIdx; i < focusStorage.levels.length; i++) { 
-                curTaxonHeirarchy[focusStorage.levels[i]] = null;
+        function fillInAvailableLevels(topLvl, lvls) { 
+            var topIdx = lvls.indexOf(topLvl);
+            for (var i = topIdx; i < lvlsH.length; i++) { 
+                curTaxonHeirarchy[lvlsH[i]] = null;
             }  
         }
-        function clearLowerLvls(parentLvl) {
-            var topIdx = focusStorage.levels.indexOf(parentLvl);
-            for (var i = ++topIdx; i < focusStorage.levels.length; i++) { curTaxonHeirarchy[focusStorage.levels[i]] = null; }
+        function clearLowerLvls(parentLvl, lvls) {
+            var topIdx = lvlsH.indexOf(parentLvl);
+            for (var i = ++topIdx; i < lvlsH.length; i++) { curTaxonHeirarchy[lvlsH[i]] = null; }
         }
         function fillInteractionRcrdsWithTaxonTreeData(intObj) {
             for (var role in intObj) {
