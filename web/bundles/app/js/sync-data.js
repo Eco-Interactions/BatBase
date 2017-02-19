@@ -285,10 +285,13 @@
     /** Stores an object of taxon names and ids for each level in each domain. */
     function deriveAndStoreTaxonData(data) {
         var nameData = separateTaxaByLevelAndDomain(data.taxon);                //console.log("taxonym name data = %O", nameData);
-        for (var domain in nameData) {
-            for (var level in domain) {
-                storeData(domain+level+'Names', nameData[domain][level]);
-            }
+        for (var domain in nameData) {  
+            storeLevelTaxonData(domain, nameData[domain]);
+        }
+    }
+    function storeLevelTaxonData(domain, taxonObj) {
+        for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", domain+level+'Names', taxonObj[level]);
+            storeData(domain+level+'Names', taxonObj[level]);
         }
     }
     /** Each taxon is sorted by domain and then level. Domain taxa are skipped.  */

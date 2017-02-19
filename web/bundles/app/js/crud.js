@@ -369,21 +369,82 @@ $(document).ready(function(){
         return { "value": "", "text": "Creating Location..." };
     }
     /*-------------- Taxon ---------------------------------------------------*/
+    /**
+     * Builds both the subject and object field and appends them disabled. The 
+     * 'Select Subject' form is appended where the user will select all 
+     * taxonomic data available. 
+     */
     function buildTaxonFieldRows() {
+        initSubjectField();
+        initObjectField();
+        initSubjectForm();
+    }
+    function initSubjectField() {
         var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
-        var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
         $('form[name="crud"]').append(buildFormRow("Subject", subjElem, "top", true));
-        $('form[name="crud"]').append(buildFormRow("Object", objElem, "top", true));
         initTopFormCombobox("subject");
+    }
+    function initObjectField() {
+        var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
+        $('form[name="crud"]').append(buildFormRow("Object", objElem, "top", true));
         initTopFormCombobox("object");
         enableCombobox('#Object-sel', false);
     }
+    /**
+     * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
+     * each level present in the Bat domain, (Family, Genus, and Species), filled 
+     * with the taxonyms at that level. When one is selected, the remaining boxes
+     * are repopulated with related taxa and the 'select' button is enabled.
+     */
+    function initSubjectForm() {
+        cParams.domain = "Bat";
+        $('form[name="crud"]').append(initSubForm(
+            "subject", "sub", "sub2-left", {}, "#Subject-sel"));
+        initSubFormComboboxes("subject");
+    }
+    /**
+     * When complete, the 'Select Subject' form is removed and the most specific 
+     * taxonomic data is displayed in the top-form Subject combobox. The 'Select 
+     * Object' form is built and displayed.
+     */
     function onSubjectSelection() {
         // body...
     }
     function onObjectSelection() {
         // body...
     }
+    function initTaxonForm(val) {
+        // body...
+    }
+    /**
+     * When a taxon at a level is selected, the remaining level comboboxes are
+     * repopulated with related taxa and the 'select' button is enabled. If the
+     * combo was cleared, ensure the remaining dropdowns are in sync or, if they
+     * are all empty, disable the 'select' button.
+     */
+    function onLevelSelection(val) {
+        if (val === "" || isNaN(parseInt(val))) { return checkSubmitButton(); } 
+        fillAncestorTaxa(val);
+        enableSubmitBttn('#sub_submit');             
+    }
+    function checkSubmitButton() {
+        // body...
+    }
+    function fillAncestorTaxa(val) {
+        // body...
+    }
+
+
+
+
+
+
+
+
+
+
+
+
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
     /**
@@ -521,6 +582,11 @@ $(document).ready(function(){
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
+            "Class": { name: "Class", change: onLevelSelection, add: initTaxonForm },
+            "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
+            "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
+            "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
+            "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
         };
         cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -607,6 +673,12 @@ $(document).ready(function(){
                     "Elevation", "ElevationMax", "ElevationUnits", "HabitatType", 
                     "Latitude", "Longitude" ],
             },
+            "subject": {
+                "add": {},  
+                "exclude": ["Domain", "Class", "Order"],
+                "required": [],
+                "order": ["Family", "Genus", "Species"],
+            },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
@@ -630,7 +702,8 @@ $(document).ready(function(){
         var coreEntityMap = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
-            "location": "location"            
+            "location": "location",     "subject": "taxon",
+            "object": "taxon"            
         };
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
@@ -641,6 +714,10 @@ $(document).ready(function(){
             "source": { "Display Name": "text", "Description": "textArea", 
                 "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
                 "Authors": "multiSelect" 
+            },
+            "taxon": {
+                "Domain": "select", "Class": "select", "Order": "select", 
+                "Family": "select", "Genus": "select", "Species": "select"
             }
         };
         return fields[coreEntityMap[entity]];
@@ -783,6 +860,11 @@ $(document).ready(function(){
             "Location_Type": [ getLocationTypeOpts ],
             "Publisher": [ getOptsFromStoredData, 'publisherNames'],
             "Tags": [ getTagOpts, 'source' ],
+            "Class": [ getTaxonOpts, 'Class' ],
+            "Order": [ getTaxonOpts, 'Order' ],
+            "Family": [ getTaxonOpts, 'Family' ],
+            "Genus": [ getTaxonOpts, 'Genus' ],
+            "Species": [ getTaxonOpts, 'Species' ],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -841,6 +923,11 @@ $(document).ready(function(){
     function getAuthOpts(prop) {
         var ids = _util.getDataFromStorage(prop);
         return getRcrdOpts(ids, cParams.records.source);
+    }
+    /** Returns an array of taxonyms for the passed level and the form's domain. */
+    function getTaxonOpts(level) {
+        var opts = getOptsFromStoredData(cParams.domain+level+"Names"); console.log("taxon opts for [%s] = %O", cParams.domain+level+"Names", opts)
+        return opts;
     }
     /* -----------------------------------------------------------------------*/
     /**
