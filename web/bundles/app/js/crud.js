@@ -393,7 +393,7 @@ $(document).ready(function(){
      * 'this' author combobox. The total count of authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
-        if (val === "" || parseInt(val) === NaN) { return; }
+        if (val === "" || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
         buildNewAuthorSelect(cnt);
         focusCombobox('#Authors-sel'+cnt);
@@ -423,6 +423,19 @@ $(document).ready(function(){
             "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
         disableSubmitBttn("#sub_submit");
         return { "value": "", "text": "Creating Author..." };
+    }
+    /**
+     * When an author combobox is cleared, all empty author comboboxes are cleared
+     * and an empty combobox is added/left at the bottom of the author comboboxes.
+     */
+    function clearUnusedAuthElems() {  
+        // for (var i = 1; i < ($("#Authors_sel-cntnr").data("cnt") + 1); i++ ) { console.log("i = ", i);console.log("val = ", $("#Authors-sel"+i).val())
+        //     if ($("#Authors-sel"+i).val() == "") { console.log("empty select for %O", $("#Authors-sel"+i));
+        //         $("#Authors-sel"+i)[0].selectize.off("change");
+                // $("#Authors-sel"+i)[0].selectize.destroy();
+                // $("#Authors-sel"+i).remove(); 
+        //     }
+        // }
     }
 
     /*------------------- Shared Methods ---------------------------------------------------*/
