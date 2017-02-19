@@ -367,7 +367,31 @@ class Taxon
     {
         return $this->domain;
     }
-    
+
+    /**
+     * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("domain")
+     *
+     * @return int
+     */
+    public function serializeDomain()
+    {
+        return $this->findDomainAndReturnObj($this);
+    }
+    private function findDomainAndReturnObj($taxon)
+    {
+        if ($taxon->getId() === 1) { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
+        $domain = $taxon->getDomain();
+        if ($domain) {
+            return [ 
+                "id" => $domain->getId(), 
+                "displayName" => $domain->getDisplayName() ];
+        }
+        if (!$taxon->getParentTaxon()) { print($taxon->getId()."\n");  }
+        return $this->findDomainAndReturnObj($taxon->getParentTaxon());
+    }
+
     /**
      * Set level.
      *
