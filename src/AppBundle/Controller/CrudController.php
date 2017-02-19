@@ -102,7 +102,6 @@ class CrudController extends Controller
         return $this->attemptFlushAndSendResponse($entityData, $em);
     }
 
-
     /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.

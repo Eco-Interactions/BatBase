@@ -852,12 +852,10 @@
         for (var topNode in locTree) {                                          //console.log("topNode = ", topNode)
             finalRowData.push( getLocRowData(locTree[topNode], 0)); 
         }
-        focusStorage.rowData = finalRowData;                                                    //console.log("rowData = %O", rowData);
+        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", focusStorage.rowData);
         loadGrid("Location Tree");
     }
-    /**
-     * Returns a row data object for the passed location and it's children. 
-     */
+    /** Returns a row data object for the passed location and it's children.  */
     function getLocRowData(locRcrd, treeLvl) {                                  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
         return {
             id: locRcrd.id,

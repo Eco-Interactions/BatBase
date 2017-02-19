@@ -394,12 +394,12 @@ $(document).ready(function(){
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return; }
-        buildNewAuthorSelect();
+        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+        buildNewAuthorSelect(cnt);
         focusCombobox('#Authors-sel'+cnt);
     }
     /** Builds a new, empty author combobox */
-    function buildNewAuthorSelect() {
-        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+    function buildNewAuthorSelect(cnt) {
         var parentFormEntity = cParams.forms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
@@ -897,7 +897,7 @@ $(document).ready(function(){
      */
     function exitForm(formId, formLvl, focus) {                                 //console.log("id = %s, formLvl = %s", id, formLvl)      
         $(formId).remove();
-        resetFormCombobox(formLvl);
+        resetFormCombobox(formLvl, focus);
         ifParentFormValidEnableSubmit(formLvl);
         cParams.forms[formLvl].exitHandler();
     }
@@ -1038,7 +1038,7 @@ $(document).ready(function(){
         var data = buildFormDataObj();
 
         for (var field in formVals) { getFormFieldData(field, formVals[field]); }
-        if (pEntity === "Source") { handleDetailTypeField(); }                  //console.log("formData = %O", data);
+        if (pEntity === "source") { handleDetailTypeField(); }                  //console.log("formData = %O", data);
         return data;
 
         function buildFormDataObj() {

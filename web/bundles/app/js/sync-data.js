@@ -101,9 +101,14 @@
     /*------------------ Entity Storage Methods ------------------------------*/
     /**
      * Updates stored-data props related to a core-entity record with new data.
-     * NOTE: Only including source for now, as only source returns data atm.  
      */
     function updateCoreEntityData(entity, rcrd) {                               //console.log("Updating Core entity. %s. %O", entity, rcrd);
+        var dataProps = getDataProps(entity, rcrd);
+        updateDataProps(dataProps, entity, rcrd);
+        updateCoreData(entity, rcrd);
+    }
+    /** Returns an object of related data properties to update. */
+    function getDataProps(entity, rcrd) {
         var type = getEntityType(entity, rcrd);                                 //console.log("type = ", type);
         var update = {
             'source': {
@@ -113,16 +118,19 @@
                 'publication': { 'pubSources': addToRcrdAryProp, 'author': addContribData },
                 'publisher': { 'publisherNames': addToNameProp }
             },
+            'location': {
+                'location': addToParentRcrd, 'habitatType': addToTypeProp, 
+                'locationType': addToTypeProp
+            },
         };
-        updateDataProps(update[entity][type], entity, rcrd);
-        updateCoreData(entity, rcrd);
+        return type ? update[entity][type] : update[entity];
     }
     /** 
-     * Returns the record's entity'Type', eg SourceType Author or Publication.
-     * Note Taxon are the only core entity without types.
+     * Returns the record's entity'Type', eg SourceType Author or Publication when
+     * there are 'type' properties to update. (Currently only source has type-specific updates.)
      */
     function getEntityType(entity, rcrd) {
-        if (entity === "Taxon") { return false; }
+        if (entity !== "source") { return false; }
         var type = _util.lcfirst(entity)+"Type";
         return _util.lcfirst(rcrd[type].displayName);
     }
@@ -145,6 +153,7 @@
     function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
+            'citation': {},
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
             'publisher': { 'publisherNames': addToNameProp }
         };
@@ -171,7 +180,8 @@
     /** Add the new record's id to the entity-type's stored id array.  */
     function addToTypeProp(prop, rcrd, entity) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("addToTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-        var typeId = rcrd[prop].id;                                             
+        var typeId = rcrd[prop] ? rcrd[prop].id : false;
+        if (!typeId) { return; }
         typeObj[typeId][entity+'s'].push(rcrd.id);
         storeData(prop, typeObj);
     }
