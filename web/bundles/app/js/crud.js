@@ -352,6 +352,7 @@ $(document).ready(function(){
         var locRcrd = cParams.records.location[val];
         enableCombobox('#Country-sel', false);
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
+        buildTaxonFieldRows();
     }
     /** When Location is cleared, the country combobox is reenabled and cleared. */
     function enableCountryField() {  
@@ -366,6 +367,22 @@ $(document).ready(function(){
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
         return { "value": "", "text": "Creating Location..." };
+    }
+    /*-------------- Taxon ---------------------------------------------------*/
+    function buildTaxonFieldRows() {
+        var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
+        var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
+        $('form[name="crud"]').append(buildFormRow("Subject", subjElem, "top", true));
+        $('form[name="crud"]').append(buildFormRow("Object", objElem, "top", true));
+        initTopFormCombobox("subject");
+        initTopFormCombobox("object");
+        enableCombobox('#Object-sel', false);
+    }
+    function onSubjectSelection() {
+        // body...
+    }
+    function onObjectSelection() {
+        // body...
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
@@ -458,6 +475,10 @@ $(document).ready(function(){
                 name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
             'location': { 
                 name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
+            'subject': { 
+                name: 'Subject', id: '#Subject-sel', change: onSubjectSelection, add: false },
+            'object': { 
+                name: 'Object', id: '#Object-sel', change: onObjectSelection, add: false },
         };
         initSelectCombobox(selMap[entity], "top"); 
     }
