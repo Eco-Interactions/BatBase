@@ -282,15 +282,31 @@
         deriveAndStoreSourceData(data[2]);
         // deriveInteractionData(data[3]);
     }
-    /** levels - an array of all Taxon level names - Kingdom, Family, Order, etc. */
+    /** Stores an object of taxon names and ids for each level in each domain. */
     function deriveAndStoreTaxonData(data) {
-        var levels = [];
-        for (var lvl in data.level) { 
-            levels.push(data.level[lvl].displayName); 
+        var nameData = separateTaxaByLevelAndDomain(data.taxon);                //console.log("taxonym name data = %O", nameData);
+        for (var domain in nameData) {
+            for (var level in domain) {
+                storeData(domain+level+'Names', nameData[domain][level]);
+            }
         }
-        storeData('levels', levels);
     }
-    /** [entity]Names - an object with each entity's displayName (key) and id. */
+    /** Each taxon is sorted by domain and then level. Domain taxa are skipped.  */
+    function separateTaxaByLevelAndDomain(taxa) {
+        var data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
+        for (var id = 5; id < Object.keys(taxa).length+1; id++) {               
+            addTaxonData(taxa[id]);
+        }                         
+        return data;                                              
+        /** Adds the taxon's name (k) and id to it's level's obj. */
+        function addTaxonData(taxon) {
+            var domainObj = data[taxon.domain.displayName];
+            var level = taxon.level.displayName;  
+            if (!domainObj[level]) { domainObj[level] = {}; }; 
+            domainObj[level][taxon.displayName] = taxon.id;
+        }
+    }
+    /** [entity]Names - an object with each entity's displayName(k) and id. */
     function deriveAndStoreLocationData(data) {  
         addUnspecifiedLocation(data.noLocIntIds);
         storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
@@ -329,9 +345,9 @@
         return data;
     }
     /**
-     * [entity]Names - an object with each entity's displayName (key) and id.
+     * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
-     * [entity]Tags - an object with each entity tag's displayName (key) and id.
+     * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
         storeData('authSources', data.sourceType[3].sources);         
