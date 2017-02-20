@@ -400,10 +400,21 @@ $(document).ready(function(){
         cParams.domain = "Bat";
         $('form[name="crud"]').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
-        initSubFormComboboxes("subject");                                       
-        $('#sub-hdr')[0].innerHTML = "Select Subject Taxon";
+        initSubFormComboboxes("subject");             
+        customizeElemsForTaxonSelectForm("Subject");
+    }
+    /** Replaces the Header and the submit/cancel button text. Sets the 'reset' event. */
+    function customizeElemsForTaxonSelectForm(role) {
+        $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
         $('#sub-submit')[0].value = "Select Taxon";        
-        $('#sub-cancel')[0].remove();
+        $('#sub-cancel')[0].value = "Reset";
+        $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
+    }
+    /** Removes and replaces the taxon form. */
+    function resetTaxonSelectForm() {                                           
+        var initForm = cParams.domain === 'Bat' ? initSubjectForm : initObjectForm;
+        $(this)[0].parentElement.parentElement.remove();
+        initForm();
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
