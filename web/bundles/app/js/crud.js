@@ -108,7 +108,7 @@ $(document).ready(function(){
             action: action,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
-            records: _util.getDataFromStorage(["source", "location"])
+            records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
         initFormLevelParamsObj("interaction", "top", null, {});
     }
@@ -438,18 +438,58 @@ $(document).ready(function(){
      */
     function onLevelSelection(val) {
         if (val === "" || isNaN(parseInt(val))) { return checkSubmitButton(); } 
-        fillAncestorTaxa(val);
+        repopulateCombosWithRelatedTaxa(val);
         enableSubmitBttn('#sub-submit');             
     }
     function checkSubmitButton() {
         // body...
     }
-    function fillAncestorTaxa(val) {
-        // body...
+    /**
+     * The selected taxon's realted taxa, ancestors and children, will repopulate 
+     * the level comboboxes. The ancestor at each level will be be selected. 
+     */
+    function repopulateCombosWithRelatedTaxa(selId) {
+        var domainTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
+        var related = {};                                                       //console.log("related = %O", related)
+        var taxon = cParams.records.taxon[selId];
+        getAncestorTaxa(taxon);
+        taxon.children.forEach(addRelatedChild);                                //console.log("related = %O", related);
+        repopulateLevelCombos(related, taxon.level.id);
+        /** Adds parent taxa to related-taxa object, until the domain parent. */
+        function getAncestorTaxa(taxon) {                                          
+            var level = taxon.level.id;
+            if ( domainTaxa.indexOf(taxon.id) !== -1 ) { return; }
+            if (!related[level]) { related[level] = {}; }
+            related[level][taxon.id] = taxon;                                   //console.log("setting lvl = ", taxon.level)
+            getAncestorTaxa(cParams.records.taxon[taxon.parent]);
+        }
+        function addRelatedChild(id) {
+            var taxon = cParams.records.taxon[id];
+            var level = taxon.level.id;
+            if (!related[level]) { related[level] = {}; }
+            related[level][taxon.id] = taxon;                                   //console.log("setting lvl = ", taxon.level)
+            taxon.children.forEach(addRelatedChild);
+        }
+    } /* End fillAncestorTaxa */    
+    function repopulateLevelCombos(relatedObj, selLvl) {
+        for (var level in relatedObj) {
+            repopulateLevelCombo(relatedObj[level], level, selLvl);
+        }
     }
+    /** Replaces the options for the level combo. Selects the ancestors of the selected. */
+    function repopulateLevelCombo(taxaObj, level, selLvl) {  
+        var opts = getRcrdOpts(null, taxaObj);
+        var levelName = taxaObj[Object.keys(taxaObj)[0]].level.displayName; //console.log("repopulateLevelCombo for level = %s (%s), selLvl = ", level, )
+        var selApi = $('#'+levelName+'-sel')[0].selectize;
 
-
-
+        replaceOptions(opts, selApi);
+        if (level <= selLvl) { selApi.addItem(opts[0].value, true); }
+    }
+    function replaceOptions(opts, selApi) {
+        selApi.clearOptions();
+        selApi.addOption(opts);
+        selApi.refreshOptions(false);
+    }
 
 
 
@@ -940,7 +980,7 @@ $(document).ready(function(){
     }
     /** Returns an array of taxonyms for the passed level and the form's domain. */
     function getTaxonOpts(level) {
-        var opts = getOptsFromStoredData(cParams.domain+level+"Names"); console.log("taxon opts for [%s] = %O", cParams.domain+level+"Names", opts)
+        var opts = getOptsFromStoredData(cParams.domain+level+"Names");         //console.log("taxon opts for [%s] = %O", cParams.domain+level+"Names", opts)
         return opts;
     }
     /* -----------------------------------------------------------------------*/
