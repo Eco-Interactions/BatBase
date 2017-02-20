@@ -546,23 +546,23 @@ a[role="button"], .tos-bttn, #exit-form {
 	height: 20px;
 	font-weight: bold;
 }
-#sub-form {
+.med-form {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 808px;
     margin: 11px 0 0 100px;
 }
-#sub2-form {
+.sml-form {
 	border: 1px solid grey;
 	border-radius: 5px;
     padding: 5px;
     margin-top: .5em;
 }
-.sub2-left {
+.sml-left {
 	position: relative;
-	left: 15px;
+	left: 25px;
 }
-.sub2-right {
+.sml-right {
 	position: relative;
 	right: 15px;
 }

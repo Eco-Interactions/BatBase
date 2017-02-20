@@ -199,7 +199,7 @@ $(document).ready(function(){
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
-            "publication", "sub", "flex-row", {"Title": val}, "#Publication-sel"));
+            "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
@@ -250,7 +250,7 @@ $(document).ready(function(){
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
-            "citation", "sub", "flex-row", {"Title": val}, "#Citation-sel"));
+            "citation", "sub", "flex-row med-form", {"Title": val}, "#Citation-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
@@ -363,7 +363,7 @@ $(document).ready(function(){
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
         $('form[name="crud"]').append(initSubForm(
-            "location", "sub", "flex-row", {"Display Name": val}, "#Location-sel"));
+            "location", "sub", "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
         return { "value": "", "text": "Creating Location..." };
@@ -399,8 +399,11 @@ $(document).ready(function(){
     function initSubjectForm() {
         cParams.domain = "Bat";
         $('form[name="crud"]').append(initSubForm(
-            "subject", "sub", "sub2-left", {}, "#Subject-sel"));
-        initSubFormComboboxes("subject");
+            "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
+        initSubFormComboboxes("subject");                                       
+        $('#sub-hdr')[0].innerHTML = "Select Subject Taxon";
+        $('#sub-submit')[0].value = "Select Taxon";        
+        $('#sub-cancel')[0].remove();
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -425,7 +428,7 @@ $(document).ready(function(){
     function onLevelSelection(val) {
         if (val === "" || isNaN(parseInt(val))) { return checkSubmitButton(); } 
         fillAncestorTaxa(val);
-        enableSubmitBttn('#sub_submit');             
+        enableSubmitBttn('#sub-submit');             
     }
     function checkSubmitButton() {
         // body...
@@ -459,9 +462,9 @@ $(document).ready(function(){
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
         $('#Publisher_row').append(initSubForm(
-            "publisher", "sub2", "sub2-right", {"Display Name": val}, "#Publisher-sel"));
-        enableSubmitBttn("#sub2_submit");
-        disableSubmitBttn("#sub_submit");
+            "publisher", "sub2", "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
+        enableSubmitBttn("#sub2-submit");
+        disableSubmitBttn("#sub-submit");
         return { "value": "", "text": "Creating Publisher..." };
     }
 
@@ -498,8 +501,8 @@ $(document).ready(function(){
         var parentSelId = "#Authors-sel"+authCnt;
         if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
         $('#Authors_row').append(initSubForm(
-            "author", "sub2", "sub2-left", {"Display Name": val}, parentSelId));
-        disableSubmitBttn("#sub_submit");
+            "author", "sub2", "sml-left sml-form", {"Display Name": val}, parentSelId));
+        disableSubmitBttn("#sub-submit");
         return { "value": "", "text": "Creating Author..." };
     }
     /**
@@ -966,7 +969,7 @@ $(document).ready(function(){
     function checkRequiredFields(e) {  
         var input = e.currentTarget;
         var formLvl = $(input).data("formLvl");  
-        var subBttnId = '#'+formLvl+'_submit';
+        var subBttnId = '#'+formLvl+'-submit';
         if (!input.value || hasOpenSubForm(formLvl)) { 
             disableSubmitBttn(subBttnId); 
         } else if (ifRequiredFieldsFilled(formLvl)) { 
@@ -992,9 +995,9 @@ $(document).ready(function(){
         var events = getBttnEvents(entity, level);                              //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
-        var submit = _util.buildElem("input", { id: level + "_submit", 
+        var submit = _util.buildElem("input", { id: level + "-submit", 
             class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
-        var cancel = _util.buildElem("input", { id: level +"_cancel", 
+        var cancel = _util.buildElem("input", { id: level +"-cancel", 
             class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
         $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
         $(cancel).css("cursor", "pointer").click(events.cancel);
@@ -1046,7 +1049,7 @@ $(document).ready(function(){
     function ifParentFormValidEnableSubmit(formLvl) {
         var parentLvl = getNextFormLevel('parent', formLvl);
         if (ifRequiredFieldsFilled(parentLvl)) {
-            enableSubmitBttn('#'+parentLvl+'_submit');
+            enableSubmitBttn('#'+parentLvl+'-submit');
         }
     }
     /** Enables passed submit button */
