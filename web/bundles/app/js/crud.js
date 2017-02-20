@@ -408,6 +408,7 @@ $(document).ready(function(){
         $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
         $('#sub-submit')[0].value = "Select Taxon";        
         $('#sub-cancel')[0].value = "Reset";
+        $('#sub-submit').unbind("click").click(selectTaxon);
         $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
     }
     /** Removes and replaces the taxon form. */
@@ -415,6 +416,31 @@ $(document).ready(function(){
         var initForm = cParams.domain === 'Bat' ? initSubjectForm : initObjectForm;
         $(this)[0].parentElement.parentElement.remove();
         initForm();
+    }
+    /** Adds the selected taxon to the top-form [role] taxon combobox. */
+    function selectTaxon() {
+        var role = cParams.domain === 'Bat' ? 'Subject' : 'Object';
+        var selApi = $('#'+role+'-sel')[0].selectize;
+        var opt = getSelectedTaxonOption();
+        replaceOptions(opt, selApi);
+        selApi.addItem(opt.value);
+    }
+    /** Returns an option object for the most specific taxon selected. */
+    function getSelectedTaxonOption() {
+        var taxon = getSelectedTaxon();                                         //console.log("selected Taxon = %O", taxon);
+        var displayName = taxon.level.id === 7 ? 
+            taxon.displayName : taxon.level.displayName + " " + taxon.displayName;
+        return { value: taxon.id, text: displayName };
+    }
+    /** Finds the most specific level with a selection and returns that taxon record. */
+    function getSelectedTaxon() {
+        var selElems = $('#sub-form .selectized').toArray(); 
+        var emptyIdx = selElems.findIndex(function(elem) {  
+            if (elem.id.includes('-sel')) { return !$(elem).val(); }
+        });  
+        var elemIdx = emptyIdx === -1 ? selElems.length-1 : emptyIdx-1; 
+        var selected = $(selElems[elemIdx]).val();
+        return cParams.records.taxon[selected];
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -484,11 +510,6 @@ $(document).ready(function(){
 
         replaceOptions(opts, selApi);
         if (level <= selLvl) { selApi.addItem(opts[0].value, true); }
-    }
-    function replaceOptions(opts, selApi) {
-        selApi.clearOptions();
-        selApi.addOption(opts);
-        selApi.refreshOptions(false);
     }
 
 
@@ -661,6 +682,11 @@ $(document).ready(function(){
         selApi.clear();
         selApi.updatePlaceholder();
     }    
+    function replaceOptions(opts, selApi) {
+        selApi.clearOptions();
+        selApi.addOption(opts);
+        selApi.refreshOptions(false);
+    }
     /*------------------- Form Builders --------------------------------------*/    
     /**
      * Builds and returns the subForm according to the passed params. Disables the 
