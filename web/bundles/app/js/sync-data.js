@@ -60,7 +60,7 @@
         var data = { updatedAt: lastUpdated };
         entities.forEach(function(entity) {
             data.entity = entity;
-            sendAjaxQuery(data, "ajax/update", processUpdatedData);
+            sendAjaxQuery(data, "ajax/sync-data", processUpdatedData);
         });
     } /* End ajaxNewData */
     /**

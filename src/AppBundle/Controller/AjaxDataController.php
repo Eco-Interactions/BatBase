@@ -46,7 +46,7 @@ class AjaxDataController extends Controller
      * Serializes and returns all entities of the passed class that have been 
      * updated since the passed 'lastUpdatedAt' time.
      *
-     * @Route("/update", name="app_ajax_updated_data")
+     * @Route("/sync-data", name="app_ajax_sync_data")
      */
     public function getUpdatedEntityData(Request $request)
     {
