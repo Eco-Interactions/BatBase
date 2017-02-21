@@ -528,35 +528,44 @@ $(document).ready(function(){
         var taxon = cParams.records.taxon[selId];
         getAncestorTaxa(taxon);
         taxon.children.forEach(addRelatedChild);                                //console.log("related = %O", related);
+        buildOptsForEmptyLevels();
         repopulateLevelCombos(related, taxon.level.id);
         /** Adds parent taxa to related-taxa object, until the realm-taxon parent. */
         function getAncestorTaxa(taxon) {                                          
             var level = taxon.level.id;
             if ( realmTaxa.indexOf(taxon.id) !== -1 ) { return; }
-            if (!related[level]) { related[level] = {}; }
-            related[level][taxon.id] = taxon;                                   //console.log("setting lvl = ", taxon.level)
+            addOptToLevelAry(taxon, level);
             getAncestorTaxa(cParams.records.taxon[taxon.parent]);
         }
         function addRelatedChild(id) {
             var taxon = cParams.records.taxon[id];
             var level = taxon.level.id;
-            if (!related[level]) { related[level] = {}; }
-            related[level][taxon.id] = taxon;                                   //console.log("setting lvl = ", taxon.level)
+            addOptToLevelAry(taxon, level);
             taxon.children.forEach(addRelatedChild);
+        }
+        function addOptToLevelAry(taxon, level) {
+            if (!related[level]) { related[level] = []; }                       //console.log("setting lvl = ", taxon.level)
+            related[level].push({ value: taxon.id, text: taxon.displayName });                                   
+        }
+        function buildOptsForEmptyLevels() {
+            var topLvl = cParams.realm === "Arthropod" ? 3 : 5; 
+            for (var i = 7; i >= topLvl; i--) {
+                if (related[i]) { continue; }
+                related[i] = [{ value: "", text: "None" }];
+            }
         }
     } /* End fillAncestorTaxa */    
     function repopulateLevelCombos(relatedObj, selLvl) {
-        for (var level in relatedObj) {
-            repopulateLevelCombo(relatedObj[level], level, selLvl);
+        var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
+        for (var level in relatedObj) {                                         //console.log("level = %s, name = ", level, lvls[level-1])
+            repopulateLevelCombo(relatedObj[level], lvls[level-1], level, selLvl);
         }
     }
     /** Replaces the options for the level combo. Selects the ancestors of the selected. */
-    function repopulateLevelCombo(taxaObj, level, selLvl) {  
-        var opts = getRcrdOpts(null, taxaObj);
-        var levelName = taxaObj[Object.keys(taxaObj)[0]].level.displayName;     //console.log("repopulateLevelCombo for level = %s (%s), selLvl = ", level, )
+    function repopulateLevelCombo(opts, levelName, level, selLvl) {             //console.log("repopulateLevelCombo for level = %s (%s), selLvl = ", level, )
         var selApi = $('#'+levelName+'-sel')[0].selectize;
         replaceOptions(opts, selApi);
-        if (level <= selLvl) { selApi.addItem(opts[0].value, true); }
+        if (level <= selLvl && opts[0].value) { selApi.addItem(opts[0].value, true); }
     }
 
 
