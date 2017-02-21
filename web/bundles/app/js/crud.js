@@ -392,16 +392,50 @@ $(document).ready(function(){
     }
     /**
      * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
-     * each level present in the Bat domain, (Family, Genus, and Species), filled 
-     * with the taxonyms at that level. When one is selected, the remaining boxes
+     * each level present in the Bat realm, (Family, Genus, and Species), filled 
+     * with the taxa at that level. When one is selected, the remaining boxes
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectForm() {
-        cParams.domain = "Bat";
+        cParams.realm = "Bat";
         $('form[name="crud"]').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");             
         customizeElemsForTaxonSelectForm("Subject");
+    }
+    /**
+     * Shows a sub-form to 'Select Object' of the interaction with a combobox for
+     * each level present in the selected Object realm, plant (default) or arthropod, 
+     * filled with the taxa at that level. When one is selected, the remaining boxes
+     * are repopulated with related taxa and the 'select' button is enabled.
+     */
+    function initObjectForm() {  
+        var realmVal = cParams.realmVal || 3;
+        cParams.realm = cParams.realm || "Plant";
+        $('#Object_row').append(initSubForm(
+            "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
+        initSubFormComboboxes("object");             
+        customizeElemsForTaxonSelectForm("Object");
+        $('#Realm-sel')[0].selectize.addItem(realmVal);
+    }
+    /**
+     * Removes any previous realm combos. Shows a combobox for each level present 
+     * in the selected Taxon realm, plant (default) or arthropod, filled with the 
+     * taxa at that level. 
+     */
+    function onRealmSelection(val) {                                            //console.log("onRealmSelection. val = ", val)
+        if (val === "" || isNaN(parseInt(val))) { return $('#Realm-sel')[0].selectize.addItem(3); }          
+        if ($('#realm-lvls').length) { $('#realm-lvls').remove(); }
+        var realms = { 3: "plant", 4: "arthropod" }
+        cParams.realm = _util.ucfirst(realms[val]);
+        cParams.realmVal = val;
+        buildAndAppendRealmElems(realms[val], val);
+        initSubFormComboboxes(realms[val]);             
+    }
+    function buildAndAppendRealmElems(realm) {
+        var realmElems = _util.buildElem("div", { id: "realm-lvls" });
+        $(realmElems).append(buildSubForm(realm, {}, "sub2", null));
+        $('#Realm_row').append(realmElems);
     }
     /** Replaces the Header and the submit/cancel button text. Sets the 'reset' event. */
     function customizeElemsForTaxonSelectForm(role) {
@@ -413,13 +447,13 @@ $(document).ready(function(){
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
-        var initForm = cParams.domain === 'Bat' ? initSubjectForm : initObjectForm;
+        var initForm = cParams.realm === 'Bat' ? initSubjectForm : initObjectForm;
         $(this)[0].parentElement.parentElement.remove();
         initForm();
     }
     /** Adds the selected taxon to the top-form [role] taxon combobox. */
     function selectTaxon() {
-        var role = cParams.domain === 'Bat' ? 'Subject' : 'Object';
+        var role = cParams.realm === 'Bat' ? 'Subject' : 'Object';
         var selApi = $('#'+role+'-sel')[0].selectize;
         var opt = getSelectedTaxonOption();
         replaceOptions(opt, selApi);
@@ -447,8 +481,10 @@ $(document).ready(function(){
      * taxonomic data is displayed in the top-form Subject combobox. The 'Select 
      * Object' form is built and displayed.
      */
-    function onSubjectSelection() {
-        // body...
+    function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
+        if (val === "" || isNaN(parseInt(val))) { return; } 
+        $('#sub-form').remove();
+        initObjectForm();
     }
     function onObjectSelection() {
         // body...
@@ -475,16 +511,16 @@ $(document).ready(function(){
      * the level comboboxes. The ancestor at each level will be be selected. 
      */
     function repopulateCombosWithRelatedTaxa(selId) {
-        var domainTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
+        var realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
         var related = {};                                                       //console.log("related = %O", related)
         var taxon = cParams.records.taxon[selId];
         getAncestorTaxa(taxon);
         taxon.children.forEach(addRelatedChild);                                //console.log("related = %O", related);
         repopulateLevelCombos(related, taxon.level.id);
-        /** Adds parent taxa to related-taxa object, until the domain parent. */
+        /** Adds parent taxa to related-taxa object, until the realm-taxon parent. */
         function getAncestorTaxa(taxon) {                                          
             var level = taxon.level.id;
-            if ( domainTaxa.indexOf(taxon.id) !== -1 ) { return; }
+            if ( realmTaxa.indexOf(taxon.id) !== -1 ) { return; }
             if (!related[level]) { related[level] = {}; }
             related[level][taxon.id] = taxon;                                   //console.log("setting lvl = ", taxon.level)
             getAncestorTaxa(cParams.records.taxon[taxon.parent]);
@@ -662,6 +698,7 @@ $(document).ready(function(){
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
             "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
+            "Realm": { name: "Realm", change: onRealmSelection, add: false },
         };
         cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -755,9 +792,27 @@ $(document).ready(function(){
             },
             "subject": {
                 "add": {},  
-                "exclude": ["Domain", "Class", "Order"],
+                "exclude": ["Class", "Order"],
                 "required": [],
                 "order": ["Family", "Genus", "Species"],
+            },
+            "object": {
+                "add": {"Realm": "select"},  
+                "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
+                "required": [],
+                "order": [],
+            },
+            "plant": {
+                "add": {},  
+                "exclude": ["Class", "Order"],
+                "required": [],
+                "order": ["Family", "Genus", "Species"],
+            },
+            "arthropod": {
+                "add": {},  
+                "exclude": [],
+                "required": [],
+                "order": ["Class", "Order", "Family", "Genus", "Species"],
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
@@ -783,7 +838,8 @@ $(document).ready(function(){
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
             "location": "location",     "subject": "taxon",
-            "object": "taxon"            
+            "object": "taxon",          "plant": "taxon",
+            "arthropod": "taxon"           
         };
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
@@ -796,8 +852,8 @@ $(document).ready(function(){
                 "Authors": "multiSelect" 
             },
             "taxon": {
-                "Domain": "select", "Class": "select", "Order": "select", 
-                "Family": "select", "Genus": "select", "Species": "select"
+                "Class": "select", "Order": "select", "Family": "select", 
+                "Genus": "select", "Species": "select"
             }
         };
         return fields[coreEntityMap[entity]];
@@ -945,6 +1001,7 @@ $(document).ready(function(){
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "Species": [ getTaxonOpts, 'Species' ],
+            "Realm": [ getRealmOpts, "" ]
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -1004,10 +1061,13 @@ $(document).ready(function(){
         var ids = _util.getDataFromStorage(prop);
         return getRcrdOpts(ids, cParams.records.source);
     }
-    /** Returns an array of taxonyms for the passed level and the form's domain. */
+    /** Returns an array of taxonyms for the passed level and the form's realm. */
     function getTaxonOpts(level) {
-        var opts = getOptsFromStoredData(cParams.domain+level+"Names");         //console.log("taxon opts for [%s] = %O", cParams.domain+level+"Names", opts)
+        var opts = getOptsFromStoredData(cParams.realm+level+"Names");          //console.log("taxon opts for [%s] = %O", cParams.realm+level+"Names", opts)
         return opts;
+    }
+    function getRealmOpts() {
+        return [{ value: 3, text: "Plant" }, { value: 4, text: "Arthropod" }];  
     }
     /* -----------------------------------------------------------------------*/
     /**
