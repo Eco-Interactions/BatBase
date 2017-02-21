@@ -402,6 +402,7 @@ $(document).ready(function(){
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");             
         customizeElemsForTaxonSelectForm("Subject");
+        focusCombobox('#Family-sel');
     }
     /**
      * Shows a sub-form to 'Select Object' of the interaction with a combobox for
@@ -424,13 +425,14 @@ $(document).ready(function(){
      * taxa at that level. 
      */
     function onRealmSelection(val) {                                            //console.log("onRealmSelection. val = ", val)
-        if (val === "" || isNaN(parseInt(val))) { return $('#Realm-sel')[0].selectize.addItem(3); }          
+        if (val === "" || isNaN(parseInt(val))) { return; }          
         if ($('#realm-lvls').length) { $('#realm-lvls').remove(); }
         var realms = { 3: "plant", 4: "arthropod" }
         cParams.realm = _util.ucfirst(realms[val]);
         cParams.realmVal = val;
         buildAndAppendRealmElems(realms[val], val);
         initSubFormComboboxes(realms[val]);             
+        focusFirstCombobox('#realm-lvls');             
     }
     function buildAndAppendRealmElems(realm) {
         var realmElems = _util.buildElem("div", { id: "realm-lvls" });
@@ -448,7 +450,7 @@ $(document).ready(function(){
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
         var initForm = cParams.realm === 'Bat' ? initSubjectForm : initObjectForm;
-        $(this)[0].parentElement.parentElement.remove();
+        $('#sub-form').remove();
         initForm();
     }
     /** Adds the selected taxon to the top-form [role] taxon combobox. */
@@ -469,12 +471,15 @@ $(document).ready(function(){
     /** Finds the most specific level with a selection and returns that taxon record. */
     function getSelectedTaxon() {
         var selElems = $('#sub-form .selectized').toArray(); 
-        var emptyIdx = selElems.findIndex(function(elem) {  
-            if (elem.id.includes('-sel')) { return !$(elem).val(); }
-        });  
+        var emptyIdx = getFirstEmptyCombo(selElems);
         var elemIdx = emptyIdx === -1 ? selElems.length-1 : emptyIdx-1; 
         var selected = $(selElems[elemIdx]).val();
         return cParams.records.taxon[selected];
+    }
+    function getFirstEmptyCombo(selElems) {
+        return selElems.findIndex(function(elem) {  
+            if (elem.id.includes('-sel')) { return !$(elem).val(); }
+        });  
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -498,14 +503,21 @@ $(document).ready(function(){
      * combo was cleared, ensure the remaining dropdowns are in sync or, if they
      * are all empty, disable the 'select' button.
      */
-    function onLevelSelection(val) {
-        if (val === "" || isNaN(parseInt(val))) { return checkSubmitButton(); } 
+    function onLevelSelection(val) {  
+        if (val === "" || isNaN(parseInt(val))) { return; } 
         repopulateCombosWithRelatedTaxa(val);
         enableSubmitBttn('#sub-submit');             
     }
-    function checkSubmitButton() {
-        // body...
-    }
+    // /** If there are no comboboxes with a selection, the 'Select' form is reset. */
+    // ## Because the 'change' event fires twice, lastly with empty string, this 
+    // ## method resets the form with selections... maybe fix later?
+    // function checkSubmitButton() {
+    //     var selElems = $('#sub-form .selectized').toArray(); 
+    //     var hasSelection = selElems.some(function(elem){  console.log("elemval = ", $(elem).val())
+    //         return $(elem).val();
+    //     }); 
+    //     if (!hasSelection) { resetTaxonSelectForm(); }
+    // }
     /**
      * The selected taxon's realted taxa, ancestors and children, will repopulate 
      * the level comboboxes. The ancestor at each level will be be selected. 
@@ -541,9 +553,8 @@ $(document).ready(function(){
     /** Replaces the options for the level combo. Selects the ancestors of the selected. */
     function repopulateLevelCombo(taxaObj, level, selLvl) {  
         var opts = getRcrdOpts(null, taxaObj);
-        var levelName = taxaObj[Object.keys(taxaObj)[0]].level.displayName; //console.log("repopulateLevelCombo for level = %s (%s), selLvl = ", level, )
+        var levelName = taxaObj[Object.keys(taxaObj)[0]].level.displayName;     //console.log("repopulateLevelCombo for level = %s (%s), selLvl = ", level, )
         var selApi = $('#'+levelName+'-sel')[0].selectize;
-
         replaceOptions(opts, selApi);
         if (level <= selLvl) { selApi.addItem(opts[0].value, true); }
     }
@@ -713,6 +724,10 @@ $(document).ready(function(){
     }
     function focusCombobox(selId) {
         $(selId)[0].selectize.focus();
+    }
+    function focusFirstCombobox(cntnrId) {
+        var selElems = $(cntnrId+' .selectized').toArray();                     //console.log("selElems[0] = %O", selElems[0].id);
+        focusCombobox('#'+ selElems[0].id);
     }
     function clearCombobox(selId) {
         var selApi = $(selId)[0].selectize;
