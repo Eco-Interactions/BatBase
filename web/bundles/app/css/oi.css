@@ -530,9 +530,8 @@ a[role="button"], .tos-bttn, #exit-form {
 }
 #crud-main {
 	padding: 25px 25px 75px 25px;
-	height: 488px;
+	height: 475px;
 	overflow: scroll;
-	postion: absolute;
 }
 /* -- Form Styles -- */
 .crud-form {
@@ -608,6 +607,9 @@ form[name="crud"] p, form[name="crud"] .bttn-cntnr {
 	padding: .1em;
 	margin: 0;
 	font-size: .95em;
+}
+.xxlrg-field {
+	width: 755px;	
 }
 .xlrg-field {
 	width: 655px;

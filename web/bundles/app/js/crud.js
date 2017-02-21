@@ -567,7 +567,21 @@ $(document).ready(function(){
         replaceOptions(opts, selApi);
         if (level <= selLvl && opts[0].value) { selApi.addItem(opts[0].value, true); }
     }
-
+    /*-------------- Interaction ---------------------------------------------*/
+    /** Builds and appends the final fields of the interaction form. */
+    function buildInteractionFieldRows() {       
+        var intFields = buildSubForm("interaction", {}, "top", null);
+        intFields.push(buildFormBttns("Interaction", "top"));
+        $('form[name="crud"]').append(intFields);
+        customizeIntFieldElems();   
+        initSubFormComboboxes("interaction");
+    }
+    function customizeIntFieldElems() {
+        document.getElementById("Interaction_Type-sel").className = "lrg-field";
+        document.getElementById("Interaction_Tags-sel").className = "lrg-field";
+        $('#Notes_row div.field-row').css("width", "933px");
+        $('#Notes_row textArea').css("width", "812px"); 
+    }
 
 
 
@@ -713,12 +727,15 @@ $(document).ready(function(){
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
+            "Interaction_Tags": { name: "Interaction Tags", change: false, add: false ,
+                "options": { "delimiter": ",", "maxItems": null }},         //, "persist": false 
             "Class": { name: "Class", change: onLevelSelection, add: initTaxonForm },
             "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
             "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
             "Realm": { name: "Realm", change: onRealmSelection, add: false },
+            "Interaction_Type": { name: "Interaction Type", change: false, add: false },
         };
         cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -806,6 +823,12 @@ $(document).ready(function(){
                     "Authors" ],
                 "exitHandler": enablePubField
             },
+            "interaction": {
+                "add": {},  
+                "exclude": [],
+                "required": ["Interaction Type"],
+                "order": ["InteractionType", "InteractionTags", "Notes"],
+            },
             "location": {
                 "add": {},  
                 "exclude": [],
@@ -863,13 +886,16 @@ $(document).ready(function(){
             "publication": "source",    "publisher": "source",
             "location": "location",     "subject": "taxon",
             "object": "taxon",          "plant": "taxon",
-            "arthropod": "taxon"           
+            "arthropod": "taxon",       "interaction": "interaction"          
         };
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
                 "Latitude": "text", "Habitat Type": "select", "Location Type": "select",
                 "Country": "edgeCase", "Elevation Units": "select"
+            },
+            "interaction": { "Interaction Type": "select", "Notes": "fullTextArea", 
+                "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
                 "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
@@ -922,7 +948,7 @@ $(document).ready(function(){
          * and sends both to @buildFormRow, returning the completed row elem.
          * Sets the value for the field if it is in the passed 'fieldVals' obj. 
          */
-        function buildRow(field, fieldsObj, formLvl) {
+        function buildRow(field, fieldsObj, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
             var reqFields = cParams.forms[formLvl].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
@@ -1025,7 +1051,9 @@ $(document).ready(function(){
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "Species": [ getTaxonOpts, 'Species' ],
-            "Realm": [ getRealmOpts, "" ]
+            "Realm": [ getRealmOpts, null ],
+            "Interaction_Type": [ getOptsFromStoredData, 'intTypeNames' ],
+            "Interaction_Tags": [ getTagOpts, 'interaction' ]
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];

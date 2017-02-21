@@ -280,7 +280,7 @@
         deriveAndStoreTaxonData(data[0]);
         deriveAndStoreLocationData(data[1]);
         deriveAndStoreSourceData(data[2]);
-        // deriveInteractionData(data[3]);
+        deriveInteractionData(data[3]);
     }
     /** Stores an object of taxon names and ids for each level in each domain. */
     function deriveAndStoreTaxonData(data) {
@@ -360,6 +360,9 @@
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         storeData('sourceTags', getTagData(data.tag, "Source"));        
         storeData('interactionTags', getTagData(data.tag, "Interaction"));        
+    }
+    function deriveInteractionData(data) {
+        storeData('intTypeNames', getTypeNameData(data.interactionType));
     }
     /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {
