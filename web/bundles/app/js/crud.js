@@ -398,6 +398,7 @@ $(document).ready(function(){
      */
     function initSubjectForm() {
         cParams.realm = "Bat";
+        cParams.realmVal = 2;
         $('form[name="crud"]').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");             
@@ -412,7 +413,7 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectForm() {  
-        var realmVal = cParams.realmVal || 3;
+        var realmVal = cParams.realmVal === 2 ? 3 : cParams.realmVal; 
         cParams.realm = cParams.realm || "Plant";
         $('#Object_row').append(initSubForm(
             "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
@@ -438,10 +439,11 @@ $(document).ready(function(){
     /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
     function initTaxonForm(val) { 
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
+        cParams.formTaxonLvl = selLvl;
         $('#'+selLvl+'_row').append(initSubForm(
             "taxon", "sub2", "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
         initSubFormComboboxes("taxon");                     
-        enableSubmitBttn("#sub2-submit")
+        enableSubmitBttn("#sub2-submit");
         return { "value": "", "text": "Creating "+selLvl+"..." };
     }
     /**
@@ -1314,11 +1316,32 @@ $(document).ready(function(){
         }
         /** Adds data from a form element at the parent form level, if needed. */
         function ifHasParentFormVals(entity) {
-            var newField;
-            var relFormFields = { "Citation": "publication" };
-            if (Object.keys(relFormFields).indexOf(entity) === -1) { return; }
-            newField = relFormFields[entity];                               //console.log("new fieldName = ", newField)
-            formVals[newField] = $('#'+_util.ucfirst(newField)+'-sel').val();
+            var fieldHndlrs = { "Citation": getPubFieldData, 
+                "Taxon": getTaxonData, "Interaction": getTopFormData };
+            if (Object.keys(fieldHndlrs).indexOf(entity) === -1) { return; }
+            fieldHndlrs[entity]();                                            //console.log("new fieldName = ", newField)
+        }
+        function getPubFieldData() {
+            formVals.publication = $('#Publication-sel').val();
+        }
+        function getTaxonData() {
+            formVals.parentTaxon = getParentTaxon(cParams.formTaxonLvl);
+            formVals.level = cParams.formTaxonLvl;
+        }
+        /**
+         * Checks each parent-level combo for a selected taxon. If none, the domain
+         * is added as the new Taxon's parent.
+         */
+        function getParentTaxon(lvl) {
+            var lvls = ["", "", "Class", "Order", "Family", "Genus", "Species"];
+            var parentLvl = lvls[lvls.indexOf(lvl)-1];
+            if ($('#'+parentLvl+'-sel').length) { 
+                return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
+            } 
+            return cParams.realmVal;
+        }
+        function getTopFormData() {
+            // body...
         }
         /** Adds entity field values not included as inputs in the form. */
         function ifHasAdditionalFields(entity) {
@@ -1462,7 +1485,8 @@ $(document).ready(function(){
             "citation": ["citationType", "authors", "tags", "publication"], 
             "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher"],
-            "publisher": []
+            "publisher": [],
+            "taxon": ["level", "parentTaxon"]
         };
         return relationships[entity];
     }

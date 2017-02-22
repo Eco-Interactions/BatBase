@@ -12,6 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use AppBundle\Entity\Source;
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Location;
+use AppBundle\Entity\Taxon;
 
 
 /**
@@ -103,6 +104,33 @@ class CrudController extends Controller
     }
 
     /**
+     * Creates a new Taxon from the submitted form data. 
+     *
+     * @Route("/taxon/create", name="app_taxon_create")
+     */
+    public function taxonCreateAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       //print("\nCreating Taxon.\n");
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
+        $taxonData = $formData->taxon;
+
+        $entityData = new \stdClass; 
+
+        $taxonEntity = new Taxon();
+        $this->setEntityData("Taxon", $taxonData, $taxonEntity, $em);
+
+        $entityData->detailEntity = false;
+        $entityData->core = "taxon";
+        $entityData->coreEntity = $taxonEntity;
+
+        return $this->attemptFlushAndSendResponse($entityData, $em);
+    }
+
+    /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.
      */
@@ -148,7 +176,8 @@ class CrudController extends Controller
     }
     private function getRelatedEntityClass($relField)
     {
-        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location" ];
+        $classMap = [ "parentSource" => "Source", "parentLoc" => "Location", 
+            "parentTaxon" => "Taxon" ];
         return array_key_exists($relField, $classMap) ? 
             $classMap[$relField] : ucfirst($relField);
     }

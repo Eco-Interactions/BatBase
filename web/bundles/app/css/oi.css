@@ -555,6 +555,7 @@ a[role="button"], .tos-bttn, #exit-form {
 	border: 1px solid grey;
 	border-radius: 5px;
     padding: 5px;
+    min-width: 385px;
     margin-top: .5em;
 }
 .sml-left {
