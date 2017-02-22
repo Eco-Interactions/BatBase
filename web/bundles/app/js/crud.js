@@ -164,8 +164,9 @@ $(document).ready(function(){
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
         var form = document.createElement("form");
-        $(form).attr({"action": "", "method": "POST", "name": "crud"});
-        form.className = "crud-form flex-row";
+        $(form).attr({"action": "", "method": "POST", "name": "top"});
+        form.className = "flex-row";
+        form.id = "top-form";
         return form;
     }
     /** Inits the main source form fields: publication and citation. */
@@ -198,7 +199,7 @@ $(document).ready(function(){
      * returned and thus selected in the combobox
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
-        $('form[name="crud"]').append(initSubForm(
+        $('form[name="top"]').append(initSubForm(
             "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
@@ -249,7 +250,7 @@ $(document).ready(function(){
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        $('form[name="crud"]').append(initSubForm(
+        $('form[name="top"]').append(initSubForm(
             "citation", "sub", "flex-row med-form", {"Title": val}, "#Citation-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
@@ -294,7 +295,7 @@ $(document).ready(function(){
     function buildCountryFieldRow() {  
         var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
-        $('form[name="crud"]').append(buildFormRow("Country", selElem, "top", false));
+        $('form[name="top"]').append(buildFormRow("Country", selElem, "top", false));
         initTopFormCombobox("country");
         focusCombobox('#Country-sel');
     }
@@ -316,7 +317,7 @@ $(document).ready(function(){
         var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
-        $('form[name="crud"]').append(buildFormRow("Location", selElem, "top", true));
+        $('form[name="top"]').append(buildFormRow("Location", selElem, "top", true));
         initTopFormCombobox("location");
     }
     /** Returns an array of option objects with all unique locations.  */
@@ -362,7 +363,7 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        $('form[name="crud"]').append(initSubForm(
+        $('form[name="top"]').append(initSubForm(
             "location", "sub", "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
@@ -381,12 +382,12 @@ $(document).ready(function(){
     }
     function initSubjectField() {
         var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
-        $('form[name="crud"]').append(buildFormRow("Subject", subjElem, "top", true));
+        $('form[name="top"]').append(buildFormRow("Subject", subjElem, "top", true));
         initTopFormCombobox("subject");
     }
     function initObjectField() {
         var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
-        $('form[name="crud"]').append(buildFormRow("Object", objElem, "top", true));
+        $('form[name="top"]').append(buildFormRow("Object", objElem, "top", true));
         initTopFormCombobox("object");
         enableCombobox('#Object-sel', false);
     }
@@ -399,7 +400,7 @@ $(document).ready(function(){
     function initSubjectForm() {
         cParams.realm = "Bat";
         cParams.realmVal = 2;
-        $('form[name="crud"]').append(initSubForm(
+        $('form[name="top"]').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");             
         customizeElemsForTaxonSelectForm("Subject");
@@ -583,7 +584,7 @@ $(document).ready(function(){
     function buildInteractionFieldRows() {       
         var intFields = buildSubForm("interaction", {}, "top", null);
         intFields.push(buildFormBttns("Interaction", "top"));
-        $('form[name="crud"]').append(intFields);
+        $('form[name="top"]').append(intFields);
         customizeIntFieldElems();   
         initSubFormComboboxes("interaction");
         focusCombobox('#InteractionType-sel');
@@ -1267,7 +1268,7 @@ $(document).ready(function(){
      * filled field values keyed under server-ready field names to submit @submitFormVals.
      * Entity data not contained in an input on the form is added @addAdditionalEntityData.
      */
-    function getFormValuesAndSubmit(id, formLvl, entity) {  
+    function getFormValuesAndSubmit(id, formLvl, entity) {                      //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
         var elems = $(id)[0].children;   
         var formVals = {};
         
@@ -1316,8 +1317,7 @@ $(document).ready(function(){
         }
         /** Adds data from a form element at the parent form level, if needed. */
         function ifHasParentFormVals(entity) {
-            var fieldHndlrs = { "Citation": getPubFieldData, 
-                "Taxon": getTaxonData, "Interaction": getTopFormData };
+            var fieldHndlrs = { "Citation": getPubFieldData, "Taxon": getTaxonData };
             if (Object.keys(fieldHndlrs).indexOf(entity) === -1) { return; }
             fieldHndlrs[entity]();                                            //console.log("new fieldName = ", newField)
         }
@@ -1339,9 +1339,6 @@ $(document).ready(function(){
                 return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
             } 
             return cParams.realmVal;
-        }
-        function getTopFormData() {
-            // body...
         }
         /** Adds entity field values not included as inputs in the form. */
         function ifHasAdditionalFields(entity) {
@@ -1402,12 +1399,19 @@ $(document).ready(function(){
             var dataGroup = rels.indexOf(field) !== -1 ? 'rel' : 'flat';
             if (field in fieldTrans) { addTransFormData(); 
             } else { addFormData(); }
-            /** Translates the passed field into it's server-ready equivalent. */
+            /** Renames the field and stores the value for each entity in the map. */
             function addTransFormData() {  
-                var transMap = fieldTrans[field];                               
-                for (var ent in transMap) { data[ent][dataGroup][transMap[ent]] = val; }
+                var transMap = fieldTrans[field];
+                for (var ent in transMap) { 
+                    addTransFieldData(data[ent][dataGroup], transMap[ent]); 
+                }
             }
-            /** Adds the passed field and value to the appropriate entity data object. */
+            /** Adds the value to formData, if the newField name isn't false. */
+            function addTransFieldData(formData, newField) {
+                if (newField === false) { return; }
+                formData[newField] = val;
+            }
+            /** Adds the field and value to the appropriate entity data-type object. */
             function addFormData() { 
                 var ent = (pEntity && parentFields.indexOf(field) !== -1) ? pEntity : entity;
                 data[ent][dataGroup][field] = val;
@@ -1431,7 +1435,8 @@ $(document).ready(function(){
         var coreEntities = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
-            "location": "location",     "taxon": "taxon"
+            "location": "location",     "taxon": "taxon",
+            "interaction": "interaction"
         };
         return coreEntities[entity];
     }
@@ -1446,9 +1451,9 @@ $(document).ready(function(){
             return _util.lcfirst(field.split(" ").join(""));
         });
     }
-    /** 
-     * Returns a object with the form's field names as keys for field translation objects
-     * with the appropraite entity name key and the field name translation. 
+    /**
+     * Returns the fields that need to be renamed and the entity they belong to. 
+     * A "false" field will not be added to the final form data.   
      */
     function getFieldTranslations(entity) {  
         var fieldTrans = {
@@ -1465,6 +1470,12 @@ $(document).ready(function(){
                 "pages": { "citation": "publicationPages" },
                 "tags": { "source": "tags" }
             },
+            "interaction": {
+                "citationTitle": { "interaction": "source" },
+                "country": { "interaction": false },
+                "interactionTags": { "interaction": "tags" },
+                "publication": { "interaction": false }
+            },
             "location": {
                 "country": { "location": "parentLoc" },
                 "elevationUnits": { "location": "elevUnitAbbrv" }                
@@ -1478,7 +1489,10 @@ $(document).ready(function(){
         };
         return fieldTrans[entity] || {};
     }
-    /** Returns an array of fields that are relationships with other entities. */
+    /**
+     * Returns an array of fields that are relationships with other entities. 
+     * Note: use field names before field translations/renamings.
+     */
     function getRelationshipFields(entity) {
         var relationships = {
             "author": ["sourceType"], 
@@ -1486,7 +1500,9 @@ $(document).ready(function(){
             "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher"],
             "publisher": [],
-            "taxon": ["level", "parentTaxon"]
+            "taxon": ["level", "parentTaxon"],
+            "interaction": ["citationTitle", "location", "subject", "object", 
+                "interactionTags", "interactionType" ]
         };
         return relationships[entity];
     }

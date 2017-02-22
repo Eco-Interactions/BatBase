@@ -534,7 +534,7 @@ a[role="button"], .tos-bttn, #exit-form {
 	overflow: scroll;
 }
 /* -- Form Styles -- */
-.crud-form {
+#top-form {
 	font-size: 1em;
 	flex-wrap: wrap;
 }
