@@ -122,15 +122,21 @@
                 'location': addToParentRcrd, 'habitatType': addToTypeProp, 
                 'locationType': addToTypeProp
             },
+            'taxon': { 'taxon': addToParentRcrd, 'taxonNames': addToTaxonNames 
+            },
         };
         return type ? update[entity][type] : update[entity];
     }
     /** 
-     * Returns the record's entity'Type', eg SourceType Author or Publication when
-     * there are 'type' properties to update. (Currently only source has type-specific updates.)
+     * Returns the record's entity'Type' for entities with stored data related to 
+     * a 'type'. Eg, the sourceTypes author, publication, etc.
      */
     function getEntityType(entity, rcrd) {
-        if (entity !== "source") { return false; }
+        if (entity === "source") { return getSourceType(entity, rcrd); }
+        return false;
+    }
+    /** Returns the records source-type. */
+    function getSourceType(entity, rcrd) {
         var type = _util.lcfirst(entity)+"Type";
         return _util.lcfirst(rcrd[type].displayName);
     }
@@ -203,6 +209,12 @@
                 addIfNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id);                
             });
         }
+    }
+    /** Adds the Taxon's name to the stored names for it's domain and level.  */
+    function addToTaxonNames(prop, rcrd, entity) {
+        var domain = rcrd.domain.displayName;
+        var level = rcrd.level.displayName;  
+        addToNameProp(domain+level+"Names", rcrd, entity);
     }
     /*----------------- Entity Specific Update Methods -----------------------*/
     /** When a Publication or Citation have been updated, update contribution data. */
