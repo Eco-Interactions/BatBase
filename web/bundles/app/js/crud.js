@@ -262,7 +262,7 @@ $(document).ready(function(){
      * citation form's author field(s). 
      */
     function addExistingPubContribs(val) {  
-        var pubRcrd = cParams.records.source[$('#Publication-sel').val()]; console.log('pubRcrd = %O', pubRcrd) 
+        var pubRcrd = cParams.records.source[$('#Publication-sel').val()];      //console.log('pubRcrd = %O', pubRcrd) 
         if (pubRcrd.contributors.length > 0) {
             selectExistingAuthors(pubRcrd.contributors);
         }
@@ -408,7 +408,8 @@ $(document).ready(function(){
      * Shows a sub-form to 'Select Object' of the interaction with a combobox for
      * each level present in the selected Object realm, plant (default) or arthropod, 
      * filled with the taxa at that level. When one is selected, the remaining boxes
-     * are repopulated with related taxa and the 'select' button is enabled.
+     * are repopulated with related taxa and the 'select' button is enabled. 
+     * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectForm() {  
         var realmVal = cParams.realmVal || 3;
@@ -418,6 +419,24 @@ $(document).ready(function(){
         initSubFormComboboxes("object");             
         customizeElemsForTaxonSelectForm("Object");
         $('#Realm-sel')[0].selectize.addItem(realmVal);
+    }
+    /**
+     * When complete, the 'Select Subject' form is removed and the most specific 
+     * taxonomic data is displayed in the top-form Subject combobox. The 'Select 
+     * Object' form is built and displayed.
+     */
+    function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
+        if (val === "" || isNaN(parseInt(val))) { return; } 
+        $('#sub-form').remove();
+        initObjectForm();
+    }
+    function onObjectSelection(val) {                                              //console.log("object selected = ", val);
+        if (val === "" || isNaN(parseInt(val))) { return; } 
+        $('#sub-form').remove();
+        buildInteractionFieldRows();
+    }
+    function initTaxonForm(val) {
+        // body...
     }
     /**
      * Removes any previous realm combos. Shows a combobox for each level present 
@@ -480,22 +499,6 @@ $(document).ready(function(){
         return selElems.findIndex(function(elem) {  
             if (elem.id.includes('-sel')) { return !$(elem).val(); }
         });  
-    }
-    /**
-     * When complete, the 'Select Subject' form is removed and the most specific 
-     * taxonomic data is displayed in the top-form Subject combobox. The 'Select 
-     * Object' form is built and displayed.
-     */
-    function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return; } 
-        $('#sub-form').remove();
-        initObjectForm();
-    }
-    function onObjectSelection() {
-        // body...
-    }
-    function initTaxonForm(val) {
-        // body...
     }
     /**
      * When a taxon at a level is selected, the remaining level comboboxes are
@@ -575,21 +578,14 @@ $(document).ready(function(){
         $('form[name="crud"]').append(intFields);
         customizeIntFieldElems();   
         initSubFormComboboxes("interaction");
+        focusCombobox('#InteractionType-sel');
     }
     function customizeIntFieldElems() {
-        document.getElementById("Interaction_Type-sel").className = "lrg-field";
-        document.getElementById("Interaction_Tags-sel").className = "lrg-field";
+        document.getElementById("InteractionType-sel").className = "lrg-field";
+        document.getElementById("InteractionTags-sel").className = "lrg-field";
         $('#Notes_row div.field-row').css("width", "933px");
         $('#Notes_row textArea').css("width", "812px"); 
     }
-
-
-
-
-
-
-
-
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
     /**
@@ -718,24 +714,24 @@ $(document).ready(function(){
         var formLvl = cParams.forms[entity];
         var selMap = { 
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
-            "Citation_Type": { name: "Citation Type", change: false, add: false },
-            "Country": { name: "Country", id: "#subCountry-sel", change: false, add: false },
-            "Habitat_Type":  { name: "Habitat Type", change: false, add: false },
-            "Elevation_Units": { name: "Elevation Units", change: false, add: false },
-            "Location_Type":  { name: "Location Type", change: false, add: false },
-            "Publication_Type": { name: "Publication Type", change: false, add: false },
-            "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
-            "Tags":  { name: "Tag", change: false, add: false, 
-                "options": { "delimiter": ",", "maxItems": null, "persist": false }},
-            "Interaction_Tags": { name: "Interaction Tags", change: false, add: false ,
-                "options": { "delimiter": ",", "maxItems": null }},         //, "persist": false 
+            "CitationType": { name: "Citation Type", change: false, add: false },
             "Class": { name: "Class", change: onLevelSelection, add: initTaxonForm },
-            "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
+            "Country": { name: "Country", id: "#subCountry-sel", change: false, add: false },
+            "ElevationUnits": { name: "Elevation Units", change: false, add: false },
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
-            "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
+            "HabitatType":  { name: "Habitat Type", change: false, add: false },
+            "InteractionTags": { name: "Interaction Tags", change: false, add: false ,
+                "options": { "delimiter": ",", "maxItems": null }},         //, "persist": false 
+            "InteractionType": { name: "Interaction Type", change: false, add: false },
+            "LocationType":  { name: "Location Type", change: false, add: false },
+            "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
+            "PublicationType": { name: "Publication Type", change: false, add: false },
+            "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
             "Realm": { name: "Realm", change: onRealmSelection, add: false },
-            "Interaction_Type": { name: "Interaction Type", change: false, add: false },
+            "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
+            "Tags":  { name: "Tag", change: false, add: false, 
+                "options": { "delimiter": ",", "maxItems": null, "persist": false }},
         };
         cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
@@ -805,6 +801,12 @@ $(document).ready(function(){
      */
     function getSubFormConfg(entity) {
         var fieldMap = { 
+            "arthropod": {
+                "add": {},  
+                "exclude": [],
+                "required": [],
+                "order": ["Class", "Order", "Family", "Genus", "Species"],
+            },
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
                 "exclude": ["Description", "Year", "Doi", "Authors"],
@@ -837,12 +839,6 @@ $(document).ready(function(){
                     "Elevation", "ElevationMax", "ElevationUnits", "HabitatType", 
                     "Latitude", "Longitude" ],
             },
-            "subject": {
-                "add": {},  
-                "exclude": ["Class", "Order"],
-                "required": [],
-                "order": ["Family", "Genus", "Species"],
-            },
             "object": {
                 "add": {"Realm": "select"},  
                 "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
@@ -855,12 +851,6 @@ $(document).ready(function(){
                 "required": [],
                 "order": ["Family", "Genus", "Species"],
             },
-            "arthropod": {
-                "add": {},  
-                "exclude": [],
-                "required": [],
-                "order": ["Class", "Order", "Family", "Genus", "Species"],
-            },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
                 "exclude": ["Display Name"],
@@ -872,7 +862,14 @@ $(document).ready(function(){
                 "add": [], 
                 "exclude": ["Year", "Doi", "Authors"],
                 "required": ["Display Name"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] },
+                "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] 
+            },
+            "subject": {
+                "add": {},  
+                "exclude": ["Class", "Order"],
+                "required": [],
+                "order": ["Family", "Genus", "Species"],
+            },
         };
         return fieldMap[entity];
     }
@@ -985,7 +982,7 @@ $(document).ready(function(){
      */
     function buildSelectElem(entity, field, cnt) {                                   
         var formLvl = cParams.forms[entity];
-        var fieldName = field.split(" ").join("_");
+        var fieldName = field.split(" ").join("");
         var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'med-field'});
@@ -1038,22 +1035,22 @@ $(document).ready(function(){
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
             "Authors": [ getAuthOpts, 'authSources'],
-            "Citation_Type": [ getOptsFromStoredData, 'citTypeNames'],
-            "Country": [ getOptsFromStoredData, 'countryNames' ],
-            "Elevation_Units": [ getElevUnitOpts ],
-            "Habitat_Type": [ getOptsFromStoredData, 'habTypeNames'],
-            "Publication_Type": [ getOptsFromStoredData, 'pubTypeNames'],
-            "Location_Type": [ getLocationTypeOpts ],
-            "Publisher": [ getOptsFromStoredData, 'publisherNames'],
-            "Tags": [ getTagOpts, 'source' ],
+            "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
-            "Order": [ getTaxonOpts, 'Order' ],
+            "Country": [ getOptsFromStoredData, 'countryNames' ],
+            "ElevationUnits": [ getElevUnitOpts, null ],
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
-            "Species": [ getTaxonOpts, 'Species' ],
+            "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
+            "InteractionTags": [ getTagOpts, 'interaction' ],
+            "InteractionType": [ getOptsFromStoredData, 'intTypeNames' ],
+            "LocationType": [ getLocationTypeOpts ],
+            "Order": [ getTaxonOpts, 'Order' ],
+            "PublicationType": [ getOptsFromStoredData, 'pubTypeNames'],
+            "Publisher": [ getOptsFromStoredData, 'publisherNames'],
             "Realm": [ getRealmOpts, null ],
-            "Interaction_Type": [ getOptsFromStoredData, 'intTypeNames' ],
-            "Interaction_Tags": [ getTagOpts, 'interaction' ]
+            "Species": [ getTaxonOpts, 'Species' ],
+            "Tags": [ getTagOpts, 'source' ],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
@@ -1128,7 +1125,7 @@ $(document).ready(function(){
      */
     function buildFormRow(fieldName, fieldInput, formLvl, isReq, rowClss) {
         var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
-        var rowClass = rowClasses[formLvl] + " " + rowClss;
+        var rowClass = rowClasses[formLvl] + (rowClss ? (" "+rowClss) : "");
         var field = fieldName.split(' ').join('');
         var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
@@ -1392,7 +1389,7 @@ $(document).ready(function(){
             }    
         }
     } /* End buildFormDataObj */
-    /** Returns the core entity. (eg, Source is returned when Author is passed.) */
+    /** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
     function getCoreFormEntity(entity) {
         var coreEntities = {
             "author": "source",         "citation": "source",
@@ -1418,11 +1415,8 @@ $(document).ready(function(){
      */
     function getFieldTranslations(entity) {  
         var fieldTrans = {
-            "publication": { 
-                "authors": { "source": "contributor" },
-                "publisher": { "source": "parentSource" }, 
-                "description": { "source": "description", "publication": "description" },
-                "title": { "source": "displayName", "publication": "displayName" },
+            "author": {
+                "displayName": { "source": "displayName", "author": "displayName" }
             },
             "citation": { 
                 "authors": { "source": "contributor" },
@@ -1434,12 +1428,16 @@ $(document).ready(function(){
                 "pages": { "citation": "publicationPages" },
                 "tags": { "source": "tags" }
             },
-            "author": {
-                "displayName": { "source": "displayName", "author": "displayName" }
-            },
             "location": {
-                "country": { "location": "parentLoc" }                
-            }
+                "country": { "location": "parentLoc" },
+                "elevationUnits": { "location": "elevUnitAbbrv" }                
+            },
+            "publication": { 
+                "authors": { "source": "contributor" },
+                "publisher": { "source": "parentSource" }, 
+                "description": { "source": "description", "publication": "description" },
+                "title": { "source": "displayName", "publication": "displayName" },
+            },
         };
         return fieldTrans[entity] || {};
     }
