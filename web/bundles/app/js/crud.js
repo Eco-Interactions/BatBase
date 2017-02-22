@@ -430,13 +430,19 @@ $(document).ready(function(){
         $('#sub-form').remove();
         initObjectForm();
     }
-    function onObjectSelection(val) {                                              //console.log("object selected = ", val);
+    function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
         buildInteractionFieldRows();
     }
-    function initTaxonForm(val) {
-        // body...
+    /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
+    function initTaxonForm(val) { 
+        var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
+        $('#'+selLvl+'_row').append(initSubForm(
+            "taxon", "sub2", "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
+        initSubFormComboboxes("taxon");                     
+        enableSubmitBttn("#sub2-submit")
+        return { "value": "", "text": "Creating "+selLvl+"..." };
     }
     /**
      * Removes any previous realm combos. Shows a combobox for each level present 
@@ -870,6 +876,12 @@ $(document).ready(function(){
                 "required": [],
                 "order": ["Family", "Genus", "Species"],
             },
+            "taxon": {
+                "add": {},  
+                "exclude": [],
+                "required": ["Display Name"],
+                "order": ["DisplayName"],
+            },
         };
         return fieldMap[entity];
     }
@@ -881,9 +893,10 @@ $(document).ready(function(){
         var coreEntityMap = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
-            "location": "location",     "subject": "taxon",
-            "object": "taxon",          "plant": "taxon",
-            "arthropod": "taxon",       "interaction": "interaction"          
+            "location": "location",     "subject": "taxonLvls",
+            "object": "taxonLvls",      "plant": "taxonLvls",
+            "arthropod": "taxonLvls",   "taxon": "taxon",
+            "interaction": "interaction"          
         };
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
@@ -898,10 +911,11 @@ $(document).ready(function(){
                 "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
                 "Authors": "multiSelect" 
             },
-            "taxon": {
+            "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
                 "Genus": "select", "Species": "select"
-            }
+            },
+            "taxon": { "Display Name": "text" }
         };
         return fields[coreEntityMap[entity]];
     }
