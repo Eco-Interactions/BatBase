@@ -1546,7 +1546,8 @@ $(document).ready(function(){
      * entity in the form's parent elem @addAndSelectEntity.
      */
     function exitFormAndSelectNewEntity(data) {
-        var formLvl = cParams.ajaxFormLvl;                         
+        var formLvl = cParams.ajaxFormLvl;           
+        if (formLvl === "top") { return; }              
         exitForm("#"+formLvl+"-form", formLvl); 
         addAndSelectEntity(data, formLvl);
     }

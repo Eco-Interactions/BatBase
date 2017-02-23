@@ -118,6 +118,11 @@
                 'publication': { 'pubSources': addToRcrdAryProp, 'author': addContribData },
                 'publisher': { 'publisherNames': addToNameProp }
             },
+            'interaction': {
+                'location': addInteractionToEntity, 'source': addInteractionToEntity, 
+                'subject': addInteractionRole, 'object': addInteractionRole, 
+                'interactionType': addToTypeProp, 
+            },
             'location': {
                 'location': addToParentRcrd, 'habitatType': addToTypeProp, 
                 'locationType': addToTypeProp
@@ -203,8 +208,8 @@
     }
     /** Adds a new tagged record to the tag's array of record ids. */
     function addToTagProp(prop, rcrd, entity) {                                 
-        var tagObj = _util.getDataFromStorage(prop);                            //console.log("addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
         if (rcrd.tags.length > 0) {
+            var tagObj = _util.getDataFromStorage(prop);                        //console.log("addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
             rcrd.tags.forEach(function(tag){
                 addIfNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id);                
             });
@@ -215,6 +220,20 @@
         var domain = rcrd.domain.displayName;
         var level = rcrd.level.displayName;  
         addToNameProp(domain+level+"Names", rcrd, entity);
+    }
+    /** Adds the Interaction to the stored entity's collection.  */
+    function addInteractionToEntity(prop, rcrd, entity) {
+        var rcrds = _util.getDataFromStorage(prop);                             //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+        var storedEntity = rcrds[rcrd[prop]];
+        storedEntity.interactions.push(rcrd.id);
+        storeData(prop, rcrds);
+    }
+    /** Adds the Interaction to the taxon's subject/objectRole collection.  */
+    function addInteractionRole(prop, rcrd, entity) {  
+        var taxa = _util.getDataFromStorage("taxon");                           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+        var taxon = taxa[rcrd[prop]];
+        taxon[prop+"Roles"].push(rcrd.id);
+        storeData("taxon", taxa);        
     }
     /*----------------- Entity Specific Update Methods -----------------------*/
     /** When a Publication or Citation have been updated, update contribution data. */
@@ -464,30 +483,4 @@
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }());
