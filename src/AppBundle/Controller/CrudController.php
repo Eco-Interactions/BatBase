@@ -24,11 +24,11 @@ use AppBundle\Entity\Taxon;
 class CrudController extends Controller
 {
     /**
-     * Creates a new Source, and any new detail-entities, from the form data. 
+     * Creates a new Entity, and any new detail-entities, from the form data. 
      *
-     * @Route("/source/create", name="app_source_create")
+     * @Route("/entity/create", name="app_entity_create")
      */
-    public function sourceCreateAction(Request $request)
+    public function entityCreateAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -36,39 +36,55 @@ class CrudController extends Controller
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        $srcData = $formData->source;
-        $entityData = new \stdClass; 
+        
+        $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
+        $coreClass = 'AppBundle\\Entity\\'. ucfirst($coreName);                 //print("\ncoreClass = ". $coreClass);
+        $coreFormData = $formData->$coreName;
+        $returnData = new \stdClass; 
 
-        $srcEntity = new Source();
-        $this->setEntityData("Source", $srcData, $srcEntity, $em);
-        $entityData->core = "source";
-        $entityData->coreEntity = $srcEntity;
+        $coreEntity = new $coreClass();
+        $this->setEntityData(ucfirst($coreName), $coreFormData, $coreEntity, $em);
+        $returnData->core = $coreName;
+        $returnData->coreEntity = $coreEntity;
 
-        $entityData->detailEntity = $this->setDetailEntityData(
-            $srcData, $formData, $entityData, $em
+        $returnData->detailEntity = $this->handleDetailEntity(
+            $coreFormData, $formData, $returnData, $em
         );
-
-        return $this->attemptFlushAndSendResponse($entityData, $em);
+        return $this->attemptFlushAndSendResponse($returnData, $em);
     }
-    /** Sets all detail-entity data and adds entity to entityData object. */
-    private function setDetailEntityData($srcData, $formData, &$entityData, $em)
+    /** If the core-entity is 'Source', process any detail-entity data. */
+    private function handleDetailEntity($coreFormData, $formData, &$returnData, $em)
     {
-        $detailName = $srcData->rel->sourceType;
-        if (!$srcData->hasDetail) { return $this->noDetailEntity($detailName, $entityData); }
+        if (property_exists($coreFormData->rel, "sourceType")) { 
+            return $this->setDetailEntityData(
+                $coreFormData, $formData, $returnData, $em
+            );  
+        }
+        return false;
+    }
+    /**
+     * Sets all detail-entity data and returns the entity. 
+     * Note: Publishers are the only 'sourceType' with no detail-entity.
+     */
+    private function setDetailEntityData($cFormData, $formData, &$returnData, &$em)
+    {
+        $detailName = $cFormData->rel->sourceType;
+        $returnData->detail = $detailName;
+        if (!$cFormData->hasDetail) { return false; }
         $detailData = $formData->$detailName;
+        return $this->setDetailData(
+            $detailData, $detailName, $returnData, $em
+        );
+    }
+    private function setDetailData($detailData, $detailName, &$returnData, &$em)
+    {
         $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
         $detailEntity = new $detailEntClass();
-        $detailEntity->setSource($entityData->coreEntity);
-        $this->addDetailToCoreEntity($entityData->coreEntity, $detailEntity, $detailName, $em);
+        $detailEntity->setSource($returnData->coreEntity);
+        $this->addDetailToCoreEntity($returnData->coreEntity, $detailEntity, $detailName, $em);
         $this->setEntityData($detailName, $detailData, $detailEntity, $em);  
 
-        $entityData->detail = $detailName;
         return $detailEntity;
-    }
-    private function noDetailEntity($detailName, &$entityData)
-    {
-        $entityData->detail = $detailName;
-        return false;
     }
     private function addDetailToCoreEntity(&$coreEntity, &$detailEntity, $detailName, &$em)
     {
@@ -76,88 +92,6 @@ class CrudController extends Controller
         $coreEntity->$setMethod($detailEntity);
         $em->persist($coreEntity);
     }
-
-    /**
-     * Creates a new Location from the submitted form data. 
-     *
-     * @Route("/location/create", name="app_location_create")
-     */
-    public function locationCreateAction(Request $request)
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       //print("\nCreating Location.\n");
-        $em = $this->getDoctrine()->getManager();
-        $requestContent = $request->getContent();
-        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        $locData = $formData->location;
-
-        $entityData = new \stdClass; 
-
-        $locEntity = new Location();
-        $this->setEntityData("Location", $locData, $locEntity, $em);
-
-        $entityData->detailEntity = false;
-        $entityData->core = "location";
-        $entityData->coreEntity = $locEntity;
-
-        return $this->attemptFlushAndSendResponse($entityData, $em);
-    }
-
-    /**
-     * Creates a new Taxon from the submitted form data. 
-     *
-     * @Route("/taxon/create", name="app_taxon_create")
-     */
-    public function taxonCreateAction(Request $request)
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       //print("\nCreating Taxon.\n");
-        $em = $this->getDoctrine()->getManager();
-        $requestContent = $request->getContent();
-        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        $taxonData = $formData->taxon;
-
-        $entityData = new \stdClass; 
-
-        $taxonEntity = new Taxon();
-        $this->setEntityData("Taxon", $taxonData, $taxonEntity, $em);
-
-        $entityData->detailEntity = false;
-        $entityData->core = "taxon";
-        $entityData->coreEntity = $taxonEntity;
-
-        return $this->attemptFlushAndSendResponse($entityData, $em);
-    }
-
-    /**
-     * Creates a new Interaction from the submitted form data. 
-     *
-     * @Route("/interaction/create", name="app_interaction_create")
-     */
-    public function interactionCreateAction(Request $request)
-    {
-        if (!$request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       //print("\nCreating Taxon.\n");
-        $em = $this->getDoctrine()->getManager();
-        $requestContent = $request->getContent();
-        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        $interactionData = $formData->interaction;
-
-        $entityData = new \stdClass; 
-
-        $interactionEntity = new Interaction();
-        $this->setEntityData("Interaction", $interactionData, $interactionEntity, $em);
-
-        $entityData->detailEntity = false;
-        $entityData->core = "interaction";
-        $entityData->coreEntity = $interactionEntity;
-
-        return $this->attemptFlushAndSendResponse($entityData, $em);
-    }
-
 
     /**
      * Calls the set method for both types of entity data, flat and relational, 
@@ -232,12 +166,12 @@ class CrudController extends Controller
         }  
     }
     /** Creates a new Contribution for each author source in the array. */
-    private function addTags($ary, &$srcEntity, &$em)
+    private function addTags($ary, &$entity, &$em)
     {
         foreach ($ary as $tag) {
             $tagEnt = $em->getRepository("AppBundle:Tag")
                 ->findOneBy(['id' => $tag]);
-            $srcEntity->addTag($tagEnt);
+            $entity->addTag($tagEnt);
         }  
     }
     /**

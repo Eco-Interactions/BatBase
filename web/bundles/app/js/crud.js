@@ -7,7 +7,7 @@
  * allow editing and saving of the content within using the trumbowyg library.
  */
 $(document).ready(function(){  
-    var userRole, envUrl, cParams = {};
+    var userRole, cParams = {};
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
 
@@ -15,7 +15,6 @@ $(document).ready(function(){
   
     function onDOMContentLoaded() { 
         userRole = $('body').data("user-role");                                 //console.log("crud.js role = ", userRole);                               console.log("----userRole =", userRole)
-        envUrl = $('body').data("ajax-target-url");
         authDependentInit(); 
     }
     function authDependentInit() {   
@@ -1514,11 +1513,13 @@ $(document).ready(function(){
         var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, cParams.action);
         cParams.ajaxFormLvl = formLvl;
+        formData.coreEntity = coreEntity;
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
-        return envUrl + "admin/crud/" + entityName + "/" + action;
+        var envUrl = $('body').data("ajax-target-url");
+        return envUrl + "admin/crud/entity/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)
