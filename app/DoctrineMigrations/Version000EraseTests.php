@@ -31,10 +31,11 @@ class Version000EraseTests extends AbstractMigration implements ContainerAwareIn
     /** Removes test entities created after a certain datetime for specified entites. */
     private function removeAllTestEntities(&$em)
     {
-        $classes = ['Source', 'Publication', 'Author', 'Citation', 'Contribution'];
+        $classes = ['Author', 'Citation', 'Contribution', 'Interaction', 'Location',
+            'Publication', 'Source', 'Taxon'];
         $date = '2017-02-04 00:00:00';
 
-        foreach ($classes as $className) { print("className = ". $className."\n");
+        foreach ($classes as $className) {                                      print("className = ". $className."\n");
             $repo = $em->getRepository('AppBundle:'.$className);
             $this->getAndRemoveTestEntities($repo, $date, $em);
         }
@@ -50,10 +51,10 @@ class Version000EraseTests extends AbstractMigration implements ContainerAwareIn
     }
     private function removeTestEntities($entities, &$em)
     {   
-        foreach ($entities as $entity) { print("\nRemoving entity.");
+        foreach ($entities as $entity) {                                        print("\nRemoving entity.");
             $em->remove($entity);
             $em->flush(); 
-        } print("\n\n\n");
+        }                                                                       print("\n\n\n");
     }
 
     /**
