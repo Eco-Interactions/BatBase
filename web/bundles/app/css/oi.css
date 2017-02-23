@@ -573,7 +573,7 @@ a[role="button"], .tos-bttn, #exit-form {
 	margin: 0 auto 8px auto;
 	align-self: center;
 }
-form[name="crud"] p, form[name="crud"] .bttn-cntnr {
+form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 100%;
 }
 .form-row {

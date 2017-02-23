@@ -1474,6 +1474,7 @@ $(document).ready(function(){
                 "citationTitle": { "interaction": "source" },
                 "country": { "interaction": false },
                 "interactionTags": { "interaction": "tags" },
+                "notes": { "interaction": "note" },
                 "publication": { "interaction": false }
             },
             "location": {

@@ -11,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 use AppBundle\Entity\Source;
 use AppBundle\Entity\Contribution;
+use AppBundle\Entity\Interaction;
 use AppBundle\Entity\Location;
 use AppBundle\Entity\Taxon;
 
@@ -131,6 +132,34 @@ class CrudController extends Controller
     }
 
     /**
+     * Creates a new Interaction from the submitted form data. 
+     *
+     * @Route("/interaction/create", name="app_interaction_create")
+     */
+    public function interactionCreateAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       //print("\nCreating Taxon.\n");
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
+        $interactionData = $formData->interaction;
+
+        $entityData = new \stdClass; 
+
+        $interactionEntity = new Interaction();
+        $this->setEntityData("Interaction", $interactionData, $interactionEntity, $em);
+
+        $entityData->detailEntity = false;
+        $entityData->core = "interaction";
+        $entityData->coreEntity = $interactionEntity;
+
+        return $this->attemptFlushAndSendResponse($entityData, $em);
+    }
+
+
+    /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.
      */
@@ -177,7 +206,7 @@ class CrudController extends Controller
     private function getRelatedEntityClass($relField)
     {
         $classMap = [ "parentSource" => "Source", "parentLoc" => "Location", 
-            "parentTaxon" => "Taxon" ];
+            "parentTaxon" => "Taxon", "subject" => "Taxon", "object" => "Taxon" ];
         return array_key_exists($relField, $classMap) ? 
             $classMap[$relField] : ucfirst($relField);
     }

@@ -406,27 +406,27 @@ class Interaction
     }
 
     /**
-     * Add Tags.
+     * Add Tag.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @param \AppBundle\Entity\Tag $tag
      *
      * @return Interaction
      */
-    public function setTags(\AppBundle\Entity\Tag $tags)
+    public function addTag(\AppBundle\Entity\Tag $tag)
     {
-        $this->tags[] = $tags;
+        $this->tags[] = $tag;
 
         return $this;
     }
 
     /**
-     * Remove Tags.
+     * Remove Tag.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @param \AppBundle\Entity\Tag $tag
      */
-    public function removeTag(\AppBundle\Entity\Tag $tags)
+    public function removeTag(\AppBundle\Entity\Tag $tag)
     {
-        $this->tags->removeElement($tags);
+        $this->tags->removeElement($tag);
     }
 
     /**
