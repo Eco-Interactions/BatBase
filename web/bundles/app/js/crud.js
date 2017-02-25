@@ -198,6 +198,7 @@ $(document).ready(function(){
      * returned and thus selected in the combobox
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
+        if ($('#sub-form').length !== 0) { return openSubFormError('Publication', null, "sub"); }
         $('form[name="top"]').append(initSubForm(
             "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
@@ -245,11 +246,11 @@ $(document).ready(function(){
     function handleCitCleared() {
         if (!$('#Country-sel').length) { return; }
         enableCombobox('#Publication-sel');
-        removeLocFields();
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        $('form[name="top"]').append(initSubForm(
+        if ($('#sub-form').length !== 0) { return openSubFormError('CitationTitle', '#Citation-sel', "sub"); }
+        $('#CitationTitle_row').after(initSubForm(
             "citation", "sub", "flex-row med-form", {"Title": val}, "#Citation-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
@@ -275,20 +276,16 @@ $(document).ready(function(){
     }
     /** Select the passed author and builds a new, empty author combobox. */
     function selectAuthor(cnt, authId) {
-        var selId = '#Authors-sel'+ ++cnt; 
+        var selId = '#Authors-sel'+ ++cnt;
         $(selId)[0].selectize.addItem(authId, true);
-        buildNewAuthorSelect();
+        buildNewAuthorSelect(++cnt, authId);
     }
     /*-------------- Country -------------------------------------------------*/
     /** Inits both the Country and Location form-fields for the 'top' interaction form. */
     function initTopLocationFields() {
+        if ($('#Country_row').length) { return focusCombobox('#Country-sel');} //rows are already displayed.
         buildCountryFieldRow();
         buildLocationFieldRow();        
-    }
-    /** Removes the country and location form-fields.  */
-    function removeLocFields() {
-        $('#Country_row').remove();
-        $('#Location_row').remove();
     }
     /** Returns a form row with a country combobox populated with all countries. */
     function buildCountryFieldRow() {  
@@ -336,7 +333,6 @@ $(document).ready(function(){
         var opts = cntry ? getChildLocOpts(cntry) : getLocationOpts();    
         updateComboboxOptions('#Location-sel', opts, focus);
     }          
-
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
         return cntry.children.map(function(id) {  
@@ -362,7 +358,8 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        $('form[name="top"]').append(initSubForm(
+        if ($('#sub-form').length !== 0) { return openSubFormError('Location', null, "sub"); }
+        $('#Location_row').after(initSubForm(
             "location", "sub", "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
@@ -375,6 +372,7 @@ $(document).ready(function(){
      * taxonomic data available. 
      */
     function buildTaxonFieldRows() {
+        if ($('#Subject_row').length) { return focusCombobox('#Family-sel');} //rows are already displayed.
         initSubjectField();
         initObjectField();
         initSubjectForm();
@@ -397,6 +395,7 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectForm() {
+        if ($('#sub-form').length !== 0) { return openSubFormError('Subject', null, "sub"); }        
         cParams.realm = "Bat";
         cParams.realmVal = 2;
         $('form[name="top"]').append(initSubForm(
@@ -413,6 +412,7 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectForm() {  
+        if ($('#sub-form').length !== 0) { return openSubFormError('Object', null, "sub"); }
         var realmVal = cParams.realmVal === 2 ? 3 : cParams.realmVal; 
         cParams.realm = cParams.realm || "Plant";
         $('#Object_row').append(initSubForm(
@@ -606,7 +606,7 @@ $(document).ready(function(){
      *     name, aka val, is it's only required field.
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
-        if ($('#sub2-form').length !== 0) { return openSub2FormError('Publisher', "#Publisher-sel"); }
+        if ($('#sub2-form').length !== 0) { return openSubFormError('Publisher', null, "sub2"); }
         $('#Publisher_row').append(initSubForm(
             "publisher", "sub2", "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
         enableSubmitBttn("#sub2-submit");
@@ -622,11 +622,11 @@ $(document).ready(function(){
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
         var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
-        buildNewAuthorSelect(cnt);
+        buildNewAuthorSelect(cnt, val);
         focusCombobox('#Authors-sel'+cnt);
     }
     /** Builds a new, empty author combobox */
-    function buildNewAuthorSelect(cnt) {
+    function buildNewAuthorSelect(cnt, val) {
         var parentFormEntity = cParams.forms.sub.entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
@@ -634,6 +634,7 @@ $(document).ready(function(){
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, "sub");
+        $("#Authors-sel"+cnt)[0].selectize.removeOption(val);
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
@@ -645,7 +646,7 @@ $(document).ready(function(){
     function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
         var authCnt = $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
-        if ($('#sub2-form').length !== 0) { return openSub2FormError('Authors', parentSelId); }
+        if ($('#sub2-form').length !== 0) { return openSubFormError('Authors', parentSelId, "sub2"); }
         $('#Authors_row').append(initSubForm(
             "author", "sub2", "sml-left sml-form", {"Display Name": val}, parentSelId));
         disableSubmitBttn("#sub-submit");
@@ -658,9 +659,9 @@ $(document).ready(function(){
     function clearUnusedAuthElems() {  
         // for (var i = 1; i < ($("#Authors_sel-cntnr").data("cnt") + 1); i++ ) { console.log("i = ", i);console.log("val = ", $("#Authors-sel"+i).val())
         //     if ($("#Authors-sel"+i).val() == "") { console.log("empty select for %O", $("#Authors-sel"+i));
-        //         $("#Authors-sel"+i)[0].selectize.off("change");
-                // $("#Authors-sel"+i)[0].selectize.destroy();
-                // $("#Authors-sel"+i).remove(); 
+        //         $("#Authors-sel"+i)[0].selectize._events = {change: []};
+        //         $("#Authors-sel"+i)[0].selectize.destroy();
+        //         // $("#Authors-sel"+i).remove();     
         //     }
         // }
     }
@@ -763,6 +764,7 @@ $(document).ready(function(){
         var selApi = $(selId)[0].selectize;
         selApi.clear();
         selApi.updatePlaceholder();
+        selApi.removeOption("");
     }    
     function replaceOptions(opts, selApi) {
         selApi.clearOptions();
@@ -1262,19 +1264,29 @@ $(document).ready(function(){
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }  
+    function toggleWaitCursor(waiting) {
+        if (waiting) {
+            $('body').addClass("waiting");
+        } else {
+            $('body').removeClass("waiting");
+        }  
+    }
+    function getFormValuesAndSubmit(id, formLvl, entity) {                   //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
+        var formVals = getFormValueData(id, entity);
+        toggleWaitCursor(true);
+        submitFormVals(formLvl, formVals);  
+    }
     /**
-     * Loops through all rows in the form with the passed id and builds an object of 
-     * filled field values keyed under server-ready field names to submit @submitFormVals.
-     * Entity data not contained in an input on the form is added @addAdditionalEntityData.
+     * Loops through all rows in the form with the passed id and returns an object 
+     * of the form values. Entity data not contained in an input on the form is 
+     * added @addAdditionalEntityData.
      */
-    function getFormValuesAndSubmit(id, formLvl, entity) {                      //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
+    function getFormValueData(id, entity) {      
         var elems = $(id)[0].children;   
         var formVals = {};
-        
         for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
-
         addAdditionalEntityData(entity);
-        submitFormVals(formLvl, formVals);  
+        return formVals;
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
@@ -1522,7 +1534,8 @@ $(document).ready(function(){
         return envUrl + "admin/crud/entity/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)
+        var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)     
+        toggleWaitCursor(false);
         $('#'+formLvl+'-hdr').after(
             '<p class="form-errors"">There was an error during form submission.</p>');
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
@@ -1537,6 +1550,7 @@ $(document).ready(function(){
         eif.syncData.update(data);
         updateStoredCrudParamsData(data);
         exitFormAndSelectNewEntity(data);
+        toggleWaitCursor(false);
     }
     /** Updates the core records in the global crud params object. */
     function updateStoredCrudParamsData(data) {
@@ -1572,24 +1586,25 @@ $(document).ready(function(){
     }
     /*------------------- Form Error Handlers --------------------------------*/
     /**
-     * When the user attempts to create an entity that uses the sub2-form and
-     * there is already a sub2-form instance, show the user an error message and 
+     * When the user attempts to create an entity that uses the sub-form and there 
+     * is already an instance using that form, show the user an error message and 
      * reset the select elem. 
      */
-    function openSub2FormError(field, selId) {                                  //console.log("selId = %s, cP = %O ", selId, cParams)
-        crudFieldErrorHandler(field, 'openSub2Form');
+    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, cP = %O ", selId, cParams)
+        var selId = id || '#'+field+'-sel';
+        crudFieldErrorHandler(field, 'openSubForm', formLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
     /** Shows the user an error message above the field row. */
-    function crudFieldErrorHandler(fieldName, errorTag, fieldErrElem) {         //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+    function crudFieldErrorHandler(fieldName, errorTag, formLvl) {              //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
         var errMsgMap = {
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
-            "openSub2Form": "<p>Please finish the open "+ 
-                _util.ucfirst(cParams.forms.sub2.entity) + " form.</p>",
+            "openSubForm": "<p>Please finish the open "+ 
+                _util.ucfirst(cParams.forms[formLvl].entity) + " form.</p>",
         };
         var msg = errMsgMap[errorTag];
-        var errElem = fieldErrElem || getErrElem(fieldName);
+        var errElem = getErrElem(fieldName);
         errElem.innerHTML = msg;
         window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
     }

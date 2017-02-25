@@ -101,6 +101,9 @@ span.lbl {
 .invis {
 	display: none;
 }
+body.waiting {
+	cursor: progress;
+}
 /*--------------- Flex ---------------------*/
 .flex-wrap {
 	flex-wrap: wrap;
@@ -604,7 +607,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .required:after {
   content: "*";
 }
-.crud-form input, .crud-form select, .crud-form textarea {
+#top-form input, #top-form select, #top-form textarea {
 	padding: .1em;
 	margin: 0;
 	font-size: .95em;
@@ -624,10 +627,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .sml-field {
 	width: 200px;
 }
-.crud-form textarea {
+#top-form textarea {
 	height: 55px;
 }
-.crud-form label {
+#top-form label {
 	font-size: 1em;
 	padding: 9px 0 2px 0;
 	width: 122px;
