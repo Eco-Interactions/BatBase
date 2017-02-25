@@ -12,20 +12,42 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
         --form
+            --disable 'select' when all combos are empty
         --search
-            -- build initComboboxes
-            -- standardize taxon 'levels' storage and usage
+            -- build initcomboboxes
+            -- standardize taxon 'levels' storage
             -- update walkthrough
-                -- Exiting walkthrough before first-time load is complete clears 
-                    the #sel-focus and caused selectSearchFocus to fail without 
-                    the focus selected.
             -- Location selects include both sub and top regions but, because the 
                 grid column filters are used to update to grid, not the selection 
                 of those regions... fix this.
             --Refactor--
-                - focusStorage['levels']. Must this be initialized w every reset?
-                - showIntroWalkthrough - Is the timeout necessary?
     --Asap--
+
+::Search Page Ui::
+    -- Add a 'control group' (jqueryui) like border around the 'search options' panel. This will aid in documentation and intuitive clarity for editors/users .
+
+::Form Ui::
+    -- On form submission, change cursor to the waiting circle. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

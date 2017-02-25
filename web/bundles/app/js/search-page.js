@@ -29,10 +29,10 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'alpha';
+        var dataKey = 'gu';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
-            _util.populateStorage(dataKey, true);
+            // _util.populateStorage(dataKey, true);
         }
     }
     /**
@@ -1338,7 +1338,7 @@
          * lvl is cleared from the taxon-heirarchy @clearLowerLvls.  
          */
         function syncTaxonHeir(taxonName, lvl, parent) {                        //console.log("syncTaxonHeir parent = ", parent);
-            var lvls = _util.getDataFromStorage('levelNames');
+            var lvls = _util.getDataFromStorage('levelNames');  //refactor. levels may not need to be stored at all
             if (parent === null || parent === 1) { fillInAvailableLevels(lvl, lvls);
             } else { clearLowerLvls(focusStorage.rcrdsById[parent].level) }
 
