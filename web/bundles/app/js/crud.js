@@ -1537,12 +1537,30 @@ $(document).ready(function(){
         var envUrl = $('body').data("ajax-target-url");
         return envUrl + "admin/crud/entity/" + action;
     }
-    function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = cParams.ajaxFormLvl;                                      //console.log("formLvl = ", formLvl)     
+    function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+        var formLvl = cParams.ajaxFormLvl;                                          
         toggleWaitCursor(false);
-        $('#'+formLvl+'-hdr').after(
-            '<p class="form-errors"">There was an error during form submission.</p>');
+        $('#'+formLvl+'-hdr').after(getErrorMessage(JSON.parse(jqXHR.responseText)));
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
+    }
+    /**
+     * Returns an error <p> based on the server error text. Reports duplicated 
+     * authors, non-unique display names, or returns a generic form-error message.
+     */
+    function getErrorMessage(errTxt) {                                          console.log("errTxt = %O", errTxt) 
+        var msg = '<p class="form-errors"">';
+        if (duplicateAuthorErr(errTxt)) {
+            msg += 'A selected author is a duplicate.';
+        } else if (errTxt.DBALException.includes("Duplicate entry")){ 
+            msg += 'A record with this display name already exists.'; 
+        } else {
+            msg += 'There was an error during form submission.'
+        }
+        return msg + '</p>'
+    }
+    function duplicateAuthorErr(errTxt) {
+        return errTxt.DBALException.includes("Duplicate entry") &&
+            errTxt.DBALException.includes("contribution");
     }
     /**
      * Ajax success callback. Updates the stored data @eif.syncData.update and the 
