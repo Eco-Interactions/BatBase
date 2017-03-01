@@ -607,6 +607,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .required:after {
   content: "*";
 }
+.top-pin {
+	margin: .6em 0 0 .6em !important;
+}
 #top-form input, #top-form select, #top-form textarea {
 	padding: .1em;
 	margin: 0;

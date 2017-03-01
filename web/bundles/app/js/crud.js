@@ -1139,7 +1139,7 @@ $(document).ready(function(){
     /* -----------------------------------------------------------------------*/
     /**
      * Each element is built, nested, and returned as a completed row. 
-     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput))
+     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput, pin))
      */
     function buildFormRow(fieldName, fieldInput, formLvl, isReq, rowClss) {
         var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
@@ -1149,10 +1149,14 @@ $(document).ready(function(){
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
+        var pin = formLvl === "top" ? getPinElem(field) : null;  
         if (isReq) { handleRequiredField(label, fieldInput, formLvl); } 
-        $(fieldRow).append([label, fieldInput]);
+        $(fieldRow).append([label, fieldInput, pin]);
         $(rowDiv).append([errorDiv, fieldRow]);
         return rowDiv;
+    }
+    function getPinElem(field) {
+        return _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: "top-pin"});
     }
     /**
      * Required field's have a 'required' class added which appends '*' to their 
