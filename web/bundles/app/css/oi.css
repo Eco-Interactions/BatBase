@@ -481,7 +481,7 @@ button[name="createbttn"] {
 	width: 420px;
 	text-align: justify;
 }
-a[role="button"], .tos-bttn, #exit-form {
+a[role="button"], .tos-bttn, .exit-bttn {
 	cursor: pointer;
 }
 /*-- Search Grid Popup --*/
@@ -541,12 +541,18 @@ a[role="button"], .tos-bttn, #exit-form {
 	font-size: 1em;
 	flex-wrap: wrap;
 }
-#exit-form {
+.exit-bttn {
 	position: relative;
-	left: 1035px;
 	width: 22px;
 	height: 20px;
 	font-weight: bold;
+}
+#exit-form {
+	left: 1035px;
+}
+#exit-sub-form {
+	left: 111px;
+	font-size: .75em !important;
 }
 .med-form {
 	border: 1px solid grey;

@@ -78,7 +78,7 @@ $(document).ready(function(){
     }
     function getExitButton() {
         var bttn = _util.buildElem("input", {
-           "id":"exit-form", "class":"grid-bttn", "type":"button", "value":"X" });
+           "id":"exit-form", "class":"grid-bttn exit-bttn", "type":"button", "value":"X" });
         $(bttn).click(exitCrudFormPopup);
         return bttn;
     }
@@ -486,13 +486,23 @@ $(document).ready(function(){
         $(realmElems).append(buildSubForm(realm, {}, "sub2", null));
         $('#Realm_row').append(realmElems);
     }
-    /** Replaces the Header and the submit/cancel button text. Sets the 'reset' event. */
+    /** Adds a close button. Updates the Header and the submit/cancel buttons. */
     function customizeElemsForTaxonSelectForm(role) {
         $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
+        $('#sub-hdr').append(getTaxonExitButton());
         $('#sub-submit')[0].value = "Select Taxon";        
         $('#sub-cancel')[0].value = "Reset";
         $('#sub-submit').unbind("click").click(selectTaxon);
         $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
+    }
+    function getTaxonExitButton() {
+        var bttn = getExitButton();
+        bttn.id = "exit-sub-form";
+        $(bttn).unbind("click").click(exitTaxonSelectForm);
+        return bttn;
+    }
+    function exitTaxonSelectForm() {
+        exitForm('#sub-form', 'sub');
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
