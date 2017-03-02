@@ -101,8 +101,8 @@ span.lbl {
 .invis {
 	display: none;
 }
-body.waiting {
-	cursor: progress;
+.waiting {
+	cursor: wait;
 }
 /*--------------- Flex ---------------------*/
 .flex-wrap {
@@ -281,13 +281,20 @@ body.waiting {
     background: rgba(0,0,0,.8);
     width: 100vw;
     height: 100vh;
-    z-index: 10000;
+    z-index: 500;
     justify-content: center;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
 }
 #b-overlay-popup {
     background: WhiteSmoke;
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
-    z-index: 20000;
+    z-index: 750;
     border-radius: 5px;
 }
 .tos-popup {

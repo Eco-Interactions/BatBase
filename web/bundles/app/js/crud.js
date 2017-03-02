@@ -502,7 +502,7 @@ $(document).ready(function(){
         return bttn;
     }
     function exitTaxonSelectForm() {
-        exitForm('#sub-form', 'sub');
+        $('#sub-form').remove();
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
@@ -1298,7 +1298,7 @@ $(document).ready(function(){
             formLvls[formLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
     }
-    /*----------------------- Form Submission -----------------------------------------------------*/
+    /*------------------ Form Submission Data-Prep Methods -------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
     function ifParentFormValidEnableSubmit(formLvl) {
         var parentLvl = getNextFormLevel('parent', formLvl);
@@ -1314,16 +1314,18 @@ $(document).ready(function(){
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }  
-    function toggleWaitCursor(waiting) {
-        if (waiting) {
-            $('body').addClass("waiting");
-        } else {
-            $('body').removeClass("waiting");
-        }  
+    function toggleWaitOverlay(waiting) {                                        //console.log("toggling wait cursor")
+        if (waiting) { appendWaitingOverlay();
+        } else { $('#c-overlay').remove(); }  
     }
-    function getFormValuesAndSubmit(id, formLvl, entity) {                   //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
+    function appendWaitingOverlay() {
+        $('#b-overlay').append(_util.buildElem('div', { 
+            class: 'overlay waiting', id: 'c-overlay'}));
+        $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
+    }
+    function getFormValuesAndSubmit(id, formLvl, entity) {                      //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
         var formVals = getFormValueData(id, entity);
-        toggleWaitCursor(true);
+        toggleWaitOverlay(true);
         submitFormVals(formLvl, formVals);  
     }
     /**
@@ -1568,14 +1570,14 @@ $(document).ready(function(){
         };
         return relationships[entity];
     }
-/*--------------------------- Helpers ----------------------------------------*/ 
-    /*------------- AJAX -----------------------------------------------------*/
+    /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, cParams.action);
-        cParams.ajaxFormLvl = formLvl;
         formData.coreEntity = coreEntity;
+        cParams.ajaxFormLvl = formLvl;
+        toggleWaitOverlay(true);
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
     }
     /** Returns the full url for the passed entity and action.  */
@@ -1585,7 +1587,7 @@ $(document).ready(function(){
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = cParams.ajaxFormLvl;                                          
-        toggleWaitCursor(false);
+        toggleWaitOverlay(false);
         $('#'+formLvl+'-hdr').after(getErrorMessage(JSON.parse(jqXHR.responseText)));
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
     }
@@ -1595,7 +1597,7 @@ $(document).ready(function(){
      */
     function getErrorMessage(errTxt) {                                          console.log("errTxt = %O", errTxt) 
         var msg = '<p class="form-errors"">';
-        if (duplicateAuthorErr(errTxt)) {
+        if (isDuplicateAuthorErr(errTxt)) {
             msg += 'A selected author is a duplicate.';
         } else if (errTxt.DBALException.includes("Duplicate entry")){ 
             msg += 'A record with this display name already exists.'; 
@@ -1604,10 +1606,11 @@ $(document).ready(function(){
         }
         return msg + '</p>'
     }
-    function duplicateAuthorErr(errTxt) {
+    function isDuplicateAuthorErr(errTxt) {
         return errTxt.DBALException.includes("Duplicate entry") &&
             errTxt.DBALException.includes("contribution");
     }
+    /*------------------ Form Success Methods --------------------------------*/
     /**
      * Ajax success callback. Updates the stored data @eif.syncData.update and the 
      * stored core records in the cParams object. Exit's the successfully submitted 
@@ -1618,7 +1621,7 @@ $(document).ready(function(){
         eif.syncData.update(data);
         updateStoredCrudParamsData(data);
         exitFormAndSelectNewEntity(data);
-        toggleWaitCursor(false);
+        toggleWaitOverlay(false);
     }
     /** Updates the core records in the global crud params object. */
     function updateStoredCrudParamsData(data) {
