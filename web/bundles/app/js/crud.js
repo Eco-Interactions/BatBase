@@ -187,10 +187,10 @@ $(document).ready(function(){
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
-    /** When a publication is selected fill citation dropdown @initCitField.  */
+    /** When a publication is selected fill citation dropdown @fillCitationField.  */
     function onPubSelection(val) { 
-        if (val === "" || isNaN(parseInt(val)) ) { return; }                                
-        initCitField(val);
+        if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#Citation-sel'); }                                
+        fillCitationField(val);
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
@@ -204,10 +204,6 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
-    /** Exit handler for the Citation sub-form, reenables the Publication combobox */
-    function enablePubField() {
-        $('#Publication-sel')[0].selectize.enable();
-    }
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
@@ -219,7 +215,7 @@ $(document).ready(function(){
      * Fills the citation field combobox with all citations for the selected publication
      * and enables the dropdown.
      */
-    function initCitField(pubId) {                                              //console.log("initCitSelect for publication = ", pubId);
+    function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
         var citOpts = getPubCitationOpts(pubId);  
         enableCombobox('#Citation-sel');
         updateComboboxOptions('#Citation-sel', citOpts, true);
@@ -232,20 +228,12 @@ $(document).ready(function(){
     }
     /** 
      * When a Citation is selected, both 'top' location fields are initialized
-     * and the publication combobox is disabled. 
+     * and the publication combobox is reenabled. 
      */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return handleCitCleared(); }
+        if (val === "" || isNaN(parseInt(val))) { return; } 
         initTopLocationFields();                  
-        enableCombobox('#Publication-sel', false);                              //console.log("cit selection = ", parseInt(val));                          
-    }
-    /**
-     * When Citation is cleared, the publication combobox is enabled and the 
-     * country and location form fields are removed.  
-     */
-    function handleCitCleared() {
-        if (!$('#Country-sel').length) { return; }
-        enableCombobox('#Publication-sel');
+        enableCombobox('#Publication-sel');                                     //console.log("cit selection = ", parseInt(val));                          
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
@@ -344,17 +332,14 @@ $(document).ready(function(){
      * which is then disabled. If the location was cleared, restores the country combobox. 
      */
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return enableCountryField(); }          
+        if (val === "" || isNaN(parseInt(val))) { return; }          
         var locRcrd = cParams.records.location[val];
-        enableCombobox('#Country-sel', false);
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
         buildTaxonFieldRows();
     }
-    /** When Location is cleared, the country combobox is reenabled and cleared. */
+    /** When Location form is cancelled, the country combobox is reenabled. */
     function enableCountryField() {  
-        if ($('#sub-form').length) { return; }  //if sub-form is open, do nothing.
         enableCombobox('#Country-sel');
-        $('#Country-sel')[0].selectize.clear(true);
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
@@ -371,6 +356,7 @@ $(document).ready(function(){
      * 'Select Subject' form is built and appended.
      */
     function buildTaxonFieldRows() {
+        if ($('#Subject-sel').length) { return; } //rows are already displayed.
         initSubjectField();
         initObjectField();
     }
@@ -883,8 +869,7 @@ $(document).ready(function(){
                 "order": ["CitationText", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
                     "Authors" ],
-                "exitHandler": enablePubField
-            },
+            },                                      
             "interaction": {
                 "add": {},  
                 "exclude": [],
@@ -898,6 +883,7 @@ $(document).ready(function(){
                 "order": ["DisplayName", "LocationType", "Country", "Description", 
                     "Elevation", "ElevationMax", "ElevationUnits", "HabitatType", 
                     "Latitude", "Longitude" ],
+                "exitHandler": enableCountryField
             },
             "object": {
                 "add": {"Realm": "select"},  
