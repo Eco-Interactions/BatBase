@@ -1202,11 +1202,33 @@ $(document).ready(function(){
         return rowDiv;
     }
     function getPinElem(field) {
+        var relFields = ["CitationTitle", "Country", "Location", "Publication"];
         var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: "top-pin"});
         $(pin).keypress(function(e){ //Enter
             if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
         });
+        if (relFields.indexOf(field) !== -1) { $(pin).click(checkConnectedFieldPin); }
         return pin;
+    }
+    /**
+     * When a dependent field is pinned, the connected field will also be pinned.
+     * If the connected field is unpinned, the dependant field is as well.
+     */
+    function checkConnectedFieldPin() {
+        var field = this.id.split("_pin")[0]; 
+        var params = {
+            "CitationTitle": { checked: true, relField: "Publication" },
+            "Country": { checked: false, relField: "Location" },
+            "Location": { checked: true, relField: "Country" },
+            "Publication": { checked: false, relField: "CitationTitle" },
+        }
+        checkFieldPins(this, params[field].checked, params[field].relField);
+    }
+    function checkFieldPins(curPin, checkState, relField) {
+        if (curPin.checked === checkState) {
+            if ($('#'+relField+'_pin')[0].checked === checkState) { return; }
+            $('#'+relField+'_pin')[0].checked = checkState;
+        }
     }
     /**
      * Required field's have a 'required' class added which appends '*' to their 
@@ -1318,7 +1340,7 @@ $(document).ready(function(){
     function disableSubmitBttn(bttnId) {
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }  
-    function toggleWaitOverlay(waiting) {                                        //console.log("toggling wait cursor")
+    function toggleWaitOverlay(waiting) {                                        //console.log("toggling wait overlay")
         if (waiting) { appendWaitingOverlay();
         } else { $('#c-overlay').remove(); }  
     }
@@ -1329,7 +1351,6 @@ $(document).ready(function(){
     }
     function getFormValuesAndSubmit(id, formLvl, entity) {                      //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
         var formVals = getFormValueData(id, entity);
-        toggleWaitOverlay(true);
         submitFormVals(formLvl, formVals);  
     }
     /**
@@ -1386,7 +1407,7 @@ $(document).ready(function(){
         function ifHasParentFormVals(entity) {
             var fieldHndlrs = { "Citation": getPubFieldData, "Taxon": getTaxonData };
             if (Object.keys(fieldHndlrs).indexOf(entity) === -1) { return; }
-            fieldHndlrs[entity]();                                            //console.log("new fieldName = ", newField)
+            fieldHndlrs[entity]();                                              //console.log("new fieldName = ", newField)
         }
         function getPubFieldData() {
             formVals.publication = $('#Publication-sel').val();
@@ -1643,11 +1664,8 @@ $(document).ready(function(){
         initCrudParams("create");
     }
     /** Returns an obj with the form fields and either their pinned values or false. */
-    function getPinnedFieldVals() {                                             //console.log("getPinnedFieldVals called.");
+    function getPinnedFieldVals(pins) {
         var pins = $('form[name="top"] [id$="_pin"]').toArray();                //console.log("pins = %O", pins);
-        return getPinnedValsObj(pins);
-    }
-    function getPinnedValsObj(pins) {
         var vals = {};
         pins.forEach(function(pin) {  
             if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
