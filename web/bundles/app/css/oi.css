@@ -202,7 +202,7 @@ span.lbl {
 	position: absolute;
 	top: 80px;
 	left: 60px;
-	z-index: 5000;
+	z-index: 500;
 }
 #side-logo {
 	position: relative;
@@ -535,7 +535,11 @@ a[role="button"], .tos-bttn, .exit-bttn {
 #crud-hdr>h1 {
 	font-size: 1.3em;
 	margin-bottom: 10px;
-	/*text-decoration: underline;*/
+	text-align: center;
+}
+#crud-hdr>p {
+	margin-bottom: 10px;
+	font-weight: bold;
 	text-align: center;
 }
 #crud-main {

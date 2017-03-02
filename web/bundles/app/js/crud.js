@@ -109,7 +109,7 @@ $(document).ready(function(){
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
-        initFormLevelParamsObj("interaction", "top", null, {});
+        initFormLevelParamsObj("interaction", "top", null, false);
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -636,6 +636,7 @@ $(document).ready(function(){
         $('form[name="top"]').append(intFields);
         customizeIntFieldElems();   
         initSubFormComboboxes("interaction");
+        addReqElemsToConfg();
         focusCombobox('#InteractionType-sel');
     }
     function customizeIntFieldElems() {
@@ -643,6 +644,14 @@ $(document).ready(function(){
         document.getElementById("InteractionTags-sel").className = "lrg-field";
         $('#Notes_row div.field-row').css("width", "933px");
         $('#Notes_row textArea').css("width", "812px"); 
+    }   
+    /** Adds the top-form's required elems to an array stored in cParams. */
+    function addReqElemsToConfg() {
+        var reqFields = ["Publication", "CitationTitle", "Country", "Location",
+                    "Subject", "Object", "InteractionType"];
+        cParams.forms.top.reqElems = reqFields.map(function(field) {
+            return $('#'+field+'-sel')[0];
+        });
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
@@ -1661,7 +1670,14 @@ $(document).ready(function(){
     /** Resets the interactions form leaving only the values that were pinned. */
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
+        showSuccessMsg();
         initCrudParams("create");
+        resetTopForm(vals);
+    }
+    /** Shows a form-submit success message at the top of the interaction form. */
+    function showSuccessMsg() {
+        $('#crud-hdr p')[0].innerHTML = "New Interaction successfully created."; 
+        window.setTimeout(function() {$('#crud-hdr p')[0].innerHTML = ""}, 2000);
     }
     /** Returns an obj with the form fields and either their pinned values or false. */
     function getPinnedFieldVals(pins) {
@@ -1681,6 +1697,29 @@ $(document).ready(function(){
             vals[fieldName] = false;
         }
     } /* End getPinnedValsObj */
+    /**
+     * Resets the top-form in preparation for another entry. All fields without  
+     * a pinned value will be reset. 
+     */
+    function resetTopForm(vals) {
+        disableSubmitBttn("top-submit"); 
+        initInteractionParams();
+        resetUnpinnedFields(vals);
+    }
+    function resetUnpinnedFields(vals) {
+        for (var field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
+            if (!vals[field]) { clearField(field); }
+        }
+    }
+    function clearField(fieldName) {
+        if (fieldName === 'Notes') { return $('#Notes-txt').val(""); }
+        clearCombobox('#'+fieldName+'-sel');
+    }
+    /** Inits the necessary interaction form params after form reset. */
+    function initInteractionParams() {
+        initFormLevelParamsObj("interaction", "top", null, getSubFormConfg("interaction"));
+        addReqElemsToConfg();
+    }
     /*------------------ Sub-Form Success Methods ----------------------------*/
     /**
      * Exits the successfully submitted form @exitForm. Adds and selects the new 
