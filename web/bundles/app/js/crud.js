@@ -189,7 +189,7 @@ $(document).ready(function(){
     }
     /** When a publication is selected fill citation dropdown @fillCitationField.  */
     function onPubSelection(val) { 
-        if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#Citation-sel'); }                                
+        if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#CitationTitle-sel'); }                                
         fillCitationField(val);
     }
     /**
@@ -207,7 +207,7 @@ $(document).ready(function(){
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
-        var selElem = _util.buildSelectElem([], {id: "Citation-sel", class: "lrg-field"});
+        var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
         $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, "top", true);
     }
@@ -217,8 +217,8 @@ $(document).ready(function(){
      */
     function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
         var citOpts = getPubCitationOpts(pubId);  
-        enableCombobox('#Citation-sel');
-        updateComboboxOptions('#Citation-sel', citOpts, true);
+        enableCombobox('#CitationTitle-sel');
+        updateComboboxOptions('#CitationTitle-sel', citOpts, true);
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -237,9 +237,9 @@ $(document).ready(function(){
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        if ($('#sub-form').length !== 0) { return openSubFormError('CitationTitle', '#Citation-sel', "sub"); }
+        if ($('#sub-form').length !== 0) { return openSubFormError('CitationTitle', '#CitationTitle-sel', "sub"); }
         $('#CitationTitle_row').after(initSubForm(
-            "citation", "sub", "flex-row med-form", {"Title": val}, "#Citation-sel"));
+            "citation", "sub", "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
@@ -724,7 +724,7 @@ $(document).ready(function(){
             'publication': { 
                 name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
             'citation': { 
-                name: 'Citation', id: '#Citation-sel', change: onCitSelection, add: initCitForm },
+                name: 'Citation', id: '#CitationTitle-sel', change: onCitSelection, add: initCitForm },
             'country': { 
                 name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
             'location': { 
@@ -1036,7 +1036,7 @@ $(document).ready(function(){
         return _util.buildElem("textarea", {class: "med-field" });
     }
     function buildLongTextArea(entity, field) {
-        return _util.buildElem("textarea", {class: "xlrg-field"});
+        return _util.buildElem("textarea", {class: "xlrg-field", id:field+"-txt"});
     }
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -1202,7 +1202,11 @@ $(document).ready(function(){
         return rowDiv;
     }
     function getPinElem(field) {
-        return _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: "top-pin"});
+        var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: "top-pin"});
+        $(pin).keypress(function(e){ //Enter
+            if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
+        });
+        return pin;
     }
     /**
      * Required field's have a 'required' class added which appends '*' to their 
@@ -1620,20 +1624,52 @@ $(document).ready(function(){
         var data = parseData(ajaxData.results);                                 console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
         eif.syncData.update(data);
         updateStoredCrudParamsData(data);
-        exitFormAndSelectNewEntity(data);
+        handleFormComplete(data);
         toggleWaitOverlay(false);
     }
     /** Updates the core records in the global crud params object. */
-    function updateStoredCrudParamsData(data) {
+    function updateStoredCrudParamsData(data) {  console.log("cParams after interaction created. %O", cParams);
         cParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
+    function handleFormComplete(data) {
+        var formLvl = cParams.ajaxFormLvl;
+        if (formLvl === "top") { return resetInteractionForm(); }              
+        exitFormAndSelectNewEntity(data);
+    }
+    /*------------------ Top-Form Success Methods ----------------------------*/
+    /** Resets the interactions form leaving only the values that were pinned. */
+    function resetInteractionForm() {
+        var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
+        initCrudParams("create");
+    }
+    /** Returns an obj with the form fields and either their pinned values or false. */
+    function getPinnedFieldVals() {                                             //console.log("getPinnedFieldVals called.");
+        var pins = $('form[name="top"] [id$="_pin"]').toArray();                //console.log("pins = %O", pins);
+        return getPinnedValsObj(pins);
+    }
+    function getPinnedValsObj(pins) {
+        var vals = {};
+        pins.forEach(function(pin) {  
+            if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
+            } else { addFalseValue(pin.id.split("_pin")[0]); }
+        });
+        return vals;
+
+        function getFieldVal(fieldName) {                                       //console.log("fieldName = %s", fieldName)
+            var suffx = fieldName === 'Notes' ? '-txt' : '-sel';
+            vals[fieldName] = $('#'+fieldName+suffx).val();
+        }
+        function addFalseValue(fieldName) {
+            vals[fieldName] = false;
+        }
+    } /* End getPinnedValsObj */
+    /*------------------ Sub-Form Success Methods ----------------------------*/
     /**
      * Exits the successfully submitted form @exitForm. Adds and selects the new 
      * entity in the form's parent elem @addAndSelectEntity.
      */
     function exitFormAndSelectNewEntity(data) {
         var formLvl = cParams.ajaxFormLvl;           
-        if (formLvl === "top") { return; }              
         exitForm("#"+formLvl+"-form", formLvl); 
         addAndSelectEntity(data, formLvl);
     }
