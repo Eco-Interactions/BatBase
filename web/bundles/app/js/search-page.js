@@ -29,10 +29,10 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'gu';
+        var dataKey = 'wu';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
-            // _util.populateStorage(dataKey, true);
+            _util.populateStorage(dataKey, true);
         }
     }
     /**
