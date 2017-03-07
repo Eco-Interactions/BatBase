@@ -52,7 +52,7 @@ $(document).ready(function(){
     /** Sets popup top using parent position. If 'reset', sets original position. */
     function setPopUpPos(reset) {
         var parentPos = $('#b-overlay').offset();  
-        var newTopPos = { top: reset ? (parentPos.top - 88) : (parentPos.top + 88) };
+        var newTopPos = { top: reset ? (parentPos.top - 66) : (parentPos.top + 66) };
         $('#b-overlay-popup').offset(newTopPos);          
     }
     function hideSearchCrudPopup() {
@@ -490,7 +490,7 @@ $(document).ready(function(){
     function customizeElemsForTaxonSelectForm(role) {
         $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
         $('#sub-hdr').append(getTaxonExitButton());
-        $('#sub-submit')[0].value = "Select Taxon";        
+        $('#sub-submit')[0].value = "Confirm";        
         $('#sub-cancel')[0].value = "Reset";
         $('#sub-submit').unbind("click").click(selectTaxon);
         $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);

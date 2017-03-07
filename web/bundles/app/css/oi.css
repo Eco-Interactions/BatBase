@@ -226,13 +226,13 @@ span.lbl {
 }
 /*--- Slider Header ---*/
 #pause-btn-frame, #prev-btn-frame, #next-btn-frame, #pause-btn, #prev-btn, #next-btn {
-	z-index: 1200;
+	z-index: 500;
 	height: 60px;
 	width: 60px;
 }
 #pause-btn-frame, #prev-btn-frame, #next-btn-frame {
 	position: absolute;
-	z-index: 1000;
+	z-index: 500;
 	height: 60px;
 	width: 60px;
 	cursor: pointer;
@@ -465,12 +465,9 @@ span.lbl {
 	height: 44px;
 }
 .grid-bttn, .tos-bttn {
-	margin: 0 .3em 0 .2em;/*
-	background: -webkit-linear-gradient(#fff, #d3d3/*d3);
-	background: -moz-linear-gradient(#fff, #d3d3d3);
-	background: -o-linear-gradient(#fff, #d3d3d3);
-	background: -ms-linear-gradient(#fff, #d3d3d3);*/
+	margin: 0 .3em 0 .2em;
 	background: linear-gradient(#fff, #d3d3d3);
+	border-radius: 3px;
 }
 button[name="csv"], #close-tos-bttn {
 	align-self: flex-end;
@@ -524,13 +521,11 @@ a[role="button"], .tos-bttn, .exit-bttn {
     top: 75px;
 }
 .crud-popup {
-    /*top: 100px;*/
-	height: 555px;
+	height: 88vh;
 	width: 1111px;
 	padding: 20px;
 	text-align: left;
 	margin: auto;
-	/*background: #a2dadd !important;*/
 }
 #crud-hdr>h1 {
 	font-size: 1.3em;
@@ -543,9 +538,9 @@ a[role="button"], .tos-bttn, .exit-bttn {
 	text-align: center;
 }
 #crud-main {
-	padding: 25px 25px 75px 25px;
-	height: 475px;
-	overflow: scroll;
+	padding: 25px 25px 15px 25px;
+	height: 750px;
+	overflow: hidden;
 }
 /* -- Form Styles -- */
 #top-form {
@@ -650,6 +645,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #top-form textarea {
 	height: 55px;
 }
+.selectize-input {
+	padding-right: 33px !important;
+}
 #top-form label {
 	font-size: 1em;
 	padding: 9px 0 2px 0;
@@ -660,8 +658,8 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	padding: 10px;
 }
 .bttn-cntnr input {
-    padding: 3px;
-    margin: 3px;
+    padding: 3px !important;
+    margin: 3px !important;
 }
 /*-- Search Tips Popup --*/
 .tips-popup {
