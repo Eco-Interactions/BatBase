@@ -162,6 +162,7 @@ $(document).ready(function(){
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         initTopFormComboboxes();  
+        addTopFormEventListeners();
         focusCombobox('#Publication-sel');
     }      
     /** Builds the form elem container. */
@@ -171,6 +172,10 @@ $(document).ready(function(){
         form.className = "flex-row";
         form.id = "top-form";
         return form;
+    }
+    function addTopFormEventListeners() {
+        $(document).on('focus', '#Subject-sel + div div.selectize-input', initSubjectSelect);
+        $(document).on('focus', '#Object-sel + div div.selectize-input', initObjectSelect);
     }
     // /** Inits the main source form fields: publication and citation. */
     // function buildSrcFields() {
@@ -182,7 +187,7 @@ $(document).ready(function(){
     /** Builds and returns all top-form fields. */
     function buildTopFormFields() {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
-            buildLocationFieldRow ];   // initSubjectField, initObjectField, buildInteractionFieldRows
+            buildLocationFieldRow, initSubjectField, initObjectField ];   // buildInteractionFieldRows
         return fieldBuilders.map(function(builder) {
             return builder();
         });
@@ -374,25 +379,26 @@ $(document).ready(function(){
         enableCombobox('#Country-sel');
     }
     /*-------------- Taxon ---------------------------------------------------*/
-    /**
-     * Builds both the subject and object fields and appends them disabled. The 
-     * 'Select Subject' form is built and appended.
-     */
-    function buildTaxonFieldRows() {
-        if ($('#Subject-sel').length) { return; } //rows are already displayed.
-        initSubjectField();
-        initObjectField();
-    }
+    // /**
+    //  * Builds both the subject and object fields and appends them disabled. The 
+    //  * 'Select Subject' form is built and appended.
+    //  */
+    // function buildTaxonFieldRows() {
+    //     if ($('#Subject-sel').length) { return; } //rows are already displayed.
+    //     initSubjectField();
+    //     initObjectField();
+    // }
     /**
      * Builds the Subject combobox with a click-bound form @initSubjectSelect.
      * Calls @initSubjectSelect to display the select form.
      */
     function initSubjectField() {
         var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
-        $('form[name="top"]').append(buildFormRow("Subject", subjElem, "top", true));
-        initTopFormCombobox("subject");
-        $(document).on('click', '#Subject-sel + div div.selectize-input', initSubjectSelect);
-        initSubjectSelect(); 
+        return buildFormRow("Subject", subjElem, "top", true);
+        // $('form[name="top"]').append(buildFormRow("Subject", subjElem, "top", true));
+        // initTopFormCombobox("subject");
+        // $(document).on('click', '#Subject-sel + div div.selectize-input', initSubjectSelect);
+        // initSubjectSelect(); 
     }
     /**
      * Builds the Object combobox with a click-bound form @initObjectSelect.
@@ -400,10 +406,11 @@ $(document).ready(function(){
      */
     function initObjectField() {
         var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
-        $('form[name="top"]').append(buildFormRow("Object", objElem, "top", true));
-        initTopFormCombobox("object");
-        $(document).on('click', '#Object-sel + div div.selectize-input', initObjectSelect);
-        enableCombobox('#Object-sel', false);
+        return buildFormRow("Object", objElem, "top", true);
+        // $('form[name="top"]').append(buildFormRow("Object", objElem, "top", true));
+        // initTopFormCombobox("object");
+        // $(document).on('click', '#Object-sel + div div.selectize-input', initObjectSelect);
+        // enableCombobox('#Object-sel', false);
     }
     /**
      * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
@@ -442,7 +449,8 @@ $(document).ready(function(){
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
-        if (!$('#Object-sel').val()) { initObjectSelect(); }
+        $('#Subject_pin').focus();
+        // if (!$('#Object-sel').val()) { initObjectSelect(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -452,7 +460,16 @@ $(document).ready(function(){
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
-        buildInteractionFieldRows();
+        $('#Object_pin').focus();
+        // buildInteractionFieldRows();
+    }
+    /** When the Subject select-form is exited, the combo is reenabled. */
+    function enableSubjField() {
+        enableCombobox('#Subject-sel');
+    }
+    /** When the Object select-form is exited, the combo is reenabled. */
+    function enableObjField() { console.log("enabling object field.")
+        enableCombobox('#Object-sel');
     }
     /** Adds the realm name and id, along with all taxon levels, to cParams. */
     function setTaxonParams(id) {
@@ -512,21 +529,22 @@ $(document).ready(function(){
     /** Adds a close button. Updates the Header and the submit/cancel buttons. */
     function customizeElemsForTaxonSelectForm(role) {
         $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
-        $('#sub-hdr').append(getTaxonExitButton());
+        $('#sub-hdr').append(getTaxonExitButton(role));
         $('#sub-submit')[0].value = "Confirm";        
         $('#sub-cancel')[0].value = "Reset";
         $('#sub-submit').unbind("click").click(selectTaxon);
         $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
     }
     function getTaxonExitButton() {
+        var func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
         var bttn = getExitButton();
         bttn.id = "exit-sub-form";
-        $(bttn).unbind("click").click(exitTaxonSelectForm);
+        $(bttn).unbind("click").click(exitForm.bind(null, '#sub-form', 'sub', false));
         return bttn;
     }
-    function exitTaxonSelectForm() {
-        $('#sub-form').remove();
-    }
+    // function exitTaxonSelectForm() {
+    //     $('#sub-form').remove();
+    // }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
         var initForm = cParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
@@ -749,13 +767,14 @@ $(document).ready(function(){
     }
 
     /*------------------- Shared Methods ---------------------------------------------------*/
-    /*------------------- Combobox (selectize) Methods -----------------------*/
+    /*------------------- Combobox (selectized) Methods ----------------------*/
     /** 
      * Inits the selectize library on all top-form select elems, turning them into 
      * multi-functional comboboxes.
      */
     function initTopFormComboboxes() {
-        var fields = ['publication', 'citation', 'country', 'location'];       //, 'subject', 'object'
+        var fields = ['publication', 'citation', 'country', 'location', 'subject', 
+            'object'];       //
         fields.forEach(initTopFormCombobox);
     }
     /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
@@ -941,6 +960,7 @@ $(document).ready(function(){
                 "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
                 "required": [],
                 "order": [],
+                "exitHandler": enableObjField
             },
             "plant": {
                 "add": {},  
@@ -966,6 +986,7 @@ $(document).ready(function(){
                 "exclude": ["Class", "Order"],
                 "required": [],
                 "order": ["Family", "Genus", "Species"],
+                "exitHandler": enableSubjField
             },
             "taxon": {
                 "add": {},  
@@ -1355,7 +1376,8 @@ $(document).ready(function(){
         combobox.clear();
         combobox.enable();
         combobox.removeOption(""); //Removes the "Creating [entity]..." placeholder.
-        if (focus) { combobox.focus(); }
+        if (focus) { combobox.focus(); 
+        } else if (focus === false) { combobox.blur(); }
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
