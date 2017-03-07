@@ -150,14 +150,18 @@ $(document).ready(function(){
      * remaining interaction fields are displayed and the interaction form is complete. 
      * Note: Many of the interaction-form dropdowns allow the user to enters a new 
      * option, which triggers a sub-form to create the new entity with its available fields. 
+     *
+     * Inits the interaction form, aka top-form, with all fields displayed and
+     * the first field, publication, in focus. From within many of the fields the
+     * user can create new entities of the field type with a sub-form for the field 
+     * displayed when selecting the 'add...' option from the field's combobox.
      */
     function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
-        var srcFields = buildSrcFields();
-        $(formCntnr).append(srcFields);
-        $('#crud-main').append(formCntnr);
-        initTopFormCombobox("publication");
-        initTopFormCombobox("citation");
+        var formFields = buildTopFormFields();                                  console.log("formFields = %O", formFields);
+        $(formCntnr).append(formFields);
+        $('#crud-main').append(formCntnr);      
+        initTopFormComboboxes();  
         focusCombobox('#Publication-sel');
     }      
     /** Builds the form elem container. */
@@ -168,13 +172,20 @@ $(document).ready(function(){
         form.id = "top-form";
         return form;
     }
-    /** Inits the main source form fields: publication and citation. */
-    function buildSrcFields() {
-        var pubSel = buildPubFieldRow();
-        var citSel = buildCitFieldRow();
-        return [pubSel, citSel];
+    // /** Inits the main source form fields: publication and citation. */
+    // function buildSrcFields() {
+    //     var pubSel = buildPubFieldRow();
+    //     var citSel = buildCitFieldRow();
+    //     return [pubSel, citSel];
+    // }
+/*-------------- Top Form Helpers ----------------------------------------------------------------*/
+    /** Builds and returns all top-form fields. */
+    function buildTopFormFields() {
+        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow ];   //buildCountryFieldRow, buildLocationFieldRow, initSubjectField, initObjectField, buildInteractionFieldRows
+        return fieldBuilders.map(function(builder) {
+            return builder();
+        });
     }
-    /*-------------- Top Form Helpers ----------------------------------------------------------*/
     /*-------------- Publication  --------------------------------------------*/
     /**
      * Returns a form row with a publication select dropdown populated with all 
@@ -191,6 +202,7 @@ $(document).ready(function(){
     function onPubSelection(val) { 
         if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#CitationTitle-sel'); }                                
         fillCitationField(val);
+        $('#Publication_pin').focus();
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
@@ -204,11 +216,15 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
+    /** When the Citation sub-form is exited, the Publication combo is reenabled. */
+    function enablePubField() {
+        enableCombobox('#Publication-sel');
+    }
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
         var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
-        $(selElem).attr("disabled", true);
+        // $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, "top", true);
     }
     /**
@@ -217,8 +233,8 @@ $(document).ready(function(){
      */
     function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
         var citOpts = getPubCitationOpts(pubId);  
-        enableCombobox('#CitationTitle-sel');
-        updateComboboxOptions('#CitationTitle-sel', citOpts, true);
+        // enableCombobox('#CitationTitle-sel');
+        updateComboboxOptions('#CitationTitle-sel', citOpts);
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -232,8 +248,9 @@ $(document).ready(function(){
      */    
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return; } 
-        initTopLocationFields();                  
+        // initTopLocationFields();                  
         enableCombobox('#Publication-sel');                                     //console.log("cit selection = ", parseInt(val));                          
+        $('#CitationTitle_pin').focus();
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
@@ -337,7 +354,7 @@ $(document).ready(function(){
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
         buildTaxonFieldRows();
     }
-    /** When Location form is cancelled, the country combobox is reenabled. */
+    /** When the Location sub-form is exited, the Country combo is reenabled. */
     function enableCountryField() {  
         enableCombobox('#Country-sel');
     }
@@ -727,8 +744,16 @@ $(document).ready(function(){
 
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectize) Methods -----------------------*/
+    /** 
+     * Inits the selectize library on all top-form select elems, turning them into 
+     * multi-functional comboboxes.
+     */
+    function initTopFormComboboxes() {
+        var fields = ['publication', 'citation'];       //, 'country', 'location', 'subject', 'object'
+        fields.forEach(initTopFormCombobox);
+    }
     /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
-    function initTopFormCombobox(entity) {
+    function initTopFormCombobox(field) {
         var selMap = { 
             'publication': { 
                 name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
@@ -743,7 +768,7 @@ $(document).ready(function(){
             'object': { 
                 name: 'Object', id: '#Object-sel', change: onObjectSelection, add: false },
         };
-        initSelectCombobox(selMap[entity], "top"); 
+        initSelectCombobox(selMap[field], "top"); 
     }
     /**
      * Inits the combobox, using 'selectize', according to the passed config.
@@ -888,6 +913,7 @@ $(document).ready(function(){
                 "order": ["CitationText", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
                     "Authors" ],
+                "exitHandler": enablePubField
             },                                      
             "interaction": {
                 "add": {},  
