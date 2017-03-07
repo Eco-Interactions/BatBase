@@ -181,7 +181,8 @@ $(document).ready(function(){
 /*-------------- Top Form Helpers ----------------------------------------------------------------*/
     /** Builds and returns all top-form fields. */
     function buildTopFormFields() {
-        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow ];   //buildCountryFieldRow, buildLocationFieldRow, initSubjectField, initObjectField, buildInteractionFieldRows
+        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
+            buildLocationFieldRow ];   // initSubjectField, initObjectField, buildInteractionFieldRows
         return fieldBuilders.map(function(builder) {
             return builder();
         });
@@ -216,10 +217,6 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
-    /** When the Citation sub-form is exited, the Publication combo is reenabled. */
-    function enablePubField() {
-        enableCombobox('#Publication-sel');
-    }
     /*-------------- Citation  -----------------------------------------------*/
     /** Returns a form row with an empty and disabled citation select dropdown. */
     function buildCitFieldRow() {
@@ -249,7 +246,7 @@ $(document).ready(function(){
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return; } 
         // initTopLocationFields();                  
-        enableCombobox('#Publication-sel');                                     //console.log("cit selection = ", parseInt(val));                          
+        // enableCombobox('#Publication-sel');                                     //console.log("cit selection = ", parseInt(val));                          
         $('#CitationTitle_pin').focus();
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
@@ -285,29 +282,36 @@ $(document).ready(function(){
         $(selId)[0].selectize.addItem(authId, true);
         buildNewAuthorSelect(++cnt, authId);
     }
-    /*-------------- Country -------------------------------------------------*/
-    /** Inits both the Country and Location form-fields for the 'top' interaction form. */
-    function initTopLocationFields() {
-        if ($('#Country_row').length) { return focusCombobox('#Country-sel');} //rows are already displayed.
-        buildCountryFieldRow();
-        buildLocationFieldRow();        
+    /** When the Citation sub-form is exited, the Publication combo is reenabled. */
+    function enablePubField() {
+        enableCombobox('#Publication-sel');
     }
+    /*-------------- Country -------------------------------------------------*/
+    // /** Inits both the Country and Location form-fields for the 'top' interaction form. */
+    // function initTopLocationFields() {
+    //     if ($('#Country_row').length) { return focusCombobox('#Country-sel');} //rows are already displayed.
+    //     buildCountryFieldRow();
+    //     buildLocationFieldRow();        
+    // }
     /** Returns a form row with a country combobox populated with all countries. */
     function buildCountryFieldRow() {  
         var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
-        var selElem = _util.buildSelectElem(cntryOpts, {id: "Country-sel", class: "lrg-field"});
-        $('form[name="top"]').append(buildFormRow("Country", selElem, "top", false));
-        initTopFormCombobox("country");
-        focusCombobox('#Country-sel');
+        var selElem = _util.buildSelectElem(
+            cntryOpts, {id: "Country-sel", class: "lrg-field"});
+        return buildFormRow("Country", selElem, "top", false);
+        // $('form[name="top"]').append(buildFormRow("Country", selElem, "top", false));
+        // initTopFormCombobox("country");
+        // focusCombobox('#Country-sel');
     }
     /** 
      * When a country is selected, the location dropdown is repopulated with it's 
      * child-locations. When cleared, the combobox is repopulated with all locations. 
      */
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(); }          
-        var cntryRcrd = cParams.records.location[val];
-        fillLocationSelect(cntryRcrd, true);
+        if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
+        // var cntryRcrd = cParams.records.location[val];
+        fillLocationSelect(cParams.records.location[val]);
+        $('#Country_pin').focus();
     }
     /*-------------- Location ------------------------------------------------*/
     /**
@@ -318,8 +322,9 @@ $(document).ready(function(){
         var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
-        $('form[name="top"]').append(buildFormRow("Location", selElem, "top", true));
-        initTopFormCombobox("location");
+        return buildFormRow("Location", selElem, "top", true);
+        // $('form[name="top"]').append(buildFormRow("Location", selElem, "top", true));
+        // initTopFormCombobox("location");
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
@@ -334,9 +339,9 @@ $(document).ready(function(){
      * When a country is selected, the location combobox is repopulated with its 
      * child-locations. When cleared, the combobox is repopulated with all locations. 
      */ 
-    function fillLocationSelect(cntry, focus) {                                 //console.log("fillLocationSelect for cntry = %O", cntry);
+    function fillLocationSelect(cntry) {                                        //console.log("fillLocationSelect for cntry = %O", cntry);
         var opts = cntry ? getChildLocOpts(cntry) : getLocationOpts();    
-        updateComboboxOptions('#Location-sel', opts, focus);
+        updateComboboxOptions('#Location-sel', opts);
     }          
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
@@ -352,11 +357,8 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val))) { return; }          
         var locRcrd = cParams.records.location[val];
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
-        buildTaxonFieldRows();
-    }
-    /** When the Location sub-form is exited, the Country combo is reenabled. */
-    function enableCountryField() {  
-        enableCombobox('#Country-sel');
+        // buildTaxonFieldRows();
+        $('#Location_pin').focus();
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
@@ -366,6 +368,10 @@ $(document).ready(function(){
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
         return { "value": "", "text": "Creating Location..." };
+    }
+    /** When the Location sub-form is exited, the Country combo is reenabled. */
+    function enableCountryField() {  
+        enableCombobox('#Country-sel');
     }
     /*-------------- Taxon ---------------------------------------------------*/
     /**
@@ -749,7 +755,7 @@ $(document).ready(function(){
      * multi-functional comboboxes.
      */
     function initTopFormComboboxes() {
-        var fields = ['publication', 'citation'];       //, 'country', 'location', 'subject', 'object'
+        var fields = ['publication', 'citation', 'country', 'location'];       //, 'subject', 'object'
         fields.forEach(initTopFormCombobox);
     }
     /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
