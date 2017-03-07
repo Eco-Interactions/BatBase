@@ -142,27 +142,17 @@ $(document).ready(function(){
         initCrudForm();
     }       
     /**
-     * Inits the interaction form with the first two form fields- a publication dropdown  
-     * and a disabled citation title dropdown that will become active when a publication 
-     * is selected. After citation selection the form will continue on to generate the
-     * location fields, country and location. With location selection, the taxon fields, 
-     * subject and object, are generated. Finally, after the taxa are selected, the 
-     * remaining interaction fields are displayed and the interaction form is complete. 
-     * Note: Many of the interaction-form dropdowns allow the user to enters a new 
-     * option, which triggers a sub-form to create the new entity with its available fields. 
-     *
      * Inits the interaction form, aka top-form, with all fields displayed and
      * the first field, publication, in focus. From within many of the fields the
-     * user can create new entities of the field type with a sub-form for the field 
-     * displayed when selecting the 'add...' option from the field's combobox.
+     * user can create new entities of the field-type by selecting the 'add...' 
+     * option from the field's combobox and completing the appended sub-form.
      */
     function initCrudForm() {
         var formCntnr = buildCrudFormCntnr();
         var formFields = buildTopFormFields();                                  console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
-        initTopFormComboboxes();  
-        addTopFormEventListeners();
+        finishFormBuild();
         focusCombobox('#Publication-sel');
     }      
     /** Builds the form elem container. */
@@ -173,24 +163,39 @@ $(document).ready(function(){
         form.id = "top-form";
         return form;
     }
-    function addTopFormEventListeners() {
-        $(document).on('focus', '#Subject-sel + div div.selectize-input', initSubjectSelect);
-        $(document).on('focus', '#Object-sel + div div.selectize-input', initObjectSelect);
+    /**
+     * Inits the selectize comboboxes, adds/modifies event listeners, modifies 
+     * field styles, and adds required field elems to the form's config object.  
+     */
+    function finishFormBuild() {
+        initTopFormComboboxes();
+        ['Subject', 'Object'].forEach(addTaxonFocusListener);
+        $('#top-cancel').unbind('click').click(exitCrudFormPopup);
+        $('#Notes_row div.field-row').css("width", "933px");   
+        addReqElemsToConfg();     
     }
-    // /** Inits the main source form fields: publication and citation. */
-    // function buildSrcFields() {
-    //     var pubSel = buildPubFieldRow();
-    //     var citSel = buildCitFieldRow();
-    //     return [pubSel, citSel];
-    // }
+    /** Displays the [Role] Taxon select form when the field gains focus. */ 
+    function addTaxonFocusListener(role) {
+        var func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
+        $(document).on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
+    }
+    function addReqElemsToConfg() {
+        var reqFields = ["Publication", "CitationTitle", "Country", "Location",
+                    "Subject", "Object", "InteractionType"];
+        cParams.forms.top.reqElems = reqFields.map(function(field) {
+            return $('#'+field+'-sel')[0];
+        });
+    }
 /*-------------- Top Form Helpers ----------------------------------------------------------------*/
-    /** Builds and returns all top-form fields. */
+    /** Builds and returns all top-form elements. */
     function buildTopFormFields() {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
-            buildLocationFieldRow, initSubjectField, initObjectField ];   // buildInteractionFieldRows
-        return fieldBuilders.map(function(builder) {
+            buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
+            buildIntTagField, buildIntNotesField ]; 
+        var fields = fieldBuilders.map(function(builder) {
             return builder();
         });
+        return fields.concat(buildFormBttns("Interaction", "top"));
     }
     /*-------------- Publication  --------------------------------------------*/
     /**
@@ -217,26 +222,20 @@ $(document).ready(function(){
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
         if ($('#sub-form').length !== 0) { return openSubFormError('Publication', null, "sub"); }
-        $('form[name="top"]').append(initSubForm(
+        $('#Publication_row').append(initSubForm(
             "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
     /*-------------- Citation  -----------------------------------------------*/
-    /** Returns a form row with an empty and disabled citation select dropdown. */
+    /** Returns a form row with an empty citation select dropdown. */
     function buildCitFieldRow() {
         var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
-        // $(selElem).attr("disabled", true);
         return buildFormRow("Citation Title", selElem, "top", true);
     }
-    /**
-     * Fills the citation field combobox with all citations for the selected publication
-     * and enables the dropdown.
-     */
+    /** Fills the citation combobox with all citations for the selected publication. */
     function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
-        var citOpts = getPubCitationOpts(pubId);  
-        // enableCombobox('#CitationTitle-sel');
-        updateComboboxOptions('#CitationTitle-sel', citOpts);
+        updateComboboxOptions('#CitationTitle-sel', getPubCitationOpts(pubId));
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
@@ -249,9 +248,7 @@ $(document).ready(function(){
      * and the publication combobox is reenabled. 
      */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return; } 
-        // initTopLocationFields();                  
-        // enableCombobox('#Publication-sel');                                     //console.log("cit selection = ", parseInt(val));                          
+        if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
         $('#CitationTitle_pin').focus();
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
@@ -292,21 +289,12 @@ $(document).ready(function(){
         enableCombobox('#Publication-sel');
     }
     /*-------------- Country -------------------------------------------------*/
-    // /** Inits both the Country and Location form-fields for the 'top' interaction form. */
-    // function initTopLocationFields() {
-    //     if ($('#Country_row').length) { return focusCombobox('#Country-sel');} //rows are already displayed.
-    //     buildCountryFieldRow();
-    //     buildLocationFieldRow();        
-    // }
     /** Returns a form row with a country combobox populated with all countries. */
     function buildCountryFieldRow() {  
         var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(
             cntryOpts, {id: "Country-sel", class: "lrg-field"});
         return buildFormRow("Country", selElem, "top", false);
-        // $('form[name="top"]').append(buildFormRow("Country", selElem, "top", false));
-        // initTopFormCombobox("country");
-        // focusCombobox('#Country-sel');
     }
     /** 
      * When a country is selected, the location dropdown is repopulated with it's 
@@ -314,7 +302,6 @@ $(document).ready(function(){
      */
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
-        // var cntryRcrd = cParams.records.location[val];
         fillLocationSelect(cParams.records.location[val]);
         $('#Country_pin').focus();
     }
@@ -328,8 +315,6 @@ $(document).ready(function(){
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
         return buildFormRow("Location", selElem, "top", true);
-        // $('form[name="top"]').append(buildFormRow("Location", selElem, "top", true));
-        // initTopFormCombobox("location");
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
@@ -362,7 +347,6 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val))) { return; }          
         var locRcrd = cParams.records.location[val];
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
-        // buildTaxonFieldRows();
         $('#Location_pin').focus();
     }
     /** Inits the location form and disables the country combobox. */
@@ -379,38 +363,15 @@ $(document).ready(function(){
         enableCombobox('#Country-sel');
     }
     /*-------------- Taxon ---------------------------------------------------*/
-    // /**
-    //  * Builds both the subject and object fields and appends them disabled. The 
-    //  * 'Select Subject' form is built and appended.
-    //  */
-    // function buildTaxonFieldRows() {
-    //     if ($('#Subject-sel').length) { return; } //rows are already displayed.
-    //     initSubjectField();
-    //     initObjectField();
-    // }
-    /**
-     * Builds the Subject combobox with a click-bound form @initSubjectSelect.
-     * Calls @initSubjectSelect to display the select form.
-     */
+    /** Builds the Subject combobox that will trigger the select form @initSubjectSelect. */
     function initSubjectField() {
         var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
         return buildFormRow("Subject", subjElem, "top", true);
-        // $('form[name="top"]').append(buildFormRow("Subject", subjElem, "top", true));
-        // initTopFormCombobox("subject");
-        // $(document).on('click', '#Subject-sel + div div.selectize-input', initSubjectSelect);
-        // initSubjectSelect(); 
     }
-    /**
-     * Builds the Object combobox with a click-bound form @initObjectSelect.
-     * Calls @initObjectSelect to display the select form.
-     */
+    /** Builds the Object combobox that will trigger the select form @initObjectSelect. */
     function initObjectField() {
         var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
         return buildFormRow("Object", objElem, "top", true);
-        // $('form[name="top"]').append(buildFormRow("Object", objElem, "top", true));
-        // initTopFormCombobox("object");
-        // $(document).on('click', '#Object-sel + div div.selectize-input', initObjectSelect);
-        // enableCombobox('#Object-sel', false);
     }
     /**
      * Shows a sub-form to 'Select Subject' of the interaction with a combobox for
@@ -450,7 +411,6 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
         $('#Subject_pin').focus();
-        // if (!$('#Object-sel').val()) { initObjectSelect(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -461,7 +421,6 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
         $('#Object_pin').focus();
-        // buildInteractionFieldRows();
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
     function enableSubjField() {
@@ -542,9 +501,6 @@ $(document).ready(function(){
         $(bttn).unbind("click").click(exitForm.bind(null, '#sub-form', 'sub', false));
         return bttn;
     }
-    // function exitTaxonSelectForm() {
-    //     $('#sub-form').remove();
-    // }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
         var initForm = cParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
@@ -592,16 +548,6 @@ $(document).ready(function(){
         repopulateCombosWithRelatedTaxa(val);
         enableSubmitBttn('#sub-submit');             
     }
-    // /** If there are no comboboxes with a selection, the 'Select' form is reset. */
-    // ## Because the 'change' event fires twice, lastly with empty string, this 
-    // ## method resets the form with selections... maybe fix later?
-    // function checkSubmitButton() {
-    //     var selElems = $('#sub-form .selectized').toArray(); 
-    //     var hasSelection = selElems.some(function(elem){  console.log("elemval = ", $(elem).val())
-    //         return $(elem).val();
-    //     }); 
-    //     if (!hasSelection) { resetTaxonSelectForm(); }
-    // }
     /**
      * Repopulates the comboboxes when a taxon is selected from one. The selected
      * and ancestor levels are populated with all taxa at the level and direct 
@@ -668,31 +614,25 @@ $(document).ready(function(){
         updateComboboxOptions('#'+lvlName+'-sel', opts);
         if (lvl in selected) { selApi.addItem(selected[lvl], true); }
     }
-    /*-------------- Interaction ---------------------------------------------*/
-    /** Builds and appends the final fields of the interaction form. */
-    function buildInteractionFieldRows() {       
-        if ($('#Notes_row').length) { return; }
-        var intFields = buildSubForm("interaction", {}, "top", null);
-        intFields.push(buildFormBttns("Interaction", "top"));
-        $('form[name="top"]').append(intFields);
-        customizeIntFieldElems();   
-        initSubFormComboboxes("interaction");
-        addReqElemsToConfg();
-        focusCombobox('#InteractionType-sel');
+    /*-------------- Interaction Detail Fields -------------------------------*/
+    function buildIntTypeField() {
+        var opts = getOptsFromStoredData('intTypeNames');
+        var selElem = _util.buildSelectElem(
+            opts, {id: "InteractionType-sel", class: "lrg-field"});
+        return buildFormRow("Interaction Type", selElem, "top", true);
     }
-    function customizeIntFieldElems() {
-        document.getElementById("InteractionType-sel").className = "lrg-field";
-        document.getElementById("InteractionTags-sel").className = "lrg-field";
-        $('#Notes_row div.field-row').css("width", "933px");
-        $('#Notes_row textArea').css("width", "812px"); 
-    }   
-    /** Adds the top-form's required elems to an array stored in cParams. */
-    function addReqElemsToConfg() {
-        var reqFields = ["Publication", "CitationTitle", "Country", "Location",
-                    "Subject", "Object", "InteractionType"];
-        cParams.forms.top.reqElems = reqFields.map(function(field) {
-            return $('#'+field+'-sel')[0];
-        });
+    function focusIntTypePin() {
+        $('#InteractionType_pin').focus();
+    }
+    function buildIntTagField() {
+        var elem = buildTagsElem('interaction', 'Interaction Tags');
+        elem.className = 'lrg-field';
+        return buildFormRow("Interaction Tags", elem, "top", false);
+    }
+    function buildIntNotesField() {
+        var txtElem = buildLongTextArea('interaction', 'Notes')
+        $(txtElem).css("width", "812px"); 
+        return buildFormRow("Notes", txtElem, "top", false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
@@ -765,7 +705,6 @@ $(document).ready(function(){
         //     }
         // }
     }
-
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectized) Methods ----------------------*/
     /** 
@@ -774,7 +713,7 @@ $(document).ready(function(){
      */
     function initTopFormComboboxes() {
         var fields = ['publication', 'citation', 'country', 'location', 'subject', 
-            'object'];       //
+            'object', 'interactionType', 'interactionTags'];       
         fields.forEach(initTopFormCombobox);
     }
     /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
@@ -786,6 +725,11 @@ $(document).ready(function(){
                 name: 'Citation', id: '#CitationTitle-sel', change: onCitSelection, add: initCitForm },
             'country': { 
                 name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
+            'interactionTags': { 
+                name: 'Interaction Tags', id: '#InteractionTags-sel', change: false, 
+                add: false , options: { delimiter: ",", maxItems: null }},         
+            'interactionType': { 
+                name: 'Interaction Type', id: '#InteractionType-sel', change: focusIntTypePin, add: false },
             'location': { 
                 name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
             'subject': { 
@@ -832,9 +776,6 @@ $(document).ready(function(){
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
             "HabitatType":  { name: "Habitat Type", change: false, add: false },
-            "InteractionTags": { name: "Interaction Tags", change: false, add: false ,
-                "options": { "delimiter": ",", "maxItems": null }},         //, "persist": false 
-            "InteractionType": { name: "Interaction Type", change: false, add: false },
             "LocationType":  { name: "Location Type", change: false, add: false },
             "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
             "PublicationType": { name: "Publication Type", change: false, add: false },

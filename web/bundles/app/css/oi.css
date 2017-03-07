@@ -467,7 +467,7 @@ span.lbl {
 .grid-bttn, .tos-bttn {
 	margin: 0 .3em 0 .2em;
 	background: linear-gradient(#fff, #d3d3d3);
-	border-radius: 3px;
+	border-radius: 4px;
 }
 button[name="csv"], #close-tos-bttn {
 	align-self: flex-end;
@@ -634,7 +634,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 655px;
 }
 .lrg-field {
-	width: 333px;
+	width: 309px;
 }
 .med-field {
 	width: 255px;
@@ -651,7 +651,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #top-form label {
 	font-size: 1em;
 	padding: 9px 0 2px 0;
-	width: 122px;
+	width: 125px;
 }
 .bttn-cntnr {
 	align-self: flex-end;
