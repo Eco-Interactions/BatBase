@@ -539,7 +539,7 @@ a[role="button"], .tos-bttn, .exit-bttn {
 }
 #crud-main {
 	padding: 25px 25px 15px 25px;
-	height: 750px;
+	max-height: 77vh;
 	overflow: hidden;
 }
 /* -- Form Styles -- */
