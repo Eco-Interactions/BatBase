@@ -52,7 +52,7 @@ $(document).ready(function(){
     /** Sets popup top using parent position. If 'reset', sets original position. */
     function setPopUpPos(reset) {
         var parentPos = $('#b-overlay').offset();  
-        var newTopPos = { top: reset ? (parentPos.top - 66) : (parentPos.top + 66) };
+        var newTopPos = { top: reset ? (parentPos.top - 33) : (parentPos.top + 33) };
         $('#b-overlay-popup').offset(newTopPos);          
     }
     function hideSearchCrudPopup() {

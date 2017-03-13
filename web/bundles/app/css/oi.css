@@ -522,7 +522,7 @@ a[role="button"], .tos-bttn, .exit-bttn {
 }
 .crud-popup {
 	height: 88vh;
-	width: 1111px;
+	width: 1065px;
 	padding: 20px;
 	text-align: left;
 	margin: auto;
@@ -554,7 +554,7 @@ a[role="button"], .tos-bttn, .exit-bttn {
 	font-weight: bold;
 }
 #exit-form {
-	left: 1035px;
+	left: 999px;
 }
 #exit-sub-form {
 	left: 111px;
@@ -644,6 +644,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 #top-form textarea {
 	height: 55px;
+}
+#Notes-txt {
+	border-color: #b8b8b8;
 }
 .selectize-input {
 	padding-right: 33px !important;
