@@ -31,6 +31,9 @@ form input, form select, form textarea {
     padding: .2em;
     margin: .5em;
 }
+form input[type=text], form input[type=email] {
+    width: 500px;
+}
 form textarea {
     vertical-align: top;
 }
@@ -508,6 +511,9 @@ a[role="button"], .tos-bttn {
 #register-pg .second-col {
 	min-width: 550px;
 }
+textarea[id^=fos_user_registration_form] {
+	width: 500px;
+}
 form.fos_user_registration_register {
 	display: table;
 	text-align: right;
@@ -542,15 +548,6 @@ label[for=fos_user_registration_form_about_me] {
 #reg-form-container div.top-em-mrg {
 	margin-top: 3em;
 }
-#reg-form-container input[type=text],  
-#reg-form-container input[type=email], 
-#reg-form-container textarea { 
-    width: 444px; 
-} 
-#reg-form-cntnr button:hover, .bttn-cntnr button:hover { 
-  border: 1.5px solid; 
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.3); 
-} 
 #terms-div {
 	padding: 1em;
 	text-align: left;
