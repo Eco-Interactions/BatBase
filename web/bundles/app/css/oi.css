@@ -22,8 +22,6 @@ a:hover {
 }
 a:active {
 }
-/**-----------Find and fix these leaky styles--------------------------------*/
-/** Commented out styles, hopefully unused, that are affecting the crud form */
 button {
 	border: 1px solid;
     border-radius: 2px;
@@ -32,9 +30,6 @@ form input, form select, form textarea {
     font-size: 1em;
     padding: .2em;
     margin: .5em;
-}
-form input[type=text], form input[type=email] {
-    /*width: 500px;*/
 }
 form textarea {
     vertical-align: top;
@@ -49,11 +44,6 @@ form button {
     padding: .25em .5em .25em .5em;
     font-size: 1.5em;
 }
-#reg-form-cntnr button:hover, .bttn-cntnr button:hover {
-	border: 1.5px solid;
-	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-}
-/*----End leak----*/
 .two-col-outer, .three-col-outer, .four-col-outer {
 	margin-top: 10px;
 	display: flex;
@@ -616,7 +606,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	font-size: .9em;
 	text-align: center;
 }
-.required:after {
+.form-row .required:after {
   content: "*";
 }
 .top-pin {
@@ -680,9 +670,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #register-pg .second-col {
 	min-width: 550px;
 }
-textarea[id^=fos_user_registration_form] {
-	width: 500px;
-}
 form.fos_user_registration_register {
 	display: table;
 	text-align: right;
@@ -716,6 +703,15 @@ label[for=fos_user_registration_form_about_me] {
 }
 #reg-form-container div.top-em-mrg {
 	margin-top: 3em;
+}
+#reg-form-container input[type=text], 
+#reg-form-container input[type=email],
+#reg-form-container textarea {
+    width: 444px;
+}
+#reg-form-cntnr button:hover, .bttn-cntnr button:hover {
+	border: 1.5px solid;
+	text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 #terms-div {
 	padding: 1em;
