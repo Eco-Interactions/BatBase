@@ -227,7 +227,7 @@ $(document).ready(function(){
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
     }
-    /*-------------- Citation  -----------------------------------------------*/
+    /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
     function buildCitFieldRow() {
         var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
@@ -526,17 +526,13 @@ $(document).ready(function(){
     }
     /** Finds the most specific level with a selection and returns that taxon record. */
     function getSelectedTaxon() {
-        var selElems = $('#sub-form .selectized').toArray(); 
-        var emptyIdx = getFirstEmptyCombo(selElems);
-        var elemIdx = emptyIdx === -1 ? selElems.length-1 : emptyIdx-1; 
-        var selected = $(selElems[elemIdx]).val();
-        return cParams.records.taxon[selected];
+        var selElems = $('#sub-form .selectized').toArray().reverse(); 
+        var selected = selElems.find(isSelectedTaxon);                          //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+        return cParams.records.taxon[$(selected).val()];
     }
-    function getFirstEmptyCombo(selElems) {
-        return selElems.findIndex(function(elem) {  
-            if (elem.id.includes('-sel')) { return !$(elem).val(); }
-        });  
-    }
+    function isSelectedTaxon(elem) {
+        if (elem.id.includes('-sel')) { return $(elem).val(); }
+    }   
     /**
      * When a taxon at a level is selected, the remaining level comboboxes are
      * repopulated with related taxa and the 'select' button is enabled. If the
