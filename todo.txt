@@ -1,115 +1,112 @@
 DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
-    --search pg-- 
+    --misc--
+        -- Refactor use of 'main' and 'top' entities to 'core' entities.
+    --Search--
+        -- csv exports
+            -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
+    --FORM--
+        -- Scroll to below where sub-form select dropdowns expand
+        --Bugs-
+            -- fix tabs on selectize (test whether firefox bug only??): 
+                https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
+    --Asac---
+        --form
+            --disable 'select' when all combos are empty
+        --search
+            -- build initcomboboxes
+            -- standardize taxon 'levels' storage
+            -- update walkthrough
+            -- Location selects include both sub and top regions but, because the 
+                grid column filters are used to update to grid, not the selection 
+                of those regions... fix this.
+            --Refactor--
+    --Asap--
+
+::Search Page Ui::
+    -- Add a 'control group' (jqueryui) like border around the 'search options' panel. This will aid in documentation and intuitive clarity for editors/users .
+
+::Form Ui::
+    -- On form submission, change cursor to the waiting circle. 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### Serialization #####
+-- Data not serialized  
+    - Taxon
+        - Namings (and Taxonym)
+    - Tag
+        - IntTypeConstraints
+    - Authority
+
+
+
+
+
+============ EMAIL ==================
 TAYLOR:
+Notes::
 Questions:
+---------------------Next-------------------------------------------------------
 
-
-
-
-
-
-
-    --Future Ui additions
+--SHORTTERM--
+    --Future Search Grid Ui
         --Popup panel with additional data about selected tree item
         --sticky column headers for search page
         --Fill search opts-col3 with easy cols to filter on
         --Set up hide/show columns options
             -Config colDefs
             -Pop up with col selects 
-
-
-Notes::
-    ::data cleanup::
-        -Citation
-            -copy paste issue with 'Tschapka, M. 2005' (cit#220) - title seems to have been miscopied
-                -Reproduction of the bat Glossophaga commissarisi (Phyllostomidae: Glossophaginae) in the Costa Rican rain forest during frugivorous and nectarivorous periods
-        -Pubs
-            -Journal of Zoology: drop "(London)"
-            -Short-tailed fruit bat -  
-                citSrcId 614 parent -> pubSrcId 458 (instead of srcId 33)
-        -Location 
-            -weird '- duplicate entry'
-
-    ::migration::
-        Commits:
-            Regions, countries, locations: 
-                b6eba34742117a6e25123d6066a3166e0dfd7b0a
-            Drop:
-                29037cdd444afe6254f9a83315a634d6cd198e60
-            SrcStructure, Pub, Auth:
-                5300058c872a4f529dca059ffc6c535afcc58f0c
-            MissPub, Cit:
-                360e7e2506962f839778718ef8e1afc6d3dbb1b7
-            Drop and Cols: (could be done any point after really...)
-                a6439a86b45f56c95cf1ae155fcf0cead3047cbe
-
-
-
-
-
-    ::Search Page Ideas::
-        --.Js
-            --Refactor usage of the global "allTaxaLvls" to return from a shared func.
-
-    ::Checked data wonkiness::
-        'northern mariana islands' is the name from red list.
-
-
-
-=========== EMAIL ==================
----------------------Next-------------------------------------------------------
-
-
-
---SHORTTERM--
-    --Editor
-        --Admin sign-in css is broken
-        --add invalid country and region check error handling (@checkCntryAndRegion & checkRegion)
+        --Save filters through changes in the view options
     --Site-
-        !! Add citation editing back !!
-
-        --Firefox does not look the same as chrome. Spend a day fixing this!!!
-            --team section styles
-                #team-sect .second-col, #team-sect .first-col {
-                    width: 420px;
-                    flex-shrink: 0;
-                }
-                #team-sect .four-col-outer>div.fourth-col {
-                    width: 220px;
-                    flex-shrink: 0;
-                }
-            -- Definition Pg
-                #def-frame .first-col {
-                    width: 550px;
-                    flex-shrink: 0;
-                }
+        --CSS
+            --Find and fix leaky styles (see file)
+            --CSS replacing/optimizing/refactoring
+            --Firefox does not look the same as chrome. Spend a day fixing this!!!
+                --team section styles
+                    #team-sect .second-col, #team-sect .first-col {
+                        width: 420px;
+                        flex-shrink: 0;
+                    }
+                    #team-sect .four-col-outer>div.fourth-col {
+                        width: 220px;
+                        flex-shrink: 0;
+                    }
+                -- Definition Pg
+                    #def-frame .first-col {
+                        width: 550px;
+                        flex-shrink: 0;
+                    }
+        --ENTITIES
+            -- Rename deletedAt field to deleted_at
         --add exit click event for menu
         --add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
         -- add copy csv
         -- fix csv exports??
         -- t&c sitemap & presentation
-        -- css replacing and cleanup
-        -- track down render func sudden case sensitivity
-
-
-
 
 --LONGTERM--
-    --Editor-
-        --prog bar isn't updating as it should
-        --Add error handling to webview
-        --Parsing
-            --catch tags with single character??
-            --Create complex error catch
-        --Update code for new loc/source structures
-            --Remove '-Unspecified' locDesc concats 
-            --update autoGen LocDesc
     --Site-
         -- test for optimizations
         -- responsive
@@ -120,56 +117,15 @@ Notes::
 
 
 ---------------------------------------------------------------------------------------------------------------------
-Notes:
-    --Missing publication added after restructure complete by dropping into 360e7e2506962f839778718ef8e1afc6d3dbb1b7
-      and running the migrations again. If more should need to be added in the future,
-      they will need to be added with this one into MissingPubs and the migrations ran on the 
-      database (which should be at the state this migration expects - afterAuthImports).
-        , 35 => [ 
-                    "publication" => ["Mammals of the Mexican state of San Luis Potosi", null, "Book"],
-                    "source" => [ "publication" => [1953, null, "Louisiana State University Press", "https://babel.hathitrust.org/cgi/pt?id=uc1.31822011936077;view=1up;seq=10", null, null, 
-                                                    [79]],
-                                  "publisher" => [null, null, null, "http://lsupress.org/", "Louisiana State University Press"]]
-            ],
-
 
 Best practices:
     comments:
         //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-
+External Todo:
     --Zenbol-
         --PAYMENT PAGE FOR WHM
         --CRON JOB BACKUPS
 
-    --Spctrm-
-        --CREATE JS SNIPPETS FILE
-            function sortProperties(obj) {
-                var sortable=[];
-                var returnObj = {};
-
-                for(var key in obj) {                   // convert object into array
-                    if(obj.hasOwnProperty(key))
-                        sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-                }
-                
-                sortable.sort(function(a, b) {          // sort items by value
-                    var x=a[1].toLowerCase(),
-                        y=b[1].toLowerCase();
-                    return x<y ? -1 : x>y ? 1 : 0;
-                });
-                sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
-
-                return returnObj;
-
-                function rebuildObj(keyValAry) {
-                    var key = keyValAry[0];
-                    var val = keyValAry[1];
-                    returnObj[key] = val;
-                }
-            }
-        --Valuable lessons:
-            ++ When making massive changes with unforseeable consequences and side effects, break the changes 
-                into as many steps as possible- especially add and delete stages!!  
 -------------------------------------------------------------------------------------------------------
 =========================================================================
 
@@ -183,7 +139,7 @@ HOW TO RUN TESTS
 Deployment Steps:
     >Cache busting:
         config.yml:
-            "Framework:
+            "Framework":
                 assets:
                     version: 'v%'"              
 

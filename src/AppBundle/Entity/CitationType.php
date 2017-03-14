@@ -7,14 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * SourceType.
+ * CitationType.
  *
- * @ORM\Table(name="source_type")
+ * @ORM\Table(name="citation_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
-class SourceType
+class CitationType
 {
     /**
      * @var int
@@ -35,7 +35,7 @@ class SourceType
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -50,19 +50,11 @@ class SourceType
     private $description;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="ordinal", type="integer", nullable=true)
-     * @JMS\Expose
-     */
-    private $ordinal;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Source", mappedBy="sourceType")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Citation", mappedBy="citationType")
      */
-    private $sources;
+    private $citations;
 
     /**
      * @var \DateTime
@@ -103,7 +95,7 @@ class SourceType
      */
     public function __construct()
     {
-        $this->sources = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->citations = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -120,14 +112,10 @@ class SourceType
 
     /**
      * Set slug.
-     *
-     * @return string
      */
     public function setSlug($slug)
     {
         $this->slug = $slug;
-
-        return $this;
     }
 
     /**
@@ -144,14 +132,10 @@ class SourceType
      * Set displayName.
      *
      * @param string $displayName
-     *
-     * @return SourceType
      */
     public function setDisplayName($displayName)
     {
         $this->displayName = $displayName;
-
-        return $this;
     }
 
     /**
@@ -164,19 +148,14 @@ class SourceType
         return $this->displayName;
     }
 
-
     /**
      * Set description.
      *
      * @param string $description
-     *
-     * @return SourceType
      */
     public function setDescription($description)
     {
         $this->description = $description;
-
-        return $this;
     }
 
     /**
@@ -190,89 +169,47 @@ class SourceType
     }
 
     /**
-     * Set ordinal.
+     * Add citation.
      *
-     * @param int $ordinal
+     * @param \AppBundle\Entity\Citation $citation
      *
-     * @return SourceType
+     * @return CitationType
      */
-    public function setOrdinal($ordinal)
+    public function addCitation(\AppBundle\Entity\Citation $citation)
     {
-        $this->ordinal = $ordinal;
+        $this->citations[] = $citation;
 
         return $this;
     }
 
     /**
-     * Get ordinal.
+     * Remove citation.
      *
-     * @return int
+     * @param \AppBundle\Entity\Citation $citation
      */
-    public function getOrdinal()
+    public function removeCitation(\AppBundle\Entity\Citation $citation)
     {
-        return $this->ordinal;
+        $this->citations->removeElement($citation);
     }
 
     /**
-     * Add source.
-     *
-     * @param \AppBundle\Entity\Source $source
-     *
-     * @return SourceType
-     */
-    public function addSource(\AppBundle\Entity\Source $source)
-    {
-        $this->sources[] = $source;
-
-        return $this;
-    }
-
-    /**
-     * Remove source.
-     *
-     * @param \AppBundle\Entity\Source $source
-     */
-    public function removeSource(\AppBundle\Entity\Source $source)
-    {
-        $this->sources->removeElement($source);
-    }
-
-    /**
-     * Get sources.
+     * Get citations.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getSources()
+    public function getCitations()
     {
-        return $this->sources;
-    }
-
-    /**
-     * Returns an array of Source ids. 
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("sources")
-     */
-    public function getSourceIds()
-    {
-        $srcIds = [];
-        foreach ($this->sources as $source) {
-            array_push($srcIds, $source->getId());
-        }
-        return $srcIds;
+        return $this->citations;
     }
 
     /**
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  SourceType
      */
     public function setCreatedBy(\AppBundle\Entity\User $user)
     {
         $this->createdBy = $user;
-
-        return $this;
     }
 
     /**
@@ -299,14 +236,10 @@ class SourceType
      * Set last updated by user.
      *
      * @param \AppBundle\Entity\User $user
-     *
-     * @return  SourceType
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user)
     {
         $this->updatedBy = $user;
-
-        return $this;
     }
 
     /**

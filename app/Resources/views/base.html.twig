@@ -54,7 +54,7 @@
         {% block javascripts %}
             <!-- remove zart-ez-logs and switch to minified libs for production -->
             <script src="{{ asset('bundles/app/js/eco-int-namespace.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/zart-ez-logs-0.1.js') }}"></script>
+            {# // <script src="{{ asset('bundles/app/js/zart-ez-logs-0.1.js') }}"></script> #}
             <script src="{{ asset('bundles/app/js/jquery/jquery-2.1.4.js') }}"></script>
             <script src="{{ asset('bundles/app/grid/ag-grid.js') }}"></script>
             <script src="{{ asset('bundles/app/js/slider/eif-frames.js') }}"></script>
@@ -72,9 +72,10 @@
             <script src="{{ asset('bundles/app/js/data-tables/oi-tables.js') }}"></script>
             <!-- wysiwyg -->
             <script src="{{ asset('bundles/app/trumbowyg/trumbowyg.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/wysiwyg.js') }}"></script>
 
+            <script src="{{ asset('bundles/app/js/util.js') }}"></script>
             <script src="{{ asset('bundles/app/js/tos.js') }}"></script>
+            <script src="{{ asset('bundles/app/js/crud.js') }}"></script>
 			<script src="{{ asset('bundles/app/js/oi.js') }}"></script>
 
 			{% if is_granted("ROLE_USER") %}
@@ -130,10 +131,10 @@
 				</div>
 			</div>
         </div>
-        <div id="base-overlay">
-            <div id="base-overlayPopUp"></div>
+        <div id="b-overlay" class="flex-col">
+            <div id="b-overlay-popup"></div>
         </div>
-        <div id="base-popUpDiv"></div>
+        {# <div id="b-popup"></div> #}
     {% endblock body %}
     </body>
 </html>

@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Citation.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Citation
 {
@@ -28,6 +30,8 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")    
      */
     private $displayName;
     
@@ -35,6 +39,7 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $title;
 
@@ -42,6 +47,8 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="full_text", type="text")
+     * @JMS\Expose
+     * @JMS\SerializedName("fullText")
      */
     private $fullText;
 
@@ -49,6 +56,8 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("publicationVolume")
      */
     private $publicationVolume;
 
@@ -56,6 +65,8 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="publication_issue", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("publicationIssue")
      */
     private $publicationIssue;
 
@@ -63,14 +74,18 @@ class Citation
      * @var string
      *
      * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("publicationPages")
      */
     private $publicationPages;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="citations")
-     * @ORM\JoinTable(name="citation_tag")
+     * @var \AppBundle\Entity\CitationType
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CitationType", inversedBy="publication")
+     * @ORM\JoinColumn(name="cit_type_id", referencedColumnName="id")
      */
-    private $tags;
+    private $citationType;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -124,11 +139,13 @@ class Citation
      */
     public function __construct()
     {
-        $this->tags = new \Doctrine\Common\Collections\ArrayCollection();
+
     }
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -281,37 +298,43 @@ class Citation
     }
 
     /**
-     * Add Tags.
+     * Set citationType.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @param \AppBundle\Entity\CitationType $citationType
      *
-     * @return Interaction
+     * @return Citation
      */
-    public function setTags(\AppBundle\Entity\Tag $tags)
+    public function setCitationType(\AppBundle\Entity\CitationType $citationType)
     {
-        $this->tags[] = $tags;
+        $this->citationType = $citationType;
 
         return $this;
     }
 
     /**
-     * Remove Tags.
+     * Get citationType.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @return \AppBundle\Entity\CitationType
      */
-    public function removeTag(\AppBundle\Entity\Tag $tags)
+    public function getCitationType()
     {
-        $this->tags->removeElement($tags);
+        return $this->citationType;
     }
 
     /**
-     * Get tags.
-     *
-     * @return \Doctrine\Common\Collections\Collection
+     * Get the Citation Type id and displayName.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("citationType")
      */
-    public function getTags()
+    public function getCitationTypeData()
     {
-        return $this->tags;
+        if ($this->citationType) {
+            return [ 
+                "id" => $this->citationType->getId(), 
+                "displayName" => $this->citationType->getDisplayName() 
+            ];
+        }
+        return null;
     }
 
     /**
@@ -336,6 +359,16 @@ class Citation
     public function getSource()
     {
         return $this->source;
+    }
+
+    /**
+     * Get the Source id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("source")
+     */
+    public function getSourceId()
+    {
+        return $this->source->getId();
     }
 
     /**

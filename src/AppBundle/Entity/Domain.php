@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Domain.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="domain")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class Domain
 {
@@ -24,22 +26,27 @@ class Domain
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"name"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")     
      */
-    private $name;
+    private $displayName;
 
     /**
      * @var string
      *
      * @ORM\Column(name="plural_name", type="string", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("pluralName")
      */
     private $pluralName;
 
@@ -87,6 +94,8 @@ class Domain
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -118,27 +127,27 @@ class Domain
     }
 
     /**
-     * Set name.
+     * Set displayName.
      *
-     * @param string $name
+     * @param string $displayName
      *
      * @return Domain
      */
-    public function setName($name)
+    public function setDisplayName($displayName)
     {
-        $this->name = $name;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get displayName.
      *
      * @return string
      */
-    public function getName()
+    public function getDisplayName()
     {
-        return $this->name;
+        return $this->displayName;
     }
 
     /**
@@ -187,6 +196,16 @@ class Domain
     public function getTaxon()
     {
         return $this->taxon;
+    }
+
+    /**
+     * Get the domain Taxon's id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("taxon")
+     */
+    public function getTaxonId()
+    {
+        return $this->taxon->getId();
     }
 
     /**
@@ -276,6 +295,6 @@ class Domain
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }

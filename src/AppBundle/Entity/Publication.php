@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Publication.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="AppBundle\Entity\PublicationRepository")
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Publication
 {
@@ -27,6 +29,7 @@ class Publication
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
     
@@ -34,6 +37,8 @@ class Publication
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -41,6 +46,7 @@ class Publication
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -101,6 +107,8 @@ class Publication
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -204,6 +212,21 @@ class Publication
     }
 
     /**
+     * Get the Publication Type id and displayName.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publicationType")
+     */
+    public function getPublicationTypeData()
+    {
+        if ($this->publicationType) {
+            return [ 
+                "id" => $this->publicationType->getId(),  
+                "displayName" => $this->publicationType->getDisplayName() 
+            ];
+        }
+    }
+
+    /**
      * Set source.
      *
      * @param \AppBundle\Entity\Source $source
@@ -225,6 +248,16 @@ class Publication
     public function getSource()
     {
         return $this->source;
+    }
+
+    /**
+     * Get the Source id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("source")
+     */
+    public function getSourceId()
+    {
+        return $this->source->getId();
     }
 
     /**

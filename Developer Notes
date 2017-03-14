@@ -1,0 +1,26 @@
+Developer Notes:
+
+::Checked data wonkiness::
+    -'northern mariana islands' is the name from red list.
+    - Id inconsistencies in the Citation, Publication, and Source table are from 
+      early testing with the interaction form before Sarah was conscious of the 
+      need to 'remove' entities via doctrine, rather than just deleting test rows 
+      from the db. There is now a db-migration, 000EraseTests, that removes test 
+      entities so they can be safely deleted from the db without remaining in memory.
+
+
+::data cleanup::
+    -Location 
+        -weird '- duplicate entry'
+    > Restructure Migration Commits:
+        Regions, countries, locations: 
+            b6eba34742117a6e25123d6066a3166e0dfd7b0a
+        Drop:
+            29037cdd444afe6254f9a83315a634d6cd198e60
+        SrcStructure, Pub, Auth:
+            5300058c872a4f529dca059ffc6c535afcc58f0c
+        MissPub, Cit:
+            360e7e2506962f839778718ef8e1afc6d3dbb1b7
+        Drop and Cols: (could be done any point after really...)
+            a6439a86b45f56c95cf1ae155fcf0cead3047cbe
+

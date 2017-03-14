@@ -4,12 +4,15 @@
 {% block stylesheets %}
     {{parent()}}
     <link rel="stylesheet" href="{{ asset('bundles/app/css/walkthrough/introjs.css') }}" />
+    <link rel="stylesheet" href="{{ asset('bundles/app/css/combobox/selectize.default.css') }}" />
 {% endblock %}
 
 {% block javascripts %}
     {{parent()}}
-    <script src="{{ asset('bundles/app/js/search-page.js') }}"></script>
+    <script src="{{ asset('bundles/app/js/combobox/selectize.js') }}"></script>    
     <script src="{{ asset('bundles/app/js/walkthrough/intro.js') }}"></script>
+    <script src="{{ asset('bundles/app/js/search-page.js') }}"></script>
+    <script src="{{ asset('bundles/app/js/sync-data.js') }}"></script>
 {% endblock %}
 
 {% block headline %}
@@ -50,7 +53,7 @@
     </div>
     
     <div id="search-grid" class="ag-fresh">
-        <div id="search-overlay"></div>
-        <div id="search-popUpDiv"></div>
+        <div id="grid-overlay"></div>
+        <div id="grid-popup"></div>
     </div>
 {% endblock detail %}

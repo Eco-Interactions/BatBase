@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Taxon.
@@ -11,7 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="taxon")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\TaxonRepository")
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)z
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Taxon
 {
@@ -27,6 +29,7 @@ class Taxon
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -34,6 +37,8 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -41,6 +46,8 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="default_guid", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("defaultGuid")
      */
     private $defaultGuid;
 
@@ -48,6 +55,8 @@ class Taxon
      * @var bool
      *
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isOldWorld")
      */
     private $isOldWorld;
 
@@ -55,6 +64,8 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("linkDisplay")
      */
     private $linkDisplay;
 
@@ -62,6 +73,8 @@ class Taxon
      * @var string
      *
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("linkUrl")
      */
     private $linkUrl;
 
@@ -72,6 +85,14 @@ class Taxon
      */
     private $domain;
 
+    /**
+     * @var \AppBundle\Entity\Level
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
+     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
+     */
+    private $level;
+    
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -117,14 +138,6 @@ class Taxon
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="object")
      */
     private $objectRoles;
-
-    /**
-     * @var \AppBundle\Entity\Level
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Level", inversedBy="taxons")
-     * @ORM\JoinColumn(name="level_id", referencedColumnName="id")
-     */
-    private $level;
 
     /**
      * @var \DateTime
@@ -179,6 +192,8 @@ class Taxon
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -330,6 +345,91 @@ class Taxon
     }
 
     /**
+     * Set domain.
+     *
+     * @param \AppBundle\Entity\Domain $domain
+     *
+     * @return Taxon
+     */
+    public function setDomain(\AppBundle\Entity\Domain $domain = null)
+    {
+        $this->domain = $domain;
+
+        return $this;
+    }
+
+    /**
+     * Get domain.
+     *
+     * @return \AppBundle\Entity\Domain
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("domain")
+     *
+     * @return int
+     */
+    public function serializeDomain()
+    {
+        return $this->findDomainAndReturnObj($this);
+    }
+    private function findDomainAndReturnObj($taxon)
+    {
+        if ($taxon->getId() === 1) { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
+        $domain = $taxon->getDomain();
+        if ($domain) {
+            return [ 
+                "id" => $domain->getId(), 
+                "displayName" => $domain->getDisplayName() ];
+        }
+        if (!$taxon->getParentTaxon()) { print($taxon->getId()."\n");  }
+        return $this->findDomainAndReturnObj($taxon->getParentTaxon());
+    }
+
+    /**
+     * Set level.
+     *
+     * @param \AppBundle\Entity\Level $level
+     *
+     * @return Taxon
+     */
+    public function setLevel(\AppBundle\Entity\Level $level = null)
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    /**
+     * Get level.
+     *
+     * @return \AppBundle\Entity\Level
+     */
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    /**
+     * Get level id and displayName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("level")
+     */
+    public function getLevelData()
+    {
+        return [ 
+            "id" => $this->level->getId(), 
+            "displayName" => $this->level->getDisplayName() 
+        ];
+    }
+
+    /**
      * Add namings.
      *
      * @param \AppBundle\Entity\Naming $namings
@@ -388,6 +488,16 @@ class Taxon
     }
 
     /**
+     * Get the Parent Taxon's id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("parent")
+     */
+    public function getParentTaxonId()
+    {
+        return $this->parentTaxon ? $this->parentTaxon->getId() : null;
+    }
+
+    /**
      * Add childTaxa.
      *
      * @param \AppBundle\Entity\Taxon $childTaxa
@@ -419,6 +529,24 @@ class Taxon
     public function getChildTaxa()
     {
         return $this->childTaxa;
+    }
+
+    /**
+     * Get an array of child Taxon ids.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("children")
+     *
+     * @return array
+     */
+    public function getChildTaxonIds()
+    {
+        if ($this->childTaxa) {
+            $childIds = [];
+            foreach ($this->childTaxa as $child) {
+                array_push($childIds, $child->getId());
+            }
+            return $childIds;
+        }
     }
 
     /**
@@ -490,6 +618,17 @@ class Taxon
     }
 
     /**
+     * Returns an array of ids for all interactions where the taxon was the subject. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("subjectRoles")     
+     */
+    public function getSubjectRoleIds()
+    {
+        $interactions = $this->subjectRoles;
+        return $this->getInteractionids($interactions);
+    }
+
+    /**
      * Add objectRoles.
      *
      * @param \AppBundle\Entity\Interaction $objectRoles
@@ -524,51 +663,26 @@ class Taxon
     }
 
     /**
-     * Set level.
-     *
-     * @param \AppBundle\Entity\Level $level
-     *
-     * @return Taxon
+     * Returns an array of ids for all interactions where the taxon was the object. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("objectRoles")
      */
-    public function setLevel(\AppBundle\Entity\Level $level = null)
+    public function getObjectRoleIds()
     {
-        $this->level = $level;
-
-        return $this;
+        $interactions = $this->objectRoles;
+        return $this->getInteractionids($interactions);
     }
 
     /**
-     * Get level.
-     *
-     * @return \AppBundle\Entity\Level
+     * Returns an array of ids for all passed interactions. 
      */
-    public function getLevel()
+    public function getInteractionids($interactions)
     {
-        return $this->level;
-    }
-
-    /**
-     * Set domain.
-     *
-     * @param \AppBundle\Entity\Domain $domain
-     *
-     * @return Taxon
-     */
-    public function setDomain(\AppBundle\Entity\Domain $domain = null)
-    {
-        $this->domain = $domain;
-
-        return $this;
-    }
-
-    /**
-     * Get domain.
-     *
-     * @return \AppBundle\Entity\Domain
-     */
-    public function getDomain()
-    {
-        return $this->domain;
+        $allIntIds = [];
+        foreach ($interactions as $interaction) {
+            array_push($allIntIds, $interaction->getId());
+        }
+        return $allIntIds;
     }
 
     /**

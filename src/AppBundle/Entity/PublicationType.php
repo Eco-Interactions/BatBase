@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * PublicationType.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="publication_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class PublicationType
 {
@@ -26,6 +28,7 @@ class PublicationType
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -33,6 +36,8 @@ class PublicationType
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -40,6 +45,7 @@ class PublicationType
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -94,6 +100,8 @@ class PublicationType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -207,6 +215,20 @@ class PublicationType
     }
 
     /**
+     * Returns an array of Publication ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publications")
+     */
+    public function getPublicationIds()
+    {
+        $pubIds = [];
+        foreach ($this->publications as $publication) {
+            array_push($pubIds, $publication->getId());
+        }
+        return $pubIds;
+    }
+
+    /**
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user
@@ -273,6 +295,6 @@ class PublicationType
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }

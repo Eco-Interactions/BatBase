@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * HabitatType.
@@ -11,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="habitat_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class HabitatType
 {
@@ -24,17 +26,20 @@ class HabitatType
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"name"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
-    private $name;
+    private $displayName;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -87,6 +92,8 @@ class HabitatType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -118,27 +125,27 @@ class HabitatType
     }
 
     /**
-     * Set name.
+     * Set displayName.
      *
-     * @param string $name
+     * @param string $displayName
      *
      * @return HabitatType
      */
-    public function setName($name)
+    public function setDisplayName($displayName)
     {
-        $this->name = $name;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get displayName.
      *
      * @return string
      */
-    public function getName()
+    public function getDisplayName()
     {
-        return $this->name;
+        return $this->displayName;
     }
 
     /**
@@ -173,6 +180,24 @@ class HabitatType
     public function getLocations()
     {
         return $this->locations;
+    }
+
+    /**
+     * Get an array of Location ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("locations")
+     *
+     * @return array
+     */
+    public function getLocationIds()
+    {
+        if ($this->locations) {
+            $locIds = [];
+            foreach ($this->locations as $loc) {
+                array_push($locIds, $loc->getId());
+            }
+            return $locIds;
+        }
     }
 
     /**
@@ -242,6 +267,6 @@ class HabitatType
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }

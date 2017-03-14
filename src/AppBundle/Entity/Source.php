@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Source.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Source
 {
@@ -28,6 +30,8 @@ class Source
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255, unique=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
@@ -35,6 +39,7 @@ class Source
      * @var string
      *
      * @ORM\Column(name="description", type="text", nullable=true)
+     * @JMS\Expose
      */
     private $description;
 
@@ -42,6 +47,7 @@ class Source
      * @var string
      *
      * @ORM\Column(name="year", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $year;
 
@@ -49,6 +55,7 @@ class Source
      * @var string
      *
      * @ORM\Column(name="doi", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $doi;
 
@@ -56,6 +63,8 @@ class Source
      * @var string
      * 
      * @ORM\Column(name="link_display", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("linkDisplay")
      */
     private $linkDisplay;
 
@@ -63,20 +72,17 @@ class Source
      * @var string
      * 
      * @ORM\Column(name="link_url", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("linkUrl")
      */
     private $linkUrl;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_citation", type="boolean", nullable=true)
-     */
-    private $isCitation;
-
-    /**
-     * @var bool
-     *
      * @ORM\Column(name="is_direct", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isDirect")
      */
     private $isDirect;
 
@@ -107,7 +113,7 @@ class Source
     private $sourceType;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="sources")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="sources")
      * @ORM\JoinTable(name="source_tag")
      */
     private $tags;
@@ -123,7 +129,7 @@ class Source
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
-
+     *
      * A collection of all Authors that contributed to a source work.
      */
     private $contributors;
@@ -211,6 +217,8 @@ class Source
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -364,35 +372,11 @@ class Source
     }
 
     /**
-     * Set isCitation.
-     *
-     * @param bool $isCitation
-     *
-     * @return Source
-     */
-    public function setIsCitation($isCitation)
-    {
-        $this->isCitation = $isCitation;
-
-        return $this;
-    }
-
-    /**
-     * Get isCitation.
-     *
-     * @return bool
-     */
-    public function getIsCitation()
-    {
-        return $this->isCitation;
-    }
-
-    /**
      * Set isDirect.
      *
      * @param bool $isDirect
      *
-     * @return Interaction
+     * @return Source
      */
     public function setIsDirect($isDirect)
     {
@@ -436,6 +420,16 @@ class Source
     }
 
     /**
+     * Get the parent Source's id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("parent")
+     */
+    public function getParentSourceSId()
+    {
+        return $this->parentSource ? $this->parentSource->getId() : null;
+    }
+
+    /**
      * Add child Source.
      *
      * @param \AppBundle\Entity\Source $childSource
@@ -471,6 +465,24 @@ class Source
     }
 
     /**
+     * Get an array of child Source ids.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("children")
+     *
+     * @return array
+     */
+    public function getChildSourceIds()
+    {
+        if ($this->childSources) {
+            $childIds = [];
+            foreach ($this->childSources as $child) {
+                array_push($childIds, $child->getId());
+            }
+            return $childIds;
+        }
+    }
+
+    /**
      * Set SourceType.
      *
      * @param \AppBundle\Entity\SourceType $sourceType
@@ -495,11 +507,26 @@ class Source
     }
 
     /**
+     * Get Source Type id and displayName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("sourceType")
+     *
+     * @return int
+     */
+    public function getSourceTypeData()
+    {
+        return [ 
+            "id" => $this->sourceType->getId(),  
+            "displayName" => $this->sourceType->getDisplayName() 
+        ];
+    }
+
+    /**
      * Add Tag.
      *
      * @param \AppBundle\Entity\Tag $tag
      *
-     * @return Interaction
+     * @return Source
      */
     public function addTag(\AppBundle\Entity\Tag $tag)
     {
@@ -526,6 +553,27 @@ class Source
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * Get an array of tag ids and displayNames.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("tags")
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        if ($this->tags) {
+            $tagIds = [];
+            foreach ($this->tags as $tag) {
+                array_push(
+                    $tagIds, 
+                    ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
+                );
+            }
+            return $tagIds;
+        }
     }
 
     /**
@@ -563,6 +611,20 @@ class Source
     }
 
     /**
+     * Returns an array of interactions ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactions")
+     */
+    public function getInteractionids()
+    {
+        $intIds = [];
+        foreach ($this->interactions as $interaction) {
+            array_push($intIds, $interaction->getId());
+        }
+        return $intIds;
+    }
+
+    /**
      * Add an Contributor.
      *
      * @param \AppBundle\Entity\Contributon $contributor
@@ -594,6 +656,22 @@ class Source
     public function getContributors()
     {
         return $this->contributors;
+    }
+
+    /**
+     * Get Contributor Ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("contributors")
+     *
+     * @return array
+     */
+    public function getContributorIds()
+    {
+        $contribIds = [];
+        foreach ($this->contributors as $contributor) {
+            array_push($contribIds, $contributor->getAuthorSource()->getId());
+        }
+        return $contribIds;
     }
 
     /**
@@ -629,40 +707,23 @@ class Source
     {
         return $this->contributions;
     }
-    /**
-     * Add a Citation.
-     *
-     * @param \AppBundle\Entity\Citation $citation
-     *
-     * @return Source
-     */
-    public function addCitation(\AppBundle\Entity\Citation $citation)
-    {
-        $this->citations[] = $citation;
-
-        return $this;
-    }
 
     /**
-     * Remove a Citation.
+     * Get Contribution Ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("contributions")
      *
-     * @param \AppBundle\Entity\Citation $citation
+     * @return array
      */
-    public function removeCitation(\AppBundle\Entity\Citation $citation)
+    public function getContributonIds()
     {
-        $this->citations->removeElement($citation);
+        $contribIds = [];
+        foreach ($this->contributions as $contribution) {
+            array_push($contribIds, $contribution->getWorkSource()->getId());
+        }
+        return $contribIds;
     }
-
-    /**
-     * Get Citations.
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCitations()
-    {
-        return $this->citations;
-    }
-
+    
     /**
      * Set publication.
      *
@@ -685,6 +746,16 @@ class Source
     public function getPublication()
     {
         return $this->publication;
+    }
+
+    /**
+     * If this is a Publication Source, get the Publication id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publication")
+     */
+    public function getPublicationId()
+    {
+        return $this->publication ? $this->publication->getId() : null;
     }
 
     /**
@@ -712,6 +783,16 @@ class Source
     }
 
     /**
+     * If this is an Author Source, get the Author id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("author")
+     */
+    public function getAuthorId()
+    {
+        return $this->author ? $this->author->getId() : null;
+    }
+
+    /**
      * Set citation.
      *
      * @param \AppBundle\Entity\Citation $citation
@@ -733,6 +814,16 @@ class Source
     public function getCitation()
     {
         return $this->citation;
+    }
+
+    /**
+     * If this is a Citation Source, get the Citation id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("citation")
+     */
+    public function getCitationId()
+    {
+        return $this->citation ? $this->citation->getId() : null;
     }
 
     /**

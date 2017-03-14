@@ -4,6 +4,8 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
+
 
 /**
  * InteractionType.
@@ -11,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="interaction_type")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
+ * @JMS\ExclusionPolicy("all")
  */
 class InteractionType
 {
@@ -24,8 +27,9 @@ class InteractionType
     private $id;
 
     /**
-     * @Gedmo\Slug(fields={"name"})
+     * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -33,15 +37,18 @@ class InteractionType
      * @var bool
      *
      * @ORM\Column(name="is_symmetric", type="boolean", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $isSymmetric;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
-    private $name;
+    private $displayName;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -101,6 +108,8 @@ class InteractionType
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -156,27 +165,27 @@ class InteractionType
     }
 
     /**
-     * Set name.
+     * Set displayName.
      *
-     * @param string $name
+     * @param string $displayName
      *
      * @return InteractionType
      */
-    public function setName($name)
+    public function setDisplayName($displayName)
     {
-        $this->name = $name;
+        $this->displayName = $displayName;
 
         return $this;
     }
 
     /**
-     * Get name.
+     * Get displayName.
      *
      * @return string
      */
-    public function getName()
+    public function getDisplayName()
     {
-        return $this->name;
+        return $this->displayName;
     }
 
     /**
@@ -211,6 +220,20 @@ class InteractionType
     public function getInteractions()
     {
         return $this->interactions;
+    }
+
+    /**
+     * Returns an array of interactions ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactions")
+     */
+    public function getInteractionids()
+    {
+        $allIntIds = [];
+        foreach ($this->interactions as $interaction) {
+            array_push($allIntIds, $interaction->getId());
+        }
+        return $allIntIds;
     }
 
     /**
@@ -314,6 +337,6 @@ class InteractionType
      */
     public function __toString()
     {
-        return $this->getName();
+        return $this->getDisplayName();
     }
 }

@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Interaction.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="AppBundle\Entity\InteractionRepository")
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Interaction
 {
@@ -28,6 +30,7 @@ class Interaction
      * @var string
      *
      * @ORM\Column(name="note", type="string", length=255, nullable=true)
+     * @JMS\Expose
      */
     private $note;
 
@@ -35,6 +38,8 @@ class Interaction
      * @var bool
      *
      * @ORM\Column(name="is_likely", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isLikely")
      */
     private $isLikely;
 
@@ -42,6 +47,8 @@ class Interaction
      * @var bool
      *
      * @ORM\Column(name="is_old_world", type="boolean", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("isOldWorld")
      */
     private $isOldWorld;
 
@@ -140,6 +147,8 @@ class Interaction
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -245,6 +254,16 @@ class Interaction
     }
 
     /**
+     * Get the Source id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("source")
+     */
+    public function getSourceId()
+    {
+        return $this->source->getId();
+    }
+
+    /**
      * Set interactionType.
      *
      * @param \AppBundle\Entity\InteractionType $interactionType
@@ -266,6 +285,22 @@ class Interaction
     public function getInteractionType()
     {
         return $this->interactionType;
+    }
+
+    /**
+     * Get the Interaction Type id and displayName.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("interactionType")
+     */
+    public function getInteractionTypeData()
+    {
+        if ($this->interactionType) {
+            return [ 
+                "id" => $this->interactionType->getId(), 
+                "displayName" => $this->interactionType->getDisplayName() 
+            ];
+        }
+        return null;    
     }
 
     /**
@@ -293,6 +328,16 @@ class Interaction
     }
 
     /**
+     * Get the Location id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("location")
+     */
+    public function getLocationId()
+    {
+        return $this->location ? $this->location->getId() : null;
+    }
+
+    /**
      * Set subject.
      *
      * @param \AppBundle\Entity\Taxon $subject
@@ -314,6 +359,16 @@ class Interaction
     public function getSubject()
     {
         return $this->subject;
+    }
+
+    /**
+     * Get the Subject id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("subject")
+     */
+    public function getSubjectId()
+    {
+        return $this->subject->getId();
     }
 
     /**
@@ -341,27 +396,37 @@ class Interaction
     }
 
     /**
-     * Add Tags.
+     * Get the Object id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("object")
+     */
+    public function getObjectId()
+    {
+        return $this->object->getId();
+    }
+
+    /**
+     * Add Tag.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @param \AppBundle\Entity\Tag $tag
      *
      * @return Interaction
      */
-    public function setTags(\AppBundle\Entity\Tag $tags)
+    public function addTag(\AppBundle\Entity\Tag $tag)
     {
-        $this->tags[] = $tags;
+        $this->tags[] = $tag;
 
         return $this;
     }
 
     /**
-     * Remove Tags.
+     * Remove Tag.
      *
-     * @param \AppBundle\Entity\Tag $tags
+     * @param \AppBundle\Entity\Tag $tag
      */
-    public function removeTag(\AppBundle\Entity\Tag $tags)
+    public function removeTag(\AppBundle\Entity\Tag $tag)
     {
-        $this->tags->removeElement($tags);
+        $this->tags->removeElement($tag);
     }
 
     /**
@@ -372,6 +437,25 @@ class Interaction
     public function getTags()
     {
         return $this->tags;
+    }
+
+    /**
+     * Get an array of tag ids and displayNames.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("tags")
+     */
+    public function getTagData()
+    {
+        if ($this->tags) {
+            $tagIds = [];
+            foreach ($this->tags as $tag) {
+                array_push(
+                    $tagIds, 
+                    ["id" => $tag->getId(), "displayName" => $tag->getDisplayName()]
+                );
+            }
+            return $tagIds;
+        }
     }
 
     /**

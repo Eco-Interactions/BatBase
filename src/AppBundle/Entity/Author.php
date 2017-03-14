@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Author.
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks
  * @ORM\Entity
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
  */
 class Author
 {
@@ -27,6 +29,7 @@ class Author
     /**
      * @Gedmo\Slug(fields={"displayName"})
      * @ORM\Column(length=128, unique=true, nullable=true)
+     * @JMS\Expose
      */
     private $slug;
 
@@ -34,13 +37,35 @@ class Author
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="last_name", type="string", length=255, nullable=true)
+     * @ORM\Column(name="first_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("firstName")
+     */
+    private $firstName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="middle_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("middleName")
+     */
+    private $middleName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="last_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("lastName")
      */
     private $lastName;
 
@@ -48,6 +73,8 @@ class Author
      * @var string
      *
      * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("fullName")
      */
     private $fullName;
 
@@ -100,6 +127,8 @@ class Author
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -152,6 +181,54 @@ class Author
     public function getDisplayName()
     {
         return $this->displayName;
+    }
+
+    /**
+     * Set firstName.
+     *
+     * @param string $firstName
+     *
+     * @return Author
+     */
+    public function setFirstName($firstName = null)
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    /**
+     * Get firstName.
+     *
+     * @return string
+     */
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * Set middleName.
+     *
+     * @param string $middleName
+     *
+     * @return Author
+     */
+    public function setMiddleName($middleName = null)
+    {
+        $this->middleName = $middleName;
+
+        return $this;
+    }
+
+    /**
+     * Get middleName.
+     *
+     * @return string
+     */
+    public function getMiddleName()
+    {
+        return $this->middleName;
     }
 
     /**
@@ -225,6 +302,17 @@ class Author
     {
         return $this->source;
     }
+
+    /**
+     * Get the Source id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("source")
+     */
+    public function getSourceId()
+    {
+        return $this->source->getId();
+    }
+
 
     /**
      * Set createdBy user.
