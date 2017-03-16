@@ -10,6 +10,9 @@ $(document).ready(function(){
     var userRole, cParams = {};
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
+    eif.crud = {
+        editInt: editInteraction
+    }
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
@@ -133,6 +136,11 @@ $(document).ready(function(){
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
+/*------------------- Edit Form ------------------------------------------------------------------*/
+    function editInteraction(interactionId) {  console.log("editing ", interactionId);
+    
+    }
+/*------------------- Create Form ----------------------------------------------------------------*/
     /**
      * Fills the global cParams obj with the basic crud params @initCrudParams. 
      * Init the crud form and append into the crud window @initCrudForm. 

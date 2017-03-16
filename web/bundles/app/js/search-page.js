@@ -4,11 +4,12 @@
      * a selected "focus": taxa (grouped further by domain: bat, plant, arthropod), 
      * locations, or sources (grouped by either publications or authors). 
      *
+     * userRole = Stores the role of the user.
      * intro = Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
      */
-    var intro, columnDefs = [], focusStorage = {}; 
+    var userRole, intro, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -64,7 +65,7 @@
         $("#show-tips").click(showTips);
     }
     function authDependentInit() {
-        var userRole = $('body').data("user-role");                             //console.log("----userRole === visitor ", userRole === "visitor")
+        userRole = $('body').data("user-role");                                 //console.log("----userRole === visitor ", userRole === "visitor")
         if (userRole === "visitor") {
             $('button[name="csv"]').prop('disabled', true);
             $('button[name="csv"]').prop('title', "Register to download.");
@@ -610,20 +611,19 @@
     } 
     /**
      * Returns both interactions for the curTaxon and rowData for any children.
-     * If there are children, the interactions for the curTaxon are grouped as 
-     * the first child row under "Unspecified [taxonName] Interactions", otherwise
-     * any interactions are added as rows directly beneath the taxon.
+     * The interactions for non-species Taxa are grouped as the first child row 
+     * under "Unspecified [taxonName] Interactions", for species the interactions 
+     * are added as rows directly beneath the taxon.
      */
-    function getTaxonChildRowData(curTaxon, curTreeLvl) { 
+    function getTaxonChildRowData(curTaxon, curTreeLvl) {
         var childRows = [];
 
-        if (curTaxon.children !== null && curTaxon.children.length > 0) {
+        if (curTaxon.level.id !== 7){ //Species
             getUnspecifiedInts(curTreeLvl);
-            curTaxon.children.forEach(function(childTaxon){
-                childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1));
-            });
+            if (curTaxon.children && curTaxon.children.length) { 
+                getTaxonChildRows(curTaxon.children); 
+            }
         } else { childRows = getTaxonIntRows(curTaxon, curTreeLvl); }
-
         return childRows;
 
         function getUnspecifiedInts(curTreeLvl) {
@@ -653,6 +653,11 @@
                     groupedInts: true
                 });
             }
+        }
+        function getTaxonChildRows(children) {
+            children.forEach(function(childTaxon){
+                childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1));
+            });
         }
     } /* End getTaxonChildRowData */
     function getTaxonIntRows(taxon, treeLvl) {                                  //console.log("getTaxonInteractions for = %O", taxon);
@@ -1401,7 +1406,6 @@
         var gridOptObj = gridOpts || gridOptions;
         gridOptObj.rowData = focusStorage.rowData;
         gridOptObj.columnDefs = getColumnDefs(treeColTitle),
-
         new agGrid.Grid(gridDiv, gridOptObj);
     }
     /**
@@ -1442,7 +1446,8 @@
                 {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-                {headerName: "Count", field: "intCnt", width: 81, headerTooltip: "Interaction Count", volatile: true },
+                {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: showIfEditor(), cellRenderer: addEditPencil },
+                {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells },
                 {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells  },
                 {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
@@ -1459,15 +1464,27 @@
                 // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
                 {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
     }
+    function showIfEditor() {
+        return !(userRole === "editor" || userRole === "admin" || userRole === "super");
+    }
     /** Adds tooltip to Tree cells */
-    function innerCellRenderer(params) {                                        //console.log("params in cell renderer = %O", params)
-        var name = params.data.name || null;   
+    function innerCellRenderer(params) {      
+        var name = params.data.name || null;                                    //console.log("params in cell renderer = %O", params)         
         return name === null ? null : '<span title="'+name+'">'+name+'</span>';
     }
     /** Adds tooltip to Interaction row cells */
     function addToolTipToCells(params) {
         var value = params.value || null;
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
+    }
+    /** Adds an edit pencil for all interaction rows bound to an edit method. */
+    function addEditPencil(params) {  
+        var name = params.data.name || null; 
+        var id = params.data.id;
+        var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
+            class="grid-edit" title="Edit Interaction" alt="Edit Interaction">`;
+        $('#search-grid').on('click', '#edit'+id, eif.crud.editInt.bind(null, id));
+        return name === null ? editPencil : null;
     }
     /*================== Row Styling =========================================*/
     /**
@@ -2217,14 +2234,17 @@
     }
     function finishGridAndUiLoad() {
         hidePopUpMsg();
-        hideGroupColFilterMenu();
+        hideUnusedColFilterMenus();
     } 
     /**
-     * Hides the group "tree" column's filter button. Filtering on the group 
+     * Hides the "tree" column's filter button. Filtering on the group 
      * column only filters the leaf nodes, by design. It is not useful here.
+     * Also hides the filter button on the 'edit' and 'count' columns.
      */
-    function hideGroupColFilterMenu() {
+    function hideUnusedColFilterMenus() {
         $('.ag-header-cell-menu-button.name').hide();
+        $('.ag-header-cell-menu-button.edit').hide();
+        $('.ag-header-cell-menu-button.intCnt').hide();
     }
     /** Sorts the all levels of the data tree alphabetically. */
     function sortDataTree(tree) {
