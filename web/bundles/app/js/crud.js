@@ -21,7 +21,7 @@ $(document).ready(function(){
         authDependentInit(); 
     }
     function authDependentInit() {   
-        if (userRole === "admin" || userRole === "super") {                     //console.log("admin CRUD ACTIVATE!! ");
+        if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {            //console.log("admin CRUD ACTIVATE!! ");
             if ($('body').data("this-url") === "/search") {
                 buildSearchPgCrudUi();
             } 

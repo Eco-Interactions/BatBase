@@ -2,19 +2,21 @@
 <html lang="en">
 
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-	{% set eifisuser = true %}
+	<!-- {% set eifisuser = true %} -->
 	{% set eifusername = app.user.username %}
 	{% if is_granted('ROLE_SUPER_ADMIN') %}
 		{% set eifrole = 'super' %}
 	{% elseif is_granted('ROLE_ADMIN') %}
 		{% set eifrole = 'admin' %}
+	{% elseif is_granted('ROLE_EDITOR') %}
+		{% set eifrole = 'editor' %}
 	{% elseif is_granted('ROLE_USER') %}
-		{% set eifrole = 'member' %}
+		{% set eifrole = 'user' %}
 	{% else %}
 		{% set eifrole = 'visitor' %}
 	{% endif %}
 {% else %}
-	{% set eifisuser = false %}
+<!-- 	{% set eifisuser = false %} -->
 	{% set eifusername = '' %}
 	{% set eifrole = 'visitor' %}
 {% endif %}

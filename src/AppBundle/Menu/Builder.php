@@ -37,7 +37,7 @@ class Builder extends ContainerAware
     }
 
     private function _isLoggedInUser($user_role) {
-		$show_for_roles = array('member','admin','super');
+		$show_for_roles = array('user', 'editor', 'admin','super');
 		if (in_array($user_role, $show_for_roles)) {
 			return true;
 		}
