@@ -155,7 +155,56 @@ $(document).ready(function(){
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
+        fillExistingData(id)
     }      
+    /** Fills form with existing data for the interaction. */
+    function fillExistingData(id) {
+        var intRcrd = getInteractionRecord(id);                                 console.log("intRcrd = %O", intRcrd);
+        for (var prop in intRcrd) {
+            if (intRcrd.hasOwnProperty(prop) &&  prop !== "id") {
+                fillIntField(prop, intRcrd);
+            }
+        }
+    }
+    function getInteractionRecord(id) {
+        var ints = _util.getDataFromStorage("interaction");                     //console.log("id = %s, ints = %O", id, ints)
+        return ints[id];
+    }
+    /** Calls the set method for the passed field. */
+    function fillIntField(field, rcrd) {
+        var setField = {
+            "interactionType": setIntType, "location": setLoc, "note": addNote, 
+            "object": addTaxon, "source": addSource, "subject": addTaxon, 
+            "tags": addTags };
+        setField[field](field, rcrd[field]);
+    }
+    function setIntType(field, intTypeObj) {
+        $('#InteractionType-sel')[0].selectize.addItem(intTypeObj.id);
+    }
+    function setLoc(field, id) {
+        $('#Location-sel')[0].selectize.addItem(id);
+    }
+    function addNote(field, note) {
+        $('#Notes-txt').val(note);
+    }
+    function addTaxon(role, id) {
+        var selApi = $('#'+ _util.ucfirst(role) + '-sel')[0].selectize;
+        var taxon = cParams.records.taxon[id];                                  //console.log("[%s] taxon = %O", role, taxon)
+        var displayName = taxon.level.id === 7 ? 
+            taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
+        selApi.addOption({ value: id, text: displayName });
+        selApi.addItem(id);
+    }
+    function addSource(field, id) {
+        var cit = cParams.records.source[id];
+        $('#Publication-sel')[0].selectize.addItem(cit.parent);
+        $('#CitationTitle-sel')[0].selectize.addItem(id);
+    }
+    function addTags(field, tags) {                                             //console.log("tags = %O", tags)
+        tags.forEach(function(tag){
+            $('#InteractionTags-sel')[0].selectize.addItem(tag.id);
+        });
+    }
 /*--------------------------- Create Form --------------------------------------------------------*/
     /**
      * Fills the global cParams obj with the basic crud params @initCrudParams. 
