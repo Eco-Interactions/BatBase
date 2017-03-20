@@ -1446,7 +1446,7 @@
                 {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-                {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: showIfEditor(), cellRenderer: addEditPencil },
+                {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
                 {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells },
                 {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells  },
@@ -1464,8 +1464,9 @@
                 // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
                 {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
     }
-    function showIfEditor() {
-        return !(userRole === "editor" || userRole === "admin" || userRole === "super");
+    function isNotEditor() {  
+        return true;
+        // return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
     }
     /** Adds tooltip to Tree cells */
     function innerCellRenderer(params) {      
