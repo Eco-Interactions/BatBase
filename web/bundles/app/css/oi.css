@@ -418,6 +418,12 @@ span.lbl {
 	height: 868px;
 	border: black 1px solid;
 }
+.grid-edit {
+	height: 22px;
+	width: 20px;
+	position: relative;
+	left: 9px;
+}
 .ag-menu{
 	z-index: 100;
 }
