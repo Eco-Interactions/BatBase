@@ -12,7 +12,7 @@ $(document).ready(function(){
     var _util = eif.util;
     eif.crud = {
         editInt: editInteraction
-    }
+    };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
@@ -29,26 +29,28 @@ $(document).ready(function(){
         }
     }
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
-    /*---------- CRUD Window Funcs -------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
     function buildSearchPgCrudUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initInteractionCrud);
+        $(bttn).click(initInteractionCrudWindow.bind(null, "create"));
         $("#opts-col1").append(bttn);
     }
+    /*---------- Shared CRUD window methods ----------------------------------*/
     /**
      * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
-    function initInteractionCrud() {                                            console.log("***initInteractionCrud***")
-        showCrudFormPopup();
-        initCrudView();
+    function initInteractionCrudWindow(action) {                                console.log("***initInteraction*** - ", action);
+        var hdrs = { create: "New", edit: "Editing" };
+        var views = { create: initCreateView, edit: Function.prototype };
+        showCrudFormPopup(hdrs[action]);
+        views[action]();
     }
     /** Builds and shows the popup crud-form's structural elements. */
-    function showCrudFormPopup() {
+    function showCrudFormPopup(actionHdr) {
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").append(getCrudWindowElems("New Interaction"));
+        $("#b-overlay-popup").append(getCrudWindowElems(actionHdr + " Interaction"));
         setPopUpPos();
         $('#b-overlay-popup, #b-overlay').show();
     }
@@ -136,18 +138,32 @@ $(document).ready(function(){
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
-/*------------------- Edit Form ------------------------------------------------------------------*/
-    function editInteraction(interactionId) {  console.log("editing ", interactionId);
-    
+/*--------------------------- Edit Form ----------------------------------------------------------*/
+    function editInteraction(id) {                                              console.log("editing ", id);
+        initCrudParams("edit");
+        initInteractionCrudWindow("edit");
+        initEditForm(id);
     }
-/*------------------- Create Form ----------------------------------------------------------------*/
+    /**
+     * Inits the interaction form, aka top-form, filled with all existing data for 
+     * the record. The all fields for the interaction can be modified and saved 
+     * within the form. 
+     */
+    function initEditForm(id) {                                                 console.log("initEditForm");
+        var formCntnr = buildCrudFormCntnr();
+        var formFields = buildTopFormFields();                                  //console.log("formFields = %O", formFields);
+        $(formCntnr).append(formFields);
+        $('#crud-main').append(formCntnr);      
+        finishFormBuild();
+    }      
+/*--------------------------- Create Form --------------------------------------------------------*/
     /**
      * Fills the global cParams obj with the basic crud params @initCrudParams. 
      * Init the crud form and append into the crud window @initCrudForm. 
      */
-    function initCrudView() {
+    function initCreateView() {
         initCrudParams("create");
-        initCrudForm();
+        initCreateForm();
     }       
     /**
      * Inits the interaction form, aka top-form, with all fields displayed and
@@ -155,14 +171,15 @@ $(document).ready(function(){
      * user can create new entities of the field-type by selecting the 'add...' 
      * option from the field's combobox and completing the appended sub-form.
      */
-    function initCrudForm() {
+    function initCreateForm() {
         var formCntnr = buildCrudFormCntnr();
-        var formFields = buildTopFormFields();                                  console.log("formFields = %O", formFields);
+        var formFields = buildTopFormFields();                                  //console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
         focusCombobox('#Publication-sel');
     }      
+/*------------------- Shared Methods -------------------------------------------------------------*/
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
         var form = document.createElement("form");
