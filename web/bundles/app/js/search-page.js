@@ -1465,7 +1465,8 @@
                 {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
     }
     function isNotEditor() {  
-        return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
+        return true;
+        // return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
     }
     /** Adds tooltip to Tree cells */
     function innerCellRenderer(params) {      
