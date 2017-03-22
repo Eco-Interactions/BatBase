@@ -481,7 +481,7 @@ button[name="createbttn"] {
 	width: 420px;
 	text-align: justify;
 }
-a[role="button"], .tos-bttn, .exit-bttn {
+a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	cursor: pointer;
 }
 /*-- Search Grid Popup --*/
@@ -639,7 +639,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 200px;
 }
 #top-form textarea {
-	height: 55px;
+	height: 63px;
 }
 #Notes-txt {
 	border-color: #b8b8b8;

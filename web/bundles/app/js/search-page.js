@@ -16,7 +16,7 @@
     var gridOptions = getDefaultGridOptions();
     eif.search = {
         initSearchPage: initSearchPage,
-        initSearchGrid: selectSearchFocus,
+        initSearchGrid: resetSearchGrid,
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -113,6 +113,11 @@
             "</p><br><p>Below is a 'Show/Hide Columns' button that will allow users to select " +
             "the data that will be shown in the grid and/or csv exported.</p>");
         $msgDiv.appendTo('#opts-col3');
+    }
+    /** Grid-rebuild entry point after crud-window close. */
+    function resetSearchGrid() {
+        resetToggleTreeBttn(false);
+        selectSearchFocus();
     }
     function selectSearchFocus() {                                              //console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
         var focus = $('#search-focus').val();         
@@ -1465,8 +1470,7 @@
                 {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
     }
     function isNotEditor() {  
-        return true;
-        // return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
+        return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
     }
     /** Adds tooltip to Tree cells */
     function innerCellRenderer(params) {      
@@ -1479,11 +1483,12 @@
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
     /** Adds an edit pencil for all interaction rows bound to an edit method. */
-    function addEditPencil(params) {  
+    function addEditPencil(params) {                                            
         var name = params.data.name || null; 
         var id = params.data.id;
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
             class="grid-edit" title="Edit Interaction" alt="Edit Interaction">`;
+        $('#search-grid').off('click', '#edit'+id);
         $('#search-grid').on('click', '#edit'+id, eif.crud.editInt.bind(null, id));
         return name === null ? editPencil : null;
     }
