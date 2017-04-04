@@ -1682,7 +1682,7 @@ $(document).ready(function(){
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         var envUrl = $('body').data("ajax-target-url");
-        return envUrl + "admin/crud/entity/" + action;
+        return envUrl + "crud/entity/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = cParams.ajaxFormLvl;                                          
