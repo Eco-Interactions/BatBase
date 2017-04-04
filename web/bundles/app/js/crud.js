@@ -22,10 +22,8 @@ $(document).ready(function(){
     }
     function authDependentInit() {   
         if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {            //console.log("admin CRUD ACTIVATE!! ");
-            if ($('body').data("this-url") === "/search") {
-                buildSearchPgCrudUi();
-            } 
-            initWysiwyg();
+            if ($('body').data("this-url") === "/search") { buildSearchPgCrudUi(); }
+            if (userRole !== 'editor') { initWysiwyg(); }
         }
     }
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
