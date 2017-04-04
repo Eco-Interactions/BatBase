@@ -19,7 +19,7 @@ use AppBundle\Entity\Taxon;
 /**
  * Crud-form controller.
  *
- * @Route("/admin/crud")
+ * @Route("/crud")
  */
 class CrudController extends Controller
 {

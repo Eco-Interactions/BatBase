@@ -22,10 +22,8 @@ $(document).ready(function(){
     }
     function authDependentInit() {   
         if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {            //console.log("admin CRUD ACTIVATE!! ");
-            if ($('body').data("this-url") === "/search") {
-                buildSearchPgCrudUi();
-            } 
-            initWysiwyg();
+            if ($('body').data("this-url") === "/search") { buildSearchPgCrudUi(); }
+            if (userRole !== 'editor') { initWysiwyg(); }
         }
     }
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
@@ -1682,7 +1680,7 @@ $(document).ready(function(){
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {
         var envUrl = $('body').data("ajax-target-url");
-        return envUrl + "admin/crud/entity/" + action;
+        return envUrl + "crud/entity/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = cParams.ajaxFormLvl;                                          

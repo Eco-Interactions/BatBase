@@ -363,7 +363,7 @@ span.lbl {
 }
 #opts-col1 {
 	border-right: black 1px solid;
-	flex: 0 0 366px;
+	flex: 0 0 343px;
 	align-items: flex-end;
 }
 #opts-col2, #opts-col3 {
@@ -450,11 +450,6 @@ span.lbl {
 }
 
 /*---Buttons---*/
-#tips-close-bttn {
-	position: absolute;
-	top: 630px;
-	left: 550px;
-}
 #filter-bttns {
 	display: inline-flex;
 	justify-content: space-between;
@@ -661,10 +656,15 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin: 3px !important;
 }
 /*-- Search Tips Popup --*/
+#tips-close-bttn {
+	position: absolute;
+	top: 555px;
+	left: 633px;
+}
 .tips-popup {
 	font-size: 1.1em;
-	height: 666px;
-	width: 650px;
+	height: 622px;
+	width: 742px;
 	padding: 2.2em;
 	text-align: left;
 	margin: auto;

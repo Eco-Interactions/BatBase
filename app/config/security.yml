@@ -23,6 +23,7 @@ security:
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/crud/, role: ROLE_EDITOR }
         - { path: /login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: profile/edit, roles: ROLE_USER }
         - { path: /edit$, roles: ROLE_ADMIN }

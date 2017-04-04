@@ -1395,6 +1395,7 @@
             onBeforeFilterChanged: beforeFilterChange, 
             onAfterFilterChanged: afterFilterChanged,
             onModelUpdated: onModelUpdated,
+            onBeforeSortChanged: onBeforeSortChanged,
             enableColResize: true,
             enableSorting: true,
             unSortIcon: true,
@@ -1410,8 +1411,15 @@
         var gridDiv = document.querySelector('#search-grid');
         var gridOptObj = gridOpts || gridOptions;
         gridOptObj.rowData = focusStorage.rowData;
-        gridOptObj.columnDefs = getColumnDefs(treeColTitle),
+        gridOptObj.columnDefs = getColumnDefs(treeColTitle);
         new agGrid.Grid(gridDiv, gridOptObj);
+        sortTreeColumnIfTaxonFocused();
+    }
+    /** If the grid is Taxon focused, sort the tree column by taxon-rank and name. */
+    function sortTreeColumnIfTaxonFocused() {
+        if (focusStorage.curFocus === 'taxa') {
+            gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]);
+        }
     }
     /**
      * Copied from agGrid's default template, with columnId added to create unique ID's
@@ -1443,7 +1451,7 @@
 
         return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
-                    cellClass: getCellStyleClass },     //cellClassRules: getCellStyleClass
+                    cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
                 {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Phylum", field: "treePhylum", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Class", field: "treeClass", width: 150, hide: true },
@@ -1453,8 +1461,8 @@
                 {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
                 {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
                 {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
-                {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells },
-                {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells  },
+                {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+                {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
@@ -1469,6 +1477,56 @@
                 // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
                 {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
     }
+    /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
+    function onBeforeSortChanged() {                                            
+        if (focusStorage.curFocus !== "taxa") { return; }                       
+        var sortModel = gridOptions.api.getSortModel();                         //console.log("model obj = %O", sortModel)
+        if (!sortModel.length) { return gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]); }
+        ifNameUnsorted(sortModel);        
+    }
+    /** Sorts the tree column if it is not sorted. */
+    function ifNameUnsorted(model) {
+        var nameSorted = model.some(function(colModel){
+            return colModel.colId === "name";
+        });
+        if (!nameSorted) { 
+            model.push({colId: "name", sort: "asc"}); 
+            gridOptions.api.setSortModel(model);
+        }
+    }
+    /**
+     * Sorts the tree column alphabetically for all views. If in Taxon view, the 
+     * rows are sorted first by rank and then alphabetized by name @sortTaxonRows. 
+     */
+    function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {               //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
+        if (!a) { return 0; } //Interaction rows are returned unsorted
+        if (focusStorage.curFocus !== "taxa") { return alphaSortVals(a, b); }
+        sortTaxonRows(a, b);
+    } 
+    /** Sorts each row by taxonomic rank and then alphabetizes by name. */
+    function sortTaxonRows(a, b) {
+        var lvls = ["Kingdom", "Arthropod", "Class", "Order", "Family", "Genus", "Species"];
+        var aParts = a.split(" ");
+        var aLvl = aParts[0];
+        var aName = aParts[1];
+        var bParts = b.split(" ");
+        var bLvl = bParts[0];
+        var bName = bParts[1];
+        return aLvl === "Unspecified" ? 0 : compareRankThenName();
+
+        function compareRankThenName() {
+            return sortByRank() || sortByName();
+        }
+        function sortByRank() {
+            return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
+                lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1; 
+        }
+        function sortByName() {
+            return lvls.indexOf(aLvl) === -1 ? 
+                a.toLowerCase() > b.toLowerCase() ? 1 : -1 :
+                aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
+        }
+    }  /* End sortTaxonRows */
     function isNotEditor() {  
         return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
     }
@@ -2038,30 +2096,29 @@
                         intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
                             "<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
                             "clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +
-                            "creative searches to filter your results you can explore once the tutorial ends.<br><br>You can exit the tutorial " +
-                            "by clicking 'Exit', or anywhere on the greyed background." +
+                            "creative searches to filter your results that you can explore once the tutorial ends.<br><br>" +
+                            "You can exit the tutorial by clicking 'Exit', or anywhere on the greyed background." +
                             "<br><br><center><h2>Use your right arrow key or click 'Next' to start the tutorial.</h2></center>",
                         position: "left",
                     },
                     {
                         /*element: document.querySelector("#filter-opts"),*/
                         element: "#filter-opts",
-                        intro: "<h3><center>The search results will be grouped by <br>Location, Source, or Taxon.<center></h3> <br> " + 
-                            "<b>Interaction records will be displayed grouped under the outline tree in the first column of the grid.</b><br><br>" +
-                            "Locations are in a Region-Country-Location structure and Taxa are arranged by Parent-Child relationships." +
-                            "<br><br>Taxon are the default focus, the most complex, and where this tutorial will continue from.",
+                        intro: "<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3> <br> " + 
+                            "<b>The serach results will be grouped under the outline tree in the first column of the grid.</b><br><br>" +
+                            "The Location view has a Region-Country-Location outline. <br>The Source view groups by either publication or author."+
+                            "<br>The Taxon view groups by realm (bat, plant, or arthropod) and taxonomic rank.",
                     },
                     {
                         element:"#sort-opts",
-                        intro: "<center><b>Results by taxon must be further grouped by the taxon realm: Bats, Plants, or Arthropoda.</b>" +
-                            "<br><br>We have selected Plants for this tutorial.</center>",
+                        intro: "<br><center>This tutorial will continue in the Taxon view with the Plant realm selected.</center><br>",
                         position: "right"
                     },
                     {
                         element: "#search-grid",
                         intro: "<h3><center>The resulting interaction data is displayed here.</center></h3><br><b><center>When first displayed " +
                             "all interactions in the database are available for further filtering or sorting.</center></b>" +
-                            "<br>The <b>'Count'</b> column shows the number of interactions attributed to each Taxon or Location in the outline tree." +
+                            "<br>The <b>'Count'</b> column shows the number of interactions attributed to each node in the outline tree." +
                             "<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
                             "<br><br>The <b>'Object Taxon'</b> column shows the plant or arthropod interacted <i>with</i>." +
                             "<br><br> Columns can be resized by dragging the column header dividers and rearranged by dragging the header iteself." +
@@ -2280,6 +2337,12 @@
     function alphaOptionObjs(a, b) {
         var x = a.text.toLowerCase();
         var y = b.text.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
+    /** Sorts an array of options via sort method. */
+    function alphaSortVals(a, b) {
+        var x = a.toLowerCase();
+        var y = b.toLowerCase();
         return x<y ? -1 : x>y ? 1 : 0;
     }
     /** Returns an array with grid-row objects for each interaction record.  */
