@@ -2096,30 +2096,29 @@
                         intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
                             "<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
                             "clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +
-                            "creative searches to filter your results you can explore once the tutorial ends.<br><br>You can exit the tutorial " +
-                            "by clicking 'Exit', or anywhere on the greyed background." +
+                            "creative searches to filter your results that you can explore once the tutorial ends.<br><br>" +
+                            "You can exit the tutorial by clicking 'Exit', or anywhere on the greyed background." +
                             "<br><br><center><h2>Use your right arrow key or click 'Next' to start the tutorial.</h2></center>",
                         position: "left",
                     },
                     {
                         /*element: document.querySelector("#filter-opts"),*/
                         element: "#filter-opts",
-                        intro: "<h3><center>The search results will be grouped by <br>Location, Source, or Taxon.<center></h3> <br> " + 
-                            "<b>Interaction records will be displayed grouped under the outline tree in the first column of the grid.</b><br><br>" +
-                            "Locations are in a Region-Country-Location structure and Taxa are arranged by Parent-Child relationships." +
-                            "<br><br>Taxon are the default focus, the most complex, and where this tutorial will continue from.",
+                        intro: "<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3> <br> " + 
+                            "<b>The serach results will be grouped under the outline tree in the first column of the grid.</b><br><br>" +
+                            "The Location view has a Region-Country-Location outline. <br>The Source view groups by either publication or author."+
+                            "<br>The Taxon view groups by realm (bat, plant, or arthropod) and taxonomic rank.",
                     },
                     {
                         element:"#sort-opts",
-                        intro: "<center><b>Results by taxon must be further grouped by the taxon realm: Bats, Plants, or Arthropoda.</b>" +
-                            "<br><br>We have selected Plants for this tutorial.</center>",
+                        intro: "<br><center>This tutorial will continue in the Taxon view with the Plant realm selected.</center><br>",
                         position: "right"
                     },
                     {
                         element: "#search-grid",
                         intro: "<h3><center>The resulting interaction data is displayed here.</center></h3><br><b><center>When first displayed " +
                             "all interactions in the database are available for further filtering or sorting.</center></b>" +
-                            "<br>The <b>'Count'</b> column shows the number of interactions attributed to each Taxon or Location in the outline tree." +
+                            "<br>The <b>'Count'</b> column shows the number of interactions attributed to each node in the outline tree." +
                             "<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
                             "<br><br>The <b>'Object Taxon'</b> column shows the plant or arthropod interacted <i>with</i>." +
                             "<br><br> Columns can be resized by dragging the column header dividers and rearranged by dragging the header iteself." +
