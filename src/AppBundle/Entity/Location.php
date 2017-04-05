@@ -762,6 +762,6 @@ class Location
      */
     public function __toString()
     {
-        return $this->getDescription();
+        return $this->getDisplayName();
     }
 }
