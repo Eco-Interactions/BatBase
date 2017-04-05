@@ -513,7 +513,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .crud-popup {
 	height: 88vh;
-	width: 1065px;
+	width: 1080px;
 	padding: 20px;
 	text-align: left;
 	margin: auto;
@@ -530,8 +530,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #crud-main {
 	padding: 25px 25px 15px 25px;
-	max-height: 77vh;
-	overflow: hidden;
+	height: 77vh;
+	overflow-x: hidden;
+	overflow-y: scroll;
 }
 /* -- Form Styles -- */
 #top-form {
