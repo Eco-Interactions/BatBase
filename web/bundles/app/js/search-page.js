@@ -30,7 +30,7 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'luv';
+        var dataKey = 'luvs';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
             _util.populateStorage(dataKey, true);
@@ -862,7 +862,7 @@
         for (var topNode in locTree) {                                          //console.log("topNode = ", topNode)
             finalRowData.push( getLocRowData(locTree[topNode], 0)); 
         }
-        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", focusStorage.rowData);
+        focusStorage.rowData = removeLocsWithoutInteractions(finalRowData);     //console.log("rowData = %O", focusStorage.rowData);
         loadGrid("Location Tree");
     }
     /** Returns a row data object for the passed location and it's children.  */
@@ -910,7 +910,7 @@
                     isParent: true,
                     open: false,
                     children: getIntRowData(intsAry, treeLvl),
-                    interactions: true,
+                    interactions: intsAry.length > 0,
                     treeLvl: treeLvl,
                     groupedInts: true
                 });
@@ -920,6 +920,21 @@
             childRows.push(getLocRowData(childLoc, pTreeLvl + 1));
         }
     } /* End getLocRowDataForChildren */
+    /** Filters out all locations with no interactions below them in the tree. */
+    function removeLocsWithoutInteractions(rows) {  
+        return rows.filter(function(row){
+            if (row.children) { 
+                row.children = removeLocsWithoutInteractions(row.children);
+            }
+            return row.interactions || hasChildInteractions(row);
+        });
+    }
+    function hasChildInteractions(row) {
+        if (!row.children) { return true; }
+        return row.children.some(function(childRow) {
+            return childRow.interactions;
+        });
+    }
 /*------------------Source Search Methods-----------------------------------*/
     /**
      * Get all data needed for the Source-focused grid from local storage and send  

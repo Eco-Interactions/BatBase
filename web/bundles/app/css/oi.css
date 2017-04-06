@@ -608,7 +608,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	font-size: .9em;
 	text-align: center;
 }
-.form-row .required:after {
+.field-row .required:after {
   content: "*";
 }
 .top-pin {
