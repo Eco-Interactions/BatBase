@@ -30,7 +30,7 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'luvs';
+        var dataKey = 'luvs!';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
             _util.populateStorage(dataKey, true);
