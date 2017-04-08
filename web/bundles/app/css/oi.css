@@ -510,7 +510,8 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .crud-popup {
 	height: 88vh;
-	width: 1080px;
+	width: 1510px;
+	/*width: 1080px;*/
 	padding: 20px;
 	text-align: left;
 	margin: auto;
@@ -526,10 +527,29 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	text-align: center;
 }
 #crud-main {
-	padding: 25px 25px 15px 25px;
-	height: 77vh;
+	padding: 5px 0 0 5px;
+	height: 82vh;
+	width: 1040px;
 	overflow-x: hidden;
 	overflow-y: scroll;
+}
+#crud-details {
+	flex: 1 1 242px;
+	padding: 20px;
+	overflow-y: scroll;
+	margin-top: 1.2em;
+}
+#crud-details h3 {
+	text-align: center;
+	font-size: 1.15em;
+	margin-bottom:1em;
+}
+.det-div {
+	min-height: 50px;
+	margin-top: .5em;
+}
+.det-div div {
+	padding: .5em 0 0 .5em;
 }
 /* -- Form Styles -- */
 #top-form {
@@ -538,12 +558,13 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .exit-bttn {
 	position: relative;
-	width: 22px;
-	height: 20px;
+	width: 2em;
+	height: 2em;
 	font-weight: bold;
 }
 #exit-form {
-	left: 999px;
+	left: 98.5%;
+	top: -10px;
 }
 #exit-sub-form {
 	left: 111px;
@@ -553,7 +574,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 808px;
-    margin: 11px 0 0 100px;
+    margin: 11px 0 10px 100px;
 }
 .sml-form {
 	border: 1px solid grey;

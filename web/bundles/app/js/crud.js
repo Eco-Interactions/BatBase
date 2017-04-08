@@ -63,18 +63,36 @@ $(document).ready(function(){
     }
     /**
      * Builds the main crud window elements.
-     * section>(header, div#crud-main, footer)
+     * section>(div#crud-main(header, form), div#crud-details(hdr, pub, cit, loc), footer)
      */
     function getCrudWindowElems(title) {
-        var cntnr = _util.buildElem("section");
-        $(cntnr).append(getHeaderHtml(title));
-        $(cntnr).append(_util.buildElem("div", { "id": "crud-main" }));
-        $(cntnr).append(_util.buildElem("footer"));
+        var cntnr = _util.buildElem("section", {"class": "flex-row flex-wrap"});
+        $(cntnr).append([getExitButton(), getCrudMainForm(title), getFormDetailElems()]);
         return cntnr;        
+    }
+    function getCrudMainForm(title) {
+        var crudWin = _util.buildElem("div", { "id": "crud-main" });
+        $(crudWin).append(getHeaderHtml(title));
+        $(crudWin).append(_util.buildElem("footer"));
+        return crudWin;
+    }
+    function getFormDetailElems() {
+        var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
+        $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
+        $(detailCntnr).append(initDetailDiv('pub'));
+        $(detailCntnr).append(initDetailDiv('cit'));
+        $(detailCntnr).append(initDetailDiv('loc'));
+        return detailCntnr;
+    }
+    function initDetailDiv(ent) {
+        var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
+        var div = _util.buildElem("div", { "id": ent+"-det", "class": "det-div" });
+        $(div).append(_util.buildElem("h5", { "text": entities[ent]+":" }));        
+        $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
+        return div;
     }
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "crud-hdr", "class":"flex-col" });
-        $(hdrSect).append(getExitButton());
         $(hdrSect).append(_util.buildElem("h1", { "text": title }));
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
