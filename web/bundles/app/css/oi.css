@@ -136,7 +136,7 @@ span.lbl {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
 }
-.top-pgs p, #terms-div p {		/*Clean up all these old references and free the ids!*/
+.top-pgs p, #terms-div p {		
 	margin: .2em 0 0 1em;
 	padding: .3em 0 .3em 0;
 	font-size: 1.05em;
@@ -158,9 +158,6 @@ span.lbl {
 	padding: 1em 0 3em 0;
 	border-top:1px solid #000;
 	justify-content: space-between;
-}
-#footer-tos {
-	/*align-self: flex-end;*/
 }
 /* wysiwyg editor */
 .wysiwyg {
@@ -789,20 +786,12 @@ label[for=fos_user_registration_form_about_me] {
 #future-dev-pg .first-col {
 	width: 64%;
 }
-/*#future-dev-pg .second-col {
-	width: 40%;
-}*/
 #future-dev-pg ul {
 	margin-left: 1em;
 }
 #articles-add{
 	height: 100vh;
 	width: 100vw;
-}
-/*--- Export ---*/
-#exprtContnt {
-	position: absolute;
-	width: 100%;
 }
 /*-- About --*/
 #about-pg .second-col {
@@ -829,19 +818,6 @@ label[for=fos_user_registration_form_about_me] {
 }
 #db-new-data {
 	margin-left: 15px;
-}
-/*-- Sources --*/
-#src-pg p {
-	width: 800px;
-	font-size: 1.21em;
-	margin-left: 1em;
-}
-#src-pg ul {
-	font-size: 1.2em;
-	margin-left: 2.2em;
-}
-#src-pg ul>li {
-	margin: .4em;
 }
 /*-- Definition --*/
 #def-frame p {
@@ -907,29 +883,3 @@ width: 150%;
 	width: 220px;
 	flex-shrink: 0;
 }
-#team-sect div {
-	/*text-align: justify;*/
-}
-/*-- Taxon --*/
-#taxon-outline li {
-	padding: 3px 0 0 30px;
-}
-#taxon-outline ul {
-	padding: 0 0 0 30px;
-}
-/*-- Location --*/
-#loc-desc {
-	margin: 1em 0 .15em 0;
-	font-size: 1.1em;
-}
-#loc-disp {
-	font-size: 1.1em;
-	height: 2.2em;
-	display:flex;
-	flex-direction: column;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	margin-bottom: 1em;
-	padding-left: 12px;
-}
-
