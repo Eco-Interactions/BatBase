@@ -136,7 +136,7 @@ span.lbl {
 	font-size: 1.2em;
 	margin: .75em 0 .5em 0;
 }
-.top-pgs p, #terms-div p {		/*Clean up all these old references and free the ids!*/
+.top-pgs p, #terms-div p {		
 	margin: .2em 0 0 1em;
 	padding: .3em 0 .3em 0;
 	font-size: 1.05em;
@@ -158,9 +158,6 @@ span.lbl {
 	padding: 1em 0 3em 0;
 	border-top:1px solid #000;
 	justify-content: space-between;
-}
-#footer-tos {
-	/*align-self: flex-end;*/
 }
 /* wysiwyg editor */
 .wysiwyg {
@@ -308,6 +305,9 @@ span.lbl {
 }
 .ul-big li {
 	margin: 1em 0 1em 0;
+}
+.ul-reg li {
+	margin: 0 0 .5em .5em;
 }
 .disc-list>li {
 	list-style: disc;
@@ -513,7 +513,8 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .crud-popup {
 	height: 88vh;
-	width: 1080px;
+	width: 1510px;
+	/*width: 1080px;*/
 	padding: 20px;
 	text-align: left;
 	margin: auto;
@@ -529,10 +530,29 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	text-align: center;
 }
 #crud-main {
-	padding: 25px 25px 15px 25px;
-	height: 77vh;
+	padding: 5px 0 0 5px;
+	height: 82vh;
+	width: 1040px;
 	overflow-x: hidden;
 	overflow-y: scroll;
+}
+#crud-details {
+	flex: 1 1 242px;
+	padding: .5em;
+	overflow-y: scroll;
+	margin-top: 1.2em;
+}
+#crud-details h3 {
+	text-align: center;
+	font-size: 1.15em;
+	margin-bottom:1em;
+}
+.det-div {
+	min-height: 50px;
+	margin: .5em 0 1em 0;
+}
+.det-div div {
+	padding: .5em 0 0 .5em;
 }
 /* -- Form Styles -- */
 #top-form {
@@ -541,12 +561,13 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .exit-bttn {
 	position: relative;
-	width: 22px;
-	height: 20px;
+	width: 2em;
+	height: 2em;
 	font-weight: bold;
 }
 #exit-form {
-	left: 999px;
+	left: 98.5%;
+	top: -10px;
 }
 #exit-sub-form {
 	left: 111px;
@@ -556,7 +577,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 808px;
-    margin: 11px 0 0 100px;
+    margin: 11px 0 10px 100px;
 }
 .sml-form {
 	border: 1px solid grey;
@@ -658,17 +679,21 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 /*-- Search Tips Popup --*/
 #tips-close-bttn {
-	position: absolute;
-	top: 555px;
-	left: 633px;
+	position: relative;
+	margin-top: .5em;
+	left: 91%;
+	bottom: -2vh;
 }
 .tips-popup {
+	top: 8vh;
+	position: relative;
 	font-size: 1.1em;
-	height: 622px;
-	width: 742px;
+	height: 66vh;
+	width: 44vw;
 	padding: 2.2em;
 	text-align: left;
 	margin: auto;
+	overflow-y: scroll;
 }
 /*----------- FOS / Registration Page ---------*/
 .fos_user_user_show {
@@ -789,20 +814,12 @@ label[for=fos_user_registration_form_about_me] {
 #future-dev-pg .first-col {
 	width: 64%;
 }
-/*#future-dev-pg .second-col {
-	width: 40%;
-}*/
 #future-dev-pg ul {
 	margin-left: 1em;
 }
 #articles-add{
 	height: 100vh;
 	width: 100vw;
-}
-/*--- Export ---*/
-#exprtContnt {
-	position: absolute;
-	width: 100%;
 }
 /*-- About --*/
 #about-pg .second-col {
@@ -829,19 +846,6 @@ label[for=fos_user_registration_form_about_me] {
 }
 #db-new-data {
 	margin-left: 15px;
-}
-/*-- Sources --*/
-#src-pg p {
-	width: 800px;
-	font-size: 1.21em;
-	margin-left: 1em;
-}
-#src-pg ul {
-	font-size: 1.2em;
-	margin-left: 2.2em;
-}
-#src-pg ul>li {
-	margin: .4em;
 }
 /*-- Definition --*/
 #def-frame p {
@@ -907,29 +911,3 @@ width: 150%;
 	width: 220px;
 	flex-shrink: 0;
 }
-#team-sect div {
-	/*text-align: justify;*/
-}
-/*-- Taxon --*/
-#taxon-outline li {
-	padding: 3px 0 0 30px;
-}
-#taxon-outline ul {
-	padding: 0 0 0 30px;
-}
-/*-- Location --*/
-#loc-desc {
-	margin: 1em 0 .15em 0;
-	font-size: 1.1em;
-}
-#loc-disp {
-	font-size: 1.1em;
-	height: 2.2em;
-	display:flex;
-	flex-direction: column;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	margin-bottom: 1em;
-	padding-left: 12px;
-}
-

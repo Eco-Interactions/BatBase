@@ -2201,7 +2201,6 @@
         }
     }   /* End startIntroWalkthrough */
     function initSearchTips() { 
-        setPopUpPos();
         $('#b-overlay-popup').html(searchTips());
         bindEscEvents();
     }
@@ -2223,14 +2222,6 @@
     function removeTips() {  //console.log("removeTips called.")
         $('#b-overlay, #b-overlay-popup').css("display", "none");
         $('#b-overlay-popup').removeClass("tips-popup");
-    }
-    /**
-     * Finds top position of fixed parent overlay and then sets the popUp  position accordingly.
-     */
-    function setPopUpPos() {
-        var parentPos = $('#b-overlay').offset();  
-        $('#b-overlay-popup').offset(
-            { top: (parentPos.top + 88)});          
     }
     function bindEscEvents() {
         addCloseButton();
