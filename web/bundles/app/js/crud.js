@@ -118,8 +118,12 @@ $(document).ready(function(){
      */
     function addDataToDetailPanel(ent, propObj) {
         var html = getDataHtmlString(propObj);
-        $('#'+ent+'-det div').empty();
+        emptySidePanel(ent);
         $('#'+ent+'-det div').append(html);
+    }
+    function emptySidePanel(ent, reset) {
+        $('#'+ent+'-det div').empty();
+        if (reset) { $('#'+ent+'-det div').append('None selected.') }
     }
     /** Returns a ul with an li for each data property */
     function getDataHtmlString(props) {
@@ -333,10 +337,14 @@ $(document).ready(function(){
     }
     /** When a publication is selected fill citation dropdown @fillCitationField.  */
     function onPubSelection(val) { 
-        if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#CitationTitle-sel'); }                                
+        if (val === "" || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
         fillPubDetailPanel(val);
         $('#Publication_pin').focus();
+    }
+    function onPubClear() {
+        clearCombobox('#CitationTitle-sel');
+        emptySidePanel('pub', true);
     }
     /** Displays the selected publication's data in the side detail panel. */
     function fillPubDetailPanel(id) {  
@@ -386,7 +394,7 @@ $(document).ready(function(){
      * and the publication combobox is reenabled. 
      */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
+        if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
         fillCitDetailPanel(val);
         $('#CitationTitle_pin').focus();
     }    
