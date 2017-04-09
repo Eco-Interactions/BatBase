@@ -129,7 +129,7 @@ $(document).ready(function(){
     function getDataHtmlString(props) {
         var html = [];
         for (var prop in props) {
-            html.push('<li><b>'+prop+'</b>:    '+ props[prop]+ '</li>');
+            html.push('<li>'+prop+': <b>'+ props[prop]+ '</b></li>');
         }
         return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
     }
@@ -510,10 +510,31 @@ $(document).ready(function(){
      * which is then disabled. If the location was cleared, restores the country combobox. 
      */
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return; }          
+        if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = cParams.records.location[val];
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
+        fillLocDetailPanel(val);
         $('#Location_pin').focus();
+    }
+    /** Displays the selected location's data in the side detail panel. */
+    function fillLocDetailPanel(id) {  
+        var locRcrd = cParams.records.location[id];  
+        var propObj = getLocDetailDataObj(locRcrd);
+        addDataToDetailPanel('loc', propObj);
+    }
+    /** Returns an object with selected location's data. */
+    function getLocDetailDataObj(locRcrd) {  console.log("locRcrd = %O", locRcrd);
+        return {
+            'Name': locRcrd.displayName, 
+            'Description': locRcrd.description || '',            
+            'Location Type': locRcrd.locationType ? locRcrd.locationType.displayName : '', 
+            'Habitat Type': locRcrd.habitatType ? locRcrd.habitatType.displayName : '', 
+            'Latitude': locRcrd.latitude || '',
+            'Longitude': locRcrd.longitude || '',
+            'Elevation': locRcrd.elevation || '',            
+            'Elevation Max': locRcrd.elevationMax || '',            
+            'Elevation Units': locRcrd.elevUnitAbbrv || '',            
+        };
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
