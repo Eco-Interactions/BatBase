@@ -306,6 +306,9 @@ span.lbl {
 .ul-big li {
 	margin: 1em 0 1em 0;
 }
+.ul-reg li {
+	margin: 0 0 .5em .5em;
+}
 .disc-list>li {
 	list-style: disc;
     display: list-item;
@@ -546,7 +549,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 .det-div {
 	min-height: 50px;
-	margin-top: .5em;
+	margin: .5em 0 1em 0;
 }
 .det-div div {
 	padding: .5em 0 0 .5em;

@@ -76,21 +76,6 @@ $(document).ready(function(){
         $(crudWin).append(_util.buildElem("footer"));
         return crudWin;
     }
-    function getFormDetailElems() {
-        var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
-        $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
-        $(detailCntnr).append(initDetailDiv('pub'));
-        $(detailCntnr).append(initDetailDiv('cit'));
-        $(detailCntnr).append(initDetailDiv('loc'));
-        return detailCntnr;
-    }
-    function initDetailDiv(ent) {
-        var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
-        var div = _util.buildElem("div", { "id": ent+"-det", "class": "det-div" });
-        $(div).append(_util.buildElem("h5", { "text": entities[ent]+":" }));        
-        $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
-        return div;
-    }
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "crud-hdr", "class":"flex-col" });
         $(hdrSect).append(_util.buildElem("h1", { "text": title }));
@@ -111,6 +96,53 @@ $(document).ready(function(){
         $("#b-overlay").removeClass("crud-ovrly");
         $("#b-overlay-popup").removeClass("crud-popup");
         $("#b-overlay-popup").empty();
+    }
+    function getFormDetailElems() {
+        var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
+        $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
+        $(detailCntnr).append(initDetailDiv('pub'));
+        $(detailCntnr).append(initDetailDiv('cit'));
+        $(detailCntnr).append(initDetailDiv('loc'));
+        return detailCntnr;
+    }
+    function initDetailDiv(ent) {
+        var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
+        var div = _util.buildElem("div", { "id": ent+"-det", "class": "det-div" });
+        $(div).append(_util.buildElem("h5", { "text": entities[ent]+":" }));        
+        $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
+        return div;
+    }
+    /**
+     * When the Publication, Citation, or Location fields are selected, their 
+     * data is added to the side detail panel of the form.
+     */
+    function addDataToDetailPanel(ent, propObj) {
+        var html = getDataHtmlString(propObj);
+        $('#'+ent+'-det div').empty();
+        $('#'+ent+'-det div').append(html);
+    }
+    /** Returns a ul with an li for each data property */
+    function getDataHtmlString(props) {
+        var html = [];
+        for (var prop in props) {
+            html.push('<li><b>'+prop+'</b>:    '+ props[prop]+ '</li>');
+        }
+        return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
+    }
+    /** Returns a comma seperated sting of all authors attributed to the source. */
+    function getAuthorNames(srcRcrd) {
+        var authStr = [];
+        if (srcRcrd.contributors.length > 0) {
+            srcRcrd.contributors.forEach(function(authId){
+                authStr.push(getAuthName(authId));
+            });
+        }
+        return authStr.join(', ');
+    }
+    /** Returns the name of the author with the passed id. */
+    function getAuthName(id) {
+        var auth = cParams.records.source[id];
+        return auth.displayName;  
     }
     /*--------------- CRUD Params Object -------------------------------------*/
     /**
@@ -287,7 +319,7 @@ $(document).ready(function(){
         });
         return fields.concat(buildFormBttns("Interaction", "top"));
     }
-    /*-------------- Publication  --------------------------------------------*/
+    /*-------------- Publication ---------------------------------------------*/
     /**
      * Returns a form row with a publication select dropdown populated with all 
      * current publication titles.
@@ -303,7 +335,23 @@ $(document).ready(function(){
     function onPubSelection(val) { 
         if (val === "" || isNaN(parseInt(val)) ) { return clearCombobox('#CitationTitle-sel'); }                                
         fillCitationField(val);
+        fillPubDetailPanel(val);
         $('#Publication_pin').focus();
+    }
+    /** Displays the selected publication's data in the side detail panel. */
+    function fillPubDetailPanel(id) {  
+        var srcRcrd = cParams.records.source[id];  
+        var propObj = getPubDetailDataObj(srcRcrd);
+        addDataToDetailPanel('pub', propObj);
+    }
+    /** Returns an object with selected publication's data. */
+    function getPubDetailDataObj(srcRcrd) {  
+        var pubRcrd = _util.getDataFromStorage('publication')[srcRcrd.publication];     //console.log("srcRcrd = %O, pubRcrd = %O", srcRcrd, pubRcrd);
+        return {
+            'Title': srcRcrd.displayName, 'Description': srcRcrd.description || '',            
+            'Publication Type': pubRcrd.publicationType ? pubRcrd.publicationType.displayName : '', 
+            'Authors': getAuthorNames(srcRcrd),
+        };
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
