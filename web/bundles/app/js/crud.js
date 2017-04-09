@@ -344,6 +344,7 @@ $(document).ready(function(){
     }
     function onPubClear() {
         clearCombobox('#CitationTitle-sel');
+        enableCombobox('#CitationTitle-sel', false);
         emptySidePanel('pub', true);
     }
     /** Displays the selected publication's data in the side detail panel. */
@@ -381,6 +382,7 @@ $(document).ready(function(){
     }
     /** Fills the citation combobox with all citations for the selected publication. */
     function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
+        enableCombobox('#CitationTitle-sel');
         updateComboboxOptions('#CitationTitle-sel', getPubCitationOpts(pubId));
     }
     /** Returns an array of option objects with citations for this publication.  */
