@@ -387,7 +387,27 @@ $(document).ready(function(){
      */    
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return; }                     //console.log("cit selection = ", parseInt(val));                          
+        fillCitDetailPanel(val);
         $('#CitationTitle_pin').focus();
+    }    
+    /** Displays the selected citation's data in the side detail panel. */
+    function fillCitDetailPanel(id) {  
+        var srcRcrd = cParams.records.source[id];  
+        var propObj = getCitDetailDataObj(srcRcrd);
+        addDataToDetailPanel('cit', propObj);
+    }
+    /** Returns an object with selected citation's data. */
+    function getCitDetailDataObj(srcRcrd) {  
+        var citRcrd = _util.getDataFromStorage('citation')[srcRcrd.citation];   //console.log("srcRcrd = %O, citRcrd = %O", srcRcrd, citRcrd);
+        return {
+            'Title': srcRcrd.displayName, 
+            'Full Text': srcRcrd.description || '',            
+            'Citation Type': citRcrd.citationType ? citRcrd.citationType.displayName : '', 
+            'Publication Vol': citRcrd.publicationVolume || '',            
+            'Publication Issue': citRcrd.publicationIssue || '',            
+            'Publication Pages': citRcrd.publicationPages || '',            
+            'Authors': getAuthorNames(srcRcrd),
+        };
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
