@@ -1,0 +1,238 @@
+/*----- Database CRUD Popup -----*/
+@media screen and (max-width: 1500px) { 
+	#b-overlay .crud-popup {
+		width: 1380px;
+		padding: 15px;
+	}
+	#b-overlay #crud-main {
+		padding: 5px 0 0 20px;
+		width: 915px;
+	}
+	#b-overlay .form-row {
+		padding: .2em .75em .3em  0;
+		width: 420px;
+	}
+	#b-overlay .sub-row {
+		width: 375px;
+	}
+	#b-overlay .long-sub-row {
+		width: 750px;
+	}
+	#b-overlay .sub2-row {
+		width: 363px;
+	}
+	#b-overlay .med-form {
+	    width: 777px;
+	    margin: 11px 0 10px 60px;
+	}
+	#b-overlay #Notes_row div.field-row {
+		width: 846px;
+	}
+	#b-overlay #top-form label {
+		font-size: 1em;
+		padding: 9px 0 2px 0;
+		width: 125px;
+	}  
+	#b-overlay #Notes-txt {
+		width: 698px;
+	}
+	#b-overlay .xxlrg-field {
+		width: 720px;	
+	}
+	#b-overlay .xlrg-field {
+		width: 595px;
+	}
+	#b-overlay .lrg-field {
+		width: 262px;
+	} 
+	#b-overlay .med-field {
+		width: 220px;
+	}
+	#b-overlay .sml-field {
+		width: 175px;
+	}
+	/*
+	#b-overlay .sml-form {
+	    padding: 5px;
+	    min-width: 385px;
+	    margin-top: .5em;
+	}*/
+} 
+@media only screen and (min-width: 1501px) {   /*and (max-width: 1920px)*/ 
+	
+} /*--------------------------------------------------------------------------*/
+    .crud-popup {
+		height: 88vh;
+		flex-grow: 0;
+		width: 1510px;
+		/*width: 1080px;*/
+		padding: 20px;
+		text-align: left;
+		justify-content: space-between;
+	}
+	.crud-ovrly {
+		align-items: center;
+	}
+	#crud-hdr>h1 {
+		font-size: 1.3em;
+		margin-bottom: 10px;
+		text-align: center;
+	}
+	#crud-hdr>p {
+		margin-bottom: 10px;
+		font-weight: bold;
+		text-align: center;
+	}
+	#crud-main {
+		padding: 5px 0 0 5px;
+		height: 82vh;
+		width: 999px;
+		overflow-x: hidden;
+		overflow-y: scroll;
+	}
+	#crud-details {
+		flex: 1 1 242px;
+		padding: 0 .5em .5em .5em;
+		overflow-y: scroll;
+		max-width: 31%;
+		/*margin-top: 1.2em;*/
+	}
+	#crud-details h3 {
+		text-align: center;
+		font-size: 1.15em;
+		margin-bottom:1em;
+	}
+	.det-div {
+		min-height: 50px;
+		margin: .5em 0 1em 0;
+	}
+	.det-div div {
+		padding: .5em 0 0 .5em;
+	}
+	/* -- Form Styles -- */
+	#top-form {
+		font-size: 1em;
+		flex-wrap: wrap;
+	}
+	.exit-bttn {
+		position: relative;
+		width: 2em;
+		height: 2em;
+		font-weight: bold;
+	}
+	#exit-form {
+		left: 94%;
+		top: 7%;
+	}
+	#exit-sub-form {
+		left: 24%;
+		font-size: .75em !important;
+	}
+	.med-form {
+		border: 1px solid grey;
+		border-radius: 5px;
+	    width: 808px;
+	    margin: 11px 0 10px 100px;
+	}
+	.sml-form {
+		border: 1px solid grey;
+		border-radius: 5px;
+	    padding: 5px;
+	    min-width: 385px;
+	    margin-top: .5em;
+	}
+	.sml-left {
+		position: relative;
+		left: 25px;
+	}
+	.sml-right {
+		position: relative;
+		right: 15px;
+	}
+	#sub-hdr, #sub2-hdr {
+		font-size: 1.1em;
+		text-align: center;
+		padding-top: 4px;
+		margin: 0 auto 8px auto;
+		align-self: center;
+	}
+	form[name="top"] p, form[name="top"] .bttn-cntnr {
+		width: 100%;
+	}
+	.form-row {
+		padding: .2em .75em .3em  .75em;
+		width: 470px;
+		margin-right: 1em;
+	}
+	.field-row {
+		justify-content: space-between;
+	}
+	#Notes_row div.field-row {
+		width: 933px;
+	}
+	.sub-row {
+		padding: .2em .75em .3em  .75em;
+		width: 400px;
+	}
+	.sub2-row {
+		padding: .2em .75em .3em  .75em;
+		width: 372px;
+	}
+	.long-sub-row {
+		padding: .2em .75em .3em  .75em;
+		width: 802px;
+	}
+	.form-errors, .row-errors {
+		color: red;
+		font-size: .9em;
+		text-align: center;
+	}
+	.field-row .required:after {
+	  content: "*";
+	}
+	.top-pin {
+		margin: .6em 0 0 .6em !important;
+	}
+	#top-form input, #top-form select, #top-form textarea {
+		padding: .1em;
+		margin: 0;
+		font-size: .95em;
+	}
+	.xxlrg-field {
+		width: 755px;	
+	}
+	.xlrg-field {
+		width: 655px;
+	}
+	.lrg-field {
+		width: 309px;
+	}
+	.med-field {
+		width: 255px;
+	}
+	.sml-field {
+		width: 200px;
+	}
+	#top-form textarea {
+		height: 63px;
+	}
+	#Notes-txt {
+		border-color: #b8b8b8;
+		width: 812px;
+	}
+	.selectize-input {
+		padding-right: 33px !important;
+	}
+	#top-form label {
+		font-size: 1em;
+		padding: 9px 0 2px 0;
+		width: 125px;
+	}
+	.bttn-cntnr {
+		align-self: flex-end;
+		padding: 10px;
+	}
+	.bttn-cntnr input {
+	    padding: 3px !important;
+	    margin: 3px !important;
+	}
