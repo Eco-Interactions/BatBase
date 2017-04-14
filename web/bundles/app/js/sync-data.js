@@ -164,7 +164,7 @@
     function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
-            'citation': {},
+            'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
             'publisher': { 'publisherNames': addToNameProp }
         };
