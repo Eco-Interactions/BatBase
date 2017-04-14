@@ -49,31 +49,22 @@ $(document).ready(function(){
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
         $("#b-overlay-popup").append(getCrudWindowElems(actionHdr + " Interaction"));
-        setPopUpPos();
-        $('#b-overlay-popup, #b-overlay').show();
-    }
-    /** Sets popup top using parent position. If 'reset', sets original position. */
-    function setPopUpPos(reset) {
-        var parentPos = $('#b-overlay').offset();  
-        var newTopPos = { top: reset ? (parentPos.top - 33) : (parentPos.top + 33) };
-        $('#b-overlay-popup').offset(newTopPos);          
+        $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
     function hideSearchCrudPopup() {
         $('#b-overlay-popup, #b-overlay').hide();
     }
     /**
-     * Builds the main crud window elements.
+     * Returns the crud window elements - the form and the detail panel.
      * section>(div#crud-main(header, form), div#crud-details(hdr, pub, cit, loc), footer)
      */
     function getCrudWindowElems(title) {
-        var cntnr = _util.buildElem("section", {"class": "flex-row flex-wrap"});
-        $(cntnr).append([getExitButton(), getCrudMainForm(title), getFormDetailElems()]);
-        return cntnr;        
+        return [getCrudMainForm(title), getFormDetailElems()];
     }
     function getCrudMainForm(title) {
         var crudWin = _util.buildElem("div", { "id": "crud-main" });
         $(crudWin).append(getHeaderHtml(title));
-        $(crudWin).append(_util.buildElem("footer"));
+        // $(crudWin).append(_util.buildElem("footer"));
         return crudWin;
     }
     function getHeaderHtml(title) {
@@ -92,13 +83,13 @@ $(document).ready(function(){
     function exitCrudFormPopup() {
         hideSearchCrudPopup();
         eif.search.initSearchGrid();
-        setPopUpPos(true);
         $("#b-overlay").removeClass("crud-ovrly");
         $("#b-overlay-popup").removeClass("crud-popup");
         $("#b-overlay-popup").empty();
     }
     function getFormDetailElems() {
         var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
+        $(detailCntnr).append(getExitButton());
         $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
         $(detailCntnr).append(initDetailDiv('pub'));
         $(detailCntnr).append(initDetailDiv('cit'));
@@ -278,7 +269,6 @@ $(document).ready(function(){
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
-        focusCombobox('#Publication-sel');
     }      
 /*------------------- Shared Methods -------------------------------------------------------------*/
     /** Builds the form elem container. */
@@ -290,15 +280,16 @@ $(document).ready(function(){
         return form;
     }
     /**
-     * Inits the selectize comboboxes, adds/modifies event listeners, modifies 
-     * field styles, and adds required field elems to the form's config object.  
+     * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
+     * required field elems to the form's config object.  
      */
     function finishFormBuild() {
         initTopFormComboboxes();
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitCrudFormPopup);
-        $('#Notes_row div.field-row').css("width", "933px");   
         addReqElemsToConfg();     
+        focusCombobox('#Publication-sel');
+        enableCombobox('#CitationTitle-sel', false);
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
     function addTaxonFocusListener(role) {
@@ -815,8 +806,7 @@ $(document).ready(function(){
         return buildFormRow("Interaction Tags", elem, "top", false);
     }
     function buildIntNotesField() {
-        var txtElem = buildLongTextArea('interaction', 'Notes')
-        $(txtElem).css("width", "812px"); 
+        var txtElem = buildLongTextArea('interaction', 'Notes');
         return buildFormRow("Notes", txtElem, "top", false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
