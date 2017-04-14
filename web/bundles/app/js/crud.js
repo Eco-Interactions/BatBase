@@ -369,7 +369,7 @@ $(document).ready(function(){
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
         if ($('#sub-form').length !== 0) { return openSubFormError('Publication', null, "sub"); }
-        $('#Publication_row').append(initSubForm(
+        $('#CitationTitle_row').after(initSubForm(
             "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         return { "value": "", "text": "Creating Publication..." };
