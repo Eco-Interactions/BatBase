@@ -94,7 +94,7 @@ span.lbl {
 .waiting {
 	cursor: wait;
 }
-/*--------------- Flex ---------------------*/
+/*-------- Flex ----------*/
 .flex-wrap {
 	flex-wrap: wrap;
 }
@@ -159,7 +159,7 @@ span.lbl {
 	border-top:1px solid #000;
 	justify-content: space-between;
 }
-/* wysiwyg editor */
+/*----------- wysiwyg editor ------------------*/
 .wysiwyg {
 	position: relative;
 }
@@ -184,7 +184,7 @@ span.lbl {
 	background: #1A80E6;
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
-/*-- Header --*/
+/*-------------- Header -------------*/
 #logo-overlay {
 	position: absolute;
 	top: 80px;
@@ -196,7 +196,7 @@ span.lbl {
 	left: 65px;
 	padding-bottom: 20px;
 }
-/*-- Icons --*/
+/*------------- Icons ----------------*/
 .icomag {
 	width: 1.5em;
 	height: auto;
@@ -319,7 +319,8 @@ span.lbl {
     display: list-item;
 }
 /*-------------------------------- Pages -------------------------------------*/
-/*--- Home --- */
+/*-------- Search Database Page styles in search_db.css -------*/
+/*------------------- Home ---------------*/
 #home-pg p {
 	font-size: 1.15em;
 }
@@ -336,14 +337,111 @@ span.lbl {
 }
 #home-pg .first-col { 
 	flex-grow: 1; 
-	/*max-width: 1100px;*/
 	border-right: none;
 	min-width: 715px;
 	padding: 25px 55px 15px 15px; 
 	margin-right: 0;
 }
-/*-------- Search Database styles in search_db.css --------------*/
-/*----------- FOS / Registration Page ---------*/
+/*-- About DB --*/
+#about-db .first-col>ul {
+	margin-left: 1em;
+}
+#about-db .first-col {
+	width: 52%;
+}
+#about-db .second-col {
+	width: 48%;
+}
+.about-db-maps {
+	display: inline-block;
+}
+#db-new-data {
+	margin-left: 15px;
+}
+/*------------- Definitions -----------------*/
+#def-frame h3 {
+	font-size: 1.4em;
+	margin: 15px 0px 10px 0;
+}
+#def-frame .first-col {
+	width: 150%;
+}
+#def-frame>div>div {
+	padding: 0 1em 1em 1em;
+}
+#def-frame p {
+	font-size: 1em;
+	padding: .3em;
+	margin: 0 1em 0 1em;
+}
+#def-frame li, #future-dev-ul li {
+	margin: 0 1.5em 0 1.2em;
+	font-size: 1em;
+	padding: .5em .5em .5em 0;
+}
+.def-ol>li {
+    list-style: decimal;
+    display: list-item;
+    margin-left: .5em;
+    margin-right: 2em;
+}
+#def-frame .disc-list {
+	margin: 0 0 0 1.5em;
+}
+#def-frame .circle-list {
+	margin: 0 0 0 2.5em;
+}
+#caveats>li.cav, #db-field-list>li.cav, #future-dev-ul>li {
+    list-style: disc;
+    display: list-item;
+    margin-left: 3em;
+    margin-right: 2em;
+}
+#db-field-list a {
+	margin-left: 0;
+}
+/*--------------- About Project ---------------------*/
+#about-pg .second-col {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+#about-pg .first-col {
+	width: 200%;
+}
+/*--- Team ---*/
+#team-hdr {
+	text-align: center;
+	margin: 2em auto 2em auto;
+	font-size: 1.2em;
+}
+.bio-img {
+	height: 200px;
+	width: 160px;
+	float: left;
+	margin: 0 1em 1.5em 0;
+	box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
+}
+#team-sect .second-col {
+	width: 272em;
+}
+#team-sect .four-col-outer>div.fourth-col {
+	width: 220px;
+	flex-shrink: 0;
+}
+
+/*-------------------- Future Dev -----------------*/
+#future-dev-pg .first-col {
+	width: 64%;
+}
+#future-dev-pg ul {
+	margin-left: 1em;
+}
+#articles-add{
+	height: 100vh;
+	width: 100vw;
+}
+/*----------- FOS / Registration Page -------------*/
 .fos_user_user_show {
 	margin-top: 1em;
 }
@@ -417,7 +515,7 @@ label[for=fos_user_registration_form_about_me] {
 #reg-submit, #reg-tos {
     cursor: pointer;
 }
-/*------- Feedback ----------------*/
+/*--------------- Feedback --------------------------*/
 #feedback-popup {
 	background-color: #a2dadd;
 	box-shadow: 5px 5px 7px rgba(0,0,0,0.6);
@@ -457,105 +555,4 @@ label[for=fos_user_registration_form_about_me] {
 #feedback-popup>button:hover {
 	background: #2D7853;
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
-}
-/*-- Future Dev --*/
-#future-dev-pg .first-col {
-	width: 64%;
-}
-#future-dev-pg ul {
-	margin-left: 1em;
-}
-#articles-add{
-	height: 100vh;
-	width: 100vw;
-}
-/*-- About --*/
-#about-pg .second-col {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-}
-#about-pg .first-col {
-	width: 200%;
-}
-
-/*-- About DB --*/
-#about-db .first-col>ul {
-	margin-left: 1em;
-}
-#about-db .first-col {
-	width: 52%;
-}
-#about-db .second-col {
-	width: 48%;
-}
-.about-db-maps {
-	display: inline-block;
-}
-#db-new-data {
-	margin-left: 15px;
-}
-/*-- Definition --*/
-#def-frame p {
-}
-#def-frame h3 {
-	font-size: 1.4em;
-	margin: 15px 0px 10px 0;
-}
-#def-frame .first-col {
-width: 150%;
-}
-#def-frame>div>div {
-	padding: 0 1em 1em 1em;
-}
-#def-frame p {
-	font-size: 1em;
-	padding: .3em;
-	margin: 0 1em 0 1em;
-}
-#def-frame li, #future-dev-ul li {
-	margin: 0 1.5em 0 1.2em;
-	font-size: 1em;
-	padding: .5em .5em .5em 0;
-}
-.def-ol>li {
-    list-style: decimal;
-    display: list-item;
-    margin-left: .5em;
-    margin-right: 2em;
-}
-#def-frame .disc-list {
-	margin: 0 0 0 1.5em;
-}
-#def-frame .circle-list {
-	margin: 0 0 0 2.5em;
-}
-#caveats>li.cav, #db-field-list>li.cav, #future-dev-ul>li {
-    list-style: disc;
-    display: list-item;
-    margin-left: 3em;
-    margin-right: 2em;
-}
-#db-field-list a {
-	margin-left: 0;
-}
-/*--- Team ---*/
-#team-hdr {
-	text-align: center;
-	margin: 2em auto 2em auto;
-	font-size: 1.2em;
-}
-.bio-img {
-	height: 200px;
-	width: 160px;
-	float: left;
-	margin: 0 1em 1.5em 0;
-	box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
-}
-#team-sect .second-col {
-	width: 272em;
-}
-#team-sect .four-col-outer>div.fourth-col {
-	width: 220px;
-	flex-shrink: 0;
 }

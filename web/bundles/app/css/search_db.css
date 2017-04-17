@@ -74,7 +74,7 @@
 	height: 868px;
 	border: black 1px solid;
 }
-.grid-edit {
+.grid-edit { 
 	height: 22px;
 	width: 20px;
 	position: relative;
@@ -104,7 +104,7 @@
 .row-red {
 	background-color: rgba(255,0,0,.15) !important; /* red */
 }
-/*-- Search Tips Popup --*/
+/*--------- Search Tips Popup -----------------*/
 #tips-close-bttn {
 	position: relative;
 	margin-top: .5em;
@@ -122,7 +122,7 @@
 	margin: auto;
 	overflow-y: scroll;
 }
-/*---Buttons---*/
+/*------- Buttons ---------------*/
 #filter-bttns {
 	display: inline-flex;
 	justify-content: space-between;
@@ -144,7 +144,7 @@ button[name="createbttn"] {
 	align-self: flex-end;
 	margin-right: 7px;
 }
-/*-- Walkthrough --*/
+/*----- Walkthrough ------*/
 .intro-tips {
 	width: 420px;
 	text-align: justify;
@@ -152,7 +152,7 @@ button[name="createbttn"] {
 a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	cursor: pointer;
 }
-/*-- Search Grid Popup --*/
+/*------------ Search Grid Popup -----------------*/
 #grid-popup {
     background: #FFF;
 	display: none;
@@ -180,7 +180,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     height: 85%;
     opacity: 0;
 }
-/*----- Database CRUD Popup -----*/
+/*-------------------------- Database CRUD Popup -----------------------------*/
 .crud-popup {
 	height: 88vh;
 	flex-grow: 0;
@@ -229,7 +229,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 .det-div div {
 	padding: .5em 0 0 .5em;
 }
-/* -- Form Styles -- */
+/*------------ Form Styles ---------------*/
 #top-form {
 	font-size: 1em;
 	flex-wrap: wrap;
@@ -359,7 +359,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 
-	/*----- Database CRUD Popup -----*/
+	/*--------------- Database CRUD Popup -------------*/
 	#b-overlay .crud-popup {
 		width: 1380px;
 		padding: 15px;
