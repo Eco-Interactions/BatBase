@@ -1464,7 +1464,7 @@
         var domain = focusStorage.curDomain || false;  
         var taxonLvlPrefix = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
-        return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
+        return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
                 {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
@@ -1474,23 +1474,28 @@
                 {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-                {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
+                {headerName: "Edit", field: "edit", width: 50, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
                 {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-                {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
-                {headerName: "Citation", field: "citation", width: 100, cellRenderer: addToolTipToCells},
-                {headerName: "Location Description", field: "location", width: 175, cellRenderer: addToolTipToCells },
+                {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
+                {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells },
                 {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-                {headerName: "Elevation", field: "elev", width: 150, hide: true },
-                {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
-                {headerName: "Latitude", field: "lat", width: 150, hide: true },
-                {headerName: "Longitude", field: "long", width: 150, hide: true },
+                // {headerName: "Elevation", field: "elev", width: 150, hide: true },
+                // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
+                // {headerName: "Latitude", field: "lat", width: 150, hide: true },
+                // {headerName: "Longitude", field: "long", width: 150, hide: true },
                 // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
-                {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
+                {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+    }
+    /** Returns the initial width of the tree column according to role and screen size. */
+    function getTreeWidth() { 
+        var offset = ['admin', 'super', 'editor'].indexOf(userRole) === -1 ? 0 : 50;
+        return ($(window).width() > 1500 ? 340 : 273) - offset;
     }
     /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
     function onBeforeSortChanged() {                                            

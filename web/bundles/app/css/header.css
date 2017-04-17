@@ -1,5 +1,5 @@
 #sticky-hdr {
-    width: 1500px;
+    max-width: 100%;
 }
 #tbl-ctrl-div {
     position: absolute;

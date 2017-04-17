@@ -29,7 +29,7 @@ button {
 form input, form select, form textarea {
     font-size: 1em;
     padding: .2em;
-    margin: .5em;
+    margin: .5em .5em .5em 0;
 }
 form textarea {
     vertical-align: top;
@@ -124,16 +124,13 @@ span.lbl {
 	top: 510px;
 }
 #detail-block {
-	margin: 1em 0 2em 1em;
+	margin: 1em .5em 2em 1em;
 }
 #detail-block h4 {
-	margin: 15px 0 0 0;
+	margin-top: 15px;
 }
 #detail-block h5 {
-	margin: 0 0 5px 0;
-}
-.top-pgs {
-	/*margin-left: 1em;*/
+	margin-bottom: 5px;
 }
 .top-pgs h3 {
 	font-size: 1.2em;
@@ -291,7 +288,7 @@ span.lbl {
 .tos-popup {
 	height: 88vh;
 	width: 44vw;
-	top: 22px;
+	top: 4vh;
 	margin: auto;
 	overflow-y: scroll;
 	padding: 2em;
@@ -362,10 +359,7 @@ span.lbl {
 }
 #about-db-maps, #db-new-data {
 	height: 552px;
-	width: 740px;
-}
-#db-new-data {
-	margin-left: 15px;
+	width: 736px;
 }
 /*------------- Definitions -----------------*/
 #def-frame h3 {
@@ -376,7 +370,7 @@ span.lbl {
 	width: 150%;
 }
 #def-frame>div>div {
-	padding: 0 1em 1em 1em;
+	padding: 0 1em 1em 0;
 }
 #def-frame p {
 	font-size: 1em;
@@ -416,7 +410,7 @@ span.lbl {
 	justify-content: space-between;
 }
 #about-pg .first-col {
-	width: 200%;
+	width: 143%;
 }
 /*--- Team ---*/
 #team-hdr {
@@ -573,12 +567,5 @@ label[for=fos_user_registration_form_about_me] {
 	#about-db-maps, #db-new-data {
 		height: 552px;
 		width: 690px;
-	}
-	#db-new-data {
-		margin-left: 0;
-	}
-	/*--- About Project Pg ---*/
-	#about-pg .first-col {
-		width: 143%;
 	}
 }
