@@ -13,7 +13,7 @@ $(function(){
 			structure: {
 				container: {
 					id: "masthead",
-					width: 1500,
+					width: 1400,
 					height: 423
 				},
 				messages: getMsgPos()

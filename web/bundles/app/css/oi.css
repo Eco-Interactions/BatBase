@@ -124,13 +124,16 @@ span.lbl {
 	top: 510px;
 }
 #detail-block {
-	margin-bottom: 20px;
+	margin: 1em 0 2em 1em;
 }
 #detail-block h4 {
 	margin: 15px 0 0 0;
 }
 #detail-block h5 {
 	margin: 0 0 5px 0;
+}
+.top-pgs {
+	/*margin-left: 1em;*/
 }
 .top-pgs h3 {
 	font-size: 1.2em;
@@ -149,9 +152,9 @@ span.lbl {
 .top-pgs .second-col {
 	margin: 0 20px 0 5px;
 }
-.top-pgs .first-col {
+/*.top-pgs .first-col {
 	width: 1800px;
-}
+}*/
 #footer {
 	font-size: 1em;
 	width:100%;
@@ -279,14 +282,16 @@ span.lbl {
     height: 100vh;
 }
 #b-overlay-popup {
+	position: relative;
     background: WhiteSmoke;
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
     z-index: 750;
     border-radius: 5px;
 }
 .tos-popup {
-	height: 666px;
-	width: 666px;
+	height: 88vh;
+	width: 44vw;
+	top: 22px;
 	margin: auto;
 	overflow-y: scroll;
 	padding: 2em;
@@ -354,6 +359,10 @@ span.lbl {
 }
 .about-db-maps {
 	display: inline-block;
+}
+#about-db-maps, #db-new-data {
+	height: 552px;
+	width: 740px;
 }
 #db-new-data {
 	margin-left: 15px;
@@ -555,4 +564,21 @@ label[for=fos_user_registration_form_about_me] {
 #feedback-popup>button:hover {
 	background: #2D7853;
 	box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
+}
+@media screen and (max-width: 1500px) { 
+	#pg-container {
+		max-width: 1400px;
+	}
+	/*--- About DB Pg ---*/
+	#about-db-maps, #db-new-data {
+		height: 552px;
+		width: 690px;
+	}
+	#db-new-data {
+		margin-left: 0;
+	}
+	/*--- About Project Pg ---*/
+	#about-pg .first-col {
+		width: 143%;
+	}
 }
