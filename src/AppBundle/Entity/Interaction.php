@@ -93,7 +93,7 @@ class Interaction
     private $object;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="interactions")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="interactions")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $tags;
