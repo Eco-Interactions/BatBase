@@ -145,14 +145,16 @@ $(document).ready(function(){
      * crud form interface. 
      * -- Property descriptions:
      * > action - eg, Create, Edit.
+     * > editing - Stores the id of the entity record being edited.
      * > forms - Container for form-specific params 
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
      */
-    function initCrudParams(action) {                                           //console.log("####cPs = %O", cParams)
+    function initCrudParams(action, id) {                                       //console.log("####cPs = %O", cParams)
         cParams = {
             action: action,
+            editing: id,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
@@ -183,7 +185,7 @@ $(document).ready(function(){
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form ----------------------------------------------------------*/
     function editInteraction(id) {                                              console.log("editing ", id);
-        initCrudParams("edit");
+        initCrudParams("edit", id);
         initInteractionCrudWindow("edit");
         initEditForm(id);
     }
@@ -192,9 +194,9 @@ $(document).ready(function(){
      * the record. The all fields for the interaction can be modified and saved 
      * within the form. 
      */
-    function initEditForm(id) {                                                 console.log("initEditForm");
+    function initEditForm(id) {                                                 //console.log("initEditForm");
         var formCntnr = buildCrudFormCntnr();
-        var formFields = buildTopFormFields();                                  //console.log("formFields = %O", formFields);
+        var formFields = buildTopFormFields('edit');                            //console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
@@ -202,7 +204,7 @@ $(document).ready(function(){
     }      
     /** Fills form with existing data for the interaction. */
     function fillExistingData(id) {
-        var intRcrd = getInteractionRecord(id);                                 console.log("intRcrd = %O", intRcrd);
+        var intRcrd = getInteractionRecord(id);                                 //console.log("intRcrd = %O", intRcrd);
         for (var prop in intRcrd) {
             if (intRcrd.hasOwnProperty(prop) &&  prop !== "id") {
                 fillIntField(prop, intRcrd);
@@ -265,7 +267,7 @@ $(document).ready(function(){
      */
     function initCreateForm() {
         var formCntnr = buildCrudFormCntnr();
-        var formFields = buildTopFormFields();                                  //console.log("formFields = %O", formFields);
+        var formFields = buildTopFormFields('create');                          //console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
@@ -305,14 +307,14 @@ $(document).ready(function(){
     }
 /*-------------- Top Form Helpers ----------------------------------------------------------------*/
     /** Builds and returns all top-form elements. */
-    function buildTopFormFields() {
+    function buildTopFormFields(action) {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
             buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
             buildIntTagField, buildIntNotesField ]; 
         var fields = fieldBuilders.map(function(builder) {
             return builder();
         });
-        return fields.concat(buildFormBttns("Interaction", "top"));
+        return fields.concat(buildFormBttns("Interaction", "top", action));
     }
     /*-------------- Publication ---------------------------------------------*/
     /**
@@ -1449,12 +1451,13 @@ $(document).ready(function(){
      * specific to their form container @getBttnEvents, and a left spacer that 
      * pushes the buttons to the bottom right of their form container.
      */
-    function buildFormBttns(entity, level) {
+    function buildFormBttns(entity, level, action) {
+        var bttn = { create: "Create", edit: "Update" };
         var events = getBttnEvents(entity, level);                              //console.log("events = %O", events);
         var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
         var spacer = $('<div></div>').css("flex-grow", 2);
         var submit = _util.buildElem("input", { id: level + "-submit", 
-            class: "ag-fresh grid-bttn", type: "button", value: "Create "+entity});
+            class: "ag-fresh grid-bttn", type: "button", value: bttn[action]+" "+entity});
         var cancel = _util.buildElem("input", { id: level +"-cancel", 
             class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
         $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
@@ -1549,9 +1552,7 @@ $(document).ready(function(){
             var input = elem.children[1].children[1];
             if ($(input).data("inputType")) { 
                 getInputVals(fieldName, input, $(input).data("inputType")); 
-            } else if (input.value) {
-                formVals[fieldName] = input.value; 
-            }
+            } else { formVals[fieldName] = input.value || null; }
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {
@@ -1779,6 +1780,7 @@ $(document).ready(function(){
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, cParams.action);
+        if (cParams.editing) { formData.intId = cParams.editing; }
         formData.coreEntity = coreEntity;
         cParams.ajaxFormLvl = formLvl;
         toggleWaitOverlay(true);
