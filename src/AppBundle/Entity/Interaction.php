@@ -459,6 +459,20 @@ class Interaction
     }
 
     /**
+     * Get an array of tag ids.
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        $tagIds = [];
+        if ($this->tags) { 
+            foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
+        }
+        return $tagIds;
+    }
+    
+    /**
      * Set createdBy user.
      *
      * @return \AppBundle\Entity\User

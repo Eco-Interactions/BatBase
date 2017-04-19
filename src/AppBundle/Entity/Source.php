@@ -562,7 +562,7 @@ class Source
      *
      * @return array 
      */
-    public function getTagIds()
+    public function getTagData()
     {
         if ($this->tags) {
             $tagIds = [];
@@ -574,6 +574,20 @@ class Source
             }
             return $tagIds;
         }
+    }
+
+    /**
+     * Get an array of tag ids.
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        $tagIds = [];
+        if ($this->tags) {
+            foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
+        }
+        return $tagIds;
     }
 
     /**
