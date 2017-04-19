@@ -1565,7 +1565,7 @@
         var name = params.data.name || null; 
         var id = params.data.id;
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
-            class="grid-edit" title="Edit Interaction" alt="Edit Interaction">`;
+            class="grid-edit" title="Edit Interaction `+id+`" alt="Edit Interaction">`;
         $('#search-grid').off('click', '#edit'+id);
         $('#search-grid').on('click', '#edit'+id, eif.crud.editInt.bind(null, id));
         return name === null ? editPencil : null;
