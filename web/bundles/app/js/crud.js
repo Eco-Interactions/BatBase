@@ -271,7 +271,12 @@ $(document).ready(function(){
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
+        finishCreateFormBuild();
     }      
+    function finishCreateFormBuild() {
+        focusCombobox('#Publication-sel');
+        enableCombobox('#CitationTitle-sel', false);
+    }
 /*------------------- Shared Methods -------------------------------------------------------------*/
     /** Builds the form elem container. */
     function buildCrudFormCntnr() {
@@ -290,8 +295,6 @@ $(document).ready(function(){
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitCrudFormPopup);
         addReqElemsToConfg();     
-        focusCombobox('#Publication-sel');
-        enableCombobox('#CitationTitle-sel', false);
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
     function addTaxonFocusListener(role) {
