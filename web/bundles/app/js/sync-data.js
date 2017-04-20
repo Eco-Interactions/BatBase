@@ -251,10 +251,10 @@
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
     function removeAndUpdateAffectedData(data) {
-        if (!$.isEmptyObject(data.coreEdits)) { 
+        if (data.coreEdits.length > 1) { 
             updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
         }
-        if (!$.isEmptyObject(data.detailEdits)) { 
+        if (data.detailEdits.length > 1) { 
             updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
         }
     }

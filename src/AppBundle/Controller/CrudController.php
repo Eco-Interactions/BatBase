@@ -46,7 +46,8 @@ class CrudController extends Controller
         $returnData = new \stdClass; 
         $returnData->core = $coreName;
         $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = new \stdClass; 
+        $returnData->coreEdits = $this->getEditsObj(false); 
+        $returnData->detailEdits = $this->getEditsObj(false); 
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -78,8 +79,8 @@ class CrudController extends Controller
         $returnData = new \stdClass; 
         $returnData->core = $coreName;
         $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = new \stdClass;
-        $returnData->detailEdits = new \stdClass;
+        $returnData->coreEdits = $this->getEditsObj(true); 
+        $returnData->detailEdits = $this->getEditsObj(true);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -89,6 +90,13 @@ class CrudController extends Controller
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Helpers -------------------------------------*/
+    /** Builds and returns an object that will track any edits made to the entity. */
+    private function getEditsObj($editing)
+    {
+        $edits = new \stdClass;
+        $edits->editing = $editing;
+        return $edits;
+    }
     /*---------- Detail Entity ------------------------------------------*/
     /** If the core-entity is 'Source', process any detail-entity data. */
     private function handleDetailEntity($cFormData, $dFormData, &$returnData, $em)
@@ -184,7 +192,7 @@ class CrudController extends Controller
     }
     private function handleContributors($ary, &$entity, &$edits, &$em)
     {
-        // $cur = $entity->getContributors(); //Get Contrib ids
+        $cur = $entity->getContributors(); //Get Contrib ids
         // $this->removeFromCollection('Contributor', $cur, $ary, $entity, $edits, $em);
         $this->addContributors($ary, $cur, $entity, $em);
     }
@@ -238,7 +246,7 @@ class CrudController extends Controller
             $collEnt = $this->getEntity($field, $id, $em);
             $entity->$addField($collEnt);
         }
-        if (count($added)) {
+        if ($edits->editing && count($added)) {
             $edits->$field = property_exists($edits, $field) ? 
                 array_merge($edits->$field, ['added' => $added]) : ['added' => $added]; 
         }
@@ -255,7 +263,7 @@ class CrudController extends Controller
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
 
-        $edits->$field = $curVal;
+        if ($edits->editing) { $edits->$field = $curVal; }
         $entity->$setField($newVal);
     }
     /**
@@ -270,7 +278,7 @@ class CrudController extends Controller
         $curVal = $entity->$getField() ? $entity->$getField()->getId() : null;
         if ($curVal === $newVal->getId()) { return; }
 
-        $edits->$field = $curVal;
+        if ($edits->editing) { $edits->$field = $curVal; }
         $entity->$setField($newVal);
     }
     /*---------- Flush and Return Data ---------------------------------------*/
