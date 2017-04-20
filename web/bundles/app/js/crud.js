@@ -1006,7 +1006,7 @@ $(document).ready(function(){
         var hdr = _util.buildElem(
             "p", { "text": "New "+_util.ucfirst(formEntity), "id": formLvl+"-hdr" });
         var subForm = buildSubForm(formEntity, fieldVals, formLvl, selId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl));
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, "create"));
         $(subFormContainer).append([hdr].concat(subForm));
         cParams.forms[formLvl].pSelId = selId; 
         enableCombobox(selId, false)
@@ -1822,34 +1822,44 @@ $(document).ready(function(){
      * stored core records in the cParams object. Exit's the successfully submitted 
      * form @exitFormAndSelectNewEntity.  
      */
-    function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    
-        var data = parseData(ajaxData.results);                                 console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
-        eif.syncData.update(data);
-        updateStoredCrudParamsData(data);
+    function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
+        var data = parseData(ajaxData.results);
+        storeData(data);
         handleFormComplete(data);
         toggleWaitOverlay(false);
     }
+    /** Calls the appropriate data storage method and updates cParams. */  
+    function storeData(data) {
+        eif.syncData.update(data);
+        updateStoredCrudParamsData(data);
+    }
     /** Updates the core records in the global crud params object. */
-    function updateStoredCrudParamsData(data) {  console.log("cParams after interaction created. %O", cParams);
+    function updateStoredCrudParamsData(data) {                                 //console.log("cParams after interaction created. %O", cParams);
         cParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     function handleFormComplete(data) {
         var formLvl = cParams.ajaxFormLvl;
-        if (formLvl === "top") { return resetInteractionForm(); }              
+        if (formLvl === "top") { return handleInteractionFormComplete(); }              
         exitFormAndSelectNewEntity(data);
     }
     /*------------------ Top-Form Success Methods ----------------------------*/
-    /** Resets the interactions form leaving only the values that were pinned. */
+    /** Resets the interactions form leaving only the pinned values. */
+    function handleInteractionFormComplete() {
+        if (!cParams.editing) { return resetInteractionForm(); }
+        showSuccessMsg("Interaction update successful.");
+    }
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
-        showSuccessMsg();
+        showSuccessMsg("New Interaction successfully created.");
         initCrudParams("create");
         resetTopForm(vals);
     }
     /** Shows a form-submit success message at the top of the interaction form. */
-    function showSuccessMsg() {
-        $('#crud-hdr p')[0].innerHTML = "New Interaction successfully created."; 
-        window.setTimeout(function() {$('#crud-hdr p')[0].innerHTML = ""}, 2000);
+    function showSuccessMsg(msg) {
+        $('#crud-hdr p')[0].innerHTML = msg;
+        window.setTimeout(function() {
+            if ($('#crud-hdr p').length) {$('#crud-hdr p')[0].innerHTML = ""}
+        }, 2500);
     }
     /** Returns an obj with the form fields and either their pinned values or false. */
     function getPinnedFieldVals(pins) {

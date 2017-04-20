@@ -159,7 +159,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 #grid-popup {
     background: #FFF;
 	display: none;
-    /*position: relative;*/
+    position: relative;
     z-index: 200;
     text-align: center;
     font-size: 20px;
