@@ -38,7 +38,7 @@ $(document).ready(function(){
     /**
      * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
-    function initInteractionCrudWindow(action) {                                console.log("***initInteraction*** - ", action);
+    function initInteractionCrudWindow(action) {                                //console.log("***initInteraction*** - ", action);
         var hdrs = { create: "New", edit: "Editing" };
         var views = { create: initCreateView, edit: Function.prototype };
         showCrudFormPopup(hdrs[action]);
@@ -573,8 +573,8 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectSelect() {                                              //console.log("initSubjectSelect val = %O", $('#Subject-sel').val())
-        setTaxonParams(2);
         if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Subject'); }  
+        setTaxonParams('Subject', 2);
         $('#Subject_row').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");           
@@ -588,8 +588,8 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
-        setTaxonParams();
         if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Object'); }
+        setTaxonParams('Object');
         $('#Object_row').append(initSubForm(
             "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
         initSubFormComboboxes("object");             
@@ -625,18 +625,22 @@ $(document).ready(function(){
         enableCombobox('#Subject-sel');
     }
     /** When the Object select-form is exited, the combo is reenabled. */
-    function enableObjField() { console.log("enabling object field.")
+    function enableObjField() { 
         enableCombobox('#Object-sel');
     }
     /** Adds the realm name and id, along with all taxon levels, to cParams. */
-    function setTaxonParams(id) {
+    function setTaxonParams(role, id) {  
         var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
         if (!id) { id = cParams.objectRealm || 3; }
         cParams.taxon = { 
             realm: realmMap[id], 
             realmId: id,
             lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"]
-        };
+        }; 
+        cParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
+            { val: $('#'+role+'-sel').val(),
+              text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
+            }; 
     }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -668,7 +672,7 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val))) { return; }          
         if ($('#realm-lvls').length) { $('#realm-lvls').remove(); }  
         var realms = { 3: "plant", 4: "arthropod" };
-        setTaxonParams(val);
+        setTaxonParams('Object', val);
         cParams.objectRealm = val;
         buildAndAppendRealmElems(realms[val], val);
         initSubFormComboboxes(realms[val]);  
@@ -692,12 +696,20 @@ $(document).ready(function(){
         $('#sub-submit').unbind("click").click(selectTaxon);
         $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
     }
-    function getTaxonExitButton() {
-        var func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
+    function getTaxonExitButton(role) {
         var bttn = getExitButton();
         bttn.id = "exit-sub-form";
-        $(bttn).unbind("click").click(exitForm.bind(null, '#sub-form', 'sub', false));
+        $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
         return bttn;
+    }
+    /** Exits sub form and restores any previous taxon selection. */
+    function exitTaxonSelectForm(role) {
+        exitForm('#sub-form', 'sub', false);
+        if (cParams.taxon.prevSel) {
+            updateComboboxOptions('#'+role+'-sel', { 
+                value: cParams.taxon.prevSel.val, text: cParams.taxon.prevSel.text });
+            $('#'+role+'-sel')[0].selectize.addItem(cParams.taxon.prevSel.val);
+        }
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
