@@ -409,8 +409,16 @@ $(document).ready(function(){
             'Publication Vol': citRcrd.publicationVolume || '',            
             'Publication Issue': citRcrd.publicationIssue || '',            
             'Publication Pages': citRcrd.publicationPages || '',            
+            'Tags': getTags(srcRcrd),
             'Authors': getAuthorNames(srcRcrd),
         };
+    }
+    function getTags(srcRcrd) {
+        var str = [];
+        if (srcRcrd.tags.length) {
+            srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
+        }
+        return str.join(', ');
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
@@ -518,7 +526,7 @@ $(document).ready(function(){
         addDataToDetailPanel('loc', propObj);
     }
     /** Returns an object with selected location's data. */
-    function getLocDetailDataObj(locRcrd) {  console.log("locRcrd = %O", locRcrd);
+    function getLocDetailDataObj(locRcrd) {  
         return {
             'Name': locRcrd.displayName, 
             'Description': locRcrd.description || '',            
