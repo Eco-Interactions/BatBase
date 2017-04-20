@@ -570,8 +570,8 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectSelect() {                                              //console.log("initSubjectSelect val = %O", $('#Subject-sel').val())
-        if ($('#sub-form').length !== 0) { return openSubFormError('Subject', null, "sub"); }  
         setTaxonParams(2);
+        if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Subject'); }  
         $('#Subject_row').append(initSubForm(
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");           
@@ -585,12 +585,17 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
-        if ($('#sub-form').length !== 0) { return openSubFormError('Object', null, "sub"); }
         setTaxonParams();
+        if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Object'); }
         $('#Object_row').append(initSubForm(
             "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
         initSubFormComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(cParams.taxon.realmId);
+    }
+    /** Note: Taxon fields often fire their focus event twice. */
+    function errIfAnotherSubFormOpen(role) {
+        if (cParams.forms['sub'].entity === _util.lcfirst(role)) {return;}
+        openSubFormError(role, null, "sub");
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
