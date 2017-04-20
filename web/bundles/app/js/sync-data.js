@@ -20,7 +20,7 @@
         return new Date().today() + " " + new Date().timeNow();
     }
 /*-------------- Stored Data Methods -----------------------------------------*/
-    /*------------------Sync Updated Data ------------------------------------*/
+    /*------------------ Page Load Data Sync ---------------------------------*/
     /**
      * On search page load, the system updatedAt flag is compared against the page's. 
      * If there they system data has updates more recent than the last sync, the 
@@ -84,7 +84,7 @@
             entityHndlr(_util.lcfirst(entity), rcrds[id]);
         }
     }
-    /*------------------ Update Form-Data  -----------------------------------*/
+    /*------------------ Update Submitted Form Data --------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
      * all relevant stored data. The core-entity data is processed @updateCoreEntityData. 
@@ -96,19 +96,18 @@
         if (data.detailEntity) { 
             updateDetailEntityData(data.detail, data.detailEntity);
         }
+        removeAndUpdateAffectedData(data);
         storeData('pgDataUpdatedAt', getCurrentDate());
     }
-    /*------------------ Entity Storage Methods ------------------------------*/
-    /**
-     * Updates stored-data props related to a core-entity record with new data.
-     */
+    /*------------------ Add-to-Storage Methods ------------------------------*/
+    /** Updates stored-data props related to a core-entity record with new data. */
     function updateCoreEntityData(entity, rcrd) {                               //console.log("Updating Core entity. %s. %O", entity, rcrd);
-        var dataProps = getDataProps(entity, rcrd);
-        updateDataProps(dataProps, entity, rcrd);
+        var propHndlrs = getAddDataHndlrs(entity, rcrd);
+        updateDataProps(propHndlrs, entity, rcrd);
         updateCoreData(entity, rcrd);
     }
-    /** Returns an object of related data properties to update. */
-    function getDataProps(entity, rcrd) {
+    /** Returns an object of related data properties and their update methods. */
+    function getAddDataHndlrs(entity, rcrd) {
         var type = getEntityType(entity, rcrd);                                 //console.log("type = ", type);
         var update = {
             'source': {
@@ -121,7 +120,7 @@
             'interaction': {
                 'location': addInteractionToEntity, 'source': addInteractionToEntity, 
                 'subject': addInteractionRole, 'object': addInteractionRole, 
-                'interactionType': addToTypeProp, 
+                'interactionType': addToTypeProp, 'tag': addToTagProp
             },
             'location': {
                 'location': addToParentRcrd, 'habitatType': addToTypeProp, 
@@ -225,17 +224,16 @@
     function addInteractionToEntity(prop, rcrd, entity) {
         var rcrds = _util.getDataFromStorage(prop);                             //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
         var storedEntity = rcrds[rcrd[prop]];
-        storedEntity.interactions.push(rcrd.id);
+        addIfNewRcrd(storedEntity.interactions, rcrd.id);
         storeData(prop, rcrds);
     }
     /** Adds the Interaction to the taxon's subject/objectRole collection.  */
     function addInteractionRole(prop, rcrd, entity) {  
         var taxa = _util.getDataFromStorage("taxon");                           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
         var taxon = taxa[rcrd[prop]];
-        taxon[prop+"Roles"].push(rcrd.id);
+        addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);        
     }
-    /*----------------- Entity Specific Update Methods -----------------------*/
     /** When a Publication or Citation have been updated, update contribution data. */
     function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
         if (rcrd.contributors.length > 0) { 
@@ -250,7 +248,71 @@
         });
         storeData('source', srcObj);
     }
-    /*------------------Init Stored Data Methods----------------------------*/
+    /*------------ Remove-from-Storage Methods -------------------------------*/
+    /** Updates any stored data that was affected during editing. */
+    function removeAndUpdateAffectedData(data) {
+        if (!$.isEmptyObject(data.coreEdits)) { 
+            updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
+        }
+        if (!$.isEmptyObject(data.detailEdits)) { 
+            updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
+        }
+    }
+    /** Updates relational storage props for the entity. */
+    function updateAffectedDataProps(entity, rcrd, edits) {                     //console.log("updateAffectedDataProps called. edits = %O", edits);
+        var propHndlrs = getRmvDataPropHndlrs(entity);
+        for (var prop in edits) {                                               
+            if (prop in propHndlrs) {
+                propHndlrs[prop](prop, rcrd, entity, edits);
+            }
+        }
+    }
+    /** Returns an object with relational properties and their removal handlers. */
+    function getRmvDataPropHndlrs(entity) {
+        var hndlrs = {
+            'interaction': {
+                'location': rmvInteractionFromEntity, 'source': rmvInteractionFromEntity, 
+                'subject': rmvInteractionFromTaxon, 'object': rmvInteractionFromTaxon, 
+                'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
+            },
+        }
+        return hndlrs[entity];
+    }
+    /** Removes the id from the ary. */
+    function rmvIdFromAry(ary, id) {
+        ary.splice(ary.indexOf(id), 1);  
+    }
+    /** Removes the Interaction from the stored entity's collection. */
+    function rmvInteractionFromEntity(prop, rcrd, entity, edits) {
+        var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvInteractionFromEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+        var storedEntity = rcrds[edits[prop]];
+        rmvIdFromAry(storedEntity.interactions, edits[prop]);
+        storeData(prop, rcrds);
+    }
+    /** Removes the Interaction from the taxon's subject/objectRole collection. */
+    function rmvInteractionFromTaxon(prop, rcrd, entity, edits) {  
+        var taxa = _util.getDataFromStorage("taxon");                           //console.log("rmvInteractionFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+        var taxon = taxa[edits[prop]];   
+        rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
+        storeData("taxon", taxa);           
+    }
+    /** Removes the record from the entity-type's stored array.  */
+    function rmvFromTypeProp(prop, rcrd, entity, edits) {
+        var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+        var typeId = edits[prop];
+        rmvIdFromAry(typeObj[typeId][entity+'s'], rcrd.id);
+        storeData(prop, typeObj);
+    }
+    /** Removes a record from the tag's array of record ids. */
+    function rmvFromTagProp(prop, rcrd, entity, edits) {                                 
+        if (edits.tag.removed.length > 0) {
+            var tagObj = _util.getDataFromStorage(prop);                        //console.log("rmvFromTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+            edits.tag.removed.forEach(function(tag){
+                rmvIdFromAry(tagObj[tag][entity+'s'], rcrd.id);                
+            });
+        }
+    }
+/*------------------ Init Stored Data Methods --------------------------------*/
     /**
      * The first time a browser visits the search page all entity data is downloaded
      * from the server and stored locally @ajaxAndStoreAllEntityData. The stored 
@@ -425,51 +487,6 @@
         }  
         return data;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
         $.ajax({

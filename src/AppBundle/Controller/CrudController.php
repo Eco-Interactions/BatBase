@@ -79,6 +79,7 @@ class CrudController extends Controller
         $returnData->core = $coreName;
         $returnData->coreEntity = $coreEntity;
         $returnData->coreEdits = new \stdClass;
+        $returnData->detailEdits = new \stdClass;
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -104,7 +105,6 @@ class CrudController extends Controller
         $dName = $cFormData->rel->sourceType;
         $returnData->detail = $dName;
         if (!$cFormData->hasDetail) { return false; }
-        $returnData->detailEdits = new \stdClass;
         $dData = $dFormData->$dName;
         
         return $this->setDetailData( $dData, $dName, $returnData, $em );
@@ -255,7 +255,7 @@ class CrudController extends Controller
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
 
-        $edits->$field = [ $curVal => $newVal ];
+        $edits->$field = $curVal;
         $entity->$setField($newVal);
     }
     /**
@@ -270,7 +270,7 @@ class CrudController extends Controller
         $curVal = $entity->$getField() ? $entity->$getField()->getId() : null;
         if ($curVal === $newVal->getId()) { return; }
 
-        $edits->$field = [ $curVal => $newVal->getId() ];
+        $edits->$field = $curVal;
         $entity->$setField($newVal);
     }
     /*---------- Flush and Return Data ---------------------------------------*/
