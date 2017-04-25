@@ -1870,14 +1870,16 @@ $(document).ready(function(){
     }
     function handleFormComplete(data) {
         var formLvl = cParams.ajaxFormLvl;
-        if (formLvl === "top") { return handleInteractionFormComplete(); }              
+        if (formLvl === "top") { return handleInteractionFormComplete(data); }              
         exitFormAndSelectNewEntity(data);
     }
     /*------------------ Top-Form Success Methods ----------------------------*/
     /** Resets the interactions form leaving only the pinned values. */
-    function handleInteractionFormComplete() {
+    function handleInteractionFormComplete(data) {
         if (!cParams.editing) { return resetInteractionForm(); }
-        showSuccessMsg("Interaction update successful.");
+        var msg = data.coreEdits.length > 1 ?
+            "Interaction update successful." : "No changes detected."; 
+        showSuccessMsg(msg);
     }
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
