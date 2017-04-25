@@ -53,7 +53,7 @@
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
         showPopUpMsg("Downloading and caching all interaction records. Please " +
-            "allow for a one-time ~25 second download.");   
+            "allow for a ~25 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
