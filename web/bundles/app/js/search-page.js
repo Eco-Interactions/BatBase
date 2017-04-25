@@ -1521,30 +1521,34 @@
     function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {               //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
         if (!a) { return 0; } //Interaction rows are returned unsorted
         if (focusStorage.curFocus !== "taxa") { return alphaSortVals(a, b); }
-        sortTaxonRows(a, b);
+        return sortTaxonRows(a, b);
     } 
     /** Sorts each row by taxonomic rank and then alphabetizes by name. */
     function sortTaxonRows(a, b) {
-        var lvls = ["Kingdom", "Arthropod", "Class", "Order", "Family", "Genus", "Species"];
+        var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
         var aParts = a.split(" ");
         var aLvl = aParts[0];
         var aName = aParts[1];
         var bParts = b.split(" ");
         var bLvl = bParts[0];
         var bName = bParts[1];
-        return aLvl === "Unspecified" ? 0 : compareRankThenName();
+        return  aLvl === "Unspecified" ? -1 : compareRankThenName();  
 
         function compareRankThenName() {
             return sortByRank() || sortByName();
         }
         function sortByRank() {
+            if (lvls.indexOf(aLvl) === -1 || lvls.indexOf(bLvl) === -1) { return alphaSpecies(); }
             return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
                 lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1; 
         }
         function sortByName() {
-            return lvls.indexOf(aLvl) === -1 ? 
-                a.toLowerCase() > b.toLowerCase() ? 1 : -1 :
-                aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
+            return aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
+        }
+        function alphaSpecies() {                                             
+            return lvls.indexOf(aLvl) !== -1 ? 1 :
+                lvls.indexOf(bLvl) !== -1 ? -1 :
+                a.toLowerCase() > b.toLowerCase() ? 1 : -1;
         }
     }  /* End sortTaxonRows */
     function isNotEditor() {  
