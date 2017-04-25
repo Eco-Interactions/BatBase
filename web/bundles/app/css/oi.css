@@ -89,7 +89,7 @@ span.lbl {
 	display: none;
 }
 .invis {
-	display: none;
+	visibility: hidden;
 }
 .waiting {
 	cursor: wait;

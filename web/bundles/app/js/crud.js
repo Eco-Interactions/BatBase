@@ -336,7 +336,7 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
         fillPubDetailPanel(val);
-        $('#Publication_pin').focus();
+        if (!cParams.editing) { $('#Publication_pin').focus(); }
     }
     function onPubClear() {
         clearCombobox('#CitationTitle-sel');
@@ -394,7 +394,7 @@ $(document).ready(function(){
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
         fillCitDetailPanel(val);
-        $('#CitationTitle_pin').focus();
+        if (!cParams.editing) { $('#CitationTitle_pin').focus(); }
     }    
     /** Displays the selected citation's data in the side detail panel. */
     function fillCitDetailPanel(id) {  
@@ -475,7 +475,7 @@ $(document).ready(function(){
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
         fillLocationSelect(cParams.records.location[val]);
-        $('#Country_pin').focus();
+        if (!cParams.editing) { $('#Country_pin').focus(); }
     }
     /*-------------- Location ------------------------------------------------*/
     /**
@@ -520,7 +520,7 @@ $(document).ready(function(){
         var locRcrd = cParams.records.location[val];
         $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
         fillLocDetailPanel(val);
-        $('#Location_pin').focus();
+        if (!cParams.editing) { $('#Location_pin').focus(); }
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillLocDetailPanel(id) {  
@@ -608,7 +608,7 @@ $(document).ready(function(){
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
-        $('#Subject_pin').focus();
+        if (!cParams.editing) { $('#Subject_pin').focus(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -618,7 +618,7 @@ $(document).ready(function(){
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
-        $('#Object_pin').focus();
+        if (!cParams.editing) { $('#Object_pin').focus(); }
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
     function enableSubjField() {
@@ -828,7 +828,7 @@ $(document).ready(function(){
         return buildFormRow("Interaction Type", selElem, "top", true);
     }
     function focusIntTypePin() {
-        $('#InteractionType_pin').focus();
+        if (!cParams.editing) { $('#InteractionType_pin').focus(); }
     }
     function buildIntTagField() {
         var elem = buildTagsElem('interaction', 'Interaction Tags');
@@ -1411,7 +1411,8 @@ $(document).ready(function(){
     }
     function getPinElem(field) {
         var relFields = ["CitationTitle", "Country", "Location", "Publication"];
-        var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: "top-pin"});
+        var pinClasses = 'top-pin' + (cParams.editing ? ' invis' : '');
+        var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: pinClasses});
         $(pin).keypress(function(e){ //Enter
             if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
         });
