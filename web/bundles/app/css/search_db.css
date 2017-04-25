@@ -223,6 +223,10 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 #crud-details h3 {
 	text-align: center;
 	font-size: 1.15em;
+}
+#crud-details p {
+	text-align: center;
+	font-size: 1.15em;
 	margin-bottom:1em;
 }
 .det-div {

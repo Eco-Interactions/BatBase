@@ -31,24 +31,24 @@ $(document).ready(function(){
     function buildSearchPgCrudUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initInteractionCrudWindow.bind(null, "create"));
+        $(bttn).click(initInteractionCrudWindow.bind(null, "create", null));
         $("#opts-col1").append(bttn);
     }
     /*---------- Shared CRUD window methods ----------------------------------*/
     /**
      * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
-    function initInteractionCrudWindow(action) {                                //console.log("***initInteraction*** - ", action);
+    function initInteractionCrudWindow(action, id) {                            //console.log("***initInteraction*** - ", action);
         var hdrs = { create: "New", edit: "Editing" };
         var views = { create: initCreateView, edit: Function.prototype };
-        showCrudFormPopup(hdrs[action]);
+        showCrudFormPopup(hdrs[action], id);
         views[action]();
     }
     /** Builds and shows the popup crud-form's structural elements. */
-    function showCrudFormPopup(actionHdr) {
+    function showCrudFormPopup(actionHdr, id) {
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").append(getCrudWindowElems(actionHdr + " Interaction"));
+        $("#b-overlay-popup").append(getCrudWindowElems(actionHdr + " Interaction", id));
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
     function hideSearchCrudPopup() {
@@ -58,8 +58,8 @@ $(document).ready(function(){
      * Returns the crud window elements - the form and the detail panel.
      * section>(div#crud-main(header, form), div#crud-details(hdr, pub, cit, loc), footer)
      */
-    function getCrudWindowElems(title) {
-        return [getCrudMainForm(title), getFormDetailElems()];
+    function getCrudWindowElems(title, id) {
+        return [getCrudMainForm(title), getFormDetailElems(id)];
     }
     function getCrudMainForm(title) {
         var crudWin = _util.buildElem("div", { "id": "crud-main" });
@@ -87,10 +87,12 @@ $(document).ready(function(){
         $("#b-overlay-popup").removeClass("crud-popup");
         $("#b-overlay-popup").empty();
     }
-    function getFormDetailElems() {
+    function getFormDetailElems(id) {  
+        var intIdStr = id ? "Id: " + id : '';
         var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
         $(detailCntnr).append(getExitButton());
         $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
+        $(detailCntnr).append(_util.buildElem("p", { "text": intIdStr }));
         $(detailCntnr).append(initDetailDiv('pub'));
         $(detailCntnr).append(initDetailDiv('cit'));
         $(detailCntnr).append(initDetailDiv('loc'));
@@ -186,7 +188,7 @@ $(document).ready(function(){
 /*--------------------------- Edit Form ----------------------------------------------------------*/
     function editInteraction(id) {                                              console.log("editing ", id);
         initCrudParams("edit", id);
-        initInteractionCrudWindow("edit");
+        initInteractionCrudWindow("edit", id);
         initEditForm(id);
     }
     /**
