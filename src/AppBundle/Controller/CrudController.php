@@ -73,7 +73,7 @@ class CrudController extends Controller
         
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
         $coreFormData = $formData->$coreName;
-        $coreEntity = $em->getRepository('AppBundle:Interaction')
+        $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
             ->findOneBy(['id' => $formData->intId ]);
         
         $returnData = new \stdClass; 

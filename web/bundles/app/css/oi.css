@@ -288,7 +288,7 @@ span.lbl {
 .tos-popup {
 	height: 88vh;
 	width: 44vw;
-	top: 4vh;
+	top: 2vh;
 	margin: auto;
 	overflow-y: scroll;
 	padding: 2em;
@@ -565,7 +565,7 @@ label[for=fos_user_registration_form_about_me] {
 	}
 	/*--- About DB Pg ---*/
 	#about-db-maps, #db-new-data {
-		height: 552px;
-		width: 690px;
+		height: 545px;
+		width: 686px;
 	}
 }

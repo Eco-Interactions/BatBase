@@ -2227,6 +2227,8 @@
         $('#show-tips').html("Search Tips");
         $('#show-tips').off("click");
         $('#show-tips').click(showTips);
+        $('#b-overlay-popup').removeClass("tips-popup");
+        $('#b-overlay-popup').empty();
     }
     function removeTips() {  //console.log("removeTips called.")
         $('#b-overlay, #b-overlay-popup').css("display", "none");

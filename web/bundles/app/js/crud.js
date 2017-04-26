@@ -52,7 +52,7 @@ $(document).ready(function(){
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
     function hideSearchCrudPopup() {
-        $('#b-overlay-popup, #b-overlay').hide();
+        $('#b-overlay-popup, #b-overlay').css({display: "none"});
     }
     /**
      * Returns the crud window elements - the form and the detail panel.
@@ -146,7 +146,6 @@ $(document).ready(function(){
      * Sets the global cParams obj with the params necessary throughout the 
      * crud form interface. 
      * -- Property descriptions:
-     * > action - eg, Create, Edit.
      * > editing - Stores the id of the entity record being edited.
      * > forms - Container for form-specific params 
      * > formLevels - An array of the form level names/tags/prefixes/etc.
@@ -155,27 +154,28 @@ $(document).ready(function(){
      */
     function initCrudParams(action, id) {                                       //console.log("####cPs = %O", cParams)
         cParams = {
-            action: action,
             editing: id,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
-        initFormLevelParamsObj("interaction", "top", null, false);
+        initFormLevelParamsObj("interaction", "top", null, false, action);
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
      * generating, validating, and submitting sub-form. 
      * -- Property descriptions:
+     * > action - eg, Create, Edit.
      * > entity - Name of this form's entity
      * > pSelId - The id of the parent select of the form.
      * > selElems - Contains all selElems until they are initialized with selectize
      * > reqElems - All required elements in the form.
      * > confg - The form config object used during form building.
      */
-    function initFormLevelParamsObj(entity, level, pSel, formConfg) {           //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
+    function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
         cParams.forms[entity] = level;
         cParams.forms[level] = {
+            action: action,
             entity: entity,
             pSelId: pSel,
             selElems: [], 
@@ -370,6 +370,7 @@ $(document).ready(function(){
         $('#CitationTitle_row').after(initSubForm(
             "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
+        $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
     }
     /*-------------- Citation ------------------------------------------------*/
@@ -551,6 +552,7 @@ $(document).ready(function(){
             "location", "sub", "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
+        $('#DisplayName_row input').focus();
         return { "value": "", "text": "Creating Location..." };
     }
     /** When the Location sub-form is exited, the Country combo is reenabled. */
@@ -581,6 +583,7 @@ $(document).ready(function(){
             "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");           
         finishTaxonSelectUi("Subject");  
+        enableCombobox('#Object-sel', false);
     }
     /**
      * Shows a sub-form to 'Select Object' of the interaction with a combobox for
@@ -591,11 +594,21 @@ $(document).ready(function(){
      */
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Object'); }
-        setTaxonParams('Object');
+        setTaxonParams('Object', getSelectedRealm($('#Object-sel').val()));
         $('#Object_row').append(initSubForm(
             "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
         initSubFormComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(cParams.taxon.realmId);
+        enableCombobox('#Subject-sel', false);
+    }
+    /** 
+     * Returns the realm taxon's id for a selected object taxon. Note: realm ids
+     * are one less than their taxon's id. 
+     */
+    function getSelectedRealm(selVal) {
+        if (!selVal) { return null; }
+        var taxon = cParams.records.taxon[selVal];  
+        return taxon.domain.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role) {
@@ -610,6 +623,7 @@ $(document).ready(function(){
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
+        enableObjField();
         if (!cParams.editing) { $('#Subject_pin').focus(); }
     }
     /**
@@ -620,6 +634,7 @@ $(document).ready(function(){
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
         $('#sub-form').remove();
+        enableSubjField();
         if (!cParams.editing) { $('#Object_pin').focus(); }
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
@@ -817,7 +832,7 @@ $(document).ready(function(){
      * Replaces the options for the level combo. Selects the selected taxon and 
      * its direct ancestors.
      */
-    function repopulateLevelCombo(opts, lvlName, lvl, selLvl, selected) {       //console.log("repopulateLevelCombo for lvl = %s (%s), selLvl = ", lvl, )
+    function repopulateLevelCombo(opts, lvlName, lvl, selLvl, selected) {       //console.log("repopulateLevelCombo for lvl = %s (%s), selLvl = ", lvl, lvlName, selLvl)
         var selApi = $('#'+lvlName+'-sel')[0].selectize;
         updateComboboxOptions('#'+lvlName+'-sel', opts);
         if (lvl in selected) { selApi.addItem(selected[lvl], true); }
@@ -858,6 +873,7 @@ $(document).ready(function(){
             "publisher", "sub2", "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
         enableSubmitBttn("#sub2-submit");
         disableSubmitBttn("#sub-submit");
+        $('#DisplayName_row input').focus();
         return { "value": "", "text": "Creating Publisher..." };
     }
 
@@ -1048,7 +1064,7 @@ $(document).ready(function(){
      */
     function buildSubForm(entity, fieldVals, level, pSel) {
         var formConfg = getSubFormConfg(entity);                                //console.log("typeFormConfg = %O", typeFormConfg)
-        initFormLevelParamsObj(entity, level, pSel, formConfg);
+        initFormLevelParamsObj(entity, level, pSel, formConfg, "create");
         return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
     /**
@@ -1740,7 +1756,7 @@ $(document).ready(function(){
         return coreEntities[entity];
     }
     function getParentEntity(entity) {                                          //console.log("hasParentEntity. entity = %s", entity)
-        var detailEntities = ["author", "citation", "publication"];
+        var detailEntities = ["author", "citation", "publication", "publisher"];
         return detailEntities.indexOf(entity) !== -1 ? "source" : false;
     }
     /** Returns an array of the parent entity's field names. */
@@ -1810,7 +1826,7 @@ $(document).ready(function(){
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
-        var url = getEntityUrl(coreEntity, cParams.action);
+        var url = getEntityUrl(coreEntity, cParams.forms[formLvl].action);
         if (cParams.editing) { formData.intId = cParams.editing; }
         formData.coreEntity = coreEntity;
         cParams.ajaxFormLvl = formLvl;
@@ -1877,7 +1893,7 @@ $(document).ready(function(){
     /** Resets the interactions form leaving only the pinned values. */
     function handleInteractionFormComplete(data) {
         if (!cParams.editing) { return resetInteractionForm(); }
-        var msg = data.coreEdits.length > 1 ?
+        var msg = Object.keys(data.coreEdits).length > 1 ?
             "Interaction update successful." : "No changes detected."; 
         showSuccessMsg(msg);
     }
@@ -1932,7 +1948,8 @@ $(document).ready(function(){
     }
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {
-        initFormLevelParamsObj("interaction", "top", null, getSubFormConfg("interaction"));
+        initFormLevelParamsObj(
+            "interaction", "top", null, getSubFormConfg("interaction"), "create");
         addReqElemsToConfg();
     }
     /*------------------ Sub-Form Success Methods ----------------------------*/

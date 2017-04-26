@@ -189,7 +189,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	flex-grow: 0;
 	width: 1510px;
 	/*width: 1080px;*/
-	padding: 20px;
+	padding: 15px;
 	text-align: left;
 	justify-content: space-between;
 }
@@ -208,7 +208,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #crud-main {
 	padding: 5px 0 0 5px;
-	height: 82vh;
+	height: 83vh;
 	width: 999px;
 	overflow-x: hidden;
 	overflow-y: scroll;
@@ -218,7 +218,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	padding: 0 .5em .5em .5em;
 	overflow-y: scroll;
 	max-width: 31%;
-	/*margin-top: 1.2em;*/
 }
 #crud-details h3 {
 	text-align: center;
