@@ -6,7 +6,6 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
     --FORM--
-        -- Scroll to below where sub-form select dropdowns expand
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
@@ -23,24 +22,20 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
             --Refactor--
     --Asap--
 
+
+
+
 ::Search Page Ui::
-    -- Add a 'control group' (jqueryui) like border around the 'search options' panel. This will aid in documentation and intuitive clarity for editors/users .
 
 ::Form Ui::
-    -- On form submission, change cursor to the waiting circle. 
 
 
+        Common screen resolutions = 1280×800, 1440×900, 1680×1050, 1920×1200 and 2560×1600
+        >> code for ratio?
 
-
-
-
-
-
-
-
-
-
-
+        ###TESTS###
+        > Create
+        > Edit
 
 
 
@@ -61,11 +56,34 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 
 
 
+============ MEETING PREP ==================
+>> 
 
+CHANGES
+>> Interaction detail panel. 
+>> Alpha taxon tree
+(>> Id added to editing panel. )
+
+TODO
+>> Need to write tests to reduce unidentified bugs upon release ~week
+>> Bring focus to the latest interaction created/edited on form close
+>> Add selectize to search options panels??
+>> CSV downloads need to be updated. 
 
 ============ EMAIL ==================
+
+
 TAYLOR:
+
+    --- General ---
+    > I think a 'next' priority is to upgrade the project to at least 2.7, if not 
+        2.8. 2.3 is no longer being maintained.
+    > We should be using assetic to combine and minify our css & js.
+
+
 Notes::
+    ## Change Log ##
+        > Sorting taxon columns by rank and name. 0404 
 Questions:
 ---------------------Next-------------------------------------------------------
 
