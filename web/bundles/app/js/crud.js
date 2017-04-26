@@ -1354,6 +1354,7 @@ $(document).ready(function(){
         var typeObj = _util.getDataFromStorage('locTypeNames');                 
         delete typeObj.Region;
         delete typeObj.Country;
+        delete typeObj.Habitat;
         return buildOptsObj(typeObj, Object.keys(typeObj).sort());
     }
     /** Returns an array of elevation unit options objects. */

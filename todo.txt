@@ -62,6 +62,7 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 CHANGES
 >> Interaction detail panel. 
 >> Alpha taxon tree
+>> Removed habitat from the location type options
 (>> Id added to editing panel. )
 
 TODO
@@ -69,6 +70,10 @@ TODO
 >> Bring focus to the latest interaction created/edited on form close
 >> Add selectize to search options panels??
 >> CSV downloads need to be updated. 
+
+NOTES
+>> It is important when entering a new species to have already selected the taxa at the higher levels.
+>> Location habitats are  
 
 ============ EMAIL ==================
 
