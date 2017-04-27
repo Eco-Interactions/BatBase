@@ -93,7 +93,7 @@ class Interaction
     private $object;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="interactions")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="interactions")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $tags;
@@ -458,6 +458,20 @@ class Interaction
         }
     }
 
+    /**
+     * Get an array of tag ids.
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        $tagIds = [];
+        if ($this->tags) { 
+            foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
+        }
+        return $tagIds;
+    }
+    
     /**
      * Set createdBy user.
      *

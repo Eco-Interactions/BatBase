@@ -26,7 +26,7 @@ security:
         - { path: ^/crud/, role: ROLE_EDITOR }
         - { path: /login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: profile/edit, roles: ROLE_USER }
-        - { path: /edit$, roles: ROLE_ADMIN }
+        - { path: /edit$, roles: ROLE_EDITOR }
         - { path: /update$, roles: ROLE_ADMIN }
         - { path: /delete$, roles: ROLE_ADMIN }
         - { path: /new$, roles: ROLE_ADMIN }

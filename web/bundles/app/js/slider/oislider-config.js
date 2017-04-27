@@ -13,7 +13,7 @@ $(function(){
 			structure: {
 				container: {
 					id: "masthead",
-					width: 1500,
+					width: getWidth(),
 					height: 423
 				},
 				messages: getMsgPos()
@@ -25,6 +25,9 @@ $(function(){
 			animation: getAnimationConfig()
 		};
 
+	function getWidth() { 
+		return $(window).width() > 1500 ? 1500 : 1400;
+	}
 	function getMsgPos() {
 		var frstFm = frames[0];
 		var obj = { containerClass: "message-container" };

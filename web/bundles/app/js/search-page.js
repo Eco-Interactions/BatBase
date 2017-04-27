@@ -30,7 +30,7 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'luvs!';
+        var dataKey = 'luv urself';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
             _util.populateStorage(dataKey, true);
@@ -53,7 +53,7 @@
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
         showPopUpMsg("Downloading and caching all interaction records. Please " +
-            "allow for a one-time ~25 second download.");   
+            "allow for a ~25 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
@@ -1464,7 +1464,7 @@
         var domain = focusStorage.curDomain || false;  
         var taxonLvlPrefix = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
-        return [{headerName: mainCol, field: "name", width: 264, cellRenderer: 'group', suppressFilter: true,
+        return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
                     cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
                 {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
@@ -1474,23 +1474,28 @@
                 {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
                 {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-                {headerName: "Edit", field: "edit", width: 49, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
+                {headerName: "Edit", field: "edit", width: 50, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
                 {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-                {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
-                {headerName: "Citation", field: "citation", width: 100, cellRenderer: addToolTipToCells},
-                {headerName: "Location Description", field: "location", width: 175, cellRenderer: addToolTipToCells },
+                {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
+                {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells },
                 {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-                {headerName: "Elevation", field: "elev", width: 150, hide: true },
-                {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
-                {headerName: "Latitude", field: "lat", width: 150, hide: true },
-                {headerName: "Longitude", field: "long", width: 150, hide: true },
+                // {headerName: "Elevation", field: "elev", width: 150, hide: true },
+                // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
+                // {headerName: "Latitude", field: "lat", width: 150, hide: true },
+                // {headerName: "Longitude", field: "long", width: 150, hide: true },
                 // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
-                {headerName: "Note", field: "note", width: 110, cellRenderer: addToolTipToCells} ];
+                {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+    }
+    /** Returns the initial width of the tree column according to role and screen size. */
+    function getTreeWidth() { 
+        var offset = ['admin', 'super', 'editor'].indexOf(userRole) === -1 ? 0 : 50;
+        return ($(window).width() > 1500 ? 340 : 273) - offset;
     }
     /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
     function onBeforeSortChanged() {                                            
@@ -1516,30 +1521,34 @@
     function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {               //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
         if (!a) { return 0; } //Interaction rows are returned unsorted
         if (focusStorage.curFocus !== "taxa") { return alphaSortVals(a, b); }
-        sortTaxonRows(a, b);
+        return sortTaxonRows(a, b);
     } 
     /** Sorts each row by taxonomic rank and then alphabetizes by name. */
     function sortTaxonRows(a, b) {
-        var lvls = ["Kingdom", "Arthropod", "Class", "Order", "Family", "Genus", "Species"];
+        var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
         var aParts = a.split(" ");
         var aLvl = aParts[0];
         var aName = aParts[1];
         var bParts = b.split(" ");
         var bLvl = bParts[0];
         var bName = bParts[1];
-        return aLvl === "Unspecified" ? 0 : compareRankThenName();
+        return  aLvl === "Unspecified" ? -1 : compareRankThenName();  
 
         function compareRankThenName() {
             return sortByRank() || sortByName();
         }
         function sortByRank() {
+            if (lvls.indexOf(aLvl) === -1 || lvls.indexOf(bLvl) === -1) { return alphaSpecies(); }
             return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
                 lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1; 
         }
         function sortByName() {
-            return lvls.indexOf(aLvl) === -1 ? 
-                a.toLowerCase() > b.toLowerCase() ? 1 : -1 :
-                aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
+            return aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
+        }
+        function alphaSpecies() {                                             
+            return lvls.indexOf(aLvl) !== -1 ? 1 :
+                lvls.indexOf(bLvl) !== -1 ? -1 :
+                a.toLowerCase() > b.toLowerCase() ? 1 : -1;
         }
     }  /* End sortTaxonRows */
     function isNotEditor() {  
@@ -1560,7 +1569,7 @@
         var name = params.data.name || null; 
         var id = params.data.id;
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
-            class="grid-edit" title="Edit Interaction" alt="Edit Interaction">`;
+            class="grid-edit" title="Edit Interaction `+id+`" alt="Edit Interaction">`;
         $('#search-grid').off('click', '#edit'+id);
         $('#search-grid').on('click', '#edit'+id, eif.crud.editInt.bind(null, id));
         return name === null ? editPencil : null;
@@ -2218,6 +2227,8 @@
         $('#show-tips').html("Search Tips");
         $('#show-tips').off("click");
         $('#show-tips').click(showTips);
+        $('#b-overlay-popup').removeClass("tips-popup");
+        $('#b-overlay-popup').empty();
     }
     function removeTips() {  //console.log("removeTips called.")
         $('#b-overlay, #b-overlay-popup').css("display", "none");

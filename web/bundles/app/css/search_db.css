@@ -1,0 +1,423 @@
+/*--- Database Search Page Styles ---*/
+#search-opts {  /* .flex-row also on elem */
+	margin: 1em auto 0 auto;
+	height: 115px;
+	width: 100%;
+	font-size: 1.1em;
+}
+.opts-col {
+	padding: .3em;
+	height: 100%;
+	justify-content: space-around;
+}
+.opts-box {
+	flex: 0 0 auto;  	  
+	height: 25px;
+	width: 130px;
+	margin: 0 .7em 0 .5em;
+	z-index: 20;
+}
+#opts-col1 {
+	border-right: black 1px solid;
+	flex: 0 0 326px;
+	align-items: flex-end;
+}
+#opts-col1 .opts-box {
+	width: 111px;
+}
+#opts-col2, #opts-col3 {
+	font-size: .9em;
+	padding: 5px;
+	border-right: black 1px solid;
+	justify-content: flex-start;
+}
+#opts-col2 {
+	flex: 0 0 460px;  	  
+}
+#opts-col3 {
+	flex: 1 0 484px;  	 /*Don't grow or shrink, width.*/ 
+}
+#futrDevMsg {
+	margin: 0 5px 0 5px;
+}
+#show-tips, #strt-tut {
+	width: 95px;
+	margin: 5px 5px 5px 15px;
+}
+.lbl-sel-opts {  		 /* .flex-row also on elems */
+	margin: .3em;
+	flex: 0 0 auto;
+	width: 208px;  	 
+	justify-content: space-between;
+}
+.opts-span {
+	padding-top: 3px;
+	width: 65px;
+}
+#grid-tools {
+	margin: .7em auto .2em auto;
+	padding: .1em;
+	width: 100%;
+	height: 28px;
+	font-size: 1.1em;
+}
+#grid-status {
+	margin: 0 0 0 .2em;
+	flex-grow: 1;
+	padding: .2em;	
+}
+#xtrnl-filter-status {
+	flex-shrink: 1;
+	margin-right: .3em;
+}
+#grid-filter-status {
+	flex-grow: 1;
+}
+#search-grid {
+	height: 86vh;
+	border: black 1px solid;
+}
+.grid-edit { 
+	height: 22px;
+	width: 20px;
+	position: relative;
+	left: 9px;
+}
+.ag-menu{
+	z-index: 100;
+}
+.row-purple {
+	background-color: rgba(128,0,128,.13) !important; /* purple */
+}
+.row-green {
+	background-color: rgba(0,128,0,.15) !important; /* green */
+}
+.row-blue {
+	background-color: rgba(0,0,255,.15) !important; /* blue */
+}
+.row-orange {
+	background-color: rgba(255,128,0,.17) !important; /* orange */
+}
+.row-turquoise {
+	background-color: rgba(0,245,255,.11) !important; /* turquoise */
+}
+.row-yellow {
+	background-color: rgba(255,255,0,.2) !important; /* yellow */
+}
+.row-red {
+	background-color: rgba(255,0,0,.15) !important; /* red */
+}
+/*--------- Search Tips Popup -----------------*/
+#tips-close-bttn {
+	position: relative;
+	margin-top: .5em;
+	left: 91%;
+	bottom: -2vh;
+}
+.tips-popup {
+	top: 4vh;
+	/*position: relative;*/
+	font-size: 1.1em;
+	height: 88vh;
+	width: 44vw;
+	padding: 2.2em;
+	text-align: left;
+	margin: auto;
+	overflow-y: scroll;
+}
+/*------- Buttons ---------------*/
+#filter-bttns {
+	display: inline-flex;
+	justify-content: space-between;
+	height: 44px;
+}
+.grid-bttn, .tos-bttn {
+	margin: 0 .3em 0 .2em;
+	background: linear-gradient(#fff, #d3d3d3);
+	border-radius: 4px;
+}
+button[name="csv"], #close-tos-bttn {
+	align-self: flex-end;
+}
+button[name="xpand-tree"] {
+	width: 105px;
+}
+button[name="createbttn"] {
+	width: 75px;
+	align-self: flex-end;
+	margin-right: 7px;
+}
+/*----- Walkthrough ------*/
+.intro-tips {
+	width: 420px;
+	text-align: justify;
+}
+a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
+	cursor: pointer;
+}
+/*------------ Search Grid Popup -----------------*/
+#grid-popup {
+    background: #FFF;
+	display: none;
+    position: relative;
+    z-index: 200;
+    text-align: center;
+    font-size: 20px;
+    box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
+    top: 25%;
+    left: 45%;
+    width: 500px;
+    height: 100px;
+    padding: 22px;
+    margin-left: -150px;
+    margin-top: -50px;
+    border-radius: 5px;
+}
+#grid-overlay {
+	display: none;
+    position: absolute;
+    z-index: 100;				
+    top: 75px;
+    bottom: 0;
+    width: 100%;
+    height: 85%;
+    opacity: 0;
+}
+/*-------------------------- Database CRUD Popup -----------------------------*/
+.crud-popup {
+	height: 88vh;
+	flex-grow: 0;
+	width: 1510px;
+	/*width: 1080px;*/
+	padding: 15px;
+	text-align: left;
+	justify-content: space-between;
+}
+.crud-ovrly {
+	align-items: center;
+}
+#crud-hdr>h1 {
+	font-size: 1.3em;
+	margin-bottom: 10px;
+	text-align: center;
+}
+#crud-hdr>p {
+	margin-bottom: 10px;
+	font-weight: bold;
+	text-align: center;
+}
+#crud-main {
+	padding: 5px 0 0 5px;
+	height: 83vh;
+	width: 999px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+#crud-details {
+	flex: 1 1 242px;
+	padding: 0 .5em .5em .5em;
+	overflow-y: scroll;
+	max-width: 31%;
+}
+#crud-details h3 {
+	text-align: center;
+	font-size: 1.15em;
+}
+#crud-details p {
+	text-align: center;
+	font-size: 1.15em;
+	margin-bottom:1em;
+}
+.det-div {
+	min-height: 50px;
+	margin: .5em 0 1em 0;
+}
+.det-div div {
+	padding: .5em 0 0 .5em;
+}
+/*------------ Form Styles ---------------*/
+#top-form {
+	font-size: 1em;
+	flex-wrap: wrap;
+}
+.exit-bttn {
+	position: relative;
+	width: 2em;
+	height: 2em;
+	font-weight: bold;
+}
+#exit-form {
+	left: 94%;
+	top: 7%;
+}
+#exit-sub-form {
+	left: 24%;
+	font-size: .75em !important;
+}
+.med-form {
+	border: 1px solid grey;
+	border-radius: 5px;
+    width: 808px;
+    margin: 11px 0 10px 100px;
+}
+.sml-form {
+	border: 1px solid grey;
+	border-radius: 5px;
+    padding: 5px;
+    min-width: 385px;
+    margin-top: .5em;
+}
+.sml-left {
+	position: relative;
+	left: 25px;
+}
+.sml-right {
+	position: relative;
+	right: 15px;
+}
+#sub-hdr, #sub2-hdr {
+	font-size: 1.1em;
+	text-align: center;
+	padding-top: 4px;
+	margin: 0 auto 8px auto;
+	align-self: center;
+}
+form[name="top"] p, form[name="top"] .bttn-cntnr {
+	width: 100%;
+}
+.form-row {
+	padding: .2em .75em .3em  .75em;
+	width: 470px;
+	margin-right: 1em;
+}
+.field-row {
+	justify-content: space-between;
+}
+#Notes_row div.field-row {
+	width: 933px;
+}
+.sub-row {
+	padding: .2em .75em .3em  .75em;
+	width: 400px;
+}
+.sub2-row {
+	padding: .2em .75em .3em  .75em;
+	width: 372px;
+}
+.long-sub-row {
+	padding: .2em .75em .3em  .75em;
+	width: 802px;
+}
+.form-errors, .row-errors {
+	color: red;
+	font-size: .9em;
+	text-align: center;
+}
+.field-row .required:after {
+  content: "*";
+}
+.top-pin {
+	margin: .6em 0 0 .6em !important;
+}
+#top-form input, #top-form select, #top-form textarea {
+	padding: .1em;
+	margin: 0;
+	font-size: .95em;
+}
+.xxlrg-field {
+	width: 755px;	
+}
+.xlrg-field {
+	width: 655px;
+}
+.lrg-field {
+	width: 309px;
+}
+.med-field {
+	width: 255px;
+}
+.sml-field {
+	width: 200px;
+}
+#top-form textarea {
+	height: 63px;
+}
+#Notes-txt {
+	border-color: #b8b8b8;
+	width: 812px;
+}
+.selectize-input {
+	padding-right: 33px !important;
+}
+#top-form label {
+	font-size: 1em;
+	padding: 9px 0 2px 0;
+	width: 125px;
+}
+.bttn-cntnr {
+	align-self: flex-end;
+	padding: 10px;
+}
+.bttn-cntnr input {
+    padding: 3px !important;
+    margin: 3px !important;
+}
+/*--------------------------------------------------------------------------*/
+/*------------------ Screen Width < 1500px -----------------------------------*/
+@media screen and (max-width: 1500px) { 
+	/*--------------- Database CRUD Popup -------------*/
+	#b-overlay .crud-popup {
+		width: 1380px;
+		padding: 15px;
+	}
+	#b-overlay #crud-main {
+		padding: 5px 0 0 20px;
+		width: 915px;
+	}
+	#b-overlay .form-row {
+		padding: .2em .75em .3em  0;
+		width: 420px;
+	}
+	#b-overlay .sub-row {
+		width: 375px;
+	}
+	#b-overlay .long-sub-row {
+		width: 750px;
+	}
+	#b-overlay .sub2-row {
+		width: 363px;
+	}
+	#b-overlay .med-form {
+	    width: 777px;
+	    margin: 11px 0 10px 60px;
+	}
+	#b-overlay #Notes_row div.field-row {
+		width: 846px;
+	}
+	#b-overlay #top-form label {
+		font-size: 1em;
+		padding: 9px 0 2px 0;
+		width: 125px;
+	}  
+	#b-overlay #Notes-txt {
+		width: 698px;
+	}
+	#b-overlay .xxlrg-field {
+		width: 720px;	
+	}
+	#b-overlay .xlrg-field {
+		width: 595px;
+	}
+	#b-overlay .lrg-field {
+		width: 262px;
+	} 
+	#b-overlay .med-field {
+		width: 220px;
+	}
+	#b-overlay .sml-field {
+		width: 175px;
+	}
+} 
+@media only screen and (min-width: 1501px) {   /*and (max-width: 1920px)*/ 
+	
+} 
