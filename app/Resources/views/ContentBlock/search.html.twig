@@ -35,10 +35,12 @@
         <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
         <div id="opts-col3" class="opts-col flex-col flex-wrap">
             <div>
-                <label><input type="checkbox" id="fltr-chngd">
-                    Show only interactions changed since:</label>
-                <label><input type="radio">Today</label>
-                <label><input type="radio" id="fltr-cstm">Custom</label>
+                <input type="checkbox" id="shw-chngd">
+                <label for="shw-chngd">Show only interactions changed since:</label>
+                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked">
+                <label for="fltr-tdy">Today</label>
+                <input type="radio" id="fltr-cstm" name="shw-chngd">
+                <label for="fltr-cstm">Custom</label>
             </div>
         </div>
         <div id="opts-col4" class="flex-col">

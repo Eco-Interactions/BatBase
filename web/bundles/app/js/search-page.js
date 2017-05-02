@@ -63,6 +63,9 @@
         $('button[name="reset-grid"]').click(resetDataGrid);
         $("#strt-tut").click(startIntroWalkthrough);
         $("#show-tips").click(showTips);
+        $('#shw-chngd').change(enableUpdatedAtFilterRadios);
+        $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
+        $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
     }
     function authDependentInit() {
         userRole = $('body').data("user-role");                                 //console.log("----userRole === visitor ", userRole === "visitor")
@@ -75,9 +78,10 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
         resetFocusStorage();
-        selectInitSearchFocus();
+        enableUpdatedAtFilterRadios();
+        selectInitialSearchFocus();
         initNoFiltersStatus();      
-        setUpFutureDevUi();
+        // setUpFutureDevUi();
         selectSearchFocus();
     } 
     /**
@@ -97,7 +101,7 @@
         focusStorage.openRows = [];                                             //console.log("focusStorage = %O", focusStorage);
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
-    function selectInitSearchFocus() {
+    function selectInitialSearchFocus() {
         $('#search-focus').val(focusStorage.curFocus);
     }
     function setUpFutureDevUi() {
@@ -1702,6 +1706,27 @@
         $('#xtrnl-filter-status').text('Filtering on: ');
         $('#grid-filter-status').text('No Active Filters.');
     }
+    /*-------------------- Filter By Time Updated ----------------------------*/
+    /**
+     * The updatedAt filter is enabled when the filter option in opts-col3 is checked. 
+     * When checked, the radio options, 'Today' and 'Custom', are enabled. 
+     * Note: 'Today' is the initial selection. 
+     */
+    function enableUpdatedAtFilterRadios() { 
+        var filtering = $('#shw-chngd')[0].checked;
+        var opac = filtering ? 1 : .3;
+        $('input[name=shw-chngd]').attr({'disabled': !filtering});  
+        $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
+    }
+    /** 
+     * Filters the interactions in the grid to show only those modified since the 
+     * user selected time - either 'Today' or a 'Custom' datetime selected using 
+     * the flatpickr calendar.
+     */
+    function filterInteractionsByTimeUpdated(e) {                               console.log("checked? = %O", e.currentTarget);
+        var elem = e.currentTarget.id;
+    }    
+    /*-------------------- Unique Values Column Filter -----------------------*/
     /**
      * Class function: 
      * This filter presents all unique values of column to potentially filter on.
