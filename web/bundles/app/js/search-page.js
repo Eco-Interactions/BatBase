@@ -5,11 +5,12 @@
      * locations, or sources (grouped by either publications or authors). 
      *
      * userRole = Stores the role of the user.
+     * cal = Stores the flatpickr calendar instance. 
      * intro = Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
      */
-    var userRole, intro, columnDefs = [], focusStorage = {}; 
+    var userRole, intro, cal, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -63,7 +64,7 @@
         $('button[name="reset-grid"]').click(resetDataGrid);
         $("#strt-tut").click(startIntroWalkthrough);
         $("#show-tips").click(showTips);
-        $('#shw-chngd').change(enableUpdatedAtFilterRadios);
+        $('#shw-chngd').change(toggleUpdatedAtFilterRadios);
         $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
         $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
     }
@@ -78,7 +79,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
         resetFocusStorage();
-        enableUpdatedAtFilterRadios();
+        toggleUpdatedAtFilterRadios();
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         // setUpFutureDevUi();
@@ -1741,6 +1742,8 @@
         $('label[for=fltr-cstm]')[0].innerText = ''; 
         $('.flatpickr-input').attr({'disabled': false});
         cal.open();                                                             
+        $('#fltr-cal').click(cal.open);
+        $('.today').focus();                                                   
     }    
     /**
      * Instantiates the flatpickr calendar, clears the label for the 'Custom' radio,
@@ -1754,9 +1757,9 @@
             onReady: function() { this.amPM.textContent = "AM"; }
         };                                                                      
         var input = document.createElement('input');
+        input.id = 'fltr-cal';
         $('label[for=fltr-cstm]')[0].innerText = ''; 
         $(elem).after(input);
-        $('.flatpickr-calendar, #fltr-cstm').onEnter(function(){ cal.close(); })
         return $(input).flatpickr(calOpts);
     }
     /**
