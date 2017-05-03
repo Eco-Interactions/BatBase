@@ -1710,22 +1710,70 @@
     /**
      * The updatedAt filter is enabled when the filter option in opts-col3 is checked. 
      * When checked, the radio options, 'Today' and 'Custom', are enabled. 
-     * Note: 'Today' is the initial selection. 
+     * Note: 'Today' is the default selection. 
      */
-    function enableUpdatedAtFilterRadios() { 
+    function toggleUpdatedAtFilterRadios() { 
         var filtering = $('#shw-chngd')[0].checked;
         var opac = filtering ? 1 : .3;
         $('input[name=shw-chngd]').attr({'disabled': !filtering});  
+        $('#fltr-tdy')[0].checked = true;
         $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
+        if (!filtering) { disableCalendar(); }
     }
     /** 
      * Filters the interactions in the grid to show only those modified since the 
      * user selected time - either 'Today' or a 'Custom' datetime selected using 
      * the flatpickr calendar.
      */
-    function filterInteractionsByTimeUpdated(e) {                               console.log("checked? = %O", e.currentTarget);
-        var elem = e.currentTarget.id;
+    function filterInteractionsByTimeUpdated(e) {                               
+        var elem = e.currentTarget;  
+        if (elem.id === 'fltr-cstm') { showFlatpickrCal(elem); 
+        } else { disableCalendar(); }
+        filterUpdatedSince('today');        
+    }
+    /** 
+     * Instantiates the flatpickr calendar or shows/opens the existing cal. The 
+     * label for the 'Custom' radio is erased and the input enabled.
+     */
+    function showFlatpickrCal(elem) {  
+        cal = cal || initCal(elem); 
+        $('.flatpickr-input').show();    
+        $('label[for=fltr-cstm]')[0].innerText = ''; 
+        $('.flatpickr-input').attr({'disabled': false});
+        cal.open();                                                             
     }    
+    /**
+     * Instantiates the flatpickr calendar, clears the label for the 'Custom' radio,
+     * appends the calendar after the radio and returns the flatpickr instance. 
+     * An onEnter listener is added that will close the calendar, after date selection.
+     */
+    function initCal(elem) {
+        var calOpts = {
+            altInput: true,     maxDate: "today",
+            enableTime: true,   plugins: [new confirmDatePlugin({})],
+            onReady: function() { this.amPM.textContent = "AM"; }
+        };                                                                      
+        var input = document.createElement('input');
+        $('label[for=fltr-cstm]')[0].innerText = ''; 
+        $(elem).after(input);
+        $('.flatpickr-calendar, #fltr-cstm').onEnter(function(){ cal.close(); })
+        return $(input).flatpickr(calOpts);
+    }
+    /**
+     * If there is no value selected, the flatpickr input is hidden and the 'Custom'
+     * label readded to the radio option. Otherwise, the input is disabled.
+     */
+    function disableCalendar() { 
+        if (!$('.flatpickr-input').val()) {
+            $('.flatpickr-input').hide();    
+            $('label[for=fltr-cstm]')[0].innerText = 'Custom';
+        } else {
+            $('.flatpickr-input').attr({'disabled': true});
+        }
+    }
+    function filterUpdatedSince(since) {
+        
+    }
     /*-------------------- Unique Values Column Filter -----------------------*/
     /**
      * Class function: 
