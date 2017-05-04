@@ -64,7 +64,7 @@
         $('button[name="reset-grid"]').click(resetDataGrid);
         $("#strt-tut").click(startIntroWalkthrough);
         $("#show-tips").click(showTips);
-        $('#shw-chngd').change(toggleUpdatedAtFilterRadios);
+        $('#shw-chngd').change(toggleUpdatedAtFilter);
         $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
         $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
     }
@@ -79,7 +79,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
         resetFocusStorage();
-        toggleUpdatedAtFilterRadios();
+        toggleUpdatedAtFilter();
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         // setUpFutureDevUi();
@@ -158,7 +158,7 @@
             buildGridFunc();
         }
     } /* End ifChangedFocus */
-/*------------------Interaction Search Methods--------------------------------------*/
+/*------------------ Interaction Search Methods--------------------------------------*/
     /**
      * If interaction data is already in local storage, the data is sent to 
      * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, 
@@ -293,6 +293,7 @@
             object: getTaxonName(intRcrd.object),
             tags: intRcrd.tags,
             note: intRcrd.note, 
+            updatedAt: intRcrd.updatedAt
         };
         if (intRcrd.location) { getLocationData(intRcrd.location); }
         return rowData;
@@ -1701,7 +1702,7 @@
     }
     function clearGridStatus() {
         $('#grid-filter-status, #xtrnl-filter-status').empty();
-        activeFilters = [];
+        // activeFilters = [];
     }
     function initNoFiltersStatus() {
         $('#xtrnl-filter-status').text('Filtering on: ');
@@ -1713,13 +1714,19 @@
      * When checked, the radio options, 'Today' and 'Custom', are enabled. 
      * Note: 'Today' is the default selection. 
      */
-    function toggleUpdatedAtFilterRadios() { 
+    function toggleUpdatedAtFilter() { 
         var filtering = $('#shw-chngd')[0].checked;
         var opac = filtering ? 1 : .3;
         $('input[name=shw-chngd]').attr({'disabled': !filtering});  
         $('#fltr-tdy')[0].checked = true;
         $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
-        if (!filtering) { disableCalendar(); }
+        if (filtering) { filterInteractionsUpdatedSince([], new Date().today());
+        } else { resetUpdatedAtFilter(); }
+    }
+    /** Disables the calendar, if shown, and resets grid to original rowData. */
+    function resetUpdatedAtFilter() {
+        disableCalendar();
+        if (gridOptions.api) { gridOptions.api.setRowData(focusStorage.rowData); }
     }
     /** 
      * Filters the interactions in the grid to show only those modified since the 
@@ -1729,8 +1736,7 @@
     function filterInteractionsByTimeUpdated(e) {                               
         var elem = e.currentTarget;  
         if (elem.id === 'fltr-cstm') { showFlatpickrCal(elem); 
-        } else { disableCalendar(); }
-        filterUpdatedSince('today');        
+        } else { showInteractionsUpdatedToday(); }
     }
     /** 
      * Instantiates the flatpickr calendar or shows/opens the existing cal. The 
@@ -1742,7 +1748,6 @@
         $('label[for=fltr-cstm]')[0].innerText = ''; 
         $('.flatpickr-input').attr({'disabled': false});
         cal.open();                                                             
-        $('#fltr-cal').click(cal.open);
         $('.today').focus();                                                   
     }    
     /**
@@ -1754,13 +1759,22 @@
         var calOpts = {
             altInput: true,     maxDate: "today",
             enableTime: true,   plugins: [new confirmDatePlugin({})],
-            onReady: function() { this.amPM.textContent = "AM"; }
+            onReady: function() { this.amPM.textContent = "AM"; },
+            onClose: filterInteractionsUpdatedSince
         };                                                                      
         var input = document.createElement('input');
         input.id = 'fltr-cal';
         $('label[for=fltr-cstm]')[0].innerText = ''; 
         $(elem).after(input);
         return $(input).flatpickr(calOpts);
+    }
+    /**
+     * Disables the calendar, if shown, and filters grid to show interactions with 
+     * updates from 'today', from midnight on. 
+     */
+    function showInteractionsUpdatedToday() {
+        disableCalendar(); 
+        filterInteractionsUpdatedSince([], new Date().today(), null);
     }
     /**
      * If there is no value selected, the flatpickr input is hidden and the 'Custom'
@@ -1774,9 +1788,29 @@
             $('.flatpickr-input').attr({'disabled': true});
         }
     }
-    function filterUpdatedSince(since) {
-        
-    }
+    /**
+     * Filters all interactions in the grid leaving only the records with updates
+     * since the datetime specified by the user.
+     */
+    function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("rowData = %O", focusStorage.rowData);
+        var rowData = JSON.parse(JSON.stringify(focusStorage.rowData));
+        var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
+        gridOptions.api.setRowData(updatedRows);
+        resetToggleTreeBttn(false);
+
+        function addAllRowsWithUpdates(rowObj) { 
+            if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
+            rowObj.children = rowObj.children ? 
+                rowObj.children.filter(addAllRowsWithUpdates) : [];
+            return rowObj.children.length > 0;
+
+            function checkIntRowForUpdates(row) { 
+                var rowUpdatedAt = new Date(row.updatedAt).getTime();
+                var sinceTime = new Date(dateStr).getTime();                    //console.log("row [%O}.data.updatedAt = [%s], upd8sSince = [%O], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
+                return rowUpdatedAt > sinceTime;
+            }
+        } /* End addAllRowsWithUpdates */
+    } /* End filterInteractionsUpdatedSince */ 
     /*-------------------- Unique Values Column Filter -----------------------*/
     /**
      * Class function: 
@@ -2536,7 +2570,8 @@
         var focus = focusStorage.curFocus; 
         resetCurTreeState();
         resetMap[focus](); 
-    }
+        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
+    } 
     /** Resets storage props, buttons and filter status. */
     function resetCurTreeState() {
         resetCurTreeStorageProps();
