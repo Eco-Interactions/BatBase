@@ -156,6 +156,7 @@
             $('#sort-opts').empty();
             $('#opts-col1, #opts-col2').fadeTo(0, 1);
             buildGridFunc();
+            if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
         }
     } /* End ifChangedFocus */
 /*------------------ Interaction Search Methods--------------------------------------*/
@@ -782,6 +783,7 @@
         var opts = { region: [], country: [] };
         for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
         sortLocOpts();
+        removeTopRegionIfFiltering();
         addAllAndNoneOpts();
         return opts; 
         /**
@@ -793,22 +795,40 @@
             if (locNode.hasOwnProperty("note")) {return;}                       //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
             var locType = locNode.locationType.id;
             if (locType === 1 || locType === 2) { 
-                getLocOpts(locNode.displayName, locNode.locationType.displayName); 
+                getLocOpts(locNode, locNode.displayName, locNode.locationType.displayName); 
             }
             if (locNode.children) { locNode.children.forEach(buildLocOptsForNode); }
         }
-        /** Adds an option object, if one has not already been added for this location. */
-        function getLocOpts(name, type) {
+        /** If the location has interactions an option object is built for it. */
+        function getLocOpts(locNode, name, type) {
             var locType = _util.lcfirst(type);
             if (processedOpts[locType].indexOf(name) === -1) {
-                var id = focusStorage.data[locType + "Names"][name];             
-                opts[locType].push({ value: id, text: name }); 
-                processedOpts[locType].push(name);
+                if (locHasInteractions(locNode, locType)) {
+                    var id = focusStorage.data[locType + "Names"][name];             
+                    opts[locType].push({ value: id, text: name }); 
+                    processedOpts[locType].push(name);
+                }
             }
+        }
+        /** Returns true if location has interactions-- many countries do not. */
+        function locHasInteractions(loc, type) { 
+            return type === "country" ? loc.children.length > 0 : true;
         }
         function sortLocOpts() {
             for (var type in opts) {
                 opts[type] = opts[type].sort(alphaOptionObjs); 
+            }
+        }
+        /** 
+         * When filtering grid by country, only include the option for the direct 
+         * region parent.
+         */
+        function removeTopRegionIfFiltering() {  
+            if (!focusStorage.selectedOpts || !focusStorage.selectedOpts.country) { return; }
+            if (opts.region.length === 2) {  
+                opts.region = opts.region.filter(function(region) {
+                    return region.value === focusStorage.selectedOpts.region;
+                });  
             }
         }
         /**
@@ -817,12 +837,19 @@
          */
         function addAllAndNoneOpts() {
             for (var type in opts) {                                            //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
-                var option = opts[type].length === 0 ? {value: 'none', text: '- None -'} 
+                var option = opts[type].length === 0 ? checkSelectedVals(type) 
                     : (opts[type].length > 1 ? {value: 'all', text: '- All -'} : null);   
                 if (option) { opts[type].unshift(option); }
             }
         } 
     } /* End buildLocSelectOpts */
+    function checkSelectedVals(type) {
+        if (focusStorage.selectedOpts[type]) {
+            var loc = getDetachedRcrd(focusStorage.selectedOpts[type]);
+            return { value: loc.id, text: loc.displayName };
+        }
+        return {value: 'none', text: '- None -'};
+    }
     /** Builds the location select elements */
     function buildLocSelects(locOptsObj) {  
         var selElems = [];
@@ -938,7 +965,7 @@
     function hasChildInteractions(row) {
         if (!row.children) { return true; }
         return row.children.some(function(childRow) {
-            return childRow.interactions;
+            return childRow.interactions || hasChildInteractions(childRow);  
         });
     }
 /*------------------Source Search Methods-----------------------------------*/
@@ -1253,17 +1280,24 @@
     /**
      * Uses column filter to rebuild the grid. Rebuilds tree and the location
      * search option dropdowns from the displayed tree data in the grid after filter.
-     * Note: There are no records with "Asia" as the region, thus the unique values grid filter
-     * is only aware of Asia's sub-regions
      */
     function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-        var filterVal = focusStorage.rcrdsById[selVal].displayName;
-        var colModel = filterVal === "Asia" ? 
-            ["East Asia", "South & Southeast Asia", "West & Central Asia"] : [filterVal];
+        var filterVal = focusStorage.rcrdsById[selVal].displayName.split('[')[0].trim(); 
+        var colModel = getColFilterModel(filterVal);
         gridOptions.api.getFilterApi(colName).setModel(colModel);
         buildFilteredLocTree(selVal, colName);
         loadLocComboboxes(focusStorage.curTree);
         gridOptions.api.onGroupExpandedOrCollapsed();
+    }
+    /** When a top region is selected, it's sub-regions are also selected. */
+    function getColFilterModel(filterVal) {
+        var models = {
+            "Asia": ["East Asia", "South & Southeast Asia", "West & Central Asia"],
+            "Africa": ["Africa", "Sub-Saharan Africa"],
+            "Central America": ["Central America", "Central & South America"],
+            "South America": ["South America", "Central & South America"]
+        };
+        return models[filterVal] || [filterVal];
     }
     /**
      * Builds new tree out of displayed rows after filter. When a location has been 
@@ -2136,7 +2170,10 @@
                 var newValue = model[i];
                 if (this.allUniqueValues.indexOf(newValue) >= 0) {
                     this.selectValue(model[i]);
-                } else { console.warn('Value ' + newValue + ' is not a valid value for filter'); }
+                } else {
+                    gridOptions.api.showNoRowsOverlay(); 
+                    console.warn('Value ' + newValue + ' is not a valid value for filter'); 
+                }
             }
         } else { this.selectEverything(); }
     };
@@ -2308,7 +2345,6 @@
             $('#search-grid').css("height", "444px");
             $('#search-focus').val("taxa");
             $('#show-tips').off("click");
-            // selectSearchFocus();
             $('#search-focus').off("change");
         }
         function resetGridState() {
@@ -2549,11 +2585,9 @@
      */
     function isNextOpenLeafRow(node) {                                          //console.log("node = %O", node);
         if (node.childrenAfterFilter) {
-            if (node.childrenAfterFilter.length > 0) {  //TODO: remove check after fixing location data
-                return node.childrenAfterFilter.every(function(childNode){
-                    return !childNode.expanded;
-                });
-            }
+            return node.childrenAfterFilter.every(function(childNode){
+                return !childNode.expanded;
+            });
         } 
         return true;
     }     
