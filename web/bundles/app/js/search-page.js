@@ -1697,23 +1697,32 @@
         };  
     }
     /**
-     * Checks all filter models for any active filters. Sets grid-status with resulting 
-     * active filters.
+     * Adds all active filters to the grid's status message. First adding any 
+     * focus-level filters, such as author name or taxon, then any active filters
+     * for grid columns, and then checks/adds the 'interactions updated since' filter. 
+     * Sets grid-status with the resulting active-filters messasge.
      */
-    function getActiveDefaultGridFilters() {                                    //console.log("getActiveDefaultGridFilters called.")
-        var filterStatus;
-        var activeFilters = [];
+    function updateGridFilterStatusMsg() {                                      //console.log("updateGridFilterStatusMsg called.")
         if (gridOptions.api === undefined) { return; }
-        var filterModels = getAllFilterModels();        
-        var columns = Object.keys(filterModels);        
+        var activeFilters = [];
 
-        for (var i=0; i < columns.length; i++) {
-            if (filterModels[columns[i]] !== null) { activeFilters.push(columns[i]); }
-        }
-        getFilterStatus();
-        filterStatus = getFilterStatus();
-        setGridFilterStatus(filterStatus); 
+        addActiveExternalFilters();
+        addActiveGridFilters();
+        setGridFilterStatus(getFilterStatus()); 
         
+        function addActiveExternalFilters() {
+            if (focusStorage.focusFltr) { 
+                activeFilters.push(focusStorage.focusFltr);
+            } 
+        }
+        function addActiveGridFilters() {
+            var filterModels = getAllFilterModels();        
+            var columns = Object.keys(filterModels);        
+            for (var i=0; i < columns.length; i++) {
+                if (filterModels[columns[i]] !== null) { 
+                    activeFilters.push(columns[i]); }
+            }
+        }
         function getFilterStatus() {
             var tempStatusTxt;
             if (activeFilters.length > 0) {
@@ -1728,7 +1737,7 @@
             }
         }
     }
-    function setGridFilterStatus(status) {  //console.log("setGridFilterStatus. status = ", status)
+    function setGridFilterStatus(status) {                                      //console.log("setGridFilterStatus. status = ", status)
         $('#grid-filter-status').text(status);
     }
     function setExternalFilterStatus(status) {
@@ -2439,7 +2448,7 @@
            return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
         }
         catch (e) { 
-           console.log("#########-ERROR- getting record [%s] from %O", rcrdKey, rcrds);
+           console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
         }
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
@@ -2610,7 +2619,7 @@
     function resetCurTreeState() {
         resetCurTreeStorageProps();
         resetToggleTreeBttn(false);
-        getActiveDefaultGridFilters();
+        updateGridFilterStatusMsg();
         initNoFiltersStatus();
     }
     /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
