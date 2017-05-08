@@ -1,5 +1,19 @@
 Developer Notes:
 
+
+
+::BUGS::
+    ## Search Page ##
+    >> The grid filter menus seem to not get cleared and/or destroyed properly with 
+      each call to setRowData. If that menu was displayed with previous grid instances, 
+      the previous filter menu options will be displayed and the new ones on top of 
+      them, causing the text to appear boldened and difficult to read-- even worse 
+      the menu is obviously inaccurrate. 
+
+
+
+
+
 ::Checked data wonkiness::
     -'northern mariana islands' is the name from red list.
     - Id inconsistencies in the Citation, Publication, and Source table are from 
