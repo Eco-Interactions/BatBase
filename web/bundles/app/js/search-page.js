@@ -792,7 +792,7 @@
          * are identified by their "note" property.
          */
         function buildLocOptsForNode(locNode) {                                 //console.log("locNode = %O", locNode)
-            if (locNode.hasOwnProperty("note")) {return;}                       //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
+            if (locNode.hasOwnProperty("interactionType")) {return;}            //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
             var locType = locNode.locationType.id;
             if (locType === 1 || locType === 2) { 
                 getLocOpts(locNode, locNode.displayName, locNode.locationType.displayName); 
@@ -1315,7 +1315,7 @@
         focusStorage.curTree = tree;
         /** Recurses through displayed children until finding the leaf interaction records. */
         function getFilteredChildData(treeNode) {                               //console.log("getHabTreeData. node = %O", treeNode);
-            if (treeNode.data.hasOwnProperty("note")) { return treeNode.data; }
+            if (treeNode.data.hasOwnProperty("interactionType")) { return treeNode.data; }
             if (!selectedOpened) { addParentOpenRows(treeNode); }
             var locNode = getDetachedRcrd(treeNode.data.id); 
             var locNodeChildren = treeNode.childrenAfterFilter;
@@ -1335,19 +1335,19 @@
      * filtered by the selected type. 
      */
     function updatePubSearch() {                                                //console.log("\n-----updatePubSearch");
-        var selElemId = $(this).attr("id");
-        var selVal = $(this).val();
+        var selVal = $("#selPubTypes").val();
         var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
-        var newRows = selVal === "all" ? focusStorage.rowData : getPubTypeRows(selVal);
+        var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
-        updateSrcFilterStatus(selVal, selText+'s');
+        focusStorage.focusFltr = selVal === "all" ? null : selText+'s';
+        updateGridFilterStatusMsg();
     } 
     /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows(selVal) {
+    function getPubTypeRows(selVal) { 
         var pubTypes = _util.getDataFromStorage('publicationType'); 
         var pubIds = pubTypes[selVal].publications;         
         var rows = [];
-        focusStorage.rowData.forEach(function(row) { 
+        getAllCurRows().forEach(function(row) { 
             if (pubIds.indexOf(row.pubId) !== -1) { rows.push(row); }
         });  
         return rows;
@@ -1379,13 +1379,6 @@
             }
         });  
         return rows;
-    }
-    function updateSrcFilterStatus(selVal, selText) {  
-        var status = "Filtering on: " + selText;
-        clearGridStatus();
-        if (selVal === "all" || selVal === "") {
-            initNoFiltersStatus();
-        } else { setExternalFilterStatus(status); }
     }
 /*================ Grid Build Methods ==============================================*/
     /**
@@ -1778,7 +1771,10 @@
         disableCalendar();
         focusStorage.fltrdRows = null;
         focusStorage.fltrSince = null;
-        if (gridOptions.api) { gridOptions.api.setRowData(focusStorage.rowData);}
+        if (gridOptions.api) { 
+            gridOptions.api.setRowData(focusStorage.rowData);
+            applyExternalFilters();
+        }
     }
     /** 
      * Filters the interactions in the grid to show only those modified since the 
@@ -1877,16 +1873,13 @@
     }
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {
-        var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
+        var resets = { 'auths': reapplyAuthFltr, 'pubs': updatePubSearch };
         var domain = focusStorage.curDomain;  
         resets[domain]();
     }
     function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
         if (getAuthFilterVal() === "") { return; }
         updateAuthSearch();
-    }
-    function reapplyPubFltr() {   console.log("reapplying pub filter");
-        // body...
     }
     /*-------------------- Unique Values Column Filter -----------------------*/
     /**
