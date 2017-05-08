@@ -968,7 +968,7 @@
             return childRow.interactions || hasChildInteractions(childRow);  
         });
     }
-/*------------------Source Search Methods-----------------------------------*/
+/*------------------ Source Search Methods -----------------------------------*/
     /**
      * Get all data needed for the Source-focused grid from local storage and send  
      * to @initSrcSearchUi to begin the data-grid build.  
@@ -1357,12 +1357,18 @@
      * by clicking on the 'search' button, the author tree is rebuilt with only 
      * authors that contain the case insensitive substring.
      */
-    function updateAuthSearch() {                                               //console.log("\n-----updateAuthSearch");
-        var authNameStr = $('input[name="authNameSrch"]').val().trim().toLowerCase();       
+    function updateAuthSearch() {                                               //console.log("-----updateAuthSearch");
+        var authNameStr = getAuthFilterVal();       
         var newRows = authNameStr === "" ?
-            focusStorage.rowData : getAuthRows(focusStorage.rowData, authNameStr);
+            getAllCurRows() : getAuthRows(getAllCurRows(), authNameStr);
         gridOptions.api.setRowData(newRows);
-        updateSrcFilterStatus(authNameStr, '"' + authNameStr + '"');
+        focusStorage.focusFltr = authNameStr === "" ? null : '"' + authNameStr + '"';
+        updateGridFilterStatusMsg();
+        resetToggleTreeBttn(false);
+    }
+    /** Returns the lowercased value of the author name filter. */ 
+    function getAuthFilterVal() {
+        return $('input[name="authNameSrch"]').val().trim().toLowerCase();
     }
     function getAuthRows(rowAry, authNameStr) {
         var rowAuthName;
@@ -1679,7 +1685,7 @@
     /** Resets Grid Status' Active Filter display */
     function beforeFilterChange() {  //console.log("beforeFilterChange")
         // clearGridStatus();
-        getActiveDefaultGridFilters();    
+        updateGridFilterStatusMsg();    
     } 
     /** Returns an obj with all filter models. */
     function getAllFilterModels() {
@@ -1765,11 +1771,14 @@
         $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
         if (filtering) { filterInteractionsUpdatedSince([], new Date().today());
         } else { resetUpdatedAtFilter(); }
+        resetToggleTreeBttn(false);
     }
     /** Disables the calendar, if shown, and resets grid to original rowData. */
     function resetUpdatedAtFilter() {
         disableCalendar();
-        if (gridOptions.api) { gridOptions.api.setRowData(focusStorage.rowData); }
+        focusStorage.fltrdRows = null;
+        focusStorage.fltrSince = null;
+        if (gridOptions.api) { gridOptions.api.setRowData(focusStorage.rowData);}
     }
     /** 
      * Filters the interactions in the grid to show only those modified since the 
@@ -1837,9 +1846,13 @@
      */
     function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("rowData = %O", focusStorage.rowData);
         var rowData = JSON.parse(JSON.stringify(focusStorage.rowData));
+        var fltrSince = dateStr || focusStorage.timeFltr;
         var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
+        focusStorage.timeFltr = dateStr || focusStorage.timeFltr;
         gridOptions.api.setRowData(updatedRows);
+        focusStorage.fltrdRows = updatedRows;
         resetToggleTreeBttn(false);
+        applyExternalFilters();
 
         function addAllRowsWithUpdates(rowObj) { 
             if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
@@ -1849,11 +1862,32 @@
 
             function checkIntRowForUpdates(row) { 
                 var rowUpdatedAt = new Date(row.updatedAt).getTime();
-                var sinceTime = new Date(dateStr).getTime();                    //console.log("row [%O}.data.updatedAt = [%s], upd8sSince = [%O], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
+                var sinceTime = new Date(fltrSince).getTime();                  //console.log("row [%O}.data.updatedAt = [%s], upd8sSince = [%O], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
                 return rowUpdatedAt > sinceTime;
             }
         } /* End addAllRowsWithUpdates */
     } /* End filterInteractionsUpdatedSince */ 
+    /**
+     * When filtering by time updated, some filters will need to be reapplied.
+     * Taxa and loation filter rowdata directly, therefore do not need to be reapplied.
+     * Source, both auth and pub views, must be reapplied. 
+     */
+    function applyExternalFilters() {
+        if (focusStorage.curFocus === "srcs") { applySrcFltrs(); }
+    }
+    /** Reapplys active external filters, author name or publication type. */
+    function applySrcFltrs() {
+        var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
+        var domain = focusStorage.curDomain;  
+        resets[domain]();
+    }
+    function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
+        if (getAuthFilterVal() === "") { return; }
+        updateAuthSearch();
+    }
+    function reapplyPubFltr() {   console.log("reapplying pub filter");
+        // body...
+    }
     /*-------------------- Unique Values Column Filter -----------------------*/
     /**
      * Class function: 
@@ -2451,6 +2485,10 @@
            console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
         }
     }
+    /** If grid is filtered by an external filter, the rows are stored in fltrdRows. */
+    function getAllCurRows() {
+        return focusStorage.fltrdRows || focusStorage.rowData;
+    }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
         var popUpMsg = msg || "Loading...";
         $("#grid-popup").text(popUpMsg);
@@ -2613,7 +2651,6 @@
         var focus = focusStorage.curFocus; 
         resetCurTreeState();
         resetMap[focus](); 
-        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
     } 
     /** Resets storage props, buttons and filter status. */
     function resetCurTreeState() {
@@ -2621,6 +2658,8 @@
         resetToggleTreeBttn(false);
         updateGridFilterStatusMsg();
         initNoFiltersStatus();
+        focusStorage.fltrdRows = null;
+        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
     }
     /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
     function resetCurTreeStorageProps() {
