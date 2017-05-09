@@ -304,8 +304,8 @@ $(document).ready(function(){
         $(document).on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
     }
     function addReqElemsToConfg() {
-        var reqFields = ["Publication", "CitationTitle", "Country", "Location",
-                    "Subject", "Object", "InteractionType"];
+        var reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
+            "InteractionType"];
         cParams.forms.top.reqElems = reqFields.map(function(field) {
             return $('#'+field+'-sel')[0];
         });
@@ -489,7 +489,7 @@ $(document).ready(function(){
         var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
-        return buildFormRow("Location", selElem, "top", true);
+        return buildFormRow("Location", selElem, "top", false);
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
