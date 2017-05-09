@@ -36,6 +36,7 @@
 }
 #opts-col3 {
 	flex: 1 0 484px;  	 /*Don't grow or shrink, width.*/ 
+	justify-content: space-between;
 }
 #futrDevMsg {
 	margin: 0 5px 0 5px;
@@ -148,8 +149,12 @@ button[name="createbttn"] {
 	margin-right: 7px;
 }
 button[name="show-hide-col"] {
-	opacity: .5;
+	opacity: .8;
 	cursor: not-allowed;
+}
+button[name="futureDevBttn"] {
+	align-self: flex-end;
+	opacity: .8;
 }
 /*----- Walkthrough ------*/
 .intro-tips {
