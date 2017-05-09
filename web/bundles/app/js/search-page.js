@@ -1222,7 +1222,6 @@
         window.setTimeout(function() {
             $('#shw-chngd')[0].checked = true;
             toggleUpdatedAtFilter();
-            gridOptions.api.expandAll();
         }, 200);        
     }
 /*================== Filter Functions ========================================*/

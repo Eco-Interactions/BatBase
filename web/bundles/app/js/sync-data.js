@@ -146,9 +146,7 @@
     /** Sends entity-record data to each storage property-type handler. */
     function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
         for (var prop in propHndlrs) {
-            if (prop in rcrd) {
-                propHndlrs[prop](prop, rcrd, entity);
-            }
+            propHndlrs[prop](prop, rcrd, entity);
         }
     }
     /** 
@@ -223,9 +221,11 @@
     }
     /** Adds the Interaction to the stored entity's collection.  */
     function addInteractionToEntity(prop, rcrd, entity) {
+        if (!rcrd[prop]) {return;}
         var rcrds = _util.getDataFromStorage(prop);                             //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
         var storedEntity = rcrds[rcrd[prop]];
         addIfNewRcrd(storedEntity.interactions, rcrd.id);
+        if (prop === 'source') { storedEntity.isDirect = true; }
         storeData(prop, rcrds);
     }
     /** Adds the Interaction to the taxon's subject/objectRole collection.  */

@@ -160,6 +160,9 @@ class CrudController extends Controller
                 $this->handleContributors($ary, $entity, $edits, $em); },
             "tags" => function($ary) use ($entity, &$edits, &$em) { 
                 $this->handleTags($ary, $entity, $edits, $em); },
+            "source" => function($id) use ($entity, &$edits, &$em) {
+                $this->addInteractionToSource($id, $entity, $edits, $em);
+            }
         ];
         foreach ($formData as $rEntityName => $val) {  
             if (array_key_exists($rEntityName, $edgeCases)) {
@@ -249,6 +252,17 @@ class CrudController extends Controller
         if ($edits->editing && count($added)) {
             $edits->$field = property_exists($edits, $field) ? 
                 array_merge($edits->$field, ['added' => $added]) : ['added' => $added]; 
+        }
+    }
+    /** If adding an interaction to a source, ensures it's 'isDirect' flag to true. */
+    private function addInteractionToSource($id, $entity, &$edits, &$em)
+    {
+        $relEntity = $this->getEntity("Source", $id, $em);
+        $this->setRelDataAndTrackEdits($entity, "Source", $relEntity, $edits);
+        $className = $em->getClassMetadata(get_class($entity))->getName(); 
+        if ($className === "AppBundle\Entity\Interaction" && !$relEntity->getIsDirect()) {
+            $relEntity->setIsDirect(true);
+            $em->persist($relEntity);
         }
     }
     /**
