@@ -4,7 +4,6 @@
     eif.syncData = {
         update: updateStoredData,
     };
-
     getServerDataLastUpdatedTimes();
     /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
     function getServerDataLastUpdatedTimes() {
@@ -147,7 +146,9 @@
     /** Sends entity-record data to each storage property-type handler. */
     function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
         for (var prop in propHndlrs) {
-            propHndlrs[prop](prop, rcrd, entity);
+            if (prop in rcrd) {
+                propHndlrs[prop](prop, rcrd, entity);
+            }
         }
     }
     /** 

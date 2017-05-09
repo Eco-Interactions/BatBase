@@ -1199,7 +1199,7 @@
             open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
             children: getChildSrcRowData(src, treeLvl),
             treeLvl: treeLvl,
-            interactions: src.isDirect,          //Only rows with interaction are colored
+            interactions: src.isDirect,   //Only rows with interaction are colored
         };  
     } 
     /**
@@ -1211,7 +1211,7 @@
         return curSrc.children === null ? [] : getChildSrcData(curSrc, treeLvl);
     }
     function getChildSrcData(src, treeLvl) {
-        return src.children.map(function(childSrc) {                         //console.log("childSrc = %O", childSrc);
+        return src.children.map(function(childSrc) {                            //console.log("childSrc = %O", childSrc);
             return getSrcRowData(childSrc, treeLvl + 1);
         });
     }
@@ -2259,7 +2259,7 @@
         gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
 
     }
-    function getCurTaxonLvlCols() { //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
+    function getCurTaxonLvlCols() {                                             //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
         var lvls = Object.keys(focusStorage.taxaByLvl);
         return lvls.map(function(lvl){ return 'tree' + lvl; });
     }

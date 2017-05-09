@@ -218,11 +218,11 @@ $(document).ready(function(){
         return ints[id];
     }
     /** Calls the set method for the passed field. */
-    function fillIntField(field, rcrd) {
+    function fillIntField(field, rcrd) {                                        //console.log("field = %s, rcrd = %O", field, rcrd);
         var setField = {
             "interactionType": setIntType, "location": setLoc, "note": addNote, 
             "object": addTaxon, "source": addSource, "subject": addTaxon, 
-            "tags": addTags };
+            "tags": addTags, "updatedAt": Function.prototype };
         setField[field](field, rcrd[field]);
     }
     function setIntType(field, intTypeObj) {
