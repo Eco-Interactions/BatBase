@@ -411,6 +411,7 @@ $(document).ready(function(){
         return {
             'Title': srcRcrd.displayName, 
             'Full Text': srcRcrd.description || '',            
+            'Abstract': citRcrd.abstract || '',            
             'Citation Type': citRcrd.citationType ? citRcrd.citationType.displayName : '', 
             'Publication Vol': citRcrd.publicationVolume || '',            
             'Publication Issue': citRcrd.publicationIssue || '',            
@@ -1094,12 +1095,12 @@ $(document).ready(function(){
                     "LinkUrl", "LinkDisplay"],
             },
             "citation": {
-                "add": { "Title": "text", "Volume": "text", 
+                "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
                     "Issue": "text", "Pages": "text", "Tags": "tags", 
                     "Citation Text": "fullTextArea", "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
-                "order": ["CitationText", "Title", "CitationType", "Year", "Volume", 
+                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
                     "Authors" ],
                 "exitHandler": enablePubField

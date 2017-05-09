@@ -55,6 +55,15 @@ class Citation
     /**
      * @var string
      *
+     * @ORM\Column(name="abstract", type="text", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("abstract")
+     */
+    private $abstract;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("publicationVolume")
@@ -225,6 +234,31 @@ class Citation
     {
         return $this->fullText;
     }
+
+    /**
+     * Set abstract.
+     *
+     * @param string $abstract
+     *
+     * @return Citation
+     */
+    public function setAbstract($abstract)
+    {
+        $this->abstract = $abstract;
+
+        return $this;
+    }
+
+    /**
+     * Get abstract.
+     *
+     * @return string
+     */
+    public function getAbstract()
+    {
+        return $this->abstract;
+    }
+
 
     /**
      * Set publicationVolume.
