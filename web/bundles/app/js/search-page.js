@@ -18,6 +18,7 @@
     eif.search = {
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
+        showUpdates: showTodaysSrcUpdates
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -1213,6 +1214,19 @@
         return src.children.map(function(childSrc) {                         //console.log("childSrc = %O", childSrc);
             return getSrcRowData(childSrc, treeLvl + 1);
         });
+    }
+    /**
+     * When the crud form is exited, the grid is reloaded in source view with the
+     * 'interactions updates since' filter set to 'today'.
+     */
+    function showTodaysSrcUpdates() {                                           //console.log("showingUpdated from today")
+        $('#search-focus').val("srcs");
+        selectSearchFocus();
+        window.setTimeout(function() {
+            $('#shw-chngd')[0].checked = true;
+            toggleUpdatedAtFilter();
+            gridOptions.api.expandAll();
+        }, 200);        
     }
 /*================== Filter Functions ========================================*/
     /*------------------ Taxon Filter Updates ---------------------------------*/

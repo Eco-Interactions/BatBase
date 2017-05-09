@@ -82,7 +82,7 @@ $(document).ready(function(){
     /** Returns popup and overlay to their original/default state. */
     function exitCrudFormPopup() {
         hideSearchCrudPopup();
-        eif.search.initSearchGrid();
+        eif.search.showUpdates();
         $("#b-overlay").removeClass("crud-ovrly");
         $("#b-overlay-popup").removeClass("crud-popup");
         $("#b-overlay-popup").empty();
