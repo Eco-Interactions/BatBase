@@ -276,7 +276,9 @@ class CrudController extends Controller
         $getField = 'get'. ucfirst($field);                                     
         
         $curVal = $entity->$getField() ? $entity->$getField()->getId() : null;
-        if ($curVal === $newVal->getId()) { return; }
+        if ($newVal === null) { 
+            if ($curVal === null) { return; }
+        } else if ($curVal === $newVal->getId()) { return; }
 
         if ($edits->editing) { $edits->$field = $curVal; }
         $entity->$setField($newVal);
