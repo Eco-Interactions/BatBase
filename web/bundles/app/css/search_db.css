@@ -147,6 +147,10 @@ button[name="createbttn"] {
 	align-self: flex-end;
 	margin-right: 7px;
 }
+button[name="show-hide-col"] {
+	opacity: .5;
+	cursor: not-allowed;
+}
 /*----- Walkthrough ------*/
 .intro-tips {
 	width: 420px;
