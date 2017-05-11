@@ -1237,13 +1237,13 @@
         focusStorage.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);       //console.log("selectedVals = %O", focusStorage.selectedVals);
         updateFilterStatus();
         rebuildTaxonTree(selTaxonRcrd);
+        if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
         function updateFilterStatus() {
             var curLevel = selTaxonRcrd.level.displayName;
             var taxonName = selTaxonRcrd.displayName;
-            var status = "Filtering on: " + curLevel + " " + taxonName; 
-            clearGridStatus();
-            setExternalFilterStatus(status);
+            focusStorage.focusFltr = curLevel + " " + taxonName; 
+            updateGridFilterStatusMsg();
         }
     } /* End updateTaxonSearch */
     /** The selected taxon's ancestors will be selected in their levels combobox. */
