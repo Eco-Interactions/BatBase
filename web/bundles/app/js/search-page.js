@@ -65,7 +65,7 @@
         $('button[name="reset-grid"]').click(resetDataGrid);
         $("#strt-tut").click(startIntroWalkthrough);
         $("#show-tips").click(showTips);
-        $('#shw-chngd').change(toggleUpdatedAtFilter);
+        $('#shw-chngd').change(toggleTimeUpdatedFilter);
         $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
         $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
     }
@@ -80,7 +80,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
         resetFocusStorage();
-        toggleUpdatedAtFilter();
+        toggleTimeUpdatedFilter();
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         setUpFutureDevInfoBttn();
@@ -1221,7 +1221,7 @@
         selectSearchFocus();
         window.setTimeout(function() {
             $('#shw-chngd')[0].checked = true;
-            toggleUpdatedAtFilter();
+            toggleTimeUpdatedFilter();
         }, 200);        
     }
 /*================== Filter Functions ========================================*/
@@ -1344,8 +1344,8 @@
      * When the publication type dropdown is changed, the grid is rebuilt with data 
      * filtered by the selected type. 
      */
-    function updatePubSearch() {                                                //console.log("\n-----updatePubSearch");
-        var selVal = $("#selPubTypes").val();
+    function updatePubSearch() {                                                
+        var selVal = $("#selPubTypes").val();                                   console.log("\n-----updatePubSearch [%s]", selVal);
         var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
@@ -1687,7 +1687,6 @@
     function afterFilterChanged() {} //console.log("afterFilterChange") 
     /** Resets Grid Status' Active Filter display */
     function beforeFilterChange() {  //console.log("beforeFilterChange")
-        // clearGridStatus();
         updateGridFilterStatusMsg();    
     } 
     /** Returns an obj with all filter models. */
@@ -1717,11 +1716,20 @@
 
         addActiveExternalFilters();
         addActiveGridFilters();
-        setGridFilterStatus(getFilterStatus()); 
+        setFilterStatus();
         
         function addActiveExternalFilters() {
+            addFocusFilters();
+            addUpdatedSinceFilter();
+        }
+        function addFocusFilters() {
             if (focusStorage.focusFltr) { 
                 activeFilters.push(focusStorage.focusFltr);
+            } 
+        }
+        function addUpdatedSinceFilter() {
+            if ($('#shw-chngd')[0].checked) { 
+                activeFilters.push("Time Updated");
             } 
         }
         function addActiveGridFilters() {
@@ -1732,17 +1740,20 @@
                     activeFilters.push(columns[i]); }
             }
         }
+        function setFilterStatus() {
+            if (activeFilters.length > 0) { setGridFilterStatus(getFilterStatus()); 
+            } else { initNoFiltersStatus() }
+        }
         function getFilterStatus() {
             var tempStatusTxt;
-            if (activeFilters.length > 0) {
-                if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
-                    return activeFilters.join(', ') + '.';
-                } else {
-                    tempStatusTxt = $('#xtrnl-filter-status').text();
-                    if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-                        setExternalFilterStatus(tempStatusTxt + ', ');
-                    }
-                    return activeFilters.join(', ') + '.'; }
+            if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
+                return activeFilters.join(', ') + '.';
+            } else {
+                tempStatusTxt = $('#xtrnl-filter-status').text();
+                if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
+                    setExternalFilterStatus(tempStatusTxt + ', ');
+                }
+                return activeFilters.join(', ') + '.'; 
             }
         }
     }
@@ -1759,31 +1770,32 @@
     function initNoFiltersStatus() {
         $('#xtrnl-filter-status').text('Filtering on: ');
         $('#grid-filter-status').text('No Active Filters.');
+        focusStorage.focusFltr = null;
     }
     /*-------------------- Filter By Time Updated ----------------------------*/
     /**
-     * The updatedAt filter is enabled when the filter option in opts-col3 is checked. 
-     * When checked, the radio options, 'Today' and 'Custom', are enabled. 
+     * The time-updated filter is enabled when the filter option in opts-col3 is 
+     * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
      * Note: 'Today' is the default selection. 
      */
-    function toggleUpdatedAtFilter() { 
+    function toggleTimeUpdatedFilter() { 
         var filtering = $('#shw-chngd')[0].checked;
         var opac = filtering ? 1 : .3;
         $('input[name=shw-chngd]').attr({'disabled': !filtering});  
         $('#fltr-tdy')[0].checked = true;
         $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
         if (filtering) { filterInteractionsUpdatedSince([], new Date().today());
-        } else { resetUpdatedAtFilter(); }
+        } else { resetTimeUpdatedFilter(); }
         resetToggleTreeBttn(false);
     }
-    /** Disables the calendar, if shown, and resets grid to original rowData. */
-    function resetUpdatedAtFilter() {
+    /** Disables the calendar, if shown, and resets grid with active filters reapplied. */
+    function resetTimeUpdatedFilter() {
         disableCalendar();
         focusStorage.fltrdRows = null;
         focusStorage.fltrSince = null;
         if (gridOptions.api) { 
             gridOptions.api.setRowData(focusStorage.rowData);
-            applyExternalFilters();
+            syncFilters();
         }
     }
     /** 
@@ -1850,7 +1862,7 @@
      * Filters all interactions in the grid leaving only the records with updates
      * since the datetime specified by the user.
      */
-    function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("rowData = %O", focusStorage.rowData);
+    function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("\nfilterInteractionsUpdatedSince called.");
         var rowData = JSON.parse(JSON.stringify(focusStorage.rowData));
         var fltrSince = dateStr || focusStorage.timeFltr;
         var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
@@ -1858,7 +1870,7 @@
         gridOptions.api.setRowData(updatedRows);
         focusStorage.fltrdRows = updatedRows;
         resetToggleTreeBttn(false);
-        applyExternalFilters();
+        syncFilters();
 
         function addAllRowsWithUpdates(rowObj) { 
             if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
@@ -1877,19 +1889,25 @@
      * When filtering by time updated, some filters will need to be reapplied.
      * Taxa and loation filter rowdata directly, therefore do not need to be reapplied.
      * Source, both auth and pub views, must be reapplied. 
+     * Also updates the grid filter's status message.
      */
-    function applyExternalFilters() {
+    function syncFilters() {
         if (focusStorage.curFocus === "srcs") { applySrcFltrs(); }
+        updateGridFilterStatusMsg();
     }
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {
-        var resets = { 'auths': reapplyAuthFltr, 'pubs': updatePubSearch };
+        var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
         var domain = focusStorage.curDomain;  
         resets[domain]();
     }
     function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
         if (getAuthFilterVal() === "") { return; }
         updateAuthSearch();
+    }
+    function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
+        if ($('#selPubTypes').val() === "all") { return; }
+        updatePubSearch();
     }
     /*-------------------- Unique Values Column Filter -----------------------*/
     /**
@@ -2656,17 +2674,15 @@
         resetMap[focus](); 
     } 
     /** Resets storage props, buttons and filter status. */
-    function resetCurTreeState() {
+    function resetCurTreeState() {                                              //console.log('\n### Restting tree state ###')
         resetCurTreeStorageProps();
         resetToggleTreeBttn(false);
+        if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; } //resets updatedAt grid filter
         updateGridFilterStatusMsg();
-        initNoFiltersStatus();
-        focusStorage.fltrdRows = null;
-        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
     }
     /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
     function resetCurTreeStorageProps() {
-        var props = ['curTree', 'selectedVals'];
+        var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltr'];
         props.forEach(function(prop){ delete focusStorage[prop]; });
         focusStorage.selectedOpts = {};
     }
