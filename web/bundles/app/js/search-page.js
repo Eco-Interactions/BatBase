@@ -5,12 +5,14 @@
      * locations, or sources (grouped by either publications or authors). 
      *
      * userRole = Stores the role of the user.
-     * cal = Stores the flatpickr calendar instance. 
-     * intro = Stores an active tutorial/walk-through instance.
+     * miscCntnr = Container for misc data used at the global level--
+     *      cal: Stores the flatpickr calendar instance. 
+     *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
+     *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
      */
-    var userRole, intro, cal, columnDefs = [], focusStorage = {}; 
+    var userRole, miscCntnr = {}, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -108,7 +110,7 @@
     }
     function setUpFutureDevInfoBttn() {
         var bttn = _util.buildElem('button', { name: 'futureDevBttn', title: getFutureDevMsg(),
-                text: 'Hover for details about future search options.'});  console.log("bttn = %O", bttn)
+                text: 'Hover for details about future search options.'});  
         $(bttn).appendTo('#opts-col3');        
     }
     function getFutureDevMsg() {                                                //console.log("addFutureDevMsg")
@@ -1765,7 +1767,6 @@
     }
     function clearGridStatus() {
         $('#grid-filter-status, #xtrnl-filter-status').empty();
-        // activeFilters = [];
     }
     function initNoFiltersStatus() {
         $('#xtrnl-filter-status').text('Filtering on: ');
@@ -1781,27 +1782,28 @@
     function toggleTimeUpdatedFilter() { 
         var filtering = $('#shw-chngd')[0].checked;
         var opac = filtering ? 1 : .3;
-        $('input[name=shw-chngd]').attr({'disabled': !filtering});  
+        $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
         $('#fltr-tdy')[0].checked = true;
-        $('label[for=fltr-tdy], label[for=fltr-cstm]').css({'opacity': opac});
-        if (filtering) { filterInteractionsUpdatedSince([], new Date().today());
+        $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
+            .css({'opacity': opac});
+        if (filtering) { showInteractionsUpdatedToday();
         } else { resetTimeUpdatedFilter(); }
         resetToggleTreeBttn(false);
     }
     /** Disables the calendar, if shown, and resets grid with active filters reapplied. */
     function resetTimeUpdatedFilter() {
-        disableCalendar();
+        // $('.flatpickr-input').attr({'disabled': true});
         focusStorage.fltrdRows = null;
         focusStorage.fltrSince = null;
         if (gridOptions.api) { 
             gridOptions.api.setRowData(focusStorage.rowData);
-            syncFilters();
+            syncFiltersAndUi();
         }
     }
     /** 
      * Filters the interactions in the grid to show only those modified since the 
-     * user selected time - either 'Today' or a 'Custom' datetime selected using 
-     * the flatpickr calendar.
+     * selected time - either 'Today' or a 'Custom' datetime selected using the 
+     * flatpickr calendar.
      */
     function filterInteractionsByTimeUpdated(e) {                               
         var elem = e.currentTarget;  
@@ -1809,54 +1811,34 @@
         } else { showInteractionsUpdatedToday(); }
     }
     /** 
-     * Instantiates the flatpickr calendar or shows/opens the existing cal. The 
-     * label for the 'Custom' radio is erased and the input enabled.
+     * Instantiates the flatpickr calendar and opens the calendar. If a custom time
+     * was previously selected and stored, it is reapplied.
      */
     function showFlatpickrCal(elem) {  
-        cal = cal || initCal(elem); 
-        $('.flatpickr-input').show();    
-        $('label[for=fltr-cstm]')[0].innerText = ''; 
-        $('.flatpickr-input').attr({'disabled': false});
-        cal.open();                                                             
-        $('.today').focus();                                                   
+        miscCntnr.cal = miscCntnr.cal || initCal(elem); 
+        if (miscCntnr.cstmTimeFltr) {
+            miscCntnr.cal.setDate(miscCntnr.cstmTimeFltr);
+            filterInteractionsUpdatedSince([], miscCntnr.cstmTimeFltr, null);
+        } else {
+            miscCntnr.cal.open();                                                             
+            $('.today').focus();                                                   
+        }
     }    
-    /**
-     * Instantiates the flatpickr calendar, clears the label for the 'Custom' radio,
-     * appends the calendar after the radio and returns the flatpickr instance. 
-     * An onEnter listener is added that will close the calendar, after date selection.
-     */
+    /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
     function initCal(elem) {
         var calOpts = {
             altInput: true,     maxDate: "today",
             enableTime: true,   plugins: [new confirmDatePlugin({})],
             onReady: function() { this.amPM.textContent = "AM"; },
             onClose: filterInteractionsUpdatedSince
-        };                                                                      
-        var input = document.createElement('input');
-        input.id = 'fltr-cal';
-        $('label[for=fltr-cstm]')[0].innerText = ''; 
-        $(elem).after(input);
-        return $(input).flatpickr(calOpts);
+        }; 
+        return $('#time-fltr').flatpickr(calOpts);
     }
-    /**
-     * Disables the calendar, if shown, and filters grid to show interactions with 
-     * updates from 'today', from midnight on. 
-     */
+    /** Filters grid to show interactions with updates since midnight 'today'. */
     function showInteractionsUpdatedToday() {
-        disableCalendar(); 
+        miscCntnr.cal = miscCntnr.cal || initCal();
+        miscCntnr.cal.setDate(new Date().today());
         filterInteractionsUpdatedSince([], new Date().today(), null);
-    }
-    /**
-     * If there is no value selected, the flatpickr input is hidden and the 'Custom'
-     * label readded to the radio option. Otherwise, the input is disabled.
-     */
-    function disableCalendar() { 
-        if (!$('.flatpickr-input').val()) {
-            $('.flatpickr-input').hide();    
-            $('label[for=fltr-cstm]')[0].innerText = 'Custom';
-        } else {
-            $('.flatpickr-input').attr({'disabled': true});
-        }
     }
     /**
      * Filters all interactions in the grid leaving only the records with updates
@@ -1865,12 +1847,13 @@
     function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("\nfilterInteractionsUpdatedSince called.");
         var rowData = JSON.parse(JSON.stringify(focusStorage.rowData));
         var fltrSince = dateStr || focusStorage.timeFltr;
+        var sinceTime = new Date(fltrSince).getTime();                          
         var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
-        focusStorage.timeFltr = dateStr || focusStorage.timeFltr;
+        focusStorage.timeFltr = fltrSince;
         gridOptions.api.setRowData(updatedRows);
         focusStorage.fltrdRows = updatedRows;
         resetToggleTreeBttn(false);
-        syncFilters();
+        syncFiltersAndUi(sinceTime);
 
         function addAllRowsWithUpdates(rowObj) { 
             if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
@@ -1879,21 +1862,28 @@
             return rowObj.children.length > 0;
 
             function checkIntRowForUpdates(row) { 
-                var rowUpdatedAt = new Date(row.updatedAt).getTime();
-                var sinceTime = new Date(fltrSince).getTime();                  //console.log("row [%O}.data.updatedAt = [%s], upd8sSince = [%O], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
+                var rowUpdatedAt = new Date(row.updatedAt).getTime();           //console.log("row [%O}.data.updatedAt = [%s], sinceTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
                 return rowUpdatedAt > sinceTime;
             }
         } /* End addAllRowsWithUpdates */
     } /* End filterInteractionsUpdatedSince */ 
     /**
      * When filtering by time updated, some filters will need to be reapplied.
-     * Taxa and loation filter rowdata directly, therefore do not need to be reapplied.
-     * Source, both auth and pub views, must be reapplied. 
-     * Also updates the grid filter's status message.
+     * (Taxa and loation filter rowdata directly, and so do not need to be reapplied.
+     * Source, both auth and pub views, must be reapplied.)
+     * The grid filter's status message is updated. The time-updated radios are synced.
      */
-    function syncFilters() {
+    function syncFiltersAndUi(sinceTime) {
         if (focusStorage.curFocus === "srcs") { applySrcFltrs(); }
-        updateGridFilterStatusMsg();
+        updateGridFilterStatusMsg();  
+        syncTimeUpdatedRadios(sinceTime);
+    }
+    function syncTimeUpdatedRadios(sinceTime) {
+        if (new Date(new Date().today()).getTime() > sinceTime) { 
+            $('#fltr-cstm')[0].checked = true;  
+            miscCntnr.cstmTimeFltr = sinceTime;
+        } else {
+            $('#fltr-tdy')[0].checked = true; }
     }
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {

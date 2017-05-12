@@ -38,6 +38,9 @@
 	flex: 1 0 484px;  	 /*Don't grow or shrink, width.*/ 
 	justify-content: space-between;
 }
+#time-fltr, .flatpickr-input {
+	margin-top: .2em;
+}
 #futrDevMsg {
 	margin: 0 5px 0 5px;
 }
