@@ -133,29 +133,13 @@ class AjaxDataController extends Controller
         $habitatType = $this->serializeEntity('HabitatType', $serializer, $em);
         $location = $this->serializeEntity('Location', $serializer, $em);
         $locType = $this->serializeEntity('LocationType', $serializer, $em);
-        $unspecifiedLocInts = $this->getInteractionsWithNoLocation($em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'location' => $location,    'habitatType' => $habitatType,   
-            'locationType' => $locType, 'noLocIntIds' => $unspecifiedLocInts
-        ));
+            'locationType' => $locType
+        )); 
         return $response;
-    }
-    /** The only properties are those that later affect how this 'region' will be handled. */
-    private function getInteractionsWithNoLocation($em)
-    {
-        $intRcrdIds = []; 
-        $interactions = $em->getRepository('AppBundle:Interaction')
-            ->findBy(array('location'=> null));   
-        if ( count($interactions) === 0 ) { return null; } 
-        
-        foreach ($interactions as $int)  
-        { 
-            array_push( $intRcrdIds, $int->getId() ); 
-        } 
-
-        return $intRcrdIds; 
     }
     /**
      * Returns serialized data objects for all entities related to Source. 

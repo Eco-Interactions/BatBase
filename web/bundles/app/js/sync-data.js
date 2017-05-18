@@ -405,32 +405,13 @@
     }
     /** [entity]Names - an object with each entity's displayName(k) and id. */
     function deriveAndStoreLocationData(data) {  
-        addUnspecifiedLocation(data.noLocIntIds);
         storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getRegionNames(data.locationType[1].locations, data.location));
+        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
         storeData('topRegionNames', getTopRegionNameData(data));
         storeData('habTypeNames', getTypeNameData(data.habitatType));
         storeData('locTypeNames', getTypeNameData(data.locationType));
     }
-    /** Adds a location object for interactions with no location specified. */
-    function addUnspecifiedLocation(noLocInts) {
-        var locRcrds = _util.getDataFromStorage('location');
-        locRcrds[9999] = {
-            id: 9999,
-            displayName: 'Unspecified',
-            children: [],
-            interactions: noLocInts,
-            locationType: {displayName: 'Region'}
-        };
-        storeData('location', locRcrds);
-    }
-    /** Note: Adds a region for interactions with no location specified. */
-    function getRegionNames(regionIds, locRcrds) {
-        var nameData = getNameDataObj(regionIds, locRcrds);
-        nameData['Unspecified'] = 9999;
-        return nameData;
-    }
-    /** Note: Adds a top region for interactions with no location specified. */
+    /** Note: Top regions are the trunk of the location data tree. */
     function getTopRegionNameData(locData) {  
         var data = {};
         var regions = locData.locationType[1].locations;
@@ -438,7 +419,6 @@
         for (var id in rcrds) {
             if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
         }
-        data['Unspecified'] = 9999; 
         return data;
     }
     /**

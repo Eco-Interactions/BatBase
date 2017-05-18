@@ -302,7 +302,7 @@
         function getLocationData(locObj) {
             getSimpleLocData();
             getOtherLocData();
-            /** Add any present scalar data. */
+            /** Add any present scalar location data. */
             function getSimpleLocData() {
                 var props = {
                     location: 'displayName',    gps: 'gpsData',
@@ -313,7 +313,7 @@
                    if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
                 }
             }
-            /** Add data from property objects. */
+            /** Adds relational location data. Skips 'unspecified' regions. */
             function getOtherLocData() {
                 var props = {
                     country: "country",         region: "region",
@@ -321,6 +321,7 @@
                 };
                 for (var p in props) {
                     if (locObj[props[p]]) { 
+                        if (p === "region" && locObj[props[p]].displayName === "Unspecified") { continue; }
                         rowData[p] = locObj[props[p]].displayName; } 
                 }                
             }
@@ -1307,7 +1308,8 @@
             "Asia": ["East Asia", "South & Southeast Asia", "West & Central Asia"],
             "Africa": ["Africa", "Sub-Saharan Africa"],
             "Central America": ["Central America", "Central & South America"],
-            "South America": ["South America", "Central & South America"]
+            "South America": ["South America", "Central & South America"],
+            "Unspecified": [null]
         };
         return models[filterVal] || [filterVal];
     }

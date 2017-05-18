@@ -1642,6 +1642,7 @@ $(document).ready(function(){
         function addAdditionalEntityData(entity) {
             ifHasParentFormVals(entity);
             ifHasAdditionalFields(entity);  
+            handleUnspecifiedLocs(entity);
         }
         /** Adds data from a form element at the parent form level, if needed. */
         function ifHasParentFormVals(entity) {
@@ -1688,6 +1689,15 @@ $(document).ready(function(){
                 if (formVals[field]) { fullName.push(formVals[field]) };
             });
             formVals.fullName = fullName.join(" ");
+        }
+        /**
+         * If no location is selected for an interaction record, the country field 
+         * is checked for a value. If set, it is added as the interaction's location;
+         * if not, the 'Unspecfied' location, id 439, is added.
+         */
+        function handleUnspecifiedLocs(entity) {
+            if (!entity !== "Interaction" || formVals.location) { return; }
+            formVals.location = formVals.country || 439;   
         }
     } /* End getFormValuesAndSubmit */
     /**
