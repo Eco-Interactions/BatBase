@@ -467,10 +467,19 @@ $(document).ready(function(){
     /*-------------- Country -------------------------------------------------*/
     /** Returns a form row with a country combobox populated with all countries. */
     function buildCountryFieldRow() {  
-        var cntryOpts = getOptsFromStoredData("countryNames");                  //console.log("buildingCountryFieldRow. ");
+        var cntryOpts = getCntryOpts();                                         //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(
             cntryOpts, {id: "Country-sel", class: "lrg-field"});
         return buildFormRow("Country", selElem, "top", false);
+    }
+    /**
+     * Adds an 'Unspecified' option with its region's id. This will populate the 
+     * location drop-down with all habitat locations on selection.
+     */ 
+    function getCntryOpts() {
+        var opts = getOptsFromStoredData("countryNames");                       
+        opts.push({ value: 439, text: 'Unspecified' });
+        return opts;
     }
     /** 
      * When a country is selected, the location dropdown is repopulated with it's 
@@ -517,12 +526,14 @@ $(document).ready(function(){
     }
     /** 
      * When a location is selected, its country is selected in the country combobox, 
-     * which is then disabled. If the location was cleared, restores the country combobox. 
+     * which is then disabled. If the location was cleared, the country combobox
+     * is restored. Note: habitat locations select the 'unspecified', 439, country option.. 
      */
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
-        var locRcrd = cParams.records.location[val];
-        $('#Country-sel')[0].selectize.addItem(locRcrd.country.id, true);
+        var locRcrd = cParams.records.location[val];                            //console.log("location = %O", locRcrd);
+        var cntryValue = locRcrd.country ? locRcrd.country.id : 439;
+        $('#Country-sel')[0].selectize.addItem(cntryValue, true);
         fillLocDetailPanel(val);
         if (!cParams.editing) { $('#Location_pin').focus(); }
     }
