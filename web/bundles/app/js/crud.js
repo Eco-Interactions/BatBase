@@ -554,7 +554,7 @@ $(document).ready(function(){
             'Longitude': locRcrd.longitude || '',
             'Elevation': locRcrd.elevation || '',            
             'Elevation Max': locRcrd.elevationMax || '',            
-            'Elevation Units': locRcrd.elevUnitAbbrv || '',            
+            // 'Elevation Units': locRcrd.elevUnitAbbrv || '',            
         };
     }
     /** Inits the location form and disables the country combobox. */
@@ -1007,7 +1007,7 @@ $(document).ready(function(){
             "CitationType": { name: "Citation Type", change: false, add: false },
             "Class": { name: "Class", change: onLevelSelection, add: initTaxonForm },
             "Country": { name: "Country", id: "#subCountry-sel", change: false, add: false },
-            "ElevationUnits": { name: "Elevation Units", change: false, add: false },
+            // "ElevationUnits": { name: "Elevation Units", change: false, add: false },
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
             "HabitatType":  { name: "Habitat Type", change: false, add: false },
@@ -1127,8 +1127,7 @@ $(document).ready(function(){
                 "exclude": [],
                 "required": ["Display Name", "Location Type", "Country"],
                 "order": ["DisplayName", "LocationType", "Country", "Description", 
-                    "Elevation", "ElevationMax", "ElevationUnits", "HabitatType", 
-                    "Latitude", "Longitude" ],
+                    "Elevation", "ElevationMax", "Latitude", "Longitude", "HabitatType" ], //"ElevationUnits", 
                 "exitHandler": enableCountryField
             },
             "object": {
@@ -1190,8 +1189,8 @@ $(document).ready(function(){
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
                 "Latitude": "text", "Habitat Type": "select", "Location Type": "select",
-                "Country": "edgeCase", "Elevation Units": "select"
-            },
+                "Country": "edgeCase", 
+            }, //"Elevation Units": "select"
             "interaction": { "Interaction Type": "select", "Notes": "fullTextArea", 
                 "Interaction Tags": "tags"
             },
@@ -1340,7 +1339,7 @@ $(document).ready(function(){
             "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
-            "ElevationUnits": [ getElevUnitOpts, null ],
+            // "ElevationUnits": [ getElevUnitOpts, null ],
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
@@ -1370,10 +1369,10 @@ $(document).ready(function(){
         return buildOptsObj(typeObj, Object.keys(typeObj).sort());
     }
     /** Returns an array of elevation unit options objects. */
-    function getElevUnitOpts() {
-        return [ { value: "ft", text: "Feet" }, 
-                 { value: "m", text: "Meters"} ];
-    }
+    // function getElevUnitOpts() {
+    //     return [ { value: "ft", text: "Feet" }, 
+    //              { value: "m", text: "Meters"} ];
+    // }
     /** Sorts an array of options via sort method. */
     function alphaOptionObjs(a, b) {
         var x = a.text.toLowerCase();
@@ -1672,7 +1671,8 @@ $(document).ready(function(){
         /** Adds entity field values not included as inputs in the form. */
         function ifHasAdditionalFields(entity) {
             var getFields = {
-                "Author": getAuthFullName, "Citation": addCitDisplayName
+                "Author": getAuthFullName, "Citation": addCitDisplayName,
+                "Location": addElevUnits
             };
             if (Object.keys(getFields).indexOf(entity) === -1) { return; }
             getFields[entity]();
@@ -1689,6 +1689,10 @@ $(document).ready(function(){
                 if (formVals[field]) { fullName.push(formVals[field]) };
             });
             formVals.fullName = fullName.join(" ");
+        }
+        /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
+        function addElevUnits() {
+            if (formVals.elevation) { formVals.elevUnitAbbrv = "m"; }
         }
         /**
          * If no location is selected for an interaction record, the country field 
@@ -1817,7 +1821,7 @@ $(document).ready(function(){
             },
             "location": {
                 "country": { "location": "parentLoc" },
-                "elevationUnits": { "location": "elevUnitAbbrv" }                
+                // "elevationUnits": { "location": "elevUnitAbbrv" }                
             },
             "publication": { 
                 "authors": { "source": "contributor" },
