@@ -5,14 +5,14 @@
      * locations, or sources (grouped by either publications or authors). 
      *
      * userRole = Stores the role of the user.
-     * miscCntnr = Container for misc data used at the global level--
+     * miscObj = Container for misc data used at the global level--
      *      cal: Stores the flatpickr calendar instance. 
      *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * focusStorage = obj container for misc data used for each focus of the grid.
      */
-    var userRole, miscCntnr = {}, columnDefs = [], focusStorage = {}; 
+    var userRole, miscObj = {}, columnDefs = [], focusStorage = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -1815,12 +1815,12 @@
      * was previously selected and stored, it is reapplied.
      */
     function showFlatpickrCal(elem) {  
-        miscCntnr.cal = miscCntnr.cal || initCal(elem); 
-        if (miscCntnr.cstmTimeFltr) {
-            miscCntnr.cal.setDate(miscCntnr.cstmTimeFltr);
-            filterInteractionsUpdatedSince([], miscCntnr.cstmTimeFltr, null);
+        miscObj.cal = miscObj.cal || initCal(elem); 
+        if (miscObj.cstmTimeFltr) {
+            miscObj.cal.setDate(miscObj.cstmTimeFltr);
+            filterInteractionsUpdatedSince([], miscObj.cstmTimeFltr, null);
         } else {
-            miscCntnr.cal.open();                                                             
+            miscObj.cal.open();                                                             
             $('.today').focus();                                                   
         }
     }    
@@ -1836,8 +1836,8 @@
     }
     /** Filters grid to show interactions with updates since midnight 'today'. */
     function showInteractionsUpdatedToday() {
-        miscCntnr.cal = miscCntnr.cal || initCal();
-        miscCntnr.cal.setDate(new Date().today());
+        miscObj.cal = miscObj.cal || initCal();
+        miscObj.cal.setDate(new Date().today());
         filterInteractionsUpdatedSince([], new Date().today(), null);
     }
     /**
@@ -1881,7 +1881,7 @@
     function syncTimeUpdatedRadios(sinceTime) {
         if (new Date(new Date().today()).getTime() > sinceTime) { 
             $('#fltr-cstm')[0].checked = true;  
-            miscCntnr.cstmTimeFltr = sinceTime;
+            miscObj.cstmTimeFltr = sinceTime;
         } else {
             $('#fltr-tdy')[0].checked = true; }
     }
@@ -2295,7 +2295,8 @@
         window.setTimeout(startIntroWalkthrough, 250); 
     }
     function startIntroWalkthrough(startStep){
-        if (intro) {                                                            //console.log("intro = %O", intro)
+        if (miscObj.intro) {                                                    //console.log("intro = %O", intro)
+            var intro = miscObj.intro;
             intro.exit() 
         } else { 
             buildIntro();
