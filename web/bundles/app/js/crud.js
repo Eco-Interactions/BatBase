@@ -1639,18 +1639,42 @@ $(document).ready(function(){
          * Additional field values are added at @ifHasAdditionalFields.
          */
         function addAdditionalEntityData(entity) {
-            ifHasParentFormVals(entity);
-            ifHasAdditionalFields(entity);  
-            handleUnspecifiedLocs(entity);
+            var dataHndlrs = {
+                "Author": [ getAuthFullName ],
+                "Citation": [ getPubFieldData, addCitDisplayName ],
+                "Location": [ addElevUnits, handleUnspecifiedLocs ],
+                "Taxon": [ getTaxonData ]
+            };
+            dataHndlrs[entity].forEach(function(func) { func(); });
         }
-        /** Adds data from a form element at the parent form level, if needed. */
-        function ifHasParentFormVals(entity) {
-            var fieldHndlrs = { "Citation": getPubFieldData, "Taxon": getTaxonData };
-            if (Object.keys(fieldHndlrs).indexOf(entity) === -1) { return; }
-            fieldHndlrs[entity]();                                              //console.log("new fieldName = ", newField)
+        /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
+        function getAuthFullName() { 
+            var nameFields = ["firstName", "middleName", "lastName"];
+            var fullName = [];
+            nameFields.forEach(function(field) {
+                if (formVals[field]) { fullName.push(formVals[field]) };
+            });
+            formVals.fullName = fullName.join(" ");
         }
         function getPubFieldData() {
             formVals.publication = $('#Publication-sel').val();
+        }
+        /** Adds 'displayName', which will be added to both the form data objects. */
+        function addCitDisplayName() {
+            formVals.displayName = formVals.title;
+        }
+        /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
+        function addElevUnits() {
+            if (formVals.elevation) { formVals.elevUnitAbbrv = "m"; }
+        }
+        /**
+         * If no location is selected for an interaction record, the country field 
+         * is checked for a value. If set, it is added as the interaction's location;
+         * if not, the 'Unspecfied' location, id 439, is added.
+         */
+        function handleUnspecifiedLocs(entity) {
+            if (!entity !== "Interaction" || formVals.location) { return; }
+            formVals.location = formVals.country || 439;   
         }
         function getTaxonData() {
             formVals.parentTaxon = getParentTaxon(cParams.formTaxonLvl);
@@ -1668,42 +1692,7 @@ $(document).ready(function(){
             } 
             return cParams.taxon.realmId;
         }
-        /** Adds entity field values not included as inputs in the form. */
-        function ifHasAdditionalFields(entity) {
-            var getFields = {
-                "Author": getAuthFullName, "Citation": addCitDisplayName,
-                "Location": addElevUnits
-            };
-            if (Object.keys(getFields).indexOf(entity) === -1) { return; }
-            getFields[entity]();
-        }
-        /** Adds 'displayName', which will be added to both the form data objects. */
-        function addCitDisplayName() {
-            formVals.displayName = formVals.title;
-        }
-        /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
-        function getAuthFullName() { 
-            var nameFields = ["firstName", "middleName", "lastName"];
-            var fullName = [];
-            nameFields.forEach(function(field) {
-                if (formVals[field]) { fullName.push(formVals[field]) };
-            });
-            formVals.fullName = fullName.join(" ");
-        }
-        /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
-        function addElevUnits() {
-            if (formVals.elevation) { formVals.elevUnitAbbrv = "m"; }
-        }
-        /**
-         * If no location is selected for an interaction record, the country field 
-         * is checked for a value. If set, it is added as the interaction's location;
-         * if not, the 'Unspecfied' location, id 439, is added.
-         */
-        function handleUnspecifiedLocs(entity) {
-            if (!entity !== "Interaction" || formVals.location) { return; }
-            formVals.location = formVals.country || 439;   
-        }
-    } /* End getFormValuesAndSubmit */
+    } /* End getFormValueData */
     /**
      * Builds a form data object @buildFormData. Sends it to the server @ajaxFormData
      */
