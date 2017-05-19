@@ -409,7 +409,7 @@ $(document).ready(function(){
     function getCitDetailDataObj(srcRcrd) {  
         var citRcrd = _util.getDataFromStorage('citation')[srcRcrd.citation];   //console.log("srcRcrd = %O, citRcrd = %O", srcRcrd, citRcrd);
         return {
-            'Title': srcRcrd.displayName, 
+            'Title': citRcrd.title, 
             'Full Text': srcRcrd.description || '',            
             'Abstract': citRcrd.abstract || '',            
             'Citation Type': citRcrd.citationType ? citRcrd.citationType.displayName : '', 
@@ -1641,7 +1641,7 @@ $(document).ready(function(){
         function addAdditionalEntityData(entity) {
             var dataHndlrs = {
                 "Author": [ getAuthFullName ],
-                "Citation": [ getPubFieldData, addCitDisplayName ],
+                "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
                 "Location": [ addElevUnits, handleUnspecifiedLocs ],
                 "Taxon": [ getTaxonData ]
             };
@@ -1662,6 +1662,13 @@ $(document).ready(function(){
         /** Adds 'displayName', which will be added to both the form data objects. */
         function addCitDisplayName() {
             formVals.displayName = formVals.title;
+        }
+        /** 
+         * Appends '-citation' to citations attributed to entire books to maintain
+         * unique display names for both the publication and its citation.
+         */
+        function ifBookType() { 
+            if (formVals.citationType == 4) { formVals.displayName += "-citation"; }
         }
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
         function addElevUnits() {
