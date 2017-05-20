@@ -11,7 +11,7 @@ $(document).ready(function(){
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.crud = {
-        editInt: editInteraction
+        editEntity: editEntity
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -31,24 +31,25 @@ $(document).ready(function(){
     function buildSearchPgCrudUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initInteractionCrudWindow.bind(null, "create", null));
+        $(bttn).click(initInteractionCrudWindow.bind(null, "create", "Interaction", null));
         $("#opts-col1").append(bttn);
     }
     /*---------- Shared CRUD window methods ----------------------------------*/
     /**
      * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
      */
-    function initInteractionCrudWindow(action, id) {                            //console.log("***initInteraction*** - ", action);
+    function initInteractionCrudWindow(action, entity, id) {                    //console.log("***initInteraction*** - ", action);
         var hdrs = { create: "New", edit: "Editing" };
         var views = { create: initCreateView, edit: Function.prototype };
-        showCrudFormPopup(hdrs[action], id);
+        showCrudFormPopup(hdrs[action], entity, id);
         views[action]();
     }
     /** Builds and shows the popup crud-form's structural elements. */
-    function showCrudFormPopup(actionHdr, id) {
+    function showCrudFormPopup(actionHdr, entity, id) {
+        var title = actionHdr + " " + entity;
         $("#b-overlay-popup").addClass("crud-popup");
         $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").append(getCrudWindowElems(actionHdr + " Interaction", id));
+        $("#b-overlay-popup").append(getCrudWindowElems(entity, id, title));
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
     function hideSearchCrudPopup() {
@@ -58,8 +59,8 @@ $(document).ready(function(){
      * Returns the crud window elements - the form and the detail panel.
      * section>(div#crud-main(header, form), div#crud-details(hdr, pub, cit, loc), footer)
      */
-    function getCrudWindowElems(title, id) {
-        return [getCrudMainForm(title), getFormDetailElems(id)];
+    function getCrudWindowElems(entity, id, title) {
+        return [getCrudMainForm(title), getFormDetailElems(entity, id)];
     }
     function getCrudMainForm(title) {
         var crudWin = _util.buildElem("div", { "id": "crud-main" });
@@ -82,16 +83,16 @@ $(document).ready(function(){
     /** Returns popup and overlay to their original/default state. */
     function exitCrudFormPopup() {
         hideSearchCrudPopup();
-        eif.search.showUpdates();
+        // eif.search.showUpdates();
         $("#b-overlay").removeClass("crud-ovrly");
         $("#b-overlay-popup").removeClass("crud-popup");
         $("#b-overlay-popup").empty();
     }
-    function getFormDetailElems(id) {  
+    function getFormDetailElems(entity, id) {  
         var intIdStr = id ? "Id: " + id : '';
         var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
         $(detailCntnr).append(getExitButton());
-        $(detailCntnr).append(_util.buildElem("h3", { "text": "Interaction Details" }));
+        $(detailCntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
         $(detailCntnr).append(_util.buildElem("p", { "text": intIdStr }));
         $(detailCntnr).append(initDetailDiv('pub'));
         $(detailCntnr).append(initDetailDiv('cit'));
@@ -152,14 +153,14 @@ $(document).ready(function(){
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
      */
-    function initCrudParams(action, id) {                                       //console.log("####cPs = %O", cParams)
+    function initCrudParams(action, entity, id) {                               //console.log("####cPs = %O", cParams)
         cParams = {
             editing: id,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
-        initFormLevelParamsObj("interaction", "top", null, false, action);
+        initFormLevelParamsObj(entity, "top", null, false, action);
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -186,24 +187,31 @@ $(document).ready(function(){
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form ----------------------------------------------------------*/
-    function editInteraction(id) {                                              console.log("editing ", id);
-        initCrudParams("edit", id);
-        initInteractionCrudWindow("edit", id);
-        initEditForm(id);
+    /** Shows the entity's edit form in a pop-up window on the search page. */
+    function editEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
+        initCrudParams("edit", entity, id);
+        initInteractionCrudWindow("edit", _util.ucfirst(entity), id);
+        initEditForm(id, entity);    
     }
-    /**
-     * Inits the interaction form, aka top-form, filled with all existing data for 
-     * the record. The all fields for the interaction can be modified and saved 
-     * within the form. 
-     */
-    function initEditForm(id) {                                                 //console.log("initEditForm");
+    /** Inits the edit top-form, filled with all existing data for the record. */
+    function initEditForm(id, entity) {                                         //console.log("initEditForm");
         var formCntnr = buildCrudFormCntnr();
-        var formFields = buildTopFormFields('edit');                            //console.log("formFields = %O", formFields);
+        var formFields = entity === "interaction" ? 
+            buildIntFormFields('edit') : buildEditFormFields(entity);           //console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
-        $('#crud-main').append(formCntnr);      
-        finishFormBuild();
-        fillExistingData(id)
+        $('#crud-main').append(formCntnr);     
+        if (entity === "interaction") { 
+            finishFormBuild(); 
+            fillExistingData(id);
+        } else {
+            initSubFormComboboxes(entity); 
+            $('#top-cancel').unbind('click').click(exitCrudFormPopup);
+        }
     }      
+    function buildEditFormFields(entity) {
+        var fields =  buildSubForm(entity, {}, "top", null, "edit");                            
+        return fields.concat(buildFormBttns(_util.ucfirst(entity), "top", "edit"));
+    }
     /** Fills form with existing data for the interaction. */
     function fillExistingData(id) {
         var intRcrd = getInteractionRecord(id);                                 //console.log("intRcrd = %O", intRcrd);
@@ -258,7 +266,7 @@ $(document).ready(function(){
      * Init the crud form and append into the crud window @initCrudForm. 
      */
     function initCreateView() {
-        initCrudParams("create");
+        initCrudParams("create", "interaction");
         initCreateForm();
     }       
     /**
@@ -269,7 +277,7 @@ $(document).ready(function(){
      */
     function initCreateForm() {
         var formCntnr = buildCrudFormCntnr();
-        var formFields = buildTopFormFields('create');                          //console.log("formFields = %O", formFields);
+        var formFields = buildIntFormFields('create');                          //console.log("formFields = %O", formFields);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);      
         finishFormBuild();
@@ -311,8 +319,8 @@ $(document).ready(function(){
         });
     }
 /*-------------- Top Form Helpers ----------------------------------------------------------------*/
-    /** Builds and returns all top-form elements. */
-    function buildTopFormFields(action) {
+    /** Builds and returns all interaction-form elements. */
+    function buildIntFormFields(action) {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
             buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
             buildIntTagField, buildIntNotesField ]; 
@@ -1074,9 +1082,9 @@ $(document).ready(function(){
      * Builds all fields for sub-form and returns the completed row elems.
      * Also inits the crud params for the sub-form in the global cParams obj.
      */
-    function buildSubForm(entity, fieldVals, level, pSel) {
+    function buildSubForm(entity, fieldVals, level, pSel, action) {
         var formConfg = getSubFormConfg(entity);                                //console.log("typeFormConfg = %O", typeFormConfg)
-        initFormLevelParamsObj(entity, level, pSel, formConfg, "create");
+        initFormLevelParamsObj(entity, level, pSel, formConfg, (action || "create"));
         return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
     /**
@@ -1327,8 +1335,10 @@ $(document).ready(function(){
     function buildSubCountryElem(entity, field) {
         var subCntrySel = buildSelectElem(entity, field);
         subCntrySel.id = "subCountry-sel";
-        if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
-        enableCombobox('#Country-sel', false);
+        if ($('#Country-sel').length) { // when editing a location, there is no 'top' country field
+            if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
+            enableCombobox('#Country-sel', false);
+        }
         return subCntrySel;
     }
     /* ---------- Option Builders ---------------------------------------------*/
@@ -1645,6 +1655,7 @@ $(document).ready(function(){
                 "Location": [ addElevUnits, handleUnspecifiedLocs ],
                 "Taxon": [ getTaxonData ]
             };
+            if (!dataHndlrs[entity]) { return; }
             dataHndlrs[entity].forEach(function(func) { func(); });
         }
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
@@ -1923,7 +1934,7 @@ $(document).ready(function(){
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
         showSuccessMsg("New Interaction successfully created.");
-        initCrudParams("create");
+        initCrudParams("create", "interaction");
         resetTopForm(vals);
     }
     /** Shows a form-submit success message at the top of the interaction form. */
