@@ -288,6 +288,7 @@
             treeLvl: treeLvl,
             type: "intRcrd", 
             id: intRcrd.id,
+            entity: "Interaction",
             interactionType: intRcrd.interactionType.displayName,
             citation: intRcrd.source.description,
             subject: getTaxonName(intRcrd.subject),
@@ -602,6 +603,7 @@
         var intCount = getIntCount(taxon); 
         return {
             id: taxon.id,
+            entity: "Taxon",
             name: name,
             isParent: true,                     
             parentTaxon: taxon.parent,
@@ -656,6 +658,7 @@
             if (getIntCount(curTaxon) !== null) { 
                 childRows.push({
                     id: curTaxon.id,
+                    entity: "Taxon",
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
                     open: domainIds.indexOf(curTaxon.id) === -1 ? false : 
@@ -903,6 +906,7 @@
     function getLocRowData(locRcrd, treeLvl) {                                  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
         return {
             id: locRcrd.id,
+            entity: "Location",
             name: locRcrd.displayName,  /* Interaction rows have no name to display. */
             isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
             open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
@@ -940,6 +944,7 @@
             if (intsAry.length > 0) { 
                 childRows.push({
                     id: locRcrd.id,
+                    entity: "Location",
                     name: 'Unspecified ' + locName + ' Interactions',
                     isParent: true,
                     open: false,
@@ -1188,10 +1193,11 @@
         loadGrid(treeName);
     }
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
-        var detailId = focusStorage.curDomain === "pubs" && src.publication ? 
-            src.publication.id : null;  
+        var entity = getSrcEntity(src, treeLvl);
+        var detailId = entity === "Publication" ? src.publication.id : null;  
         return {
             id: src.id,
+            entity: entity,
             pubId: detailId,
             name: src.displayName,
             isParent: true,      
@@ -1202,6 +1208,12 @@
             interactions: src.isDirect,   //Only rows with interaction are colored
         };  
     } 
+    function getSrcEntity(src, treeLvl) {  
+        if (focusStorage.curDomain === "auths") { 
+            return treeLvl === 0 ? "Author" : "Citation";
+        }
+        return src.publication ? "Publication" : "Citation";
+    }
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
      * for each source node in the tree.
@@ -1617,15 +1629,17 @@
         var value = params.value || null;
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
-    /** Adds an edit pencil for all interaction rows bound to an edit method. */
+    /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
     function addEditPencil(params) {                                            
-        var name = params.data.name || null; 
-        var id = params.data.id;
+        return getPencilHtml(params.data.id, params.data.entity, eif.crud.editEntity);
+    }
+    function getPencilHtml(id, entity, editFunc) {
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
-            class="grid-edit" title="Edit Interaction `+id+`" alt="Edit Interaction">`;
+            class="grid-edit" title="Edit `+entity+`" alt="Edit `+entity+`">`;
         $('#search-grid').off('click', '#edit'+id);
-        $('#search-grid').on('click', '#edit'+id, eif.crud.editInt.bind(null, id));
-        return name === null ? editPencil : null;
+        $('#search-grid').on(
+            'click', '#edit'+id, eif.crud.editEntity.bind(null, id, _util.lcfirst(entity)));
+        return editPencil;
     }
     /*================== Row Styling =========================================*/
     /**
