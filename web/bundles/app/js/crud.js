@@ -374,9 +374,10 @@ $(document).ready(function(){
      * returned and thus selected in the combobox
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
-        if ($('#sub-form').length !== 0) { return openSubFormError('Publication', null, "sub"); }
+        var formLvl = getSubFormLvl("sub");
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Publication', null, formLvl); }
         $('#CitationTitle_row').after(initSubForm(
-            "publication", "sub", "flex-row med-form", {"Title": val}, "#Publication-sel"));
+            "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initSubFormComboboxes("publication");
         $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
@@ -437,9 +438,10 @@ $(document).ready(function(){
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        if ($('#sub-form').length !== 0) { return openSubFormError('CitationTitle', '#CitationTitle-sel', "sub"); }
+        var formLvl = getSubFormLvl("sub");
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('CitationTitle', '#CitationTitle-sel', formLvl); }
         $('#CitationTitle_row').after(initSubForm(
-            "citation", "sub", "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
+            "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
         initSubFormComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
@@ -567,9 +569,10 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        if ($('#sub-form').length !== 0) { return openSubFormError('Location', null, "sub"); }
+        var formLvl = getSubFormLvl("sub");
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Location', null, formLvl); }
         $('#Location_row').after(initSubForm(
-            "location", "sub", "flex-row med-form", {"Display Name": val}, "#Location-sel"));
+            "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
         $('#DisplayName_row input').focus();
@@ -597,10 +600,11 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectSelect() {                                              //console.log("initSubjectSelect val = %O", $('#Subject-sel').val())
-        if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Subject'); }  
+        var formLvl = getSubFormLvl("sub");
+        if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', formLvl); }  
         setTaxonParams('Subject', 2);
         $('#Subject_row').append(initSubForm(
-            "subject", "sub", "sml-left sml-form", {}, "#Subject-sel"));
+            "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
         initSubFormComboboxes("subject");           
         finishTaxonSelectUi("Subject");  
         enableCombobox('#Object-sel', false);
@@ -613,10 +617,11 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
-        if ($('#sub-form').length !== 0) { return errIfAnotherSubFormOpen('Object'); }
+        var formLvl = getSubFormLvl("sub");
+        if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
         setTaxonParams('Object', getSelectedRealm($('#Object-sel').val()));
         $('#Object_row').append(initSubForm(
-            "object", "sub", "sml-right sml-form", {}, "#Object-sel"));
+            "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
         initSubFormComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(cParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
@@ -631,9 +636,9 @@ $(document).ready(function(){
         return taxon.domain.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
-    function errIfAnotherSubFormOpen(role) {
-        if (cParams.forms['sub'].entity === _util.lcfirst(role)) {return;}
-        openSubFormError(role, null, "sub");
+    function errIfAnotherSubFormOpen(role, formLvl) {
+        if (cParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
+        openSubFormError(role, null, formLvl);
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -641,8 +646,9 @@ $(document).ready(function(){
      * Object' form is built and displayed, unless the object is already selected.
      */
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
-        if (val === "" || isNaN(parseInt(val))) { return; } 
-        $('#sub-form').remove();
+        if (val === "" || isNaN(parseInt(val))) { return; }         
+        var formLvl = getSubFormLvl("sub");
+        $('#'+formLvl+'-form').remove();
         enableObjField();
         if (!cParams.editing) { $('#Subject_pin').focus(); }
     }
@@ -653,7 +659,8 @@ $(document).ready(function(){
      */
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
-        $('#sub-form').remove();
+        var formLvl = getSubFormLvl("sub");
+        $('#'+formLvl+'-form').remove();
         enableSubjField();
         if (!cParams.editing) { $('#Object_pin').focus(); }
     }
@@ -684,7 +691,8 @@ $(document).ready(function(){
      * or brings the first level-combo into focus. Clears the top-form [role] combo. 
      */
     function finishTaxonSelectUi(role) {
-        var selCntnr = role === "Subject" ? "#sub-form" : "#realm-lvls";
+        var formLvl = getSubFormLvl("sub");
+        var selCntnr = role === "Subject" ? "#"+formLvl+"-form" : "#realm-lvls";
         customizeElemsForTaxonSelectForm(role);
         if (!$('#'+role+'-sel').val()) { focusFirstCombobox(selCntnr);   
         } else { onLevelSelection($('#'+role+'-sel').val()); }
@@ -693,11 +701,12 @@ $(document).ready(function(){
     /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
     function initTaxonForm(val) { 
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
+        var formLvl = getSubFormLvl("sub2");
         cParams.formTaxonLvl = selLvl;
         $('#'+selLvl+'_row').append(initSubForm(
-            "taxon", "sub2", "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
+            "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
         initSubFormComboboxes("taxon");                     
-        enableSubmitBttn("#sub2-submit");
+        enableSubmitBttn("#"+formLvl+"-submit");
         return { "value": "", "text": "Creating "+selLvl+"..." };
     }
     /**
@@ -720,8 +729,9 @@ $(document).ready(function(){
      * with the taxa at that level. 
      */
     function buildAndAppendRealmElems(realm) {
+        var formLvl = getSubFormLvl("sub2");
         var realmElems = _util.buildElem("div", { id: "realm-lvls" });
-        $(realmElems).append(buildSubForm(realm, {}, "sub2", null));
+        $(realmElems).append(buildSubForm(realm, {}, formLvl, null));
         $('#Realm_row').append(realmElems);
     }
     /** Adds a close button. Updates the Header and the submit/cancel buttons. */
@@ -788,8 +798,9 @@ $(document).ready(function(){
      */
     function onLevelSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return; } 
+        var formLvl = getSubFormLvl("sub");
         repopulateCombosWithRelatedTaxa(val);
-        enableSubmitBttn('#sub-submit');             
+        enableSubmitBttn('#'+formLvl+'-submit');             
     }
     /**
      * Repopulates the comboboxes when a taxon is selected from one. The selected
@@ -888,11 +899,13 @@ $(document).ready(function(){
      *     name, aka val, is it's only required field.
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
-        if ($('#sub2-form').length !== 0) { return openSubFormError('Publisher', null, "sub2"); }
+        var formLvl = getSubFormLvl("sub2");
+        var prntLvl = getNextFormLevel("parent", formLvl);
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Publisher', null, formLvl); }
         $('#Publisher_row').append(initSubForm(
-            "publisher", "sub2", "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
-        enableSubmitBttn("#sub2-submit");
-        disableSubmitBttn("#sub-submit");
+            "publisher", formLvl, "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
+        enableSubmitBttn("#"+formLvl+"-submit");
+        disableSubmitBttn("#"+prntLvl+"-submit");
         $('#DisplayName_row input').focus();
         return { "value": "", "text": "Creating Publisher..." };
     }
@@ -910,29 +923,32 @@ $(document).ready(function(){
     }
     /** Builds a new, empty author combobox */
     function buildNewAuthorSelect(cnt, val) {
-        var parentFormEntity = cParams.forms.sub.entity;
+        var prntLvl = getSubFormLvl("sub");
+        var parentFormEntity = cParams.forms[prntLvl].entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
         $("#Authors_sel-cntnr").append(
             buildSelectElem( parentFormEntity, "Authors", cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
-        initSelectCombobox(selConfg, "sub");
+        initSelectCombobox(selConfg, prntLvl);
         $("#Authors-sel"+cnt)[0].selectize.removeOption(val);
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
      * built, appended to the author field row, and an option object is returned 
-     * to be selected in the combobox. Unless there is already a sub2Form, where 
-     * a message will be shown telling the user to complete the open sub2 form
-     * and the form init canceled.
+     * to be selected in the combobox. Unless there is already an open form at
+     * this level , where a message will be shown telling the user to complete 
+     * the open form and the form init will be canceled.
      */
     function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
         var authCnt = $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
-        if ($('#sub2-form').length !== 0) { return openSubFormError('Authors', parentSelId, "sub2"); }
+        var formLvl = getSubFormLvl("sub2");
+        var prntLvl = getNextFormLevel("parent", formLvl);
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Authors', parentSelId, formLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", "sub2", "sml-left sml-form", {"Display Name": val}, parentSelId));
-        disableSubmitBttn("#sub-submit");
+            "author", formLvl, "sml-left sml-form", {"Display Name": val}, parentSelId));
+        disableSubmitBttn("#"+prntLvl+"-submit");
         return { "value": "", "text": "Creating Author..." };
     }
     /**
@@ -1574,6 +1590,15 @@ $(document).ready(function(){
             formLvls[formLvls.indexOf(curLvl) - 1] : 
             formLvls[formLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
+    }
+    /** 
+     * Returns the sub form's lvl. If the top form is not the interaction form,
+     * the passed form lvl is reduced by one and returned. 
+     */
+    function getSubFormLvl(intFormLvl) {  
+        var formLvls = cParams.formLevels;
+        return cParams.forms.top.entity === "interaction" ? 
+            intFormLvl : formLvls[formLvls.indexOf(intFormLvl) - 1];
     }
     /*------------------ Form Submission Data-Prep Methods -------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
