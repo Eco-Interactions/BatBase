@@ -147,7 +147,7 @@ $(document).ready(function(){
      * Sets the global cParams obj with the params necessary throughout the 
      * crud form interface. 
      * -- Property descriptions:
-     * > editing - Stores the id of the entity record being edited.
+     * > editing - Stores the id of the entity record(s) being edited. (Detail ids are added later)
      * > forms - Container for form-specific params 
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
@@ -155,7 +155,7 @@ $(document).ready(function(){
      */
     function initCrudParams(action, entity, id) {                               //console.log("####cPs = %O", cParams)
         cParams = {
-            editing: id,
+            editing: { core: id || null, detail: null },
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
@@ -202,28 +202,31 @@ $(document).ready(function(){
         $('#crud-main').append(formCntnr);     
         if (entity === "interaction") { 
             finishFormBuild(); 
-            fillExistingData(id);
         } else {
             initSubFormComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitCrudFormPopup);
         }
+        fillExistingData(entity, id);
     }      
+    /** Returns the passed entity's form fields. */
     function buildEditFormFields(entity) {
         var fields =  buildSubForm(entity, {}, "top", null, "edit");                            
         return fields.concat(buildFormBttns(_util.ucfirst(entity), "top", "edit"));
     }
-    /** Fills form with existing data for the interaction. */
-    function fillExistingData(id) {
-        var intRcrd = getInteractionRecord(id);                                 //console.log("intRcrd = %O", intRcrd);
+    /** Fills form with existing data for the entity being edited. */
+    function fillExistingData(entity, id) {
+        if (entity === "interaction") { fillIntData(id); 
+        } else { fillSubEntData(entity, id); }
+        enableSubmitBttn('#top-submit');
+    }
+    /** TODO: Refactor */
+    function fillIntData(id) {
+        var intRcrd = getEntityRecord("interaction", id);                       
         for (var prop in intRcrd) {
             if (intRcrd.hasOwnProperty(prop) &&  prop !== "id") {
                 fillIntField(prop, intRcrd);
             }
         }
-    }
-    function getInteractionRecord(id) {
-        var ints = _util.getDataFromStorage("interaction");                     //console.log("id = %s, ints = %O", id, ints)
-        return ints[id];
     }
     /** Calls the set method for the passed field. */
     function fillIntField(field, rcrd) {                                        //console.log("field = %s, rcrd = %O", field, rcrd);
@@ -259,6 +262,74 @@ $(document).ready(function(){
         tags.forEach(function(tag){
             $('#InteractionTags-sel')[0].selectize.addItem(tag.id);
         });
+    }
+    function fillSubEntData(entity, id) {
+        var srcs = ["author", "citation", "publication", "publisher"];
+        if (srcs.indexOf(entity) !== -1) { return fillSrcFormFields(entity, id); }
+        // var rcrd = getEntityRecord(entity, id);                              console.log("fillSubEntData [%s] [%s] = %O", entity, id, rcrd);
+        // Code this
+    }
+    function fillSrcFormFields(entity, id) {
+        var src = getEntityRecord("source", id);
+        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFormFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
+        var fields = getSourceFields(entity);
+        fillFields(src, fields.core, fields.detail.exclude);
+        fillFields(detail, fields.detail.add, []);
+        setAdditionalFields(entity, src);
+        cParams.editing.detail = detail.id;
+    }
+    function getSourceFields(entity) {
+        var fields = {
+            core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity)
+        };
+        return fields;
+    }
+    function setAdditionalFields(entity, srcRcrd) {
+        setTitleField(entity, srcRcrd);
+        setPublisherField(entity, srcRcrd);
+        addAuthors(entity, srcRcrd);
+    }
+    function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
+        if (["publication", "citation"].indexOf(entity) !== -1) {
+            $('#Title_row input[type="text"]').val(srcRcrd.displayName);
+        }
+    }
+    function setPublisherField(entity, srcRcrd) {
+        if (entity !== 'publication') { return; }
+        setSelect("Publisher", "parent", srcRcrd)
+    }
+    function addAuthors(entity, srcRcrd) {
+        var cnt = 0;
+        if (["publication", "citation"].indexOf(entity) !== -1) {
+            srcRcrd.contributors.forEach(function(authId) {
+                selectAuthor(cnt++, authId)
+            });
+        }
+    }
+    function fillFields(rcrd, fields, excluded) {
+        var fieldHndlrs = {
+            "text": setTextField, "textArea": setTextArea, "select": setSelect, 
+            "fullTextArea": setTextField, "multiSelect": Function.prototype
+        };
+        for (var field in fields) {  
+            if (excluded.indexOf(field) !== -1) { continue; }                   //console.log("field type = [%s]. fields = [%O] fieldHndlr = %O", fields[field], fields, fieldHndlrs[fields[field]]);
+            addDataToField(field, fieldHndlrs[fields[field]], rcrd);
+        }
+    }
+    function addDataToField(field, fieldHndlr, rcrd) {                          //console.log("addDataToField [%s] [%0] rcrd = %O", field, fieldHndlr, rcrd);
+        var elemId = field.split(' ').join('');
+        var prop = _util.lcfirst(elemId);
+        fieldHndlr(elemId, prop, rcrd);
+    }
+    function setTextField(fieldId, prop, rcrd) {                                //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+        $('#'+fieldId+'_row input[type="text"]').val(rcrd[prop]);
+    }
+    function setTextArea(fieldId, prop, rcrd) {
+        $('#'+fieldId+'_row textarea').val(rcrd[prop]);   
+    }
+    function setSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+        var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
+        $('#'+fieldId+'-sel')[0].selectize.addItem(id);        
     }
 /*--------------------------- Create Form --------------------------------------------------------*/
     /**
@@ -318,6 +389,11 @@ $(document).ready(function(){
             return $('#'+field+'-sel')[0];
         });
     }
+    /** Returns the record for the passed id and entity-type. */
+    function getEntityRecord(entity, id) {
+        var rcrds = _util.getDataFromStorage(entity);                           console.log("id = %s, rcrds = %O", id, rcrds)
+        return rcrds[id];
+    }
 /*-------------- Top Form Helpers ----------------------------------------------------------------*/
     /** Builds and returns all interaction-form elements. */
     function buildIntFormFields(action) {
@@ -361,7 +437,7 @@ $(document).ready(function(){
     }
     /** Returns an object with selected publication's data. */
     function getPubDetailDataObj(srcRcrd) {  
-        var pubRcrd = _util.getDataFromStorage('publication')[srcRcrd.publication];     //console.log("srcRcrd = %O, pubRcrd = %O", srcRcrd, pubRcrd);
+        var pubRcrd = getEntityRecord('publication', srcRcrd.publication);      //console.log("srcRcrd = %O, pubRcrd = %O", srcRcrd, pubRcrd);
         return {
             'Title': srcRcrd.displayName, 'Description': srcRcrd.description || '',            
             'Publication Type': pubRcrd.publicationType ? pubRcrd.publicationType.displayName : '', 
@@ -416,7 +492,7 @@ $(document).ready(function(){
     }
     /** Returns an object with selected citation's data. */
     function getCitDetailDataObj(srcRcrd) {  
-        var citRcrd = _util.getDataFromStorage('citation')[srcRcrd.citation];   //console.log("srcRcrd = %O, citRcrd = %O", srcRcrd, citRcrd);
+        var citRcrd = getEntityRecord('citation', srcRcrd.citation);            //console.log("srcRcrd = %O, citRcrd = %O", srcRcrd, citRcrd);
         return {
             'Title': citRcrd.title, 
             'Full Text': srcRcrd.description || '',            
@@ -1637,13 +1713,13 @@ $(document).ready(function(){
     function getFormValueData(id, entity) {      
         var elems = $(id)[0].children;   
         var formVals = {};
-        for (var i = 1; i < elems.length-1; i++) { getInputData(elems[i]); }
+        for (var i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  // setting i to 0 instead of 1... this may affect interaction processing
         addAdditionalEntityData(entity);
         return formVals;
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            var input = elem.children[1].children[1];
+            var input = elem.children[1].children[1];                           console.log("fieldName = ", fieldName)
             if ($(input).data("inputType")) { 
                 getInputVals(fieldName, input, $(input).data("inputType")); 
             } else { formVals[fieldName] = input.value || null; }
@@ -1886,7 +1962,7 @@ $(document).ready(function(){
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, cParams.forms[formLvl].action);
-        if (cParams.editing) { formData.intId = cParams.editing; }
+        if (cParams.editing) { formData.ids = cParams.editing; }
         formData.coreEntity = coreEntity;
         cParams.ajaxFormLvl = formLvl;
         toggleWaitOverlay(true);
