@@ -74,13 +74,13 @@ class CrudController extends Controller
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
         $coreFormData = $formData->$coreName;
         $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
-            ->findOneBy(['id' => $formData->intId ]);
+            ->findOneBy(['id' => $formData->ids->core ]);
         
         $returnData = new \stdClass; 
         $returnData->core = $coreName;
         $returnData->coreEntity = $coreEntity;
-        $returnData->coreEdits = $this->getEditsObj(true); 
-        $returnData->detailEdits = $this->getEditsObj(true);
+        $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
+        $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
 
         $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
@@ -90,7 +90,10 @@ class CrudController extends Controller
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Helpers -------------------------------------*/
-    /** Builds and returns an object that will track any edits made to the entity. */
+    /**
+     * Builds and returns an object that will track any edits made to the entity. 
+     * The editing prop holds the id of the entity being edited, or false if creating.
+     */
     private function getEditsObj($editing)
     {
         $edits = new \stdClass;
@@ -119,13 +122,21 @@ class CrudController extends Controller
     }
     private function setDetailData($dData, $dName, &$returnData, &$em)
     {
-        $dClass = 'AppBundle\\Entity\\'. ucfirst($dName);
-        $dEntity = new $dClass();
+        $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
         $dEntity->setSource($returnData->coreEntity);
         $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
         $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
 
         return $dEntity;
+    }
+    /** Returns either a newly created entity or an existing entity to edit. */
+    private function getDetailEntity($dName, $edits, $em)
+    {
+        if ($edits->editing !== false) {
+            return $this->getEntity(ucfirst($dName), $edits->editing, $em);
+        }
+        $dClass = 'AppBundle\\Entity\\'. ucfirst($dName);
+        return new $dClass();
     }
     /** Adds the detail entity to the core entity. Eg, A Publication to it's Source record. */
     private function addDetailToCoreEntity(&$coreEntity, &$dEntity, $dName, &$em)
