@@ -113,8 +113,10 @@
                 'author': { 'authSources': addToRcrdAryProp },
                 'citation': { 'contributors': addContribData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
-                'publication': { 'pubSources': addToRcrdAryProp, 'contributors': addContribData },
-                'publisher': { 'publisherNames': addToNameProp }
+                'publication': { 'pubSources': addToRcrdAryProp, 'contributors': addContribData,
+                    'source': addToParentRcrd },
+                'publisher': { 'publisherNames': addToNameProp },
+
             },
             'interaction': {
                 'location': addInteractionToEntity, 'source': addInteractionToEntity, 
@@ -266,12 +268,13 @@
     /** Returns an object with relational properties and their removal handlers. */
     function getRmvDataPropHndlrs(entity) {
         var hndlrs = {
+            'author': {},
             'interaction': {
                 'location': rmvIntFromEntity, 'source': rmvIntFromEntity, 
                 'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
                 'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
             },
-            'source': { 'contributor': rmvContrib },
+            'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent },
             'publication': { 'publicationType': rmvFromTypeProp }
         }
         return hndlrs[entity];
@@ -279,6 +282,13 @@
     /** Removes the id from the ary. */
     function rmvIdFromAry(ary, id) {
         ary.splice(ary.indexOf(id), 1);  
+    }
+    /** Removes a record's id from the previous parent's 'children' array. */ 
+    function rmvFromParent(prop, rcrd, entity, edits) {
+        if (!rcrd[prop] || !rcrd[prop].old) { return; }
+        var srcObj = _util.getDataFromStorage('source');  
+        rmvIdFromAry(srcObj[rcrd[prop].old].children, rcrd.id);                
+        storeData('source', srcObj);
     }
     /** Removes the Interaction from the stored entity's collection. */
     function rmvIntFromEntity(prop, rcrd, entity, edits) {
@@ -297,7 +307,7 @@
     /** Removes the record from the entity-type's stored array. */
     function rmvFromTypeProp(prop, rcrd, entity, edits) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-        var typeId = edits[prop];
+        var typeId = edits[prop].new;
         rmvIdFromAry(typeObj[typeId][entity+'s'], rcrd.id);
         storeData(prop, typeObj);
     }

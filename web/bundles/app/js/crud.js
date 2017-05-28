@@ -2029,7 +2029,8 @@ $(document).ready(function(){
     /** Resets the interactions form leaving only the pinned values. */
     function handleInteractionFormComplete(data) {
         if (!cParams.editing) { return resetInteractionForm(); }
-        var msg = Object.keys(data.coreEdits).length > 1 ?
+        var msg = Object.keys(data.coreEdits).length > 1 || 
+            Object.keys(data.detailEdits).length > 1 ?
             "Interaction update successful." : "No changes detected."; 
         showSuccessMsg(msg);
     }
