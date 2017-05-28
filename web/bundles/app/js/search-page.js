@@ -1635,7 +1635,7 @@
     }
     function getPencilHtml(id, entity, editFunc) {
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
-            class="grid-edit" title="Edit `+entity+`" alt="Edit `+entity+`">`;
+            class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
         $('#search-grid').off('click', '#edit'+id);
         $('#search-grid').on(
             'click', '#edit'+id, eif.crud.editEntity.bind(null, id, _util.lcfirst(entity)));
