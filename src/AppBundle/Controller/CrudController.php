@@ -206,28 +206,49 @@ class CrudController extends Controller
     }
     private function handleContributors($ary, &$entity, &$edits, &$em)
     {
-        $cur = $entity->getContributors(); //Get Contrib ids
-        // $this->removeFromCollection('Contributor', $cur, $ary, $entity, $edits, $em);
-        $this->addContributors($ary, $cur, $entity, $em);
+        $this->removeContributors($ary, $entity, $edits, $em);
+        $this->addContributors($ary, $entity, $edits, $em);
     }
     /** Creates a new Contribution for each author source in the array. */
-    private function addContributors($ary, $curContribs, &$srcEntity, &$em)
+    private function addContributors($ary, &$pub, $edits, &$em)
     {
-        // $added = [];
-        foreach ($ary as $contributorId) {
-            $authSrc = $em->getRepository("AppBundle:Source")
-                ->findOneBy(['id' => $contributorId]);
-            // if (in_array($authSrc, $curContribs)) { continue; }
-            $contribEntity = new Contribution();
-            $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setAuthorSource($authSrc);
-            $em->persist($contribEntity);
-            // array_push($added, $contributorId);
-            $srcEntity->addContributor($contribEntity);  //$srcEntity persisted later
-            $authSrc->addContribution($contribEntity);
-            $em->persist($authSrc);
+        $added = []; 
+        $curContribs = $pub->getContributorIds();
+        $contribs = $pub->getContributors();
+        foreach ($ary as $authId) { 
+            if (in_array($authId, $curContribs)) { continue; } 
+            $auth = $em->getRepository('AppBundle:Source')
+                ->findOneBy(['id' => $authId ]);
+            $contribEntity = $this->createContrib($pub, $auth, $em);
+            $pub->addContributor($contribEntity);  //$pub persisted later
+            $auth->addContribution($contribEntity);
+            $em->persist($auth);
+            array_push($added, $authId);
         }  
-        // $edits->Contributor = [ 'added' => $added ];  //TODO 
+        if (count($added) > 0) {
+            $edits->contributor = [ 'added' => $added ]; 
+        }
+    }
+    private function createContrib($pub, $auth, &$em)
+    {
+        $entity = new Contribution();
+        $entity->setWorkSource($pub);
+        $entity->setAuthorSource($auth);
+        $em->persist($entity);  
+        return $entity;
+    }
+    /** Removes any entities currently in the $coll that are not in the new $ary.  */
+    private function removeContributors($ary, &$entity, &$edits, &$em)
+    {
+        $contributors = $entity->getContributors();
+        $removed = [];  
+        foreach ($contributors as $contrib) { 
+            $authId = $contrib->getAuthorSource()->getId();
+            if (in_array($authId, $ary)) { continue; }
+            $entity->removeContributor($contrib);
+            array_push($removed, $authId); 
+        }
+        if (count($removed)) { $edits->contributor = [ 'removed' => $removed ]; }
     }
     /** Handles adding and removing tags from the entity. */  
     private function handleTags($ary, &$entity, &$edits, &$em)
@@ -243,9 +264,9 @@ class CrudController extends Controller
         $removeField = 'remove'.ucfirst($field);
         foreach ($coll as $id) { 
             if (in_array($id, $ary)) { continue; }
-            array_push($removed, $id); 
             $collEnt = $this->getEntity($field, $id, $em);
             $entity->$removeField($collEnt);
+            array_push($removed, $id); 
         }
         if (count($removed)) { $edits->$field = [ 'removed' => $removed ]; }
     }
@@ -288,7 +309,7 @@ class CrudController extends Controller
         $curVal = $entity->$getField();
         if ($curVal === $newVal) { return; }
 
-        if ($edits->editing) { $edits->$field = $curVal; }
+        if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
         $entity->$setField($newVal);
     }
     /**
@@ -305,14 +326,15 @@ class CrudController extends Controller
             if ($curVal === null) { return; }
         } else if ($curVal === $newVal->getId()) { return; }
 
-        if ($edits->editing) { $edits->$field = $curVal; }
+        if ($edits->editing) { 
+            $edits->$field = [ "old" => $curVal, "new" => $newVal->getId()]; }
         $entity->$setField($newVal);
     }
     /*---------- Flush and Return Data ---------------------------------------*/
     /**
      * Attempts to flush all persisted data. If there are no errors, the created/updated 
      * data is sent back to the crud form; otherise, an error message is sent back.
-     */
+     */                                                                                                                                     
     private function attemptFlushAndSendResponse($entityData, &$em)
     {        
         try {

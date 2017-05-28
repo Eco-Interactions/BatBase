@@ -111,9 +111,9 @@
         var update = {
             'source': {
                 'author': { 'authSources': addToRcrdAryProp },
-                'citation': { 'author': addContribData, 'source': addToParentRcrd,
+                'citation': { 'contributors': addContribData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
-                'publication': { 'pubSources': addToRcrdAryProp, 'author': addContribData },
+                'publication': { 'pubSources': addToRcrdAryProp, 'contributors': addContribData },
                 'publisher': { 'publisherNames': addToNameProp }
             },
             'interaction': {
@@ -237,30 +237,25 @@
     }
     /** When a Publication or Citation have been updated, update contribution data. */
     function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
-        if (rcrd.contributors.length > 0) { 
-            addContributionData(rcrd.contributors, rcrd); 
-        }
-    }
-    /** Adds the new work-source to each contributor's contributions array. */
-    function addContributionData(contributors, rcrd) {                          //console.log("contributors = %O", contributors);
+        if (rcrd.contributors.length == 0) { return; }
         var srcObj = _util.getDataFromStorage('source');
-        contributors.forEach(function(authId) {
+        rcrd.contributors.forEach(function(authId) {
             addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
         });
         storeData('source', srcObj);
     }
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
-    function removeAndUpdateAffectedData(data) {
-        if (data.coreEdits.length > 1) { 
+    function removeAndUpdateAffectedData(data) {                                //console.log("removeAndUpdateAffectedData called. data = %O", data);
+        if (Object.keys(data.coreEdits).length > 1) { 
             updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
         }
-        if (data.detailEdits.length > 1) { 
+        if (Object.keys(data.detailEdits).length > 1) { 
             updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
         }
     }
     /** Updates relational storage props for the entity. */
-    function updateAffectedDataProps(entity, rcrd, edits) {                     //console.log("updateAffectedDataProps called. edits = %O", edits);
+    function updateAffectedDataProps(entity, rcrd, edits) {                     //console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
         var propHndlrs = getRmvDataPropHndlrs(entity);
         for (var prop in edits) {                                               
             if (prop in propHndlrs) {
@@ -272,10 +267,12 @@
     function getRmvDataPropHndlrs(entity) {
         var hndlrs = {
             'interaction': {
-                'location': rmvInteractionFromEntity, 'source': rmvInteractionFromEntity, 
-                'subject': rmvInteractionFromTaxon, 'object': rmvInteractionFromTaxon, 
+                'location': rmvIntFromEntity, 'source': rmvIntFromEntity, 
+                'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
                 'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
             },
+            'source': { 'contributor': rmvContrib },
+            'publication': { 'publicationType': rmvFromTypeProp }
         }
         return hndlrs[entity];
     }
@@ -284,20 +281,20 @@
         ary.splice(ary.indexOf(id), 1);  
     }
     /** Removes the Interaction from the stored entity's collection. */
-    function rmvInteractionFromEntity(prop, rcrd, entity, edits) {
-        var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvInteractionFromEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    function rmvIntFromEntity(prop, rcrd, entity, edits) {
+        var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
         var storedEntity = rcrds[edits[prop]];
         rmvIdFromAry(storedEntity.interactions, edits[prop]);
         storeData(prop, rcrds);
     }
     /** Removes the Interaction from the taxon's subject/objectRole collection. */
-    function rmvInteractionFromTaxon(prop, rcrd, entity, edits) {  
-        var taxa = _util.getDataFromStorage("taxon");                           //console.log("rmvInteractionFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+    function rmvIntFromTaxon(prop, rcrd, entity, edits) {  
+        var taxa = _util.getDataFromStorage("taxon");                           //console.log("rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
         var taxon = taxa[edits[prop]];   
         rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);           
     }
-    /** Removes the record from the entity-type's stored array.  */
+    /** Removes the record from the entity-type's stored array. */
     function rmvFromTypeProp(prop, rcrd, entity, edits) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
         var typeId = edits[prop];
@@ -306,12 +303,21 @@
     }
     /** Removes a record from the tag's array of record ids. */
     function rmvFromTagProp(prop, rcrd, entity, edits) {                                 
-        if (edits.tag.removed.length > 0) {
-            var tagObj = _util.getDataFromStorage(prop);                        //console.log("rmvFromTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
-            edits.tag.removed.forEach(function(tag){
-                rmvIdFromAry(tagObj[tag][entity+'s'], rcrd.id);                
-            });
-        }
+        if (!edits.tag.removed) { return; }
+        var tagObj = _util.getDataFromStorage(prop);                            //console.log("rmvFromTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+        edits.tag.removed.forEach(function(tagId){
+            rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
+        });
+        storeData(prop, typeObj);
+    }
+    /** Removes a record from the pub's array of contributor ids. */
+    function rmvContrib(prop, rcrd, entity, edits) {                            //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
+        if (!edits.contributor.removed) { return; }
+        var srcObj = _util.getDataFromStorage('source');
+        edits.contributor.removed.forEach(function(authId) {
+            rmvIdFromAry(srcObj[authId].contributions, rcrd.id);
+        });
+        storeData('source', srcObj);
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
     /**

@@ -147,7 +147,8 @@ $(document).ready(function(){
      * Sets the global cParams obj with the params necessary throughout the 
      * crud form interface. 
      * -- Property descriptions:
-     * > editing - Stores the id of the entity record(s) being edited. (Detail ids are added later)
+     * > editing - Container for the id(s) of the record(s) being edited. (Detail 
+            ids are added later). False if not editing.
      * > forms - Container for form-specific params 
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
@@ -155,7 +156,7 @@ $(document).ready(function(){
      */
     function initCrudParams(action, entity, id) {                               //console.log("####cPs = %O", cParams)
         cParams = {
-            editing: { core: id || null, detail: null },
+            editing: action === "edit" ? { core: id || null, detail: null } : false,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
@@ -1719,7 +1720,7 @@ $(document).ready(function(){
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            var input = elem.children[1].children[1];                           console.log("fieldName = ", fieldName)
+            var input = elem.children[1].children[1];                           //console.log("fieldName = ", fieldName)
             if ($(input).data("inputType")) { 
                 getInputVals(fieldName, input, $(input).data("inputType")); 
             } else { formVals[fieldName] = input.value || null; }
