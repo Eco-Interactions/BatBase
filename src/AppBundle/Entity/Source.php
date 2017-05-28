@@ -128,7 +128,8 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource", 
+     *     cascade={"persist", "remove"}, orphanRemoval=true)
      *
      * A collection of all Authors that contributed to a source work.
      */
@@ -137,7 +138,8 @@ class Source
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource", 
+     *     cascade={"persist", "remove"}, orphanRemoval=true)
      *
      * A collection of all works an Author source contributed to.
      */
