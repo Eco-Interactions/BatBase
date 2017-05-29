@@ -1201,20 +1201,20 @@ $(document).ready(function(){
             },
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["Description", "Year", "Doi", "Authors"],
+                "exclude": ["Description", "Year", "Doi", "Authors", "Tags"],
                 "required": ["Last Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
                     "LinkUrl", "LinkDisplay"],
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
-                    "Issue": "text", "Pages": "text", "Tags": "tags", 
-                    "Citation Text": "fullTextArea", "Citation Type": "select"},
+                    "Issue": "text", "Pages": "text", "Citation Text": "fullTextArea", 
+                    "Citation Type": "select"},
                 "exclude": ["Display Name", "Description"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
-                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
-                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Tags", 
-                    "Authors" ],
+                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", 
+                    "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
+                    "Tags", "Authors" ],
                 "exitHandler": enablePubField
             },                                      
             "interaction": {
@@ -1246,14 +1246,14 @@ $(document).ready(function(){
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
-                "exclude": ["Display Name"],
+                "exclude": ["Display Name", "Tags"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year",  
                     "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
             },
             "publisher": { 
                 "add": [], 
-                "exclude": ["Year", "Doi", "Authors"],
+                "exclude": ["Year", "Doi", "Authors", "Tags"],
                 "required": ["Display Name"],
                 "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] 
             },
@@ -1297,7 +1297,7 @@ $(document).ready(function(){
             },
             "source": { "Display Name": "text", "Description": "textArea", 
                 "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
-                "Authors": "multiSelect" 
+                "Authors": "multiSelect", "Tags": "tags" 
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
