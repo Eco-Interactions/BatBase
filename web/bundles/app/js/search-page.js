@@ -10,9 +10,9 @@
      *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
-     * focusStorage = obj container for misc data used for each focus of the grid.
+     * gParams = obj container for misc params used for the search grid.
      */
-    var userRole, miscObj = {}, columnDefs = [], focusStorage = {}; 
+    var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -81,7 +81,7 @@
     }
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
-        resetFocusStorage();
+        resetGridParams();
         toggleTimeUpdatedFilter();
         selectInitialSearchFocus();
         initNoFiltersStatus();      
@@ -99,14 +99,14 @@
      * rowData - array of rows displayed in the grid.
      * selectedOpts - search combobox values 'selected' for the current tree.
      */
-    function resetFocusStorage() {                                              
-        focusStorage = {}; 
-        focusStorage.curFocus =  localStorage.getItem('curFocus') || "taxa";  
-        focusStorage.openRows = [];                                             //console.log("focusStorage = %O", focusStorage);
+    function resetGridParams() {                                              
+        gParams = {}; 
+        gParams.curFocus =  localStorage.getItem('curFocus') || "taxa";  
+        gParams.openRows = [];                                                  //console.log("gParams = %O", gParams);
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
     function selectInitialSearchFocus() {
-        $('#search-focus').val(focusStorage.curFocus);
+        $('#search-focus').val(gParams.curFocus);
     }
     function setUpFutureDevInfoBttn() {
         var bttn = _util.buildElem('button', { name: 'futureDevBttn', title: getFutureDevMsg(),
@@ -138,11 +138,11 @@
      */
     function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called.")
         clearPreviousGrid();
-        if (focus !== focusStorage.curFocus) {   
+        if (focus !== gParams.curFocus) {   
             _util.populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();
-            resetFocusStorage();
+            resetGridParams();
             resetToggleTreeBttn(false);
             clearPastHtmlOptions(); //buildGridFunc called here. 
         } else { buildGridFunc(); }
@@ -166,7 +166,7 @@
      * an ajax call gets the data which is stored @storeInteractions before being
      * sent to @fillTreeWithInteractions.    
      */
-    function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", focusStorage.curTree);
+    function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", gParams.curTree);
         var entityData = _util.getDataFromStorage('interaction');
         fadeGrid();
         if (entityData) { fillTreeWithInteractions(entityData); 
@@ -178,8 +178,8 @@
      * calls @finishGridAndUiLoad for the final stage of the grid build. 
      */
     function fillTreeWithInteractions(intRcrds) {                               //console.log("fillTreeWithInteractionscalled.");
-        var focus = focusStorage.curFocus; 
-        var curTree = focusStorage.curTree; 
+        var focus = gParams.curFocus; 
+        var curTree = gParams.curTree; 
 
         fillTree(focus, curTree, intRcrds);
         buildGrid(focus, curTree);
@@ -350,7 +350,7 @@
      */
     function initTaxonSearchUi(data) {                                          //console.log("initTaxonSearchUi. data = %O", data);
         var domainTaxonRcrd;
-        focusStorage.rcrdsById = data.taxon;
+        gParams.rcrdsById = data.taxon;
         if (!$("#sel-domain").length) { buildTaxonDomainHtml(data.domain); }  
         setTaxonDomain();  
         
@@ -369,17 +369,17 @@
         }
     }
     /**
-     * Stores in the global focusStorage obj:
+     * Stores in the global gParams obj:
      * > taxonByLvl - object with taxon records in the current tree organized by 
      *   level and keyed under their display name.
      * > allDomainLvls - array of all levels present in the current domain tree.
      */
     function storeLevelData(topTaxon) {
-        focusStorage["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);           //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
-        focusStorage["allDomainLvls"] = Object.keys(focusStorage.taxaByLvl);
+        gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+        gParams["allDomainLvls"] = Object.keys(gParams.taxaByLvl);
     }
     function updateTaxaByLvl(topTaxon) {
-        focusStorage["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);           //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
+        gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
     }
     /** Returns an object with taxon records by level and keyed with display names. */
     function seperateTaxonTreeByLvl(topTaxon) {
@@ -413,8 +413,8 @@
         var domainTaxonRcrd = getDetachedRcrd(domainId);                        //console.log("domainTaxon = %O", domainTaxonRcrd);
         var domainLvl = domainTaxonRcrd.level;
         _util.populateStorage('curDomain', domainId);
-        focusStorage.curDomain = domainId;
-        focusStorage.domainLvl = domainLvl;
+        gParams.curDomain = domainId;
+        gParams.domainLvl = domainLvl;
         return domainTaxonRcrd;
     }
     /**
@@ -436,18 +436,18 @@
      */
     function initTaxonTree(topTaxon) {
         buildTaxonTree(topTaxon);                                 
-        focusStorage.openRows = [topTaxon.id.toString()];                                    //console.log("openRows=", openRows)
+        gParams.openRows = [topTaxon.id.toString()];                            //console.log("openRows=", openRows)
     }
     /**
      * Returns a heirarchical tree of taxon record data from the top, parent, 
      * domain taxon through all children. The tree is stored as 'curTree' in the 
-     * global focusStorage obj. 
+     * global gParams obj. 
      */
     function buildTaxonTree(topTaxon) {                                         //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
         var tree = {};                                                          //console.log("tree = %O", tree);
         tree[topTaxon.displayName] = topTaxon;  
         topTaxon.children = getChildTaxa(topTaxon.children);    
-        focusStorage.curTree = tree;  
+        gParams.curTree = tree;  
         /**
          * Recurses through each taxon's 'children' property and returns a record 
          * for each child ID found. 
@@ -470,7 +470,7 @@
      * Initialize a search-combobox for each level in the tree @loadTaxonComboboxes.
      * Transform tree data into grid rows and load grid @transformTaxonDataAndLoadGrid.
      */
-    function buildTaxonSearchUiAndGrid(taxonTree) {                               //console.log("taxaByLvl = %O", focusStorage.taxaByLvl);
+    function buildTaxonSearchUiAndGrid(taxonTree) {                               //console.log("taxaByLvl = %O", gParams.taxaByLvl);
         loadTaxonComboboxes();
         transformTaxonDataAndLoadGrid(taxonTree);
     } 
@@ -503,10 +503,10 @@
      * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
      */
     function loadTaxonComboboxes() {
-        var curTaxaByLvl = focusStorage.taxaByLvl;                              //console.log("curTaxaByLvl = %O", curTaxaByLvl);
+        var curTaxaByLvl = gParams.taxaByLvl;                                   //console.log("curTaxaByLvl = %O", curTaxaByLvl);
         var lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
         var levels = Object.keys(lvlOptsObj);
-        if (levels.indexOf(focusStorage.domainLvl) !== -1) { levels.shift(); } //Removes domain level
+        if (levels.indexOf(gParams.domainLvl) !== -1) { levels.shift(); } //Removes domain level
 
         loadLevelSelects(lvlOptsObj, levels);
         // initComboboxes();
@@ -516,9 +516,9 @@
      * If there is no data after filtering at a level, a 'none' option obj is built
      * and will be selected.
      */
-    function buildTaxonSelectOpts(rcrdsByLvl) {                                  //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
+    function buildTaxonSelectOpts(rcrdsByLvl) {                                 //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
         var optsObj = {};
-        var curDomainLvls = focusStorage.allDomainLvls.slice(1);                //console.log("curDomainLvls = %O", curDomainLvls) //Skips domain lvl 
+        var curDomainLvls = gParams.allDomainLvls.slice(1);                     //console.log("curDomainLvls = %O", curDomainLvls) //Skips domain lvl 
         curDomainLvls.forEach(function(lvl) {
             if (lvl in rcrdsByLvl) { getLvlOptsObjs(rcrdsByLvl[lvl], lvl);
             } else { fillInLvlOpts(lvl); }
@@ -526,7 +526,7 @@
         return optsObj;
 
         function getLvlOptsObjs(rcrds, lvl) {
-            var taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                //console.log("taxonNames = %O", taxonNames);
+            var taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();               //console.log("taxonNames = %O", taxonNames);
             optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
             if (taxonNames.length > 0 && taxonNames[0] !== "None") {
                 optsObj[lvl].unshift({value: 'all', text: '- All -'});
@@ -534,12 +534,12 @@
         }
         function fillInLvlOpts(lvl) {                                           //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
             var taxon;
-            if (lvl in focusStorage.selectedVals) {
-                taxon = getDetachedRcrd(focusStorage.selectedVals[lvl]);
+            if (lvl in gParams.selectedVals) {
+                taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
                 optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];    
             } else {
                 optsObj[lvl] = [{value: 'none', text: '- None -'}];
-                focusStorage.selectedVals[lvl] = "none";
+                gParams.selectedVals[lvl] = "none";
             }
         }
     } /* End buildTaxonSelectOpts */
@@ -555,7 +555,7 @@
         var elems = buildTaxonSelects(levelOptsObj, levels);
         clearCol2();        
         $('#opts-col2').append(elems);
-        setSelectedTaxonVals(focusStorage.selectedVals);
+        setSelectedTaxonVals(gParams.selectedVals);
     }
     function buildTaxonSelects(lvlOpts, levels) {  
         var selElems = [];
@@ -569,9 +569,9 @@
         });
         return selElems;
     }
-    function setSelectedTaxonVals(selected) {                                    //console.log("selected in setSelectedTaxonVals = %O", selected);
+    function setSelectedTaxonVals(selected) {                                   //console.log("selected in setSelectedTaxonVals = %O", selected);
         if (selected === undefined) {return;}
-        focusStorage.allDomainLvls.forEach(function(lvl) {                      //console.log("lvl ", lvl)
+        gParams.allDomainLvls.forEach(function(lvl) {                           //console.log("lvl ", lvl)
             var selId = '#sel' + lvl;
             $(selId).find('option[value="all"]').hide();
             if (selected[lvl]) {                                                //console.log("selecting = ", lvl, selected[lvl])
@@ -583,14 +583,14 @@
     /*-------- Taxon Data Formatting ------------------------------------------*/
     /**
      * Transforms the tree's taxon record data into the grid format and sets the 
-     * row data in the global focusStorage object as 'rowData'. Calls @loadGrid.
+     * row data in the global gParams object as 'rowData'. Calls @loadGrid.
      */
     function transformTaxonDataAndLoadGrid(taxonTree) {                         //console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
         var finalRowData = [];
         for (var topTaxon in taxonTree) {
             finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
         }
-        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", finalRowData);
+        gParams.rowData = finalRowData;                                         //console.log("rowData = %O", finalRowData);
         loadGrid("Taxon Tree");
     }
     /**
@@ -607,7 +607,7 @@
             name: name,
             isParent: true,                     
             parentTaxon: taxon.parent,
-            open: focusStorage.openRows.indexOf(taxon.id.toString()) !== -1, 
+            open: gParams.openRows.indexOf(taxon.id.toString()) !== -1, 
             children: getTaxonChildRowData(taxon, treeLvl),
             treeLvl: treeLvl,
             interactions: intCount !== null,          
@@ -662,7 +662,7 @@
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
                     open: domainIds.indexOf(curTaxon.id) === -1 ? false : 
-                        focusStorage.openRows.indexOf(curTaxon.id.toString()) !== -1,
+                        gParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
                     children: getTaxonIntRows(curTaxon, treeLvl),
                     treeLvl: treeLvl,
                     interactions: true,
@@ -702,17 +702,17 @@
         return _util.getDataFromStorage(locDataStorageProps);
     }
     /**
-     * Store the location records as 'rcrdsById' in focusStorage. Gets top region 
+     * Store the location records as 'rcrdsById' in gParams. Gets top region 
      * ids and sends them to @buildLocTreeAndGrid.
      */ 
     function startLocGridBuild(data) {                   
-        focusStorage.rcrdsById = data.location;                                    
-        focusStorage.data = data;
+        gParams.rcrdsById = data.location;                                    
+        gParams.data = data;
         buildLocTreeAndGrid(getTopRegionIds());
     }
     function getTopRegionIds() {
         var ids = [];
-        var regions = focusStorage.data.topRegionNames;
+        var regions = gParams.data.topRegionNames;
         for (var name in regions) { ids.push(regions[name]); } 
         return ids;
     }
@@ -732,14 +732,14 @@
      */
     function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
         var topLocs = topLoc || getTopRegionIds();
-        focusStorage.openRows = topLocs.length === 1 ? topLocs[0] : [];
+        gParams.openRows = topLocs.length === 1 ? topLocs[0] : [];
         clearPreviousGrid();
         buildLocTreeAndGrid(topLocs);
     }
     /**
      * Builds a tree of location data with passed locations at the top level, and 
      * sub-locations as nested children. Adds the alphabetized tree to the global 
-     * focusStorage obj as 'curTree'. 
+     * gParams obj as 'curTree'. 
      */ 
     function buildLocTree(topLocs) {                                            //console.log("passed 'top' locIds = %O", topLocs)
         var topLoc;
@@ -748,7 +748,7 @@
             topLoc = getDetachedRcrd(id);  
             tree[topLoc.displayName] = getLocChildren(topLoc);
         });  
-        focusStorage.curTree = sortDataTree(tree);
+        gParams.curTree = sortDataTree(tree);
     }
     /** Returns the location record with all child ids replaced with their records. */
     function getLocChildren(rcrd) {     
@@ -808,7 +808,7 @@
             var locType = _util.lcfirst(type);
             if (processedOpts[locType].indexOf(name) === -1) {
                 if (locHasInteractions(locNode, locType)) {
-                    var id = focusStorage.data[locType + "Names"][name];             
+                    var id = gParams.data[locType + "Names"][name];             
                     opts[locType].push({ value: id, text: name }); 
                     processedOpts[locType].push(name);
                 }
@@ -828,10 +828,10 @@
          * region parent.
          */
         function removeTopRegionIfFiltering() {  
-            if (!focusStorage.selectedOpts || !focusStorage.selectedOpts.country) { return; }
+            if (!gParams.selectedOpts || !gParams.selectedOpts.country) { return; }
             if (opts.region.length === 2) {  
                 opts.region = opts.region.filter(function(region) {
-                    return region.value === focusStorage.selectedOpts.region;
+                    return region.value === gParams.selectedOpts.region;
                 });  
             }
         }
@@ -848,8 +848,8 @@
         } 
     } /* End buildLocSelectOpts */
     function checkSelectedVals(type) {
-        if (focusStorage.selectedOpts[type]) {
-            var loc = getDetachedRcrd(focusStorage.selectedOpts[type]);
+        if (gParams.selectedOpts[type]) {
+            var loc = getDetachedRcrd(gParams.selectedOpts[type]);
             return { value: loc.id, text: loc.displayName };
         }
         return {value: 'none', text: '- None -'};
@@ -869,19 +869,19 @@
         return selElems;
     }
     function selectNoneVals(locOpts) {
-        var sel = focusStorage.selectedOpts || createSelectedOptsObj();
+        var sel = gParams.selectedOpts || createSelectedOptsObj();
         for (var type in locOpts) {
             if (locOpts[type][0].value === 'none') { sel[type] = 'none'; }
         }          
     }
     /** If selectedOpts is undefined, add it as an empty object. */
     function createSelectedOptsObj() {
-        focusStorage.selectedOpts = {};
-        return focusStorage.selectedOpts;
+        gParams.selectedOpts = {};
+        return gParams.selectedOpts;
     }
-    function setSelectedLocVals() {                                             //console.log("openRows = %O", focusStorage.openRows);           
+    function setSelectedLocVals() {                                             //console.log("openRows = %O", gParams.openRows);           
         var selId;
-        var selected = focusStorage.selectedOpts;                               //console.log("selected in setSelectedLocVals = %O", selected);
+        var selected = gParams.selectedOpts;                                    //console.log("selected in setSelectedLocVals = %O", selected);
         Object.keys(selected).forEach(function(selName) {
             selId = '#sel' + _util.ucfirst(selName);
             $(selId).val(selected[selName]); 
@@ -892,14 +892,14 @@
 /*--------- Location Data Formatting -----------------------------------------*/
     /**
      * Transforms the tree's location data into the grid format and sets the row 
-     * data in the global focusStorage object as 'rowData'. Calls @loadGrid.
+     * data in the global gParams object as 'rowData'. Calls @loadGrid.
      */
     function transformLocDataAndLoadGrid(locTree) {
         var finalRowData = [];                                                  //console.log("locTree = %O", locTree);
         for (var topNode in locTree) {                                          //console.log("topNode = ", topNode)
             finalRowData.push( getLocRowData(locTree[topNode], 0)); 
         }
-        focusStorage.rowData = removeLocsWithoutInteractions(finalRowData);     //console.log("rowData = %O", focusStorage.rowData);
+        gParams.rowData = removeLocsWithoutInteractions(finalRowData);          //console.log("rowData = %O", gParams.rowData);
         loadGrid("Location Tree");
     }
     /** Returns a row data object for the passed location and it's children.  */
@@ -909,7 +909,7 @@
             entity: "Location",
             name: locRcrd.displayName,  /* Interaction rows have no name to display. */
             isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
-            open: focusStorage.openRows.indexOf(locRcrd.id) !== -1, 
+            open: gParams.openRows.indexOf(locRcrd.id) !== -1, 
             children: getLocRowDataForRowChildren(locRcrd, treeLvl),
             treeLvl: treeLvl,
             interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
@@ -991,16 +991,16 @@
      * If no domain selected, set the default domain value. Start grid build @buildSrcTree.
      */
     function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
-        addSrcDataToFocusStorage(srcData);
+        addSrcDataToGridParams(srcData);
         if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
         setSrcDomain();  
         buildSrcTree();
     }
-    /** Add source data to focusStorage to be available while in a source focus. */
-    function addSrcDataToFocusStorage(srcData) {
-        focusStorage.rcrdsById = srcData.source;
-        focusStorage.author = srcData.author;
-        focusStorage.publication = srcData.publication;
+    /** Add source data to gParams to be available while in a source focus. */
+    function addSrcDataToGridParams(srcData) {
+        gParams.rcrdsById = srcData.source;
+        gParams.author = srcData.author;
+        gParams.publication = srcData.publication;
     }
     /** Builds the combobox for the source domain types. */
     function buildSrcDomainHtml() {                                             
@@ -1032,14 +1032,14 @@
     /** (Re)builds source tree for the selected source domain. */
     function buildSrcTree() {
         var domainRcrds = storeAndReturnCurDomainRcrds();                       //console.log("---Search Change. domainRcrds = %O", domainRcrds);
-        initSrcTree(focusStorage.curDomain, domainRcrds);
+        initSrcTree(gParams.curDomain, domainRcrds);
         getInteractionsAndFillTree();
     }
     /** Returns the records for the source domain currently selected. */
     function storeAndReturnCurDomainRcrds() {
         var valMap = { "auths": "authSources", "pubs": "pubSources" };
         var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
-        focusStorage.curDomain = domainVal;
+        gParams.curDomain = domainVal;
         _util.populateStorage('curDomain', domainVal);
         return getTreeRcrdAry(valMap[domainVal]);
     }
@@ -1051,13 +1051,13 @@
     /**
      * Builds a family tree of source data of the selected source domain: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree, and adds it to 
-     * the global focusStorage obj as 'curTree', 
+     * the global gParams obj as 'curTree', 
      * NOTE: Sources have two domains, or types of tree data: 
      * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
     function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree domainRcrds = %O", domainRcrds);
         var tree = focus === "pubs" ? buildPubTree(rcrds) : buildAuthTree(rcrds);
-        focusStorage.curTree = sortDataTree(tree);
+        gParams.curTree = sortDataTree(tree);
     }  
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
@@ -1079,7 +1079,7 @@
     function getPubData(rcrd) {                                                 //console.log("getPubData. rcrd = %O", rcrd);
         rcrd.children = getPubChildren(rcrd);
         if (rcrd.publication) {                                                 //console.log("rcrd with pub = %O", rcrd)
-            rcrd.publication = getDetachedRcrd(rcrd.publication, focusStorage.publication);
+            rcrd.publication = getDetachedRcrd(rcrd.publication, gParams.publication);
         }
         return rcrd;
     }
@@ -1108,7 +1108,7 @@
 
         function getAuthData(authSrc) {                                         //console.log("rcrd = %O", authSrc);
             if (authSrc.contributions.length > 0) {
-                authSrc.author = getDetachedRcrd(authSrc.author, focusStorage.author);
+                authSrc.author = getDetachedRcrd(authSrc.author, gParams.author);
                 authSrc.children = getAuthChildren(authSrc.contributions); 
                 tree[authSrc.displayName] = authSrc;
             }
@@ -1131,7 +1131,7 @@
      */
     function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
-        if (focusStorage.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
+        if (gParams.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
         } else { loadAuthSearchHtml(); }
         transformSrcDataAndLoadGrid(srcTree);
     } 
@@ -1179,17 +1179,17 @@
     /*--------- Source Data Formatting ---------------------------------------*/
     /**
      * Transforms the tree's source record data into grid row format and set as 
-     * 'rowData' in the global focusStorage object as 'rowData'. Calls @loadGrid.
+     * 'rowData' in the global gParams object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
-        var prefix = focusStorage.curDomain === "pubs" ? "Publication" : "Author";
+        var prefix = gParams.curDomain === "pubs" ? "Publication" : "Author";
         var treeName = prefix + ' Tree';
         var finalRowData = [];
 
         for (var topNode in srcTree) {
             finalRowData.push( getSrcRowData(srcTree[topNode], 0) );
         }
-        focusStorage.rowData = finalRowData;                                    //console.log("rowData = %O", focusStorage.rowData);
+        gParams.rowData = finalRowData;                                        //console.log("rowData = %O", gParams.rowData);
         loadGrid(treeName);
     }
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
@@ -1202,14 +1202,14 @@
             name: src.displayName,
             isParent: true,      
             parentSource: src.parent,
-            open: focusStorage.openRows.indexOf(src.id.toString()) !== -1, 
+            open: gParams.openRows.indexOf(src.id.toString()) !== -1, 
             children: getChildSrcRowData(src, treeLvl),
             treeLvl: treeLvl,
             interactions: src.isDirect,   //Only rows with interaction are colored
         };  
     } 
     function getSrcEntity(src, treeLvl) {  
-        if (focusStorage.curDomain === "auths") { 
+        if (gParams.curDomain === "auths") { 
             return treeLvl === 0 ? "Author" : "Citation";
         }
         return src.publication ? "Publication" : "Citation";
@@ -1249,7 +1249,7 @@
     function updateTaxonSearch() {                                              //console.log("updateTaxonSearch val = ", $(this).val())
         var selectedTaxonId = $(this).val();                                    //console.log("selectedTaxonId = %O", selectedTaxonId);
         var selTaxonRcrd = getDetachedRcrd(selectedTaxonId);  
-        focusStorage.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);       //console.log("selectedVals = %O", focusStorage.selectedVals);
+        gParams.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);            //console.log("selectedVals = %O", gParams.selectedVals);
         updateFilterStatus();
         rebuildTaxonTree(selTaxonRcrd);
         if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
@@ -1257,7 +1257,7 @@
         function updateFilterStatus() {
             var curLevel = selTaxonRcrd.level.displayName;
             var taxonName = selTaxonRcrd.displayName;
-            focusStorage.focusFltr = curLevel + " " + taxonName; 
+            gParams.focusFltr = curLevel + " " + taxonName; 
             updateGridFilterStatusMsg();
         }
     } /* End updateTaxonSearch */
@@ -1287,7 +1287,7 @@
         var selTypeMap = { selCountry: "country", selRegion: "region" };
         var selType = selTypeMap[selElemId];
 
-        focusStorage.selectedOpts = getSelectedVals(selVal, selType);
+        gParams.selectedOpts = getSelectedVals(selVal, selType);
         filterGridOnLocCol(selVal, selType);
         /** Retuns the vals to select. If 'country' was selected, add it's region. */
         function getSelectedVals(val, type) {                                   //console.log("getSelectedVals. val = %s, selType = ", val, type)
@@ -1307,11 +1307,11 @@
      * search option dropdowns from the displayed tree data in the grid after filter.
      */
     function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-        var filterVal = focusStorage.rcrdsById[selVal].displayName.split('[')[0].trim(); 
+        var filterVal = gParams.rcrdsById[selVal].displayName.split('[')[0].trim(); 
         var colModel = getColFilterModel(filterVal);
         gridOptions.api.getFilterApi(colName).setModel(colModel);
         buildFilteredLocTree(selVal, colName);
-        loadLocComboboxes(focusStorage.curTree);
+        loadLocComboboxes(gParams.curTree);
         gridOptions.api.onGroupExpandedOrCollapsed();
     }
     /** When a top region is selected, it's sub-regions are also selected. */
@@ -1338,7 +1338,7 @@
         gridModel.rowsToDisplay.forEach(function(topNode) {                     //console.log("rowToDisplay = %O", topNode)
             tree[topNode.data.name] = getFilteredChildData(topNode);
         });
-        focusStorage.curTree = tree;
+        gParams.curTree = tree;
         /** Recurses through displayed children until finding the leaf interaction records. */
         function getFilteredChildData(treeNode) {                               //console.log("getHabTreeData. node = %O", treeNode);
             if (treeNode.data.hasOwnProperty("interactionType")) { return treeNode.data; }
@@ -1365,7 +1365,7 @@
         var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
-        focusStorage.focusFltr = selVal === "all" ? null : selText+'s';
+        gParams.focusFltr = selVal === "all" ? null : selText+'s';
         updateGridFilterStatusMsg();
     } 
     /** Returns the rows for publications with their id in the selected type's array */
@@ -1388,7 +1388,7 @@
         var newRows = authNameStr === "" ?
             getAllCurRows() : getAuthRows(getAllCurRows(), authNameStr);
         gridOptions.api.setRowData(newRows);
-        focusStorage.focusFltr = authNameStr === "" ? null : '"' + authNameStr + '"';
+        gParams.focusFltr = authNameStr === "" ? null : '"' + authNameStr + '"';
         updateGridFilterStatusMsg();
         resetToggleTreeBttn(false);
     }
@@ -1430,7 +1430,7 @@
         function syncTaxonHeir(taxonName, lvl, parent) {                        //console.log("syncTaxonHeir parent = ", parent);
             var lvls = _util.getDataFromStorage('levelNames');  //refactor. levels may not need to be stored at all
             if (parent === null || parent === 1) { fillInAvailableLevels(lvl, lvls);
-            } else { clearLowerLvls(focusStorage.rcrdsById[parent].level) }
+            } else { clearLowerLvls(gParams.rcrdsById[parent].level) }
 
             curTaxonHeirarchy[lvl] = taxonName;
         }
@@ -1490,14 +1490,14 @@
     function loadGrid(treeColTitle, gridOpts) {  //console.log("loading grid. rowdata = %s", JSON.stringify(rowData, null, 2));
         var gridDiv = document.querySelector('#search-grid');
         var gridOptObj = gridOpts || gridOptions;
-        gridOptObj.rowData = focusStorage.rowData;
+        gridOptObj.rowData = gParams.rowData;
         gridOptObj.columnDefs = getColumnDefs(treeColTitle);
         new agGrid.Grid(gridDiv, gridOptObj);
         sortTreeColumnIfTaxonFocused();
     }
     /** If the grid is Taxon focused, sort the tree column by taxon-rank and name. */
     function sortTreeColumnIfTaxonFocused() {
-        if (focusStorage.curFocus === 'taxa') {
+        if (gParams.curFocus === 'taxa') {
             gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]);
         }
     }
@@ -1526,7 +1526,7 @@
      * plants and arthropods.
      */
     function getColumnDefs(mainCol) { 
-        var domain = focusStorage.curDomain || false;  
+        var domain = gParams.curDomain || false;  
         var taxonLvlPrefix = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
 
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
@@ -1564,7 +1564,7 @@
     }
     /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
     function onBeforeSortChanged() {                                            
-        if (focusStorage.curFocus !== "taxa") { return; }                       
+        if (gParams.curFocus !== "taxa") { return; }                       
         var sortModel = gridOptions.api.getSortModel();                         //console.log("model obj = %O", sortModel)
         if (!sortModel.length) { return gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]); }
         ifNameUnsorted(sortModel);        
@@ -1585,7 +1585,7 @@
      */
     function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {               //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
         if (!a) { return 0; } //Interaction rows are returned unsorted
-        if (focusStorage.curFocus !== "taxa") { return alphaSortVals(a, b); }
+        if (gParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
         return sortTaxonRows(a, b);
     } 
     /** Sorts each row by taxonomic rank and then alphabetizes by name. */
@@ -1647,7 +1647,7 @@
      * interaction rows are not colored, their name rows are colored instead. 
      */
     function getRowStyleClass(params) {                                         //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
-        if (focusStorage.curFocus === "srcs") { return sourceRowStyleClass(params); }
+        if (gParams.curFocus === "srcs") { return sourceRowStyleClass(params); }
         if (params.data.name === "") { 
             return getRowColorClass(params.data.treeLvl);
         } 
@@ -1741,8 +1741,8 @@
             addUpdatedSinceFilter();
         }
         function addFocusFilters() {
-            if (focusStorage.focusFltr) { 
-                activeFilters.push(focusStorage.focusFltr);
+            if (gParams.focusFltr) { 
+                activeFilters.push(gParams.focusFltr);
             } 
         }
         function addUpdatedSinceFilter() {
@@ -1787,7 +1787,7 @@
     function initNoFiltersStatus() {
         $('#xtrnl-filter-status').text('Filtering on: ');
         $('#grid-filter-status').text('No Active Filters.');
-        focusStorage.focusFltr = null;
+        gParams.focusFltr = null;
     }
     /*-------------------- Filter By Time Updated ----------------------------*/
     /**
@@ -1809,10 +1809,10 @@
     /** Disables the calendar, if shown, and resets grid with active filters reapplied. */
     function resetTimeUpdatedFilter() {
         // $('.flatpickr-input').attr({'disabled': true});
-        focusStorage.fltrdRows = null;
-        focusStorage.fltrSince = null;
+        gParams.fltrdRows = null;
+        gParams.fltrSince = null;
         if (gridOptions.api) { 
-            gridOptions.api.setRowData(focusStorage.rowData);
+            gridOptions.api.setRowData(gParams.rowData);
             syncFiltersAndUi();
         }
     }
@@ -1861,13 +1861,13 @@
      * since the datetime specified by the user.
      */
     function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("\nfilterInteractionsUpdatedSince called.");
-        var rowData = JSON.parse(JSON.stringify(focusStorage.rowData));
-        var fltrSince = dateStr || focusStorage.timeFltr;
+        var rowData = JSON.parse(JSON.stringify(gParams.rowData));
+        var fltrSince = dateStr || gParams.timeFltr;
         var sinceTime = new Date(fltrSince).getTime();                          
         var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
-        focusStorage.timeFltr = fltrSince;
+        gParams.timeFltr = fltrSince;
         gridOptions.api.setRowData(updatedRows);
-        focusStorage.fltrdRows = updatedRows;
+        gParams.fltrdRows = updatedRows;
         resetToggleTreeBttn(false);
         syncFiltersAndUi(sinceTime);
 
@@ -1890,7 +1890,7 @@
      * The grid filter's status message is updated. The time-updated radios are synced.
      */
     function syncFiltersAndUi(sinceTime) {
-        if (focusStorage.curFocus === "srcs") { applySrcFltrs(); }
+        if (gParams.curFocus === "srcs") { applySrcFltrs(); }
         updateGridFilterStatusMsg();  
         syncTimeUpdatedRadios(sinceTime);
     }
@@ -1904,7 +1904,7 @@
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {
         var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
-        var domain = focusStorage.curDomain;  
+        var domain = gParams.curDomain;  
         resets[domain]();
     }
     function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
@@ -2254,7 +2254,7 @@
      * For taxon csv export: The relevant tree columns are shown and also exported. 
      */
     function exportCsvData() {
-        var fileName = focusStorage.curFocus === "taxa" ? 
+        var fileName = gParams.curFocus === "taxa" ? 
             "Bat Eco-Interaction Records by Taxon.csv" : "Bat Eco-Interaction Records by Location.csv";
         var params = {
             onlySelected: true,
@@ -2262,14 +2262,14 @@
             // customHeader: "This is a custom header.\n\n",
             // customFooter: "This is a custom footer."
         };
-        if (focusStorage.curFocus === "taxa") { showOverlayAndTaxonCols(); }
+        if (gParams.curFocus === "taxa") { showOverlayAndTaxonCols(); }
         gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], false)
         selectRowsForExport();
         gridOptions.api.exportDataAsCsv(params);
         returnGridState();
     }
     function returnGridState() {
-        // if (focusStorage.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
+        // if (gParams.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
         gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], true);
         gridOptions.api.deselectAll();
         hidePopUpMsg();
@@ -2279,8 +2279,8 @@
         gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
 
     }
-    function getCurTaxonLvlCols() {                                             //console.log("taxaByLvl = %O", focusStorage.taxaByLvl)
-        var lvls = Object.keys(focusStorage.taxaByLvl);
+    function getCurTaxonLvlCols() {                                             //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+        var lvls = Object.keys(gParams.taxaByLvl);
         return lvls.map(function(lvl){ return 'tree' + lvl; });
     }
     function hideOverlayAndTaxonCols() {
@@ -2419,7 +2419,7 @@
             $('#search-focus').off("change");
         }
         function resetGridState() {
-            var focus = focusStorage.curFocus || "taxa";
+            var focus = gParams.curFocus || "taxa";
             $('#search-grid').css("height", "888px");
             $('#show-tips').click(showTips);
             $('#search-focus').change(selectSearchFocus);
@@ -2505,7 +2505,7 @@
      * focus' records are used.
      */
     function getDetachedRcrd(rcrdKey, rcrds) {                                  
-        var orgnlRcrds = rcrds || focusStorage.rcrdsById;                       //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+        var orgnlRcrds = rcrds || gParams.rcrdsById;                            //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
         try {
            return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
         }
@@ -2515,7 +2515,7 @@
     }
     /** If grid is filtered by an external filter, the rows are stored in fltrdRows. */
     function getAllCurRows() {
-        return focusStorage.fltrdRows || focusStorage.rowData;
+        return gParams.fltrdRows || gParams.rowData;
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
         var popUpMsg = msg || "Loading...";
@@ -2676,7 +2676,7 @@
      */
     function resetDataGrid() {                                                  //console.log("---reseting grid---")
         var resetMap = { taxa: onTaxonDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
-        var focus = focusStorage.curFocus; 
+        var focus = gParams.curFocus; 
         resetCurTreeState();
         resetMap[focus](); 
     } 
@@ -2687,11 +2687,11 @@
         if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; } //resets updatedAt grid filter
         updateGridFilterStatusMsg();
     }
-    /** Deltes the props uesd for only the displayed grid in the global focusStorage. */
+    /** Deltes the props uesd for only the displayed grid in the global gParams. */
     function resetCurTreeStorageProps() {
         var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltr'];
-        props.forEach(function(prop){ delete focusStorage[prop]; });
-        focusStorage.selectedOpts = {};
+        props.forEach(function(prop){ delete gParams[prop]; });
+        gParams.selectedOpts = {};
     }
     /**
      * When the grid rowModel is updated, the total interaction count for each 
