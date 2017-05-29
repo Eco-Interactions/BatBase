@@ -288,7 +288,8 @@ $(document).ready(function(){
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
-            "fullTextArea": setTextField, "multiSelect": Function.prototype
+            "fullTextArea": setTextField, "multiSelect": Function.prototype,
+            "tags": setTagField
         };
         for (var field in fields) {  
             if (excluded.indexOf(field) !== -1) { continue; }                   //console.log("field type = [%s]. fields = [%O] fieldHndlr = %O", fields[field], fields, fieldHndlrs[fields[field]]);
@@ -310,6 +311,11 @@ $(document).ready(function(){
         var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
         $('#'+fieldId+'-sel')[0].selectize.addItem(id);        
     }
+    function setTagField(fieldId, prop, rcrd) {                                 //console.log("setTagField. rcrd = %O", rcrd)
+        rcrd[prop].forEach(function(tag) {  
+            $('#Tags-sel')[0].selectize.addItem(tag.id);
+        });
+    }    
     function setAdditionalFields(entity, srcRcrd) {
         setTitleField(entity, srcRcrd);
         setPublisherField(entity, srcRcrd);
