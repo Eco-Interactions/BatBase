@@ -201,6 +201,7 @@
     }
     /** Adds a new child record's id to it's parent's 'children' array. */ 
     function addToParentRcrd(prop, rcrd, entity) {                              
+        if (!rcrd.parent) { return; }
         var parentObj = _util.getDataFromStorage(prop);                         //console.log("addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
         var parent = parentObj[rcrd.parent];
         addIfNewRcrd(parent.children, rcrd.id);
@@ -307,7 +308,7 @@
     /** Removes the record from the entity-type's stored array. */
     function rmvFromTypeProp(prop, rcrd, entity, edits) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-        var typeId = edits[prop].new;
+        var typeId = edits[prop].old;
         rmvIdFromAry(typeObj[typeId][entity+'s'], rcrd.id);
         storeData(prop, typeObj);
     }

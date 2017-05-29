@@ -285,28 +285,6 @@ $(document).ready(function(){
         };
         return fields;
     }
-    function setAdditionalFields(entity, srcRcrd) {
-        setTitleField(entity, srcRcrd);
-        setPublisherField(entity, srcRcrd);
-        addAuthors(entity, srcRcrd);
-    }
-    function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
-        if (["publication", "citation"].indexOf(entity) !== -1) {
-            $('#Title_row input[type="text"]').val(srcRcrd.displayName);
-        }
-    }
-    function setPublisherField(entity, srcRcrd) {
-        if (entity !== 'publication') { return; }
-        setSelect("Publisher", "parent", srcRcrd)
-    }
-    function addAuthors(entity, srcRcrd) {
-        var cnt = 0;
-        if (["publication", "citation"].indexOf(entity) !== -1) {
-            srcRcrd.contributors.forEach(function(authId) {
-                selectAuthor(cnt++, authId)
-            });
-        }
-    }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
@@ -331,6 +309,28 @@ $(document).ready(function(){
     function setSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
         var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
         $('#'+fieldId+'-sel')[0].selectize.addItem(id);        
+    }
+    function setAdditionalFields(entity, srcRcrd) {
+        setTitleField(entity, srcRcrd);
+        setPublisherField(entity, srcRcrd);
+        addAuthors(entity, srcRcrd);
+    }
+    function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
+        if (["publication", "citation"].indexOf(entity) !== -1) {
+            $('#Title_row input[type="text"]').val(srcRcrd.displayName);
+        }
+    }
+    function setPublisherField(entity, srcRcrd) {
+        if (entity !== 'publication') { return; }
+        setSelect("Publisher", "parent", srcRcrd)
+    }
+    function addAuthors(entity, srcRcrd) {
+        var cnt = 0;
+        if (["publication", "citation"].indexOf(entity) !== -1) {
+            srcRcrd.contributors.forEach(function(authId) {
+                selectAuthor(cnt++, authId)
+            });
+        }
     }
 /*--------------------------- Create Form --------------------------------------------------------*/
     /**
@@ -1714,11 +1714,12 @@ $(document).ready(function(){
     function getFormValueData(id, entity) {      
         var elems = $(id)[0].children;   
         var formVals = {};
-        for (var i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  // setting i to 0 instead of 1... this may affect interaction processing
+        for (var i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  
         addAdditionalEntityData(entity);
         return formVals;
         /** Get's the value from the form elem and set it into formVals. */
-        function getInputData(elem) {
+        function getInputData(elem) {                                           //console.log("elem = %O", elem)
+            if (elem.id.includes('-hdr')) { return; }
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
             var input = elem.children[1].children[1];                           //console.log("fieldName = ", fieldName)
             if ($(input).data("inputType")) { 
