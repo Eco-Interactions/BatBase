@@ -930,7 +930,7 @@
         var childRows = [];
         var locType = locRcrd.locationType.displayName; 
         if (locType === "Region" || locType === "Country") {
-            getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl);
+            getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl, locType);
             locRcrd.children.forEach(getChildLocData);
         } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
         return childRows;
@@ -938,7 +938,7 @@
          * Groups interactions attributed directly to a location with child-locations
          * and adds them as it's first child row. 
          */
-        function getUnspecifiedLocInts(intsAry, treeLvl) {   
+        function getUnspecifiedLocInts(intsAry, treeLvl, locType) {   
             var locName = locRcrd.displayName === "Unspecified" ? 
                 "Location" : locRcrd.displayName;
             if (intsAry.length > 0) { 
@@ -1630,7 +1630,9 @@
         return value === null ? null : '<span title="'+value+'">'+value+'</span>';
     }
     /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
-    function addEditPencil(params) {                                            
+    function addEditPencil(params) {   
+        if (gParams.curFocus === 'locs' && ['Region', 'Country'].indexOf(params.data.type) !== -1) {
+            return "<span>"; }                                                
         return getPencilHtml(params.data.id, params.data.entity, eif.crud.editEntity);
     }
     function getPencilHtml(id, entity, editFunc) {
