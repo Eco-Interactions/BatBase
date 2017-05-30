@@ -307,7 +307,7 @@ class CrudController extends Controller
         $getField = 'get'. ucfirst($field);                                     
         
         $curVal = $entity->$getField();
-        if ($curVal === $newVal) { return; }
+        if ($curVal == $newVal) { return; }
 
         if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
         $entity->$setField($newVal);
@@ -327,7 +327,8 @@ class CrudController extends Controller
         } else if ($curVal === $newVal->getId()) { return; }
 
         if ($edits->editing) { 
-            $edits->$field = [ "old" => $curVal, "new" => $newVal->getId()]; }
+            $newValue = $newVal === null ? null : $newVal->getId();
+            $edits->$field = [ "old" => $curVal, "new" => $newValue ]; }
         $entity->$setField($newVal);
     }
     /*---------- Flush and Return Data ---------------------------------------*/
