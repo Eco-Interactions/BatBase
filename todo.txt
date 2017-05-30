@@ -3,6 +3,7 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
     --Search--
+        -- refactor into and cal out of the global space. Perhaps a temp storage obj?
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
     --FORM--
@@ -11,18 +12,38 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
         --form
-            --disable 'select' when all combos are empty
+            -- Auto generate citation full text from filled fields
         --search
-            -- build initcomboboxes
+            -- Add an 'All' option to taxon and location dropdowns to reset data to that level and retain other filters- updated at for example.
+            -- add selectize library
             -- standardize taxon 'levels' storage
             -- update walkthrough
-            -- Location selects include both sub and top regions but, because the 
-                grid column filters are used to update to grid, not the selection 
-                of those regions... fix this.
-            --Refactor--
     --Asap--
+        --crud--
+            -- When only a country is selected, add the interaction directly to the country location.
+            -- remove elev units from form. Assume meters if given.??
+            -- Change description to 'translation'
+
+        --TODO-- 
+            -- update all comments from top-form to interaction-form, where appropriate
+            -- Fix taxon form to show taxon selection ui
+            -- add publisher to publication detail panel
+            -- Auto-derive location type
+
+            -!!- With grid in source-author view, publication edit pencils are linked 
+            to the citation entity. I pressume something in author rowData generation 
+            is assuming all child sources are citations. Hopefully I coded otherwise 
+            and this a simple bug fix. =}
+            -!!- When editing publication, description field disappears a few seconds 
+            after submiting; perhaps a wonky exit event?
 
 
+    LEFT OFF THINKING ABOUT WHERE TO ADD THE PADDING FOR LAT AND LONG (13 SCALE)
+
+
+::Testing!::
+> Data Storage
+    >Data is added and removed correctly   
 
 
 ::Search Page Ui::
@@ -33,9 +54,8 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         Common screen resolutions = 1280×800, 1440×900, 1680×1050, 1920×1200 and 2560×1600
         >> code for ratio?
 
-        ###TESTS###
-        > Create
-        > Edit
+
+
 
 
 
@@ -57,29 +77,20 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 
 
 ============ MEETING ==================
+>> Talk about the location naming convention for when to add author and year and when to assign interactions directly to the country.
 
 TASK LIST
-    >> Auto generate citation full text from filled fields
-    >> Citation 'abstract' field
     >> Ensure you can't make a detached species
-    >> Jump to source view after interaction form exited (##FIRST##)
-        >> Show only interactions modified 'today'
-    >> Create 'edited' filter
-        >> Allow choice of all records modified 'today' or a specfied datetime
 
-CHANGES
-    >>
 
 TODO
     >> Need to write tests to reduce unidentified bugs upon release ~week
-    >> Bring focus to the latest interaction created/edited on form close
 
 NOTES
     >> 
 
-    
 ============ EMAIL ==================
-
+    >>  
 
 TAYLOR:
     --- General ---
@@ -104,8 +115,6 @@ Questions:
         --Save filters through changes in the view options
     --Site-
         --CSS
-            --Find and fix leaky styles (see file)
-            --CSS replacing/optimizing/refactoring
             --Firefox does not look the same as chrome. Spend a day fixing this!!!
                 --team section styles
                     #team-sect .second-col, #team-sect .first-col {
@@ -123,8 +132,8 @@ Questions:
                     }
         --ENTITIES
             -- Rename deletedAt field to deleted_at
-        --add exit click event for menu
-        --add tips and search page static content to content blocks and wysiwyg
+        -- add exit click event for menu
+        -- add tips and search page static content to content blocks and wysiwyg
         -- revisit tag constraint system 
         -- add copy csv
         -- fix csv exports??

@@ -951,7 +951,8 @@
                     children: getIntRowData(intsAry, treeLvl),
                     interactions: intsAry.length > 0,
                     treeLvl: treeLvl,
-                    groupedInts: true
+                    groupedInts: true,
+                    type: locType
                 });
             }
         }

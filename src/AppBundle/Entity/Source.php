@@ -404,7 +404,7 @@ class Source
      *
      * @return Source
      */
-    public function setParentSource(\AppBundle\Entity\Source $parentSource)
+    public function setParentSource(\AppBundle\Entity\Source $parentSource = null)
     {
         $this->parentSource = $parentSource;
 

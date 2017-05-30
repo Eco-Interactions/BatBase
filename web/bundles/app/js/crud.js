@@ -217,9 +217,10 @@ $(document).ready(function(){
     /** Fills form with existing data for the entity being edited. */
     function fillExistingData(entity, id) {
         if (entity === "interaction") { fillIntData(id); 
-        } else { fillSubEntData(entity, id); }
+        } else { fillEntityData(entity, id); }
         enableSubmitBttn('#top-submit');
     }
+    /*------------------- Fill Interaction Form Fields -----------------------*/
     /** TODO: Refactor */
     function fillIntData(id) {
         var intRcrd = getEntityRecord("interaction", id);                       
@@ -264,15 +265,23 @@ $(document).ready(function(){
             $('#InteractionTags-sel')[0].selectize.addItem(tag.id);
         });
     }
-    function fillSubEntData(entity, id) {
-        var srcs = ["author", "citation", "publication", "publisher"];
-        if (srcs.indexOf(entity) !== -1) { return fillSrcFormFields(entity, id); }
-        // var rcrd = getEntityRecord(entity, id);                              console.log("fillSubEntData [%s] [%s] = %O", entity, id, rcrd);
-        // Code this
+    /*------------------- Fill Form Fields -----------------------------------*/
+    function fillEntityData(entity, id) {
+        var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
+            "location": fillLocFields, "publication": fillSrcFields, 
+            "publisher": fillSrcFields };
+        var rcrd = getEntityRecord(entity, id);                                 console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
+        hndlrs[entity](entity, id, rcrd);
     }
-    function fillSrcFormFields(entity, id) {
+    function fillLocFields(entity, id, rcrd) {
+        var fields = getCoreFieldDefs(entity);
+        delete fields.Country;
+        fields["subCountry"] = "cntry";
+        fillFields(rcrd, fields, []);
+    }
+    function fillSrcFields(entity, id) {
         var src = getEntityRecord("source", id);
-        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFormFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
+        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
         var fields = getSourceFields(entity);
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
@@ -289,7 +298,7 @@ $(document).ready(function(){
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
             "fullTextArea": setTextField, "multiSelect": Function.prototype,
-            "tags": setTagField
+            "tags": setTagField, "cntry": setCntry
         };
         for (var field in fields) {  
             if (excluded.indexOf(field) !== -1) { continue; }                   //console.log("field type = [%s]. fields = [%O] fieldHndlr = %O", fields[field], fields, fieldHndlrs[fields[field]]);
@@ -316,6 +325,9 @@ $(document).ready(function(){
             $('#Tags-sel')[0].selectize.addItem(tag.id);
         });
     }    
+    function setCntry(fieldId, prop, rcrd) {
+        $('#subCountry-sel')[0].selectize.addItem(rcrd.country.id);
+    }
     function setAdditionalFields(entity, srcRcrd) {
         setTitleField(entity, srcRcrd);
         setPublisherField(entity, srcRcrd);
@@ -1232,7 +1244,7 @@ $(document).ready(function(){
             "location": {
                 "add": {},  
                 "exclude": [],
-                "required": ["Display Name", "Location Type", "Country"],
+                "required": ["Display Name", "Location Type"],
                 "order": ["DisplayName", "LocationType", "Country", "Description", 
                     "Elevation", "ElevationMax", "Latitude", "Longitude", "HabitatType" ], //"ElevationUnits", 
                 "exitHandler": enableCountryField
@@ -1761,8 +1773,10 @@ $(document).ready(function(){
             var dataHndlrs = {
                 "Author": [ getAuthFullName ],
                 "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
-                "Location": [ addElevUnits, handleUnspecifiedLocs ],
-                "Taxon": [ getTaxonData ]
+                "Interaction": [ handleUnspecifiedLocs ],
+                "Location": [ addElevUnits, padLatLong, checkParentLoc ], 
+                "Taxon": [ getTaxonData ],
+
             };
             if (!dataHndlrs[entity]) { return; }
             dataHndlrs[entity].forEach(function(func) { func(); });
@@ -1794,13 +1808,26 @@ $(document).ready(function(){
         function addElevUnits() {
             if (formVals.elevation) { formVals.elevUnitAbbrv = "m"; }
         }
+        /** Pads each to the 13 scale set by the db. This eliminates false change flags. */
+        function padLatLong() {
+            if (formVals.latitude) {            
+                formVals.latitude = parseFloat(formVals.latitude).toFixed(13); 
+            }
+            if (formVals.longitude) {            
+                formVals.longitude = parseFloat(formVals.longitude).toFixed(13); 
+            }
+        }
+        /** If no parent country is selected, the 'Unspecified' region is the parent. */
+        function checkParentLoc() {
+            if (!formVals.country) { formVals.country = 439; }
+        }
         /**
          * If no location is selected for an interaction record, the country field 
          * is checked for a value. If set, it is added as the interaction's location;
          * if not, the 'Unspecfied' location, id 439, is added.
          */
         function handleUnspecifiedLocs(entity) {
-            if (!entity !== "Interaction" || formVals.location) { return; }
+            if (formVals.location) { return; }
             formVals.location = formVals.country || 439;   
         }
         function getTaxonData() {

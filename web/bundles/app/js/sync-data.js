@@ -275,6 +275,7 @@
                 'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
                 'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
             },
+            'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp  },
             'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent },
             'publication': { 'publicationType': rmvFromTypeProp }
         }
@@ -285,31 +286,31 @@
         ary.splice(ary.indexOf(id), 1);  
     }
     /** Removes a record's id from the previous parent's 'children' array. */ 
-    function rmvFromParent(prop, rcrd, entity, edits) {
-        if (!rcrd[prop] || !rcrd[prop].old) { return; }
-        var srcObj = _util.getDataFromStorage('source');  
-        rmvIdFromAry(srcObj[rcrd[prop].old].children, rcrd.id);                
-        storeData('source', srcObj);
+    function rmvFromParent(prop, rcrd, entity, edits) {  
+        if (!edits[prop].old) { return; }
+        var rcrds = _util.getDataFromStorage(entity);                           //console.log("rmvFromParent. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);  
+        rmvIdFromAry(rcrds[edits[prop].old].children, rcrd.id);                
+        storeData(entity, rcrds);
     }
     /** Removes the Interaction from the stored entity's collection. */
     function rmvIntFromEntity(prop, rcrd, entity, edits) {
         var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
-        var storedEntity = rcrds[edits[prop]];
+        var storedEntity = rcrds[edits[prop].old];
         rmvIdFromAry(storedEntity.interactions, edits[prop]);
         storeData(prop, rcrds);
     }
     /** Removes the Interaction from the taxon's subject/objectRole collection. */
     function rmvIntFromTaxon(prop, rcrd, entity, edits) {  
         var taxa = _util.getDataFromStorage("taxon");                           //console.log("rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
-        var taxon = taxa[edits[prop]];   
+        var taxon = taxa[edits[prop].old];   
         rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);           
     }
     /** Removes the record from the entity-type's stored array. */
     function rmvFromTypeProp(prop, rcrd, entity, edits) {
         var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-        var typeId = edits[prop].old;
-        rmvIdFromAry(typeObj[typeId][entity+'s'], rcrd.id);
+        var type = typeObj[edits[prop].old];
+        rmvIdFromAry(type[entity+'s'], rcrd.id);
         storeData(prop, typeObj);
     }
     /** Removes a record from the tag's array of record ids. */
