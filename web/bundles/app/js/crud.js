@@ -201,7 +201,7 @@ $(document).ready(function(){
         if (entity === "interaction") { 
             finishFormBuild(); 
         } else {
-            initSubFormComboboxes(entity); 
+            initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
         }
         fillExistingData(entity, id);
@@ -290,13 +290,13 @@ $(document).ready(function(){
     function fillLocFields(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
         delete fields.Country;
-        fields["subCountry"] = "cntry";
+        fields["locCountry"] = "cntry";
         fillFields(rcrd, fields, []);
     }
     function fillSrcFields(entity, id, rcrd) {
+        var src = getEntityRecord("source", id);
         var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
         var fields = getSourceFields(entity);
-        var src = rcrd;
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
         setAdditionalFields(entity, src);
@@ -342,7 +342,7 @@ $(document).ready(function(){
         });
     }    
     function setCntry(fieldId, prop, rcrd) {
-        $('#subCountry-sel')[0].selectize.addItem(rcrd.country.id);
+        $('#locCountry-sel')[0].selectize.addItem(rcrd.country.id);
     }
     function setAdditionalFields(entity, srcRcrd) {
         setTitleField(entity, srcRcrd);
@@ -376,10 +376,10 @@ $(document).ready(function(){
         initCreateForm();
     }       
     /**
-     * Inits the interaction form, aka top-form, with all fields displayed and
-     * the first field, publication, in focus. From within many of the fields the
-     * user can create new entities of the field-type by selecting the 'add...' 
-     * option from the field's combobox and completing the appended sub-form.
+     * Inits the interaction form with all fields displayed and the first field, 
+     * publication, in focus. From within many of the fields the user can create 
+     * new entities of the field-type by selecting the 'add...' option from the 
+     * field's combobox and completing the appended sub-form.
      */
     function initCreateForm() {
         var form = buildFormElem();
@@ -407,7 +407,7 @@ $(document).ready(function(){
      * required field elems to the form's config object.  
      */
     function finishFormBuild() {
-        initTopFormComboboxes();
+        initComboboxes("interaction");
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
         addReqElemsToConfg();     
@@ -426,19 +426,28 @@ $(document).ready(function(){
     }
     /** Returns the record for the passed id and entity-type. */
     function getEntityRecord(entity, id) {
-        var rcrds = _util.getDataFromStorage(entity);                           console.log("id = %s, rcrds = %O", id, rcrds)
+        var rcrds = _util.getDataFromStorage(entity);                           console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
         return rcrds[id];
     }
-/*-------------- Top Form Helpers ----------------------------------------------------------------*/
+/*-------------- Form Builders -------------------------------------------------------------------*/
     /** Builds and returns all interaction-form elements. */
     function buildIntFormFields(action) {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
             buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
             buildIntTagField, buildIntNotesField ]; 
-        var fields = fieldBuilders.map(function(builder) {
-            return builder();
-        });
+        var fields = fieldBuilders.map(buildField);
         return fields.concat(buildFormBttns("Interaction", "top", action));
+    }
+    function buildField(builder) {
+        var field = builder();                                                  //console.log("field = %O", field);
+        var fieldType = field.children[1].children[1].nodeName; 
+        if (fieldType === "SELECT") { addSelElemToInitAry(field); }
+        return field;
+    }
+    /** Select elems with be initialized into multi-functional comboboxes. */
+    function addSelElemToInitAry(field) {
+        var fieldName = field.id.split('_row')[0];
+        fParams.forms.top.selElems.push(fieldName);
     }
     /*-------------- Publication ---------------------------------------------*/
     /**
@@ -489,7 +498,7 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Publication', null, formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
-        initSubFormComboboxes("publication");
+        initComboboxes("publication");
         $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
     }
@@ -553,7 +562,7 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('CitationTitle', '#CitationTitle-sel', formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
-        initSubFormComboboxes("citation");
+        initComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
         $('#CitationText_row textarea').focus();
@@ -683,7 +692,7 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Location', null, formLvl); }
         $('#Location_row').after(initSubForm(
             "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
-        initSubFormComboboxes("location");
+        initComboboxes("location");
         enableCombobox('#Country-sel', false);
         $('#DisplayName_row input').focus();
         enableSubmitBttn("#"+formLvl+"-submit");
@@ -716,7 +725,7 @@ $(document).ready(function(){
         setTaxonParams('Subject', 2);
         $('#Subject_row').append(initSubForm(
             "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
-        initSubFormComboboxes("subject");           
+        initComboboxes("subject");           
         finishTaxonSelectUi("Subject");  
         enableCombobox('#Object-sel', false);
     }
@@ -733,7 +742,7 @@ $(document).ready(function(){
         setTaxonParams('Object', getSelectedRealm($('#Object-sel').val()));
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
-        initSubFormComboboxes("object");             
+        initComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
     }
@@ -753,8 +762,7 @@ $(document).ready(function(){
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
-     * taxonomic data is displayed in the top-form Subject combobox. The 'Select 
-     * Object' form is built and displayed, unless the object is already selected.
+     * taxonomic data is displayed in the interaction-form Subject combobox. 
      */
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }         
@@ -765,8 +773,7 @@ $(document).ready(function(){
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
-     * taxonomic data is displayed in the top-form Object combobox. The interaction
-     * field rows are initialized @buildInteractionFieldRows.
+     * taxonomic data is displayed in the interaction-form Object combobox. 
      */
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
@@ -802,7 +809,7 @@ $(document).ready(function(){
     }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
-     * or brings the first level-combo into focus. Clears the top-form [role] combo. 
+     * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
      */
     function finishTaxonSelectUi(role) {
         var formLvl = getSubFormLvl("sub");
@@ -819,7 +826,7 @@ $(document).ready(function(){
         fParams.formTaxonLvl = selLvl;
         $('#'+selLvl+'_row').append(initSubForm(
             "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
-        initSubFormComboboxes("taxon");                     
+        initComboboxes("taxon");                     
         enableSubmitBttn("#"+formLvl+"-submit");
         return { "value": "", "text": "Creating "+selLvl+"..." };
     }
@@ -835,7 +842,7 @@ $(document).ready(function(){
         setTaxonParams('Object', val);
         fParams.objectRealm = val;
         buildAndAppendRealmElems(realms[val], val);
-        initSubFormComboboxes(realms[val]);  
+        initComboboxes(realms[val]);  
         finishTaxonSelectUi("Object");          
     }
     /**
@@ -878,7 +885,7 @@ $(document).ready(function(){
         $('#sub-form').remove();
         initForm();
     }
-    /** Adds the selected taxon to the top-form [role] taxon combobox. */
+    /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
     function selectTaxon() {
         var role = fParams.taxon.realm === 'Bat' ? 'Subject' : 'Object';
         var selApi = $('#'+role+'-sel')[0].selectize;
@@ -1080,38 +1087,6 @@ $(document).ready(function(){
     }
     /*------------------- Shared Methods ---------------------------------------------------*/
     /*------------------- Combobox (selectized) Methods ----------------------*/
-    /** 
-     * Inits the selectize library on all top-form select elems, turning them into 
-     * multi-functional comboboxes.
-     */
-    function initTopFormComboboxes() {
-        var fields = ['publication', 'citation', 'country', 'location', 'subject', 
-            'object', 'interactionType', 'interactionTags'];       
-        fields.forEach(initTopFormCombobox);
-    }
-    /** Inits the entity's combobox in the 'top' interaction form @initSelectCombobox. */
-    function initTopFormCombobox(field) {
-        var selMap = { 
-            'publication': { 
-                name: 'Publication', id: '#Publication-sel', change: onPubSelection, add: initPubForm },
-            'citation': { 
-                name: 'Citation', id: '#CitationTitle-sel', change: onCitSelection, add: initCitForm },
-            'country': { 
-                name: 'Country', id: '#Country-sel', change: onCntrySelection, add: false },
-            'interactionTags': { 
-                name: 'Interaction Tags', id: '#InteractionTags-sel', change: false, 
-                add: false , options: { delimiter: ",", maxItems: null }},         
-            'interactionType': { 
-                name: 'Interaction Type', id: '#InteractionType-sel', change: focusIntTypePin, add: false },
-            'location': { 
-                name: 'Location', id: '#Location-sel', change: onLocSelection, add: initLocForm },
-            'subject': { 
-                name: 'Subject', id: '#Subject-sel', change: onSubjectSelection, add: false },
-            'object': { 
-                name: 'Object', id: '#Object-sel', change: onObjectSelection, add: false },
-        };
-        initSelectCombobox(selMap[field], "top"); 
-    }
     /**
      * Inits the combobox, using 'selectize', according to the passed config.
      * Note: The 'selectize' library turns select dropdowns into input comboboxes
@@ -1134,17 +1109,34 @@ $(document).ready(function(){
         }
     } /* End initSelectCombobox */
     /**
-     * Inits 'selectize' for each select elem in the subForm's 'selElems' array
+     * Inits 'selectize' for each select elem in the form's 'selElems' array
      * according to the 'selMap' config. Empties array after intializing.
      */
-    function initSubFormComboboxes(entity) {
-        var confg;
+    function initComboboxes(entity) {
         var formLvl = fParams.forms[entity];
-        var selMap = { 
-            "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
+        var selMap = getSelConfgObjs();
+        fParams.forms[formLvl].selElems.forEach(selectizeElem);
+        fParams.forms[formLvl].selElems = [];
+
+        function selectizeElem(field) {                                         //console.log("Initializing --%s-- select", field);
+            var confg = getSelConfg(field);
+            confg.id = confg.id || '#'+field+'-sel';
+            initSelectCombobox(confg, formLvl);
+        }
+        /** Handles the shared Country field between Location and Interaction forms. */
+        function getSelConfg(field) {
+            var fieldName = field === 'Country' && entity === 'location' ? 
+                field + '-loc' : field;
+            return selMap[fieldName];
+        }
+    } 
+    function getSelConfgObjs() {
+        return { 
+            "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, 
+                add: initAuthForm },
             "CitationType": { name: "Citation Type", change: false, add: false },
             "Class": { name: "Class", change: onLevelSelection, add: initTaxonForm },
-            "Country": { name: "Country", id: "#subCountry-sel", change: false, add: false },
+            "Country-loc": { name: "Country", id: "#locCountry-sel", change: false, add: false },
             // "ElevationUnits": { name: "Elevation Units", change: false, add: false },
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
@@ -1156,19 +1148,22 @@ $(document).ready(function(){
             "Species": { name: "Species", change: onLevelSelection, add: initTaxonForm },
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
+            'Publication': { name: 'Publication', change: onPubSelection, add: initPubForm },
+            'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
+            'Country': { name: 'Country', change: onCntrySelection, add: false },
+            'InteractionTags': { name: 'Interaction Tags', change: false, add: false , 
+                options: { delimiter: ",", maxItems: null }},         
+            'InteractionType': { name: 'Interaction Type', change: focusIntTypePin, add: false },
+            'Location': { name: 'Location', change: onLocSelection, add: initLocForm },
+            'Subject': { name: 'Subject', change: onSubjectSelection, add: false },
+            'Object': { name: 'Object', change: onObjectSelection, add: false },
         };
-        fParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
-            confg = selMap[field];
-            confg.id = confg.id || '#'+field+'-sel';
-            initSelectCombobox(confg, "sub");
-        });
-        fParams.forms[formLvl].selElems = [];
-    } 
+    }
     function enableCombobox(selId, enable) {
         if (enable === false) { return $(selId)[0].selectize.disable(); }
         $(selId)[0].selectize.enable();
     }
-    function focusCombobox(selId) {
+    function focusCombobox(selId) { 
         $(selId)[0].selectize.focus();
     }
     function focusFirstCombobox(cntnrId) {
@@ -1451,7 +1446,7 @@ $(document).ready(function(){
     /** Routes edge case fields to its field-builder method. */
     function buildEdgeCaseElem(entity, field) {
         var caseMap = {
-            "Country": buildSubCountryElem
+            "Country": buildLocCountryElem
         };
         return caseMap[field](entity, field);
     }
@@ -1460,9 +1455,9 @@ $(document).ready(function(){
      * unique id. If there is a selected value in the top-form country combobox, 
      * it is set in this sub-field. The top-form country combobox is disabled. 
      */
-    function buildSubCountryElem(entity, field) {
+    function buildLocCountryElem(entity, field) {
         var subCntrySel = buildSelectElem(entity, field);
-        subCntrySel.id = "subCountry-sel";
+        subCntrySel.id = "locCountry-sel";
         if ($('#Country-sel').length) { // when editing a location, there is no 'top' country field
             if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
             enableCombobox('#Country-sel', false);
