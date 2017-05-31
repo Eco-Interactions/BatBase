@@ -197,8 +197,7 @@ $(document).ready(function(){
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
         var formCntnr = buildCrudFormCntnr();
-        var formFields = entity === "interaction" ? 
-            buildIntFormFields('edit') : buildEditFormFields(entity);           //console.log("formFields = %O", formFields);
+        var formFields = getFormFields(id, entity);
         $(formCntnr).append(formFields);
         $('#crud-main').append(formCntnr);     
         if (entity === "interaction") { 
@@ -208,7 +207,24 @@ $(document).ready(function(){
             $('#top-cancel').unbind('click').click(exitCrudFormPopup);
         }
         fillExistingData(entity, id);
-    }      
+    }   
+    /** Returns the form fields for the passed entity.  */
+    function getFormFields(id, entity) {
+        var edges = { "interaction": buildIntFormFields, "taxon": getTaxonFormFields };
+        var hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
+        var fields = hndlr(entity, id);                                         //console.log("fields = %O, hndlr = %O", fields, hndlr);     
+        return fields;
+    }   
+    function getIntFormFields(entity, id) {
+        buildIntFormFields('edit');
+    }
+    function getTaxonFormFields(entity, id) {
+        var realm = { 2: "plant", 3: "arthropod" };
+        var taxon = cParams.records.taxon[id];  
+        var realmId = taxon.domain.id;
+        initTaxonParams(realmId+1); //domain ids and the domain taxon's id are one off from eachother
+        return buildEditFormFields(realm[realmId]);
+    }
     /** Returns the passed entity's form fields. */
     function buildEditFormFields(entity) {
         var fields =  buildSubForm(entity, {}, "top", null, "edit");                            
@@ -269,7 +285,7 @@ $(document).ready(function(){
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
             "location": fillLocFields, "publication": fillSrcFields, 
-            "publisher": fillSrcFields };
+            "publisher": fillSrcFields, "taxon": fillTaxonFields };
         var rcrd = getEntityRecord(entity, id);                                 console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
         hndlrs[entity](entity, id, rcrd);
     }
@@ -279,20 +295,22 @@ $(document).ready(function(){
         fields["subCountry"] = "cntry";
         fillFields(rcrd, fields, []);
     }
-    function fillSrcFields(entity, id) {
-        var src = getEntityRecord("source", id);
+    function fillSrcFields(entity, id, rcrd) {
         var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
         var fields = getSourceFields(entity);
+        var src = rcrd;
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
         setAdditionalFields(entity, src);
         cParams.editing.detail = detail.id;
     }
     function getSourceFields(entity) {
-        var fields = {
-            core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity)
-        };
-        return fields;
+        return { core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity) };
+    }
+    function fillTaxonFields(entity, id, rcrd) {
+        var realm = _util.lcfirst(rcrd.domain.displayName);
+        var fields = getCoreFieldDefs(realm);                                   //console.log("fillTaxonFields [%s] rcrd = %O, fields = %O", id, rcrd, fields);
+        $('#'+rcrd.level.displayName+'-sel')[0].selectize.addItem(id);
     }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
@@ -769,17 +787,20 @@ $(document).ready(function(){
     }
     /** Adds the realm name and id, along with all taxon levels, to cParams. */
     function setTaxonParams(role, id) {  
-        var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
         if (!id) { id = cParams.objectRealm || 3; }
+        initTaxonParams(id);
+        cParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
+            { val: $('#'+role+'-sel').val(),
+              text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
+            }; 
+    }
+    function initTaxonParams(id) {
+        var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
         cParams.taxon = { 
             realm: realmMap[id], 
             realmId: id,
             lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"]
         }; 
-        cParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
-            { val: $('#'+role+'-sel').val(),
-              text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
-            }; 
     }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
