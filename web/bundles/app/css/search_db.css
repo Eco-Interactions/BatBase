@@ -196,7 +196,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     opacity: 0;
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
-.crud-popup {
+.form-popup {
 	height: 88vh;
 	flex-grow: 0;
 	width: 1510px;
@@ -205,37 +205,37 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	text-align: left;
 	justify-content: space-between;
 }
-.crud-ovrly {
+.form-ovrly {
 	align-items: center;
 }
-#crud-hdr>h1 {
+#form-hdr>h1 {
 	font-size: 1.3em;
 	margin-bottom: 10px;
 	text-align: center;
 }
-#crud-hdr>p {
+#form-hdr>p {
 	margin-bottom: 10px;
 	font-weight: bold;
 	text-align: center;
 }
-#crud-main {
+#form-main {
 	padding: 5px 0 0 5px;
 	height: 83vh;
 	width: 999px;
 	overflow-x: hidden;
 	overflow-y: scroll;
 }
-#crud-details {
+#form-details {
 	flex: 1 1 242px;
 	padding: 0 .5em .5em .5em;
 	overflow-y: scroll;
 	max-width: 31%;
 }
-#crud-details h3 {
+#form-details h3 {
 	text-align: center;
 	font-size: 1.15em;
 }
-#crud-details p {
+#form-details p {
 	text-align: center;
 	font-size: 1.15em;
 	margin-bottom:1em;
@@ -378,11 +378,11 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 
 	/*--------------- Database CRUD Popup -------------*/
-	#b-overlay .crud-popup {
+	#b-overlay .form-popup {
 		width: 1380px;
 		padding: 15px;
 	}
-	#b-overlay #crud-main {
+	#b-overlay #form-main {
 		padding: 5px 0 0 20px;
 		width: 915px;
 	}

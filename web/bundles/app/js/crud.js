@@ -7,69 +7,68 @@
  * allow editing and saving of the content within using the trumbowyg library.
  */
 $(document).ready(function(){  
-    var userRole, cParams = {};
+    var userRole, fParams = {};
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
-    eif.crud = {
+    eif.form = {
         editEntity: editEntity
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
     function onDOMContentLoaded() { 
-        userRole = $('body').data("user-role");                                 //console.log("crud.js role = ", userRole);                               console.log("----userRole =", userRole)
+        userRole = $('body').data("user-role");                                 //console.log("crud.js role = ", userRole);
         authDependentInit(); 
     }
     function authDependentInit() {   
         if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {            //console.log("admin CRUD ACTIVATE!! ");
-            if ($('body').data("this-url") === "/search") { buildSearchPgCrudUi(); }
+            if ($('body').data("this-url") === "/search") { buildSearchPgFormUi(); }
             if (userRole !== 'editor') { initWysiwyg(); }
         }
     }
 /*--------------------- SEARCH PAGE CRUD -------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
-    function buildSearchPgCrudUi() {
+    function buildSearchPgFormUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initInteractionCrudWindow.bind(null, "create", "Interaction", null));
+        $(bttn).click(initInteractionFormWindow.bind(null, "create", "Interaction", null));
         $("#opts-col1").append(bttn);
     }
     /*---------- Shared CRUD window methods ----------------------------------*/
     /**
-     * Builds the crud window popup @showEntityCrudPopup and loads the form @initCrudView.
+     * Builds the form window popup @showEntityFormPopup and loads the form @initFormView.
      */
-    function initInteractionCrudWindow(action, entity, id) {                    //console.log("***initInteraction*** - ", action);
+    function initInteractionFormWindow(action, entity, id) {                    //console.log("***initInteraction*** - ", action);
         var hdrs = { create: "New", edit: "Editing" };
         var views = { create: initCreateView, edit: Function.prototype };
-        showCrudFormPopup(hdrs[action], entity, id);
+        showFormPopup(hdrs[action], entity, id);
         views[action]();
     }
-    /** Builds and shows the popup crud-form's structural elements. */
-    function showCrudFormPopup(actionHdr, entity, id) {
+    /** Builds and shows the popup form's structural elements. */
+    function showFormPopup(actionHdr, entity, id) {
         var title = actionHdr + " " + entity;
-        $("#b-overlay-popup").addClass("crud-popup");
-        $("#b-overlay").addClass("crud-ovrly");
-        $("#b-overlay-popup").append(getCrudWindowElems(entity, id, title));
+        $("#b-overlay-popup").addClass("form-popup");
+        $("#b-overlay").addClass("form-ovrly");
+        $("#b-overlay-popup").append(getFormWindowElems(entity, id, title));
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
-    function hideSearchCrudPopup() {
+    function hideSearchFormPopup() {
         $('#b-overlay-popup, #b-overlay').css({display: "none"});
     }
     /**
-     * Returns the crud window elements - the form and the detail panel.
-     * section>(div#crud-main(header, form), div#crud-details(hdr, pub, cit, loc), footer)
+     * Returns the form window elements - the form and the detail panel.
+     * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
      */
-    function getCrudWindowElems(entity, id, title) {
-        return [getCrudMainForm(title), getFormDetailElems(entity, id)];
+    function getFormWindowElems(entity, id, title) {
+        return [getMainFormHtml(title), getDetailPanelElems(entity, id)];
     }
-    function getCrudMainForm(title) {
-        var crudWin = _util.buildElem("div", { "id": "crud-main" });
-        $(crudWin).append(getHeaderHtml(title));
-        // $(crudWin).append(_util.buildElem("footer"));
-        return crudWin;
+    function getMainFormHtml(title) {
+        var formWin = _util.buildElem("div", { "id": "form-main" });
+        $(formWin).append(getHeaderHtml(title));
+        return formWin;
     }
     function getHeaderHtml(title) {
-        var hdrSect = _util.buildElem("header", { "id": "crud-hdr", "class":"flex-col" });
+        var hdrSect = _util.buildElem("header", { "id": "form-hdr", "class":"flex-col" });
         $(hdrSect).append(_util.buildElem("h1", { "text": title }));
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
@@ -77,20 +76,20 @@ $(document).ready(function(){
     function getExitButton() {
         var bttn = _util.buildElem("input", {
            "id":"exit-form", "class":"grid-bttn exit-bttn", "type":"button", "value":"X" });
-        $(bttn).click(exitCrudFormPopup);
+        $(bttn).click(exitFormPopup);
         return bttn;
     }
     /** Returns popup and overlay to their original/default state. */
-    function exitCrudFormPopup() {
-        hideSearchCrudPopup();
-        // eif.search.showUpdates();
-        $("#b-overlay").removeClass("crud-ovrly");
-        $("#b-overlay-popup").removeClass("crud-popup");
+    function exitFormPopup() {
+        hideSearchFormPopup();
+        eif.search.showUpdates();
+        $("#b-overlay").removeClass("form-ovrly");
+        $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
     }
-    function getFormDetailElems(entity, id) {  
+    function getDetailPanelElems(entity, id) {  
         var intIdStr = id ? "Id: " + id : '';
-        var detailCntnr = _util.buildElem("div", { "id": "crud-details" });
+        var detailCntnr = _util.buildElem("div", { "id": "form-details" });
         $(detailCntnr).append(getExitButton());
         $(detailCntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
         $(detailCntnr).append(_util.buildElem("p", { "text": intIdStr }));
@@ -139,13 +138,12 @@ $(document).ready(function(){
     }
     /** Returns the name of the author with the passed id. */
     function getAuthName(id) {
-        var auth = cParams.records.source[id];
+        var auth = fParams.records.source[id];
         return auth.displayName;  
     }
-    /*--------------- CRUD Params Object -------------------------------------*/
+    /*--------------- FORM Params Object -------------------------------------*/
     /**
-     * Sets the global cParams obj with the params necessary throughout the 
-     * crud form interface. 
+     * Sets the global fParams obj with the params necessary throughout the form code. 
      * -- Property descriptions:
      * > editing - Container for the id(s) of the record(s) being edited. (Detail 
             ids are added later). False if not editing.
@@ -154,8 +152,8 @@ $(document).ready(function(){
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
      */
-    function initCrudParams(action, entity, id) {                               //console.log("####cPs = %O", cParams)
-        cParams = {
+    function initFormParams(action, entity, id) {                               //console.log("####fPs = %O", fParams)
+        fParams = {
             editing: action === "edit" ? { core: id || null, detail: null } : false,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
@@ -174,9 +172,9 @@ $(document).ready(function(){
      * > reqElems - All required elements in the form.
      * > confg - The form config object used during form building.
      */
-    function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. cP = %O, arguments = %O", cParams, arguments)
-        cParams.forms[entity] = level;
-        cParams.forms[level] = {
+    function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. cP = %O, arguments = %O", fParams, arguments)
+        fParams.forms[entity] = level;
+        fParams.forms[level] = {
             action: action,
             entity: entity,
             pSelId: pSel,
@@ -190,21 +188,21 @@ $(document).ready(function(){
 /*--------------------------- Edit Form ----------------------------------------------------------*/
     /** Shows the entity's edit form in a pop-up window on the search page. */
     function editEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
-        initCrudParams("edit", entity, id);
-        initInteractionCrudWindow("edit", _util.ucfirst(entity), id);
+        initFormParams("edit", entity, id);
+        initInteractionFormWindow("edit", _util.ucfirst(entity), id);
         initEditForm(id, entity);    
     }
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
-        var formCntnr = buildCrudFormCntnr();
+        var form = buildFormElem();
         var formFields = getFormFields(id, entity);
-        $(formCntnr).append(formFields);
-        $('#crud-main').append(formCntnr);     
+        $(form).append(formFields);
+        $('#form-main').append(form);     
         if (entity === "interaction") { 
             finishFormBuild(); 
         } else {
             initSubFormComboboxes(entity); 
-            $('#top-cancel').unbind('click').click(exitCrudFormPopup);
+            $('#top-cancel').unbind('click').click(exitFormPopup);
         }
         fillExistingData(entity, id);
     }   
@@ -220,7 +218,7 @@ $(document).ready(function(){
     }
     function getTaxonFormFields(entity, id) {
         var realm = { 2: "plant", 3: "arthropod" };
-        var taxon = cParams.records.taxon[id];  
+        var taxon = fParams.records.taxon[id];  
         var realmId = taxon.domain.id;
         initTaxonParams(realmId+1); //domain ids and the domain taxon's id are one off from eachother
         return buildEditFormFields(realm[realmId]);
@@ -265,14 +263,14 @@ $(document).ready(function(){
     }
     function addTaxon(role, id) {
         var selApi = $('#'+ _util.ucfirst(role) + '-sel')[0].selectize;
-        var taxon = cParams.records.taxon[id];                                  //console.log("[%s] taxon = %O", role, taxon)
+        var taxon = fParams.records.taxon[id];                                  //console.log("[%s] taxon = %O", role, taxon)
         var displayName = taxon.level.id === 7 ? 
             taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
         selApi.addOption({ value: id, text: displayName });
         selApi.addItem(id);
     }
     function addSource(field, id) {
-        var cit = cParams.records.source[id];
+        var cit = fParams.records.source[id];
         $('#Publication-sel')[0].selectize.addItem(cit.parent);
         $('#CitationTitle-sel')[0].selectize.addItem(id);
     }
@@ -302,7 +300,7 @@ $(document).ready(function(){
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
         setAdditionalFields(entity, src);
-        cParams.editing.detail = detail.id;
+        fParams.editing.detail = detail.id;
     }
     function getSourceFields(entity) {
         return { core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity) };
@@ -370,11 +368,11 @@ $(document).ready(function(){
     }
 /*--------------------------- Create Form --------------------------------------------------------*/
     /**
-     * Fills the global cParams obj with the basic crud params @initCrudParams. 
-     * Init the crud form and append into the crud window @initCrudForm. 
+     * Fills the global fParams obj with the basic form params @initFormParams. 
+     * Init the create interaction form and append into the popup window @initCreateForm. 
      */
     function initCreateView() {
-        initCrudParams("create", "interaction");
+        initFormParams("create", "interaction");
         initCreateForm();
     }       
     /**
@@ -384,10 +382,10 @@ $(document).ready(function(){
      * option from the field's combobox and completing the appended sub-form.
      */
     function initCreateForm() {
-        var formCntnr = buildCrudFormCntnr();
+        var form = buildFormElem();
         var formFields = buildIntFormFields('create');                          //console.log("formFields = %O", formFields);
-        $(formCntnr).append(formFields);
-        $('#crud-main').append(formCntnr);      
+        $(form).append(formFields);
+        $('#form-main').append(form);      
         finishFormBuild();
         finishCreateFormBuild();
     }      
@@ -397,7 +395,7 @@ $(document).ready(function(){
     }
 /*------------------- Shared Methods -------------------------------------------------------------*/
     /** Builds the form elem container. */
-    function buildCrudFormCntnr() {
+    function buildFormElem() {
         var form = document.createElement("form");
         $(form).attr({"action": "", "method": "POST", "name": "top"});
         form.className = "flex-row";
@@ -411,7 +409,7 @@ $(document).ready(function(){
     function finishFormBuild() {
         initTopFormComboboxes();
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
-        $('#top-cancel').unbind('click').click(exitCrudFormPopup);
+        $('#top-cancel').unbind('click').click(exitFormPopup);
         addReqElemsToConfg();     
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
@@ -422,7 +420,7 @@ $(document).ready(function(){
     function addReqElemsToConfg() {
         var reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
             "InteractionType"];
-        cParams.forms.top.reqElems = reqFields.map(function(field) {
+        fParams.forms.top.reqElems = reqFields.map(function(field) {
             return $('#'+field+'-sel')[0];
         });
     }
@@ -450,7 +448,7 @@ $(document).ready(function(){
     function buildPubFieldRow() {
         var selElem;
         var pubIds = _util.getDataFromStorage("pubSources");
-        var opts = getRcrdOpts(pubIds, cParams.records.source);
+        var opts = getRcrdOpts(pubIds, fParams.records.source);
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
     }
@@ -459,7 +457,7 @@ $(document).ready(function(){
         if (val === "" || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
         fillPubDetailPanel(val);
-        if (!cParams.editing) { $('#Publication_pin').focus(); }
+        if (!fParams.editing) { $('#Publication_pin').focus(); }
     }
     function onPubClear() {
         clearCombobox('#CitationTitle-sel');
@@ -468,7 +466,7 @@ $(document).ready(function(){
     }
     /** Displays the selected publication's data in the side detail panel. */
     function fillPubDetailPanel(id) {  
-        var srcRcrd = cParams.records.source[id];  
+        var srcRcrd = fParams.records.source[id];  
         var propObj = getPubDetailDataObj(srcRcrd);
         addDataToDetailPanel('pub', propObj);
     }
@@ -483,8 +481,8 @@ $(document).ready(function(){
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
-     * form is built and appended to the crud form. An option object is 
-     * returned and thus selected in the combobox
+     * form is built and appended to the interaction form. An option object is 
+     * returned to be selected in the interaction form's publication combobox.
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
         var formLvl = getSubFormLvl("sub");
@@ -508,9 +506,9 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
-        var pubRcrd = cParams.records.source[pubId];  
+        var pubRcrd = fParams.records.source[pubId];  
         if (!pubRcrd) { return []; }
-        return getRcrdOpts(pubRcrd.children, cParams.records.source);
+        return getRcrdOpts(pubRcrd.children, fParams.records.source);
     }
     /** 
      * When a Citation is selected, both 'top' location fields are initialized
@@ -519,11 +517,11 @@ $(document).ready(function(){
     function onCitSelection(val) {  
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
         fillCitDetailPanel(val);
-        if (!cParams.editing) { $('#CitationTitle_pin').focus(); }
+        if (!fParams.editing) { $('#CitationTitle_pin').focus(); }
     }    
     /** Displays the selected citation's data in the side detail panel. */
     function fillCitDetailPanel(id) {  
-        var srcRcrd = cParams.records.source[id];  
+        var srcRcrd = fParams.records.source[id];  
         var propObj = getCitDetailDataObj(srcRcrd);
         addDataToDetailPanel('cit', propObj);
     }
@@ -566,7 +564,7 @@ $(document).ready(function(){
      * citation form's author field(s). 
      */
     function addExistingPubContribs(val) {  
-        var pubRcrd = cParams.records.source[$('#Publication-sel').val()];      //console.log('pubRcrd = %O', pubRcrd) 
+        var pubRcrd = fParams.records.source[$('#Publication-sel').val()];      //console.log('pubRcrd = %O', pubRcrd) 
         if (pubRcrd.contributors.length > 0) {
             selectExistingAuthors(pubRcrd.contributors);
         }
@@ -610,8 +608,8 @@ $(document).ready(function(){
      */
     function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
-        fillLocationSelect(cParams.records.location[val]);
-        if (!cParams.editing) { $('#Country_pin').focus(); }
+        fillLocationSelect(fParams.records.location[val]);
+        if (!fParams.editing) { $('#Country_pin').focus(); }
     }
     /*-------------- Location ------------------------------------------------*/
     /**
@@ -627,9 +625,9 @@ $(document).ready(function(){
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
         var opts = [];
-        for (var id in cParams.records.location) {
+        for (var id in fParams.records.location) {
             opts.push({ 
-                value: id, text: cParams.records.location[id].displayName });
+                value: id, text: fParams.records.location[id].displayName });
         }
         return opts;
     }
@@ -644,7 +642,7 @@ $(document).ready(function(){
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(cntry) {
         return cntry.children.map(function(id) {  
-            return { value: id, text: cParams.records.location[id].displayName };
+            return { value: id, text: fParams.records.location[id].displayName };
         });
     }
     /** 
@@ -654,15 +652,15 @@ $(document).ready(function(){
      */
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
-        var locRcrd = cParams.records.location[val];                            //console.log("location = %O", locRcrd);
+        var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
         var cntryValue = locRcrd.country ? locRcrd.country.id : 439;
         $('#Country-sel')[0].selectize.addItem(cntryValue, true);
         fillLocDetailPanel(val);
-        if (!cParams.editing) { $('#Location_pin').focus(); }
+        if (!fParams.editing) { $('#Location_pin').focus(); }
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillLocDetailPanel(id) {  
-        var locRcrd = cParams.records.location[id];  
+        var locRcrd = fParams.records.location[id];  
         var propObj = getLocDetailDataObj(locRcrd);
         addDataToDetailPanel('loc', propObj);
     }
@@ -736,7 +734,7 @@ $(document).ready(function(){
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
         initSubFormComboboxes("object");             
-        $('#Realm-sel')[0].selectize.addItem(cParams.taxon.realmId);
+        $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
     }
     /** 
@@ -745,12 +743,12 @@ $(document).ready(function(){
      */
     function getSelectedRealm(selVal) {
         if (!selVal) { return null; }
-        var taxon = cParams.records.taxon[selVal];  
+        var taxon = fParams.records.taxon[selVal];  
         return taxon.domain.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, formLvl) {
-        if (cParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
+        if (fParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
         openSubFormError(role, null, formLvl);
     }
     /**
@@ -763,7 +761,7 @@ $(document).ready(function(){
         var formLvl = getSubFormLvl("sub");
         $('#'+formLvl+'-form').remove();
         enableObjField();
-        if (!cParams.editing) { $('#Subject_pin').focus(); }
+        if (!fParams.editing) { $('#Subject_pin').focus(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -775,7 +773,7 @@ $(document).ready(function(){
         var formLvl = getSubFormLvl("sub");
         $('#'+formLvl+'-form').remove();
         enableSubjField();
-        if (!cParams.editing) { $('#Object_pin').focus(); }
+        if (!fParams.editing) { $('#Object_pin').focus(); }
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
     function enableSubjField() {
@@ -785,18 +783,18 @@ $(document).ready(function(){
     function enableObjField() { 
         enableCombobox('#Object-sel');
     }
-    /** Adds the realm name and id, along with all taxon levels, to cParams. */
+    /** Adds the realm name and id, along with all taxon levels, to fParams. */
     function setTaxonParams(role, id) {  
-        if (!id) { id = cParams.objectRealm || 3; }
+        if (!id) { id = fParams.objectRealm || 3; }
         initTaxonParams(id);
-        cParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
+        fParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
             { val: $('#'+role+'-sel').val(),
               text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
             }; 
     }
     function initTaxonParams(id) {
         var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
-        cParams.taxon = { 
+        fParams.taxon = { 
             realm: realmMap[id], 
             realmId: id,
             lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"]
@@ -818,7 +816,7 @@ $(document).ready(function(){
     function initTaxonForm(val) { 
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
         var formLvl = getSubFormLvl("sub2");
-        cParams.formTaxonLvl = selLvl;
+        fParams.formTaxonLvl = selLvl;
         $('#'+selLvl+'_row').append(initSubForm(
             "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
         initSubFormComboboxes("taxon");                     
@@ -835,7 +833,7 @@ $(document).ready(function(){
         if ($('#realm-lvls').length) { $('#realm-lvls').remove(); }  
         var realms = { 3: "plant", 4: "arthropod" };
         setTaxonParams('Object', val);
-        cParams.objectRealm = val;
+        fParams.objectRealm = val;
         buildAndAppendRealmElems(realms[val], val);
         initSubFormComboboxes(realms[val]);  
         finishTaxonSelectUi("Object");          
@@ -868,21 +866,21 @@ $(document).ready(function(){
     /** Exits sub form and restores any previous taxon selection. */
     function exitTaxonSelectForm(role) {
         exitForm('#sub-form', 'sub', false);
-        if (cParams.taxon.prevSel) {
+        if (fParams.taxon.prevSel) {
             updateComboboxOptions('#'+role+'-sel', { 
-                value: cParams.taxon.prevSel.val, text: cParams.taxon.prevSel.text });
-            $('#'+role+'-sel')[0].selectize.addItem(cParams.taxon.prevSel.val);
+                value: fParams.taxon.prevSel.val, text: fParams.taxon.prevSel.text });
+            $('#'+role+'-sel')[0].selectize.addItem(fParams.taxon.prevSel.val);
         }
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
-        var initForm = cParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
+        var initForm = fParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
         $('#sub-form').remove();
         initForm();
     }
     /** Adds the selected taxon to the top-form [role] taxon combobox. */
     function selectTaxon() {
-        var role = cParams.taxon.realm === 'Bat' ? 'Subject' : 'Object';
+        var role = fParams.taxon.realm === 'Bat' ? 'Subject' : 'Object';
         var selApi = $('#'+role+'-sel')[0].selectize;
         var opt = getSelectedTaxonOption();
         $('#sub-form').remove();
@@ -901,7 +899,7 @@ $(document).ready(function(){
     function getSelectedTaxon() {
         var selElems = $('#sub-form .selectized').toArray().reverse(); 
         var selected = selElems.find(isSelectedTaxon);                          //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-        return cParams.records.taxon[$(selected).val()];
+        return fParams.records.taxon[$(selected).val()];
     }
     function isSelectedTaxon(elem) {
         if (elem.id.includes('-sel')) { return $(elem).val(); }
@@ -926,10 +924,10 @@ $(document).ready(function(){
      */
     function repopulateCombosWithRelatedTaxa(selId) {
         var realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
-        var lvls = cParams.taxon.lvls;  
+        var lvls = fParams.taxon.lvls;  
         var opts = {};                                                          //console.log("opts = %O", opts)
         var selected = {};                                                      //console.log("selected = %O", selected)
-        var taxon = cParams.records.taxon[selId];
+        var taxon = fParams.records.taxon[selId];
         taxon.children.forEach(addRelatedChild);                                
         getSiblingAndAncestorTaxaOpts(taxon);
         buildOptsForEmptyLevels(taxon.level.id);
@@ -940,10 +938,10 @@ $(document).ready(function(){
             if ( realmTaxa.indexOf(taxon.id) !== -1 ) { return; } 
             opts[taxon.level.id] = getTaxonOpts(lvl);  
             selected[taxon.level.id] = taxon.id;
-            getSiblingAndAncestorTaxaOpts(cParams.records.taxon[taxon.parent]);
+            getSiblingAndAncestorTaxaOpts(fParams.records.taxon[taxon.parent]);
         }
         function addRelatedChild(id) {
-            var taxon = cParams.records.taxon[id];
+            var taxon = fParams.records.taxon[id];
             var level = taxon.level.id;
             addOptToLevelAry(taxon, level);
             taxon.children.forEach(addRelatedChild);
@@ -958,7 +956,7 @@ $(document).ready(function(){
          * the 'none' value selected.
          */
         function buildOptsForEmptyLevels(selLvl) {
-            var topLvl = cParams.taxon.realm === "Arthropod" ? 3 : 5; 
+            var topLvl = fParams.taxon.realm === "Arthropod" ? 3 : 5; 
             for (var i = 7; i >= topLvl; i--) {
                 if (opts[i]) { continue; }
                 opts[i] = [{ value: "", text: "None" }];                    
@@ -970,7 +968,7 @@ $(document).ready(function(){
         }
     } /* End fillAncestorTaxa */    
     function repopulateLevelCombos(optsObj, selLvl, selected) {
-        var lvls = cParams.taxon.lvls;
+        var lvls = fParams.taxon.lvls;
         for (var lvl in optsObj) {                                              //console.log("lvl = %s, name = ", lvl, lvls[lvl-1])
             repopulateLevelCombo(optsObj[lvl], lvls[lvl-1], lvl, selLvl, selected);
         }
@@ -992,7 +990,7 @@ $(document).ready(function(){
         return buildFormRow("Interaction Type", selElem, "top", true);
     }
     function focusIntTypePin() {
-        if (!cParams.editing) { $('#InteractionType_pin').focus(); }
+        if (!fParams.editing) { $('#InteractionType_pin').focus(); }
     }
     function buildIntTagField() {
         var elem = buildTagsElem('interaction', 'Interaction Tags');
@@ -1040,7 +1038,7 @@ $(document).ready(function(){
     /** Builds a new, empty author combobox */
     function buildNewAuthorSelect(cnt, val) {
         var prntLvl = getSubFormLvl("sub");
-        var parentFormEntity = cParams.forms[prntLvl].entity;
+        var parentFormEntity = fParams.forms[prntLvl].entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
         $("#Authors_sel-cntnr").append(
@@ -1141,7 +1139,7 @@ $(document).ready(function(){
      */
     function initSubFormComboboxes(entity) {
         var confg;
-        var formLvl = cParams.forms[entity];
+        var formLvl = fParams.forms[entity];
         var selMap = { 
             "Authors": { name: "Authors", id:"#Authors-sel1", change: onAuthSelection, add: initAuthForm },
             "CitationType": { name: "Citation Type", change: false, add: false },
@@ -1159,12 +1157,12 @@ $(document).ready(function(){
             "Tags":  { name: "Tag", change: false, add: false, 
                 "options": { "delimiter": ",", "maxItems": null, "persist": false }},
         };
-        cParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
+        fParams.forms[formLvl].selElems.forEach(function(field) {               //console.log("Initializing --%s-- select", field);
             confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg, "sub");
         });
-        cParams.forms[formLvl].selElems = [];
+        fParams.forms[formLvl].selElems = [];
     } 
     function enableCombobox(selId, enable) {
         if (enable === false) { return $(selId)[0].selectize.disable(); }
@@ -1205,13 +1203,13 @@ $(document).ready(function(){
         var subForm = buildSubForm(formEntity, fieldVals, formLvl, selId);
         subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, "create"));
         $(subFormContainer).append([hdr].concat(subForm));
-        cParams.forms[formLvl].pSelId = selId; 
+        fParams.forms[formLvl].pSelId = selId; 
         enableCombobox(selId, false)
         return subFormContainer;
     }
     /** 
      * Builds all fields for sub-form and returns the completed row elems.
-     * Also inits the crud params for the sub-form in the global cParams obj.
+     * Also inits the params for the sub-form in the global fParams obj.
      */
     function buildSubForm(entity, fieldVals, level, pSel, action) {
         var formConfg = getSubFormConfg(entity);                                //console.log("typeFormConfg = %O", typeFormConfg)
@@ -1359,12 +1357,12 @@ $(document).ready(function(){
         /** Adds the form-entity's default fields, unless they are included in exclude. */
         function buildDefaultRows() {                                           //console.log("    Building default rows");
             var dfltFields = getCoreFieldDefs(entity);
-            var exclude = cParams.forms[formLvl].confg.exclude;
+            var exclude = fParams.forms[formLvl].confg.exclude;
             return buildRows(dfltFields, exclude);
         }
         /** Adds fields specific to a sub-entity. */
         function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var addedFields = cParams.forms[formLvl].confg.add;
+            var addedFields = fParams.forms[formLvl].confg.add;
             return buildRows(addedFields);
         }
         /**
@@ -1386,7 +1384,7 @@ $(document).ready(function(){
          */
         function buildRow(field, fieldsObj, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
             var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = cParams.forms[formLvl].confg.required;
+            var reqFields = fParams.forms[formLvl].confg.required;
             var isReq = reqFields.indexOf(field) !== -1;
             var rowClass = fieldsObj[field] === "fullTextArea" ? "long-sub-row" : "";
             if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
@@ -1420,12 +1418,12 @@ $(document).ready(function(){
      * init the 'selectize' combobox. 
      */
     function buildSelectElem(entity, field, cnt) {                                   
-        var formLvl = cParams.forms[entity];
+        var formLvl = fParams.forms[entity];
         var fieldName = field.split(" ").join("");
         var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
         var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'med-field'});
-        cParams.forms[formLvl].selElems.push(fieldName);
+        fParams.forms[formLvl].selElems.push(fieldName);
         return sel;
     }
     /**
@@ -1538,11 +1536,11 @@ $(document).ready(function(){
     /** Returns an array of author-source options objects. */
     function getAuthOpts(prop) {
         var ids = _util.getDataFromStorage(prop);
-        return getRcrdOpts(ids, cParams.records.source);
+        return getRcrdOpts(ids, fParams.records.source);
     }
     /** Returns an array of taxonyms for the passed level and the form's realm. */
     function getTaxonOpts(level) {
-        var opts = getOptsFromStoredData(cParams.taxon.realm+level+"Names");    //console.log("taxon opts for [%s] = %O", cParams.taxon.realm+level+"Names", opts)
+        var opts = getOptsFromStoredData(fParams.taxon.realm+level+"Names");    //console.log("taxon opts for [%s] = %O", fParams.taxon.realm+level+"Names", opts)
         return opts;
     }
     function getRealmOpts() {
@@ -1569,7 +1567,7 @@ $(document).ready(function(){
     }
     function getPinElem(field) {
         var relFields = ["CitationTitle", "Country", "Location", "Publication"];
-        var pinClasses = 'top-pin' + (cParams.editing ? ' invis' : '');
+        var pinClasses = 'top-pin' + (fParams.editing ? ' invis' : '');
         var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: pinClasses});
         $(pin).keypress(function(e){ //Enter
             if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
@@ -1607,7 +1605,7 @@ $(document).ready(function(){
         $(label).addClass('required');  
         $(input).change(checkRequiredFields);
         $(input).data("formLvl", formLvl);
-        cParams.forms[formLvl].reqElems.push(input);
+        fParams.forms[formLvl].reqElems.push(input);
     }
     /**
      * On a required field's change event, the submit button for the element's form 
@@ -1625,7 +1623,7 @@ $(document).ready(function(){
     }
     /** Returns true if all the required elements for the current form have a value. */
     function ifRequiredFieldsFilled(formLvl) {
-        var reqElems = cParams.forms[formLvl].reqElems;
+        var reqElems = fParams.forms[formLvl].reqElems;
         return reqElems.every(function(reqElem){ return reqElem.value; }); 
     }
     /** Returns true if the next sub-level form exists in the dom. */
@@ -1671,14 +1669,14 @@ $(document).ready(function(){
         $(formId).remove();
         resetFormCombobox(formLvl, focus);
         ifParentFormValidEnableSubmit(formLvl);
-        cParams.forms[formLvl].exitHandler();
+        fParams.forms[formLvl].exitHandler();
     }
     /**
      * Clears and enables the parent combobox for the exited form. Removes any 
      * placeholder options and, optionally, brings it into focus.
      */
     function resetFormCombobox(formLvl, focus) {        
-        var combobox = $(cParams.forms[formLvl].pSelId)[0].selectize;   
+        var combobox = $(fParams.forms[formLvl].pSelId)[0].selectize;   
         combobox.clear();
         combobox.enable();
         combobox.removeOption(""); //Removes the "Creating [entity]..." placeholder.
@@ -1687,7 +1685,7 @@ $(document).ready(function(){
     }
     /** Returns the 'next' form level- either the parent or child. */
     function getNextFormLevel(nextLvl, curLvl) {
-        var formLvls = cParams.formLevels;
+        var formLvls = fParams.formLevels;
         var nextLvl = nextLvl === "parent" ? 
             formLvls[formLvls.indexOf(curLvl) - 1] : 
             formLvls[formLvls.indexOf(curLvl) + 1] ;
@@ -1698,8 +1696,8 @@ $(document).ready(function(){
      * the passed form lvl is reduced by one and returned. 
      */
     function getSubFormLvl(intFormLvl) {  
-        var formLvls = cParams.formLevels;
-        return cParams.forms.top.entity === "interaction" ? 
+        var formLvls = fParams.formLevels;
+        return fParams.forms.top.entity === "interaction" ? 
             intFormLvl : formLvls[formLvls.indexOf(intFormLvl) - 1];
     }
     /*------------------ Form Submission Data-Prep Methods -------------------*/
@@ -1727,7 +1725,7 @@ $(document).ready(function(){
             class: 'overlay waiting', id: 'c-overlay'}));
         $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
     }
-    function getFormValuesAndSubmit(id, formLvl, entity) {                      //console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
+    function getFormValuesAndSubmit(id, formLvl, entity) {                      console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
         var formVals = getFormValueData(id, entity);
         submitFormVals(formLvl, formVals);  
     }
@@ -1848,27 +1846,27 @@ $(document).ready(function(){
             formVals.location = formVals.country || 439;   
         }
         function getTaxonData() {
-            formVals.parentTaxon = getParentTaxon(cParams.formTaxonLvl);
-            formVals.level = cParams.formTaxonLvl;
+            formVals.parentTaxon = getParentTaxon(fParams.formTaxonLvl);
+            formVals.level = fParams.formTaxonLvl;
         }
         /**
          * Checks each parent-level combo for a selected taxon. If none, the realm
          * taxon is added as the new Taxon's parent.
          */
         function getParentTaxon(lvl) {
-            var lvls = cParams.taxon.lvls;
+            var lvls = fParams.taxon.lvls;
             var parentLvl = lvls[lvls.indexOf(lvl)-1];
             if ($('#'+parentLvl+'-sel').length) { 
                 return $('#'+parentLvl+'-sel').val() || getParentTaxon(parentLvl);
             } 
-            return cParams.taxon.realmId;
+            return fParams.taxon.realmId;
         }
     } /* End getFormValueData */
     /**
      * Builds a form data object @buildFormData. Sends it to the server @ajaxFormData
      */
     function submitFormVals(formLvl, formVals) {                        
-        var entity = cParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
+        var entity = fParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
         var formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
         ajaxFormData(formData, formLvl);
     }                
@@ -2012,11 +2010,11 @@ $(document).ready(function(){
     /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
     function ajaxFormData(formData, formLvl) {                                  console.log("ajaxFormData [ %s ]= %O", formLvl, formData);
-        var coreEntity = getCoreFormEntity(cParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
-        var url = getEntityUrl(coreEntity, cParams.forms[formLvl].action);
-        if (cParams.editing) { formData.ids = cParams.editing; }
+        var coreEntity = getCoreFormEntity(fParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
+        var url = getEntityUrl(coreEntity, fParams.forms[formLvl].action);
+        if (fParams.editing) { formData.ids = fParams.editing; }
         formData.coreEntity = coreEntity;
-        cParams.ajaxFormLvl = formLvl;
+        fParams.ajaxFormLvl = formLvl;
         toggleWaitOverlay(true);
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
     }
@@ -2026,7 +2024,7 @@ $(document).ready(function(){
         return envUrl + "crud/entity/" + action;
     }
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = cParams.ajaxFormLvl;                                          
+        var formLvl = fParams.ajaxFormLvl;                                          
         toggleWaitOverlay(false);
         $('#'+formLvl+'-hdr').after(getErrorMessage(JSON.parse(jqXHR.responseText)));
         window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
@@ -2053,7 +2051,7 @@ $(document).ready(function(){
     /*------------------ Form Success Methods --------------------------------*/
     /**
      * Ajax success callback. Updates the stored data @eif.syncData.update and the 
-     * stored core records in the cParams object. Exit's the successfully submitted 
+     * stored core records in the fParams object. Exit's the successfully submitted 
      * form @exitFormAndSelectNewEntity.  
      */
     function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
@@ -2062,24 +2060,24 @@ $(document).ready(function(){
         handleFormComplete(data);
         toggleWaitOverlay(false);
     }
-    /** Calls the appropriate data storage method and updates cParams. */  
+    /** Calls the appropriate data storage method and updates fParams. */  
     function storeData(data) {
         eif.syncData.update(data);
-        updateStoredCrudParamsData(data);
+        updateStoredFormParamsData(data);
     }
-    /** Updates the core records in the global crud params object. */
-    function updateStoredCrudParamsData(data) {                                 //console.log("cParams after interaction created. %O", cParams);
-        cParams.records[data.core] = _util.getDataFromStorage(data.core);
+    /** Updates the core records in the global form params object. */
+    function updateStoredFormParamsData(data) {                                 //console.log("fParams after interaction created. %O", fParams);
+        fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     function handleFormComplete(data) {
-        var formLvl = cParams.ajaxFormLvl;
+        var formLvl = fParams.ajaxFormLvl;
         if (formLvl === "top") { return handleInteractionFormComplete(data); }              
         exitFormAndSelectNewEntity(data);
     }
     /*------------------ Top-Form Success Methods ----------------------------*/
     /** Resets the interactions form leaving only the pinned values. */
     function handleInteractionFormComplete(data) {
-        if (!cParams.editing) { return resetInteractionForm(); }
+        if (!fParams.editing) { return resetInteractionForm(); }
         var msg = Object.keys(data.coreEdits).length > 1 || 
             Object.keys(data.detailEdits).length > 1 ?
             "Interaction update successful." : "No changes detected."; 
@@ -2088,14 +2086,14 @@ $(document).ready(function(){
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
         showSuccessMsg("New Interaction successfully created.");
-        initCrudParams("create", "interaction");
+        initFormParams("create", "interaction");
         resetTopForm(vals);
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {
-        $('#crud-hdr p')[0].innerHTML = msg;
+        $('#form-hdr p')[0].innerHTML = msg;
         window.setTimeout(function() {
-            if ($('#crud-hdr p').length) {$('#crud-hdr p')[0].innerHTML = ""}
+            if ($('#form-hdr p').length) {$('#form-hdr p')[0].innerHTML = ""}
         }, 2500);
     }
     /** Returns an obj with the form fields and either their pinned values or false. */
@@ -2146,7 +2144,7 @@ $(document).ready(function(){
      * entity in the form's parent elem @addAndSelectEntity.
      */
     function exitFormAndSelectNewEntity(data) {
-        var formLvl = cParams.ajaxFormLvl;           
+        var formLvl = fParams.ajaxFormLvl;           
         exitForm("#"+formLvl+"-form", formLvl); 
         addAndSelectEntity(data, formLvl);
     }
@@ -2162,7 +2160,7 @@ $(document).ready(function(){
     }
     /** Adds and option for the new entity to the form's parent elem, and selects it. */
     function addAndSelectEntity(data, formLvl) {
-        var selApi = $(cParams.forms[formLvl].pSelId)[0].selectize;        
+        var selApi = $(fParams.forms[formLvl].pSelId)[0].selectize;        
         selApi.addOption({ 
             "value": data.coreEntity.id, "text": data.coreEntity.displayName 
         });
@@ -2174,18 +2172,18 @@ $(document).ready(function(){
      * is already an instance using that form, show the user an error message and 
      * reset the select elem. 
      */
-    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, cP = %O ", selId, cParams)
+    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, cP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
-        crudFieldErrorHandler(field, 'openSubForm', formLvl);
+        formFieldErrorHandler(field, 'openSubForm', formLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
     /** Shows the user an error message above the field row. */
-    function crudFieldErrorHandler(fieldName, errorTag, formLvl) {              //console.log("###__crudFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+    function formFieldErrorHandler(fieldName, errorTag, formLvl) {              //console.log("###__formFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
         var errMsgMap = {
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
             "openSubForm": "<p>Please finish the open "+ 
-                _util.ucfirst(cParams.forms[formLvl].entity) + " form.</p>",
+                _util.ucfirst(fParams.forms[formLvl].entity) + " form.</p>",
         };
         var msg = errMsgMap[errorTag];
         var errElem = getErrElem(fieldName);

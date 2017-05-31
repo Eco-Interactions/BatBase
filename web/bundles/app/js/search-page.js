@@ -119,7 +119,7 @@
             "Below is a 'Show/Hide Columns' button that will allow users to specify " +
             "the data shown in the grid and/or csv exported.";
     }
-    /** Grid-rebuild entry point after crud-window close. */
+    /** Grid-rebuild entry point after form-window close. */
     function resetSearchGrid() {
         resetToggleTreeBttn(false);
         selectSearchFocus();
@@ -1229,7 +1229,7 @@
         });
     }
     /**
-     * When the crud form is exited, the grid is reloaded in source view with the
+     * When the entity-crud form is exited, the grid is reloaded in source view with the
      * 'interactions updates since' filter set to 'today'.
      */
     function showTodaysSrcUpdates() {                                           //console.log("showingUpdated from today")
@@ -1634,14 +1634,14 @@
     function addEditPencil(params) {   
         if (gParams.curFocus === 'locs' && ['Region', 'Country'].indexOf(params.data.type) !== -1) {
             return "<span>"; }                                                
-        return getPencilHtml(params.data.id, params.data.entity, eif.crud.editEntity);
+        return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
     }
     function getPencilHtml(id, entity, editFunc) {
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
             class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
         $('#search-grid').off('click', '#edit'+id);
         $('#search-grid').on(
-            'click', '#edit'+id, eif.crud.editEntity.bind(null, id, _util.lcfirst(entity)));
+            'click', '#edit'+id, eif.form.editEntity.bind(null, id, _util.lcfirst(entity)));
         return editPencil;
     }
     /*================== Row Styling =========================================*/
