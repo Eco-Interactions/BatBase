@@ -671,7 +671,6 @@ $(document).ready(function(){
         return {
             'Name': locRcrd.displayName, 
             'Description': locRcrd.description || '',            
-            'Location Type': locRcrd.locationType ? locRcrd.locationType.displayName : '', 
             'Habitat Type': locRcrd.habitatType ? locRcrd.habitatType.displayName : '', 
             'Latitude': locRcrd.latitude || '',
             'Longitude': locRcrd.longitude || '',
@@ -689,6 +688,7 @@ $(document).ready(function(){
         initSubFormComboboxes("location");
         enableCombobox('#Country-sel', false);
         $('#DisplayName_row input').focus();
+        enableSubmitBttn("#"+formLvl+"-submit");
         return { "value": "", "text": "Creating Location..." };
     }
     /** When the Location sub-form is exited, the Country combo is reenabled. */
@@ -1151,7 +1151,6 @@ $(document).ready(function(){
             "Family": { name: "Family", change: onLevelSelection, add: initTaxonForm },
             "Genus": { name: "Genus", change: onLevelSelection, add: initTaxonForm },
             "HabitatType":  { name: "Habitat Type", change: false, add: false },
-            "LocationType":  { name: "Location Type", change: false, add: false },
             "Order": { name: "Order", change: onLevelSelection, add: initTaxonForm },
             "PublicationType": { name: "Publication Type", change: false, add: false },
             "Publisher": { name: "Publisher", change: Function.prototype, add: initPublisherForm },
@@ -1264,10 +1263,10 @@ $(document).ready(function(){
             },
             "location": {
                 "add": {},  
-                "exclude": [],
-                "required": ["Display Name", "Location Type"],
-                "order": ["DisplayName", "LocationType", "Country", "Description", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude", "HabitatType" ], //"ElevationUnits", 
+                "exclude": [], 
+                "required": ["Display Name"],
+                "order": ["DisplayName", "Description", "Country", "HabitatType", 
+                    "Elevation", "ElevationMax", "Latitude", "Longitude" ], //"ElevationUnits", 
                 "exitHandler": enableCountryField
             },
             "object": {
@@ -1328,9 +1327,8 @@ $(document).ready(function(){
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
-                "Latitude": "text", "Habitat Type": "select", "Location Type": "select",
-                "Country": "edgeCase", 
-            }, //"Elevation Units": "select"
+                "Latitude": "text", "Habitat Type": "select", "Country": "edgeCase", 
+            }, //"Elevation Units": "select",
             "interaction": { "Interaction Type": "select", "Notes": "fullTextArea", 
                 "Interaction Tags": "tags"
             },
@@ -1487,7 +1485,6 @@ $(document).ready(function(){
             "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
             "InteractionTags": [ getTagOpts, 'interaction' ],
             "InteractionType": [ getOptsFromStoredData, 'intTypeNames' ],
-            "LocationType": [ getLocationTypeOpts ],
             "Order": [ getTaxonOpts, 'Order' ],
             "PublicationType": [ getOptsFromStoredData, 'pubTypeNames'],
             "Publisher": [ getOptsFromStoredData, 'publisherNames'],
@@ -1498,17 +1495,6 @@ $(document).ready(function(){
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
         return getOpts(fieldKey);
-    }
-    /**
-     * Returns options for the location types that can be created by a general editor. 
-     * Regions and Countries will be available for a higher-level access editor.
-     */
-    function getLocationTypeOpts() {
-        var typeObj = _util.getDataFromStorage('locTypeNames');                 
-        delete typeObj.Region;
-        delete typeObj.Country;
-        delete typeObj.Habitat;
-        return buildOptsObj(typeObj, Object.keys(typeObj).sort());
     }
     /** Returns an array of elevation unit options objects. */
     // function getElevUnitOpts() {
@@ -1795,7 +1781,7 @@ $(document).ready(function(){
                 "Author": [ getAuthFullName ],
                 "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
                 "Interaction": [ handleUnspecifiedLocs ],
-                "Location": [ addElevUnits, padLatLong, checkParentLoc ], 
+                "Location": [ addElevUnits, padLatLong, checkParentLoc, getLocType ], 
                 "Taxon": [ getTaxonData ],
 
             };
@@ -1841,6 +1827,16 @@ $(document).ready(function(){
         /** If no parent country is selected, the 'Unspecified' region is the parent. */
         function checkParentLoc() {
             if (!formVals.country) { formVals.country = 439; }
+        }
+        /**
+         * Sets location type according to the most specific data entered. 
+         * "Point": if there is lat/long data. "Area": if there is elev data. 
+         * "Habitat": if habType selected. "Area": if there is no specific data entered.
+         */
+        function getLocType() {
+            formVals.locationType = formVals.longitude || formVals.latitude ? 5 :
+                formVals.elevation || formVals.elevationMax ? 4 :
+                formVals.habitatType ? 3 : 4;   
         }
         /**
          * If no location is selected for an interaction record, the country field 
