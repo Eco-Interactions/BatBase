@@ -1210,10 +1210,10 @@
         };  
     } 
     function getSrcEntity(src, treeLvl) {  
-        if (gParams.curDomain === "auths") { 
-            return treeLvl === 0 ? "Author" : "Citation";
-        }
-        return src.publication ? "Publication" : "Citation";
+        var subEntities = ['author', 'citation', 'publication'];
+        return _util.ucfirst(subEntities.find(function(entity){
+            return src[entity];
+        }));
     }
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
