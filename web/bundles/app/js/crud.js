@@ -485,8 +485,12 @@ $(document).ready(function(){
         return {
             'Title': srcRcrd.displayName, 'Description': srcRcrd.description || '',            
             'Publication Type': pubRcrd.publicationType ? pubRcrd.publicationType.displayName : '', 
-            'Authors': getAuthorNames(srcRcrd),
+            'Publisher': getPublisher(srcRcrd), 'Authors': getAuthorNames(srcRcrd), 
         };
+    }
+    function getPublisher(srcRcrd) {
+        if (!srcRcrd.parent) { return ''; }
+        return fParams.records.source[srcRcrd.parent].displayName;
     }
     /**
      * When a user enters a new publication into the combobox, a create-publication
