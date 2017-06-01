@@ -221,64 +221,26 @@ $(document).ready(function(){
         var fields =  buildSubForm(entity, {}, "top", null, "edit");                            
         return fields.concat(buildFormBttns(_util.ucfirst(entity), "top", "edit"));
     }
+    /*------------------- Fills Edit Form Fields -----------------------------*/
     /** Fills form with existing data for the entity being edited. */
     function fillExistingData(entity, id) {
-        if (entity === "interaction") { fillIntData(id); 
-        } else { fillEntityData(entity, id); }
+        fillEntityData(entity, id); 
         enableSubmitBttn('#top-submit');
     }
-    /*------------------- Fills Interaction Form Fields ----------------------*/
-    /** TODO: Refactor */
-    function fillIntData(id) {
-        var intRcrd = getEntityRecord("interaction", id);                       
-        for (var prop in intRcrd) {
-            if (intRcrd.hasOwnProperty(prop) &&  prop !== "id") {
-                fillIntField(prop, intRcrd);
-            }
-        }
-    }
-    /** Calls the set method for the passed field. */
-    function fillIntField(field, rcrd) {                                        //console.log("field = %s, rcrd = %O", field, rcrd);
-        var setField = {
-            "interactionType": setIntType, "location": setLoc, "note": addNote, 
-            "object": addTaxon, "source": addSource, "subject": addTaxon, 
-            "tags": addTags, "updatedAt": Function.prototype };
-        setField[field](field, rcrd[field]);
-    }
-    function setIntType(field, intTypeObj) {
-        $('#InteractionType-sel')[0].selectize.addItem(intTypeObj.id);
-    }
-    function setLoc(field, id) {
-        $('#Location-sel')[0].selectize.addItem(id);
-    }
-    function addNote(field, note) {
-        $('#Notes-txt').val(note);
-    }
-    function addTaxon(role, id) {
-        var selApi = $('#'+ _util.ucfirst(role) + '-sel')[0].selectize;
-        var taxon = fParams.records.taxon[id];                                  //console.log("[%s] taxon = %O", role, taxon)
-        var displayName = taxon.level.id === 7 ? 
-            taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
-        selApi.addOption({ value: id, text: displayName });
-        selApi.addItem(id);
-    }
-    function addSource(field, id) {
-        var cit = fParams.records.source[id];
-        $('#Publication-sel')[0].selectize.addItem(cit.parent);
-        $('#CitationTitle-sel')[0].selectize.addItem(id);
-    }
-    function addTags(field, tags) {                                             //console.log("tags = %O", tags)
-        tags.forEach(function(tag){
-            $('#InteractionTags-sel')[0].selectize.addItem(tag.id);
-        });
-    }
-    /*------------------- Fills Edit Form Fields -----------------------------*/
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
             "location": fillLocFields, "publication": fillSrcFields, 
-            "publisher": fillSrcFields, "taxon": fillTaxonFields };
+            "publisher": fillSrcFields, "taxon": fillTaxonFields, 
+            "interaction": fillIntFields };
         var rcrd = getEntityRecord(entity, id);                                 console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
         hndlrs[entity](entity, id, rcrd);
+    }
+    function fillIntFields(entity, id, rcrd) {
+        var fields = {
+            "InteractionType": "select", "Location": "select", "Note": "textArea", 
+            "Object": "taxon", "Source": "source", "Subject": "taxon", 
+            "InteractionTags": "tags" };
+        fillFields(rcrd, fields, []);
     }
     function fillLocFields(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
@@ -307,10 +269,11 @@ $(document).ready(function(){
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
             "fullTextArea": setTextField, "multiSelect": Function.prototype,
-            "tags": setTagField, "cntry": setCntry
+            "tags": setTagField, "cntry": setCntry, "source": addSource, 
+            "taxon": addTaxon
         };
         for (var field in fields) {  
-            if (excluded.indexOf(field) !== -1) { continue; }                   //console.log("field type = [%s]. fields = [%O] fieldHndlr = %O", fields[field], fields, fieldHndlrs[fields[field]]);
+            if (excluded.indexOf(field) !== -1) { continue; }                   //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
             addDataToField(field, fieldHndlrs[fields[field]], rcrd);
         }
     }
@@ -330,8 +293,9 @@ $(document).ready(function(){
         $('#'+fieldId+'-sel')[0].selectize.addItem(id);        
     }
     function setTagField(fieldId, prop, rcrd) {                                 //console.log("setTagField. rcrd = %O", rcrd)
-        rcrd[prop].forEach(function(tag) {  
-            $('#Tags-sel')[0].selectize.addItem(tag.id);
+        var tags = rcrd[prop] || rcrd.tags;
+        tags.forEach(function(tag) {  
+            $('#'+fieldId+'-sel')[0].selectize.addItem(tag.id);
         });
     }    
     function setCntry(fieldId, prop, rcrd) {
@@ -358,6 +322,19 @@ $(document).ready(function(){
                 selectAuthor(cnt++, authId)
             });
         }
+    }
+    function addTaxon(fieldId, prop, rcrd) {                                    //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
+        var selApi = $('#'+ fieldId + '-sel')[0].selectize;
+        var taxon = fParams.records.taxon[rcrd[prop]];                          
+        var displayName = taxon.level.id === 7 ? 
+            taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
+        selApi.addOption({ value: rcrd.id, text: displayName });
+        selApi.addItem(rcrd.id);
+    }
+    function addSource(fieldId, prop, rcrd) {
+        var citSrc = fParams.records.source[rcrd.source];  
+        $('#Publication-sel')[0].selectize.addItem(citSrc.parent);
+        $('#CitationTitle-sel')[0].selectize.addItem(rcrd.source);
     }
 /*--------------------------- Create Form --------------------------------------------------------*/
     /**
