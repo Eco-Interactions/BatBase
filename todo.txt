@@ -1,4 +1,3 @@
-DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 -- Short Range TODO --
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
@@ -7,72 +6,34 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
     --FORM--
+        -- Auto generate citation full text from filled fields
+        -- Change description to 'translation'
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
-        --form
-            -- Auto generate citation full text from filled fields
-        --search
+        --form--
+            -- Validate that genus and species have the same genus names.
+        --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data to that level and retain other filters- updated at for example.
             -- add selectize library
             -- standardize taxon 'levels' storage
             -- update walkthrough
-    --Asap--
-        --crud--
-            -- When only a country is selected, add the interaction directly to the country location.
-            -- remove elev units from form. Assume meters if given.??
-            -- Change description to 'translation'
-
-        --TODO-- 
-            -- update all comments from top-form to interaction-form, where appropriate
-            -- Fix taxon form to show taxon selection ui
-            -- add publisher to publication detail panel
-            -- Auto-derive location type
-
-            -!!- With grid in source-author view, publication edit pencils are linked 
-            to the citation entity. I pressume something in author rowData generation 
-            is assuming all child sources are citations. Hopefully I coded otherwise 
-            and this a simple bug fix. =}
-            -!!- When editing publication, description field disappears a few seconds 
-            after submiting; perhaps a wonky exit event?
-
-
-    LEFT OFF THINKING ABOUT WHERE TO ADD THE PADDING FOR LAT AND LONG (13 SCALE)
-
+    --Asap--        
+        --form--
+            -- //Refactor fillIntData (crud.js)
+            -- Taxon form 
+            -- Style all sub-entity forms
+            -- add related entity details to sub-entity edit forms
 
 ::Testing!::
 > Data Storage
-    >Data is added and removed correctly   
-
-
-::Search Page Ui::
-
-::Form Ui::
-
-
-        Common screen resolutions = 1280×800, 1440×900, 1680×1050, 1920×1200 and 2560×1600
-        >> code for ratio?
+    > Data is added and removed correctly   
 
 
 
 
 
-
-
-
-
-
-
-
-
-##### Serialization #####
--- Data not serialized  
-    - Taxon
-        - Namings (and Taxonym)
-    - Tag
-        - IntTypeConstraints
-    - Authority
 
 
 
@@ -80,7 +41,6 @@ DOCUMENT EVERYTHING MOVING FORWARD AND BACKWARDS
 >> Talk about the location naming convention for when to add author and year and when to assign interactions directly to the country.
 
 TASK LIST
-    >> Ensure you can't make a detached species
 
 
 TODO
@@ -94,12 +54,12 @@ NOTES
 
 TAYLOR:
     --- General ---
-    > I think a 'next' priority is to upgrade the project to at least 2.7, if not 
-        2.8. 2.3 is no longer being maintained.
 
 
 Notes::
     ## Change Log ##
+        > Removed location type select
+        > Species are no longer able to be created without a parent genus selected.
 
 Questions:
 ---------------------Next-------------------------------------------------------

@@ -38,3 +38,12 @@ Developer Notes:
         Drop and Cols: (could be done any point after really...)
             a6439a86b45f56c95cf1ae155fcf0cead3047cbe
 
+
+
+##### Serialization #####
+-- Data not serialized  
+    - Taxon
+        - Namings (and Taxonym)
+    - Tag
+        - IntTypeConstraints
+    - Authority
