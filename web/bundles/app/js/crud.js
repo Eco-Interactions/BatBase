@@ -26,7 +26,7 @@ $(document).ready(function(){
             if (userRole !== 'editor') { initWysiwyg(); }
         }
     }
-/*--------------------- SEARCH PAGE CRUD -------------------------------------*/
+/*--------------------- SEARCH PAGE CRUD-FORM ----------------------------------------------------*/
     /** Adds a "New" button under the top grid focus options. */
     function buildSearchPgFormUi() {
         var bttn = _util.buildElem('button', { 
@@ -34,7 +34,7 @@ $(document).ready(function(){
         $(bttn).click(initInteractionFormWindow.bind(null, "create", "Interaction", null));
         $("#opts-col1").append(bttn);
     }
-    /*---------- Shared CRUD window methods ----------------------------------*/
+/*-------------- Form HTML Methods -------------------------------------------*/
     /**
      * Builds the form window popup @showEntityFormPopup and loads the form @initFormView.
      */
@@ -126,22 +126,15 @@ $(document).ready(function(){
         }
         return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
     }
-    /** Returns a comma seperated sting of all authors attributed to the source. */
-    function getAuthorNames(srcRcrd) {
-        var authStr = [];
-        if (srcRcrd.contributors.length > 0) {
-            srcRcrd.contributors.forEach(function(authId){
-                authStr.push(getAuthName(authId));
-            });
-        }
-        return authStr.join(', ');
+    /** Builds the form elem container. */
+    function buildFormElem() {
+        var form = document.createElement("form");
+        $(form).attr({"action": "", "method": "POST", "name": "top"});
+        form.className = "flex-row";
+        form.id = "top-form";
+        return form;
     }
-    /** Returns the name of the author with the passed id. */
-    function getAuthName(id) {
-        var auth = fParams.records.source[id];
-        return auth.displayName;  
-    }
-    /*--------------- FORM Params Object -------------------------------------*/
+/*------------------- FORM Params Object -------------------------------------*/
     /**
      * Sets the global fParams obj with the params necessary throughout the form code. 
      * -- Property descriptions:
@@ -185,7 +178,7 @@ $(document).ready(function(){
         };      
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
-/*--------------------------- Edit Form ----------------------------------------------------------*/
+/*--------------------------- Edit Form --------------------------------------*/
     /** Shows the entity's edit form in a pop-up window on the search page. */
     function editEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
         initFormParams("edit", entity, id);
@@ -194,12 +187,12 @@ $(document).ready(function(){
     }
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
-        var form = buildFormElem();
+        var form = buildFormElem();  //#washere
         var formFields = getFormFields(id, entity);
         $(form).append(formFields);
         $('#form-main').append(form);     
         if (entity === "interaction") { 
-            finishFormBuild(); 
+            finishIntFormBuild(); 
         } else {
             initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
@@ -234,7 +227,7 @@ $(document).ready(function(){
         } else { fillEntityData(entity, id); }
         enableSubmitBttn('#top-submit');
     }
-    /*------------------- Fill Interaction Form Fields -----------------------*/
+    /*------------------- Fills Interaction Form Fields ----------------------*/
     /** TODO: Refactor */
     function fillIntData(id) {
         var intRcrd = getEntityRecord("interaction", id);                       
@@ -279,7 +272,7 @@ $(document).ready(function(){
             $('#InteractionTags-sel')[0].selectize.addItem(tag.id);
         });
     }
-    /*------------------- Fill Form Fields -----------------------------------*/
+    /*------------------- Fills Edit Form Fields -----------------------------*/
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
             "location": fillLocFields, "publication": fillSrcFields, 
@@ -386,27 +379,19 @@ $(document).ready(function(){
         var formFields = buildIntFormFields('create');                          //console.log("formFields = %O", formFields);
         $(form).append(formFields);
         $('#form-main').append(form);      
-        finishFormBuild();
+        finishIntFormBuild();
         finishCreateFormBuild();
     }      
     function finishCreateFormBuild() {
         focusCombobox('#Publication-sel');
         enableCombobox('#CitationTitle-sel', false);
     }
-/*------------------- Shared Methods -------------------------------------------------------------*/
-    /** Builds the form elem container. */
-    function buildFormElem() {
-        var form = document.createElement("form");
-        $(form).attr({"action": "", "method": "POST", "name": "top"});
-        form.className = "flex-row";
-        form.id = "top-form";
-        return form;
-    }
+/*------------------- Shared Interaction Form Methods ------------------------*/
     /**
      * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
      * required field elems to the form's config object.  
      */
-    function finishFormBuild() {
+    function finishIntFormBuild() {
         initComboboxes("interaction");
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
@@ -423,11 +408,6 @@ $(document).ready(function(){
         fParams.forms.top.reqElems = reqFields.map(function(field) {
             return $('#'+field+'-sel')[0];
         });
-    }
-    /** Returns the record for the passed id and entity-type. */
-    function getEntityRecord(entity, id) {
-        var rcrds = _util.getDataFromStorage(entity);                           console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
-        return rcrds[id];
     }
 /*-------------- Form Builders -------------------------------------------------------------------*/
     /** Builds and returns all interaction-form elements. */
@@ -1096,7 +1076,28 @@ $(document).ready(function(){
         //     }
         // }
     }
-    /*------------------- Shared Methods ---------------------------------------------------*/
+
+    /** Returns a comma seperated sting of all authors attributed to the source. */
+    function getAuthorNames(srcRcrd) {
+        var authStr = [];
+        if (srcRcrd.contributors.length > 0) {
+            srcRcrd.contributors.forEach(function(authId){
+                authStr.push(getAuthName(authId));
+            });
+        }
+        return authStr.join(', ');
+    }
+    /** Returns the name of the author with the passed id. */
+    function getAuthName(id) {
+        var auth = fParams.records.source[id];
+        return auth.displayName;  
+    }
+    /*------------------- Shared Form Builders ---------------------------------------------------*/
+    /** Returns the record for the passed id and entity-type. */
+    function getEntityRecord(entity, id) {
+        var rcrds = _util.getDataFromStorage(entity);                           console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
+        return rcrds[id];
+    }
     /*------------------- Combobox (selectized) Methods ----------------------*/
     /**
      * Inits the combobox, using 'selectize', according to the passed config.
