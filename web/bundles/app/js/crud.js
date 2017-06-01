@@ -827,13 +827,20 @@ $(document).ready(function(){
     function initTaxonForm(val) { 
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
         var formLvl = getSubFormLvl("sub2");
+        if (selLvl === "Species" && !$('#Genus-sel').val()) {
+            return formInitError(selLvl, "noGenus", formLvl);
+        }
         fParams.formTaxonLvl = selLvl;
-        $('#'+selLvl+'_row').append(initSubForm(
-            "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
-        initComboboxes("taxon");                     
-        enableSubmitBttn("#"+formLvl+"-submit");
+        buildTaxonForm();
         return { "value": "", "text": "Creating "+selLvl+"..." };
-    }
+
+        function buildTaxonForm() {
+            $('#'+selLvl+'_row').append(initSubForm(
+                "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
+            initComboboxes("taxon");                     
+            enableSubmitBttn("#"+formLvl+"-submit");
+        }
+    } /* End initTaxonForm */
     /**
      * Removes any previous realm comboboxes. Shows a combobox for each level present 
      * in the selected Taxon realm, plant (default) or arthropod, filled with the 
@@ -2173,7 +2180,15 @@ $(document).ready(function(){
      */
     function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, cP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
-        formFieldErrorHandler(field, 'openSubForm', formLvl);
+        formInitError(field, 'openSubForm', formLvl, selId);
+    }
+    /** 
+     * When an error prevents a form init, this method shows an error to the user
+     * and resets the combobox that triggered the form. 
+     */
+    function formInitError(field, errorTag, formLvl, id) {
+        var selId = id || '#'+field+'-sel';
+        formFieldErrorHandler(field, errorTag, formLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
@@ -2183,6 +2198,7 @@ $(document).ready(function(){
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
             "openSubForm": "<p>Please finish the open "+ 
                 _util.ucfirst(fParams.forms[formLvl].entity) + " form.</p>",
+            "noGenus": "<p>Please select a genus before creating a species.</p>"
         };
         var msg = errMsgMap[errorTag];
         var errElem = getErrElem(fieldName);
