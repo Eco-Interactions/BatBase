@@ -50,7 +50,22 @@ $(document).ready(function(){
         $("#b-overlay-popup").addClass("form-popup");
         $("#b-overlay").addClass("form-ovrly");
         $("#b-overlay-popup").append(getFormWindowElems(entity, id, title));
+        sizeFormHtml(entity);
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
+    }
+    /** Adds the width to both the popup window and the form element for each entity. */
+    function sizeFormHtml(entity) {
+        var sizeConfgs = {
+            'Interaction': { popup: '1510px', form: '999px' },
+            'Publication': { popup: '1510px', form: '999px' },
+            'Citation': { popup: '1510px', form: '999px' },
+            'Author': { popup: '1111px', form: '666px' },
+            'Location': { popup: '1510px', form: '999px' },
+            'Taxon': { popup: '1510px', form: '999px' },
+        };
+        var confg = sizeConfgs[entity];                                         console.log("sizeFormHtml [%s] confg = %O", entity, confg);
+        $('.form-popup').css({'width': confg.popup});
+        $('#form-main').css({'width': confg.form});
     }
     function hideSearchFormPopup() {
         $('#b-overlay-popup, #b-overlay').css({display: "none"});
@@ -225,7 +240,7 @@ $(document).ready(function(){
     /** Fills form with existing data for the entity being edited. */
     function fillExistingData(entity, id) {
         fillEntityData(entity, id); 
-        enableSubmitBttn('#top-submit');
+        if (ifRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
     }
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
@@ -968,12 +983,12 @@ $(document).ready(function(){
         if (!fParams.editing) { $('#InteractionType_pin').focus(); }
     }
     function buildIntTagField() {
-        var elem = buildTagsElem('interaction', 'Interaction Tags');
+        var elem = buildTagsElem('interaction', 'Interaction Tags', 'top');
         elem.className = 'lrg-field';
         return buildFormRow("Interaction Tags", elem, "top", false);
     }
     function buildIntNotesField() {
-        var txtElem = buildLongTextArea('interaction', 'Notes');
+        var txtElem = buildLongTextArea('interaction', 'Notes', 'top');
         return buildFormRow("Notes", txtElem, "top", false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
@@ -1011,13 +1026,13 @@ $(document).ready(function(){
         focusCombobox('#Authors-sel'+cnt);
     }
     /** Builds a new, empty author combobox */
-    function buildNewAuthorSelect(cnt, val) {
+    function buildNewAuthorSelect(cnt, val) {                                   //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
         var prntLvl = getSubFormLvl("sub");
         var parentFormEntity = fParams.forms[prntLvl].entity;
         var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
                          change: onAuthSelection, add: initAuthForm };
         $("#Authors_sel-cntnr").append(
-            buildSelectElem( parentFormEntity, "Authors", cnt ));   
+            buildSelectCombo( parentFormEntity, "Authors", prntLvl, cnt ));   
         $("#Authors_sel-cntnr").data("cnt", cnt);
         initSelectCombobox(selConfg, prntLvl);
         $("#Authors-sel"+cnt)[0].selectize.removeOption(val);
@@ -1072,7 +1087,7 @@ $(document).ready(function(){
     /*------------------- Shared Form Builders ---------------------------------------------------*/
     /** Returns the record for the passed id and entity-type. */
     function getEntityRecord(entity, id) {
-        var rcrds = _util.getDataFromStorage(entity);                           console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
+        var rcrds = _util.getDataFromStorage(entity);                           //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
         return rcrds[id];
     }
     /*------------------- Combobox (selectized) Methods ----------------------*/
@@ -1332,7 +1347,7 @@ $(document).ready(function(){
      */
     function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
-            "select": buildSelectElem, "multiSelect": buildMultiSelectElem,  
+            "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea,
             "edgeCase": buildEdgeCaseElem };
         var defaultRows = buildDefaultRows();
@@ -1361,20 +1376,29 @@ $(document).ready(function(){
             }
             return rows;
         }
-        /**
-         * Builds field input @buildFieldType, stores whether field is required, 
-         * and sends both to @buildFormRow, returning the completed row elem.
-         * Sets the value for the field if it is in the passed 'fieldVals' obj. 
-         */
+        /** Builds and returns the form field's row html. */
         function buildRow(field, fieldsObj, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
-            var fieldInput = buildFieldType[fieldsObj[field]](entity, field);      
-            var reqFields = fParams.forms[formLvl].confg.required;
-            var isReq = reqFields.indexOf(field) !== -1;
-            var rowClass = fieldsObj[field] === "fullTextArea" ? "long-sub-row" : "";
-            if (field in fieldVals) { $(fieldInput).val(fieldVals[field]); }
-            return buildFormRow(_util.ucfirst(field), fieldInput, formLvl, isReq, rowClass);
+            var input = buildFieldType[fieldsObj[field]](entity, field, formLvl);  
+            var isReq = isFieldRequried(field, formLvl);    
+            fillFieldIfValuePassed(field);
+            return buildFormRow(_util.ucfirst(field), input, formLvl, isReq, "");
         }
+        /** Sets the value for the  field if it is in the passed 'fieldVals' obj. */
+        function fillFieldIfValuePassed(field) {
+            if (field in fieldVals) { $(input).val(fieldVals[field]); }
+        }
+
     } /* End getFormFieldRows */
+    function getFieldClass(formLvl, fieldType) {
+        var classes = { "top": "lrg-field", "sub": "med-field" };
+        return fieldType === "long" ? (formLvl === "top" ? "xlrg-field top" :
+            "xlrg-field") : classes[formLvl];
+    }
+    /** Returns true if field is in the required fields array. */
+    function isFieldRequried(field, formLvl) {
+        var reqFields = fParams.forms[formLvl].confg.required;
+        return reqFields.indexOf(field) !== -1;
+    }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
         var field, idx;
@@ -1386,14 +1410,15 @@ $(document).ready(function(){
         return order;
     }
     /*----------------------- Form Input Builders ----------------------------*/
-    function buildTextInput(entity, field) {                         
-        return _util.buildElem("input", { "type": "text", class: "med-field" });
+    function buildTextInput(entity, field, formLvl) { 
+        return _util.buildElem("input", { "type": "text", class: getFieldClass(formLvl) });
     }
-    function buildTextArea(entity, field) {                                     
-        return _util.buildElem("textarea", {class: "med-field" });
+    function buildTextArea(entity, field, formLvl) {                                     
+        return _util.buildElem("textarea", {class: getFieldClass(formLvl) });
     }
-    function buildLongTextArea(entity, field) {
-        return _util.buildElem("textarea", {class: "xlrg-field", id:field+"-txt"});
+    function buildLongTextArea(entity, field, formLvl) {
+        return _util.buildElem("textarea", 
+            { class: getFieldClass(formLvl, "long"), id:field+"-txt" });
     }
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -1401,12 +1426,11 @@ $(document).ready(function(){
      * the select's fieldName to the subForm config's 'selElem' array to later 
      * init the 'selectize' combobox. 
      */
-    function buildSelectElem(entity, field, cnt) {                                   
-        var formLvl = fParams.forms[entity];
+    function buildSelectCombo(entity, field, formLvl, cnt) {                    //console.log("buildSelectCombo [%s] field %s, formLvl [%s], cnt [%s]", entity, field, formLvl, cnt);                            
         var fieldName = field.split(" ").join("");
         var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
-        var sel = _util.buildSelectElem(opts, { id: fieldId , class: 'med-field'});
+        var sel = _util.buildSelectElem(opts, { id: fieldId , class: getFieldClass(formLvl)});
         fParams.forms[formLvl].selElems.push(fieldName);
         return sel;
     }
@@ -1415,9 +1439,9 @@ $(document).ready(function(){
      * be reaplced inline upon selection. Either with an existing Author's name, 
      * or the Author create form when the user enters a new Author's name. 
      */
-    function buildMultiSelectElem(entity, field) {                              //console.log("entity = %s. field = ", entity, field);
+    function buildMultiSelectElem(entity, field, formLvl) {                     //console.log("entity = %s. field = ", entity, field);
        var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
-       var selElem = buildSelectElem(entity, field, 1);
+       var selElem = buildSelectCombo(entity, field, formLvl, 1);
        $(cntnr).data("cnt", 1);
        $(cntnr).data("inputType", "multiSelect");
        $(cntnr).append(selElem);
@@ -1427,25 +1451,23 @@ $(document).ready(function(){
      * Creates and returns a select dropdown that will be initialized with 'selectize'
      * to allow multiple selections. A data property is added for use form submission.
      */
-    function buildTagsElem(entity, field) {
-        var tagSel = buildSelectElem(entity, field);
+    function buildTagsElem(entity, field, formLvl) {
+        var tagSel = buildSelectCombo(entity, field, formLvl);
         $(tagSel).data("inputType", "tags");
         return tagSel;
     }
-    /** Routes edge case fields to its field-builder method. */
-    function buildEdgeCaseElem(entity, field) {
-        var caseMap = {
-            "Country": buildLocCountryElem
-        };
-        return caseMap[field](entity, field);
+    /** Routes edge case fields to their field-builder method. */
+    function buildEdgeCaseElem(entity, field, formLvl) {
+        var caseMap = { "Country": buildLocCountryElem };
+        return caseMap[field](entity, field, formLvl);
     }
     /**
      * Modifies the Country combobox used in the location sub-form by giving it a 
      * unique id. If there is a selected value in the top-form country combobox, 
      * it is set in this sub-field. The top-form country combobox is disabled. 
      */
-    function buildLocCountryElem(entity, field) {
-        var subCntrySel = buildSelectElem(entity, field);
+    function buildLocCountryElem(entity, field, formLvl) {
+        var subCntrySel = buildSelectCombo(entity, field, formLvl);
         subCntrySel.id = "locCountry-sel";
         if ($('#Country-sel').length) { // when editing a location, there is no 'top' country field
             if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
@@ -1533,22 +1555,27 @@ $(document).ready(function(){
     /* -----------------------------------------------------------------------*/
     /**
      * Each element is built, nested, and returned as a completed row. 
-     * rowDiv>(errorDiv, fieldDiv>(fieldLabel, fieldInput, pin))
+     * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
      */
-    function buildFormRow(fieldName, fieldInput, formLvl, isReq, rowClss) {
-        var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
-        var rowClass = rowClasses[formLvl] + (rowClss ? (" "+rowClss) : "");
+    function buildFormRow(fieldName, input, formLvl, isReq, rowClss) {
         var field = fieldName.split(' ').join('');
-        var rowDiv = _util.buildElem("div", { class: rowClass, id: field + "_row"});
+        var rowDiv = _util.buildElem("div", { class: getRowClasses(), id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
-        var fieldRow = _util.buildElem("div", { class: "field-row flex-row"});
+        var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
         var pin = formLvl === "top" ? getPinElem(field) : null;     
-        if (isReq) { handleRequiredField(label, fieldInput, formLvl); } 
-        $(fieldRow).append([label, fieldInput, pin]);
-        $(rowDiv).append([errorDiv, fieldRow]);
+        if (isReq) { handleRequiredField(label, input, formLvl); } 
+        $(fieldCntnr).append([label, input, pin]);
+        $(rowDiv).append([errorDiv, fieldCntnr]);
         return rowDiv;
-    }
+        /** Returns the style classes for the row. */
+        function getRowClasses() { 
+            var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
+            var rowClass = input.className === "xlrg-field top" ? 
+                "full-row" : rowClasses[formLvl] + (rowClss ? (" "+rowClss) : "");
+            return rowClass; 
+        }
+    } /* End buildFormRow */
     function getPinElem(field) {
         var relFields = ["CitationTitle", "Country", "Location", "Publication"];
         var pinClasses = 'top-pin' + (fParams.editing ? ' invis' : '');

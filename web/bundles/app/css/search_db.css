@@ -199,8 +199,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 .form-popup {
 	height: 88vh;
 	flex-grow: 0;
-	width: 1510px;
-	/*width: 1080px;*/
 	padding: 15px;
 	text-align: left;
 	justify-content: space-between;
@@ -221,7 +219,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 #form-main {
 	padding: 5px 0 0 5px;
 	height: 83vh;
-	width: 999px;
 	overflow-x: hidden;
 	overflow-y: scroll;
 }
@@ -305,8 +302,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .field-row {
 	justify-content: space-between;
 }
-#Notes_row div.field-row {
-	width: 933px;
+.full-row {
+	padding: .2em .75em .3em  .75em;
+	width: 97.4%;
 }
 .sub-row {
 	padding: .2em .75em .3em  .75em;
@@ -315,10 +313,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .sub2-row {
 	padding: .2em .75em .3em  .75em;
 	width: 372px;
-}
-.long-sub-row {
-	padding: .2em .75em .3em  .75em;
-	width: 802px;
 }
 .form-errors, .row-errors {
 	color: red;
@@ -337,11 +331,11 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	margin: 0;
 	font-size: .95em;
 }
-.xxlrg-field {
-	width: 755px;	
-}
 .xlrg-field {
 	width: 655px;
+}
+.top.xlrg-field {
+	width: 816px;
 }
 .lrg-field {
 	width: 309px;
@@ -357,7 +351,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 #Notes-txt {
 	border-color: #b8b8b8;
-	width: 812px;
 }
 .selectize-input {
 	padding-right: 33px !important;
@@ -380,7 +373,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 @media screen and (max-width: 1500px) { 
 	/*--------------- Database CRUD Popup -------------*/
 	#b-overlay .form-popup {
-		width: 1380px;
 		padding: 15px;
 	}
 	#b-overlay #form-main {
@@ -412,12 +404,15 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 		padding: 9px 0 2px 0;
 		width: 125px;
 	}  
-	#b-overlay #Notes-txt {
+	/*#b-overlay .xlrg-field.top {
+		width: 698px;
+	}*/
+	#b-overlay .top .xlrg-field {
 		width: 698px;
 	}
-	#b-overlay .xxlrg-field {
+	/*#b-overlay .xxlrg-field {
 		width: 720px;	
-	}
+	}*/
 	#b-overlay .xlrg-field {
 		width: 595px;
 	}
