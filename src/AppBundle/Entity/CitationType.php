@@ -203,6 +203,24 @@ class CitationType
     }
 
     /**
+     * Get an array of Citation ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("citations")
+     *
+     * @return array
+     */
+    public function getCitationIds()
+    {
+        if ($this->citations) {
+            $ids = [];
+            foreach ($this->citations as $cit) {
+                array_push($ids, $cit->getId());
+            }
+            return $ids;
+        }
+    }
+
+    /**
      * Set createdBy user.
      *
      * @param \AppBundle\Entity\User $user

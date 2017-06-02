@@ -257,11 +257,11 @@ class LocationType
     public function getLocationIds()
     {
         if ($this->locations) {
-            $locIds = [];
+            $ids = [];
             foreach ($this->locations as $loc) {
-                array_push($locIds, $loc->getId());
+                array_push($ids, $loc->getId());
             }
-            return $locIds;
+            return $ids;
         }
     }
 
