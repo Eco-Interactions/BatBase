@@ -276,8 +276,10 @@
                 'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
             },
             'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp  },
-            'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent },
-            'publication': { 'publicationType': rmvFromTypeProp }
+            'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
+                'tag': rmvFromTagProp },
+            'publication': { 'publicationType': rmvFromTypeProp },
+            'citation': { 'citationType': rmvFromTypeProp,  }
         }
         return hndlrs[entity];
     }
@@ -320,7 +322,7 @@
         edits.tag.removed.forEach(function(tagId){
             rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
         });
-        storeData(prop, typeObj);
+        storeData(prop, tagObj);
     }
     /** Removes a record from the pub's array of contributor ids. */
     function rmvContrib(prop, rcrd, entity, edits) {                            //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
