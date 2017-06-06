@@ -223,10 +223,11 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	overflow-y: scroll;
 }
 #form-details {
-	flex: 1 1 242px;
+	flex: 1 1 333px;
 	padding: 0 .5em .5em .5em;
 	overflow-y: scroll;
-	max-width: 31%;
+	overflow-x: hidden;
+	/*max-width: 42%;*/
 }
 #form-details h3 {
 	text-align: center;
@@ -368,6 +369,12 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: 3px !important;
     margin: 3px !important;
 }
+/**--- Edit-form Styles ---*/
+#prnt-cntr {
+	width: 88%;
+	margin-left: 1em;
+	justify-content: space-between;
+} 
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 

@@ -59,9 +59,9 @@ $(document).ready(function(){
             'Interaction': { popup: '1510px', form: '999px' },
             'Publication': { popup: '1510px', form: '999px' },
             'Citation': { popup: '1510px', form: '999px' },
-            'Author': { popup: '1111px', form: '666px' },
+            'Author': { popup: '999px', form: '555px' },
             'Location': { popup: '1510px', form: '999px' },
-            'Taxon': { popup: '1510px', form: '999px' },
+            'Taxon': { popup: '808px', form: '60%' },
         };
         var confg = sizeConfgs[entity];                                         console.log("sizeFormHtml [%s] confg = %O", entity, confg);
         $('.form-popup').css({'width': confg.popup});
@@ -202,7 +202,7 @@ $(document).ready(function(){
     }
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
-        var form = buildFormElem();  //#washere
+        var form = buildFormElem();  
         var formFields = getFormFields(id, entity);
         $(form).append(formFields);
         $('#form-main').append(form);     
@@ -216,7 +216,7 @@ $(document).ready(function(){
     }   
     /** Returns the form fields for the passed entity.  */
     function getFormFields(id, entity) {
-        var edges = { "interaction": buildIntFormFields, "taxon": getTaxonFormFields };
+        var edges = { "interaction": buildIntFormFields, "taxon": buildTaxonEditFields };
         var hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
         var fields = hndlr(entity, id);                                         //console.log("fields = %O, hndlr = %O", fields, hndlr);     
         return fields;
@@ -276,9 +276,9 @@ $(document).ready(function(){
         return { core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity) };
     }
     function fillTaxonFields(entity, id, rcrd) {
-        var realm = _util.lcfirst(rcrd.domain.displayName);
-        var fields = getCoreFieldDefs(realm);                                   //console.log("fillTaxonFields [%s] rcrd = %O, fields = %O", id, rcrd, fields);
-        $('#'+rcrd.level.displayName+'-sel')[0].selectize.addItem(id);
+        // var realm = _util.lcfirst(rcrd.domain.displayName);
+        // var fields = getCoreFieldDefs(realm);                                //console.log("fillTaxonFields [%s] rcrd = %O, fields = %O", id, rcrd, fields);
+        // $('#'+rcrd.level.displayName+'-sel')[0].selectize.addItem(id);
     }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
@@ -972,6 +972,49 @@ $(document).ready(function(){
         updateComboboxOptions('#'+lvlName+'-sel', opts);
         if (lvl in selected) { selApi.addItem(selected[lvl], true); }
     }
+    /*-------- Edit Taxon Methods ----------*/
+    /**
+     * Returns the elements of the edit-taxon form. 
+     * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
+     * <select>[Taxon-level]</>    <input type="text">[Taxon Display-name]</>
+     */
+    function buildTaxonEditFields(entity, id) {
+        var taxon = fParams.records.taxon[id];  
+        var prntElems = getPrntTaxonElems(taxon);
+        var taxonElems = getEditTaxonFields(taxon);
+        return prntElems.concat(taxonElems);
+    }
+    function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
+        var prnt = fParams.records.taxon[taxon.parent]; 
+        var cntnr = _util.buildElem("div", { class:"flex-row", id:"prnt-cntr" });
+        $(cntnr).append([buildNameElem(prnt), buildEditPrntBttn(prnt)]);
+        return [cntnr];
+    }
+    function buildNameElem(prnt) {
+        var pName =  prnt.level.displayName + " " + prnt.displayName;
+        var div = document.createElement("div");
+        div.innerHTML = "<b>Parent Taxon</b>: &nbsp &nbsp" + pName;
+        $(div).css({"padding-top": "4px"});
+        return div;
+    }
+    function buildEditPrntBttn(prnt) {
+        var bttn = _util.buildElem("input", { type: "button", value: "Edit Parent" });
+        $(bttn).click(buildParentTaxonEditFields.bind(null, prnt.id));
+        return bttn;
+    }
+    function getEditTaxonFields(taxon) { console.log("getEditTaxonFields for [%s]", taxon.displayName);
+        return [];
+    }
+    function buildParentTaxonEditFields(prntId) {                               console.log("buildParentTaxonEditFields [%s]", prntId);
+        
+    }
+    // function getTaxonFormFields(entity, id) {
+    //     var realm = { 2: "plant", 3: "arthropod" };
+    //     var taxon = fParams.records.taxon[id];  
+    //     var realmId = taxon.domain.id;
+    //     initTaxonParams(realmId+1); //domain ids and the domain taxon's id are one off from eachother
+    //     return buildEditFormFields(realm[realmId]);
+    // }
     /*-------------- Interaction Detail Fields -------------------------------*/
     function buildIntTypeField() {
         var opts = getOptsFromStoredData('intTypeNames');
