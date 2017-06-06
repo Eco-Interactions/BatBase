@@ -216,13 +216,13 @@ $(document).ready(function(){
     }   
     /** Returns the form fields for the passed entity.  */
     function getFormFields(id, entity) {
-        var edges = { "interaction": buildIntFormFields, "taxon": buildTaxonEditFields };
+        var edges = { "interaction": getIntFormFields, "taxon": buildTaxonEditFields };
         var hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
         var fields = hndlr(entity, id);                                         //console.log("fields = %O, hndlr = %O", fields, hndlr);     
         return fields;
     }   
     function getIntFormFields(entity, id) {
-        buildIntFormFields('edit');
+        return buildIntFormFields('edit');
     }
     function getTaxonFormFields(entity, id) {
         var realm = { 2: "plant", 3: "arthropod" };
@@ -343,8 +343,8 @@ $(document).ready(function(){
         var taxon = fParams.records.taxon[rcrd[prop]];                          
         var displayName = taxon.level.id === 7 ? 
             taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
-        selApi.addOption({ value: rcrd.id, text: displayName });
-        selApi.addItem(rcrd.id);
+        selApi.addOption({ value: taxon.id, text: displayName });
+        selApi.addItem(taxon.id);
     }
     function addSource(fieldId, prop, rcrd) {
         var citSrc = fParams.records.source[rcrd.source];  
