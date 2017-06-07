@@ -370,9 +370,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin: 3px !important;
 }
 /**--- Edit-form Styles ---*/
-#prnt-cntr {
+.edt-txn-row {
 	width: 88%;
-	margin-left: 1em;
+	margin: 1em 0 0 1em;
 	justify-content: space-between;
 } 
 /*--------------------------------------------------------------------------*/
