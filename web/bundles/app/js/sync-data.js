@@ -397,13 +397,17 @@
         deriveInteractionData(data[3]);
     }
     /** Stores an object of taxon names and ids for each level in each domain. */
-    function deriveAndStoreTaxonData(data) {
-        var nameData = separateTaxaByLevelAndDomain(data.taxon);                //console.log("taxonym name data = %O", nameData);
-        for (var domain in nameData) {  
-            storeLevelTaxonData(domain, nameData[domain]);
+    function deriveAndStoreTaxonData(data) {                                    //console.log("deriveAndStoreTaxonData called. data = %O", data);
+        storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
+        storeTaxaByLevelAndDomain(data.taxon);
+    }
+    function storeTaxaByLevelAndDomain(taxa) {
+        var domainData = separateTaxaByLevelAndDomain(taxa);                    //console.log("taxonym name data = %O", nameData);
+        for (var domain in domainData) {  
+            storeTaxaByLvl(domain, domainData[domain]);
         }
     }
-    function storeLevelTaxonData(domain, taxonObj) {
+    function storeTaxaByLvl(domain, taxonObj) {
         for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", domain+level+'Names', taxonObj[level]);
             storeData(domain+level+'Names', taxonObj[level]);
         }
@@ -422,7 +426,7 @@
             if (!domainObj[level]) { domainObj[level] = {}; }; 
             domainObj[level][taxon.displayName] = taxon.id;
         }
-    }
+    } /* End separateTaxaByLevelAndDomain */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
     function deriveAndStoreLocationData(data) {  
         storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
