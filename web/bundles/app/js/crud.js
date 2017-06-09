@@ -1049,12 +1049,13 @@ $(document).ready(function(){
     }
     function buildEditParentHdr() {
         var hdr = _util.buildElem("h3", { text: "Editing Taxon Parent" });
-        $(hdr).css({'text-align': 'center', 'width': '100%', 'margin-bottom': '.5em'});
+        $(hdr).css({'text-align': 'center'});
         return hdr;
     }
     function finishEditParentFormBuild() {                                          
         initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
         initTaxonEditCombo("txnyms-sel", null, createTaxonParent);
+        $('#txnyms-sel')[0].selectize.settings.placeholder = "Select Parent";                       
         $('#sub-submit').attr("disabled", false).css("opacity", "1");
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
@@ -1065,7 +1066,7 @@ $(document).ready(function(){
         var opts = getTaxonOpts(lvl);                                           
         updateComboboxOptions('#txnyms-sel', opts);
     }
-    function createTaxonParent(val) {                                           console.log("createTaxonParent called.  [%s]", val);
+    function createTaxonParent(val) {                                           //console.log("createTaxonParent called.  [%s]", val);
         var lvl = $('#sub-txn-lvl')[0].innerText;    
         if (creatingDomainTaxon(lvl)) { return showDomainCreateError(); }
         return buildNewTaxonForm(val, lvl);
@@ -1363,7 +1364,7 @@ $(document).ready(function(){
     }
     function clearCombobox(selId) {
         var selApi = $(selId)[0].selectize;
-        selApi.clear();
+        selApi.clear(true);
         selApi.updatePlaceholder();
         selApi.removeOption("");
     }    

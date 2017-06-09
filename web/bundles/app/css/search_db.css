@@ -372,8 +372,8 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 /**--- Edit-form Styles ---*/
 .edt-txn-row {
-	width: 88%;
-	margin: 1em 0 0 1em;
+	width: 92%;
+	margin: .5em 0 0 1em;
 	justify-content: space-between;
 } 
 #prnt-cntnr {
@@ -388,11 +388,11 @@ select[id$="txn-lvl"] + div {
     width: 150px;
 }
 #txnyms-sel + div {
-	width: 175px;
+	width: 200px;
 }
 #Parent_row #sub2-form {
 	position: relative;
-	left: -20px;
+	left: -4%;
 }
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
