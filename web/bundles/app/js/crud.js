@@ -209,7 +209,7 @@ $(document).ready(function(){
         if (entity === "interaction") { 
             finishIntFormBuild(); 
         } else if (entity === "taxon") { 
-            finishTaxonEditForm(); 
+            initTaxonEditCombo("top-txn-lvl"); 
         } else {
             initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
@@ -780,9 +780,9 @@ $(document).ready(function(){
     function initTaxonParams(id) {
         var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
         var domainLvls = {
-            'Bat': ["Family", "Genus", "Species"],
-            'Arthropod': ["Class", "Order", "Family", "Genus", "Species"],
-            'Plant': ["Phylum", "Class", "Order", "Family", "Genus", "Species"]
+            'Bat': ["Order", "Family", "Genus", "Species"],
+            'Arthropod': ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
+            'Plant': ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"]
         };
         fParams.taxon = { 
             realm: realmMap[id], 
@@ -995,56 +995,112 @@ $(document).ready(function(){
     }
     function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
         var prnt = fParams.records.taxon[taxon.parent]; 
-        var cntnr = _util.buildElem("div", { class:"flex-row edt-txn-row" });
+        var cntnr = _util.buildElem("div", { class:"flex-row edt-txn-row", id:"prnt-txn-cntnr" });
         $(cntnr).append([
             buildNameElem(prnt), buildEditPrntBttn(prnt)]);
         return [cntnr];
     }
     function buildNameElem(prnt) {
         var pName =  prnt.level.displayName + " " + prnt.displayName;
-        var div = document.createElement("div");
-        div.innerHTML = "<b>Parent Taxon</b>: &nbsp &nbsp" + pName;
+        var div = _util.buildElem("div", { id: "txn-prnt-name" });
+        setTaxonPrntNameElem(pName, div);
         $(div).css({"padding-top": "4px"});
         return div;
     }
+    function setTaxonPrntNameElem(pText, elem) {
+        var div = elem || $('#txn-prnt-name')[0];
+        div.innerHTML = "<b>Taxon Parent</b>: &nbsp " + pText;
+    }
     function buildEditPrntBttn(prnt) {
-        var bttn = _util.buildElem("input", { type: "button", value: "Edit Parent" });
+        var bttn = _util.buildElem("input", { type: "button", value: "Edit Parent", id: "edit-prnt" });
         $(bttn).click(buildParentTaxonEditFields.bind(null, prnt.id));
         return bttn;
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
         var cntnr = _util.buildElem("div", { class:"flex-row edt-txn-row" });
         var input = _util.buildElem("input", { type: "text", value: taxon.displayName });
-        $(cntnr).append([getlvlSel(taxon), input]);
+        $(cntnr).append([getlvlSel(taxon, "top"), input]);
         return [cntnr];
     }
-    function getlvlSel(taxon) {
-        initTaxonParams(taxon.domain.id+1); //domain ids and the domain taxon's id are one off from eachother
-        return buildLvlSel(taxon);
+    /**
+     * Returns a level select with all levels in the taxon-parent's domain and a 
+     * combobox with all taxa at the parent's level and the current parent selected.
+     * Changing the level select repopulates the taxa with those at the new level.
+     * Entering a taxon that does not already exists will open the 'create' form.
+     */
+    function buildParentTaxonEditFields(prntId) {                               //console.log("buildParentTaxonEditFields [%s]", prntId);
+        buildAndAppendEditParentElems(prntId);
+        setTaxonPrntNameElem("");
+        $('#edit-prnt').attr({'disabled': true}).css({'opacity': '.6'});
+        disableSubmitBttn('#top-submit');
     }
-    function buildLvlSel(taxon) {
-        var opts = getTaxonLvlOpts(taxon); 
-        var sel = _util.buildSelectElem(opts, { id:"txn-lvl" });
-        $(sel).data("level", taxon.level.id)
+    function buildAndAppendEditParentElems(prntId) {
+        var prnt = fParams.records.taxon[prntId];
+        var cntnr = _util.buildElem("div", { class: "sml-form flex-row", id: "prnt-cntnr" });
+        var hdr = buildEditParentHdr();
+        var lvlSel = getlvlSel(prnt, "sub", true);
+        var nameSel = getPrntNameSel(prnt);
+        var bttns = buildFormBttns("Parent Taxon", "sub", "edit");
+        $(cntnr).append([hdr, lvlSel, nameSel, bttns]);
+        $('#prnt-txn-cntnr').after(cntnr);
+        finishEditParentFormBuild();
+    }
+    function buildEditParentHdr() {
+        var hdr = _util.buildElem("h3", { text: "Editing Taxon Parent" });
+        $(hdr).css({'text-align': 'center', 'width': '100%', 'margin-bottom': '.5em'});
+        return hdr;
+    }
+    function finishEditParentFormBuild() {                                          
+        initTaxonEditCombo("sub-txn-lvl");
+        initTaxonEditCombo("txnyms");
+        $('#sub-submit').attr("disabled", false).css("opacity", "1");
+        $('#sub-submit').off('click').click(closePrntEdit);
+        $('#sub-cancel').off('click').click(cancelPrntEdit);
+    }
+    function closePrntEdit() {                                                  console.log("closePrntEdit called.");
+        // body...
+    }
+    function cancelPrntEdit() {                                                 console.log("cancelPrntEdit called.");
+        // body...
+    }
+    function getlvlSel(taxon, formLvl, isPrnt) {
+        initTaxonParams(taxon.domain.id+1); //domain ids and the domain taxon's id are one off from eachother
+        return buildLvlSel(taxon, formLvl, isPrnt);
+    }
+    function buildLvlSel(taxon, formLvl, isPrnt) {
+        var opts = getTaxonLvlOpts(taxon, isPrnt); 
+        var sel = _util.buildSelectElem(opts, { id: formLvl+"-txn-lvl" });
+        $(sel).data('prevSel', taxon.level.id);
         return sel;
     }
     /** Returns an array of options for the levels in the taxon's domain. */
-    function getTaxonLvlOpts() {
-        var domainLvls = fParams.taxon.domainLvls;  
+    function getTaxonLvlOpts(taxon, isPrnt) {
+        var domainLvls = fParams.taxon.domainLvls;
         var lvls = _util.getDataFromStorage("levelNames");  
+        if (!isPrnt) { domainLvls.shift(); } //Removes the (uneditable) domain-level
         for (var name in lvls) {
             if (domainLvls.indexOf(name) === -1) { delete lvls[name]; }
         }
-        return buildOptsObj(lvls, Object.keys(lvls).sort());
+        return buildOptsObj(lvls, Object.keys(lvls));
     }
-    function buildParentTaxonEditFields(prntId) {                               console.log("buildParentTaxonEditFields [%s]", prntId);
-        
+    function getPrntNameSel(taxon) {
+        var lvl = taxon.level.displayName;                                      //console.log('taxon = %O', taxon)
+        var opts = getTaxonOpts(lvl);                                           
+        var sel = _util.buildSelectElem(opts, { id:"txnyms" });
+        $(sel).data('prevSel', taxon.id);
+        return sel;
     }
-    function finishTaxonEditForm() {
-        var options = {
-            create: false, onChange: Function.prototype, placeholder: null }; 
-        $('#txn-lvl').selectize(options);
-        $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data("level"));
+    function getParentTaxonBttns() {
+        var bttns = buildFormBttns("Parent Taxon", "sub", "edit");
+        $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
+    }
+    function initTaxonEditCombo(selId, chngFunc, createFunc) {
+        var chng = chngFunc || Function.prototype;
+        var create = createFunc || false;
+        var options = { create: create, onChange: chng, placeholder: null }; 
+        $('#'+selId).css({'width': '150px'});
+        $('#'+selId).selectize(options);
+        $('#'+selId)[0].selectize.addItem($('#'+selId).data("prevSel"));
     }
     /*-------------- Interaction Detail Fields -------------------------------*/
     function buildIntTypeField() {

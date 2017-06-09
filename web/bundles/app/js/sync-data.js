@@ -412,19 +412,24 @@
             storeData(domain+level+'Names', taxonObj[level]);
         }
     }
-    /** Each taxon is sorted by domain and then level. Domain taxa are skipped.  */
+    /** Each taxon is sorted by domain and then level. 'Animalia' is skipped. */
     function separateTaxaByLevelAndDomain(taxa) {
         var data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (var id = 5; id < Object.keys(taxa).length+1; id++) {               
+        for (var id = 2; id < Object.keys(taxa).length+1; id++) {               
             addTaxonData(taxa[id]);
         }                         
         return data;                                              
         /** Adds the taxon's name (k) and id to it's level's obj. */
         function addTaxonData(taxon) {
-            var domainObj = data[taxon.domain.displayName];
+            var domainObj = getDomainObj(taxon);
             var level = taxon.level.displayName;  
             if (!domainObj[level]) { domainObj[level] = {}; }; 
             domainObj[level][taxon.displayName] = taxon.id;
+        }
+        function getDomainObj(taxon) {
+            var domain = taxon.domain.displayName
+            var key = domain === 'Animalia' ? 'Bat' : domain;
+            return data[key];
         }
     } /* End separateTaxaByLevelAndDomain */
     /** [entity]Names - an object with each entity's displayName(k) and id. */

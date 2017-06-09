@@ -328,7 +328,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	margin: .6em 0 0 .6em !important;
 }
 #top-form input, #top-form select, #top-form textarea {
-	padding: .1em;
+	padding: .2em;
 	margin: 0;
 	font-size: .95em;
 }
@@ -375,6 +375,14 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	margin: 1em 0 0 1em;
 	justify-content: space-between;
 } 
+#prnt-cntnr {
+	flex-wrap: wrap;
+	justify-content: space-around;
+	border: 1px solid grey;
+	border-radius: 5px;
+	margin: .5em;
+	padding: .5em;
+}
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 
