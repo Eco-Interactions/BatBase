@@ -810,6 +810,9 @@ $(document).ready(function(){
         if (selLvl === "Species" && !$('#Genus-sel').val()) {
             return formInitError(selLvl, "noGenus", formLvl);
         }
+        return showNewTaxonForm(val, selLvl, formLvl);
+    } 
+    function showNewTaxonForm(val, selLvl, formLvl) {
         fParams.formTaxonLvl = selLvl;
         buildTaxonForm();
         return { "value": "", "text": "Creating "+selLvl+"..." };
@@ -817,10 +820,9 @@ $(document).ready(function(){
         function buildTaxonForm() {
             $('#'+selLvl+'_row').append(initSubForm(
                 "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
-            initComboboxes("taxon");                     
             enableSubmitBttn("#"+formLvl+"-submit");
         }
-    } /* End initTaxonForm */
+    }  /* End showTaxonForm */
     /**
      * Removes any previous realm comboboxes. Shows a combobox for each level present 
      * in the selected Taxon realm, plant (default) or arthropod, filled with the 
@@ -1038,10 +1040,10 @@ $(document).ready(function(){
         var prnt = fParams.records.taxon[prntId];
         var cntnr = _util.buildElem("div", { class: "sml-form flex-row", id: "prnt-cntnr" });
         var hdr = buildEditParentHdr();
-        var lvlSel = getlvlSel(prnt, "sub", true);
-        var nameSel = getPrntNameSel(prnt);
+        var inputElems = [ getlvlSel(prnt, "sub", true), getPrntNameSel(prnt) ];
+        var formRow = buildTaxonEditFormRow('Parent', inputElems, 'sub');
         var bttns = buildFormBttns("Parent Taxon", "sub", "edit");
-        $(cntnr).append([hdr, lvlSel, nameSel, bttns]);
+        $(cntnr).append([hdr, formRow, bttns]);
         $('#prnt-txn-cntnr').after(cntnr);
         finishEditParentFormBuild();
     }
@@ -1051,8 +1053,8 @@ $(document).ready(function(){
         return hdr;
     }
     function finishEditParentFormBuild() {                                          
-        initTaxonEditCombo("txnyms");
         initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
+        initTaxonEditCombo("txnyms-sel", null, createTaxonParent);
         $('#sub-submit').attr("disabled", false).css("opacity", "1");
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
@@ -1063,6 +1065,40 @@ $(document).ready(function(){
         var opts = getTaxonOpts(lvl);                                           
         updateComboboxOptions('#txnyms-sel', opts);
     }
+    function createTaxonParent(val) {                                           console.log("createTaxonParent called.  [%s]", val);
+        var lvl = $('#sub-txn-lvl')[0].innerText;    
+        if (creatingDomainTaxon(lvl)) { return showDomainCreateError(); }
+        return buildNewTaxonForm(val, lvl);
+    }
+    function creatingDomainTaxon(lvl) {
+        var domainLvl = fParams.taxon.domainLvls.shift();                       //console.log('domainLvl = ', domainLvl);
+        return lvl === domainLvl;
+    }
+    /**
+     * If the user attempts to create a new taxon at the domain level, an error 
+     * is shown and the combobox is reset. 
+     */
+    function showDomainCreateError() {
+        formInitError('Parent', 'creatingDomain', 'sub');
+        var opts = $('#txnyms-sel')[0].selectize.options;  
+        window.setTimeout(function() {
+            $('#txnyms-sel')[0].selectize.addItem(Object.keys(opts)[0]);  
+        }, 10);     //Reselects the domain taxon
+        return { value: "", text: "" };
+    }
+    /** Appends the new Taxon form and updates related UI. */
+    function buildNewTaxonForm(val, lvl) {
+        fParams.formTaxonLvl = lvl;
+        appendTaxonForm();
+        return { 'value': '', 'text': 'Creating '+lvl+'...' };
+
+        function appendTaxonForm() {                                             //console.log("buildTaxonForm")
+            $('#Parent_row').append(initSubForm(
+                'taxon', 'sub2', 'sml-form', {'Display Name': val}, '#txnyms-sel'));
+            enableSubmitBttn('#sub2-submit');
+            disableSubmitBttn('#sub-submit');
+        }
+    } /* End buildNewTaxonForm */
     function closePrntEdit() {                                                  console.log("closePrntEdit called.");
         // body...
     }
@@ -1092,7 +1128,7 @@ $(document).ready(function(){
     function getPrntNameSel(taxon) {
         var lvl = taxon.level.displayName;                                      //console.log('taxon = %O', taxon)
         var opts = getTaxonOpts(lvl);                                           
-        var sel = _util.buildSelectElem(opts, { id:"txnyms" });
+        var sel = _util.buildSelectElem(opts, { id:"txnyms-sel" });
         $(sel).data('prevSel', taxon.id);
         return sel;
     }
@@ -1104,10 +1140,25 @@ $(document).ready(function(){
         var chng = chngFunc || Function.prototype;
         var create = createFunc || false;
         var options = { create: create, onChange: chng, placeholder: null }; 
-        $('#'+selId).css({'width': '150px'});
         $('#'+selId).selectize(options);
-        $('#'+selId)[0].selectize.addItem($('#'+selId).data("prevSel"));
+        $('#'+selId)[0].selectize.addItem($('#'+selId).data("prevSel"), true);
     }
+    /**
+     * Each element is built, nested, and returned as a completed row. 
+     * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
+     */
+    function buildTaxonEditFormRow(field, inputElems, formLvl, isReq, rowClss) {
+        var rowDiv = _util.buildElem("div", { class: 'edt-txn-row', id: field + "_row"});
+        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
+        var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
+        if (isReq) { handleRequiredField(label, input, formLvl); } 
+        $(fieldCntnr).append(inputElems);
+        $(rowDiv).append([errorDiv, fieldCntnr]);
+        return rowDiv;
+    } 
+
+
+
     /*-------------- Interaction Detail Fields -------------------------------*/
     function buildIntTypeField() {
         var opts = getOptsFromStoredData('intTypeNames');
@@ -1518,12 +1569,12 @@ $(document).ready(function(){
             var isReq = isFieldRequried(field, formLvl);    
             fillFieldIfValuePassed(field);
             return buildFormRow(_util.ucfirst(field), input, formLvl, isReq, "");
-        }
-        /** Sets the value for the  field if it is in the passed 'fieldVals' obj. */
-        function fillFieldIfValuePassed(field) {
-            if (field in fieldVals) { $(input).val(fieldVals[field]); }
-        }
-
+            
+            /** Sets the value for the  field if it is in the passed 'fieldVals' obj. */
+            function fillFieldIfValuePassed(field) {
+                if (field in fieldVals) { $(input).val(fieldVals[field]); }
+            }
+        } /* End buildRow */ 
     } /* End getFormFieldRows */
     function getFieldClass(formLvl, fieldType) {
         var classes = { "top": "lrg-field", "sub": "med-field" };
@@ -2335,16 +2386,18 @@ $(document).ready(function(){
     }
     /** Shows the user an error message above the field row. */
     function formFieldErrorHandler(fieldName, errorTag, formLvl) {              //console.log("###__formFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+        var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
+            "creatingDomain": "<p>Not able to create Taxa at the domain level.</p>",
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
             "openSubForm": "<p>Please finish the open "+ 
-                _util.ucfirst(fParams.forms[formLvl].entity) + " form.</p>",
+                _util.ucfirst(subEntity) + " form.</p>",
             "noGenus": "<p>Please select a genus before creating a species.</p>"
         };
         var msg = errMsgMap[errorTag];
         var errElem = getErrElem(fieldName);
         errElem.innerHTML = msg;
-        window.setTimeout(function(){errElem.innerHTML = ""}, 5000);
+        window.setTimeout(function(){errElem.innerHTML = ""}, 4000);
     }
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
