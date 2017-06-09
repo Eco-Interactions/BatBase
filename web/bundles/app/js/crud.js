@@ -1051,11 +1051,17 @@ $(document).ready(function(){
         return hdr;
     }
     function finishEditParentFormBuild() {                                          
-        initTaxonEditCombo("sub-txn-lvl");
         initTaxonEditCombo("txnyms");
+        initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
         $('#sub-submit').attr("disabled", false).css("opacity", "1");
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
+    }
+    /** Repopulates the taxon-parent select with all taxa at the selected level. */
+    function repopPrntTxynms() {                                                
+        var lvl = $('#sub-txn-lvl')[0].innerText;  
+        var opts = getTaxonOpts(lvl);                                           
+        updateComboboxOptions('#txnyms-sel', opts);
     }
     function closePrntEdit() {                                                  console.log("closePrntEdit called.");
         // body...
