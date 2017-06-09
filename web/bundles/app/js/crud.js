@@ -1041,7 +1041,7 @@ $(document).ready(function(){
         var cntnr = _util.buildElem("div", { class: "sml-form flex-row", id: "prnt-cntnr" });
         var hdr = buildEditParentHdr();
         var inputElems = [ getlvlSel(prnt, "sub", true), getPrntNameSel(prnt) ];
-        var formRow = buildTaxonEditFormRow('Parent', inputElems, 'sub');
+        var formRow = buildTaxonEditFormRow('EditParent', inputElems, 'sub');
         var bttns = buildFormBttns("Parent Taxon", "sub", "edit");
         $(cntnr).append([hdr, formRow, bttns]);
         $('#prnt-txn-cntnr').after(cntnr);
@@ -1054,8 +1054,8 @@ $(document).ready(function(){
     }
     function finishEditParentFormBuild() {                                          
         initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
-        initTaxonEditCombo("txnyms-sel", null, createTaxonParent);
-        $('#txnyms-sel')[0].selectize.settings.placeholder = "Select Parent";                       
+        initTaxonEditCombo("EditParent-sel", null, createTaxonParent);
+        $('#EditParent-sel')[0].selectize.settings.placeholder = "Select Parent";                       
         $('#sub-submit').attr("disabled", false).css("opacity", "1");
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
@@ -1064,7 +1064,7 @@ $(document).ready(function(){
     function repopPrntTxynms() {                                                
         var lvl = $('#sub-txn-lvl')[0].innerText;  
         var opts = getTaxonOpts(lvl);                                           
-        updateComboboxOptions('#txnyms-sel', opts);
+        updateComboboxOptions('#EditParent-sel', opts);
     }
     function createTaxonParent(val) {                                           //console.log("createTaxonParent called.  [%s]", val);
         var lvl = $('#sub-txn-lvl')[0].innerText;    
@@ -1080,10 +1080,10 @@ $(document).ready(function(){
      * is shown and the combobox is reset. 
      */
     function showDomainCreateError() {
-        formInitError('Parent', 'creatingDomain', 'sub');
-        var opts = $('#txnyms-sel')[0].selectize.options;  
+        formInitError('EditParent', 'creatingDomain', 'sub');
+        var opts = $('#EditParent-sel')[0].selectize.options;  
         window.setTimeout(function() {
-            $('#txnyms-sel')[0].selectize.addItem(Object.keys(opts)[0]);  
+            $('#EditParent-sel')[0].selectize.addItem(Object.keys(opts)[0]);  
         }, 10);     //Reselects the domain taxon
         return { value: "", text: "" };
     }
@@ -1094,8 +1094,8 @@ $(document).ready(function(){
         return { 'value': '', 'text': 'Creating '+lvl+'...' };
 
         function appendTaxonForm() {                                             //console.log("buildTaxonForm")
-            $('#Parent_row').append(initSubForm(
-                'taxon', 'sub2', 'sml-form', {'Display Name': val}, '#txnyms-sel'));
+            $('#EditParent_row').after(initSubForm(
+                'taxon', 'sub2', 'sml-form', {'Display Name': val}, '#EditParent-sel'));
             enableSubmitBttn('#sub2-submit');
             disableSubmitBttn('#sub-submit');
         }
@@ -1129,7 +1129,7 @@ $(document).ready(function(){
     function getPrntNameSel(taxon) {
         var lvl = taxon.level.displayName;                                      //console.log('taxon = %O', taxon)
         var opts = getTaxonOpts(lvl);                                           
-        var sel = _util.buildSelectElem(opts, { id:"txnyms-sel" });
+        var sel = _util.buildSelectElem(opts, { id:"EditParent-sel" });
         $(sel).data('prevSel', taxon.id);
         return sel;
     }

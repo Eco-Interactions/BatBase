@@ -387,10 +387,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 select[id$="txn-lvl"] + div {
     width: 150px;
 }
-#txnyms-sel + div {
+#EditParent-sel + div {
 	width: 200px;
 }
-#Parent_row #sub2-form {
+#EditParent_row #sub2-form {
 	position: relative;
 	left: -4%;
 }
