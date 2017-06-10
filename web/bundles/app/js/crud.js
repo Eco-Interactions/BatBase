@@ -993,24 +993,22 @@ $(document).ready(function(){
         var taxon = fParams.records.taxon[id];  
         var prntElems = getPrntTaxonElems(taxon);
         var taxonElems = getEditTaxonFields(taxon);
-        return prntElems.concat(taxonElems, buildFormBttns("taxon", "top", "edit"));
+        return prntElems.concat(taxonElems, buildFormBttns("Taxon", "top", "edit"));
     }
     function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
         var prnt = fParams.records.taxon[taxon.parent]; 
-        var cntnr = _util.buildElem("div", { class:"flex-row edt-txn-row", id:"prnt-txn-cntnr" });
-        $(cntnr).append([
-            buildNameElem(prnt), buildEditPrntBttn(prnt)]);
-        return [cntnr];
+        var elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt) ];
+        return [ buildTaxonEditFormRow('Parent', elems) ];
     }
     function buildNameElem(prnt) {
         var pName =  prnt.level.displayName + " " + prnt.displayName;
-        var div = _util.buildElem("div", { id: "txn-prnt-name" });
+        var div = _util.buildElem("div", { id: "Parent-name" });
         setTaxonPrntNameElem(pName, div);
         $(div).css({"padding-top": "4px"});
         return div;
     }
     function setTaxonPrntNameElem(pText, elem) {
-        var div = elem || $('#txn-prnt-name')[0];
+        var div = elem || $('#Parent-name')[0];
         div.innerHTML = "<b>Taxon Parent</b>: &nbsp " + pText;
     }
     function buildEditPrntBttn(prnt) {
@@ -1019,10 +1017,8 @@ $(document).ready(function(){
         return bttn;
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
-        var cntnr = _util.buildElem("div", { class:"flex-row edt-txn-row" });
         var input = _util.buildElem("input", { type: "text", value: taxon.displayName });
-        $(cntnr).append([getlvlSel(taxon, "top"), input]);
-        return [cntnr];
+        return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, "top"), input])];
     }
     /**
      * Returns a level select with all levels in the taxon-parent's domain and a 
@@ -1042,9 +1038,9 @@ $(document).ready(function(){
         var hdr = buildEditParentHdr();
         var inputElems = [ getlvlSel(prnt, "sub", true), getPrntNameSel(prnt) ];
         var formRow = buildTaxonEditFormRow('EditParent', inputElems, 'sub');
-        var bttns = buildFormBttns("Parent Taxon", "sub", "edit");
+        var bttns = buildFormBttns("Parent", "sub", "edit");
         $(cntnr).append([hdr, formRow, bttns]);
-        $('#prnt-txn-cntnr').after(cntnr);
+        $('#Parent_row').after(cntnr);
         finishEditParentFormBuild();
     }
     function buildEditParentHdr() {
@@ -1093,7 +1089,7 @@ $(document).ready(function(){
         appendTaxonForm();
         return { 'value': '', 'text': 'Creating '+lvl+'...' };
 
-        function appendTaxonForm() {                                             //console.log("buildTaxonForm")
+        function appendTaxonForm() {                                            //console.log("buildTaxonForm")
             $('#EditParent_row').after(initSubForm(
                 'taxon', 'sub2', 'sml-form', {'Display Name': val}, '#EditParent-sel'));
             enableSubmitBttn('#sub2-submit');
@@ -1146,13 +1142,12 @@ $(document).ready(function(){
     }
     /**
      * Each element is built, nested, and returned as a completed row. 
-     * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
+     * rowDiv>(errorDiv, fieldDiv>inputElems)
      */
-    function buildTaxonEditFormRow(field, inputElems, formLvl, isReq, rowClss) {
+    function buildTaxonEditFormRow(field, inputElems) {
         var rowDiv = _util.buildElem("div", { class: 'edt-txn-row', id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
-        if (isReq) { handleRequiredField(label, input, formLvl); } 
         $(fieldCntnr).append(inputElems);
         $(rowDiv).append([errorDiv, fieldCntnr]);
         return rowDiv;
