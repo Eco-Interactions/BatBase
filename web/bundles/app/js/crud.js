@@ -209,7 +209,7 @@ $(document).ready(function(){
         if (entity === "interaction") { 
             finishIntFormBuild(); 
         } else if (entity === "taxon") { 
-            initTaxonEditCombo("top-txn-lvl"); 
+            initTaxonEditCombo("top-txn-lvl", checkPrntLvl); 
         } else {
             initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
@@ -1001,19 +1001,20 @@ $(document).ready(function(){
         return [ buildTaxonEditFormRow('Parent', elems) ];
     }
     function buildNameElem(prnt) {
-        var pName =  prnt.level.displayName + " " + prnt.displayName;
         var div = _util.buildElem("div", { id: "Parent-name" });
-        setTaxonPrntNameElem(pName, div);
+        setTaxonPrntNameElem(prnt, div);
         $(div).css({"padding-top": "4px"});
+        $(div).data("lvl", prnt.level.id).data("txn", prnt.id);
         return div;
     }
-    function setTaxonPrntNameElem(pText, elem) {
+    function setTaxonPrntNameElem(prnt, elem, pText) {
         var div = elem || $('#Parent-name')[0];
-        div.innerHTML = "<b>Taxon Parent</b>: &nbsp " + pText;
+        var text = pText || prnt.level.displayName + " " + prnt.displayName;
+        div.innerHTML = "<b>Taxon Parent</b>: &nbsp " + text;
     }
     function buildEditPrntBttn(prnt) {
         var bttn = _util.buildElem("input", { type: "button", value: "Edit Parent", id: "edit-prnt" });
-        $(bttn).click(buildParentTaxonEditFields.bind(null, prnt.id));
+        $(bttn).click(buildParentTaxonEditFields);
         return bttn;
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
@@ -1026,9 +1027,10 @@ $(document).ready(function(){
      * Changing the level select repopulates the taxa with those at the new level.
      * Entering a taxon that does not already exists will open the 'create' form.
      */
-    function buildParentTaxonEditFields(prntId) {                               //console.log("buildParentTaxonEditFields [%s]", prntId);
+    function buildParentTaxonEditFields() {                                     //console.log("buildParentTaxonEditFields [%s]", prntId);
+        var prntId = $('#Parent-name').data('txn');
         buildAndAppendEditParentElems(prntId);
-        setTaxonPrntNameElem("");
+        setTaxonPrntNameElem(null, null, " ");
         $('#edit-prnt').attr({'disabled': true}).css({'opacity': '.6'});
         disableSubmitBttn('#top-submit');
     }
@@ -1096,11 +1098,33 @@ $(document).ready(function(){
             disableSubmitBttn('#sub-submit');
         }
     } /* End buildNewTaxonForm */
-    function closePrntEdit() {                                                  console.log("closePrntEdit called.");
-        // body...
+    function closePrntEdit() {                                                  //console.log("closePrntEdit called.");
+        var prnt =  fParams.records.taxon[$('#EditParent-sel').val()];
+        if (!prnt) { return formFieldErrorHandler('EditParent', 'emptyParentTaxon', 'sub'); }
+        $('#Parent-name').data('txn', prnt.id).data('lvl', prnt.level.id);
+        resetAfterEditParentClose(prnt);
     }
-    function cancelPrntEdit() {                                                 console.log("cancelPrntEdit called.");
-        // body...
+    function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
+        var prnt = fParams.records.taxon[$('#Parent-name').data('txn')];
+        resetAfterEditParentClose(prnt);
+    }
+    function checkPrntLvl() {  
+        var prntLvl = $('#Parent-name').data('lvl');
+        var taxonLvl = $('#top-txn-lvl').val();                                 //console.log("checkPrntLvl. taxon = %s. parent = %s", taxonLvl, prntLvl);
+        if (taxonLvl == 7 && prntLvl != 6) {
+            return showGenusPrntError();
+        } else { enableSubmitBttn('#top-submit'); }
+    }
+    function showGenusPrntError() {  
+        formFieldErrorHandler('Parent', 'needsGenusPrnt', 'top');
+        disableSubmitBttn('#top-submit');
+    }
+    function resetAfterEditParentClose(prnt) {
+        $('#prnt-cntnr').remove();
+        setTaxonPrntNameElem(prnt);
+        $('#edit-prnt').attr({'disabled': false}).css({'opacity': '1'});
+        enableSubmitBttn('#top-submit');
+        checkPrntLvl();
     }
     function getlvlSel(taxon, formLvl, isPrnt) {
         initTaxonParams(taxon.domain.id+1); //domain ids and the domain taxon's id are one off from eachother
@@ -1116,7 +1140,8 @@ $(document).ready(function(){
     function getTaxonLvlOpts(taxon, isPrnt) {
         var domainLvls = fParams.taxon.domainLvls;
         var lvls = _util.getDataFromStorage("levelNames");  
-        if (!isPrnt) { domainLvls.shift(); } //Removes the (uneditable) domain-level
+        if (!isPrnt) { domainLvls.shift(); //Removes the (uneditable) domain-level
+        } else { domainLvls.pop(); }  //Removes 'Species', which can't be parent-taxa.
         for (var name in lvls) {
             if (domainLvls.indexOf(name) === -1) { delete lvls[name]; }
         }
@@ -2385,9 +2410,11 @@ $(document).ready(function(){
         var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
             "creatingDomain": "<p>Not able to create Taxa at the domain level.</p>",
+            "emptyParentTaxon": "<p>Please select a Parent Taxon.</p>",
             "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
             "openSubForm": "<p>Please finish the open "+ 
                 _util.ucfirst(subEntity) + " form.</p>",
+            "needsGenusPrnt": "<p>Please select a Genus parent for the Species Taxon.</p>",
             "noGenus": "<p>Please select a genus before creating a species.</p>"
         };
         var msg = errMsgMap[errorTag];
