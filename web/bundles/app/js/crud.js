@@ -182,7 +182,7 @@ $(document).ready(function(){
      * > reqElems - All required elements in the form.
      * > confg - The form config object used during form building.
      */
-    function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. cP = %O, arguments = %O", fParams, arguments)
+    function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. fP = %O, arguments = %O", fParams, arguments)
         fParams.forms[entity] = level;
         fParams.forms[level] = {
             action: action,
@@ -832,7 +832,7 @@ $(document).ready(function(){
         var realms = { 3: "plant", 4: "arthropod" };
         setTaxonParams('Object', val);
         fParams.objectRealm = val;
-        buildAndAppendRealmElems(realms[val], val);
+        buildAndAppendRealmElems(realms[val]);
         initComboboxes(realms[val]);  
         finishTaxonSelectUi("Object");          
     }
@@ -991,7 +991,6 @@ $(document).ready(function(){
         var taxon = fParams.records.taxon[id];  
         var prntElems = getPrntTaxonElems(taxon);
         var taxonElems = getEditTaxonFields(taxon);
-        initFormLevelParamsObj("taxon", "sub", null, getSubFormConfg('taxon'), "edit");
         return prntElems.concat(taxonElems, buildFormBttns("Taxon", "top", "edit"));
     }
     function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
@@ -1027,32 +1026,37 @@ $(document).ready(function(){
      * Entering a taxon that does not already exists will open the 'create' form.
      */
     function buildParentTaxonEditFields() {                                     //console.log("buildParentTaxonEditFields [%s]", prntId);
-        var prntId = $('#Parent-name').data('txn');
-        buildAndAppendEditParentElems(prntId);
+        buildAndAppendEditParentElems($('#Parent-name').data('txn'));
         setTaxonPrntNameElem(null, null, " ");
         $('#edit-prnt').attr({'disabled': true}).css({'opacity': '.6'});
         disableSubmitBttn('#top-submit');
     }
     function buildAndAppendEditParentElems(prntId) {
-        var prnt = fParams.records.taxon[prntId];
         var cntnr = _util.buildElem("div", { class: "sml-form flex-row pTaxon", id: "sub-form" });
-        var hdr = buildEditParentHdr();
-        var inputElems = [ getlvlSel(prnt, "sub", true), getPrntNameSel(prnt) ];
-        var formRow = buildTaxonEditFormRow('EditParent', inputElems, 'sub');
-        var bttns = buildFormBttns("Parent", "sub", "edit");
-        $(cntnr).append([hdr, formRow, bttns]);
+        var elems = buildParentTaxonEditElems(prntId);
+        $(cntnr).append(elems);
         $('#Parent_row').after(cntnr);
         finishEditParentFormBuild();
     }
+    function buildParentTaxonEditElems(prntId) {
+        var fields;
+        var prnt = fParams.records.taxon[prntId];
+        var domain = _util.lcfirst(prnt.domain.displayName);
+        var hdr = [buildEditParentHdr()];
+        var bttns = [buildFormBttns("Parent", "sub", "edit")];
+        setTaxonParams('Object', prnt.domain.id+1);
+        fields = buildSubForm(domain, {}, 'sub', null, 'edit'); 
+        return hdr.concat(fields, bttns);
+    }
     function buildEditParentHdr() {
-        var hdr = _util.buildElem("h3", { text: "Editing Taxon Parent" });
+        var hdr = _util.buildElem("h3", { text: "Editing Taxon Parent", id:'sub-form-hdr' });
         $(hdr).css({'text-align': 'center'});
         return hdr;
     }
     function finishEditParentFormBuild() {                                          
-        initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
-        initTaxonEditCombo("EditParent-sel", null, createTaxonParent);
-        $('#EditParent-sel')[0].selectize.settings.placeholder = "Select Parent";                       
+        // initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
+        // initTaxonEditCombo("EditParent-sel", null, createTaxonParent);
+        // $('#EditParent-sel')[0].selectize.settings.placeholder = "Select Parent";                       
         $('#sub-submit').attr("disabled", false).css("opacity", "1");
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
@@ -2408,7 +2412,7 @@ $(document).ready(function(){
      * is already an instance using that form, show the user an error message and 
      * reset the select elem. 
      */
-    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, cP = %O ", selId, fParams)
+    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, fP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
         formInitError(field, 'openSubForm', formLvl, selId);
     }
