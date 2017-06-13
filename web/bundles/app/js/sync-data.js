@@ -220,7 +220,14 @@
     function addToTaxonNames(prop, rcrd, entity) {
         var domain = rcrd.domain.displayName;
         var level = rcrd.level.displayName;  
+        addPropIfNewLevel(level, domain);
         addToNameProp(domain+level+"Names", rcrd, entity);
+    }
+    /** Creates the level property if no taxa have been saved at this level and domain.  */
+    function addPropIfNewLevel(level, domain) {
+        var lvlObj = _util.getDataFromStorage(domain+level+"Names");
+        if (lvlObj) { return; }  console.log("creating new level for [", domain+level+"]Names")
+        storeData(domain+level+"Names", {});
     }
     /** Adds the Interaction to the stored entity's collection.  */
     function addInteractionToEntity(prop, rcrd, entity) {
@@ -270,16 +277,17 @@
     function getRmvDataPropHndlrs(entity) {
         var hndlrs = {
             'author': {},
+            'citation': { 'citationType': rmvFromTypeProp,  },
             'interaction': {
                 'location': rmvIntFromEntity, 'source': rmvIntFromEntity, 
                 'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
                 'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
             },
+            'publication': { 'publicationType': rmvFromTypeProp },
             'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp  },
             'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
                 'tag': rmvFromTagProp },
-            'publication': { 'publicationType': rmvFromTypeProp },
-            'citation': { 'citationType': rmvFromTypeProp,  }
+            'taxon': {}
         }
         return hndlrs[entity];
     }

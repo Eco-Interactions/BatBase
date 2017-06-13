@@ -376,7 +376,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	margin: .5em 0 0 1em;
 	justify-content: space-between;
 } 
-#prnt-cntnr {
+.pTaxon#sub-form {
 	flex-wrap: wrap;
 	justify-content: space-around;
 	border: 1px solid grey;
