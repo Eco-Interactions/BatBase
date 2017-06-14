@@ -768,7 +768,7 @@ $(document).ready(function(){
     }
     /** Adds the realm name and id, along with all taxon levels, to fParams. */
     function setTaxonParams(role, id) {  
-        if (!id) { id = fParams.objectRealm || 3; }
+        if (!id) { id = fParams.taxon.objectRealm || 3; }
         initTaxonParams(id);
         fParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
             { val: $('#'+role+'-sel').val(),
@@ -831,7 +831,7 @@ $(document).ready(function(){
         if ($('#realm-lvls').length) { $('#realm-lvls').remove(); }  
         var realms = { 3: "plant", 4: "arthropod" };
         setTaxonParams('Object', val);
-        fParams.objectRealm = val;
+        fParams.taxon.objectRealm = val;
         buildAndAppendRealmElems(realms[val]);
         initComboboxes(realms[val]);  
         finishTaxonSelectUi("Object");          
@@ -1039,13 +1039,10 @@ $(document).ready(function(){
         finishEditParentFormBuild();
     }
     function buildParentTaxonEditElems(prntId) {
-        var fields;
         var prnt = fParams.records.taxon[prntId];
-        var domain = _util.lcfirst(prnt.domain.displayName);
         var hdr = [buildEditParentHdr()];
         var bttns = [buildFormBttns("Parent", "sub", "edit")];
-        setTaxonParams('Object', prnt.domain.id+1);
-        fields = buildSubForm(domain, {}, 'sub', null, 'edit'); 
+        var fields = getParentEditFields(prnt);
         return hdr.concat(fields, bttns);
     }
     function buildEditParentHdr() {
@@ -1053,7 +1050,15 @@ $(document).ready(function(){
         $(hdr).css({'text-align': 'center'});
         return hdr;
     }
-    function finishEditParentFormBuild() {                                          
+    function getParentEditFields(prnt) {
+        var domain = _util.lcfirst(prnt.domain.displayName);        
+        setTaxonParams('Object', prnt.domain.id+1);                
+        fParams.taxon.parentTaxon = prnt.domain.id+1;  console.log("domain = ", prnt.domain.id+1);
+        return buildSubForm(domain, {}, 'sub', null, 'edit');     
+    }
+    function finishEditParentFormBuild() {                                      console.log("fParams = %O", fParams);    
+        initComboboxes(null, 'sub');  
+                      
         // initTaxonEditCombo("sub-txn-lvl", repopPrntTxynms);
         // initTaxonEditCombo("EditParent-sel", null, createTaxonParent);
         // $('#EditParent-sel')[0].selectize.settings.placeholder = "Select Parent";                       
@@ -1332,9 +1337,9 @@ $(document).ready(function(){
      * Inits 'selectize' for each select elem in the form's 'selElems' array
      * according to the 'selMap' config. Empties array after intializing.
      */
-    function initComboboxes(entity) {
-        var formLvl = fParams.forms[entity];
-        var selMap = getSelConfgObjs();
+    function initComboboxes(entity, formLvl) {                                  //console.log("initComboboxes. [%s]", entity);
+        var formLvl = formLvl || fParams.forms[entity];  
+        var selMap = getSelConfgObjs();  
         fParams.forms[formLvl].selElems.forEach(selectizeElem);
         fParams.forms[formLvl].selElems = [];
 
@@ -1505,7 +1510,7 @@ $(document).ready(function(){
                     "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
             },
             "publisher": { 
-                "add": [], 
+                "add": {}, 
                 "exclude": ["Year", "Doi", "Authors", "Tags"],
                 "required": ["Display Name"],
                 "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] 
