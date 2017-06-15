@@ -208,13 +208,16 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #form-hdr>h1 {
 	font-size: 1.3em;
-	margin-bottom: 10px;
-	text-align: center;
 }
 #form-hdr>p {
 	margin-bottom: 10px;
 	font-weight: bold;
 	text-align: center;
+}
+[id$="-hdr"] {
+	margin-bottom: 10px;
+	text-align: center;
+	padding-top: 4px;
 }
 #form-main {
 	padding: 5px 0 0 5px;
@@ -227,7 +230,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	padding: 0 .5em .5em .5em;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	/*max-width: 42%;*/
 }
 #form-details h3 {
 	text-align: center;
@@ -268,6 +270,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	border: 1px solid grey;
 	border-radius: 5px;
     width: 808px;
+    padding: 3px;
     margin: 11px 0 10px 100px;
 }
 .sml-form {
@@ -287,10 +290,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #sub-hdr, #sub2-hdr {
 	font-size: 1.1em;
-	text-align: center;
-	padding-top: 4px;
-	margin: 0 auto 8px auto;
-	align-self: center;
 }
 form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 100%;
@@ -309,7 +308,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 .sub-row {
 	padding: .2em .75em .3em  .75em;
-	width: 400px;
+	width: 390px;
 }
 .sub2-row {
 	padding: .2em .75em .3em  .75em;
@@ -340,10 +339,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 816px;
 }
 .lrg-field {
-	width: 309px;
+	width: 302px;
 }
 .med-field {
-	width: 255px;
+	width: 245px;
 }
 .sml-field {
 	width: 200px;

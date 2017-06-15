@@ -332,7 +332,7 @@
         var lvl = taxon.level.displayName;  
         return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
     }   
-/*------------------Taxon Search Methods---------------------------------------*/
+/*------------------ Taxon Search Methods ------------------------------------*/
     /**
      * Get all data needed for the Taxon-focused grid from local storage and send 
      * to @initTaxonSearchUi to begin the data-grid build.  
