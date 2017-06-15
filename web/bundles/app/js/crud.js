@@ -996,7 +996,7 @@ $(document).ready(function(){
     function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
         var prnt = fParams.records.taxon[taxon.parent]; 
         var elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt) ];
-        return [ buildTaxonEditFormRow('Parent', elems) ];
+        return [ buildTaxonEditFormRow('Parent', elems, 'top') ];
     }
     function buildNameElem(prnt) {
         var div = _util.buildElem("div", { id: "Parent-name" });
@@ -1017,7 +1017,7 @@ $(document).ready(function(){
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
         var input = _util.buildElem("input", { type: "text", value: taxon.displayName });
-        return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, "top"), input])];
+        return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, "top"), input], 'top')];
     }
     /**
      * Returns a level select with all levels in the taxon-parent's domain and a 
@@ -1061,7 +1061,7 @@ $(document).ready(function(){
         var domainLvl = fParams.taxon.domainLvls[0];
         var lbl = _util.buildElem('label', { text: domainLvl });
         var sel = getDomainLvlSel(taxon, domainLvl);
-        return [buildTaxonEditFormRow(domainLvl, [lbl, sel])];
+        return [buildTaxonEditFormRow(domainLvl, [lbl, sel], 'sub')];
     }
     function getDomainLvlSel(taxon, domainLvl) {
         var opts = getTaxonOpts(domainLvl);
@@ -1142,8 +1142,8 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>inputElems)
      */
-    function buildTaxonEditFormRow(field, inputElems) {
-        var rowDiv = _util.buildElem("div", { class: 'sub-row', id: field + "_row"});
+    function buildTaxonEditFormRow(field, inputElems, formLvl) {
+        var rowDiv = _util.buildElem("div", { class: formLvl + '-row', id: field + "_row"});
         var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
         var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
         $(fieldCntnr).append(inputElems);
@@ -1773,9 +1773,8 @@ $(document).ready(function(){
         return rowDiv;
         /** Returns the style classes for the row. */
         function getRowClasses() { 
-            var rowClasses = { "top": "form-row", "sub": "sub-row", "sub2": "sub2-row" };
-            var rowClass = input.className.includes("xlrg-field") ? //top
-                "full-row" : rowClasses[formLvl] + (rowClss ? (" "+rowClss) : "");  //console.log("rowClass = ", rowClass)
+             var rowClass = input.className.includes("xlrg-field") ? 
+                "full-row" : (formLvl + '-row') + (rowClss ? (" "+rowClss) : "");  //console.log("rowClass = ", rowClass)
             return rowClass; 
         }
     } /* End buildFormRow */

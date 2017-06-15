@@ -294,24 +294,23 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 form[name="top"] p, form[name="top"] .bttn-cntnr {
 	width: 100%;
 }
-.form-row {
-	padding: .2em .75em .3em  .75em;
-	width: 470px;
-	margin-right: 1em;
-}
 .field-row {
 	justify-content: space-between;
 }
+[id$="_row"] {
+	padding: .2em .75em .3em  .75em;	
+}
+.top-row {
+	width: 470px;
+	margin-right: 1em;
+}
 .full-row {
-	padding: .2em .75em .3em  .75em;
 	width: 97.4%;
 }
 .sub-row {
-	padding: .2em .75em .3em  .75em;
 	width: 390px;
 }
 .sub2-row {
-	padding: .2em .75em .3em  .75em;
 	width: 372px;
 }
 .form-errors, .row-errors {
@@ -370,11 +369,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin: 3px !important;
 }
 /**--- Edit-form Styles ---*/
-.edt-txn-row {
-	width: 92%;
-	margin: .5em 0 0 1em;
-	justify-content: space-between;
-} 
 .pTaxon#sub-form {
 	flex-wrap: wrap;
 	justify-content: space-around;
@@ -385,13 +379,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 select[id$="txn-lvl"] + div {
     width: 150px;
-}
-#EditParent-sel + div {
-	width: 200px;
-}
-#EditParent_row #sub2-form {
-	position: relative;
-	left: -4%;
 }
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
