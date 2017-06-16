@@ -899,35 +899,63 @@ $(document).ready(function(){
         if (elem.id.includes('-sel')) { return $(elem).val(); }
     }   
     /**
-     * When a taxon at a level is selected, the remaining level comboboxes are
+     * When a taxon at a level is selected, all child level comboboxes are
      * repopulated with related taxa and the 'select' button is enabled. If the
      * combo was cleared, ensure the remaining dropdowns are in sync or, if they
      * are all empty, disable the 'select' button.
+     * NOTE: Change event fires twice upon selection. Worked around using @captureSecondFire
      */
-    function onLevelSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return; } 
+    function onLevelSelection(val) {                                            //console.log("onLevelSelection. val = [%s] isNaN?", val, isNaN(parseInt(val)))
+        if (val === "" || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
         var formLvl = getSubFormLvl("sub");
+        fParams.taxon.recentChange = true;  // Flag used to filter out the second change event
         repopulateCombosWithRelatedTaxa(val);
         enableSubmitBttn('#'+formLvl+'-submit');             
     }
+    function syncTaxonCombos(elem) {                                            //console.log("syncTaxonCombos. elem = %O", elem)
+        if (fParams.taxon.recentChange) { return captureSecondFire(); }
+        resetChildLevelCombos(elem.id.split('-sel')[0]);
+    }
+    /*
+     * Note: There is a closed issue for the library (#84) that seems to address
+     * this second change-event fire, but it is still an issue here. Instead of figuring 
+     * out the cause, this method captures that event and filters it out.
+     */
+    function captureSecondFire() {                                              //console.log("Capturing second fire.")
+        delete fParams.taxon.recentChange;
+    }
+    function resetChildLevelCombos(lvlName) {
+        repopulateLevelCombos(getChildlevelOpts(lvlName), {});
+    }
+    function getChildlevelOpts(lvlName) {  
+        var opts = {};
+        var lvls = fParams.taxon.lvls;
+        var lvlIdx = lvls.indexOf(lvlName);
+        for (var i = lvlIdx+2; i < 8; i++) {  
+            opts[i] = getTaxonOpts(lvls[i]);                    
+        }                                                                       //console.log("getChildlevelOpts. opts = %O", opts);
+        return opts;
+    }
     /**
-     * Repopulates the comboboxes when a taxon is selected from one. The selected
-     * and ancestor levels are populated with all taxa at the level and direct 
+     * Repopulates the comboboxes of child levels when a taxon is selected. Selected
+     * and ancestor levels are populated with all taxa at the level and the direct 
      * ancestors selected. Child levels populate with only decendant taxa and
      * have no initial selection.
      */
     function repopulateCombosWithRelatedTaxa(selId) {
-        var realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
-        var lvls = fParams.taxon.lvls;  
-        var opts = {};                                                          //console.log("opts = %O", opts)
-        var selected = {};                                                      //console.log("selected = %O", selected)
+        var opts = {}, selected = {};                                           //console.log("repopulateCombosWithRelatedTaxa. opts = %O, selected = %O", opts, selected);
         var taxon = fParams.records.taxon[selId];
-        taxon.children.forEach(addRelatedChild);                                
-        getSiblingAndAncestorTaxaOpts(taxon);
-        buildOptsForEmptyLevels(taxon.level.id);
-        repopulateLevelCombos(opts, taxon.level.id, selected);
+        repopulateTaxonCombos();
+
+        function repopulateTaxonCombos() {
+            taxon.children.forEach(addRelatedChild);                                
+            getSiblingAndAncestorTaxaOpts(taxon);
+            buildOptsForEmptyLevels(taxon.level.id);
+            repopulateLevelCombos(opts, selected);
+        }
         /** Adds all taxa from the selected taxon's level up until the realm-taxon level. */
         function getSiblingAndAncestorTaxaOpts(taxon) {                                          
+            var realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
             var lvl = taxon.level.displayName;  
             if ( realmTaxa.indexOf(taxon.id) !== -1 ) { return; } 
             opts[taxon.level.id] = getTaxonOpts(lvl);  
@@ -950,28 +978,29 @@ $(document).ready(function(){
          * the 'none' value selected.
          */
         function buildOptsForEmptyLevels(selLvl) {
+            var lvls = fParams.taxon.lvls;  
             var topLvl = fParams.taxon.realm === "Arthropod" ? 3 : 5; 
             for (var i = 7; i >= topLvl; i--) {
                 if (opts[i]) { continue; }
                 opts[i] = [{ value: "", text: "None" }];                    
-                if (i < selLvl) {
-                    opts[i] = opts[i].concat(getTaxonOpts(lvls[i]));                    
+                if (i < selLvl) {  
+                    opts[i] = opts[i].concat(getTaxonOpts(lvls[i-1]));                    
                     selected[i] = "";
                 }
             }
         }
     } /* End fillAncestorTaxa */    
-    function repopulateLevelCombos(optsObj, selLvl, selected) {
-        var lvls = fParams.taxon.lvls;
+    function repopulateLevelCombos(optsObj, selected) {
+        var lvls = fParams.taxon.lvls;  
         for (var lvl in optsObj) {                                              //console.log("lvl = %s, name = ", lvl, lvls[lvl-1])
-            repopulateLevelCombo(optsObj[lvl], lvls[lvl-1], lvl, selLvl, selected);
+            repopulateLevelCombo(optsObj[lvl], lvls[lvl-1], lvl, selected);
         }
     }
     /**
      * Replaces the options for the level combo. Selects the selected taxon and 
      * its direct ancestors.
      */
-    function repopulateLevelCombo(opts, lvlName, lvl, selLvl, selected) {       //console.log("repopulateLevelCombo for lvl = %s (%s), selLvl = ", lvl, lvlName, selLvl)
+    function repopulateLevelCombo(opts, lvlName, lvl, selected) {               //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName)
         var selApi = $('#'+lvlName+'-sel')[0].selectize;
         updateComboboxOptions('#'+lvlName+'-sel', opts);
         if (lvl in selected) { selApi.addItem(selected[lvl], true); }
