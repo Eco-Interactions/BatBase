@@ -171,7 +171,7 @@ $(document).ready(function(){
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
-        initFormLevelParamsObj(entity, "top", null, false, action);
+        initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action);
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -191,12 +191,22 @@ $(document).ready(function(){
             action: action,
             confg: formConfg,
             entity: entity,
-            exitHandler: formConfg.exitHandler ? 
-                formConfg.exitHandler[action] || Function.prototype : Function.prototype,
+            exitHandler: getFormExitHandler(formConfg, action),
             pSelId: pSel,
             reqElems: [],
             selElems: [], 
-        };      
+        };                                                                      //console.log("formLvl params = %O", fParams.forms[level]);
+    }
+    /**
+     * Returns the exitHandler stored in the form confg for the current action, or, 
+     * if no handler is stored, edit forms have a default of @showEditSuccessMsg
+     * and create forms default to noOp.
+     */
+    function getFormExitHandler(confg, action) {  
+        return confg.exitHandler && confg.exitHandler[action] ? 
+            confg.exitHandler[action] :
+            action === 'edit' ? 
+                showEditSuccessMsg : Function.prototype;
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form --------------------------------------*/
@@ -246,7 +256,7 @@ $(document).ready(function(){
             "location": fillLocFields, "publication": fillSrcFields, 
             "publisher": fillSrcFields, "taxon": Function.prototype, 
             "interaction": fillIntFields };
-        var rcrd = getEntityRecord(entity, id);                                 console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
+        var rcrd = getEntityRecord(entity, id);                                 //console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
         hndlrs[entity](entity, id, rcrd);
     }
     function fillIntFields(entity, id, rcrd) {
@@ -272,7 +282,7 @@ $(document).ready(function(){
         fParams.editing.detail = detail.id;
     }
     function getSourceFields(entity) {
-        return { core: getCoreFieldDefs(entity), detail: getSubFormConfg(entity) };
+        return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity) };
     }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
@@ -1017,6 +1027,7 @@ $(document).ready(function(){
     }
     function finishTaxonEditFormBuild() {
         $('#top-cancel').off('click').click(exitFormPopup);
+        $('#top-submit').off('click').click(submitTaxonEdit);
         initTaxonEditCombo("txn-lvl", checkForParentLvlErrs); 
     }
     function buildTaxonEditFields(taxon) {
@@ -1188,13 +1199,14 @@ $(document).ready(function(){
         $(rowDiv).append([errorDiv, fieldCntnr]);
         return rowDiv;
     } 
-    function onParentTaxonEditSuccess(data) {                                   console.log("onParentTaxonEditSuccess called. data = %O", data);
-        
+    function submitTaxonEdit () {
+        var vals = {
+            displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
+            level: $('#Taxon_row select').text(),
+            parentTaxon: $('#Parent-name').data('txn')
+        };                                                                      //console.log("taxon vals = %O", vals);
+        buildFormDataAndSubmit('top', vals);
     }
-    function onTaxonEditSuccess(data) {                                         console.log("onTaxonEditSuccess called. data = %O", data);
-        
-    }
-
     /*-------------- Interaction Detail Fields -------------------------------*/
     function buildIntTypeField() {
         var opts = getOptsFromStoredData('intTypeNames');
@@ -1435,7 +1447,7 @@ $(document).ready(function(){
      * Also inits the params for the sub-form in the global fParams obj.
      */
     function buildSubForm(entity, fieldVals, level, pSel, action) {             //console.log('buildSubForm. args = %O', arguments)
-        var formConfg = getSubFormConfg(entity);                                //console.log('formConfg = %O', formConfg)
+        var formConfg = getFormConfg(entity);                                   //console.log('formConfg = %O', formConfg)
         initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));
         return getFormFieldRows(entity, formConfg, fieldVals, level);
     }
@@ -1451,7 +1463,7 @@ $(document).ready(function(){
      *   id, which has no spaces.
      * > exitHandler - optional Obj with handlers for exiting create/edit forms.
      */
-    function getSubFormConfg(entity) {
+    function getFormConfg(entity) {
         var fieldMap = { 
             "arthropod": {
                 "add": {},  
@@ -1536,7 +1548,6 @@ $(document).ready(function(){
                 "exclude": [],
                 "required": ["Display Name"],
                 "order": ["DisplayName"],
-                "exitHandler": { edit: onTaxonEditSuccess }
             },
         };
         return fieldMap[entity];
@@ -1911,7 +1922,7 @@ $(document).ready(function(){
     function exitForm(formId, formLvl, focus, data) {                           //console.log("id = %s, formLvl = %s", id, formLvl)      
         $(formId).remove();
         resetFormCombobox(formLvl, focus);
-        ifParentFormValidEnableSubmit(formLvl);
+        if (formLvl !== 'top') { ifParentFormValidEnableSubmit(formLvl); }
         fParams.forms[formLvl].exitHandler(data);
     }
     /**
@@ -2314,20 +2325,17 @@ $(document).ready(function(){
     }
     function handleFormComplete(data) {
         var formLvl = fParams.ajaxFormLvl;
-        if (formLvl === "top") { return handleInteractionFormComplete(data); }              
-        exitFormAndSelectNewEntity(data);
+        if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
+        fParams.forms.top.exitHandler(data);
     }
-    /*------------------ Interaction-Form Success Methods --------------------*/
-    /** Resets the interactions form leaving only the pinned values. */
-    function handleInteractionFormComplete(data) {
-        if (!fParams.editing) { return resetInteractionForm(); }
-    }
+    /*------------------ Top-Form Success Methods --------------------*/
     function showEditSuccessMsg(data) {
         var msg = Object.keys(data.coreEdits).length > 1 || 
             Object.keys(data.detailEdits).length > 1 ?
-            "Interaction update successful." : "No changes detected."; 
+            "Update successful." : "No changes detected."; 
         showSuccessMsg(msg);
     }
+    /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
         showSuccessMsg("New Interaction successfully created.");
@@ -2380,7 +2388,7 @@ $(document).ready(function(){
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {
         initFormLevelParamsObj(
-            "interaction", "top", null, getSubFormConfg("interaction"), "create");
+            "interaction", "top", null, getFormConfg("interaction"), "create");
         addReqElemsToConfg();
     }
     /*------------------ Sub-Form Success Methods ----------------------------*/

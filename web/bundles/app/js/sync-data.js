@@ -226,7 +226,7 @@
     /** Creates the level property if no taxa have been saved at this level and domain.  */
     function addPropIfNewLevel(level, domain) {
         var lvlObj = _util.getDataFromStorage(domain+level+"Names");
-        if (lvlObj) { return; }  console.log("creating new level for [", domain+level+"]Names")
+        if (lvlObj) { return; }                                                 //console.log("creating new level for [", domain+level+"]Names")
         storeData(domain+level+"Names", {});
     }
     /** Adds the Interaction to the stored entity's collection.  */
@@ -287,7 +287,7 @@
             'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp  },
             'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
                 'tag': rmvFromTagProp },
-            'taxon': {}
+            'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp }
         }
         return hndlrs[entity];
     }
@@ -340,6 +340,15 @@
             rmvIdFromAry(srcObj[authId].contributions, rcrd.id);
         });
         storeData('source', srcObj);
+    }
+    function rmvFromNameProp(prop, rcrd, entity, edits) { 
+        var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
+        var domain = rcrd.domain.displayName;
+        var level = lvls[edits.level.old-1];
+        var taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
+        var nameObj = _util.getDataFromStorage(domain+level+'Names');           //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",domain+level+'Names', nameObj, rcrd, edits)
+        delete nameObj[taxonName];
+        storeData(domain+level+'Names', nameObj);
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
     /**

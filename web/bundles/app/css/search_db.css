@@ -208,6 +208,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #form-hdr>h1 {
 	font-size: 1.3em;
+	margin-bottom: .5em;
 }
 #form-hdr>p {
 	margin-bottom: 10px;
