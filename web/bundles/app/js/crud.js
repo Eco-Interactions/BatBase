@@ -212,10 +212,8 @@ $(document).ready(function(){
         var formFields = getFormFields(id, entity);
         $(form).append(formFields);
         $('#form-main').append(form);     
-        if (entity === "interaction") { 
-            finishIntFormBuild(); 
-        } else if (entity === "taxon") { 
-            initTaxonEditCombo("txn-lvl", checkForParentLvlErrs); 
+        if (entity === "interaction") { finishIntFormBuild(); 
+        } else if (entity === "taxon") { finishTaxonEditFormBuild();
         } else {
             initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
@@ -1016,6 +1014,10 @@ $(document).ready(function(){
         var taxon = fParams.records.taxon[id];  
         initTaxonParams(taxon.domain.id+1);                
         return buildTaxonEditFields(taxon);
+    }
+    function finishTaxonEditFormBuild() {
+        $('#top-cancel').off('click').click(exitFormPopup);
+        initTaxonEditCombo("txn-lvl", checkForParentLvlErrs); 
     }
     function buildTaxonEditFields(taxon) {
         var prntElems = getPrntTaxonElems(taxon);
