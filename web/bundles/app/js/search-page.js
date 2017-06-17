@@ -614,7 +614,7 @@
             entity: "Taxon",
             name: name,
             isParent: true,                     
-            parentTaxon: taxon.parent,
+            parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
             open: gParams.openRows.indexOf(taxon.id.toString()) !== -1, 
             children: getTaxonChildRowData(taxon, treeLvl),
             treeLvl: treeLvl,
@@ -1641,7 +1641,9 @@
     /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
     function addEditPencil(params) {   
         if (gParams.curFocus === 'locs' && ['Region', 'Country'].indexOf(params.data.type) !== -1) {
-            return "<span>"; }                                                
+            return "<span>"; }                
+        if (gParams.curFocus === 'taxa' && !params.data.parentTaxon) {  //Domain Taxa can not be edited.
+            return "<span>"; }                                             
         return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
     }
     function getPencilHtml(id, entity, editFunc) {

@@ -939,8 +939,8 @@ $(document).ready(function(){
         var opts = {};
         var lvls = fParams.taxon.lvls;
         var lvlIdx = lvls.indexOf(lvlName);
-        for (var i = lvlIdx+2; i < 8; i++) {  
-            opts[i] = getTaxonOpts(lvls[i]);                    
+        for (var i = lvlIdx+1; i < 8; i++) { 
+            opts[i] = getTaxonOpts(lvls[i-1]);                    
         }                                                                       //console.log("getChildlevelOpts. opts = %O", opts);
         return opts;
     }
@@ -1178,6 +1178,7 @@ $(document).ready(function(){
             return showNeedshigherLvlTaxonError($('#taxon-name').data('txn'));
         } else {
             $('#Parent_errs')[0].innerText = '';
+            $('#Taxon_errs')[0].innerText = '';
             enableSubmitBttn('#top-submit'); 
         }
     }
