@@ -215,7 +215,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 	font-weight: bold;
 	text-align: center;
 }
-[id$="-hdr"] {
+.form-popup [id$="-hdr"] {
 	margin-bottom: 10px;
 	text-align: center;
 	padding-top: 4px;
