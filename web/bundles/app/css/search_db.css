@@ -1,176 +1,176 @@
 /*--- Database Search Page Styles ---*/
 #search-opts {  /* .flex-row also on elem */
-	margin: 1em auto 0 auto;
-	height: 115px;
-	width: 100%;
-	font-size: 1.1em;
+    margin: 1em auto 0 auto;
+    height: 115px;
+    width: 100%;
+    font-size: 1.1em;
 }
 .opts-col {
-	padding: .3em;
-	height: 100%;
-	justify-content: space-around;
+    padding: .3em;
+    height: 100%;
+    justify-content: space-around;
 }
 .opts-box {
-	flex: 0 0 auto;  	  
-	height: 25px;
-	width: 130px;
-	margin: 0 .7em 0 .5em;
-	z-index: 20;
+    flex: 0 0 auto;       
+    height: 25px;
+    width: 130px;
+    margin: 0 .7em 0 .5em;
+    z-index: 20;
 }
 #opts-col1 {
-	border-right: black 1px solid;
-	flex: 0 0 326px;
-	align-items: flex-end;
+    border-right: black 1px solid;
+    flex: 0 0 326px;
+    align-items: flex-end;
 }
 #opts-col1 .opts-box {
-	width: 111px;
+    width: 111px;
 }
 #opts-col2, #opts-col3 {
-	font-size: .9em;
-	padding: 5px;
-	border-right: black 1px solid;
-	justify-content: flex-start;
+    font-size: .9em;
+    padding: 5px;
+    border-right: black 1px solid;
+    justify-content: flex-start;
 }
 #opts-col2 {
-	flex: 0 0 460px;  	  
+    flex: 0 0 460px;      
 }
 #opts-col3 {
-	flex: 1 0 484px;  	 /*Don't grow or shrink, width.*/ 
-	justify-content: space-between;
+    flex: 1 0 484px;     /*Don't grow or shrink, width.*/ 
+    justify-content: space-between;
 }
 #time-fltr, .flatpickr-input {
-	margin-top: .2em;
+    margin-top: .2em;
 }
 #futrDevMsg {
-	margin: 0 5px 0 5px;
+    margin: 0 5px 0 5px;
 }
 #show-tips, #strt-tut {
-	width: 95px;
-	margin: 5px 5px 5px 15px;
+    width: 95px;
+    margin: 5px 5px 5px 15px;
 }
-.lbl-sel-opts {  		 /* .flex-row also on elems */
-	margin: .3em;
-	flex: 0 0 auto;
-	width: 208px;  	 
-	justify-content: space-between;
+.lbl-sel-opts {          /* .flex-row also on elems */
+    margin: .3em;
+    flex: 0 0 auto;
+    width: 208px;    
+    justify-content: space-between;
 }
 .opts-span {
-	padding-top: 3px;
-	width: 65px;
+    padding-top: 3px;
+    width: 65px;
 }
 #grid-tools {
-	margin: .7em auto .2em auto;
-	padding: .1em;
-	width: 100%;
-	height: 28px;
-	font-size: 1.1em;
+    margin: .7em auto .2em auto;
+    padding: .1em;
+    width: 100%;
+    height: 28px;
+    font-size: 1.1em;
 }
 #grid-status {
-	margin: 0 0 0 .2em;
-	flex-grow: 1;
-	padding: .2em;	
+    margin: 0 0 0 .2em;
+    flex-grow: 1;
+    padding: .2em;  
 }
 #xtrnl-filter-status {
-	flex-shrink: 1;
-	margin-right: .3em;
+    flex-shrink: 1;
+    margin-right: .3em;
 }
 #grid-filter-status {
-	flex-grow: 1;
+    flex-grow: 1;
 }
 #search-grid {
-	height: 86vh;
-	border: black 1px solid;
+    height: 86vh;
+    border: black 1px solid;
 }
 .grid-edit { 
-	height: 22px;
-	width: 20px;
-	position: relative;
-	left: 9px;
+    height: 22px;
+    width: 20px;
+    position: relative;
+    left: 9px;
 }
 .ag-menu{
-	z-index: 100;
+    z-index: 100;
 }
 .row-purple {
-	background-color: rgba(128,0,128,.13) !important; /* purple */
+    background-color: rgba(128,0,128,.13) !important; /* purple */
 }
 .row-green {
-	background-color: rgba(0,128,0,.15) !important; /* green */
+    background-color: rgba(0,128,0,.15) !important; /* green */
 }
 .row-blue {
-	background-color: rgba(0,0,255,.15) !important; /* blue */
+    background-color: rgba(0,0,255,.15) !important; /* blue */
 }
 .row-orange {
-	background-color: rgba(255,128,0,.17) !important; /* orange */
+    background-color: rgba(255,128,0,.17) !important; /* orange */
 }
 .row-turquoise {
-	background-color: rgba(0,245,255,.11) !important; /* turquoise */
+    background-color: rgba(0,245,255,.11) !important; /* turquoise */
 }
 .row-yellow {
-	background-color: rgba(255,255,0,.2) !important; /* yellow */
+    background-color: rgba(255,255,0,.2) !important; /* yellow */
 }
 .row-red {
-	background-color: rgba(255,0,0,.15) !important; /* red */
+    background-color: rgba(255,0,0,.15) !important; /* red */
 }
 /*--------- Search Tips Popup -----------------*/
 #tips-close-bttn {
-	position: relative;
-	margin-top: .5em;
-	left: 91%;
-	bottom: -2vh;
+    position: relative;
+    margin-top: .5em;
+    left: 91%;
+    bottom: -2vh;
 }
 .tips-popup {
-	top: 4vh;
-	/*position: relative;*/
-	font-size: 1.1em;
-	height: 88vh;
-	width: 44vw;
-	padding: 2.2em;
-	text-align: left;
-	margin: auto;
-	overflow-y: scroll;
+    top: 4vh;
+    /*position: relative;*/
+    font-size: 1.1em;
+    height: 88vh;
+    width: 44vw;
+    padding: 2.2em;
+    text-align: left;
+    margin: auto;
+    overflow-y: scroll;
 }
 /*------- Buttons ---------------*/
 #filter-bttns {
-	display: inline-flex;
-	justify-content: space-between;
-	height: 44px;
+    display: inline-flex;
+    justify-content: space-between;
+    height: 44px;
 }
 .grid-bttn, .tos-bttn {
-	margin: 0 .3em 0 .2em;
-	background: linear-gradient(#fff, #d3d3d3);
-	border-radius: 4px;
+    margin: 0 .3em 0 .2em;
+    background: linear-gradient(#fff, #d3d3d3);
+    border-radius: 4px;
 }
 button[name="csv"], #close-tos-bttn {
-	align-self: flex-end;
+    align-self: flex-end;
 }
 button[name="xpand-tree"] {
-	width: 105px;
+    width: 105px;
 }
 button[name="createbttn"] {
-	width: 75px;
-	align-self: flex-end;
-	margin-right: 7px;
+    width: 75px;
+    align-self: flex-end;
+    margin-right: 7px;
 }
 button[name="show-hide-col"] {
-	opacity: .8;
-	cursor: not-allowed;
+    opacity: .8;
+    cursor: not-allowed;
 }
 button[name="futureDevBttn"] {
-	align-self: flex-end;
-	opacity: .8;
+    align-self: flex-end;
+    opacity: .8;
 }
 /*----- Walkthrough ------*/
 .intro-tips {
-	width: 420px;
-	text-align: justify;
+    width: 420px;
+    text-align: justify;
 }
 a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
-	cursor: pointer;
+    cursor: pointer;
 }
 /*------------ Search Grid Popup -----------------*/
 #grid-popup {
     background: #FFF;
-	display: none;
+    display: none;
     position: relative;
     z-index: 200;
     text-align: center;
@@ -186,9 +186,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     border-radius: 5px;
 }
 #grid-overlay {
-	display: none;
+    display: none;
     position: absolute;
-    z-index: 100;				
+    z-index: 100;               
     top: 75px;
     bottom: 0;
     width: 100%;
@@ -197,173 +197,173 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
 .form-popup {
-	height: 88vh;
-	flex-grow: 0;
-	padding: 15px;
-	text-align: left;
-	justify-content: space-between;
+    height: 88vh;
+    flex-grow: 0;
+    padding: 15px;
+    text-align: left;
+    justify-content: space-between;
 }
 .form-ovrly {
-	align-items: center;
+    align-items: center;
 }
 #form-hdr>h1 {
-	font-size: 1.3em;
-	margin-bottom: .5em;
+    font-size: 1.3em;
+    margin-bottom: .5em;
 }
 #form-hdr>p {
-	margin-bottom: 10px;
-	font-weight: bold;
-	text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
 }
 .form-popup [id$="-hdr"] {
-	margin-bottom: 10px;
-	text-align: center;
-	padding-top: 4px;
+    margin-bottom: 10px;
+    text-align: center;
+    padding-top: 4px;
 }
 #form-main {
-	padding: 5px 0 0 5px;
-	height: 83vh;
-	overflow-x: hidden;
-	overflow-y: scroll;
+    padding: 5px 0 0 5px;
+    height: 83vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 #form-details {
-	flex: 1 1 333px;
-	padding: 0 .5em .5em .5em;
-	overflow-y: scroll;
-	overflow-x: hidden;
+    flex: 1 1 333px;
+    padding: 0 .5em .5em .5em;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 #form-details h3 {
-	text-align: center;
-	font-size: 1.15em;
+    text-align: center;
+    font-size: 1.15em;
 }
 #form-details p {
-	text-align: center;
-	font-size: 1.15em;
-	margin-bottom:1em;
+    text-align: center;
+    font-size: 1.15em;
+    margin-bottom:1em;
 }
 .det-div {
-	min-height: 50px;
-	margin: .5em 0 1em 0;
+    min-height: 50px;
+    margin: .5em 0 1em 0;
 }
 .det-div div {
-	padding: .5em 0 0 .5em;
+    padding: .5em 0 0 .5em;
 }
 /*------------ Form Styles ---------------*/
 #top-form {
-	font-size: 1em;
-	flex-wrap: wrap;
+    font-size: 1em;
+    flex-wrap: wrap;
 }
 .exit-bttn {
-	position: relative;
-	width: 2em;
-	height: 2em;
-	font-weight: bold;
+    position: relative;
+    width: 2em;
+    height: 2em;
+    font-weight: bold;
 }
 #exit-form {
-	left: 94%;
-	top: 7%;
+    left: 94%;
+    top: 7%;
 }
 #exit-sub-form {
-	left: 24%;
-	font-size: .75em !important;
+    left: 24%;
+    font-size: .75em !important;
 }
 .med-form {
-	border: 1px solid grey;
-	border-radius: 5px;
+    border: 1px solid grey;
+    border-radius: 5px;
     width: 808px;
     padding: 3px;
     margin: 11px 0 10px 100px;
 }
 .sml-form {
-	border: 1px solid grey;
-	border-radius: 5px;
+    border: 1px solid grey;
+    border-radius: 5px;
     padding: 5px;
     min-width: 385px;
     margin-top: .5em;
 }
 .sml-left {
-	position: relative;
-	left: 25px;
+    position: relative;
+    left: 25px;
 }
 .sml-right {
-	position: relative;
-	right: 15px;
+    position: relative;
+    right: 15px;
 }
 #sub-hdr, #sub2-hdr {
-	font-size: 1.1em;
+    font-size: 1.1em;
 }
 form[name="top"] p, form[name="top"] .bttn-cntnr {
-	width: 100%;
+    width: 100%;
 }
 .field-row {
-	justify-content: space-between;
+    justify-content: space-between;
 }
 [id$="_row"] {
-	padding: .2em .75em .3em  .75em;	
+    padding: .2em .75em .3em  .75em;    
 }
 .top-row {
-	width: 470px;
-	margin-right: 1em;
+    width: 470px;
+    margin-right: 1em;
 }
 .full-row {
-	width: 97.4%;
+    width: 97.4%;
 }
 .sub-row {
-	width: 390px;
+    width: 390px;
 }
 .sub2-row {
-	width: 372px;
+    width: 372px;
 }
 .form-errors, .row-errors {
-	color: red;
-	font-size: .9em;
-	text-align: center;
-	padding-bottom: 3px;
-	width: 100%;
+    color: red;
+    font-size: .9em;
+    text-align: center;
+    padding-bottom: 3px;
+    width: 100%;
 }
 .field-row .required:after {
   content: "*";
 }
 .top-pin {
-	margin: .6em 0 0 .6em !important;
+    margin: .6em 0 0 .6em !important;
 }
 #top-form input, #top-form select, #top-form textarea {
-	padding: .2em;
-	margin: 0;
-	font-size: .95em;
+    padding: .2em;
+    margin: 0;
+    font-size: .95em;
 }
 .xlrg-field {
-	width: 655px;
+    width: 655px;
 }
 .top.xlrg-field {
-	width: 816px;
+    width: 816px;
 }
 .lrg-field {
-	width: 302px;
+    width: 302px;
 }
 .med-field {
-	width: 245px;
+    width: 245px;
 }
 .sml-field {
-	width: 200px;
+    width: 200px;
 }
 #top-form textarea {
-	height: 63px;
+    height: 63px;
 }
 #Notes-txt {
-	border-color: #b8b8b8;
+    border-color: #b8b8b8;
 }
 .selectize-input {
-	padding-right: 33px !important;
+    padding-right: 33px !important;
 }
 #top-form label {
-	font-size: 1em;
-	padding: 9px 0 2px 0;
-	width: 125px;
+    font-size: 1em;
+    padding: 9px 0 2px 0;
+    width: 125px;
 }
 .bttn-cntnr {
-	align-self: flex-end;
-	padding: 10px;
+    align-self: flex-end;
+    padding: 10px;
 }
 .bttn-cntnr input {
     padding: 3px !important;
@@ -371,12 +371,12 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 /**--- Edit-form Styles ---*/
 .pTaxon#sub-form {
-	flex-wrap: wrap;
-	justify-content: space-around;
-	border: 1px solid grey;
-	border-radius: 5px;
-	margin: .5em;
-	padding: .5em;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    border: 1px solid grey;
+    border-radius: 5px;
+    margin: .5em;
+    padding: .5em;
 }
 select[id$="txn-lvl"] + div {
     width: 150px;
@@ -384,61 +384,61 @@ select[id$="txn-lvl"] + div {
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 
-	/*--------------- Database CRUD Popup -------------*/
-	#b-overlay .form-popup {
-		padding: 15px;
-	}
-	#b-overlay #form-main {
-		padding: 5px 0 0 20px;
-		width: 915px;
-	}
-	#b-overlay .form-row {
-		padding: .2em .75em .3em  0;
-		width: 420px;
-	}
-	#b-overlay .sub-row {
-		width: 375px;
-	}
-	#b-overlay .long-sub-row {
-		width: 750px;
-	}
-	#b-overlay .sub2-row {
-		width: 363px;
-	}
-	#b-overlay .med-form {
-	    width: 777px;
-	    margin: 11px 0 10px 60px;
-	}
-	#b-overlay #Notes_row div.field-row {
-		width: 846px;
-	}
-	#b-overlay #top-form label {
-		font-size: 1em;
-		padding: 9px 0 2px 0;
-		width: 125px;
-	}  
-	/*#b-overlay .xlrg-field.top {
-		width: 698px;
-	}*/
-	#b-overlay .top .xlrg-field {
-		width: 698px;
-	}
-	/*#b-overlay .xxlrg-field {
-		width: 720px;	
-	}*/
-	#b-overlay .xlrg-field {
-		width: 595px;
-	}
-	#b-overlay .lrg-field {
-		width: 262px;
-	} 
-	#b-overlay .med-field {
-		width: 220px;
-	}
-	#b-overlay .sml-field {
-		width: 175px;
-	}
+    /*--------------- Database CRUD Popup -------------*/
+    #b-overlay .form-popup {
+        padding: 15px;
+    }
+    #b-overlay #form-main {
+        padding: 5px 0 0 20px;
+        width: 915px;
+    }
+    #b-overlay .form-row {
+        padding: .2em .75em .3em  0;
+        width: 420px;
+    }
+    #b-overlay .sub-row {
+        width: 375px;
+    }
+    #b-overlay .long-sub-row {
+        width: 750px;
+    }
+    #b-overlay .sub2-row {
+        width: 363px;
+    }
+    #b-overlay .med-form {
+        width: 777px;
+        margin: 11px 0 10px 60px;
+    }
+    #b-overlay #Notes_row div.field-row {
+        width: 846px;
+    }
+    #b-overlay #top-form label {
+        font-size: 1em;
+        padding: 9px 0 2px 0;
+        width: 125px;
+    }  
+    /*#b-overlay .xlrg-field.top {
+        width: 698px;
+    }*/
+    #b-overlay .top .xlrg-field {
+        width: 698px;
+    }
+    /*#b-overlay .xxlrg-field {
+        width: 720px;   
+    }*/
+    #b-overlay .xlrg-field {
+        width: 595px;
+    }
+    #b-overlay .lrg-field {
+        width: 262px;
+    } 
+    #b-overlay .med-field {
+        width: 220px;
+    }
+    #b-overlay .sml-field {
+        width: 175px;
+    }
 } 
 @media only screen and (min-width: 1501px) {   /*and (max-width: 1920px)*/ 
-	
+    
 } 

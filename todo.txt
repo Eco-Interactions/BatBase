@@ -8,6 +8,12 @@
     --FORM--
         -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
+        -- Add exit button to error msgs, auto-clear when error is fixed, and remove 
+            auto-timeout. 
+        -- //Refactor fillIntData (crud.js)
+        -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
+            > or refactor into using it to general disable and dim buttons
+        -- refactor realm to domain until the name change happens in the backend
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
@@ -15,22 +21,33 @@
         --form--
             -- Validate that genus and species have the same genus names.
         --search--
-            -- Add an 'All' option to taxon and location dropdowns to reset data to that level and retain other filters- updated at for example.
+            -- Add an 'All' option to taxon and location dropdowns to reset data 
+                to that level and retain other filters- updated at for example.
             -- add selectize library
             -- standardize taxon 'levels' storage
             -- update walkthrough
     --Asap--        
         --form--
-            -- //Refactor fillIntData (crud.js)
-            -- Taxon form 
             -- Style all sub-entity forms
             -- add related entity details to sub-entity edit forms
+            -- Update submit success and failure messages
+            -- make new form styles 'respond' to the smaller screenizes
+            -- refactor initcomboboxes to need only the form-lvl param
+        --css--
+            --refactor to use parital, effectively 'group', selectors
 
 ::Testing!::
 > Data Storage
     > Data is added and removed correctly   
 
+:: Questions ::
+    -- Why are we using level instead of rank?
 
+:; Email ::
+    -- TAXON errors being caught:
+        -- Can't change taxon to a level equal/beneath any children,
+            -- or equal/above the parent.
+        -- Species must have genus parent
 
 
 
