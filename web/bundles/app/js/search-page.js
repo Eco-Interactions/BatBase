@@ -385,7 +385,7 @@
     function seperateTaxonTreeByLvl(topTaxon) {
         var separated = {};
         separate(topTaxon);
-        return separated;
+        return sortObjByLevelRank(separated);
 
         function separate(taxon) {
             var lvl = taxon.level.displayName;
@@ -395,6 +395,14 @@
             if (taxon.children) { 
                 taxon.children.forEach(function(child){ separate(child); }); 
             }
+        }
+        function sortObjByLevelRank(taxonObj) {
+            var levels = Object.keys(_util.getDataFromStorage('levelNames'));   //console.log("levels = %O", levels)
+            var obj = {};
+            levels.forEach(function(lvl){
+                if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
+            });
+            return obj;
         }
     } /* End seperateTaxonTreeByLvl */
     /** Event fired when the taxon domain select box has been changed. */
