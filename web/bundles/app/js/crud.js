@@ -1058,8 +1058,9 @@ $(document).ready(function(){
         return bttn;
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
-        var input = _util.buildElem("input", { type: "text", value: taxon.displayName });
-        return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, "top"), input], 'top')];
+        var input = _util.buildElem('input', { id: 'taxon-name', type: 'text', value: taxon.displayName });
+        $(input).data('txn', taxon.id);
+        return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, 'top'), input], 'top')];
     }
     function getlvlSel(taxon, formLvl) {
         var opts = getTaxonLvlOpts(taxon); 
@@ -1161,25 +1162,51 @@ $(document).ready(function(){
         checkForParentLvlErrs();
     }
     /**
-     * Ensures that the parent taxon is of a higher taxonomic level and that a 
-     * species taxon being edited has a genus parent selected.
+     * Ensures that the parent taxon is from a higher taxonomic rank, that the taxon 
+     * is of a higher rank than its children, and that a species taxon being edited 
+     * has a genus parent selected.
      */
     function checkForParentLvlErrs() {  
+        var childLvl;
         var prntLvl = $('#Parent-name').data('lvl');
         var taxonLvl = $('#txn-lvl').val();                                     //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", taxonLvl, prntLvl);
         if ( taxonLvl <= prntLvl ) {
-            return showEditTaxonError('Parent', 'prntAtChildLvl');
+            return showEditTaxonError('Parent', 'needsHigherLvlPrnt');
         } else if ( taxonLvl == 7 && prntLvl != 6 ) {
             return showEditTaxonError('Parent', 'needsGenusPrnt');
-        } else { 
+        } else if (isLevelLowerThanChildLevels($('#taxon-name').data('txn'), taxonLvl)) {
+            return showNeedshigherLvlTaxonError($('#taxon-name').data('txn'));
+        } else {
             $('#Parent_errs')[0].innerText = '';
             enableSubmitBttn('#top-submit'); 
         }
     }
     function showEditTaxonError(field, errorTag) {
+        $('#Parent_errs')[0].innerText = '';
         formFieldErrorHandler(field, errorTag, 'top');
         disableSubmitBttn('#top-submit');
     }
+    function isLevelLowerThanChildLevels(taxonId, taxonLvl) {  
+        var highLvl = getHighestChildLvl(taxonId);                              //console.log('isLevelLowerThanChildLevels. high = [%s]. taxonLvl = [%s]', highLvl, taxonLvl)
+        return taxonLvl >= highLvl;
+    }
+    function showNeedshigherLvlTaxonError(taxon) {
+        var childLvl = getHighestChildLvl(taxon); 
+        var lvlName = fParams.taxon.lvls[childLvl-1];
+        showEditTaxonError('Taxon', 'needsLevelHigherThan');
+        $('#Taxon_errs')[0].innerHTML += '<p><b>Please select a level higher than '
+            + lvlName + '.<b></p>';    
+    }
+    function getHighestChildLvl(taxonId) {
+        var high = 7;
+        fParams.records.taxon[taxonId].children.forEach(checkChildLvl);
+        return high;
+
+        function checkChildLvl(id) {
+            var child = fParams.records.taxon[id]
+            if (child.level.id < high) { high = child.level.id; }
+        }
+    } /* End getHighestChildLvl */
     function initTaxonEditCombo(selId, chngFunc, createFunc) {                  //console.log("initTaxonEditCombo. selId = ", selId);
         var chng = chngFunc || Function.prototype;
         var create = createFunc || false;
@@ -2449,7 +2476,8 @@ $(document).ready(function(){
                 _util.ucfirst(subEntity) + " form.</p>",
             "needsGenusPrnt": "<p>Please select a genus parent for the species taxon.</p>",
             "noGenus": "<p>Please select a genus before creating a species.</p>",
-            "prntAtChildLvl": "<p>The parent taxon must be at a higher taxonomic level.</p>",
+            "needsHigherLvlPrnt": "<p>The parent taxon must be at a higher taxonomic level.</p>",
+            'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>'
         };
         var msg = errMsgMap[errorTag];
         var errElem = getErrElem(fieldName);
