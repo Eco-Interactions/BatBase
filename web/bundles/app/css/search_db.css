@@ -392,9 +392,15 @@ select[id$="txn-lvl"] + div {
         padding: 5px 0 0 20px;
         width: 915px;
     }
-    #b-overlay .form-row {
+    #b-overlay #exit-form {
+        left: 91%;
+    }
+    #b-overlay #sub2-form.sml-form {  
+        min-width: 366px;
+    }
+    #b-overlay .top-row {
         padding: .2em .75em .3em  0;
-        width: 420px;
+        width: 448px;
     }
     #b-overlay .sub-row {
         width: 375px;
@@ -409,23 +415,21 @@ select[id$="txn-lvl"] + div {
         width: 777px;
         margin: 11px 0 10px 60px;
     }
-    #b-overlay #Notes_row div.field-row {
-        width: 846px;
+    #b-overlay .full-row {
+        padding: .2em 0 .3em  0;
+        width: 98%;
+    }
+    #b-overlay #Notes_row div.field-row {        
+        width: 900px;
     }
     #b-overlay #top-form label {
         font-size: 1em;
         padding: 9px 0 2px 0;
-        width: 125px;
+        width: 120px;
     }  
-    /*#b-overlay .xlrg-field.top {
-        width: 698px;
-    }*/
-    #b-overlay .top .xlrg-field {
-        width: 698px;
+    #b-overlay .top.xlrg-field {
+        width: 724px;
     }
-    /*#b-overlay .xxlrg-field {
-        width: 720px;   
-    }*/
     #b-overlay .xlrg-field {
         width: 595px;
     }
@@ -433,7 +437,7 @@ select[id$="txn-lvl"] + div {
         width: 262px;
     } 
     #b-overlay .med-field {
-        width: 220px;
+        width: 232px;
     }
     #b-overlay .sml-field {
         width: 175px;
