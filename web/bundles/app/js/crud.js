@@ -31,19 +31,10 @@ $(document).ready(function(){
     function buildSearchPgFormUi() {
         var bttn = _util.buildElem('button', { 
                 text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(initInteractionFormWindow.bind(null, "create", "Interaction", null));
+        $(bttn).click(createEntity.bind(null, "create", "interaction"));
         $("#opts-col1").append(bttn);
     }
 /*-------------- Form HTML Methods -------------------------------------------*/
-    /**
-     * Builds the form window popup @showEntityFormPopup and loads the form @initFormView.
-     */
-    function initInteractionFormWindow(action, entity, id) {                    //console.log("***initInteraction*** - ", action);
-        var hdrs = { create: "New", edit: "Editing" };
-        var views = { create: initCreateView, edit: Function.prototype };
-        showFormPopup(hdrs[action], entity, id);
-        views[action]();
-    }
     /** Builds and shows the popup form's structural elements. */
     function showFormPopup(actionHdr, entity, id) {
         var title = actionHdr + " " + entity;
@@ -102,16 +93,20 @@ $(document).ready(function(){
         $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
     }
-    function getDetailPanelElems(entity, id) {  
+    function getDetailPanelElems(entity, id) {                                  //console.log("getDetailPanelElems. action = %s, entity = %s", fParams.action, fParams.entity)
+        var getDetailElemFunc = fParams.action === 'edit' && fParams.entity !== 'interaction' ?
+            getSubEntityEditDetailElems : getInteractionDetailElems;
+        var cntnr = _util.buildElem("div", { "id": "form-details" });
         var intIdStr = id ? "Id: " + id : '';
-        var detailCntnr = _util.buildElem("div", { "id": "form-details" });
-        $(detailCntnr).append(getExitButton());
-        $(detailCntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
-        $(detailCntnr).append(_util.buildElem("p", { "text": intIdStr }));
-        $(detailCntnr).append(initDetailDiv('pub'));
-        $(detailCntnr).append(initDetailDiv('cit'));
-        $(detailCntnr).append(initDetailDiv('loc'));
-        return detailCntnr;
+        $(cntnr).append(getExitButton());
+        $(cntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
+        $(cntnr).append(_util.buildElem("p", { "text": intIdStr }));
+        $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
+        return cntnr;
+    }
+    function getInteractionDetailElems(entity, id, cntnr) {
+        var entities = ['pub', 'cit', 'loc'];
+        return entities.map(function(entity){ return initDetailDiv(entity) });
     }
     function initDetailDiv(ent) {
         var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
@@ -119,6 +114,9 @@ $(document).ready(function(){
         $(div).append(_util.buildElem("h5", { "text": entities[ent]+":" }));        
         $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
         return div;
+    }
+    function getSubEntityEditDetailElems(entity, id, cntnr) {                   console.log("getSubEntityEditDetailElems.")
+        return [];
     }
     /**
      * When the Publication, Citation, or Location fields are selected, their 
@@ -162,7 +160,7 @@ $(document).ready(function(){
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
      */
-    function initFormParams(action, entity, id) {                               //console.log("####fPs = %O", fParams)
+    function initFormParams(action, entity, id) {                               
         fParams = {
             action: action,
             editing: action === "edit" ? { core: id || null, detail: null } : false,
@@ -171,7 +169,7 @@ $(document).ready(function(){
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"])
         };
-        initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action);
+        initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action); console.log("####fPs = %O", fParams)
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -213,7 +211,7 @@ $(document).ready(function(){
     /** Shows the entity's edit form in a pop-up window on the search page. */
     function editEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
         initFormParams("edit", entity, id);
-        initInteractionFormWindow("edit", _util.ucfirst(entity), id);
+        showFormPopup('Editing', _util.ucfirst(entity), id);
         initEditForm(id, entity);    
     }
     /** Inits the edit top-form, filled with all existing data for the record. */
@@ -360,10 +358,11 @@ $(document).ready(function(){
      * Fills the global fParams obj with the basic form params @initFormParams. 
      * Init the create interaction form and append into the popup window @initCreateForm. 
      */
-    function initCreateView() {
-        initFormParams("create", "interaction");
+    function createEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
+        initFormParams("create", entity);
+        showFormPopup('New', _util.ucfirst(entity), null);
         initCreateForm();
-    }       
+    }
     /**
      * Inits the interaction form with all fields displayed and the first field, 
      * publication, in focus. From within many of the fields the user can create 
