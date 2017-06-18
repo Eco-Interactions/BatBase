@@ -41,11 +41,11 @@ $(document).ready(function(){
         $("#b-overlay-popup").addClass("form-popup");
         $("#b-overlay").addClass("form-ovrly");
         $("#b-overlay-popup").append(getFormWindowElems(entity, id, title));
-        sizeFormHtml(entity);
+        setFormSize(entity);
         $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
     }
     /** Adds the width to both the popup window and the form element for each entity. */
-    function sizeFormHtml(entity) {
+    function setFormSize(entity) {
         var sizeConfgs = { 
             '1500': {
                 'Interaction': { popup: '1510px', form: '999px' },
@@ -56,15 +56,15 @@ $(document).ready(function(){
                 'Taxon': { popup: '808px', form: '60%' },
             },
             '1366': {
-                'Interaction': { popup: '96%', form: '78%' },
-                'Publication': { popup: '96%', form: '78%' },
-                'Citation': { popup: '96%', form: '78%' },
+                'Interaction': { popup: '95%', form: '78%' },
+                'Publication': { popup: '95%', form: '78%' },
+                'Citation': { popup: '95%', form: '78%' },
                 'Author': { popup: '63%', form: '55%' },
-                'Location': { popup: '96%', form: '78%' },
+                'Location': { popup: '95%', form: '78%' },
                 'Taxon': { popup: '808px', form: '60%' },
         }};
         var wKey = $(window).width() > 1499 ? '1500' : '1366';
-        var confg = sizeConfgs[wKey][entity];                                         console.log("sizeFormHtml [%s] confg = %O", entity, confg);
+        var confg = sizeConfgs[wKey][entity];                                         console.log("setFormSize [%s] confg = %O", entity, confg);
         $('.form-popup').css({'width': confg.popup});
         $('#form-main').css({'width': confg.form});
     }

@@ -1,6 +1,7 @@
 -- Short Range TODO --
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
+        -- Resize slider-header when screen size changes 
     --Search--
         -- refactor into and cal out of the global space. Perhaps a temp storage obj?
         -- csv exports

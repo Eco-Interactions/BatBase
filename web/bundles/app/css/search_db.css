@@ -384,6 +384,14 @@ select[id$="txn-lvl"] + div {
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 @media screen and (max-width: 1500px) { 
+    /*--------------- Search Page ---------------------*/
+    #detail-block #show-tips, 
+    #detail-block #strt-tut {
+        margin: 10px 5px 0 5px;
+    }
+    #detail-block #opts-col3 {
+        border-right: none;
+    }
     /*--------------- Database CRUD Popup -------------*/
     #b-overlay .form-popup {
         padding: 15px;

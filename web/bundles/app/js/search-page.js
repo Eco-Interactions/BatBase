@@ -29,6 +29,7 @@
         clearLocalStorageCheck();
         showPopUpMsg('Loading...');
         addDomEventListeners();
+        adaptUiToScreenSize();
         authDependentInit();
         initSearchState();
     }
@@ -78,6 +79,16 @@
             $('button[name="csv"]').prop('title', "Register to download.");
             $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
         } else { $('button[name="csv"]').click(exportCsvData); }
+    }
+    /** Moves the buttons from the end of the search options panel to just beneath. */
+    function adaptUiToScreenSize() {
+        if ($(window).width() > 1500) { return; }
+        var elemCntnr = $('#opts-col4').detach();  
+        var cntnr = _util.buildElem('div', { class: 'flex-row' });
+        $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
+        $(elemCntnr)[0].className = 'flex-row';
+        $(cntnr).append(elemCntnr);
+        $('#search-opts').after(cntnr);
     }
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {

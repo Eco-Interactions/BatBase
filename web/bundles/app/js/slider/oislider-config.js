@@ -26,7 +26,7 @@ $(function(){
 		};
 
 	function getWidth() { 
-		return $(window).width() > 1500 ? 1500 : 1400;
+		return $(window).width() > 1500 ? 1500 : 1350;
 	}
 	function getMsgPos() {
 		var frstFm = frames[0];

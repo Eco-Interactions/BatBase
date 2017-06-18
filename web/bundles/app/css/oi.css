@@ -561,11 +561,11 @@ label[for=fos_user_registration_form_about_me] {
 }
 @media screen and (max-width: 1500px) { 
     #pg-container {
-        max-width: 1400px;
+        max-width: 1350px;
     }
     /*--- About DB Pg ---*/
     #about-db-maps, #db-new-data {
-        height: 545px;
-        width: 686px;
+        height: 540px;
+        width: 660px;
     }
 }
