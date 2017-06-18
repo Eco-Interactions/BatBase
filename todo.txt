@@ -8,8 +8,6 @@
     --FORM--
         -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
-        -- Add exit button to error msgs, auto-clear when error is fixed, and remove 
-            auto-timeout. 
         -- //Refactor fillIntData (crud.js)
         -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
             > or refactor into using it to general disable and dim buttons
@@ -20,21 +18,26 @@
     --Asac---
         --form--
             -- Validate that genus and species have the same genus names.
+            -- Add exit button to error msgs, auto-clear when error is fixed, and remove 
+                auto-timeout. 
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
             -- standardize taxon 'levels' storage
             -- update walkthrough
+        --css--
+            --refactor to use parital, effectively 'group', selectors
     --Asap--        
         --form--
+            -- Move exit button out of detail panel elem.
             -- Style all sub-entity forms
             -- add related entity details to sub-entity edit forms
             -- Update submit success and failure messages
-            -- make new form styles 'respond' to the smaller screenizes
+            -- make new form styles 'respond' to the smaller screenizes  1366x768
             -- refactor initcomboboxes to need only the form-lvl param
-        --css--
-            --refactor to use parital, effectively 'group', selectors
+        --Data--
+            -- Src 945: Is both the pub and citation. create a seperate child cit.
 
 ::Testing!::
 > Data Storage

@@ -368,8 +368,8 @@ $(document).ready(function(){
      * Fills the global fParams obj with the basic form params @initFormParams. 
      * Init the create interaction form and append into the popup window @initCreateForm. 
      */
-    function createEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
-        initFormParams("create", entity);
+    function createEntity(id, entity) {                                         console.log('Editing [%s] [%s]', entity, id);  
+        initFormParams('create', entity);
         showFormPopup('New', _util.ucfirst(entity), null);
         initCreateForm();
     }
@@ -728,7 +728,9 @@ $(document).ready(function(){
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        setTaxonParams('Object', getSelectedRealm($('#Object-sel').val()));
+        var id = getSelectedRealm($('#Object-sel').val()) || fParams.taxon ? 
+            fParams.taxon.objectRealm || 3 : 3;
+        setTaxonParams('Object', id);
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
         initComboboxes("object");             
@@ -781,7 +783,6 @@ $(document).ready(function(){
     }
     /** Adds the realm name and id, along with all taxon levels, to fParams. */
     function setTaxonParams(role, id) {  
-        if (!id) { id = fParams.taxon ? fParams.taxon.objectRealm : 3; }
         initTaxonParams(id);
         fParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
             { val: $('#'+role+'-sel').val(),
@@ -800,7 +801,7 @@ $(document).ready(function(){
             realmId: id,
             lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
             domainLvls: domainLvls[realmMap[id]]
-        }; 
+        };                                                                      //console.log('taxon params = %O', fParams.taxon)
     }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
@@ -1447,7 +1448,7 @@ $(document).ready(function(){
         var selElems = $(cntnrId+' .selectized').toArray();                     //console.log("selElems[0] = %O", selElems[0].id);
         focusCombobox('#'+ selElems[0].id);
     }
-    function clearCombobox(selId) {
+    function clearCombobox(selId) {                                             //console.log("clearCombobox [%s]", selId);
         var selApi = $(selId)[0].selectize;
         selApi.clear(true);
         selApi.updatePlaceholder();
@@ -1552,7 +1553,7 @@ $(document).ready(function(){
                 "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
                 "required": [],
                 "order": [],
-                "exitHandler": { create: enableObjField }
+                "exitHandler": { create: enableSubjField }
             },
             "plant": {
                 "add": {},  
@@ -1578,7 +1579,7 @@ $(document).ready(function(){
                 "exclude": ["Class", "Order"],
                 "required": [],
                 "order": ["Family", "Genus", "Species"],
-                "exitHandler": { create: enableSubjField }
+                "exitHandler": { create: enableObjField }
             },
             "taxon": {
                 "add": {},  
@@ -2377,7 +2378,7 @@ $(document).ready(function(){
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
         showSuccessMsg("New Interaction successfully created.");
         initFormParams("create", "interaction");
-        resetInteractionForm(vals);
+        resetIntFields(vals);
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {
@@ -2408,7 +2409,7 @@ $(document).ready(function(){
      * Resets the top-form in preparation for another entry. All fields without  
      * a pinned value will be reset. 
      */
-    function resetInteractionForm(vals) {
+    function resetIntFields(vals) {
         disableSubmitBttn("top-submit"); 
         initInteractionParams();
         resetUnpinnedFields(vals);
