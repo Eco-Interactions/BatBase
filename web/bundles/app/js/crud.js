@@ -2465,7 +2465,7 @@ $(document).ready(function(){
      */
     function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, fP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
-        formInitError(field, 'openSubForm', formLvl, selId);
+        return formInitError(field, 'openSubForm', formLvl, selId);
     }
     /** 
      * When an error prevents a form init, this method shows an error to the user
