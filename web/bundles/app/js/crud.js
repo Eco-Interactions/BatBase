@@ -1043,12 +1043,12 @@ $(document).ready(function(){
     function finishTaxonEditFormBuild() {
         $('#top-cancel').off('click').click(exitFormPopup);
         $('#top-submit').off('click').click(submitTaxonEdit);
-        initTaxonEditCombo("txn-lvl", checkForParentLvlErrs); 
+        initTaxonEditCombo('txn-lvl', checkForParentLvlErrs); 
     }
     function buildTaxonEditFields(taxon) {
         var prntElems = getPrntTaxonElems(taxon);
         var taxonElems = getEditTaxonFields(taxon);
-        return prntElems.concat(taxonElems, buildFormBttns("Taxon", "top", "edit"));
+        return prntElems.concat(taxonElems, buildFormBttns('Taxon', 'top', 'edit'));
     }
     function getPrntTaxonElems(taxon) {                                         //console.log("getPrntTaxonElems for %O", taxon);
         var prnt = fParams.records.taxon[taxon.parent]; 
@@ -1056,19 +1056,20 @@ $(document).ready(function(){
         return [ buildTaxonEditFormRow('Parent', elems, 'top') ];
     }
     function buildNameElem(prnt) {
-        var div = _util.buildElem("div", { id: "Parent-name" });
+        var div = _util.buildElem('div', { id: 'txn-prnt' });
         setTaxonPrntNameElem(prnt, div);
-        $(div).css({"padding-top": "4px"});
-        $(div).data("lvl", prnt.level.id).data("txn", prnt.id);
+        $(div).css({'padding-top': '4px'});
         return div;
     }
     function setTaxonPrntNameElem(prnt, elem, pText) {
-        var div = elem || $('#Parent-name')[0];
-        var text = pText || prnt.level.displayName + " " + prnt.displayName;
-        div.innerHTML = "<b>Taxon Parent</b>: &nbsp " + text;
+        var div = elem || $('#txn-prnt')[0];
+        var text = pText || prnt.level.displayName + ' ' + prnt.displayName;
+        div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
+        if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
     }
     function buildEditPrntBttn(prnt) {
-        var bttn = _util.buildElem("input", { type: "button", value: "Edit Parent", id: "edit-prnt" });
+        var bttn = _util.buildElem('input', { type: 'button', value: 'Change Parent', 
+            id: 'chng-prnt', class: 'ag-fresh grid-bttn' });
         $(bttn).click(buildParentTaxonEditFields);
         return bttn;
     }
@@ -1079,14 +1080,14 @@ $(document).ready(function(){
     }
     function getlvlSel(taxon, formLvl) {
         var opts = getTaxonLvlOpts(taxon); 
-        var sel = _util.buildSelectElem(opts, { id: "txn-lvl" });
+        var sel = _util.buildSelectElem(opts, { id: 'txn-lvl' });
         $(sel).data('toSel', taxon.level.id);
         return sel;
     }
     /** Returns an array of options for the levels in the taxon's domain. */
     function getTaxonLvlOpts(taxon) {
         var domainLvls = fParams.taxon.domainLvls.map(function(lvl){return lvl;});
-        var lvls = _util.getDataFromStorage("levelNames");  
+        var lvls = _util.getDataFromStorage('levelNames');  
         domainLvls.shift();  //Removes the domain-level
         for (var name in lvls) {
             if (domainLvls.indexOf(name) === -1) { delete lvls[name]; }
@@ -1100,10 +1101,11 @@ $(document).ready(function(){
      * Entering a taxon that does not already exists will open the 'create' form.
      */
     function buildParentTaxonEditFields() {           
-        buildAndAppendEditParentElems($('#Parent-name').data('txn'));
+        buildAndAppendEditParentElems($('#txn-prnt').data('txn'));
         setTaxonPrntNameElem(null, null, " ");
-        $('#edit-prnt').attr({'disabled': true}).css({'opacity': '.6'});
+        $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
         disableSubmitBttn('#top-submit');
+        $('#sub-submit')[0].value = 'Confirm';
     }
     function buildAndAppendEditParentElems(prntId) {
         var cntnr = _util.buildElem("div", { class: "sml-form flex-row pTaxon", id: "sub-form" });
@@ -1120,7 +1122,7 @@ $(document).ready(function(){
         return hdr.concat(fields, bttns);
     }
     function buildEditParentHdr() {
-        var hdr = _util.buildElem("h3", { text: "Editing Taxon Parent", id:'sub-form-hdr' });
+        var hdr = _util.buildElem("h3", { text: "Select New Taxon Parent", id:'sub-form-hdr' });
         return hdr;
     }
     function getParentEditFields(prnt) {  
@@ -1128,51 +1130,46 @@ $(document).ready(function(){
         var lvlSelRows = buildSubForm(domain, {}, 'sub', null, 'edit');
         var domainSelRow = getDomainLvlRow(prnt);
         fParams.taxon.formTaxonLvl = 'sub2';
-        fParams.taxon.parentTaxon = prnt.id;            
         return domainSelRow.concat(lvlSelRows);
     }
     function getDomainLvlRow(taxon) {
         var domainLvl = fParams.taxon.domainLvls[0];
         var lbl = _util.buildElem('label', { text: domainLvl });
-        var sel = getDomainLvlSel(taxon, domainLvl);
-        return [buildTaxonEditFormRow(domainLvl, [lbl, sel], 'sub')];
+        var taxonym = _util.buildElem('span', { text: getDomainTaxon().displayName });
+        $(taxonym).css({ 'padding-top': '.55em' });
+        return [buildTaxonEditFormRow(domainLvl, [lbl, taxonym], 'sub')];
     }
-    function getDomainLvlSel(taxon, domainLvl) {
-        var opts = getTaxonOpts(domainLvl);
-        var sel = _util.buildSelectElem(opts, { id: domainLvl + '-sel', class: 'med-field' });
-        fParams.forms.sub.selElems.push(domainLvl);
-        $(sel).data('toSel', taxon.domain.id+1);
-        return sel;
+    function getDomainTaxon() {
+        return fParams.records.taxon[fParams.taxon.realmId];
     }
     function finishEditParentFormBuild() {                                      console.log("fParams = %O", fParams);    
         var domainLvl = fParams.taxon.domainLvls[0];
         initComboboxes(null, 'sub');
-        selectParentTaxon(fParams.taxon.parentTaxon);
+        selectParentTaxon($('#txn-prnt').data('txn'), domainLvl);
         $('#Species_row').hide();
-        $('#'+domainLvl+'-sel')[0].selectize.addItem($('#'+domainLvl+'-sel').data('toSel'));
+        $('#'+domainLvl+'_row .field-row')[0].className += ' domain-row';
         $('#sub-submit').attr('disabled', false).css('opacity', '1');
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
     }
-    function selectParentTaxon(prntId) {  
+    function selectParentTaxon(prntId, domainLvl) {                                 
         var parentLvl = fParams.records.taxon[prntId].level.displayName;
+        if (parentLvl === domainLvl) { return; }
         $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
     }
     function closePrntEdit() {                                                  //console.log("closePrntEdit called.");
-        var prnt =  getSelectedTaxon();
-        if (!prnt) { return formFieldErrorHandler('Parent', 'emptyParentTaxon', 'sub'); }
-        $('#Parent-name').data('txn', prnt.id).data('lvl', prnt.level.id);
+        var prnt =  getSelectedTaxon() || getDomainTaxon();
         fParams.taxon.formTaxonLvl = null;
         resetAfterEditParentClose(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
-        var prnt = fParams.records.taxon[$('#Parent-name').data('txn')];
+        var prnt = fParams.records.taxon[$('#txn-prnt').data('txn')];
         resetAfterEditParentClose(prnt);
     }
     function resetAfterEditParentClose(prnt) {
         $('#sub-form').remove();
         setTaxonPrntNameElem(prnt);
-        $('#edit-prnt').attr({'disabled': false}).css({'opacity': '1'});
+        $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
         enableSubmitBttn('#top-submit');
         checkForParentLvlErrs();
     }
@@ -1183,7 +1180,7 @@ $(document).ready(function(){
      */
     function checkForParentLvlErrs() {  
         var childLvl;
-        var prntLvl = $('#Parent-name').data('lvl');
+        var prntLvl = $('#txn-prnt').data('lvl');
         var taxonLvl = $('#txn-lvl').val();                                     //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", taxonLvl, prntLvl);
         if ( taxonLvl <= prntLvl ) {
             return showEditTaxonError('Parent', 'needsHigherLvlPrnt');
@@ -1228,25 +1225,25 @@ $(document).ready(function(){
         var create = createFunc || false;
         var options = { create: create, onChange: chng, placeholder: null }; 
         $('#'+selId).selectize(options);
-        $('#'+selId)[0].selectize.addItem($('#'+selId).data("toSel"), true);
+        $('#'+selId)[0].selectize.addItem($('#'+selId).data('toSel'), true);
     }
     /**
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>inputElems)
      */
     function buildTaxonEditFormRow(field, inputElems, formLvl) {
-        var rowDiv = _util.buildElem("div", { class: formLvl + '-row', id: field + "_row"});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
-        var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
+        var rowDiv = _util.buildElem('div', { class: formLvl + '-row', id: field + '_row'});
+        var errorDiv = _util.buildElem('div', { class: 'row-errors', id: field+'_errs'});
+        var fieldCntnr = _util.buildElem('div', { class: 'field-row flex-row'});
         $(fieldCntnr).append(inputElems);
         $(rowDiv).append([errorDiv, fieldCntnr]);
         return rowDiv;
     } 
-    function submitTaxonEdit () {
+    function submitTaxonEdit() {
         var vals = {
             displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
             level: $('#Taxon_row select').text(),
-            parentTaxon: $('#Parent-name').data('txn')
+            parentTaxon: $('#txn-prnt').data('txn')
         };                                                                      //console.log("taxon vals = %O", vals);
         buildFormDataAndSubmit('top', vals);
     }
@@ -1254,8 +1251,8 @@ $(document).ready(function(){
     function buildIntTypeField() {
         var opts = getOptsFromStoredData('intTypeNames');
         var selElem = _util.buildSelectElem(
-            opts, {id: "InteractionType-sel", class: "lrg-field"});
-        return buildFormRow("Interaction Type", selElem, "top", true);
+            opts, {id: 'InteractionType-sel', class: 'lrg-field'});
+        return buildFormRow('Interaction Type', selElem, 'top', true);
     }
     function focusIntTypePin() {
         if (!fParams.editing) { $('#InteractionType_pin').focus(); }
@@ -1267,7 +1264,7 @@ $(document).ready(function(){
     }
     function buildIntNotesField() {
         var txtElem = buildLongTextArea('interaction', 'Notes', 'top');
-        return buildFormRow("Notes", txtElem, "top", false);
+        return buildFormRow('Notes', txtElem, 'top', false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
