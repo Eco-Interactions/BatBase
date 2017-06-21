@@ -286,7 +286,7 @@ $(document).ready(function(){
         var fields = getSourceFields(entity);
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
-        setAdditionalFields(entity, src);
+        setAdditionalFields(entity, src, detail);
         fParams.editing.detail = detail.id;
     }
     function getSourceFields(entity) {
@@ -328,9 +328,10 @@ $(document).ready(function(){
     function setCntry(fieldId, prop, rcrd) {
         $('#locCountry-sel')[0].selectize.addItem(rcrd.country.id);
     }
-    function setAdditionalFields(entity, srcRcrd) {
+    function setAdditionalFields(entity, srcRcrd, detail) {
         setTitleField(entity, srcRcrd);
         setPublisherField(entity, srcRcrd);
+        setCitationFullText(entity, detail);
         addAuthors(entity, srcRcrd);
     }
     function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
@@ -340,7 +341,11 @@ $(document).ready(function(){
     }
     function setPublisherField(entity, srcRcrd) {
         if (entity !== 'publication') { return; }
-        setSelect("Publisher", "parent", srcRcrd)
+        setSelect("Publisher", "parent", srcRcrd);
+    }
+    function setCitationFullText(entity, citRcrd) {  
+        if (entity !== 'citation') { return; }
+        $('#CitationText_row textarea')[0].innerText = citRcrd.fullText;
     }
     function addAuthors(entity, srcRcrd) {
         var cnt = 0;

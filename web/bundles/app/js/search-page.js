@@ -1653,7 +1653,8 @@
     function addEditPencil(params) {   
         if (gParams.curFocus === 'locs' && ['Region', 'Country'].indexOf(params.data.type) !== -1) {
             return "<span>"; }                
-        if (gParams.curFocus === 'taxa' && !params.data.parentTaxon) {  //Domain Taxa can not be edited.
+        if (gParams.curFocus === 'taxa' &&
+            (!params.data.parentTaxon && !params.data.interactionType)) {  //Domain Taxa can not be edited.
             return "<span>"; }                                             
         return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
     }

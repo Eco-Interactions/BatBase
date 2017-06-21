@@ -37,6 +37,9 @@
             -- Update submit success and failure messages
             -- make new form styles 'respond' to the smaller screenizes  1366x768
             -- refactor initcomboboxes to need only the form-lvl param
+            *- Show 'No changes' success msg when locations update and only
+                elevUnit is changed. 
+            *- On grid close, reset tree toggle
         --Data--
             -- Src 945: Is both the pub and citation. create a seperate child cit.
 
