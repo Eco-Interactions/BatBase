@@ -202,6 +202,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     padding: 15px;
     text-align: left;
     justify-content: space-between;
+    flex-direction: column;
 }
 .form-ovrly {
     align-items: center;
@@ -228,6 +229,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #form-details {
     flex: 1 1 333px;
+    margin: .5em .2em 0 0;
     padding: 0 .5em .5em .5em;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -253,17 +255,18 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     font-size: 1em;
     flex-wrap: wrap;
 }
+.exit-row {
+    width: 100%;
+    justify-content: flex-end;
+    display: flex;
+}
 .exit-bttn {
-    position: relative;
     width: 2em;
     height: 2em;
     font-weight: bold;
 }
-#exit-form {
-    left: 94%;
-    top: 7%;
-}
 #exit-sub-form {
+    position: relative;
     left: 24%;
     font-size: .75em !important;
 }
@@ -402,9 +405,6 @@ select[id$="txn-lvl"] + div {
     #b-overlay #form-main {
         padding: 5px 0 0 20px;
         width: 915px;
-    }
-    #b-overlay #exit-form {
-        left: 91%;
     }
     #b-overlay #sub2-form.sml-form {  
         min-width: 366px;

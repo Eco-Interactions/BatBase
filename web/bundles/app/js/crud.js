@@ -76,7 +76,23 @@ $(document).ready(function(){
      * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
      */
     function getFormWindowElems(entity, id, title) {
-        return [getMainFormHtml(title), getDetailPanelElems(entity, id)];
+        return [getExitButtonRow(), getFormHtml(entity, id, title)];
+    }
+    function getExitButtonRow() {
+        var row = _util.buildElem('div', { class: 'exit-row' });
+        $(row).append(getExitButton());
+        return row;        
+    }
+    function getExitButton() {
+        var bttn = _util.buildElem('input', {
+           'id':'exit-form', 'class':'grid-bttn exit-bttn', 'type':'button', 'value':'X' });
+        $(bttn).click(exitFormPopup);
+        return bttn;
+    }
+    function getFormHtml(entity, id, title) {
+        var cntnr = _util.buildElem('div', { class: 'flex-row' });
+        $(cntnr).append([getMainFormHtml(title), getDetailPanelElems(entity, id)]);
+        return cntnr;
     }
     function getMainFormHtml(title) {
         var formWin = _util.buildElem("div", { "id": "form-main" });
@@ -88,12 +104,6 @@ $(document).ready(function(){
         $(hdrSect).append(_util.buildElem("h1", { "text": title }));
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
-    }
-    function getExitButton() {
-        var bttn = _util.buildElem("input", {
-           "id":"exit-form", "class":"grid-bttn exit-bttn", "type":"button", "value":"X" });
-        $(bttn).click(exitFormPopup);
-        return bttn;
     }
     /** Returns popup and overlay to their original/default state. */
     function exitFormPopup() {
@@ -108,7 +118,6 @@ $(document).ready(function(){
             getSubEntityEditDetailElems : getInteractionDetailElems;
         var cntnr = _util.buildElem("div", { "id": "form-details" });
         var intIdStr = id ? "Id: " + id : '';
-        $(cntnr).append(getExitButton());
         $(cntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
         $(cntnr).append(_util.buildElem("p", { "text": intIdStr }));
         $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
