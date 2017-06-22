@@ -256,8 +256,15 @@ $(document).ready(function(){
     /*------------------- Fills Edit Form Fields -----------------------------*/
     /** Fills form with existing data for the entity being edited. */
     function fillExistingData(entity, id) {
+        addDisplayNameToHdr(entity, id);
         fillEntityData(entity, id); 
         if (ifRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
+    }
+    function addDisplayNameToHdr(ent, id) {
+        var prnt = getParentEntity(ent);
+        var entity = prnt || ent;
+        var rcrd = getEntityRecord(entity, id);                                 
+        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName;  
     }
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
