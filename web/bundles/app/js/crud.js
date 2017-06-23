@@ -505,7 +505,7 @@ $(document).ready(function(){
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
         var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Publication', null, formLvl); }
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
         initComboboxes("publication");
@@ -569,7 +569,7 @@ $(document).ready(function(){
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('CitationTitle', '#CitationTitle-sel', formLvl); }
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
         initComboboxes("citation");
@@ -699,7 +699,7 @@ $(document).ready(function(){
     /** Inits the location form and disables the country combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
         var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Location', null, formLvl); }
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Location', null, formLvl); }
         $('#Location_row').after(initSubForm(
             "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initComboboxes("location");
@@ -770,7 +770,7 @@ $(document).ready(function(){
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, formLvl) {
         if (fParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
-        openSubFormError(role, null, formLvl);
+        openSubFormErr(role, null, formLvl);
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -841,7 +841,7 @@ $(document).ready(function(){
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
         var formLvl = fParams.taxon.prntSubFormLvl || getSubFormLvl("sub2"); 
         if (selLvl === "Species" && !$('#Genus-sel').val()) {
-            return formInitError(selLvl, "noGenus", formLvl);
+            return formInitErr(selLvl, "noGenus", formLvl);
         }
         return showNewTaxonForm(val, selLvl, formLvl);
     } 
@@ -1215,9 +1215,9 @@ $(document).ready(function(){
             enableSubmitBttn('#top-submit'); 
         }
     }
-    function showEditTaxonError(field, errorTag) {
+    function showEditTaxonError(field, errTag) {
         $('#Parent_errs')[0].innerText = '';
-        formFieldErrorHandler(field, errorTag, 'top');
+        handleFieldErr(field, errTag, 'top');
         disableSubmitBttn('#top-submit');
     }
     function isLevelLowerThanChildLevels(taxonId, taxonLvl) {  
@@ -1301,7 +1301,7 @@ $(document).ready(function(){
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
         var formLvl = getSubFormLvl("sub2");
         var prntLvl = getNextFormLevel("parent", formLvl);
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Publisher', null, formLvl); }
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, formLvl); }
         $('#Publisher_row').append(initSubForm(
             "publisher", formLvl, "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
         enableSubmitBttn("#"+formLvl+"-submit");
@@ -1345,7 +1345,7 @@ $(document).ready(function(){
         var parentSelId = "#Authors-sel"+authCnt;
         var formLvl = getSubFormLvl("sub2");
         var prntLvl = getNextFormLevel("parent", formLvl);
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormError('Authors', parentSelId, formLvl); }
+        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, formLvl); }
         $('#Authors_row').append(initSubForm(
             "author", formLvl, "sml-left sml-form", {"Display Name": val}, parentSelId));
         disableSubmitBttn("#"+prntLvl+"-submit");
@@ -2486,63 +2486,73 @@ $(document).ready(function(){
      * is already an instance using that form, show the user an error message and 
      * reset the select elem. 
      */
-    function openSubFormError(field, id, formLvl) {                             //console.log("selId = %s, fP = %O ", selId, fParams)
+    function openSubFormErr(field, id, formLvl) {                               //console.log("selId = %s, fP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
-        return formInitError(field, 'openSubForm', formLvl, selId);
+        return formInitErr(field, 'openSubForm', formLvl, selId);
     }
     /** 
      * When an error prevents a form init, this method shows an error to the user
      * and resets the combobox that triggered the form. 
      */
-    function formInitError(field, errorTag, formLvl, id) {
+    function formInitErr(field, errTag, formLvl, id) {                          console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, formLvl, id)
         var selId = id || '#'+field+'-sel';
-        formFieldErrorHandler(field, errorTag, formLvl);
+        handleFieldErr(field, errTag, formLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
-    /** Shows the user an error message above the field row. */
-    function formFieldErrorHandler(fieldName, errorTag, formLvl) {              //console.log("###__formFieldError- '%s' for '%s'. ErrElem = %O", fieldName, errorTag, fieldErrElem);
+    /**
+     * Shows the user an error message above the field row. The user can clear the 
+     * error manually with the close button, or automatically by resolving the error.
+     */
+    function handleFieldErr(fieldName, errTag, formLvl) {                     console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
         var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
-            "emptyParentTaxon": "<p>Please select a parent taxon.</p>",
-            // "emptyRequiredField" : "<p>Please fill in "+fieldName+".</p>",
-            "openSubForm": "<p>Please finish the open "+ 
-                _util.ucfirst(subEntity) + " form.</p>",
             "needsGenusPrnt": "<p>Please select a genus parent for the species taxon.</p>",
             "noGenus": handleNoGenus,
             "needsHigherLvlPrnt": "<p>The parent taxon must be at a higher taxonomic level.</p>",
-            'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>'
+            'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>',
+            "openSubForm": "<p>Please finish the open "+ 
+                _util.ucfirst(subEntity) + " form.</p>",
         };
         var errElem = getErrElem(fieldName);
-        errMsgMap[errorTag](errElem);
+        errMsgMap[errTag](errElem, errTag);
     }
-    function handleNoGenus(elem) {  
-        elem.className += ' active-errs';
-        elem.innerHTML = "<span>Please select a genus before creating a species.</span>";
-        $(elem).append(getErrExitBttn('noGenus', elem));
-        $('#Genus-sel').change(checkFormSelectionAndClearError);
-        function checkFormSelectionAndClearError(e) {                               console.log("clearing error. val = ", e.target.value)
-            if (!e.target.value) { return; }
-            $('#Species_errs')[0].innerHTML = ''; 
-            $('#Genus-sel').off('change');   
-        }
-    } /* End handleNoGenus */
+    /* ----------- Field-Error Handlers --------------------------------------*/
+    function handleNoGenus(elem, errTag) {  
+        var msg = '<span>Please select a genus before creating a species.</span>';
+        setErrElemAndAppend(elem, msg, errTag)
+        $('#Genus-sel').change(function(e){
+            if (e.target.value) { clearNoGenusErr(elem); }
+        });
+    }
+    function clearNoGenusErr(elem) {                                            //console.log('clearNoGenusErr. elem = %O', elem);
+        $('#Genus-sel').off('change');
+        clearErrElem(elem);
+    }
+    /* ----------- Error-Elem Methods -------------- */
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
-        return $('#'+field+'_errs')[0];    
+        var elem = $('#'+field+'_errs')[0];    
+        elem.className += ' active-errs';
+        return elem;
     }   
+    function setErrElemAndAppend(elem, msg, errTag) {
+        elem.innerHTML = msg;
+        $(elem).append(getErrExitBttn(errTag, elem));
+    }
     function getErrExitBttn(errTag, elem) {
         var exitHdnlrs = {
-            noGenus: clearErrElem,
+            noGenus: clearNoGenusErr,
         };
         var bttn = getExitButton();
-        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
         bttn.className += ' err-exit';
+        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
         return bttn;
     }
-    function clearErrElem(elem) {                                               console.log('clearErrElem.')
-        // body...  //remove change method on genus-sel
+    function clearErrElem(elem) {                                               //console.log('clearErrElem.')
+        elem.innerHTML = '';
+        elem.className = elem.className.split(' active-errs')[0];
     }
 
 
