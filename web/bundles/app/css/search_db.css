@@ -397,6 +397,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin: .5em;
     padding: .5em;
 }
+.pTaxon #sub2-form {
+    left: -.5em;
+    position: relative;
+}
 .domain-row {
     justify-content: flex-start !important; 
 }

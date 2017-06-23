@@ -839,13 +839,13 @@ $(document).ready(function(){
     /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
     function initTaxonForm(val) { 
         var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
-        var formLvl = fParams.taxon.formTaxonLvl || getSubFormLvl("sub2");
+        var formLvl = fParams.taxon.prntSubFormLvl || getSubFormLvl("sub2"); 
         if (selLvl === "Species" && !$('#Genus-sel').val()) {
             return formInitError(selLvl, "noGenus", formLvl);
         }
         return showNewTaxonForm(val, selLvl, formLvl);
     } 
-    function showNewTaxonForm(val, selLvl, formLvl) {
+    function showNewTaxonForm(val, selLvl, formLvl) {                           //console.log("showNewTaxonForm. val, selVal, formLvl = %O", arguments)
         fParams.taxon.formTaxonLvl = selLvl;
         buildTaxonForm();
         return { "value": "", "text": "Creating "+selLvl+"..." };
@@ -854,6 +854,7 @@ $(document).ready(function(){
             $('#'+selLvl+'_row').append(initSubForm(
                 "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
             enableSubmitBttn("#"+formLvl+"-submit");
+            $('#'+formLvl+'-hdr')[0].innerText = ' '+ selLvl;
         }
     }  /* End showTaxonForm */
     /**
@@ -1145,7 +1146,7 @@ $(document).ready(function(){
         var domain = _util.lcfirst(prnt.domain.displayName);      
         var lvlSelRows = buildSubForm(domain, {}, 'sub', null, 'edit');
         var domainSelRow = getDomainLvlRow(prnt);
-        fParams.taxon.formTaxonLvl = 'sub2';
+        fParams.taxon.prntSubFormLvl = 'sub2';
         return domainSelRow.concat(lvlSelRows);
     }
     function getDomainLvlRow(taxon) {
@@ -1158,6 +1159,10 @@ $(document).ready(function(){
     function getDomainTaxon() {
         return fParams.records.taxon[fParams.taxon.realmId];
     }
+    /**
+     * Initializes the edit-parent form's comboboxes. Selects the current parent.
+     * Hides the species row. Adds styles and modifies event listeners. 
+     */
     function finishEditParentFormBuild() {                                      console.log("fParams = %O", fParams);    
         var domainLvl = fParams.taxon.domainLvls[0];
         initComboboxes(null, 'sub');
@@ -1175,7 +1180,7 @@ $(document).ready(function(){
     }
     function closePrntEdit() {                                                  //console.log("closePrntEdit called.");
         var prnt =  getSelectedTaxon() || getDomainTaxon();
-        fParams.taxon.formTaxonLvl = null;
+        fParams.taxon.prntSubFormLvl = null;
         resetAfterEditParentClose(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
@@ -1932,7 +1937,7 @@ $(document).ready(function(){
         }
     }
     /** Returns true if all the required elements for the current form have a value. */
-    function ifRequiredFieldsFilled(formLvl) {
+    function ifRequiredFieldsFilled(formLvl) {                                  //console.log("formLvl = %s. fPs = %O", formLvl, fParams)
         var reqElems = fParams.forms[formLvl].reqElems;
         return reqElems.every(function(reqElem){ return reqElem.value; }); 
     }
@@ -1964,7 +1969,7 @@ $(document).ready(function(){
      * Returns an object with 'submit' and 'cancel' events bound to the passed level's
      * form container.  
      */
-    function getBttnEvents(entity, level) { 
+    function getBttnEvents(entity, level) {                                     //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
         return { 
             submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
             cancel: exitForm.bind(null, '#'+level+'-form', level, true) 
@@ -1975,7 +1980,7 @@ $(document).ready(function(){
      * and contextually enables to parent form's submit button. Calls the exit 
      * handler stored in the form's params object.
      */
-    function exitForm(formId, formLvl, focus, data) {                           //console.log("id = %s, formLvl = %s", id, formLvl)      
+    function exitForm(formId, formLvl, focus, data) {                           //console.log("id = %s, formLvl = %s", formId, formLvl)      
         $(formId).remove();
         resetFormCombobox(formLvl, focus);
         if (formLvl !== 'top') { ifParentFormValidEnableSubmit(formLvl); }
