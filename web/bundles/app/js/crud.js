@@ -2504,20 +2504,41 @@ $(document).ready(function(){
             "openSubForm": "<p>Please finish the open "+ 
                 _util.ucfirst(subEntity) + " form.</p>",
             "needsGenusPrnt": "<p>Please select a genus parent for the species taxon.</p>",
-            "noGenus": "<p>Please select a genus before creating a species.</p>",
+            "noGenus": handleNoGenus,
             "needsHigherLvlPrnt": "<p>The parent taxon must be at a higher taxonomic level.</p>",
             'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>'
         };
-        var msg = errMsgMap[errorTag];
         var errElem = getErrElem(fieldName);
-        errElem.innerHTML = msg;
-        window.setTimeout(function(){errElem.innerHTML = ""}, 4000);
+        errMsgMap[errorTag](errElem);
     }
+    function handleNoGenus(elem) {  
+        elem.className += ' active-errs';
+        elem.innerHTML = "<span>Please select a genus before creating a species.</span>";
+        $(elem).append(getErrExitBttn('noGenus', elem));
+        $('#Genus-sel').change(checkFormSelectionAndClearError);
+        function checkFormSelectionAndClearError(e) {                               console.log("clearing error. val = ", e.target.value)
+            if (!e.target.value) { return; }
+            $('#Species_errs')[0].innerHTML = ''; 
+            $('#Genus-sel').off('change');   
+        }
+    } /* End handleNoGenus */
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
         return $('#'+field+'_errs')[0];    
     }   
+    function getErrExitBttn(errTag, elem) {
+        var exitHdnlrs = {
+            noGenus: clearErrElem,
+        };
+        var bttn = getExitButton();
+        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
+        bttn.className += ' err-exit';
+        return bttn;
+    }
+    function clearErrElem(elem) {                                               console.log('clearErrElem.')
+        // body...  //remove change method on genus-sel
+    }
 
 
 
