@@ -1092,7 +1092,7 @@ $(document).ready(function(){
     }
     function getEditTaxonFields(taxon) {                                        //console.log("getEditTaxonFields for [%s]", taxon.displayName);
         var input = _util.buildElem('input', { id: 'taxon-name', type: 'text', value: taxon.displayName });
-        $(input).data('txn', taxon.id);
+        $(input).data('txn', taxon.id).data('lvl', taxon.level.id);
         return [buildTaxonEditFormRow('Taxon', [getlvlSel(taxon, 'top'), input], 'top')];
     }
     function getlvlSel(taxon, formLvl) {
@@ -1210,10 +1210,14 @@ $(document).ready(function(){
         } else if (isLevelLowerThanChildLevels($('#taxon-name').data('txn'), taxonLvl)) {
             return showNeedshigherLvlTaxonError($('#taxon-name').data('txn'));
         } else {
-            $('#Parent_errs')[0].innerText = '';
-            $('#Taxon_errs')[0].innerText = '';
-            enableSubmitBttn('#top-submit'); 
+            clearLvlErrsAndEnableSubmit(taxonLvl);
         }
+    }
+    function clearLvlErrsAndEnableSubmit(taxonLvl) {
+        clearErrElem($('#Parent_errs')[0]);
+        clearErrElem($('#Taxon_errs')[0]);
+        $('#txn-lvl').data('lvl', taxonLvl);
+        enableSubmitBttn('#top-submit'); 
     }
     function showEditTaxonError(field, errTag) {
         $('#Parent_errs')[0].innerText = '';
@@ -2507,8 +2511,7 @@ $(document).ready(function(){
     function handleFieldErr(fieldName, errTag, formLvl) {                     console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
         var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
-            "needsGenusPrnt": "<p>Please select a genus parent for the species taxon.</p>",
-            "noGenus": handleNoGenus,
+            "needsGenusPrnt": handleNeedsGenusParent, "noGenus": handleNoGenus,
             "needsHigherLvlPrnt": "<p>The parent taxon must be at a higher taxonomic level.</p>",
             'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>',
             "openSubForm": "<p>Please finish the open "+ 
@@ -2518,6 +2521,16 @@ $(document).ready(function(){
         errMsgMap[errTag](errElem, errTag);
     }
     /* ----------- Field-Error Handlers --------------------------------------*/
+    /** Note: error for the edit-taxon form. */
+    function handleNeedsGenusParent(elem, errTag) {  
+        var msg = '<span>Please select a genus parent for the species taxon.</span>';
+        setErrElemAndAppend(elem, msg, errTag);
+    }
+    function clearNeedsGenusParentErr(elem) {                                            //console.log('clearNoGenusErr. elem = %O', elem);
+        $('#txn-lvl')[0].selectize.addItem($('#taxon-name').data('lvl'));
+        clearErrElem(elem);
+    }
+    /** Note: error for the create-taxon form. */
     function handleNoGenus(elem, errTag) {  
         var msg = '<span>Please select a genus before creating a species.</span>';
         setErrElemAndAppend(elem, msg, errTag)
@@ -2543,7 +2556,7 @@ $(document).ready(function(){
     }
     function getErrExitBttn(errTag, elem) {
         var exitHdnlrs = {
-            noGenus: clearNoGenusErr,
+            needsGenusPrnt: clearNeedsGenusParentErr, noGenus: clearNoGenusErr, 
         };
         var bttn = getExitButton();
         bttn.className += ' err-exit';
