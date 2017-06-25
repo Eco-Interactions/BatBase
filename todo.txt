@@ -40,8 +40,34 @@
             *- Show 'No changes' success msg when locations update and only
                 elevUnit is changed. 
             *- On grid close, reset tree toggle
+            *- Remove edit pencil from Central, South America -- Forest.
+            -- disable all taxon level selects when a new taxon form is open.
         --Data--
             -- Src 945: Is both the pub and citation. create a seperate child cit.
+
+        --Bugs--
+            - new taxon form isn't returning the 'Creating [lvl]' option to select properly
+
+
+
+
+    && Left Off &&
+        -- Trying to disable the 'change parent' options when there is a 'needsHigherLvl' err
+        
+
+
+
+
+Changes::
+    -misc
+        extend length of error
+            Replace timeouts with moot-checking || close button
+
+
+
+
+
+
 
 ::Testing!::
 > Data Storage

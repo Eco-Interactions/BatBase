@@ -1174,66 +1174,74 @@ $(document).ready(function(){
         $('#sub-cancel').off('click').click(cancelPrntEdit);
     }
     function selectParentTaxon(prntId, domainLvl) {                                 
-        var parentLvl = fParams.records.taxon[prntId].level.displayName;
-        if (parentLvl === domainLvl) { return; }
+        var parentLvl = fParams.records.taxon[prntId].level.displayName; 
+        if (parentLvl === domainLvl) { return clearAllOtherLvls(); }
         $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
     }
-    function closePrntEdit() {                                                  //console.log("closePrntEdit called.");
-        var prnt =  getSelectedTaxon() || getDomainTaxon();
-        fParams.taxon.prntSubFormLvl = null;
+    function clearAllOtherLvls() {
+        $.each($('#sub-form select[id$="-sel"]'), function(i, elem){ 
+            $(elem)[0].selectize.clear('silent');
+        });
+    }
+    function closePrntEdit() {                                                  
+        var prnt =  getSelectedTaxon() || getDomainTaxon();                     //console.log("closePrntEdit called. prnt = %O", prnt);
+        if (checkForParentLvlErrs(null, prnt.level.id)) { return; }
         resetAfterEditParentClose(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
         var prnt = fParams.records.taxon[$('#txn-prnt').data('txn')];
+        if (checkForParentLvlErrs(null, prnt.level.id)) { return; }
         resetAfterEditParentClose(prnt);
     }
     function resetAfterEditParentClose(prnt) {
+        clearLvlErrs('#Parent_errs');
+        fParams.taxon.prntSubFormLvl = null;
         $('#sub-form').remove();
-        setTaxonPrntNameElem(prnt);
         $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
+        setTaxonPrntNameElem(prnt);
         enableSubmitBttn('#top-submit');
-        checkForParentLvlErrs();
     }
     /**
      * Ensures that the parent taxon is from a higher taxonomic rank, that the taxon 
      * is of a higher rank than its children, and that a species taxon being edited 
      * has a genus parent selected.
+     * Note: 'val' comes in with '#txn-lvl''s change event. 
      */
-    function checkForParentLvlErrs() {  
-        var childLvl;
-        var prntLvl = $('#txn-prnt').data('lvl');
-        var taxonLvl = $('#txn-lvl').val();                                     //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", taxonLvl, prntLvl);
-        if ( taxonLvl <= prntLvl ) {
-            return showEditTaxonError('Parent', 'needsHigherLvlPrnt');
-        } else if ( taxonLvl == 7 && prntLvl != 6 ) {
-            return showEditTaxonError('Parent', 'needsGenusPrnt');
-        } else if (isLevelLowerThanChildLevels($('#taxon-name').data('txn'), taxonLvl)) {
-            return showNeedshigherLvlTaxonError($('#taxon-name').data('txn'));
-        } else {
-            clearLvlErrsAndEnableSubmit(taxonLvl);
+    function checkForParentLvlErrs(val, prnt) {
+        var fields = val ? ['Taxon', 'Parent'] : ['Parent', 'Taxon']; 
+        var errObj = getTaxonErrs(prnt);
+        var triggerFieldErrs = hasErrs = checkFieldForErrs(fields.shift());     //console.log("triggerFieldErrs = ", triggerFieldErrs)
+        hasErrs = checkFieldForErrs(fields.shift());
+        if (!hasErrs) { updateDataPropsAndEnableSubmit(); }
+        return triggerFieldErrs;
+    
+        function checkFieldForErrs(field) {                                     //console.log("checking field [%s] for errors", field);
+            var errFound;
+            for (var errTag in errObj[field]) {
+                if (!errObj[field][errTag]) { continue; }
+                sendErrRprt(errTag, field);
+                errFound = true;
+            }                                                                   //console.log('errFound [%s] for field [%s]', errFound, field);
+            if (!errFound) { clearLvlErrs('#'+field+'_errs'); }
+            return errFound || false;
         }
-    }
-    function clearLvlErrsAndEnableSubmit(taxonLvl) {
-        clearErrElem($('#Parent_errs')[0]);
-        clearErrElem($('#Taxon_errs')[0]);
-        $('#txn-lvl').data('lvl', taxonLvl);
-        enableSubmitBttn('#top-submit'); 
-    }
-    function showEditTaxonError(field, errTag) {
-        $('#Parent_errs')[0].innerText = '';
-        handleFieldErr(field, errTag, 'top');
-        disableSubmitBttn('#top-submit');
-    }
+    } /* End checkForParentLvlErrs */
+    function getTaxonErrs(prnt) {
+        var prntLvl = prnt || $('#txn-prnt').data('lvl'); 
+        var taxonLvl = $('#txn-lvl').val();                                     //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", taxonLvl, prntLvl);
+        return {
+            'Parent': {
+                'needsHigherLvlPrnt': taxonLvl <= prntLvl,
+                'needsGenusPrnt': taxonLvl == 7 && prntLvl != 6, },
+            'Taxon': {
+                'needsHigherLvl': isLevelLowerThanChildLevels(
+                    $('#taxon-name').data('txn'), taxonLvl), }
+        };
+    } 
     function isLevelLowerThanChildLevels(taxonId, taxonLvl) {  
         var highLvl = getHighestChildLvl(taxonId);                              //console.log('isLevelLowerThanChildLevels. high = [%s]. taxonLvl = [%s]', highLvl, taxonLvl)
+        if (taxonLvl === 7) { return false; }
         return taxonLvl >= highLvl;
-    }
-    function showNeedshigherLvlTaxonError(taxon) {
-        var childLvl = getHighestChildLvl(taxon); 
-        var lvlName = fParams.taxon.lvls[childLvl-1];
-        showEditTaxonError('Taxon', 'needsLevelHigherThan');
-        $('#Taxon_errs')[0].innerHTML += '<p><b>Please select a level higher than '
-            + lvlName + '.<b></p>';    
     }
     function getHighestChildLvl(taxonId) {
         var high = 7;
@@ -1245,6 +1253,18 @@ $(document).ready(function(){
             if (child.level.id < high) { high = child.level.id; }
         }
     } /* End getHighestChildLvl */
+    function sendErrRprt(errTag, field) {                                              
+        reportFormFieldErr(field, errTag, 'top');
+        disableSubmitBttn('#top-submit');
+        return true;
+    }
+    function updateDataPropsAndEnableSubmit(field) {
+        $('#txn-lvl').data('lvl', $('#txn-lvl').val());
+        enableSubmitBttn('#top-submit'); 
+    }
+    function clearLvlErrs(elemId) {                                             //console.log('clearLvlErrs.')
+        clearErrElem($(elemId)[0]);
+    }
     function initTaxonEditCombo(selId, chngFunc, createFunc) {                  //console.log("initTaxonEditCombo. selId = ", selId);
         var chng = chngFunc || Function.prototype;
         var create = createFunc || false;
@@ -2500,7 +2520,7 @@ $(document).ready(function(){
      */
     function formInitErr(field, errTag, formLvl, id) {                          console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, formLvl, id)
         var selId = id || '#'+field+'-sel';
-        handleFieldErr(field, errTag, formLvl);
+        reportFormFieldErr(field, errTag, formLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
         return { "value": "", "text": "Select " + field };
     }
@@ -2508,12 +2528,12 @@ $(document).ready(function(){
      * Shows the user an error message above the field row. The user can clear the 
      * error manually with the close button, or automatically by resolving the error.
      */
-    function handleFieldErr(fieldName, errTag, formLvl) {                     console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
+    function reportFormFieldErr(fieldName, errTag, formLvl) {                   console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
         var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
             "needsGenusPrnt": handleNeedsGenusParent, "noGenus": handleNoGenus,
-            "needsHigherLvlPrnt": "<p>The parent taxon must be at a higher taxonomic level.</p>",
-            'needsLevelHigherThan': '<p>Taxon level must be higher than that of child taxa.</p>',
+            "needsHigherLvlPrnt": handleNeedsHigherLvlPrnt,
+            'needsHigherLvl': handleNeedsHigherLvl,
             "openSubForm": "<p>Please finish the open "+ 
                 _util.ucfirst(subEntity) + " form.</p>",
         };
@@ -2526,7 +2546,7 @@ $(document).ready(function(){
         var msg = '<span>Please select a genus parent for the species taxon.</span>';
         setErrElemAndAppend(elem, msg, errTag);
     }
-    function clearNeedsGenusParentErr(elem) {                                            //console.log('clearNoGenusErr. elem = %O', elem);
+    function clrNeedsGenusPrntErr(elem) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#taxon-name').data('lvl'));
         clearErrElem(elem);
     }
@@ -2538,10 +2558,37 @@ $(document).ready(function(){
             if (e.target.value) { clearNoGenusErr(elem); }
         });
     }
-    function clearNoGenusErr(elem) {                                            //console.log('clearNoGenusErr. elem = %O', elem);
+    function clearNoGenusErr(elem) {                                            
         $('#Genus-sel').off('change');
         clearErrElem(elem);
     }
+    /** Note: error for the edit-taxon form. */
+    function handleNeedsHigherLvlPrnt(elem, errTag) {  
+        var msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
+        setErrElemAndAppend(elem, msg, errTag);
+    }
+    /** Clears the cause, either the parent-selection process or the taxon's level. */
+    function clrNeedsHigherLvlPrnt(elem) {                                    
+        $('#txn-lvl')[0].selectize.addItem($('#taxon-name').data('lvl'));
+        clearErrElem(elem);
+        if ($('#sub-form').length) { return selectParentTaxon($('#txn-prnt').data('txn'), 'Kingdom'); }
+        $('#txn-lvl').data('lvl', $('#txn-lvl').val());
+    }
+    /** Note: error for the edit-taxon form. */
+    function handleNeedsHigherLvl(elem, errTag) {  
+        var childLvl = getHighestChildLvl($('#taxon-name').data('txn'));
+        var lvlName = fParams.taxon.lvls[childLvl-1];
+        var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp'+
+            'Please select a level higher than '+lvlName+'</div>';
+        setErrElemAndAppend(elem, msg, errTag);
+    }
+    function clrNeedsHigherLvl(elem) {                                       
+        $('#txn-lvl')[0].selectize.addItem($('#taxon-name').data('lvl'));
+        clearErrElem(elem);
+    }
+
+
+
     /* ----------- Error-Elem Methods -------------- */
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
@@ -2556,14 +2603,16 @@ $(document).ready(function(){
     }
     function getErrExitBttn(errTag, elem) {
         var exitHdnlrs = {
-            needsGenusPrnt: clearNeedsGenusParentErr, noGenus: clearNoGenusErr, 
+            needsGenusPrnt: clrNeedsGenusPrntErr, noGenus: clearNoGenusErr, 
+            needsHigherLvl: clrNeedsHigherLvl, needsHigherLvlPrnt: clrNeedsHigherLvlPrnt, 
         };
         var bttn = getExitButton();
         bttn.className += ' err-exit';
         $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
         return bttn;
     }
-    function clearErrElem(elem) {                                               //console.log('clearErrElem.')
+    function clearErrElem(elem) {                                               //console.log('clearErrElem. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+        if (!elem.innerHTML) { return; }
         elem.innerHTML = '';
         elem.className = elem.className.split(' active-errs')[0];
     }
