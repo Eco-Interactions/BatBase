@@ -1186,12 +1186,14 @@ $(document).ready(function(){
     }
     function closePrntEdit() {                                                  
         var prnt =  getSelectedTaxon() || getDomainTaxon();                     //console.log("closePrntEdit called. prnt = %O", prnt);
-        if (checkForParentLvlErrs(null, prnt.level.id)) { return; }
-        resetAfterEditParentClose(prnt);
+        exitPrntEdit(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
         var prnt = fParams.records.taxon[$('#txn-prnt').data('txn')];
-        if (checkForParentLvlErrs(null, prnt.level.id)) { return; }
+        exitPrntEdit(prnt);
+    }
+    function exitPrntEdit(prnt) {
+        if (checkForParentLvlErrs(prnt.level.id)) { return; }
         resetAfterEditParentClose(prnt);
     }
     function resetAfterEditParentClose(prnt) {
@@ -1206,24 +1208,26 @@ $(document).ready(function(){
      * Ensures that the new taxon-level is higher than its children, and that a 
      * species taxon being edited has a genus parent selected.
      */
-    function checkForTaxonLvlErrs(taxonLvl) {  
-        var prntLvl = $('#txn-prnt').data('lvl'); 
+    function checkForTaxonLvlErrs(txnLvl) {  
+        var prntLvl = $('#txn-prnt').data('lvl');                               //console.log("checkForTaxonLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
         var errObj = {
-            'needsHigherLvl': [lvlIsLowerThanKidLvls(taxonLvl), 'Taxon'],  // test, field
-            'needsGenusPrnt': [taxonLvl == 7 && prntLvl != 6, 'Parent'], 
-        };
-        for (var tag in errObj) {
-            if (errObj[tag][0]) { return sendTxnErrRprt(tag, errObj[tag][1]); }
+            'needsHigherLvl': [lvlIsLowerThanKidLvls(txnLvl), 'Taxon'] };
+        for (var tag in errObj) {  
+            if (errObj[tag][0] === true) { return sendTxnErrRprt(tag, errObj[tag][1]); }
         }
-        if ($('#Taxon_errs').innerText !== '') { clrNeedsHigherLvl(null, null, taxonLvl); }                                 
+        clrNeedsHigherLvl(null, null, txnLvl);
+        checkForParentLvlErrs(prntLvl);
     }
-    function lvlIsLowerThanKidLvls(taxonLvl) {  
-        var highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                              //console.log('lvlIsLowerThanKidLvls. high = [%s]. taxonLvl = [%s]', highLvl, taxonLvl)
-        if (taxonLvl === 7) { return false; }
-        return taxonLvl >= highLvl;
+    /** 
+     * Returns true if the passed level is lower or equal to the highest level of 
+     * the taxon-being-edited's children.  
+     */
+    function lvlIsLowerThanKidLvls(txnLvl) {                                    
+        var highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));            //console.log('lvlIsLowerThanKidLvls. txnLvl = %s, childHigh = %s', txnLvl, highLvl)                  
+        return txnLvl >= highLvl;
     }
     function getHighestChildLvl(taxonId) {
-        var high = 7;
+        var high = 8;
         fParams.records.taxon[taxonId].children.forEach(checkChildLvl);
         return high;
 
@@ -1232,18 +1236,35 @@ $(document).ready(function(){
             if (child.level.id < high) { high = child.level.id; }
         }
     } /* End getHighestChildLvl */
-    function sendErrRprt(errTag, field) {                                              
+    /**
+     * Ensures that the parent taxon has a higher taxon-level and that a species 
+     * taxon being edited has a genus parent selected.
+     */
+    function checkForParentLvlErrs(prnt) {
+        var prntLvl = prnt || $('#txn-prnt').data('lvl'); 
+        var txnLvl = $('#txn-lvl').val();                                       //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
+        var errs = [
+            { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
+            { 'needsGenusPrnt': txnLvl == 7 && prntLvl != 6 }];
+        var hasErrs = !errs.every(checkForErr);                                 //console.log('hasErrs? ', hasErrs)
+        if (!hasErrs) { clearLvlErrs('#Parent_errs'); }
+        return hasErrs;
+    
+        function checkForErr(errObj) {                                         
+            for (var err in errObj) { 
+                return errObj[err] ? sendTxnErrRprt(err, 'Parent') : true;
+            }                                                                   
+        }
+    } /* End checkForParentLvlErrs */
+    function sendTxnErrRprt(errTag, field) {                                              
         reportFormFieldErr(field, errTag, 'top');
         disableSubmitBttn('#top-submit');
-        return true;
-    }
-    function updateDataPropsAndEnableSubmit(field) {
-        $('#txn-lvl').data('lvl', $('#txn-lvl').val());
-        enableSubmitBttn('#top-submit'); 
+        return false;
     }
     function clearLvlErrs(elemId) {                                             //console.log('clearLvlErrs.')
         clearErrElem($(elemId)[0]);
     }
+    /** Inits a taxon select-elem with the selectize library. */
     function initTaxonEditCombo(selId, chngFunc, createFunc) {                  //console.log("initTaxonEditCombo. selId = ", selId);
         var chng = chngFunc || Function.prototype;
         var create = createFunc || false;
@@ -2543,7 +2564,7 @@ $(document).ready(function(){
         clearErrElem(elem);
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsHigherLvlPrnt(elem, errTag) {  
+    function handleNeedsHigherLvlPrnt(elem, errTag) { 
         var msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
         setErrElemAndAppend(elem, msg, errTag);
     }
@@ -2563,12 +2584,17 @@ $(document).ready(function(){
         $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
         setErrElemAndAppend(elem, msg, errTag);
     }
-    function clrNeedsHigherLvl(elem, e, taxonLvl) {      
+    function clrNeedsHigherLvl(elem, e, taxonLvl) {    
         var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-        $('#txn-lvl')[0].selectize.addItem(txnLvl);
+        $('#txn-lvl')[0].selectize.addItem(txnLvl, 'silent');
         $('#txn-lvl').data('lvl', txnLvl);
-        $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
         clearLvlErrs('#Taxon_errs');
+        enableChngPrntBtttn();
+    }
+    /** Enables the button if the change-parent form isn't already open. */
+    function enableChngPrntBtttn() {
+        if ($('#sub-form').length ) { return; }
+        $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     }
 
 
