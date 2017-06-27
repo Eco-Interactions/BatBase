@@ -139,6 +139,7 @@
     }
     function extendJquery() {
         addOnEnterEvent();
+        addOnDestroyedEvent();
     }
     function addOnEnterEvent() {
         $.fn.onEnter = function(func) {
@@ -147,6 +148,16 @@
             });               
             return this; 
          };
+    }
+    /** A 'post-remove' event listener. Use: $('.elem').bind('destroyed', cb); */
+    function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
+        $.event.special.destroyed = {
+            remove: function(o) {
+              if (o.handler) {  // (&& o.type !== 'destroyed') <- something similar to this should fix the off() firing.g
+                o.handler();
+              }
+            }
+          }
     }
     /*--------------------------Storage Methods-------------------------------*/
 
