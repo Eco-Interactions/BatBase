@@ -2529,21 +2529,19 @@ $(document).ready(function(){
      * error manually with the close button, or automatically by resolving the error.
      */
     function reportFormFieldErr(fieldName, errTag, formLvl) {                   console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
-        var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var errMsgMap = {
-            "needsGenusPrnt": handleNeedsGenusParent, 
-            "noGenus": handleNoGenus,
-            "needsHigherLvlPrnt": handleNeedsHigherLvlPrnt,
+            'needsGenusPrnt': handleNeedsGenusParent, 
+            'noGenus': handleNoGenus,
+            'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
             'needsHigherLvl': handleNeedsHigherLvl,
-            "openSubForm": "<p>Please finish the open "+ 
-                _util.ucfirst(subEntity) + " form.</p>",
+            'openSubForm': handleOpenSubForm,
         };
         var errElem = getErrElem(fieldName);
-        errMsgMap[errTag](errElem, errTag);
+        errMsgMap[errTag](errElem, errTag, formLvl);
     }
     /* ----------- Field-Error Handlers --------------------------------------*/
     /** Note: error for the edit-taxon form. */
-    function handleNeedsGenusParent(elem, errTag) {  
+    function handleNeedsGenusParent(elem, errTag, formLvl) {  
         var msg = '<span>Please select a genus parent for the species taxon.</span>';
         setErrElemAndAppend(elem, msg, errTag);
     }
@@ -2552,19 +2550,19 @@ $(document).ready(function(){
         clearErrElem(elem);
     }
     /** Note: error for the create-taxon form. */
-    function handleNoGenus(elem, errTag) {  
+    function handleNoGenus(elem, errTag, formLvl) {  
         var msg = '<span>Please select a genus before creating a species.</span>';
         setErrElemAndAppend(elem, msg, errTag)
         $('#Genus-sel').change(function(e){
-            if (e.target.value) { clearNoGenusErr(elem); }
+            if (e.target.value) { clrNoGenusErr(elem); }
         });
     }
-    function clearNoGenusErr(elem, e) {                                            
+    function clrNoGenusErr(elem, e) {                                            
         $('#Genus-sel').off('change');
         clearErrElem(elem);
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsHigherLvlPrnt(elem, errTag) { 
+    function handleNeedsHigherLvlPrnt(elem, errTag, formLvl) { 
         var msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
         setErrElemAndAppend(elem, msg, errTag);
     }
@@ -2576,7 +2574,7 @@ $(document).ready(function(){
         $('#txn-lvl').data('lvl', $('#txn-lvl').val());
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsHigherLvl(elem, errTag) {  
+    function handleNeedsHigherLvl(elem, errTag, formLvl) {  
         var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
         var lvlName = fParams.taxon.lvls[childLvl-1];
         var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
@@ -2596,9 +2594,16 @@ $(document).ready(function(){
         if ($('#sub-form').length ) { return; }
         $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     }
-
-
-
+    /** Note: error used for the publication form. */
+    function handleOpenSubForm(elem, errTag, formLvl) {  
+        var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
+        var msg = '<p>Please finish the open '+ _util.ucfirst(subEntity) + ' form.</p>';
+        setErrElemAndAppend(elem, msg, errTag);
+        $('#'+formLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
+    }
+    function clrOpenSubForm(elem, e) {   \
+        clearLvlErrs(elem);
+    }
     /* ----------- Error-Elem Methods -------------- */
     /** Returns the error div for the passed field. */
     function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
@@ -2613,8 +2618,9 @@ $(document).ready(function(){
     }
     function getErrExitBttn(errTag, elem) {
         var exitHdnlrs = {
-            needsGenusPrnt: clrNeedsGenusPrntErr, noGenus: clearNoGenusErr, 
+            needsGenusPrnt: clrNeedsGenusPrntErr, noGenus: clrNoGenusErr, 
             needsHigherLvl: clrNeedsHigherLvl, needsHigherLvlPrnt: clrNeedsHigherLvlPrnt, 
+            openSubForm: clrOpenSubForm
         };
         var bttn = getExitButton();
         bttn.className += ' err-exit';
