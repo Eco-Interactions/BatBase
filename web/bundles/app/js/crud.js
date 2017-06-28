@@ -124,14 +124,13 @@ $(document).ready(function(){
         return cntnr;
     }
     function getInteractionDetailElems(entity, id, cntnr) {
-        var entities = ['pub', 'cit', 'loc'];
-        return entities.map(function(entity){ return initDetailDiv(entity) });
+        return ['pub','cit','loc'].map(function(en){ return initDetailDiv(en)});
     }
     function initDetailDiv(ent) {
         var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
-        var div = _util.buildElem("div", { "id": ent+"-det", "class": "det-div" });
-        $(div).append(_util.buildElem("h5", { "text": entities[ent]+":" }));        
-        $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
+        var div = _util.buildElem('div', { 'id': ent+'-det', 'class': 'det-div' });
+        $(div).append(_util.buildElem('h5', { 'text': entities[ent]+':' }));        
+        $(div).append(_util.buildElem('div', { 'text': 'None selected.' }));
         return div;
     }
     /** Returns the elems that will display the count of references to the entity. */
