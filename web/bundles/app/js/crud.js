@@ -30,19 +30,19 @@ $(document).ready(function(){
     /** Adds a "New" button under the top grid focus options. */
     function buildSearchPgFormUi() {
         var bttn = _util.buildElem('button', { 
-                text: "New", name: 'createbttn', class: "adminbttn" });
-        $(bttn).click(createEntity.bind(null, "create", "interaction"));
-        $("#opts-col1").append(bttn);
+                text: 'New', name: 'createbttn', class: 'adminbttn' });
+        $(bttn).click(createEntity.bind(null, 'create', 'interaction'));
+        $('#opts-col1').append(bttn);
     }
 /*-------------- Form HTML Methods -------------------------------------------*/
     /** Builds and shows the popup form's structural elements. */
     function showFormPopup(actionHdr, entity, id) {
         var title = actionHdr + " " + entity;
-        $("#b-overlay-popup").addClass("form-popup");
-        $("#b-overlay").addClass("form-ovrly");
-        $("#b-overlay-popup").append(getFormWindowElems(entity, id, title));
+        $('#b-overlay-popup').addClass('form-popup');
+        $('#b-overlay').addClass('form-ovrly');
+        $('#b-overlay-popup').append(getFormWindowElems(entity, id, title));
         setFormSize(entity);
-        $('#b-overlay, #b-overlay-popup').css({display: "flex"});        
+        $('#b-overlay, #b-overlay-popup').css({display: 'flex'});        
     }
     /** Adds the width to both the popup window and the form element for each entity. */
     function setFormSize(entity) {
@@ -69,7 +69,7 @@ $(document).ready(function(){
         $('#form-main').css({'width': confg.form});
     }
     function hideSearchFormPopup() {
-        $('#b-overlay-popup, #b-overlay').css({display: "none"});
+        $('#b-overlay-popup, #b-overlay').css({display: 'none'});
     }
     /**
      * Returns the form window elements - the form and the detail panel.
@@ -2618,7 +2618,7 @@ $(document).ready(function(){
         setErrElemAndAppend(elem, msg, errTag);
         $('#'+formLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
     }
-    function clrOpenSubForm(elem, e) {   \
+    function clrOpenSubForm(elem, e) {   
         clearLvlErrs(elem);
     }
     /* ----------- Error-Elem Methods -------------- */
