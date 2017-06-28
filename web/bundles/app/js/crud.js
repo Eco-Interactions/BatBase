@@ -49,22 +49,22 @@ $(document).ready(function(){
         var sizeConfgs = { 
             '1500': {
                 'Interaction': { popup: '1510px', form: '999px' },
-                'Publication': { popup: '1510px', form: '999px' },
-                'Citation': { popup: '1510px', form: '999px' },
+                'Publication': { popup: '72%', form: '999px' },
+                'Citation': { popup: '72%', form: '999px' },
                 'Author': { popup: '48%', form: '55%' },
-                'Location': { popup: '1510px', form: '999px' },
+                'Location': { popup: '72%', form: '999px' },
                 'Taxon': { popup: '808px', form: '60%' },
             },
             '1366': {
-                'Interaction': { popup: '95%', form: '78%' },
-                'Publication': { popup: '95%', form: '78%' },
-                'Citation': { popup: '95%', form: '78%' },
-                'Author': { popup: '63%', form: '55%' },
-                'Location': { popup: '95%', form: '78%' },
+                'Interaction': { popup: '97%', form: '71%' },
+                'Publication': { popup: '97%', form: '71%' },
+                'Citation': { popup: '97%', form: '71%' },
+                'Author': { popup: '63%', form: '58%' },
+                'Location': { popup: '97%', form: '71%' },
                 'Taxon': { popup: '808px', form: '60%' },
         }};
         var wKey = $(window).width() > 1499 ? '1500' : '1366';
-        var confg = sizeConfgs[wKey][entity];                                         console.log("setFormSize [%s] confg = %O", entity, confg);
+        var confg = sizeConfgs[wKey][entity];                                   //console.log("setFormSize [%s] confg = %O", entity, confg);
         $('.form-popup').css({'width': confg.popup});
         $('#form-main').css({'width': confg.form});
     }

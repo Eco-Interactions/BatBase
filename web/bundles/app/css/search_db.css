@@ -229,7 +229,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #form-details {
     flex: 1 1 333px;
-    margin: .5em .2em 0 0;
+    margin: .5em .2em 0 .2em;
     padding: 0 .5em .5em .5em;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -438,7 +438,8 @@ select[id$="txn-lvl"] + div {
     }
     #b-overlay .top-row {
         padding: .2em .75em .3em  0;
-        width: 448px;
+        width: 423px;
+        margin-right: 1em;
     }
     #b-overlay .sub-row {
         width: 375px;
@@ -455,10 +456,10 @@ select[id$="txn-lvl"] + div {
     }
     #b-overlay .full-row {
         padding: .2em 0 .3em  0;
-        width: 98%;
+        width: 96%;
     }
     #b-overlay #Notes_row div.field-row {        
-        width: 900px;
+        width: 852px;
     }
     #b-overlay #top-form label {
         font-size: 1em;
@@ -466,7 +467,7 @@ select[id$="txn-lvl"] + div {
         width: 120px;
     }  
     #b-overlay .top.xlrg-field {
-        width: 724px;
+        width: 700px;
     }
     #b-overlay .xlrg-field {
         width: 595px;
