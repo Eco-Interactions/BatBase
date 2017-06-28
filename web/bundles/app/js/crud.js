@@ -134,8 +134,26 @@ $(document).ready(function(){
         $(div).append(_util.buildElem("div", { "text": 'None selected.' }));
         return div;
     }
-    function getSubEntityEditDetailElems(entity, id, cntnr) {                   console.log("getSubEntityEditDetailElems.")
-        return [];
+    /** Returns the elems that will display the count of references to the entity. */
+    function getSubEntityEditDetailElems(entity, id, cntnr) {                   //console.log("getSubEntityEditDetailElems.")
+        var refEnts = {
+            'Author': [ 'int', 'cit' ],     'Citation': [ 'int' ],
+            'Taxon':  [ 'int', 'txn' ],     'Location': [ 'int' ],          
+            'Publication': [ 'int', 'pub', 'cit'],
+        };
+        var div = _util.buildElem('div', { 'id': 'det-cnt-cntnr' });
+        $(div).append(_util.buildElem('h5', { 'text': 'Referenced by: ' }));        
+        $(div).append(refEnts[entity].map(function(en){ return initCountDiv(en)}));
+        return div;
+    }
+    function initCountDiv(ent) { 
+        var entities = { 'cit': 'Citations', 'loc': 'Locations', 'int': 'Interactions',
+            'txn': 'Taxa', 'pub': 'Publications'
+        };
+        var div = _util.buildElem('div', { 'id': ent+'-det', 'class': 'cnt-div flex-row' });
+        $(div).append(_util.buildElem('div', {'text': '0' }));
+        $(div).append(_util.buildElem('span', {'text': entities[ent] }));
+        return div;
     }
     /**
      * When the Publication, Citation, or Location fields are selected, their 
