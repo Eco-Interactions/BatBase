@@ -254,8 +254,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     margin: .5em;
 }
 .cnt-div div, .cnt-div span {
-    padding: .5em 0 0 .5em;
-    margin-right: .25em;
+    padding: .25em;
+    width: 44px;
+    text-align: right
 }
 /*------------ Form Styles ---------------*/
 #top-form {

@@ -138,10 +138,10 @@ $(document).ready(function(){
         var refEnts = {
             'Author': [ 'int', 'cit' ],     'Citation': [ 'int' ],
             'Taxon':  [ 'int', 'txn' ],     'Location': [ 'int' ],          
-            'Publication': [ 'int', 'pub', 'cit'],
+            'Publication': [ 'int', 'cit'],
         };
         var div = _util.buildElem('div', { 'id': 'det-cnt-cntnr' });
-        $(div).append(_util.buildElem('h5', { 'text': 'Referenced by: ' }));        
+        $(div).append(_util.buildElem('span', { 'text': 'Referenced by: ' }));        
         $(div).append(refEnts[entity].map(function(en){ return initCountDiv(en)}));
         return div;
     }
@@ -154,11 +154,18 @@ $(document).ready(function(){
         $(div).append(_util.buildElem('span', {'text': entities[ent] }));
         return div;
     }
+    /** Adds a count of references to the entity-being-edited, by entity, to the panel. */
+    function addDataToCntDetailPanel(refObj) {
+        for (var ent in refObj) {
+            $('#'+ent+'-det div')[0].innerText = refObj[ent];    
+        }
+    }
     /**
-     * When the Publication, Citation, or Location fields are selected, their 
-     * data is added to the side detail panel of the form.
+     * When the Publication, Citation, or Location fields are selected, their data 
+     * is added to the side detail panel of the form. For other entity edit-forms: 
+     * the total number of referencing records is added. 
      */
-    function addDataToDetailPanel(ent, propObj) {
+    function addDataToIntDetailPanel(ent, propObj) {
         var html = getDataHtmlString(propObj);
         emptySidePanel(ent);
         $('#'+ent+'-det div').append(html);
@@ -293,37 +300,69 @@ $(document).ready(function(){
         $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName;  
     }
     function fillEntityData(entity, id) {
-        var hndlrs = { "author": fillSrcFields, "citation": fillSrcFields,
-            "location": fillLocFields, "publication": fillSrcFields, 
-            "publisher": fillSrcFields, "taxon": Function.prototype, 
-            "interaction": fillIntFields };
+        var hndlrs = { "author": fillSrcData, "citation": fillSrcData,
+            "location": fillLocData, "publication": fillSrcData, 
+            "publisher": fillSrcData, "taxon": fillTaxonData, 
+            "interaction": fillIntData };
         var rcrd = getEntityRecord(entity, id);                                 //console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
         hndlrs[entity](entity, id, rcrd);
     }
-    function fillIntFields(entity, id, rcrd) {
+    function fillIntData(entity, id, rcrd) {
         var fields = {
             "InteractionType": "select", "Location": "select", "Note": "textArea", 
             "Object": "taxon", "Source": "source", "Subject": "taxon", 
             "InteractionTags": "tags" };
         fillFields(rcrd, fields, []);
     }
-    function fillLocFields(entity, id, rcrd) {
+    function fillLocData(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
         delete fields.Country;
         fields["locCountry"] = "cntry";
         fillFields(rcrd, fields, []);
     }
-    function fillSrcFields(entity, id, rcrd) {
+    function fillTaxonData(entity, id, rcrd) {
+        // body...
+    }
+    function fillSrcData(entity, id, rcrd) {
         var src = getEntityRecord("source", id);
-        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcFields [%s] src = %O,[%s] = %O", id, src, entity, detail);
+        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O,[%s] = %O", id, src, entity, detail);
         var fields = getSourceFields(entity);
         fillFields(src, fields.core, fields.detail.exclude);
         fillFields(detail, fields.detail.add, []);
         setAdditionalFields(entity, src, detail);
+        fillSrcDetailPanel(entity, src);
         fParams.editing.detail = detail.id;
     }
     function getSourceFields(entity) {
         return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity) };
+    }
+    /** Adds a count of all refences to the entity to the form's detail-panel. */
+    function fillSrcDetailPanel(entity, srcRcrd) {                              //console.log('fillSrcDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
+        var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
+        addAddtionalRefs();                                                     //console.log('refObj = %O', refObj);
+        addDataToCntDetailPanel(refObj);
+
+        function addAddtionalRefs() {
+            if (entity === 'citation') { return; }
+            refObj.cit = srcRcrd.children.length || srcRcrd.contributions.length;
+        }
+    } /* End fillSrcDetailPanel */
+    function getSrcIntCnt(entity, rcrd) {                                       //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+        return entity === 'citation' ? rcrd.interactions.length : getTtlIntCnt(rcrd); 
+    }
+    function getTtlIntCnt(rcrd) {                                               //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+        var ints = rcrd.interactions.length;
+        if (rcrd.children.length) { ints += getChildIntCnt(rcrd.children);}
+        if (rcrd.contributions.length) { ints += getChildIntCnt(rcrd.contributions);}        
+        return ints;
+    }
+    function getChildIntCnt(children) {
+        var ints = 0;
+        children.forEach(function(child){ 
+            child = fParams.records.source[child];
+            ints += getTtlIntCnt(child); 
+        });
+        return ints;
     }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
@@ -500,7 +539,7 @@ $(document).ready(function(){
     function fillPubDetailPanel(id) {  
         var srcRcrd = fParams.records.source[id];  
         var propObj = getPubDetailDataObj(srcRcrd);
-        addDataToDetailPanel('pub', propObj);
+        addDataToIntDetailPanel('pub', propObj);
     }
     /** Returns an object with selected publication's data. */
     function getPubDetailDataObj(srcRcrd) {  
@@ -559,7 +598,7 @@ $(document).ready(function(){
     function fillCitDetailPanel(id) {  
         var srcRcrd = fParams.records.source[id];  
         var propObj = getCitDetailDataObj(srcRcrd);
-        addDataToDetailPanel('cit', propObj);
+        addDataToIntDetailPanel('cit', propObj);
     }
     /** Returns an object with selected citation's data. */
     function getCitDetailDataObj(srcRcrd) {  
@@ -698,7 +737,7 @@ $(document).ready(function(){
     function fillLocDetailPanel(id) {  
         var locRcrd = fParams.records.location[id];  
         var propObj = getLocDetailDataObj(locRcrd);
-        addDataToDetailPanel('loc', propObj);
+        addDataToIntDetailPanel('loc', propObj);
     }
     /** Returns an object with selected location's data. */
     function getLocDetailDataObj(locRcrd) {  
