@@ -108,7 +108,7 @@ $(document).ready(function(){
     /** Returns popup and overlay to their original/default state. */
     function exitFormPopup() {
         hideSearchFormPopup();
-        eif.search.showUpdates();
+        eif.search.initSearchGrid();
         $("#b-overlay").removeClass("form-ovrly");
         $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
@@ -319,25 +319,35 @@ $(document).ready(function(){
         delete fields.Country;
         fields["locCountry"] = "cntry";
         fillFields(rcrd, fields, []);
+        addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
     }
-    function fillTaxonData(entity, id, rcrd) {
-        // body...
+    function fillTaxonData(entity, id, rcrd) {                                  //console.log('fillTaxonData. rcrd = %O', rcrd)
+        var refs = { 
+            'int': getTtlIntCnt('taxon', rcrd, 'objectRoles') || 
+                getTtlIntCnt('taxon', rcrd, 'subjectRoles'), 
+            'txn': getTtlChildrenCnt('taxon', rcrd)
+        };
+        addDataToCntDetailPanel(refs);
     }
     function fillSrcData(entity, id, rcrd) {
         var src = getEntityRecord("source", id);
         var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O,[%s] = %O", id, src, entity, detail);
-        var fields = getSourceFields(entity);
-        fillFields(src, fields.core, fields.detail.exclude);
-        fillFields(detail, fields.detail.add, []);
-        setAdditionalFields(entity, src, detail);
-        fillSrcDetailPanel(entity, src);
+        setSrcData();
         fParams.editing.detail = detail.id;
-    }
+
+        function setSrcData() {
+            var fields = getSourceFields(entity);
+            fillFields(src, fields.core, fields.detail.exclude);
+            fillFields(detail, fields.detail.add, []);
+            setAdditionalFields(entity, src, detail);
+            fillEditSrcDetails(entity, src);
+        }
+    } /* End fillSrcData */
     function getSourceFields(entity) {
         return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity) };
     }
     /** Adds a count of all refences to the entity to the form's detail-panel. */
-    function fillSrcDetailPanel(entity, srcRcrd) {                              //console.log('fillSrcDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
+    function fillEditSrcDetails(entity, srcRcrd) {                              //console.log('fillEditSrcDetails. [%s]. srcRcrd = %O', entity, srcRcrd);
         var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
         addAddtionalRefs();                                                     //console.log('refObj = %O', refObj);
         addDataToCntDetailPanel(refObj);
@@ -346,21 +356,31 @@ $(document).ready(function(){
             if (entity === 'citation') { return; }
             refObj.cit = srcRcrd.children.length || srcRcrd.contributions.length;
         }
-    } /* End fillSrcDetailPanel */
+    } /* End fillEditSrcDetails */
     function getSrcIntCnt(entity, rcrd) {                                       //console.log('getSrcIntCnt. rcrd = %O', rcrd);
-        return entity === 'citation' ? rcrd.interactions.length : getTtlIntCnt(rcrd); 
+        return entity === 'citation' ? 
+            rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
     }
-    function getTtlIntCnt(rcrd) {                                               //console.log('getSrcIntCnt. rcrd = %O', rcrd);
-        var ints = rcrd.interactions.length;
-        if (rcrd.children.length) { ints += getChildIntCnt(rcrd.children);}
-        if (rcrd.contributions.length) { ints += getChildIntCnt(rcrd.contributions);}        
+    /** ----------- Shared ---------------------------- */
+    function getTtlChildrenCnt(entity, rcrd) {                                  //console.log('getTtlChildrenCnt. rcrd = %O', rcrd);
+        var cnt = rcrd.children.length;
+        rcrd.children.forEach(function(child) { 
+            child = fParams.records[entity][child];            
+            cnt += getTtlChildrenCnt(entity, child);
+        });
+        return cnt;
+    }
+    function getTtlIntCnt(entity, rcrd, intProp) {                              //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
+        var ints = rcrd[intProp].length;
+        if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
+        if (rcrd.contributions) { ints += getChildIntCnt(entity, rcrd.contributions, intProp);}        
         return ints;
     }
-    function getChildIntCnt(children) {
+    function getChildIntCnt(entity, children, intProp) {
         var ints = 0;
         children.forEach(function(child){ 
-            child = fParams.records.source[child];
-            ints += getTtlIntCnt(child); 
+            child = fParams.records[entity][child];
+            ints += getTtlIntCnt(entity, child, intProp); 
         });
         return ints;
     }
@@ -730,11 +750,11 @@ $(document).ready(function(){
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
         var cntryValue = locRcrd.country ? locRcrd.country.id : 439;
         $('#Country-sel')[0].selectize.addItem(cntryValue, true);
-        fillLocDetailPanel(val);
+        fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
     }
     /** Displays the selected location's data in the side detail panel. */
-    function fillLocDetailPanel(id) {  
+    function fillEditLocDetails(id) {  
         var locRcrd = fParams.records.location[id];  
         var propObj = getLocDetailDataObj(locRcrd);
         addDataToIntDetailPanel('loc', propObj);
