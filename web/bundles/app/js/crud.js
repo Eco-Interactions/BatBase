@@ -136,9 +136,9 @@ $(document).ready(function(){
     /** Returns the elems that will display the count of references to the entity. */
     function getSubEntityEditDetailElems(entity, id, cntnr) {                   //console.log("getSubEntityEditDetailElems.")
         var refEnts = {
-            'Author': [ 'int', 'cit' ],     'Citation': [ 'int' ],
-            'Taxon':  [ 'int', 'txn' ],     'Location': [ 'int' ],          
-            'Publication': [ 'int', 'cit'],
+            'Author': [ 'cit', 'int' ],     'Citation': [ 'int' ],
+            'Location': [ 'int' ],          'Publication': ['cit', 'int' ],
+            'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],     
         };
         var div = _util.buildElem('div', { 'id': 'det-cnt-cntnr' });
         $(div).append(_util.buildElem('span', { 'text': 'Referenced by: ' }));        
@@ -146,8 +146,9 @@ $(document).ready(function(){
         return div;
     }
     function initCountDiv(ent) { 
-        var entities = { 'cit': 'Citations', 'loc': 'Locations', 'int': 'Interactions',
-            'txn': 'Taxa', 'pub': 'Publications'
+        var entities = { 'cit': 'Citations', 'fam': 'Families', 'gen': 'Genera', 
+            'int': 'Interactions', 'loc': 'Locations', 'ord': 'Orders',
+            'pub': 'Publications', 'spc': 'Species', 'txn': 'Taxa', 
         };
         var div = _util.buildElem('div', { 'id': ent+'-det', 'class': 'cnt-div flex-row' });
         $(div).append(_util.buildElem('div', {'text': '0' }));
@@ -324,10 +325,28 @@ $(document).ready(function(){
     function fillTaxonData(entity, id, rcrd) {                                  //console.log('fillTaxonData. rcrd = %O', rcrd)
         var refs = { 
             'int': getTtlIntCnt('taxon', rcrd, 'objectRoles') || 
-                getTtlIntCnt('taxon', rcrd, 'subjectRoles'), 
-            'txn': getTtlChildrenCnt('taxon', rcrd)
+                getTtlIntCnt('taxon', rcrd, 'subjectRoles')
         };
+        getTaxonChildRefs(rcrd);  
         addDataToCntDetailPanel(refs);
+        removeEmptyDetailPanelElems();
+
+        function getTaxonChildRefs(txn) {
+            txn.children.forEach(function(child) { addChildRefData(child); });
+        }
+        function addChildRefData(id) {
+            var lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
+            var child = fParams.records.taxon[id];              
+            var lvlK = lvlKeys[child.level.displayName];       
+            if (!refs[lvlK]) { refs[lvlK] = 0; }
+            refs[lvlK] += 1;
+            getTaxonChildRefs(child);
+        }
+    } /* End fillTaxonData */
+    function removeEmptyDetailPanelElems() {                                         
+        $.each($('[id$="-det"] div'), function(i, elem) {
+            if (elem.innerText == 0) {  elem.parentElement.remove(); }
+        });
     }
     function fillSrcData(entity, id, rcrd) {
         var src = getEntityRecord("source", id);
@@ -362,14 +381,6 @@ $(document).ready(function(){
             rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
     }
     /** ----------- Shared ---------------------------- */
-    function getTtlChildrenCnt(entity, rcrd) {                                  //console.log('getTtlChildrenCnt. rcrd = %O', rcrd);
-        var cnt = rcrd.children.length;
-        rcrd.children.forEach(function(child) { 
-            child = fParams.records[entity][child];            
-            cnt += getTtlChildrenCnt(entity, child);
-        });
-        return cnt;
-    }
     function getTtlIntCnt(entity, rcrd, intProp) {                              //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
         var ints = rcrd[intProp].length;
         if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
