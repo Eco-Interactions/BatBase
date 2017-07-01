@@ -20,7 +20,7 @@
     eif.search = {
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
-        showUpdates: showTodaysSrcUpdates
+        // showUpdates: showTodaysSrcUpdates
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -933,8 +933,15 @@
             treeLvl: treeLvl,
             interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
             locGroupedInts: hasGroupedInteractionsRow(locRcrd),
-            type: locRcrd.locationType.displayName
+            type: getLocationType()
         };      
+        /** Intercepts the edge-case region/habitat location and sets it as a Region. */
+        function getLocationType() {
+            if (locRcrd.displayName === 'Central America, South America-Forest') {
+                return 'Region';
+            }
+            return locRcrd.locationType.displayName
+        }
     }
     function hasGroupedInteractionsRow(locRcrd) {
         return locRcrd.children.length > 0 && locRcrd.interactions.length > 0;

@@ -2223,19 +2223,19 @@ $(document).ready(function(){
          * unique display names for both the publication and its citation.
          */
         function ifBookType() { 
-            if (formVals.citationType == 4) { formVals.displayName += "-citation"; }
+            if (formVals.citationType == 4) { formVals.displayName += '-citation'; }
         }
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
         function addElevUnits() {
-            if (formVals.elevation) { formVals.elevUnitAbbrv = "m"; }
+            if (formVals.elevation) { formVals.elevUnitAbbrv = 'm'; }
         }
         /** Pads each to the 13 scale set by the db. This eliminates false change flags. */
         function padLatLong() {
             if (formVals.latitude) {            
-                formVals.latitude = parseFloat(formVals.latitude).toFixed(13); 
+                formVals.latitude = parseFloat(formVals.latitude).toFixed(14); 
             }
             if (formVals.longitude) {            
-                formVals.longitude = parseFloat(formVals.longitude).toFixed(13); 
+                formVals.longitude = parseFloat(formVals.longitude).toFixed(14); 
             }
         }
         /** If no parent country is selected, the 'Unspecified' region is the parent. */
