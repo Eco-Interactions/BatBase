@@ -930,8 +930,14 @@ $(document).ready(function(){
         if (selLvl === "Species" && !$('#Genus-sel').val()) {
             return formInitErr(selLvl, "noGenus", formLvl);
         }
+        enableTxnCombos(false);
         return showNewTaxonForm(val, selLvl, formLvl);
     } 
+    function enableTxnCombos(enable) {
+        $.each($('#sub-form select'), function(i, sel){
+            return enable ? $(sel)[0].selectize.enable() : $(sel)[0].selectize.disable();
+        });
+    }
     function showNewTaxonForm(val, selLvl, formLvl) {                           //console.log("showNewTaxonForm. val, selVal, formLvl = %O", arguments)
         fParams.taxon.formTaxonLvl = selLvl;
         buildTaxonForm();
@@ -941,9 +947,12 @@ $(document).ready(function(){
             $('#'+selLvl+'_row').append(initSubForm(
                 "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
             enableSubmitBttn("#"+formLvl+"-submit");
-            $('#'+formLvl+'-hdr')[0].innerText = ' '+ selLvl;
+            $('#'+formLvl+'-hdr')[0].innerText += ' '+ selLvl;
         }
     }  /* End showTaxonForm */
+    function onTaxonCreateFormExit() {
+        enableTxnCombos(true);
+    }
     /**
      * Removes any previous realm comboboxes. Shows a combobox for each level present 
      * in the selected Taxon realm, plant (default) or arthropod, filled with the 
@@ -1610,13 +1619,13 @@ $(document).ready(function(){
      * select elem 'parent' of the sub-form. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selId) {
+    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selId) {  //console.log('initSubForm called. args = %O', arguments)
         var subFormContainer = _util.buildElem('div', {
             id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
         var hdr = _util.buildElem(
-            "p", { "text": "New "+_util.ucfirst(formEntity), "id": formLvl+"-hdr" });
+            'p', { 'text': 'New '+_util.ucfirst(formEntity), 'id': formLvl+'-hdr' });
         var subForm = buildSubForm(formEntity, fieldVals, formLvl, selId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, "create"));
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, 'create'));
         $(subFormContainer).append([hdr].concat(subForm));
         fParams.forms[formLvl].pSelId = selId; 
         enableCombobox(selId, false)
@@ -1728,6 +1737,7 @@ $(document).ready(function(){
                 "exclude": [],
                 "required": ["Display Name"],
                 "order": ["DisplayName"],
+                "exitHandler": { create: onTaxonCreateFormExit }
             },
         };
         return fieldMap[entity];
