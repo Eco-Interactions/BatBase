@@ -2510,10 +2510,21 @@ $(document).ready(function(){
     }
     /*------------------ Top-Form Success Methods --------------------*/
     function showEditSuccessMsg(data) {
-        var msg = Object.keys(data.coreEdits).length > 1 || 
-            Object.keys(data.detailEdits).length > 1 ?
-            "Update successful." : "No changes detected."; 
+        var msg = hasChngs(data) ? "Update successful." : "No changes detected."; 
         showSuccessMsg(msg);
+    }
+    /** 
+     * Returns true if there have been user-made changes to the entity. 
+     * Note: The location elevUnitAbbrv is updated automatically for locations with
+     * elevation data, and is ignored here. 
+     */
+    function hasChngs(data) {
+        var chngs = Object.keys(data.coreEdits).length > 1 || 
+            Object.keys(data.detailEdits).length > 1;
+        if (chngs && data.core == 'location' && Object.keys(data.coreEdits).length == 2) {
+            if ('elevUnitAbbrv' in data.coreEdits) { return false; }
+        }
+        return chngs;
     }
     /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
