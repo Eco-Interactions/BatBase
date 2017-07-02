@@ -309,15 +309,17 @@ $(document).ready(function(){
     /*------------------- Fills Edit Form Fields -----------------------------*/
     /** Fills form with existing data for the entity being edited. */
     function fillExistingData(entity, id) {
-        addDisplayNameToHdr(entity, id);
+        addDisplayNameToForm(entity, id);
         fillEntityData(entity, id); 
         if (ifRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
     }
-    function addDisplayNameToHdr(ent, id) {
+    function addDisplayNameToForm(ent, id) {
+        if (ent === 'interaction') { return; }
         var prnt = getParentEntity(ent);
         var entity = prnt || ent;
         var rcrd = getEntityRecord(entity, id);                                 
-        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName;  
+        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName; 
+        $('#det-cnt-cntnr span')[0].innerText = rcrd.displayName + ' is referenced by:';
     }
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcData, "citation": fillSrcData,
@@ -480,9 +482,7 @@ $(document).ready(function(){
     function addTaxon(fieldId, prop, rcrd) {                                    //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
         var selApi = $('#'+ fieldId + '-sel')[0].selectize;
         var taxon = fParams.records.taxon[rcrd[prop]];                          
-        var displayName = taxon.level.id === 7 ? 
-            taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
-        selApi.addOption({ value: taxon.id, text: displayName });
+        selApi.addOption({ value: taxon.id, text: getTaxonDisplayName(taxon) });
         selApi.addItem(taxon.id);
     }
     function addSource(fieldId, prop, rcrd) {
@@ -1041,9 +1041,11 @@ $(document).ready(function(){
     /** Returns an option object for the most specific taxon selected. */
     function getSelectedTaxonOption() {
         var taxon = getSelectedTaxon();                                         //console.log("selected Taxon = %O", taxon);
-        var displayName = taxon.level.id === 7 ? 
-            taxon.displayName : taxon.level.displayName + " " + taxon.displayName;
-        return { value: taxon.id, text: displayName };
+        return { value: taxon.id, text: getTaxonDisplayName(taxon) };
+    }
+    function getTaxonDisplayName(taxon) { 
+        return taxon.level.id === 7 ? 
+            taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
     }
     /** Finds the most specific level with a selection and returns that taxon record. */
     function getSelectedTaxon() {
@@ -1196,7 +1198,7 @@ $(document).ready(function(){
     }
     function setTaxonPrntNameElem(prnt, elem, pText) {
         var div = elem || $('#txn-prnt')[0];
-        var text = pText || prnt.level.displayName + ' ' + prnt.displayName;
+        var text = pText || getTaxonDisplayName(prnt);
         div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
         if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
     }
@@ -1280,7 +1282,7 @@ $(document).ready(function(){
      * Initializes the edit-parent form's comboboxes. Selects the current parent.
      * Hides the species row. Adds styles and modifies event listeners. 
      */
-    function finishEditParentFormBuild() {                                      console.log("fParams = %O", fParams);    
+    function finishEditParentFormBuild() {                                      //console.log("fParams = %O", fParams);    
         var domainLvl = fParams.taxon.domainLvls[0];
         initComboboxes(null, 'sub');
         selectParentTaxon($('#txn-prnt').data('txn'), domainLvl);
@@ -1290,9 +1292,10 @@ $(document).ready(function(){
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
     }
-    function selectParentTaxon(prntId, domainLvl) {                                 
-        var parentLvl = fParams.records.taxon[prntId].level.displayName; 
-        if (parentLvl === domainLvl) { return clearAllOtherLvls(); }
+    function selectParentTaxon(prntId, domainLvl) {                             //console.log('selectParentTaxon. prntId [%s], domainLvl [%s]', prntId, domainLvl);                 
+        var parentLvl = fParams.records.taxon[prntId].level.displayName;  
+        if (parentLvl == domainLvl) { return clearAllOtherLvls(); }
+        clearAllOtherLvls();
         $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
     }
     function clearAllOtherLvls() {
