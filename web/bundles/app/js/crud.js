@@ -508,6 +508,7 @@ $(document).ready(function(){
         initComboboxes("interaction");
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
+        $('#Note_row label')[0].innerText += 's';
         addReqElemsToConfg();     
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
@@ -527,7 +528,7 @@ $(document).ready(function(){
     function buildIntFormFields(action) {
         var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
             buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
-            buildIntTagField, buildIntNotesField ]; 
+            buildIntTagField, buildIntNoteField ]; 
         var fields = fieldBuilders.map(buildField);
         return fields.concat(buildFormBttns("Interaction", "top", action));
     }
@@ -1411,9 +1412,9 @@ $(document).ready(function(){
         elem.className = 'lrg-field';
         return buildFormRow("Interaction Tags", elem, "top", false);
     }
-    function buildIntNotesField() {
-        var txtElem = buildLongTextArea('interaction', 'Notes', 'top');
-        return buildFormRow('Notes', txtElem, 'top', false);
+    function buildIntNoteField() {
+        var txtElem = buildLongTextArea('interaction', 'Note', 'top');
+        return buildFormRow('Note', txtElem, 'top', false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
@@ -1688,7 +1689,7 @@ $(document).ready(function(){
                 "add": {},  
                 "exclude": [],
                 "required": ["Interaction Type"],
-                "order": ["InteractionType", "InteractionTags", "Notes"],
+                "order": ["InteractionType", "InteractionTags", "Note"],
                 "exitHandler": { create: resetInteractionForm }
             },
             "location": {
@@ -1760,7 +1761,7 @@ $(document).ready(function(){
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
                 "Latitude": "text", "Habitat Type": "select", "Country": "edgeCase", 
             }, //"Elevation Units": "select",
-            "interaction": { "Interaction Type": "select", "Notes": "fullTextArea", 
+            "interaction": { "Interaction Type": "select", "Note": "fullTextArea", 
                 "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
@@ -2419,7 +2420,6 @@ $(document).ready(function(){
                 "citationTitle": { "interaction": "source" },
                 "country": { "interaction": false },
                 "interactionTags": { "interaction": "tags" },
-                "notes": { "interaction": "note" },
                 "publication": { "interaction": false }
             },
             "location": {
@@ -2561,7 +2561,7 @@ $(document).ready(function(){
         return vals;
 
         function getFieldVal(fieldName) {                                       //console.log("fieldName = %s", fieldName)
-            var suffx = fieldName === 'Notes' ? '-txt' : '-sel';
+            var suffx = fieldName === 'Note' ? '-txt' : '-sel';
             vals[fieldName] = $('#'+fieldName+suffx).val();
         }
         function addFalseValue(fieldName) {
@@ -2583,7 +2583,7 @@ $(document).ready(function(){
         }
     }
     function clearField(fieldName) {
-        if (fieldName === 'Notes') { return $('#Notes-txt').val(""); }
+        if (fieldName === 'Note') { return $('#Note-txt').val(""); }
         clearCombobox('#'+fieldName+'-sel');
     }
     /** Inits the necessary interaction form params after form reset. */
