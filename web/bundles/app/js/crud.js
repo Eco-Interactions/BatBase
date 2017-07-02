@@ -1389,7 +1389,7 @@ $(document).ready(function(){
         return false;
     }
     function clearLvlErrs(elemId) {                                             //console.log('clearLvlErrs.')
-        clearErrElem($(elemId)[0]);
+        clearErrElemAndEnableSubmit($(elemId)[0]);
     }
     /** Inits a taxon select-elem with the selectize library. */
     function initTaxonEditCombo(selId, chngFunc, createFunc) {                  //console.log("initTaxonEditCombo. selId = ", selId);
@@ -2442,6 +2442,7 @@ $(document).ready(function(){
                 "citationTitle": { "interaction": "source" },
                 "country": { "interaction": false },
                 "interactionTags": { "interaction": "tags" },
+                "notes": { "interaction": "note" }, 
                 "publication": { "interaction": false }
             },
             "location": {
@@ -2694,7 +2695,7 @@ $(document).ready(function(){
     }
     function clrIsGenusPrnt(elem, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
-        clearErrElem(elem);
+        clearErrElemAndEnableSubmit(elem);
     }
     /** Note: error for the edit-taxon form. */
     function handleNeedsGenusParent(elem, errTag, formLvl) {  
@@ -2703,7 +2704,7 @@ $(document).ready(function(){
     }
     function clrNeedsGenusPrntErr(elem, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
-        clearErrElem(elem);
+        clearErrElemAndEnableSubmit(elem);
     }
     /** Note: error for the create-taxon form. */
     function handleNoGenus(elem, errTag, formLvl) {  
@@ -2715,7 +2716,7 @@ $(document).ready(function(){
     }
     function clrNoGenusErr(elem, e) {                                            
         $('#Genus-sel').off('change');
-        clearErrElem(elem);
+        clearErrElemAndEnableSubmit(elem);
     }
     /** Note: error for the edit-taxon form. */
     function handleNeedsHigherLvlPrnt(elem, errTag, formLvl) { 
@@ -2725,8 +2726,10 @@ $(document).ready(function(){
     /** Clears the cause, either the parent-selection process or the taxon's level. */
     function clrNeedsHigherLvlPrnt(elem, e) {                                    
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
-        clearErrElem(elem);
-        if ($('#sub-form').length) { return selectParentTaxon($('#txn-prnt').data('txn'), 'Kingdom'); }
+        clearErrElemAndEnableSubmit(elem);
+        if ($('#sub-form').length) { return selectParentTaxon(
+            $('#txn-prnt').data('txn'), fParams.taxon.domainLvls[0]); 
+        }
         $('#txn-lvl').data('lvl', $('#txn-lvl').val());
     }
     /** Note: error for the edit-taxon form. */
@@ -2771,6 +2774,7 @@ $(document).ready(function(){
     function setErrElemAndAppend(elem, msg, errTag) {
         elem.innerHTML = msg;
         $(elem).append(getErrExitBttn(errTag, elem));
+        disableSubmitBttn('#top-submit');
     }
     function getErrExitBttn(errTag, elem) {
         var exitHdnlrs = {
@@ -2783,7 +2787,11 @@ $(document).ready(function(){
         $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
         return bttn;
     }
-    function clearErrElem(elem) {                                               //console.log('clearErrElem. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+    function clearErrElemAndEnableSubmit(elem) {                                //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+        clearErrElem(elem);
+        if (!$('#sub-form').length) { enableSubmitBttn('#top-submit'); }
+    }
+    function clearErrElem(elem) {
         if (!elem.innerHTML) { return; }
         elem.innerHTML = '';
         elem.className = elem.className.split(' active-errs')[0];

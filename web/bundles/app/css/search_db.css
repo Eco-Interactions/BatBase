@@ -377,7 +377,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #top-form textarea {
     height: 63px;
 }
-#Notes-txt {
+#Note-txt {
     border-color: #b8b8b8;
 }
 .selectize-input {
@@ -459,7 +459,7 @@ select[id$="txn-lvl"] + div {
         padding: .2em 0 .3em  0;
         width: 96%;
     }
-    #b-overlay #Notes_row div.field-row {        
+    #b-overlay #Note_row div.field-row {        
         width: 852px;
     }
     #b-overlay #top-form label {
