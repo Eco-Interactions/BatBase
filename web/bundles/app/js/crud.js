@@ -108,10 +108,25 @@ $(document).ready(function(){
     /** Returns popup and overlay to their original/default state. */
     function exitFormPopup() {
         hideSearchFormPopup();
-        eif.search.initSearchGrid();
+        refocusGridIfFormWasSubmitted();
         $("#b-overlay").removeClass("form-ovrly");
         $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
+    }
+    /**
+     * If the form was not submitted the grid does not reload. Otherwise, if exiting 
+     * the edit-forms, the grid will reload with the current focus; or, after creating 
+     * an interaction, the grid will refocus into source-view. Exiting the interaction
+     * forms also sets the 'int-updated-at' filter to 'today'.
+     */
+    function refocusGridIfFormWasSubmitted() {                                  //console.log('submitFocus = ', fParams.submitFocus)
+        if (!fParams.submitted) { return; }
+        if (fParams.submitFocus === 'int') { return refocusAndShowUpdates();}
+        eif.search.initSearchGrid(fParams.submitFocus);
+    }
+    function refocusAndShowUpdates() { 
+        var focus  = fParams.action === 'create' ? 'srcs': null;
+        eif.search.showUpdates(focus);   
     }
     function getDetailPanelElems(entity, id) {                                  //console.log("getDetailPanelElems. action = %s, entity = %s", fParams.action, fParams.entity)
         var getDetailElemFunc = fParams.action === 'edit' && fParams.entity !== 'interaction' ?
@@ -141,7 +156,7 @@ $(document).ready(function(){
             'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],     
         };
         var div = _util.buildElem('div', { 'id': 'det-cnt-cntnr' });
-        $(div).append(_util.buildElem('span', { 'text': 'Referenced by: ' }));        
+        $(div).append(_util.buildElem('span'));        
         $(div).append(refEnts[entity].map(function(en){ return initCountDiv(en)}));
         return div;
     }
@@ -203,15 +218,19 @@ $(document).ready(function(){
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
+     * > submitFocus - Stores the grid-focus for the entity of the most recent 
+            form submission. Will be used on form-exit.
      */
-    function initFormParams(action, entity, id) {                               
+    function initFormParams(action, entity, id) {   
+        var prevSubmitFocus = fParams.submitFocus;
         fParams = {
             action: action,
             editing: action === "edit" ? { core: id || null, detail: null } : false,
             entity: entity,
             forms: {},
             formLevels: ["top", "sub", "sub2"],
-            records: _util.getDataFromStorage(["source", "location", "taxon"])
+            records: _util.getDataFromStorage(["source", "location", "taxon"]),
+            submitFocus: prevSubmitFocus || false
         };
         initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action); console.log("####fPs = %O", fParams)
     }
@@ -2458,9 +2477,17 @@ $(document).ready(function(){
         var url = getEntityUrl(coreEntity, fParams.forms[formLvl].action);
         if (fParams.editing) { formData.ids = fParams.editing; }
         formData.coreEntity = coreEntity;
-        fParams.ajaxFormLvl = formLvl;
+        storeParamsData(coreEntity, formLvl);
         toggleWaitOverlay(true);
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
+    }
+    /** Stores data relevant to the form submission that will be used later. */
+    function storeParamsData(entity, formLvl) {                                 
+        var focuses = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
+            'interaction': 'int' };
+        fParams.ajaxFormLvl = formLvl;
+        fParams.submitted = true;
+        fParams.submitFocus = focuses[entity];
     }
     /** Returns the full url for the passed entity and action.  */
     function getEntityUrl(entityName, action) {

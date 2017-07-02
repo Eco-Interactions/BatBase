@@ -20,7 +20,7 @@
     eif.search = {
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
-        // showUpdates: showTodaysSrcUpdates
+        showUpdates: showTodaysUpdates
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -131,12 +131,13 @@
             "the data shown in the grid and/or csv exported.";
     }
     /** Grid-rebuild entry point after form-window close. */
-    function resetSearchGrid() {
+    function resetSearchGrid(focus) {
         resetToggleTreeBttn(false);
-        selectSearchFocus();
+        if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
+        selectSearchFocus(null, focus);
     }
-    function selectSearchFocus() {                                              //console.log("---select(ing)SearchFocus = ", $('#search-focus').val())
-        var focus = $('#search-focus').val();         
+    function selectSearchFocus(e, focus) { 
+        var focus = focus || $('#search-focus').val();                          //console.log("---select(ing)SearchFocus = ", focus)
         var builderMap = { 
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
             "taxa": buildTaxonGrid 
@@ -149,7 +150,7 @@
      */
     function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called.")
         clearPreviousGrid();
-        if (focus !== gParams.curFocus) {   
+        if (focus !== gParams.curFocus) {   //focus && 
             _util.populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();
@@ -1255,11 +1256,11 @@
         });
     }
     /**
-     * When the entity-crud form is exited, the grid is reloaded in source view with the
-     * 'interactions updates since' filter set to 'today'.
+     * When the interaction form is exited, the passed focus is selected and the 
+     * grid is refreshed with the 'interactions updates since' filter set to 'today'.
      */
-    function showTodaysSrcUpdates() {                                           //console.log("showingUpdated from today")
-        $('#search-focus').val("srcs");
+    function showTodaysUpdates(focus) {                                         //console.log("showingUpdated from today")
+        if (focus) { $('#search-focus').val(focus); }
         selectSearchFocus();
         window.setTimeout(function() {
             $('#shw-chngd')[0].checked = true;
@@ -1827,8 +1828,8 @@
      * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
      * Note: 'Today' is the default selection. 
      */
-    function toggleTimeUpdatedFilter() { 
-        var filtering = $('#shw-chngd')[0].checked;
+    function toggleTimeUpdatedFilter(state) { 
+        var filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
         var opac = filtering ? 1 : .3;
         $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
         $('#fltr-tdy')[0].checked = true;
