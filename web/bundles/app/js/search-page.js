@@ -58,7 +58,7 @@
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
         showPopUpMsg("Downloading and caching all interaction records. Please " +
-            "allow for a ~25 second download.");   
+            "allow for an ~30 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
@@ -927,7 +927,7 @@
         return {
             id: locRcrd.id,
             entity: "Location",
-            name: locRcrd.displayName,  /* Interaction rows have no name to display. */
+            name: getLocDisplayName(),  /* Interaction rows have no name to display. */
             isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
             open: gParams.openRows.indexOf(locRcrd.id) !== -1, 
             children: getLocRowDataForRowChildren(locRcrd, treeLvl),
@@ -935,7 +935,11 @@
             interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
             locGroupedInts: hasGroupedInteractionsRow(locRcrd),
             type: getLocationType()
-        };      
+        }; 
+        function getLocDisplayName() {
+            var trans = { 'Unspecified': 'Unspecified / Habitat Only' };
+            return trans[locRcrd.displayName] || locRcrd.displayName;
+        }     
         /** Intercepts the edge-case region/habitat location and sets it as a Region. */
         function getLocationType() {
             if (locRcrd.displayName === 'Central America, South America-Forest') {
