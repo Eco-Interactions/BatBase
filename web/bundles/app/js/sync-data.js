@@ -78,7 +78,7 @@
     function storeUpdatedData(rcrds, entity) {
         var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
         var entityHndlr = coreEntities.indexOf(entity) !== -1 ? 
-            updateCoreEntityData : updateDetailEntityData;
+            addCoreEntityData : addDetailEntityData;
         for (var id in rcrds) {
             entityHndlr(_util.lcfirst(entity), rcrds[id]);
         }
@@ -86,21 +86,24 @@
     /*------------------ Update Submitted Form Data --------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
-     * all relevant stored data. The core-entity data is processed @updateCoreEntityData. 
-     * Then any detail-entity data is processed @updateDetailEntityData. 
-     * The stored data's lastUpdated flag, 'pgDataUpdatedAt', is updated. 
+     * all relevant stored data @updateEntityData. The stored data's lastUpdated 
+     * flag, 'pgDataUpdatedAt', is updated. 
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
-        updateCoreEntityData(data.core, data.coreEntity);
-        if (data.detailEntity) { 
-            updateDetailEntityData(data.detail, data.detailEntity);
-        }
-        removeAndUpdateAffectedData(data);
+        updateEntityData(data);
         storeData('pgDataUpdatedAt', getCurrentDate());
+    }
+    /** Stores both core and detail entity data, and updates data affected by edits. */
+    function updateEntityData(data) {
+        addCoreEntityData(data.core, data.coreEntity);
+        if (data.detailEntity) { 
+            addDetailEntityData(data.detail, data.detailEntity);
+        }
+        updateAffectedData(data);
     }
     /*------------------ Add-to-Storage Methods ------------------------------*/
     /** Updates stored-data props related to a core-entity record with new data. */
-    function updateCoreEntityData(entity, rcrd) {                               //console.log("Updating Core entity. %s. %O", entity, rcrd);
+    function addCoreEntityData(entity, rcrd) {                                  //console.log("Updating Core entity. %s. %O", entity, rcrd);
         var propHndlrs = getAddDataHndlrs(entity, rcrd);
         updateDataProps(propHndlrs, entity, rcrd);
         updateCoreData(entity, rcrd);
@@ -147,8 +150,9 @@
     }
     /** Sends entity-record data to each storage property-type handler. */
     function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
+        var params = { entity: entity, rcrd: rcrd, stage: 'addData' };
         for (var prop in propHndlrs) {
-            propHndlrs[prop](prop, rcrd, entity);
+            updateData(propHndlrs[prop], prop, params);
         }
     }
     /** 
@@ -161,7 +165,7 @@
         addToTypeProp(entity+"Type", rcrd, entity); 
     } 
     /** Updates stored-data props related to a detail-entity record with new data. */
-    function updateDetailEntityData(entity, rcrd) {                             //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    function addDetailEntityData(entity, rcrd) {                                //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
             'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
@@ -256,20 +260,24 @@
     }
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
-    function removeAndUpdateAffectedData(data) {                                //console.log("removeAndUpdateAffectedData called. data = %O", data);
-        if (Object.keys(data.coreEdits).length > 1) { 
+    function updateAffectedData(data) {                                         //console.log("updateAffectedData called. data = %O", data);
+        if (hasEdits(data.coreEdits)) { 
             updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
         }
-        if (Object.keys(data.detailEdits).length > 1) { 
+        if (hasEdits(data.detailEdits)) { 
             updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
         }
+    }
+    function hasEdits(editObj) {
+        return Object.keys(editObj).length > 1;
     }
     /** Updates relational storage props for the entity. */
     function updateAffectedDataProps(entity, rcrd, edits) {                     //console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
         var propHndlrs = getRmvDataPropHndlrs(entity);
+        var params = { entity: entity, rcrd: rcrd, stage: 'rmvData' };
         for (var prop in edits) {                                               
             if (prop in propHndlrs) {
-                propHndlrs[prop](prop, rcrd, entity, edits);
+                updateData(propHndlrs[prop], prop, params, edits);
             }
         }
     }
@@ -303,10 +311,10 @@
         storeData(entity, rcrds);
     }
     /** Removes the Interaction from the stored entity's collection. */
-    function rmvIntFromEntity(prop, rcrd, entity, edits) {
-        var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    function rmvIntFromEntity(prop, rcrd, entity, edits) {   
+        var rcrds = _util.getDataFromStorage(prop);                             //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
         var storedEntity = rcrds[edits[prop].old];
-        rmvIdFromAry(storedEntity.interactions, edits[prop]);
+        rmvIdFromAry(storedEntity.interactions, rcrd.id);
         storeData(prop, rcrds);
     }
     /** Removes the Interaction from the taxon's subject/objectRole collection. */
@@ -317,8 +325,9 @@
         storeData("taxon", taxa);           
     }
     /** Removes the record from the entity-type's stored array. */
-    function rmvFromTypeProp(prop, rcrd, entity, edits) {
-        var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+    function rmvFromTypeProp(prop, rcrd, entity, edits) { 
+        if (!edits[prop].old) { return; }
+        var typeObj = _util.getDataFromStorage(prop);                           //onsole.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
         var type = typeObj[edits[prop].old];
         rmvIdFromAry(type[entity+'s'], rcrd.id);
         storeData(prop, typeObj);
@@ -392,10 +401,6 @@
         for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
             storeData(entity, parseData(data[entity]));
         }
-    }
-    /** Stores passed data under the key in localStorage. */
-    function storeData(key, data) {
-        _util.populateStorage(key, JSON.stringify(data));
     }
     /**
      * Loops through the passed data object to parse the nested objects. This is 
@@ -513,6 +518,28 @@
             }
         }  
         return data;
+    }
+    /*--------------- Shared Helpers -----------------------------*/
+    /** Stores passed data under the key in localStorage. */
+    function storeData(key, data) {
+        _util.populateStorage(key, JSON.stringify(data));
+    }
+    function updateData(updateFunc, prop, params, edits) {                      console.log('[%s] -> [%s]', params.stage, prop)
+        // try {
+            updateFunc(prop, params.rcrd, params.entity, edits);
+        // } catch (e) {  console.log('ERR  updateDataProps err = %O', e);
+            // reportDataUpdateErr(prop, rcrd, entity, stage);
+        // }
+    }
+    /*----------------- Errs ---------------------------------------*/
+    function reportDataUpdateErr(stage, prop, rcrd, entity, stage) {
+        // var trans = {
+        //     'addData': 'adding data to ', 'rmvData': 'removing data from '
+        // };
+        // var msg = 'There was an error while ' + trans[stage] + ' the ' + entity + 
+        //     '\'s ' + prop + '.';
+        // var errTag = stage
+        // eif.form.errUpdatingData(msg);
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
