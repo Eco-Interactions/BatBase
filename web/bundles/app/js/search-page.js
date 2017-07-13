@@ -1663,7 +1663,7 @@
     }
     /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
     function addEditPencil(params) {   
-        if (gParams.curFocus === 'locs' && ['Region', 'Country'].indexOf(params.data.type) !== -1) {
+        if (gParams.curFocus === 'locs' && ['Region','Country','Habitat'].indexOf(params.data.type) !== -1) {
             return "<span>"; }                
         if (gParams.curFocus === 'taxa' &&
             (!params.data.parentTaxon && !params.data.interactionType)) {  //Domain Taxa can not be edited.

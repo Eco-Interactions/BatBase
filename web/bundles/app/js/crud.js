@@ -528,6 +528,7 @@ $(document).ready(function(){
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
         $('#Note_row label')[0].innerText += 's';
+        $('#Country-Region_row label')[0].innerText = 'Country/Region';
         addReqElemsToConfg();     
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
@@ -545,7 +546,7 @@ $(document).ready(function(){
 /*-------------- Form Builders -------------------------------------------------------------------*/
     /** Builds and returns all interaction-form elements. */
     function buildIntFormFields(action) {
-        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryFieldRow,
+        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryRegionFieldRow,
             buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
             buildIntTagField, buildIntNoteField ]; 
         var fields = fieldBuilders.map(buildField);
@@ -711,36 +712,33 @@ $(document).ready(function(){
     function enablePubField() {
         enableCombobox('#Publication-sel');
     }
-    /*-------------- Country -------------------------------------------------*/
-    /** Returns a form row with a country combobox populated with all countries. */
-    function buildCountryFieldRow() {  
-        var cntryOpts = getCntryOpts();                                         //console.log("buildingCountryFieldRow. ");
+    /*-------------- Country/Region ------------------------------------------*/
+    /** Returns a form row with a combobox populated with all countries and regions. */
+    function buildCountryRegionFieldRow() {  
+        var opts = getCntryRegOpts();                                           //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(
-            cntryOpts, {id: "Country-sel", class: "lrg-field"});
-        return buildFormRow("Country", selElem, "top", false);
+            opts, {id: 'Country-Region-sel', class: 'lrg-field'});
+        return buildFormRow('Country-Region', selElem, 'top', false);
     }
-    /**
-     * Adds an 'Unspecified' option with its region's id. This will populate the 
-     * location drop-down with all habitat locations on selection.
-     */ 
-    function getCntryOpts() {
-        var opts = getOptsFromStoredData("countryNames");                       
-        opts.push({ value: 439, text: 'Unspecified' });
-        return opts;
+    /** Returns options for each country and region. */ 
+    function getCntryRegOpts() {
+        var opts = getOptsFromStoredData('countryNames');                       
+        return opts.concat(getOptsFromStoredData('regionNames'));
     }
     /** 
-     * When a country is selected, the location dropdown is repopulated with it's 
-     * child-locations. When cleared, the combobox is repopulated with all locations. 
+     * When a country or region is selected, the location dropdown is repopulated 
+     * with it's child-locations and, for regions, all habitat types. When cleared, 
+     * the combobox is repopulated with all locations. 
      */
-    function onCntrySelection(val) {                                            //console.log("country selected 'val' = ", val);
+    function onCntryRegSelection(val) {                                         //console.log("country/region selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
         fillLocationSelect(fParams.records.location[val]);
-        if (!fParams.editing) { $('#Country_pin').focus(); }
+        if (!fParams.editing) { $('#Country-Region_pin').focus(); }
     }
     /*-------------- Location ------------------------------------------------*/
     /**
-     * Returns a form row with a country select dropdown populated with all 
-     * available countries.
+     * Returns a form row with a select dropdown populated with all available 
+     * locations.
      */
     function buildLocationFieldRow() {                                          //console.log("buildingLocationFieldRow. ");
         var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
@@ -758,31 +756,37 @@ $(document).ready(function(){
         return opts;
     }
     /**
-     * When a country is selected, the location combobox is repopulated with its 
-     * child-locations. When cleared, the combobox is repopulated with all locations. 
+     * When a country/region is selected, the location combobox is repopulated with its 
+     * child-locations and all habitat types. When cleared, the combobox is 
+     * repopulated with all locations. 
      */ 
-    function fillLocationSelect(cntry) {                                        //console.log("fillLocationSelect for cntry = %O", cntry);
-        var opts = cntry ? getChildLocOpts(cntry) : getLocationOpts();    
+    function fillLocationSelect(loc) {                                          console.log("fillLocationSelect for parent Loc = %O", loc);
+        var opts = loc ? getChildLocOpts(loc) : getLocationOpts();    
         updateComboboxOptions('#Location-sel', opts);
     }          
     /** Returns an array of options for the child-locations of the passed country. */
-    function getChildLocOpts(cntry) {
-        return cntry.children.map(function(id) {  
+    function getChildLocOpts(loc) {  //TODO: connect hab with country/region parent
+        var opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });
+        return opts.concat(getOptsFromStoredData('habTypeNames'));  
     }
     /** 
-     * When a location is selected, its country is selected in the country combobox, 
-     * which is then disabled. If the location was cleared, the country combobox
-     * is restored. Note: habitat locations select the 'unspecified', 439, country option.. 
+     * When a location is selected, its country/region is selected in the top-form
+     * combobox and the location record's data is added to the detail panel. If 
+     * the location was cleared, the detail panel is cleared. 
+     * Note: habitat location parents are handled @getHabitatParent.
      */
-    function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
+    function onLocSelection(val) {                                              console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
-        var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
-        var cntryValue = locRcrd.country ? locRcrd.country.id : 439;
-        $('#Country-sel')[0].selectize.addItem(cntryValue, true);
+        var locRcrd = fParams.records.location[val];                            console.log("location = %O", locRcrd);
+        var cntryValue = locRcrd.country ? locRcrd.country.id : getHabitatParent(locRcrd);
+        $('#Country-Region-sel')[0].selectize.addItem(cntryValue, true);
         fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
+    }
+    function getHabitatParent(rcrd) { //TODO: connect hab with country/region parent
+        return $('#Country-Region-sel').val() || 439; 
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
@@ -803,21 +807,21 @@ $(document).ready(function(){
             // 'Elevation Units': locRcrd.elevUnitAbbrv || '',            
         };
     }
-    /** Inits the location form and disables the country combobox. */
+    /** Inits the location form and disables the country/region combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Location', null, formLvl); }
         $('#Location_row').after(initSubForm(
             "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
         initComboboxes("location");
-        enableCombobox('#Country-sel', false);
+        enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
         enableSubmitBttn("#"+formLvl+"-submit");
         return { "value": "", "text": "Creating Location..." };
     }
-    /** When the Location sub-form is exited, the Country combo is reenabled. */
-    function enableCountryField() {  
-        enableCombobox('#Country-sel');
+    /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
+    function enableCountryRegionField() {  
+        enableCombobox('#Country-Region-sel');
     }
     /*-------------- Taxon ---------------------------------------------------*/
     /** Builds the Subject combobox that will trigger the select form @initSubjectSelect. */
@@ -1570,17 +1574,11 @@ $(document).ready(function(){
         fParams.forms[formLvl].selElems = [];
 
         function selectizeElem(field) {                                         //console.log("Initializing --%s-- select", field);
-            var confg = getSelConfg(field);
+            var confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
             initSelectCombobox(confg, formLvl);
         }
-        /** Handles the shared Country field between Location and Interaction forms. */
-        function getSelConfg(field) {
-            var fieldName = field === 'Country' && entity === 'location' ? 
-                field + '-loc' : field;
-            return selMap[fieldName];
-        }
-    } 
+    } /* End initComboboxes */
     function getSelConfgObjs() {
         return { 
             'Authors': { name: 'Authors', id: '#Authors-sel1', change: onAuthSelection, 
@@ -1588,8 +1586,8 @@ $(document).ready(function(){
             'CitationType': { name: 'Citation Type', change: false, add: false },
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
-            'Country': { name: 'Country', change: onCntrySelection, add: false },
-            'Country-loc': { name: 'Country', id: '#locCountry-sel', change: false, add: false },
+            'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
+            'Country': { name: 'Country', change: false, add: false },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },
             'Genus': { name: 'Genus', change: onLevelSelection, add: initTaxonForm },
             'HabitatType':  { name: 'Habitat Type', change: false, add: false },
@@ -1720,7 +1718,7 @@ $(document).ready(function(){
                 "required": ["Display Name"],
                 "order": ["DisplayName", "Description", "Country", "HabitatType", 
                     "Elevation", "ElevationMax", "Latitude", "Longitude" ], //"ElevationUnits", 
-                "exitHandler": { create: enableCountryField }
+                "exitHandler": { create: enableCountryRegionField }
             },
             "object": {
                 "add": {"Realm": "select"},  
@@ -1781,7 +1779,7 @@ $(document).ready(function(){
         var fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
-                "Latitude": "text", "Habitat Type": "select", "Country": "edgeCase", 
+                "Latitude": "text", "Habitat Type": "select", "Country": "select", 
             }, //"Elevation Units": "select",
             "interaction": { "Interaction Type": "select", "Note": "fullTextArea", 
                 "Interaction Tags": "tags"
@@ -1805,8 +1803,7 @@ $(document).ready(function(){
     function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
         var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
-            "textArea": buildTextArea, "fullTextArea": buildLongTextArea,
-            "edgeCase": buildEdgeCaseElem };
+            "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
         var defaultRows = buildDefaultRows();
         var additionalRows = buildAdditionalRows();
         return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
@@ -1913,25 +1910,6 @@ $(document).ready(function(){
         $(tagSel).data("inputType", "tags");
         return tagSel;
     }
-    /** Routes edge case fields to their field-builder method. */
-    function buildEdgeCaseElem(entity, field, formLvl) {
-        var caseMap = { "Country": buildLocCountryElem };
-        return caseMap[field](entity, field, formLvl);
-    }
-    /**
-     * Modifies the Country combobox used in the location sub-form by giving it a 
-     * unique id. If there is a selected value in the top-form country combobox, 
-     * it is set in this sub-field. The top-form country combobox is disabled. 
-     */
-    function buildLocCountryElem(entity, field, formLvl) {
-        var subCntrySel = buildSelectCombo(entity, field, formLvl);
-        subCntrySel.id = "locCountry-sel";
-        if ($('#Country-sel').length) { // when editing a location, there is no 'top' country field
-            if ($('#Country-sel').val()) { $(subCntrySel).val($('#Country-sel').val()); }
-            enableCombobox('#Country-sel', false);
-        }
-        return subCntrySel;
-    }
     /* ---------- Option Builders ---------------------------------------------*/
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
@@ -2033,7 +2011,7 @@ $(document).ready(function(){
         }
     } /* End buildFormRow */
     function getPinElem(field) {
-        var relFields = ["CitationTitle", "Country", "Location", "Publication"];
+        var relFields = ["CitationTitle", "Country-Region", "Location", "Publication"];
         var pinClasses = 'top-pin' + (fParams.editing ? ' invis' : '');
         var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: pinClasses});
         $(pin).keypress(function(e){ //Enter
@@ -2050,8 +2028,8 @@ $(document).ready(function(){
         var field = this.id.split("_pin")[0]; 
         var params = {
             "CitationTitle": { checked: true, relField: "Publication" },
-            "Country": { checked: false, relField: "Location" },
-            "Location": { checked: true, relField: "Country" },
+            "Country-Region": { checked: false, relField: "Location" },
+            "Location": { checked: true, relField: "Country-Region" },
             "Publication": { checked: false, relField: "CitationTitle" },
         }
         checkFieldPins(this, params[field].checked, params[field].relField);
@@ -2440,7 +2418,7 @@ $(document).ready(function(){
             },
             "interaction": {
                 "citationTitle": { "interaction": "source" },
-                "country": { "interaction": false },
+                "country/Region": { "interaction": false },
                 "interactionTags": { "interaction": "tags" },
                 "notes": { "interaction": "note" }, 
                 "publication": { "interaction": false }

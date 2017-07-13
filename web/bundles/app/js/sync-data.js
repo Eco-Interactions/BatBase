@@ -524,7 +524,7 @@
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }
-    function updateData(updateFunc, prop, params, edits) {                      console.log('[%s] -> [%s]', params.stage, prop)
+    function updateData(updateFunc, prop, params, edits) {                      //console.log('[%s] -> [%s]', params.stage, prop)
         // try {
             updateFunc(prop, params.rcrd, params.entity, edits);
         // } catch (e) {  console.log('ERR  updateDataProps err = %O', e);
