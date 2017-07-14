@@ -760,33 +760,29 @@ $(document).ready(function(){
      * child-locations and all habitat types. When cleared, the combobox is 
      * repopulated with all locations. 
      */ 
-    function fillLocationSelect(loc) {                                          console.log("fillLocationSelect for parent Loc = %O", loc);
+    function fillLocationSelect(loc) {                                          //console.log("fillLocationSelect for parent Loc = %O", loc);
         var opts = loc ? getChildLocOpts(loc) : getLocationOpts();    
         updateComboboxOptions('#Location-sel', opts);
     }          
     /** Returns an array of options for the child-locations of the passed country. */
     function getChildLocOpts(loc) {  //TODO: connect hab with country/region parent
-        var opts = loc.children.map(function(id) {  
+        return loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
-        });
-        return opts.concat(getOptsFromStoredData('habTypeNames'));  
+        });  
     }
     /** 
      * When a location is selected, its country/region is selected in the top-form
      * combobox and the location record's data is added to the detail panel. If 
      * the location was cleared, the detail panel is cleared. 
-     * Note: habitat location parents are handled @getHabitatParent.
-     */
-    function onLocSelection(val) {                                              console.log("location selected 'val' = ", val);
+     * Note: Habitat-only locations are children of the Unspecified region, 439.
+     */     
+    function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
-        var locRcrd = fParams.records.location[val];                            console.log("location = %O", locRcrd);
-        var cntryValue = locRcrd.country ? locRcrd.country.id : getHabitatParent(locRcrd);
+        var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
+        var cntryValue = locRcrd.parent ? locRcrd.parent : 439;
         $('#Country-Region-sel')[0].selectize.addItem(cntryValue, true);
         fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
-    }
-    function getHabitatParent(rcrd) { //TODO: connect hab with country/region parent
-        return $('#Country-Region-sel').val() || 439; 
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
@@ -803,8 +799,7 @@ $(document).ready(function(){
             'Latitude': locRcrd.latitude || '',
             'Longitude': locRcrd.longitude || '',
             'Elevation': locRcrd.elevation || '',            
-            'Elevation Max': locRcrd.elevationMax || '',            
-            // 'Elevation Units': locRcrd.elevUnitAbbrv || '',            
+            'Elevation Max': locRcrd.elevationMax || '',       
         };
     }
     /** Inits the location form and disables the country/region combobox. */
@@ -816,7 +811,6 @@ $(document).ready(function(){
         initComboboxes("location");
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
-        enableSubmitBttn("#"+formLvl+"-submit");
         return { "value": "", "text": "Creating Location..." };
     }
     /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
@@ -1715,7 +1709,7 @@ $(document).ready(function(){
             "location": {
                 "add": {},  
                 "exclude": [], 
-                "required": ["Display Name"],
+                "required": ["Display Name", "Country"],
                 "order": ["DisplayName", "Description", "Country", "HabitatType", 
                     "Elevation", "ElevationMax", "Latitude", "Longitude" ], //"ElevationUnits", 
                 "exitHandler": { create: enableCountryRegionField }
