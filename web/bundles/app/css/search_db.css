@@ -207,11 +207,12 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 .form-ovrly {
     align-items: center;
 }
-#form-hdr>h1 {
+#form-hdr div {
     font-size: 1.3em;
     margin-bottom: .5em;
+    justify-content: center;    
 }
-#form-hdr>p {
+#form-hdr p {
     margin-bottom: 10px;
     font-weight: bold;
     text-align: center;

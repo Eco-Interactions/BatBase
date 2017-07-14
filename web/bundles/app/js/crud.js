@@ -101,7 +101,10 @@ $(document).ready(function(){
     }
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "form-hdr", "class":"flex-col" });
-        $(hdrSect).append(_util.buildElem("h1", { "text": title }));
+        var hdr = _util.buildElem("div", { class: 'flex-row' });        
+        $(hdr).append(_util.buildElem("h1", { "text": title }));
+        $(hdr).append(_util.buildElem("h2"));
+        $(hdrSect).append(hdr);
         $(hdrSect).append(_util.buildElem("p"));
         return hdrSect;
     }
@@ -318,8 +321,8 @@ $(document).ready(function(){
         var prnt = getParentEntity(ent);
         var entity = prnt || ent;
         var rcrd = getEntityRecord(entity, id);                                 
-        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName; 
-        $('#det-cnt-cntnr span')[0].innerText = rcrd.displayName + ' is referenced by:';
+        $('#form-hdr h2')[0].innerText = ': ' + rcrd.displayName; 
+        $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
     }
     function fillEntityData(entity, id) {
         var hndlrs = { "author": fillSrcData, "citation": fillSrcData,
@@ -2528,6 +2531,7 @@ $(document).ready(function(){
     function showEditSuccessMsg(data) {
         var msg = hasChngs(data) ? "Update successful." : "No changes detected."; 
         showSuccessMsg(msg);
+        ifHasDisplayNameChanges(data);
     }
     /** 
      * Returns true if there have been user-made changes to the entity. 
@@ -2541,6 +2545,11 @@ $(document).ready(function(){
             if ('elevUnitAbbrv' in data.coreEdits) { return false; }
         }
         return chngs;
+    }
+    /** Updates the header with any display name changes. */ 
+    function ifHasDisplayNameChanges(data) {
+        if (!data.coreEdits.displayName) { return; }  
+        $('#form-hdr h2')[0].innerText = ': ' + data.coreEdits.displayName.new;
     }
     /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
