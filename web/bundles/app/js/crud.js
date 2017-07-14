@@ -364,9 +364,12 @@ $(document).ready(function(){
             getTaxonChildRefs(child);
         }
     } /* End fillTaxonData */
-    function removeEmptyDetailPanelElems() {                                         
+    function removeEmptyDetailPanelElems() {  
+        var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
+            'Species': 'Species' };                                       
         $.each($('[id$="-det"] div'), function(i, elem) {
             if (elem.innerText == 0) {  elem.parentElement.remove(); }
+            if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
         });
     }
     function fillSrcData(entity, id, rcrd) {
