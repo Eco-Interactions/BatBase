@@ -34,11 +34,6 @@ class Version20170713015904LocHabs extends AbstractMigration implements Containe
         $countries = $em->getRepository('AppBundle:Location')
             ->findBy(array('locationType' => 2));
 
-
-        // $test = $em->getRepository('AppBundle:Location')
-        //     ->findBy(array('displayName' => 'Uruguay'));
-        // $this->addAllNewHabitatLocs($test, $habitats, $em);
-
         $this->addAllNewHabitatLocs($regions, $habitats, $em);
         $this->addAllNewHabitatLocs($countries, $habitats, $em);
 

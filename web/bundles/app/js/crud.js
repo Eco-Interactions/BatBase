@@ -341,8 +341,6 @@ $(document).ready(function(){
     }
     function fillLocData(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
-        delete fields.Country;
-        fields["locCountry"] = "cntry";
         fillFields(rcrd, fields, []);
         addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
     }
@@ -369,7 +367,7 @@ $(document).ready(function(){
     } /* End fillTaxonData */
     function removeEmptyDetailPanelElems() {  
         var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
-            'Species': 'Species' };                                       
+            'Species': 'Species', 'Interactions': 'Interaction' };                                       
         $.each($('[id$="-det"] div'), function(i, elem) {
             if (elem.innerText == 0) {  elem.parentElement.remove(); }
             if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
@@ -456,7 +454,7 @@ $(document).ready(function(){
         });
     }    
     function setCntry(fieldId, prop, rcrd) {
-        $('#locCountry-sel')[0].selectize.addItem(rcrd.country.id);
+        $('#Country-sel')[0].selectize.addItem(rcrd.country.id);
     }
     function setAdditionalFields(entity, srcRcrd, detail) {
         setTitleField(entity, srcRcrd);
@@ -771,7 +769,7 @@ $(document).ready(function(){
         updateComboboxOptions('#Location-sel', opts);
     }          
     /** Returns an array of options for the child-locations of the passed country. */
-    function getChildLocOpts(loc) {  //TODO: connect hab with country/region parent
+    function getChildLocOpts(loc) {
         return loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
@@ -2274,13 +2272,11 @@ $(document).ready(function(){
         }
         /**
          * Sets location type according to the most specific data entered. 
-         * "Point": if there is lat/long data. "Area": if there is elev data. 
-         * "Habitat": if habType selected. "Area": if there is no specific data entered.
+         * "Point": if there is lat/long data. "Area" otherwise.
          */
         function getLocType() {
-            formVals.locationType = formVals.longitude || formVals.latitude ? 5 :
-                formVals.elevation || formVals.elevationMax ? 4 :
-                formVals.habitatType ? 3 : 4;   
+            formVals.locationType = 
+                formVals.longitude || formVals.latitude ? 5 : 4;
         }
         /**
          * If no location is selected for an interaction record, the country field 
