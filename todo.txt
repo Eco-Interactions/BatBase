@@ -1,18 +1,27 @@
--- Short Range TODO --
+-- Short Range TODO [priority, difficulty]--
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
+        -- Change domain -> realm, level -> rank.
     --Search--
         -- refactor into and cal out of the global space. Perhaps a temp storage obj?
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
+        -- Add publisher to source-type view
+        -- refactor enable/disable submit-button methods to one method with 'enable' param
     --FORM--
         -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
         -- //Refactor fillIntData (crud.js)
+        -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
         -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
             > or refactor into using it to general disable and dim buttons
         -- refactor realm to domain until the name change happens in the backend
+        -- Location --
+            -- Add message to inform user that new countries can not be created.
+            -- When nothing is selected but a country, a habitat type, and the 
+                displayname, suggest to user they use the country-habitat combo
+                that already exists.
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
@@ -31,64 +40,82 @@
             --refactor to use parital, effectively 'group', selectors
     --Asap--        
         --form--
-            -- Move exit button out of detail panel elem.
-            -- Style all sub-entity forms
-            -- add related entity details to sub-entity edit forms
-            -- Update submit success and failure messages
-            -- make new form styles 'respond' to the smaller screenizes  1366x768
             -- refactor initcomboboxes to need only the form-lvl param
-            *- Show 'No changes' success msg when locations update and only
-                elevUnit is changed. 
-            *- On grid close, reset tree toggle
-            *- Remove edit pencil from Central, South America -- Forest.
-            -- disable all taxon level selects when a new taxon form is open.
-        --Data--
+        --feedback page--
+            -- status is a number
+            -- add the header back?
+
+
+
+         --Data--
             -- Src 945: Is both the pub and citation. create a seperate child cit.
-
+        -- Search 
+            -- update all the comments that mention the updates-since filter to 
+                'int-updated-at'
+            -- clear external filters with updates-since activates
         --Bugs--
-            - new taxon form isn't returning the 'Creating [lvl]' option to select properly
-
-
-
-
-    && Left Off &&
-        -- Trying to disable the 'change parent' options when there is a 'needsHigherLvl' err
-        
-
+            - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
 
 
 
 Changes::
-    -misc
-        extend length of error
-            Replace timeouts with moot-checking || close button
+    -- Fix University of Chicago Press
+    -- Mammals. food web... add Pub parent
 
+    -- "central farm" - change loc-type habitat -> Area
+        -- Update all locations with type == habitat.
+            -- if displayname matches country, leave as habitat and append hab name
+                -- if not, change to area.
 
+    -- Finish fixing dataUpdateErrs
 
-
+    --country/region
+        -- pop w children and 
+        -- When region is selected, disable create.
+            -- unspecified as well? 
+        -- there is no longer a need to append -loc to the country sel in the location form
+        -- DB Migration to create all country-habitat combos that do not yet exist.
 
 
 
 ::Testing!::
 > Data Storage
-    > Data is added and removed correctly   
+    > Data is added and removed correctly  
+    > The grid shoudl reload as expect with the form close
+        > With and without submitting. 
+        > interaction forms and sub-entity forms. 
 
 :: Questions ::
-    -- Why are we using level instead of rank?
 
 :; Email ::
     -- TAXON errors being caught:
         -- Can't change taxon to a level equal/beneath any children,
             -- or equal/above the parent.
         -- Species must have genus parent
+        -- Can't change genus that has species children
 
 
 
+:: Docs ::
+    -- Location naming:
+        --To select a region or country habitat, type in the region/country name 
+            in the location combobox. Look for the [name]- [habitat]. 
 
 
 
 ============ MEETING ==================
 >> Talk about the location naming convention for when to add author and year and when to assign interactions directly to the country.
+
+>> Flag any data in the tree, in particular the location tree, that sems like it 
+    should be editable. Location-types were automatically assigned and there will be 
+    edge-cases that were mislabeled. Only 'Areas' and 'Points' are editable. Regions, 
+    Countries, and habitats are not.
+
+>> Detail panel
+    >> Singular tense used where appropriate for taxon only atm. 
+
+Changes
+>> Changed form exit event [--describe]
 
 TASK LIST
 

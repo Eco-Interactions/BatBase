@@ -11,7 +11,8 @@ $(document).ready(function(){
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.form = {
-        editEntity: editEntity
+        editEntity: editEntity,
+        errUpdatingData: errUpdatingData
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -122,13 +123,13 @@ $(document).ready(function(){
      * an interaction, the grid will refocus into source-view. Exiting the interaction
      * forms also sets the 'int-updated-at' filter to 'today'.
      */
-    function refocusGridIfFormWasSubmitted() {                                  //console.log('submitFocus = ', fParams.submitFocus)
-        if (!fParams.submitted) { return; }
-        if (fParams.submitFocus === 'int') { return refocusAndShowUpdates();}
+    function refocusGridIfFormWasSubmitted() {                                  //console.log('submitFocus = [%s]', fParams.submitFocus);
+        if (!fParams.submitFocus) { return; }
+        if (fParams.submitFocus == 'int') { return refocusAndShowUpdates(); }   
         eif.search.initSearchGrid(fParams.submitFocus);
     }
-    function refocusAndShowUpdates() { 
-        var focus  = fParams.action === 'create' ? 'srcs': null;
+    function refocusAndShowUpdates() {                                          //console.log('refocusAndShowUpdates.')
+        var focus  = fParams.action === 'create' ? 'srcs' : null;
         eif.search.showUpdates(focus);   
     }
     function getDetailPanelElems(entity, id) {                                  //console.log("getDetailPanelElems. action = %s, entity = %s", fParams.action, fParams.entity)
@@ -2251,7 +2252,9 @@ $(document).ready(function(){
          * unique display names for both the publication and its citation.
          */
         function ifBookType() { 
-            if (formVals.citationType == 4) { formVals.displayName += '-citation'; }
+            if (formVals.citationType != 4) { return; }
+            if (formVals.displayName.includes('-citation')) { return; }
+            formVals.displayName += '-citation';
         }
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
         function addElevUnits() {
@@ -2464,7 +2467,6 @@ $(document).ready(function(){
         var focuses = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
             'interaction': 'int' };
         fParams.ajaxFormLvl = formLvl;
-        fParams.submitted = true;
         fParams.submitFocus = focuses[entity];
     }
     /** Returns the full url for the passed entity and action.  */
@@ -2525,6 +2527,7 @@ $(document).ready(function(){
     }
     /*------------------ Top-Form Success Methods --------------------*/
     function showEditSuccessMsg(data) {
+        if (data.coreEdits.errors || data.detailEdits.errors) { return; }
         var msg = hasChngs(data) ? "Update successful." : "No changes detected."; 
         showSuccessMsg(msg);
         ifHasDisplayNameChanges(data);
@@ -2632,6 +2635,24 @@ $(document).ready(function(){
         return data;
     }
     /*------------------- Form Error Handlers --------------------------------*/
+    function errUpdatingData(errMsg, errTag) {                                  //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
+        var cntnr = _util.buildElem('div', { class: 'flex-col' });
+        var msg = "<span>" + errMsg + "<br> Please report this error to the developer: <b>" 
+            + errTag + "</b><br>This form will close and all stored data will be " +
+            "redownloaded.</span>";
+        var confirm = _util.buildElem('span', { class: 'flex-row', 
+                'text': "Please click \"OK\" to continue." });
+        var bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
+                class: 'grid-bttn exit-bttn' });
+        $(confirm).append(bttn);
+        $(cntnr).append([msg, confirm]);
+        $('#form-hdr p').after(cntnr);
+        $(bttn).click(reloadAndRedownloadData);
+    }
+    function reloadAndRedownloadData() {                                        //console.log('reloadAndRedownloadData called. ');
+        exitFormPopup();
+        eif.syncData.reset(fParams.submitFocus);
+    }
     /**
      * When the user attempts to create an entity that uses the sub-form and there 
      * is already an instance using that form, show the user an error message and 

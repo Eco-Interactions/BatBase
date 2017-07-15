@@ -11,8 +11,10 @@
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * gParams = obj container for misc params used for the search grid.
+     * dataKey = Indicates whether the stored data is up to date or should be redownloaded.
      */
     var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
+    var dataKey = 'THE FUTURE IS NOW, AGAIN';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -20,7 +22,8 @@
     eif.search = {
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
-        showUpdates: showTodaysUpdates
+        showUpdates: showTodaysUpdates,
+        handleReset: handleDataReset
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -35,7 +38,6 @@
     }
     /** If local storage needs to be cleared, the datakey is updated */ 
     function clearLocalStorageCheck() {
-        var dataKey = 'THE FUTURE IS NOW';
         if (localStorage && !localStorage.getItem(dataKey)) {
             localStorage.clear();
             _util.populateStorage(dataKey, true);
@@ -54,6 +56,15 @@
     function syncStoredData(pgDataUpdatedAt) {
         var dataUpdatedAt = _util.getDataFromStorage('dataUpdatedAt');          //console.log("dataUpdatedAt = %O", dataUpdatedAt);
         eif.syncData.sync(pgDataUpdatedAt);
+    }
+    /** 
+     * When the stored data is reset from another file, the loading data popup 
+     * message is shown and the dataKey is restored.
+     */
+    function handleDataReset(prevFocus) {
+        showLoadingDataPopUp();
+        _util.populateStorage(dataKey, true);
+        _util.populateStorage('curFocus', prevFocus);
     }
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
@@ -131,7 +142,7 @@
             "the data shown in the grid and/or csv exported.";
     }
     /** Grid-rebuild entry point after form-window close. */
-    function resetSearchGrid(focus) {
+    function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
         resetToggleTreeBttn(false);
         if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
         selectSearchFocus(null, focus);

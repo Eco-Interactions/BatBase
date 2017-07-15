@@ -3,7 +3,9 @@
     var _util = eif.util;
     eif.syncData = {
         update: updateStoredData,
+        reset: resetStoredData
     };
+
     getServerDataLastUpdatedTimes();
     /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
     function getServerDataLastUpdatedTimes() {
@@ -327,7 +329,7 @@
     /** Removes the record from the entity-type's stored array. */
     function rmvFromTypeProp(prop, rcrd, entity, edits) { 
         if (!edits[prop].old) { return; }
-        var typeObj = _util.getDataFromStorage(prop);                           //onsole.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+        var typeObj = _util.getDataFromStorage(prop);                           //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
         var type = typeObj[edits[prop].old];
         rmvIdFromAry(type[entity+'s'], rcrd.id);
         storeData(prop, typeObj);
@@ -360,6 +362,12 @@
         storeData(domain+level+'Names', nameObj);
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
+    /** When there is an error while storing data, all data is redownloaded. */
+    function resetStoredData(prevFocus) {
+        localStorage.clear();
+        ajaxAndStoreAllEntityData();
+        eif.search.handleReset(prevFocus);
+    }
     /**
      * The first time a browser visits the search page all entity data is downloaded
      * from the server and stored locally @ajaxAndStoreAllEntityData. The stored 
@@ -524,22 +532,24 @@
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }
-    function updateData(updateFunc, prop, params, edits) {                      //console.log('[%s] -> [%s]', params.stage, prop)
-        // try {
+    function updateData(updateFunc, prop, params, edits) {                      //console.log('prop [%s] -> params [%O]', prop, params);
+        try {
             updateFunc(prop, params.rcrd, params.entity, edits);
-        // } catch (e) {  console.log('ERR  updateDataProps err = %O', e);
-            // reportDataUpdateErr(prop, rcrd, entity, stage);
-        // }
+        } catch (e) {                                                           console.log('ERR  updateDataProps err = %O', e);
+            reportDataUpdateErr(prop, params.rcrd, params.entity, params.stage);
+            edits.errors = true;
+        }
     }
     /*----------------- Errs ---------------------------------------*/
-    function reportDataUpdateErr(stage, prop, rcrd, entity, stage) {
-        // var trans = {
-        //     'addData': 'adding data to ', 'rmvData': 'removing data from '
-        // };
-        // var msg = 'There was an error while ' + trans[stage] + ' the ' + entity + 
-        //     '\'s ' + prop + '.';
-        // var errTag = stage
-        // eif.form.errUpdatingData(msg);
+    /** Sends a message and error tag back to the form to be displayed to the user. */
+    function reportDataUpdateErr(prop, rcrd, entity, stage) {
+        var trans = {
+            'addData': 'adding data to ', 'rmvData': 'removing data from '
+        };
+        var msg = 'There was an error while '+trans[stage]+' the '+ entity +
+            '\'s stored data.';
+        var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
+        eif.form.errUpdatingData(msg, errTag);
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)

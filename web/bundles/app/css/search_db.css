@@ -211,11 +211,20 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     font-size: 1.3em;
     margin-bottom: .5em;
     justify-content: center;    
+    align-items: center;   
 }
 #form-hdr p {
     margin-bottom: 10px;
     font-weight: bold;
     text-align: center;
+}
+#form-hdr span {
+    color: red;
+    line-height: 111%;
+}
+#form-hdr span input {
+    margin-left: 1em;
+    width: 2.2em;
 }
 .form-popup [id$="-hdr"] {
     margin-bottom: 10px;
