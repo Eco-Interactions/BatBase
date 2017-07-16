@@ -2302,28 +2302,28 @@
      * For taxon csv export: The relevant tree columns are shown and also exported. 
      */
     function exportCsvData() {
-        var fileName = gParams.curFocus === "taxa" ? 
-            "Bat Eco-Interaction Records by Taxon.csv" : "Bat Eco-Interaction Records by Location.csv";
+        var views = { 'locs': 'Location', 'srcs': 'Source', 'taxa': 'Taxon' };
+        var fileName = 'Bat Eco-Interaction Records by '+ views[gParams.curFocus] +'.csv';
         var params = {
             onlySelected: true,
             fileName: fileName,
             // customHeader: "This is a custom header.\n\n",
             // customFooter: "This is a custom footer."
         };
-        if (gParams.curFocus === "taxa") { showOverlayAndTaxonCols(); }
-        gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], false)
+        if (gParams.curFocus === 'taxa') { showOverlayAndTaxonCols(); }
+        gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], false);
         selectRowsForExport();
         gridOptions.api.exportDataAsCsv(params);
         returnGridState();
     }
     function returnGridState() {
         // if (gParams.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
-        gridOptions.columnApi.setColumnsVisible(["name", "intCnt"], true);
+        gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
         gridOptions.api.deselectAll();
         hidePopUpMsg();
     }
     function showOverlayAndTaxonCols() {
-        showPopUpMsg("Exporting...");
+        showPopUpMsg('Exporting...');
         gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
 
     }
