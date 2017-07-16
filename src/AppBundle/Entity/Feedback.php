@@ -132,7 +132,7 @@ class Feedback
     /**
      * Get status.
      *
-     * @return string
+     * @return int
      */
     public function getStatus()
     {
