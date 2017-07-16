@@ -102,11 +102,8 @@ $(document).ready(function(){
     }
     function getHeaderHtml(title) {
         var hdrSect = _util.buildElem("header", { "id": "form-hdr", "class":"flex-col" });
-        var hdr = _util.buildElem("div", { class: 'flex-row' });        
-        $(hdr).append(_util.buildElem("h1", { "text": title }));
-        $(hdr).append(_util.buildElem("h2"));
-        $(hdrSect).append(hdr);
-        $(hdrSect).append(_util.buildElem("p"));
+        var hdr = _util.buildElem("h1", { "text": title });
+        $(hdrSect).append([ hdr, _util.buildElem("p") ]);
         return hdrSect;
     }
     /** Returns popup and overlay to their original/default state. */
@@ -116,6 +113,7 @@ $(document).ready(function(){
         $("#b-overlay").removeClass("form-ovrly");
         $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
+        fParams = {};
     }
     /**
      * If the form was not submitted the grid does not reload. Otherwise, if exiting 
@@ -322,7 +320,7 @@ $(document).ready(function(){
         var prnt = getParentEntity(ent);
         var entity = prnt || ent;
         var rcrd = getEntityRecord(entity, id);                                 
-        $('#form-hdr h2')[0].innerText = ': ' + rcrd.displayName; 
+        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName; 
         $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
     }
     function fillEntityData(entity, id) {
@@ -2548,7 +2546,8 @@ $(document).ready(function(){
     /** Updates the header with any display name changes. */ 
     function ifHasDisplayNameChanges(data) {
         if (!data.coreEdits.displayName) { return; }  
-        $('#form-hdr h2')[0].innerText = ': ' + data.coreEdits.displayName.new;
+        var formHdr = $('#form-hdr h1')[0].innerText.split(':')[0]; 
+        $('#form-hdr h1')[0].innerText = formHdr + ': ' + data.coreEdits.displayName.new;
     }
     /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
