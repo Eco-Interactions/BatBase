@@ -797,57 +797,48 @@
      * Note: This is also the entry point for filter-related grid rebuilds.
      */
     function buildLocSearchUiAndGrid(locTree) {                                 //console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
-        loadLocComboboxes(locTree);
         transformLocDataAndLoadGrid(locTree);
+        loadLocComboboxes();
     }
     /**
      * Create and append the location search comboboxes, Region and Country, and
      * set any previously 'selected' values.
      */
-    function loadLocComboboxes(curTree) {  
-        var locOpts = buildLocSelectOpts(curTree);
+    function loadLocComboboxes() {  
+        var locOpts = buildLocSelectOpts();
         var selElems = buildLocSelects(locOpts);
         clearCol2();        
         selectNoneVals(locOpts);
         $('#opts-col2').append(selElems);
         setSelectedLocVals();
-    }
-    /** Builds arrays of options objects for the location comboboxes. */
-    function buildLocSelectOpts(curTree) {
-        var processedOpts = { region: [], country: [] };
-        var opts = { region: [], country: [] };
-        for (var topNode in curTree) { buildLocOptsForNode(curTree[topNode]); }
+    }/** Builds arrays of options objects for the location comboboxes. */
+    function buildLocSelectOpts() {
+        var processedOpts = { Region: [], Country: [] };
+        var opts = { Region: [], Country: [] };  
+        gridOptions.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
         sortLocOpts();
         removeTopRegionIfFiltering();
         addAllAndNoneOpts();
         return opts; 
         /**
          * Recurses through the tree and builds a option object for each unique 
-         * country and region in the current tree. Skips interaction records, which 
-         * are identified by their "note" property.
+         * country and region in the current grid with interactions.
          */
-        function buildLocOptsForNode(locNode) {                                 //console.log("locNode = %O", locNode)
-            if (locNode.hasOwnProperty("interactionType")) {return;}            //console.log("buildLocOptsForNode %s = %O", locNode.displayName, locNode)
-            var locType = locNode.locationType.id;
-            if (locType === 1 || locType === 2) { 
-                getLocOpts(locNode, locNode.displayName, locNode.locationType.displayName); 
+        function buildLocOptsForNode(row) {                                 
+            var rowData = row.data;  
+            if (rowData.interactionType) {return;}                              //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
+            if (rowData.type === 'Region' || rowData.type === 'Country') {
+                getLocOpts(rowData, rowData.name, rowData.type); 
             }
-            if (locNode.children) { locNode.children.forEach(buildLocOptsForNode); }
+            if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
         }
         /** If the location has interactions an option object is built for it. */
-        function getLocOpts(locNode, name, type) {
-            var locType = _util.lcfirst(type);
-            if (processedOpts[locType].indexOf(name) === -1) {
-                if (locHasInteractions(locNode, locType)) {
-                    var id = gParams.data[locType + "Names"][name];             
-                    opts[locType].push({ value: id, text: name }); 
-                    processedOpts[locType].push(name);
-                }
-            }
-        }
-        /** Returns true if location has interactions-- many countries do not. */
-        function locHasInteractions(loc, type) { 
-            return type === "country" ? loc.children.length > 0 : true;
+        function getLocOpts(rowData, name, type) {
+            if (name.includes('Unspecified')) { return; }
+            if (processedOpts[type].indexOf(name) !== -1) { return; }
+            var id = gParams.data[_util.lcfirst(type) + "Names"][name];             
+            opts[type].push({ value: id, text: name }); 
+            processedOpts[type].push(name);
         }
         function sortLocOpts() {
             for (var type in opts) {
@@ -860,8 +851,8 @@
          */
         function removeTopRegionIfFiltering() {  
             if (!gParams.selectedOpts || !gParams.selectedOpts.country) { return; }
-            if (opts.region.length === 2) {  
-                opts.region = opts.region.filter(function(region) {
+            if (opts.Region.length === 2) {  
+                opts.Region = opts.Region.filter(function(region) {
                     return region.value === gParams.selectedOpts.region;
                 });  
             }
@@ -945,20 +936,13 @@
             treeLvl: treeLvl,
             interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
             locGroupedInts: hasGroupedInteractionsRow(locRcrd),
-            type: getLocationType()
+            type: locRcrd.locationType.displayName
         }; 
         function getLocDisplayName() {
             var trans = { 'Unspecified': 'Unspecified / Habitat Only' };
             return trans[locRcrd.displayName] || locRcrd.displayName;
         }     
-        /** Intercepts the edge-case region/habitat location and sets it as a Region. */
-        function getLocationType() {
-            if (locRcrd.displayName === 'Central America, South America-Forest') {
-                return 'Region';
-            }
-            return locRcrd.locationType.displayName
-        }
-    }
+    } /* End getLocRowData */
     function hasGroupedInteractionsRow(locRcrd) {
         return locRcrd.children.length > 0 && locRcrd.interactions.length > 0;
     }
