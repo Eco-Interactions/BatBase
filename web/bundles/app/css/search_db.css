@@ -143,7 +143,7 @@
 button[name="csv"], #close-tos-bttn {
     align-self: flex-end;
 }
-button[name="xpand-tree"] {
+button[name="xpand-all"] {
     width: 105px;
 }
 button[name="createbttn"] {
@@ -158,6 +158,12 @@ button[name="show-hide-col"] {
 button[name="futureDevBttn"] {
     align-self: flex-end;
     opacity: .8;
+}
+#xpand-tree button {
+    margin: 0em;
+}
+#xpand-tree {
+    margin-right: .3em;
 }
 /*----- Walkthrough ------*/
 .intro-tips {

@@ -11,7 +11,8 @@
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * gParams = obj container for misc params used for the search grid.
-     * dataKey = Indicates whether the stored data is up to date or should be redownloaded.
+     * dataKey = String checked in local storage to indicate whether the stored 
+     *      data should be cleared and redownloaded.
      */
     var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
     var dataKey = 'THE FUTURE IS NOW, AGAIN';
@@ -73,7 +74,7 @@
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
-        $('button[name="xpand-tree"]').click(toggleExpandTree);
+        $('button[name="xpand-all"]').click(toggleExpandTree);
         $('button[name="xpand-1"]').click(expandTreeByOne);
         $('button[name="collapse-1"]').click(collapseTreeByOne);
         $('button[name="reset-grid"]').click(resetDataGrid);
@@ -139,7 +140,7 @@
         return "Future options include year and elevation range, habitat and interaction type, " +
             "as well as other criteria that would be helpful to focus the data. \n" +
             "Below is a 'Show/Hide Columns' button that will allow users to specify " +
-            "the data shown in the grid and/or csv exported.";
+            "the data shown in the grid and/or csv export.";
     }
     /** Grid-rebuild entry point after form-window close. */
     function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
@@ -2343,23 +2344,19 @@
         window.setTimeout(startIntroWalkthrough, 250); 
     }
     function startIntroWalkthrough(startStep){
-        if (miscObj.intro) {                                                    //console.log("intro = %O", intro)
-            var intro = miscObj.intro;
-            intro.exit() 
-        } else { 
-            buildIntro();
-        }
+        if (miscObj.intro) { return; }                                          //console.log("intro = %O", miscObj.intro)
+        buildIntro();
         setGridState();
-        intro.start();
+        miscObj.intro.start();
 
         function buildIntro() {                                                 //console.log("buildIntro called")
-            intro = introJs();
             var startStep = startStep || 0; 
+            miscObj.intro = introJs();
 
-            intro.onexit(function() { resetGridState(); });
-            intro.oncomplete(function() { resetGridState(); });
+            miscObj.intro.onexit(function() { resetGridState(); });
+            miscObj.intro.oncomplete(function() { resetGridState(); });
 
-            intro.setOptions({
+            miscObj.intro.setOptions({
                 showStepNumbers: false,
                 skipLabel: "Exit",
                 doneLabel: "I'm done.",
@@ -2390,19 +2387,19 @@
                     },
                     {
                         element: "#search-grid",
-                        intro: "<h3><center>The resulting interaction data is displayed here.</center></h3><br><b><center>When first displayed " +
-                            "all interactions in the database are available for further filtering or sorting.</center></b>" +
-                            "<br>The <b>'Count'</b> column shows the number of interactions attributed to each node in the outline tree." +
-                            "<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon that each interaction is attributed to." +
-                            "<br><br>The <b>'Object Taxon'</b> column shows the plant or arthropod interacted <i>with</i>." +
-                            "<br><br> Columns can be resized by dragging the column header dividers and rearranged by dragging the header iteself." +
-                            "<br><br>Note on Taxon names: Species names include the genus in the species name and names at all other levels have the" +
-                            "level added to the start of their name.",
+                        intro: "<b><center>When first displayed all interactions in the database are available for further filtering" + 
+                            " or sorting.</center></b><br>The <b>'Count'</b> column shows the number of interactions attributed " +
+                            "to each node in the outline tree.<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon" +
+                            " that each interaction is attributed to.<br><br>The <b>'Object Taxon'</b> column shows the plant" +
+                            " or arthropod interacted <i>with</i>.<br><br> Columns can be resized by dragging the column header" +
+                            " dividers and rearranged by dragging the header iteself.<br><br>Note on Taxon names: Species use scientific " +
+                            "naming and all other taxa have their taxonomic rank prepended to their name.",
                         position: "top"
                     },
                     {
                         element: "#xpand-tree",   
-                        intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><center>You can try it now.</center>",
+                        intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><center>The tree can be expanded or collapsed" +
+                            " by a single level or by all at once.</center></b><br><center>You can try it now.</center>",
                         position: "right"
                     },
                     {
@@ -2420,7 +2417,7 @@
                     },
                     {
                         element: "#opts-col2",
-                        intro: "<h3><center>There are taxon-specific search filters available.</center></h3><br>" + 
+                        intro: "<h3><center>There are view-specific search filters available.</center></h3><br>" + 
                             "<b>These dropdowns show all taxon levels that are used in the outline tree.</b> When first displayed, " +
                             "all taxa for each level will be available in the dropdown selection lists.<br><br><b>You can focus  " +
                             "on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The outline " +
@@ -2435,10 +2432,10 @@
                         element: "button[name=\"csv\"]",
                         intro: "<h3><center>As a member of batplant.org, data displayed in the grid can be exported in csv format.</center></h3>" +
                             "<br>The columns are exported in the order they are displayed in the grid.<br><br>For Taxon exports, " +
-                            "the outline tree will be translated into additional columns at the start of each interaction.<br><br>" +
-                            "The Location outline is not translated into the interaction data at this time, every other column " +
-                            "will export.<br><br>For an explanation of the csv format and how to use the file, see the note at the " + 
-                            "bottom of the \"Search Tips\"",
+                            "the outline tree will be translated into additional columns at the start of each interaction. " +
+                            "The Location and Source outlines are not translated into the interaction data at this time.<br><br>" +
+                            "All columns to the right of the 'Count' column will export.<br><br>For an explanation of the csv " +
+                            "format and how to use the file, see a note at the bottom of the \"Search Tips\"",
                         position: "left"
                     },
                 ]
@@ -2447,6 +2444,7 @@
         function setGridState() {
             $('#search-grid').css("height", "444px");
             $('#search-focus').val("taxa");
+            selectSearchFocus();
             $('#show-tips').off("click");
             $('#search-focus').off("change");
         }
@@ -2456,6 +2454,7 @@
             $('#show-tips').click(showTips);
             $('#search-focus').change(selectSearchFocus);
             $('#search-focus').val(focus);
+            miscObj.intro = null;
         }
     }   /* End startIntroWalkthrough */
     function initSearchTips() { 
@@ -2626,15 +2625,15 @@
     }
     /*--------------------- Grid Button Methods ------------------------------*/
     function toggleExpandTree() {                                               //console.log("toggleExpandTree")
-        var expanded = $('#xpand-tree').data('xpanded');
+        var expanded = $('#xpand-all').data('xpanded');
         if (expanded) { 
             gridOptions.api.collapseAll();
-            $('#xpand-tree').html("Expand All");
+            $('#xpand-all').html("Expand All");
         } else { 
             gridOptions.api.expandAll();    
-            $('#xpand-tree').html("Collapse All");
+            $('#xpand-all').html("Collapse All");
         }
-        $('#xpand-tree').data("xpanded", !expanded);
+        $('#xpand-all').data("xpanded", !expanded);
     }
     /**
      * Resets button based on passed boolean xpanded state. True for fully 
@@ -2642,8 +2641,8 @@
      */
     function resetToggleTreeBttn(xpanded) {
         var bttnText = xpanded ? "Collapse All" : "Expand All"; 
-        $('#xpand-tree').html(bttnText);
-        $('#xpand-tree').data("xpanded", xpanded);
+        $('#xpand-all').html(bttnText);
+        $('#xpand-all').data("xpanded", xpanded);
     }
     /** Events fired when clicking the + or - tree buttons.  */
     function expandTreeByOne() {    
@@ -2658,7 +2657,7 @@
      */
     function toggleTreeByOneLvl(opening) {
         var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
-        var bttXpandedAll = $("#xpand-tree").data('xpanded');
+        var bttXpandedAll = $("#xpand-all").data('xpanded');
         if (opening && bttXpandedAll === true) {return;}
 
         gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", row)
