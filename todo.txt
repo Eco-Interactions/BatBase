@@ -4,7 +4,6 @@
         -- Resize slider-header when screen size changes 
         -- Change domain -> realm, level -> rank.
     --Search--
-        -- refactor into and cal out of the global space. Perhaps a temp storage obj?
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
         -- Add publisher to source-type view
@@ -28,79 +27,50 @@
     --Asac---
         --form--
             -- Validate that genus and species have the same genus names.
-            -- Add exit button to error msgs, auto-clear when error is fixed, and remove 
-                auto-timeout. 
+            -- refactor initcomboboxes to need only the form-lvl param
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
             -- standardize taxon 'levels' storage
-            -- update walkthrough
-        --css--
-            --refactor to use parital, effectively 'group', selectors
-    --Asap--        
-        --form--
-            -- refactor initcomboboxes to need only the form-lvl param
-        --feedback page--
-            -- status is a number
-            -- add the header back?
-
-
-
-         --Data--
-            -- Src 945: Is both the pub and citation. create a seperate child cit.
-        -- Search 
             -- update all the comments that mention the updates-since filter to 
                 'int-updated-at'
-            -- clear external filters with updates-since activates
+        --css--
+            --refactor to use parital, effectively 'group', selectors
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
-
-
-
-Changes::
-    -- Fix University of Chicago Press
-    -- Mammals. food web... add Pub parent
-
-    -- "central farm" - change loc-type habitat -> Area
-        -- Update all locations with type == habitat.
-            -- if displayname matches country, leave as habitat and append hab name
-                -- if not, change to area.
-
-    -- Finish fixing dataUpdateErrs
-
-    --country/region
-        -- pop w children and 
-        -- When region is selected, disable create.
-            -- unspecified as well? 
-        -- there is no longer a need to append -loc to the country sel in the location form
-        -- DB Migration to create all country-habitat combos that do not yet exist.
-
+    --Asap--        
+        --form--
+        --search--
 
 
 ::Testing!::
-> Data Storage
-    > Data is added and removed correctly  
-    > The grid shoudl reload as expect with the form close
-        > With and without submitting. 
-        > interaction forms and sub-entity forms. 
+> Search Page
+    > CSV downloads
+    > Data Storage
+        > Data is added and removed correctly  
+        > The grid should reload as expect with the form close
+            > With and without submit. 
+            > interaction forms and sub-entity forms. 
 
 :: Questions ::
+        --feedback page--
+            -- add the header back?
 
 :; Email ::
-    -- TAXON errors being caught:
-        -- Can't change taxon to a level equal/beneath any children,
-            -- or equal/above the parent.
-        -- Species must have genus parent
-        -- Can't change genus that has species children
-
 
 
 :: Docs ::
     -- Location naming:
         --To select a region or country habitat, type in the region/country name 
             in the location combobox. Look for the [name]- [habitat]. 
-
+    -- Errors: 
+        -- TAXON errors being caught:
+            -- Can't change taxon to a level equal/beneath any children,
+                -- or equal/above the parent.
+            -- Species must have genus parent
+            -- Can't change genus that has species children
+    
 
 
 ============ MEETING ==================
@@ -111,17 +81,45 @@ Changes::
     edge-cases that were mislabeled. Only 'Areas' and 'Points' are editable. Regions, 
     Countries, and habitats are not.
 
->> Detail panel
+>> Detail panel <<
     >> Singular tense used where appropriate for taxon only atm. 
 
-Changes
->> Changed form exit event [--describe]
+
+## Changes ##
+    >> Changed form exit event [--describe]
+        >> On Interaction form exit
+            >> create: Grid is reloaded in source view with the 'ints-updates-since' today.
+            >> edit: The current view is reloaded with the filter set to today.
+        >> Sub-entity exits
+            >> Grid is reloaded in the current view
+        >> Search page
+            >> Location dropdowns now only include locations with interactions
+            >> CSV downloads have been updated.
+    >> Removed location type select
+    >> Updated walkthrough
+    >> All static pages and forms are responsive to two standard screen resolutions:
+        1366x768 (?), 1500x??? and up
+
+    ## LOCATION DATA ##
+        >> change captivity from a region to a habitat under 439
+            >> delete the captivity-habitat combos
+        >> Change locType to Area
+            >> St.Croix - forest
+            >> Santa Ana - forest
+            >> Central farm ???? 
+            >> San Luis Potosi
+            >> Sinaloa state
+            >> arizona
+            >> campinas, san paulo
+            >> espirito santo
+            >> manaus
+            >> cayenne
+        >> Move all interactions from 159 -> 181 (barrao ISLAND DUPLICATE)
 
 TASK LIST
 
 
 TODO
-    >> Need to write tests to reduce unidentified bugs upon release ~week
 
 NOTES
     >> 
@@ -135,7 +133,6 @@ TAYLOR:
 
 Notes::
     ## Change Log ##
-        > Removed location type select
         > Species are no longer able to be created without a parent genus selected.
 
 Questions:

@@ -15,7 +15,7 @@
      *      data should be cleared and redownloaded.
      */
     var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey = 'THE FUTURE IS NOW, AGAIN';
+    var dataKey = 'Welcome to the past.';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
