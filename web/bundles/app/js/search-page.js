@@ -2417,7 +2417,7 @@
                     },
                     {
                         element: "#opts-col2",
-                        intro: "<h3><center>There are view-specific search filters available.</center></h3><br>" + 
+                        intro: "<h3><center>View-specific filtering options are in this panel.</center></h3><br>" + 
                             "<b>These dropdowns show all taxon levels that are used in the outline tree.</b> When first displayed, " +
                             "all taxa for each level will be available in the dropdown selection lists.<br><br><b>You can focus  " +
                             "on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The outline " +

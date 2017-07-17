@@ -251,11 +251,11 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 #form-details h3 {
     text-align: center;
     font-size: 1.15em;
+    margin-bottom: .5em;
 }
 #form-details p {
-    text-align: center;
-    font-size: 1.15em;
-    margin-bottom:1em;
+    color: darkgrey;   
+    text-align: right
 }
 .det-div {
     min-height: 50px;

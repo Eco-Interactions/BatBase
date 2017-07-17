@@ -133,11 +133,11 @@ $(document).ready(function(){
     function getDetailPanelElems(entity, id) {                                  //console.log("getDetailPanelElems. action = %s, entity = %s", fParams.action, fParams.entity)
         var getDetailElemFunc = fParams.action === 'edit' && fParams.entity !== 'interaction' ?
             getSubEntityEditDetailElems : getInteractionDetailElems;
-        var cntnr = _util.buildElem("div", { "id": "form-details" });
-        var intIdStr = id ? "Id: " + id : '';
-        $(cntnr).append(_util.buildElem("h3", { "text": entity + " Details" }));
-        $(cntnr).append(_util.buildElem("p", { "text": intIdStr }));
+        var cntnr = _util.buildElem('div', { 'id': 'form-details' });
+        var intIdStr = id ? 'Id:  ' + id : '';
+        $(cntnr).append(_util.buildElem('h3', { 'text': entity + ' Details' }));
         $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
+        $(cntnr).append(_util.buildElem('p', { id: 'ent-id',  'text': intIdStr }));
         return cntnr;
     }
     function getInteractionDetailElems(entity, id, cntnr) {
