@@ -764,28 +764,33 @@ $(document).ready(function(){
      * repopulated with all locations. 
      */ 
     function fillLocationSelect(loc) {                                          //console.log("fillLocationSelect for parent Loc = %O", loc);
-        var opts = loc ? getChildLocOpts(loc) : getLocationOpts();    
+        var opts = loc ? getOptsForLoc(loc) : getLocationOpts();    
         updateComboboxOptions('#Location-sel', opts);
     }          
-    /** Returns an array of options for the child-locations of the passed country. */
-    function getChildLocOpts(loc) {
-        return loc.children.map(function(id) {  
+    /** Returns an array of options for the locations of the passed country/region. */
+    function getOptsForLoc(loc) {
+        var opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
+        return opts.concat([{ value: loc.id, text: loc.displayName }]).sort(alphaOptionObjs);
     }
     /** 
      * When a location is selected, its country/region is selected in the top-form
      * combobox and the location record's data is added to the detail panel. If 
      * the location was cleared, the detail panel is cleared. 
-     * Note: Habitat-only locations are children of the Unspecified region, 439.
      */     
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
-        var cntryValue = locRcrd.parent ? locRcrd.parent : 439;
+        var cntryValue = locRcrd.parent ? locRcrd.parent : getParentLoc(locRcrd);
         $('#Country-Region-sel')[0].selectize.addItem(cntryValue, true);
         fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
+    }
+    /* Note: Habitat-only locations are children of the Unspecified region, 439. */
+    function getParentLoc(loc) {  
+        return ['Region','Country'].indexOf(loc.locationType.displayName) !== -1 ? 
+            rcrd.id : 439;
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
