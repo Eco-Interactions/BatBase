@@ -8,13 +8,12 @@
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
         -- Add publisher to source-type view
         -- refactor enable/disable submit-button methods to one method with 'enable' param
+        -- Add data-entry tutorial.
     --FORM--
         -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
         -- //Refactor fillIntData (crud.js)
         -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
-            > or refactor into using it to general disable and dim buttons
         -- refactor realm to domain until the name change happens in the backend
         -- Location --
             -- Add message to inform user that new countries can not be created.
@@ -28,6 +27,9 @@
         --form--
             -- Validate that genus and species have the same genus names.
             -- refactor initcomboboxes to need only the form-lvl param
+            -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
+                > or refactor into using it to general disable and dim buttons
+                > or refactor both enable/disable submit methods into one func to rule them all
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
@@ -41,7 +43,12 @@
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
     --Asap--        
         --form--
+            -- Change edit form's cancel buttons to 'close' after submit.
+            -- Location
+                -- on Country/region selection, include selection in the options 
+                    for the location combobox 
         --search--
+            -- add 'updatedAt' filter to walkthrough.
 
 
 ::Testing!::

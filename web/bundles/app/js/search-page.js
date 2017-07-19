@@ -70,7 +70,7 @@
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
         showPopUpMsg("Downloading and caching all interaction records. Please " +
-            "allow for an ~30 second download.");   
+            "allow for a ~30 second download.");   
     }
     function addDomEventListeners() {
         $("#search-focus").change(selectSearchFocus);
@@ -124,8 +124,13 @@
      */
     function resetGridParams() {                                              
         gParams = {}; 
-        gParams.curFocus =  localStorage.getItem('curFocus') || "taxa";  
+        gParams.curFocus = getResetFocus();  
         gParams.openRows = [];                                                  //console.log("gParams = %O", gParams);
+    }
+    function getResetFocus() {
+        var foci = ['locs', 'srcs', 'taxa'];
+        var storedFocus = localStorage.getItem('curFocus');
+        return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
     function selectInitialSearchFocus() {
@@ -160,9 +165,9 @@
     /**
      * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
      */
-    function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called.")
+    function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called. focus = ", focus)
         clearPreviousGrid();
-        if (focus !== gParams.curFocus) {   //focus && 
+        if (focus !== gParams.curFocus) {
             _util.populateStorage("curFocus", focus);
             localStorage.removeItem("curDomain");
             initNoFiltersStatus();

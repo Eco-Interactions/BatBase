@@ -107,9 +107,9 @@ $(document).ready(function(){
         return hdrSect;
     }
     /** Returns popup and overlay to their original/default state. */
-    function exitFormPopup() {
+    function exitFormPopup(skipReset) {
         hideSearchFormPopup();
-        refocusGridIfFormWasSubmitted();
+        if (!skipReset) { refocusGridIfFormWasSubmitted(); }
         $("#b-overlay").removeClass("form-ovrly");
         $("#b-overlay-popup").removeClass("form-popup");
         $("#b-overlay-popup").empty();
@@ -1337,7 +1337,7 @@ $(document).ready(function(){
         for (var tag in errObj) {  
             if (errObj[tag]) { return sendTxnErrRprt(tag, 'Taxon'); }
         }
-        clrNeedsHigherLvl(null, null, txnLvl);
+        clrNeedsHigherLvl(null, null, null, txnLvl);
         checkForParentLvlErrs(prntLvl);
     }
     /** Returns true if the taxon's original level is Genus and it has children. */
@@ -1406,7 +1406,7 @@ $(document).ready(function(){
      */
     function buildTaxonEditFormRow(field, inputElems, formLvl) {
         var rowDiv = _util.buildElem('div', { class: formLvl + '-row', id: field + '_row'});
-        var errorDiv = _util.buildElem('div', { class: 'row-errors', id: field+'_errs'});
+        var errorDiv = _util.buildElem('div', { id: field+'_errs'}); 
         var fieldCntnr = _util.buildElem('div', { class: 'field-row flex-row'});
         $(fieldCntnr).append(inputElems);
         $(rowDiv).append([errorDiv, fieldCntnr]);
@@ -1992,7 +1992,7 @@ $(document).ready(function(){
     function buildFormRow(fieldName, input, formLvl, isReq, rowClss) {
         var field = fieldName.split(' ').join('');
         var rowDiv = _util.buildElem("div", { class: getRowClasses(), id: field + "_row"});
-        var errorDiv = _util.buildElem("div", { class: "row-errors", id: field+"_errs"});
+        var errorDiv = _util.buildElem("div", { id: field+"_errs"}); 
         var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
         var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
         var pin = formLvl === "top" ? getPinElem(field) : null;     
@@ -2472,31 +2472,6 @@ $(document).ready(function(){
         var envUrl = $('body').data("ajax-target-url");
         return envUrl + "crud/entity/" + action;
     }
-    function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = fParams.ajaxFormLvl;                                          
-        toggleWaitOverlay(false);
-        $('#'+formLvl+'-hdr').after(getErrorMessage(JSON.parse(jqXHR.responseText)));
-        window.setTimeout(function(){$('#'+formLvl+'-form')[0].children[1].remove() }, 3000);        
-    }
-    /**
-     * Returns an error <p> based on the server error text. Reports duplicated 
-     * authors, non-unique display names, or returns a generic form-error message.
-     */
-    function getErrorMessage(errTxt) {                                          console.log("errTxt = %O", errTxt) 
-        var msg = '<p class="form-errors"">';
-        if (isDuplicateAuthorErr(errTxt)) {
-            msg += 'A selected author is a duplicate.';
-        } else if (errTxt.DBALException.includes("Duplicate entry")){ 
-            msg += 'A record with this display name already exists.'; 
-        } else {
-            msg += 'There was an error during form submission.'
-        }
-        return msg + '</p>'
-    }
-    function isDuplicateAuthorErr(errTxt) {
-        return errTxt.DBALException.includes("Duplicate entry") &&
-            errTxt.DBALException.includes("contribution");
-    }
     /*------------------ Form Success Methods --------------------------------*/
     /**
      * Ajax success callback. Updates the stored data @eif.syncData.update and the 
@@ -2634,8 +2609,41 @@ $(document).ready(function(){
         return data;
     }
     /*------------------- Form Error Handlers --------------------------------*/
+    /**------------- Form Submit-Errors --------------*/
+    /** Builds and appends an error elem that displays the error to the user. */
+    function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+        var formLvl = fParams.ajaxFormLvl;                                          
+        var elem = getFormErrElem(formLvl);
+        var errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
+        var msg = getFormErrMsg(errTag);
+        toggleWaitOverlay(false);
+        setErrElemAndExitBttn(elem, msg, errTag, formLvl);
+        disableSubmitBttn('#'+formLvl+'-submit');
+    }
+    /**
+     * Returns an error tag based on the server error text. Reports duplicated 
+     * authors, non-unique display names, or returns a generic form-error message.
+     */
+    function getFormErrTag(errTxt) {                                            //console.log("errTxt = %O", errTxt) 
+        return isDuplicateAuthorErr(errTxt) ?
+            'dupAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
+            'dupEnt'  : 'genSubmitErr';
+    }
+    function isDuplicateAuthorErr(errTxt) {
+        return errTxt.DBALException.includes("Duplicate entry") &&
+            errTxt.DBALException.includes("contribution");
+    }
+    function getFormErrMsg(errTag) {
+        var msg = {
+            'dupAuth': 'An author is selected multiple times.',
+            'dupEnt' : 'A record with this display name already exists.',
+            'genSubmitErr': 'There was an error during form submission.'
+        };
+        return '<span>' + msg[errTag] + '</span>'; 
+    }
+    /**------------- Data Storage Errors --------------*/
     function errUpdatingData(errMsg, errTag) {                                  //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-        var cntnr = _util.buildElem('div', { class: 'flex-col' });
+        var cntnr = _util.buildElem('div', { class: 'flex-col', id:'data_errs' });
         var msg = "<span>" + errMsg + "<br> Please report this error to the developer: <b>" 
             + errTag + "</b><br>This form will close and all stored data will be " +
             "redownloaded.</span>";
@@ -2648,9 +2656,9 @@ $(document).ready(function(){
         $('#form-hdr p').after(cntnr);
         $(bttn).click(reloadAndRedownloadData);
     }
-    function reloadAndRedownloadData() {                                        //console.log('reloadAndRedownloadData called. ');
-        exitFormPopup();
-        eif.syncData.reset(fParams.submitFocus);
+    function reloadAndRedownloadData() {                                        //console.log('reloadAndRedownloadData called. prevFocus = ', fParams.submitFocus);
+        exitFormPopup('skipGridReset');
+        eif.syncData.reset();
     }
     /**
      * When the user attempts to create an entity that uses the sub-form and there 
@@ -2684,47 +2692,47 @@ $(document).ready(function(){
             'needsHigherLvl': handleNeedsHigherLvl,
             'openSubForm': handleOpenSubForm,
         };
-        var errElem = getErrElem(fieldName);
+        var errElem = getFieldErrElem(fieldName);
         errMsgMap[errTag](errElem, errTag, formLvl);
     }
     /* ----------- Field-Error Handlers --------------------------------------*/
     /** Note: error for the edit-taxon form. */
     function handleIsGenusPrnt(elem, errTag, formLvl) {  
         var msg = "<span>Genus' with species children must remain at genus.</span>";
-        setErrElemAndAppend(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag, 'top');
     }
-    function clrIsGenusPrnt(elem, e) {                                       
+    function clrIsGenusPrnt(elem, formLvl, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
-        clearErrElemAndEnableSubmit(elem);
+        clearErrElemAndEnableSubmit(elem, 'top');
     }
     /** Note: error for the edit-taxon form. */
     function handleNeedsGenusParent(elem, errTag, formLvl) {  
         var msg = '<span>Please select a genus parent for the species taxon.</span>';
-        setErrElemAndAppend(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag, 'top');
     }
-    function clrNeedsGenusPrntErr(elem, e) {                                       
+    function clrNeedsGenusPrntErr(elem, formLvl, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
-        clearErrElemAndEnableSubmit(elem);
+        clearErrElemAndEnableSubmit(elem, 'top');
     }
     /** Note: error for the create-taxon form. */
     function handleNoGenus(elem, errTag, formLvl) {  
         var msg = '<span>Please select a genus before creating a species.</span>';
-        setErrElemAndAppend(elem, msg, errTag)
+        setErrElemAndExitBttn(elem, msg, errTag, 'top');
         $('#Genus-sel').change(function(e){
             if (e.target.value) { clrNoGenusErr(elem); }
         });
     }
-    function clrNoGenusErr(elem, e) {                                            
+    function clrNoGenusErr(elem, formLvl, e) {                                            
         $('#Genus-sel').off('change');
         clearErrElemAndEnableSubmit(elem);
     }
     /** Note: error for the edit-taxon form. */
     function handleNeedsHigherLvlPrnt(elem, errTag, formLvl) { 
         var msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
-        setErrElemAndAppend(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag);
     }
     /** Clears the cause, either the parent-selection process or the taxon's level. */
-    function clrNeedsHigherLvlPrnt(elem, e) {                                    
+    function clrNeedsHigherLvlPrnt(elem, formLvl, e) {                                    
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem);
         if ($('#sub-form').length) { return selectParentTaxon(
@@ -2739,9 +2747,9 @@ $(document).ready(function(){
         var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
             'Please select a level higher than '+lvlName+'</div>';
         $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-        setErrElemAndAppend(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag);
     }
-    function clrNeedsHigherLvl(elem, e, taxonLvl) {    
+    function clrNeedsHigherLvl(elem, formLvl, e, taxonLvl) {    
         var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
         $('#txn-lvl')[0].selectize.addItem(txnLvl, 'silent');
         $('#txn-lvl').data('lvl', txnLvl);
@@ -2757,7 +2765,7 @@ $(document).ready(function(){
     function handleOpenSubForm(elem, errTag, formLvl) {  
         var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
         var msg = '<p>Please finish the open '+ _util.ucfirst(subEntity) + ' form.</p>';
-        setErrElemAndAppend(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag);
         $('#'+formLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
     }
     function clrOpenSubForm(elem, e) {   
@@ -2765,27 +2773,41 @@ $(document).ready(function(){
     }
     /* ----------- Error-Elem Methods -------------- */
     /** Returns the error div for the passed field. */
-    function getErrElem(fieldName) {                                            //console.log("getErrElem for %s", fieldName);
+    function getFieldErrElem(fieldName) {                                       //console.log("getFieldErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
         var elem = $('#'+field+'_errs')[0];    
         elem.className += ' active-errs';
         return elem;
     }   
-    function setErrElemAndAppend(elem, msg, errTag) {
-        elem.innerHTML = msg;
-        $(elem).append(getErrExitBttn(errTag, elem));
-        disableSubmitBttn('#top-submit');
+    function getFormErrElem(formLvl) {
+        var elem = _util.buildElem('div', { id: formLvl+'_errs', class: 'active-errs' }); 
+        $('#'+formLvl+'-hdr').after(elem);
+        return elem;
     }
-    function getErrExitBttn(errTag, elem) {
+    function setErrElemAndExitBttn(elem, msg, errTag, formLvl) {
+        elem.innerHTML = msg;
+        $(elem).append(getErrExitBttn(errTag, elem, formLvl));
+        disableSubmitBttn('#'+formLvl+'-submit');
+    }
+    function getErrExitBttn(errTag, elem, formLvl) {
         var exitHdnlrs = {
-            isGenusPrnt: clrIsGenusPrnt, needsGenusPrnt: clrNeedsGenusPrntErr, 
-            noGenus: clrNoGenusErr, needsHigherLvl: clrNeedsHigherLvl, 
-            needsHigherLvlPrnt: clrNeedsHigherLvlPrnt, openSubForm: clrOpenSubForm
+            'isGenusPrnt': clrIsGenusPrnt, 'needsGenusPrnt': clrNeedsGenusPrntErr, 
+            'noGenus': clrNoGenusErr, 'needsHigherLvl': clrNeedsHigherLvl, 
+            'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt, 'openSubForm': clrOpenSubForm,
+            'dupAuth': clrFormLvlErr, 'dupEnt': clrFormLvlErr, 
+            'genSubmitErr': clrFormLvlErr
         };
         var bttn = getExitButton();
         bttn.className += ' err-exit';
-        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem));
+        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, formLvl));
         return bttn;
+    }
+    function clrFormLvlErr(elem, formLvl) {
+        var childFormLvl = getNextFormLevel('child', formLvl);
+        $('#'+formLvl+'_errs').remove();
+        if (!$('#'+childFormLvl+'-form').length && ifRequiredFieldsFilled(formLvl)) {
+            enableSubmitBttn('#'+formLvl+'-submit');
+        }
     }
     function clearErrElemAndEnableSubmit(elem) {                                //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
         clearErrElem(elem);

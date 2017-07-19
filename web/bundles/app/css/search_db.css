@@ -340,17 +340,17 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 372px;
 }
 /** --- Error Styles --- */
-.form-errors, .row-errors {
+[id$="_errs"] {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    color: red;
-    font-size: .9em;
+    justify-content: center;
     text-align: center;
+    font-size: .9em;
     width: 100%;
+    color: red;
 }
-.row-errors span {
+[id$="_errs"] span {
     margin-top: .3em;
+    justify-content: center;
 }
 .active-errs {
     padding: .3em;
@@ -360,6 +360,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     color: darkred;
     height: 1.65em;
     width: 1.7em;
+    margin-left: 1em !important;
 }
 /** --- Field Styles --- */
 .field-row .required:after {

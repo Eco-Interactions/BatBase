@@ -363,7 +363,8 @@
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
-    function resetStoredData(prevFocus) {
+    function resetStoredData() {
+        var prevFocus = localStorage.getItem('curFocus');
         localStorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);

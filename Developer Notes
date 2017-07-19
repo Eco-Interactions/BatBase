@@ -9,6 +9,11 @@ Developer Notes:
       the previous filter menu options will be displayed and the new ones on top of 
       them, causing the text to appear boldened and difficult to read-- even worse 
       the menu is obviously inaccurrate. 
+    ## Forms ##
+        >> Citation
+          --Removing previously selected authors from the dropdowns of new authors will require a bit of creativity. Currently, only the last selected author name is removed from the new combobox's options.  
+          --Removing empty author comboboxes has proven more complicated than expected. There is a some weirdness on 'destroy' in the selectize library that needs to be isolated.
+
 
 
 
@@ -16,11 +21,8 @@ Developer Notes:
 
 ::Checked data wonkiness::
     -'northern mariana islands' is the name from red list.
-    - Id inconsistencies in the Citation, Publication, and Source table are from 
-      early testing with the interaction form before Sarah was conscious of the 
-      need to 'remove' entities via doctrine, rather than just deleting test rows 
-      from the db. There is now a db-migration, 000EraseTests, that removes test 
-      entities so they can be safely deleted from the db without remaining in memory.
+    - Id inconsistencies in the db are from early testing with the interaction 
+      form before Sarah was conscious of the need to 'remove' entities via doctrine, rather than just deleting test rows from the db. There is now a db-migration, 000EraseTests, that removes test entities so they can be safely deleted from the db without remaining in memory.
 
 
 ::data cleanup::
