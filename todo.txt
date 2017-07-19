@@ -42,13 +42,8 @@
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
     --Asap--        
-        --form--
-            -- Change edit form's cancel buttons to 'close' after submit.
-            -- Location
-                -- on Country/region selection, include selection in the options 
-                    for the location combobox 
+        --form-- 
         --search--
-            -- add 'updatedAt' filter to walkthrough.
 
 
 ::Testing!::
@@ -107,29 +102,17 @@
     >> All static pages and forms are responsive to two standard screen resolutions:
         1366x768 (?), 1500x??? and up
 
-    ## LOCATION DATA ##
-        >> change captivity from a region to a habitat under 439
-            >> delete the captivity-habitat combos
-        >> Change locType to Area
-            >> St.Croix - forest
-            >> Santa Ana - forest
-            >> Central farm ???? 
-            >> San Luis Potosi
-            >> Sinaloa state
-            >> arizona
-            >> campinas, san paulo
-            >> espirito santo
-            >> manaus
-            >> cayenne
-        >> Move all interactions from 159 -> 181 (barrao ISLAND DUPLICATE)
-
 TASK LIST
 
 
 TODO
+    >> data cleanup <<        
+
 
 NOTES
-    >> 
+    >> I can go through the location grid and spot obvious location that should be 
+        merged and do so.
+        >> from 159 -> 181 (barrao ISLAND DUPLICATE)
 
 ============ EMAIL ==================
     >>  
@@ -143,6 +126,7 @@ Notes::
         > Species are no longer able to be created without a parent genus selected.
 
 Questions:
+    >> We can either close the update forms on submit, or leave the close button.
 ---------------------Next-------------------------------------------------------
 
 --SHORTTERM--

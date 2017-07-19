@@ -2434,6 +2434,14 @@
                         position: "left"
                     },
                     {
+                        element: "#opts-col3",
+                        intro: "<h3><center>Filter options in this panel are available in all views.</center></h3><br>" + 
+                            "<b>Check the box to filter interaction records by time updated/created.</b> The time defaults to post midnight " +
+                            "of the current date. Clicking on 'Custom' allows the selection of any date/time.<br><br>Hover over the text " +
+                            "at the bottom of this panel to see what future search options are planned.",
+                        position: "left"
+                    },
+                    {
                         element: "button[name=\"csv\"]",
                         intro: "<h3><center>As a member of batplant.org, data displayed in the grid can be exported in csv format.</center></h3>" +
                             "<br>The columns are exported in the order they are displayed in the grid.<br><br>For Taxon exports, " +
