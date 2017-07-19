@@ -2504,6 +2504,7 @@ $(document).ready(function(){
         var msg = hasChngs(data) ? "Update successful." : "No changes detected."; 
         showSuccessMsg(msg);
         ifHasDisplayNameChanges(data);
+        $('#top-cancel').val('Close');
     }
     /** 
      * Returns true if there have been user-made changes to the entity. 
