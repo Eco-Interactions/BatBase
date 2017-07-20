@@ -107,7 +107,7 @@ $(document).ready(function(){
         return hdrSect;
     }
     /** Returns popup and overlay to their original/default state. */
-    function exitFormPopup(skipReset) {
+    function exitFormPopup(e, skipReset) { 
         hideSearchFormPopup();
         if (!skipReset) { refocusGridIfFormWasSubmitted(); }
         $("#b-overlay").removeClass("form-ovrly");
@@ -790,7 +790,7 @@ $(document).ready(function(){
     /* Note: Habitat-only locations are children of the Unspecified region, 439. */
     function getParentLoc(loc) {  
         return ['Region','Country'].indexOf(loc.locationType.displayName) !== -1 ? 
-            rcrd.id : 439;
+            loc.id : 439;
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
@@ -2617,7 +2617,7 @@ $(document).ready(function(){
     /*------------------- Form Error Handlers --------------------------------*/
     /**------------- Form Submit-Errors --------------*/
     /** Builds and appends an error elem that displays the error to the user. */
-    function formSubmitError(jqXHR, textStatus, errorThrown) {                  //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
         var formLvl = fParams.ajaxFormLvl;                                          
         var elem = getFormErrElem(formLvl);
         var errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
@@ -2643,7 +2643,8 @@ $(document).ready(function(){
         var msg = {
             'dupAuth': 'An author is selected multiple times.',
             'dupEnt' : 'A record with this display name already exists.',
-            'genSubmitErr': 'There was an error during form submission.'
+            'genSubmitErr': 'There was an error during form submission. Please note the ' + 
+                'record ID and the changes attempted and send to the developer.'
         };
         return '<span>' + msg[errTag] + '</span>'; 
     }
@@ -2663,7 +2664,7 @@ $(document).ready(function(){
         $(bttn).click(reloadAndRedownloadData);
     }
     function reloadAndRedownloadData() {                                        //console.log('reloadAndRedownloadData called. prevFocus = ', fParams.submitFocus);
-        exitFormPopup('skipGridReset');
+        exitFormPopup(null, 'skipGridReset');
         eif.syncData.reset();
     }
     /**
@@ -2786,11 +2787,12 @@ $(document).ready(function(){
         return elem;
     }   
     function getFormErrElem(formLvl) {
+        var hdrId = formLvl === 'top' ? '#form-hdr' : '#'+formLvl+'-hdr';
         var elem = _util.buildElem('div', { id: formLvl+'_errs', class: 'active-errs' }); 
-        $('#'+formLvl+'-hdr').after(elem);
+        $(hdrId).after(elem);
         return elem;
     }
-    function setErrElemAndExitBttn(elem, msg, errTag, formLvl) {
+    function setErrElemAndExitBttn(elem, msg, errTag, formLvl) {  console.log('setErrElemAndExitBttn. args = %O', arguments)
         elem.innerHTML = msg;
         $(elem).append(getErrExitBttn(errTag, elem, formLvl));
         disableSubmitBttn('#'+formLvl+'-submit');

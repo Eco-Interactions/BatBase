@@ -237,7 +237,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 }
 #form-main {
     padding: 5px 0 0 5px;
-    height: 83vh;
+    height: 81vh;
     overflow-x: hidden;
     overflow-y: scroll;
 }
