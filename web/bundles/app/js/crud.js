@@ -1686,7 +1686,7 @@ $(document).ready(function(){
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
                 "exclude": ["Description", "Year", "Doi", "Authors", "Tags"],
-                "required": ["Last Name"], 
+                "required": ["Last Name", "Display Name"], 
                 "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
                     "LinkUrl", "LinkDisplay"],
             },

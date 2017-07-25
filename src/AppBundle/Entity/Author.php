@@ -72,6 +72,15 @@ class Author
     /**
      * @var string
      *
+     * @ORM\Column(name="suffix", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("suffix")
+     */
+    private $suffix;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="full_name", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("fullName")
@@ -254,6 +263,31 @@ class Author
     {
         return $this->lastName;
     }
+    
+    /**
+     * Set suffix.
+     *
+     * @param string $suffix
+     *
+     * @return Author
+     */
+    public function setSuffix($suffix)
+    {
+        $this->suffix = $suffix;
+
+        return $this;
+    }
+
+    /**
+     * Get suffix.
+     *
+     * @return string
+     */
+    public function getSuffix()
+    {
+        return $this->suffix;
+    }
+
 
     /**
      * Set fullName.
