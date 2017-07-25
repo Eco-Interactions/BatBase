@@ -268,8 +268,7 @@ $(document).ready(function(){
     function getFormExitHandler(confg, action) {  
         return confg.exitHandler && confg.exitHandler[action] ? 
             confg.exitHandler[action] :
-            action === 'edit' ? 
-                showEditSuccessMsg : Function.prototype;
+            action === 'edit' ? exitFormPopup : Function.prototype;
     }
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form --------------------------------------*/
