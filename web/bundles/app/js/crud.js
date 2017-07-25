@@ -49,25 +49,25 @@ $(document).ready(function(){
     function setFormSize(entity) {
         var sizeConfgs = { 
             '1500': {
-                'Interaction': { popup: '1510px', form: '999px', min: '1510px' },
-                'Publication': { popup: '72%', form: '999px', min: '1370px' },
-                'Citation': { popup: '72%', form: '999px', min: '1370px' },
-                'Author': { popup: '48%', form: '55%', min: '909px' },
-                'Location': { popup: '72%', form: '999px', min: '1370px' },
-                'Taxon': { popup: '808px', form: '60%', min: '808px' },
+                'Interaction': { popup: '1510px', form: '999px' },
+                'Publication': { popup: '72%', form: '999px' },
+                'Citation': { popup: '72%', form: '999px' },
+                'Author': { popup: '48%', form: '55%' },
+                'Location': { popup: '72%', form: '999px' },
+                'Taxon': { popup: '808px', form: '60%' },
             },
             '1366': {
-                'Interaction': { popup: '97%', form: '71%' },
-                'Publication': { popup: '97%', form: '71%' },
-                'Citation': { popup: '97%', form: '71%' },
-                'Author': { popup: '63%', form: '58%' },
-                'Location': { popup: '97%', form: '71%' },
-                'Taxon': { popup: '808px', form: '60%' },
+                'Interaction': { popup: '97%', form: '924px' },
+                'Publication': { popup: '92%', form: '920px' },
+                'Citation': { popup: '92%', form: '920px' },
+                'Author': { popup: '58%', form: '460px' },
+                'Location': { popup: '92%', form: '920px' },
+                'Taxon': { popup: '808px', form: '450px' },
         }};
         var wKey = $(window).width() > 1499 ? '1500' : '1366';
         var confg = sizeConfgs[wKey][entity];                                   //console.log("setFormSize [%s] confg = %O", entity, confg);
-        $('.form-popup').css({'width': confg.popup, 'min-width': confg.min});
-        $('#form-main').css({'width': confg.form});
+        $('.form-popup').css({'width': confg.popup});
+        $('#form-main').css({'flex': '0 0 '+ confg.form});
     }
     function hideSearchFormPopup() {
         $('#b-overlay-popup, #b-overlay').css({display: 'none'});
@@ -454,7 +454,7 @@ $(document).ready(function(){
     function setAdditionalFields(entity, srcRcrd, detail) {
         setTitleField(entity, srcRcrd);
         setPublisherField(entity, srcRcrd);
-        setCitationFullText(entity, detail);
+        setCitationEdgeCaseFields(entity, detail);
         addAuthors(entity, srcRcrd);
     }
     function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
@@ -466,9 +466,12 @@ $(document).ready(function(){
         if (entity !== 'publication') { return; }
         setSelect("Publisher", "parent", srcRcrd);
     }
-    function setCitationFullText(entity, citRcrd) {  
+    function setCitationEdgeCaseFields(entity, citRcrd) {
         if (entity !== 'citation') { return; }
         $('#CitationText_row textarea')[0].innerText = citRcrd.fullText;
+        $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
+        $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
+        $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
     }
     function addAuthors(entity, srcRcrd) {
         var cnt = 0;
@@ -2495,7 +2498,8 @@ $(document).ready(function(){
         updateStoredFormParamsData(data);
     }
     /** Updates the core records in the global form params object. */
-    function updateStoredFormParamsData(data) {                                 //console.log("fParams after interaction created. %O", fParams);
+    function updateStoredFormParamsData(data) {                                 console.log("fParams after interaction created. %O", fParams);
+        if (!fParams.length) { return; }
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /*------------------ Top-Form Success Methods --------------------*/

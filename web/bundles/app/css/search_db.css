@@ -432,13 +432,15 @@ select[id$="txn-lvl"] + div {
     #detail-block #opts-col3 {
         border-right: none;
     }
+    .tips-popup {
+        width: 77%;
+    }
     /*--------------- Database CRUD Popup -------------*/
     #b-overlay .form-popup {
         padding: 15px;
     }
     #b-overlay #form-main {
         padding: 5px 0 0 20px;
-        width: 915px;
     }
     #b-overlay #sub2-form.sml-form {  
         min-width: 366px;
