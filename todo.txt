@@ -43,7 +43,25 @@
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
     --Asap--        
         --form-- 
+            -- Refactor 'form-hdr' into 'top-hdr'
+            -- Data storage err - Ensure user can't close the form any other way 
+                than clicking the 'ok' in the error meseage.
+        -- data creation --
+            -> If a new authors display name is identical to another's, prompt 
+               user to check existing author for duplication, and then prompt 
+               them to add initials if not.  
         --search--
+            -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
+
+Todo:
+    > Edit forms: Close on update
+        not on no changes
+    > Fix responsiveness and formatting for the edit forms. 
+    > Alpha init loc opts 
+    > Future additions
+        > Displaying contained data on data grid
+    > Set min-widths for form windows
+    > Fix bat data in csv export
 
 
 ::Testing!::
@@ -76,31 +94,6 @@
 
 
 ============ MEETING ==================
->> Talk about the location naming convention for when to add author and year and when to assign interactions directly to the country.
-
->> Flag any data in the tree, in particular the location tree, that sems like it 
-    should be editable. Location-types were automatically assigned and there will be 
-    edge-cases that were mislabeled. Only 'Areas' and 'Points' are editable. Regions, 
-    Countries, and habitats are not.
-
->> Detail panel <<
-    >> Singular tense used where appropriate for taxon only atm. 
-
-
-## Changes ##
-    >> Changed form exit event [--describe]
-        >> On Interaction form exit
-            >> create: Grid is reloaded in source view with the 'ints-updates-since' today.
-            >> edit: The current view is reloaded with the filter set to today.
-        >> Sub-entity exits
-            >> Grid is reloaded in the current view
-        >> Search page
-            >> Location dropdowns now only include locations with interactions
-            >> CSV downloads have been updated.
-    >> Removed location type select
-    >> Updated walkthrough
-    >> All static pages and forms are responsive to two standard screen resolutions:
-        1366x768 (?), 1500x??? and up
 
 TASK LIST
 
