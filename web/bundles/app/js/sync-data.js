@@ -94,6 +94,14 @@
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
         storeData('pgDataUpdatedAt', getCurrentDate());
+        sendDataUpdateStatus(data);
+    }
+    function sendDataUpdateStatus(data) {
+        var errs = data.coreEdits.errors ? data.coreEdits.errors : 
+             data.detailEdits.errors ? data.detailEdits.errors : false;
+        var msg = errs ? errs[0] : null;
+        var tag = errs ? errs[1] : null;
+        eif.form.dataSynced(data, msg, tag);
     }
     /** Stores both core and detail entity data, and updates data affected by edits. */
     function updateEntityData(data) {
@@ -537,20 +545,19 @@
         try {
             updateFunc(prop, params.rcrd, params.entity, edits);
         } catch (e) {                                                           console.log('ERR  updateDataProps err = %O', e);
-            reportDataUpdateErr(prop, params.rcrd, params.entity, params.stage);
-            edits.errors = true;
+            reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
         }
     }
     /*----------------- Errs ---------------------------------------*/
     /** Sends a message and error tag back to the form to be displayed to the user. */
-    function reportDataUpdateErr(prop, rcrd, entity, stage) {
+    function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {
         var trans = {
             'addData': 'adding data to ', 'rmvData': 'removing data from '
         };
         var msg = 'There was an error while '+trans[stage]+' the '+ entity +
             '\'s stored data.';
         var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
-        eif.form.errUpdatingData(msg, errTag);
+        edits.errors = [ msg, errTag ];
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)

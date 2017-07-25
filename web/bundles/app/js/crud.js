@@ -12,7 +12,7 @@ $(document).ready(function(){
     var _util = eif.util;
     eif.form = {
         editEntity: editEntity,
-        errUpdatingData: errUpdatingData
+        dataSynced: afterStoredDataUpdated 
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -101,10 +101,7 @@ $(document).ready(function(){
         return formWin;
     }
     function getHeaderHtml(title) {
-        var hdrSect = _util.buildElem("header", { "id": "form-hdr", "class":"flex-col" });
-        var hdr = _util.buildElem("h1", { "text": title });
-        $(hdrSect).append([ hdr, _util.buildElem("p") ]);
-        return hdrSect;
+        return _util.buildElem("h1", { "id": "top-hdr", "text": title });
     }
     /** Returns popup and overlay to their original/default state. */
     function exitFormPopup(e, skipReset) { 
@@ -262,7 +259,7 @@ $(document).ready(function(){
     }
     /**
      * Returns the exitHandler stored in the form confg for the current action, or, 
-     * if no handler is stored, edit forms have a default of @showEditSuccessMsg
+     * if no handler is stored, edit forms have a default of @exitFormHandler
      * and create forms default to noOp.
      */
     function getFormExitHandler(confg, action) {  
@@ -319,7 +316,7 @@ $(document).ready(function(){
         var prnt = getParentEntity(ent);
         var entity = prnt || ent;
         var rcrd = getEntityRecord(entity, id);                                 
-        $('#form-hdr h1')[0].innerText += ': ' + rcrd.displayName; 
+        $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
         $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
     }
     function fillEntityData(entity, id) {
@@ -1263,7 +1260,7 @@ $(document).ready(function(){
         return hdr.concat(fields, bttns);
     }
     function buildEditParentHdr() {
-        var hdr = _util.buildElem("h3", { text: "Select New Taxon Parent", id:'sub-form-hdr' });
+        var hdr = _util.buildElem("h3", { text: "Select New Taxon Parent", id:'sub-hdr' });
         return hdr;
     }
     function getParentEditFields(prnt) {  
@@ -2485,8 +2482,12 @@ $(document).ready(function(){
     function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
         var data = parseData(ajaxData.results);
         storeData(data);
-        handleFormComplete(data);
+    }
+    function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
+        if (errTag) { return errUpdatingData(msg, errTag); }
+        if (!hasChngs(data)) { return showSuccessMsg("No changes detected."); }
+        handleFormComplete(data);
     }
     /** Calls the appropriate data storage method and updates fParams. */  
     function storeData(data) {
@@ -2497,18 +2498,11 @@ $(document).ready(function(){
     function updateStoredFormParamsData(data) {                                 //console.log("fParams after interaction created. %O", fParams);
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
+    /*------------------ Top-Form Success Methods --------------------*/
     function handleFormComplete(data) {
         var formLvl = fParams.ajaxFormLvl;
         if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
-    }
-    /*------------------ Top-Form Success Methods --------------------*/
-    function showEditSuccessMsg(data) {
-        if (data.coreEdits.errors || data.detailEdits.errors) { return; }
-        var msg = hasChngs(data) ? "Update successful." : "No changes detected."; 
-        showSuccessMsg(msg);
-        ifHasDisplayNameChanges(data);
-        $('#top-cancel').val('Close');
     }
     /** 
      * Returns true if there have been user-made changes to the entity. 
@@ -2523,12 +2517,6 @@ $(document).ready(function(){
         }
         return chngs;
     }
-    /** Updates the header with any display name changes. */ 
-    function ifHasDisplayNameChanges(data) {
-        if (!data.coreEdits.displayName) { return; }  
-        var formHdr = $('#form-hdr h1')[0].innerText.split(':')[0]; 
-        $('#form-hdr h1')[0].innerText = formHdr + ': ' + data.coreEdits.displayName.new;
-    }
     /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
@@ -2538,10 +2526,9 @@ $(document).ready(function(){
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {
-        $('#form-hdr p')[0].innerHTML = msg;
-        window.setTimeout(function() {
-            if ($('#form-hdr p').length) {$('#form-hdr p')[0].innerHTML = ""}
-        }, 2500);
+        var p = _util.buildElem('p', { id: 'success', text: msg });
+        $('#top-hdr').after(p);
+        window.setTimeout(function() { $('#success').remove(); }, 3500);
     }
     /** Returns an obj with the form fields and either their pinned values or false. */
     function getPinnedFieldVals(pins) {
@@ -2659,7 +2646,7 @@ $(document).ready(function(){
                 class: 'grid-bttn exit-bttn' });
         $(confirm).append(bttn);
         $(cntnr).append([msg, confirm]);
-        $('#form-hdr p').after(cntnr);
+        $('#top-hdr').after(cntnr);
         $(bttn).click(reloadAndRedownloadData);
     }
     function reloadAndRedownloadData() {                                        //console.log('reloadAndRedownloadData called. prevFocus = ', fParams.submitFocus);
@@ -2786,9 +2773,8 @@ $(document).ready(function(){
         return elem;
     }   
     function getFormErrElem(formLvl) {
-        var hdrId = formLvl === 'top' ? '#form-hdr' : '#'+formLvl+'-hdr';
         var elem = _util.buildElem('div', { id: formLvl+'_errs', class: 'active-errs' }); 
-        $(hdrId).after(elem);
+        $('#'+formLvl+'-hdr').after(elem);
         return elem;
     }
     function setErrElemAndExitBttn(elem, msg, errTag, formLvl) {  console.log('setErrElemAndExitBttn. args = %O', arguments)

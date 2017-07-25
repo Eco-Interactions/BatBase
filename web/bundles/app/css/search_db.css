@@ -213,22 +213,14 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 .form-ovrly {
     align-items: center;
 }
-#form-hdr h1 {
+#top-hdr {
     font-size: 1.3em;
-    margin-bottom: .5em;
+    margin-bottom: 1em;
 }
-#form-hdr p {
+#success {
     margin-bottom: 10px;
     font-weight: bold;
     text-align: center;
-}
-#form-hdr span {
-    color: red;
-    line-height: 111%;
-}
-#form-hdr span input {
-    margin-left: 1em;
-    width: 2.2em;
 }
 .form-popup [id$="-hdr"] {
     margin-bottom: 10px;
@@ -344,7 +336,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     display: flex;
     justify-content: center;
     text-align: center;
-    font-size: .9em;
     width: 100%;
     color: red;
 }
