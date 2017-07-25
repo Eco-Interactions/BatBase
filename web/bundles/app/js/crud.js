@@ -49,12 +49,12 @@ $(document).ready(function(){
     function setFormSize(entity) {
         var sizeConfgs = { 
             '1500': {
-                'Interaction': { popup: '1510px', form: '999px' },
-                'Publication': { popup: '72%', form: '999px' },
-                'Citation': { popup: '72%', form: '999px' },
-                'Author': { popup: '48%', form: '55%' },
-                'Location': { popup: '72%', form: '999px' },
-                'Taxon': { popup: '808px', form: '60%' },
+                'Interaction': { popup: '1510px', form: '999px', min: '1510px' },
+                'Publication': { popup: '72%', form: '999px', min: '1370px' },
+                'Citation': { popup: '72%', form: '999px', min: '1370px' },
+                'Author': { popup: '48%', form: '55%', min: '909px' },
+                'Location': { popup: '72%', form: '999px', min: '1370px' },
+                'Taxon': { popup: '808px', form: '60%', min: '808px' },
             },
             '1366': {
                 'Interaction': { popup: '97%', form: '71%' },
@@ -66,7 +66,7 @@ $(document).ready(function(){
         }};
         var wKey = $(window).width() > 1499 ? '1500' : '1366';
         var confg = sizeConfgs[wKey][entity];                                   //console.log("setFormSize [%s] confg = %O", entity, confg);
-        $('.form-popup').css({'width': confg.popup});
+        $('.form-popup').css({'width': confg.popup, 'min-width': confg.min});
         $('#form-main').css({'width': confg.form});
     }
     function hideSearchFormPopup() {
@@ -752,7 +752,7 @@ $(document).ready(function(){
             opts.push({ 
                 value: id, text: fParams.records.location[id].displayName });
         }
-        return opts;
+        return opts.sort(alphaOptionObjs);
     }
     /**
      * When a country/region is selected, the location combobox is repopulated with its 

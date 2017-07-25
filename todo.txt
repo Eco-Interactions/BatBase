@@ -10,6 +10,7 @@
         -- refactor enable/disable submit-button methods to one method with 'enable' param
         -- Add data-entry tutorial.
     --FORM--
+        -- Add inline help tooltips to guide data-entry/edit
         -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
         -- //Refactor fillIntData (crud.js)
@@ -43,7 +44,6 @@
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
     --Asap--        
         --form-- 
-            -- Refactor 'form-hdr' into 'top-hdr'
             -- Data storage err - Ensure user can't close the form any other way 
                 than clicking the 'ok' in the error meseage.
         -- data creation --
@@ -54,15 +54,13 @@
             -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
 
 Todo:
-    > Edit forms: Close on update
-        not on no changes
     > Fix responsiveness and formatting for the edit forms. 
-    > Alpha init loc opts 
     > Future additions
         > Displaying contained data on data grid
-    > Set min-widths for form windows
-    > Fix bat data in csv export
 
+##CHANGES##
+    >> Fixed CSV export for bats. Currently, only the taxa from the tree are 
+       expanded in the export. Do we want both sub and obj expanded in this way? 
 
 ::Testing!::
 > Search Page
@@ -74,10 +72,8 @@ Todo:
             > interaction forms and sub-entity forms. 
 
 :: Questions ::
-        --feedback page--
-            -- add the header back?
 
-:; Email ::
+:: Email ::
 
 
 :: Docs ::
