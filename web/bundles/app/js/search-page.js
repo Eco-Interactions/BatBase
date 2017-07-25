@@ -223,7 +223,8 @@
 
         function fillTaxonTree(curTree) {                                        //console.log("fillingTaxonTree. curTree = %O", curTree);
             fillTaxaInteractions(curTree);  
-            // fillHiddenTaxonColumns(curTree, intRcrds);
+            fillHiddenTaxonColumns(curTree, intRcrds);
+
             function fillTaxaInteractions(treeLvl) {                            //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
                 for (var taxon in treeLvl) {   
                     fillTaxonInteractions(treeLvl[taxon]);
@@ -714,16 +715,21 @@
         }
     } /* End getTaxonChildRowData */
     function getTaxonIntRows(taxon, treeLvl) {                                  //console.log("getTaxonInteractions for = %O", taxon);
-        var roles = ["subjectRoles", "objectRoles"];
         var ints = [];
-        roles.forEach(function(role) {
-            if (taxon[role].length > 0) {
-                taxon[role].forEach(function(intRcrd){
-                    ints.push( buildIntRowData(intRcrd, treeLvl));
-                });
-            } 
+        ['subjectRoles', 'objectRoles'].forEach(function(role) {
+            taxon[role].forEach(function(intRcrd){
+                ints.push( buildTaxonIntRowData(intRcrd, treeLvl) );
+            });
         });
         return ints;
+    }
+    /** Adds the taxon heirarchical data to the interactions row data. */ 
+    function buildTaxonIntRowData(intRcrd, treeLvl) {
+        var rowData = buildIntRowData(intRcrd, treeLvl);
+        getCurTaxonLvlCols().forEach(function(colName){
+            rowData[colName] = intRcrd[colName];
+        });
+        return rowData;                
     }
 /*------------------Location Search Methods-----------------------------------*/
     /** Get location data from local storage and sends it to @startLocGridBuild. */
@@ -1443,55 +1449,56 @@
     /**
      * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
      */
-    function fillHiddenTaxonColumns(curTaxonTree) {  
+    function fillHiddenTaxonColumns(curTaxonTree) {                             //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
         var curTaxonHeirarchy = {};
-        getNextLvlTaxonData(curTaxonTree);
+        var lvls = Object.keys(_util.getDataFromStorage('levelNames'));         //console.log('lvls = %O', lvls);
+        getTaxonDataAtTreeLvl(curTaxonTree);
 
-        function getNextLvlTaxonData(treeObj) {
-            for(var topTaxon in treeObj) {  
-                syncTaxonHeir( treeObj[topTaxon].displayName, treeObj[topTaxon].level, treeObj[topTaxon].parent);
-                fillInteractionRcrdsWithTaxonTreeData( treeObj[topTaxon].interactions );
-                if (treeObj[topTaxon].children) { 
-                    getNextLvlTaxonData( treeObj[topTaxon].children ); }             
+        function getTaxonDataAtTreeLvl(treeLvl) {
+            for (var topTaxon in treeLvl) {                                     //console.log('curTaxon = %O', treeLvl[topTaxon])
+                syncTaxonHeir( treeLvl[topTaxon] ); 
+                fillInteractionRcrdsWithTaxonTreeData( treeLvl[topTaxon] );
+                if (treeLvl[topTaxon].children) { 
+                    getTaxonDataAtTreeLvl( treeLvl[topTaxon].children ); }             
             }
         }
         /**
-         * The top taxon for the domain triggers the taxon-heirarchy init @fillInAvailableLevels. 
-         * For each subsequent taxon, each level more specific that the parent 
-         * lvl is cleared from the taxon-heirarchy @clearLowerLvls.  
+         * This method keeps the curTaxonChain obj in sync with the taxon being processed.  
+         * For each taxon, all level more specific that the parent lvl are cleared.
+         * Note: The top taxon for the domain inits the taxon chain obj. 
          */
-        function syncTaxonHeir(taxonName, lvl, parent) {                        //console.log("syncTaxonHeir parent = ", parent);
-            var lvls = _util.getDataFromStorage('levelNames');  //refactor. levels may not need to be stored at all
-            if (parent === null || parent === 1) { fillInAvailableLevels(lvl, lvls);
-            } else { clearLowerLvls(gParams.rcrdsById[parent].level) }
-
-            curTaxonHeirarchy[lvl] = taxonName;
+        function syncTaxonHeir(taxon) {                        
+            var lvl = taxon.level.displayName;
+            var prntId = taxon.parent;                                          //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
+            if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
+            } else { clearLowerLvls(gParams.rcrdsById[prntId].level.displayName); }
+            curTaxonHeirarchy[lvl] = taxon.displayName;
         }
         /**
-         * Inits the taxon-heirarchy object that will be used to track of the current
-         * parent chain of each taxon being processed. 
+         * Inits the taxonomic-rank object that will be used to track the parent
+         * chain of each taxon being processed. 
          */
-        function fillInAvailableLevels(topLvl, lvls) { 
+        function fillInAvailableLevels(topLvl) { 
             var topIdx = lvls.indexOf(topLvl);
             for (var i = topIdx; i < lvls.length; i++) { 
                 curTaxonHeirarchy[lvls[i]] = null;
             }  
         }
-        function clearLowerLvls(parentLvl, lvls) {
+        function clearLowerLvls(parentLvl) {
             var topIdx = lvls.indexOf(parentLvl);
             for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
         }
-        function fillInteractionRcrdsWithTaxonTreeData(intObj) {
-            for (var role in intObj) {
-                if (intObj[role] !== null) { intObj[role].forEach(addTaxonTreeFields) }
-            }
+        function fillInteractionRcrdsWithTaxonTreeData(taxon) {                 //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
+            $(['subjectRoles', 'objectRoles']).each(function(i, role) {         //console.log('role = ', role)
+                if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
+            });
         } 
-        function addTaxonTreeFields(intRcrdObj) {
-            for (var lvl in curTaxonHeirarchy) { 
-                colName = 'tree' + lvl; 
+        function addTaxonTreeFields(intRcrdObj) {                               
+            for (var lvl in curTaxonHeirarchy) {
+                var colName = 'tree' + lvl; 
                 intRcrdObj[colName] = lvl === 'Species' ? 
                     getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
-            }
+            }                                                                   //console.log('intRcrd after taxon fill = %O', intRcrdObj);
         }
         function getSpeciesName(speciesName) {
             return speciesName === null ? null : _util.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
@@ -1587,7 +1594,6 @@
                 // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
                 // {headerName: "Latitude", field: "lat", width: 150, hide: true },
                 // {headerName: "Longitude", field: "long", width: 150, hide: true },
-                // {headerName: "GPS Data", field: "gps", width: 150, hide: true }, //No data currently in the db
                 {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
     }
     /** Returns the initial width of the tree column according to role and screen size. */
@@ -2307,7 +2313,7 @@
         returnGridState();
     }
     function returnGridState() {
-        // if (gParams.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
+        if (gParams.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
         gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
         gridOptions.api.deselectAll();
         hidePopUpMsg();
@@ -2329,11 +2335,8 @@
      * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
      */
     function selectRowsForExport() {
-        var curDisplayedRows, returnRows;
         gridOptions.api.expandAll();
-        curDisplayedRows = gridOptions.api.getModel().rowsToDisplay;            
-        curDisplayedRows.forEach(selectInteractions);
-        //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
+        gridOptions.api.getModel().rowsToDisplay.forEach(selectInteractions);   //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
     }
     /**
      * A row is identified as an interaction row by the 'interactionType' property
