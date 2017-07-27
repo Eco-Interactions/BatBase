@@ -2489,22 +2489,22 @@ $(document).ready(function(){
     function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
         if (errTag) { return errUpdatingData(msg, errTag); }
-        if (!hasChngs(data)) { return showSuccessMsg("No changes detected."); }
+        if (fParams.action === 'edit' && !hasChngs(data)) { 
+            return showSuccessMsg("No changes detected."); }  
+        updateStoredFormParamsData(data);
         handleFormComplete(data);
     }
     /** Calls the appropriate data storage method and updates fParams. */  
-    function storeData(data) {
+    function storeData(data) {  
         eif.syncData.update(data);
-        updateStoredFormParamsData(data);
     }
     /** Updates the core records in the global form params object. */
-    function updateStoredFormParamsData(data) {                                 console.log("fParams after interaction created. %O", fParams);
-        if (!fParams.length) { return; }
+    function updateStoredFormParamsData(data) {                                 //console.log('updateStoredFormParams. fPs = %O', fParams);
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /*------------------ Top-Form Success Methods --------------------*/
-    function handleFormComplete(data) {
-        var formLvl = fParams.ajaxFormLvl;
+    function handleFormComplete(data) {   
+        var formLvl = fParams.ajaxFormLvl;                                      //console.log('handleFormComplete formLvl = ', formLvl);
         if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
     }
