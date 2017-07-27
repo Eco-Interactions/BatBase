@@ -15,7 +15,7 @@
      *      data should be cleared and redownloaded.
      */
     var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey = 'Welcome to the past, again.';
+    var dataKey = 'Welcome to tomorrow.';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
