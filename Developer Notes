@@ -1,5 +1,50 @@
 Developer Notes:
 
+=========================================================================
+
+READ ME
+
+HOW TO RUN TESTS
+    phpunit -c app/ tests   
+    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
+
+
+Deployment Steps:
+    >Cache busting:
+        config.yml:
+            "Framework":
+                assets:
+                    version: 'v%'"              
+
+Install Cmds
+  > composer update
+  > Set file permissions:
+    > Ubuntu : 
+      $ sudo chgrp www-data /var/www/* -R //Make sure the group is www-data on '/var/www'
+      $ sudo chmod 775 /var/www/* -R  //Make '/var/www' writable for the group
+      $ sudo chmod g+s /var/www/* -R  //Set the GID for www-data for all sub-folders
+      $ sudo usermod -a -G www-data [YOURUSERNAME]  // add your username to the www-data group
+      Or/And (from symfony docs, didn't work before cmds above... probably user err)
+       $ HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx' | grep -v root | head -1 | cut -d\  -f1)
+       $ sudo setfacl -dR -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
+       $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
+
+
+
+
+
+Best practices:
+    comments:
+        //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
+External Todo:
+    --Zenbol-
+        --PAYMENT PAGE FOR WHM
+        --CRON JOB BACKUPS
+
+-------------------------------------------------------------------------------------------------------
+
+
+
 
 
 ::BUGS::
