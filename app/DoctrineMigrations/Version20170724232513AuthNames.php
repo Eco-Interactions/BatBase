@@ -15,8 +15,6 @@ class Version20170724232513AuthNames extends AbstractMigration implements Contai
 
     private $container;
 
-    private $missingAuths;
-
     public function setContainer(ContainerInterface $container = null)
     {
         $this->container = $container;

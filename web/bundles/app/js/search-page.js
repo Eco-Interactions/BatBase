@@ -15,7 +15,7 @@
      *      data should be cleared and redownloaded.
      */
     var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey = 'Welcome to the future.';
+    var dataKey = 'Welcome to tomorrow.';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var localStorage = _util.setlocalStorage();
@@ -1584,9 +1584,9 @@
                 {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
                 {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
                 {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
+                {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells },
                 {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
                 {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
