@@ -13,7 +13,7 @@
     }
     /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
     function storeDataUpdatedTimes(ajaxData) {
-        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", ajaxData.dataState);
+        storeData('dataUpdatedAt', ajaxData.dataState);                         console.log("dataState = %O", ajaxData.dataState);
         addNewDataToStorage(ajaxData.dataState);
     }
     /** Returns the current date time in the format: Y-m-d H:i:s */
@@ -30,7 +30,7 @@
      * search page ui is initialized @initStoredData.
      */
     function addNewDataToStorage(dataUpdatedAt) {  
-        var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          //console.log("pgUpdatedAt = ", pgUpdatedAt)
+        var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
         if (!pgUpdatedAt) { return initStoredData(); } 
         if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
         delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
@@ -93,7 +93,7 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
-        storeData('pgDataUpdatedAt', getCurrentDate());
+        storeData('pgDataUpdatedAt', getCurrentDate());  console.log('pgDataUpdatedAt = ', getCurrentDate())
         sendDataUpdateStatus(data);
     }
     function sendDataUpdateStatus(data) {
