@@ -105,7 +105,7 @@
 /*-------------------- Top "State" Managment Methods -------------------------*/
     function initSearchState() {
         resetGridParams();
-        toggleTimeUpdatedFilter();
+        toggleTimeUpdatedFilter('disable');
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         setUpFutureDevInfoBttn();
@@ -1844,6 +1844,7 @@
         var opac = filtering ? 1 : .3;
         $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
         $('#fltr-tdy')[0].checked = true;
+        $('#shw-chngd')[0].checked = filtering;
         $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
             .css({'opacity': opac});
         if (filtering) { showInteractionsUpdatedToday();
