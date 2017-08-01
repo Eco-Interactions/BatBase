@@ -31,11 +31,17 @@
             -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
                 > or refactor into using it to general disable and dim buttons
                 > or refactor both enable/disable submit methods into one func to rule them all
+            -- data creation --
+                -> If a new authors display name is identical to another's, prompt 
+                   user to check existing author for duplication, and then prompt 
+                   them to add initials if not.  
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
             -- standardize taxon 'levels' storage
+            -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
+            -- add text search to all views.
             -- update all the comments that mention the updates-since filter to 
                 'int-updated-at'
         --css--
@@ -46,13 +52,12 @@
         --form-- 
             -- Data storage err - Ensure user can't close the form any other way 
                 than clicking the 'ok' in the error meseage.
-        -- data creation --
-            -> If a new authors display name is identical to another's, prompt 
-               user to check existing author for duplication, and then prompt 
-               them to add initials if not.  
         --search--
-            -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
-
+        -- UPGRADE --
+            -- Add more sophisticated logging
+        -- Bug with data storage seeming to always updating data created 'today'
+        --MISC--
+            -- Comment the crud controller method 'setupdatedattimes'
 Todo:
     > Fix responsiveness and formatting for the edit forms. 
     > Future additions
@@ -61,6 +66,7 @@ Todo:
 ##CHANGES##
     >> Fixed CSV export for bats. Currently, only the taxa from the tree are 
        expanded in the export. Do we want both sub and obj expanded in this way? 
+    >> Move tags next to the interaction type
 
 ::Testing!::
 > Search Page
