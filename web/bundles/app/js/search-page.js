@@ -1228,7 +1228,7 @@
         for (var topNode in srcTree) {
             finalRowData.push( getSrcRowData(srcTree[topNode], 0) );
         }
-        gParams.rowData = finalRowData;                                        //console.log("rowData = %O", gParams.rowData);
+        gParams.rowData = finalRowData;                                         //console.log("rowData = %O", gParams.rowData);
         loadGrid(treeName);
     }
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);

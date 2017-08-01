@@ -89,7 +89,7 @@ class CrudController extends Controller
         );
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
-/*------------------------------ Helpers -------------------------------------*/
+/*------------------------------ Shared Helpers ------------------------------*/
     /**
      * Builds and returns an object that will track any edits made to the entity. 
      * The editing prop holds the id of the entity being edited, or false if creating.
@@ -345,6 +345,7 @@ class CrudController extends Controller
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e, "\Exception");
         }
+        $this->setUpdatedAtTimes($entityData, $em);
         return $this->sendDataAndResponse($entityData);
     }
     /** Logs the error message and returns an error response message. */
@@ -372,5 +373,31 @@ class CrudController extends Controller
         ));
         return $response;
     }
-
+    /** ----------------- Set Entity/System UpdatedAt ----------------------- */
+    private function setUpdatedAtTimes($entityData, &$em)
+    {
+        $this->updateUpdatedAt($entityData->core, $em);
+        if ($entityData->detailEntity) {
+            $this->updateUpdatedAt($entityData->detail, $em);
+        }
+        $this->setUpdatedAt(1, $em); //System updateAt
+        $em->flush();
+    }
+    private function updateUpdatedAt($className, &$em)
+    {
+        $dateEntities = ["System", "Author", "Authority", "Citation", "CitationType", 
+            "ContentBlock", "Contribution", "Domain", "Feedback", "HabitatType", 
+            "ImageUpload", "Interaction", "InteractionType", "Level", "Location", 
+            "LocationType", "Naming", "NamingType", "Publication", "PublicationType", 
+            "Source", "SourceType", "Tag", "Taxon", "Taxonym"];
+        $entityDateId = array_search(ucfirst($className), $dateEntities) + 1;
+        $this->setUpdatedAt($entityDateId, $em);                                
+    }
+    private function setUpdatedAt($id, &$em)
+    {
+        $entity = $em->getRepository('AppBundle:SystemDate')
+            ->findOneBy(['id' => $id]);
+        $entity->setDateVal(new \DateTime());
+        $em->persist($entity);
+    }
 }
