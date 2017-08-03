@@ -32,9 +32,12 @@
     function addNewDataToStorage(dataUpdatedAt) {  
         var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
         if (!pgUpdatedAt) { return initStoredData(); } 
-        if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
-        delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
-        syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
+        if (firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { 
+            delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
+            syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
+        } else { console.log("Data up to date."); 
+            eif.search.initSearchGrid();
+        }
     }
     /**
      * Returns true if the first datetime is more recent than the second. 

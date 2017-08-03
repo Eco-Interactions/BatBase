@@ -109,7 +109,6 @@
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         setUpFutureDevInfoBttn();
-        selectSearchFocus();
     } 
     /**
      * Container for param data needed for a selected focus. Resets on focus change.
