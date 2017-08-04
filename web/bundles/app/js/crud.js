@@ -2486,13 +2486,17 @@ $(document).ready(function(){
         var data = parseData(ajaxData.results);
         storeData(data);
     }
-    function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
+    function afterStoredDataUpdated(data, msg, errTag) {                        console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
-        if (errTag) { return errUpdatingData(msg, errTag); }
-        if (fParams.action === 'edit' && !hasChngs(data)) { 
-            return showSuccessMsg("No changes detected."); }  
+        if (errTag) { return errUpdatingData(msg, errTag); }                    //console.log('no error')
+        if (editFormSubmitted() && !hasChngs(data)) { 
+            return showSuccessMsg("No changes detected."); }                    //console.log('has Changes')
         updateStoredFormParamsData(data);
         handleFormComplete(data);
+    }
+    /** Returns true if the form submitted was an edit form. */
+    function editFormSubmitted() {
+        return fParams.forms[fParams.ajaxFormLvl].action === 'edit';
     }
     /** Calls the appropriate data storage method and updates fParams. */  
     function storeData(data) {  
@@ -2503,9 +2507,8 @@ $(document).ready(function(){
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /*------------------ Top-Form Success Methods --------------------*/
-    function handleFormComplete(data) {   
-        var formLvl = fParams.ajaxFormLvl;                                      //console.log('handleFormComplete formLvl = ', formLvl);
-        if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
+    function handleFormComplete(data) {                                         //console.log('handleFormComplete formLvl = [%s] formParams = [%O]', fParams.ajaxFormLvl, fParams.forms[fParams.ajaxFormLvl]);
+        if (fParams.ajaxFormLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
     }
     /** 
