@@ -21,10 +21,11 @@
     var localStorage = _util.setlocalStorage();
     var gridOptions = getDefaultGridOptions();
     eif.search = {
+        dbErr: handleDbUpdateErr,
+        handleReset: handleDataReset,
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
         showUpdates: showTodaysUpdates,
-        handleReset: handleDataReset
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -146,8 +147,8 @@
             "Below is a 'Show/Hide Columns' button that will allow users to specify " +
             "the data shown in the grid and/or csv export.";
     }
-    /** Grid-rebuild entry point after form-window close. */
-    function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
+    /** Starts the grid-build after data downlaoded or after form close. */
+    function resetSearchGrid(focus) {                                           console.log('Loading search grid.')
         resetToggleTreeBttn(false);
         if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
         selectSearchFocus(null, focus);
@@ -2839,6 +2840,31 @@
             callback(key, value);
         }
     };
+    /** --------- Error Handlers ---------------------------------------------*/
+    /** Handles errors that occur while updating the stored data. */
+    function handleDbUpdateErr(errObj) {                                        //console.log('handleDbUpdateErr called.');
+        var cntnr = _util.buildElem('div', { class: 'flex-col', id:'data_errs' });
+        var msg = getErrorMsg(errObj); 
+        var confirm = _util.buildElem('span', { class: 'flex-row', 
+                'text': "Please click \"OK\" to continue." });
+        var bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
+                class: 'grid-bttn exit-bttn' });
+        $(confirm).append(bttn);
+        $(cntnr).append([msg, confirm]);
+        $('#grid-popup').empty().addClass('has-errs').append(cntnr);
+        $(bttn).click(resetStoredData);
+    }
+    function resetStoredData() {
+        $('#grid-popup').removeClass('has-errs');
+        eif.syncData.reset();
+    }
+    function getErrorMsg(errObj) {  
+        var openMsg = '<b>There was an error while updating the database.</b><br>';
+        var errMsg = 'Please report this error(s) to the developer: <b>' + 
+            Object.keys(errObj).join("\n") + '</b></br>&nbsp';
+        var closeMsg = '<br>All stored data will be redownloaded.'
+        return '<span>'+openMsg+errMsg+closeMsg+'</span>';
+    }
     /*-------------AJAX ------------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
         $.ajax({
