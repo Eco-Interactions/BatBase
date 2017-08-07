@@ -1198,7 +1198,9 @@ $(document).ready(function(){
      */
     function getTaxonEditFields(entity, id) {
         var taxon = fParams.records.taxon[id];  
-        initTaxonParams(taxon.domain.id+1);                
+        var realm = taxon.domain.id+1;
+        var role = realm === 'Bats' ? 'Subject': 'Object';
+        setTaxonParams(role, realm);                
         return buildTaxonEditFields(taxon);
     }
     function finishTaxonEditFormBuild() {
