@@ -290,7 +290,7 @@ class CrudController extends Controller
     private function addInteractionToSource($id, $entity, &$edits, &$em)
     {
         $relEntity = $this->getEntity("Source", $id, $em);
-        $this->setRelDataAndTrackEdits($entity, "Source", $relEntity, $edits);
+        $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits);
         $className = $em->getClassMetadata(get_class($entity))->getName(); 
         if ($className === "AppBundle\Entity\Interaction" && !$relEntity->getIsDirect()) {
             $relEntity->setIsDirect(true);
