@@ -2587,12 +2587,16 @@ $(document).ready(function(){
     }
     function resetUnpinnedFields(vals) {
         for (var field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
-            if (!vals[field]) { clearField(field); }
+            if (!vals[field]) { clearFieldData(field); }
         }
     }
-    function clearField(fieldName) {
+    function clearFieldData(fieldName) {  
+        var detElems = {'Publication': 'pub', 'CitationTitle': 'cit', 'Location': 'loc'};
         if (fieldName === 'Note') { return $('#Note-txt').val(""); }
-        clearCombobox('#'+fieldName+'-sel');
+        clearCombobox('#'+fieldName+'-sel'); 
+        if (fieldName in detElems) {
+            $('#'+detElems[fieldName]+'-det div')[0].innerText = 'None selected.';
+        }
     }
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {
