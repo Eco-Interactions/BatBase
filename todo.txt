@@ -35,6 +35,8 @@
                 -> If a new authors display name is identical to another's, prompt 
                    user to check existing author for duplication, and then prompt 
                    them to add initials if not.  
+            -- Data storage err - Ensure user can't close the form any other way 
+                than clicking the 'ok' in the error meseage.
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
@@ -48,25 +50,27 @@
             --refactor to use parital, effectively 'group', selectors
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
-    --Asap--        
-        --form-- 
-            -- Data storage err - Ensure user can't close the form any other way 
-                than clicking the 'ok' in the error meseage.
-        --search--
         -- UPGRADE --
             -- Add more sophisticated logging
-        -- Bug with data storage seeming to always updating data created 'today'
+    --Asap--        
+        --form-- 
+            -- Add top location option, 'Add a new Location...'
+            -- update detail panel on interaction form submit
+            -- add err eliminating the possibility of creating an orphan taxon
+            -- (fix) Fill country field in new location form with top-form country
+        --search--
+        -- sync data --
+            -- Add error handling for pending updates that can't be resolved 
         --MISC--
+            -- Change author display names to Last, First M Suffix 
             -- Comment the crud controller method 'setupdatedattimes'
 Todo:
-    > Fix responsiveness and formatting for the edit forms. 
+    > Fix responsiveness and formatting for the edit forms.
+
     > Future additions
         > Displaying contained data on data grid
 
 ##CHANGES##
-    >> Fixed CSV export for bats. Currently, only the taxa from the tree are 
-       expanded in the export. Do we want both sub and obj expanded in this way? 
-    >> Move tags next to the interaction type
 
 ::Testing!::
 > Search Page
@@ -76,7 +80,9 @@ Todo:
         > The grid should reload as expect with the form close
             > With and without submit. 
             > interaction forms and sub-entity forms. 
-
+    > Forms
+        > Taxa select
+            > Object select forms open and change realm 
 :: Questions ::
 
 :: Email ::
