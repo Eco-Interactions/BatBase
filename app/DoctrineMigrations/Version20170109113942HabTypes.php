@@ -2,11 +2,11 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\HabitatType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\HabitatType;
 
 /**
  * @up Creates the missing habitat types.

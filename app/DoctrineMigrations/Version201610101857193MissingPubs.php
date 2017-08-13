@@ -2,15 +2,15 @@
 
 namespace Application\Migrations;
 
-use Doctrine\DBAL\Migrations\AbstractMigration;
-use Doctrine\DBAL\Schema\Schema;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Publication;
-// use AppBundle\Entity\SourceType;
 use AppBundle\Entity\Source;
+use Doctrine\DBAL\Migrations\AbstractMigration;
+
+use Doctrine\DBAL\Schema\Schema;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+// use AppBundle\Entity\SourceType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @up Creates a new "Source" entity for every publication or publisher found while 

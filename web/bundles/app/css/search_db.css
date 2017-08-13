@@ -191,10 +191,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     margin-top: -50px;
     border-radius: 5px;
 }
-#grid-popup.has-errs {
-    width: 555px;
-    height: 350px;    
-}
 #grid-overlay {
     display: none;
     position: absolute;

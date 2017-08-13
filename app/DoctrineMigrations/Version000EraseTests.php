@@ -2,11 +2,11 @@
 
 namespace Application\Migrations;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use AppBundle\Entity\SystemDate;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
-use AppBundle\Entity\SystemDate;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @up- Removes test entities created after a certain datetime for specified entites.

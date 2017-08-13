@@ -2,14 +2,14 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Citation;
+use AppBundle\Entity\CitationType;
+use AppBundle\Entity\SourceType;
+use Doctrine\DBAL\Migrations\AbstractMigration;
+
+use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Doctrine\DBAL\Migrations\AbstractMigration;
-use Doctrine\DBAL\Schema\Schema;
-
-use AppBundle\Entity\Citation;
-use AppBundle\Entity\SourceType;
-use AppBundle\Entity\CitationType;
 
 /**
  * @preUp - Adds 'Citation' back as a Source Type and creates all Citation Types.

@@ -18,7 +18,7 @@ class ProfileFormType extends AbstractType
         $builder->add('first_name');
     }
 
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'appbundle_profile';
     }

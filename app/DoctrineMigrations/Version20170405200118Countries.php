@@ -2,12 +2,12 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\Location;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * @up Creates a Location entity for each country that does not already exist.
  */

@@ -2,12 +2,12 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\Source;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Adds a citation source for publications that were functioning as both citation

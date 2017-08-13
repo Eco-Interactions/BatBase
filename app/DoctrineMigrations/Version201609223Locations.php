@@ -2,11 +2,11 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Location;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\Location;
 
 /**
  * Migration updates all locations to the new structure. Parent locations and location

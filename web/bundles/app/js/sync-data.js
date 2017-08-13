@@ -1,5 +1,4 @@
 (function(){
-    var errObj = {}, pending = [];
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     eif.syncData = {
@@ -14,7 +13,7 @@
     }
     /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
     function storeDataUpdatedTimes(ajaxData) {
-        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", ajaxData.dataState);
+        storeData('dataUpdatedAt', ajaxData.dataState);                         console.log("dataState = %O", ajaxData.dataState);
         addNewDataToStorage(ajaxData.dataState);
     }
     /** Returns the current date time in the format: Y-m-d H:i:s */
@@ -33,12 +32,9 @@
     function addNewDataToStorage(dataUpdatedAt) {  
         var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
         if (!pgUpdatedAt) { return initStoredData(); } 
-        if (firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { 
-            delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
-            syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
-        } else { console.log("Data up to date."); 
-            eif.search.initSearchGrid();
-        }
+        if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
+        delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
+        syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
     }
     /**
      * Returns true if the first datetime is more recent than the second. 
@@ -58,41 +54,16 @@
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
     /** 
-     * Sends an ajax call for each entity with updates, sending interaction updates 
-     * last to ensure all related entities are saved first. All new entity data 
-     * is stored @processUpdatedData and then @onDataUpdateComplete is called.
+     * Sends an ajax call for each entity with updates. On return, the new data 
+     * is stored @processUpdatedData. 
      */
-    function ajaxNewData(entities, lastUpdated) {                               //console.log('ajaxNewData. entities with updates = %O', entities)
+    function ajaxNewData(entities, lastUpdated) {
         var data = { updatedAt: lastUpdated };
-        var ajaxCalls = entities.map(function(entity) {
+        entities.forEach(function(entity) {
             data.entity = entity;
-            return sendAjaxQuery(data, "ajax/sync-data", processUpdatedData); 
+            sendAjaxQuery(data, "ajax/sync-data", processUpdatedData);
         });
-        $.when.apply($, ajaxCalls).then(updatePending).done(onDataUpdateComplete); 
     } /* End ajaxNewData */
-    /**
-     * Any update that could not be completed initially is attempted again here.
-     */
-    function updatePending() {                                                  //console.log('pending = %O', pending);
-        var errCnt = Object.keys(errObj).length;
-        var loop = 0; 
-        while (pending.length > 0 && loop++ < 11) {  
-            pending = pending.filter(function(updateAry) {                      //console.log('updateAry = %O', updateAry);
-                //updateFunc(prop, rcrd, entity);
-                updateAry[0](updateAry[1], updateAry[2], updateAry[3]);
-                return updateSuccessful() ? false : updateAry;
-            });
-        }
-        function updateSuccessful() {
-            var curCnt = Object.keys(errObj).length;
-            if (curCnt !== errCnt) {
-                errCnt = curCnt;
-                return false;
-            }
-            return true;
-        }
-    } /* End updatePending */
-
     /**
      * Parses and sends the returned data to @storeUpdatedData. The stored data's 
      * lastUpdated flag, 'pgDataUpdatedAt', is updated and the search-page grid
@@ -102,23 +73,16 @@
         var entity = Object.keys(results)[0];
         var data = parseData(results[entity]);
         storeUpdatedData(data, entity);
-    }
-    function onDataUpdateComplete() {                                           console.log('onDataUpdateComplete. errObj = %O, args = %O',errObj, arguments);
-        if (!$.isEmptyObject(errObj)) { return handleDataSyncErr(); }
         storeData('pgDataUpdatedAt', getCurrentDate());
         eif.search.initSearchGrid();
     }
-    function handleDataSyncErr() {
-        eif.search.dbErr(errObj);
-        errObj = {};
-    }
-    /** Sends each updated record to the update handler for the entity. */
+    /** Sends the each updated record to the update handler for the entity. */
     function storeUpdatedData(rcrds, entity) {
         var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
         var entityHndlr = coreEntities.indexOf(entity) !== -1 ? 
             addCoreEntityData : addDetailEntityData;
         for (var id in rcrds) {
-            entityHndlr(_util.lcfirst(entity), rcrds[id], 'updateData');
+            entityHndlr(_util.lcfirst(entity), rcrds[id]);
         }
     }
     /*------------------ Update Submitted Form Data --------------------------*/
@@ -129,33 +93,30 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
+        storeData('pgDataUpdatedAt', getCurrentDate());  console.log('pgDataUpdatedAt = ', getCurrentDate())
         sendDataUpdateStatus(data);
-        if ($.isEmptyObject(errObj)) { storeData('pgDataUpdatedAt', getCurrentDate()); }           //console.log('pgDataUpdatedAt = ', getCurrentDate())
     }
     function sendDataUpdateStatus(data) {
-        var errs = getErrs(data);
+        var errs = data.coreEdits.errors ? data.coreEdits.errors : 
+             data.detailEdits.errors ? data.detailEdits.errors : false;
         var msg = errs ? errs[0] : null;
         var tag = errs ? errs[1] : null;
         eif.form.dataSynced(data, msg, tag);
-    } 
-    function getErrs(data) {
-        return data.coreEdits.errors ? data.coreEdits.errors : 
-             data.detailEdits.errors ? data.detailEdits.errors : false;
     }
     /** Stores both core and detail entity data, and updates data affected by edits. */
     function updateEntityData(data) {
-        addCoreEntityData(data.core, data.coreEntity, 'addData');
+        addCoreEntityData(data.core, data.coreEntity);
         if (data.detailEntity) { 
-            addDetailEntityData(data.detail, data.detailEntity, 'addData');
+            addDetailEntityData(data.detail, data.detailEntity);
         }
         updateAffectedData(data);
     }
     /*------------------ Add-to-Storage Methods ------------------------------*/
     /** Updates stored-data props related to a core-entity record with new data. */
-    function addCoreEntityData(entity, rcrd, stage) {                           //console.log("Updating Core entity. %s. %O", entity, rcrd);
+    function addCoreEntityData(entity, rcrd) {                                  //console.log("Updating Core entity. %s. %O", entity, rcrd);
         var propHndlrs = getAddDataHndlrs(entity, rcrd);
-        updateDataProps(propHndlrs, entity, rcrd, stage);
-        updateCoreData(entity, rcrd, stage);
+        updateDataProps(propHndlrs, entity, rcrd);
+        updateCoreData(entity, rcrd);
     }
     /** Returns an object of related data properties and their update methods. */
     function getAddDataHndlrs(entity, rcrd) {
@@ -198,8 +159,8 @@
         return _util.lcfirst(rcrd[type].displayName);
     }
     /** Sends entity-record data to each storage property-type handler. */
-    function updateDataProps(propHndlrs, entity, rcrd, stage) {                 //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
-        var params = { entity: entity, rcrd: rcrd, stage: stage };
+    function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
+        var params = { entity: entity, rcrd: rcrd, stage: 'addData' };
         for (var prop in propHndlrs) {
             updateData(propHndlrs[prop], prop, params);
         }
@@ -214,14 +175,14 @@
         addToTypeProp(entity+"Type", rcrd, entity); 
     } 
     /** Updates stored-data props related to a detail-entity record with new data. */
-    function addDetailEntityData(entity, rcrd, stage) {                         //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    function addDetailEntityData(entity, rcrd) {                                //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
             'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
             'publisher': { 'publisherNames': addToNameProp }
         };
-        updateDataProps(update[entity], entity, rcrd, stage);  
+        updateDataProps(update[entity], entity, rcrd)
     }
     /** Add the new record to the prop's stored records object.  */
     function addToRcrdProp(prop, rcrd, entity) {  
@@ -257,7 +218,6 @@
         if (!rcrd.parent) { return; }
         var parentObj = _util.getDataFromStorage(prop);                         //console.log("addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
         var parent = parentObj[rcrd.parent];
-        if (!parent) { return pendUpdate(addToParentRcrd, prop, rcrd, entity); }
         addIfNewRcrd(parent.children, rcrd.id);
         storeData(prop, parentObj);
     }
@@ -288,7 +248,6 @@
         if (!rcrd[prop]) {return;}
         var rcrds = _util.getDataFromStorage(prop);                             //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
         var storedEntity = rcrds[rcrd[prop]];
-        if (!storedEntity) { return pendUpdate(addInteractionToEntity, prop, rcrd, entity); }
         addIfNewRcrd(storedEntity.interactions, rcrd.id);
         if (prop === 'source') { storedEntity.isDirect = true; }
         storeData(prop, rcrds);
@@ -297,7 +256,6 @@
     function addInteractionRole(prop, rcrd, entity) {  
         var taxa = _util.getDataFromStorage("taxon");                           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
         var taxon = taxa[rcrd[prop]];
-        if (!taxon) { return pendUpdate(addInteractionRole, prop, rcrd, entity); }
         addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);        
     }
@@ -305,14 +263,10 @@
     function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
         if (rcrd.contributors.length == 0) { return; }
         var srcObj = _util.getDataFromStorage('source');
-        rcrd.contributors.forEach(function(authId) { addContribution(authId); });
+        rcrd.contributors.forEach(function(authId) {
+            addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
+        });
         storeData('source', srcObj);
-
-        function addContribution(authId) {pendUpdate
-            var auth = srcObj[authId];
-            if (!auth) { return pendUpdate(addContribData, prop, rcrd, entity); }
-            addIfNewRcrd(auth.contributions, rcrd.id);
-        }
     }
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
@@ -461,7 +415,7 @@
      * the entity data.
      */
     function storeServerData(data) {                                            //console.log("data received = %O", data);
-        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, data);
+        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
             storeData(entity, parseData(data[entity]));
         }
     }
@@ -594,28 +548,20 @@
             reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
         }
     }
-    function pendUpdate(upd8Func, prop, rcrd, entity) {                         //console.log('pend update args = %O', arguments);
-        pending.push([upd8Func, prop, rcrd, entity]);   
-    }
     /*----------------- Errs ---------------------------------------*/
     /** Sends a message and error tag back to the form to be displayed to the user. */
-    function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {            //console.log('reportDataUpdateErr. args = %O', arguments);
+    function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {
         var trans = {
-            'addData': 'adding data to ', 'rmvData': 'removing data from ', 
-            'updateData': 'updateData' 
+            'addData': 'adding data to ', 'rmvData': 'removing data from '
         };
         var msg = 'There was an error while '+trans[stage]+' the '+ entity +
             '\'s stored data.';
         var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
-        trackErr(edits, msg, errTag);        
-    }
-    function trackErr(tracker, msg, errTag) {  
-        if (tracker) { tracker.errors = [ msg, errTag ]; } 
-        errObj[errTag] = [ msg, errTag ]; 
+        edits.errors = [ msg, errTag ];
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
-        return $.ajax({
+        $.ajax({
             method: "POST",
             url: url,
             success: successCb,

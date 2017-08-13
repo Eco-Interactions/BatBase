@@ -845,7 +845,9 @@ $(document).ready(function(){
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', formLvl); }  
         setTaxonParams('Subject', 2);
-        buildTaxonSelectForm('Subject', formLvl);
+        $('#Subject_row').append(initSubForm(
+            "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
+        initComboboxes("subject");           
         finishTaxonSelectUi("Subject");  
         enableCombobox('#Object-sel', false);
     }
@@ -856,42 +858,31 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled. 
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
-    function initObjectSelect() {                                               //console.log("initObjectSelect val = %O, taxonParams = %O", $('#Object-sel').val(), fParams.taxon)
+    function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        setTaxonParams('Object', getObjectRealmId($('#Object-sel').val()));
-        buildTaxonSelectForm('Object', formLvl);
+        var id = getSelectedRealm($('#Object-sel').val()) || fParams.taxon ? 
+            fParams.taxon.objectRealm || 3 : 3;
+        setTaxonParams('Object', id);
+        $('#Object_row').append(initSubForm(
+            "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
+        initComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
     }
-    /** Returns the realm id of the selected taxon, or the default realm: plant (3). */
-    function getObjectRealmId(selVal) {  
-        var selected = getSelectedRealm(selVal);
-        var dflt = fParams.taxon && fParams.taxon.objectRealm ? 
-            fParams.taxon.objectRealm : 3;       
-        return selected || dflt;
-        /** Note: realm ids are one less than their taxon's id. */
-        function getSelectedRealm(selVal) {
-            if (!selVal) { return null; }
-            var taxon = fParams.records.taxon[selVal];  
-            return taxon.domain.id + 1;
-        }
-    } /* End getObjectRealmId */
-    function resetObjectSelect(role, formLvl) {
-        buildTaxonSelectForm(role, formLvl);
-        $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
+    /** 
+     * Returns the realm taxon's id for a selected object taxon. Note: realm ids
+     * are one less than their taxon's id. 
+     */
+    function getSelectedRealm(selVal) {
+        if (!selVal) { return null; }
+        var taxon = fParams.records.taxon[selVal];  
+        return taxon.domain.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, formLvl) {
         if (fParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
         openSubFormErr(role, null, formLvl);
-    }
-    function buildTaxonSelectForm(role, formLvl) {
-        var dir = { 'Subject': 'left', 'Object': 'right' };
-        var styles = "sml-"+dir+" sml-form";
-        $('#'+role+'_row').append(initSubForm( 
-            _util.lcfirst(role), formLvl, styles, {}, "#"+role+"-sel"));
-        initComboboxes(_util.lcfirst(role));             
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -899,8 +890,10 @@ $(document).ready(function(){
      */
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }         
-        onTaxonSelection('Subject');
+        var formLvl = getSubFormLvl("sub");
+        $('#'+formLvl+'-form').remove();
         enableObjField();
+        if (!fParams.editing) { $('#Subject_pin').focus(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -908,14 +901,10 @@ $(document).ready(function(){
      */
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
-        onTaxonSelection('Object');
-        enableSubjField();
-    }
-    function onTaxonSelection(role) {
         var formLvl = getSubFormLvl("sub");
         $('#'+formLvl+'-form').remove();
-        fParams.taxon = null;
-        if (!fParams.editing) { $('#'+role+'_pin').focus(); }
+        enableSubjField();
+        if (!fParams.editing) { $('#Object_pin').focus(); }
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
     function enableSubjField() {
@@ -927,34 +916,26 @@ $(document).ready(function(){
     }
     /** Adds the realm name and id, along with all taxon levels, to fParams. */
     function setTaxonParams(role, id) {  
-        if (fParams.taxon && fParams.taxon.realmId === id) { return; }          //console.log('tParams = %O', fParams.taxon);
-        var orgnl = getOrgnlTaxon(role);                                        
+        initTaxonParams(id);
+        fParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
+            { val: $('#'+role+'-sel').val(),
+              text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
+            }; 
+    }
+    function initTaxonParams(id) {
+        var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
+        var domainLvls = {
+            'Bat': ["Order", "Family", "Genus", "Species"],
+            'Arthropod': ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
+            'Plant': ["Kingdom", "Family", "Genus", "Species"]
+        };
         fParams.taxon = { 
-            domainLvls: getDomainLvls(id),
-            lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
-            orgnl: orgnl,
-            realm: getRealmName(id), // realmMap[id]
+            realm: realmMap[id], 
             realmId: id,
-        };                                                                      
-        function getDomainLvls(id) {
-            return {
-                2: ["Order", "Family", "Genus", "Species"],
-                3: ["Kingdom", "Family", "Genus", "Species"],
-                4: ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
-            }[id];
-        }
-        function getRealmName(id) {
-            return { 2: "Bat", 3: "Plant", 4: "Arthropod" }[id];  
-        }
-        function getOrgnlTaxon(role) {
-            if (fParams.taxon) { return fParams.taxon.orgnl; }
-            var orgnlVal = $('#'+role+'-sel').val(); 
-            if (!orgnlVal) { return false; }
-            return { value: orgnlVal,
-                text: $('#'+role+'-sel')[0].selectize.getOption(orgnlVal)[0].innerText
-            };
-        }
-    } /* End setTaxonParams */
+            lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
+            domainLvls: domainLvls[realmMap[id]]
+        };                                                                      //console.log('taxon params = %O', fParams.taxon)
+    }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
      * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
@@ -1039,20 +1020,18 @@ $(document).ready(function(){
     }
     /** Exits sub form and restores any previous taxon selection. */
     function exitTaxonSelectForm(role) {
-        exitForm('#sub-form', 'sub', false); 
-        if (fParams.taxon.orgnl) {  
-            updateComboboxOptions('#'+role+'-sel', fParams.taxon.orgnl); 
-            $('#'+role+'-sel')[0].selectize.addItem(fParams.taxon.orgnl.value);
+        exitForm('#sub-form', 'sub', false);
+        if (fParams.taxon.prevSel) {
+            updateComboboxOptions('#'+role+'-sel', { 
+                value: fParams.taxon.prevSel.val, text: fParams.taxon.prevSel.text });
+            $('#'+role+'-sel')[0].selectize.addItem(fParams.taxon.prevSel.val);
         }
-        fParams.taxon = null;
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
-        var formLvl = getSubFormLvl('sub');
-        var role = fParams.taxon.realm === 'Bat' ? 'Subject' : 'Object';
-        var resetForm = role === 'Subject' ? initSubjectSelect : resetObjectSelect;
+        var initForm = fParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
         $('#sub-form').remove();
-        resetForm(role, formLvl);
+        initForm();
     }
     /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
     function selectTaxon() {
@@ -1198,9 +1177,7 @@ $(document).ready(function(){
      */
     function getTaxonEditFields(entity, id) {
         var taxon = fParams.records.taxon[id];  
-        var realm = taxon.domain.id+1;
-        var role = realm === 'Bats' ? 'Subject': 'Object';
-        setTaxonParams(role, realm);                
+        initTaxonParams(taxon.domain.id+1);                
         return buildTaxonEditFields(taxon);
     }
     function finishTaxonEditFormBuild() {
@@ -2509,17 +2486,13 @@ $(document).ready(function(){
         var data = parseData(ajaxData.results);
         storeData(data);
     }
-    function afterStoredDataUpdated(data, msg, errTag) {                        console.log('data update complete. args = %O', arguments);
+    function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
-        if (errTag) { return errUpdatingData(msg, errTag); }                    //console.log('no error')
-        if (editFormSubmitted() && !hasChngs(data)) { 
-            return showSuccessMsg("No changes detected."); }                    //console.log('has Changes')
+        if (errTag) { return errUpdatingData(msg, errTag); }
+        if (fParams.action === 'edit' && !hasChngs(data)) { 
+            return showSuccessMsg("No changes detected."); }  
         updateStoredFormParamsData(data);
         handleFormComplete(data);
-    }
-    /** Returns true if the form submitted was an edit form. */
-    function editFormSubmitted() {
-        return fParams.forms[fParams.ajaxFormLvl].action === 'edit';
     }
     /** Calls the appropriate data storage method and updates fParams. */  
     function storeData(data) {  
@@ -2530,8 +2503,9 @@ $(document).ready(function(){
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /*------------------ Top-Form Success Methods --------------------*/
-    function handleFormComplete(data) {                                         //console.log('handleFormComplete formLvl = [%s] formParams = [%O]', fParams.ajaxFormLvl, fParams.forms[fParams.ajaxFormLvl]);
-        if (fParams.ajaxFormLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
+    function handleFormComplete(data) {   
+        var formLvl = fParams.ajaxFormLvl;                                      //console.log('handleFormComplete formLvl = ', formLvl);
+        if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
     }
     /** 
@@ -2589,16 +2563,12 @@ $(document).ready(function(){
     }
     function resetUnpinnedFields(vals) {
         for (var field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
-            if (!vals[field]) { clearFieldData(field); }
+            if (!vals[field]) { clearField(field); }
         }
     }
-    function clearFieldData(fieldName) {  
-        var detElems = {'Publication': 'pub', 'CitationTitle': 'cit', 'Location': 'loc'};
+    function clearField(fieldName) {
         if (fieldName === 'Note') { return $('#Note-txt').val(""); }
-        clearCombobox('#'+fieldName+'-sel'); 
-        if (fieldName in detElems) {
-            $('#'+detElems[fieldName]+'-det div')[0].innerText = 'None selected.';
-        }
+        clearCombobox('#'+fieldName+'-sel');
     }
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {

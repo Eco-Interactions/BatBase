@@ -2,12 +2,12 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Publication;
+use AppBundle\Entity\Source;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\Publication;
-use AppBundle\Entity\Source;
 
 /**
  * @up- Fixes some miscellaneous source data discrepancies. 
