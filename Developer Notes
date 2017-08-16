@@ -59,6 +59,11 @@ External Todo:
           --Removing previously selected authors from the dropdowns of new authors will require a bit of creativity. Currently, only the last selected author name is removed from the new combobox's options.  
           --Removing empty author comboboxes has proven more complicated than expected. There is a some weirdness on 'destroy' in the selectize library that needs to be isolated.
 
+    ## composer.json ## 
+    -- Removed from symfony-scripts because it deletes everything in the web/bundles 
+      folder... The resoures/public is supposed to be symlinked into web/bundles folder 
+      on update, but it is not working. (waiting to fix, potentially after the 3.4 update):
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
 
 
 
