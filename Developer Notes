@@ -63,7 +63,7 @@ External Todo:
     -- Removed from symfony-scripts because it deletes everything in the web/bundles 
       folder... The resoures/public is supposed to be symlinked into web/bundles folder 
       on update, but it is not working. (waiting to fix, potentially after the 3.4 update):
-      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",  
 
 
 
