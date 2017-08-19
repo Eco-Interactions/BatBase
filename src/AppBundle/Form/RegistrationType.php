@@ -4,9 +4,11 @@ namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class zzHideRegistrationType extends AbstractType
+class RegistrationType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -14,7 +16,9 @@ class zzHideRegistrationType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('first_name');
+        $builder->add('first_name', TextType::class, array('label' => 'First Name'));
+        $builder->add('last_name', TextType::class, array('label' => 'Last Name'));
+        $builder->add('about_me', TextareaType::class, array('label' => 'About Me'));
     }
 
     /**
@@ -29,7 +33,7 @@ class zzHideRegistrationType extends AbstractType
 
     public function getParent()
     {
-        return 'fos_user_registration';
+        return 'FOS\UserBundle\Form\Type\RegistrationFormType';
     }
 
     /**
@@ -37,6 +41,6 @@ class zzHideRegistrationType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'appbundle_registration';
+        return 'app_user_registration';
     }
 }

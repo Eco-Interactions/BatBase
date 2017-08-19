@@ -82,7 +82,7 @@ fos_user:
         confirmation:
             enabled:    true
         form:
-            type: appbundle_registration
+            type: AppBundle\Form\RegistrationType
     profile:
         form:
             type: appbundle_profile
@@ -91,13 +91,8 @@ services:
     app.form.type.registration:
         class: AppBundle\Form\RegistrationFormType
         tags:
-            - { name: form.type, alias: appbundle_registration }
+            - { name: form.type, alias: app_user_registration }
     app.form.type.profile:
         class: AppBundle\Form\ProfileFormType
         tags:
             - { name: form.type, alias: appbundle_profile }
-    # app.listener:
-    #     class: AppBundle\EventListener\UpdateSystemDates
-    #     # arguments: ['@logger']
-    #     tags:
-    #         - { name: doctrine.event_listener, event: postPersist }

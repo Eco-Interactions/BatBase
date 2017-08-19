@@ -36,6 +36,7 @@ form textarea {
 }
 form label {
     vertical-align: text-top;
+    margin-right: .5em;
 }
 form button {
     border: 1px solid;
