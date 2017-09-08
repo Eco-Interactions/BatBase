@@ -58,8 +58,8 @@ class InteractionType
     private $interactions;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="constrainedToType")
-     * @ORM\JoinTable(name="type_tag_contraints")
+     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="intTypeConstraints")
+     * @ORM\JoinTable(name="int_type_tag_contraints")
      */
     private $validTags;
 
