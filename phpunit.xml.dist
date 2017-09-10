@@ -5,21 +5,22 @@
          xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
          backupGlobals="false"
          colors="true"
-         bootstrap="autoload.php"
+         bootstrap="app/autoload.php"
 >
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>../tests/AppBundle/Controller</directory>
+            <!-- <directory>tests/*Bundle/Controller</directory> -->
+            <file>tests/AppBundle/Controller/ContentBlockTest.php</file>
 <!--             <directory>../src/*/*Bundle/Tests</directory>
             <directory>../src/*/Bundle/*Bundle/Tests</directory> -->
         </testsuite>
     </testsuites>
 
-    <!--
+    
     <php>
-        <server name="KERNEL_DIR" value="/path/to/your/app/" />
+        <server name="KERNEL_DIR" value="app" />
     </php>
-    -->
+    
 
     <filter>
         <whitelist>

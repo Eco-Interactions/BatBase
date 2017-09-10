@@ -4,10 +4,8 @@ Developer Notes:
 
 READ ME
 
-HOW TO RUN TESTS
-    phpunit -c app/ tests   
-    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
 
+## DEPLOYMENT / INSTALLATION ##
 
 Deployment Steps:
     >Cache busting:
@@ -31,15 +29,16 @@ Install Cmds
     > Extend php.ini memory-limit
 
 
+## TESTING ##
+HOW TO RUN TESTS
+    phpunit -c app/ tests   
+    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
 
 
-Best practices:
+## BEST PRACTICES ##
     comments:
         //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-External Todo:
-    --Zenbol-
-        --PAYMENT PAGE FOR WHM
-        --CRON JOB BACKUPS
+
 
 -------------------------------------------------------------------------------------------------------
 
@@ -56,8 +55,12 @@ External Todo:
       the menu is obviously inaccurrate. 
     ## Forms ##
         >> Citation
-          --Removing previously selected authors from the dropdowns of new authors will require a bit of creativity. Currently, only the last selected author name is removed from the new combobox's options.  
-          --Removing empty author comboboxes has proven more complicated than expected. There is a some weirdness on 'destroy' in the selectize library that needs to be isolated.
+          --Removing previously selected authors from the dropdowns of new authors will 
+            require a bit of creativity. Currently, only the last selected author name 
+            is removed from the new combobox's options.  
+          --Removing empty author comboboxes has proven more complicated than expected. 
+            There is a some weirdness on 'destroy' in the selectize library that needs 
+            to be isolated.
 
     ## composer.json ## 
     -- Removed from symfony-scripts because it deletes everything in the web/bundles 
@@ -72,27 +75,14 @@ External Todo:
 ::Checked data wonkiness::
     -'northern mariana islands' is the name from red list.
     - Id inconsistencies in the db are from early testing with the interaction 
-      form before Sarah was conscious of the need to 'remove' entities via doctrine, rather than just deleting test rows from the db. There is now a db-migration, 000EraseTests, that removes test entities so they can be safely deleted from the db without remaining in memory.
-
-
-::data cleanup::
-    -Location 
-        -weird '- duplicate entry'
-    > Restructure Migration Commits:
-        Regions, countries, locations: 
-            b6eba34742117a6e25123d6066a3166e0dfd7b0a
-        Drop:
-            29037cdd444afe6254f9a83315a634d6cd198e60
-        SrcStructure, Pub, Auth:
-            5300058c872a4f529dca059ffc6c535afcc58f0c
-        MissPub, Cit:
-            360e7e2506962f839778718ef8e1afc6d3dbb1b7
-        Drop and Cols: (could be done any point after really...)
-            a6439a86b45f56c95cf1ae155fcf0cead3047cbe
+      form before Sarah was conscious of the need to 'remove' entities via doctrine, 
+      rather than just deleting test rows from the db. There is now a db-migration, 
+      000EraseTests, that removes test entities so they can be safely deleted from 
+      the db without remaining in memory.
 
 
 
-##### Serialization #####
+## Serialization ##
 -- Data not serialized  
     - Taxon
         - Namings (and Taxonym)
