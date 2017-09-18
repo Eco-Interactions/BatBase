@@ -93,7 +93,7 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
-        storeData('pgDataUpdatedAt', getCurrentDate());  console.log('pgDataUpdatedAt = ', getCurrentDate())
+        storeData('pgDataUpdatedAt', getCurrentDate());                         console.log('pgDataUpdatedAt = ', getCurrentDate())
         sendDataUpdateStatus(data);
     }
     function sendDataUpdateStatus(data) {
@@ -472,23 +472,29 @@
         }
     } /* End separateTaxaByLevelAndDomain */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
-    function deriveAndStoreLocationData(data) {  
-        storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
-        storeData('topRegionNames', getTopRegionNameData(data));
+    function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
+        const regns = getTopLocObj(data.locationType, 'region');
+        const cntrys = getTopLocObj(data.locationType, 'country');              //console.log('reg = %O, cntry = %O', regns, cntrys);
+        storeData('countryNames', getNameDataObj(cntrys, data.location));
+        storeData('regionNames', getNameDataObj(regns, data.location));
+        storeData('topRegionNames', getTopRegionNameData(data, regns));
         storeData('habTypeNames', getTypeNameData(data.habitatType));
         storeData('locTypeNames', getTypeNameData(data.locationType));
     }
-    /** Note: Top regions are the trunk of the location data tree. */
-    function getTopRegionNameData(locData) {  
-        var data = {};
-        var regions = locData.locationType[1].locations;
-        var rcrds = getEntityRcrds(regions, locData.location);
-        for (var id in rcrds) {
+    function getTopRegionNameData(locData, regns) {  
+        const data = {};
+        const rcrds = getEntityRcrds(regns, locData.location);
+        for (const id in rcrds) { 
             if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
         }
         return data;
     }
+    function getTopLocObj(locTypes, type) { 
+        for (const t in locTypes) {
+            if (locTypes[t].slug === type) { return locTypes[t].locations; }
+        }
+    }
+    /** Note: Top regions are the trunk of the location data tree. */
     /**
      * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
