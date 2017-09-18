@@ -1,0 +1,36 @@
+AppBundle\Entity\LocationType:
+    LocationType-1:
+        slug: point
+        displayName: Point
+        ordinal: 50
+        locations: ['@Location-23', '@Location-58']
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+    LocationType-2:
+        slug: area
+        displayName: Area
+        ordinal: 40
+        locations: ['@Location-35']
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+    LocationType-3:
+        slug: habitat
+        displayName: Habitat
+        ordinal: 30
+        locations: ['@Location-2', '@Location-3', '@Location-4', '@Location-5', '@Location-6', '@Location-7', '@Location-8', '@Location-9', '@Location-10', '@Location-11', '@Location-13', '@Location-14', '@Location-15', '@Location-16', '@Location-17', '@Location-18', '@Location-19', '@Location-20', '@Location-21', '@Location-22', '@Location-25', '@Location-26', '@Location-27', '@Location-28', '@Location-29', '@Location-30', '@Location-31', '@Location-32', '@Location-33', '@Location-34', '@Location-37', '@Location-38', '@Location-39', '@Location-40', '@Location-41', '@Location-42', '@Location-43', '@Location-44', '@Location-45', '@Location-46', '@Location-48', '@Location-49', '@Location-50', '@Location-51', '@Location-52', '@Location-53', '@Location-54', '@Location-55', '@Location-56']
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+    LocationType-4:
+        slug: country
+        displayName: Country
+        ordinal: 20
+        locations: ['@Location-12', '@Location-24', '@Location-47']
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
+    LocationType-5:
+        slug: region
+        displayName: Region
+        ordinal: 10
+        locations: ['@Location-1', '@Location-36']
+        created: '<(new \DateTime("2016-09-27 15:50:43", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'

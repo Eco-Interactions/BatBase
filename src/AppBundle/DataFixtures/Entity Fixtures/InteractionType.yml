@@ -1,0 +1,41 @@
+AppBundle\Entity\InteractionType:
+    InteractionType-1:
+        slug: visitation
+        displayName: Visitation
+        interactions: ['@Interaction-8']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    InteractionType-2:
+        slug: consumption
+        displayName: Consumption
+        interactions: ['@Interaction-6', '@Interaction-3', '@Interaction-2']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    InteractionType-3:
+        slug: seed-dispersal
+        displayName: Seed Dispersal
+        interactions: ['@Interaction-5']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    InteractionType-4:
+        slug: pollination
+        displayName: Pollination
+        interactions: ['@Interaction-4', '@Interaction-1']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    InteractionType-5:   #added
+        slug: transport
+        displayName: Transport
+        interactions: ['@Interaction-7']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
