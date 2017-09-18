@@ -1,5 +1,9 @@
 imports:
     - { resource: config_dev.yml }
+doctrine:
+    dbal:
+        dbname:   "%database_name%_test"
+        server_version: 10.0.30
 
 framework:
     test: ~
