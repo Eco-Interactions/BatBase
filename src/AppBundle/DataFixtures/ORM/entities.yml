@@ -116,7 +116,7 @@ AppBundle\Entity\ContentBlock:
         slug: home-pg-intro
         name: 'Home Pg Intro'
         page: home
-        content: '\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t<p class=\"top-em-mrg\">With over 1,300 species worldwide, bats are critical components to many ecosystems as pollinators, seed dispersers, and consumers of night-flying insects. We created the Bat Eco-Interactions Database to facilitate scientific research worldwide on bat diets and the ecosystem services they provide by gathering all published, peer-reviewed accounts of these interactions.</p>\n\t\t\t<p><strong>Our vision</strong> is to provide a unique platform for scientists, researchers, and avid amateurs to investigate bat diets and the important roles bats play in our environment with the goal of promoting bat research and conservation worldwide. Our database is open sourced, freely available and continually updated by collaborators to provide current information on bat interactions with plants and arthropods.</p>\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t'
+        content: "\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t\n\t\t\t\t<p class=\"top-em-mrg\">With over 1,300 species worldwide, bats are critical components to many ecosystems as pollinators, seed dispersers, and consumers of night-flying insects. We created the Bat Eco-Interactions Database to facilitate scientific research worldwide on bat diets and the ecosystem services they provide by gathering all published, peer-reviewed accounts of these interactions.</p>\n\t\t\t<p><strong>Our vision</strong> is to provide a unique platform for scientists, researchers, and avid amateurs to investigate bat diets and the important roles bats play in our environment with the goal of promoting bat research and conservation worldwide. Our database is open sourced, freely available and continually updated by collaborators to provide current information on bat interactions with plants and arthropods.</p>\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t\n\t\t\t"
         created: '<(new \DateTime("2016-01-08 19:54:51", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-09-14 13:59:20", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1899,22 +1899,22 @@ AppBundle\Entity\Taxon:
         updated: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 AppBundle\Entity\User:
-    User-1:
-        username: Sarah
-        usernameCanonical: sarah
-        email: bluewhirligig@gmail.com
-        emailCanonical: bluewhirligig@gmail.com
+    User-1: #pw4super
+        username: SuperAdmin
+        usernameCanonical: superadmin
+        email: admin@email.com
+        emailCanonical: admin@email.com
         enabled: true
-        salt: r2ufh94118g04gsw4k84cg80w40g0c
-        password: ap2tF1uL0WJgVTygn6sSwN9HVYZNuoHd8KXDHlRotkMiVCgZwXND+076WKSmICVY3HlgRR7j5zrNYJgbnaHVzA==
+        salt: bxtygVRmJP707gAbcclLwe8v9ZNpirQiKxA0zY1gzYc
+        password: Wb/wGkLVR8fU2t2lzW/1i/cEzjEPAsKWAozQTEMbKJPHN08N9BSTELsc62CJkQNAaVZsUy+fkuzkz49YEauVoA==
         lastLogin: '<(new \DateTime("2017-03-19 13:53:50", new \DateTimeZone("America/Los_Angeles")))>'
         roles: [ROLE_SUPER_ADMIN]
-        aboutMe: Sarah
+        aboutMe: 'Test super admin'
         firstName: ''
         lastName: ''
         created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-03-19 13:53:50", new \DateTimeZone("America/Los_Angeles")))>'
-    User-2:
+    User-2:   #pw4test
         username: testeditor
         usernameCanonical: testeditor
         email: test.editor@email.com
@@ -1930,7 +1930,7 @@ AppBundle\Entity\User:
         lastName: Editor
         created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
-    User-3:
+    User-3:   #pw4test
         username: testuser
         usernameCanonical: testuser
         email: test.user@email.com
@@ -1946,17 +1946,17 @@ AppBundle\Entity\User:
         lastName: User
         created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
-    User-4:
-        username: Tuli
-        usernameCanonical: tuli
+    User-4: #pw4admin
+        username: TestAdmin
+        usernameCanonical: testadmin
         email: temp@nomail.com
         emailCanonical: temp@nomail.com
         enabled: true
-        salt: 6bib94hsscg044s8cc4sokc4g88w4k4
-        password: QBHLn956oV3Hc3JtGKX1X5pl7KZA4XLMXNLqFGSi23njxQSE2YZAp5ck9WfH5V6hDGEwB709w8xCS7i9SCav0g==
+        salt: kfEVpd/UQNB.fH2sFABJeLZ1n3QlS8sn5tw8CmgaySg
+        password: 8VC9V27dKsk2qKigvKiRjV3Ox+kk8DR2b3YC9pr90YrTTCAdPV+Fz+gjlVKbR9EPlOgr0n5M0t/vZB7CwfkVQA==
         lastLogin: '<(new \DateTime("2015-11-17 00:08:50", new \DateTimeZone("America/Los_Angeles")))>'
         roles: [ROLE_ADMIN]
-        aboutMe: ''
+        aboutMe: 'Test admin'
         firstName: ''
         lastName: ''
         created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
