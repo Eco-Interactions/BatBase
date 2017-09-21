@@ -49,7 +49,7 @@
     function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
         var withUpdates = Object.keys(updatedAt).filter(function(entity){
             return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
-        });
+        });                                                                     console.log("entities with updates = %O", withUpdates);
         if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
@@ -452,29 +452,30 @@
         }
     }
     /** Each taxon is sorted by domain and then level. 'Animalia' is skipped. */
-    function separateTaxaByLevelAndDomain(taxa) {
-        var data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (var id = 2; id < Object.keys(taxa).length+1; id++) {               
+    function separateTaxaByLevelAndDomain(taxa) {  
+        const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
+        for (let id = 1; id < Object.keys(taxa).length+1; id++) {
+            if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
             addTaxonData(taxa[id]);
-        }                         
-        return data;                                              
+        }
+        return data;
         /** Adds the taxon's name (k) and id to it's level's obj. */
         function addTaxonData(taxon) {
-            var domainObj = getDomainObj(taxon);
-            var level = taxon.level.displayName;  
+            const domainObj = getDomainObj(taxon);
+            const level = taxon.level.displayName;  
             if (!domainObj[level]) { domainObj[level] = {}; }; 
             domainObj[level][taxon.displayName] = taxon.id;
         }
         function getDomainObj(taxon) {
-            var domain = taxon.domain.displayName
-            var key = domain === 'Animalia' ? 'Bat' : domain;
+            const domain = taxon.domain.displayName
+            const key = domain === 'Animalia' ? 'Bat' : domain;
             return data[key];
         }
     } /* End separateTaxaByLevelAndDomain */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
     function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
-        const regns = getTopLocObj(data.locationType, 'region');
-        const cntrys = getTopLocObj(data.locationType, 'country');              //console.log('reg = %O, cntry = %O', regns, cntrys);
+        const regns = getTypeObj(data.locationType, 'region', 'locations');
+        const cntrys = getTypeObj(data.locationType, 'country', 'locations');   //console.log('reg = %O, cntry = %O', regns, cntrys);
         storeData('countryNames', getNameDataObj(cntrys, data.location));
         storeData('regionNames', getNameDataObj(regns, data.location));
         storeData('topRegionNames', getTopRegionNameData(data, regns));
@@ -489,9 +490,9 @@
         }
         return data;
     }
-    function getTopLocObj(locTypes, type) { 
-        for (const t in locTypes) {
-            if (locTypes[t].slug === type) { return locTypes[t].locations; }
+    function getTypeObj(types, type, collection) { 
+        for (const t in types) {
+            if (types[t].slug === type) { return types[t][collection]; }
         }
     }
     /** Note: Top regions are the trunk of the location data tree. */
@@ -501,9 +502,12 @@
      * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        storeData('authSources', data.sourceType[3].sources);         
-        storeData('pubSources', data.sourceType[2].sources);         
-        storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
+        const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
+        const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
+        const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources');
+        storeData('authSources', authSrcs);         
+        storeData('pubSources', pubSrcs);         
+        storeData('publisherNames', publSrcs, data.source);
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         storeData('sourceTags', getTagData(data.tag, "Source"));        
@@ -511,7 +515,7 @@
     }
     function deriveInteractionData(data) {
         storeData('intTypeNames', getTypeNameData(data.interactionType));
-    }
+    }   
     /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {
         var data = {};

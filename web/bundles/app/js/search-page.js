@@ -882,7 +882,7 @@
         } 
     } /* End buildLocSelectOpts */
     function checkSelectedVals(type) {
-        if (gParams.selectedOpts[type]) {
+        if (gParams.selectedOpts && gParams.selectedOpts[type]) {
             var loc = getDetachedRcrd(gParams.selectedOpts[type]);
             return { value: loc.id, text: loc.displayName };
         }

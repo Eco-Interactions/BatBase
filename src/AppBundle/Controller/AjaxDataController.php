@@ -69,15 +69,15 @@ class AjaxDataController extends Controller
      * All entities updated since the lastUpdatedAt time are serialized and 
      * returned in a data object keyed by id.  
      */
-    private function getAllUpdatedData($entity, $lastUpdatedAt, &$em)
-    {  
+    private function getAllUpdatedData($entityType, $lastUpdatedAt, &$em)
+    {    
         $serializer = $this->container->get('jms_serializer');
         $data = new \stdClass;
 
-        $entities = $this->getEntitiesWithUpdates($entity, $lastUpdatedAt, $em);
+        $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt, $em);
 
-        foreach ($entities as $entity) {
-            $id = $entity->getId();
+        foreach ($entities as $entity) {   
+            $id = $entity->getId();    
             $data->$id = $serializer->serialize($entity, 'json');
         }
         return $data;
