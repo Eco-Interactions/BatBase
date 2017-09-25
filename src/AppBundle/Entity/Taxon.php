@@ -381,7 +381,7 @@ class Taxon
     }
     private function findDomainAndReturnObj($taxon)
     {
-        if ($taxon->getId() === 1) { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
+        if ($taxon->getSlug() === 'animalia') { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
         $domain = $taxon->getDomain();
         if ($domain) {
             return [ 
