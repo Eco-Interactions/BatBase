@@ -3,6 +3,9 @@
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
         -- Change domain -> realm, level -> rank.
+        -- Style the 'change password' page
+        -- Bad credentials exception on wrong password?
+        -- remove eif declarations in js files.
     --Search--
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
@@ -60,7 +63,7 @@
             -- update detail panel on interaction form submit
             -- add err eliminating the possibility of creating an orphan taxon
             -- (fix) Fill country field in new location form with top-form country
-
+            -- don't allow creation of location with only region selected 
         --search--
             -- Toggle expand tree button after publication type filter changes
         -- sync data --
@@ -77,16 +80,32 @@ Todo:
 ##CHANGES##
 
 ::Testing!::
-> Search Page
-    > CSV downloads
-    > Data Storage
-        > Data is added and removed correctly  
-        > The grid should reload as expect with the form close
-            > With and without submit. 
-            > interaction forms and sub-entity forms. 
-    > Forms
-        > Taxa select
-            > Object select forms open and change realm 
+~ Data Cleanup ~
+    pub 561 - delete (dup of 338)
+    pub388 - Change srcId -> 967 
+
+    >> Change Sarah's about me to a lower case 'software developer'.
+
+~ Refactor out use of hardcoded ids ~
+    >> Location <<
+
+
+
+
+
+
+
+~ What to test ~
+    > Search Page
+        > CSV downloads
+        > Data Storage
+            > Data is added and removed correctly  
+            > The grid should reload as expect with the form close
+                > With and without submit. 
+                > interaction forms and sub-entity forms. 
+        > Forms
+            > Taxa select
+                > Object select forms open and change realm 
 :: Questions ::
 
 :: Email ::

@@ -31,8 +31,29 @@ Install Cmds
 
 ## TESTING ##
 HOW TO RUN TESTS
-    phpunit -c app/ tests   
-    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
+    >> Pre-test installs <<
+        > Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
+            > Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
+        > Install Chrome Driver (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
+
+    >> Set up test db before tests: <<
+        (generate fixtures as needed: php bin/console generate:fixtures)
+        php bin/console doctrine:database:drop --force --env=test 
+        php bin/console doctrine:database:create --env=test
+        php bin/console doctrine:schema:update --force --env=test
+        php bin/console hautelook_alice:fixtures:load --env=test
+
+    >> Start Selenium << 
+        $ java -jar selenium-server-standalone-3.5.3.jar
+
+    >> Run Tests <<
+        phpunit = ./vendor/bin/simple-phpunit
+            [phpunit] -c app/ tests   
+            [phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+
+    >> Resources used during set-up <<
+        > https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
+
 
 
 ## BEST PRACTICES ##
@@ -89,3 +110,23 @@ HOW TO RUN TESTS
     - Tag
         - IntTypeConstraints
     - Authority
+
+
+---- To the future dev ----
+  
+~ Tips for jumping to specific areas of the code ~
+
+search-page.js
+    >> Jump to the start of a grid-tree build <<
+        * Search for "--[Taxon, Location, Source] Search Methods"
+    >> Jump to the data formatting <<
+        * Search for "-- [Taxon, Location, Source] Data Formatting"
+
+sync-data.js
+    ~ Data storage init ~
+        >> Jump to start of data storage - @deriveAndStoreData
+
+    ~ Data storage updates ~
+        >> Jump to the start of adding data - @updateEntityData
+        >> Jump to the start of removing data - @updateAffectedData
+  
