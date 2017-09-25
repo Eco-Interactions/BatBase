@@ -503,12 +503,13 @@
      * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
-        const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
-        const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources');
-        storeData('authSources', authSrcs);         
-        storeData('pubSources', pubSrcs);         
-        storeData('publisherNames', publSrcs, data.source);
+        const authIds = getTypeObj(data.sourceType, 'author', 'sources');
+        const pubIds = getTypeObj(data.sourceType, 'publication', 'sources');
+        const publIds = getTypeObj(data.sourceType, 'publisher', 'sources'); 
+        const publSrcs = getEntityRcrds(publIds, data.source);
+        storeData('authSources', authIds);         
+        storeData('pubSources', pubIds);         
+        storeData('publisherNames', getTypeNameData(publSrcs));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         storeData('sourceTags', getTagData(data.tag, "Source"));        
