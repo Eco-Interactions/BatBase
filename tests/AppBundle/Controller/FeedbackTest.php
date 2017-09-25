@@ -4,7 +4,7 @@ namespace Tests\AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class FeedbackControllerTest extends WebTestCase
+class FeedbackTest extends WebTestCase
 {
     public function testIndex()
     {

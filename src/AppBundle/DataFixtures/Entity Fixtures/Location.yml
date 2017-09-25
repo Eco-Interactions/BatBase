@@ -530,3 +530,83 @@ AppBundle\Entity\Location:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-18 01:38:27", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
+    Location-59: #added
+        displayName: Unspecified
+        childLocs: ['@Location-60', '@Location-61', '@Location-62', '@Location-63', '@Location-64', '@Location-65', '@Location-66', '@Location-67', '@Location-68', '@Location-69']
+        locationType: '@LocationType-5' #
+        interactions: ['@Interaction-10'] #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-60:  #added
+        displayName: Captivity
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        interactions: ['@Interaction-9'] #
+        habitatType: '@HabitatType-5' #
+        created: '<(new \DateTime("2016-07-15 23:19:43", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2017-07-16 16:38:57", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Location-61:  #added
+        displayName: Forest
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-1' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-62: #added
+        displayName: Savanna
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-2' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-63: #added
+        displayName: Desert
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-3'#
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-64: #added
+        displayName: Shrubland
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-4' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-65: #added
+        displayName: 'Artificial Landscape'
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-6' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-66: #added
+        displayName: Grassland
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-7' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-67: #added
+        displayName: Wetlands
+        parentLoc: '@Location-59'
+        locationType: '@LocationType-3'
+        habitatType: '@HabitatType-8' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-68: #added
+        displayName: 'Rocky Areas'
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-9' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+    Location-69: #added
+        displayName: 'Caves and Subterranean Areas'
+        parentLoc: '@Location-59' #
+        locationType: '@LocationType-3' #
+        habitatType: '@HabitatType-10' #
+        created: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'

@@ -21,7 +21,7 @@ AppBundle\Entity\Tag:
         displayName: Flower
         description: ''
         constrainedToEntity: Interaction
-        interactions: ['@Interaction-5']
+        interactions: ['@Interaction-5', '@Interaction-9', '@Interaction-10']
         created: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:59", new \DateTimeZone("America/Los_Angeles")))>'

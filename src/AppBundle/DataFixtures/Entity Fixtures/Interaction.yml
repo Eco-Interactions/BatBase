@@ -81,3 +81,25 @@ AppBundle\Entity\Interaction:
         created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-9: #added
+        note: 'Bat cited as Leptonycteris sanborni'
+        source: '@Source-1'  #
+        interactionType: '@InteractionType-1'  #
+        location: '@Location-60'  #
+        subject: '@Taxon-6' #
+        object: '@Taxon-23'  #
+        tags: ['@Tag-3'] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-10: #added
+        note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
+        source: '@Source-3'  #
+        interactionType: '@InteractionType-3'  #
+        location: '@Location-59'  #
+        subject: '@Taxon-21' #
+        object: '@Taxon-23'  #
+        tags: ['@Tag-3'] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'

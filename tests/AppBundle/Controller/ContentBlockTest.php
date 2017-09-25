@@ -2,10 +2,14 @@
 
 namespace Tests\AppBundle\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\AppBundle\DatabasePrimer;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\StringInput;
 
-class ContentBlockControllerTest extends WebTestCase
-{
+class ContentBlockTest extends WebTestCase
+{   
     public function testHome()
     {
         $client = static::createClient();
@@ -13,19 +17,19 @@ class ContentBlockControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/');
         $this->assertGreaterThan(
             0,
-            $crawler->filter('div#detail-block p')->count(),
-            'Missing element div#detail-block p');
+            $crawler->filter('html:contains("Bat Eco-Interactions")')->count(),
+            'Missing text "Bat Eco-Interactions"');
     }
 
-    public function testAbout()
+    public function testAboutProject()
     {
         $client = static::createClient();
         $client->followRedirects();
         $crawler = $client->request('GET', '/about');
         $this->assertGreaterThan(
             0,
-            $crawler->filter('div#detail-block p')->count(),
-            'Missing element div#detail-block p');
+            $crawler->filter('html:contains("Contact us")')->count(),
+            'Missing text "Contact us"');
     }
 
     public function testDbTop()
@@ -35,8 +39,8 @@ class ContentBlockControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/db');
         $this->assertGreaterThan(
             0,
-            $crawler->filter('div#detail-block p')->count(),
-            'Missing element div#detail-block p');
+            $crawler->filter('html:contains("How to Use")')->count(),
+            'Missing text "How to Use"');
     }
 
     public function testDefinitions()
@@ -46,8 +50,30 @@ class ContentBlockControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/definitions');
         $this->assertGreaterThan(
             0,
-            $crawler->filter('div#detail-block p')->count(),
-            'Missing element div#detail-block p');
+            $crawler->filter('html:contains("Habitat Types")')->count(),
+            'Missing text "Habitat Types"');
+    }
+
+    public function testComingSoon()
+    {
+        $client = static::createClient();
+        $client->followRedirects();
+        $crawler = $client->request('GET', '/future-developments');
+        $this->assertGreaterThan(
+            0,
+            $crawler->filter('html:contains("Coming Soon")')->count(),
+            'Missing text "Coming Soon"');
+    }
+
+    public function testSearchLoad()
+    {
+        $client = static::createClient();
+        $client->followRedirects();
+        $crawler = $client->request('GET', '/search');
+        $this->assertGreaterThan(
+            0,
+            $crawler->filter('div#detail-block div' )->count(),
+            'Missing element div#detail-block div');
     }
 
     // public function testEdit()               //Tackle functional testing a different way.

@@ -7,7 +7,7 @@ AppBundle\Entity\Source:
         parentSource: '@Source-2' #
         sourceType: '@SourceType-2' #
         tags: ['@Tag-1']
-        interactions: ['@Interaction-1', '@Interaction-2', '@Interaction-4']  #
+        interactions: ['@Interaction-1', '@Interaction-2', '@Interaction-4', '@Interaction-9']  #
         contributors: ['@Contribution-1']  #517
         citation: '@Citation-1'  #237
         created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
@@ -28,7 +28,7 @@ AppBundle\Entity\Source:
         isDirect: true
         parentSource: '@Source-4'  #
         sourceType: '@SourceType-2'  #
-        interactions: ['@Interaction-3'] #
+        interactions: ['@Interaction-3', '@Interaction-10'] #
         contributors: ['@Contribution-2'] #541
         citation: '@Citation-2'  #225
         created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'

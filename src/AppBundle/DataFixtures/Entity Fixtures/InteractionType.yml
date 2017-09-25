@@ -2,7 +2,7 @@ AppBundle\Entity\InteractionType:
     InteractionType-1:
         slug: visitation
         displayName: Visitation
-        interactions: ['@Interaction-8']
+        interactions: ['@Interaction-8', '@Interaction-9']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
@@ -18,7 +18,7 @@ AppBundle\Entity\InteractionType:
     InteractionType-3:
         slug: seed-dispersal
         displayName: Seed Dispersal
-        interactions: ['@Interaction-5']
+        interactions: ['@Interaction-5', '@Interaction-10']
         created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
