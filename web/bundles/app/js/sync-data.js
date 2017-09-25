@@ -1,6 +1,7 @@
 (function(){
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
+    var dataStorage;
     eif.syncData = {
         update: updateStoredData,
         reset: resetStoredData
@@ -372,8 +373,8 @@
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
     function resetStoredData() {
-        var prevFocus = localStorage.getItem('curFocus');
-        localStorage.clear();
+        var prevFocus = dataStorage.getItem('curFocus');
+        dataStorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);
     }
@@ -428,7 +429,7 @@
         for (var id in data) { data[id] = JSON.parse(data[id]); }
         return data;
     }
-    /** Adds to localStorage data derived from the serialized entity data. */
+    /** Adds the data derived from the serialized entity data to data storage. */
     function deriveAndStoreData(data) {
         deriveAndStoreTaxonData(data[0]);
         deriveAndStoreLocationData(data[1]);
@@ -547,7 +548,7 @@
         return data;
     }
     /*--------------- Shared Helpers -----------------------------*/
-    /** Stores passed data under the key in localStorage. */
+    /** Stores passed data under the key in dataStorage. */
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }
