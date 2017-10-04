@@ -44,16 +44,19 @@ HOW TO RUN TESTS
         php bin/console hautelook_alice:fixtures:load --env=test
 
     >> Start Selenium << 
-        $ java -jar selenium-server-standalone-3.5.3.jar
+        $ java -jar [selenium-server-standalone-3.5.3.jar]
 
     >> Run Tests <<
-        phpunit = ./vendor/bin/simple-phpunit
+        > Unit Tests <
+          phpunit = ./vendor/bin/simple-phpunit
             [phpunit] -c app/ tests   
             [phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+        > Functional Tests <
+          behat = ./vendor/bin/behat
 
     >> Resources used during set-up <<
         > https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
-
+        > https://knpuniversity.com/screencast/behat
 
 
 ## BEST PRACTICES ##
