@@ -83,15 +83,13 @@ Todo:
 ~ Data Cleanup ~
     pub 561 - delete (dup of 338)
     pub388 - Change srcId -> 967 
+    >> Change my team desc to lower case title.
 
-    >> Change Sarah's about me to a lower case 'software developer'.
+    !! Refactor !!
+        > Change sel-domain vals to slugs of realm
+        > change search-focus to search-view
 
-~ Refactor out use of hardcoded ids ~
-    >> Location <<
-
-
-
-
+        > Change test at end of 'change views/groups' to test view dependent elems rather than sel value
 
 
 
