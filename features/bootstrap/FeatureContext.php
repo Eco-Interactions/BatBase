@@ -25,7 +25,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
 
     }
-
     /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
      *
@@ -50,7 +49,6 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /** -------------------------- Page Interactions --------------------------*/
-
     /**
      * @Given I exit the tutorial
      */
@@ -61,19 +59,27 @@ class FeatureContext extends RawMinkContext implements Context
         $this->getSession()->executeScript("$('.introjs-overlay').click();");
         sleep(1);
     }
-
     /**
      * @Given the database grid is in :view view
      */
     public function theDatabaseGridIsInSelectedView($view)
     {
         $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
-        $this->getSession()->executeScript("$('#search-focus').val('$vals[$view]').change();");
-        $selected = $this->getSession()->evaluateScript("$('#search-focus option:selected').text();");
-        assertEquals($selected, $view, 'In "'.$selected.'" view; expected "'.$view.'"');
+        $newElems = ['Taxon' => '#selSpecies', 'Location' => '#selRegion', 'Source' => '#selPubTypes'];
+        $this->changeGridSort('#search-focus', $vals[$view], $newElems[$view]);
         sleep(1);
     }
-
+    /**
+     * @Given I group interactions by :type
+     */
+    public function iGroupInteractionsBy($type)
+    {
+        $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 2, 
+            'Arthropoda' => 4, 'Plants' => 3];
+        $newElems = ['Authors' => '[name="authNameSrch"]', 'Publications' => '#selPubTypes', 
+            'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies'];
+        $this->changeGridSort('#sel-domain', $vals[$type], $newElems[$type]);
+    }
     /**------------------ Grid Funcs -----------------------------------------*/
     /**
      * @Then the count column should show :count interactions
@@ -93,7 +99,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :count rows in the grid data tree
+     * @Then I (should) see :count rows in the grid data tree
      */
     public function iShouldSeeRowsInTheGridDataTree($count)
     {
@@ -114,19 +120,40 @@ class FeatureContext extends RawMinkContext implements Context
         }
         assertTrue($found, '"'.$text.'" is not displayed in grid data-tree.');
     }
-
-    /** ------------------Taxon View -----------------------------------------*/
-
+    /** ------------------ Helpers -------------------------------------------*/
     /**
-     * @When I group taxa by :realm
+     * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
-    public function iGroupTaxaBy($realm)
+    private function changeGridSort($elemId, $newVal, $newElemId)
     {
-        $vals = ['Bat' => 2, 'Plant' => 3, 'Arthropod' => 4];
-        $this->getSession()->executeScript("$('#sel-domain').val($vals[$realm]).change();");
-        $selected = $this->getSession()->evaluateScript("$('#sel-domain option:selected').text();");
-        assertEquals($selected, $realm, 'Taxa grouped by "'.$selected.'"; Expected "'.$realm.'"');
+        $this->getSession()->executeScript("$('$elemId').val('$newVal').change();");
+        $uiUpdated = $this->getSession()->evaluateScript("$('#newElemId').length > 0;");
+        assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
     }
+
+
+
+    /** ------------------ Generic Helpers -----------------------------------*/
+    /**
+     * @When I press :bttnText :count times
+     */
+    public function iPressTimes($bttnText, $count)
+    {
+        for ($i=0; $i < $count; $i++) { 
+            $this->getSession()->getPage()->pressButton($bttnText);
+        }
+    }
+    /**
+     * @Given I see :text
+     */
+    public function iSee($text)
+    {
+        $this->assertSession()->pageTextContains($text);
+    }
+
+
+
+
 
 
 }
