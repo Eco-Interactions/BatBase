@@ -25,6 +25,15 @@ class FeatureContext extends RawMinkContext implements Context
     {
 
     }
+
+    /**
+     * @Given I resize browser window
+     */
+    public function iResizeBrowserWindow()
+    {
+        $this->getSession()->resizeWindow(1440, 900, 'current');
+    }
+
     /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
      *
@@ -80,6 +89,118 @@ class FeatureContext extends RawMinkContext implements Context
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies'];
         $this->changeGridSort('#sel-domain', $vals[$type], $newElems[$type]);
     }
+
+    /**
+     * @When I select :text from the :label dropdown
+     */
+    public function iSelectFromTheDropdown($text, $label)
+    {
+        $vals = ['Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1 ];
+        $selId = '#sel'.str_replace(' ','',$label);
+        $this->getSession()->executeScript("$('$selId').val('$vals[$text]').change();");
+    }
+
+    /**
+     * @Then I should see :text in the :label dropdown
+     */
+    public function iShouldSeeInTheDropdown($text, $label)
+    {
+        $selId = '#sel'.str_replace(' ','',$label);
+        $selector = $selId.' option:selected';  
+        $sel = $this->getSession()->getPage()->find('css', $selId); 
+        $selected = $this->getSession()->evaluateScript("$('$selector').text();");  
+        assertEquals($text, $selected); //, "Expected [$text]; Found [$selected]"
+    }
+
+    /**
+     * @When I type :text in the :type text box and press enter
+     */
+    public function iTypeInTheTextBoxAndPressEnter($text, $type)
+    {
+        $input = 'sel'.$type;  var_dump($input);
+        $bttn = $input.'_submit';
+        $this->getSession()->executeScript("$('[name=\"$input\"]')[0].value = '$text';");
+        $this->getSession()->getPage()->pressButton($bttn);
+    }
+
+    /**------------------- Form Interactions ---------------------------------*/
+    /**
+     * @Given I open the new Interaction form
+     */
+    public function iOpenTheNewInteractionForm()
+    {
+        $this->getSession()->getPage()->pressButton('New');
+    }
+
+    /**
+     * @Given I enter :text in the :prop field dropdown 
+     */
+    public function iEnterInTheFieldDropdown($text, $prop)
+    {
+        $selId = '#'.$prop.'-sel';
+        $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+    }
+
+    /**
+     * @When I type :text in the :prop field :type
+     */
+    public function iTypeInTheField($text, $prop, $type)
+    {
+        $field = '#'.str_replace(' ','',$prop).'_row '.$type;
+        $this->getSession()->executeScript("$('$field')[0].value = '$text';");        
+    }
+
+    /**
+     * @When I select :text from the :prop field dropdown
+     */
+    public function iSelectFromTheFieldDropdown($text, $prop)
+    {
+        $selId = '#'.str_replace(' ','',$prop).'-sel';
+        $val = $this->getValueToSelect($selId, $text);
+        $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+    }
+
+    private function getValueToSelect($selId, $text)
+    {
+        $opts = $this->getSession()->evaluateScript("$('$selId')[0].selectize.options;");
+        foreach ($opts as $key => $optAry) {
+            if ($optAry['text'] === $text) { return $optAry['value']; }
+        } 
+    }
+    /**
+     * @When I select :text from the :prop field dynamic dropdown
+     */
+    public function iSelectFromTheFieldDynamicDropdown($text, $prop)
+    {
+        $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
+        $count = $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
+        $val = $this->getValueToSelect($selId, $text); 
+        $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+    }
+
+    /**
+     * @Then I should see :text in the :prop field
+     */
+    public function iShouldSeeInTheField($text, $prop)
+    {
+        $selId = '#'.str_replace(' ','',$prop).'-sel';
+        $this->getSession()->wait( 5000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+        assertEquals($text, $selected);  //, "Expected [$text]; Found [$selected]"
+    }
+
+    /**
+     * @Then I should see :text in the :entity detail panel
+     */
+    public function iShouldSeeInTheDetailPanel($text, $entity)
+    {
+        $elemId = '#'.strtolower(substr($entity , 0, 3)).'-det'; 
+        $elem = $this->getSession()->getPage()->find('css', $elemId);
+        assertContains($text, $elem->getHtml()); 
+
+    }
+
     /**------------------ Grid Funcs -----------------------------------------*/
     /**
      * @Then the count column should show :count interactions
@@ -104,7 +225,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeRowsInTheGridDataTree($count)
     {
         $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container>div'); 
-        assertCount(intval($count), $rows, 'There are "'.count($rows).'" rows displayed; Expected "'.$count.'"');
+        assertCount(intval($count), $rows, "Expected [$count] rows; Found [".count($rows)."]");
     }
 
     /**
@@ -130,9 +251,6 @@ class FeatureContext extends RawMinkContext implements Context
         $uiUpdated = $this->getSession()->evaluateScript("$('#newElemId').length > 0;");
         assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
     }
-
-
-
     /** ------------------ Generic Helpers -----------------------------------*/
     /**
      * @When I press :bttnText :count times

@@ -1180,6 +1180,7 @@
         var pubSelElem = buildPubSelects(pubTypeOpts);
         clearCol2();        
         $('#opts-col2').append(pubSelElem);
+        $('#selPublicationType').val('all');
         //initComboboxes
     }
     function buildPubSelectOpts() {
@@ -1195,7 +1196,7 @@
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         var spanElem = _util.buildElem('span', { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = _util.buildSelectElem(
-            pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
+            pubTypeOpts, { class: "opts-box", id: 'selPublicationType' }, updatePubSearch
         );
         $(labelElem).css('width', '255px');
         $(selectElem).css('width', '115px');
@@ -1206,8 +1207,8 @@
     /** Builds a text input for searching author names. */
     function loadAuthSearchHtml() {
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = _util.buildElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
-        var bttn = _util.buildElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        var inputElem = _util.buildElem('input', { name: 'selAuthor', type: 'text', placeholder: "Author Name"  });
+        var bttn = _util.buildElem('button', { text: 'Search', name: 'selAuthor_submit', class: "ag-fresh grid-bttn" });
         $(inputElem).onEnter(updateAuthSearch);
         $(bttn).css('margin-left', '5px');
         $(bttn).click(updateAuthSearch);
@@ -1401,8 +1402,8 @@
      * filtered by the selected type. 
      */
     function updatePubSearch() {                                                
-        var selVal = $("#selPubTypes").val();                                   console.log("\n-----updatePubSearch [%s]", selVal);
-        var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
+        var selVal = $("#selPublicationType").val();                            console.log("\n-----updatePubSearch [%s]", selVal);
+        var selText = $("#selPublicationType option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
         gParams.focusFltr = selVal === "all" ? null : selText+'s';
@@ -1434,7 +1435,7 @@
     }
     /** Returns the lowercased value of the author name filter. */ 
     function getAuthFilterVal() {
-        return $('input[name="authNameSrch"]').val().trim().toLowerCase();
+        return $('input[name="selAuthor"]').val().trim().toLowerCase();
     }
     function getAuthRows(rowAry, authNameStr) {
         var rowAuthName;
@@ -1958,7 +1959,7 @@
         updateAuthSearch();
     }
     function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
-        if ($('#selPubTypes').val() === "all") { return; }
+        if ($('#selPublicationType').val() === "all") { return; }
         updatePubSearch();
     }
     /*-------------------- Unique Values Column Filter -----------------------*/
