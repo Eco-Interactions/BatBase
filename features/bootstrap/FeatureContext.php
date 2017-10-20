@@ -137,7 +137,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iEnterInTheFieldDropdown($text, $prop)
     {
-        $selId = '#'.$prop.'-sel';
+        $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
     }
 
@@ -147,7 +147,10 @@ class FeatureContext extends RawMinkContext implements Context
     public function iTypeInTheField($text, $prop, $type)
     {
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
-        $this->getSession()->executeScript("$('$field')[0].value = '$text';");        
+        $curForm = $this->getOpenFormId(); var_dump($curForm);
+        $selector = $curForm.' '.$field;
+        $this->getSession()->executeScript("$('$selector')[0].value = '$text';");        
+        $this->getSession()->executeScript("$('$selector').change();");        
     }
 
     /**
@@ -172,13 +175,39 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSelectFromTheFieldDynamicDropdown($text, $prop)
     {
-        $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
-        $count = $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+        $count = $this->getCurrentFieldCount($prop);
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
         $val = $this->getValueToSelect($selId, $text); 
         $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
     }
 
+    /**
+     * @When I enter :text in the :prop field dynamic dropdown
+     */
+    public function iEnterInTheFieldDynamicDropdown($text, $prop)
+    {
+        $count = $this->getCurrentFieldCount($prop);
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
+        $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+    }
+
+    /**
+     * @Then I should see :text in the :prop field dynamic dropdown
+     */
+    public function iShouldSeeInTheFieldDynamicDropdown($text, $prop)
+    {
+        $count = $this->getCurrentFieldCount($prop)-1;
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
+        $this->getSession()->wait(5000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+        assertEquals($text, $selected); 
+    }
+
+    private function getCurrentFieldCount($prop)
+    {
+        $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
+        return $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+    }
     /**
      * @Then I should see :text in the :prop field
      */
@@ -198,7 +227,17 @@ class FeatureContext extends RawMinkContext implements Context
         $elemId = '#'.strtolower(substr($entity , 0, 3)).'-det'; 
         $elem = $this->getSession()->getPage()->find('css', $elemId);
         assertContains($text, $elem->getHtml()); 
+    }
 
+    /** ------------------ Helpers ----------------- */
+    private function getOpenFormId()
+    {
+        $forms = ['sub2', 'sub', 'top'];
+        foreach ($forms as $prefix) {
+            $selector = '#'.$prefix.'-form';
+            $elem = $this->getSession()->getPage()->find('css', $selector);
+            if ($elem !== null) { return $selector; }
+        }
     }
 
     /**------------------ Grid Funcs -----------------------------------------*/
