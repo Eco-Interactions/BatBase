@@ -17,13 +17,6 @@ Feature: Initialize Search Page Database
 		Given the database has loaded
 		And I exit the tutorial
 
-	# @javascript
-	# Scenario:  I should be able to open the new interaction form
-	# 	Given the database has loaded
-	# 	And I exit the tutorial
-	# 	When I press "New"
-	# 	Then I should see "New Interaction"
-
 	@javascript
 	Scenario:  I should be able to create a publisher with its sub-form
 		Given I open the New Interaction form
@@ -53,7 +46,7 @@ Feature: Initialize Search Page Database
 		Then I should see "Test Author" in the "Authors" field dynamic dropdown
 
 	@javascript
-	Scenario:  I should be able to add a new publication with its sub-form
+	Scenario:  I should be able to create a publication with its sub-form
 		Given I open the New Interaction form
 		And I enter "Test Publication" in the "Publication" field dropdown
 		And I see "New Publication"
@@ -73,7 +66,7 @@ Feature: Initialize Search Page Database
 		And I should see "Test Author" in the "Publication" detail panel
 
 	@javascript
-	Scenario:  I should be able to add a new citation with its sub-form
+	Scenario:  I should be able to create a citation with its sub-form
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
 		And I enter "Test Citation" in the "Citation Title" field dropdown
@@ -99,3 +92,197 @@ Feature: Initialize Search Page Database
 		And I should see "3" in the "Citation" detail panel
 		And I should see "333-666" in the "Citation" detail panel
 		And I should see "Test Author, Cockle" in the "Citation" detail panel
+
+	@javascript
+	Scenario:  I should be able to create a location with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I enter "Test Location" in the "Location" field dropdown
+		Then I should see "New Location"
+		When I type "Test Description" in the "Description" field "textarea"
+		And I select "Costa Rica" from the "Country" field dropdown
+		And I select "Savanna" from the "Habitat Type" field dropdown
+		And I type "1500" in the "Elevation" field "input"
+		And I type "2500" in the "Elevation Max" field "input"
+		And I type "-58.864905" in the "Latitude" field "input"
+		And I type "3.339844" in the "Longitude" field "input"
+		And I press "Create Location"
+		Then I should see "Test Location" in the "Location" field
+		And I should see "Test Description" in the "Location" detail panel
+		And I should see "Savanna" in the "Location" detail panel
+		And I should see "1500" in the "Location" detail panel
+		And I should see "2500" in the "Location" detail panel
+		And I should see "-58.864905" in the "Location" detail panel
+		And I should see "3.339844" in the "Location" detail panel
+
+	@javascript
+	Scenario:  I should be able to create a taxon Family within the subject taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		When I enter "Subject Family" in the "Family" field dropdown
+		And I see "New Taxon Family"
+		And I press "Create Taxon"
+		Then I should see "Subject Family" in the "Family" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Genus within the subject taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		And I select "Subject Family" from the "Family" field dropdown
+		When I enter "Subject Genus" in the "Genus" field dropdown
+		And I see "New Taxon Genus"
+		And I press "Create Taxon"
+		Then I should see "Subject Genus" in the "Genus" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Species within the subject taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		And I select "Subject Family" from the "Family" field dropdown
+		And I select "Subject Genus" from the "Genus" field dropdown
+		When I enter "Subject Species" in the "Species" field dropdown
+		And I see "New Taxon Species"
+		And I press "Create Taxon"
+		Then I should see "Subject Species" in the "Species" field
+
+	@javascript
+	Scenario:  I should be able to select a taxon with the subject taxon select form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		And I select "Subject Family" from the "Family" field dropdown
+		And I select "Subject Genus" from the "Genus" field dropdown
+		And I select "Subject Species" from the "Species" field dropdown
+		When I press "Confirm"
+		Then I should see "Subject Species" in the "Subject" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Class within the object taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I enter "Object Class" in the "Class" field dropdown
+		And I see "New Taxon Class"
+		And I press "Create Taxon"
+		Then I should see "Object Class" in the "Class" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Order within the object taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Class" from the "Class" field dropdown
+		And I enter "Object Order" in the "Order" field dropdown
+		And I see "New Taxon Order"
+		And I press "Create Taxon"
+		Then I should see "Object Order" in the "Order" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Family within the object taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Class" from the "Class" field dropdown
+		And I select "Object Order" from the "Order" field dropdown
+		And I enter "Object Family" in the "Family" field dropdown
+		And I see "New Taxon Family"
+		And I press "Create Taxon"
+		Then I should see "Object Family" in the "Family" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Genus within the object taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Class" from the "Class" field dropdown
+		And I select "Object Order" from the "Order" field dropdown
+		And I select "Object Family" from the "Family" field dropdown
+		When I enter "Object Genus" in the "Genus" field dropdown
+		And I see "New Taxon Genus"
+		And I press "Create Taxon"
+		Then I should see "Object Genus" in the "Genus" field
+
+	@javascript
+	Scenario:  I should be able to create a taxon Species within the object taxon sub-form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Class" from the "Class" field dropdown
+		And I select "Object Order" from the "Order" field dropdown
+		And I select "Object Family" from the "Family" field dropdown
+		And I select "Object Genus" from the "Genus" field dropdown
+		When I enter "Object Species" in the "Species" field dropdown
+		And I see "New Taxon Species"
+		And I press "Create Taxon"
+		Then I should see "Object Species" in the "Species" field
+
+	@javascript
+	Scenario:  I should be able to select a taxon with the object taxon select form
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "South America" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I select "Subject Species" from the "Subject" field dropdown
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Class" from the "Class" field dropdown
+		And I select "Object Order" from the "Order" field dropdown
+		And I select "Object Family" from the "Family" field dropdown
+		And I select "Object Genus" from the "Genus" field dropdown
+		And I select "Object Species" from the "Species" field dropdown
+		When I press "Confirm"
+		Then I should see "Object Species" in the "Object" field
+

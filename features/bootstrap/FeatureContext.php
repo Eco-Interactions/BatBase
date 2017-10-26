@@ -229,6 +229,15 @@ class FeatureContext extends RawMinkContext implements Context
         assertContains($text, $elem->getHtml()); 
     }
 
+    /**
+     * @Given I focus on the :role taxon field
+     */
+    public function iFocusOnTheTaxonField($role)
+    {
+        $selId = '#'.$role.'-sel';
+        $this->getSession()->executeScript("$('$selId')[0].selectize.focus();");
+    }
+
     /** ------------------ Helpers ----------------- */
     private function getOpenFormId()
     {
