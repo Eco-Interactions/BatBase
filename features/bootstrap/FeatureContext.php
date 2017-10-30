@@ -3,7 +3,6 @@
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-// use Behat\MinkExtension\Context\MinkContext;
 use Behat\MinkExtension\Context\RawMinkContext;
 
 require_once(__DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
@@ -109,7 +108,7 @@ class FeatureContext extends RawMinkContext implements Context
         $selector = $selId.' option:selected';  
         $sel = $this->getSession()->getPage()->find('css', $selId); 
         $selected = $this->getSession()->evaluateScript("$('$selector').text();");  
-        assertEquals($text, $selected); //, "Expected [$text]; Found [$selected]"
+        assertEquals($text, $selected); 
     }
 
     /**
@@ -117,7 +116,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iTypeInTheTextBoxAndPressEnter($text, $type)
     {
-        $input = 'sel'.$type;  var_dump($input);
+        $input = 'sel'.$type;
         $bttn = $input.'_submit';
         $this->getSession()->executeScript("$('[name=\"$input\"]')[0].value = '$text';");
         $this->getSession()->getPage()->pressButton($bttn);
@@ -147,10 +146,11 @@ class FeatureContext extends RawMinkContext implements Context
     public function iTypeInTheField($text, $prop, $type)
     {
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
-        $curForm = $this->getOpenFormId(); var_dump($curForm);
+        $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;
         $this->getSession()->executeScript("$('$selector')[0].value = '$text';");        
         $this->getSession()->executeScript("$('$selector').change();");        
+        $this->textSelectedInField($text, $selector);
     }
 
     /**
@@ -161,15 +161,10 @@ class FeatureContext extends RawMinkContext implements Context
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $val = $this->getValueToSelect($selId, $text);
         $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->textSelectedInField($text, $selId);
+
     }
 
-    private function getValueToSelect($selId, $text)
-    {
-        $opts = $this->getSession()->evaluateScript("$('$selId')[0].selectize.options;");
-        foreach ($opts as $key => $optAry) {
-            if ($optAry['text'] === $text) { return $optAry['value']; }
-        } 
-    }
     /**
      * @When I select :text from the :prop field dynamic dropdown
      */
@@ -179,6 +174,7 @@ class FeatureContext extends RawMinkContext implements Context
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
         $val = $this->getValueToSelect($selId, $text); 
         $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->textSelectedInField($text, $selId);
     }
 
     /**
@@ -196,27 +192,20 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheFieldDynamicDropdown($text, $prop)
     {
-        $count = $this->getCurrentFieldCount($prop)-1;
+        $count = $this->getCurrentFieldCount($prop);     
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
-        $this->getSession()->wait(5000, "$('$selId+div>div>div')[0].innerText == '$text';");
-        $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
-        assertEquals($text, $selected); 
+        $this->getSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $this->textSelectedInField($text, $selId.'+div>div>div');
     }
 
-    private function getCurrentFieldCount($prop)
-    {
-        $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
-        return $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
-    }
     /**
      * @Then I should see :text in the :prop field
      */
     public function iShouldSeeInTheField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getSession()->wait( 5000, "$('$selId+div>div>div')[0].innerText == '$text';");
-        $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
-        assertEquals($text, $selected);  //, "Expected [$text]; Found [$selected]"
+        $this->getSession()->wait( 10000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $this->textSelectedInField($text, $selId.'+div>div>div');
     }
 
     /**
@@ -230,12 +219,23 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Then I should see :text in the form header
+     */
+    public function iShouldSeeInTheFormHeader($text)
+    {
+        $this->getSession()->wait( 10000, "$('#form-main p').length;");
+        $elem = $this->getSession()->getPage()->find('css', '#form-main p');
+        assertContains($text, $elem->getHtml()); 
+    }
+
+    /**
      * @Given I focus on the :role taxon field
      */
     public function iFocusOnTheTaxonField($role)
     {
         $selId = '#'.$role.'-sel';
         $this->getSession()->executeScript("$('$selId')[0].selectize.focus();");
+        sleep(1);
     }
 
     /** ------------------ Helpers ----------------- */
@@ -247,6 +247,29 @@ class FeatureContext extends RawMinkContext implements Context
             $elem = $this->getSession()->getPage()->find('css', $selector);
             if ($elem !== null) { return $selector; }
         }
+    }
+
+    private function getValueToSelect($selId, $text)
+    {
+        $opts = $this->getSession()->evaluateScript("$('$selId')[0].selectize.options;");
+        foreach ($opts as $key => $optAry) {
+            if ($optAry['text'] === $text) { return $optAry['value']; }
+        } 
+    }
+
+    private function getCurrentFieldCount($prop)
+    {
+        $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
+        return $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+    }
+
+    private function textSelectedInField($text, $fieldId)
+    {  
+        $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
+        if ($selected === null || $selected === "") {
+            $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].value;"); 
+        }
+        assertEquals($text, $selected); 
     }
 
     /**------------------ Grid Funcs -----------------------------------------*/

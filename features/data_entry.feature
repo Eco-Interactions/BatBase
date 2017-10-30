@@ -24,7 +24,7 @@ Feature: Initialize Search Page Database
 		And I see "New Publication"
 		When I enter "Test Publisher" in the "Publisher" field dropdown
 		And I see "New Publisher"
-		And I type "10.1037/rmh0000008" in the "Description" field "textarea"
+		And I type "Publisher Description" in the "Description" field "textarea"
 		And I type "www.publisher.com" in the "Link Url" field "input"
 		And I type "Test Publisher Webiste" in the "Link Display" field "input"
 		And I press "Create Publisher"
@@ -42,7 +42,6 @@ Feature: Initialize Search Page Database
 		And I type "www.author.com" in the "Link Url" field "input"
 		And I type "Test Author Webiste" in the "Link Display" field "input"
 		And I press "Create Author"
-		And I break
 		Then I should see "Test Author" in the "Authors" field dynamic dropdown
 
 	@javascript
@@ -96,9 +95,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a location with its sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
 		And I enter "Test Location" in the "Location" field dropdown
 		Then I should see "New Location"
 		When I type "Test Description" in the "Description" field "textarea"
@@ -120,10 +116,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Family within the subject taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		When I enter "Subject Family" in the "Family" field dropdown
@@ -134,10 +126,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Genus within the subject taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Family" from the "Family" field dropdown
@@ -149,10 +137,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Species within the subject taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Family" from the "Family" field dropdown
@@ -165,10 +149,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to select a taxon with the subject taxon select form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Family" from the "Family" field dropdown
@@ -180,11 +160,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Class within the object taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -196,11 +171,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Order within the object taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -213,11 +183,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Family within the object taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -231,11 +196,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Genus within the object taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -250,11 +210,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to create a taxon Species within the object taxon sub-form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -270,11 +225,6 @@ Feature: Initialize Search Page Database
 	@javascript
 	Scenario:  I should be able to select a taxon with the object taxon select form
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
-		And I select "South America" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I select "Subject Species" from the "Subject" field dropdown
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		When I select "Arthropod" from the "Realm" field dropdown
@@ -286,3 +236,24 @@ Feature: Initialize Search Page Database
 		When I press "Confirm"
 		Then I should see "Object Species" in the "Object" field
 
+	@javascript
+	Scenario:  I should be able to create a new interaction with all fields filled
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "Costa Rica" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		And I select "Subject Species" from the "Species" field dropdown
+		And I press "Confirm"
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		And I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Species" from the "Species" field dropdown
+		And I press "Confirm"
+		When I select "Consumption" from the "Interaction Type" field dropdown
+		And I select "Arthropod" from the "Interaction Tags" field dropdown
+		And I type "Detailed interaction notes." in the "Note" field "textarea"
+		And I press "Create Interaction"
+		Then I should see "New Interaction successfully created." in the form header
