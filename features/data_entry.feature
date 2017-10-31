@@ -237,23 +237,37 @@ Feature: Initialize Search Page Database
 		Then I should see "Object Species" in the "Object" field
 
 	@javascript
-	Scenario:  I should be able to create a new interaction with all fields filled
+	Scenario:  Pinned field values should remain after interaction form submission
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
 		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I pin the "Citation Title" field
 		And I select "Costa Rica" from the "Country-Region" field dropdown
 		And I select "Test Location" from the "Location" field dropdown
+		And I pin the "Location" field
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Species" from the "Species" field dropdown
 		And I press "Confirm"
+		And I pin the "Subject" field
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		And I select "Arthropod" from the "Realm" field dropdown
 		And I select "Object Species" from the "Species" field dropdown
 		And I press "Confirm"
 		When I select "Consumption" from the "Interaction Type" field dropdown
+		And I pin the "Interaction Type" field
 		And I select "Arthropod" from the "Interaction Tags" field dropdown
 		And I type "Detailed interaction notes." in the "Note" field "textarea"
 		And I press "Create Interaction"
 		Then I should see "New Interaction successfully created." in the form header
+		And I should see "Test Publication" in the "Publication" field
+		And I should see "Test Citation" in the "Citation Title" field
+		And I should see "Costa Rica" in the "Country-Region" field
+		And I should see "Test Location" in the "Location" field
+		And I should see "Subject Species" in the "Subject" field
+		And the "Object" select field should be empty
+		And I should see "Consumption" in the "Interaction Type" field
+		And the "Interaction Tags" select field should be empty
+		And the "Note" field should be empty
+

@@ -238,6 +238,42 @@ class FeatureContext extends RawMinkContext implements Context
         sleep(1);
     }
 
+    /**
+     * @Given I pin the :prop field
+     */
+    public function iPinTheField($prop)
+    {
+        $selector = '#'.str_replace(' ','',$prop).'_pin';
+        $this->getSession()->executeScript("$('$selector').click();");
+        $checked = $this->getSession()->evaluateScript("$('$selector').prop('checked');");
+        assertTrue($checked);
+    }
+
+    /**
+     * @Then the :prop field should be empty
+     */
+    public function theFieldShouldBeEmpty($prop)
+    {
+        $map = [ 'Note' => '#Note_row textarea' ];
+        $selector = $map[str_replace(' ','',$prop)];
+        $val = $this->getSession()->evaluateScript("$('$selector')[0].innerText"); 
+        assertEquals($val, '');
+    }
+
+    /**
+     * @Then the :prop select field should be empty
+     */
+    public function theSelectFieldShouldBeEmpty($prop)
+    {
+        $selector = '#'.str_replace(' ','',$prop).'-sel';
+        $val = $this->getSession()->evaluateScript("$('$selector')[0].selectize.getValue();"); 
+        if (is_array($val)) {
+            foreach ($val as $value) { if ($value) { $val = false; } }
+            if ($val !== false) { $val = ''; }
+        }
+        assertEquals($val, '');
+    }
+
     /** ------------------ Helpers ----------------- */
     private function getOpenFormId()
     {
