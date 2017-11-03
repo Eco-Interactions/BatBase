@@ -12,6 +12,7 @@
         -- Add publisher to source-type view
         -- refactor enable/disable submit-button methods to one method with 'enable' param
         -- Add data-entry tutorial.
+        -- update 'shw-changd' 'custom' value on date selection
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
         -- Auto generate citation full text from filled fields
@@ -61,14 +62,9 @@
             -- Change author display names to [L, F M S]
             -- domain = realm
         --form-- 
-            -- Should we include all children in the location drop down when a region is selected?
-            -- Fix error message when empty interaction form submits
-            -- Add top location option, 'Add a new Location...'
-            -- Add a way to select an area as parent
-            -- update detail panel on interaction form submit
             -- add err in controllers eliminating the possibility of creating orphans
-            -- (fix) Fill country field in new location form with top-form country
-            -- don't allow creation of location with only region selected 
+            -- Fix error message when empty interaction form submits
+            -- update detail panel on interaction form submit
             -- Pub form
                 -- Change Doi field to DOI
                 -- update test
@@ -78,7 +74,9 @@
             -- auth form
                 -- remove 'display name' field
             -- loc form
+                -- Add top location option, 'Add a new Location...'
                 -- Country/region should be auto selected on form open
+                -- don't allow creation of location with only region selected 
             -- data submit process
                 -- tags must be hardcoded somewhere. Adding 'secondary' to a citation added the 'seed' tag
         --search--

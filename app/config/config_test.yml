@@ -7,6 +7,7 @@ doctrine:
         server_version: 10.0.30
 
 framework:
+    profiler: { only_exceptions: true }
     test: ~
     session:
         storage_id: session.storage.mock_file

@@ -237,7 +237,29 @@ Feature: Initialize Search Page Database
 		Then I should see "Object Species" in the "Object" field
 
 	@javascript
-	Scenario:  Pinned field values should remain after interaction form submission
+	Scenario:  I should be able to create a new interaction with all fields filled
+		Given I open the New Interaction form
+		And I select "Test Publication" from the "Publication" field dropdown
+		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "Costa Rica" from the "Country-Region" field dropdown
+		And I select "Test Location" from the "Location" field dropdown
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		And I select "Subject Species" from the "Species" field dropdown
+		And I press "Confirm"
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		And I select "Arthropod" from the "Realm" field dropdown
+		And I select "Object Species" from the "Species" field dropdown
+		And I press "Confirm"
+		When I select "Consumption" from the "Interaction Type" field dropdown
+		And I select "Arthropod" from the "Interaction Tags" field dropdown
+		And I type "Detailed interaction notes." in the "Note" field "textarea"
+		And I press "Create Interaction"
+		Then I should see "New Interaction successfully created." in the form header
+
+	@javascript
+	Scenario:  Pinned field values should remain after interaction form submission (all others should clear)
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
 		And I select "Test Citation" from the "Citation Title" field dropdown
@@ -271,3 +293,85 @@ Feature: Initialize Search Page Database
 		And the "Interaction Tags" select field should be empty
 		And the "Note" field should be empty
 
+	@javascript
+	Scenario:  The grid should not change views when form closes without submitting 
+		Given I open the New Interaction form
+		And the database grid is in "Location" view
+		When I exit the form window
+		Then I should see the grid displayed in "Location" view
+
+	@javascript
+	Scenario:  The grid should reload in Source view after creating an interaction.
+		Given I open the New Interaction form
+		And I fill the new interaction form with the test values
+		And I press "Create Interaction"
+		And I see "New Interaction successfully created." in the form header
+		When I exit the form window
+		Then I should see the grid displayed in "Source" view
+		And the grid should be filtered to interactions created since "today"
+		And I should see "1" row in the grid data tree
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the publication source
+		Given the database grid is in "Source" view
+		And I filter the grid to interactions created since "today"
+		When I expand "Test Publication" in the data tree
+		And I expand "Test Citation" in the data tree
+		Then I should see "3" interactions attributed
+		And the expected data in the interaction row
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the author [Cockle]
+		Given the database grid is in "Source" view
+		And I group interactions by "Authors"
+		And I filter the grid to interactions created since "today"
+		When I expand "Cockle" in the data tree
+		And I expand "Test Citation" in the data tree
+		Then I should see "3" interactions attributed
+		And the expected data in the interaction row
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the author [Test Author]
+		Given the database grid is in "Source" view
+		And I group interactions by "Authors"
+		And I filter the grid to interactions created since "today"
+		When I expand "Test Author" in the data tree
+		And I expand "Test Citation" in the data tree
+		And I expand "Test Publication" in the data tree
+		And I expand "Test Citation" in level "3" of the data tree
+		Then I should see "6" interactions attributed
+		And the expected data in the interaction row
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the location
+		Given the database grid is in "Location" view
+		And I filter the grid to interactions created since "today"
+		When I expand "Central America" in the data tree
+		And I expand "Costa Rica" in the data tree
+		And I expand "Test Location" in the data tree
+		Then I should see "3" interactions attributed
+		And the expected data in the interaction row
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the subject taxon
+		Given the database grid is in "Taxon" view
+		And I group interactions by "Bats"
+		And I filter the grid to interactions created since "today"
+		When I expand "Family Subject Family" in the data tree
+		And I expand "Genus Subject Genus" in the data tree
+		And I expand "Subject Species" in the data tree
+		Then I should see "3" interactions attributed
+		And the expected data in the interaction row
+
+	@javascript
+	Scenario:  I should see the newly created interactions under the object taxon
+		Given the database grid is in "Taxon" view
+		And I group interactions by "Arthropoda"
+		And I filter the grid to interactions created since "today"
+		When I expand "Class Object Class" in the data tree
+		When I expand "Order Object Order" in the data tree
+		When I expand "Family Object Family" in the data tree
+		And I expand "Genus Object Genus" in the data tree
+		And I expand "Object Species" in the data tree
+		Then I should see "3" interactions attributed
+		And the expected data in the interaction row
