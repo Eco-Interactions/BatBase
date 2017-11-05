@@ -91,10 +91,11 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @When I select :text from the :label dropdown
+     * Search page elems.
      */
     public function iSelectFromTheDropdown($text, $label)
     {
-        $vals = ['Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1 ];
+        $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1 ];
         $selId = '#sel'.str_replace(' ','',$label);
         $this->getSession()->executeScript("$('$selId').val('$vals[$text]').change();");
     }
@@ -369,6 +370,42 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Given I click on the edit pencil for the :text row
+     */
+    public function iClickOnTheEditPencilForTheRow($text)
+    {
+        $row = $this->getGridRow($text);
+        assertNotNull($row);
+        $pencil = $row->find('css', '.grid-edit');
+        assertNotNull($pencil);
+        $pencil->click();
+    }
+
+    /**
+     * @When I change the :propTag field :type to :text
+     */
+    public function iChangeTheFieldTo($propTag, $type, $text)
+    { 
+        $map = [ "taxon name" => "#txn-name" ];
+        $curForm = $this->getOpenFormId();
+        $selector = $curForm.' '.$map[$propTag];
+        $this->getSession()->executeScript("$('$selector')[0].value = '$text';");        
+        $this->getSession()->executeScript("$('$selector').change();");        
+        $this->textSelectedInField($text, $selector);
+    }
+
+    /**
+     * @When I change the :propTag dropdown field to :text
+     */
+    public function iChangeTheDropdownFieldTo($propTag, $text)
+    {
+        $map = [ "taxon level" => "#txn-lvl" ];
+        $val = $this->getValueToSelect($map[$propTag], $text);
+        $this->getSession()->executeScript("$('$map[$propTag]')[0].selectize.addItem('$val');");
+        $this->textSelectedInField($text, $map[$propTag]);
+    }
+
+    /**
      * @When I expand :text in the data tree
      */
     public function iExpandInTheDataTree($text)
@@ -476,7 +513,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $cols = [ 'subject', 'object', 'interactionType', 'tags', 'citation', 
             'habitat', 'location', 'country', 'region', 'note' ];
-        $intRows = $this->getDisplayedInteractionRows();
+        $intRows = $this->getInteractionsRows();
 
         foreach ($intRows as $row) {
             foreach ($cols as $colId) {            
@@ -486,6 +523,18 @@ class FeatureContext extends RawMinkContext implements Context
             }
         }
     }
+
+    /**
+     * @Then I should see :text under :parentNode in the tree
+     */
+    public function iShouldSeeUnderInTheTree($text, $parentNode)
+    {
+        $this->iExpandInTheDataTree($parentNode);
+        $row = $this->getGridRow($text);
+        assertNotNull($row);
+
+    }
+ 
 
     /** ------------------ Helpers -------------------------------------------*/
     /**
@@ -498,7 +547,7 @@ class FeatureContext extends RawMinkContext implements Context
         assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
     }
 
-    private function getDisplayedInteractionRows()
+    private function getInteractionsRows()
     {
         $intRows = [];
         $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
@@ -510,6 +559,16 @@ class FeatureContext extends RawMinkContext implements Context
         return $intRows;
     }
 
+    private function getGridRow($text)
+    {
+        $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
+        assertNotNull($rows, 'No nodes found in data tree.');  
+        foreach ($rows as $row) {
+            $treeNode = $row->find('css', '[colid="name"]');
+            if ($treeNode->getText() == $text) { return $row; }
+        }
+    }
+    
     /** ------------------ Generic Helpers -----------------------------------*/
     /**
      * @Given I see :text
