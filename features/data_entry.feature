@@ -13,11 +13,6 @@ Feature: Initialize Search Page Database
 		Then I should see "TestEditor"
 
 	@javascript
-	Scenario:  Setup: Database loads and the welcome tutorial is exited.
-		Given the database has loaded
-		And I exit the tutorial
-
-	@javascript
 	Scenario:  I should be able to create a publisher with its sub-form
 		Given I open the New Interaction form
 		And I enter "Test Publication" in the "Publication" field dropdown
@@ -80,7 +75,7 @@ Feature: Initialize Search Page Database
 		And I type "www.citation.com" in the "Link Url" field "input"
 		And I type "Test Citation Webiste" in the "Link Display" field "input"
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
-		And I select "Cockle" from the "Authors" field dynamic dropdown
+		And I select "Cockel (K)" from the "Authors" field dynamic dropdown
 		And I press "Create Citation"
 		Then I should see "Test Citation" in the "Citation Title" field
 		And I should see "Test Citation" in the "Citation" detail panel
@@ -90,7 +85,7 @@ Feature: Initialize Search Page Database
 		And I should see "29" in the "Citation" detail panel
 		And I should see "3" in the "Citation" detail panel
 		And I should see "333-666" in the "Citation" detail panel
-		And I should see "Test Author, Cockle" in the "Citation" detail panel
+		And I should see "Test Author, Cockel (K)" in the "Citation" detail panel
 
 	@javascript
 	Scenario:  I should be able to create a location with its sub-form
@@ -321,11 +316,11 @@ Feature: Initialize Search Page Database
 		And the expected data in the interaction row
 
 	@javascript
-	Scenario:  I should see the newly created interactions under the author [Cockle]
+	Scenario:  I should see the newly created interactions under the author [Cockel (K)]
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
-		When I expand "Cockle" in the data tree
+		When I expand "Cockel (K)" in the data tree
 		And I expand "Test Citation" in the data tree
 		Then I should see "3" interactions attributed
 		And the expected data in the interaction row
