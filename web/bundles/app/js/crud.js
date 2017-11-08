@@ -856,8 +856,8 @@ $(document).ready(function(){
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        var id = getSelectedRealm($('#Object-sel').val()) || fParams.taxon ? 
-            fParams.taxon.objectRealm || 3 : 3;
+        var id = getSelectedRealm($('#Object-sel').val()) || 
+            !fParams.taxon ? 3 : fParams.taxon.objectRealm || 3;
         setTaxonParams('Object', id);
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));

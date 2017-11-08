@@ -124,7 +124,7 @@ class FeatureContext extends RawMinkContext implements Context
         assertEquals($text, $selected); 
     }
 
-    /**------------------- Form Interactions ---------------------------------*/
+    /**------------------- Form Functions ------------------------------------*/
     /**
      * @Given I open the new Interaction form
      */
@@ -185,11 +185,29 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Given I click on the edit pencil for the first interaction of :nodeTxt
+     */
+    public function iClickOnTheEditPencilForTheFirstInteractionOf($nodeTxt)
+    {
+        $this->iExpandInTheDataTree($nodeTxt);
+        $intRows = $this->getInteractionsRows();
+        $this->clickRowEditPencil(reset($intRows));
+    }
+
+    /**
      * @When I exit the form window
      */
     public function iExitTheFormWindow()
     {
         $this->getSession()->executeScript("$('#exit-form').click();");
+    }
+
+    /**
+     * @When I wait for form to submit successfully
+     */
+    public function iWaitForFormToSubmitSuccessfully()
+    {
+        $this->getSession()->wait( 5000, "!$('#c-overlay').length");
     }
 
     /**
@@ -232,6 +250,17 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @When I uncheck the time-updated filter
+     */
+    public function iUncheckTheTimeUpdatedFilter()
+    {
+        usleep(500000);
+        $checkbox = $this->getSession()->getPage()->find('css', '#shw-chngd');  
+        $checkbox->uncheck();  
+        usleep(500000);
+    }
+
+    /**
      * @When I enter :text in the :prop field dynamic dropdown
      */
     public function iEnterInTheFieldDynamicDropdown($text, $prop)
@@ -239,6 +268,44 @@ class FeatureContext extends RawMinkContext implements Context
         $count = $this->getCurrentFieldCount($prop);
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
         $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+    }
+
+    /**
+     * @When I add the :text interaction tag
+     */
+    public function iAddTheInteractionTag($text)
+    {
+        $val = $this->getValueToSelect('#InteractionTags-sel', $text);
+        $this->getSession()->executeScript("$('#InteractionTags-sel')[0].selectize.addItem('$val');");
+        usleep(500000);
+        $this->textContainedInField($text, '#InteractionTags-sel');
+    }
+
+    /**
+     * @When I remove the :text interaction tag
+     */
+    public function iRemoveTheInteractionTag($text)
+    {
+        $val = $this->getValueToSelect('#InteractionTags-sel', $text);
+        $this->getSession()->executeScript("$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
+        usleep(500000);
+        $this->textContainedInField($text, '#InteractionTags-sel', true);
+    }
+
+    /**
+     * @Then I should see the :text interaction tag
+     */
+    public function iShouldSeeTheInteractionTag($text)
+    {
+        $this->textContainedInField($text, '#InteractionTags-sel');
+    }
+
+    /**
+     * @Then I should not see the :text interaction tag
+     */
+    public function iShouldNotSeeTheInteractionTag($text)
+    {
+        $this->textContainedInField($text, '#InteractionTags-sel', true);
     }
 
     /**
@@ -380,15 +447,35 @@ class FeatureContext extends RawMinkContext implements Context
         return $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
     }
 
-    private function textSelectedInField($text, $fieldId)
+    /** 
+     * If $isNot passed, text should not be equal to the field value.
+     */
+    private function textSelectedInField($text, $fieldId, $isNot = false)
     {  
         $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
         if ($selected === null || $selected === "") {
             $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].value;"); 
         }
-        assertEquals($text, $selected); 
+        if ($isNot) { assertNotEquals($text, $selected); 
+        } else {
+            assertEquals($text, $selected); 
+        }
     }
 
+    /** 
+     * If $isNot passed, text should not be found in field.
+     */
+    private function textContainedInField($text, $fieldId, $isNot = false)
+    {  
+        $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
+        if ($selected === null || $selected === "") {
+            $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].value;"); 
+        }
+        if ($isNot) { assertNotContains($text, $selected); 
+        } else {
+            assertContains($text, $selected); 
+        }
+    }
     /**------------------ Grid Funcs -----------------------------------------*/
     /**
      * @Given I filter the grid to interactions created since :time
@@ -408,9 +495,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $row = $this->getGridRow($text);
         assertNotNull($row);
-        $pencil = $row->find('css', '.grid-edit');
-        assertNotNull($pencil);
-        $pencil->click();
+        $this->clickRowEditPencil($row);
     }
 
     /**
@@ -438,6 +523,7 @@ class FeatureContext extends RawMinkContext implements Context
             '#'.str_replace(' ','',$prop).'-sel';     
         $val = $this->getValueToSelect($field, $text);
         $this->getSession()->executeScript("$('$field')[0].selectize.addItem('$val');");
+        usleep(500000);
         $this->textSelectedInField($text, $field);
     }
 
@@ -454,6 +540,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iExpandInTheDataTree($text)
     {
+        usleep(500000);
         $row = $this->getTreeNode($text);
         $row->doubleClick();
     }
@@ -522,18 +609,14 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :count interaction(s) attributed
+     * @Then I should see :count interaction(s) under :nodeTxt
      */
-    public function iShouldSeeInteractionsAttributed($count)
+    public function iShouldSeeInteractionsUnder($count, $nodeTxt)
     {
-        $treeNodes = $this->getSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
-        assertNotNull($treeNodes, 'No nodes found in data tree.');  
-        $rows = 0;
-        for ($i=0; $i < count($treeNodes); $i++) { 
-            if ($treeNodes[$i]->getText() === '') { $rows += 1; }
-        }
+        $this->iExpandInTheDataTree($nodeTxt);
+        $rows = $this->getInteractionsRows($nodeTxt); 
         assertNotNull($rows, "Didn't find any interaction rows.");
-        assertEquals($count, $rows);
+        assertEquals($count, count($rows));
     }
 
     /**
@@ -586,18 +669,24 @@ class FeatureContext extends RawMinkContext implements Context
         assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
     }
 
-    private function getInteractionsRows()
-    {
+    /** 
+     * Either returns all the interaction rows displayed in the grid, or a subset
+     * under a specified node in the tree.
+     */
+    private function getInteractionsRows($node = false)
+    {  
         $intRows = [];
+        $subSet = $node === false; 
         $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         assertNotNull($rows, 'No nodes found in data tree.');  
-        foreach ($rows as $row) {
-            $treeNode = $row->find('css', '[colid="name"]');
-            if ($treeNode->getText() !== '') { array_push($intRows, $row); }
-        }
+        foreach ($rows as $row) { 
+            $nodeText = $row->find('css', '[colid="name"]')->getText(); 
+            if ($node && $nodeText === $node) { $subSet = true; continue; }
+            if ($subSet && $nodeText === '') { array_push($intRows, $row); }
+            if ($subSet && $node && $nodeText !== '') { break; } 
+        } 
         return $intRows;
     }
-
     private function getGridRow($text)
     {
         $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
@@ -637,6 +726,12 @@ class FeatureContext extends RawMinkContext implements Context
         $row->doubleClick();
     }
 
+    private function clickRowEditPencil($row)
+    {
+        $pencil = $row->find('css', '.grid-edit');
+        assertNotNull($pencil);
+        $pencil->click();
+    }
     /** ------------------ Generic Helpers -----------------------------------*/
     /**
      * @Given I see :text

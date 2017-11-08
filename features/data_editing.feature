@@ -18,7 +18,6 @@ Feature: Editable data via the Search Database page
 		And I exit the tutorial
 
 	#Test for form error handling
-	#Test moving interactions from one entity to another
 
 	@javascript
 	Scenario:  I should be able to edit the name and level of an existing taxon
@@ -169,3 +168,110 @@ Feature: Editable data via the Search Database page
 		And I should see "Author Website" in the "Link Display" field "input"
 		And I should see "10.1037/rmh0000008" in the "Doi" field "input"
 		And I should see "Cockel (K)" in the "Authors" field dynamic dropdown
+
+	@javascript
+	Scenario:  I should be able to change an interaction's publication
+		Given the database grid is in "Source" view
+		And I group interactions by "Publications"
+		And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+		And I click on the edit pencil for the first interaction of "Feeding habits of bats"
+		And I see "Editing Interaction"
+		When I change the "Publication" dropdown field to "Book of Mammalogy"
+		And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
+		And I press "Update Interaction"
+		And I uncheck the time-updated filter
+		And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+		And I expand "Book of Mammalogy" in the data tree
+		Then I should see "3" interactions under "Observations on the life histories of Panama bats"
+		And I should see "3" interactions under "Feeding habits of bats"
+
+	# @javascript
+	# Scenario:  I should be able to change an interaction's citation  #TODO
+	# 	Given the database grid is in "Source" view
+	# 	And I group interactions by "Publications"
+	# 	And I break
+	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I click on the edit pencil for the first interaction of "Feeding habits of bats"
+	# 	And I see "Editing Interaction"
+	# 	When I change the "Publication" dropdown field to "Book of Mammalogy"
+	# 	And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
+	# 	And I press "Update Interaction"
+	# 	And I uncheck the time-updated filter
+	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I expand "Book of Mammalogy" in the data tree
+	# 	Then I should see "3" interactions under "Observations on the life histories of Panama bats"
+	# 	And I should see "3" interactions under "Feeding habits of bats"
+
+	@javascript
+	Scenario:  I should be able to change an interaction's location
+		Given the database grid is in "Location" view
+		And I expand "Central America" in the data tree
+		And I expand "Panama" in the data tree
+		And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"
+		And I see "Editing Interaction"
+		When I change the "Location" dropdown field to "Panama"
+		And I press "Update Interaction"
+		And I uncheck the time-updated filter
+		And I expand "Central America" in the data tree
+		And I expand "Panama" in the data tree
+		Then I should see "3" interactions under "Unspecified Panama Interactions"
+		And I should not see "Summit Experimental Gardens" under "Panama" in the tree
+
+	@javascript
+	Scenario:  I should be able to change an interaction's subject taxon
+		Given the database grid is in "Taxon" view
+		And I group interactions by "Bats"
+		And I expand "Family Phyllostomidae" in the data tree
+		And I click on the edit pencil for the first interaction of "Unspecified Phyllostomidae Interactions"
+		And I see "Editing Interaction"
+		And I focus on the "Subject" taxon field
+		And I see "Select Subject Taxon"
+		When I select "Artibeus lituratus" from the "Species" field dropdown
+		And I should see "Artibeus" in the "Genus" dropdown field
+		And I press "Confirm"
+		And I press "Update Interaction"
+		And I uncheck the time-updated filter
+		And I expand "Family Phyllostomidae" in the data tree
+		And I expand "Genus Artibeus" in the data tree
+		Then I should see "2" interactions under "Artibeus lituratus"
+		And I should see "1" interactions under "Unspecified Phyllostomidae Interactions"
+
+	@javascript
+	Scenario:  I should be able to change an interaction's object taxon
+		Given the database grid is in "Taxon" view
+		And I group interactions by "Plants"
+		And I expand "Family Araceae" in the data tree
+		And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
+		And I see "Editing Interaction"
+		And I focus on the "Object" taxon field
+		And I see "Select Object Taxon"
+		When I select "Philodendron sphalerum" from the "Species" field dropdown
+		And I should see "Philodendron" in the "Genus" dropdown field
+		And I press "Confirm"
+		And I press "Update Interaction"
+		And I uncheck the time-updated filter
+		And I expand "Family Araceae" in the data tree
+		And I expand "Genus Philodendron" in the data tree
+		Then I should see "2" interactions under "Philodendron sphalerum"
+		And I should see "1" interactions under "Unspecified Araceae Interactions"
+
+	@javascript
+	Scenario:  I should be able to change an interaction's type, tags, and notes
+		Given the database grid is in "Taxon" view
+		And I group interactions by "Plants"
+		And I expand "Family Araceae" in the data tree
+		And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
+		And I see "Editing Interaction"
+		When I change the "Interaction Type" dropdown field to "Consumption"
+		And I add the "Seed" interaction tag
+		And I remove the "Flower" interaction tag
+		And I change the "Note" field "textarea" to "New Test Note Description"
+		And I press "Update Interaction"
+		And I wait for form to submit successfully
+		And I expand "Family Araceae" in the data tree
+		And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
+		And I see "Editing Interaction"
+		Then I should see "Consumption" in the "Interaction Type" dropdown field
+		Then I should see the "Seed" interaction tag
+		Then I should not see the "Flower" interaction tag
+		Then I should see "New Test Note Description" in the "Note" field "textarea"
