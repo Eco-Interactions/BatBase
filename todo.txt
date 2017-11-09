@@ -58,7 +58,6 @@
             -- Add more sophisticated logging
     --Asap (Before next release!!)--        
         -- site -- 
-            -- Fix login error for bad password
             -- Change author display names to [L, F M S]
             -- domain = realm
         --form-- 
