@@ -2813,15 +2813,6 @@ $(document).ready(function(){
         elem.className = elem.className.split(' active-errs')[0];
     }
 
-
-
-
-
-
-
-
-
- 
 /*=================== Content Block WYSIWYG ======================================================*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
@@ -2835,6 +2826,7 @@ $(document).ready(function(){
             text: "Edit Content", 
             id: 'editContentBttn',
             class: 'adminbttn',
+            title: 'Edit Content',
             click: toggleContentBlockEditing
         });  //console.log("button = %O", button)
         button.css({

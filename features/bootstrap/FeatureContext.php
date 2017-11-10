@@ -56,7 +56,43 @@ class FeatureContext extends RawMinkContext implements Context
         assertNotNull($row, "There are no rows in the database grid.");
     }
 
-    /** -------------------------- Page Interactions --------------------------*/
+    /** -------------------------- Page Interactions -------------------------*/
+
+    // /**
+    //  * @When I press the edit pencil for the :section
+    //  */
+    // public function iPressTheEditPencilForThe($section)
+    // {
+    //     $map = [ 'home page second column' => '#home-pg-second-col-edit'];
+    //     $this->getSession()->executeScript("$('$map[$section]').click();");
+    //     usleep(500000);
+    // }
+
+    // /**
+    //  * @When I change the header to :text
+    //  */
+    // public function iChangeTheHeaderTo($text)
+    // {
+    //     $this->getSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
+    //     // $this->getSession()->executeScript("$('.trumbowyg-editor').change();");
+    // }
+
+    // /**
+    //  * @When I wait for the wysiwyg editor to update and close successfully
+    //  */
+    // public function iWaitForTheWysiwygEditorToUpdateAndCloseSuccessfully()
+    // {
+    // }
+    // /**
+    //  * @When I save and close the wysiwyg editor
+    //  */
+    // public function iSaveAndCloseTheWysiwygEditor()
+    // {
+    //     $this->getSession()->getPage()->pressButton('Save');
+    //     $this->getSession()->wait( 5000, "!$('.wysiwyg').length" );
+    // }
+
+    /** -------------------------- Search Page Interactions ------------------*/
     /**
      * @Given I exit the tutorial
      */
@@ -77,6 +113,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->changeGridSort('#search-focus', $vals[$view], $newElems[$view]);
         usleep(500000);
     }
+
     /**
      * @Given I group interactions by :type
      */
@@ -313,11 +350,11 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheFieldDynamicDropdown($text, $prop)
     {
+        usleep(500000);
         $count = $this->getCurrentFieldCount($prop);     
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
-        $this->getSession()->wait(1000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
         $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
-        while ($count > 0 && !$selected) {
+        while ($count > 1 && $selected !== $text) {
             $selId = substr($selId, 0, -1).--$count;
             $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
         }
@@ -620,6 +657,16 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Then I should see :count interactions attributed
+     */
+    public function iShouldSeeInteractionsAttributed($count)
+    {
+        $rows = $this->getInteractionsRows(); 
+        assertNotNull($rows, "Didn't find any interaction rows.");
+        assertEquals($count, count($rows));
+    }
+
+    /**
      * @Then the expected data in the interaction row
      */
     public function theExpectedDataInTheInteractionRow()
@@ -663,7 +710,7 @@ class FeatureContext extends RawMinkContext implements Context
      * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
     private function changeGridSort($elemId, $newVal, $newElemId)
-    {
+    {  
         $this->getSession()->executeScript("$('$elemId').val('$newVal').change();");
         $uiUpdated = $this->getSession()->evaluateScript("$('#newElemId').length > 0;");
         assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
