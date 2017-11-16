@@ -51,8 +51,9 @@ HOW TO RUN TESTS
           phpunit = ./vendor/bin/simple-phpunit
             [phpunit] -c app/ tests   
             [phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
-        > Functional Tests <
-          behat = ./vendor/bin/behat
+        > Functional Tests (Behat/Mink) <
+          >> all test: ./vendor/bin/behat 
+          >> test feature: ./vendor/bin/behat features/[FeatureName].feature
 
     >> Resources used during set-up <<
         > https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html

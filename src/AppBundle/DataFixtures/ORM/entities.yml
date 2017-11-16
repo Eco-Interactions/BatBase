@@ -2008,65 +2008,64 @@ AppBundle\Entity\Taxon:
         updated: '<(new \DateTime("2016-07-15 23:19:49", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
 AppBundle\Entity\User:
-    User-1: #pw4super
+    User-1:  #passwordhere
         username: SuperAdmin
         usernameCanonical: superadmin
         email: admin@email.com
         emailCanonical: admin@email.com
         enabled: true
-        salt: bxtygVRmJP707gAbcclLwe8v9ZNpirQiKxA0zY1gzYc
-        password: Wb/wGkLVR8fU2t2lzW/1i/cEzjEPAsKWAozQTEMbKJPHN08N9BSTELsc62CJkQNAaVZsUy+fkuzkz49YEauVoA==
-        lastLogin: '<(new \DateTime("2017-03-19 13:53:50", new \DateTimeZone("America/Los_Angeles")))>'
+        salt: ymtB6aUsJ6ILrfSr0w90vBYF81tfM2242j8SrwO9ewM
+        password: v2J+UJtIpSBNcLkasyqQaImxOFaxRDO8V2/OTVqmCN263GxCZsVUOBIXCgCkiV8s9yFCstTd1gtps9HyMsUX+A==
+        lastLogin: '<(new \DateTime("2017-11-16 12:17:32", new \DateTimeZone("America/Los_Angeles")))>'
         roles: [ROLE_SUPER_ADMIN]
         aboutMe: 'Test super admin'
         firstName: ''
         lastName: ''
         created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2017-03-19 13:53:50", new \DateTimeZone("America/Los_Angeles")))>'
-    User-2:   #pw4test
+        updated: '<(new \DateTime("2017-11-16 12:17:47", new \DateTimeZone("America/Los_Angeles")))>'
+    User-2:
         username: testeditor
         usernameCanonical: testeditor
         email: test.editor@email.com
         emailCanonical: test.editor@email.com
         enabled: true
-        salt: 42ul6dwffqgwoswwo8sgwsccgscg88k
-        password: XHMcMPAWFo0Xlm+M8JaI/4Z68KB9JiVKEci+3JAer+hTwwlzZ4D4vGbV/Key/U2wS9E3wJyWq9/Qh0RHurRgQQ==
-        lastLogin: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
+        salt: a7khcujQ7FAl7JRLY2tw73RqbJbEGkqCoj8eLHu3Ltg
+        password: wtPqKdiScQlpVOKGkno8zL0AsQUNkGKwoII9N1xU1O41C1B0t9//XuxXFlgkv1km5YyN+wjTNksDsMtMdJIcng==
+        lastLogin: '<(new \DateTime("2017-11-16 12:14:13", new \DateTimeZone("America/Los_Angeles")))>'
         confirmationToken: baRiFfFCB7nZnOfSsaGRBOoulddg7o9vx1BsBXkyvKUNE
         roles: [ROLE_EDITOR]
         aboutMe: 'Testing the editor user role.'
         firstName: Test
         lastName: Editor
         created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
-    User-3:   #pw4test
+        updated: '<(new \DateTime("2017-11-16 12:14:30", new \DateTimeZone("America/Los_Angeles")))>'
+    User-3:
         username: testuser
         usernameCanonical: testuser
         email: test.user@email.com
         emailCanonical: test.user@email.com
         enabled: true
-        salt: 42ul6dwffqgwoswwo8sgwsccgscg88k
-        password: XHMcMPAWFo0Xlm+M8JaI/4Z68KB9JiVKEci+3JAer+hTwwlzZ4D4vGbV/Key/U2wS9E3wJyWq9/Qh0RHurRgQQ==
-        lastLogin: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
+        salt: /43UyT1sqorgXSr.4XsKu3AhkZsSqChs8zxQVBmPfhA
+        password: VQ1DAuZK+wJDJTVGfas4rBUSMyTlgA3+KsGs+QO2diNLvh5LLK+rMkUrEr0kSx4dGvTSei+9jwJ6+Prl+HLOww==
+        lastLogin: '<(new \DateTime("2017-11-16 12:12:16", new \DateTimeZone("America/Los_Angeles")))>'
         confirmationToken: baRiFfFCB7nZnOfSGRBOoulddg7o9vx1BsBXkyvKUNE
-        roles: [ROLE_USER]
         aboutMe: 'Testing the user role.'
         firstName: Test
         lastName: User
         created: '<(new \DateTime("2017-03-18 18:07:44", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2017-03-20 08:52:03", new \DateTimeZone("America/Los_Angeles")))>'
-    User-4: #pw4admin
+        updated: '<(new \DateTime("2017-11-16 12:12:43", new \DateTimeZone("America/Los_Angeles")))>'
+    User-4:
         username: TestAdmin
         usernameCanonical: testadmin
         email: temp@nomail.com
         emailCanonical: temp@nomail.com
         enabled: true
-        salt: kfEVpd/UQNB.fH2sFABJeLZ1n3QlS8sn5tw8CmgaySg
-        password: 8VC9V27dKsk2qKigvKiRjV3Ox+kk8DR2b3YC9pr90YrTTCAdPV+Fz+gjlVKbR9EPlOgr0n5M0t/vZB7CwfkVQA==
-        lastLogin: '<(new \DateTime("2015-11-17 00:08:50", new \DateTimeZone("America/Los_Angeles")))>'
+        salt: 0ZJkWBPuxlaUmrR5ZmZgyNSUtz097DFOVDH6jewaQtI
+        password: IitAqqnWKBleQ7iML8dKM4LxB4v/VtZrdaNJmt08beJn/5BuFqiPCZwb8zU+jFtguErJ4/Lkl645Q9dnqreeqw==
+        lastLogin: '<(new \DateTime("2017-11-16 12:14:47", new \DateTimeZone("America/Los_Angeles")))>'
         roles: [ROLE_ADMIN]
         aboutMe: 'Test admin'
         firstName: ''
         lastName: ''
         created: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2015-12-29 13:49:30", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-11-16 12:15:00", new \DateTimeZone("America/Los_Angeles")))>'

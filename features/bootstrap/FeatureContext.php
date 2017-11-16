@@ -13,6 +13,13 @@ require_once __DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-
  */
 class FeatureContext extends RawMinkContext implements Context
 {
+
+    private $editor1; 
+
+    private $editor2;
+
+    private $curUser;
+
     /**
      * Initializes context.
      *
@@ -30,7 +37,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iResizeBrowserWindow()
     {
-        $this->getSession()->resizeWindow(1440, 900, 'current');
+        $this->getUserSession()->resizeWindow(1440, 900, 'current');
     }
 
     /**
@@ -51,8 +58,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theDatabaseHasLoaded()
     {
-        $this->getSession()->wait( 5000, "$('.ag-row').length" );
-        $row = $this->getSession()->getPage()->find('css', '[row=0]');
+        $this->getUserSession()->wait( 5000, "$('.ag-row').length" );
+        $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
         assertNotNull($row, "There are no rows in the database grid.");
     }
 
@@ -64,7 +71,7 @@ class FeatureContext extends RawMinkContext implements Context
     // public function iPressTheEditPencilForThe($section)
     // {
     //     $map = [ 'home page second column' => '#home-pg-second-col-edit'];
-    //     $this->getSession()->executeScript("$('$map[$section]').click();");
+    //     $this->getUserSession()->executeScript("$('$map[$section]').click();");
     //     usleep(500000);
     // }
 
@@ -73,8 +80,8 @@ class FeatureContext extends RawMinkContext implements Context
     //  */
     // public function iChangeTheHeaderTo($text)
     // {
-    //     $this->getSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
-    //     // $this->getSession()->executeScript("$('.trumbowyg-editor').change();");
+    //     $this->getUserSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
+    //     // $this->getUserSession()->executeScript("$('.trumbowyg-editor').change();");
     // }
 
     // /**
@@ -88,8 +95,8 @@ class FeatureContext extends RawMinkContext implements Context
     //  */
     // public function iSaveAndCloseTheWysiwygEditor()
     // {
-    //     $this->getSession()->getPage()->pressButton('Save');
-    //     $this->getSession()->wait( 5000, "!$('.wysiwyg').length" );
+    //     $this->getUserSession()->getPage()->pressButton('Save');
+    //     $this->getUserSession()->wait( 5000, "!$('.wysiwyg').length" );
     // }
 
     /** -------------------------- Search Page Interactions ------------------*/
@@ -98,9 +105,9 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iExitTheTutorial()
     {
-        $tutorial = $this->getSession()->getPage()->find('css', '.intro-tips');
+        $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
         assertNotNull($tutorial, 'Tutorial is not displayed.');
-        $this->getSession()->executeScript("$('.introjs-overlay').click();");
+        $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
         usleep(500000);
     }
     /**
@@ -135,7 +142,7 @@ class FeatureContext extends RawMinkContext implements Context
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
             'Book' => 2, 'Article' => 3 ];
         $selId = '#sel'.str_replace(' ','',$label);
-        $this->getSession()->executeScript("$('$selId').val('$vals[$text]').change();");
+        $this->getUserSession()->executeScript("$('$selId').val('$vals[$text]').change();");
     }
 
     /**
@@ -145,8 +152,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $input = 'sel'.$type;
         $bttn = $input.'_submit';
-        $this->getSession()->executeScript("$('[name=\"$input\"]')[0].value = '$text';");
-        $this->getSession()->getPage()->pressButton($bttn);
+        $this->getUserSession()->executeScript("$('[name=\"$input\"]')[0].value = '$text';");
+        $this->getUserSession()->getPage()->pressButton($bttn);
     }
 
     /**
@@ -157,7 +164,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $selId = '#sel'.str_replace(' ','',$label);
         $selector = $selId.' option:selected';  
-        $selected = $this->getSession()->evaluateScript("$('$selector').text();");  
+        $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
         assertEquals($text, $selected); 
     }
 
@@ -167,7 +174,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iOpenTheNewInteractionForm()
     {
-        $this->getSession()->getPage()->pressButton('New');
+        $this->getUserSession()->getPage()->pressButton('New');
     }
 
     /**
@@ -176,7 +183,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iEnterInTheFieldDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
     }
 
     /**
@@ -185,7 +192,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iFocusOnTheTaxonField($role)
     {
         $selId = '#'.$role.'-sel';
-        $this->getSession()->executeScript("$('$selId')[0].selectize.focus();");
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.focus();");
         usleep(500000);
     }
 
@@ -195,8 +202,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iPinTheField($prop)
     {
         $selector = '#'.str_replace(' ','',$prop).'_pin';
-        $this->getSession()->executeScript("$('$selector').click();");
-        $checked = $this->getSession()->evaluateScript("$('$selector').prop('checked');");
+        $this->getUserSession()->executeScript("$('$selector').click();");
+        $checked = $this->getUserSession()->evaluateScript("$('$selector').prop('checked');");
         assertTrue($checked, $prop.' field is not checked.');
     }
     
@@ -211,11 +218,11 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iSelectFromTheFieldDropdown('Test Location', 'Location');
         $this->iFocusOnTheTaxonField('Subject');
         $this->iSelectFromTheFieldDropdown('Subject Species', 'Species');
-        $this->getSession()->getPage()->pressButton('Confirm');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
         $this->iFocusOnTheTaxonField('Object');
         $this->iSelectFromTheFieldDropdown('Arthropod', 'Realm');
         $this->iSelectFromTheFieldDropdown('Object Species', 'Species');
-        $this->getSession()->getPage()->pressButton('Confirm');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
         $this->iSelectFromTheFieldDropdown('Consumption', 'Interaction Type');
         $this->iSelectFromTheFieldDropdown('Arthropod', 'Interaction Tags');
         $this->iTypeInTheField('Detailed interaction notes.', 'Note', 'textarea');
@@ -236,7 +243,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iExitTheFormWindow()
     {
-        $this->getSession()->executeScript("$('#exit-form').click();");
+        $this->getUserSession()->executeScript("$('#exit-form').click();");
     }
 
     /**
@@ -244,7 +251,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iWaitForFormToSubmitSuccessfully()
     {
-        $this->getSession()->wait( 5000, "!$('#c-overlay').length");
+        $this->getUserSession()->wait( 5000, "!$('#c-overlay').length");
     }
 
     /**
@@ -255,8 +262,8 @@ class FeatureContext extends RawMinkContext implements Context
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;
-        $this->getSession()->executeScript("$('$selector')[0].value = '$text';");        
-        $this->getSession()->executeScript("$('$selector').change();");    
+        $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
+        $this->getUserSession()->executeScript("$('$selector').change();");    
         usleep(500000);
         $this->textSelectedInField($text, $selector);
     }
@@ -268,7 +275,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $val = $this->getValueToSelect($selId, $text);
-        $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
         usleep(500000);
         $this->textSelectedInField($text, $selId);
     }
@@ -281,7 +288,7 @@ class FeatureContext extends RawMinkContext implements Context
         $count = $this->getCurrentFieldCount($prop);
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
         $val = $this->getValueToSelect($selId, $text); 
-        $this->getSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
         usleep(500000);
         $this->textSelectedInField($text, $selId);
     }
@@ -292,7 +299,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iUncheckTheTimeUpdatedFilter()
     {
         usleep(500000);
-        $checkbox = $this->getSession()->getPage()->find('css', '#shw-chngd');  
+        $checkbox = $this->getUserSession()->getPage()->find('css', '#shw-chngd');  
         $checkbox->uncheck();  
         usleep(500000);
     }
@@ -304,7 +311,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $count = $this->getCurrentFieldCount($prop);
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
-        $this->getSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
     }
 
     /**
@@ -313,7 +320,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iAddTheInteractionTag($text)
     {
         $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->getSession()->executeScript("$('#InteractionTags-sel')[0].selectize.addItem('$val');");
+        $this->getUserSession()->executeScript("$('#InteractionTags-sel')[0].selectize.addItem('$val');");
         usleep(500000);
         $this->textContainedInField($text, '#InteractionTags-sel');
     }
@@ -324,7 +331,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iRemoveTheInteractionTag($text)
     {
         $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->getSession()->executeScript("$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
+        $this->getUserSession()->executeScript("$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
         usleep(500000);
         $this->textContainedInField($text, '#InteractionTags-sel', true);
     }
@@ -353,10 +360,10 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $count = $this->getCurrentFieldCount($prop);     
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
-        $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+        $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
         while ($count > 1 && $selected !== $text) {
             $selId = substr($selId, 0, -1).--$count;
-            $selected = $this->getSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+            $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
         }
         $this->textSelectedInField($text, $selId.'+div>div>div');
     }
@@ -378,7 +385,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInTheDetailPanel($text, $entity)
     {
         $elemId = '#'.strtolower(substr($entity , 0, 3)).'-det'; 
-        $elem = $this->getSession()->getPage()->find('css', $elemId);
+        $elem = $this->getUserSession()->getPage()->find('css', $elemId);
         assertContains($text, $elem->getHtml()); 
     }
 
@@ -399,7 +406,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInTheDropdownField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
+        $this->getUserSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
         $this->textSelectedInField($text, $selId.'+div>div>div');
     }
     /**
@@ -407,8 +414,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheFormHeader($text)
     {
-        $this->getSession()->wait( 10000, "$('#form-main p').length;");
-        $elem = $this->getSession()->getPage()->find('css', '#form-main p');
+        $this->getUserSession()->wait( 10000, "$('#form-main p').length;");
+        $elem = $this->getUserSession()->getPage()->find('css', '#form-main p');
         assertContains($text, $elem->getHtml()); 
     }
 
@@ -419,7 +426,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $map = [ 'Note' => '#Note_row textarea' ];
         $selector = $map[str_replace(' ','',$prop)];
-        $val = $this->getSession()->evaluateScript("$('$selector')[0].innerText"); 
+        $val = $this->getUserSession()->evaluateScript("$('$selector')[0].innerText"); 
         assertEquals($val, '');
     }
 
@@ -429,7 +436,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function theSelectFieldShouldBeEmpty($prop)
     {
         $selector = '#'.str_replace(' ','',$prop).'-sel';
-        $val = $this->getSession()->evaluateScript("$('$selector')[0].selectize.getValue();"); 
+        $val = $this->getUserSession()->evaluateScript("$('$selector')[0].selectize.getValue();"); 
         if (is_array($val)) {
             foreach ($val as $value) { if ($value) { $val = false; } }
             if ($val !== false) { $val = ''; }
@@ -443,7 +450,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeTheGridDisplayedInView($entity)
     {
         $map = [ 'Location' => 'locs', 'Taxon' => 'taxa', 'Source' => 'srcs' ];
-        $view = $this->getSession()->evaluateScript("$('#search-focus').val();");
+        $view = $this->getUserSession()->evaluateScript("$('#search-focus').val();");
         assertEquals($view, $map[$entity]);
     }
 
@@ -453,9 +460,9 @@ class FeatureContext extends RawMinkContext implements Context
     public function theGridShouldBeFilteredToInteractionsCreatedSince($time)
     {
         usleep(500000);
-        $checked = $this->getSession()->evaluateScript("$('#shw-chngd').prop('checked');");
+        $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
         assertTrue($checked, 'Filter is not checked.');
-        $filter = $this->getSession()->evaluateScript("$('input[name=shw-chngd]:checked').val();");
+        $filter = $this->getUserSession()->evaluateScript("$('input[name=shw-chngd]:checked').val();");
         assertEquals(lcfirst($time), $filter);
     }
 
@@ -465,14 +472,14 @@ class FeatureContext extends RawMinkContext implements Context
         $forms = ['sub2', 'sub', 'top'];
         foreach ($forms as $prefix) {
             $selector = '#'.$prefix.'-form';
-            $elem = $this->getSession()->getPage()->find('css', $selector);
+            $elem = $this->getUserSession()->getPage()->find('css', $selector);
             if ($elem !== null) { return $selector; }
         }
     }
 
     private function getValueToSelect($selId, $text)
     {
-        $opts = $this->getSession()->evaluateScript("$('$selId')[0].selectize.options;");
+        $opts = $this->getUserSession()->evaluateScript("$('$selId')[0].selectize.options;");
         foreach ($opts as $key => $optAry) {
             if ($optAry['text'] === $text) { return $optAry['value']; }
         } 
@@ -481,7 +488,7 @@ class FeatureContext extends RawMinkContext implements Context
     private function getCurrentFieldCount($prop)
     {
         $selCntnrId = '#'.str_replace(' ','',$prop).'_sel-cntnr';
-        return $this->getSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+        return $this->getUserSession()->evaluateScript("$('$selCntnrId').data('cnt');");
     }
 
     /** 
@@ -489,9 +496,9 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function textSelectedInField($text, $fieldId, $isNot = false)
     {  
-        $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
+        $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
         if ($selected === null || $selected === "") {
-            $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].value;"); 
+            $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
         }
         if ($isNot) { assertNotEquals($text, $selected); 
         } else {
@@ -504,22 +511,23 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function textContainedInField($text, $fieldId, $isNot = false)
     {  
-        $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
+        $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
         if ($selected === null || $selected === "") {
-            $selected = $this->getSession()->evaluateScript("$('$fieldId')[0].value;"); 
+            $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
         }
         if ($isNot) { assertNotContains($text, $selected); 
         } else {
             assertContains($text, $selected); 
         }
     }
+
     /**------------------ Grid Funcs -----------------------------------------*/
     /**
      * @Given I filter the grid to interactions created since :time
      */
     public function iFilterTheGridToInteractionsCreatedSince($time)
     {
-        $this->getSession()->executeScript("$('#shw-chngd').click().change();");
+        $this->getUserSession()->executeScript("$('#shw-chngd').click().change();");
         $this->theGridShouldBeFilteredToInteractionsCreatedSince($time);
         usleep(500000);
     }
@@ -545,8 +553,8 @@ class FeatureContext extends RawMinkContext implements Context
         $field = array_key_exists($prop, $map) ? $map[$prop] :
             '#'.str_replace(' ','',$prop).'_row '.$type; 
         $selector = $curForm.' '.$field;
-        $this->getSession()->executeScript("$('$selector')[0].value = '$text';");        
-        $this->getSession()->executeScript("$('$selector').change();");        
+        $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
+        $this->getUserSession()->executeScript("$('$selector').change();");        
         $this->textSelectedInField($text, $selector);
     }
 
@@ -559,7 +567,7 @@ class FeatureContext extends RawMinkContext implements Context
         $field = array_key_exists($prop, $map) ? $map[$prop] :
             '#'.str_replace(' ','',$prop).'-sel';     
         $val = $this->getValueToSelect($field, $text);
-        $this->getSession()->executeScript("$('$field')[0].selectize.addItem('$val');");
+        $this->getUserSession()->executeScript("$('$field')[0].selectize.addItem('$val');");
         usleep(500000);
         $this->textSelectedInField($text, $field);
     }
@@ -588,7 +596,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iExpandInLevelOfTheDataTree($txt, $num)
     {
         usleep(500000);
-        $treeNodes = $this->getSession()->getPage()->findAll('css', 'div.ag-row-level-'.--$num.' [colid="name"]');  
+        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row-level-'.--$num.' [colid="name"]');  
         assertNotNull($treeNodes, 'No nodes found at level $num of the data tree.');  
         $row = null;
         for ($i=0; $i < count($treeNodes); $i++) { 
@@ -603,7 +611,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theCountColumnShouldShowInteractions($count)
     {
-        $cell = $this->getSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
+        $cell = $this->getUserSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
         assertContains($cell->getText(), $count, 'No interaction count found.');
     }
     /**
@@ -611,7 +619,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function dataInTheInteractionRows()
     {   /** Data pulled from the Subject Taxon column. */
-        $data = $this->getSession()->getPage()->find('css', '[colid="subject"] span');
+        $data = $this->getUserSession()->getPage()->find('css', '[colid="subject"] span');
         assertNotNull($data->getText(), 'No data found in the interaction rows.');
     }
 
@@ -621,7 +629,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeRowsInTheGridDataTree($count)
     {
         usleep(500000);
-        $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container>div'); 
+        $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
         assertCount(intval($count), $rows, "Expected [$count] rows; Found [".count($rows)."]");
     }
 
@@ -641,7 +649,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function theDatabaseGridShouldBeInView($entity)
     {
         $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
-        $view = $this->getSession()->evaluateScript("$('#search-focus').val();");
+        $view = $this->getUserSession()->evaluateScript("$('#search-focus').val();");
         assertEquals($vals[$entity], $view);
     }
 
@@ -689,6 +697,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeUnderInTheTree($text, $parentNode)
     {
+        usleep(500000);
         $this->iExpandInTheDataTree($parentNode);
         $row = $this->getGridRow($text);
         assertNotNull($row);
@@ -711,8 +720,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function changeGridSort($elemId, $newVal, $newElemId)
     {  
-        $this->getSession()->executeScript("$('$elemId').val('$newVal').change();");
-        $uiUpdated = $this->getSession()->evaluateScript("$('#newElemId').length > 0;");
+        $this->getUserSession()->executeScript("$('$elemId').val('$newVal').change();");
+        $uiUpdated = $this->getUserSession()->evaluateScript("$('#newElemId').length > 0;");
         assertNotNull($uiUpdated, 'UI did not update as expected. Did not find "'.$newElemId.'"');
     }
 
@@ -724,7 +733,7 @@ class FeatureContext extends RawMinkContext implements Context
     {  
         $intRows = [];
         $subSet = $node === false; 
-        $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
+        $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         assertNotNull($rows, 'No nodes found in data tree.');  
         foreach ($rows as $row) { 
             $nodeText = $row->find('css', '[colid="name"]')->getText(); 
@@ -736,7 +745,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function getGridRow($text)
     {
-        $rows = $this->getSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
+        $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         assertNotNull($rows, 'No nodes found in data tree.');  
         foreach ($rows as $row) {
             $treeNode = $row->find('css', '[colid="name"]');
@@ -746,7 +755,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function isInDataTree($text)
     {
-        $treeNodes = $this->getSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
+        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
         assertNotNull($treeNodes);  
         for ($i=0; $i < count($treeNodes); $i++) { 
             if ($treeNodes[$i]->getText() === $text) { return true; }
@@ -757,7 +766,7 @@ class FeatureContext extends RawMinkContext implements Context
     private function getTreeNode($text)
     {
         usleep(500000);
-        $treeNodes = $this->getSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]');  
+        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]');  
         assertNotNull($treeNodes, 'No nodes found in data tree.');  
         $row = null;
         for ($i=0; $i < count($treeNodes); $i++) { 
@@ -779,6 +788,133 @@ class FeatureContext extends RawMinkContext implements Context
         assertNotNull($pencil);
         $pencil->click();
     }
+    /** ------------------ Data Sync Feature -----------------------------------*/
+    /**
+     * @Given two editors are logged into the website
+     */
+    public function twoEditorsAreLoggedIntoTheWebsite()
+    {
+        $this->editor1 = $this->getEditorSession();
+        $this->editorLogIn($this->editor1, 'testeditor');
+
+        $this->editor2 = $this->getEditorSession();
+        $this->editorLogIn($this->editor2, 'testAdmin');
+    }
+
+    /**
+     * @When each user creates two interactions
+     */
+    public function eachUserCreatesTwoInteractions()
+    {
+        $this->userCreatesInteractions($this->editor1, [1, 2]);
+        $this->userCreatesInteractions($this->editor2, [3, 4]);
+    }
+
+    /**
+     * @When each edits some sub-entity data
+     */
+    public function eachEditsSomeSubEntityData()
+    {   // move interaction from one taxa, location, and source to another
+    }
+
+    /**
+     * @When each reloads the search page
+     */
+    public function eachReloadsTheSearchPage()
+    {
+        $this->editorVisitsSearchPage($this->editor1);
+        $this->editorVisitsSearchPage($this->editor2);
+    }
+
+    /**
+     * @Then the new data should sync between the editors
+     */
+    public function theNewDataShouldSyncBetweenTheEditors()
+    {
+        $this->editorGridLoads($this->editor1);
+        $this->editorGridLoads($this->editor2);
+    }
+
+    /**
+     * @Then they should see the expected changes in the data grid
+     */
+    public function theyShouldSeeTheExpectedChangesInTheDataGrid()
+    {
+        $this->editorSeesExpectedInteractions($this->editor1);
+        $this->editorSeesExpectedInteractions($this->editor2);
+    }
+
+    /** ------------------ Helpers ----------------- */
+    private function getEditorSession()
+    {
+        $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome');
+        $session = new \Behat\Mink\Session($driver);
+        $session->start();
+        return $session;
+    }
+
+    private function editorLogIn($editor, $name)
+    {
+        $editor->visit('http://localhost/batplant/web/app_test.php/login');
+        $editor->getPage()->fillField('_username', $name);
+        $editor->getPage()->fillField('_password', 'passwordhere');
+        $editor->getPage()->pressButton('_submit');
+    }
+
+    private function userCreatesInteractions($editor, $cntAry)
+    {
+        $this->curUser = $editor;
+        $this->editorVisitsSearchPage($this->curUser);
+        $this->iExitTheTutorial();
+        $this->curUser->getPage()->pressButton('New');
+        foreach ($cntAry as $cnt) {
+            $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
+        }
+        $this->iExitTheFormWindow();
+    }
+
+    private function editorVisitsSearchPage($editor)
+    {
+        $editor->visit('http://localhost/batplant/web/app_test.php/search');
+        usleep(500000);
+    }
+
+    private function iSubmitTheNewInteractionFormWithTheFixtureEntities($count)
+    {
+        $this->iSelectFromTheFieldDropdown('Revista de Biologia Tropical', 'Publication'); 
+        $this->iSelectFromTheFieldDropdown('Two cases of bat pollination in Central America', 'Citation Title');
+        $this->iSelectFromTheFieldDropdown('Central America', 'Country-Region');
+        $this->iSelectFromTheFieldDropdown('Panama', 'Location');
+        $this->iFocusOnTheTaxonField('Subject');
+        $this->iSelectFromTheFieldDropdown('Phyllostomidae', 'Family');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iFocusOnTheTaxonField('Object');
+        $this->iSelectFromTheFieldDropdown('Plant', 'Realm');
+        $this->iSelectFromTheFieldDropdown('Fabaceae', 'Family');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iSelectFromTheFieldDropdown('Consumption', 'Interaction Type');
+        $this->iSelectFromTheFieldDropdown('Arthropod', 'Interaction Tags');
+        $this->iTypeInTheField('Interaction '.$count, 'Note', 'textarea');
+        $this->curUser->getPage()->pressButton('Create Interaction');
+        usleep(500000);
+    }
+
+    private function editorGridLoads($editor)
+    {
+        $editor->wait( 5000, "$('.ag-row').length" );
+        $gridRows = $editor->evaluateScript("$('.ag-row').length > 0");
+        assertTrue($gridRows);
+    }
+
+    private function editorSeesExpectedInteractions($editor)
+    {
+        $this->curUser = $editor;
+        $this->iExpandInTheDataTree('Revista de Biologia Tropical');
+        $this->iExpandInTheDataTree('Two cases of bat pollination in Central America');
+        $this->iShouldSeeInteractionsAttributed(6);
+    }
+
+
     /** ------------------ Generic Helpers -----------------------------------*/
     /**
      * @Given I see :text
@@ -794,13 +930,13 @@ class FeatureContext extends RawMinkContext implements Context
     public function iPressTimes($bttnText, $count)
     {
         for ($i=0; $i < $count; $i++) { 
-            $this->getSession()->getPage()->pressButton($bttnText);
+            $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
 
-
-
-
-
+    private function getUserSession()
+    {
+        return isset($this->curUser) ? $this->curUser : $this->getSession();
+    }
 
 }
