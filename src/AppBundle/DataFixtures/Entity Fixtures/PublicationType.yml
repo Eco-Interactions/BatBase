@@ -1,0 +1,29 @@
+AppBundle\Entity\PublicationType:
+    PublicationType-1: #1
+        slug: journal
+        displayName: Journal
+        publications: ['@Publication-2', '@Publication-3'] #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    PublicationType-2: #2
+        slug: book
+        displayName: Book
+        publications: ['@Publication-1'] #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    PublicationType-3: #3
+        slug: ph-d-dissertation
+        displayName: 'Thesis/Ph.D. Dissertation'
+        publications: ['@Publication-4'] #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    PublicationType-4: #added
+        slug: other
+        displayName: Other
+        publications: []
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'

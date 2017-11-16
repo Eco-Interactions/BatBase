@@ -5,20 +5,20 @@
      * locations, or sources (grouped by either publications or authors). 
      *
      * userRole = Stores the role of the user.
+     * dataStorage = window.localStorage (sessionStorage for tests)
      * miscObj = Container for misc data used at the global level--
      *      cal: Stores the flatpickr calendar instance. 
      *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * gParams = obj container for misc params used for the search grid.
-     * dataKey = String checked in local storage to indicate whether the stored 
+     * dataKey = String checked in data storage to indicate whether the stored 
      *      data should be cleared and redownloaded.
      */
-    var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
+    var userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
     var dataKey = 'Welcome to tomorrow.';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
-    var localStorage = _util.setlocalStorage();
     var gridOptions = getDefaultGridOptions();
     eif.search = {
         initSearchPage: initSearchPage,
@@ -29,24 +29,25 @@
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
-    function onDOMContentLoaded () {
-        clearLocalStorageCheck();
+    function onDOMContentLoaded () {  
+        dataStorage = _util.getDataStorage();
+        clearDataStorageCheck();
         showPopUpMsg('Loading...');
         addDomEventListeners();
         adaptUiToScreenSize();
         authDependentInit();
         initSearchState();
     }
-    /** If local storage needs to be cleared, the datakey is updated */ 
-    function clearLocalStorageCheck() {
-        if (localStorage && !localStorage.getItem(dataKey)) {
-            localStorage.clear();
+    /** If data storage needs to be cleared, the datakey is updated */ 
+    function clearDataStorageCheck() {
+        if (dataStorage && !dataStorage.getItem(dataKey)) {  
+            dataStorage.clear();
             _util.populateStorage(dataKey, true);
         }
     }
     /**
      * The first time a browser visits the search page, all data is downloaded
-     * from the server and stored in LocalStorage. The intro-walkthrough is shown 
+     * from the server and stored in dataStorage. The intro-walkthrough is shown 
      * for the user @showIntroWalkthrough.
      */
     function initSearchPage() {
@@ -129,7 +130,7 @@
     }
     function getResetFocus() {
         var foci = ['locs', 'srcs', 'taxa'];
-        var storedFocus = localStorage.getItem('curFocus');
+        var storedFocus = dataStorage.getItem('curFocus');
         return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
@@ -159,7 +160,7 @@
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
             "taxa": buildTaxonGrid 
         };  
-        if (!localStorage.getItem('pgDataUpdatedAt')) { return; } 
+        if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
         ifChangedFocus(focus, builderMap[focus]); 
     }
     /**
@@ -169,7 +170,7 @@
         clearPreviousGrid();
         if (focus !== gParams.curFocus) {
             _util.populateStorage("curFocus", focus);
-            localStorage.removeItem("curDomain");
+            dataStorage.removeItem("curDomain");
             initNoFiltersStatus();
             resetGridParams();
             resetToggleTreeBttn(false);
@@ -190,7 +191,7 @@
     } /* End ifChangedFocus */
 /*------------------ Interaction Search Methods--------------------------------------*/
     /**
-     * If interaction data is already in local storage, the data is sent to 
+     * If interaction data is already in data storage, the data is sent to 
      * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, 
      * an ajax call gets the data which is stored @storeInteractions before being
      * sent to @fillTreeWithInteractions.    
@@ -364,7 +365,7 @@
     }   
 /*------------------ Taxon Search Methods ------------------------------------*/
     /**
-     * Get all data needed for the Taxon-focused grid from local storage and send 
+     * Get all data needed for the Taxon-focused grid from data storage and send 
      * to @initTaxonSearchUi to begin the data-grid build.  
      */
     function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
@@ -392,7 +393,7 @@
     /** Restores stored domain from previous session or sets the default 'Plants'. */
     function setTaxonDomain() {
         var domainVal;
-        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
+        var storedDomain = dataStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
         if ($('#sel-domain').val() === null) { 
             domainVal = storedDomain !== null ? storedDomain : "3";  
             $('#sel-domain').val(domainVal);
@@ -732,7 +733,7 @@
         return rowData;                
     }
 /*------------------Location Search Methods-----------------------------------*/
-    /** Get location data from local storage and sends it to @startLocGridBuild. */
+    /** Get location data from data storage and sends it to @startLocGridBuild. */
     function buildLocationGrid() {
         var data = getLocData();
         if( data ) {  startLocGridBuild(data);
@@ -882,7 +883,7 @@
         } 
     } /* End buildLocSelectOpts */
     function checkSelectedVals(type) {
-        if (gParams.selectedOpts[type]) {
+        if (gParams.selectedOpts && gParams.selectedOpts[type]) {
             var loc = getDetachedRcrd(gParams.selectedOpts[type]);
             return { value: loc.id, text: loc.displayName };
         }
@@ -1015,7 +1016,7 @@
     }
 /*------------------ Source Search Methods -----------------------------------*/
     /**
-     * Get all data needed for the Source-focused grid from local storage and send  
+     * Get all data needed for the Source-focused grid from data storage and send  
      * to @initSrcSearchUi to begin the data-grid build.  
      */
     function buildSourceGrid() {
@@ -1057,7 +1058,7 @@
     } /* End buildSrcDomainHtml */
     /** Restores stored domain from previous session or sets the default 'Publications'. */
     function setSrcDomain() {
-        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
+        var storedDomain = dataStorage.getItem('curDomain');                    //console.log("storedDomain = ", storedDomain)
         var srcDomain = storedDomain || "pubs";
         if ($('#sel-domain').val() === null) { $('#sel-domain').val(srcDomain); }
     }
@@ -1179,6 +1180,7 @@
         var pubSelElem = buildPubSelects(pubTypeOpts);
         clearCol2();        
         $('#opts-col2').append(pubSelElem);
+        $('#selPublicationType').val('all');
         //initComboboxes
     }
     function buildPubSelectOpts() {
@@ -1194,7 +1196,7 @@
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         var spanElem = _util.buildElem('span', { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = _util.buildSelectElem(
-            pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
+            pubTypeOpts, { class: "opts-box", id: 'selPublicationType' }, updatePubSearch
         );
         $(labelElem).css('width', '255px');
         $(selectElem).css('width', '115px');
@@ -1205,8 +1207,8 @@
     /** Builds a text input for searching author names. */
     function loadAuthSearchHtml() {
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = _util.buildElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
-        var bttn = _util.buildElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        var inputElem = _util.buildElem('input', { name: 'selAuthor', type: 'text', placeholder: "Author Name"  });
+        var bttn = _util.buildElem('button', { text: 'Search', name: 'selAuthor_submit', class: "ag-fresh grid-bttn" });
         $(inputElem).onEnter(updateAuthSearch);
         $(bttn).css('margin-left', '5px');
         $(bttn).click(updateAuthSearch);
@@ -1400,8 +1402,8 @@
      * filtered by the selected type. 
      */
     function updatePubSearch() {                                                
-        var selVal = $("#selPubTypes").val();                                   console.log("\n-----updatePubSearch [%s]", selVal);
-        var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
+        var selVal = $("#selPublicationType").val();                            console.log("\n-----updatePubSearch [%s]", selVal);
+        var selText = $("#selPublicationType option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
         gParams.focusFltr = selVal === "all" ? null : selText+'s';
@@ -1433,7 +1435,7 @@
     }
     /** Returns the lowercased value of the author name filter. */ 
     function getAuthFilterVal() {
-        return $('input[name="authNameSrch"]').val().trim().toLowerCase();
+        return $('input[name="selAuthor"]').val().trim().toLowerCase();
     }
     function getAuthRows(rowAry, authNameStr) {
         var rowAuthName;
@@ -1678,11 +1680,11 @@
         return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
     }
     function getPencilHtml(id, entity, editFunc) {
-        var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
+        var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
             class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
-        $('#search-grid').off('click', '#edit'+id);
+        $('#search-grid').off('click', '#edit'+entity+id);
         $('#search-grid').on(
-            'click', '#edit'+id, eif.form.editEntity.bind(null, id, _util.lcfirst(entity)));
+            'click', '#edit'+entity+id, eif.form.editEntity.bind(null, id, _util.lcfirst(entity)));
         return editPencil;
     }
     /*================== Row Styling =========================================*/
@@ -1957,7 +1959,7 @@
         updateAuthSearch();
     }
     function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
-        if ($('#selPubTypes').val() === "all") { return; }
+        if ($('#selPublicationType').val() === "all") { return; }
         updatePubSearch();
     }
     /*-------------------- Unique Values Column Filter -----------------------*/

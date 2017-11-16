@@ -1,0 +1,21 @@
+default:
+    extensions:
+        Behat\MinkExtension:
+            base_url: http://localhost/batplant/web/app_test.php
+            goutte: ~
+            selenium2: 
+                wd_host: "http://127.0.0.1:4444/wd/hub"
+            browser_name: chrome
+
+        Behat\Symfony2Extension: ~
+
+    suites:
+        default:
+            contexts:
+                - FeatureContext
+                - Behat\MinkExtension\Context\MinkContext
+                # - SearchDatabaseContext
+        # database:
+        #     contexts:
+        #     paths: [ %paths.base%/features/database ]
+

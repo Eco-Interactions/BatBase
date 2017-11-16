@@ -418,7 +418,7 @@ $(document).ready(function(){
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
-            "fullTextArea": setTextField, "multiSelect": Function.prototype,
+            "fullTextArea": setTextArea, "multiSelect": Function.prototype,
             "tags": setTagField, "cntry": setCntry, "source": addSource, 
             "taxon": addTaxon
         };
@@ -468,7 +468,7 @@ $(document).ready(function(){
     }
     function setCitationEdgeCaseFields(entity, citRcrd) {
         if (entity !== 'citation') { return; }
-        $('#CitationText_row textarea')[0].innerText = citRcrd.fullText;
+        $('#CitationText_row textarea').val(citRcrd.fullText);
         $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
         $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
         $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
@@ -781,15 +781,10 @@ $(document).ready(function(){
     function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
-        var cntryValue = locRcrd.parent ? locRcrd.parent : getParentLoc(locRcrd);
-        $('#Country-Region-sel')[0].selectize.addItem(cntryValue, true);
+        var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
+        $('#Country-Region-sel')[0].selectize.addItem(prntVal, true);
         fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
-    }
-    /* Note: Habitat-only locations are children of the Unspecified region, 439. */
-    function getParentLoc(loc) {  
-        return ['Region','Country'].indexOf(loc.locationType.displayName) !== -1 ? 
-            loc.id : 439;
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
@@ -861,8 +856,8 @@ $(document).ready(function(){
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        var id = getSelectedRealm($('#Object-sel').val()) || fParams.taxon ? 
-            fParams.taxon.objectRealm || 3 : 3;
+        var id = getSelectedRealm($('#Object-sel').val()) || 
+            !fParams.taxon ? 3 : fParams.taxon.objectRealm || 3;
         setTaxonParams('Object', id);
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
@@ -2226,7 +2221,7 @@ $(document).ready(function(){
                 "Author": [ getAuthFullName ],
                 "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
                 "Interaction": [ handleUnspecifiedLocs ],
-                "Location": [ addElevUnits, padLatLong, checkParentLoc, getLocType ], 
+                "Location": [ addElevUnits, padLatLong, getLocType ], 
                 "Taxon": [ getTaxonData ],
 
             };
@@ -2271,26 +2266,28 @@ $(document).ready(function(){
                 formVals.longitude = parseFloat(formVals.longitude).toFixed(14); 
             }
         }
-        /** If no parent country is selected, the 'Unspecified' region is the parent. */
-        function checkParentLoc() {
-            if (!formVals.country) { formVals.country = 439; }
+        /** Returns the id of the Unspecified region. */
+        function getUnspecifiedLocId() {
+            const regions = _util.getDataFromStorage('topRegionNames');
+            return regions['Unspecified'];
         }
         /**
          * Sets location type according to the most specific data entered. 
          * "Point": if there is lat/long data. "Area" otherwise.
          */
         function getLocType() {
-            formVals.locationType = 
-                formVals.longitude || formVals.latitude ? 5 : 4;
+            const locTypes = _util.getDataFromStorage('locTypeNames');
+            const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
+            formVals.locationType = locTypes[type];  
         }
         /**
          * If no location is selected for an interaction record, the country field 
          * is checked for a value. If set, it is added as the interaction's location;
-         * if not, the 'Unspecfied' location, id 439, is added.
+         * if not, the 'Unspecfied' location is added.
          */
         function handleUnspecifiedLocs(entity) {
             if (formVals.location) { return; }
-            formVals.location = formVals.country || 439;   
+            formVals.location = formVals.country || getUnspecifiedLocId();   
         }
         function getTaxonData() {
             formVals.parentTaxon = getParentTaxon(fParams.taxon.formTaxonLvl);
@@ -2816,15 +2813,6 @@ $(document).ready(function(){
         elem.className = elem.className.split(' active-errs')[0];
     }
 
-
-
-
-
-
-
-
-
- 
 /*=================== Content Block WYSIWYG ======================================================*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
@@ -2838,6 +2826,7 @@ $(document).ready(function(){
             text: "Edit Content", 
             id: 'editContentBttn',
             class: 'adminbttn',
+            title: 'Edit Content',
             click: toggleContentBlockEditing
         });  //console.log("button = %O", button)
         button.css({

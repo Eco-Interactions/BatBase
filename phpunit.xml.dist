@@ -5,21 +5,24 @@
          xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
          backupGlobals="false"
          colors="true"
-         bootstrap="autoload.php"
+         bootstrap="app/autoload.php"
 >
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>../tests/AppBundle/Controller</directory>
-<!--             <directory>../src/*/*Bundle/Tests</directory>
-            <directory>../src/*/Bundle/*Bundle/Tests</directory> -->
+            <directory>tests/*Bundle/Controller</directory>
+            <directory>tests/*Bundle/Functional</directory>
+            <!-- <file>tests/AppBundle/Controller/ContentBlockTest.php</file> -->
         </testsuite>
     </testsuites>
 
-    <!--
+    <listeners>  <!-- Rolls back db changes after each test.  -->
+        <listener class="\DAMA\DoctrineTestBundle\PHPUnit\LegacyPHPUnitListener" />
+    </listeners>
+    
     <php>
-        <server name="KERNEL_DIR" value="/path/to/your/app/" />
+        <server name="KERNEL_DIR" value="app" />
     </php>
-    -->
+    
 
     <filter>
         <whitelist>

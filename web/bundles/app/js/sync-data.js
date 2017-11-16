@@ -1,6 +1,7 @@
 (function(){
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
+    var dataStorage;
     eif.syncData = {
         update: updateStoredData,
         reset: resetStoredData
@@ -49,7 +50,7 @@
     function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
         var withUpdates = Object.keys(updatedAt).filter(function(entity){
             return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
-        });
+        });                                                                     console.log("entities with updates = %O", withUpdates);
         if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
@@ -93,7 +94,7 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
-        storeData('pgDataUpdatedAt', getCurrentDate());  console.log('pgDataUpdatedAt = ', getCurrentDate())
+        storeData('pgDataUpdatedAt', getCurrentDate());                         console.log('pgDataUpdatedAt = ', getCurrentDate())
         sendDataUpdateStatus(data);
     }
     function sendDataUpdateStatus(data) {
@@ -372,8 +373,8 @@
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
     function resetStoredData() {
-        var prevFocus = localStorage.getItem('curFocus');
-        localStorage.clear();
+        var prevFocus = dataStorage.getItem('curFocus');
+        dataStorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);
     }
@@ -428,7 +429,7 @@
         for (var id in data) { data[id] = JSON.parse(data[id]); }
         return data;
     }
-    /** Adds to localStorage data derived from the serialized entity data. */
+    /** Adds the data derived from the serialized entity data to data storage. */
     function deriveAndStoreData(data) {
         deriveAndStoreTaxonData(data[0]);
         deriveAndStoreLocationData(data[1]);
@@ -452,52 +453,63 @@
         }
     }
     /** Each taxon is sorted by domain and then level. 'Animalia' is skipped. */
-    function separateTaxaByLevelAndDomain(taxa) {
-        var data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (var id = 2; id < Object.keys(taxa).length+1; id++) {               
+    function separateTaxaByLevelAndDomain(taxa) {  
+        const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
+        for (let id = 1; id < Object.keys(taxa).length+1; id++) {
+            if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
             addTaxonData(taxa[id]);
-        }                         
-        return data;                                              
+        }
+        return data;
         /** Adds the taxon's name (k) and id to it's level's obj. */
         function addTaxonData(taxon) {
-            var domainObj = getDomainObj(taxon);
-            var level = taxon.level.displayName;  
+            const domainObj = getDomainObj(taxon);
+            const level = taxon.level.displayName;  
             if (!domainObj[level]) { domainObj[level] = {}; }; 
             domainObj[level][taxon.displayName] = taxon.id;
         }
         function getDomainObj(taxon) {
-            var domain = taxon.domain.displayName
-            var key = domain === 'Animalia' ? 'Bat' : domain;
+            const domain = taxon.domain.displayName
+            const key = domain === 'Animalia' ? 'Bat' : domain;
             return data[key];
         }
     } /* End separateTaxaByLevelAndDomain */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
-    function deriveAndStoreLocationData(data) {  
-        storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
-        storeData('topRegionNames', getTopRegionNameData(data));
+    function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
+        const regns = getTypeObj(data.locationType, 'region', 'locations');
+        const cntrys = getTypeObj(data.locationType, 'country', 'locations');   //console.log('reg = %O, cntry = %O', regns, cntrys);
+        storeData('countryNames', getNameDataObj(cntrys, data.location));
+        storeData('regionNames', getNameDataObj(regns, data.location));
+        storeData('topRegionNames', getTopRegionNameData(data, regns));
         storeData('habTypeNames', getTypeNameData(data.habitatType));
         storeData('locTypeNames', getTypeNameData(data.locationType));
     }
-    /** Note: Top regions are the trunk of the location data tree. */
-    function getTopRegionNameData(locData) {  
-        var data = {};
-        var regions = locData.locationType[1].locations;
-        var rcrds = getEntityRcrds(regions, locData.location);
-        for (var id in rcrds) {
+    function getTopRegionNameData(locData, regns) {  
+        const data = {};
+        const rcrds = getEntityRcrds(regns, locData.location);
+        for (const id in rcrds) { 
             if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
         }
         return data;
     }
+    function getTypeObj(types, type, collection) { 
+        for (const t in types) {
+            if (types[t].slug === type) { return types[t][collection]; }
+        }
+    }
+    /** Note: Top regions are the trunk of the location data tree. */
     /**
      * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
      * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        storeData('authSources', data.sourceType[3].sources);         
-        storeData('pubSources', data.sourceType[2].sources);         
-        storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
+        const authIds = getTypeObj(data.sourceType, 'author', 'sources');
+        const pubIds = getTypeObj(data.sourceType, 'publication', 'sources');
+        const publIds = getTypeObj(data.sourceType, 'publisher', 'sources'); 
+        const publSrcs = getEntityRcrds(publIds, data.source);
+        storeData('authSources', authIds);         
+        storeData('pubSources', pubIds);         
+        storeData('publisherNames', getTypeNameData(publSrcs));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         storeData('sourceTags', getTagData(data.tag, "Source"));        
@@ -505,7 +517,7 @@
     }
     function deriveInteractionData(data) {
         storeData('intTypeNames', getTypeNameData(data.interactionType));
-    }
+    }   
     /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {
         var data = {};
@@ -537,7 +549,7 @@
         return data;
     }
     /*--------------- Shared Helpers -----------------------------*/
-    /** Stores passed data under the key in localStorage. */
+    /** Stores passed data under the key in dataStorage. */
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }

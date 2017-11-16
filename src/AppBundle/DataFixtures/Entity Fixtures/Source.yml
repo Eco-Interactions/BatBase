@@ -1,0 +1,130 @@
+AppBundle\Entity\Source:
+    Source-1: #1
+        displayName: 'Feeding habits'
+        description: 'Gardner, A. L. 1977. Feeding habits. In Biology of bats of the New World family Phyllostomatidae. Part II (R.J. Baker, J.K. Jones, Jr. & D.C. Carter, ed.), pp. 293-350, Special Publications, The Museum, Texas Tech Univ. Press.'
+        year: '1977'
+        isDirect: true
+        parentSource: '@Source-2' #
+        sourceType: '@SourceType-2' #
+        tags: ['@Tag-1']
+        interactions: ['@Interaction-1', '@Interaction-2', '@Interaction-4', '@Interaction-9']  #
+        contributors: ['@Contribution-1']  #517
+        citation: '@Citation-1'  #237
+        created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-2: #2
+        displayName: 'In Biology of bats of the New World family Phyllostomatidae'
+        childSources: ['@Source-1'] #
+        sourceType: '@SourceType-1' #
+        publication: '@Publication-1'  #100
+        created: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-3: #12
+        displayName: 'Observations on the life histories of Panama bats'
+        description: 'Bloedel, P. 1955. Observations on the life histories of Panama bats. Journal of Mammalogy 36: 232-235.'
+        year: '1955'
+        isDirect: true
+        parentSource: '@Source-4'  #
+        sourceType: '@SourceType-2'  #
+        interactions: ['@Interaction-3', '@Interaction-10'] #
+        contributors: ['@Contribution-2'] #541
+        citation: '@Citation-2'  #225
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-4: #11
+        displayName: 'Journal of Mammalogy'
+        childSources: ['@Source-3']  #
+        sourceType: '@SourceType-1'  #
+        publication: '@Publication-2' #97
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-5: #35
+        displayName: 'Revista de Biologia Tropical'
+        childSources: ['@Source-6']  #
+        sourceType: '@SourceType-1'  #
+        publication: '@Publication-3' #91
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-6: #36
+        displayName: 'Two cases of bat pollination in Central America'
+        description: 'Baker, H. G. 1970. Two cases of bat pollination in Central America. Revista de Biologia Tropical. 17: 187-197.'
+        year: '1970'
+        isDirect: true
+        parentSource: '@Source-5' #
+        sourceType: '@SourceType-2'  #
+        interactions: ['@Interaction-5']  #
+        contributors: ['@Contribution-3']  #475
+        citation: '@Citation-3'  #223
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-7:  #74
+        displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
+        year: '1997'
+        parentSource: '@Source-9'  #73
+        childSources: ['@Source-8']  #75
+        sourceType: '@SourceType-1'  #
+        publication: '@Publication-4'  #22
+        created: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updatedBy: '@User-1'
+    Source-8:  #75
+        displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise-citation'
+        description: 'Cockle, A. 1997. Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise. Ph.D. Dissertation. Université de Paris 6, Paris.'
+        year: '1997'
+        isDirect: true
+        parentSource: '@Source-7'  #74
+        sourceType: '@SourceType-2'  #
+        interactions: ['@Interaction-6'] #56
+        contributors: ['@Contribution-4']  #504
+        citation: '@Citation-4'  #144
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-07-16 10:46:19", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updatedBy: '@User-1'
+    Source-9:  #73
+        displayName: 'University of Paris VI'
+        description: 'University of Paris VI (Pierre and Marie Curie University)'
+        childSources: ['@Source-7']  #74
+        sourceType: '@SourceType-4'  # 
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-10:  #634
+        displayName: Gardner
+        sourceType: '@SourceType-3' #
+        contributions: ['@Contribution-1']  #517
+        author: '@Author-1' #282
+        created: '<(new \DateTime("2016-11-23 01:20:30", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:16", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-11:  #666
+        displayName: Bloedel
+        sourceType: '@SourceType-3' #
+        contributions: ['@Contribution-2']  #541
+        author: '@Author-2'  #315
+        created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-12:  #110
+        displayName: Baker(H)
+        sourceType: '@SourceType-3' #
+        contributions: ['@Contribution-3']  #475
+        author: '@Author-3'  #250
+        created: '<(new \DateTime("2016-11-23 01:20:27", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-13:  #624
+        displayName: Cockle
+        sourceType: '@SourceType-3' #
+        contributions: ['@Contribution-4'] #504
+        author: '@Author-4' #274
+        created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'

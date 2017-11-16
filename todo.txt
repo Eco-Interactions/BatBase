@@ -3,12 +3,16 @@
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
         -- Change domain -> realm, level -> rank.
+        -- Style the 'change password' page
+        -- Bad credentials exception on wrong password?
+        -- remove eif declarations in js files.
     --Search--
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
         -- Add publisher to source-type view
         -- refactor enable/disable submit-button methods to one method with 'enable' param
         -- Add data-entry tutorial.
+        -- update 'shw-changd' 'custom' value on date selection
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
         -- Auto generate citation full text from filled fields
@@ -52,15 +56,28 @@
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
         -- UPGRADE --
             -- Add more sophisticated logging
-    --Asap--        
+    --Asap (Before next release!!)--        
         -- site -- 
-            -- look into mediawiki
+            -- Change author display names to [L, F M S]
+            -- domain = realm
         --form-- 
-            -- Add top location option, 'Add a new Location...'
+            -- add err in controllers eliminating the possibility of creating orphans
+            -- Fix error message when empty interaction form submits
             -- update detail panel on interaction form submit
-            -- add err eliminating the possibility of creating an orphan taxon
-            -- (fix) Fill country field in new location form with top-form country
-
+            -- Pub form
+                -- Change Doi field to DOI
+                -- update test
+            -- Cit form
+                -- remove tags field
+                -- migrate all secondary tags to the citation's interactions
+            -- auth form
+                -- remove 'display name' field
+            -- loc form
+                -- Add top location option, 'Add a new Location...'
+                -- Country/region should be auto selected on form open
+                -- don't allow creation of location with only region selected 
+            -- data submit process
+                -- tags must be hardcoded somewhere. Adding 'secondary' to a citation added the 'seed' tag
         --search--
             -- Toggle expand tree button after publication type filter changes
         -- sync data --
@@ -68,31 +85,45 @@
         --MISC--
             -- Change author display names to Last, First M Suffix 
             -- Comment the crud controller method 'setupdatedattimes'
-Todo:
-    > Fix responsiveness and formatting for the edit forms.
 
-    > Future additions
-        > Displaying contained data on data grid
+
+~~~ What to test ~~~
+    > Search Page
+        > CSV downloads
+        > Data Storage
+            > Data is added and removed correctly  
+            > The grid should reload as expect with the form close
+                > With and without submit. 
+                > interaction forms and sub-entity forms. 
+        > Grid
+            > Unq Vals col filter
+        > Forms
+            -- displays correctly.
+            -- all errors are caught and handled as expected
+            --INT CREATE FORM--
+                -- Pinned fields persist as expected
 
 ##CHANGES##
 
 ::Testing!::
-> Search Page
-    > CSV downloads
-    > Data Storage
-        > Data is added and removed correctly  
-        > The grid should reload as expect with the form close
-            > With and without submit. 
-            > interaction forms and sub-entity forms. 
-    > Forms
-        > Taxa select
-            > Object select forms open and change realm 
-:: Questions ::
+    - Tests written for
+        > Data entry form (new interaction)
+        > Search page features
+        > Website top pages load with content
 
-:: Email ::
+~ Data Cleanup ~
+    pub 561 - delete (dup of 338)
+    pub388 - Change srcId -> 967 
+    >> Change my team desc to lower case title.
+
+    !! Refactor !!
+        > Change sel-domain vals to slugs of realm
+        > change search-focus to search-view
+        > Change test at end of 'change views/groups' to test view dependent elems rather than sel value
 
 
-:: Docs ::
+
+:: Dev Docs ::
     -- Location naming:
         --To select a region or country habitat, type in the region/country name 
             in the location combobox. Look for the [name]- [habitat]. 
@@ -109,18 +140,11 @@ Todo:
 
 TASK LIST
 
-
 TODO
-    >> data cleanup <<        
-
 
 NOTES
-    >> I can go through the location grid and spot obvious location that should be 
-        merged and do so.
-        >> from 159 -> 181 (barrao ISLAND DUPLICATE)
 
 ============ EMAIL ==================
-    >>  
 
 TAYLOR:
     --- General ---
@@ -128,10 +152,8 @@ TAYLOR:
 
 Notes::
     ## Change Log ##
-        > Species are no longer able to be created without a parent genus selected.
 
 Questions:
-    >> We can either close the update forms on submit, or leave the close button.
 ---------------------Next-------------------------------------------------------
 
 --SHORTTERM--
@@ -174,7 +196,6 @@ Questions:
         -- test for optimizations
         -- responsive
         -- Taxonym need a collection of namings
-        -- update: domain = realm
 
 
 

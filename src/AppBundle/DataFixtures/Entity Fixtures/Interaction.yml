@@ -1,0 +1,105 @@
+AppBundle\Entity\Interaction:
+    Interaction-1:
+        source: '@Source-1' #
+        interactionType: '@InteractionType-4' #
+        location: '@Location-12'  #Panama
+        subject: '@Taxon-7' #40
+        object: '@Taxon-9' #859
+        tags: ['@Tag-6'] #
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-2'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-2:
+        source: '@Source-1' #
+        interactionType: '@InteractionType-2' #
+        location: '@Location-12'  #Panama
+        subject: '@Taxon-7' #40
+        object: '@Taxon-11' #899
+        tags: ['@Tag-2'] #
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-3:
+        source: '@Source-3' #
+        interactionType: '@InteractionType-2' #
+        location: '@Location-23' #
+        subject: '@Taxon-13' #120
+        object: '@Taxon-16'  #74
+        tags: ['@Tag-2'] #
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-4:  #3121
+        source: '@Source-1' #
+        interactionType: '@InteractionType-4' #
+        location: '@Location-24'   #Costa Rica
+        subject: '@Taxon-17' #1250
+        object: '@Taxon-8' #218
+        tags: ['@Tag-6'] #
+        created: '<(new \DateTime("2016-07-15 23:21:49", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:39:31", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-5:   #973
+        source: '@Source-6' #36
+        interactionType: '@InteractionType-3' #
+        location: '@Location-35'  #Santa Ana - Forest
+        subject: '@Taxon-5'  #6
+        object: '@Taxon-20'  #564
+        tags: ['@Tag-3'] #
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-6: #56
+        note: 'Coordinates for Les Nouragues are taken from Delaval et al.2005; elevation range of 40 to 100 mt is taken from Charles-Dominique 2001.'
+        source: '@Source-8' #75
+        interactionType: '@InteractionType-2' #
+        location: '@Location-58'  #51 Les Nouragues
+        subject: '@Taxon-22' #58
+        object: '@Taxon-25' #528
+        tags: ['@Tag-5'] #
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-7: #added
+        note: 'Coordinates for Les Nouragues are taken from Delaval et al.2005; elevation range of 40 to 100 mt is taken from Charles-Dominique 2001.'
+        source: '@Source-8' #75
+        interactionType: '@InteractionType-5' #
+        location: '@Location-58'  #51 Les Nouragues
+        subject: '@Taxon-22' #58
+        object: '@Taxon-8'  #218 
+        tags: ['@Tag-6'] #
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-8:   #added
+        source: '@Source-6' #36
+        interactionType: '@InteractionType-1' #
+        location: '@Location-35'  #Santa Ana - Forest
+        subject: '@Taxon-5'  #6
+        object: '@Taxon-20'  #564
+        tags: ['@Tag-4'] #
+        created: '<(new \DateTime("2016-07-15 23:21:53", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-9: #added
+        note: 'Bat cited as Leptonycteris sanborni'
+        source: '@Source-1'  #
+        interactionType: '@InteractionType-1'  #
+        location: '@Location-60'  #
+        subject: '@Taxon-6' #
+        object: '@Taxon-23'  #
+        tags: ['@Tag-3'] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:36", new \DateTimeZone("America/Los_Angeles")))>'
+    Interaction-10: #added
+        note: 'Bat cited as Leptonycteris sanborni. Author reported the study area from Arizona through Mexico'
+        source: '@Source-3'  #
+        interactionType: '@InteractionType-3'  #
+        location: '@Location-59'  #
+        subject: '@Taxon-21' #
+        object: '@Taxon-23'  #
+        tags: ['@Tag-3'] #
+        created: '<(new \DateTime("2016-07-15 23:21:50", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2017-05-17 16:27:49", new \DateTimeZone("America/Los_Angeles")))>'

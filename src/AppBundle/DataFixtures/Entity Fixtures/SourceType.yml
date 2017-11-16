@@ -1,0 +1,32 @@
+AppBundle\Entity\SourceType:
+    SourceType-1:
+        slug: publication
+        displayName: Publication
+        ordinal: 20
+        sources: ['@Source-2', '@Source-4', '@Source-5', '@Source-7'] #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    SourceType-2:
+        slug: citation
+        displayName: Citation
+        ordinal: 40
+        sources: ['@Source-1', '@Source-3', '@Source-6', '@Source-8']  #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    SourceType-3:
+        slug: author
+        displayName: Author
+        ordinal: 30
+        sources: ['@Source-10', '@Source-11', '@Source-12', '@Source-13'] #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    SourceType-4:
+        slug: publisher
+        displayName: Publisher
+        ordinal: 10
+        sources: ['@Source-9']  #
+        created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
