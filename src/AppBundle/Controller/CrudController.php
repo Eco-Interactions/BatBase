@@ -386,7 +386,7 @@ class CrudController extends Controller
     private function updateUpdatedAt($className, &$em)
     {
         $dateEntities = ["System", "Author", "Authority", "Citation", "CitationType", 
-            "ContentBlock", "Contribution", "Domain", "Feedback", "HabitatType", 
+            "ContentBlock", "Contribution", "Realm", "Feedback", "HabitatType", 
             "ImageUpload", "Interaction", "InteractionType", "Level", "Location", 
             "LocationType", "Naming", "NamingType", "Publication", "PublicationType", 
             "Source", "SourceType", "Tag", "Taxon", "Taxonym"];

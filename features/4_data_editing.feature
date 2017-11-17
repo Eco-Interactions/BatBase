@@ -11,6 +11,8 @@ Feature: Editable data via the Search Database page
 		And I am on "/search"
 		And I resize browser window
 		And I should see "TestEditor"
+		# And the database has loaded
+		# And I exit the tutorial
 
 	# @javascript
 	# Scenario:  Setup: Database loads and the welcome tutorial is exited.

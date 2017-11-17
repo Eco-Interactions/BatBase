@@ -396,8 +396,8 @@ AppBundle\Entity\Contribution:
         created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-AppBundle\Entity\Domain:
-    Domain-1: #1
+AppBundle\Entity\Realm:
+    Realm-1: #1
         slug: bat
         displayName: Bat
         pluralName: Bats
@@ -406,7 +406,7 @@ AppBundle\Entity\Domain:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Domain-2: #3
+    Realm-2: #3
         slug: plant
         displayName: Plant
         pluralName: Plants
@@ -415,7 +415,7 @@ AppBundle\Entity\Domain:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-1'
-    Domain-3: #2
+    Realm-3: #2
         slug: arthropod
         displayName: Arthropod
         pluralName: Arthropods
@@ -1626,7 +1626,7 @@ AppBundle\Entity\SystemDate:
         dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-8:
-        description: Domain
+        description: Realm
         dateVal: '<(new \DateTime("2017-02-04 11:24:08", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
     SystemDate-9:
@@ -1764,7 +1764,7 @@ AppBundle\Entity\Taxon:
     Taxon-2: #7
         slug: chiroptera
         displayName: Chiroptera
-        domain: '@Domain-1' #
+        realm: '@Realm-1' #
         level: '@Level-4' #
         parentTaxon: '@Taxon-1' #21
         childTaxa: ['@Taxon-5']
@@ -1775,7 +1775,7 @@ AppBundle\Entity\Taxon:
     Taxon-3: #20
         slug: plantae
         displayName: Plantae
-        domain: '@Domain-2' #3
+        realm: '@Realm-2' #3
         level: '@Level-1' #7
         childTaxa: ['@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1785,7 +1785,7 @@ AppBundle\Entity\Taxon:
     Taxon-4: #11
         slug: arthropoda
         displayName: Arthropoda
-        domain: '@Domain-3' #2
+        realm: '@Realm-3' #2
         level: '@Level-2' #6
         childTaxa: ['@Taxon-8']
         created: '<(new \DateTime("2016-07-15 23:19:45", new \DateTimeZone("America/Los_Angeles")))>'

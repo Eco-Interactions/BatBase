@@ -130,7 +130,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Arthropoda' => 4, 'Plants' => 3];
         $newElems = ['Authors' => '[name="authNameSrch"]', 'Publications' => '#selPubTypes', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies'];
-        $this->changeGridSort('#sel-domain', $vals[$type], $newElems[$type]);
+        $this->changeGridSort('#sel-realm', $vals[$type], $newElems[$type]);
     }
 
     /**
@@ -301,7 +301,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $checkbox = $this->getUserSession()->getPage()->find('css', '#shw-chngd');  
         $checkbox->uncheck();  
-        usleep(500000);
+        usleep(1000000);
     }
 
     /**
@@ -661,6 +661,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree($nodeTxt);
         $rows = $this->getInteractionsRows($nodeTxt); 
         assertNotNull($rows, "Didn't find any interaction rows.");
+        if ($count != count($rows)) { $this->printErrorAndBreak("Found ". count($rows)." rows under $nodeTxt. Expected $count"); }
         assertEquals($count, count($rows));
     }
 
@@ -700,6 +701,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->iExpandInTheDataTree($parentNode);
         $row = $this->getGridRow($text);
+        if ($row === null) { $this->printErrorAndBreak("Couldn't find $text in the tree"); }
         assertNotNull($row);
         $this->collapseDataTreeNode($parentNode);
     }
@@ -731,6 +733,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     private function getInteractionsRows($node = false)
     {  
+        usleep(500000);
         $intRows = [];
         $subSet = $node === false; 
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
@@ -745,6 +748,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function getGridRow($text)
     {
+        usleep(500000);
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         assertNotNull($rows, 'No nodes found in data tree.');  
         foreach ($rows as $row) {
@@ -937,6 +941,13 @@ class FeatureContext extends RawMinkContext implements Context
     private function getUserSession()
     {
         return isset($this->curUser) ? $this->curUser : $this->getSession();
+    }
+
+    private function printErrorAndBreak($errMsg)
+    {
+        print("\n".$errMsg."\n");
+        usleep(200000);
+        $this->iPutABreakpoint();
     }
 
 }

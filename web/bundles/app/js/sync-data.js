@@ -231,18 +231,18 @@
             });
         }
     }
-    /** Adds the Taxon's name to the stored names for it's domain and level.  */
+    /** Adds the Taxon's name to the stored names for it's realm and level.  */
     function addToTaxonNames(prop, rcrd, entity) {
-        var domain = rcrd.domain.displayName;
+        var realm = rcrd.realm.displayName;
         var level = rcrd.level.displayName;  
-        addPropIfNewLevel(level, domain);
-        addToNameProp(domain+level+"Names", rcrd, entity);
+        addPropIfNewLevel(level, realm);
+        addToNameProp(realm+level+"Names", rcrd, entity);
     }
-    /** Creates the level property if no taxa have been saved at this level and domain.  */
-    function addPropIfNewLevel(level, domain) {
-        var lvlObj = _util.getDataFromStorage(domain+level+"Names");
-        if (lvlObj) { return; }                                                 //console.log("creating new level for [", domain+level+"]Names")
-        storeData(domain+level+"Names", {});
+    /** Creates the level property if no taxa have been saved at this level and realm.  */
+    function addPropIfNewLevel(level, realm) {
+        var lvlObj = _util.getDataFromStorage(realm+level+"Names");
+        if (lvlObj) { return; }                                                 //console.log("creating new level for [", realm+level+"]Names")
+        storeData(realm+level+"Names", {});
     }
     /** Adds the Interaction to the stored entity's collection.  */
     function addInteractionToEntity(prop, rcrd, entity) {
@@ -363,12 +363,12 @@
     }
     function rmvFromNameProp(prop, rcrd, entity, edits) { 
         var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-        var domain = rcrd.domain.displayName;
+        var realm = rcrd.realm.displayName;
         var level = lvls[edits.level.old-1];
         var taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
-        var nameObj = _util.getDataFromStorage(domain+level+'Names');           //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",domain+level+'Names', nameObj, rcrd, edits)
+        var nameObj = _util.getDataFromStorage(realm+level+'Names');            //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",realm+level+'Names', nameObj, rcrd, edits)
         delete nameObj[taxonName];
-        storeData(domain+level+'Names', nameObj);
+        storeData(realm+level+'Names', nameObj);
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
@@ -394,7 +394,7 @@
      * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Search page 
      * grid-build begins @eif.search.initSearchGrid.
      * Entities downloaded with each ajax call:
-     *   /taxon - Taxon, Domain, Level 
+     *   /taxon - Taxon, Realm, Level 
      *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
      *   /source - Author, Citation, CitationType, Publication, PublicationType, 
      *       Source, SourceType, Tag
@@ -436,24 +436,24 @@
         deriveAndStoreSourceData(data[2]);
         deriveInteractionData(data[3]);
     }
-    /** Stores an object of taxon names and ids for each level in each domain. */
+    /** Stores an object of taxon names and ids for each level in each realm. */
     function deriveAndStoreTaxonData(data) {                                    //console.log("deriveAndStoreTaxonData called. data = %O", data);
         storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
-        storeTaxaByLevelAndDomain(data.taxon);
+        storeTaxaByLevelAndRealm(data.taxon);
     }
-    function storeTaxaByLevelAndDomain(taxa) {
-        var domainData = separateTaxaByLevelAndDomain(taxa);                    //console.log("taxonym name data = %O", nameData);
-        for (var domain in domainData) {  
-            storeTaxaByLvl(domain, domainData[domain]);
+    function storeTaxaByLevelAndRealm(taxa) {
+        var realmData = separateTaxaByLevelAndRealm(taxa);                     //console.log("taxonym name data = %O", nameData);
+        for (var realm in realmData) {  
+            storeTaxaByLvl(realm, realmData[realm]);
         }
     }
-    function storeTaxaByLvl(domain, taxonObj) {
-        for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", domain+level+'Names', taxonObj[level]);
-            storeData(domain+level+'Names', taxonObj[level]);
+    function storeTaxaByLvl(realm, taxonObj) {
+        for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
+            storeData(realm+level+'Names', taxonObj[level]);
         }
     }
-    /** Each taxon is sorted by domain and then level. 'Animalia' is skipped. */
-    function separateTaxaByLevelAndDomain(taxa) {  
+    /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
+    function separateTaxaByLevelAndRealm(taxa) {  
         const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
         for (let id = 1; id < Object.keys(taxa).length+1; id++) {
             if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
@@ -462,17 +462,17 @@
         return data;
         /** Adds the taxon's name (k) and id to it's level's obj. */
         function addTaxonData(taxon) {
-            const domainObj = getDomainObj(taxon);
+            const realmObj = getRealmObj(taxon);
             const level = taxon.level.displayName;  
-            if (!domainObj[level]) { domainObj[level] = {}; }; 
-            domainObj[level][taxon.displayName] = taxon.id;
+            if (!realmObj[level]) { realmObj[level] = {}; }; 
+            realmObj[level][taxon.displayName] = taxon.id;
         }
-        function getDomainObj(taxon) {
-            const domain = taxon.domain.displayName
-            const key = domain === 'Animalia' ? 'Bat' : domain;
+        function getRealmObj(taxon) {
+            const realm = taxon.realm.displayName
+            const key = realm === 'Animalia' ? 'Bat' : realm;
             return data[key];
         }
-    } /* End separateTaxaByLevelAndDomain */
+    } /* End separateTaxaByLevelAndRealm */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
     function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
         const regns = getTypeObj(data.locationType, 'region', 'locations');

@@ -93,7 +93,7 @@ class AjaxDataController extends Controller
         return $query->getResult();
     }
     /**
-     * Returns serialized data objects for the Domain, Level, and Taxon entities.
+     * Returns serialized data objects for the Realm, Level, and Taxon entities.
      *
      * @Route("/taxon", name="app_serialize_taxon")
      */
@@ -105,13 +105,13 @@ class AjaxDataController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $domain = $this->serializeEntity('Domain', $serializer, $em);
+        $realm = $this->serializeEntity('Realm', $serializer, $em);
         $level = $this->serializeEntity('Level', $serializer, $em);
         $taxon = $this->serializeEntity('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domain' => $domain,    'level' => $level,
+            'realm' => $realm,    'level' => $level,
             'taxon' => $taxon            
         )); 
         return $response;

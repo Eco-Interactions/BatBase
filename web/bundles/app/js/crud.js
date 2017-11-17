@@ -872,7 +872,7 @@ $(document).ready(function(){
     function getSelectedRealm(selVal) {
         if (!selVal) { return null; }
         var taxon = fParams.records.taxon[selVal];  
-        return taxon.domain.id + 1;
+        return taxon.realm.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, formLvl) {
@@ -919,7 +919,7 @@ $(document).ready(function(){
     }
     function initTaxonParams(id) {
         var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
-        var domainLvls = {
+        var realmLvls = {
             'Bat': ["Order", "Family", "Genus", "Species"],
             'Arthropod': ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
             'Plant': ["Kingdom", "Family", "Genus", "Species"]
@@ -928,7 +928,7 @@ $(document).ready(function(){
             realm: realmMap[id], 
             realmId: id,
             lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
-            domainLvls: domainLvls[realmMap[id]]
+            realmLvls: realmLvls[realmMap[id]]
         };                                                                      //console.log('taxon params = %O', fParams.taxon)
     }
     /**
@@ -1172,7 +1172,7 @@ $(document).ready(function(){
      */
     function getTaxonEditFields(entity, id) {
         var taxon = fParams.records.taxon[id];  
-        initTaxonParams(taxon.domain.id+1);                
+        initTaxonParams(taxon.realm.id+1);                
         return buildTaxonEditFields(taxon);
     }
     function finishTaxonEditFormBuild() {
@@ -1220,18 +1220,18 @@ $(document).ready(function(){
         $(sel).data('toSel', taxon.level.id);
         return sel;
     }
-    /** Returns an array of options for the levels in the taxon's domain. */
+    /** Returns an array of options for the levels in the taxon's realm. */
     function getTaxonLvlOpts(taxon) {
-        var domainLvls = fParams.taxon.domainLvls.map(function(lvl){return lvl;});
+        var realmLvls = fParams.taxon.realmLvls.map(function(lvl){return lvl;});
         var lvls = _util.getDataFromStorage('levelNames');  
-        domainLvls.shift();  //Removes the domain-level
+        realmLvls.shift();  //Removes the realm-level
         for (var name in lvls) {
-            if (domainLvls.indexOf(name) === -1) { delete lvls[name]; }
+            if (realmLvls.indexOf(name) === -1) { delete lvls[name]; }
         }
         return buildOptsObj(lvls, Object.keys(lvls));
     }
     /**
-     * Returns a level select with all levels in the taxon-parent's domain and a 
+     * Returns a level select with all levels in the taxon-parent's realm and a 
      * combobox with all taxa at the parent's level and the current parent selected.
      * Changing the level select repopulates the taxa with those at the new level.
      * Entering a taxon that does not already exists will open the 'create' form.
@@ -1262,20 +1262,20 @@ $(document).ready(function(){
         return hdr;
     }
     function getParentEditFields(prnt) {  
-        var domain = _util.lcfirst(prnt.domain.displayName);      
-        var lvlSelRows = buildSubForm(domain, {}, 'sub', null, 'edit');
-        var domainSelRow = getDomainLvlRow(prnt);
+        var realm = _util.lcfirst(prnt.realm.displayName);      
+        var lvlSelRows = buildSubForm(realm, {}, 'sub', null, 'edit');
+        var realmSelRow = getRealmLvlRow(prnt);
         fParams.taxon.prntSubFormLvl = 'sub2';
-        return domainSelRow.concat(lvlSelRows);
+        return realmSelRow.concat(lvlSelRows);
     }
-    function getDomainLvlRow(taxon) {
-        var domainLvl = fParams.taxon.domainLvls[0];
-        var lbl = _util.buildElem('label', { text: domainLvl });
-        var taxonym = _util.buildElem('span', { text: getDomainTaxon().displayName });
+    function getRealmLvlRow(taxon) {
+        var realmLvl = fParams.taxon.realmLvls[0];
+        var lbl = _util.buildElem('label', { text: realmLvl });
+        var taxonym = _util.buildElem('span', { text: getRealmTaxon().displayName });
         $(taxonym).css({ 'padding-top': '.55em' });
-        return [buildTaxonEditFormRow(domainLvl, [lbl, taxonym], 'sub')];
+        return [buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub')];
     }
-    function getDomainTaxon() {
+    function getRealmTaxon() {
         return fParams.records.taxon[fParams.taxon.realmId];
     }
     /**
@@ -1283,18 +1283,18 @@ $(document).ready(function(){
      * Hides the species row. Adds styles and modifies event listeners. 
      */
     function finishEditParentFormBuild() {                                      //console.log("fParams = %O", fParams);    
-        var domainLvl = fParams.taxon.domainLvls[0];
+        var realmLvl = fParams.taxon.realmLvls[0];
         initComboboxes(null, 'sub');
-        selectParentTaxon($('#txn-prnt').data('txn'), domainLvl);
+        selectParentTaxon($('#txn-prnt').data('txn'), realmLvl);
         $('#Species_row').hide();
-        $('#'+domainLvl+'_row .field-row')[0].className += ' domain-row';
+        $('#'+realmLvl+'_row .field-row')[0].className += ' realm-row';
         $('#sub-submit').attr('disabled', false).css('opacity', '1');
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
     }
-    function selectParentTaxon(prntId, domainLvl) {                             //console.log('selectParentTaxon. prntId [%s], domainLvl [%s]', prntId, domainLvl);                 
+    function selectParentTaxon(prntId, realmLvl) {                              //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
         var parentLvl = fParams.records.taxon[prntId].level.displayName;  
-        if (parentLvl == domainLvl) { return clearAllOtherLvls(); }
+        if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
         clearAllOtherLvls();
         $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
     }
@@ -1304,7 +1304,7 @@ $(document).ready(function(){
         });
     }
     function closePrntEdit() {                                                  
-        var prnt =  getSelectedTaxon() || getDomainTaxon();                     //console.log("closePrntEdit called. prnt = %O", prnt);
+        var prnt =  getSelectedTaxon() || getRealmTaxon();                      //console.log("closePrntEdit called. prnt = %O", prnt);
         exitPrntEdit(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
@@ -2730,7 +2730,7 @@ $(document).ready(function(){
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem);
         if ($('#sub-form').length) { return selectParentTaxon(
-            $('#txn-prnt').data('txn'), fParams.taxon.domainLvls[0]); 
+            $('#txn-prnt').data('txn'), fParams.taxon.realmLvls[0]); 
         }
         $('#txn-lvl').data('lvl', $('#txn-lvl').val());
     }

@@ -79,11 +79,11 @@ class Taxon
     private $linkUrl;
 
     /**
-     * @var \AppBundle\Entity\Domain
+     * @var \AppBundle\Entity\Realm
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Domain", mappedBy="taxon")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Realm", mappedBy="taxon")
      */
-    private $domain;
+    private $realm;
 
     /**
      * @var \AppBundle\Entity\Level
@@ -345,51 +345,51 @@ class Taxon
     }
 
     /**
-     * Set domain.
+     * Set realm.
      *
-     * @param \AppBundle\Entity\Domain $domain
+     * @param \AppBundle\Entity\Realm $realm
      *
      * @return Taxon
      */
-    public function setDomain(\AppBundle\Entity\Domain $domain = null)
+    public function setRealm(\AppBundle\Entity\Realm $realm = null)
     {
-        $this->domain = $domain;
+        $this->realm = $realm;
 
         return $this;
     }
 
     /**
-     * Get domain.
+     * Get realm.
      *
-     * @return \AppBundle\Entity\Domain
+     * @return \AppBundle\Entity\Realm
      */
-    public function getDomain()
+    public function getRealm()
     {
-        return $this->domain;
+        return $this->realm;
     }
 
     /**
      * Get id.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("domain")
+     * @JMS\SerializedName("realm")
      *
      * @return int
      */
-    public function serializeDomain()
+    public function serializeRealm()
     {
-        return $this->findDomainAndReturnObj($this);
+        return $this->findRealmAndReturnObj($this);
     }
-    private function findDomainAndReturnObj($taxon)
+    private function findRealmAndReturnObj($taxon)
     {
         if ($taxon->getSlug() === 'animalia') { return ["id"=>0, "displayName"=>"Animalia"]; } //Animalia
-        $domain = $taxon->getDomain();
-        if ($domain) {
+        $realm = $taxon->getRealm();
+        if ($realm) {
             return [ 
-                "id" => $domain->getId(), 
-                "displayName" => $domain->getDisplayName() ];
+                "id" => $realm->getId(), 
+                "displayName" => $realm->getDisplayName() ];
         }
         if (!$taxon->getParentTaxon()) { print($taxon->getId()."\n");  }
-        return $this->findDomainAndReturnObj($taxon->getParentTaxon());
+        return $this->findRealmAndReturnObj($taxon->getParentTaxon());
     }
 
     /**
