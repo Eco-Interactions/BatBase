@@ -6,6 +6,9 @@
         -- Style the 'change password' page
         -- Bad credentials exception on wrong password?
         -- remove eif declarations in js files.
+        -- Added header to FOS pages 
+            -- change password page (/profile/change-password)
+            -- update profile page (/profile/edit)
     --Search--
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
@@ -59,7 +62,6 @@
     --Asap (Before next release!!)--        
         -- site -- 
             -- Change author display names to [L, F M S]
-            -- domain = realm
         --form-- 
             -- add err in controllers eliminating the possibility of creating orphans
             -- Fix error message when empty interaction form submits

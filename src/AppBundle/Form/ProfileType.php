@@ -5,7 +5,7 @@ namespace AppBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class ProfileFormType extends AbstractType
+class ProfileType extends AbstractType
 {
     private $class;
 
@@ -25,6 +25,6 @@ class ProfileFormType extends AbstractType
 
     public function getParent()
     {
-        return 'fos_user_profile';
+        return 'FOS\UserBundle\Form\Type\ProfileFormType';
     }
 }

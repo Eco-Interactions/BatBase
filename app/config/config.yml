@@ -79,7 +79,7 @@ fos_user:
             type: AppBundle\Form\RegistrationType
     profile:
         form:
-            type: appbundle_profile
+            type: AppBundle\Form\ProfileType
 
 services:
     app.form.type.registration:
