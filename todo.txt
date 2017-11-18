@@ -71,7 +71,6 @@
                 -- update test
             -- Cit form
                 -- remove tags field
-                -- migrate all secondary tags to the citation's interactions
             -- auth form
                 -- remove 'display name' field
             -- loc form
