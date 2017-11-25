@@ -71,7 +71,7 @@ class Version20161216175055CitTypes extends AbstractMigration implements Contain
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
         $articles = $em->getRepository('AppBundle:Publication')
-            ->findBy(array('publicationType' => 1)); print("total articles = ".count($articles));
+            ->findBy(array('publicationType' => 1));                            //print("total articles = ".count($articles));
         $citSourceType = $em->getRepository('AppBundle:SourceType')
             ->findOneBy(array('id' => 4));
         $articleCitType = $em->getRepository('AppBundle:CitationType')

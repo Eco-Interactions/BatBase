@@ -1498,7 +1498,7 @@ $(document).ready(function(){
         var prntLvl = getNextFormLevel("parent", formLvl);
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, formLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", formLvl, "sml-left sml-form", {"Display Name": val}, parentSelId));
+            "author", formLvl, "sml-left sml-form", {}, parentSelId));
         disableSubmitBttn("#"+prntLvl+"-submit");
         return { "value": "", "text": "Creating Author..." };
     }
@@ -1678,11 +1678,11 @@ $(document).ready(function(){
                 "order": ["Class", "Order", "Family", "Genus", "Species"],
             },
             "author": { 
-                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["Description", "Year", "Doi", "Authors", "Tags"],
+                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text",
+                    "Suffix": "text"}, 
+                "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", "Tags"],
                 "required": ["Last Name", "Display Name"], 
-                "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkDisplay"],
+                "order": [ "FirstName", "MiddleName", "LastName", "Suffix", "LinkUrl", "LinkDisplay"],
             },
             "bat": {
                 "add": {},  
@@ -2218,7 +2218,7 @@ $(document).ready(function(){
          */
         function handleAdditionalEntityData(entity) {
             var dataHndlrs = {
-                "Author": [ getAuthFullName ],
+                "Author": [ getAuthFullName, getAuthDisplayName ],
                 "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
                 "Interaction": [ handleUnspecifiedLocs ],
                 "Location": [ addElevUnits, padLatLong, getLocType ], 
@@ -2230,12 +2230,20 @@ $(document).ready(function(){
         }
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
         function getAuthFullName() { 
-            var nameFields = ["firstName", "middleName", "lastName"];
+            var nameFields = ["firstName", "middleName", "lastName", "suffix"];
             var fullName = [];
             nameFields.forEach(function(field) {
                 if (formVals[field]) { fullName.push(formVals[field]) };
             });
             formVals.fullName = fullName.join(" ");
+        }
+        /** Concats author Last, First Middle Suffix as the author display name.*/
+        function getAuthDisplayName() {
+            var displayName = formVals.lastName + ',';
+            ["firstName", "middleName", "suffix"].forEach(function(name){
+                if (formVals[name]) { displayName += ' '+formVals[name]; };
+            });
+            formVals.displayName = displayName;
         }
         function getPubFieldData() {
             formVals.publication = $('#Publication-sel').val();
@@ -2452,7 +2460,7 @@ $(document).ready(function(){
     }
     /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
-    function submitFormData(formData, formLvl) {                                //console.log("submitFormData [ %s ]= %O", formLvl, formData);
+    function submitFormData(formData, formLvl) {                                console.log("submitFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(fParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, fParams.forms[formLvl].action);
         if (fParams.editing) { formData.ids = fParams.editing; }
