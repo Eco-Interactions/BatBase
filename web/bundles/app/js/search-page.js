@@ -1402,12 +1402,13 @@
      * filtered by the selected type. 
      */
     function updatePubSearch() {                                                
-        var selVal = $("#selPublicationType").val();                            console.log("\n-----updatePubSearch [%s]", selVal);
+        var selVal = $("#selPublicationType").val();                            //console.log("\n-----updatePubSearch [%s]", selVal);
         var selText = $("#selPublicationType option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
         gParams.focusFltr = selVal === "all" ? null : selText+'s';
         updateGridFilterStatusMsg();
+        resetToggleTreeBttn(false);
     } 
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows(selVal) { 

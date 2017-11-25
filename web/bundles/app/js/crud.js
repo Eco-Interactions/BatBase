@@ -665,17 +665,17 @@ $(document).ready(function(){
             'Publication Vol': citRcrd.publicationVolume || '',            
             'Publication Issue': citRcrd.publicationIssue || '',            
             'Publication Pages': citRcrd.publicationPages || '',            
-            'Tags': getTags(srcRcrd),
+            // 'Tags': getTags(srcRcrd),
             'Authors': getAuthorNames(srcRcrd),
         };
     }
-    function getTags(srcRcrd) {
-        var str = [];
-        if (srcRcrd.tags.length) {
-            srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
-        }
-        return str.join(', ');
-    }
+    // function getTags(srcRcrd) {
+    //     var str = [];
+    //     if (srcRcrd.tags.length) {
+    //         srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
+    //     }
+    //     return str.join(', ');
+    // }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         var formLvl = getSubFormLvl("sub");
@@ -1598,8 +1598,8 @@ $(document).ready(function(){
             'Publisher': { name: 'Publisher', change: Function.prototype, add: initPublisherForm },
             'Realm': { name: 'Realm', change: onRealmSelection, add: false },
             'Species': { name: 'Species', change: onLevelSelection, add: initTaxonForm },
-            'Tags':  { name: 'Tag', change: false, add: false, 
-                'options': { 'delimiter': ',', 'maxItems': null, 'persist': false }},
+            // 'Tags':  { name: 'Tag', change: false, add: false, 
+            //     'options': { 'delimiter': ',', 'maxItems': null, 'persist': false }},
             'Publication': { name: 'Publication', change: onPubSelection, add: initPubForm },
             'Subject': { name: 'Subject', change: onSubjectSelection, add: false },
             'Object': { name: 'Object', change: onObjectSelection, add: false },
@@ -1694,11 +1694,10 @@ $(document).ready(function(){
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
                     "Issue": "text", "Pages": "text", "Citation Text": "fullTextArea", 
                     "Citation Type": "select"},
-                "exclude": ["Display Name", "Description"], 
+                "exclude": ["Display Name", "Description", "Tags"], 
                 "required": ["Title", "Citation Text", "Citation Type"],
                 "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", 
-                    "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
-                    "Tags", "Authors" ],
+                    "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ],
                 "exitHandler": { create: enablePubField }
             },                                      
             "interaction": {
@@ -1781,8 +1780,8 @@ $(document).ready(function(){
                 "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
-                "Authors": "multiSelect", "Tags": "tags" 
+                "Year": "text", "Doi": "text", "Link Display": "text", 
+                "Link Url": "text", "Authors": "multiSelect" 
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
@@ -1914,7 +1913,6 @@ $(document).ready(function(){
             "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
-            // "ElevationUnits": [ getElevUnitOpts, null ],
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
@@ -1925,17 +1923,12 @@ $(document).ready(function(){
             "Publisher": [ getOptsFromStoredData, 'publisherNames'],
             "Realm": [ getRealmOpts, null ],
             "Species": [ getTaxonOpts, 'Species' ],
-            "Tags": [ getTagOpts, 'source' ],
+            // "Tags": [ getTagOpts, 'source' ],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
         return getOpts(fieldKey);
     }
-    /** Returns an array of elevation unit options objects. */
-    // function getElevUnitOpts() {
-    //     return [ { value: "ft", text: "Feet" }, 
-    //              { value: "m", text: "Meters"} ];
-    // }
     /** Sorts an array of options via sort method. */
     function alphaOptionObjs(a, b) {
         var x = a.text.toLowerCase();
@@ -2420,7 +2413,7 @@ $(document).ready(function(){
                 "volume": { "citation": "publicationVolume" },
                 "issue": { "citation": "publicationIssue" },
                 "pages": { "citation": "publicationPages" },
-                "tags": { "source": "tags" }
+                // "tags": { "source": "tags" }
             },
             "interaction": {
                 "citationTitle": { "interaction": "source" },
@@ -2448,7 +2441,7 @@ $(document).ready(function(){
     function getRelationshipFields(entity) {
         var relationships = {
             "author": ["sourceType"], 
-            "citation": ["citationType", "authors", "tags", "publication"], 
+            "citation": ["citationType", "authors", "publication"], 
             "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher"],
             "publisher": [],

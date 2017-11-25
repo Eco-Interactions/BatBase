@@ -500,7 +500,6 @@
     /**
      * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
-     * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
         const authIds = getTypeObj(data.sourceType, 'author', 'sources');
@@ -512,11 +511,15 @@
         storeData('publisherNames', getTypeNameData(publSrcs));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
-        storeData('sourceTags', getTagData(data.tag, "Source"));        
-        storeData('interactionTags', getTagData(data.tag, "Interaction"));        
+        // storeData('sourceTags', getTagData(data.tag, "Source"));        
     }
+    /**
+     * [entity]Names - an object with each entity's displayName(k) and id.
+     * [entity]Tags - an object with each entity tag's displayName and id.
+     */
     function deriveInteractionData(data) {
         storeData('intTypeNames', getTypeNameData(data.interactionType));
+        storeData('interactionTags', getTagData(data.tag, "Interaction"));        
     }   
     /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {

@@ -161,14 +161,13 @@ class AjaxDataController extends Controller
         $pubType = $this->serializeEntity('PublicationType', $serializer, $em);
         $source = $this->serializeEntity('Source', $serializer, $em);
         $srcType = $this->serializeEntity('SourceType', $serializer, $em);
-        $tag = $this->serializeEntity('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'author' => $author,        'citation' => $citation,
             'source' => $source,        'citationType' => $citType, 
             'sourceType' => $srcType,   'publication' => $publication,  
-            'tag' => $tag,              'publicationType' => $pubType
+            'publicationType' => $pubType
         ));
         return $response;
     }
@@ -187,10 +186,12 @@ class AjaxDataController extends Controller
 
         $interaction = $this->serializeEntity('Interaction', $serializer, $em);
         $intType = $this->serializeEntity('InteractionType', $serializer, $em);
+        $tag = $this->serializeEntity('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array(
-            'interaction' => $interaction,  'interactionType' => $intType
+            'interaction' => $interaction,  'interactionType' => $intType,
+            'tag' => $tag
         ));
         return $response;
     }
