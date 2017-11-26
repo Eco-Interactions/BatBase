@@ -64,7 +64,6 @@
             -- Change author display names to [L, F M S]
         --form-- 
             -- add err in controllers eliminating the possibility of creating orphans
-            -- update detail panel on interaction form submit
             -- Pub form
                 -- Change Doi field to DOI
                 -- update test

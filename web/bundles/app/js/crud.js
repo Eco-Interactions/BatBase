@@ -2568,7 +2568,15 @@ $(document).ready(function(){
     }
     function clearField(fieldName) {
         if (fieldName === 'Note') { return $('#Note-txt').val(""); }
+        clearDetailPanel(fieldName);
         clearCombobox('#'+fieldName+'-sel');
+    }
+    function clearDetailPanel(field) {
+        let detailFields = {
+            'Location': 'loc', 'CitationTitle': 'cit', 'Publication': 'pub' };
+        if (Object.keys(detailFields).indexOf(field) !== -1) {  
+            emptySidePanel(detailFields[field], true);
+        }
     }
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {
