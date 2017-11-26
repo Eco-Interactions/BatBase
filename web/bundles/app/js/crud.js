@@ -2525,6 +2525,7 @@ $(document).ready(function(){
         showSuccessMsg("New Interaction successfully created.");
         initFormParams("create", "interaction");
         resetIntFields(vals);
+        $('#top-cancel').val(" Close "); 
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {
@@ -2551,13 +2552,14 @@ $(document).ready(function(){
         }
     } /* End getPinnedValsObj */
     /**
-     * Resets the top-form in preparation for another entry. All fields without  
-     * a pinned value will be reset. 
+     * Resets the top-form in preparation for another entry. All fields without a pinned
+     * value will be reset. checkRequiredFields is triggered to update the submit button.
      */
     function resetIntFields(vals) {
-        disableSubmitBttn("top-submit"); 
+        disableSubmitBttn("#top-submit");
         initInteractionParams();
         resetUnpinnedFields(vals);
+        $(fParams.forms.top.reqElems[0]).change();
     }
     function resetUnpinnedFields(vals) {
         for (var field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
