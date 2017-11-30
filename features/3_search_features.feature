@@ -54,6 +54,17 @@ Feature: Search page features
 		Then I should see "Expand All"
 
 	@javascript
+	Scenario:  I should be able to reset the data tree.
+		Given the database grid is in "Source" view
+		And I group interactions by "Publications"
+		And I select "Journal" from the "Publication Type" dropdown
+     	And I see "2" rows in the grid data tree
+		When I press "Reset Data"
+		And I should see "4" rows in the grid data tree
+		And I should see "- All -" in the "Publication Type" dropdown
+		And data in the interaction rows
+
+	@javascript
 	Scenario:  I should be able to show the search tips
 		When I press "Search Tips"
 		Then I should see "Tips for searching"

@@ -54,5 +54,5 @@ Feature: Initialize Search Page Database
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		Then I should see "4" rows in the grid data tree
-		And I should see "Cockle" in the tree
+		And I should see "Cockle, Anya" in the tree
 		And data in the interaction rows

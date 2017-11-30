@@ -1,6 +1,6 @@
 Feature: Local Data Storage
 	In order to search the most recent interaction data
-	As a web visitor
+	As an editor
 	The remote and local databases needs to sync on search page load
 
 	@javascript

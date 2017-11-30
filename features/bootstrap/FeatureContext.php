@@ -6,7 +6,7 @@ use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 
 require_once(__DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
-require_once __DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php';
+require_once( __DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
 
 /**
  * Defines application features from the specific context.
@@ -45,8 +45,9 @@ class FeatureContext extends RawMinkContext implements Context
      *
      * @Then (I )break
      */
-    public function iPutABreakpoint()
+    public function iPutABreakpoint($errMsg = null)
     {
+        if ($errMsg !== null) { fwrite(STDOUT, "\n".$errMsg."\n");} 
         fwrite(STDOUT, "\033[s    \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
         while (fgets(STDIN, 1024) == '') {}
         fwrite(STDOUT, "\033[u");
@@ -291,6 +292,13 @@ class FeatureContext extends RawMinkContext implements Context
         $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
         usleep(500000);
         $this->textSelectedInField($text, $selId);
+        $this->blurNextDynamicDropdown($selId, $count);
+    }
+
+    private function blurNextDynamicDropdown($prevId, $count)
+    {
+        $selId = substr($prevId, 0, -1).++$count;
+        $this->getUserSession()->executeScript("$('$selId')[0].selectize.blur();");
     }
 
     /**
@@ -298,10 +306,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iUncheckTheTimeUpdatedFilter()
     {
-        usleep(500000);
-        $checkbox = $this->getUserSession()->getPage()->find('css', '#shw-chngd');  
-        $checkbox->uncheck();  
         usleep(1000000);
+        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
+        $checkbox->uncheck();  
+        usleep(500000);
     }
 
     /**
@@ -661,9 +669,9 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree($nodeTxt);
         $rows = $this->getInteractionsRows($nodeTxt); 
         assertNotNull($rows, "Didn't find any interaction rows.");
-        if ($count != count($rows)) { $this->printErrorAndBreak("Found ". count($rows)." rows under $nodeTxt. Expected $count"); }
+        if ($count != count($rows)) { $this->iPutABreakpoint("Found ". count($rows)." rows under $nodeTxt. Expected $count"); }
         assertEquals($count, count($rows));
-    }
+    } 
 
     /**
      * @Then I should see :count interactions attributed
@@ -701,7 +709,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->iExpandInTheDataTree($parentNode);
         $row = $this->getGridRow($text);
-        if ($row === null) { $this->printErrorAndBreak("Couldn't find $text in the tree"); }
+        if ($row === null) { $this->iPutABreakpoint("Couldn't find $text in the tree"); }
         assertNotNull($row);
         $this->collapseDataTreeNode($parentNode);
     }

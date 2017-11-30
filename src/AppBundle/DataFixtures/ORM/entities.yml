@@ -1,7 +1,7 @@
 AppBundle\Entity\Author:
     Author-1:  #282
         slug: gardner
-        displayName: Gardner
+        displayName: 'Gardner, Alfred L'
         firstName: Alfred
         middleName: L
         lastName: Gardner
@@ -13,7 +13,7 @@ AppBundle\Entity\Author:
         updatedBy: '@User-1'
     Author-2:   #315
         slug: bloedel
-        displayName: Bloedel
+        displayName: 'Bloedel, P'
         firstName: P
         lastName: Bloedel
         fullName: 'P Bloedel'
@@ -24,7 +24,7 @@ AppBundle\Entity\Author:
         updatedBy: '@User-1'
     Author-3:  #250
         slug: baker-h
-        displayName: Baker(H)
+        displayName: 'Baker, Herbert G'
         firstName: Herbert
         middleName: G
         lastName: Baker
@@ -36,7 +36,7 @@ AppBundle\Entity\Author:
         updatedBy: '@User-1'
     Author-4:  #274
         slug: cockle
-        displayName: Cockle
+        displayName: 'Cockle, Anya'
         firstName: Anya
         lastName: Cockle
         fullName: 'Anya Cockle'
@@ -1534,7 +1534,7 @@ AppBundle\Entity\Source:
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-10:  #634
-        displayName: Gardner
+        displayName: 'Gardner, Alfred L'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-1']  #517
         author: '@Author-1' #282
@@ -1542,7 +1542,7 @@ AppBundle\Entity\Source:
         updated: '<(new \DateTime("2017-01-24 15:44:16", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-11:  #666
-        displayName: Bloedel
+        displayName: 'Bloedel, P'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-2']  #541
         author: '@Author-2'  #315
@@ -1550,7 +1550,7 @@ AppBundle\Entity\Source:
         updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-12:  #110
-        displayName: Baker(H)
+        displayName: 'Baker, Herbert G'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-3']  #475
         author: '@Author-3'  #250
@@ -1558,7 +1558,7 @@ AppBundle\Entity\Source:
         updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-13:  #624
-        displayName: Cockle
+        displayName: 'Cockle, Anya'
         sourceType: '@SourceType-3' #
         contributions: ['@Contribution-4'] #504
         author: '@Author-4' #274

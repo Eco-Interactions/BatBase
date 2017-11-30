@@ -97,7 +97,7 @@ Feature: Editable data via the Search Database page
 		And I change the "Link Display" field "input" to "Book Website"
 		And I change the "Doi" field "input" to "10.1037/rmh0000008"
 		And I change the "Publisher" dropdown field to "University of Paris VI"
-		And I change the "Authors" dynamic dropdown field to "Cockle"
+		And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
 		And I press "Update Publication"
 		And I select "Book" from the "Publication Type" dropdown
 		And I click on the edit pencil for the "Book of Mammalogy" row
@@ -108,27 +108,27 @@ Feature: Editable data via the Search Database page
 		Then I should see "www.link.com" in the "Link Url" field "input"
 		Then I should see "Book Website" in the "Link Display" field "input"
 		Then I should see "University of Paris VI" in the "Publisher" dropdown field
-		Then I should see "Cockle" in the "Authors" field dynamic dropdown
+		Then I should see "Cockle, Anya" in the "Authors" field dynamic dropdown
 
 	@javascript
 	Scenario:  I should be able to edit the data of an existing author
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
-		And I click on the edit pencil for the "Cockle" row
+		And I click on the edit pencil for the "Cockle, Anya" row
 		And I see "Editing Author"
-		When I change the "Display Name" field "input" to "Cockel (K)"
-		And I change the "First Name" field "input" to "Joy"
+		When I change the "First Name" field "input" to "Joy"
 		And I change the "Middle Name" field "input" to "Karen"
 		And I change the "Last Name" field "input" to "Cockel"
+		And I change the "Suffix" field "input" to "Jr"
 		And I change the "Link Url" field "input" to "www.link.com"
 		And I change the "Link Display" field "input" to "Author Website"
 		And I press "Update Author"
-		And I click on the edit pencil for the "Cockel (K)" row
+		And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
 		And I see "Editing Author"
-		Then I should see "Cockel (K)" in the "Display Name" field "input"
 		Then I should see "Joy" in the "First Name" field "input"
 		Then I should see "Karen" in the "Middle Name" field "input"
 		Then I should see "Cockel" in the "Last Name" field "input"
+		Then I should see "Jr" in the "Suffix" field "input"
 		Then I should see "www.link.com" in the "Link Url" field "input"
 		Then I should see "Author Website" in the "Link Display" field "input"
 
@@ -136,7 +136,7 @@ Feature: Editable data via the Search Database page
 	Scenario:  I should be able to edit the data of an existing citation
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
-		And I expand "Gardner" in the data tree
+		And I expand "Gardner, Alfred L" in the data tree
 		And I click on the edit pencil for the "Feeding habits" row
 		And I see "Editing Citation"
 		And I change the "Citation Text" field "textarea" to "Test Citation Text"
@@ -150,10 +150,10 @@ Feature: Editable data via the Search Database page
 		And I change the "Link Url" field "input" to "www.link.com"
 		And I change the "Link Display" field "input" to "Author Website"
 		And I change the "Doi" field "input" to "10.1037/rmh0000008"
-		When I change the "Authors" dynamic dropdown field to "Cockel (K)"
+		When I change the "Authors" dynamic dropdown field to "Cockel, Joy Karen Jr"
 		And I press "Update Citation"
-		And I should not see "Feeding habits" under "Gardner" in the tree
-		And I expand "Cockel (K)" in the data tree
+		And I should not see "Feeding habits" under "Gardner, Alfred L" in the tree
+		And I expand "Cockel, Joy Karen Jr" in the data tree
 		And I click on the edit pencil for the "Feeding habits of bats" row
 		And I see "Editing Citation"
 		Then I should see "Test Citation Text" in the "Citation Text" field "textarea"
@@ -167,7 +167,7 @@ Feature: Editable data via the Search Database page
 		And I should see "www.link.com" in the "Link Url" field "input"
 		And I should see "Author Website" in the "Link Display" field "input"
 		And I should see "10.1037/rmh0000008" in the "Doi" field "input"
-		And I should see "Cockel (K)" in the "Authors" field dynamic dropdown
+		And I should see "Cockel, Joy Karen Jr" in the "Authors" field dynamic dropdown
 
 	@javascript
 	Scenario:  I should be able to change an interaction's publication
@@ -184,23 +184,6 @@ Feature: Editable data via the Search Database page
 		And I expand "Book of Mammalogy" in the data tree
 		Then I should see "3" interactions under "Observations on the life histories of Panama bats"
 		And I should see "3" interactions under "Feeding habits of bats"
-
-	# @javascript
-	# Scenario:  I should be able to change an interaction's citation  #TODO
-	# 	Given the database grid is in "Source" view
-	# 	And I group interactions by "Publications"
-	# 	And I break
-	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
-	# 	And I click on the edit pencil for the first interaction of "Feeding habits of bats"
-	# 	And I see "Editing Interaction"
-	# 	When I change the "Publication" dropdown field to "Book of Mammalogy"
-	# 	And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
-	# 	And I press "Update Interaction"
-	# 	And I uncheck the time-updated filter
-	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
-	# 	And I expand "Book of Mammalogy" in the data tree
-	# 	Then I should see "3" interactions under "Observations on the life histories of Panama bats"
-	# 	And I should see "3" interactions under "Feeding habits of bats"
 
 	@javascript
 	Scenario:  I should be able to change an interaction's location
@@ -275,5 +258,22 @@ Feature: Editable data via the Search Database page
 		Then I should see the "Seed" interaction tag
 		Then I should not see the "Flower" interaction tag
 		Then I should see "New Test Note Description" in the "Note" field "textarea"
+
+	# @javascript
+	# Scenario:  I should be able to change an interaction's citation  #TODO
+	# 	Given the database grid is in "Source" view
+	# 	And I group interactions by "Publications"
+	# 	And I break
+	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I click on the edit pencil for the first interaction of "Feeding habits of bats"
+	# 	And I see "Editing Interaction"
+	# 	When I change the "Publication" dropdown field to "Book of Mammalogy"
+	# 	And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
+	# 	And I press "Update Interaction"
+	# 	And I uncheck the time-updated filter
+	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I expand "Book of Mammalogy" in the data tree
+	# 	Then I should see "3" interactions under "Observations on the life histories of Panama bats"
+	# 	And I should see "3" interactions under "Feeding habits of bats"
 
 	#Test form error handling

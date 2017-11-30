@@ -35,14 +35,15 @@ Feature: Initialize Search Page Database
 		Given I open the New Interaction form
 		And I enter "Test Publication" in the "Publication" field dropdown
 		And I see "New Publication"
-		When I enter "Test Author" in the "Authors" field dynamic dropdown
+		When I enter "Smith, George" in the "Authors" field dynamic dropdown
 		And I type "George" in the "First Name" field "input"
 		And I type "Michael" in the "Middle Name" field "input"
 		And I type "Smith" in the "Last Name" field "input"
+		And I type "Sr" in the "Suffix" field "input"
 		And I type "www.author.com" in the "Link Url" field "input"
 		And I type "Test Author Webiste" in the "Link Display" field "input"
 		And I press "Create Author"
-		Then I should see "Test Author" in the "Authors" field dynamic dropdown
+		Then I should see "Smith, George Michael Sr" in the "Authors" field dynamic dropdown
 
 	@javascript
 	Scenario:  I should be able to create a publication with its sub-form
@@ -55,14 +56,14 @@ Feature: Initialize Search Page Database
 		And I type "Test Publication Webiste" in the "Link Display" field "input"
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
 		And I select "Test Publisher" from the "Publisher" field dropdown
-		And I select "Test Author" from the "Authors" field dynamic dropdown
+		And I select "Smith, George Michael Sr" from the "Authors" field dynamic dropdown
 		And I press "Create Publication"
 		Then I should see "Test Publication" in the "Publication" field
 		And I should see "Test Publication" in the "Publication" detail panel
 		And I should see "Test description" in the "Publication" detail panel
 		And I should see "Book" in the "Publication" detail panel
 		And I should see "Test Publisher" in the "Publication" detail panel
-		And I should see "Test Author" in the "Publication" detail panel
+		And I should see "Smith, George Michael Sr" in the "Publication" detail panel
 
 	@javascript
 	Scenario:  I should be able to create a citation with its sub-form
@@ -80,7 +81,7 @@ Feature: Initialize Search Page Database
 		And I type "www.citation.com" in the "Link Url" field "input"
 		And I type "Test Citation Webiste" in the "Link Display" field "input"
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
-		And I select "Cockel (K)" from the "Authors" field dynamic dropdown
+		And I select "Cockel, Joy Karen Jr" from the "Authors" field dynamic dropdown
 		And I press "Create Citation"
 		Then I should see "Test Citation" in the "Citation Title" field
 		And I should see "Test Citation" in the "Citation" detail panel
@@ -90,7 +91,7 @@ Feature: Initialize Search Page Database
 		And I should see "29" in the "Citation" detail panel
 		And I should see "3" in the "Citation" detail panel
 		And I should see "333-666" in the "Citation" detail panel
-		And I should see "Test Author, Cockel (K)" in the "Citation" detail panel
+		And I should see "Smith, George Michael Sr, Cockel, Joy Karen Jr" in the "Citation" detail panel
 
 	@javascript
 	Scenario:  I should be able to create a location with its sub-form
@@ -320,20 +321,20 @@ Feature: Initialize Search Page Database
 		And the expected data in the interaction row
 
 	@javascript
-	Scenario:  I should see the newly created interactions under the author [Cockel (K)]
+	Scenario:  I should see the newly created interactions under the author [Cockel, Joy Karen Jr]
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
-		When I expand "Cockel (K)" in the data tree
+		When I expand "Cockel, Joy Karen Jr" in the data tree
 		Then I should see "3" interactions under "Test Citation"
 		And the expected data in the interaction row
 
 	@javascript
-	Scenario:  I should see the newly created interactions under the author [Test Author]
+	Scenario:  I should see the newly created interactions under the author [Smith, George Michael Sr]
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
-		When I expand "Test Author" in the data tree
+		When I expand "Smith, George Michael Sr" in the data tree
 		And I expand "Test Citation" in the data tree
 		And I expand "Test Publication" in the data tree
 		And I expand "Test Citation" in level "3" of the data tree
