@@ -755,7 +755,9 @@ $(document).ready(function(){
             opts.push({ 
                 value: id, text: fParams.records.location[id].displayName });
         }
-        return opts.sort(alphaOptionObjs);
+        opts = opts.sort(alphaOptionObjs);
+        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        return opts;
     }
     /**
      * When a country/region is selected, the location combobox is repopulated with its 
@@ -771,14 +773,18 @@ $(document).ready(function(){
         var opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
-        return opts.concat([{ value: loc.id, text: loc.displayName }]).sort(alphaOptionObjs);
+        opts = opts.concat([{ value: loc.id, text: loc.displayName }])
+            .sort(alphaOptionObjs);
+        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        return opts;
     }
     /** 
      * When a location is selected, its country/region is selected in the top-form
      * combobox and the location record's data is added to the detail panel. If 
      * the location was cleared, the detail panel is cleared. 
      */     
-    function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
+    function onLocSelection(val) {                                              //console.log("location selected 'val' = '"+ val+"'");
+        if (val === "create") { return $('#Location-sel')[0].selectize.createItem("create"); }
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
         var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
@@ -806,13 +812,18 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country/region combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        var formLvl = getSubFormLvl("sub");
+        let formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Location', null, formLvl); }
+        let vals = {
+            "Display Name": val === "create" ? "" : val, //clears form trigger value
+            "Country": $('#Country-Region-sel').val()
+        }; 
         $('#Location_row').after(initSubForm(
-            "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
+            "location", formLvl, "flex-row med-form", vals, "#Location-sel"));
         initComboboxes("location");
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
+        clearCombobox('#Location-sel'); 
         return { "value": "", "text": "Creating Location..." };
     }
     /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
@@ -1498,8 +1509,10 @@ $(document).ready(function(){
         var prntLvl = getNextFormLevel("parent", formLvl);
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, formLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", formLvl, "sml-left sml-form", {}, parentSelId));
+            "author", formLvl, "sml-left sml-form", {"Last Name": val}, parentSelId));
+        enableSubmitBttn("#"+formLvl+"-submit");
         disableSubmitBttn("#"+prntLvl+"-submit");
+        $('#FirstName_row input').focus();
         return { "value": "", "text": "Creating Author..." };
     }
     /**
