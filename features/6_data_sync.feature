@@ -1,4 +1,4 @@
-Feature: Local Data Storage
+Feature: Local Data Storage updates with changes made by other editors
 	In order to search the most recent interaction data
 	As an editor
 	The remote and local databases needs to sync on search page load

@@ -1,7 +1,7 @@
-Feature: Search page features
+Feature: Search page features and database grid controls
 	In order to interact with the database
 	As a web visitor
-	I should be able to use the various features of the search page
+	I should be able to use the various features and controls on the search page
 
 	Background:
 		Given I am on "/search"
@@ -52,17 +52,6 @@ Feature: Search page features
 		And I see "Collapse All"
 		When I press "collapse-1"
 		Then I should see "Expand All"
-
-	@javascript
-	Scenario:  I should be able to reset the data tree.
-		Given the database grid is in "Source" view
-		And I group interactions by "Publications"
-		And I select "Journal" from the "Publication Type" dropdown
-     	And I see "2" rows in the grid data tree
-		When I press "Reset Data"
-		And I should see "4" rows in the grid data tree
-		And I should see "- All -" in the "Publication Type" dropdown
-		And data in the interaction rows
 
 	@javascript
 	Scenario:  I should be able to show the search tips

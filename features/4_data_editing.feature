@@ -1,7 +1,7 @@
-Feature: Editable data via the Search Database page
-	In order to find data about bat eco-interactions
-	As a web visitor
-	I need to be able to search the database
+Feature: Edit data in the database
+	In order to have accurate data about bat eco-interactions
+	As an editor
+	I need to be able to edit the data in the database
 
 	Background:
 		Given I am on "/login"

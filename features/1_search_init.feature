@@ -1,7 +1,7 @@
-Feature: Initialize Search Page Database
+Feature: Search Page Database Initialization
 	In order to find data about bat eco-interactions
 	As a web visitor
-	I need to be able to search the database
+	I need to be able to load the database
 
 	Background:
 		Given I am on "/search"

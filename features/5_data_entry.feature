@@ -1,7 +1,7 @@
-Feature: Initialize Search Page Database
-	In order to add data about bat eco-interactions
+Feature: Add new data to the database
+	In order to have accurate data about bat eco-interactions
 	As an editor
-	I need to be able to use the create forms
+	I need to be able to add new data to the database
 
 	Background:
 		Given I am on "/login"

@@ -2,9 +2,7 @@
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
-        -- Change domain -> realm, level -> rank.
         -- Style the 'change password' page
-        -- Bad credentials exception on wrong password?
         -- remove eif declarations in js files.
         -- Added header to FOS pages 
             -- change password page (/profile/change-password)
@@ -18,21 +16,18 @@
         -- update 'shw-changd' 'custom' value on date selection
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
-        -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
-        -- //Refactor fillIntData (crud.js)
         -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        -- refactor realm to domain until the name change happens in the backend
-        -- Location --
-            -- Add message to inform user that new countries can not be created.
-            -- When nothing is selected but a country, a habitat type, and the 
-                displayname, suggest to user they use the country-habitat combo
-                that already exists.
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
         --form--
+            -- Location --
+                -- When nothing is selected but a country, a habitat type, and the 
+                    displayname, suggest to user they use the country-habitat combo
+                    that already exists.
+            -- Auto generate citation full text from filled fields
             -- Validate that genus and species have the same genus names.
             -- refactor initcomboboxes to need only the form-lvl param
             -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
@@ -44,63 +39,44 @@
                    them to add initials if not.  
             -- Data storage err - Ensure user can't close the form any other way 
                 than clicking the 'ok' in the error meseage.
+            -- Pub form
+                -- Change Doi field to DOI
+                -- update test
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
-            -- standardize taxon 'levels' storage
             -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
             -- add text search to all views.
             -- update all the comments that mention the updates-since filter to 
-                'int-updated-at'
+                'ints-updated-at'
+        -- Data storage --
         --css--
             --refactor to use parital, effectively 'group', selectors
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
         -- UPGRADE --
             -- Add more sophisticated logging
-    --Asap (Before next release!!)--        
-        -- site -- 
-            -- Change author display names to [L, F M S]
-        --form-- 
+        --Refactor--
+            -- Add '-sel' to the edit taxon form's 'txn-lvl' field 
+
+    --Asap--        
+        -- CRUD --
             -- add err in controllers eliminating the possibility of creating orphans
-            -- Pub form
-                -- Change Doi field to DOI
-                -- update test
-            -- Cit form
-                -- remove tags field
-            -- auth form
-                -- remove 'display name' field
-            -- loc form
-                -- Add top location option, 'Add a new Location...'
-                -- Country/region should be auto selected on form open
-                -- don't allow creation of location with only region selected 
-            -- data submit process
-                -- tags must be hardcoded somewhere. Adding 'secondary' to a citation added the 'seed' tag
-        --search--
-            -- Toggle expand tree button after publication type filter changes
         -- sync data --
             -- Add error handling for pending updates that can't be resolved 
-        --MISC--
-            -- Change author display names to Last, First M Suffix 
+        -- MISC --
             -- Comment the crud controller method 'setupdatedattimes'
 
 
 ~~~ What to test ~~~
     > Search Page
         > CSV downloads
-        > Data Storage
-            > Data is added and removed correctly  
-            > The grid should reload as expect with the form close
-                > With and without submit. 
-                > interaction forms and sub-entity forms. 
         > Grid
             > Unq Vals col filter
         > Forms
             -- displays correctly.
             -- all errors are caught and handled as expected
-            --INT CREATE FORM--
-                -- Pinned fields persist as expected
 
 ##CHANGES##
 

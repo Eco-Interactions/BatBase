@@ -1,7 +1,7 @@
-Feature: Search page features
-	In order to search the database
+Feature: Filtering the data displayed in the database grid
+	In order to find specific data about bat eco-interactions
 	As a web visitor
-	I should be able to use the various features of the search page
+	I should be able to use the various search options of the search page
 
 	Background:
 		Given I am on "/search"
