@@ -2,6 +2,10 @@ default:
     extensions:
         Behat\MinkExtension:
             base_url: http://localhost/batplant/web/app_test.php
+            sessions:
+                javascript:
+                  selenium2:
+                    capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=900,1440']}, "marionette": true}
             goutte: ~
             selenium2: 
                 wd_host: "http://127.0.0.1:4444/wd/hub"
@@ -14,8 +18,3 @@ default:
             contexts:
                 - FeatureContext
                 - Behat\MinkExtension\Context\MinkContext
-                # - SearchDatabaseContext
-        # database:
-        #     contexts:
-        #     paths: [ %paths.base%/features/database ]
-

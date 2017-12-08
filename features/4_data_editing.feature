@@ -9,7 +9,6 @@ Feature: Edit data in the database
 		And I fill in "Password" with "passwordhere"
 		And I press "_submit"
 		And I am on "/search"
-		And I resize browser window
 		And I should see "TestEditor"
 		# And the database has loaded
 		# And I exit the tutorial

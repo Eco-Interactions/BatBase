@@ -5,8 +5,8 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 
-require_once(__DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
-require_once( __DIR__.'/../../vendor/symfony/phpunit-bridge/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
+require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/vendor/autoload.php');
+require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
 
 /**
  * Defines application features from the specific context.
@@ -33,14 +33,6 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given I resize browser window
-     */
-    public function iResizeBrowserWindow()
-    {
-        $this->getUserSession()->resizeWindow(1440, 900, 'current');
-    }
-
-    /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
      *
      * @Then (I )break
@@ -63,42 +55,6 @@ class FeatureContext extends RawMinkContext implements Context
         $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
         assertNotNull($row, "There are no rows in the database grid.");
     }
-
-    /** -------------------------- Page Interactions -------------------------*/
-
-    // /**
-    //  * @When I press the edit pencil for the :section
-    //  */
-    // public function iPressTheEditPencilForThe($section)
-    // {
-    //     $map = [ 'home page second column' => '#home-pg-second-col-edit'];
-    //     $this->getUserSession()->executeScript("$('$map[$section]').click();");
-    //     usleep(500000);
-    // }
-
-    // /**
-    //  * @When I change the header to :text
-    //  */
-    // public function iChangeTheHeaderTo($text)
-    // {
-    //     $this->getUserSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
-    //     // $this->getUserSession()->executeScript("$('.trumbowyg-editor').change();");
-    // }
-
-    // /**
-    //  * @When I wait for the wysiwyg editor to update and close successfully
-    //  */
-    // public function iWaitForTheWysiwygEditorToUpdateAndCloseSuccessfully()
-    // {
-    // }
-    // /**
-    //  * @When I save and close the wysiwyg editor
-    //  */
-    // public function iSaveAndCloseTheWysiwygEditor()
-    // {
-    //     $this->getUserSession()->getPage()->pressButton('Save');
-    //     $this->getUserSession()->wait( 5000, "!$('.wysiwyg').length" );
-    // }
 
     /** -------------------------- Search Page Interactions ------------------*/
     /**
@@ -951,11 +907,39 @@ class FeatureContext extends RawMinkContext implements Context
         return isset($this->curUser) ? $this->curUser : $this->getSession();
     }
 
-    private function printErrorAndBreak($errMsg)
-    {
-        print("\n".$errMsg."\n");
-        usleep(200000);
-        $this->iPutABreakpoint();
-    }
+    /** -------------------------- Page Interactions -------------------------*/
 
+    // /**
+    //  * @When I press the edit pencil for the :section
+    //  */
+    // public function iPressTheEditPencilForThe($section)
+    // {
+    //     $map = [ 'home page second column' => '#home-pg-second-col-edit'];
+    //     $this->getUserSession()->executeScript("$('$map[$section]').click();");
+    //     usleep(500000);
+    // }
+
+    // /**
+    //  * @When I change the header to :text
+    //  */
+    // public function iChangeTheHeaderTo($text)
+    // {
+    //     $this->getUserSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
+    //     // $this->getUserSession()->executeScript("$('.trumbowyg-editor').change();");
+    // }
+
+    // /**
+    //  * @When I wait for the wysiwyg editor to update and close successfully
+    //  */
+    // public function iWaitForTheWysiwygEditorToUpdateAndCloseSuccessfully()
+    // {
+    // }
+    // /**
+    //  * @When I save and close the wysiwyg editor
+    //  */
+    // public function iSaveAndCloseTheWysiwygEditor()
+    // {
+    //     $this->getUserSession()->getPage()->pressButton('Save');
+    //     $this->getUserSession()->wait( 5000, "!$('.wysiwyg').length" );
+    // }
 }

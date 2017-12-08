@@ -9,7 +9,6 @@ Feature: Add new data to the database
 		And I fill in "Password" with "passwordhere"
 		And I press "_submit"
 		And I am on "/search"
-		And I resize browser window
 		Then I should see "TestEditor"
 
 	# @javascript
