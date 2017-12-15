@@ -7,8 +7,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-use AppBundle\Entity\Interaction;
-
 /**
  * @up -> Merges JSON data into the database.
  */
@@ -46,14 +44,14 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
      */
     private function mergeEntityData($interactions)
     {
-        foreach ($interactions as $intData) { // ignore: slug, id
-            $int = new Interaction(); // "{add}": 
+        foreach ($interactions as $intData) { 
+            $int = $this->getNewEntity('interaction'); 
             $this->setEntityData($int, 'interaction', $intData);
             $int->setSource($this->getSource($int, $intData['source']));
+            $this->addInteractionTag($int, $intData);
             $this->em->flush();
         }
-        // $this->addContributions();
-        // $this->addInteractionTags();
+        $this->addContributions($this->allData['contribution']);
         $this->em->flush();
     }
 
@@ -184,6 +182,27 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         $setter = 'set'.ucfirst($srcType);
         $srcEntity->$setter($typeEntity);
     }
+    /** ----------- Set Other Data -------------------------------------------*/
+    private function addContributions($contributions)
+    {
+        foreach ($contributions as $contribData) {
+            $this->createEntity('contribution', $contribData['id']);
+        }
+    }
+    /** Note: only adds a single tag currently. */
+    private function addInteractionTag(&$int, $intData)
+    {  
+        $tagId = $this->getInteractionTag($intData); 
+        $tag = $this->em->getRepository('AppBundle:Tag')
+            ->findOneBy(['id' => $tagId]);
+        $int->addTag($tag);
+    }
+    private function getInteractionTag($intData)
+    {
+        foreach ($this->allData['interactionTag'] as $tag) {
+            if ($tag['interaction'] == $intData['id']) { return $tag['tag']; }
+        }
+    }
 
     /** ----------- Helpers --------------------------------------------------*/
     private function getNewEntity($entityType)
@@ -207,7 +226,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         return [
             'author' => ['source' => 'source', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'citation' => ['source' => 'source', 'citationType' => 'citationType', 'createdBy' => 'user', 'updatedBy' => 'user'],
-            'contribution' => ['source' => 'source', 'createdBy' => 'user', 'updatedBy' => 'user'],
+            'contribution' => ['workSource' => 'source', 'authorSource' => 'source', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'interaction' => ['source' => 'source', 'interactionType' => 'interactionType',
                'location' => 'location', 'subject' => 'taxon', 'object' => 'taxon', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'location' => ['parentLoc' => 'location', 'locationType' => 'locationType', 
