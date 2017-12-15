@@ -35,103 +35,149 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->allData = $this->getJsonData();
 
-        $data = $this->getJsonData();
-
-        $this->mergeEntityData($data["interaction"], $data);
+        $this->mergeEntityData($this->allData["interaction"]);
     }
-
-    private function mergeEntityData($interactions, $allData)
+    /**
+     * Adds all new data to the database. Starts by adding each interaction entity
+     * and related sub-entity data, flushing between each record, and then adds 
+     * the remaining data.
+     */
+    private function mergeEntityData($interactions)
     {
-        // foreach ($interactions as $intData) { // ignore: slug, id
+        foreach ($interactions as $intData) { // ignore: slug, id
             $int = new Interaction(); // "{add}": 
-            $this->addAllRelatedInteractionData($interactions[0], $int, $allData);
-        // }
+            $this->setEntityData($int, 'interaction', $intData);
+            $int->setSource($this->getSource($int, $intData['source']));
+            $this->em->flush();
+        }
+        // $this->addContributions();
+        // $this->addInteractionTags();
         $this->em->flush();
-        // $em->persist($int);
     }
 
-    private function addAllRelatedInteractionData($intData, &$int, $allData)
-    {    
-        $relFields = ["source", "interactionType", "location", "subject", 
-            "object", "createdBy", "updatedBy"];
+    /** ---------------- Set Entity Data ------------------------------------ */
+    /** Sets all new data for the passed entity. */
+    private function setEntityData(&$entity, $entType, $entData)
+    {   //print("\nSetting entity data = ".$entType." \n");print_r($entData);
+        $relFields = $this->getEntityRelFields($entType);
+        $skipFields = ['id', 'slug', 'created', 'updated', 'deletedAt', 'parentSource', 'source'];
+        $parents = ['parentLoc', 'parentTaxon'];
 
-        // foreach ($intData as $field => $value) {
-            // $setter = 'set'.ucfirst($field);  //getFieldName split('_') ucfirst
-            // if (in_array($field, $relFields)) {
-                $entity = $this->createRelatedEntity("source", $intData["source"], $allData);
-                // $int->$setter = $entity;
-            // }
-            // $int->$setter = $value;
-        // }
+        foreach ($entData as $field => $val) { 
+            if (in_array($field , $skipFields) || $val === null) { continue; }  //print("\n    Setting field = ". $field);
+            $fieldType = array_key_exists($field, $relFields) ? $relFields[$field] : $field; 
+            $val = in_array($field, $parents) ? 
+                $this->getParent($val, $entType) :
+                (array_key_exists($field, $relFields) ? //print("\n setting rel field ". $field);
+                    $this->getRelatedEntity($val, $fieldType) :
+                    $val);   //print("\n setting field ". $field);
+            $setter = 'set'.ucfirst($field);  
+            $entity->$setter($val);
+        }  
+        $this->em->persist($entity);
+        return $entity;
+    }
+    /** Finds or creates the entity parent and returns. */
+    private function getParent($id, $entType)
+    {   //print("\n    getParent ".$entType." with id = ". $id);
+        $parent = $this->getExistingEntity($id, $entType);
+        if ($parent === null) { 
+            $parent = $this->getNewEntity($entType);
+            $entityData = $this->getEntityData($entType, $id, false);  
+            $parent = $this->setEntityData($parent, $entType, $entityData);
+        }
+        return $parent;
+    }
+    /** Finds or creates the related entity and returns. */  
+    private function getRelatedEntity($id, $entType)
+    {   //print("\n       Getting related ". $entType);
+        $entity = $this->getExistingEntity($id, $entType);      
+        return $entity !== null ? $entity : $this->createEntity($entType, $id);
     }
 
-    private function createRelatedEntity($intField, $intVal, $allData)
+    /** 
+     * Checks whether the entity exists under the passed id. If found, the entity
+     * is verified as the intended entity by checking the display name against the
+     * entity in the new data. Returns the entity or false.
+     */
+    private function getExistingEntity($id, $entType)
     {
-        $trans = [ "subject" => "taxon", "object" => "taxon", "updatedBy" => "user", "createdBy" => "user" ];
-        $entityType = array_key_exists($intField, $trans) ? $trans[$intField] : $intField; 
-
-        $entity = $this->getNewEntity($entityType);
-        $entityData = $this->getEntityData($entityType, $intVal, false, $allData);  
-            
-        return $entityType === "source" ? 
-            $this->setSourceData($entity, $entityType, $entityData, $allData) : 
-            $this->setEntityData($entity, $entityType, $entityData, $allData);
+        $mutable = ['author', 'citation', 'interaction', 'location', 'publication', 
+            'source', 'taxon' ];
+        $idEntity = $this->em->getRepository('AppBundle:'.ucfirst($entType))
+            ->findOneBy(['id' => $id]);
+        if (!in_array($entType, $mutable)) { return $idEntity; }
+        return $this->checkDisplayNameForCorrectEntity($idEntity, $entType, $id);
+    }
+    /**
+     * Checks that the entity found with the passed id is the entity passed in the 
+     * new data by checking their respective display names. Returns either the entity
+     * found by, or that found by display name.
+     */
+    private function checkDisplayNameForCorrectEntity($idEntity, $entType, $id)
+    {
+        $newEntData = $this->getEntityData($entType, $id, false);
+        $nameEntity = $entity = $this->em->getRepository('AppBundle:'.ucfirst($entType))
+            ->findOneBy(['displayName' => $newEntData['displayName']]);
+        if ($idEntity && strpos($idEntity->getDisplayName(), $newEntData['displayName']) !== false) {
+            return $nameEntity;            
+        }
+        return $idEntity ? $idEntity : $nameEntity;
+    }
+    /** Creates a new entity with the new data and returns. */
+    private function createEntity($entType, $id)
+    {   //print("\n\n  Creating '".$entType."'");
+        $entity = $this->getNewEntity($entType);
+        $entityData = $this->getEntityData($entType, $id, false); 
+        return $entType === "source" ?
+            $this->createSource($entity, $entType, $entityData) : 
+        $this->setEntityData($entity, $entType, $entityData);
     }
 
     /** ---------------- Set Source Data ------------------------------------ */ 
-    private function setSourceData(&$srcEntity, $entityType, $entData, $allData)
-    {        
-        $this->createAndSetParentSourceEntity($srcEntity, $entData, $allData);
-        $this->createAndSetSrcTypeEntity($srcEntity, $entData, $allData);
-        $relFields = $this->getEntityRelFields($entityType);  
-        $skipFields = ['id', 'slug', 'parentSource', 'created', 'updated', 'deletedAt'];
-
-        foreach ($entData as $field => $val) { print("\n  field = ".$field);
-            if (in_array($field, $skipFields)) { continue; }
-            if (array_key_exists($field, $relFields)) { 
-                $this->setRelField($field, $val, $relFields, $srcEntity);
-                continue; 
-            }
-            $setter = 'set'.ucfirst($field); //print("\n setting source field = ".$setter);
-            $srcEntity->$setter($val);
-        }   
-        $this->em->persist($srcEntity);
-        return $srcEntity;
-    }
-
-    private function createAndSetParentSourceEntity(&$srcEntity, $entData, $allData)
+    /** Finds or creates the source entity. */
+    private function getSource($int, $srcId)
     {
-        if ($entData['parentSource'] === null) { return; }
-        $parent = $this->em->getRepository('AppBundle:Source')
-            ->findOneBy(['id' => $entData['parentSource']]);
-        if ($parent === null) { 
-            $entity = $this->getNewEntity('source');
-            $entityData = $this->getEntityData('source', $entData['parentSource'], false, $allData); 
-            $parent = $this->setSourceData($entity, 'source', $entityData, $allData);
+        $src = $this->getExistingEntity($srcId, 'source');
+        return $src !== null ? $src : $this->createEntity('source', $srcId);
+    }
+    /** 
+     * Creates and returns a new source, and finds or creates the parent 
+     * source and the source-type entity.
+     */
+
+    private function createSource(&$srcEntity, $entityType, $entData)
+    {   //print("\n    Setting source data.");
+        $this->setParentSrcEntity($srcEntity, $entData['parentSource']);
+        $this->setSrcTypeEntity($srcEntity, $entData);
+
+        return $this->setEntityData($srcEntity, $entityType, $entData);
+    }
+    /** Finds or creates the parent source and sets the parent source. */
+    private function setParentSrcEntity(&$srcEntity, $parentId)
+    {   //print("\n      Setting parent source");
+        if (!$parentId) { return; }
+        $parent = $this->getExistingEntity($parentId, 'source');
+
+        if ($parent === null) {
+            $parent = $this->getNewEntity('source');
+            $parentData = $this->getEntityData('source', $parentId, false);
+            $parent = $this->createSource($parent, 'source', $parentData);
         }
         $srcEntity->setParentSource($parent);
     }
-
-    private function createAndSetSrcTypeEntity(&$srcEntity, $entData, $allData)
-    { 
+    /** Creates the source-type entity and sets it in the source. */
+    private function setSrcTypeEntity(&$srcEntity, $entData)
+    {   //print("\n      Setting source type entity");
         $srcType = $this->em->getRepository('AppBundle:SourceType')
             ->findOneBy(['id' => $entData["sourceType"]])->getSlug(); 
         $typeEntity = $this->getNewEntity($srcType);
-        $entityData = $this->getEntityData($srcType, false, $entData["displayName"], $allData);  //print_r("\n".$srcType." data = ");print_r($entityData);
+        $entityData = $this->getEntityData($srcType, false, $entData["displayName"]); 
 
-        $relFields = $this->getEntityRelFields($srcType); //print_r($relFields);
-        $skipFields = ['id', 'slug', 'source', 'created', 'updated', 'deletedAt'];
+        $this->setEntityData($typeEntity, $srcType, $entityData);
 
-        foreach ($entityData as $field => $val) {
-            if (in_array($field, $skipFields)) { continue; }
-            if (array_key_exists($field, $relFields)) { print("\nsetting rel field = ". $field);
-                $this->setRelField($field, $val, $relFields, $typeEntity); 
-                continue;
-            }
-            $setter = 'set'.ucfirst($field); // print("\n setting source type entity field = ".$setter);
-            $typeEntity->$setter($val);
-        }
         $typeEntity->setSource($srcEntity);
         $this->em->persist($typeEntity);
 
@@ -145,23 +191,19 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         $typeClass = 'AppBundle\\Entity\\'.ucfirst($entityType); 
         return new $typeClass();
     }
-    private function getEntityData($entityType, $id, $dispName, $allData)
-    {
-        foreach ($allData[$entityType] as $entity) {
+    private function getEntityData($entityType, $id, $dispName)
+    { 
+        foreach ($this->allData[$entityType] as $entity) {
             if ($id && $entity["id"] === $id) { return $entity; }            
             if ($dispName && $entity["displayName"] === $dispName) { return $entity; }
         }
     }
-
-    private function setEntityData(&$entity, $entData, $allData)
-    {
-        $trans = [];
-        foreach ($entityData as $field => $val) {
-        }
-    }
-
+    /**
+     * Returns an array of entity relationship fields and their entity classes 
+     * for the passed entity. 
+     */
     private function getEntityRelFields($entity)
-    {  print("\n getEntityRelFields called. Entity = ". $entity);
+    {   
         return [
             'author' => ['source' => 'source', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'citation' => ['source' => 'source', 'citationType' => 'citationType', 'createdBy' => 'user', 'updatedBy' => 'user'],
@@ -172,24 +214,10 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
                'habitatType' => 'habitatType', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'publication' => ['source' => 'source', 'publicationType' => 'publicationType', 'createdBy' => 'user', 'updatedBy' => 'user'],
             'source' => ['parentSource' => 'source', 'sourceType' => 'sourceType', 'createdBy' => 'user', 'updatedBy' => 'user'],
-            'taxon' => ['parentTaxon' => 'taxon', 'createdBy' => 'user', 'updatedBy' => 'user']
+            'taxon' => ['parentTaxon' => 'taxon', 'level' => 'level', 'createdBy' => 'user', 'updatedBy' => 'user']
         ][$entity];
     }
-
-    private function setRelField($field, $val, $relFields, &$entity)
-    {
-        $relEntityType = ucfirst($relFields[$field]);
-        $relEntity = $this->em->getRepository('AppBundle:'.$relEntityType)
-            ->findOneBy(['id' => $val]);  
-        $setter = 'set'.ucfirst($field);
-        $entity->$setter($relEntity);
-    }
-
-    private function createEntity($entityType, $id, $allData)
-    {
-        
-    }
-
+    /** json_parse result. */
     private function getJsonData()
     {
         return array (
