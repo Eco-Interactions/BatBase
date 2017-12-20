@@ -169,10 +169,10 @@
      */
     function getDataFromStorage(props) {
         if (!Array.isArray(props)) { return getStoredData(); }
-        return getStoredDataObj(props);
+        return getStoredDataObj();
 
         function getStoredData() {
-            var data = dataStorage.getItem(props);
+            var data = dataStorage.getItem(props);  if (!data) { console.log("no stored data for [%s]", props); }
             return data ? JSON.parse(data) : false;
         }
         function getStoredDataObj() {
@@ -183,7 +183,7 @@
             return allFound ? data : false;
             function getPropData(prop) {
                     var jsonData = dataStorage.getItem(prop) || false;                              
-                    if (!jsonData) { return false; }
+                    if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
                     data[prop] = JSON.parse(jsonData);                          //console.log("data for %s - %O", entity, data[entity]);
                     return true;   
             }
