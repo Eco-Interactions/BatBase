@@ -1,7 +1,7 @@
 (function(){
-    var errObj = {}, pending = [];
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
+    var dataStorage;
     eif.syncData = {
         update: updateStoredData,
         reset: resetStoredData
@@ -14,7 +14,7 @@
     }
     /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
     function storeDataUpdatedTimes(ajaxData) {
-        storeData('dataUpdatedAt', ajaxData.dataState);                         //console.log("dataState = %O", ajaxData.dataState);
+        storeData('dataUpdatedAt', ajaxData.dataState);                         console.log("dataState = %O", ajaxData.dataState);
         addNewDataToStorage(ajaxData.dataState);
     }
     /** Returns the current date time in the format: Y-m-d H:i:s */
@@ -33,12 +33,9 @@
     function addNewDataToStorage(dataUpdatedAt) {  
         var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
         if (!pgUpdatedAt) { return initStoredData(); } 
-        if (firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { 
-            delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
-            syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
-        } else { console.log("Data up to date."); 
-            eif.search.initSearchGrid();
-        }
+        if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
+        delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
+        syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
     }
     /**
      * Returns true if the first datetime is more recent than the second. 
@@ -53,46 +50,21 @@
     function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
         var withUpdates = Object.keys(updatedAt).filter(function(entity){
             return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
-        });
+        });                                                                     console.log("entities with updates = %O", withUpdates);
         if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
     /** 
-     * Sends an ajax call for each entity with updates, sending interaction updates 
-     * last to ensure all related entities are saved first. All new entity data 
-     * is stored @processUpdatedData and then @onDataUpdateComplete is called.
+     * Sends an ajax call for each entity with updates. On return, the new data 
+     * is stored @processUpdatedData. 
      */
-    function ajaxNewData(entities, lastUpdated) {                               //console.log('ajaxNewData. entities with updates = %O', entities)
+    function ajaxNewData(entities, lastUpdated) {
         var data = { updatedAt: lastUpdated };
-        var ajaxCalls = entities.map(function(entity) {
+        entities.forEach(function(entity) {
             data.entity = entity;
-            return sendAjaxQuery(data, "ajax/sync-data", processUpdatedData); 
+            sendAjaxQuery(data, "ajax/sync-data", processUpdatedData);
         });
-        $.when.apply($, ajaxCalls).then(updatePending).done(onDataUpdateComplete); 
     } /* End ajaxNewData */
-    /**
-     * Any update that could not be completed initially is attempted again here.
-     */
-    function updatePending() {                                                  //console.log('pending = %O', pending);
-        var errCnt = Object.keys(errObj).length;
-        var loop = 0; 
-        while (pending.length > 0 && loop++ < 11) {  
-            pending = pending.filter(function(updateAry) {                      //console.log('updateAry = %O', updateAry);
-                //updateFunc(prop, rcrd, entity);
-                updateAry[0](updateAry[1], updateAry[2], updateAry[3]);
-                return updateSuccessful() ? false : updateAry;
-            });
-        }
-        function updateSuccessful() {
-            var curCnt = Object.keys(errObj).length;
-            if (curCnt !== errCnt) {
-                errCnt = curCnt;
-                return false;
-            }
-            return true;
-        }
-    } /* End updatePending */
-
     /**
      * Parses and sends the returned data to @storeUpdatedData. The stored data's 
      * lastUpdated flag, 'pgDataUpdatedAt', is updated and the search-page grid
@@ -102,23 +74,16 @@
         var entity = Object.keys(results)[0];
         var data = parseData(results[entity]);
         storeUpdatedData(data, entity);
-    }
-    function onDataUpdateComplete() {                                           console.log('onDataUpdateComplete. errObj = %O, args = %O',errObj, arguments);
-        if (!$.isEmptyObject(errObj)) { return handleDataSyncErr(); }
         storeData('pgDataUpdatedAt', getCurrentDate());
         eif.search.initSearchGrid();
     }
-    function handleDataSyncErr() {
-        eif.search.dbErr(errObj);
-        errObj = {};
-    }
-    /** Sends each updated record to the update handler for the entity. */
+    /** Sends the each updated record to the update handler for the entity. */
     function storeUpdatedData(rcrds, entity) {
         var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
         var entityHndlr = coreEntities.indexOf(entity) !== -1 ? 
             addCoreEntityData : addDetailEntityData;
         for (var id in rcrds) {
-            entityHndlr(_util.lcfirst(entity), rcrds[id], 'updateData');
+            entityHndlr(_util.lcfirst(entity), rcrds[id]);
         }
     }
     /*------------------ Update Submitted Form Data --------------------------*/
@@ -129,33 +94,30 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
+        storeData('pgDataUpdatedAt', getCurrentDate());                         console.log('pgDataUpdatedAt = ', getCurrentDate())
         sendDataUpdateStatus(data);
-        if ($.isEmptyObject(errObj)) { storeData('pgDataUpdatedAt', getCurrentDate()); }           //console.log('pgDataUpdatedAt = ', getCurrentDate())
     }
     function sendDataUpdateStatus(data) {
-        var errs = getErrs(data);
+        var errs = data.coreEdits.errors ? data.coreEdits.errors : 
+             data.detailEdits.errors ? data.detailEdits.errors : false;
         var msg = errs ? errs[0] : null;
         var tag = errs ? errs[1] : null;
         eif.form.dataSynced(data, msg, tag);
-    } 
-    function getErrs(data) {
-        return data.coreEdits.errors ? data.coreEdits.errors : 
-             data.detailEdits.errors ? data.detailEdits.errors : false;
     }
     /** Stores both core and detail entity data, and updates data affected by edits. */
     function updateEntityData(data) {
-        addCoreEntityData(data.core, data.coreEntity, 'addData');
+        addCoreEntityData(data.core, data.coreEntity);
         if (data.detailEntity) { 
-            addDetailEntityData(data.detail, data.detailEntity, 'addData');
+            addDetailEntityData(data.detail, data.detailEntity);
         }
         updateAffectedData(data);
     }
     /*------------------ Add-to-Storage Methods ------------------------------*/
     /** Updates stored-data props related to a core-entity record with new data. */
-    function addCoreEntityData(entity, rcrd, stage) {                           //console.log("Updating Core entity. %s. %O", entity, rcrd);
+    function addCoreEntityData(entity, rcrd) {                                  //console.log("Updating Core entity. %s. %O", entity, rcrd);
         var propHndlrs = getAddDataHndlrs(entity, rcrd);
-        updateDataProps(propHndlrs, entity, rcrd, stage);
-        updateCoreData(entity, rcrd, stage);
+        updateDataProps(propHndlrs, entity, rcrd);
+        updateCoreData(entity, rcrd);
     }
     /** Returns an object of related data properties and their update methods. */
     function getAddDataHndlrs(entity, rcrd) {
@@ -198,8 +160,8 @@
         return _util.lcfirst(rcrd[type].displayName);
     }
     /** Sends entity-record data to each storage property-type handler. */
-    function updateDataProps(propHndlrs, entity, rcrd, stage) {                 //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
-        var params = { entity: entity, rcrd: rcrd, stage: stage };
+    function updateDataProps(propHndlrs, entity, rcrd) {                        //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
+        var params = { entity: entity, rcrd: rcrd, stage: 'addData' };
         for (var prop in propHndlrs) {
             updateData(propHndlrs[prop], prop, params);
         }
@@ -214,14 +176,14 @@
         addToTypeProp(entity+"Type", rcrd, entity); 
     } 
     /** Updates stored-data props related to a detail-entity record with new data. */
-    function addDetailEntityData(entity, rcrd, stage) {                         //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    function addDetailEntityData(entity, rcrd) {                                //console.log("Updating Detail entity. %s. %O", entity, rcrd);
         var update = {
             'author': { 'author': addToRcrdProp },
             'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
             'publisher': { 'publisherNames': addToNameProp }
         };
-        updateDataProps(update[entity], entity, rcrd, stage);  
+        updateDataProps(update[entity], entity, rcrd)
     }
     /** Add the new record to the prop's stored records object.  */
     function addToRcrdProp(prop, rcrd, entity) {  
@@ -257,7 +219,6 @@
         if (!rcrd.parent) { return; }
         var parentObj = _util.getDataFromStorage(prop);                         //console.log("addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
         var parent = parentObj[rcrd.parent];
-        if (!parent) { return pendUpdate(addToParentRcrd, prop, rcrd, entity); }
         addIfNewRcrd(parent.children, rcrd.id);
         storeData(prop, parentObj);
     }
@@ -270,25 +231,24 @@
             });
         }
     }
-    /** Adds the Taxon's name to the stored names for it's domain and level.  */
+    /** Adds the Taxon's name to the stored names for it's realm and level.  */
     function addToTaxonNames(prop, rcrd, entity) {
-        var domain = rcrd.domain.displayName;
+        var realm = rcrd.realm.displayName;
         var level = rcrd.level.displayName;  
-        addPropIfNewLevel(level, domain);
-        addToNameProp(domain+level+"Names", rcrd, entity);
+        addPropIfNewLevel(level, realm);
+        addToNameProp(realm+level+"Names", rcrd, entity);
     }
-    /** Creates the level property if no taxa have been saved at this level and domain.  */
-    function addPropIfNewLevel(level, domain) {
-        var lvlObj = _util.getDataFromStorage(domain+level+"Names");
-        if (lvlObj) { return; }                                                 //console.log("creating new level for [", domain+level+"]Names")
-        storeData(domain+level+"Names", {});
+    /** Creates the level property if no taxa have been saved at this level and realm.  */
+    function addPropIfNewLevel(level, realm) {
+        var lvlObj = _util.getDataFromStorage(realm+level+"Names");
+        if (lvlObj) { return; }                                                 //console.log("creating new level for [", realm+level+"]Names")
+        storeData(realm+level+"Names", {});
     }
     /** Adds the Interaction to the stored entity's collection.  */
     function addInteractionToEntity(prop, rcrd, entity) {
         if (!rcrd[prop]) {return;}
         var rcrds = _util.getDataFromStorage(prop);                             //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
         var storedEntity = rcrds[rcrd[prop]];
-        if (!storedEntity) { return pendUpdate(addInteractionToEntity, prop, rcrd, entity); }
         addIfNewRcrd(storedEntity.interactions, rcrd.id);
         if (prop === 'source') { storedEntity.isDirect = true; }
         storeData(prop, rcrds);
@@ -297,7 +257,6 @@
     function addInteractionRole(prop, rcrd, entity) {  
         var taxa = _util.getDataFromStorage("taxon");                           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
         var taxon = taxa[rcrd[prop]];
-        if (!taxon) { return pendUpdate(addInteractionRole, prop, rcrd, entity); }
         addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);        
     }
@@ -305,14 +264,10 @@
     function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
         if (rcrd.contributors.length == 0) { return; }
         var srcObj = _util.getDataFromStorage('source');
-        rcrd.contributors.forEach(function(authId) { addContribution(authId); });
+        rcrd.contributors.forEach(function(authId) {
+            addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
+        });
         storeData('source', srcObj);
-
-        function addContribution(authId) {pendUpdate
-            var auth = srcObj[authId];
-            if (!auth) { return pendUpdate(addContribData, prop, rcrd, entity); }
-            addIfNewRcrd(auth.contributions, rcrd.id);
-        }
     }
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
@@ -408,18 +363,18 @@
     }
     function rmvFromNameProp(prop, rcrd, entity, edits) { 
         var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-        var domain = rcrd.domain.displayName;
+        var realm = rcrd.realm.displayName;
         var level = lvls[edits.level.old-1];
         var taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
-        var nameObj = _util.getDataFromStorage(domain+level+'Names');           //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",domain+level+'Names', nameObj, rcrd, edits)
+        var nameObj = _util.getDataFromStorage(realm+level+'Names');            //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",realm+level+'Names', nameObj, rcrd, edits)
         delete nameObj[taxonName];
-        storeData(domain+level+'Names', nameObj);
+        storeData(realm+level+'Names', nameObj);
     }
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
     function resetStoredData() {
-        var prevFocus = localStorage.getItem('curFocus');
-        localStorage.clear();
+        var prevFocus = dataStorage.getItem('curFocus');
+        dataStorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);
     }
@@ -439,7 +394,7 @@
      * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Search page 
      * grid-build begins @eif.search.initSearchGrid.
      * Entities downloaded with each ajax call:
-     *   /taxon - Taxon, Domain, Level 
+     *   /taxon - Taxon, Realm, Level 
      *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
      *   /source - Author, Citation, CitationType, Publication, PublicationType, 
      *       Source, SourceType, Tag
@@ -461,7 +416,7 @@
      * the entity data.
      */
     function storeServerData(data) {                                            //console.log("data received = %O", data);
-        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, data);
+        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
             storeData(entity, parseData(data[entity]));
         }
     }
@@ -474,84 +429,98 @@
         for (var id in data) { data[id] = JSON.parse(data[id]); }
         return data;
     }
-    /** Adds to localStorage data derived from the serialized entity data. */
+    /** Adds the data derived from the serialized entity data to data storage. */
     function deriveAndStoreData(data) {
         deriveAndStoreTaxonData(data[0]);
         deriveAndStoreLocationData(data[1]);
         deriveAndStoreSourceData(data[2]);
         deriveInteractionData(data[3]);
     }
-    /** Stores an object of taxon names and ids for each level in each domain. */
+    /** Stores an object of taxon names and ids for each level in each realm. */
     function deriveAndStoreTaxonData(data) {                                    //console.log("deriveAndStoreTaxonData called. data = %O", data);
         storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
-        storeTaxaByLevelAndDomain(data.taxon);
+        storeTaxaByLevelAndRealm(data.taxon);
     }
-    function storeTaxaByLevelAndDomain(taxa) {
-        var domainData = separateTaxaByLevelAndDomain(taxa);                    //console.log("taxonym name data = %O", nameData);
-        for (var domain in domainData) {  
-            storeTaxaByLvl(domain, domainData[domain]);
+    function storeTaxaByLevelAndRealm(taxa) {
+        var realmData = separateTaxaByLevelAndRealm(taxa);                     //console.log("taxonym name data = %O", nameData);
+        for (var realm in realmData) {  
+            storeTaxaByLvl(realm, realmData[realm]);
         }
     }
-    function storeTaxaByLvl(domain, taxonObj) {
-        for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", domain+level+'Names', taxonObj[level]);
-            storeData(domain+level+'Names', taxonObj[level]);
+    function storeTaxaByLvl(realm, taxonObj) {
+        for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
+            storeData(realm+level+'Names', taxonObj[level]);
         }
     }
-    /** Each taxon is sorted by domain and then level. 'Animalia' is skipped. */
-    function separateTaxaByLevelAndDomain(taxa) {
-        var data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (var id = 2; id < Object.keys(taxa).length+1; id++) {               
+    /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
+    function separateTaxaByLevelAndRealm(taxa) {  
+        const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
+        for (let id = 1; id < Object.keys(taxa).length+1; id++) {
+            if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
             addTaxonData(taxa[id]);
-        }                         
-        return data;                                              
+        }
+        return data;
         /** Adds the taxon's name (k) and id to it's level's obj. */
         function addTaxonData(taxon) {
-            var domainObj = getDomainObj(taxon);
-            var level = taxon.level.displayName;  
-            if (!domainObj[level]) { domainObj[level] = {}; }; 
-            domainObj[level][taxon.displayName] = taxon.id;
+            const realmObj = getRealmObj(taxon);
+            const level = taxon.level.displayName;  
+            if (!realmObj[level]) { realmObj[level] = {}; }; 
+            realmObj[level][taxon.displayName] = taxon.id;
         }
-        function getDomainObj(taxon) {
-            var domain = taxon.domain.displayName
-            var key = domain === 'Animalia' ? 'Bat' : domain;
+        function getRealmObj(taxon) {
+            const realm = taxon.realm.displayName
+            const key = realm === 'Animalia' ? 'Bat' : realm;
             return data[key];
         }
-    } /* End separateTaxaByLevelAndDomain */
+    } /* End separateTaxaByLevelAndRealm */
     /** [entity]Names - an object with each entity's displayName(k) and id. */
-    function deriveAndStoreLocationData(data) {  
-        storeData('countryNames', getNameDataObj(data.locationType[2].locations, data.location));
-        storeData('regionNames', getNameDataObj(data.locationType[1].locations, data.location));
-        storeData('topRegionNames', getTopRegionNameData(data));
+    function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
+        const regns = getTypeObj(data.locationType, 'region', 'locations');
+        const cntrys = getTypeObj(data.locationType, 'country', 'locations');   //console.log('reg = %O, cntry = %O', regns, cntrys);
+        storeData('countryNames', getNameDataObj(cntrys, data.location));
+        storeData('regionNames', getNameDataObj(regns, data.location));
+        storeData('topRegionNames', getTopRegionNameData(data, regns));
         storeData('habTypeNames', getTypeNameData(data.habitatType));
         storeData('locTypeNames', getTypeNameData(data.locationType));
     }
-    /** Note: Top regions are the trunk of the location data tree. */
-    function getTopRegionNameData(locData) {  
-        var data = {};
-        var regions = locData.locationType[1].locations;
-        var rcrds = getEntityRcrds(regions, locData.location);
-        for (var id in rcrds) {
+    function getTopRegionNameData(locData, regns) {  
+        const data = {};
+        const rcrds = getEntityRcrds(regns, locData.location);
+        for (const id in rcrds) { 
             if (!rcrds[id].parent) { data[rcrds[id].displayName] = id; }
         }
         return data;
     }
+    function getTypeObj(types, type, collection) { 
+        for (const t in types) {
+            if (types[t].slug === type) { return types[t][collection]; }
+        }
+    }
+    /** Note: Top regions are the trunk of the location data tree. */
     /**
      * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
-     * [entity]Tags - an object with each entity tag's displayName and id.
      */
     function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        storeData('authSources', data.sourceType[3].sources);         
-        storeData('pubSources', data.sourceType[2].sources);         
-        storeData('publisherNames', getNameDataObj(data.sourceType[1].sources, data.source));
+        const authIds = getTypeObj(data.sourceType, 'author', 'sources');
+        const pubIds = getTypeObj(data.sourceType, 'publication', 'sources');
+        const publIds = getTypeObj(data.sourceType, 'publisher', 'sources'); 
+        const publSrcs = getEntityRcrds(publIds, data.source);
+        storeData('authSources', authIds);         
+        storeData('pubSources', pubIds);         
+        storeData('publisherNames', getTypeNameData(publSrcs));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
-        storeData('sourceTags', getTagData(data.tag, "Source"));        
-        storeData('interactionTags', getTagData(data.tag, "Interaction"));        
+        // storeData('sourceTags', getTagData(data.tag, "Source"));        
     }
+    /**
+     * [entity]Names - an object with each entity's displayName(k) and id.
+     * [entity]Tags - an object with each entity tag's displayName and id.
+     */
     function deriveInteractionData(data) {
         storeData('intTypeNames', getTypeNameData(data.interactionType));
-    }
+        storeData('interactionTags', getTagData(data.tag, "Interaction"));        
+    }   
     /** Returns an object with a record (value) for each id (key) in passed array.*/
     function getEntityRcrds(ids, rcrds) {
         var data = {};
@@ -583,7 +552,7 @@
         return data;
     }
     /*--------------- Shared Helpers -----------------------------*/
-    /** Stores passed data under the key in localStorage. */
+    /** Stores passed data under the key in dataStorage. */
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }
@@ -594,28 +563,20 @@
             reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
         }
     }
-    function pendUpdate(upd8Func, prop, rcrd, entity) {                         //console.log('pend update args = %O', arguments);
-        pending.push([upd8Func, prop, rcrd, entity]);   
-    }
     /*----------------- Errs ---------------------------------------*/
     /** Sends a message and error tag back to the form to be displayed to the user. */
-    function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {            //console.log('reportDataUpdateErr. args = %O', arguments);
+    function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {
         var trans = {
-            'addData': 'adding data to ', 'rmvData': 'removing data from ', 
-            'updateData': 'updateData' 
+            'addData': 'adding data to ', 'rmvData': 'removing data from '
         };
         var msg = 'There was an error while '+trans[stage]+' the '+ entity +
             '\'s stored data.';
         var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
-        trackErr(edits, msg, errTag);        
-    }
-    function trackErr(tracker, msg, errTag) {  
-        if (tracker) { tracker.errors = [ msg, errTag ]; } 
-        errObj[errTag] = [ msg, errTag ]; 
+        edits.errors = [ msg, errTag ];
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
-        return $.ajax({
+        $.ajax({
             method: "POST",
             url: url,
             success: successCb,

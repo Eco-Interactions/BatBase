@@ -1,12 +1,13 @@
 (function(){ 
     var eif = ECO_INT_FMWK;
+    var dataStorage;
     eif.util = {
         buildElem: buildElem,
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
         getDataFromStorage: getDataFromStorage,
         lcfirst: lcfirst, 
-        setlocalStorage: setlocalStorage,
+        getDataStorage: getDataStorage,
         populateStorage: populateStorage,
         removeFromStorage: removeFromStorage,
         ucfirst: ucfirst, 
@@ -162,16 +163,16 @@
     /*--------------------------Storage Methods-------------------------------*/
 
     /**
-     * Gets data from local storage for each storage property passed. If an array
+     * Gets data from data storage for each storage property passed. If an array
      * is passed, an object with each prop as the key for it's data is returned. 
      * If a property is not found, false is returned. 
      */
     function getDataFromStorage(props) {
         if (!Array.isArray(props)) { return getStoredData(); }
-        return getStoredDataObj(props);
+        return getStoredDataObj();
 
         function getStoredData() {
-            var data = localStorage.getItem(props);
+            var data = dataStorage.getItem(props);  if (!data) { console.log("no stored data for [%s]", props); }
             return data ? JSON.parse(data) : false;
         }
         function getStoredDataObj() {
@@ -181,16 +182,19 @@
             });  
             return allFound ? data : false;
             function getPropData(prop) {
-                    var jsonData = localStorage.getItem(prop) || false;                              
-                    if (!jsonData) { return false; }
+                    var jsonData = dataStorage.getItem(prop) || false;                              
+                    if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
                     data[prop] = JSON.parse(jsonData);                          //console.log("data for %s - %O", entity, data[entity]);
                     return true;   
             }
         } /* End getDataObj */
     } /* End getDataFromStorage */
-    function setlocalStorage() {
-        if (storageAvailable('localStorage')) { 
-            return window['localStorage'];                                      //console.log("Storage available. Setting now. localStorage = %O", localStorage);
+    function getDataStorage() {
+        const env = $('body').data('env');
+        const storageType = env === 'test' ? 'sessionStorage' : 'localStorage'; //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
+        if (storageAvailable(storageType)) { 
+            dataStorage = window[storageType]; 
+            return dataStorage;                                                 //console.log("Storage available. Setting now. dataStorage = %O", dataStorage);
         } else { 
             return false;                                                       //console.log("No Local Storage Available"); 
         }
@@ -209,16 +213,16 @@
         }
     }
     function populateStorage(key, val) {
-        if (localStorage) {                                                     //console.log("localStorage active.");
-            localStorage.setItem(key, val);
+        if (dataStorage) {                                                      //console.log("dataStorage active.");
+            dataStorage.setItem(key, val);
         } else { console.log("No Local Storage Available"); }
     }
     function removeFromStorage(key) {
-        localStorage.removeItem(key);
+        dataStorage.removeItem(key);
     }
     function getRemainingStorageSpace() {
          var limit = 1024 * 1024 * 5; // 5 MB
-         return limit - unescape(encodeURIComponent(JSON.stringify(localStorage))).length;
+         return limit - unescape(encodeURIComponent(JSON.stringify(dataStorage))).length;
     }
     
 }());  /* End of namespacing anonymous function */

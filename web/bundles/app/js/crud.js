@@ -418,7 +418,7 @@ $(document).ready(function(){
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
             "text": setTextField, "textArea": setTextArea, "select": setSelect, 
-            "fullTextArea": setTextField, "multiSelect": Function.prototype,
+            "fullTextArea": setTextArea, "multiSelect": Function.prototype,
             "tags": setTagField, "cntry": setCntry, "source": addSource, 
             "taxon": addTaxon
         };
@@ -468,7 +468,7 @@ $(document).ready(function(){
     }
     function setCitationEdgeCaseFields(entity, citRcrd) {
         if (entity !== 'citation') { return; }
-        $('#CitationText_row textarea')[0].innerText = citRcrd.fullText;
+        $('#CitationText_row textarea').val(citRcrd.fullText);
         $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
         $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
         $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
@@ -665,17 +665,17 @@ $(document).ready(function(){
             'Publication Vol': citRcrd.publicationVolume || '',            
             'Publication Issue': citRcrd.publicationIssue || '',            
             'Publication Pages': citRcrd.publicationPages || '',            
-            'Tags': getTags(srcRcrd),
+            // 'Tags': getTags(srcRcrd),
             'Authors': getAuthorNames(srcRcrd),
         };
     }
-    function getTags(srcRcrd) {
-        var str = [];
-        if (srcRcrd.tags.length) {
-            srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
-        }
-        return str.join(', ');
-    }
+    // function getTags(srcRcrd) {
+    //     var str = [];
+    //     if (srcRcrd.tags.length) {
+    //         srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
+    //     }
+    //     return str.join(', ');
+    // }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         var formLvl = getSubFormLvl("sub");
@@ -685,7 +685,7 @@ $(document).ready(function(){
         initComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
-        $('#CitationText_row textarea').focus();
+        $('#Abstract_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
     }
     /**
@@ -755,7 +755,9 @@ $(document).ready(function(){
             opts.push({ 
                 value: id, text: fParams.records.location[id].displayName });
         }
-        return opts.sort(alphaOptionObjs);
+        opts = opts.sort(alphaOptionObjs);
+        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        return opts;
     }
     /**
      * When a country/region is selected, the location combobox is repopulated with its 
@@ -771,25 +773,24 @@ $(document).ready(function(){
         var opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
-        return opts.concat([{ value: loc.id, text: loc.displayName }]).sort(alphaOptionObjs);
+        opts = opts.concat([{ value: loc.id, text: loc.displayName }])
+            .sort(alphaOptionObjs);
+        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        return opts;
     }
     /** 
      * When a location is selected, its country/region is selected in the top-form
      * combobox and the location record's data is added to the detail panel. If 
      * the location was cleared, the detail panel is cleared. 
      */     
-    function onLocSelection(val) {                                              //console.log("location selected 'val' = ", val);
+    function onLocSelection(val) {                                              //console.log("location selected 'val' = '"+ val+"'");
+        if (val === "create") { return $('#Location-sel')[0].selectize.createItem("create"); }
         if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
-        var cntryValue = locRcrd.parent ? locRcrd.parent : getParentLoc(locRcrd);
-        $('#Country-Region-sel')[0].selectize.addItem(cntryValue, true);
+        var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
+        $('#Country-Region-sel')[0].selectize.addItem(prntVal, true);
         fillEditLocDetails(val);
         if (!fParams.editing) { $('#Location_pin').focus(); }
-    }
-    /* Note: Habitat-only locations are children of the Unspecified region, 439. */
-    function getParentLoc(loc) {  
-        return ['Region','Country'].indexOf(loc.locationType.displayName) !== -1 ? 
-            loc.id : 439;
     }
     /** Displays the selected location's data in the side detail panel. */
     function fillEditLocDetails(id) {  
@@ -811,13 +812,18 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country/region combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        var formLvl = getSubFormLvl("sub");
+        let formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Location', null, formLvl); }
+        let vals = {
+            "Display Name": val === "create" ? "" : val, //clears form trigger value
+            "Country": $('#Country-Region-sel').val()
+        }; 
         $('#Location_row').after(initSubForm(
-            "location", formLvl, "flex-row med-form", {"Display Name": val}, "#Location-sel"));
+            "location", formLvl, "flex-row med-form", vals, "#Location-sel"));
         initComboboxes("location");
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
+        clearCombobox('#Location-sel'); 
         return { "value": "", "text": "Creating Location..." };
     }
     /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
@@ -845,7 +851,9 @@ $(document).ready(function(){
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', formLvl); }  
         setTaxonParams('Subject', 2);
-        buildTaxonSelectForm('Subject', formLvl);
+        $('#Subject_row').append(initSubForm(
+            "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
+        initComboboxes("subject");           
         finishTaxonSelectUi("Subject");  
         enableCombobox('#Object-sel', false);
     }
@@ -856,42 +864,31 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled. 
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
-    function initObjectSelect() {                                               //console.log("initObjectSelect val = %O, taxonParams = %O", $('#Object-sel').val(), fParams.taxon)
+    function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
         var formLvl = getSubFormLvl("sub");
         if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        setTaxonParams('Object', getObjectRealmId($('#Object-sel').val()));
-        buildTaxonSelectForm('Object', formLvl);
+        var id = getSelectedRealm($('#Object-sel').val()) || 
+            !fParams.taxon ? 3 : fParams.taxon.objectRealm || 3;
+        setTaxonParams('Object', id);
+        $('#Object_row').append(initSubForm(
+            "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
+        initComboboxes("object");             
         $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
     }
-    /** Returns the realm id of the selected taxon, or the default realm: plant (3). */
-    function getObjectRealmId(selVal) {  
-        var selected = getSelectedRealm(selVal);
-        var dflt = fParams.taxon && fParams.taxon.objectRealm ? 
-            fParams.taxon.objectRealm : 3;       
-        return selected || dflt;
-        /** Note: realm ids are one less than their taxon's id. */
-        function getSelectedRealm(selVal) {
-            if (!selVal) { return null; }
-            var taxon = fParams.records.taxon[selVal];  
-            return taxon.domain.id + 1;
-        }
-    } /* End getObjectRealmId */
-    function resetObjectSelect(role, formLvl) {
-        buildTaxonSelectForm(role, formLvl);
-        $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
+    /** 
+     * Returns the realm taxon's id for a selected object taxon. Note: realm ids
+     * are one less than their taxon's id. 
+     */
+    function getSelectedRealm(selVal) {
+        if (!selVal) { return null; }
+        var taxon = fParams.records.taxon[selVal];  
+        return taxon.realm.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, formLvl) {
         if (fParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
         openSubFormErr(role, null, formLvl);
-    }
-    function buildTaxonSelectForm(role, formLvl) {
-        var dir = { 'Subject': 'left', 'Object': 'right' };
-        var styles = "sml-"+dir+" sml-form";
-        $('#'+role+'_row').append(initSubForm( 
-            _util.lcfirst(role), formLvl, styles, {}, "#"+role+"-sel"));
-        initComboboxes(_util.lcfirst(role));             
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -899,8 +896,10 @@ $(document).ready(function(){
      */
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }         
-        onTaxonSelection('Subject');
+        var formLvl = getSubFormLvl("sub");
+        $('#'+formLvl+'-form').remove();
         enableObjField();
+        if (!fParams.editing) { $('#Subject_pin').focus(); }
     }
     /**
      * When complete, the 'Select Object' form is removed and the most specific 
@@ -908,14 +907,10 @@ $(document).ready(function(){
      */
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
-        onTaxonSelection('Object');
-        enableSubjField();
-    }
-    function onTaxonSelection(role) {
         var formLvl = getSubFormLvl("sub");
         $('#'+formLvl+'-form').remove();
-        fParams.taxon = null;
-        if (!fParams.editing) { $('#'+role+'_pin').focus(); }
+        enableSubjField();
+        if (!fParams.editing) { $('#Object_pin').focus(); }
     }
     /** When the Subject select-form is exited, the combo is reenabled. */
     function enableSubjField() {
@@ -927,34 +922,26 @@ $(document).ready(function(){
     }
     /** Adds the realm name and id, along with all taxon levels, to fParams. */
     function setTaxonParams(role, id) {  
-        if (fParams.taxon && fParams.taxon.realmId === id) { return; }          //console.log('tParams = %O', fParams.taxon);
-        var orgnl = getOrgnlTaxon(role);                                        
+        initTaxonParams(id);
+        fParams.taxon.prevSel = !$('#'+role+'-sel').val() ? null : 
+            { val: $('#'+role+'-sel').val(),
+              text: $('#'+role+'-sel')[0].selectize.getItem($('#'+role+'-sel').val())[0].innerText
+            }; 
+    }
+    function initTaxonParams(id) {
+        var realmMap = { 2: "Bat", 3: "Plant", 4: "Arthropod" };
+        var realmLvls = {
+            'Bat': ["Order", "Family", "Genus", "Species"],
+            'Arthropod': ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
+            'Plant': ["Kingdom", "Family", "Genus", "Species"]
+        };
         fParams.taxon = { 
-            domainLvls: getDomainLvls(id),
-            lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
-            orgnl: orgnl,
-            realm: getRealmName(id), // realmMap[id]
+            realm: realmMap[id], 
             realmId: id,
-        };                                                                      
-        function getDomainLvls(id) {
-            return {
-                2: ["Order", "Family", "Genus", "Species"],
-                3: ["Kingdom", "Family", "Genus", "Species"],
-                4: ["Phylum", "Class", "Order", "Family", "Genus", "Species"],
-            }[id];
-        }
-        function getRealmName(id) {
-            return { 2: "Bat", 3: "Plant", 4: "Arthropod" }[id];  
-        }
-        function getOrgnlTaxon(role) {
-            if (fParams.taxon) { return fParams.taxon.orgnl; }
-            var orgnlVal = $('#'+role+'-sel').val(); 
-            if (!orgnlVal) { return false; }
-            return { value: orgnlVal,
-                text: $('#'+role+'-sel')[0].selectize.getOption(orgnlVal)[0].innerText
-            };
-        }
-    } /* End setTaxonParams */
+            lvls: ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"],
+            realmLvls: realmLvls[realmMap[id]]
+        };                                                                      //console.log('taxon params = %O', fParams.taxon)
+    }
     /**
      * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
      * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
@@ -1039,20 +1026,18 @@ $(document).ready(function(){
     }
     /** Exits sub form and restores any previous taxon selection. */
     function exitTaxonSelectForm(role) {
-        exitForm('#sub-form', 'sub', false); 
-        if (fParams.taxon.orgnl) {  
-            updateComboboxOptions('#'+role+'-sel', fParams.taxon.orgnl); 
-            $('#'+role+'-sel')[0].selectize.addItem(fParams.taxon.orgnl.value);
+        exitForm('#sub-form', 'sub', false);
+        if (fParams.taxon.prevSel) {
+            updateComboboxOptions('#'+role+'-sel', { 
+                value: fParams.taxon.prevSel.val, text: fParams.taxon.prevSel.text });
+            $('#'+role+'-sel')[0].selectize.addItem(fParams.taxon.prevSel.val);
         }
-        fParams.taxon = null;
     }
     /** Removes and replaces the taxon form. */
     function resetTaxonSelectForm() {                                           
-        var formLvl = getSubFormLvl('sub');
-        var role = fParams.taxon.realm === 'Bat' ? 'Subject' : 'Object';
-        var resetForm = role === 'Subject' ? initSubjectSelect : resetObjectSelect;
+        var initForm = fParams.taxon.realm === 'Bat' ? initSubjectSelect : initObjectSelect;
         $('#sub-form').remove();
-        resetForm(role, formLvl);
+        initForm();
     }
     /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
     function selectTaxon() {
@@ -1198,9 +1183,7 @@ $(document).ready(function(){
      */
     function getTaxonEditFields(entity, id) {
         var taxon = fParams.records.taxon[id];  
-        var realm = taxon.domain.id+1;
-        var role = realm === 'Bats' ? 'Subject': 'Object';
-        setTaxonParams(role, realm);                
+        initTaxonParams(taxon.realm.id+1);                
         return buildTaxonEditFields(taxon);
     }
     function finishTaxonEditFormBuild() {
@@ -1248,18 +1231,18 @@ $(document).ready(function(){
         $(sel).data('toSel', taxon.level.id);
         return sel;
     }
-    /** Returns an array of options for the levels in the taxon's domain. */
+    /** Returns an array of options for the levels in the taxon's realm. */
     function getTaxonLvlOpts(taxon) {
-        var domainLvls = fParams.taxon.domainLvls.map(function(lvl){return lvl;});
+        var realmLvls = fParams.taxon.realmLvls.map(function(lvl){return lvl;});
         var lvls = _util.getDataFromStorage('levelNames');  
-        domainLvls.shift();  //Removes the domain-level
+        realmLvls.shift();  //Removes the realm-level
         for (var name in lvls) {
-            if (domainLvls.indexOf(name) === -1) { delete lvls[name]; }
+            if (realmLvls.indexOf(name) === -1) { delete lvls[name]; }
         }
         return buildOptsObj(lvls, Object.keys(lvls));
     }
     /**
-     * Returns a level select with all levels in the taxon-parent's domain and a 
+     * Returns a level select with all levels in the taxon-parent's realm and a 
      * combobox with all taxa at the parent's level and the current parent selected.
      * Changing the level select repopulates the taxa with those at the new level.
      * Entering a taxon that does not already exists will open the 'create' form.
@@ -1290,20 +1273,20 @@ $(document).ready(function(){
         return hdr;
     }
     function getParentEditFields(prnt) {  
-        var domain = _util.lcfirst(prnt.domain.displayName);      
-        var lvlSelRows = buildSubForm(domain, {}, 'sub', null, 'edit');
-        var domainSelRow = getDomainLvlRow(prnt);
+        var realm = _util.lcfirst(prnt.realm.displayName);      
+        var lvlSelRows = buildSubForm(realm, {}, 'sub', null, 'edit');
+        var realmSelRow = getRealmLvlRow(prnt);
         fParams.taxon.prntSubFormLvl = 'sub2';
-        return domainSelRow.concat(lvlSelRows);
+        return realmSelRow.concat(lvlSelRows);
     }
-    function getDomainLvlRow(taxon) {
-        var domainLvl = fParams.taxon.domainLvls[0];
-        var lbl = _util.buildElem('label', { text: domainLvl });
-        var taxonym = _util.buildElem('span', { text: getDomainTaxon().displayName });
+    function getRealmLvlRow(taxon) {
+        var realmLvl = fParams.taxon.realmLvls[0];
+        var lbl = _util.buildElem('label', { text: realmLvl });
+        var taxonym = _util.buildElem('span', { text: getRealmTaxon().displayName });
         $(taxonym).css({ 'padding-top': '.55em' });
-        return [buildTaxonEditFormRow(domainLvl, [lbl, taxonym], 'sub')];
+        return [buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub')];
     }
-    function getDomainTaxon() {
+    function getRealmTaxon() {
         return fParams.records.taxon[fParams.taxon.realmId];
     }
     /**
@@ -1311,18 +1294,18 @@ $(document).ready(function(){
      * Hides the species row. Adds styles and modifies event listeners. 
      */
     function finishEditParentFormBuild() {                                      //console.log("fParams = %O", fParams);    
-        var domainLvl = fParams.taxon.domainLvls[0];
+        var realmLvl = fParams.taxon.realmLvls[0];
         initComboboxes(null, 'sub');
-        selectParentTaxon($('#txn-prnt').data('txn'), domainLvl);
+        selectParentTaxon($('#txn-prnt').data('txn'), realmLvl);
         $('#Species_row').hide();
-        $('#'+domainLvl+'_row .field-row')[0].className += ' domain-row';
+        $('#'+realmLvl+'_row .field-row')[0].className += ' realm-row';
         $('#sub-submit').attr('disabled', false).css('opacity', '1');
         $('#sub-submit').off('click').click(closePrntEdit);
         $('#sub-cancel').off('click').click(cancelPrntEdit);
     }
-    function selectParentTaxon(prntId, domainLvl) {                             //console.log('selectParentTaxon. prntId [%s], domainLvl [%s]', prntId, domainLvl);                 
+    function selectParentTaxon(prntId, realmLvl) {                              //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
         var parentLvl = fParams.records.taxon[prntId].level.displayName;  
-        if (parentLvl == domainLvl) { return clearAllOtherLvls(); }
+        if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
         clearAllOtherLvls();
         $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
     }
@@ -1332,7 +1315,7 @@ $(document).ready(function(){
         });
     }
     function closePrntEdit() {                                                  
-        var prnt =  getSelectedTaxon() || getDomainTaxon();                     //console.log("closePrntEdit called. prnt = %O", prnt);
+        var prnt =  getSelectedTaxon() || getRealmTaxon();                      //console.log("closePrntEdit called. prnt = %O", prnt);
         exitPrntEdit(prnt);
     }
     function cancelPrntEdit() {                                                 //console.log("cancelPrntEdit called.");
@@ -1526,8 +1509,10 @@ $(document).ready(function(){
         var prntLvl = getNextFormLevel("parent", formLvl);
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, formLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", formLvl, "sml-left sml-form", {"Display Name": val}, parentSelId));
+            "author", formLvl, "sml-left sml-form", {"Last Name": val}, parentSelId));
+        enableSubmitBttn("#"+formLvl+"-submit");
         disableSubmitBttn("#"+prntLvl+"-submit");
+        $('#FirstName_row input').focus();
         return { "value": "", "text": "Creating Author..." };
     }
     /**
@@ -1626,8 +1611,8 @@ $(document).ready(function(){
             'Publisher': { name: 'Publisher', change: Function.prototype, add: initPublisherForm },
             'Realm': { name: 'Realm', change: onRealmSelection, add: false },
             'Species': { name: 'Species', change: onLevelSelection, add: initTaxonForm },
-            'Tags':  { name: 'Tag', change: false, add: false, 
-                'options': { 'delimiter': ',', 'maxItems': null, 'persist': false }},
+            // 'Tags':  { name: 'Tag', change: false, add: false, 
+            //     'options': { 'delimiter': ',', 'maxItems': null, 'persist': false }},
             'Publication': { name: 'Publication', change: onPubSelection, add: initPubForm },
             'Subject': { name: 'Subject', change: onSubjectSelection, add: false },
             'Object': { name: 'Object', change: onObjectSelection, add: false },
@@ -1706,11 +1691,11 @@ $(document).ready(function(){
                 "order": ["Class", "Order", "Family", "Genus", "Species"],
             },
             "author": { 
-                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text"}, 
-                "exclude": ["Description", "Year", "Doi", "Authors", "Tags"],
+                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text",
+                    "Suffix": "text"}, 
+                "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", "Tags"],
                 "required": ["Last Name", "Display Name"], 
-                "order": [ "DisplayName", "FirstName", "MiddleName", "LastName", 
-                    "LinkUrl", "LinkDisplay"],
+                "order": [ "FirstName", "MiddleName", "LastName", "Suffix", "LinkUrl", "LinkDisplay"],
             },
             "bat": {
                 "add": {},  
@@ -1720,13 +1705,11 @@ $(document).ready(function(){
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
-                    "Issue": "text", "Pages": "text", "Citation Text": "fullTextArea", 
-                    "Citation Type": "select"},
-                "exclude": ["Display Name", "Description"], 
-                "required": ["Title", "Citation Text", "Citation Type"],
-                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", 
-                    "Volume", "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", 
-                    "Tags", "Authors" ],
+                    "Issue": "text", "Pages": "text", "Citation Type": "select"}, //"Citation Text": "fullTextArea",
+                "exclude": ["Display Name", "Description", "Tags"], 
+                "required": ["Title", "Citation Type"], //"Citation Text", 
+                "order": ["Abstract", "Title", "CitationType", "Year", "Volume", 
+                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], //"CitationText", 
                 "exitHandler": { create: enablePubField }
             },                                      
             "interaction": {
@@ -1809,8 +1792,8 @@ $(document).ready(function(){
                 "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Display": "text", "Link Url": "text", 
-                "Authors": "multiSelect", "Tags": "tags" 
+                "Year": "text", "Doi": "text", "Link Display": "text", 
+                "Link Url": "text", "Authors": "multiSelect" 
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
@@ -1942,7 +1925,6 @@ $(document).ready(function(){
             "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
-            // "ElevationUnits": [ getElevUnitOpts, null ],
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
@@ -1953,17 +1935,12 @@ $(document).ready(function(){
             "Publisher": [ getOptsFromStoredData, 'publisherNames'],
             "Realm": [ getRealmOpts, null ],
             "Species": [ getTaxonOpts, 'Species' ],
-            "Tags": [ getTagOpts, 'source' ],
+            // "Tags": [ getTagOpts, 'source' ],
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
         return getOpts(fieldKey);
     }
-    /** Returns an array of elevation unit options objects. */
-    // function getElevUnitOpts() {
-    //     return [ { value: "ft", text: "Feet" }, 
-    //              { value: "m", text: "Meters"} ];
-    // }
     /** Sorts an array of options via sort method. */
     function alphaOptionObjs(a, b) {
         var x = a.text.toLowerCase();
@@ -2228,12 +2205,16 @@ $(document).ready(function(){
         }
         /** Adds an array of selected values from the passed select container.*/
         function getMultiSelectVals(fieldName, cntnr) {
+            formVals[fieldName] = getSelectedVals(cntnr);
+        }
+        /** Returns an array of the selected values inside of a container elem. */
+        function getSelectedVals(cntnr) {
             var vals = [];
             var elems = cntnr.children;  
             for (var i = 0; i <= elems.length-1; i+= 2) { 
                 if (elems[i].value) { vals.push(elems[i].value); }
             }
-            formVals[fieldName] = vals;
+            return vals;
         }
         /** Adds an array of tag values. */
         function getTagVals(fieldName, input) {                                 
@@ -2246,41 +2227,129 @@ $(document).ready(function(){
          */
         function handleAdditionalEntityData(entity) {
             var dataHndlrs = {
-                "Author": [ getAuthFullName ],
-                "Citation": [ getPubFieldData, addCitDisplayName, ifBookType ],
+                "Author": [ getAuthFullName, getAuthDisplayName ],
+                "Citation": [ getPubFieldData, ifBookType, addCitFullText ], //addCitDisplayName, 
                 "Interaction": [ handleUnspecifiedLocs ],
-                "Location": [ addElevUnits, padLatLong, checkParentLoc, getLocType ], 
+                "Location": [ addElevUnits, padLatLong, getLocType ], 
                 "Taxon": [ getTaxonData ],
-
             };
             if (!dataHndlrs[entity]) { return; }
             dataHndlrs[entity].forEach(function(func) { func(); });
         }
+        /** -------------------- Additional Author Data ----------------------*/ 
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
         function getAuthFullName() { 
-            var nameFields = ["firstName", "middleName", "lastName"];
+            var nameFields = ["firstName", "middleName", "lastName", "suffix"];
             var fullName = [];
             nameFields.forEach(function(field) {
                 if (formVals[field]) { fullName.push(formVals[field]) };
             });
             formVals.fullName = fullName.join(" ");
         }
+        /** Concats author Last, First Middle Suffix as the author display name.*/
+        function getAuthDisplayName() {
+            var displayName = formVals.lastName + ',';
+            ["firstName", "middleName", "suffix"].forEach(function(name){
+                if (formVals[name]) { displayName += ' '+formVals[name]; };
+            });
+            formVals.displayName = displayName;
+        }
+        /** -------------------- Additional Citation Data --------------------*/ 
         function getPubFieldData() {
             formVals.publication = $('#Publication-sel').val();
         }
-        /** Adds 'displayName', which will be added to both the form data objects. */
-        function addCitDisplayName() {
-            formVals.displayName = formVals.title;
-        }
+        // /** Adds 'displayName', which will be added to both the form data objects. */
+        // function addCitDisplayName() {
+        //     formVals.displayName = formVals.title;
+        // }
         /** 
-         * Appends '-citation' to citations attributed to entire books to maintain
-         * unique display names for both the publication and its citation.
+         * Appends '-citation' to citations that are attributed to entire books 
+         * to maintain unique display names for both the publication and its citation.
          */
         function ifBookType() { 
-            if (formVals.citationType != 4) { return; }
+            if (getTypeName('citType', formVals.citationType) !== "Book") { return; }
             if (formVals.displayName.includes('-citation')) { return; }
             formVals.displayName += '-citation';
         }
+        /** Adds the full text for the citation formatted based on citation type. */
+        function addCitFullText() {
+            const type = getTypeName('citType', formVals.citationType);         console.log("type = ", type);
+            const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
+                'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
+                'Page range': chapterSympCit, 'Museum record': articleRecordCit,
+                'Symposium proceeding': chapterSympCit };
+            formVals.fullText = getFullText[type]();                            console.log('Full text = ', formVals.fullText);
+        }
+        /**
+         * Returns: 1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *   [Initials. Last]. Year. Title of article. Title of Journal. Volume 
+         *   (Issue): Pages.
+         */
+        function articleRecordCit() {                                           console.log("articleRecordCit called.")
+            const athrs = getCitAuthors();
+            let fullText = [athrs, formVals.year, formVals.title, getPubName()].join('. '); 
+            fullText += ['', getVolAndIss(), formVals.pages].join(' ');
+            return fullText+'.';
+        }
+        function bookCit() {
+            // body...
+        }
+        function chapterSympCit() {
+            // body...
+        }
+        function reportCit() {
+            // body...
+        }
+        function otherCit() {
+            // body...
+        }
+                /** -------- Additional Citation data helpers --------*/
+        function getTypeName(type, id) {            
+            const types = _util.getDataFromStorage(type+'Names');               
+            for (name in types) {
+                if (types[name] === id) { return name; }
+            }
+        }
+        /** 
+         * Returns a string with all author names formatted with the first author
+         * [Last, Initials.], all following authors as [Initials. Last], and each 
+         * are seperated by commas until the final author, which is seperated with '&'.
+         */
+        function getCitAuthors() { 
+            const auths = getSelectedVals($('#Authors_sel-cntnr')[0]);          //console.log('auths = %O', auths);
+            let athrs = '';
+            $(auths).each(function(i, srcId){
+                const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
+                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
+                const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
+                const name = getAuthName(i, athr);
+                athrs += i == 0 ? name : (i == auths.length-1 ?
+                    ' & '+ name : ', '+ name); 
+            }); 
+            return athrs;
+        }
+        /**
+         * Returns the last name and initials of the passed author. The first 
+         * author is formatted [Last, Initials.] and all others [Initials. Last];
+         */
+        function getAuthName(cnt, athr) {                                       
+            const last = athr.lastName;                                         
+            let initials = ["firstName", "middleName"].map(function(name) {
+                return athr[name] ? athr[name].charAt(0)+'.' : null;
+            }).filter(function(i) {return i;}).join(' '); //removes null values and joins
+            return cnt > 0 ? initials +' '+ last : last+', '+initials; 
+        }
+        function getPubName() {
+            const pub = fParams.records.source[$('#Publication-sel').val()];
+            return pub.displayName+'.';
+        }
+        /** Returns: Volume (Issue): || Volume: || (Issue): || null */
+        function getVolAndIss() {  //append ':'
+            let iss = formVals.issue ? '('+formVals.issue+'):' : null;
+            return formVals.volume && iss ? formVals.volume +' '+ iss :
+                formVals.volume ? formVals.volume+':' : iss ? iss : null;
+        }
+        /** -------------------- Additional Location Data _-------------------*/ 
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
         function addElevUnits() {
             if (formVals.elevation) { formVals.elevUnitAbbrv = 'm'; }
@@ -2294,31 +2363,34 @@ $(document).ready(function(){
                 formVals.longitude = parseFloat(formVals.longitude).toFixed(14); 
             }
         }
-        /** If no parent country is selected, the 'Unspecified' region is the parent. */
-        function checkParentLoc() {
-            if (!formVals.country) { formVals.country = 439; }
+        /** Returns the id of the Unspecified region. */
+        function getUnspecifiedLocId() {
+            const regions = _util.getDataFromStorage('topRegionNames');
+            return regions['Unspecified'];
         }
         /**
          * Sets location type according to the most specific data entered. 
          * "Point": if there is lat/long data. "Area" otherwise.
          */
         function getLocType() {
-            formVals.locationType = 
-                formVals.longitude || formVals.latitude ? 5 : 4;
+            const locTypes = _util.getDataFromStorage('locTypeNames');
+            const type = formVals.longitude || formVals.latitude ? 'Point' : 'Area';
+            formVals.locationType = locTypes[type];  
         }
         /**
          * If no location is selected for an interaction record, the country field 
          * is checked for a value. If set, it is added as the interaction's location;
-         * if not, the 'Unspecfied' location, id 439, is added.
+         * if not, the 'Unspecfied' location is added.
          */
         function handleUnspecifiedLocs(entity) {
             if (formVals.location) { return; }
-            formVals.location = formVals.country || 439;   
+            formVals.location = formVals.country || getUnspecifiedLocId();   
         }
         function getTaxonData() {
             formVals.parentTaxon = getParentTaxon(fParams.taxon.formTaxonLvl);
             formVals.level = fParams.taxon.formTaxonLvl;
         }
+        /** -------------------- Additional Taxon Data -----------------------*/ 
         /**
          * Checks each parent-level combo for a selected taxon. If none, the realm
          * taxon is added as the new Taxon's parent.
@@ -2432,13 +2504,13 @@ $(document).ready(function(){
             },
             "citation": { 
                 "authors": { "source": "contributor" },
-                "citationText": { "source": "description", "citation": "fullText" },
+                "fullText": { "source": "description", "citation": "fullText" }, 
                 "publication": { "source": "parentSource" },
-                "displayName": { "source": "displayName", "citation": "displayName" },
+                "title": { "source": "displayName", "citation": "displayName" },
                 "volume": { "citation": "publicationVolume" },
                 "issue": { "citation": "publicationIssue" },
                 "pages": { "citation": "publicationPages" },
-                "tags": { "source": "tags" }
+                // "tags": { "source": "tags" }
             },
             "interaction": {
                 "citationTitle": { "interaction": "source" },
@@ -2466,7 +2538,7 @@ $(document).ready(function(){
     function getRelationshipFields(entity) {
         var relationships = {
             "author": ["sourceType"], 
-            "citation": ["citationType", "authors", "tags", "publication"], 
+            "citation": ["citationType", "authors", "publication"], 
             "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher"],
             "publisher": [],
@@ -2478,7 +2550,7 @@ $(document).ready(function(){
     }
     /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
-    function submitFormData(formData, formLvl) {                                //console.log("submitFormData [ %s ]= %O", formLvl, formData);
+    function submitFormData(formData, formLvl) {                                console.log("submitFormData [ %s ]= %O", formLvl, formData);
         var coreEntity = getCoreFormEntity(fParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
         var url = getEntityUrl(coreEntity, fParams.forms[formLvl].action);
         if (fParams.editing) { formData.ids = fParams.editing; }
@@ -2509,17 +2581,13 @@ $(document).ready(function(){
         var data = parseData(ajaxData.results);
         storeData(data);
     }
-    function afterStoredDataUpdated(data, msg, errTag) {                        console.log('data update complete. args = %O', arguments);
+    function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
-        if (errTag) { return errUpdatingData(msg, errTag); }                    //console.log('no error')
-        if (editFormSubmitted() && !hasChngs(data)) { 
-            return showSuccessMsg("No changes detected."); }                    //console.log('has Changes')
+        if (errTag) { return errUpdatingData(msg, errTag); }
+        if (fParams.action === 'edit' && !hasChngs(data)) { 
+            return showSuccessMsg("No changes detected."); }  
         updateStoredFormParamsData(data);
         handleFormComplete(data);
-    }
-    /** Returns true if the form submitted was an edit form. */
-    function editFormSubmitted() {
-        return fParams.forms[fParams.ajaxFormLvl].action === 'edit';
     }
     /** Calls the appropriate data storage method and updates fParams. */  
     function storeData(data) {  
@@ -2530,8 +2598,9 @@ $(document).ready(function(){
         fParams.records[data.core] = _util.getDataFromStorage(data.core);
     }
     /*------------------ Top-Form Success Methods --------------------*/
-    function handleFormComplete(data) {                                         //console.log('handleFormComplete formLvl = [%s] formParams = [%O]', fParams.ajaxFormLvl, fParams.forms[fParams.ajaxFormLvl]);
-        if (fParams.ajaxFormLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
+    function handleFormComplete(data) {   
+        var formLvl = fParams.ajaxFormLvl;                                      //console.log('handleFormComplete formLvl = ', formLvl);
+        if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
     }
     /** 
@@ -2553,6 +2622,7 @@ $(document).ready(function(){
         showSuccessMsg("New Interaction successfully created.");
         initFormParams("create", "interaction");
         resetIntFields(vals);
+        $('#top-cancel').val(" Close "); 
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {
@@ -2579,25 +2649,30 @@ $(document).ready(function(){
         }
     } /* End getPinnedValsObj */
     /**
-     * Resets the top-form in preparation for another entry. All fields without  
-     * a pinned value will be reset. 
+     * Resets the top-form in preparation for another entry. All fields without a pinned
+     * value will be reset. checkRequiredFields is triggered to update the submit button.
      */
     function resetIntFields(vals) {
-        disableSubmitBttn("top-submit"); 
+        disableSubmitBttn("#top-submit");
         initInteractionParams();
         resetUnpinnedFields(vals);
+        $(fParams.forms.top.reqElems[0]).change();
     }
     function resetUnpinnedFields(vals) {
         for (var field in vals) {                                               //console.log("field %s val %s", field, vals[field]);
-            if (!vals[field]) { clearFieldData(field); }
+            if (!vals[field]) { clearField(field); }
         }
     }
-    function clearFieldData(fieldName) {  
-        var detElems = {'Publication': 'pub', 'CitationTitle': 'cit', 'Location': 'loc'};
+    function clearField(fieldName) {
         if (fieldName === 'Note') { return $('#Note-txt').val(""); }
-        clearCombobox('#'+fieldName+'-sel'); 
-        if (fieldName in detElems) {
-            $('#'+detElems[fieldName]+'-det div')[0].innerText = 'None selected.';
+        clearDetailPanel(fieldName);
+        clearCombobox('#'+fieldName+'-sel');
+    }
+    function clearDetailPanel(field) {
+        let detailFields = {
+            'Location': 'loc', 'CitationTitle': 'cit', 'Publication': 'pub' };
+        if (Object.keys(detailFields).indexOf(field) !== -1) {  
+            emptySidePanel(detailFields[field], true);
         }
     }
     /** Inits the necessary interaction form params after form reset. */
@@ -2763,7 +2838,7 @@ $(document).ready(function(){
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem);
         if ($('#sub-form').length) { return selectParentTaxon(
-            $('#txn-prnt').data('txn'), fParams.taxon.domainLvls[0]); 
+            $('#txn-prnt').data('txn'), fParams.taxon.realmLvls[0]); 
         }
         $('#txn-lvl').data('lvl', $('#txn-lvl').val());
     }
@@ -2846,15 +2921,6 @@ $(document).ready(function(){
         elem.className = elem.className.split(' active-errs')[0];
     }
 
-
-
-
-
-
-
-
-
- 
 /*=================== Content Block WYSIWYG ======================================================*/
     /**
      *  Adds edit content button to the top of any page with editable content blocks.
@@ -2868,6 +2934,7 @@ $(document).ready(function(){
             text: "Edit Content", 
             id: 'editContentBttn',
             class: 'adminbttn',
+            title: 'Edit Content',
             click: toggleContentBlockEditing
         });  //console.log("button = %O", button)
         button.css({

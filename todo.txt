@@ -2,30 +2,32 @@
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
-        -- Change domain -> realm, level -> rank.
+        -- Style the 'change password' page
+        -- remove eif declarations in js files.
+        -- Added header to FOS pages 
+            -- change password page (/profile/change-password)
+            -- update profile page (/profile/edit)
     --Search--
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
         -- Add publisher to source-type view
         -- refactor enable/disable submit-button methods to one method with 'enable' param
         -- Add data-entry tutorial.
+        -- update 'shw-changd' 'custom' value on date selection
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
-        -- Auto generate citation full text from filled fields
         -- Change description to 'translation'
-        -- //Refactor fillIntData (crud.js)
         -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        -- refactor realm to domain until the name change happens in the backend
-        -- Location --
-            -- Add message to inform user that new countries can not be created.
-            -- When nothing is selected but a country, a habitat type, and the 
-                displayname, suggest to user they use the country-habitat combo
-                that already exists.
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
     --Asac---
         --form--
+            -- Location --
+                -- When nothing is selected but a country, a habitat type, and the 
+                    displayname, suggest to user they use the country-habitat combo
+                    that already exists.
+            -- Auto generate citation full text from filled fields
             -- Validate that genus and species have the same genus names.
             -- refactor initcomboboxes to need only the form-lvl param
             -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
@@ -37,58 +39,66 @@
                    them to add initials if not.  
             -- Data storage err - Ensure user can't close the form any other way 
                 than clicking the 'ok' in the error meseage.
+            -- Pub form
+                -- Change Doi field to DOI
+                -- update test
         --search--
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
-            -- standardize taxon 'levels' storage
             -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
             -- add text search to all views.
             -- update all the comments that mention the updates-since filter to 
-                'int-updated-at'
+                'ints-updated-at'
+        -- Data storage --
         --css--
             --refactor to use parital, effectively 'group', selectors
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
         -- UPGRADE --
             -- Add more sophisticated logging
+        --Refactor--
+            -- Add '-sel' to the edit taxon form's 'txn-lvl' field 
+
     --Asap--        
-        --form-- 
-            -- Add top location option, 'Add a new Location...'
-            -- update detail panel on interaction form submit
-            -- add err eliminating the possibility of creating an orphan taxon
-            -- (fix) Fill country field in new location form with top-form country
-        --search--
+        -- CRUD --
+            -- add err in controllers eliminating the possibility of creating orphans
         -- sync data --
             -- Add error handling for pending updates that can't be resolved 
-        --MISC--
-            -- Change author display names to Last, First M Suffix 
+        -- MISC --
             -- Comment the crud controller method 'setupdatedattimes'
-Todo:
-    > Fix responsiveness and formatting for the edit forms.
 
-    > Future additions
-        > Displaying contained data on data grid
+
+~~~ What to test ~~~
+    > Search Page
+        > CSV downloads
+        > Grid
+            > Unq Vals col filter
+        > Forms
+            -- displays correctly.
+            -- all errors are caught and handled as expected
 
 ##CHANGES##
 
 ::Testing!::
-> Search Page
-    > CSV downloads
-    > Data Storage
-        > Data is added and removed correctly  
-        > The grid should reload as expect with the form close
-            > With and without submit. 
-            > interaction forms and sub-entity forms. 
-    > Forms
-        > Taxa select
-            > Object select forms open and change realm 
-:: Questions ::
+    - Tests written for
+        > Data entry form (new interaction)
+        > Search page features
+        > Website top pages load with content
 
-:: Email ::
+~ Data Cleanup ~
+    pub 561 - delete (dup of 338)
+    pub388 - Change srcId -> 967 
+    >> Change my team desc to lower case title.
+
+    !! Refactor !!
+        > Change sel-domain vals to slugs of realm
+        > change search-focus to search-view
+        > Change test at end of 'change views/groups' to test view dependent elems rather than sel value
 
 
-:: Docs ::
+
+:: Dev Docs ::
     -- Location naming:
         --To select a region or country habitat, type in the region/country name 
             in the location combobox. Look for the [name]- [habitat]. 
@@ -105,18 +115,11 @@ Todo:
 
 TASK LIST
 
-
 TODO
-    >> data cleanup <<        
-
 
 NOTES
-    >> I can go through the location grid and spot obvious location that should be 
-        merged and do so.
-        >> from 159 -> 181 (barrao ISLAND DUPLICATE)
 
 ============ EMAIL ==================
-    >>  
 
 TAYLOR:
     --- General ---
@@ -124,10 +127,8 @@ TAYLOR:
 
 Notes::
     ## Change Log ##
-        > Species are no longer able to be created without a parent genus selected.
 
 Questions:
-    >> We can either close the update forms on submit, or leave the close button.
 ---------------------Next-------------------------------------------------------
 
 --SHORTTERM--
@@ -170,7 +171,6 @@ Questions:
         -- test for optimizations
         -- responsive
         -- Taxonym need a collection of namings
-        -- update: domain = realm
 
 
 
@@ -201,4 +201,7 @@ Deployment Steps:
             "Framework":
                 assets:
                     version: 'v%'"              
+
+
+
 

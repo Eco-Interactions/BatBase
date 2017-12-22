@@ -2,11 +2,11 @@
 
 namespace Application\Migrations;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use AppBundle\Entity\SystemDate;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
-use AppBundle\Entity\SystemDate;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @up- Creates a systemDate for each entity expected to be modified during data

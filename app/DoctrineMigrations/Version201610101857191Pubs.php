@@ -2,13 +2,13 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\PublicationType;
+use AppBundle\Entity\Source;
+use AppBundle\Entity\SourceType;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\PublicationType;
-use AppBundle\Entity\SourceType;
-use AppBundle\Entity\Source;
 
 /**
  * @preUp creates all sourceType entities: Publisher, Publication, Citation, Author. 

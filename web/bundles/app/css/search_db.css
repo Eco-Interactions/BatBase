@@ -191,10 +191,6 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     margin-top: -50px;
     border-radius: 5px;
 }
-#grid-popup.has-errs {
-    width: 555px;
-    height: 350px;    
-}
 #grid-overlay {
     display: none;
     position: absolute;
@@ -379,7 +375,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 302px;
 }
 .med-field {
-    width: 245px;
+    width: 235px;
 }
 .sml-field {
     width: 200px;
@@ -419,7 +415,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     left: -.5em;
     position: relative;
 }
-.domain-row {
+.realm-row {
     justify-content: flex-start !important; 
 }
 select[id$="txn-lvl"] + div {

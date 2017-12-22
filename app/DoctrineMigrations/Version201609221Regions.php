@@ -2,12 +2,12 @@
 
 namespace Application\Migrations;
 
+use AppBundle\Entity\Location;
+use AppBundle\Entity\Region;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\Location;
-use AppBundle\Entity\Region;
 
 /**
  * Migration updates existing region (-Unspecified) locations or adds a new location

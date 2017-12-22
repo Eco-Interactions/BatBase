@@ -1,53 +1,53 @@
 (function(){  
     /**
      * The search grid is built to display the eco-interaction records organized by
-     * a selected "focus": taxa (grouped further by domain: bat, plant, arthropod), 
+     * a selected "focus": taxa (grouped further by realm: bat, plant, arthropod), 
      * locations, or sources (grouped by either publications or authors). 
      *
      * userRole = Stores the role of the user.
+     * dataStorage = window.localStorage (sessionStorage for tests)
      * miscObj = Container for misc data used at the global level--
      *      cal: Stores the flatpickr calendar instance. 
      *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
      *      intro: Stores an active tutorial/walk-through instance.
      * columnDefs = Array of column definitions for the grid.
      * gParams = obj container for misc params used for the search grid.
-     * dataKey = String checked in local storage to indicate whether the stored 
+     * dataKey = String checked in data storage to indicate whether the stored 
      *      data should be cleared and redownloaded.
      */
-    var userRole, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey = 'Welcome to the future....';
+    var userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
+    var dataKey = 'Welcome to tomorrow.';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
-    var localStorage = _util.setlocalStorage();
     var gridOptions = getDefaultGridOptions();
     eif.search = {
-        dbErr: handleDbUpdateErr,
-        handleReset: handleDataReset,
         initSearchPage: initSearchPage,
         initSearchGrid: resetSearchGrid,
         showUpdates: showTodaysUpdates,
+        handleReset: handleDataReset
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
 
-    function onDOMContentLoaded () {
-        clearLocalStorageCheck();
+    function onDOMContentLoaded () {  
+        dataStorage = _util.getDataStorage();
+        clearDataStorageCheck();
         showPopUpMsg('Loading...');
         addDomEventListeners();
         adaptUiToScreenSize();
         authDependentInit();
         initSearchState();
     }
-    /** If local storage needs to be cleared, the datakey is updated */ 
-    function clearLocalStorageCheck() {
-        if (localStorage && !localStorage.getItem(dataKey)) {
-            localStorage.clear();
+    /** If data storage needs to be cleared, the datakey is updated */ 
+    function clearDataStorageCheck() {
+        if (dataStorage && !dataStorage.getItem(dataKey)) {  
+            dataStorage.clear();
             _util.populateStorage(dataKey, true);
         }
     }
     /**
      * The first time a browser visits the search page, all data is downloaded
-     * from the server and stored in LocalStorage. The intro-walkthrough is shown 
+     * from the server and stored in dataStorage. The intro-walkthrough is shown 
      * for the user @showIntroWalkthrough.
      */
     function initSearchPage() {
@@ -110,6 +110,7 @@
         selectInitialSearchFocus();
         initNoFiltersStatus();      
         setUpFutureDevInfoBttn();
+        selectSearchFocus();
     } 
     /**
      * Container for param data needed for a selected focus. Resets on focus change.
@@ -117,7 +118,7 @@
      * - openRows: Array of entity ids whose grid rows will be expanded on grid load.
      * Notable properties stored later: 
      * rcrdsById - all records for the current focus.
-     * curDomain - focus' domain-level sort (eg, Taxon domains: Bat, Plant, Arthropod).
+     * curRealm - focus' realm-level sort (eg, Taxon realms: Bat, Plant, Arthropod).
      * curTree - data 'tree' object to be displayed in grid.
      * rowData - array of rows displayed in the grid.
      * selectedOpts - search combobox values 'selected' for the current tree.
@@ -129,7 +130,7 @@
     }
     function getResetFocus() {
         var foci = ['locs', 'srcs', 'taxa'];
-        var storedFocus = localStorage.getItem('curFocus');
+        var storedFocus = dataStorage.getItem('curFocus');
         return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
     }
     /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
@@ -147,8 +148,8 @@
             "Below is a 'Show/Hide Columns' button that will allow users to specify " +
             "the data shown in the grid and/or csv export.";
     }
-    /** Starts the grid-build after data downlaoded or after form close. */
-    function resetSearchGrid(focus) {                                           console.log('Loading search grid.')
+    /** Grid-rebuild entry point after form-window close. */
+    function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
         resetToggleTreeBttn(false);
         if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
         selectSearchFocus(null, focus);
@@ -159,7 +160,7 @@
             "locs": buildLocationGrid, "srcs": buildSourceGrid,
             "taxa": buildTaxonGrid 
         };  
-        if (!localStorage.getItem('pgDataUpdatedAt')) { return; } 
+        if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
         ifChangedFocus(focus, builderMap[focus]); 
     }
     /**
@@ -169,7 +170,7 @@
         clearPreviousGrid();
         if (focus !== gParams.curFocus) {
             _util.populateStorage("curFocus", focus);
-            localStorage.removeItem("curDomain");
+            dataStorage.removeItem("curRealm");
             initNoFiltersStatus();
             resetGridParams();
             resetToggleTreeBttn(false);
@@ -190,7 +191,7 @@
     } /* End ifChangedFocus */
 /*------------------ Interaction Search Methods--------------------------------------*/
     /**
-     * If interaction data is already in local storage, the data is sent to 
+     * If interaction data is already in data storage, the data is sent to 
      * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, 
      * an ajax call gets the data which is stored @storeInteractions before being
      * sent to @fillTreeWithInteractions.    
@@ -364,49 +365,49 @@
     }   
 /*------------------ Taxon Search Methods ------------------------------------*/
     /**
-     * Get all data needed for the Taxon-focused grid from local storage and send 
+     * Get all data needed for the Taxon-focused grid from data storage and send 
      * to @initTaxonSearchUi to begin the data-grid build.  
      */
     function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
-        var data = _util.getDataFromStorage(['domain', 'taxon', 'level']); 
+        var data = _util.getDataFromStorage(['realm', 'taxon', 'level']); 
         if( data ) { initTaxonSearchUi(data);
         } else { console.log("Error loading taxon data from storage."); }
     }
     /**
-     * If the taxon search comboboxes aren't displayed, build them @buildTaxonDomainHtml.
-     * If no domain is selected, the default domain value is set. The domain-tree 
+     * If the taxon search comboboxes aren't displayed, build them @buildTaxonRealmHtml.
+     * If no realm is selected, the default realm value is set. The realm-tree 
      * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
      * Continues grid build @getInteractionsAndFillTree.  
      */
     function initTaxonSearchUi(data) {                                          //console.log("initTaxonSearchUi. data = %O", data);
-        var domainTaxonRcrd;
+        var realmTaxonRcrd;
         gParams.rcrdsById = data.taxon;
-        if (!$("#sel-domain").length) { buildTaxonDomainHtml(data.domain); }  
-        setTaxonDomain();  
+        if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
+        setTaxonRealm();  
         
-        domainTaxonRcrd = storeAndReturnDomain();
-        initTaxonTree(domainTaxonRcrd);
-        storeLevelData(domainTaxonRcrd);
+        realmTaxonRcrd = storeAndReturnRealm();
+        initTaxonTree(realmTaxonRcrd);
+        storeLevelData(realmTaxonRcrd);
         getInteractionsAndFillTree();
     }
-    /** Restores stored domain from previous session or sets the default 'Plants'. */
-    function setTaxonDomain() {
-        var domainVal;
-        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
-        if ($('#sel-domain').val() === null) { 
-            domainVal = storedDomain !== null ? storedDomain : "3";  
-            $('#sel-domain').val(domainVal);
+    /** Restores stored realm from previous session or sets the default 'Plants'. */
+    function setTaxonRealm() {
+        var realmVal;
+        var storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
+        if ($('#sel-realm').val() === null) { 
+            realmVal = storedRealm !== null ? storedRealm : "3";  
+            $('#sel-realm').val(realmVal);
         }
     }
     /**
      * Stores in the global gParams obj:
      * > taxonByLvl - object with taxon records in the current tree organized by 
      *   level and keyed under their display name.
-     * > allDomainLvls - array of all levels present in the current domain tree.
+     * > allRealmLvls - array of all levels present in the current realm tree.
      */
     function storeLevelData(topTaxon) {
         gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
-        gParams["allDomainLvls"] = Object.keys(gParams.taxaByLvl);
+        gParams["allRealmLvls"] = Object.keys(gParams.taxaByLvl);
     }
     function updateTaxaByLvl(topTaxon) {
         gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
@@ -435,35 +436,35 @@
             return obj;
         }
     } /* End seperateTaxonTreeByLvl */
-    /** Event fired when the taxon domain select box has been changed. */
-    function onTaxonDomainChange(e) {  
-        var domainTaxon = storeAndReturnDomain();
+    /** Event fired when the taxon realm select box has been changed. */
+    function onTaxonRealmChange(e) {  
+        var realmTaxon = storeAndReturnRealm();
         resetCurTreeState();
-        rebuildTaxonTree(domainTaxon, true);
+        rebuildTaxonTree(realmTaxon, true);
     }
     /**
-     * Gets the currently selected taxon domain's id, gets the record for the taxon, 
+     * Gets the currently selected taxon realm's id, gets the record for the taxon, 
      * stores both it's id and level in the global focusStorag, and returns 
      * the taxon's record.
      */
-    function storeAndReturnDomain() {
-        var domainId = $('#sel-domain').val();
-        var domainTaxonRcrd = getDetachedRcrd(domainId);                        //console.log("domainTaxon = %O", domainTaxonRcrd);
-        var domainLvl = domainTaxonRcrd.level;
-        _util.populateStorage('curDomain', domainId);
-        gParams.curDomain = domainId;
-        gParams.domainLvl = domainLvl;
-        return domainTaxonRcrd;
+    function storeAndReturnRealm() {
+        var realmId = $('#sel-realm').val();
+        var realmTaxonRcrd = getDetachedRcrd(realmId);                          //console.log("realmTaxon = %O", realmTaxonRcrd);
+        var realmLvl = realmTaxonRcrd.level;
+        _util.populateStorage('curRealm', realmId);
+        gParams.curRealm = realmId;
+        gParams.realmLvl = realmLvl;
+        return realmTaxonRcrd;
     }
     /**
      * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
      * the tree are stored or updated before continuing @getInteractionsAndFillTree.. 
      * Note: This is the entry point for filter-related taxon-grid rebuilds.
      */
-    function rebuildTaxonTree(topTaxon, domainInit) {                           //console.log("domainTaxon=%O", domainTaxon)
+    function rebuildTaxonTree(topTaxon, realmInit) {                            //console.log("realmTaxon=%O", realmTaxon)
         clearPreviousGrid();
         initTaxonTree(topTaxon);
-        if (domainInit) { storeLevelData(topTaxon); 
+        if (realmInit) { storeLevelData(topTaxon); 
         } else { updateTaxaByLvl(topTaxon); }
         getInteractionsAndFillTree();
     }
@@ -478,7 +479,7 @@
     }
     /**
      * Returns a heirarchical tree of taxon record data from the top, parent, 
-     * domain taxon through all children. The tree is stored as 'curTree' in the 
+     * realm taxon through all children. The tree is stored as 'curTree' in the 
      * global gParams obj. 
      */
     function buildTaxonTree(topTaxon) {                                         //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
@@ -514,29 +515,29 @@
     } 
     /*------------------ Build Taxon Search Ui --------------------------------*/
     /**
-     * Builds the select box for the taxon domains that will become the data tree 
+     * Builds the select box for the taxon realms that will become the data tree 
      * nodes displayed in the grid.
      */
-    function buildTaxonDomainHtml(data) {                                        //console.log("buildTaxonDomainHtml called. ");
+    function buildTaxonRealmHtml(data) {                                        //console.log("buildTaxonRealmHtml called. ");
         var browseElems = _util.buildElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-        var domainOpts = getDomainOpts(data);   //console.log("domainOpts = %O", domainOpts);
-        $(browseElems).append(_util.buildSelectElem( domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+        var realmOpts = getRealmOpts(data);                                     //console.log("realmOpts = %O", realmOpts);
+        $(browseElems).append(_util.buildSelectElem( realmOpts, { class: 'opts-box', id: 'sel-realm' }));
 
         $('#sort-opts').append(browseElems);
-        $('#sel-domain').change(onTaxonDomainChange);
+        $('#sel-realm').change(onTaxonRealmChange);
         $('#sort-opts').fadeTo(0, 1);
 
-        function getDomainOpts(data) {  
+        function getRealmOpts(data) {  
             var optsAry = [];
             for (var id in data) {                                              //console.log("taxon = %O", data[taxonId]);
                 optsAry.push({ value: data[id].taxon, text: data[id].displayName });
             }
             return optsAry;
         }
-    } /* End buildTaxonDomainHtml */
+    } /* End buildTaxonRealmHtml */
     /**
      * Builds and initializes a search-combobox for each level present in the 
-     * the unfiltered domain tree. Each level's box is populated with the names 
+     * the unfiltered realm tree. Each level's box is populated with the names 
      * of every taxon at that level in the displayed, filtered, grid-tree. After 
      * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
      */
@@ -544,20 +545,20 @@
         var curTaxaByLvl = gParams.taxaByLvl;                                   //console.log("curTaxaByLvl = %O", curTaxaByLvl);
         var lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
         var levels = Object.keys(lvlOptsObj);
-        if (levels.indexOf(gParams.domainLvl) !== -1) { levels.shift(); } //Removes domain level
+        if (levels.indexOf(gParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
 
         loadLevelSelects(lvlOptsObj, levels);
         // initComboboxes();
     }
     /**
-     * Builds select options for each level with taxon data in the current domain.
+     * Builds select options for each level with taxon data in the current realm.
      * If there is no data after filtering at a level, a 'none' option obj is built
      * and will be selected.
      */
     function buildTaxonSelectOpts(rcrdsByLvl) {                                 //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
         var optsObj = {};
-        var curDomainLvls = gParams.allDomainLvls.slice(1);                     //console.log("curDomainLvls = %O", curDomainLvls) //Skips domain lvl 
-        curDomainLvls.forEach(function(lvl) {
+        var curRealmLvls = gParams.allRealmLvls.slice(1);                       //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+        curRealmLvls.forEach(function(lvl) {
             if (lvl in rcrdsByLvl) { getLvlOptsObjs(rcrdsByLvl[lvl], lvl);
             } else { fillInLvlOpts(lvl); }
         });
@@ -609,7 +610,7 @@
     }
     function setSelectedTaxonVals(selected) {                                   //console.log("selected in setSelectedTaxonVals = %O", selected);
         if (selected === undefined) {return;}
-        gParams.allDomainLvls.forEach(function(lvl) {                           //console.log("lvl ", lvl)
+        gParams.allRealmLvls.forEach(function(lvl) {                           //console.log("lvl ", lvl)
             var selId = '#sel' + lvl;
             $(selId).find('option[value="all"]').hide();
             if (selected[lvl]) {                                                //console.log("selecting = ", lvl, selected[lvl])
@@ -680,26 +681,26 @@
         return childRows;
 
         function getUnspecifiedInts(curTreeLvl) {
-            var domainMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
-            var name = curTaxon.id in domainMap ?  
-                domainMap[curTaxon.id] : curTaxon.displayName;
+            var realmMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
+            var name = curTaxon.id in realmMap ?  
+                realmMap[curTaxon.id] : curTaxon.displayName;
             getUnspecifiedTaxonInts(name, curTreeLvl);
         }
         /**
          * Groups interactions attributed directly to a taxon with child-taxa
          * and adds them as it's first child row. 
-         * Note: Domain interactions are built closed, otherwise they would be expanded
+         * Note: Realm interactions are built closed, otherwise they would be expanded
          * by default
          */
         function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
-            var domainIds = ["2", "3", "4"];  
+            var realmIds = ["2", "3", "4"];  
             if (getIntCount(curTaxon) !== null) { 
                 childRows.push({
                     id: curTaxon.id,
                     entity: "Taxon",
                     name: 'Unspecified ' + taxonName + ' Interactions',
                     isParent: true,
-                    open: domainIds.indexOf(curTaxon.id) === -1 ? false : 
+                    open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
                         gParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
                     children: getTaxonIntRows(curTaxon, treeLvl),
                     treeLvl: treeLvl,
@@ -732,7 +733,7 @@
         return rowData;                
     }
 /*------------------Location Search Methods-----------------------------------*/
-    /** Get location data from local storage and sends it to @startLocGridBuild. */
+    /** Get location data from data storage and sends it to @startLocGridBuild. */
     function buildLocationGrid() {
         var data = getLocData();
         if( data ) {  startLocGridBuild(data);
@@ -882,7 +883,7 @@
         } 
     } /* End buildLocSelectOpts */
     function checkSelectedVals(type) {
-        if (gParams.selectedOpts[type]) {
+        if (gParams.selectedOpts && gParams.selectedOpts[type]) {
             var loc = getDetachedRcrd(gParams.selectedOpts[type]);
             return { value: loc.id, text: loc.displayName };
         }
@@ -1015,7 +1016,7 @@
     }
 /*------------------ Source Search Methods -----------------------------------*/
     /**
-     * Get all data needed for the Source-focused grid from local storage and send  
+     * Get all data needed for the Source-focused grid from data storage and send  
      * to @initSrcSearchUi to begin the data-grid build.  
      */
     function buildSourceGrid() {
@@ -1026,13 +1027,13 @@
     }
     
     /**
-     * If the source-domain combobox isn't displayed, build it @buildSrcDomainHtml.
-     * If no domain selected, set the default domain value. Start grid build @buildSrcTree.
+     * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
+     * If no realm selected, set the default realm value. Start grid build @buildSrcTree.
      */
     function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
         addSrcDataToGridParams(srcData);
-        if (!$("#sel-domain").length) { buildSrcDomainHtml(); }  
-        setSrcDomain();  
+        if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
+        setSrcRealm();  
         buildSrcTree();
     }
     /** Add source data to gParams to be available while in a source focus. */
@@ -1041,60 +1042,60 @@
         gParams.author = srcData.author;
         gParams.publication = srcData.publication;
     }
-    /** Builds the combobox for the source domain types. */
-    function buildSrcDomainHtml() {                                             
+    /** Builds the combobox for the source realm types. */
+    function buildSrcRealmHtml() {                                             
         var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
-        var domainOpts = getDomainOpts();                                       
-        $(browseElems).append(_util.buildSelectElem(domainOpts, { class: 'opts-box', id: 'sel-domain' }));
+        var realmOpts = getRealmOpts();                                       
+        $(browseElems).append(_util.buildSelectElem(realmOpts, { class: 'opts-box', id: 'sel-realm' }));
         $('#sort-opts').append(browseElems);
         //initComboboxes
-        $('#sel-domain').change(onSrcDomainChange);
+        $('#sel-realm').change(onSrcRealmChange);
         $('#sort-opts').fadeTo(0, 1);
-        function getDomainOpts() {
+        function getRealmOpts() {
             return [{ value: "auths", text: "Authors" },
                     { value: "pubs", text: "Publications" }];
         }
-    } /* End buildSrcDomainHtml */
-    /** Restores stored domain from previous session or sets the default 'Publications'. */
-    function setSrcDomain() {
-        var storedDomain = localStorage.getItem('curDomain');                   //console.log("storedDomain = ", storedDomain)
-        var srcDomain = storedDomain || "pubs";
-        if ($('#sel-domain').val() === null) { $('#sel-domain').val(srcDomain); }
+    } /* End buildSrcRealmHtml */
+    /** Restores stored realm from previous session or sets the default 'Publications'. */
+    function setSrcRealm() {
+        var storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
+        var srcRealm = storedRealm || "pubs";
+        if ($('#sel-realm').val() === null) { $('#sel-realm').val(srcRealm); }
     }
-    /** Event fired when the source domain select box has been changed. */
-    function onSrcDomainChange(e) {  
+    /** Event fired when the source realm select box has been changed. */
+    function onSrcRealmChange(e) {  
         clearPreviousGrid();
         resetCurTreeState();
         resetToggleTreeBttn(false);
         buildSrcTree();
     }
-    /** (Re)builds source tree for the selected source domain. */
+    /** (Re)builds source tree for the selected source realm. */
     function buildSrcTree() {
-        var domainRcrds = storeAndReturnCurDomainRcrds();                       //console.log("---Search Change. domainRcrds = %O", domainRcrds);
-        initSrcTree(gParams.curDomain, domainRcrds);
+        var realmRcrds = storeAndReturnCurRealmRcrds();                         //console.log("---Search Change. realmRcrds = %O", realmRcrds);
+        initSrcTree(gParams.curRealm, realmRcrds);
         getInteractionsAndFillTree();
     }
-    /** Returns the records for the source domain currently selected. */
-    function storeAndReturnCurDomainRcrds() {
+    /** Returns the records for the source realm currently selected. */
+    function storeAndReturnCurRealmRcrds() {
         var valMap = { "auths": "authSources", "pubs": "pubSources" };
-        var domainVal = $('#sel-domain').val();                                 //console.log("domainVal = ", domainVal)                     
-        gParams.curDomain = domainVal;
-        _util.populateStorage('curDomain', domainVal);
-        return getTreeRcrdAry(valMap[domainVal]);
+        var realmVal = $('#sel-realm').val();                                   //console.log("realmVal = ", realmVal)                     
+        gParams.curRealm = realmVal;
+        _util.populateStorage('curRealm', realmVal);
+        return getTreeRcrdAry(valMap[realmVal]);
     }
     /** Returns an array with all records from the stored record object. */
-    function getTreeRcrdAry(domain) {
-        var rcrdIdAry = _util.getDataFromStorage(domain);
+    function getTreeRcrdAry(realm) {
+        var rcrdIdAry = _util.getDataFromStorage(realm);
         return rcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
     }
     /**
-     * Builds a family tree of source data of the selected source domain: authors 
+     * Builds a family tree of source data of the selected source realm: authors 
      * @buildAuthSrcTree and publications @buildPubSrcTree, and adds it to 
      * the global gParams obj as 'curTree', 
-     * NOTE: Sources have two domains, or types of tree data: 
+     * NOTE: Sources have two realms, or types of tree data: 
      * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
      */
-    function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree domainRcrds = %O", domainRcrds);
+    function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree realmRcrds = %O", realmRcrds);
         var tree = focus === "pubs" ? buildPubTree(rcrds) : buildAuthTree(rcrds);
         gParams.curTree = sortDataTree(tree);
     }  
@@ -1170,7 +1171,7 @@
      */
     function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
         clearPreviousGrid();
-        if (gParams.curDomain === "pubs") { loadPubSearchHtml(srcTree); 
+        if (gParams.curRealm === "pubs") { loadPubSearchHtml(srcTree); 
         } else { loadAuthSearchHtml(); }
         transformSrcDataAndLoadGrid(srcTree);
     } 
@@ -1179,6 +1180,7 @@
         var pubSelElem = buildPubSelects(pubTypeOpts);
         clearCol2();        
         $('#opts-col2').append(pubSelElem);
+        $('#selPublicationType').val('all');
         //initComboboxes
     }
     function buildPubSelectOpts() {
@@ -1194,7 +1196,7 @@
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         var spanElem = _util.buildElem('span', { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = _util.buildSelectElem(
-            pubTypeOpts, { class: "opts-box", id: 'selPubTypes' }, updatePubSearch
+            pubTypeOpts, { class: "opts-box", id: 'selPublicationType' }, updatePubSearch
         );
         $(labelElem).css('width', '255px');
         $(selectElem).css('width', '115px');
@@ -1205,8 +1207,8 @@
     /** Builds a text input for searching author names. */
     function loadAuthSearchHtml() {
         var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = _util.buildElem('input', { name: 'authNameSrch', type: 'text', placeholder: "Author Name"  });
-        var bttn = _util.buildElem('button', { text: 'Search', name: 'authSrchBttn', class: "ag-fresh grid-bttn" });
+        var inputElem = _util.buildElem('input', { name: 'selAuthor', type: 'text', placeholder: "Author Name"  });
+        var bttn = _util.buildElem('button', { text: 'Search', name: 'selAuthor_submit', class: "ag-fresh grid-bttn" });
         $(inputElem).onEnter(updateAuthSearch);
         $(bttn).css('margin-left', '5px');
         $(bttn).click(updateAuthSearch);
@@ -1221,7 +1223,7 @@
      * 'rowData' in the global gParams object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
-        var prefix = gParams.curDomain === "pubs" ? "Publication" : "Author";
+        var prefix = gParams.curRealm === "pubs" ? "Publication" : "Author";
         var treeName = prefix + ' Tree';
         var finalRowData = [];
 
@@ -1306,7 +1308,7 @@
         var selected = {};                                                      //console.log("selected = %O", selected)
         selectAncestorTaxa(selTaxonObj);
         return selected;
-        /** Adds parent taxa to selected object, until the domain parent. */
+        /** Adds parent taxa to selected object, until the realm parent. */
         function selectAncestorTaxa(taxon) {                                    //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
             if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
                 selected[taxon.level.displayName] = taxon.id;                   //console.log("setting lvl = ", taxon.level)
@@ -1400,12 +1402,13 @@
      * filtered by the selected type. 
      */
     function updatePubSearch() {                                                
-        var selVal = $("#selPubTypes").val();                                   console.log("\n-----updatePubSearch [%s]", selVal);
-        var selText = $("#selPubTypes option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
+        var selVal = $("#selPublicationType").val();                            //console.log("\n-----updatePubSearch [%s]", selVal);
+        var selText = $("#selPublicationType option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
         gridOptions.api.setRowData(newRows);
         gParams.focusFltr = selVal === "all" ? null : selText+'s';
         updateGridFilterStatusMsg();
+        resetToggleTreeBttn(false);
     } 
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows(selVal) { 
@@ -1433,7 +1436,7 @@
     }
     /** Returns the lowercased value of the author name filter. */ 
     function getAuthFilterVal() {
-        return $('input[name="authNameSrch"]').val().trim().toLowerCase();
+        return $('input[name="selAuthor"]').val().trim().toLowerCase();
     }
     function getAuthRows(rowAry, authNameStr) {
         var rowAuthName;
@@ -1465,7 +1468,7 @@
         /**
          * This method keeps the curTaxonChain obj in sync with the taxon being processed.  
          * For each taxon, all level more specific that the parent lvl are cleared.
-         * Note: The top taxon for the domain inits the taxon chain obj. 
+         * Note: The top taxon for the realm inits the taxon chain obj. 
          */
         function syncTaxonHeir(taxon) {                        
             var lvl = taxon.level.displayName;
@@ -1566,8 +1569,8 @@
      * plants and arthropods.
      */
     function getColumnDefs(mainCol) { 
-        var domain = gParams.curDomain || false;  
-        var taxonLvlPrefix = domain ? (domain == 2 ? "Subject" : "Object") : "Tree"; 
+        var realm = gParams.curRealm || false;  
+        var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
 
         return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
                     cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
@@ -1673,16 +1676,16 @@
         if (gParams.curFocus === 'locs' && ['Region','Country','Habitat'].indexOf(params.data.type) !== -1) {
             return "<span>"; }                
         if (gParams.curFocus === 'taxa' &&
-            (!params.data.parentTaxon && !params.data.interactionType)) {  //Domain Taxa can not be edited.
+            (!params.data.parentTaxon && !params.data.interactionType)) {  //Realm Taxa can not be edited.
             return "<span>"; }                                             
         return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
     }
     function getPencilHtml(id, entity, editFunc) {
-        var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+id+`"
+        var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
             class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
-        $('#search-grid').off('click', '#edit'+id);
+        $('#search-grid').off('click', '#edit'+entity+id);
         $('#search-grid').on(
-            'click', '#edit'+id, eif.form.editEntity.bind(null, id, _util.lcfirst(entity)));
+            'click', '#edit'+entity+id, eif.form.editEntity.bind(null, id, _util.lcfirst(entity)));
         return editPencil;
     }
     /*================== Row Styling =========================================*/
@@ -1949,15 +1952,15 @@
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {
         var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
-        var domain = gParams.curDomain;  
-        resets[domain]();
+        var realm = gParams.curRealm;  
+        resets[realm]();
     }
     function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
         if (getAuthFilterVal() === "") { return; }
         updateAuthSearch();
     }
     function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
-        if ($('#selPubTypes').val() === "all") { return; }
+        if ($('#selPublicationType').val() === "all") { return; }
         updatePubSearch();
     }
     /*-------------------- Unique Values Column Filter -----------------------*/
@@ -2720,10 +2723,10 @@
     }
     /**
      * Resets grid state to top focus options: Taxon and source are reset at current
-     * domain; locations are reset to the top regions.
+     * realm; locations are reset to the top regions.
      */
     function resetDataGrid() {                                                  //console.log("---reseting grid---")
-        var resetMap = { taxa: onTaxonDomainChange, locs: rebuildLocTree, srcs: onSrcDomainChange };
+        var resetMap = { taxa: onTaxonRealmChange, locs: rebuildLocTree, srcs: onSrcRealmChange };
         var focus = gParams.curFocus; 
         resetCurTreeState();
         resetMap[focus](); 
@@ -2840,31 +2843,6 @@
             callback(key, value);
         }
     };
-    /** --------- Error Handlers ---------------------------------------------*/
-    /** Handles errors that occur while updating the stored data. */
-    function handleDbUpdateErr(errObj) {                                        //console.log('handleDbUpdateErr called.');
-        var cntnr = _util.buildElem('div', { class: 'flex-col', id:'data_errs' });
-        var msg = getErrorMsg(errObj); 
-        var confirm = _util.buildElem('span', { class: 'flex-row', 
-                'text': "Please click \"OK\" to continue." });
-        var bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
-                class: 'grid-bttn exit-bttn' });
-        $(confirm).append(bttn);
-        $(cntnr).append([msg, confirm]);
-        $('#grid-popup').empty().addClass('has-errs').append(cntnr);
-        $(bttn).click(resetStoredData);
-    }
-    function resetStoredData() {
-        $('#grid-popup').removeClass('has-errs');
-        eif.syncData.reset();
-    }
-    function getErrorMsg(errObj) {  
-        var openMsg = '<b>There was an error while updating the database.</b><br>';
-        var errMsg = 'Please report this error(s) to the developer: <b>' + 
-            Object.keys(errObj).join("\n") + '</b></br>&nbsp';
-        var closeMsg = '<br>All stored data will be redownloaded.'
-        return '<span>'+openMsg+errMsg+closeMsg+'</span>';
-    }
     /*-------------AJAX ------------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
         $.ajax({

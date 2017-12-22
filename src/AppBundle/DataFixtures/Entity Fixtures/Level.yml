@@ -1,0 +1,63 @@
+AppBundle\Entity\Level:
+    Level-1: #7
+        displayName: Kingdom
+        ordinal: 10
+        pluralName: Kingdoms
+        taxons: ['@Taxon-3', '@Taxon-1']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-2: #6
+        displayName: Phylum
+        ordinal: 30
+        pluralName: Phyla
+        taxons: ['@Taxon-4'] #
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-3: #5
+        displayName: Class
+        ordinal: 50
+        pluralName: Classes
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-4: #
+        displayName: Order
+        ordinal: 70
+        pluralName: Orders
+        taxons: ['@Taxon-2', '@Taxon-8']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-5: #3
+        displayName: Family
+        ordinal: 90
+        pluralName: Families
+        taxons: ['@Taxon-5', '@Taxon-9', '@Taxon-10', '@Taxon-14', '@Taxon-18', '@Taxon-23']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-6: #2
+        displayName: Genus
+        ordinal: 110
+        pluralName: Genera
+        taxons: ['@Taxon-6', '@Taxon-11', '@Taxon-12', '@Taxon-15', '@Taxon-19', '@Taxon-21', '@Taxon-24']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Level-7: #1
+        displayName: Species
+        ordinal: 130
+        pluralName: Species
+        taxons: ['@Taxon-7', '@Taxon-13', '@Taxon-16', '@Taxon-17', '@Taxon-20', '@Taxon-22', '@Taxon-25']
+        created: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:19:41", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'

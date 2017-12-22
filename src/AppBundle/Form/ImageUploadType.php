@@ -3,8 +3,9 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ImageUploadType extends AbstractType
 {
@@ -16,7 +17,7 @@ class ImageUploadType extends AbstractType
     {
         $builder
             ->add('taxon')
-            ->add('file', 'file', array(
+            ->add('file', FileType::class, array(
                 'label' => 'Upload image file',
             ))
             ->add('caption')
@@ -26,7 +27,7 @@ class ImageUploadType extends AbstractType
     /**
      * @param OptionsResolverInterface $resolver
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => 'AppBundle\Entity\ImageUpload',
@@ -36,7 +37,7 @@ class ImageUploadType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'appbundle_image_upload';
     }
