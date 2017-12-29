@@ -56,36 +56,35 @@
     }
     /** 
      * Sends an ajax call for each entity with updates. On return, the new data 
-     * is stored @processUpdatedData. 
-     */
-    function ajaxNewData(entities, lastUpdated) {
-        var data = { updatedAt: lastUpdated };
-        entities.forEach(function(entity) {
-            data.entity = entity;
-            sendAjaxQuery(data, "ajax/sync-data", processUpdatedData);
-        });
-    } /* End ajaxNewData */
-    /**
-     * Parses and sends the returned data to @storeUpdatedData. The stored data's 
-     * lastUpdated flag, 'pgDataUpdatedAt', is updated and the search-page grid
-     * is reinitialized with the updated data @initSearchGrid.
-     */
-    function processUpdatedData(results) {                                      console.log("updated data returned from server = %O", arguments);
-        var entity = Object.keys(results)[0];
-        var data = parseData(results[entity]);
-        storeUpdatedData(data, entity);
-        storeData('pgDataUpdatedAt', getCurrentDate());
-        eif.search.initSearchGrid();
-    }
-    /** Sends the each updated record to the update handler for the entity. */
-    function storeUpdatedData(rcrds, entity) {
-        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon'];
-        var entityHndlr = coreEntities.indexOf(entity) !== -1 ? 
-            addCoreEntityData : addDetailEntityData;
-        for (var id in rcrds) {
-            entityHndlr(_util.lcfirst(entity), rcrds[id]);
-        }
-    }
+     * is stored @processUpdatedData.  
+     */ 
+    function ajaxNewData(entities, lastUpdated) { 
+        const ints = entities.indexOf('Interaction') !== -1 ?  
+            entities.splice(entities.indexOf('Interaction'), 1) : false;         
+        const promises = entities.map(e => getNewData(e)); 
+        if (ints) { $.when(promises).then(getNewData('Interaction')); } 
+         
+        function getNewData(entity) {                                           //console.log('getting new data for ', entity); 
+            let data = { entity: entity, updatedAt: lastUpdated }; 
+            return sendAjaxQuery(data, "ajax/sync-data", storeDataAndInitGrid); 
+        } 
+    } /* End ajaxNewData */ 
+    /** Parses and sends the returned data to @storeUpdatedData. */ 
+    function processUpdatedData(results) {                                       
+        const entity = Object.keys(results)[0];                                 console.log("[%s] data returned from server = %O", entity, results); 
+        const data = parseData(results[entity]); 
+        storeUpdatedData(data, entity); 
+    } 
+    /** 
+     * Stores interaction data @processUpdatedData. Updates the stored data's  
+     * updatedAt flag, and einitializes the search-page grid with the updated  
+     * data @initSearchGrid. 
+     */ 
+    function storeDataAndInitGrid(results) { 
+        processUpdatedData(results); 
+        storeData('pgDataUpdatedAt', getCurrentDate()); 
+        eif.search.initSearchGrid(); 
+    } 
     /*------------------ Update Submitted Form Data --------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
@@ -559,7 +558,7 @@
     function updateData(updateFunc, prop, params, edits) {                      //console.log('prop [%s] -> params [%O]', prop, params);
         try {
             updateFunc(prop, params.rcrd, params.entity, edits);
-        } catch (e) {                                                           console.log('ERR  updateDataProps err = %O', e);
+        } catch (e) {                                                           console.log('ERR updating data = %O', e); 
             reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
         }
     }
