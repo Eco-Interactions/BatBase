@@ -29,7 +29,7 @@ class Location
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
