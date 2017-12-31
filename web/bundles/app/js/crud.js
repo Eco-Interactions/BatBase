@@ -2288,15 +2288,28 @@ $(document).ready(function(){
         function articleRecordCit() {                                           console.log("articleRecordCit called.")
             const athrs = getCitAuthors();
             let fullText = [athrs, formVals.year, formVals.title, getPubName()].join('. '); 
-            fullText += ['', getVolAndIss(), formVals.pages].join(' ');
+            fullText += ' ' + [getVolAndIss(), formVals.pages].join(' ');
             return fullText+'.';
         }
+        /**
+         * 1st Author last name, initials. Year. Book Title. Edition. Publisher 
+         *   Name, City, Country.
+         */
         function bookCit() {
             // body...
         }
+        /** 
+         * 1st Author last name, initials, & 2nd Author initials, last name. Year. 
+         *   Chapter Title. In: Book Title (Editor 1 [initials, last name], & 
+         *   Editor X [initials, last name], eds.). Pages of Chapter. Publisher Name, 
+         *   City, Country.
+         */
         function chapterSympCit() {
             // body...
         }
+        /**
+         * Authors, Year. Title. Academic degree. Academic Institution, City, Country.
+         */
         function reportCit() {
             // body...
         }
