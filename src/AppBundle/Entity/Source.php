@@ -54,6 +54,22 @@ class Source
     /**
      * @var string
      *
+     * @ORM\Column(name="city", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $city;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="country", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $country;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="doi", type="string", length=255, nullable=true)
      * @JMS\Expose
      */
@@ -299,6 +315,54 @@ class Source
     public function getYear()
     {
         return $this->year;
+    }
+
+    /**
+     * Set city.
+     *
+     * @param string $city
+     *
+     * @return Source
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * Get city.
+     *
+     * @return string
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * Set country.
+     *
+     * @param string $country
+     *
+     * @return Source
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country.
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
     }
 
     /**
