@@ -1466,7 +1466,6 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, formLvl); }
         $('#Publisher_row').append(initSubForm(
             "publisher", formLvl, "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
-        enableSubmitBttn("#"+formLvl+"-submit");
         disableSubmitBttn("#"+prntLvl+"-submit");
         $('#DisplayName_row input').focus();
         return { "value": "", "text": "Creating Publisher..." };
@@ -1693,7 +1692,8 @@ $(document).ready(function(){
             "author": { 
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text",
                     "Suffix": "text"}, 
-                "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", "Tags"],
+                "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", 
+                    "Tags", "City", "Country"],
                 "required": ["Last Name", "Display Name"], 
                 "order": [ "FirstName", "MiddleName", "LastName", "Suffix", "LinkUrl", "LinkDisplay"],
             },
@@ -1706,7 +1706,7 @@ $(document).ready(function(){
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
                     "Issue": "text", "Pages": "text", "Citation Type": "select"}, //"Citation Text": "fullTextArea",
-                "exclude": ["Display Name", "Description", "Tags"], 
+                "exclude": ["Display Name", "Description", "Tags", "City", "Country"], 
                 "required": ["Title", "Citation Type"], //"Citation Text", 
                 "order": ["Abstract", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], //"CitationText", 
@@ -1742,7 +1742,7 @@ $(document).ready(function(){
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
-                "exclude": ["Display Name", "Tags"],
+                "exclude": ["Display Name", "Tags", "City", "Country"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year",  
                     "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
@@ -1750,8 +1750,9 @@ $(document).ready(function(){
             "publisher": { 
                 "add": {}, 
                 "exclude": ["Year", "Doi", "Authors", "Tags"],
-                "required": ["Display Name"],
-                "order": ["DisplayName", "Description", "LinkUrl", "LinkDisplay"] 
+                "required": ["Display Name", "City", "Country"],
+                "order": ["DisplayName", "City", "Country", "Description", 
+                    "LinkUrl", "LinkDisplay"] 
             },
             "subject": {
                 "add": {},  
@@ -1792,8 +1793,8 @@ $(document).ready(function(){
                 "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Display": "text", 
-                "Link Url": "text", "Authors": "multiSelect" 
+                "Year": "text", "Doi": "text", "Link Display": "text", "City": "text", 
+                "Link Url": "text", "Authors": "multiSelect", "Country": "text",
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
