@@ -140,7 +140,7 @@ $(document).ready(function(){
         return cntnr;
     }
     function getInteractionDetailElems(entity, id, cntnr) {
-        return ['pub','cit','loc'].map(function(en){ return initDetailDiv(en)});
+        return ['pub','cit','loc'].map(en => initDetailDiv(en));
     }
     function initDetailDiv(ent) {
         var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
