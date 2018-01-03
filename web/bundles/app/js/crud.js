@@ -51,6 +51,7 @@ $(document).ready(function(){
             '1500': {
                 'Interaction': { popup: '1510px', form: '999px' },
                 'Publication': { popup: '72%', form: '999px' },
+                'Publisher': { popup: '48%', form: '55%' },
                 'Citation': { popup: '72%', form: '999px' },
                 'Author': { popup: '48%', form: '55%' },
                 'Location': { popup: '72%', form: '999px' },
@@ -59,6 +60,7 @@ $(document).ready(function(){
             '1366': {
                 'Interaction': { popup: '97%', form: '924px' },
                 'Publication': { popup: '92%', form: '920px' },
+                'Publisher': { popup: '58%', form: '460px' },
                 'Citation': { popup: '92%', form: '920px' },
                 'Author': { popup: '58%', form: '460px' },
                 'Location': { popup: '92%', form: '920px' },
@@ -148,15 +150,16 @@ $(document).ready(function(){
         return div;
     }
     /** Returns the elems that will display the count of references to the entity. */
-    function getSubEntityEditDetailElems(entity, id, cntnr) {                   //console.log("getSubEntityEditDetailElems.")
+    function getSubEntityEditDetailElems(entity, id, cntnr) {                   //console.log("getSubEntityEditDetailElems for [%s]", entity);
         var refEnts = {
             'Author': [ 'cit', 'int' ],     'Citation': [ 'int' ],
             'Location': [ 'int' ],          'Publication': ['cit', 'int' ],
-            'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],     
+            'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],   
+            'Publisher': [ 'pub', 'int']  
         };
         var div = _util.buildElem('div', { 'id': 'det-cnt-cntnr' });
         $(div).append(_util.buildElem('span'));        
-        $(div).append(refEnts[entity].map(function(en){ return initCountDiv(en)}));
+        $(div).append(refEnts[entity].map(en => initCountDiv(en)));
         return div;
     }
     function initCountDiv(ent) { 
@@ -277,18 +280,23 @@ $(document).ready(function(){
     }
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
-        var form = buildFormElem();  
-        var formFields = getFormFields(id, entity);
+        const form = buildFormElem();  
+        const formFields = getFormFields(id, entity);
         $(form).append(formFields);
         $('#form-main').append(form);     
-        if (entity === "interaction") { finishIntFormBuild(); 
-        } else if (entity === "taxon") { finishTaxonEditFormBuild();
+        finishEditFormBuild(entity);
+        fillExistingData(entity, id);
+    }   
+    function finishEditFormBuild(entity) {
+        const hndlrs = {
+            'interaction': finishIntFormBuild, 'taxon': finishTaxonEditFormBuild
+        };
+        if (entity in hndlrs) { hndlrs[entity]()  
         } else {
             initComboboxes(entity); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
         }
-        fillExistingData(entity, id);
-    }   
+    }
     /** Returns the form fields for the passed entity.  */
     function getFormFields(id, entity) {
         var edges = { "interaction": getIntFormFields, "taxon": getTaxonEditFields };
@@ -319,13 +327,13 @@ $(document).ready(function(){
         $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
         $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
     }
-    function fillEntityData(entity, id) {
-        var hndlrs = { "author": fillSrcData, "citation": fillSrcData,
+    function fillEntityData(ent, id) {
+        const hndlrs = { "author": fillSrcData, "citation": fillSrcData,
             "location": fillLocData, "publication": fillSrcData, 
             "publisher": fillSrcData, "taxon": fillTaxonData, 
             "interaction": fillIntData };
-        var rcrd = getEntityRecord(entity, id);                                 //console.log("fillEntityData [%s] [%s] = %O", entity, id, rcrd);
-        hndlrs[entity](entity, id, rcrd);
+        const rcrd = ent !== "publisher" ? getEntityRecord(ent, id) : null;     //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+        hndlrs[ent](ent, id, rcrd);
     }
     function fillIntData(entity, id, rcrd) {
         var fields = {
@@ -368,18 +376,22 @@ $(document).ready(function(){
             if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
         });
     }
-    function fillSrcData(entity, id, rcrd) {
+    /** Fills all data for the source-type entity. Note: Publishers have no deatil entity. */
+    function fillSrcData(entity, id, rcrd) { 
         var src = getEntityRecord("source", id);
-        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O,[%s] = %O", id, src, entity, detail);
+        var fields = getSourceFields(entity);
+        if (entity !== "publisher") { setDetailData(); }
         setSrcData();
-        fParams.editing.detail = detail.id;
 
         function setSrcData() {
-            var fields = getSourceFields(entity);
             fillFields(src, fields.core, fields.detail.exclude);
+            fillEditSrcDetails(entity, src);            
+        }
+        function setDetailData() {
+            var detail = getEntityRecord(entity, src[entity]);                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
             fillFields(detail, fields.detail.add, []);
             setAdditionalFields(entity, src, detail);
-            fillEditSrcDetails(entity, src);
+            fParams.editing.detail = detail.id;
         }
     } /* End fillSrcData */
     function getSourceFields(entity) {
@@ -393,7 +405,8 @@ $(document).ready(function(){
 
         function addAddtionalRefs() {
             if (entity === 'citation') { return; }
-            refObj.cit = srcRcrd.children.length || srcRcrd.contributions.length;
+            const ref = entity === 'publisher' ? 'pub' : 'cit';
+            refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
         }
     } /* End fillEditSrcDetails */
     function getSrcIntCnt(entity, rcrd) {                                       //console.log('getSrcIntCnt. rcrd = %O', rcrd);
@@ -572,7 +585,7 @@ $(document).ready(function(){
      */
     function buildPubFieldRow() {
         var selElem;
-        var pubIds = _util.getDataFromStorage("pubSources");
+        var pubIds = _util.getDataFromStorage("pubSrcs");
         var opts = getRcrdOpts(pubIds, fParams.records.source);
         selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
         return buildFormRow("Publication", selElem, "top", true);
@@ -1788,7 +1801,7 @@ $(document).ready(function(){
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
                 "Latitude": "text", "Habitat Type": "select", "Country": "select", 
-            }, //"Elevation Units": "select",
+            }, 
             "interaction": { "Interaction Type": "select", "Note": "fullTextArea", 
                 "Interaction Tags": "tags"
             },
@@ -1922,7 +1935,7 @@ $(document).ready(function(){
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
-            "Authors": [ getAuthOpts, 'authSources'],
+            "Authors": [ getAuthOpts, 'authSrcs'],
             "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
@@ -2496,9 +2509,9 @@ $(document).ready(function(){
         };
         return coreEntities[entity];
     }
-    function getParentEntity(entity) {                                          //console.log("hasParentEntity. entity = %s", entity)
-        var detailEntities = ["author", "citation", "publication", "publisher"];
-        return detailEntities.indexOf(entity) !== -1 ? "source" : false;
+    function getParentEntity(entity) {                                          
+        var details = ["author", "citation", "publication", "publisher"];       //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
+        return details.indexOf(entity) !== -1 ? "source" : false;
     }
     /** Returns an array of the parent entity's field names. */
     function getParentFields(entity) {

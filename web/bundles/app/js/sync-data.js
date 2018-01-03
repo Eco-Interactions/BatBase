@@ -123,10 +123,10 @@
         var type = getEntityType(entity, rcrd);                                 //console.log("type = ", type);
         var update = {
             'source': {
-                'author': { 'authSources': addToRcrdAryProp },
+                'author': { 'authSrcs': addToRcrdAryProp },
                 'citation': { 'contributors': addContribData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
-                'publication': { 'pubSources': addToRcrdAryProp, 'contributors': addContribData,
+                'publication': { 'pubSrcs': addToRcrdAryProp, 'contributors': addContribData,
                     'source': addToParentRcrd },
                 'publisher': { 'publisherNames': addToNameProp },
 
@@ -505,8 +505,8 @@
         const pubIds = getTypeObj(data.sourceType, 'publication', 'sources');
         const publIds = getTypeObj(data.sourceType, 'publisher', 'sources'); 
         const publSrcs = getEntityRcrds(publIds, data.source);
-        storeData('authSources', authIds);         
-        storeData('pubSources', pubIds);         
+        storeData('authSrcs', authIds);         
+        storeData('pubSrcs', pubIds);              
         storeData('publisherNames', getTypeNameData(publSrcs));
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        

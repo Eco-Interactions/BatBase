@@ -172,7 +172,7 @@
         return getStoredDataObj();
 
         function getStoredData() {
-            var data = dataStorage.getItem(props);  if (!data) { console.log("no stored data for [%s]", props); }
+            var data = dataStorage.getItem(props);  if (!data) { console.log("no stored data for [%s]", props); console.trace(); }
             return data ? JSON.parse(data) : false;
         }
         function getStoredDataObj() {

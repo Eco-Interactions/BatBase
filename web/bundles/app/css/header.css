@@ -22,7 +22,7 @@
     padding: 0;
     background: White;
 }
-#locs_list_filter, #interaction_list_filter, #loc_det_list_filter, input {
+#locs_list_filter, #interaction_list_filter, #loc_det_list_filter input {
     margin-left: 5px;
     padding: 0;
 }

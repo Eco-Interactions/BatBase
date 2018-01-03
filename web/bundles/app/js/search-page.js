@@ -599,12 +599,12 @@
     function buildTaxonSelects(lvlOpts, levels) {  
         var selElems = [];
         levels.forEach(function(level) {
-            var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+            var lblElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
             var spanElem = _util.buildElem('span', { text: level + ': ', class: "opts-span" });
             var selectElem = _util.buildSelectElem(
                 lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxonSearch);
-            $(labelElem).append([spanElem, selectElem]);
-            selElems.push(labelElem);
+            $(lblElem).append([spanElem, selectElem]);
+            selElems.push(lblElem);
         });
         return selElems;
     }
@@ -771,7 +771,7 @@
     }
     /**
      * Rebuilds loc tree with passed location, or the default top regions, as the
-     * top node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
+     * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
      * Resets 'openRows' and clears grid. Continues @buildLocTreeAndGrid.
      */
     function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
@@ -894,12 +894,12 @@
         var selElems = [];
         for (var locSelName in locOptsObj) {
             var selName = _util.ucfirst(locSelName);
-            var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+            var lblElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
             var spanElem = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
             var selectElem = _util.buildSelectElem(
                 locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
-            $(labelElem).append([spanElem, selectElem]);
-            selElems.push(labelElem);
+            $(lblElem).append([spanElem, selectElem]);
+            selElems.push(lblElem);
         }
         return selElems;
     }
@@ -1053,7 +1053,8 @@
         $('#sort-opts').fadeTo(0, 1);
         function getRealmOpts() {
             return [{ value: "auths", text: "Authors" },
-                    { value: "pubs", text: "Publications" }];
+                    { value: "pubs", text: "Publications" },
+                    { value: "publ", text: "Publishers" }];
         }
     } /* End buildSrcRealmHtml */
     /** Restores stored realm from previous session or sets the default 'Publications'. */
@@ -1077,7 +1078,7 @@
     }
     /** Returns the records for the source realm currently selected. */
     function storeAndReturnCurRealmRcrds() {
-        var valMap = { "auths": "authSources", "pubs": "pubSources" };
+        var valMap = { "auths": "authSrcs", "pubs": "pubSrcs", "publ": "pubSrcs" };
         var realmVal = $('#sel-realm').val();                                   //console.log("realmVal = ", realmVal)                     
         gParams.curRealm = realmVal;
         _util.populateStorage('curRealm', realmVal);
@@ -1089,27 +1090,29 @@
         return rcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
     }
     /**
-     * Builds a family tree of source data of the selected source realm: authors 
-     * @buildAuthSrcTree and publications @buildPubSrcTree, and adds it to 
-     * the global gParams obj as 'curTree', 
-     * NOTE: Sources have two realms, or types of tree data: 
-     * Authors->Publications->Interactions, and Publications->Citations->Interactions. 
+     * Builds the source data tree for the selected source realm (source type) and 
+     * adds it to the global gParams obj as 'curTree', 
+     * NOTE: Sources have three realms and tree-data structures:
+     * Authors->Citations/Publications->Interactions
+     * Publications->Citations->Interactions. 
+     * Publishers->Publications->Citations->Interactions. 
      */
     function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree realmRcrds = %O", realmRcrds);
-        var tree = focus === "pubs" ? buildPubTree(rcrds) : buildAuthTree(rcrds);
+        const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
+        let tree = treeMap[focus](rcrds);
         gParams.curTree = sortDataTree(tree);
     }  
 /*-------------- Publication Source Tree -------------------------------------------*/
     /**
-     * Returns a heirarchical tree with Publications as top nodes of the data tree. 
+     * Returns a tree object with Publications as the base nodes of the data tree. 
      * Each interaction is attributed directly to a citation source, which currently 
      * always has a 'parent' publication source.
-     * Publication Source Tree:
+     * Data structure:
      * ->Publication Title
      * ->->Citation Title
      * ->->->Interactions Records
      */
-    function buildPubTree(pubSrcRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubRcrds);
+    function buildPubTree(pubSrcRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
         var tree = {};
         pubSrcRcrds.forEach(function(pub) { 
             tree[pub.displayName] = getPubData(pub); 
@@ -1125,17 +1128,51 @@
     }
     function getPubChildren(rcrd) {                                             //console.log("getPubChildren rcrd = %O", rcrd)
         if (rcrd.children.length === 0) { return []; }
-        return rcrd.children.map(function(id) {
-            return getPubData(getDetachedRcrd(id));
-        });
+        return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
     }
-/*-------------- Author Source Tree -------------------------------------------*/
+/*-------------- Publisher Source Tree ---------------------------------------*/
     /**
-     * Returns a heirarchical tree with Authors as top nodes of the data tree, 
+     * Returns a tree object with Publishers as the base nodes of the data tree. 
+     * Publications with no publisher are added underneath the "Unspecified" base node.
+     * Data structure:
+     * ->Publisher Name
+     * ->->Publication Title
+     * ->->->Citation Title
+     * ->->->->Interactions Records
+     */
+    function buildPublTree(pubRcrds) {                                          //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+        let tree = {};
+        let noPubl = [];
+        pubRcrds.forEach(function(pub) { addPubl(pub); });
+        tree["Unspecified"] = getPubsWithoutPubls(noPubl);
+        return tree;
+
+        function addPubl(pub) {
+            if (!pub.parent) { noPubl.push(pub); return; }
+            const publ = getDetachedRcrd(pub.parent, gParams.rcrdsById);
+            tree[publ.displayName] = getPublData(publ); 
+        }
+    }
+    function getPublData(rcrd) {
+        rcrd.children = getPublChildren(rcrd);
+        return rcrd;
+    }
+    function getPublChildren(rcrd) {                                            //console.log("getPubChildren rcrd = %O", rcrd)
+        if (rcrd.children.length === 0) { return []; }
+        return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
+    }
+    function getPubsWithoutPubls(pubs) {
+        let publ = { id: 0, displayName: "Unspecified", parent: null };
+        publ.children = pubs.map(pub => getPubData(pub));
+        return publ;
+    }
+/*-------------- Author Source Tree ------------------------------------------*/
+    /**
+     * Returns a tree object with Authors as the base nodes of the data tree, 
      * with their contributibuted works and the interactions they contain nested 
      * within. Authors with no contributions are not added to the tree.
-     * Author Source Tree:
-     * ->Author
+     * Data structure:
+     * ->Author Display Name [Last, First M Suff]
      * ->->Citation Title (Publication Title)
      * ->->->Interactions Records
      */
@@ -1158,9 +1195,7 @@
      * @getPubData and return's the source record.
      */
     function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", contribs);
-        return contribs.map(function(workSrcId){
-            return getPubData(getDetachedRcrd(workSrcId));
-        });
+        return contribs.map(wrkSrcid => getPubData(getDetachedRcrd(wrkSrcid)));
     }
     /**
      * Will build the select elems for the source search options. Clears previous 
@@ -1170,52 +1205,59 @@
      * contained in the data tree.
      */
     function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+        const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
+            'publ':loadPublSearchHtml };
         clearPreviousGrid();
-        if (gParams.curRealm === "pubs") { loadPubSearchHtml(srcTree); 
-        } else { loadAuthSearchHtml(); }
+        buildUi[gParams.curRealm](srcTree); 
         transformSrcDataAndLoadGrid(srcTree);
     } 
-    function loadPubSearchHtml(srcTree) {
-        var pubTypeOpts = buildPubSelectOpts();
-        var pubSelElem = buildPubSelects(pubTypeOpts);
+    /** Builds a text input for searching author names. */
+    function loadAuthSearchHtml(srcTree) {
+        const searchTreeElem = buildTreeSearchHtml('Author');
         clearCol2();        
-        $('#opts-col2').append(pubSelElem);
+        $('#opts-col2').append(searchTreeElem);
+        //initComboboxes
+    }
+    function loadPubSearchHtml(srcTree) {
+        const pubTypeElem = buildPubTypeSelect();
+        // const searchTreeElem = buildTreeSearchHtml('Publication');
+        // $(searchTreeElem).css('width', '255px');
+        clearCol2();        
+        $('#opts-col2').append([pubTypeElem]); //searchTreeElem, 
         $('#selPublicationType').val('all');
         //initComboboxes
-    }
-    function buildPubSelectOpts() {
-        var pubTypes = _util.getDataFromStorage("publicationType");
-        var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
-        for (var t in pubTypes) {
-            opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
+        
+        function buildPubTypeSelect() {
+            const pubTypeOpts = buildPubSelectOpts();
+            return pubSelElem = buildPubSelects(pubTypeOpts);
         }
-        return opts.sort(alphaOptionObjs);  
-    }
-    /** Builds the publication type dropdown */
-    function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = _util.buildElem('span', { text: 'Publication Type:', class: 'opts-span'});
-        var selectElem = _util.buildSelectElem(
-            pubTypeOpts, { class: "opts-box", id: 'selPublicationType' }, updatePubSearch
-        );
-        $(labelElem).css('width', '255px');
-        $(selectElem).css('width', '115px');
-        $(spanElem).css('width', '124px');
-        $(labelElem).append([spanElem, selectElem]);
-        return labelElem;
-    }
-    /** Builds a text input for searching author names. */
-    function loadAuthSearchHtml() {
-        var labelElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var inputElem = _util.buildElem('input', { name: 'selAuthor', type: 'text', placeholder: "Author Name"  });
-        var bttn = _util.buildElem('button', { text: 'Search', name: 'selAuthor_submit', class: "ag-fresh grid-bttn" });
-        $(inputElem).onEnter(updateAuthSearch);
-        $(bttn).css('margin-left', '5px');
-        $(bttn).click(updateAuthSearch);
-        $(labelElem).append([inputElem, bttn]);
+        function buildPubSelectOpts() {
+            var pubTypes = _util.getDataFromStorage("publicationType");
+            var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
+            for (var t in pubTypes) {
+                opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
+            }
+            return opts.sort(alphaOptionObjs);  
+        }
+        /** Builds the publication type dropdown */
+        function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+            var lblElem = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
+            var spanElem = _util.buildElem('span', 
+                { text: 'Publication Type:', class: 'opts-span'});
+            var selectElem = _util.buildSelectElem(
+                pubTypeOpts, 
+                { class: "opts-box", id: 'selPublicationType' }, updatePubSearch);
+            $(lblElem).css('width', '255px');
+            $(selectElem).css('width', '115px');
+            $(spanElem).css('width', '124px');
+            $(lblElem).append([spanElem, selectElem]);
+            return lblElem;
+        }
+    } /* End loadPubSearchHtml */
+    function loadPublSearchHtml(srcTree) {
+        const searchTreeElem = buildTreeSearchHtml('Publisher');
         clearCol2();        
-        $('#opts-col2').append(labelElem);
-        //initComboboxes
+        $('#opts-col2').append(searchTreeElem);
     }
     /*--------- Source Data Formatting ---------------------------------------*/
     /**
@@ -1223,8 +1265,8 @@
      * 'rowData' in the global gParams object as 'rowData'. Calls @loadGrid.
      */
     function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
-        var prefix = gParams.curRealm === "pubs" ? "Publication" : "Author";
-        var treeName = prefix + ' Tree';
+        var prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
+        var treeName = prefix[gParams.curRealm] + ' Tree';
         var finalRowData = [];
 
         for (var topNode in srcTree) {
@@ -1250,10 +1292,9 @@
         };  
     } 
     function getSrcEntity(src, treeLvl) {  
-        var subEntities = ['author', 'citation', 'publication'];
-        return _util.ucfirst(subEntities.find(function(entity){
-            return src[entity];
-        }));
+        const subEntities = ['author', 'citation', 'publication'];
+        const subEntity = subEntities.find(entity => src[entity]);
+        return subEntity ? _util.ucfirst(subEntity) : "Publisher";
     }
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
@@ -1280,7 +1321,39 @@
             toggleTimeUpdatedFilter();
         }, 200);        
     }
-/*================== Filter Functions ========================================*/
+/*================== Search Panel Filter Functions ===========================*/
+    /** Returns a text input with submit button that will filter tree by text string. */
+    function buildTreeSearchHtml(entity) {
+        let labelCntnr = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        let inputElem = _util.buildElem('input', { 
+            name: 'srchTree', type: 'text', placeholder: entity+" Name"  });
+        let bttn = _util.buildElem('button', { text: 'Search', name: 'srchTree_submit', class: "ag-fresh grid-bttn" });
+        $(bttn).css('margin-left', '5px');
+        $(inputElem).onEnter(searchTreeText);
+        $(bttn).click(searchTreeText);
+        $(labelCntnr).append([inputElem, bttn]);
+        return labelCntnr;
+    }
+    /**
+     * When the search-tree text-input is submitted, by either pressing 'enter' or
+     * by clicking on the 'search' button, the tree is rebuilt with only rows that  
+     * contain the case insensitive substring.
+     */
+    function searchTreeText() {                                                 //console.log("----- Search Tree Text");
+        const text = getFilterTreeTextVal();
+        const allRows = getAllCurRows(); 
+        const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
+        gridOptions.api.setRowData(newRows);
+        gParams.focusFltrs = text === "" ? [] : ['"' + text + '"'];
+        updateGridFilterStatusMsg();
+        resetToggleTreeBttn(false);
+    } 
+    function getFilterTreeTextVal() {
+        return $('input[name="srchTree"]').val().trim().toLowerCase();
+    }
+    function getTreeRowsWithText(rows, text) {
+        return rows.filter(row => row.name.toLowerCase().indexOf(text) !== -1);
+    }
     /*------------------ Taxon Filter Updates ---------------------------------*/
     /**
      * When a taxon is selected from one of the taxon-level comboboxes, the grid 
@@ -1298,7 +1371,7 @@
         function updateFilterStatus() {
             var curLevel = selTaxonRcrd.level.displayName;
             var taxonName = selTaxonRcrd.displayName;
-            gParams.focusFltr = curLevel + " " + taxonName; 
+            gParams.focusFltrs.push(curLevel + " " + taxonName); 
             updateGridFilterStatusMsg();
         }
     } /* End updateTaxonSearch */
@@ -1403,51 +1476,42 @@
      */
     function updatePubSearch() {                                                
         var selVal = $("#selPublicationType").val();                            //console.log("\n-----updatePubSearch [%s]", selVal);
-        var selText = $("#selPublicationType option[value='"+selVal+"']").text();      //console.log("selText = ", selText)
+        var selText = $("#selPublicationType option[value='"+selVal+"']").text();//console.log("selText = ", selText)
         var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
+        gParams.focusFltrs = selVal === "all" ? [] : [ selText+'s' ];
         gridOptions.api.setRowData(newRows);
-        gParams.focusFltr = selVal === "all" ? null : selText+'s';
         updateGridFilterStatusMsg();
         resetToggleTreeBttn(false);
-    } 
+        
+    } /* End updatePubSearch */
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows(selVal) { 
-        var pubTypes = _util.getDataFromStorage('publicationType'); 
-        var pubIds = pubTypes[selVal].publications;         
-        var rows = [];
-        getAllCurRows().forEach(function(row) { 
-            if (pubIds.indexOf(row.pubId) !== -1) { rows.push(row); }
-        });  
-        return rows;
+        const pubTypes = _util.getDataFromStorage('publicationType'); 
+        const pubIds = pubTypes[selVal].publications;         
+        return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
-    /**
-     * When the input author search box is submitted, by either pressing 'enter' or
-     * by clicking on the 'search' button, the author tree is rebuilt with only 
-     * authors that contain the case insensitive substring.
-     */
-    function updateAuthSearch() {                                               //console.log("-----updateAuthSearch");
-        var authNameStr = getAuthFilterVal();       
-        var newRows = authNameStr === "" ?
-            getAllCurRows() : getAuthRows(getAllCurRows(), authNameStr);
-        gridOptions.api.setRowData(newRows);
-        gParams.focusFltr = authNameStr === "" ? null : '"' + authNameStr + '"';
-        updateGridFilterStatusMsg();
-        resetToggleTreeBttn(false);
-    }
-    /** Returns the lowercased value of the author name filter. */ 
-    function getAuthFilterVal() {
-        return $('input[name="selAuthor"]').val().trim().toLowerCase();
-    }
-    function getAuthRows(rowAry, authNameStr) {
-        var rowAuthName;
-        var rows = [];
-        rowAry.forEach(function(row) {  
-            if (row.name.toLowerCase().indexOf(authNameStr) >= 0) {
-                rows.push(row);
-            }
-        });  
-        return rows;
-    }
+    // function syncPubTypeAndPubNameFilters(rows, txt, type) {
+    //     const newRows = type && getFilterTreeTextVal() ? 
+    //         filterAlsoOnText() :
+    //         (txt && $("#selPublicationType").val() !== 'all' ?
+    //             filterAlsoOnType() : rows);
+    //     if (newRows.length !== rows.length) { gParams.fltrdRows =  newRows; }
+    //     gridOptions.api.setRowData(newRows);
+    //     updateGridFilterStatusMsg();
+    //     resetToggleTreeBttn(false);
+
+    //     function filterAlsoOnText() {
+    //         const text = getFilterTreeTextVal();
+    //         if (text !== '') { gParams.focusFltrs.push('"' + text + '"'); }
+    //         return text === '' ? rows : getTreeRowsWithText(rows, text);
+    //     }
+    //     function filterAlsoOnType() {
+    //         const selVal = $("#selPublicationType").val();
+    //         const selText = $("#selPublicationType option[value='"+selVal+"']").text();//console.log("selText = ", selText)
+    //         gParams.focusFltrs.push(selText+'s');
+    //         return getPubTypeRows(selVal);
+    //     }
+    // } /* End syncPubTypeAndPubNameFilters */
 /*================ Grid Build Methods ==============================================*/
     /**
      * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
@@ -1673,12 +1737,17 @@
     }
     /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
     function addEditPencil(params) {   
-        if (gParams.curFocus === 'locs' && ['Region','Country','Habitat'].indexOf(params.data.type) !== -1) {
-            return "<span>"; }                
-        if (gParams.curFocus === 'taxa' &&
-            (!params.data.parentTaxon && !params.data.interactionType)) {  //Realm Taxa can not be edited.
-            return "<span>"; }                                             
+        if (uneditableEntityRow(params)) { return "<span>"; }                     
         return getPencilHtml(params.data.id, params.data.entity, eif.form.editEntity);
+    }
+    function uneditableEntityRow(params) {                                      //console.log('focus = [%s] params = %O', gParams.curFocus, params);
+        const uneditables = [
+            gParams.curFocus === 'locs' && 
+                (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
+            gParams.curFocus === 'taxa' && //Realm Taxa 
+                (!params.data.parentTaxon && !params.data.interactionType),
+            gParams.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
+        return uneditables.some(test => test);
     }
     function getPencilHtml(id, entity, editFunc) {
         var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
@@ -1745,7 +1814,7 @@
             return { group: true, expanded: rcrd.open, children: rcrd.children };
         } else { return null; }
     }
-    /*================== Filter Functions ====================================*/
+    /*================== Grid Filter Functions ===============================*/
     function onFilterChange() {
         gridOptions.api.onFilterChanged();
     }
@@ -1788,8 +1857,8 @@
             addUpdatedSinceFilter();
         }
         function addFocusFilters() {
-            if (gParams.focusFltr) { 
-                activeFilters.push(gParams.focusFltr);
+            if (gParams.focusFltrs && gParams.focusFltrs.length > 0) { 
+                activeFilters.push(gParams.focusFltrs.map(filter => filter));
             } 
         }
         function addUpdatedSinceFilter() {
@@ -1834,7 +1903,7 @@
     function initNoFiltersStatus() {
         $('#xtrnl-filter-status').text('Filtering on: ');
         $('#grid-filter-status').text('No Active Filters.');
-        gParams.focusFltr = null;
+        gParams.focusFltrs = [];
     }
     /*-------------------- Filter By Time Updated ----------------------------*/
     /**
@@ -1951,13 +2020,14 @@
     }
     /** Reapplys active external filters, author name or publication type. */
     function applySrcFltrs() {
-        var resets = { 'auths': reapplyAuthFltr, 'pubs': reapplyPubFltr };
+        var resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
+            'publ': reapplyTreeTextFltr };
         var realm = gParams.curRealm;  
         resets[realm]();
     }
-    function reapplyAuthFltr() {                                                //console.log("reapplying auth filter");
-        if (getAuthFilterVal() === "") { return; }
-        updateAuthSearch();
+    function reapplyTreeTextFltr() {                                            //console.log("reapplying tree text filter");
+        if (getFilterTreeTextVal() === "") { return; }
+        searchTreeText();
     }
     function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
         if ($('#selPublicationType').val() === "all") { return; }
@@ -2740,7 +2810,7 @@
     }
     /** Deltes the props uesd for only the displayed grid in the global gParams. */
     function resetCurTreeStorageProps() {
-        var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltr'];
+        var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltrs'];
         props.forEach(function(prop){ delete gParams[prop]; });
         gParams.selectedOpts = {};
     }
