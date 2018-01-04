@@ -1,3 +1,22 @@
+============ MEETING ==================
+TASK LIST
+TODO
+NOTES
+============ EMAIL ====================
+TAYLOR:
+    --- General ---
+Tullenda:
+=======================================
+Notes::
+    ## Change Log ##
+
+Questions:
+    ## Citation full text ##
+    
+    -Todo-
+        - Show full text when editing, not creating.
+________________________________________________________________________________
+
 -- Short Range TODO [priority, difficulty]--
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
@@ -14,6 +33,8 @@
         -- refactor enable/disable submit-button methods to one method with 'enable' param
         -- Add data-entry tutorial.
         -- update 'shw-changd' 'custom' value on date selection
+        -- add bibliography of all the citations
+            -- the same text that is coming up in the Citation column and putting it in alphabetical order by author.
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
         -- Change description to 'translation'
@@ -42,7 +63,9 @@
             -- Pub form
                 -- Change Doi field to DOI
                 -- update test
-        --search--
+        --search----
+            --popup Editor options 
+                -sort interactions by which editor created them.     
             -- Add an 'All' option to taxon and location dropdowns to reset data 
                 to that level and retain other filters- updated at for example.
             -- add selectize library
@@ -50,6 +73,8 @@
             -- add text search to all views.
             -- update all the comments that mention the updates-since filter to 
                 'ints-updated-at'
+            -- Refactor focus search filters to sync together better
+                -- Add publication name search
         -- Data storage --
         --css--
             --refactor to use parital, effectively 'group', selectors
@@ -60,13 +85,21 @@
         --Refactor--
             -- Add '-sel' to the edit taxon form's 'txn-lvl' field 
 
-    --Asap--        
+    --Asap--   
+        -- Data sync --
+            -- write SQL script to get only records with updates/newly created  
         -- CRUD --
             -- add err in controllers eliminating the possibility of creating orphans
+                -- Finish
         -- sync data --
             -- Add error handling for pending updates that can't be resolved 
         -- MISC --
             -- Comment the crud controller method 'setupdatedattimes'
+
+        -- Bug fix --
+            - enable 'update location' button when country is filled from int form on init 
+            - clear cit detail panel when pub cleared.
+
 
 
 ~~~ What to test ~~~
@@ -110,36 +143,22 @@
             -- Can't change genus that has species children
     
 
-
-============ MEETING ==================
-
-TASK LIST
-
-TODO
-
-NOTES
-
-============ EMAIL ==================
-
-TAYLOR:
-    --- General ---
-
-
-Notes::
-    ## Change Log ##
-
-Questions:
----------------------Next-------------------------------------------------------
+-------------------- PLANNED ADDITIONS -----------------------------------------
 
 --SHORTTERM--
     --Future Search Grid Ui
         --Popup panel with additional data about selected tree item
         --sticky column headers for search page
         --Fill search opts-col3 with easy cols to filter on
+        --popup Editor options 
+            -sort interactions by which editor created them.  
         --Set up hide/show columns options
             -Config colDefs
             -Pop up with col selects 
         --Save filters through changes in the view options
+        -- add bibliography of all the citations
+            -- the same text that is coming up in the Citation column and putting it in alphabetical order by author.
+
     --Site-
         --CSS
             --Firefox does not look the same as chrome. Spend a day fixing this!!!
