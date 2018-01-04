@@ -132,6 +132,27 @@ Feature: Edit data in the database
 		Then I should see "Author Website" in the "Link Display" field "input"
 
 	@javascript
+	Scenario:  I should be able to edit the data of an existing publisher
+		Given the database grid is in "Source" view
+		And I group interactions by "Publishers"
+		And I click on the edit pencil for the "University of Paris VI" row
+		And I see "Editing Publisher"
+		When I change the "Display Name" field "input" to "University of Paris V"
+		And I change the "City" field "input" to "Nice"
+		And I change the "Country" field "input" to "France"
+		And I change the "Description" field "input" to "Something descriptive"
+		And I change the "Link Url" field "input" to "www.link.com"
+		And I change the "Link Display" field "input" to "Publisher Website"
+		And I press "Update Publisher"
+		And I click on the edit pencil for the "University of Paris V" row
+		And I see "Editing Publisher"
+		Then I should see "Nice" in the "City" field "input"
+		Then I should see "France" in the "Country" field "input"
+		Then I should see "Something descriptive" in the "Desciption" field "input"
+		Then I should see "www.link.com" in the "Link Url" field "input"
+		Then I should see "Publisher Website" in the "Link Display" field "input"
+
+	@javascript
 	Scenario:  I should be able to edit the data of an existing citation
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"

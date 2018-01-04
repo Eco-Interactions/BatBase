@@ -6,6 +6,11 @@ Feature: Filtering the data displayed in the database grid
 	Background:
 		Given I am on "/search"
 
+	# @javascript
+	# Scenario: The tutorial should be displayed on first search page load.
+	# 	Given the database has loaded
+	# 	Then I exit the tutorial
+
 	@javascript
 	Scenario:  I should be able to filter the data tree to a specific taxon.
 		Given the database grid is in "Taxon" view
@@ -37,6 +42,14 @@ Feature: Filtering the data displayed in the database grid
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		When I type "Cockle" in the "Author" text box and press enter
+		And I should see "1" rows in the grid data tree
+		And data in the interaction rows
+
+	@javascript
+	Scenario:  I should be able to filter the data tree to a specific publisher.
+		Given the database grid is in "Source" view
+		And I group interactions by "Publishers"
+		When I type "University of Paris VI" in the "Publisher" text box and press enter
 		And I should see "1" rows in the grid data tree
 		And data in the interaction rows
 

@@ -1327,7 +1327,7 @@
         let inputElem = _util.buildElem('input', { 
             name: 'sel'+entity, type: 'text', placeholder: entity+" Name"  });
         let bttn = _util.buildElem('button', 
-            { text: 'Search', name: 'srchTree_submit', class: "ag-fresh grid-bttn" });
+            { text: 'Search', name: 'sel'+entity+'_submit', class: "ag-fresh grid-bttn" });
         $(bttn).css('margin-left', '5px');
         $(labelCntnr).css('width', '249px');
         $(inputElem).css('width', '180px');

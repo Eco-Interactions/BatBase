@@ -56,3 +56,11 @@ Feature: Search Page Database Initialization
 		Then I should see "4" rows in the grid data tree
 		And I should see "Cockle, Anya" in the tree
 		And data in the interaction rows
+
+	@javascript
+	Scenario:  There should be 2 publishers in the initial database grid.
+		Given the database grid is in "Source" view
+		And I group interactions by "Publishers"
+		Then I should see "2" rows in the grid data tree
+		And I should see "University of Paris VI" in the tree
+		And data in the interaction rows

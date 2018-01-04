@@ -24,6 +24,8 @@ Feature: Add new data to the database
 		When I enter "Test Publisher" in the "Publisher" field dropdown
 		And I see "New Publisher"
 		And I type "Publisher Description" in the "Description" field "textarea"
+		And I type "Nice" in the "City" field "input"
+		And I type "France" in the "Country" field "input"
 		And I type "www.publisher.com" in the "Link Url" field "input"
 		And I type "Test Publisher Webiste" in the "Link Display" field "input"
 		And I press "Create Publisher"

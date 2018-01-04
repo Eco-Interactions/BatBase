@@ -84,9 +84,10 @@ class FeatureContext extends RawMinkContext implements Context
     public function iGroupInteractionsBy($type)
     {
         $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 2, 
-            'Arthropoda' => 4, 'Plants' => 3];
-        $newElems = ['Authors' => '[name="authNameSrch"]', 'Publications' => '#selPubTypes', 
-            'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies'];
+            'Arthropoda' => 4, 'Plants' => 3, 'Publishers' => 'publ'];
+        $newElems = ['Authors' => '[name="srchTree"]', 'Publications' => '#selPubTypes', 
+            'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
+            'Publishers' => '[name="srchTree"]'];
         $this->changeGridSort('#sel-realm', $vals[$type], $newElems[$type]);
     }
 
