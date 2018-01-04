@@ -1220,12 +1220,10 @@
     }
     function loadPubSearchHtml(srcTree) {
         const pubTypeElem = buildPubTypeSelect();
-        // const searchTreeElem = buildTreeSearchHtml('Publication');
-        // $(searchTreeElem).css('width', '255px');
+        const searchTreeElem = buildTreeSearchHtml('Publication', updatePubSearch);
         clearCol2();        
-        $('#opts-col2').append([pubTypeElem]); //searchTreeElem, 
+        $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
         $('#selPublicationType').val('all');
-        //initComboboxes
         
         function buildPubTypeSelect() {
             const pubTypeOpts = buildPubSelectOpts();
@@ -1247,9 +1245,9 @@
             var selectElem = _util.buildSelectElem(
                 pubTypeOpts, 
                 { class: "opts-box", id: 'selPublicationType' }, updatePubSearch);
-            $(lblElem).css('width', '255px');
             $(selectElem).css('width', '115px');
             $(spanElem).css('width', '124px');
+            $(lblElem).css('width', '255px');
             $(lblElem).append([spanElem, selectElem]);
             return lblElem;
         }
@@ -1323,14 +1321,18 @@
     }
 /*================== Search Panel Filter Functions ===========================*/
     /** Returns a text input with submit button that will filter tree by text string. */
-    function buildTreeSearchHtml(entity) {
+    function buildTreeSearchHtml(entity, hndlr) {
+        const func = hndlr || searchTreeText.bind(null, entity);
         let labelCntnr = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         let inputElem = _util.buildElem('input', { 
-            name: 'srchTree', type: 'text', placeholder: entity+" Name"  });
-        let bttn = _util.buildElem('button', { text: 'Search', name: 'srchTree_submit', class: "ag-fresh grid-bttn" });
+            name: 'sel'+entity, type: 'text', placeholder: entity+" Name"  });
+        let bttn = _util.buildElem('button', 
+            { text: 'Search', name: 'srchTree_submit', class: "ag-fresh grid-bttn" });
         $(bttn).css('margin-left', '5px');
-        $(inputElem).onEnter(searchTreeText);
-        $(bttn).click(searchTreeText);
+        $(labelCntnr).css('width', '249px');
+        $(inputElem).css('width', '180px');
+        $(inputElem).onEnter(func);
+        $(bttn).click(func);
         $(labelCntnr).append([inputElem, bttn]);
         return labelCntnr;
     }
@@ -1339,8 +1341,8 @@
      * by clicking on the 'search' button, the tree is rebuilt with only rows that  
      * contain the case insensitive substring.
      */
-    function searchTreeText() {                                                 //console.log("----- Search Tree Text");
-        const text = getFilterTreeTextVal();
+    function searchTreeText(entity) {                                           //console.log("----- Search Tree Text");
+        const text = getFilterTreeTextVal(entity);
         const allRows = getAllCurRows(); 
         const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
         gridOptions.api.setRowData(newRows);
@@ -1348,8 +1350,8 @@
         updateGridFilterStatusMsg();
         resetToggleTreeBttn(false);
     } 
-    function getFilterTreeTextVal() {
-        return $('input[name="srchTree"]').val().trim().toLowerCase();
+    function getFilterTreeTextVal(entity) {
+        return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
     }
     function getTreeRowsWithText(rows, text) {
         return rows.filter(row => row.name.toLowerCase().indexOf(text) !== -1);
@@ -1471,47 +1473,39 @@
     } /* End buildFilteredLocTree */
     /*------------------ Source Filter Updates -------------------------------*/
     /**
-     * When the publication type dropdown is changed, the grid is rebuilt with data 
-     * filtered by the selected type. 
+     * When the publication type dropdown is changed or the grid is filtered by 
+     * publication text, the grid is rebuilt with the filtered data.
      */
-    function updatePubSearch() {                                                
-        var selVal = $("#selPublicationType").val();                            //console.log("\n-----updatePubSearch [%s]", selVal);
-        var selText = $("#selPublicationType option[value='"+selVal+"']").text();//console.log("selText = ", selText)
-        var newRows = selVal === "all" ? getAllCurRows() : getPubTypeRows(selVal);
-        gParams.focusFltrs = selVal === "all" ? [] : [ selText+'s' ];
+    function updatePubSearch() {
+        const val = $("#selPublicationType").val();
+        const text = getFilterTreeTextVal('Publication');
+        const newRows = getFilteredPubRows(val, text);
+        gParams.focusFltrs = getPubFilters();
         gridOptions.api.setRowData(newRows);
         updateGridFilterStatusMsg();
         resetToggleTreeBttn(false);
-        
-    } /* End updatePubSearch */
-    /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows(selVal) { 
-        const pubTypes = _util.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[selVal].publications;         
-        return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
-    }
-    // function syncPubTypeAndPubNameFilters(rows, txt, type) {
-    //     const newRows = type && getFilterTreeTextVal() ? 
-    //         filterAlsoOnText() :
-    //         (txt && $("#selPublicationType").val() !== 'all' ?
-    //             filterAlsoOnType() : rows);
-    //     if (newRows.length !== rows.length) { gParams.fltrdRows =  newRows; }
-    //     gridOptions.api.setRowData(newRows);
-    //     updateGridFilterStatusMsg();
-    //     resetToggleTreeBttn(false);
 
-    //     function filterAlsoOnText() {
-    //         const text = getFilterTreeTextVal();
-    //         if (text !== '') { gParams.focusFltrs.push('"' + text + '"'); }
-    //         return text === '' ? rows : getTreeRowsWithText(rows, text);
-    //     }
-    //     function filterAlsoOnType() {
-    //         const selVal = $("#selPublicationType").val();
-    //         const selText = $("#selPublicationType option[value='"+selVal+"']").text();//console.log("selText = ", selText)
-    //         gParams.focusFltrs.push(selText+'s');
-    //         return getPubTypeRows(selVal);
-    //     }
-    // } /* End syncPubTypeAndPubNameFilters */
+        function getFilteredPubRows(typeId, txt) {
+            if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
+            if (txt === '') { return getPubTypeRows(typeId); }
+            const pubTypes = _util.getDataFromStorage('publicationType'); 
+            const pubIds = pubTypes[val].publications;         
+            return getAllCurRows().filter(row => 
+                pubIds.indexOf(row.pubId) !== -1 && 
+                row.name.toLowerCase().indexOf(text) !== -1);
+        }
+        /** Returns the rows for publications with their id in the selected type's array */
+        function getPubTypeRows() { 
+            const pubTypes = _util.getDataFromStorage('publicationType'); 
+            const pubIds = pubTypes[val].publications;      
+            return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
+        }
+        function getPubFilters() {
+            return val === 'all' && text === '' ? [] :
+                (val === 'all' ? ['"' + text + '"'] : 
+                [$("#selPublicationType option[value='"+val+"']").text()+'s']);
+        }
+    } /* End updatePubSearch */
 /*================ Grid Build Methods ==============================================*/
     /**
      * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
