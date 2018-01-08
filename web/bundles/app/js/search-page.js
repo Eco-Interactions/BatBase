@@ -1350,7 +1350,7 @@
         updateGridFilterStatusMsg();
         resetToggleTreeBttn(false);
     } 
-    function getFilterTreeTextVal(entity) {
+    function getFilterTreeTextVal(entity) {                                     //console.log('getFilterTreeTextVal entity = ', entity);
         return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
     }
     function getTreeRowsWithText(rows, text) {
@@ -2019,9 +2019,16 @@
         var realm = gParams.curRealm;  
         resets[realm]();
     }
-    function reapplyTreeTextFltr() {                                            //console.log("reapplying tree text filter");
-        if (getFilterTreeTextVal() === "") { return; }
+    function reapplyTreeTextFltr() {                                            
+        const entity = getGridEntityName();                                     //console.log("reapplying [%s] text filter", entity);
+        if (getFilterTreeTextVal(entity) === "") { return; }
         searchTreeText();
+    }
+    function getGridEntityName() {
+        const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
+            'publ': 'Publisher', 'pubs': 'Publication' };
+        const ent = gParams.curFocus === "srcs" ? gParams.curRealm : gParams.curFocus;
+        return names[ent];
     }
     function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
         if ($('#selPublicationType').val() === "all") { return; }
