@@ -1718,11 +1718,11 @@ $(document).ready(function(){
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
-                    "Issue": "text", "Pages": "text", "Citation Type": "select"}, //"Citation Text": "fullTextArea",
+                    "Issue": "text", "Pages": "text", "Citation Type": "select", "Citation Text": "fullTextArea"},
                 "exclude": ["Display Name", "Description", "Tags"], 
-                "required": ["Title", "Citation Type"], //"Citation Text", 
-                "order": ["Abstract", "Title", "CitationType", "Year", "Volume", 
-                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], //"CitationText", 
+                "required": ["Title", "Citation Text", "Citation Type"],  
+                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
+                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], 
                 "exitHandler": { create: enablePubField }
             },                                      
             "interaction": {
@@ -2242,7 +2242,7 @@ $(document).ready(function(){
         function handleAdditionalEntityData(entity) {
             var dataHndlrs = {
                 "Author": [ getAuthFullName, getAuthDisplayName ],
-                "Citation": [ getPubFieldData, ifBookType, addCitFullText ], //addCitDisplayName, 
+                "Citation": [ getPubFieldData, ifBookType, addCitFullText, addCitDisplayName ], 
                 "Interaction": [ handleUnspecifiedLocs ],
                 "Location": [ addElevUnits, padLatLong, getLocType ], 
                 "Taxon": [ getTaxonData ],
@@ -2272,10 +2272,10 @@ $(document).ready(function(){
         function getPubFieldData() {
             formVals.publication = $('#Publication-sel').val();
         }
-        // /** Adds 'displayName', which will be added to both the form data objects. */
-        // function addCitDisplayName() {
-        //     formVals.displayName = formVals.title;
-        // }
+        /** Adds 'displayName', which will be added to both the form data objects. */
+        function addCitDisplayName() {
+            formVals.displayName = formVals.title;
+        }
         /** 
          * Appends '-citation' to citations that are attributed to entire books 
          * to maintain unique display names for both the publication and its citation.
@@ -2531,7 +2531,7 @@ $(document).ready(function(){
             },
             "citation": { 
                 "authors": { "source": "contributor" },
-                "fullText": { "source": "description", "citation": "fullText" }, 
+                "citationText": { "source": "description", "citation": "fullText" }, 
                 "publication": { "source": "parentSource" },
                 "title": { "source": "displayName", "citation": "displayName" },
                 "volume": { "citation": "publicationVolume" },
