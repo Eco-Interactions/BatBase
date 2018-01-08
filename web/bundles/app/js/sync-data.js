@@ -62,11 +62,12 @@
         const ints = entities.indexOf('Interaction') !== -1 ?  
             entities.splice(entities.indexOf('Interaction'), 1) : false;         
         const promises = entities.map(e => getNewData(e)); 
-        if (ints) { $.when(promises).then(getNewData('Interaction')); } 
+        $.when(promises).then(finishAndLoadGrid(ints, getNewData));
          
-        function getNewData(entity) {                                           //console.log('getting new data for ', entity); 
+        function getNewData(entity, func) {                                     //console.log('getting new data for ', entity); 
             let data = { entity: entity, updatedAt: lastUpdated }; 
-            return sendAjaxQuery(data, "ajax/sync-data", storeDataAndInitGrid); 
+            const hndlr = func || processUpdatedData;
+            return sendAjaxQuery(data, "ajax/sync-data", hndlr); 
         } 
     } /* End ajaxNewData */ 
     /** Parses and sends the returned data to @storeUpdatedData. */ 
@@ -75,16 +76,33 @@
         const data = parseData(results[entity]); 
         storeUpdatedData(data, entity); 
     } 
-    /** 
-     * Stores interaction data @processUpdatedData. Updates the stored data's  
-     * updatedAt flag, and einitializes the search-page grid with the updated  
-     * data @initSearchGrid. 
-     */ 
+    /** Sends the each updated record to the update handler for the entity. */ 
+    function storeUpdatedData(rcrds, entity) { 
+        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
+        var entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
+            addCoreEntityData : addDetailEntityData; 
+        for (var id in rcrds) { 
+            entityHndlr(_util.lcfirst(entity), rcrds[id]); 
+        } 
+    } 
+    /** Fetches any interaction updates and/or inits grid @initSearchGrid. */
+    function finishAndLoadGrid(ints, getNewData) {
+        if (ints) { getNewData('Interaction', storeDataAndInitGrid); 
+        } else { initSearchGrid(); }
+    }
+    /** Stores interaction data and inits the search-page grid.*/ 
     function storeDataAndInitGrid(results) { 
         processUpdatedData(results); 
+        initSearchGrid();
+    } 
+    /**
+     * Updates the stored data's updatedAt flag, and initializes the search-page 
+     * grid with the updated data @eif.search.initSearchGrid. 
+     */
+    function initSearchGrid() {
         storeData('pgDataUpdatedAt', getCurrentDate()); 
         eif.search.initSearchGrid(); 
-    } 
+    }
     /*------------------ Update Submitted Form Data --------------------------*/
     /**
      * On crud-form submit success, the returned data is added to, or updated in, 
