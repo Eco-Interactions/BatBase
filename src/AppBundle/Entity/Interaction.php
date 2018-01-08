@@ -64,7 +64,7 @@ class Interaction
      * @var \AppBundle\Entity\InteractionType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\InteractionType", inversedBy="interactions")
-     * @ORM\JoinColumn(name="interaction_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $interactionType;
 

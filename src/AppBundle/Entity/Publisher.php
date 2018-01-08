@@ -7,15 +7,15 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * Citation.
+ * Publisher.
  *
- * @ORM\Table(name="citation")
+ * @ORM\Table(name="publisher")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  * @JMS\ExclusionPolicy("all")
  */
-class Citation
+class Publisher
 {
     /**
      * @var int
@@ -27,79 +27,57 @@ class Citation
     private $id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="display_name", type="string", length=255, nullable=true, unique=true)
+     * @Gedmo\Slug(fields={"displayName"})
+     * @ORM\Column(length=128, unique=true, nullable=true)
      * @JMS\Expose
-     * @JMS\SerializedName("displayName")    
      */
-    private $displayName;
+    private $slug;
     
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
-    private $title;
+    private $displayName;
 
     /**
-     * @var string
+     * @var \AppBundle\Entity\PublisherType
      *
-     * @ORM\Column(name="full_text", type="text")
-     * @JMS\Expose
-     * @JMS\SerializedName("fullText")
-     */
-    private $fullText;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="abstract", type="text", nullable=true)
-     * @JMS\Expose
-     * @JMS\SerializedName("abstract")
-     */
-    private $abstract;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
-     * @JMS\Expose
-     * @JMS\SerializedName("publicationVolume")
-     */
-    private $publicationVolume;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="publication_issue", type="string", length=255, nullable=true)
-     * @JMS\Expose
-     * @JMS\SerializedName("publicationIssue")
-     */
-    private $publicationIssue;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="publication_pages", type="string", length=255, nullable=true)
-     * @JMS\Expose
-     * @JMS\SerializedName("publicationPages")
-     */
-    private $publicationPages;
-
-    /**
-     * @var \AppBundle\Entity\CitationType
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CitationType", inversedBy="publication")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublisherType", inversedBy="publishers")
      * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
-    private $citationType;
+    private $publisherType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="city", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $city;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="country", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $country;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $description;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="citation")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publisher")
      * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
      */
     private $source;
@@ -120,7 +98,7 @@ class Citation
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-
+    
     /**
      * @var \DateTime
      *
@@ -144,14 +122,6 @@ class Citation
     private $deletedAt;
 
     /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-
-    }
-
-    /**
      * Get id.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("id")
@@ -164,11 +134,33 @@ class Citation
     }
 
     /**
+     * Set slug.
+     *
+     * @return string
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug.
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
      * Set displayName.
      *
      * @param string $displayName
      *
-     * @return Citation
+     * @return Publisher
      */
     public function setDisplayName($displayName)
     {
@@ -188,187 +180,114 @@ class Citation
     }
 
     /**
-     * Set title.
+     * Set publisherType.
      *
-     * @param string $title
+     * @param \AppBundle\Entity\PublisherType $publisherType
      *
-     * @return Citation
+     * @return Publisher
      */
-    public function setTitle($title)
+    public function setPublisherType(\AppBundle\Entity\PublisherType $publisherType)
     {
-        $this->title = $title;
+        $this->publisherType = $publisherType;
 
         return $this;
     }
 
     /**
-     * Get title.
+     * Get publisherType.
      *
-     * @return string
+     * @return \AppBundle\Entity\PublisherType
      */
-    public function getTitle()
+    public function getPublisherType()
     {
-        return $this->title;
+        return $this->publisherType;
     }
 
     /**
-     * Set fullText.
-     *
-     * @param string $fullText
-     *
-     * @return Citation
-     */
-    public function setFullText($fullText)
-    {
-        $this->fullText = $fullText;
-
-        return $this;
-    }
-
-    /**
-     * Get fullText.
-     *
-     * @return string
-     */
-    public function getFullText()
-    {
-        return $this->fullText;
-    }
-
-    /**
-     * Set abstract.
-     *
-     * @param string $abstract
-     *
-     * @return Citation
-     */
-    public function setAbstract($abstract)
-    {
-        $this->abstract = $abstract;
-
-        return $this;
-    }
-
-    /**
-     * Get abstract.
-     *
-     * @return string
-     */
-    public function getAbstract()
-    {
-        return $this->abstract;
-    }
-
-
-    /**
-     * Set publicationVolume.
-     *
-     * @param string $publicationVolume
-     *
-     * @return Citation
-     */
-    public function setPublicationVolume($publicationVolume)
-    {
-        $this->publicationVolume = $publicationVolume;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationVolume.
-     *
-     * @return string
-     */
-    public function getPublicationVolume()
-    {
-        return $this->publicationVolume;
-    }
-
-    /**
-     * Set publicationIssue.
-     *
-     * @param string $publicationIssue
-     *
-     * @return Citation
-     */
-    public function setPublicationIssue($publicationIssue)
-    {
-        $this->publicationIssue = $publicationIssue;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationIssue.
-     *
-     * @return string
-     */
-    public function getPublicationIssue()
-    {
-        return $this->publicationIssue;
-    }
-    /**
-     * Set publicationPages.
-     *
-     * @param string $publicationPages
-     *
-     * @return Citation
-     */
-    public function setPublicationPages($publicationPages)
-    {
-        $this->publicationPages = $publicationPages;
-
-        return $this;
-    }
-
-    /**
-     * Get publicationPages.
-     *
-     * @return string
-     */
-    public function getPublicationPages()
-    {
-        return $this->publicationPages;
-    }
-
-    /**
-     * Set citationType.
-     *
-     * @param \AppBundle\Entity\CitationType $citationType
-     *
-     * @return Citation
-     */
-    public function setCitationType(\AppBundle\Entity\CitationType $citationType)
-    {
-        $this->citationType = $citationType;
-
-        return $this;
-    }
-
-    /**
-     * Get citationType.
-     *
-     * @return \AppBundle\Entity\CitationType
-     */
-    public function getCitationType()
-    {
-        return $this->citationType;
-    }
-
-    /**
-     * Get the Citation Type id and displayName.   
+     * Get the Publisher Type id and displayName.   
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("citationType")
+     * @JMS\SerializedName("publisherType")
      */
-    public function getCitationTypeData()
+    public function getPublisherTypeData()
     {
-        if ($this->citationType) {
+        if ($this->publisherType) {
             return [ 
-                "id" => $this->citationType->getId(), 
-                "displayName" => $this->citationType->getDisplayName() 
+                "id" => $this->publisherType->getId(),  
+                "displayName" => $this->publisherType->getDisplayName() 
             ];
         }
-        return null;
+    }
+
+    /**
+     * Set city.
+     *
+     * @param string $city
+     *
+     * @return Publisher
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * Get city.
+     *
+     * @return string
+     */
+    public function getCity()
+    {
+        return $this->city;
+    }
+
+    /**
+     * Set country.
+     *
+     * @param string $country
+     *
+     * @return Publisher
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country.
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * Set description.
+     *
+     * @param string $description
+     *
+     * @return Publisher
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description.
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 
     /**
@@ -376,7 +295,7 @@ class Citation
      *
      * @param \AppBundle\Entity\Source $source
      *
-     * @return Citation
+     * @return Publisher
      */
     public function setSource(\AppBundle\Entity\Source $source)
     {

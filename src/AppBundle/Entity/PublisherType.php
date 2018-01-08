@@ -7,15 +7,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * Publication.
+ * PublisherType.
  *
- * @ORM\Table(name="publication")
- * @ORM\Entity(repositoryClass="AppBundle\Entity\PublicationRepository")
+ * @ORM\Table(name="publisher_type")
+ * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  * @JMS\ExclusionPolicy("all")
  */
-class Publication
+class PublisherType
 {
     /**
      * @var int
@@ -32,11 +31,11 @@ class Publication
      * @JMS\Expose
      */
     private $slug;
-    
+
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -51,20 +50,11 @@ class Publication
     private $description;
 
     /**
-     * @var \AppBundle\Entity\PublicationType
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publications")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
-     */
-    private $publicationType;
-
-    /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Source", inversedBy="publication")
-     * @ORM\JoinColumn(name="source_id", referencedColumnName="id", unique=true)
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Publisher", mappedBy="publisherType")
      */
-    private $source;
+    private $publishers;
 
     /**
      * @var \DateTime
@@ -101,9 +91,12 @@ class Publication
     private $updatedBy;
 
     /**
-     * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
+     * Constructor.
      */
-    private $deletedAt;
+    public function __construct()
+    {
+        $this->publishers = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Get id.
@@ -144,7 +137,7 @@ class Publication
      *
      * @param string $displayName
      *
-     * @return Publication
+     * @return PublisherType
      */
     public function setDisplayName($displayName)
     {
@@ -168,7 +161,7 @@ class Publication
      *
      * @param string $description
      *
-     * @return Publication
+     * @return PublisherType
      */
     public function setDescription($description)
     {
@@ -188,76 +181,51 @@ class Publication
     }
 
     /**
-     * Set publicationType.
+     * Add publisher.
      *
-     * @param \AppBundle\Entity\PublicationType $publicationType
+     * @param \AppBundle\Entity\Publisher $publisher
      *
-     * @return Publication
+     * @return PublisherType
      */
-    public function setPublicationType(\AppBundle\Entity\PublicationType $publicationType)
+    public function addPublisher(\AppBundle\Entity\Publisher $publisher)
     {
-        $this->publicationType = $publicationType;
+        $this->publishers[] = $publisher;
 
         return $this;
     }
 
     /**
-     * Get publicationType.
+     * Remove publisher.
      *
-     * @return \AppBundle\Entity\PublicationType
+     * @param \AppBundle\Entity\Publisher $publisher
      */
-    public function getPublicationType()
+    public function removePublisher(\AppBundle\Entity\Publisher $publisher)
     {
-        return $this->publicationType;
+        $this->publishers->removeElement($publisher);
     }
 
     /**
-     * Get the Publication Type id and displayName.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("publicationType")
+     * Get publishers.
+     *
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getPublicationTypeData()
+    public function getPublishers()
     {
-        if ($this->publicationType) {
-            return [ 
-                "id" => $this->publicationType->getId(),  
-                "displayName" => $this->publicationType->getDisplayName() 
-            ];
+        return $this->publishers;
+    }
+
+    /**
+     * Returns an array of Publisher ids. 
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publishers")
+     */
+    public function getPublisherIds()
+    {
+        $pubIds = [];
+        foreach ($this->publishers as $publisher) {
+            array_push($pubIds, $publisher->getId());
         }
-    }
-
-    /**
-     * Set source.
-     *
-     * @param \AppBundle\Entity\Source $source
-     *
-     * @return Publication
-     */
-    public function setSource(\AppBundle\Entity\Source $source)
-    {
-        $this->source = $source;
-
-        return $this;
-    }
-
-    /**
-     * Get source.
-     *
-     * @return \AppBundle\Entity\Source
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
-     * Get the Source id.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("source")
-     */
-    public function getSourceId()
-    {
-        return $this->source->getId();
+        return $pubIds;
     }
 
     /**
@@ -318,16 +286,6 @@ class Publication
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
     }
 
     /**

@@ -123,7 +123,7 @@ class Location
      * @var \AppBundle\Entity\LocationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
-     * @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $locationType;
 

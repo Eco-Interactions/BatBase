@@ -332,7 +332,7 @@ $(document).ready(function(){
             "location": fillLocData, "publication": fillSrcData, 
             "publisher": fillSrcData, "taxon": fillTaxonData, 
             "interaction": fillIntData };
-        const rcrd = ent !== "publisher" ? getEntityRecord(ent, id) : null;     //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+        const rcrd = getEntityRecord(ent, id);                                  //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
         hndlrs[ent](ent, id, rcrd);
     }
     function fillIntData(entity, id, rcrd) {
@@ -376,12 +376,12 @@ $(document).ready(function(){
             if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
         });
     }
-    /** Fills all data for the source-type entity. Note: Publishers have no deatil entity. */
+    /** Fills all data for the source-type entity.  */
     function fillSrcData(entity, id, rcrd) { 
         var src = getEntityRecord("source", id);
         var fields = getSourceFields(entity);
-        if (entity !== "publisher") { setDetailData(); }
         setSrcData();
+        setDetailData();
 
         function setSrcData() {
             fillFields(src, fields.core, fields.detail.exclude);
@@ -1706,7 +1706,7 @@ $(document).ready(function(){
                 "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text",
                     "Suffix": "text"}, 
                 "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", 
-                    "Tags", "City", "Country"],
+                    "Tags"],
                 "required": ["Last Name", "Display Name"], 
                 "order": [ "FirstName", "MiddleName", "LastName", "Suffix", "LinkUrl", "LinkDisplay"],
             },
@@ -1719,7 +1719,7 @@ $(document).ready(function(){
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
                     "Issue": "text", "Pages": "text", "Citation Type": "select"}, //"Citation Text": "fullTextArea",
-                "exclude": ["Display Name", "Description", "Tags", "City", "Country"], 
+                "exclude": ["Display Name", "Description", "Tags"], 
                 "required": ["Title", "Citation Type"], //"Citation Text", 
                 "order": ["Abstract", "Title", "CitationType", "Year", "Volume", 
                     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], //"CitationText", 
@@ -1755,13 +1755,13 @@ $(document).ready(function(){
             },
             "publication": {
                 "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
-                "exclude": ["Display Name", "Tags", "City", "Country"],
+                "exclude": ["Display Name", "Tags"],
                 "required": ["Publication Type", "Title"],
                 "order": ["Title", "Description", "PublicationType", "Year",  
                     "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
             },
             "publisher": { 
-                "add": {}, 
+                "add": { "City": "text", "Country": "text"}, 
                 "exclude": ["Year", "Doi", "Authors", "Tags"],
                 "required": ["Display Name", "City", "Country"],
                 "order": ["DisplayName", "City", "Country", "Description", 
@@ -1806,8 +1806,8 @@ $(document).ready(function(){
                 "Interaction Tags": "tags"
             },
             "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Display": "text", "City": "text", 
-                "Link Url": "text", "Authors": "multiSelect", "Country": "text",
+                "Year": "text", "Doi": "text", "Link Display": "text", 
+                "Link Url": "text", "Authors": "multiSelect"
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
@@ -2490,13 +2490,13 @@ $(document).ready(function(){
          * If the form entity is a detail entity for a 'parent' entity (e.g. as citation
          * or author are to Source), that entity is added as the 'type' of it's parent and 
          * 'hasDetail' is added to trigger detail entity processing on the server.
+         * Note: currently, only sources have detail entities.
          */
-        function handleDetailTypeField() {  
-            var nonDetailEntities = ["publisher"];
-            if (pEntity) { 
-                data[pEntity].rel[pEntity+"Type"] = entity; 
-                data[pEntity].hasDetail = nonDetailEntities.indexOf(entity) === -1;
-            }    
+        function handleDetailTypeField() { 
+            if (pEntity) {
+                data[pEntity].rel[pEntity+'Type'] = entity; 
+                data[pEntity].hasDetail = true;
+            } 
         }
     } /* End buildFormDataObj */
     /** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
@@ -2554,6 +2554,9 @@ $(document).ready(function(){
                 "publisher": { "source": "parentSource" }, 
                 "description": { "source": "description", "publication": "description" },
                 "title": { "source": "displayName", "publication": "displayName" },
+            },
+            "publisher": {
+                "displayName": { "source": "displayName", "publisher": "displayName" }
             },
         };
         return fieldTrans[entity] || {};

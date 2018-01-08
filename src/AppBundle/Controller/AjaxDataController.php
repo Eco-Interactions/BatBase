@@ -159,6 +159,7 @@ class AjaxDataController extends Controller
         $citType = $this->serializeEntity('CitationType', $serializer, $em);
         $publication = $this->serializeEntity('Publication', $serializer, $em);
         $pubType = $this->serializeEntity('PublicationType', $serializer, $em);
+        $publisher = $this->serializeEntity('Publisher', $serializer, $em);
         $source = $this->serializeEntity('Source', $serializer, $em);
         $srcType = $this->serializeEntity('SourceType', $serializer, $em);
 
@@ -167,7 +168,7 @@ class AjaxDataController extends Controller
             'author' => $author,        'citation' => $citation,
             'source' => $source,        'citationType' => $citType, 
             'sourceType' => $srcType,   'publication' => $publication,  
-            'publicationType' => $pubType
+            'publicationType' => $pubType, 'publisher' => $publisher
         ));
         return $response;
     }
