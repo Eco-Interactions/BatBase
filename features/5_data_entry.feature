@@ -7,7 +7,7 @@ Feature: Add new data to the database
 		Given I am on "/login"
 		And I fill in "Username" with "TestEditor"
 		And I fill in "Password" with "passwordhere"
-		And I press "_submit"
+		And I press the "_submit" button
 		And I am on "/search"
 		Then I should see "TestEditor"
 
@@ -28,7 +28,7 @@ Feature: Add new data to the database
 		And I type "France" in the "Country" field "input"
 		And I type "www.publisher.com" in the "Link Url" field "input"
 		And I type "Test Publisher Webiste" in the "Link Display" field "input"
-		And I press "Create Publisher"
+		And I press the "Create Publisher" button
 		Then I should see "Test Publisher" in the "Publisher" field
 
 	@javascript
@@ -43,7 +43,7 @@ Feature: Add new data to the database
 		And I type "Sr" in the "Suffix" field "input"
 		And I type "www.author.com" in the "Link Url" field "input"
 		And I type "Test Author Webiste" in the "Link Display" field "input"
-		And I press "Create Author"
+		And I press the "Create Author" button
 		Then I should see "Smith, George Michael Sr" in the "Authors" field dynamic dropdown
 
 	@javascript
@@ -58,7 +58,7 @@ Feature: Add new data to the database
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
 		And I select "Test Publisher" from the "Publisher" field dropdown
 		And I select "Smith, George Michael Sr" from the "Authors" field dynamic dropdown
-		And I press "Create Publication"
+		And I press the "Create Publication" button
 		Then I should see "Test Publication" in the "Publication" field
 		And I should see "Test Publication" in the "Publication" detail panel
 		And I should see "Test description" in the "Publication" detail panel
@@ -70,7 +70,7 @@ Feature: Add new data to the database
 	Scenario:  I should be able to create a citation with its sub-form
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
-		And I enter "Test Citation" in the "Citation Title" field dropdown
+		And I enter "Test Citation Title" in the "Citation Title" field dropdown
 		And I see "New Citation"
 		When I type "Test Citation Text" in the "Citation Text" field "textarea"
 		And I type "Test Abstract Text" in the "Abstract" field "textarea"
@@ -83,9 +83,9 @@ Feature: Add new data to the database
 		And I type "Test Citation Webiste" in the "Link Display" field "input"
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
 		And I select "Cockel, Joy Karen Jr" from the "Authors" field dynamic dropdown
-		And I press "Create Citation"
-		Then I should see "Test Citation" in the "Citation Title" field
-		And I should see "Test Citation" in the "Citation" detail panel
+		And I press the "Create Citation" button
+		Then I should see "Test Citation Title" in the "Citation Title" field
+		And I should see "Test Citation Title" in the "Citation" detail panel
 		And I should see "Test Citation Text" in the "Citation" detail panel
 		And I should see "Test Abstract Text" in the "Citation" detail panel
 		And I should see "Article" in the "Citation" detail panel
@@ -106,7 +106,7 @@ Feature: Add new data to the database
 		And I type "2500" in the "Elevation Max" field "input"
 		And I type "-58.864905" in the "Latitude" field "input"
 		And I type "3.339844" in the "Longitude" field "input"
-		And I press "Create Location"
+		And I press the "Create Location" button
 		Then I should see "Test Location" in the "Location" field
 		And I should see "Test Description" in the "Location" detail panel
 		And I should see "Savanna" in the "Location" detail panel
@@ -122,7 +122,7 @@ Feature: Add new data to the database
 		And I see "Select Subject Taxon"
 		When I enter "Subject Family" in the "Family" field dropdown
 		And I see "New Taxon Family"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Subject Family" in the "Family" field
 
 	@javascript
@@ -133,7 +133,7 @@ Feature: Add new data to the database
 		And I select "Subject Family" from the "Family" field dropdown
 		When I enter "Subject Genus" in the "Genus" field dropdown
 		And I see "New Taxon Genus"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Subject Genus" in the "Genus" field
 
 	@javascript
@@ -145,7 +145,7 @@ Feature: Add new data to the database
 		And I select "Subject Genus" from the "Genus" field dropdown
 		When I enter "Subject Species" in the "Species" field dropdown
 		And I see "New Taxon Species"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Subject Species" in the "Species" field
 
 	@javascript
@@ -167,7 +167,7 @@ Feature: Add new data to the database
 		When I select "Arthropod" from the "Realm" field dropdown
 		And I enter "Object Class" in the "Class" field dropdown
 		And I see "New Taxon Class"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Object Class" in the "Class" field
 
 	@javascript
@@ -179,7 +179,7 @@ Feature: Add new data to the database
 		And I select "Object Class" from the "Class" field dropdown
 		And I enter "Object Order" in the "Order" field dropdown
 		And I see "New Taxon Order"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Object Order" in the "Order" field
 
 	@javascript
@@ -192,7 +192,7 @@ Feature: Add new data to the database
 		And I select "Object Order" from the "Order" field dropdown
 		And I enter "Object Family" in the "Family" field dropdown
 		And I see "New Taxon Family"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Object Family" in the "Family" field
 
 	@javascript
@@ -206,7 +206,7 @@ Feature: Add new data to the database
 		And I select "Object Family" from the "Family" field dropdown
 		When I enter "Object Genus" in the "Genus" field dropdown
 		And I see "New Taxon Genus"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Object Genus" in the "Genus" field
 
 	@javascript
@@ -221,7 +221,7 @@ Feature: Add new data to the database
 		And I select "Object Genus" from the "Genus" field dropdown
 		When I enter "Object Species" in the "Species" field dropdown
 		And I see "New Taxon Species"
-		And I press "Create Taxon"
+		And I press the "Create Taxon" button
 		Then I should see "Object Species" in the "Species" field
 
 	@javascript
@@ -242,29 +242,29 @@ Feature: Add new data to the database
 	Scenario:  I should be able to create a new interaction with all fields filled
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "Test Citation Title" from the "Citation Title" field dropdown
 		And I select "Costa Rica" from the "Country-Region" field dropdown
 		And I select "Test Location" from the "Location" field dropdown
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Species" from the "Species" field dropdown
-		And I press "Confirm"
+		And I press the "Confirm" button
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		And I select "Arthropod" from the "Realm" field dropdown
 		And I select "Object Species" from the "Species" field dropdown
-		And I press "Confirm"
+		And I press the "Confirm" button
 		When I select "Consumption" from the "Interaction Type" field dropdown
 		And I select "Arthropod" from the "Interaction Tags" field dropdown
 		And I type "Detailed interaction notes." in the "Note" field "textarea"
-		And I press "Create Interaction"
+		And I press the "Create Interaction" button
 		Then I should see "New Interaction successfully created." in the form header
 
 	@javascript
 	Scenario:  Pinned field values should remain after interaction form submission (all others should clear)
 		Given I open the New Interaction form
 		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation" from the "Citation Title" field dropdown
+		And I select "Test Citation Title" from the "Citation Title" field dropdown
 		And I pin the "Citation Title" field
 		And I select "Costa Rica" from the "Country-Region" field dropdown
 		And I select "Test Location" from the "Location" field dropdown
@@ -272,21 +272,21 @@ Feature: Add new data to the database
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
 		And I select "Subject Species" from the "Species" field dropdown
-		And I press "Confirm"
+		And I press the "Confirm" button
 		And I pin the "Subject" field
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
 		And I select "Arthropod" from the "Realm" field dropdown
 		And I select "Object Species" from the "Species" field dropdown
-		And I press "Confirm"
+		And I press the "Confirm" button
 		When I select "Consumption" from the "Interaction Type" field dropdown
 		And I pin the "Interaction Type" field
 		And I select "Arthropod" from the "Interaction Tags" field dropdown
 		And I type "Detailed interaction notes." in the "Note" field "textarea"
-		And I press "Create Interaction"
+		And I press the "Create Interaction" button
 		Then I should see "New Interaction successfully created." in the form header
 		And I should see "Test Publication" in the "Publication" field
-		And I should see "Test Citation" in the "Citation Title" field
+		And I should see "Test Citation Title" in the "Citation Title" field
 		And I should see "Costa Rica" in the "Country-Region" field
 		And I should see "Test Location" in the "Location" field
 		And I should see "Subject Species" in the "Subject" field
@@ -306,7 +306,7 @@ Feature: Add new data to the database
 	Scenario:  The grid should reload in Source view after creating an interaction.
 		Given I open the New Interaction form
 		And I fill the new interaction form with the test values
-		And I press "Create Interaction"
+		And I press the "Create Interaction" button
 		And I see "New Interaction successfully created." in the form header
 		When I exit the form window
 		Then I should see the grid displayed in "Source" view
@@ -318,7 +318,7 @@ Feature: Add new data to the database
 		Given the database grid is in "Source" view
 		And I filter the grid to interactions created since "today"
 		When I expand "Test Publication" in the data tree
-		Then I should see "3" interactions under "Test Citation"
+		Then I should see "3" interactions under "Test Citation Title"
 		And the expected data in the interaction row
 
 	@javascript
@@ -327,7 +327,7 @@ Feature: Add new data to the database
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
 		When I expand "Cockel, Joy Karen Jr" in the data tree
-		Then I should see "3" interactions under "Test Citation"
+		Then I should see "3" interactions under "Test Citation Title"
 		And the expected data in the interaction row
 
 	@javascript
@@ -336,9 +336,9 @@ Feature: Add new data to the database
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
 		When I expand "Smith, George Michael Sr" in the data tree
-		And I expand "Test Citation" in the data tree
+		And I expand "Test Citation Title" in the data tree
 		And I expand "Test Publication" in the data tree
-		And I expand "Test Citation" in level "3" of the data tree
+		And I expand "Test Citation Title" in level "3" of the data tree
 		Then I should see "6" interactions attributed
 		And the expected data in the interaction row
 

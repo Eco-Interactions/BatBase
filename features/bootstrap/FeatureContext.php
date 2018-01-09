@@ -51,7 +51,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theDatabaseHasLoaded()
     {
-        $this->getUserSession()->wait( 5000, "$('.ag-row').length" );
+        $this->getUserSession()->wait( 10000, "$('.ag-row').length" );
         $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
         assertNotNull($row, "There are no rows in the database grid.");
     }
@@ -171,7 +171,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iFillTheNewInteractionFormWithTheTestValues()
     {
         $this->iSelectFromTheFieldDropdown('Test Publication', 'Publication');
-        $this->iSelectFromTheFieldDropdown('Test Citation', 'Citation Title');
+        $this->iSelectFromTheFieldDropdown('Test Citation Title', 'Citation Title');
         $this->iSelectFromTheFieldDropdown('Costa Rica', 'Country-Region');
         $this->iSelectFromTheFieldDropdown('Test Location', 'Location');
         $this->iFocusOnTheTaxonField('Subject');
@@ -551,7 +551,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iExpandInTheDataTree($text)
     {
         usleep(500000);
-        $row = $this->getTreeNode($text);
+        $row = $this->getTreeNode($text);  if (!$row) { $this->iPutABreakpoint('Couldn\'t find row = '.$text); }
         $row->doubleClick();
     }
 
@@ -901,6 +901,15 @@ class FeatureContext extends RawMinkContext implements Context
         for ($i=0; $i < $count; $i++) { 
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
+    }
+
+    /**
+     * @When I press the :bttnText button
+     */
+    public function iPressTheButton($bttnText)
+    {
+        $this->getUserSession()->getPage()->pressButton($bttnText);
+        usleep(500000);
     }
 
     private function getUserSession()

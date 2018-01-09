@@ -78,10 +78,10 @@
     } 
     /** Sends the each updated record to the update handler for the entity. */ 
     function storeUpdatedData(rcrds, entity) { 
-        var coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
-        var entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
+        const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
+        const entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
             addCoreEntityData : addDetailEntityData; 
-        for (var id in rcrds) { 
+        for (let id in rcrds) { 
             entityHndlr(_util.lcfirst(entity), rcrds[id]); 
         } 
     } 
@@ -146,7 +146,7 @@
                     'tag': addToTagProp },
                 'publication': { 'pubSrcs': addToRcrdAryProp, 'contributors': addContribData,
                     'source': addToParentRcrd },
-                'publisher': { 'publisherNames': addToNameProp },
+                'publisher': { 'publSrcs': addToRcrdAryProp },
 
             },
             'interaction': {
@@ -198,7 +198,7 @@
             'author': { 'author': addToRcrdProp },
             'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
             'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
-            'publisher': { 'publisherNames': addToNameProp }
+            'publisher': { 'publisher': addToRcrdProp } 
         };
         updateDataProps(update[entity], entity, rcrd)
     }
@@ -250,8 +250,8 @@
     }
     /** Adds the Taxon's name to the stored names for it's realm and level.  */
     function addToTaxonNames(prop, rcrd, entity) {
-        var realm = rcrd.realm.displayName;
-        var level = rcrd.level.displayName;  
+        const realm = rcrd.realm.displayName;
+        const level = rcrd.level.displayName;  
         addPropIfNewLevel(level, realm);
         addToNameProp(realm+level+"Names", rcrd, entity);
     }
@@ -297,7 +297,7 @@
         }
     }
     function hasEdits(editObj) {
-        return Object.keys(editObj).length > 1;
+        return Object.keys(editObj).length > 0;
     }
     /** Updates relational storage props for the entity. */
     function updateAffectedDataProps(entity, rcrd, edits) {                     //console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
@@ -317,9 +317,9 @@
             'interaction': {
                 'location': rmvIntFromEntity, 'source': rmvIntFromEntity, 
                 'subject': rmvIntFromTaxon, 'object': rmvIntFromTaxon, 
-                'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp
-            },
+                'interactionType': rmvFromTypeProp, 'tag': rmvFromTagProp },
             'publication': { 'publicationType': rmvFromTypeProp },
+            'publisher': {},
             'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp  },
             'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
                 'tag': rmvFromTagProp },
@@ -518,14 +518,13 @@
      * [entity]Names - an object with each entity's displayName(k) and id.
      * [entity]Sources - an array with of all source records for the entity type.
      */
-    function deriveAndStoreSourceData(data) {                                   //console.log("dervied source data = %O", derivedData);
-        const authIds = getTypeObj(data.sourceType, 'author', 'sources');
-        const pubIds = getTypeObj(data.sourceType, 'publication', 'sources');
-        const publIds = getTypeObj(data.sourceType, 'publisher', 'sources'); 
-        const publSrcs = getEntityRcrds(publIds, data.source);
-        storeData('authSrcs', authIds);         
-        storeData('pubSrcs', pubIds);              
-        storeData('publisherNames', getTypeNameData(publSrcs));
+    function deriveAndStoreSourceData(data) {                                   //console.log("source data = %O", data);
+        const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
+        const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
+        const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources'); 
+        storeData('authSrcs', authSrcs);         
+        storeData('pubSrcs', pubSrcs);              
+        storeData('publSrcs', publSrcs);
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
         // storeData('sourceTags', getTagData(data.tag, "Source"));        

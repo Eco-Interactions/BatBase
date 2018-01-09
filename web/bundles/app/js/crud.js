@@ -533,7 +533,7 @@ $(document).ready(function(){
         focusCombobox('#Publication-sel');
         enableCombobox('#CitationTitle-sel', false);
     }
-/*------------------- Shared Interaction Form Methods ------------------------*/
+/*------------------- Interaction Form Methods (Shared) ----------------------*/ 
     /**
      * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
      * required field elems to the form's config object.  
@@ -584,10 +584,8 @@ $(document).ready(function(){
      * current publication titles.
      */
     function buildPubFieldRow() {
-        var selElem;
-        var pubIds = _util.getDataFromStorage("pubSrcs");
-        var opts = getRcrdOpts(pubIds, fParams.records.source);
-        selElem = _util.buildSelectElem(opts, {id: "Publication-sel", class: "lrg-field"});
+        const selElem = _util.buildSelectElem(getSrcOpts('pubSrcs'), 
+            { id: "Publication-sel", class: "lrg-field" });
         return buildFormRow("Publication", selElem, "top", true);
     }
     /** When a publication is selected fill citation dropdown @fillCitationField.  */
@@ -1935,7 +1933,7 @@ $(document).ready(function(){
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
-            "Authors": [ getAuthOpts, 'authSrcs'],
+            "Authors": [ getSrcOpts, 'authSrcs'],
             "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
@@ -1946,7 +1944,7 @@ $(document).ready(function(){
             "InteractionType": [ getOptsFromStoredData, 'intTypeNames' ],
             "Order": [ getTaxonOpts, 'Order' ],
             "PublicationType": [ getOptsFromStoredData, 'pubTypeNames'],
-            "Publisher": [ getOptsFromStoredData, 'publisherNames'],
+            "Publisher": [ getSrcOpts, 'publSrcs'],
             "Realm": [ getRealmOpts, null ],
             "Species": [ getTaxonOpts, 'Species' ],
             // "Tags": [ getTagOpts, 'source' ],
@@ -1989,8 +1987,8 @@ $(document).ready(function(){
     function getTagOpts(entity) {
         return getOptsFromStoredData(entity+"Tags");
     }
-    /** Returns an array of author-source options objects. */
-    function getAuthOpts(prop) {
+    /** Returns an array of source-type (prop) options objects. */
+    function getSrcOpts(prop) {
         var ids = _util.getDataFromStorage(prop);
         return getRcrdOpts(ids, fParams.records.source);
     }
@@ -2242,7 +2240,7 @@ $(document).ready(function(){
         function handleAdditionalEntityData(entity) {
             var dataHndlrs = {
                 "Author": [ getAuthFullName, getAuthDisplayName ],
-                "Citation": [ getPubFieldData, ifBookType, addCitFullText, addCitDisplayName ], 
+                "Citation": [ getPubFieldData, addCitDisplayName, ifBookType, addCitFullText ], 
                 "Interaction": [ handleUnspecifiedLocs ],
                 "Location": [ addElevUnits, padLatLong, getLocType ], 
                 "Taxon": [ getTaxonData ],
@@ -2533,7 +2531,8 @@ $(document).ready(function(){
                 "authors": { "source": "contributor" },
                 "citationText": { "source": "description", "citation": "fullText" }, 
                 "publication": { "source": "parentSource" },
-                "title": { "source": "displayName", "citation": "displayName" },
+                "title": { "source": "displayName", "citation": "displayName", 
+                    "citation": "title"  },
                 "volume": { "citation": "publicationVolume" },
                 "issue": { "citation": "publicationIssue" },
                 "pages": { "citation": "publicationPages" },
@@ -2639,8 +2638,8 @@ $(document).ready(function(){
      * elevation data, and is ignored here. 
      */
     function hasChngs(data) {
-        var chngs = Object.keys(data.coreEdits).length > 1 || 
-            Object.keys(data.detailEdits).length > 1;
+        var chngs = Object.keys(data.coreEdits).length > 0 || 
+            Object.keys(data.detailEdits).length > 0;
         if (chngs && data.core == 'location' && Object.keys(data.coreEdits).length == 2) {
             if ('elevUnitAbbrv' in data.coreEdits) { return false; }
         }
