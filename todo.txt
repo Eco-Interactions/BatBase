@@ -3,21 +3,30 @@ TASK LIST
 TODO
 NOTES
 ============ EMAIL ====================
-TAYLOR:
     --- General ---
+TAYLOR:
+    > Publication display name does not require it to be unique. Intentional?
+        ## Check other entities before email ##
 Tullenda:
+    > Publication that should be publisher? - Goteborg University, University of Aberdeen
 =======================================
 Notes::
     ## Change Log ##
 
 Questions:
     ## Citation full text ##
-    
+    -Thoughts-
+        - Show citation full text to user before submit? 
+        - What is necessary to show user?
     -Todo-
-        - Show full text when editing, not creating.
+        - Remove publisher type code?
 ________________________________________________________________________________
 
 -- Short Range TODO [priority, difficulty]--
+    --Tests-- 
+        - Add tests and breakpoints before asserts to allow for exploring the page 
+            where the error occured
+            - Use the step name in description printed 
     --misc--
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
@@ -80,7 +89,7 @@ ________________________________________________________________________________
             --refactor to use parital, effectively 'group', selectors
         --Bugs--
             - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
-        -- UPGRADE --
+        -- Ongoing --
             -- Add more sophisticated logging
         --Refactor--
             -- Add '-sel' to the edit taxon form's 'txn-lvl' field 

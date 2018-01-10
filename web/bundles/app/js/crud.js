@@ -2279,7 +2279,8 @@ $(document).ready(function(){
          * to maintain unique display names for both the publication and its citation.
          */
         function ifBookType() { 
-            if (getTypeName('citType', formVals.citationType) !== "Book") { return; }
+            if (getTypeName('citType', formVals.citationType) !== "Book" || 
+                getTypeName('citType', formVals.citationType) !== "Report") { return; }
             if (formVals.displayName.includes('-citation')) { return; }
             formVals.displayName += '-citation';
         }
@@ -2290,7 +2291,7 @@ $(document).ready(function(){
                 'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
                 'Page range': chapterSympCit, 'Museum record': articleRecordCit,
                 'Symposium proceeding': chapterSympCit };
-            formVals.fullText = getFullText[type]();                            console.log('Full text = ', formVals.fullText);
+            // formVals.fullText = getFullText[type]();                            console.log('Full text = ', formVals.fullText);
         }
         /**
          * Returns: 1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
