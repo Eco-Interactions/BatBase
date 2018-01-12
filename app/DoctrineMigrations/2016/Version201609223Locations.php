@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Migration updates all locations to the new structure. Parent locations and location
+ * Updates all remaining locations to the new structure. Parent locations and location
  * types are filled in. Duplicate location entities are consolidated into one record, 
  * the other record is appended with '-Removed' and soft-deleted.
  */

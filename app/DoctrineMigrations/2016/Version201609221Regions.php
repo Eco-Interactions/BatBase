@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Migration updates existing region (-Unspecified) locations or adds a new location
+ * Updates existing region (-Unspecified) locations or adds a new location
  * for any not currently in the database. 
  */
 class Version201609221Regions extends AbstractMigration implements ContainerAwareInterface

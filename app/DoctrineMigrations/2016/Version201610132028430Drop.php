@@ -6,7 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Drops unnecessary fields and rearranges others.
  */
 class Version201610132028430Drop extends AbstractMigration
 {

@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Migration adds location parent self-join and LocationType entity. 
+ * Adds location parent self-join and LocationType entity. 
  */
 class Version20160809221825 extends AbstractMigration implements ContainerAwareInterface
 {

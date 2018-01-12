@@ -6,7 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
- * Update the database into the new Source heirarchical-structure.
+ * Updates the database into the new Source structure.
  */
 class Version201610101857190SrcStructure extends AbstractMigration
 {

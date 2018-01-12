@@ -6,7 +6,7 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
- * Migration drops Country, Region and Region_Location tables.
+ * Drops Country, Region and Region_Location tables.
  */
 class Version201609224Drop extends AbstractMigration
 {
