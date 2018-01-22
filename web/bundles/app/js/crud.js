@@ -633,6 +633,29 @@ $(document).ready(function(){
         $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
     }
+    /**
+     * Loads the deafult fields for the selected Publication Type. Clears any 
+     * previous type-fields and initializes the selectized dropdowns.
+     */
+    function loadPubTypeFields(typeId) {
+        resetTypeRows('Publication');      
+        const formConfg = getSourceTypeConfg('publication', typeId);              
+        $('#PublicationTypeRows').append(getTypeFieldRows('publication', formConfg));
+        initComboboxes("publication");
+    }
+    /** Returns the form confg for the selected source type. */
+    function getSourceTypeConfg(entity, id) {
+        const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
+        const type = $(typeElemId)[0].selectize.getItem(id)[0].innerText;
+        return formConfg = getFormConfg(entity).types[type];                    //console.log('srcTypeConfg for [%s] = [%O]', type, formConfg);
+    }
+    /** Empties or creates the source-type row container. */
+    function resetTypeRows(entity) {
+        if ($('#'+entity+'TypeRows').length) { return $('#'+entity+'TypeRows').empty(); }
+        const rowCntnr = _util.buildElem('div', {
+            id: entity+'TypeRows', class: 'flex-row med-form-sub flex-wrap'});  
+        $('#PublicationType_row').after(rowCntnr);
+    }
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
     function buildCitFieldRow() {
@@ -698,6 +721,9 @@ $(document).ready(function(){
         addExistingPubContribs();
         $('#Abstract_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
+    }
+    function loadCitTypeFields(typeId) {
+        // body...
     }
     /**
      * If the parent publication has existing contributors, add them to the new 
@@ -1602,7 +1628,7 @@ $(document).ready(function(){
         return { 
             'Authors': { name: 'Authors', id: '#Authors-sel1', change: onAuthSelection, 
                 add: initAuthForm },
-            'CitationType': { name: 'Citation Type', change: false, add: false },
+            'CitationType': { name: 'Citation Type', change: loadCitTypeFields, add: false },
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
@@ -1617,7 +1643,7 @@ $(document).ready(function(){
             'Kingdom': { name: 'Kingdom', change: false, add: false },
             'Order': { name: 'Order', change: onLevelSelection, add: initTaxonForm },
             'Phylum': { name: 'Phylum', change: false, add: false },
-            'PublicationType': { name: 'Publication Type', change: false, add: false },
+            'PublicationType': { name: 'Publication Type', change: loadPubTypeFields, add: false },
             'Publisher': { name: 'Publisher', change: Function.prototype, add: initPublisherForm },
             'Realm': { name: 'Realm', change: onRealmSelection, add: false },
             'Species': { name: 'Species', change: onLevelSelection, add: initTaxonForm },
@@ -1659,12 +1685,12 @@ $(document).ready(function(){
      * select elem 'parent' of the sub-form. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLvl, formClasses, fieldVals, selId) {  //console.log('initSubForm called. args = %O', arguments)
-        var subFormContainer = _util.buildElem('div', {
+    function initSubForm(formEntity, formLvl, formClasses, fVals, selId) {      //console.log('initSubForm called. args = %O', arguments)
+        const subFormContainer = _util.buildElem('div', {
             id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
-        var hdr = _util.buildElem(
+        const hdr = _util.buildElem(
             'p', { 'text': 'New '+_util.ucfirst(formEntity), 'id': formLvl+'-hdr' });
-        var subForm = buildSubForm(formEntity, fieldVals, formLvl, selId);
+        const subForm = buildSubForm(formEntity, fVals, formLvl, selId);
         subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, 'create'));
         $(subFormContainer).append([hdr].concat(subForm));
         fParams.forms[formLvl].pSelId = selId; 
@@ -1672,13 +1698,13 @@ $(document).ready(function(){
         return subFormContainer;
     }
     /** 
-     * Builds all fields for sub-form and returns the completed row elems.
-     * Also inits the params for the sub-form in the global fParams obj.
+     * Builds and returns the default fields for entity sub-form and returns the 
+     * row elems. Inits the params for the sub-form in the global fParams obj.
      */
-    function buildSubForm(entity, fieldVals, level, pSel, action) {             //console.log('buildSubForm. args = %O', arguments)
-        var formConfg = getFormConfg(entity);                                   //console.log('formConfg = %O', formConfg)
-        initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));
-        return getFormFieldRows(entity, formConfg, fieldVals, level);
+    function buildSubForm(entity, fVals, level, pSel, action) {                 //console.log('buildSubForm. args = %O', arguments)
+        const formConfg = getFormConfg(entity);                                 
+        initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));        
+        return getInitialFieldRows(entity, formConfg, fVals, level);
     }
     /**
      * Returns a form-config object for the passed entity. 
@@ -1688,106 +1714,199 @@ $(document).ready(function(){
      * > exclude - Fields to exclude in a detail-entity form. E.g. Citation doesn't 
      *   use Source's 'displayName' field as it's 'title' is it's display name. 
      * > required - Required fields for the entity.
+     * > suggested - Suggested fields for the entity.
+     *   NOTE: The required and suggested fields will be the default shown in form. 
+     * > optional - Additional fields for the entity.
      * > order - Order of the fields in the form. This is matched to the field elems' 
      *   id, which has no spaces.
      * > exitHandler - optional Obj with handlers for exiting create/edit forms.
      */
     function getFormConfg(entity) {
-        var fieldMap = { 
+        const fieldMap = { 
             "arthropod": {
                 "add": {},  
                 "exclude": [],
                 "required": [],
-                "order": ["Class", "Order", "Family", "Genus", "Species"],
+                "suggested": ["Class", "Order", "Family", "Genus", "Species"],
+                "optional": [],
+                "order": {
+                    "sug": ["Class", "Order", "Family", "Genus", "Species"],
+                    "opt": false },
             },
             "author": { 
-                "add": { "First Name": "text", "Middle Name": "text", "Last Name": "text",
-                    "Suffix": "text"}, 
-                "exclude": ["Display Name", "Description", "Year", "Doi", "Authors", 
-                    "Tags"],
-                "required": ["Last Name", "Display Name"], 
-                "order": [ "FirstName", "MiddleName", "LastName", "Suffix", "LinkUrl", "LinkDisplay"],
+                "add": { "First Name": "text", "Middle Name": "text", 
+                    "Last Name": "text", "Suffix": "text"}, 
+                "exclude": ["Display Name", "Description", "Year", "Doi", 
+                    "Authors", "Tags"],
+                "required": ["Last Name"], 
+                "suggested": ["First Name", "Middle Name"],
+                "optional": ["Suffix", "Link Url", "Link Display"],
+                "order": {
+                    "sug": ["FirstName", "MiddleName", "LastName"],
+                    "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
+                        "LinkUrl", "LinkDisplay"]},
             },
             "bat": {
                 "add": {},  
                 "exclude": ["Class", "Order"],
                 "required": [],
-                "order": ["Family", "Genus", "Species"],
+                "suggested": ["Family", "Genus", "Species"],
+                "optional": [],
+                "order": {
+                    "sug": ["Family", "Genus", "Species"],
+                    "opt": false },
             },
             "citation": {
                 "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
-                    "Issue": "text", "Pages": "text", "Citation Type": "select", "Citation Text": "fullTextArea"},
+                    "Issue": "text", "Pages": "text", "Citation Type": "select", 
+                    "Citation Text": "fullTextArea"},
                 "exclude": ["Display Name", "Description", "Tags"], 
                 "required": ["Title", "Citation Text", "Citation Type"],  
-                "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
-                    "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], 
+                // "suggested": [],
+                // "optional": [],
+                // "order": {
+                //     "sug": ["Family", "Genus", "Species"],
+                //     "opt": []},
+                // "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
+                //     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], 
                 "exitHandler": { create: enablePubField }
             },                                      
             "interaction": {
                 "add": {},  
                 "exclude": [],
                 "required": ["Interaction Type"],
-                "order": ["InteractionType", "InteractionTags", "Note"],
+                "suggested": ["Interaction Tags", "Note"],
+                "optional": ["InteractionTags", "Note"],
+                "order": {
+                    "sug": ["InteractionType","InteractionTags", "Note"],
+                    "opt": false },
                 "exitHandler": { create: resetInteractionForm }
             },
             "location": {
                 "add": {},  
                 "exclude": [], 
                 "required": ["Display Name", "Country"],
-                "order": ["DisplayName", "Description", "Country", "HabitatType", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude" ], //"ElevationUnits", 
+                "suggested": ["Description", "Habitat Type"],
+                "optional": ["Elevation", "Elevation Max", "Latitude", "Longitude"],
+                "order": {
+                    "sug": ["DisplayName", "Description", "Country", "HabitatType"],
+                    "opt": ["DisplayName", "Description", "Country", "HabitatType", 
+                        "Elevation", "ElevationMax", "Latitude", "Longitude" ]},
                 "exitHandler": { create: enableCountryRegionField }
             },
             "object": {
                 "add": {"Realm": "select"},  
                 "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
                 "required": [],
-                "order": [],
+                "suggested": ["Realm"],
+                "optional": [],
+                "order": {
+                    "sug": ["Realm"],
+                    "opt": false }, //use this to trigger the removal of the 'show additional fields'
                 "exitHandler": { create: enableSubjField }
             },
             "plant": {
                 "add": {},  
                 "exclude": ["Class", "Order"],
                 "required": [],
-                "order": ["Family", "Genus", "Species"],
+                "suggested": ["Family", "Genus", "Species"],
+                "optional": [],
+                "order": {
+                    "sug": ["Family", "Genus", "Species"],
+                    "opt": false},
             },
             "publication": {
-                "add": { "Title" : "text", "Publication Type": "select", "Publisher": "select" },  
+                "add": { "Title" : "text", "Publication Type": "select", 
+                    "Publisher": "select" },  
                 "exclude": ["Display Name", "Tags"],
                 "required": ["Publication Type", "Title"],
-                "order": ["Title", "Description", "PublicationType", "Year",  
-                    "LinkUrl", "LinkDisplay", "Doi", "Publisher", "Authors" ],
+                "suggested": [],
+                "optional": [],
+                "order": {
+                    "sug": ["Title", "Publication Type"],
+                    "opt": [] },
+                "types": {
+                    "Book": {
+                        "required": ["Authors", "Publisher", "Year"],
+                        "suggested": [],
+                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "order": {
+                            "sug": ["Year", "Publisher", "Authors"],
+                            "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
+                                "Description", "Publisher", "Authors"]},
+                    },
+                    "Journal": {
+                        "required": [],
+                        "suggested": [],
+                        "optional": ["Description", "Link Display", "Link Url", "Doi",
+                            "Publisher", "Authors" ],
+                        "order": {
+                            "sug": [],
+                            "opt": ["Description", "Doi", "LinkDisplay", "LinkUrl",
+                            "Publisher", "Authors" ]},
+                    },
+                    "Other": {
+                        "required": [],
+                        "suggested": ["Authors", "Publisher", "Year"],
+                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "order":  {
+                            "sug": ["Year", "Publisher", "Authors"],
+                            "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
+                                "Description", "Publisher", "Authors"]},
+                    },
+                    "Thesis/Ph.D. Dissertation": {
+                        "required": ["Authors", "Publisher", "Year"],
+                        "suggested": [],
+                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "order":  {
+                            "sug": ["Year", "Publisher", "Authors"],
+                            "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
+                                "Description", "Publisher", "Authors"]},
+                    }
+                }
             },
             "publisher": { 
                 "add": { "City": "text", "Country": "text"}, 
                 "exclude": ["Year", "Doi", "Authors", "Tags"],
                 "required": ["Display Name", "City", "Country"],
-                "order": ["DisplayName", "City", "Country", "Description", 
-                    "LinkUrl", "LinkDisplay"] 
+                "suggested": [],
+                "optional": ["Description", "Link Url", "Link Display"],
+                "order": {
+                    "sug": ["DisplayName", "City", "Country"],
+                    "opt": ["DisplayName", "City", "Country", "Description", 
+                        "LinkUrl", "LinkDisplay"]},
             },
             "subject": {
                 "add": {},  
                 "exclude": ["Class", "Order"],
                 "required": [],
-                "order": ["Family", "Genus", "Species"],
+                "suggested": ["Family", "Genus", "Species"],
+                "optional": [],
+                "order": {
+                    "sug": ["Family", "Genus", "Species"],
+                    "opt": false },
                 "exitHandler": { create: enableObjField }
             },
             "taxon": {
                 "add": {},  
                 "exclude": [],
                 "required": ["Display Name"],
-                "order": ["DisplayName"],
+                "suggested": [],
+                "optional": [],
+                "order": {
+                    "sug": ["DisplayName"],
+                    "opt": false },
                 "exitHandler": { create: onTaxonCreateFormExit }
             },
         };
         return fieldMap[entity];
     }
     /**
-     * Returns an object of core fields and field types for the passed entity.
-     * Note: source's have sub-entities that will return the core source fields.
+     * Returns an object of fields and field types for the passed entity.
+     * Note: Source's have sub-entities that will return the core source fields.
      */
     function getCoreFieldDefs(entity) {  
-        var coreEntityMap = {
+        const coreEntityMap = {
             "author": "source",         "citation": "source",
             "publication": "source",    "publisher": "source",
             "location": "location",     "subject": "taxonLvls",
@@ -1795,7 +1914,7 @@ $(document).ready(function(){
             "arthropod": "taxonLvls",   "taxon": "taxon",
             "interaction": "interaction","bat": "taxonLvls",          
         };
-        var fields = {
+        const fields = {
             "location": { "Display Name": "text", "Description": "textArea", 
                 "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
                 "Latitude": "text", "Habitat Type": "select", "Country": "select", 
@@ -1816,68 +1935,86 @@ $(document).ready(function(){
         return fields[coreEntityMap[entity]];
     }
     /**
-     * Builds all rows for the sub-form according to the passed formConfig obj. 
-     * Returns a container div with the rows ready to be appended to the form window.
+     * @return {obj} All fields (and their types) available to the entity form.
      */
-    function getFormFieldRows(entity, formCnfg, fieldVals, formLvl) {           //console.log("  Building Form rows. arguemnts = %O", arguments);
-        var buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
+    function getEntityFieldDefs(entity) {
+        const formConfg = getFormConfg(entity);                                 //console.log('formConfg for [%s] = %O', entity, formConfg)
+        return Object.assign(getCoreFieldDefs(entity), formConfg.add);
+    }
+    /**
+     * Returns an obj with the entity's field defs and all required fields.
+     * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
+     *               .required Ary of required fields
+     */
+    function getFieldTypeObj(entity, formConfg) {
+        const allFields = getEntityFieldDefs(entity);                           
+        const include = formConfg.required.concat(formConfg.suggested);
+        const required = formConfg.required;
+        let obj = { required: required, fields: {} };
+        include.forEach(field => obj.fields[field] = allFields[field]);         
+        return obj;
+    }   
+    /** Returns rows for the default (inital) fields of the entity form. */
+    function getInitialFieldRows(entity, formConfg, fVals, formLvl) {           //console.log("Building initial fields. entity = [%s], formConfg = [%O], fVals = [%O]", entity, formConfg, fVals);
+        const fObj = getFieldTypeObj(entity, formConfg);
+        const initRows = buildRows(fObj, entity, fVals, formLvl);
+        return orderRows(initRows, formConfg.order.sug);
+    } 
+    /**
+     * Builds and return the default field rows for the selected source type.
+     * @return {ary} Default field rows ordered according to the form config.
+     */
+    function getTypeFieldRows(entity, formConfg) {
+        const fObj = getFieldTypeObj(entity, formConfg);
+        const typeRows = buildRows(fObj, entity, {}, 'sub');  
+        return orderRows(typeRows, formConfg.order.sug);
+    }
+    /**
+     * Builds and return all field rows for the entity form.
+     * @return {ary} All field rows ordered according to the form config.
+     */
+    function getOptionalFieldRows(entity, formConfg) {
+        // body...
+    }
+    /** @return {ary} Rows for each field in the entity field obj. */
+    function buildRows(fieldObj, entity, fVals, formLvl) {                        console.log("buildRows. formLvl = [%s] fields = [%O]", formLvl, fieldObj);
+        const rows = [];
+        for (let field in fieldObj.fields) {                                             console.log("  field = ", field);
+            rows.push(buildRow(field, fieldObj, entity, fVals, formLvl));
+        }
+        return rows;
+    }
+    /**
+     * @return {div} Form field row with required-state and value (if passed) set.  
+     */
+    function buildRow(field, fieldsObj, entity, fVals, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
+        const buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
-        var defaultRows = buildDefaultRows();
-        var additionalRows = buildAdditionalRows();
-        return orderRows(defaultRows.concat(additionalRows), formCnfg.order);
-        /** Adds the form-entity's default fields, unless they are included in exclude. */
-        function buildDefaultRows() {                                           //console.log("    Building default rows");
-            var dfltFields = getCoreFieldDefs(entity);
-            var exclude = fParams.forms[formLvl].confg.exclude;
-            return buildRows(dfltFields, exclude);
+        const input = buildFieldType[fieldsObj.fields[field]](entity, field, formLvl);  
+        const isReq = isFieldRequried(field, formLvl, fieldsObj.required);    
+        fillFieldIfValuePassed(field);
+        return buildFormRow(_util.ucfirst(field), input, formLvl, isReq, "");
+        
+        /** Sets the value for the  field if it is in the passed 'fVals' obj. */
+        function fillFieldIfValuePassed(field) {
+            if (field in fVals) { $(input).val(fVals[field]); }
         }
-        /** Adds fields specific to a sub-entity. */
-        function buildAdditionalRows() {                                        //console.log("    Building additional rows");
-            var addedFields = fParams.forms[formLvl].confg.add;
-            return buildRows(addedFields);
-        }
-        /**
-         * Builds a row for each field not explicitly excluded from the fieldGroup. 
-         * If exclude is set to true, all default fields are excluded. 
-         */
-        function buildRows(fieldGroup, exclude) {
-            var rows = [];
-            for (var field in fieldGroup) {                                     //console.log("      field = ", field);
-                if (exclude && (exclude === true || exclude.indexOf(field) !== -1)) { continue; }                //console.log("      field = ", field);
-                rows.push(buildRow(field, fieldGroup, formLvl));
-            }
-            return rows;
-        }
-        /** Builds and returns the form field's row html. */
-        function buildRow(field, fieldsObj, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
-            var input = buildFieldType[fieldsObj[field]](entity, field, formLvl);  
-            var isReq = isFieldRequried(field, formLvl);    
-            fillFieldIfValuePassed(field);
-            return buildFormRow(_util.ucfirst(field), input, formLvl, isReq, "");
-            
-            /** Sets the value for the  field if it is in the passed 'fieldVals' obj. */
-            function fillFieldIfValuePassed(field) {
-                if (field in fieldVals) { $(input).val(fieldVals[field]); }
-            }
-        } /* End buildRow */ 
-    } /* End getFormFieldRows */
+    } /* End buildRow */ 
     function getFieldClass(formLvl, fieldType) {  
-        var classes = { "top": "lrg-field", "sub": "med-field", "sub2": "med-field" };
+        const classes = { "top": "lrg-field", "sub": "med-field", "sub2": "med-field" };
         return fieldType === "long" ? (formLvl === "top" ? "xlrg-field top" :
             "xlrg-field") : classes[formLvl];
     }
     /** Returns true if field is in the required fields array. */
-    function isFieldRequried(field, formLvl) {
-        var reqFields = fParams.forms[formLvl].confg.required;
+    function isFieldRequried(field, formLvl, reqFields) {                       //console.log('isFieldRequried. formLvl = [%s], fParams = %O', formLvl, fParams);
         return reqFields.indexOf(field) !== -1;
     }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
-        var field, idx;
         rows.forEach(function(row) {
-            field = row.id.split("_row")[0];
-            idx = order.indexOf(field);
+            let field = row.id.split("_row")[0];
+            let idx = order.indexOf(field);
             order.splice(idx, 1, row);
         });
         return order;
