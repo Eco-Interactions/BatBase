@@ -721,6 +721,9 @@ $(document).ready(function(){
         $('#Abstract_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
     }
+    function loadCitTypeFields(typeId) {
+        // body...
+    }
     /**
      * Loads the deafult fields for the selected Citation Type. Clears any 
      * previous type-fields and initializes the selectized dropdowns.
