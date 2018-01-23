@@ -721,8 +721,15 @@ $(document).ready(function(){
         $('#Abstract_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
     }
+    /**
+     * Loads the deafult fields for the selected Citation Type. Clears any 
+     * previous type-fields and initializes the selectized dropdowns.
+     */
     function loadCitTypeFields(typeId) {
-        // body...
+        resetTypeRows('Citation');      
+        const formConfg = getSourceTypeConfg('citation', typeId);              
+        $('#CitationTypeRows').append(getTypeFieldRows('citation', formConfg));
+        initComboboxes('citation');
     }
     /**
      * Loads the deafult fields for the selected Citation Type. Clears any 
