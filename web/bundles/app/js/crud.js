@@ -654,7 +654,7 @@ $(document).ready(function(){
         if ($('#'+entity+'TypeRows').length) { return $('#'+entity+'TypeRows').empty(); }
         const rowCntnr = _util.buildElem('div', {
             id: entity+'TypeRows', class: 'flex-row med-form-sub flex-wrap'});  
-        $('#PublicationType_row').after(rowCntnr);
+        $('#'+entity+'Type_row').after(rowCntnr);
     }
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
@@ -722,8 +722,15 @@ $(document).ready(function(){
         $('#Abstract_row textarea').focus();
         return { "value": "", "text": "Creating Citation..." };
     }
+    /**
+     * Loads the deafult fields for the selected Citation Type. Clears any 
+     * previous type-fields and initializes the selectized dropdowns.
+     */
     function loadCitTypeFields(typeId) {
-        // body...
+        resetTypeRows('Citation');      
+        const formConfg = getSourceTypeConfg('citation', typeId);              
+        $('#CitationTypeRows').append(getTypeFieldRows('citation', formConfg));
+        initComboboxes('citation');
     }
     /**
      * If the parent publication has existing contributors, add them to the new 
@@ -1756,20 +1763,92 @@ $(document).ready(function(){
                     "sug": ["Family", "Genus", "Species"],
                     "opt": false },
             },
-            "citation": {
-                "add": { "Title": "text", "Volume": "text", "Abstract": "fullTextArea",
-                    "Issue": "text", "Pages": "text", "Citation Type": "select", 
-                    "Citation Text": "fullTextArea"},
-                "exclude": ["Display Name", "Description", "Tags"], 
-                "required": ["Title", "Citation Text", "Citation Type"],  
-                // "suggested": [],
-                // "optional": [],
-                // "order": {
-                //     "sug": ["Family", "Genus", "Species"],
-                //     "opt": []},
+            'citation': {
+                'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
+                    'Issue': 'text', 'Pages': 'text', 'Citation Type': 'select', 
+                    'Citation Text': 'fullTextArea'},
+                'exclude': ['Display Name', 'Description', 'Tags'], 
+                'required': ['Title', 'Citation Type'],  
+                'suggested': [], //"Citation Text", 'Abstract'
+                'optional': ['Abstract'],
+                'order': {
+                    'sug': ['Title', 'CitationType'], 
+                    'opt': ['Abstract', 'Title', 'CitationType']},  //"CitationText"
                 // "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
                 //     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], 
-                "exitHandler": { create: enablePubField }
+                'types': {
+                    'Article': {
+                        'required': ['Authors', 'Year'],
+                        'suggested': ['Issue', 'Pages', 'Volume'],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
+                            'opt': ['Year', 'Pages', 'Volume', 'Issue', 
+                                'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Book': {
+                        'required': ['Authors'],
+                        'suggested': [],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Authors'],
+                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Chapter': {
+                        'required': ['Authors', 'Pages'],
+                        'suggested': [],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Pages', 'Authors'],
+                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
+                                'Authors']},
+                    },
+                    'Museum record': {
+                        'required': ['Authors', 'Year'],
+                        'suggested': ['Issue', 'Pages', 'Volume'],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
+                            'opt': ['Year', 'Pages', 'Volume', 'Issue', 
+                                'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Other': {
+                        'required': ['Authors', 'Year'],
+                        'suggested': ['Issue', 'Pages', 'Volume'],
+                        'optional': ['Abstract', 'Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
+                            'opt': ['Abstract', 'Year', 'Pages', 'Volume', 'Issue', 
+                                'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Report': {
+                        'required': ['Authors'],
+                        'suggested': [],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Authors'],
+                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Symposium proceeding': {
+                        'required': ['Authors', 'Pages'],
+                        'suggested': [],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Pages', "Authors"],
+                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
+                                'Authors']},
+                    },
+                    'Thesis/Ph. D. Dissertation': {
+                        'required': ['Authors'],
+                        'suggested': [],
+                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'order': {
+                            'sug': ['Authors'],
+                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+
+                },
+                'exitHandler': { create: enablePubField }
             },                                      
             "interaction": {
                 "add": {},  
