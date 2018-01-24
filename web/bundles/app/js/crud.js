@@ -14,7 +14,6 @@ $(document).ready(function(){
         editEntity: editEntity,
         dataSynced: afterStoredDataUpdated 
     };
-
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
   
     function onDOMContentLoaded() { 
@@ -2311,18 +2310,22 @@ $(document).ready(function(){
      * pushes the buttons to the bottom right of their form container.
      */
     function buildFormBttns(entity, level, action) {
-        var bttn = { create: "Create", edit: "Update" };
-        var events = getBttnEvents(entity, level);                              //console.log("events = %O", events);
-        var cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
-        var spacer = $('<div></div>').css("flex-grow", 2);
-        var submit = _util.buildElem("input", { id: level + "-submit", 
-            class: "ag-fresh grid-bttn", type: "button", value: bttn[action]+" "+entity});
-        var cancel = _util.buildElem("input", { id: level +"-cancel", 
-            class: "ag-fresh grid-bttn", type: "button", value: "Cancel"});
+        const bttn = { create: "Create", edit: "Update" };
+        const events = getBttnEvents(entity, level);                            //console.log("events = %O", events);
+        const cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
+        const allFields = buildAddFieldsCheckbox(level);
+        const spacer = $('<div></div>').css("flex-grow", 2);
+        const submit = buildFormButton('submit', level, bttn[action]+" "+entity);
+        const cancel = buildFormButton('cancel', level, 'Cancel');
         $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
         $(cancel).css("cursor", "pointer").click(events.cancel);
-        $(cntnr).append([spacer, submit, cancel]);
+        $(cntnr).append([allFields, spacer, submit, cancel]);
         return cntnr;
+    }
+    /** Returns a (submit or cancel) button for the form level. */
+    function buildFormButton(action, level, val) {
+        return _util.buildElem("input", { id: level +'-'+action, 
+            class: "ag-fresh grid-bttn", type: "button", value: val});
     }
     /**
      * Returns an object with 'submit' and 'cancel' events bound to the passed level's
@@ -2333,6 +2336,20 @@ $(document).ready(function(){
             submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
             cancel: exitForm.bind(null, '#'+level+'-form', level, true) 
         };
+    }
+    /** 
+     * Returns a the html of a checkbox labeled 'Show additional fields' that will
+     * trigger all additional fields being shown for every form.
+     * @return {elem} Checkbox and label that will 'Show additional fields'
+     */
+    function buildAddFieldsCheckbox(level) {
+        const cntnr = _util.buildElem('div', {class: 'all-fields-cntnr'});
+        const chckBox = _util.buildElem('input', { id: level+'-all-fields', 
+            type: 'checkbox', value: 'Show all fields' }) 
+        const lbl = _util.buildElem('label', { for: level+'-all-fields', 
+            text: 'Show additional fields.' });
+        $(cntnr).append([chckBox, lbl]);
+        return cntnr;
     }
     /**
      * Removes the form container with the passed id, clears and enables the combobox,

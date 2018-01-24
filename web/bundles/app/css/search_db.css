@@ -315,6 +315,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
 form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 100%;
 }
+.all-fields-cntnr {
+    padding-top: 1em; 
+}
 .field-row {
     justify-content: space-between;
 }
