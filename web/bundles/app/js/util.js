@@ -69,7 +69,7 @@
             });
         }
         function addAttrProps() {
-            var attrProps = [ "name", "type", "value", "placeholder" ];
+            var attrProps = [ "name", "type", "value", "placeholder", "for" ];
             var attrsToAdd = {};
             attrProps.forEach(function(prop) {
                if (prop in attrs) { attrsToAdd[prop] = attrs[prop]; } 
