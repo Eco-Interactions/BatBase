@@ -219,6 +219,8 @@ $(document).ready(function(){
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
+     * > shwAllFields - True: all available fields are shown.
+     *      False: Only the default (required and suggested) form fields shown.
      * > submitFocus - Stores the grid-focus for the entity of the most recent 
             form submission. Will be used on form-exit.
      */
@@ -231,6 +233,7 @@ $(document).ready(function(){
             forms: {},
             formLevels: ["top", "sub", "sub2"],
             records: _util.getDataFromStorage(["source", "location", "taxon"]),
+            shwAllFields: false,
             submitFocus: prevSubmitFocus || false
         };
         initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action); console.log("####fPs = %O", fParams)
@@ -241,6 +244,7 @@ $(document).ready(function(){
      * -- Property descriptions:
      * > action - eg, Create, Edit.
      * > confg - The form config object used during form building.
+     * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
      * > entity - Name of this form's entity.
      * > exitHandler - Form exit handler or noOp.
      * > pSelId - The id of the parent select of the form.
@@ -252,6 +256,7 @@ $(document).ready(function(){
         fParams.forms[level] = {
             action: action,
             confg: formConfg,
+            typeConfg: false,
             entity: entity,
             exitHandler: getFormExitHandler(formConfg, action),
             pSelId: pSel,
@@ -280,7 +285,7 @@ $(document).ready(function(){
     /** Inits the edit top-form, filled with all existing data for the record. */
     function initEditForm(id, entity) {                                         //console.log("initEditForm");
         const form = buildFormElem();  
-        const formFields = getFormFields(id, entity);
+        const formFields = getEditFormFields(id, entity);
         $(form).append(formFields);
         $('#form-main').append(form);     
         finishEditFormBuild(entity);
@@ -297,7 +302,7 @@ $(document).ready(function(){
         }
     }
     /** Returns the form fields for the passed entity.  */
-    function getFormFields(id, entity) {
+    function getEditFormFields(id, entity) {
         var edges = { "interaction": getIntFormFields, "taxon": getTaxonEditFields };
         var hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
         var fields = hndlr(entity, id);                                         //console.log("fields = %O, hndlr = %O", fields, hndlr);     
@@ -637,23 +642,9 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadPubTypeFields(typeId) {
-        resetTypeRows('Publication');      
-        const formConfg = getSourceTypeConfg('publication', typeId);              
-        $('#PublicationTypeRows').append(getTypeFieldRows('publication', formConfg));
+        resetVolatileRows('Publication');      
+        $('#Publication_Rows').append(getTypeFieldRows('publication', typeId));
         initComboboxes("publication");
-    }
-    /** Returns the form confg for the selected source type. */
-    function getSourceTypeConfg(entity, id) {
-        const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
-        const type = $(typeElemId)[0].selectize.getItem(id)[0].innerText;
-        return formConfg = getFormConfg(entity).types[type];                    //console.log('srcTypeConfg for [%s] = [%O]', type, formConfg);
-    }
-    /** Empties or creates the source-type row container. */
-    function resetTypeRows(entity) {
-        if ($('#'+entity+'TypeRows').length) { return $('#'+entity+'TypeRows').empty(); }
-        const rowCntnr = _util.buildElem('div', {
-            id: entity+'TypeRows', class: 'flex-row med-form-sub flex-wrap'});  
-        $('#'+entity+'Type_row').after(rowCntnr);
     }
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
@@ -697,18 +688,10 @@ $(document).ready(function(){
             'Citation Type': citRcrd.citationType ? citRcrd.citationType.displayName : '', 
             'Publication Vol': citRcrd.publicationVolume || '',            
             'Publication Issue': citRcrd.publicationIssue || '',            
-            'Publication Pages': citRcrd.publicationPages || '',            
-            // 'Tags': getTags(srcRcrd),
+            'Publication Pages': citRcrd.publicationPages || '',   
             'Authors': getAuthorNames(srcRcrd),
         };
     }
-    // function getTags(srcRcrd) {
-    //     var str = [];
-    //     if (srcRcrd.tags.length) {
-    //         srcRcrd.tags.forEach(function(tag) { str.push(tag.displayName); });
-    //     }
-    //     return str.join(', ');
-    // }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
         var formLvl = getSubFormLvl("sub");
@@ -726,9 +709,8 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadCitTypeFields(typeId) {
-        resetTypeRows('Citation');      
-        const formConfg = getSourceTypeConfg('citation', typeId);              
-        $('#CitationTypeRows').append(getTypeFieldRows('citation', formConfg));
+        resetVolatileRows('Citation');      
+        $('#Citation_Rows').append(getTypeFieldRows('citation', typeId));
         initComboboxes('citation');
     }
     /**
@@ -1720,7 +1702,7 @@ $(document).ready(function(){
     function buildSubForm(entity, fVals, level, pSel, action) {                 //console.log('buildSubForm. args = %O', arguments)
         const formConfg = getFormConfg(entity);                                 
         initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));        
-        return getInitialFieldRows(entity, formConfg, fVals, level);
+        return getFormFieldRows(entity, formConfg, fVals, level, false);
     }
     /**
      * Returns a form-config object for the passed entity. 
@@ -2021,53 +2003,90 @@ $(document).ready(function(){
             "taxon": { "Display Name": "text" }
         };
         return fields[coreEntityMap[entity]];
+    }    
+    /** ----- Shared Publication and Citation form helpers ------------------ */
+    /**
+     * Builds and return the form-field rows for the selected source type.
+     * @return {ary} Form-field rows ordered according to the form config.
+     */
+    function getTypeFieldRows(entity, typeId) {
+        setSourceTypeConfg(entity, typeId); 
+        return getFormFieldRows(entity, getFormConfg(entity), {}, 'sub');
+    }
+    /** Sets the type confg for the selected source type in form params. */
+    function setSourceTypeConfg(entity, id) {
+        const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
+        const type = $(typeElemId)[0].selectize.getItem(id)[0].innerText;
+        fParams.forms.sub.typeConfg = getFormConfg(entity).types[type];         //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms.sub.typeConfg);             
+    }
+    /** -------------------- Form Row Builders ------------------------------ */
+    /**
+     * Toggles between displaying all fields for the entity and only showing the 
+     * default (required and suggested) fields.
+     */
+    function toggleShowAllFields(entity, level) {
+        fParams.shwAllFields = this.checked;         
+        const capsEnt = _util.ucfirst(entity);
+        const fConfg = fParams.forms[level].confg;                              //console.log('toggling optional fields. Show? [%s]', fParams.shwAllFields);
+        resetVolatileRows(capsEnt);
+        $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, {}, level));
+        initComboboxes(entity);
+    }
+    /** Empties or creates the entity-form's row container. */
+    function resetVolatileRows(entity) {
+        if ($('#'+entity+'_Rows').length) { return $('#'+entity+'_Rows').empty(); }
+        const rowCntnr = _util.buildElem('div', {
+            id: entity+'_Rows', class: 'flex-row med-form-sub flex-wrap'});  
+        $('#'+entity+'Type_row').after(rowCntnr);
     }
     /**
-     * @return {obj} All fields (and their types) available to the entity form.
+     * Returns rows for the entity form fields. If the form is a source-type, 
+     * the type-entity form config is used. 
      */
-    function getEntityFieldDefs(entity) {
-        const formConfg = getFormConfg(entity);                                 //console.log('formConfg for [%s] = %O', entity, formConfg)
-        return Object.assign(getCoreFieldDefs(entity), formConfg.add);
+    function getFormFieldRows(entity, fConfg, fVals, formLvl) {
+        const typeConfg = fParams.forms.sub.typeConfg;
+        const fObj = getFieldTypeObj(entity, fConfg, formLvl, typeConfg);
+        const order = getFieldOrder(fConfg, typeConfg);
+        const rows = buildRows(fObj, entity, fVals, formLvl);                   //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, order);
+        return orderRows(rows, order);
     }
     /**
      * Returns an obj with the entity's field defs and all required fields.
      * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
      *               .required Ary of required fields
      */
-    function getFieldTypeObj(entity, formConfg) {
-        const allFields = getEntityFieldDefs(entity);                           
-        const include = formConfg.required.concat(formConfg.suggested);
-        const required = formConfg.required;
+    function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                 //console.log('getFieldTypeObj for [%s] confg = %O', entity, formConfg);
+        const allFields = Object.assign(getCoreFieldDefs(entity), fConfg.add);
+        const include = getFormFields(fConfg, typeConfg);                               
+        const required = typeConfg ? typeConfg.required : fConfg.required;
         let obj = { required: required, fields: {} };
         include.forEach(field => obj.fields[field] = allFields[field]);         
         return obj;
     }   
-    /** Returns rows for the default (inital) fields of the entity form. */
-    function getInitialFieldRows(entity, formConfg, fVals, formLvl) {           //console.log("Building initial fields. entity = [%s], formConfg = [%O], fVals = [%O]", entity, formConfg, fVals);
-        const fObj = getFieldTypeObj(entity, formConfg);
-        const initRows = buildRows(fObj, entity, fVals, formLvl);
-        return orderRows(initRows, formConfg.order.sug);
-    } 
     /**
-     * Builds and return the default field rows for the selected source type.
-     * @return {ary} Default field rows ordered according to the form config.
+     * Returns an array of fields to include in the form. If the form is a 
+     * source-type, the type-entity form config is used. 
      */
-    function getTypeFieldRows(entity, formConfg) {
-        const fObj = getFieldTypeObj(entity, formConfg);
-        const typeRows = buildRows(fObj, entity, {}, 'sub');  
-        return orderRows(typeRows, formConfg.order.sug);
+    function getFormFields(fConfg, typeConfg) {
+        const shwAll = fParams.shwAllFields;
+        const typeFields = typeConfg && shwAll ? 
+            typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
+            typeConfg ? typeConfg.required.concat(typeConfg.suggested) : false; 
+        return typeFields !== false ? typeFields : shwAll ? 
+            fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
+            fConfg.required.concat(fConfg.suggested); 
     }
-    /**
-     * Builds and return all field rows for the entity form.
-     * @return {ary} All field rows ordered according to the form config.
-     */
-    function getOptionalFieldRows(entity, formConfg) {
-        // body...
+    /** Returns the order the form fields should be displayed. */
+    function getFieldOrder(fConfg, typeConfg) {
+        const shwAll = fParams.shwAllFields;
+        const order = typeConfg && shwAll ? typeConfg.order.opt : typeConfg ? 
+            typeConfg.order.sug : shwAll ? fConfg.order.opt : fConfg.order.sug; 
+        return order.map(field => field);
     }
     /** @return {ary} Rows for each field in the entity field obj. */
-    function buildRows(fieldObj, entity, fVals, formLvl) {                        console.log("buildRows. formLvl = [%s] fields = [%O]", formLvl, fieldObj);
+    function buildRows(fieldObj, entity, fVals, formLvl) {                      console.log("buildRows. formLvl = [%s] fields = [%O]", formLvl, fieldObj);
         const rows = [];
-        for (let field in fieldObj.fields) {                                             console.log("  field = ", field);
+        for (let field in fieldObj.fields) {                                    //console.log("  field = ", field);
             rows.push(buildRow(field, fieldObj, entity, fVals, formLvl));
         }
         return rows;
@@ -2075,7 +2094,7 @@ $(document).ready(function(){
     /**
      * @return {div} Form field row with required-state and value (if passed) set.  
      */
-    function buildRow(field, fieldsObj, entity, fVals, formLvl) {                          //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
+    function buildRow(field, fieldsObj, entity, fVals, formLvl) {               //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
         const buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
             "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
@@ -2323,13 +2342,13 @@ $(document).ready(function(){
         const bttn = { create: "Create", edit: "Update" };
         const events = getBttnEvents(entity, level);                            //console.log("events = %O", events);
         const cntnr = _util.buildElem("div", { class: "flex-row bttn-cntnr" });
-        const allFields = buildAddFieldsCheckbox(level);
+        const shwFields = buildAddFieldsCheckbox(entity, level);
         const spacer = $('<div></div>').css("flex-grow", 2);
         const submit = buildFormButton('submit', level, bttn[action]+" "+entity);
         const cancel = buildFormButton('cancel', level, 'Cancel');
         $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
         $(cancel).css("cursor", "pointer").click(events.cancel);
-        $(cntnr).append([allFields, spacer, submit, cancel]);
+        $(cntnr).append([shwFields, spacer, submit, cancel]);
         return cntnr;
     }
     /** Returns a (submit or cancel) button for the form level. */
@@ -2348,16 +2367,19 @@ $(document).ready(function(){
         };
     }
     /** 
-     * Returns a the html of a checkbox labeled 'Show additional fields' that will
+     * Returns the html of a checkbox labeled 'Show additional fields' that will
      * trigger all additional fields being shown for every form.
+     * If there are no optional fields for the form, returns nothing. 
      * @return {elem} Checkbox and label that will 'Show additional fields'
      */
-    function buildAddFieldsCheckbox(level) {
+    function buildAddFieldsCheckbox(entity, level) {
+        if (fParams.forms[level].confg.order.opt === false) { return; }
         const cntnr = _util.buildElem('div', {class: 'all-fields-cntnr'});
         const chckBox = _util.buildElem('input', { id: level+'-all-fields', 
             type: 'checkbox', value: 'Show all fields' }) 
         const lbl = _util.buildElem('label', { for: level+'-all-fields', 
             text: 'Show additional fields.' });
+        $(chckBox).change(toggleShowAllFields.bind(chckBox, _util.lcfirst(entity), level));
         $(cntnr).append([chckBox, lbl]);
         return cntnr;
     }
