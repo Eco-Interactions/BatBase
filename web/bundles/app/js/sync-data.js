@@ -1,7 +1,7 @@
 (function(){
-    var eif = ECO_INT_FMWK;
-    var _util = eif.util;
-    var dataStorage;
+    const eif = ECO_INT_FMWK;
+    const _util = eif.util;
+    let failed = {};
     eif.syncData = {
         update: updateStoredData,
         reset: resetStoredData
@@ -56,26 +56,41 @@
     }
     /** 
      * Sends an ajax call for each entity with updates. On return, the new data 
-     * is stored @processUpdatedData.  
+     * is stored @processUpdatedData. Interactions are sent after all other entity
+     * updates. Finally, any failed updates are retried and then the search page 
+     * is reloaded.
+     * TODO: Add 'fail' callback for server errors. Send back any errors and 
+     * describe them to the user. 
      */ 
     function ajaxNewData(entities, lastUpdated) { 
         const ints = entities.indexOf('Interaction') !== -1 ?  
-            entities.splice(entities.indexOf('Interaction'), 1) : false;         
+            entities.splice(entities.indexOf('Interaction'), 1) : false;    
         const promises = entities.map(e => getNewData(e)); 
-        $.when(promises).then(finishAndLoadGrid(ints, getNewData));
+        $.when(...promises).then(processUpdatedData).then(updateInteractions)
+            .done(retryFailedUpdatesAndLoadGrid);
          
         function getNewData(entity, func) {                                     //console.log('getting new data for ', entity); 
             let data = { entity: entity, updatedAt: lastUpdated }; 
-            const hndlr = func || processUpdatedData;
+            const hndlr = func || null;
             return sendAjaxQuery(data, "ajax/sync-data", hndlr); 
         } 
+        function updateInteractions() {                                         
+            return ints ? getNewData('Interaction', processUpdatedEntityData) : null;
+        }
     } /* End ajaxNewData */ 
+    /** Sends each entity's ajax return to be processed and stored. */
+    function processUpdatedData() {               
+        for (let data in arguments) { 
+            processUpdatedEntityData(arguments[data][0]);
+        }
+    } 
     /** Parses and sends the returned data to @storeUpdatedData. */ 
-    function processUpdatedData(results) {                                       
+    function processUpdatedEntityData() { 
+        const results = arguments[0]; 
         const entity = Object.keys(results)[0];                                 console.log("[%s] data returned from server = %O", entity, results); 
         const data = parseData(results[entity]); 
         storeUpdatedData(data, entity); 
-    } 
+    }
     /** Sends the each updated record to the update handler for the entity. */ 
     function storeUpdatedData(rcrds, entity) { 
         const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
@@ -85,16 +100,15 @@
             entityHndlr(_util.lcfirst(entity), rcrds[id]); 
         } 
     } 
-    /** Fetches any interaction updates and/or inits grid @initSearchGrid. */
-    function finishAndLoadGrid(ints, getNewData) {
-        if (ints) { getNewData('Interaction', storeDataAndInitGrid); 
-        } else { initSearchGrid(); }
-    }
     /** Stores interaction data and inits the search-page grid.*/ 
-    function storeDataAndInitGrid(results) { 
+    function storeDataAndRetryFailedUpdates(results) { 
         processUpdatedData(results); 
-        initSearchGrid();
+        retryFailedUpdatesAndLoadGrid();
     } 
+    function retryFailedUpdatesAndLoadGrid() {                                  console.log('retryFailedUpdatesAndLoadGrid')
+        retryFailedUpdates();
+        initSearchGrid(); // send errors during init update to search page and show error message to user.
+    }
     /**
      * Updates the stored data's updatedAt flag, and initializes the search-page 
      * grid with the updated data @eif.search.initSearchGrid. 
@@ -390,8 +404,8 @@
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
     function resetStoredData() {
-        var prevFocus = dataStorage.getItem('curFocus');
-        dataStorage.clear();
+        const prevFocus = Window.localstorage.getItem('curFocus');
+        Window.localstorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);
     }
@@ -572,14 +586,49 @@
     function storeData(key, data) {
         _util.populateStorage(key, JSON.stringify(data));
     }
+    /**
+     * Attempts to update the data and catches any errors.
+     * @param  {func} updateFunc  To update the entity's data.
+     * @param  {str}  prop   Entity prop to update     
+     * @param  {obj}  params Has props shown, as well as the current update stage. 
+     * @param  {obj}  edits  Edit obj returned from server 
+     */
     function updateData(updateFunc, prop, params, edits) {                      //console.log('prop [%s] -> params [%O]', prop, params);
         try {
             updateFunc(prop, params.rcrd, params.entity, edits);
-        } catch (e) {                                                           console.log('ERR updating data = %O', e); 
-            reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
+        } catch (e) { 
+            handleFailedUpdate(prop, updateFunc, params, edits);
         }
     }
     /*----------------- Errs ---------------------------------------*/
+    /**
+     * If this is the first failure, it is added to other failed updates to be 
+     * retried at the end of the update process. If this is the second error, 
+     * the error is reported to the user. (<--todo) 
+     */
+    function handleFailedUpdate(prop, updateFunc, params, edits) {
+        if (failed.twice) { 
+            reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
+        } else {
+            addToFailedUpdates(updateFunc, params, edits);       
+        }
+    }
+    function addToFailedUpdates(updateFunc, params, edits) {
+        if (!failed[params.entity]) { failed[params.entity] = {}; }
+        failed[params.entity][params.prop] = {
+            edits: edits, entity: params.entity, rcrd: params.rcrd, updateFunc: updateFunc
+        };
+    }
+    /** Retries any updates that failed in the first pass. */
+    function retryFailedUpdates() {
+        failed.twice = true;
+        for (let entity in failed) {
+            for (let prop in failed[entity]) {
+                let params = failed[entity][prop];
+                updateData(params.updateFunc, prop, params, params.edits);
+            }            
+        }
+    }
     /** Sends a message and error tag back to the form to be displayed to the user. */
     function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {
         var trans = {
@@ -592,7 +641,7 @@
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
-        $.ajax({
+        return $.ajax({
             method: "POST",
             url: url,
             success: successCb,

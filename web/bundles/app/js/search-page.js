@@ -16,7 +16,7 @@
      *      data should be cleared and redownloaded.
      */
     var userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey = 'Fight for love!!';
+    var dataKey = 'Fight for love!! <3';
     var eif = ECO_INT_FMWK;
     var _util = eif.util;
     var gridOptions = getDefaultGridOptions();
