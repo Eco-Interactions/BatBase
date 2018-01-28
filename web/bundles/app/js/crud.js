@@ -633,6 +633,7 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
+        moveFieldsIntoVolatileContainer('Publication', 'sub');
         initComboboxes("publication");
         $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
@@ -642,7 +643,6 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadPubTypeFields(typeId) {
-        resetVolatileRows('Publication');      
         $('#Publication_Rows').append(getTypeFieldRows('publication', typeId));
         initComboboxes("publication");
     }
@@ -698,6 +698,7 @@ $(document).ready(function(){
         if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', formLvl); }
         $('#CitationTitle_row').after(initSubForm(
             "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
+        moveFieldsIntoVolatileContainer('Citation', 'sub');
         initComboboxes("citation");
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
@@ -709,7 +710,6 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadCitTypeFields(typeId) {
-        resetVolatileRows('Citation');      
         $('#Citation_Rows').append(getTypeFieldRows('citation', typeId));
         initComboboxes('citation');
     }
@@ -1883,8 +1883,8 @@ $(document).ready(function(){
                 "suggested": [],
                 "optional": [],
                 "order": {
-                    "sug": ["Title", "Publication Type"],
-                    "opt": [] },
+                    "sug": ["Title", "PublicationType"],
+                    "opt": ["Title", "PublicationType"] },
                 "types": {
                     "Book": {
                         "required": ["Authors", "Publisher", "Year"],
@@ -1995,12 +1995,30 @@ $(document).ready(function(){
         return fields[coreEntityMap[entity]];
     }    
     /** ----- Shared Publication and Citation form helpers ------------------ */
+    /** Forms with optional fields are wrapped in a container. */
+    function moveFieldsIntoVolatileContainer(entity, formLvl) {                 //console.log('entity = %s, formLvl = %s, form = %O', entity, formLvl, $('#'+formLvl+'-form')[0])
+        resetVolatileRows(entity, formLvl);
+        $('#'+formLvl+'-form').children().each(moveIntoVolatileCntnr);
+
+        function moveIntoVolatileCntnr(i, elem) {  
+            if (!elem.id.includes('_row')) { return; }          
+            $(elem).appendTo('#'+entity+'_Rows');
+        }
+    }
+    /** Empties or creates the entity-form's field container. */
+    function resetVolatileRows(entity, formLvl) {                               //console.log('reseting rows--------')
+        if ($('#'+entity+'_Rows').length) { return $('#'+entity+'_Rows').empty(); }
+        const rowCntnr = _util.buildElem('div', {
+            id: entity+'_Rows', class: 'flex-row med-form-sub flex-wrap'});  
+        $('#'+formLvl+'-hdr').after(rowCntnr);
+    }
     /**
      * Builds and return the form-field rows for the selected source type.
      * @return {ary} Form-field rows ordered according to the form config.
      */
     function getTypeFieldRows(entity, typeId) {
         setSourceTypeConfg(entity, typeId); 
+        resetVolatileRows(_util.ucfirst(entity), 'sub');      
         return getFormFieldRows(entity, getFormConfg(entity), {}, 'sub');
     }
     /** Sets the type confg for the selected source type in form params. */
@@ -2014,30 +2032,23 @@ $(document).ready(function(){
      * Toggles between displaying all fields for the entity and only showing the 
      * default (required and suggested) fields.
      */
-    function toggleShowAllFields(entity, level) {
+    function toggleShowAllFields(entity, level) {                               console.log('--- Showing all Fields [%s] -------', this.checked);
         fParams.shwAllFields = this.checked;         
         const capsEnt = _util.ucfirst(entity);
         const fConfg = fParams.forms[level].confg;                              //console.log('toggling optional fields. Show? [%s]', fParams.shwAllFields);
-        resetVolatileRows(capsEnt);
+        resetVolatileRows(capsEnt, level);
         $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, {}, level));
         initComboboxes(entity);
-    }
-    /** Empties or creates the entity-form's row container. */
-    function resetVolatileRows(entity) {
-        if ($('#'+entity+'_Rows').length) { return $('#'+entity+'_Rows').empty(); }
-        const rowCntnr = _util.buildElem('div', {
-            id: entity+'_Rows', class: 'flex-row med-form-sub flex-wrap'});  
-        $('#'+entity+'Type_row').after(rowCntnr);
     }
     /**
      * Returns rows for the entity form fields. If the form is a source-type, 
      * the type-entity form config is used. 
      */
-    function getFormFieldRows(entity, fConfg, fVals, formLvl) {
+    function getFormFieldRows(entity, fConfg, fVals, fLvl) {
         const typeConfg = fParams.forms.sub.typeConfg;
-        const fObj = getFieldTypeObj(entity, fConfg, formLvl, typeConfg);
+        const fObj = getFieldTypeObj(entity, fConfg, fLvl, typeConfg);
         const order = getFieldOrder(fConfg, typeConfg);
-        const rows = buildRows(fObj, entity, fVals, formLvl);                   //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, order);
+        const rows = buildRows(fObj, entity, fVals, fLvl);                      //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, order);
         return orderRows(rows, order);
     }
     /**
@@ -2048,29 +2059,35 @@ $(document).ready(function(){
     function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                 //console.log('getFieldTypeObj for [%s] confg = %O', entity, formConfg);
         const allFields = Object.assign(getCoreFieldDefs(entity), fConfg.add);
         const include = getFormFields(fConfg, typeConfg);                               
-        const required = typeConfg ? typeConfg.required : fConfg.required;
+        const required = typeConfg ? typeConfg.required.concat(fConfg.required) 
+            : fConfg.required;
         let obj = { required: required, fields: {} };
         include.forEach(field => obj.fields[field] = allFields[field]);         
         return obj;
     }   
     /**
      * Returns an array of fields to include in the form. If the form is a 
-     * source-type, the type-entity form config is used. 
+     * source-type, the type-entity form config is combined with the main-entity's.
+     * Eg, Publication-type confgs are combined with publication's form confg.
      */
     function getFormFields(fConfg, typeConfg) {
         const shwAll = fParams.shwAllFields;
-        const typeFields = typeConfg && shwAll ? 
-            typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
-            typeConfg ? typeConfg.required.concat(typeConfg.suggested) : false; 
-        return typeFields !== false ? typeFields : shwAll ? 
+        const dfault = shwAll ? 
             fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
             fConfg.required.concat(fConfg.suggested); 
+        const typeFields = typeConfg && shwAll ? 
+            typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
+            typeConfg ? typeConfg.required.concat(typeConfg.suggested) : []; 
+        return dfault.concat(typeFields);
     }
     /** Returns the order the form fields should be displayed. */
     function getFieldOrder(fConfg, typeConfg) {
         const shwAll = fParams.shwAllFields;
-        const order = typeConfg && shwAll ? typeConfg.order.opt : typeConfg ? 
-            typeConfg.order.sug : shwAll ? fConfg.order.opt : fConfg.order.sug; 
+        const order = typeConfg && shwAll ? 
+            fConfg.order.opt.concat(typeConfg.order.opt) : 
+            typeConfg ? 
+                fConfg.order.sug.concat(typeConfg.order.sug) : 
+                shwAll ? fConfg.order.opt : fConfg.order.sug; 
         return order.map(field => field);
     }
     /** @return {ary} Rows for each field in the entity field obj. */
