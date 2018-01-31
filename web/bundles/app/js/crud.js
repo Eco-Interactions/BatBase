@@ -245,11 +245,13 @@ $(document).ready(function(){
      * > action - eg, Create, Edit.
      * > confg - The form config object used during form building.
      * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
+     * > fieldConfg - Form fields and types, values entered, and the required fields.
      * > entity - Name of this form's entity.
      * > exitHandler - Form exit handler or noOp.
      * > pSelId - The id of the parent select of the form.
      * > reqElems - All required elements in the form.
      * > selElems - Contains all selElems until they are initialized with selectize.
+     * > vals - Stores all values entered in the form's fields.
      */
     function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. fP = %O, arguments = %O", fParams, arguments)
         fParams.forms[entity] = level;
@@ -257,11 +259,13 @@ $(document).ready(function(){
             action: action,
             confg: formConfg,
             typeConfg: false,
+            fieldConfg: { fields: {}, vals: {}, required: [] },
             entity: entity,
             exitHandler: getFormExitHandler(formConfg, action),
             pSelId: pSel,
             reqElems: [],
             selElems: [], 
+            vals: {}
         };                                                                      //console.log("formLvl params = %O", fParams.forms[level]);
     }
     /**
@@ -297,7 +301,7 @@ $(document).ready(function(){
         };
         if (entity in hndlrs) { hndlrs[entity]()  
         } else {
-            initComboboxes(entity); 
+            initComboboxes(entity, 'top'); 
             $('#top-cancel').unbind('click').click(exitFormPopup);
         }
     }
@@ -434,7 +438,7 @@ $(document).ready(function(){
     }
     function fillFields(rcrd, fields, excluded) {
         var fieldHndlrs = {
-            "text": setTextField, "textArea": setTextArea, "select": setSelect, 
+            "text": hndlText, "textArea": setTextArea, "select": hndlSelect, 
             "fullTextArea": setTextArea, "multiSelect": Function.prototype,
             "tags": setTagField, "cntry": setCntry, "source": addSource, 
             "taxon": addTaxon
@@ -449,15 +453,15 @@ $(document).ready(function(){
         var prop = _util.lcfirst(elemId);
         fieldHndlr(elemId, prop, rcrd);
     }
-    function setTextField(fieldId, prop, rcrd) {                                //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-        $('#'+fieldId+'_row input[type="text"]').val(rcrd[prop]);
+    function hndlText(fieldId, prop, rcrd) {                                    //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+        setTextField(fieldId, prop, rcrd[prop]);
     }
     function setTextArea(fieldId, prop, rcrd) {
         $('#'+fieldId+'_row textarea').val(rcrd[prop]);   
     }
-    function setSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    function hndlSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
         var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
-        $('#'+fieldId+'-sel')[0].selectize.addItem(id);        
+        setSelect(id, fieldId);      
     }
     function setTagField(fieldId, prop, rcrd) {                                 //console.log("setTagField. rcrd = %O", rcrd)
         var tags = rcrd[prop] || rcrd.tags;
@@ -543,7 +547,7 @@ $(document).ready(function(){
      * required field elems to the form's config object.  
      */
     function finishIntFormBuild() {
-        initComboboxes("interaction");
+        initComboboxes('interaction', 'top');
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
         $('#Note_row label')[0].innerText += 's';
@@ -552,11 +556,11 @@ $(document).ready(function(){
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
     function addTaxonFocusListener(role) {
-        var func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
+        const func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
         $(document).on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
     }
     function addReqElemsToConfg() {
-        var reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
+        const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
             "InteractionType"];
         fParams.forms.top.reqElems = reqFields.map(function(field) {
             return $('#'+field+'-sel')[0];
@@ -565,21 +569,22 @@ $(document).ready(function(){
 /*-------------- Form Builders -------------------------------------------------------------------*/
     /** Builds and returns all interaction-form elements. */
     function buildIntFormFields(action) {
-        var fieldBuilders = [ buildPubFieldRow, buildCitFieldRow, buildCountryRegionFieldRow,
-            buildLocationFieldRow, initSubjectField, initObjectField, buildIntTypeField,
+        const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
+            buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
             buildIntTagField, buildIntNoteField ]; 
-        var fields = fieldBuilders.map(buildField);
+        const fields = builders.map(buildField);
         return fields.concat(buildFormBttns("Interaction", "top", action));
     }
     function buildField(builder) {
-        var field = builder();                                                  //console.log("field = %O", field);
-        var fieldType = field.children[1].children[1].nodeName; 
-        if (fieldType === "SELECT") { addSelElemToInitAry(field); }
+        const field = builder();                                                //console.log("field = %O", field);
+        ifSelectAddToInitAry(field);
         return field;
     }
     /** Select elems with be initialized into multi-functional comboboxes. */
-    function addSelElemToInitAry(field) {
-        var fieldName = field.id.split('_row')[0];
+    function ifSelectAddToInitAry(field) {
+        const fieldType = field.children[1].children[1].nodeName; 
+        if (fieldType !== "SELECT") { return; }  
+        const fieldName = field.id.split('_row')[0];
         fParams.forms.top.selElems.push(fieldName);
     }
     /*-------------- Publication ---------------------------------------------*/
@@ -634,7 +639,7 @@ $(document).ready(function(){
         $('#CitationTitle_row').after(initSubForm(
             "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
         moveFieldsIntoVolatileContainer('Publication', 'sub');
-        initComboboxes("publication");
+        initComboboxes('publication', 'sub');
         $('#Title_row input').focus();
         return { "value": "", "text": "Creating Publication..." };
     }
@@ -643,14 +648,15 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadPubTypeFields(typeId) {
+        fParams.forms.sub.fieldConfg.vals.PublicationType.val = typeId;
         $('#Publication_Rows').append(getTypeFieldRows('publication', typeId));
-        initComboboxes("publication");
+        initComboboxes('publication', 'sub');
     }
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
     function buildCitFieldRow() {
         var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
-        return buildFormRow("Citation Title", selElem, "top", true);
+        return buildFormRow('CitationTitle', selElem, 'top', true);
     }
     /** Fills the citation combobox with all citations for the selected publication. */
     function fillCitationField(pubId) {                                         //console.log("initCitSelect for publication = ", pubId);
@@ -699,7 +705,7 @@ $(document).ready(function(){
         $('#CitationTitle_row').after(initSubForm(
             "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
         moveFieldsIntoVolatileContainer('Citation', 'sub');
-        initComboboxes("citation");
+        initComboboxes('citation', 'sub');
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
         $('#Abstract_row textarea').focus();
@@ -710,8 +716,9 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadCitTypeFields(typeId) {
+        fParams.forms.sub.fieldConfg.vals.CitationType.val = typeId;
         $('#Citation_Rows').append(getTypeFieldRows('citation', typeId));
-        initComboboxes('citation');
+        initComboboxes('citation', 'sub');
     }
     /**
      * If the parent publication has existing contributors, add them to the new 
@@ -741,7 +748,7 @@ $(document).ready(function(){
     }
     /*-------------- Country/Region ------------------------------------------*/
     /** Returns a form row with a combobox populated with all countries and regions. */
-    function buildCountryRegionFieldRow() {  
+    function buildCntryRegFieldRow() {  
         var opts = getCntryRegOpts();                                           //console.log("buildingCountryFieldRow. ");
         var selElem = _util.buildSelectElem(
             opts, {id: 'Country-Region-sel', class: 'lrg-field'});
@@ -767,7 +774,7 @@ $(document).ready(function(){
      * Returns a form row with a select dropdown populated with all available 
      * locations.
      */
-    function buildLocationFieldRow() {                                          //console.log("buildingLocationFieldRow. ");
+    function buildLocFieldRow() {                                               //console.log("buildingLocationFieldRow. ");
         var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
         var selElem = _util.buildSelectElem(
             locOpts, {id: "Location-sel", class: "lrg-field"});
@@ -845,7 +852,7 @@ $(document).ready(function(){
         }; 
         $('#Location_row').after(initSubForm(
             "location", formLvl, "flex-row med-form", vals, "#Location-sel"));
-        initComboboxes("location");
+        initComboboxes('location', 'sub');
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
         clearCombobox('#Location-sel'); 
@@ -857,12 +864,12 @@ $(document).ready(function(){
     }
     /*-------------- Taxon ---------------------------------------------------*/
     /** Builds the Subject combobox that will trigger the select form @initSubjectSelect. */
-    function initSubjectField() {
+    function initSubjField() {
         var subjElem = _util.buildSelectElem([], {id: "Subject-sel", class: "lrg-field"});
         return buildFormRow("Subject", subjElem, "top", true);
     }
     /** Builds the Object combobox that will trigger the select form @initObjectSelect. */
-    function initObjectField() {
+    function initObjField() {
         var objElem =  _util.buildSelectElem([], {id: "Object-sel", class: "lrg-field"});
         return buildFormRow("Object", objElem, "top", true);
     }
@@ -878,7 +885,7 @@ $(document).ready(function(){
         setTaxonParams('Subject', 2);
         $('#Subject_row').append(initSubForm(
             "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
-        initComboboxes("subject");           
+        initComboboxes('subject', 'sub');           
         finishTaxonSelectUi("Subject");  
         enableCombobox('#Object-sel', false);
     }
@@ -897,7 +904,7 @@ $(document).ready(function(){
         setTaxonParams('Object', id);
         $('#Object_row').append(initSubForm(
             "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
-        initComboboxes("object");             
+        initComboboxes('object', 'sub');             
         $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
     }
@@ -1021,7 +1028,7 @@ $(document).ready(function(){
         setTaxonParams('Object', val);
         fParams.taxon.objectRealm = val;
         buildAndAppendRealmElems(realms[val]);
-        initComboboxes(realms[val]);  
+        initComboboxes(realms[val], 'sub');  
         finishTaxonSelectUi("Object");          
     }
     /**
@@ -1460,15 +1467,15 @@ $(document).ready(function(){
         var opts = getOptsFromStoredData('intTypeNames');
         var selElem = _util.buildSelectElem(
             opts, {id: 'InteractionType-sel', class: 'lrg-field'});
-        return buildFormRow('Interaction Type', selElem, 'top', true);
+        return buildFormRow('InteractionType', selElem, 'top', true);
     }
     function focusIntTypePin() {
         if (!fParams.editing) { $('#InteractionType_pin').focus(); }
     }
     function buildIntTagField() {
-        var elem = buildTagsElem('interaction', 'Interaction Tags', 'top');
+        var elem = buildTagsElem('interaction', 'InteractionTags', 'top');
         elem.className = 'lrg-field';
-        return buildFormRow("Interaction Tags", elem, "top", false);
+        return buildFormRow('InteractionTags', elem, 'top', false);
     }
     function buildIntNoteField() {
         var txtElem = buildLongTextArea('interaction', 'Note', 'top');
@@ -1600,7 +1607,7 @@ $(document).ready(function(){
      * Inits 'selectize' for each select elem in the form's 'selElems' array
      * according to the 'selMap' config. Empties array after intializing.
      */
-    function initComboboxes(entity, formLvl) {                                  //console.log("initComboboxes. [%s]", entity);
+    function initComboboxes(entity, formLvl) {                                  //console.log("initComboboxes. [%s] fields = %O", entity, fParams.forms[formLvl].selElems);
         var formLvl = formLvl || fParams.forms[entity];  
         var selMap = getSelConfgObjs();  
         fParams.forms[formLvl].selElems.forEach(selectizeElem);
@@ -1704,9 +1711,8 @@ $(document).ready(function(){
      * > required - Required fields for the entity.
      * > suggested - Suggested fields for the entity.
      *   NOTE: The required and suggested fields will be the default shown in form. 
-     * > optional - Additional fields for the entity.
-     * > order - Order of the fields in the form. This is matched to the field elems' 
-     *   id, which has no spaces.
+     * > optional - All remaining available fields for the entity.
+     * > order - Order to display the fields in the form. 
      * > exitHandler - optional Obj with handlers for exiting create/edit forms.
      */
     function getFormConfg(entity) {
@@ -1722,13 +1728,13 @@ $(document).ready(function(){
                     "opt": false },
             },
             "author": { 
-                "add": { "First Name": "text", "Middle Name": "text", 
-                    "Last Name": "text", "Suffix": "text"}, 
-                "exclude": ["Display Name", "Description", "Year", "Doi", 
+                "add": { "FirstName": "text", "MiddleName": "text", 
+                    "LastName": "text", "Suffix": "text"}, 
+                "exclude": ["DisplayName", "Description", "Year", "Doi", 
                     "Authors", "Tags"],
-                "required": ["Last Name"], 
-                "suggested": ["First Name", "Middle Name"],
-                "optional": ["Suffix", "Link Url", "Link Display"],
+                "required": ["LastName"], 
+                "suggested": ["FirstName", "MiddleName"],
+                "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
                 "order": {
                     "sug": ["FirstName", "MiddleName", "LastName"],
                     "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
@@ -1746,22 +1752,20 @@ $(document).ready(function(){
             },
             'citation': {
                 'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
-                    'Issue': 'text', 'Pages': 'text', 'Citation Type': 'select', 
-                    'Citation Text': 'fullTextArea'},
-                'exclude': ['Display Name', 'Description', 'Tags'], 
-                'required': ['Title', 'Citation Type'],  
-                'suggested': [], //"Citation Text", 'Abstract'
+                    'Issue': 'text', 'Pages': 'text', 'CitationType': 'select', 
+                    'CitationText': 'fullTextArea'},
+                'exclude': ['DisplayName', 'Description', 'Tags'], 
+                'required': ['Title', 'CitationType'],  
+                'suggested': [], 
                 'optional': ['Abstract'],
                 'order': {
                     'sug': ['Title', 'CitationType'], 
-                    'opt': ['Abstract', 'Title', 'CitationType']},  //"CitationText"
-                // "order": ["CitationText", "Abstract", "Title", "CitationType", "Year", "Volume", 
-                //     "Issue", "Pages", "LinkUrl", "LinkDisplay", "Doi", "Authors" ], 
+                    'opt': ['Abstract', 'Title', 'CitationType']},  
                 'types': {
                     'Article': {
                         'required': ['Authors', 'Year'],
                         'suggested': ['Issue', 'Pages', 'Volume'],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
                             'opt': ['Year', 'Pages', 'Volume', 'Issue', 
@@ -1770,7 +1774,7 @@ $(document).ready(function(){
                     'Book': {
                         'required': ['Authors'],
                         'suggested': [],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Authors'],
                             'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
@@ -1778,7 +1782,7 @@ $(document).ready(function(){
                     'Chapter': {
                         'required': ['Authors', 'Pages'],
                         'suggested': [],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Pages', 'Authors'],
                             'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
@@ -1787,7 +1791,7 @@ $(document).ready(function(){
                     'Museum record': {
                         'required': ['Authors', 'Year'],
                         'suggested': ['Issue', 'Pages', 'Volume'],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
                             'opt': ['Year', 'Pages', 'Volume', 'Issue', 
@@ -1796,16 +1800,25 @@ $(document).ready(function(){
                     'Other': {
                         'required': ['Authors', 'Year'],
                         'suggested': ['Issue', 'Pages', 'Volume'],
-                        'optional': ['Abstract', 'Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
-                            'opt': ['Abstract', 'Year', 'Pages', 'Volume', 'Issue', 
+                            'opt': ['Pages', 'Volume', 'Issue', 
                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Page range': {
+                        'required': ['Authors', 'Pages'],
+                        'suggested': [],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
+                        'order': {
+                            'sug': ['Pages', 'Authors'],
+                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
+                                'Authors']},
                     },
                     'Report': {
                         'required': ['Authors'],
                         'suggested': [],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Authors'],
                             'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
@@ -1813,7 +1826,7 @@ $(document).ready(function(){
                     'Symposium proceeding': {
                         'required': ['Authors', 'Pages'],
                         'suggested': [],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Pages', "Authors"],
                             'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
@@ -1822,7 +1835,7 @@ $(document).ready(function(){
                     'Thesis/Ph. D. Dissertation': {
                         'required': ['Authors'],
                         'suggested': [],
-                        'optional': ['Doi', 'Link Display', 'Link Url'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Authors'],
                             'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
@@ -1834,9 +1847,9 @@ $(document).ready(function(){
             "interaction": {
                 "add": {},  
                 "exclude": [],
-                "required": ["Interaction Type"],
-                "suggested": ["Interaction Tags", "Note"],
-                "optional": ["InteractionTags", "Note"],
+                "required": ["InteractionType"],
+                "suggested": ["InteractionTags", "Note"],
+                "optional": [],
                 "order": {
                     "sug": ["InteractionType","InteractionTags", "Note"],
                     "opt": false },
@@ -1846,8 +1859,8 @@ $(document).ready(function(){
                 "add": {},  
                 "exclude": [], 
                 "required": ["Display Name", "Country"],
-                "suggested": ["Description", "Habitat Type"],
-                "optional": ["Elevation", "Elevation Max", "Latitude", "Longitude"],
+                "suggested": ["Description", "HabitatType"],
+                "optional": ["Elevation", "ElevationMax", "Latitude", "Longitude"],
                 "order": {
                     "sug": ["DisplayName", "Description", "Country", "HabitatType"],
                     "opt": ["DisplayName", "Description", "Country", "HabitatType", 
@@ -1862,7 +1875,7 @@ $(document).ready(function(){
                 "optional": [],
                 "order": {
                     "sug": ["Realm"],
-                    "opt": false }, //use this to trigger the removal of the 'show additional fields'
+                    "opt": false }, 
                 "exitHandler": { create: enableSubjField }
             },
             "plant": {
@@ -1876,10 +1889,10 @@ $(document).ready(function(){
                     "opt": false},
             },
             "publication": {
-                "add": { "Title" : "text", "Publication Type": "select", 
+                "add": { "Title" : "text", "PublicationType": "select", 
                     "Publisher": "select" },  
-                "exclude": ["Display Name", "Tags"],
-                "required": ["Publication Type", "Title"],
+                "exclude": ["DisplayName", "Tags"],
+                "required": ["PublicationType", "Title"],
                 "suggested": [],
                 "optional": [],
                 "order": {
@@ -1889,7 +1902,7 @@ $(document).ready(function(){
                     "Book": {
                         "required": ["Authors", "Publisher", "Year"],
                         "suggested": [],
-                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order": {
                             "sug": ["Year", "Publisher", "Authors"],
                             "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
@@ -1898,7 +1911,7 @@ $(document).ready(function(){
                     "Journal": {
                         "required": [],
                         "suggested": [],
-                        "optional": ["Description", "Link Display", "Link Url", "Doi",
+                        "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi",
                             "Publisher", "Authors" ],
                         "order": {
                             "sug": [],
@@ -1908,7 +1921,7 @@ $(document).ready(function(){
                     "Other": {
                         "required": [],
                         "suggested": ["Authors", "Publisher", "Year"],
-                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order":  {
                             "sug": ["Year", "Publisher", "Authors"],
                             "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
@@ -1917,7 +1930,7 @@ $(document).ready(function(){
                     "Thesis/Ph.D. Dissertation": {
                         "required": ["Authors", "Publisher", "Year"],
                         "suggested": [],
-                        "optional": ["Description", "Link Display", "Link Url", "Doi"],
+                        "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order":  {
                             "sug": ["Year", "Publisher", "Authors"],
                             "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
@@ -1928,9 +1941,9 @@ $(document).ready(function(){
             "publisher": { 
                 "add": { "City": "text", "Country": "text"}, 
                 "exclude": ["Year", "Doi", "Authors", "Tags"],
-                "required": ["Display Name", "City", "Country"],
+                "required": ["DisplayName", "City", "Country"],
                 "suggested": [],
-                "optional": ["Description", "Link Url", "Link Display"],
+                "optional": ["Description", "LinkUrl", "LinkDisplay"],
                 "order": {
                     "sug": ["DisplayName", "City", "Country"],
                     "opt": ["DisplayName", "City", "Country", "Description", 
@@ -1950,7 +1963,7 @@ $(document).ready(function(){
             "taxon": {
                 "add": {},  
                 "exclude": [],
-                "required": ["Display Name"],
+                "required": ["DisplayName"],
                 "suggested": [],
                 "optional": [],
                 "order": {
@@ -1975,22 +1988,22 @@ $(document).ready(function(){
             "interaction": "interaction","bat": "taxonLvls",          
         };
         const fields = {
-            "location": { "Display Name": "text", "Description": "textArea", 
-                "Elevation": "text", "Elevation Max": "text", "Longitude": "text", 
-                "Latitude": "text", "Habitat Type": "select", "Country": "select", 
+            "location": { "DisplayName": "text", "Description": "textArea", 
+                "Elevation": "text", "ElevationMax": "text", "Longitude": "text", 
+                "Latitude": "text", "HabitatType": "select", "Country": "select", 
             }, 
-            "interaction": { "Interaction Type": "select", "Note": "fullTextArea", 
-                "Interaction Tags": "tags"
+            "interaction": { "InteractionType": "select", "Note": "fullTextArea", 
+                "InteractionTags": "tags"
             },
-            "source": { "Display Name": "text", "Description": "textArea", 
-                "Year": "text", "Doi": "text", "Link Display": "text", 
-                "Link Url": "text", "Authors": "multiSelect"
+            "source": { "DisplayName": "text", "Description": "textArea", 
+                "Year": "text", "Doi": "text", "LinkDisplay": "text", 
+                "LinkUrl": "text", "Authors": "multiSelect"
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
                 "Genus": "select", "Species": "select"
             },
-            "taxon": { "Display Name": "text" }
+            "taxon": { "DisplayName": "text" }
         };
         return fields[coreEntityMap[entity]];
     }    
@@ -2017,9 +2030,10 @@ $(document).ready(function(){
      * @return {ary} Form-field rows ordered according to the form config.
      */
     function getTypeFieldRows(entity, typeId) {
+        const fVals = getCurrentFormFieldVals('sub');
         setSourceTypeConfg(entity, typeId); 
         resetVolatileRows(_util.ucfirst(entity), 'sub');      
-        return getFormFieldRows(entity, getFormConfg(entity), {}, 'sub');
+        return getFormFieldRows(entity, getFormConfg(entity), fVals, 'sub');
     }
     /** Sets the type confg for the selected source type in form params. */
     function setSourceTypeConfg(entity, id) {
@@ -2032,20 +2046,22 @@ $(document).ready(function(){
      * Toggles between displaying all fields for the entity and only showing the 
      * default (required and suggested) fields.
      */
-    function toggleShowAllFields(entity, level) {                               console.log('--- Showing all Fields [%s] -------', this.checked);
+    function toggleShowAllFields(entity, fLvl) {                                //console.log('--- Showing all Fields [%s] -------', this.checked);
         fParams.shwAllFields = this.checked;         
+        const fVals = getCurrentFormFieldVals(fLvl);
         const capsEnt = _util.ucfirst(entity);
-        const fConfg = fParams.forms[level].confg;                              //console.log('toggling optional fields. Show? [%s]', fParams.shwAllFields);
-        resetVolatileRows(capsEnt, level);
-        $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, {}, level));
-        initComboboxes(entity);
+        const fConfg = fParams.forms[fLvl].confg;                               //console.log('toggling optional fields. Show? [%s]', fParams.shwAllFields);
+        resetVolatileRows(capsEnt, fLvl);
+        $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
+        initComboboxes(entity, fLvl);
+        fillFormFields(fLvl);
     }
     /**
      * Returns rows for the entity form fields. If the form is a source-type, 
      * the type-entity form config is used. 
      */
     function getFormFieldRows(entity, fConfg, fVals, fLvl) {
-        const typeConfg = fParams.forms.sub.typeConfg;
+        const typeConfg = fParams.forms[fLvl].typeConfg;
         const fObj = getFieldTypeObj(entity, fConfg, fLvl, typeConfg);
         const order = getFieldOrder(fConfg, typeConfg);
         const rows = buildRows(fObj, entity, fVals, fLvl);                      //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, order);
@@ -2056,14 +2072,14 @@ $(document).ready(function(){
      * @return {obj} .fields   Obj - k: fieldName, v: fieldType.
      *               .required Ary of required fields
      */
-    function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                 //console.log('getFieldTypeObj for [%s] confg = %O', entity, formConfg);
+    function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                 //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
         const allFields = Object.assign(getCoreFieldDefs(entity), fConfg.add);
-        const include = getFormFields(fConfg, typeConfg);                               
-        const required = typeConfg ? typeConfg.required.concat(fConfg.required) 
-            : fConfg.required;
-        let obj = { required: required, fields: {} };
-        include.forEach(field => obj.fields[field] = allFields[field]);         
-        return obj;
+        const include = getFormFields(fConfg, typeConfg);       
+        const fieldConfg = fParams.forms[fLvl].fieldConfg;                         
+        fieldConfg.required = typeConfg ? 
+            typeConfg.required.concat(fConfg.required) : fConfg.required;
+        include.forEach(field => fieldConfg.fields[field] = allFields[field]);    
+        return fieldConfg;
     }   
     /**
      * Returns an array of fields to include in the form. If the form is a 
@@ -2099,22 +2115,34 @@ $(document).ready(function(){
         return rows;
     }
     /**
+     * Refactor to use camel field name here.
      * @return {div} Form field row with required-state and value (if passed) set.  
      */
-    function buildRow(field, fieldsObj, entity, fVals, formLvl) {               //console.log("buildRow. field [%s], formLvl [%s], fieldsObj = %O", field, formLvl, fieldsObj);
-        const buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
-            "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
-            "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
-        const input = buildFieldType[fieldsObj.fields[field]](entity, field, formLvl);  
-        const isReq = isFieldRequried(field, formLvl, fieldsObj.required);    
-        fillFieldIfValuePassed(field);
-        return buildFormRow(_util.ucfirst(field), input, formLvl, isReq, "");
-        
-        /** Sets the value for the  field if it is in the passed 'fVals' obj. */
-        function fillFieldIfValuePassed(field) {
+    function buildRow(field, fieldsObj, entity, fVals, fLvl) {                  console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+        const input = buildFieldInput(fieldsObj.fields[field], entity, field, fLvl);
+        const isReq = isFieldRequried(field, fLvl, fieldsObj.required);    
+        addFieldToFormFieldObj();
+        fillFieldIfValuePassed();
+        $(input).change(storeFieldValue.bind(null, input, field, fLvl, null));
+        return buildFormRow(_util.ucfirst(field), input, fLvl, isReq, "");
+        /** Adds the field, and it's type and value, to the form's field obj.  */
+        function addFieldToFormFieldObj() {
+            const fieldName = field.split(' ').join(''); // START:: Remove the space from field names wherever possible
+            fParams.forms[fLvl].fieldConfg.vals[fieldName] = {
+                val: fVals[field], type: fieldsObj.fields[field]
+            };  console.log('form vals = %O', fParams.forms[fLvl].fieldConfg.vals)
+        }
+        /** Sets the value for the field if it is in the passed 'fVals' obj. */
+        function fillFieldIfValuePassed() {
             if (field in fVals) { $(input).val(fVals[field]); }
         }
     } /* End buildRow */ 
+    function buildFieldInput(fieldType, entity, field, fLvl) {
+        const buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
+            "select": buildSelectCombo, "multiSelect": buildMultiSelectElem,  
+            "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
+        return buildFieldType[fieldType](entity, field, fLvl);  
+    }
     function getFieldClass(formLvl, fieldType) {  
         const classes = { "top": "lrg-field", "sub": "med-field", "sub2": "med-field" };
         return fieldType === "long" ? (formLvl === "top" ? "xlrg-field top" :
@@ -2123,6 +2151,11 @@ $(document).ready(function(){
     /** Returns true if field is in the required fields array. */
     function isFieldRequried(field, formLvl, reqFields) {                       //console.log('isFieldRequried. formLvl = [%s], fParams = %O', formLvl, fParams);
         return reqFields.indexOf(field) !== -1;
+    }
+    /** Adds field value to the form's confg object. */
+    function storeFieldValue(elem, fieldName, fLvl, value) {                    //console.log('store fields value. args = %O', arguments);
+        const val = value || $(elem).val();                                     //console.log("val = %s", val);
+        fParams.forms[fLvl].fieldConfg.vals[fieldName].val = val;
     }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -2151,11 +2184,10 @@ $(document).ready(function(){
      * init the 'selectize' combobox. 
      */
     function buildSelectCombo(entity, field, formLvl, cnt) {                    //console.log("buildSelectCombo [%s] field %s, formLvl [%s], cnt [%s]", entity, field, formLvl, cnt);                            
-        var fieldName = field.split(" ").join("");
-        var opts = getSelectOpts(fieldName);                                    //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
-        var fieldId = cnt ? fieldName+"-sel"+cnt : fieldName+"-sel";
-        var sel = _util.buildSelectElem(opts, { id: fieldId , class: getFieldClass(formLvl)});
-        fParams.forms[formLvl].selElems.push(fieldName);
+        const opts = getSelectOpts(field);                                      //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
+        const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
+        const sel = _util.buildSelectElem(opts, { id: fieldId , class: getFieldClass(formLvl)});
+        fParams.forms[formLvl].selElems.push(field);
         return sel;
     }
     /**
@@ -2176,11 +2208,13 @@ $(document).ready(function(){
      * to allow multiple selections. A data property is added for use form submission.
      */
     function buildTagsElem(entity, field, formLvl) {
-        var tagSel = buildSelectCombo(entity, field, formLvl);
+        const opts = getSelectOpts(field);                                      //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
+        const tagSel = _util.buildSelectElem(opts, { id: field + '-sel', 
+            class: getFieldClass(formLvl)});
         $(tagSel).data("inputType", "tags");
         return tagSel;
     }
-    /* ---------- Option Builders ---------------------------------------------*/
+    /* ---------- Option Builders --------------------------------------------*/
     /** Returns and array of options for the passed field type. */
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
@@ -2256,13 +2290,14 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
      */
-    function buildFormRow(fieldName, input, formLvl, isReq, rowClss) {
-        var field = fieldName.split(' ').join('');
-        var rowDiv = _util.buildElem("div", { class: getRowClasses(), id: field + "_row"});
-        var errorDiv = _util.buildElem("div", { id: field+"_errs"}); 
-        var fieldCntnr = _util.buildElem("div", { class: "field-row flex-row"});
-        var label = _util.buildElem("label", {text: _util.ucfirst(fieldName)});
-        var pin = formLvl === "top" ? getPinElem(field) : null;     
+    function buildFormRow(field, input, formLvl, isReq, rowClss) {
+        const fieldName = field.replace(/([A-Z])/g, ' $1');
+        const rowDiv = _util.buildElem('div', { class: getRowClasses(), 
+            id: field + '_row'});
+        const errorDiv = _util.buildElem('div', { id: field+'_errs'}); 
+        const fieldCntnr = _util.buildElem('div', { class: 'field-row flex-row'});
+        const label = _util.buildElem('label', {text: _util.ucfirst(fieldName)});
+        const pin = formLvl === 'top' ? getPinElem(field) : null;     
         if (isReq) { handleRequiredField(label, input, formLvl); } 
         $(fieldCntnr).append([label, input, pin]);
         $(rowDiv).append([errorDiv, fieldCntnr]);
@@ -2386,6 +2421,7 @@ $(document).ready(function(){
             type: 'checkbox', value: 'Show all fields' }) 
         const lbl = _util.buildElem('label', { for: level+'-all-fields', 
             text: 'Show additional fields.' });
+        if (fParams.shwAllFields) { chckBox.checked = true; }
         $(chckBox).change(toggleShowAllFields.bind(chckBox, _util.lcfirst(entity), level));
         $(cntnr).append([chckBox, lbl]);
         return cntnr;
@@ -2430,6 +2466,40 @@ $(document).ready(function(){
         var formLvls = fParams.formLevels;
         return fParams.forms.top.entity === "interaction" ? 
             intFormLvl : formLvls[formLvls.indexOf(intFormLvl) - 1];
+    }
+/*--------------------------- Misc Form Helpers ------------------------------*/
+/*--------------------------- Fill Form Fields -------------------------------*/
+    /** Returns an object with field names(k) and values(v) of all form fields*/
+    function getCurrentFormFieldVals(fLvl) {
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', vals);
+        const valObj = {};
+        for (let field in vals) {
+            valObj[field] = vals[field].val;
+        }
+        return valObj;
+    }
+    /** Fills all displayed form fields with any values previously entered. */
+    function fillFormFields(fLvl) {
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('fillFormFields. vals = %O', vals);
+        var fieldHndlrs = {
+            'text': setTextField, 'textArea': setTextArea, 'select': setSelect, 
+            'fullTextArea': setTextArea, 'multiSelect': Function.prototype,
+            'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
+            'taxon': addTaxon
+        };
+        for (let field in vals) {
+            addValueIfFieldShown(field, vals[field], fLvl);
+        }
+        function addValueIfFieldShown(field, fieldObj, fLvl) {
+            if (!field in fParams.forms[fLvl].fieldConfg.fields) { return; }
+            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);
+        }
+    } /* End fillFormFields */
+    function setTextField(val, field, fLvl) {
+        $('#'+field+'_row input[type="text"]').val(val);
+    }
+    function setSelect(val, field, fLvl) {
+        $('#'+field+'-sel')[0].selectize.addItem(val);        
     }
     /*------------------ Form Submission Data-Prep Methods -------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
