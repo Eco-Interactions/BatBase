@@ -266,7 +266,7 @@ $(document).ready(function(){
             reqElems: [],
             selElems: [], 
             vals: {}
-        };                                                                      //console.log("formLvl params = %O", fParams.forms[level]);
+        };                                                                      //console.log("fLvl params = %O", fParams.forms[level]);
     }
     /**
      * Returns the exitHandler stored in the form confg for the current action, or, 
@@ -634,14 +634,14 @@ $(document).ready(function(){
      * returned to be selected in the interaction form's publication combobox.
      */
     function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
-        var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, formLvl); }
+        const fLvl = getSubFormLvl('sub');
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, fLvl); }
         $('#CitationTitle_row').after(initSubForm(
-            "publication", formLvl, "flex-row med-form", {"Title": val}, "#Publication-sel"));
+            'publication', fLvl, 'flex-row med-form', {'Title': val}, '#Publication-sel'));
         moveFieldsIntoVolatileContainer('Publication', 'sub');
         initComboboxes('publication', 'sub');
         $('#Title_row input').focus();
-        return { "value": "", "text": "Creating Publication..." };
+        return { 'value': '', 'text': 'Creating Publication...' };
     }
     /**
      * Loads the deafult fields for the selected Publication Type. Clears any 
@@ -700,16 +700,16 @@ $(document).ready(function(){
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', formLvl); }
+        var fLvl = getSubFormLvl("sub");
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
         $('#CitationTitle_row').after(initSubForm(
-            "citation", formLvl, "flex-row med-form", {"Title": val}, "#CitationTitle-sel"));
+            'citation', fLvl, 'flex-row med-form', {'Title': val}, '#CitationTitle-sel'));
         moveFieldsIntoVolatileContainer('Citation', 'sub');
         initComboboxes('citation', 'sub');
         enableCombobox('#Publication-sel', false);
         addExistingPubContribs();
         $('#Abstract_row textarea').focus();
-        return { "value": "", "text": "Creating Citation..." };
+        return { 'value': '', 'text': 'Creating Citation...' };
     }
     /**
      * Loads the deafult fields for the selected Citation Type. Clears any 
@@ -844,19 +844,19 @@ $(document).ready(function(){
     }
     /** Inits the location form and disables the country/region combobox. */
     function initLocForm(val) {                                                 //console.log("Adding new loc! val = %s", val);
-        let formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Location', null, formLvl); }
-        let vals = {
-            "Display Name": val === "create" ? "" : val, //clears form trigger value
-            "Country": $('#Country-Region-sel').val()
+        const fLvl = getSubFormLvl("sub");
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Location', null, fLvl); }
+        const vals = {
+            'Display Name': val === 'create' ? '' : val, //clears form trigger value
+            'Country': $('#Country-Region-sel').val()
         }; 
         $('#Location_row').after(initSubForm(
-            "location", formLvl, "flex-row med-form", vals, "#Location-sel"));
+            'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
         initComboboxes('location', 'sub');
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
         clearCombobox('#Location-sel'); 
-        return { "value": "", "text": "Creating Location..." };
+        return { 'value': '', 'text': 'Creating Location...' };
     }
     /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
     function enableCountryRegionField() {  
@@ -880,13 +880,13 @@ $(document).ready(function(){
      * are repopulated with related taxa and the 'select' button is enabled.
      */
     function initSubjectSelect() {                                              //console.log("initSubjectSelect val = %O", $('#Subject-sel').val())
-        var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', formLvl); }  
+        const fLvl = getSubFormLvl('sub');
+        if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', fLvl); }  
         setTaxonParams('Subject', 2);
         $('#Subject_row').append(initSubForm(
-            "subject", formLvl, "sml-left sml-form", {}, "#Subject-sel"));
+            'subject', fLvl, 'sml-left sml-form', {}, '#Subject-sel'));
         initComboboxes('subject', 'sub');           
-        finishTaxonSelectUi("Subject");  
+        finishTaxonSelectUi('Subject');  
         enableCombobox('#Object-sel', false);
     }
     /**
@@ -897,13 +897,13 @@ $(document).ready(function(){
      * Note: The selected realm's level combos are built @onRealmSelection. 
      */
     function initObjectSelect() {                                               //console.log("initObjectSelect val = %O", $('#Object-sel').val())
-        var formLvl = getSubFormLvl("sub");
-        if ($('#'+formLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', formLvl); }
-        var id = getSelectedRealm($('#Object-sel').val()) || 
+        const fLvl = getSubFormLvl('sub');
+        if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', fLvl); }
+        const id = getSelectedRealm($('#Object-sel').val()) || 
             !fParams.taxon ? 3 : fParams.taxon.objectRealm || 3;
         setTaxonParams('Object', id);
         $('#Object_row').append(initSubForm(
-            "object", formLvl, "sml-right sml-form", {}, "#Object-sel"));
+            'object', fLvl, 'sml-right sml-form', {}, '#Object-sel'));
         initComboboxes('object', 'sub');             
         $('#Realm-sel')[0].selectize.addItem(fParams.taxon.realmId);
         enableCombobox('#Subject-sel', false);
@@ -918,9 +918,9 @@ $(document).ready(function(){
         return taxon.realm.id + 1;
     }
     /** Note: Taxon fields often fire their focus event twice. */
-    function errIfAnotherSubFormOpen(role, formLvl) {
-        if (fParams.forms[formLvl].entity === _util.lcfirst(role)) {return;}
-        openSubFormErr(role, null, formLvl);
+    function errIfAnotherSubFormOpen(role, fLvl) {
+        if (fParams.forms[fLvl].entity === _util.lcfirst(role)) {return;}
+        openSubFormErr(role, null, fLvl);
     }
     /**
      * When complete, the 'Select Subject' form is removed and the most specific 
@@ -928,8 +928,7 @@ $(document).ready(function(){
      */
     function onSubjectSelection(val) {                                          //console.log("subject selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; }         
-        var formLvl = getSubFormLvl("sub");
-        $('#'+formLvl+'-form').remove();
+        $('#'+getSubFormLvl('sub')+'-form').remove();
         enableObjField();
         if (!fParams.editing) { $('#Subject_pin').focus(); }
     }
@@ -939,8 +938,7 @@ $(document).ready(function(){
      */
     function onObjectSelection(val) {                                           //console.log("object selected = ", val);
         if (val === "" || isNaN(parseInt(val))) { return; } 
-        var formLvl = getSubFormLvl("sub");
-        $('#'+formLvl+'-form').remove();
+        $('#'+getSubFormLvl('sub')+'-form').remove();
         enableSubjField();
         if (!fParams.editing) { $('#Object_pin').focus(); }
     }
@@ -979,8 +977,8 @@ $(document).ready(function(){
      * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
      */
     function finishTaxonSelectUi(role) {
-        var formLvl = getSubFormLvl("sub");
-        var selCntnr = role === "Subject" ? "#"+formLvl+"-form" : "#realm-lvls";
+        const fLvl = getSubFormLvl('sub');
+        const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
         customizeElemsForTaxonSelectForm(role);
         if (!$('#'+role+'-sel').val()) { focusFirstCombobox(selCntnr);   
         } else { onLevelSelection($('#'+role+'-sel').val()); }
@@ -988,29 +986,29 @@ $(document).ready(function(){
     }
     /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
     function initTaxonForm(val) { 
-        var selLvl = this.$control_input[0].id.split("-sel-selectize")[0]; 
-        var formLvl = fParams.taxon.prntSubFormLvl || getSubFormLvl("sub2"); 
-        if (selLvl === "Species" && !$('#Genus-sel').val()) {
-            return formInitErr(selLvl, "noGenus", formLvl);
+        const selLvl = this.$control_input[0].id.split('-sel-selectize')[0]; 
+        const fLvl = fParams.taxon.prntSubFormLvl || getSubFormLvl('sub2'); 
+        if (selLvl === 'Species' && !$('#Genus-sel').val()) {
+            return formInitErr(selLvl, 'noGenus', fLvl);
         }
         enableTxnCombos(false);
-        return showNewTaxonForm(val, selLvl, formLvl);
+        return showNewTaxonForm(val, selLvl, fLvl);
     } 
     function enableTxnCombos(enable) {
         $.each($('#sub-form select'), function(i, sel){
             return enable ? $(sel)[0].selectize.enable() : $(sel)[0].selectize.disable();
         });
     }
-    function showNewTaxonForm(val, selLvl, formLvl) {                           //console.log("showNewTaxonForm. val, selVal, formLvl = %O", arguments)
+    function showNewTaxonForm(val, selLvl, fLvl) {                              //console.log("showNewTaxonForm. val, selVal, fLvl = %O", arguments)
         fParams.taxon.formTaxonLvl = selLvl;
         buildTaxonForm();
-        return { "value": "", "text": "Creating "+selLvl+"..." };
+        return { 'value': '', 'text': 'Creating '+selLvl+'...' };
 
         function buildTaxonForm() {
             $('#'+selLvl+'_row').append(initSubForm(
-                "taxon", formLvl, "sml-form", {"Display Name": val}, "#"+selLvl+"-sel"));
-            enableSubmitBttn("#"+formLvl+"-submit");
-            $('#'+formLvl+'-hdr')[0].innerText += ' '+ selLvl;
+                'taxon', fLvl, 'sml-form', {'Display Name': val}, '#'+selLvl+'-sel'));
+            enableSubmitBttn('#'+fLvl+'-submit');
+            $('#'+fLvl+'-hdr')[0].innerText += ' '+ selLvl;
         }
     }  /* End showTaxonForm */
     function onTaxonCreateFormExit() {
@@ -1036,9 +1034,9 @@ $(document).ready(function(){
      * with the taxa at that level. 
      */
     function buildAndAppendRealmElems(realm) {
-        var formLvl = getSubFormLvl("sub2");
-        var realmElems = _util.buildElem("div", { id: "realm-lvls" });
-        $(realmElems).append(buildSubForm(realm, {}, formLvl, null));
+        const fLvl = getSubFormLvl('sub2');
+        const realmElems = _util.buildElem('div', { id: 'realm-lvls' });
+        $(realmElems).append(buildSubForm(realm, {}, fLvl, null));
         $('#Realm_row').append(realmElems);
     }
     /** Adds a close button. Updates the Header and the submit/cancel buttons. */
@@ -1107,11 +1105,11 @@ $(document).ready(function(){
      * NOTE: Change event fires twice upon selection. Worked around using @captureSecondFire
      */
     function onLevelSelection(val) {                                            //console.log("onLevelSelection. val = [%s] isNaN?", val, isNaN(parseInt(val)))
-        if (val === "" || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
-        var formLvl = getSubFormLvl("sub");
+        if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
+        const fLvl = getSubFormLvl('sub');
         fParams.taxon.recentChange = true;  // Flag used to filter out the second change event
         repopulateCombosWithRelatedTaxa(val);
-        enableSubmitBttn('#'+formLvl+'-submit');             
+        enableSubmitBttn('#'+fLvl+'-submit');             
     }
     function syncTaxonCombos(elem) {                                            //console.log("syncTaxonCombos. elem = %O", elem)
         if (fParams.taxon.recentChange) { return captureSecondFire(); }
@@ -1257,7 +1255,7 @@ $(document).ready(function(){
         $(lvlSel).data('txn', taxon.id).data('lvl', taxon.level.id);
         return [buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
     }
-    function getlvlSel(taxon, formLvl) {
+    function getlvlSel(taxon, fLvl) {
         var opts = getTaxonLvlOpts(taxon); 
         var sel = _util.buildSelectElem(opts, { id: 'txn-lvl' });
         $(sel).data('toSel', taxon.level.id);
@@ -1446,8 +1444,8 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>inputElems)
      */
-    function buildTaxonEditFormRow(field, inputElems, formLvl) {
-        var rowDiv = _util.buildElem('div', { class: formLvl + '-row', id: field + '_row'});
+    function buildTaxonEditFormRow(field, inputElems, fLvl) {
+        var rowDiv = _util.buildElem('div', { class: fLvl + '-row', id: field + '_row'});
         var errorDiv = _util.buildElem('div', { id: field+'_errs'}); 
         var fieldCntnr = _util.buildElem('div', { class: 'field-row flex-row'});
         $(fieldCntnr).append(inputElems);
@@ -1493,14 +1491,14 @@ $(document).ready(function(){
      *     name, aka val, is it's only required field.
      */
     function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
-        var formLvl = getSubFormLvl("sub2");
-        var prntLvl = getNextFormLevel("parent", formLvl);
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, formLvl); }
+        const fLvl = getSubFormLvl('sub2');
+        const prntLvl = getNextFormLevel('parent', fLvl);
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, fLvl); }
         $('#Publisher_row').append(initSubForm(
-            "publisher", formLvl, "sml-right sml-form", {"Display Name": val}, "#Publisher-sel"));
-        disableSubmitBttn("#"+prntLvl+"-submit");
+            'publisher', fLvl, 'sml-right sml-form', {'DisplayName': val}, '#Publisher-sel'));
+        disableSubmitBttn('#'+prntLvl+'-submit');
         $('#DisplayName_row input').focus();
-        return { "value": "", "text": "Creating Publisher..." };
+        return { 'value': '', 'text': 'Creating Publisher...' };
     }
 
     /*-------------- Author --------------------------------------------------*/
@@ -1536,12 +1534,12 @@ $(document).ready(function(){
     function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
         var authCnt = $("#Authors_sel-cntnr").data("cnt");
         var parentSelId = "#Authors-sel"+authCnt;
-        var formLvl = getSubFormLvl("sub2");
-        var prntLvl = getNextFormLevel("parent", formLvl);
-        if ($('#'+formLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, formLvl); }
+        var fLvl = getSubFormLvl("sub2");
+        var prntLvl = getNextFormLevel("parent", fLvl);
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, fLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", formLvl, "sml-left sml-form", {"Last Name": val}, parentSelId));
-        enableSubmitBttn("#"+formLvl+"-submit");
+            "author", fLvl, "sml-left sml-form", {"Last Name": val}, parentSelId));
+        enableSubmitBttn("#"+fLvl+"-submit");
         disableSubmitBttn("#"+prntLvl+"-submit");
         $('#FirstName_row input').focus();
         return { "value": "", "text": "Creating Author..." };
@@ -1588,7 +1586,7 @@ $(document).ready(function(){
      * that allow users to search by typing and, when configured, add new options 
      * not in the list by triggering a sub-form for that entity.
      */
-    function initSelectCombobox(confg, formLvl) {                               //console.log("initSelectCombobox. CONFG = %O. formLvl = ", confg, formLvl)
+    function initSelectCombobox(confg, fLvl) {                                  //console.log("initSelectCombobox. CONFG = %O. fLvl = ", confg, fLvl)
         var options = {
             create: confg.add,
             onChange: confg.change,
@@ -1608,15 +1606,15 @@ $(document).ready(function(){
      * according to the 'selMap' config. Empties array after intializing.
      */
     function initComboboxes(entity, formLvl) {                                  //console.log("initComboboxes. [%s] fields = %O", entity, fParams.forms[formLvl].selElems);
-        var formLvl = formLvl || fParams.forms[entity];  
-        var selMap = getSelConfgObjs();  
-        fParams.forms[formLvl].selElems.forEach(selectizeElem);
-        fParams.forms[formLvl].selElems = [];
+        const fLvl = formLvl || fParams.forms[entity];  
+        const selMap = getSelConfgObjs();  
+        fParams.forms[fLvl].selElems.forEach(selectizeElem);
+        fParams.forms[fLvl].selElems = [];
 
         function selectizeElem(field) {                                         //console.log("Initializing --%s-- select", field);
-            var confg = selMap[field];
+            const confg = selMap[field];
             confg.id = confg.id || '#'+field+'-sel';
-            initSelectCombobox(confg, formLvl);
+            initSelectCombobox(confg, fLvl);
         }
     } /* End initComboboxes */
     function getSelConfgObjs() {
@@ -1680,15 +1678,15 @@ $(document).ready(function(){
      * select elem 'parent' of the sub-form. 
      * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
      */
-    function initSubForm(formEntity, formLvl, formClasses, fVals, selId) {      //console.log('initSubForm called. args = %O', arguments)
+    function initSubForm(formEntity, fLvl, formClasses, fVals, selId) {         //console.log('initSubForm called. args = %O', arguments)
         const subFormContainer = _util.buildElem('div', {
-            id: formLvl+'-form', class: formClasses + ' flex-wrap'}); 
+            id: fLvl+'-form', class: formClasses + ' flex-wrap'}); 
         const hdr = _util.buildElem(
-            'p', { 'text': 'New '+_util.ucfirst(formEntity), 'id': formLvl+'-hdr' });
-        const subForm = buildSubForm(formEntity, fVals, formLvl, selId);
-        subForm.push(buildFormBttns(_util.ucfirst(formEntity), formLvl, 'create'));
+            'p', { 'text': 'New '+_util.ucfirst(formEntity), 'id': fLvl+'-hdr' });
+        const subForm = buildSubForm(formEntity, fVals, fLvl, selId);
+        subForm.push(buildFormBttns(_util.ucfirst(formEntity), fLvl, 'create'));
         $(subFormContainer).append([hdr].concat(subForm));
-        fParams.forms[formLvl].pSelId = selId; 
+        fParams.forms[fLvl].pSelId = selId; 
         enableCombobox(selId, false)
         return subFormContainer;
     }
@@ -2009,9 +2007,9 @@ $(document).ready(function(){
     }    
     /** ----- Shared Publication and Citation form helpers ------------------ */
     /** Forms with optional fields are wrapped in a container. */
-    function moveFieldsIntoVolatileContainer(entity, formLvl) {                 //console.log('entity = %s, formLvl = %s, form = %O', entity, formLvl, $('#'+formLvl+'-form')[0])
-        resetVolatileRows(entity, formLvl);
-        $('#'+formLvl+'-form').children().each(moveIntoVolatileCntnr);
+    function moveFieldsIntoVolatileContainer(entity, fLvl) {                    //console.log('entity = %s, fLvl = %s, form = %O', entity, fLvl, $('#'+fLvl+'-form')[0])
+        resetVolatileRows(entity, fLvl);
+        $('#'+fLvl+'-form').children().each(moveIntoVolatileCntnr);
 
         function moveIntoVolatileCntnr(i, elem) {  
             if (!elem.id.includes('_row')) { return; }          
@@ -2019,11 +2017,11 @@ $(document).ready(function(){
         }
     }
     /** Empties or creates the entity-form's field container. */
-    function resetVolatileRows(entity, formLvl) {                               //console.log('reseting rows--------')
+    function resetVolatileRows(entity, fLvl) {                                  console.log('reseting rows--------')
         if ($('#'+entity+'_Rows').length) { return $('#'+entity+'_Rows').empty(); }
         const rowCntnr = _util.buildElem('div', {
             id: entity+'_Rows', class: 'flex-row med-form-sub flex-wrap'});  
-        $('#'+formLvl+'-hdr').after(rowCntnr);
+        $('#'+fLvl+'-hdr').after(rowCntnr);
     }
     /**
      * Builds and return the form-field rows for the selected source type.
@@ -2046,7 +2044,7 @@ $(document).ready(function(){
      * Toggles between displaying all fields for the entity and only showing the 
      * default (required and suggested) fields.
      */
-    function toggleShowAllFields(entity, fLvl) {                                //console.log('--- Showing all Fields [%s] -------', this.checked);
+    function toggleShowAllFields(entity, fLvl) {                                console.log('--- Showing all Fields [%s] -------', this.checked);
         fParams.shwAllFields = this.checked;         
         const fVals = getCurrentFormFieldVals(fLvl);
         const capsEnt = _util.ucfirst(entity);
@@ -2063,9 +2061,8 @@ $(document).ready(function(){
     function getFormFieldRows(entity, fConfg, fVals, fLvl) {
         const typeConfg = fParams.forms[fLvl].typeConfg;
         const fObj = getFieldTypeObj(entity, fConfg, fLvl, typeConfg);
-        const order = getFieldOrder(fConfg, typeConfg);
-        const rows = buildRows(fObj, entity, fVals, fLvl);                      //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, order);
-        return orderRows(rows, order);
+        const rows = buildRows(fObj, entity, fVals, fLvl);                      console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, fConfg.order);
+        return orderRows(rows, fObj.order);
     }
     /**
      * Returns an obj with the entity's field defs and all required fields.
@@ -2075,9 +2072,11 @@ $(document).ready(function(){
     function getFieldTypeObj(entity, fConfg, fLvl, typeConfg) {                 //console.log('getFieldTypeObj for [%s] @ [%s] level. confg = %O typeConfg = %O', entity, fLvl, fConfg, typeConfg);
         const allFields = Object.assign(getCoreFieldDefs(entity), fConfg.add);
         const include = getFormFields(fConfg, typeConfg);       
-        const fieldConfg = fParams.forms[fLvl].fieldConfg;                         
+        const fieldConfg = fParams.forms[fLvl].fieldConfg;     
+        fieldConfg.order = getFieldOrder(fConfg, typeConfg);                     
         fieldConfg.required = typeConfg ? 
             typeConfg.required.concat(fConfg.required) : fConfg.required;
+        fieldConfg.fields = {};
         include.forEach(field => fieldConfg.fields[field] = allFields[field]);    
         return fieldConfg;
     }   
@@ -2090,7 +2089,7 @@ $(document).ready(function(){
         const shwAll = fParams.shwAllFields;
         const dfault = shwAll ? 
             fConfg.required.concat(fConfg.suggested).concat(fConfg.optional) :
-            fConfg.required.concat(fConfg.suggested); 
+            fConfg.required.concat(fConfg.suggested); console.log
         const typeFields = typeConfg && shwAll ? 
             typeConfg.required.concat(typeConfg.suggested).concat(typeConfg.optional) :
             typeConfg ? typeConfg.required.concat(typeConfg.suggested) : []; 
@@ -2107,10 +2106,10 @@ $(document).ready(function(){
         return order.map(field => field);
     }
     /** @return {ary} Rows for each field in the entity field obj. */
-    function buildRows(fieldObj, entity, fVals, formLvl) {                      console.log("buildRows. formLvl = [%s] fields = [%O]", formLvl, fieldObj);
+    function buildRows(fieldObj, entity, fVals, fLvl) {                         console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
         const rows = [];
         for (let field in fieldObj.fields) {                                    //console.log("  field = ", field);
-            rows.push(buildRow(field, fieldObj, entity, fVals, formLvl));
+            rows.push(buildRow(field, fieldObj, entity, fVals, fLvl));
         }
         return rows;
     }
@@ -2118,7 +2117,7 @@ $(document).ready(function(){
      * Refactor to use camel field name here.
      * @return {div} Form field row with required-state and value (if passed) set.  
      */
-    function buildRow(field, fieldsObj, entity, fVals, fLvl) {                  console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
+    function buildRow(field, fieldsObj, entity, fVals, fLvl) {                  //console.log("buildRow. field [%s], fLvl [%s], fVals = %O, fieldsObj = %O", field, fLvl, fVals, fieldsObj);
         const input = buildFieldInput(fieldsObj.fields[field], entity, field, fLvl);
         const isReq = isFieldRequried(field, fLvl, fieldsObj.required);    
         addFieldToFormFieldObj();
@@ -2143,13 +2142,13 @@ $(document).ready(function(){
             "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
         return buildFieldType[fieldType](entity, field, fLvl);  
     }
-    function getFieldClass(formLvl, fieldType) {  
-        const classes = { "top": "lrg-field", "sub": "med-field", "sub2": "med-field" };
-        return fieldType === "long" ? (formLvl === "top" ? "xlrg-field top" :
-            "xlrg-field") : classes[formLvl];
+    function getFieldClass(fLvl, fieldType) {  
+        const classes = { 'top': 'lrg-field', 'sub': 'med-field', 'sub2': 'med-field' };
+        return fieldType === 'long' ? (fLvl === 'top' ? 'xlrg-field top' :
+            'xlrg-field') : classes[fLvl];
     }
     /** Returns true if field is in the required fields array. */
-    function isFieldRequried(field, formLvl, reqFields) {                       //console.log('isFieldRequried. formLvl = [%s], fParams = %O', formLvl, fParams);
+    function isFieldRequried(field, fLvl, reqFields) {                          //console.log('isFieldRequried. fLvl = [%s], fParams = %O', fLvl, fParams);
         return reqFields.indexOf(field) !== -1;
     }
     /** Adds field value to the form's confg object. */
@@ -2158,24 +2157,24 @@ $(document).ready(function(){
         fParams.forms[fLvl].fieldConfg.vals[fieldName].val = val;
     }
     /** Reorders the rows into the order set in the form config obj. */
-    function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
-        rows.forEach(function(row) {
-            let field = row.id.split("_row")[0];
-            let idx = order.indexOf(field);
-            order.splice(idx, 1, row);
+    function orderRows(rows, order) {                                           console.log("    ordering rows = %O, order = %O", rows, order);
+        rows.sort((a, b) => {
+            let x = order.indexOf(a.id.split("_row")[0]);  
+            let y = order.indexOf(b.id.split("_row")[0]); 
+            return x < y ? -1 : x > y ? 1 : 0;
         });
-        return order;
+        return rows;
     }
     /*----------------------- Form Input Builders ----------------------------*/
-    function buildTextInput(entity, field, formLvl) { 
-        return _util.buildElem("input", { "type": "text", class: getFieldClass(formLvl) });
+    function buildTextInput(entity, field, fLvl) { 
+        return _util.buildElem('input', { 'type': 'text', class: getFieldClass(fLvl) });
     }
-    function buildTextArea(entity, field, formLvl) {                                     
-        return _util.buildElem("textarea", {class: getFieldClass(formLvl) });
+    function buildTextArea(entity, field, fLvl) {                                     
+        return _util.buildElem('textarea', {class: getFieldClass(fLvl) });
     }
-    function buildLongTextArea(entity, field, formLvl) {
-        return _util.buildElem("textarea", 
-            { class: getFieldClass(formLvl, "long"), id:field+"-txt" });
+    function buildLongTextArea(entity, field, fLvl) {
+        return _util.buildElem('textarea', 
+            { class: getFieldClass(fLvl, 'long'), id:field+'-txt' });
     }
     /**
      * Creates and returns a select dropdown for the passed field. If it is one of 
@@ -2183,11 +2182,11 @@ $(document).ready(function(){
      * the select's fieldName to the subForm config's 'selElem' array to later 
      * init the 'selectize' combobox. 
      */
-    function buildSelectCombo(entity, field, formLvl, cnt) {                    //console.log("buildSelectCombo [%s] field %s, formLvl [%s], cnt [%s]", entity, field, formLvl, cnt);                            
+    function buildSelectCombo(entity, field, fLvl, cnt) {                       //console.log("buildSelectCombo [%s] field %s, fLvl [%s], cnt [%s]", entity, field, fLvl, cnt);                            
         const opts = getSelectOpts(field);                                      //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         const fieldId = cnt ? field + '-sel' + cnt : field + '-sel';
-        const sel = _util.buildSelectElem(opts, { id: fieldId , class: getFieldClass(formLvl)});
-        fParams.forms[formLvl].selElems.push(field);
+        const sel = _util.buildSelectElem(opts, { id: fieldId , class: getFieldClass(fLvl)});
+        fParams.forms[fLvl].selElems.push(field);
         return sel;
     }
     /**
@@ -2195,11 +2194,11 @@ $(document).ready(function(){
      * be reaplced inline upon selection. Either with an existing Author's name, 
      * or the Author create form when the user enters a new Author's name. 
      */
-    function buildMultiSelectElem(entity, field, formLvl) {                     //console.log("entity = %s. field = ", entity, field);
-       var cntnr = _util.buildElem("div", { id: field+"_sel-cntnr"});
-       var selElem = buildSelectCombo(entity, field, formLvl, 1);
-       $(cntnr).data("cnt", 1);
-       $(cntnr).data("inputType", "multiSelect");
+    function buildMultiSelectElem(entity, field, fLvl) {                        //console.log("entity = %s. field = ", entity, field);
+       const cntnr = _util.buildElem('div', { id: field+'_sel-cntnr'});
+       const selElem = buildSelectCombo(entity, field, fLvl, 1);
+       $(cntnr).data('cnt', 1);
+       $(cntnr).data('inputType', 'multiSelect');
        $(cntnr).append(selElem);
        return cntnr;
     }
@@ -2207,11 +2206,11 @@ $(document).ready(function(){
      * Creates and returns a select dropdown that will be initialized with 'selectize'
      * to allow multiple selections. A data property is added for use form submission.
      */
-    function buildTagsElem(entity, field, formLvl) {
+    function buildTagsElem(entity, field, fLvl) {
         const opts = getSelectOpts(field);                                      //console.log("entity = %s. field = %s, opts = %O ", entity, field, opts);
         const tagSel = _util.buildSelectElem(opts, { id: field + '-sel', 
-            class: getFieldClass(formLvl)});
-        $(tagSel).data("inputType", "tags");
+            class: getFieldClass(fLvl)});
+        $(tagSel).data('inputType', 'tags');
         return tagSel;
     }
     /* ---------- Option Builders --------------------------------------------*/
@@ -2290,22 +2289,22 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
      */
-    function buildFormRow(field, input, formLvl, isReq, rowClss) {
+    function buildFormRow(field, input, fLvl, isReq, rowClss) {
         const fieldName = field.replace(/([A-Z])/g, ' $1');
         const rowDiv = _util.buildElem('div', { class: getRowClasses(), 
             id: field + '_row'});
         const errorDiv = _util.buildElem('div', { id: field+'_errs'}); 
         const fieldCntnr = _util.buildElem('div', { class: 'field-row flex-row'});
         const label = _util.buildElem('label', {text: _util.ucfirst(fieldName)});
-        const pin = formLvl === 'top' ? getPinElem(field) : null;     
-        if (isReq) { handleRequiredField(label, input, formLvl); } 
+        const pin = fLvl === 'top' ? getPinElem(field) : null;     
+        if (isReq) { handleRequiredField(label, input, fLvl); } 
         $(fieldCntnr).append([label, input, pin]);
         $(rowDiv).append([errorDiv, fieldCntnr]);
         return rowDiv;
         /** Returns the style classes for the row. */
         function getRowClasses() { 
-             var rowClass = input.className.includes("xlrg-field") ? 
-                "full-row" : (formLvl + '-row') + (rowClss ? (" "+rowClss) : "");  //console.log("rowClass = ", rowClass)
+             var rowClass = input.className.includes('xlrg-field') ? 
+                'full-row' : (fLvl + '-row') + (rowClss ? (' '+rowClss) : '');  //console.log("rowClass = ", rowClass)
             return rowClass; 
         }
     } /* End buildFormRow */
@@ -2345,11 +2344,11 @@ $(document).ready(function(){
      * disabling the submit button and a form-level data property. The input elem
      * is added to the form param's reqElems property. 
      */
-    function handleRequiredField(label, input, formLvl) {
+    function handleRequiredField(label, input, fLvl) {
         $(label).addClass('required');  
         $(input).change(checkRequiredFields);
-        $(input).data("formLvl", formLvl);
-        fParams.forms[formLvl].reqElems.push(input);
+        $(input).data('fLvl', fLvl);
+        fParams.forms[fLvl].reqElems.push(input);
     }
     /**
      * On a required field's change event, the submit button for the element's form 
@@ -2357,22 +2356,22 @@ $(document).ready(function(){
      */
     function checkRequiredFields(e) {  
         var input = e.currentTarget;
-        var formLvl = $(input).data("formLvl");  
-        var subBttnId = '#'+formLvl+'-submit';
-        if (!input.value || hasOpenSubForm(formLvl)) { 
+        var fLvl = $(input).data('fLvl');  
+        var subBttnId = '#'+fLvl+'-submit';
+        if (!input.value || hasOpenSubForm(fLvl)) { 
             disableSubmitBttn(subBttnId); 
-        } else if (ifRequiredFieldsFilled(formLvl)) { 
+        } else if (ifRequiredFieldsFilled(fLvl)) { 
             enableSubmitBttn(subBttnId);
         }
     }
     /** Returns true if all the required elements for the current form have a value. */
-    function ifRequiredFieldsFilled(formLvl) {                                  //console.log("formLvl = %s. fPs = %O", formLvl, fParams)
-        var reqElems = fParams.forms[formLvl].reqElems;
+    function ifRequiredFieldsFilled(fLvl) {                                     //console.log("fLvl = %s. fPs = %O", fLvl, fParams)
+        const reqElems = fParams.forms[fLvl].confg.required;
         return reqElems.every(function(reqElem){ return reqElem.value; }); 
     }
     /** Returns true if the next sub-level form exists in the dom. */
-    function hasOpenSubForm(formLvl) {
-        var childFormLvl = getNextFormLevel('child', formLvl);
+    function hasOpenSubForm(fLvl) {
+        const childFormLvl = getNextFormLevel('child', fLvl);
         return $('#'+childFormLvl+'-form').length > 0;
     }
     /**
@@ -2431,31 +2430,31 @@ $(document).ready(function(){
      * and contextually enables to parent form's submit button. Calls the exit 
      * handler stored in the form's params object.
      */
-    function exitForm(formId, formLvl, focus, data) {                           //console.log("id = %s, formLvl = %s", formId, formLvl)      
+    function exitForm(formId, fLvl, focus, data) {                              //console.log("id = %s, fLvl = %s", formId, fLvl)      
         $(formId).remove();
-        resetFormCombobox(formLvl, focus);
-        if (formLvl !== 'top') { ifParentFormValidEnableSubmit(formLvl); }
-        fParams.forms[formLvl].exitHandler(data);
+        resetFormCombobox(fLvl, focus);
+        if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
+        fParams.forms[fLvl].exitHandler(data);
     }
     /**
      * Clears and enables the parent combobox for the exited form. Removes any 
      * placeholder options and, optionally, brings it into focus.
      */
-    function resetFormCombobox(formLvl, focus) {        
-        if (!fParams.forms[formLvl].pSelId) { return; }
-        var combobox = $(fParams.forms[formLvl].pSelId)[0].selectize;   
+    function resetFormCombobox(fLvl, focus) {        
+        if (!fParams.forms[fLvl].pSelId) { return; }
+        const combobox = $(fParams.forms[fLvl].pSelId)[0].selectize;   
         combobox.clear();
         combobox.enable();
-        combobox.removeOption(""); //Removes the "Creating [entity]..." placeholder.
+        combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
         if (focus) { combobox.focus(); 
         } else if (focus === false) { combobox.blur(); }
     }
     /** Returns the 'next' form level- either the parent or child. */
-    function getNextFormLevel(nextLvl, curLvl) {
-        var formLvls = fParams.formLevels;
-        var nextLvl = nextLvl === "parent" ? 
-            formLvls[formLvls.indexOf(curLvl) - 1] : 
-            formLvls[formLvls.indexOf(curLvl) + 1] ;
+    function getNextFormLevel(next, curLvl) {
+        const fLvls = fParams.formLevels;
+        const nextLvl = next === 'parent' ? 
+            fLvls[fLvls.indexOf(curLvl) - 1] : 
+            fLvls[fLvls.indexOf(curLvl) + 1] ;
         return nextLvl;
     }
     /** 
@@ -2463,9 +2462,9 @@ $(document).ready(function(){
      * the passed form lvl is reduced by one and returned. 
      */
     function getSubFormLvl(intFormLvl) {  
-        var formLvls = fParams.formLevels;
-        return fParams.forms.top.entity === "interaction" ? 
-            intFormLvl : formLvls[formLvls.indexOf(intFormLvl) - 1];
+        var fLvls = fParams.formLevels;
+        return fParams.forms.top.entity === 'interaction' ? 
+            intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
     }
 /*--------------------------- Misc Form Helpers ------------------------------*/
 /*--------------------------- Fill Form Fields -------------------------------*/
@@ -2480,8 +2479,9 @@ $(document).ready(function(){
     }
     /** Fills all displayed form fields with any values previously entered. */
     function fillFormFields(fLvl) {
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('fillFormFields. vals = %O', vals);
-        var fieldHndlrs = {
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       console.log('fillFormFields. vals = %O, curFields = %O', vals,fParams.forms[fLvl].fieldConfg.fields);
+        const fieldObj = fParams.forms[fLvl].fieldConfg.fields;
+        const fieldHndlrs = {
             'text': setTextField, 'textArea': setTextArea, 'select': setSelect, 
             'fullTextArea': setTextArea, 'multiSelect': Function.prototype,
             'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
@@ -2490,21 +2490,21 @@ $(document).ready(function(){
         for (let field in vals) {
             addValueIfFieldShown(field, vals[field], fLvl);
         }
-        function addValueIfFieldShown(field, fieldObj, fLvl) {
-            if (!field in fParams.forms[fLvl].fieldConfg.fields) { return; }
-            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);
+        function addValueIfFieldShown(field, fieldObj, fLvl) {  
+            if (Object.keys(fieldObj).indexOf(field) === -1) { return; }
+            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);        //console.log('adding value to [%s] field', field);
         }
     } /* End fillFormFields */
     function setTextField(val, field, fLvl) {
         $('#'+field+'_row input[type="text"]').val(val);
     }
-    function setSelect(val, field, fLvl) {
+    function setSelect(val, field, fLvl) {  
         $('#'+field+'-sel')[0].selectize.addItem(val);        
     }
     /*------------------ Form Submission Data-Prep Methods -------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
-    function ifParentFormValidEnableSubmit(formLvl) {
-        var parentLvl = getNextFormLevel('parent', formLvl);
+    function ifParentFormValidEnableSubmit(fLvl) {
+        const parentLvl = getNextFormLevel('parent', fLvl);
         if (ifRequiredFieldsFilled(parentLvl)) {
             enableSubmitBttn('#'+parentLvl+'-submit');
         }
@@ -2526,9 +2526,9 @@ $(document).ready(function(){
             class: 'overlay waiting', id: 'c-overlay'}));
         $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
     }
-    function getFormValuesAndSubmit(id, formLvl, entity) {                      console.log("getFormValuesAndSubmit. id = %s, formLvl = %s, entity = %s", id, formLvl, entity);
-        var formVals = getFormValueData(id, entity);
-        buildFormDataAndSubmit(formLvl, formVals);  
+    function getFormValuesAndSubmit(id, fLvl, entity) {                         console.log("getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
+        const formVals = getFormValueData(id, entity);
+        buildFormDataAndSubmit(fLvl, formVals);  
     }
     /**
      * Loops through all rows in the form with the passed id and returns an object 
@@ -2775,10 +2775,10 @@ $(document).ready(function(){
     /**
      * Builds a form data object @buildFormData. Sends it to the server @submitFormData
      */
-    function buildFormDataAndSubmit(formLvl, formVals) {                        
-        var entity = fParams.forms[formLvl].entity;                             //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, formLvl, formVals);  
-        var formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
-        submitFormData(formData, formLvl);
+    function buildFormDataAndSubmit(fLvl, formVals) {                        
+        const entity = fParams.forms[fLvl].entity;                                //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
+        const formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
+        submitFormData(formData, fLvl);
     }                
     /**
      * Returns an object with the entity names' as keys for their field-val objects, 
@@ -2922,20 +2922,20 @@ $(document).ready(function(){
     }
     /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
-    function submitFormData(formData, formLvl) {                                console.log("submitFormData [ %s ]= %O", formLvl, formData);
-        var coreEntity = getCoreFormEntity(fParams.forms[formLvl].entity);      //console.log("entity = ", coreEntity);
-        var url = getEntityUrl(coreEntity, fParams.forms[formLvl].action);
+    function submitFormData(formData, fLvl) {                                   console.log("submitFormData [ %s ]= %O", fLvl, formData);
+        var coreEntity = getCoreFormEntity(fParams.forms[fLvl].entity);         //console.log("entity = ", coreEntity);
+        var url = getEntityUrl(coreEntity, fParams.forms[fLvl].action);
         if (fParams.editing) { formData.ids = fParams.editing; }
         formData.coreEntity = coreEntity;
-        storeParamsData(coreEntity, formLvl);
+        storeParamsData(coreEntity, fLvl);
         toggleWaitOverlay(true);
         sendAjaxQuery(formData, url, formSubmitSucess, formSubmitError);
     }
     /** Stores data relevant to the form submission that will be used later. */
-    function storeParamsData(entity, formLvl) {                                 
+    function storeParamsData(entity, fLvl) {                                 
         var focuses = { 'source': 'srcs', 'location': 'locs', 'taxon': 'taxa', 
             'interaction': 'int' };
-        fParams.ajaxFormLvl = formLvl;
+        fParams.ajaxFormLvl = fLvl;
         fParams.submitFocus = focuses[entity];
     }
     /** Returns the full url for the passed entity and action.  */
@@ -2971,8 +2971,8 @@ $(document).ready(function(){
     }
     /*------------------ Top-Form Success Methods --------------------*/
     function handleFormComplete(data) {   
-        var formLvl = fParams.ajaxFormLvl;                                      //console.log('handleFormComplete formLvl = ', formLvl);
-        if (formLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
+        var fLvl = fParams.ajaxFormLvl;                                         //console.log('handleFormComplete fLvl = ', fLvl);
+        if (fLvl !== 'top') { return exitFormAndSelectNewEntity(data); }
         fParams.forms.top.exitHandler(data);
     }
     /** 
@@ -3059,15 +3059,15 @@ $(document).ready(function(){
      * entity in the form's parent elem @addAndSelectEntity.
      */
     function exitFormAndSelectNewEntity(data) {
-        var formLvl = fParams.ajaxFormLvl;           
-        exitForm("#"+formLvl+"-form", formLvl, false, data); 
-        if (fParams.forms[formLvl].pSelId) { addAndSelectEntity(data, formLvl); }
+        const fLvl = fParams.ajaxFormLvl;           
+        exitForm('#'+fLvl+'-form', fLvl, false, data); 
+        if (fParams.forms[fLvl].pSelId) { addAndSelectEntity(data, fLvl); }
     }
     /** Adds and option for the new entity to the form's parent elem, and selects it. */
-    function addAndSelectEntity(data, formLvl) {
-        var selApi = $(fParams.forms[formLvl].pSelId)[0].selectize;        
+    function addAndSelectEntity(data, fLvl) {
+        const selApi = $(fParams.forms[fLvl].pSelId)[0].selectize;        
         selApi.addOption({ 
-            "value": data.coreEntity.id, "text": data.coreEntity.displayName 
+            'value': data.coreEntity.id, 'text': data.coreEntity.displayName 
         });
         selApi.addItem(data.coreEntity.id);
     }
@@ -3085,13 +3085,13 @@ $(document).ready(function(){
     /**------------- Form Submit-Errors --------------*/
     /** Builds and appends an error elem that displays the error to the user. */
     function formSubmitError(jqXHR, textStatus, errorThrown) {                  console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-        var formLvl = fParams.ajaxFormLvl;                                          
-        var elem = getFormErrElem(formLvl);
-        var errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
-        var msg = getFormErrMsg(errTag);
+        const fLvl = fParams.ajaxFormLvl;                                          
+        const elem = getFormErrElem(fLvl);
+        const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
+        const msg = getFormErrMsg(errTag);
         toggleWaitOverlay(false);
-        setErrElemAndExitBttn(elem, msg, errTag, formLvl);
-        disableSubmitBttn('#'+formLvl+'-submit');
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+        disableSubmitBttn('#'+fLvl+'-submit');
     }
     /**
      * Returns an error tag based on the server error text. Reports duplicated 
@@ -3139,26 +3139,26 @@ $(document).ready(function(){
      * is already an instance using that form, show the user an error message and 
      * reset the select elem. 
      */
-    function openSubFormErr(field, id, formLvl) {                               //console.log("selId = %s, fP = %O ", selId, fParams)
+    function openSubFormErr(field, id, fLvl) {                                  //console.log("selId = %s, fP = %O ", selId, fParams)
         var selId = id || '#'+field+'-sel';
-        return formInitErr(field, 'openSubForm', formLvl, selId);
+        return formInitErr(field, 'openSubForm', fLvl, selId);
     }
     /** 
      * When an error prevents a form init, this method shows an error to the user
      * and resets the combobox that triggered the form. 
      */
-    function formInitErr(field, errTag, formLvl, id) {                          console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, formLvl, id)
-        var selId = id || '#'+field+'-sel';
-        reportFormFieldErr(field, errTag, formLvl);
+    function formInitErr(field, errTag, fLvl, id) {                             console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
+        const selId = id || '#'+field+'-sel';
+        reportFormFieldErr(field, errTag, fLvl);
         window.setTimeout(function() {clearCombobox(selId)}, 10);
-        return { "value": "", "text": "Select " + field };
+        return { 'value': '', 'text': 'Select ' + field };
     }
     /**
      * Shows the user an error message above the field row. The user can clear the 
      * error manually with the close button, or automatically by resolving the error.
      */
-    function reportFormFieldErr(fieldName, errTag, formLvl) {                   console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, formLvl);
-        var errMsgMap = {
+    function reportFormFieldErr(fieldName, errTag, fLvl) {                      console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
+        const errMsgMap = {
             'isGenusPrnt': handleIsGenusPrnt,
             'needsGenusPrnt': handleNeedsGenusParent, 
             'noGenus': handleNoGenus,
@@ -3166,47 +3166,47 @@ $(document).ready(function(){
             'needsHigherLvl': handleNeedsHigherLvl,
             'openSubForm': handleOpenSubForm,
         };
-        var errElem = getFieldErrElem(fieldName);
-        errMsgMap[errTag](errElem, errTag, formLvl);
+        const errElem = getFieldErrElem(fieldName);
+        errMsgMap[errTag](errElem, errTag, fLvl);
     }
     /* ----------- Field-Error Handlers --------------------------------------*/
     /** Note: error for the edit-taxon form. */
-    function handleIsGenusPrnt(elem, errTag, formLvl) {  
-        var msg = "<span>Genus' with species children must remain at genus.</span>";
+    function handleIsGenusPrnt(elem, errTag, fLvl) {  
+        const msg = "<span>Genus' with species children must remain at genus.</span>";
         setErrElemAndExitBttn(elem, msg, errTag, 'top');
     }
-    function clrIsGenusPrnt(elem, formLvl, e) {                                       
+    function clrIsGenusPrnt(elem, fLvl, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem, 'top');
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsGenusParent(elem, errTag, formLvl) {  
-        var msg = '<span>Please select a genus parent for the species taxon.</span>';
+    function handleNeedsGenusParent(elem, errTag, fLvl) {  
+        const msg = '<span>Please select a genus parent for the species taxon.</span>';
         setErrElemAndExitBttn(elem, msg, errTag, 'top');
     }
-    function clrNeedsGenusPrntErr(elem, formLvl, e) {                                       
+    function clrNeedsGenusPrntErr(elem, fLvl, e) {                                       
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem, 'top');
     }
     /** Note: error for the create-taxon form. */
-    function handleNoGenus(elem, errTag, formLvl) {  
-        var msg = '<span>Please select a genus before creating a species.</span>';
+    function handleNoGenus(elem, errTag, fLvl) {  
+        const msg = '<span>Please select a genus before creating a species.</span>';
         setErrElemAndExitBttn(elem, msg, errTag, 'top');
         $('#Genus-sel').change(function(e){
             if (e.target.value) { clrNoGenusErr(elem); }
         });
     }
-    function clrNoGenusErr(elem, formLvl, e) {                                            
+    function clrNoGenusErr(elem, fLvl, e) {                                            
         $('#Genus-sel').off('change');
         clearErrElemAndEnableSubmit(elem);
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsHigherLvlPrnt(elem, errTag, formLvl) { 
-        var msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
+    function handleNeedsHigherLvlPrnt(elem, errTag, fLvl) { 
+        const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
         setErrElemAndExitBttn(elem, msg, errTag);
     }
     /** Clears the cause, either the parent-selection process or the taxon's level. */
-    function clrNeedsHigherLvlPrnt(elem, formLvl, e) {                                    
+    function clrNeedsHigherLvlPrnt(elem, fLvl, e) {                                    
         $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
         clearErrElemAndEnableSubmit(elem);
         if ($('#sub-form').length) { return selectParentTaxon(
@@ -3215,7 +3215,7 @@ $(document).ready(function(){
         $('#txn-lvl').data('lvl', $('#txn-lvl').val());
     }
     /** Note: error for the edit-taxon form. */
-    function handleNeedsHigherLvl(elem, errTag, formLvl) {  
+    function handleNeedsHigherLvl(elem, errTag, fLvl) {  
         var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
         var lvlName = fParams.taxon.lvls[childLvl-1];
         var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
@@ -3223,7 +3223,7 @@ $(document).ready(function(){
         $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
         setErrElemAndExitBttn(elem, msg, errTag);
     }
-    function clrNeedsHigherLvl(elem, formLvl, e, taxonLvl) {    
+    function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
         var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
         $('#txn-lvl')[0].selectize.addItem(txnLvl, 'silent');
         $('#txn-lvl').data('lvl', txnLvl);
@@ -3236,11 +3236,11 @@ $(document).ready(function(){
         $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
     }
     /** Note: error used for the publication form. */
-    function handleOpenSubForm(elem, errTag, formLvl) {  
-        var subEntity = fParams.forms[formLvl] ? fParams.forms[formLvl].entity : '';
+    function handleOpenSubForm(elem, errTag, fLvl) {  
+        var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
         var msg = '<p>Please finish the open '+ _util.ucfirst(subEntity) + ' form.</p>';
         setErrElemAndExitBttn(elem, msg, errTag);
-        $('#'+formLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
+        $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
     }
     function clrOpenSubForm(elem, e) {   
         clearLvlErrs(elem);
@@ -3253,34 +3253,34 @@ $(document).ready(function(){
         elem.className += ' active-errs';
         return elem;
     }   
-    function getFormErrElem(formLvl) {
-        var elem = _util.buildElem('div', { id: formLvl+'_errs', class: 'active-errs' }); 
-        $('#'+formLvl+'-hdr').after(elem);
+    function getFormErrElem(fLvl) {
+        const elem = _util.buildElem('div', { id: fLvl+'_errs', class: 'active-errs' }); 
+        $('#'+fLvl+'-hdr').after(elem);
         return elem;
     }
-    function setErrElemAndExitBttn(elem, msg, errTag, formLvl) {  console.log('setErrElemAndExitBttn. args = %O', arguments)
+    function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                   console.log('setErrElemAndExitBttn. args = %O', arguments)
         elem.innerHTML = msg;
-        $(elem).append(getErrExitBttn(errTag, elem, formLvl));
-        disableSubmitBttn('#'+formLvl+'-submit');
+        $(elem).append(getErrExitBttn(errTag, elem, fLvl));
+        disableSubmitBttn('#'+fLvl+'-submit');
     }
-    function getErrExitBttn(errTag, elem, formLvl) {
-        var exitHdnlrs = {
+    function getErrExitBttn(errTag, elem, fLvl) {
+        const exitHdnlrs = {
             'isGenusPrnt': clrIsGenusPrnt, 'needsGenusPrnt': clrNeedsGenusPrntErr, 
             'noGenus': clrNoGenusErr, 'needsHigherLvl': clrNeedsHigherLvl, 
             'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt, 'openSubForm': clrOpenSubForm,
             'dupAuth': clrFormLvlErr, 'dupEnt': clrFormLvlErr, 
             'genSubmitErr': clrFormLvlErr
         };
-        var bttn = getExitButton();
+        const bttn = getExitButton();
         bttn.className += ' err-exit';
-        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, formLvl));
+        $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
         return bttn;
     }
-    function clrFormLvlErr(elem, formLvl) {
-        var childFormLvl = getNextFormLevel('child', formLvl);
-        $('#'+formLvl+'_errs').remove();
-        if (!$('#'+childFormLvl+'-form').length && ifRequiredFieldsFilled(formLvl)) {
-            enableSubmitBttn('#'+formLvl+'-submit');
+    function clrFormLvlErr(elem, fLvl) {
+        const childFormLvl = getNextFormLevel('child', fLvl);
+        $('#'+fLvl+'_errs').remove();
+        if (!$('#'+childFormLvl+'-form').length && ifRequiredFieldsFilled(fLvl)) {
+            enableSubmitBttn('#'+fLvl+'-submit');
         }
     }
     function clearErrElemAndEnableSubmit(elem) {                                //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
