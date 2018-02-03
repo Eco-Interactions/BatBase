@@ -301,13 +301,16 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     min-width: 385px;
     margin-top: .5em;
 }
+.sml-form-sub {
+    min-width: 385px;
+}
 .sml-left {
     position: relative;
-    left: 25px;
+    left: 10px;
 }
 .sml-right {
     position: relative;
-    right: 15px;
+    right: 25px;
 }
 #sub-hdr, #sub2-hdr {
     font-size: 1.1em;
