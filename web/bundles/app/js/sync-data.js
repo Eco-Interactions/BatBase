@@ -470,10 +470,19 @@
     /** Stores an object of taxon names and ids for each level in each realm. */
     function deriveAndStoreTaxonData(data) {                                    //console.log("deriveAndStoreTaxonData called. data = %O", data);
         storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
+        storeData('objectRealmNames', getObjectRealmNames(data.realm));
         storeTaxaByLevelAndRealm(data.taxon);
     }
+    function getObjectRealmNames(realms) {                                      //console.log('getObjectRealmNames. [%s] realms = %O',Object.keys(realms).length, realms);
+        let data = {};
+        for (let i=1; i <= Object.keys(realms).length; i++) { 
+            if (realms[i].displayName === 'Bat') { continue; }  
+            data[realms[i].displayName] = realms[i].id;
+        }
+        return data;
+    }
     function storeTaxaByLevelAndRealm(taxa) {
-        var realmData = separateTaxaByLevelAndRealm(taxa);                     //console.log("taxonym name data = %O", nameData);
+        var realmData = separateTaxaByLevelAndRealm(taxa);                      //console.log("taxonym name data = %O", nameData);
         for (var realm in realmData) {  
             storeTaxaByLvl(realm, realmData[realm]);
         }
@@ -486,7 +495,7 @@
     /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
     function separateTaxaByLevelAndRealm(taxa) {  
         const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (let id = 1; id < Object.keys(taxa).length+1; id++) {
+        for (let id = 1; id <= Object.keys(taxa).length; id++) {
             if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
             addTaxonData(taxa[id]);
         }
