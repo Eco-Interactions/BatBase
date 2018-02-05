@@ -242,13 +242,13 @@ $(document).ready(function(){
      * -- Property descriptions:
      * > action - eg, Create, Edit.
      * > confg - The form config object used during form building.
-     * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
-     * > fieldConfg - Form fields and types, values entered, and the required fields.
      * > entity - Name of this form's entity.
      * > exitHandler - Form exit handler or noOp.
+     * > fieldConfg - Form fields and types, values entered, and the required fields.
      * > pSelId - The id of the parent select of the form.
      * > reqElems - All required elements in the form.
      * > selElems - Contains all selElems until they are initialized with selectize.
+     * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
      * > vals - Stores all values entered in the form's fields.
      */
     function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. fP = %O, arguments = %O", fParams, arguments)
@@ -256,13 +256,13 @@ $(document).ready(function(){
         fParams.forms[level] = {
             action: action,
             confg: formConfg,
-            typeConfg: false,
-            fieldConfg: { fields: {}, vals: {}, required: [] },
             entity: entity,
             exitHandler: getFormExitHandler(formConfg, action),
+            fieldConfg: { fields: {}, vals: {}, required: [] },
             pSelId: pSel,
             reqElems: [],
             selElems: [], 
+            typeConfg: false,
             vals: {}
         };                                                                      //console.log("fLvl params = %O", fParams.forms[level]);
     }
