@@ -323,7 +323,7 @@ $(document).ready(function(){
     function fillExistingData(entity, id) {
         addDisplayNameToForm(entity, id);
         fillEntityData(entity, id); 
-        if (ifRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
+        if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
     }
     function addDisplayNameToForm(ent, id) {
         if (ent === 'interaction') { return; }
@@ -645,10 +645,8 @@ $(document).ready(function(){
      * Loads the deafult fields for the selected Publication Type. Clears any 
      * previous type-fields and initializes the selectized dropdowns.
      */
-    function loadPubTypeFields(typeId) {
-        fParams.forms.sub.fieldConfg.vals.PublicationType.val = typeId;
-        $('#Publication_Rows').append(getTypeFieldRows('publication', typeId));
-        initComboboxes('publication', 'sub');
+    function loadPubTypeFields(typeId) { 
+        loadSrcTypeFields('publication', typeId, this.$input[0]);
     }
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
@@ -714,9 +712,7 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadCitTypeFields(typeId) {
-        fParams.forms.sub.fieldConfg.vals.CitationType.val = typeId;
-        $('#Citation_Rows').append(getTypeFieldRows('citation', typeId));
-        initComboboxes('citation', 'sub');
+        loadSrcTypeFields('citation', typeId, this.$input[0]);
     }
     /**
      * Loads the deafult fields for the selected Citation Type. Clears any 
@@ -753,6 +749,41 @@ $(document).ready(function(){
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
+    }
+    /** ----- Publication and Citation Shared form helpers ------------------ */
+    /**
+     * Loads the deafult fields for the selected Source Type's type. Clears any 
+     * previous type-fields and initializes the selectized dropdowns.  
+     * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
+     */
+    function loadSrcTypeFields(type, typeId, elem) {
+        const fLvl = getSubFormLvl('sub');
+        const capsType = _util.ucfirst(type);
+        resetOnFormTypeChange(capsType, typeId, fLvl);
+        $('#'+capsType+'_Rows').append(getTypeFieldRows(type, typeId));
+        initComboboxes(type, fLvl);
+        checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
+    }
+    function resetOnFormTypeChange(capsType, typeId, fLvl) {  
+        fParams.forms[fLvl].fieldConfg.vals[capsType+'Type'].val = typeId;
+        fParams.forms[fLvl].reqElems = [];
+        disableSubmitBttn('#'+fLvl+'-submit'); 
+    }
+    /**
+     * Builds and return the form-field rows for the selected source type.
+     * @return {ary} Form-field rows ordered according to the form config.
+     */
+    function getTypeFieldRows(entity, typeId) {
+        const fVals = getCurrentFormFieldVals('sub');
+        setSourceTypeConfg(entity, typeId); 
+        resetVolatileRows(_util.ucfirst(entity), 'sub');      
+        return getFormFieldRows(entity, getFormConfg(entity), fVals, 'sub');
+    }
+    /** Sets the type confg for the selected source type in form params. */
+    function setSourceTypeConfg(entity, id) {
+        const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
+        const type = $(typeElemId)[0].selectize.getItem(id)[0].innerText;
+        fParams.forms.sub.typeConfg = getFormConfg(entity).types[type];         //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms.sub.typeConfg);             
     }
     /*-------------- Country/Region ------------------------------------------*/
     /** Returns a form row with a combobox populated with all countries and regions. */
@@ -2065,7 +2096,7 @@ $(document).ready(function(){
         };
         return fields[coreEntityMap[entity]];
     }    
-    /** ----- Shared Publication and Citation form helpers ------------------ */
+    /** -------------------- Form Row Builders ------------------------------ */
     /** Forms with optional fields are wrapped in a container. */
     function moveFieldsIntoVolatileContainer(entity, fClasses, fLvl) {          //console.log('entity = %s, fLvl = %s, form = %O', entity, fLvl, $('#'+fLvl+'-form')[0])
         resetVolatileRows(entity, fClasses, fLvl);
@@ -2083,23 +2114,6 @@ $(document).ready(function(){
             id: entity+'_Rows', class: 'flex-row flex-wrap ' + fClasses});  
         $('#'+fLvl+'-hdr').after(rowCntnr);
     }
-    /**
-     * Builds and return the form-field rows for the selected source type.
-     * @return {ary} Form-field rows ordered according to the form config.
-     */
-    function getTypeFieldRows(entity, typeId) {
-        const fVals = getCurrentFormFieldVals('sub');
-        setSourceTypeConfg(entity, typeId); 
-        resetVolatileRows(_util.ucfirst(entity), 'sub');      
-        return getFormFieldRows(entity, getFormConfg(entity), fVals, 'sub');
-    }
-    /** Sets the type confg for the selected source type in form params. */
-    function setSourceTypeConfg(entity, id) {
-        const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
-        const type = $(typeElemId)[0].selectize.getItem(id)[0].innerText;
-        fParams.forms.sub.typeConfg = getFormConfg(entity).types[type];         //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms.sub.typeConfg);             
-    }
-    /** -------------------- Form Row Builders ------------------------------ */
     /**
      * Toggles between displaying all fields for the entity and only showing the 
      * default (required and suggested) fields.
@@ -2346,7 +2360,7 @@ $(document).ready(function(){
      * Each element is built, nested, and returned as a completed row. 
      * rowDiv>(errorDiv, fieldDiv>(label, input, [pin]))
      */
-    function buildFormRow(field, input, fLvl, isReq, rowClss) {
+    function buildFormRow(field, input, fLvl, isReq, rowClss) {                 //console.log('building form row for [%s], req? [%s]', field, isReq);
         const fieldName = field.replace(/([A-Z])/g, ' $1');
         const rowDiv = _util.buildElem('div', { class: getRowClasses(), 
             id: field + '_row'});
@@ -2412,19 +2426,26 @@ $(document).ready(function(){
      * is enabled if all of it's required fields have values and it has no open child forms. 
      */
     function checkRequiredFields(e) {  
-        var input = e.currentTarget;
-        var fLvl = $(input).data('fLvl');  
-        var subBttnId = '#'+fLvl+'-submit';
-        if (!input.value || hasOpenSubForm(fLvl)) { 
+        const input = e.currentTarget;
+        const fLvl = $(input).data('fLvl');  
+        checkReqFieldsAndToggleSubmitBttn(input, fLvl);
+    }
+    function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                   //console.log('checkingReqFields = %O, fLvl = ', input, fLvl);
+        const subBttnId = '#'+fLvl+'-submit';
+        if (!isRequiredFieldFilled(input) || hasOpenSubForm(fLvl)) { 
             disableSubmitBttn(subBttnId); 
-        } else if (ifRequiredFieldsFilled(fLvl)) { 
+        } else if (ifAllRequiredFieldsFilled(fLvl)) { 
             enableSubmitBttn(subBttnId);
         }
     }
     /** Returns true if all the required elements for the current form have a value. */
-    function ifRequiredFieldsFilled(fLvl) {                                     //console.log("fLvl = %s. fPs = %O", fLvl, fParams)
-        const reqElems = fParams.forms[fLvl].confg.required;
-        return reqElems.every(function(reqElem){ return reqElem.value; }); 
+    function ifAllRequiredFieldsFilled(fLvl) {                                  //console.log("ifAllRequiredFieldsFilled... fLvl = %s. fPs = %O", fLvl, fParams)
+        const reqElems = fParams.forms[fLvl].reqElems;                          
+        return reqElems.every(isRequiredFieldFilled);
+    }
+    function isRequiredFieldFilled(elem) {
+        return elem.value ? true : 
+            elem.id.includes('-cntnr') ? elem.firstChild.value : false;  
     }
     /** Returns true if the next sub-level form exists in the dom. */
     function hasOpenSubForm(fLvl) {
@@ -2568,7 +2589,7 @@ $(document).ready(function(){
     /** Enables the parent form's submit button if all required fields have values. */
     function ifParentFormValidEnableSubmit(fLvl) {
         const parentLvl = getNextFormLevel('parent', fLvl);
-        if (ifRequiredFieldsFilled(parentLvl)) {
+        if (ifAllRequiredFieldsFilled(parentLvl)) {
             enableSubmitBttn('#'+parentLvl+'-submit');
         }
     }
@@ -3343,7 +3364,7 @@ $(document).ready(function(){
     function clrFormLvlErr(elem, fLvl) {
         const childFormLvl = getNextFormLevel('child', fLvl);
         $('#'+fLvl+'_errs').remove();
-        if (!$('#'+childFormLvl+'-form').length && ifRequiredFieldsFilled(fLvl)) {
+        if (!$('#'+childFormLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) {
             enableSubmitBttn('#'+fLvl+'-submit');
         }
     }
