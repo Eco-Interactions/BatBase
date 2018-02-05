@@ -16,10 +16,22 @@ Notes::
 Questions:
     ## Citation full text ##
     -Thoughts-
-        - Show citation full text to user before submit? 
-        - What is necessary to show user?
     -Todo-
-        - Remove publisher type code?
+
+        - Also store the entered values of elems with custom change events
+            - Handle authors
+        - fix required fields and form submit
+
+        - alphabetize form params
+
+        - check all edit forms
+
+
+        - Remove publisher type code? 
+        - redownload all autocomplete(?)
+
+        -- fix taxon lvl fills. 
+
 ________________________________________________________________________________
 
 -- Short Range TODO [priority, difficulty]--
@@ -28,6 +40,7 @@ ________________________________________________________________________________
             where the error occured
             - Use the step name in description printed 
     --misc--
+        -- Find out how to tell how many users are online
         -- Refactor use of 'main' and 'top' entities to 'core' entities.
         -- Resize slider-header when screen size changes 
         -- Style the 'change password' page
@@ -35,6 +48,9 @@ ________________________________________________________________________________
         -- Added header to FOS pages 
             -- change password page (/profile/change-password)
             -- update profile page (/profile/edit)
+    --data restructure--
+        -- add 'role' to realms to be able to grab all object/subject realms
+            without hardcoding them.
     --Search--
         -- csv exports
             -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
@@ -47,7 +63,10 @@ ________________________________________________________________________________
     --FORM--
         -- Add inline help tooltips to guide data-entry/edit
         -- Change description to 'translation'
+        -- Remove all authors previous selected (and stored in formVals) from new combos
+        REFACTOR
         -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
+        -- Move interaction create form functions into the same func chain building the rest? 
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
@@ -93,6 +112,7 @@ ________________________________________________________________________________
             -- Add more sophisticated logging
         --Refactor--
             -- Add '-sel' to the edit taxon form's 'txn-lvl' field 
+            -- update all quotes to singles unless escaping
 
     --Asap--   
         -- Data sync --

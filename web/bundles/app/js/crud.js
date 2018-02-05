@@ -734,18 +734,6 @@ $(document).ready(function(){
             selectExistingAuthors(pubRcrd.contributors);
         }
     }
-    /** Loops through author array and selects each author in the form */ 
-    function selectExistingAuthors(authAry) {
-        $.each(authAry, function(i, authId) {  
-            selectAuthor(i, authId);
-        });
-    }
-    /** Select the passed author and builds a new, empty author combobox. */
-    function selectAuthor(cnt, authId) {
-        var selId = '#Authors-sel'+ ++cnt;
-        $(selId)[0].selectize.addItem(authId, true);
-        buildNewAuthorSelect(++cnt, authId);
-    }
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
@@ -762,6 +750,7 @@ $(document).ready(function(){
         resetOnFormTypeChange(capsType, typeId, fLvl);
         $('#'+capsType+'_Rows').append(getTypeFieldRows(type, typeId));
         initComboboxes(type, fLvl);
+        fillFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
     }
     function resetOnFormTypeChange(capsType, typeId, fLvl) {  
@@ -1589,9 +1578,26 @@ $(document).ready(function(){
     }
 
     /*-------------- Author --------------------------------------------------*/
+    /** Reselects authors after source-type fields are regenerated */
+    function reselectAuthors(field, fieldObj, fLvl) {                               
+        const valConfg = fParams.forms[fLvl].fieldConfg.vals; 
+        selectExistingAuthors(valConfg.Authors.val);
+    }
+    /** Loops through author array and selects each author in the form */ 
+    function selectExistingAuthors(authAry) { 
+        $.each(authAry, function(i, authId) {  
+            selectAuthor(i, authId);
+        });
+    }
+    /** Selects the passed author and builds a new, empty author combobox. */
+    function selectAuthor(cnt, authId) {
+        const selId = '#Authors-sel'+ ++cnt;
+        $(selId)[0].selectize.addItem(authId, true);
+        buildNewAuthorSelect(++cnt, authId);
+    }
     /**
      * When an author is selected, a new author combobox is initialized underneath
-     * 'this' author combobox. The total count of authors is added to the new id.
+     * the last author combobox. The total count of authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         if (val === "" || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
@@ -1601,13 +1607,13 @@ $(document).ready(function(){
     }
     /** Builds a new, empty author combobox */
     function buildNewAuthorSelect(cnt, val) {                                   //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
-        var prntLvl = getSubFormLvl("sub");
-        var parentFormEntity = fParams.forms[prntLvl].entity;
-        var selConfg = { name: "Author", id: "#Authors-sel"+cnt, 
+        const prntLvl = getSubFormLvl('sub');
+        const parentFormEntity = fParams.forms[prntLvl].entity;
+        const selConfg = { name: 'Author', id: '#Authors-sel'+cnt, 
                          change: onAuthSelection, add: initAuthForm };
-        $("#Authors_sel-cntnr").append(
-            buildSelectCombo( parentFormEntity, "Authors", prntLvl, cnt ));   
-        $("#Authors_sel-cntnr").data("cnt", cnt);
+        const sel = buildSelectCombo(parentFormEntity, 'Authors', prntLvl, cnt);  
+        $(sel).change(storeAuthorValue.bind(null, prntLvl, cnt)); 
+        $("#Authors_sel-cntnr").append(sel).data("cnt", cnt);
         initSelectCombobox(selConfg, prntLvl);
         $("#Authors-sel"+cnt)[0].selectize.removeOption(val);
     }
@@ -2000,12 +2006,12 @@ $(document).ready(function(){
                     "Journal": {
                         "required": [],
                         "suggested": [],
-                        "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi",
-                            "Publisher", "Authors" ],
+                        "optional": ["Year", "Description", "LinkDisplay", "LinkUrl", 
+                            "Doi", "Publisher", "Authors" ],
                         "order": {
                             "sug": [],
-                            "opt": ["Description", "Doi", "LinkDisplay", "LinkUrl",
-                            "Publisher", "Authors" ]},
+                            "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl",
+                            "Description", "Publisher", "Authors" ]},
                     },
                     "Other": {
                         "required": [],
@@ -2226,7 +2232,16 @@ $(document).ready(function(){
     /** Adds field value to the form's confg object. */
     function storeFieldValue(elem, fieldName, fLvl, value) {                    //console.log('store fields value. args = %O', arguments);
         const val = value || $(elem).val();                                     //console.log("val = %s, formValObj = %O", val, fParams.forms[fLvl]);
+        if (fieldName === 'Authors') { return; }
         fParams.forms[fLvl].fieldConfg.vals[fieldName].val = val;
+    }
+    /** Author values are stored in an array at the combo's 'cnt' index. */
+    function storeAuthorValue(fLvl, cnt, e) {                       
+        const valConfg = fParams.forms[fLvl].fieldConfg.vals; 
+        if (!Array.isArray(valConfg.Authors.val)) { valConfg.Authors.val = []; }
+        const val = e.target.value || null;
+        const pos = cnt - 1;
+        valConfg.Authors.val.splice(pos, 1, val);  
     }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -2269,6 +2284,7 @@ $(document).ready(function(){
     function buildMultiSelectElem(entity, field, fLvl) {                        //console.log("entity = %s. field = ", entity, field);
        const cntnr = _util.buildElem('div', { id: field+'_sel-cntnr'});
        const selElem = buildSelectCombo(entity, field, fLvl, 1);
+       $(selElem).change(storeAuthorValue.bind(null, fLvl, 1));
        $(cntnr).data('cnt', 1);
        $(cntnr).data('inputType', 'multiSelect');
        $(cntnr).append(selElem);
@@ -2564,19 +2580,20 @@ $(document).ready(function(){
     /** Fills all displayed form fields with any values previously entered. */
     function fillFormFields(fLvl) {
         const vals = fParams.forms[fLvl].fieldConfg.vals;                       console.log('fillFormFields. vals = %O, curFields = %O', vals,fParams.forms[fLvl].fieldConfg.fields);
-        const fieldObj = fParams.forms[fLvl].fieldConfg.fields;
+        const curFieldObj = fParams.forms[fLvl].fieldConfg.fields;
         const fieldHndlrs = {
             'text': setTextField, 'textArea': setTextArea, 'select': setSelect, 
-            'fullTextArea': setTextArea, 'multiSelect': Function.prototype,
+            'fullTextArea': setTextArea, 'multiSelect': reselectAuthors,
             'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
             'taxon': addTaxon
         };
         for (let field in vals) {
-            addValueIfFieldShown(field, vals[field], fLvl);
+            if (!vals[field].val) { continue; }
+            addValueIfFieldShown(field, vals[field], curFieldObj, fLvl);
         }
-        function addValueIfFieldShown(field, fieldObj, fLvl) {  
-            if (Object.keys(fieldObj).indexOf(field) === -1) { return; }
-            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);        //console.log('adding value to [%s] field', field);
+        function addValueIfFieldShown(field, fieldObj, curFieldObj, fLvl) {     //console.log('addValueIfFieldShown [%s] field, obj = %O', field, fieldObj);
+            if (Object.keys(curFieldObj).indexOf(field) === -1) { return; }
+            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);        
         }
     } /* End fillFormFields */
     function setTextField(val, field, fLvl) {
