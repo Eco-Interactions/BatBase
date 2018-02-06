@@ -754,7 +754,7 @@ $(document).ready(function(){
         resetOnFormTypeChange(capsType, typeId, fLvl);
         $('#'+capsType+'_Rows').append(getTypeFieldRows(type, typeId));
         initComboboxes(type, fLvl);
-        fillFormFields(fLvl);
+        fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
     }
     function resetOnFormTypeChange(capsType, typeId, fLvl) {  
@@ -2136,7 +2136,7 @@ $(document).ready(function(){
         resetVolatileRows(capsEnt, fLvl);
         $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
         initComboboxes(entity, fLvl);
-        fillFormFields(fLvl);
+        fillComplexFormFields(fLvl);
     }
     /**
      * Returns rows for the entity form fields. If the form is a source-type, 
@@ -2145,7 +2145,7 @@ $(document).ready(function(){
     function getFormFieldRows(entity, fConfg, fVals, fLvl) {
         const typeConfg = fParams.forms[fLvl].typeConfg;
         const fObj = getFieldTypeObj(entity, fConfg, fLvl, typeConfg);
-        const rows = buildRows(fObj, entity, fVals, fLvl);                      console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, fConfg.order);
+        const rows = buildRows(fObj, entity, fVals, fLvl);                      //console.log('[%s] form rows. confg = %O, rows = %O, order = %O', entity, fObj, rows, fConfg.order);
         return orderRows(rows, fObj.order);
     }
     /**
@@ -2581,31 +2581,27 @@ $(document).ready(function(){
         }
         return valObj;
     }
-    /** Fills all displayed form fields with any values previously entered. */
-    function fillFormFields(fLvl) {
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       console.log('fillFormFields. vals = %O, curFields = %O', vals,fParams.forms[fLvl].fieldConfg.fields);
+    /**
+     * When either source-type fields are regenerated or the form fields are toggled 
+     * between all available fields and the default shown, the fields that can 
+     * not be reset as easily as simply setting a value in the form input during 
+     * reinitiation are handled here.
+     */
+    function fillComplexFormFields(fLvl) {
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('fillComplexFormFields. vals = %O, curFields = %O', vals,fParams.forms[fLvl].fieldConfg.fields);
         const curFieldObj = fParams.forms[fLvl].fieldConfg.fields;
-        const fieldHndlrs = {
-            'text': setTextField, 'textArea': setTextArea, 'select': setSelect, 
-            'fullTextArea': setTextArea, 'multiSelect': reselectAuthors,
-            'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
-            'taxon': addTaxon
-        };
-        for (let field in vals) {
-            if (!vals[field].val) { continue; }
+        const fieldHndlrs = { 'multiSelect': reselectAuthors };
+
+        for (var field in vals) {                                               //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
+            if (!vals[field].val) { continue; } 
+            if (Object.keys(fieldHndlrs).indexOf(vals[field].type) == -1) {continue;}
             addValueIfFieldShown(field, vals[field], curFieldObj, fLvl);
         }
         function addValueIfFieldShown(field, fieldObj, curFieldObj, fLvl) {     //console.log('addValueIfFieldShown [%s] field, obj = %O', field, fieldObj);
             if (Object.keys(curFieldObj).indexOf(field) === -1) { return; }
             fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);        
         }
-    } /* End fillFormFields */
-    function setTextField(val, field, fLvl) {
-        $('#'+field+'_row input[type="text"]').val(val);
-    }
-    function setSelect(val, field, fLvl) {  
-        $('#'+field+'-sel')[0].selectize.addItem(val);        
-    }
+    } /* End fillComplexFormFields */
     /*------------------ Form Submission Data-Prep Methods -------------------*/
     /** Enables the parent form's submit button if all required fields have values. */
     function ifParentFormValidEnableSubmit(fLvl) {
