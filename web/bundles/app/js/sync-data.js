@@ -50,7 +50,7 @@
     function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
         var withUpdates = Object.keys(updatedAt).filter(function(entity){
             return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
-        });                                                                     console.log("entities with updates = %O", withUpdates);
+        });                                                                     console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
         if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
         ajaxNewData(withUpdates, pgUpdatedAt);
     }
@@ -107,13 +107,13 @@
     } 
     function retryFailedUpdatesAndLoadGrid() {                                  console.log('retryFailedUpdatesAndLoadGrid')
         retryFailedUpdates();
-        initSearchGrid(); // send errors during init update to search page and show error message to user.
+        initSearchGrid(); //send errors during init update to search page and show error message to user.
     }
     /**
      * Updates the stored data's updatedAt flag, and initializes the search-page 
      * grid with the updated data @eif.search.initSearchGrid. 
      */
-    function initSearchGrid() {
+    function initSearchGrid() {                                                 console.log('Finished updating! Loading search grid.')
         storeData('pgDataUpdatedAt', getCurrentDate()); 
         eif.search.initSearchGrid(); 
     }
@@ -615,14 +615,15 @@
     }
     function addToFailedUpdates(updateFunc, params, edits) {
         if (!failed[params.entity]) { failed[params.entity] = {}; }
+        const errObj = edits || failed[params.entity];
         failed[params.entity][params.prop] = {
-            edits: edits, entity: params.entity, rcrd: params.rcrd, updateFunc: updateFunc
+            edits: errObj, entity: params.entity, rcrd: params.rcrd, updateFunc: updateFunc
         };
     }
     /** Retries any updates that failed in the first pass. */
     function retryFailedUpdates() {
-        failed.twice = true;
-        for (let entity in failed) {
+        failed.twice = true;                                                    console.log('failed updates = %O', failed);
+        for (let entity in failed) {  
             for (let prop in failed[entity]) {
                 let params = failed[entity][prop];
                 updateData(params.updateFunc, prop, params, params.edits);
