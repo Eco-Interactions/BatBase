@@ -242,6 +242,8 @@ $(document).ready(function(){
      * -- Property descriptions:
      * > action - eg, Create, Edit.
      * > confg - The form config object used during form building.
+     * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
+     * > fieldConfg - Form fields and types, values entered, and the required fields.
      * > entity - Name of this form's entity.
      * > exitHandler - Form exit handler or noOp.
      * > fieldConfg - Form fields and types, values entered, and the required fields.
@@ -256,6 +258,8 @@ $(document).ready(function(){
         fParams.forms[level] = {
             action: action,
             confg: formConfg,
+            typeConfg: false,
+            fieldConfg: { fields: {}, vals: {}, required: [] },
             entity: entity,
             exitHandler: getFormExitHandler(formConfg, action),
             fieldConfg: { fields: {}, vals: {}, required: [] },
