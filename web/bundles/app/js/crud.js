@@ -309,9 +309,9 @@ $(document).ready(function(){
     }
     /** Returns the form fields for the passed entity.  */
     function getEditFormFields(id, entity) {
-        var edges = { "interaction": getIntFormFields, "taxon": getTaxonEditFields };
-        var hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
-        var fields = hndlr(entity, id);                                         //console.log("fields = %O, hndlr = %O", fields, hndlr);     
+        const edges = { 'interaction': getIntFormFields, 'taxon': getTaxonEditFields };
+        const hndlr = entity in edges ? edges[entity] : buildEditFormFields;  
+        const fields = hndlr(entity, id);                                       //console.log("fields = %O, hndlr = %O", fields, hndlr);     
         return fields;
     }   
     function getIntFormFields(entity, id) {
@@ -319,8 +319,8 @@ $(document).ready(function(){
     }
     /** Returns the passed entity's form fields. */
     function buildEditFormFields(entity) {
-        var fields =  buildSubForm(entity, {}, "top", null, "edit");                            
-        return fields.concat(buildFormBttns(entity, "top", "edit"));
+        const fieldRows = buildFormRows(entity, {}, 'top', null, 'edit');                            
+        return [fieldRows, buildFormBttns(entity, 'top', 'edit')];
     }
     /*------------------- Fills Edit Form Fields -----------------------------*/
     /** Fills form with existing data for the entity being edited. */
@@ -532,8 +532,8 @@ $(document).ready(function(){
      * field's combobox and completing the appended sub-form.
      */
     function initCreateForm() {
-        var form = buildFormElem();
-        var formFields = buildIntFormFields('create');                          //console.log("formFields = %O", formFields);
+        const form = buildFormElem();
+        const formFields = buildIntFormFields('create');                        //console.log("formFields = %O", formFields);
         $(form).append(formFields);
         $('#form-main').append(form);      
         finishIntFormBuild();
@@ -573,9 +573,11 @@ $(document).ready(function(){
     function buildIntFormFields(action) {
         const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
             buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
-            buildIntTagField, buildIntNoteField ]; 
-        const fields = builders.map(buildField);
-        return fields.concat(buildFormBttns("interaction", "top", action));
+            buildIntTagField, buildIntNoteField ];
+        const rowCntnr = _util.buildElem('div', {
+            id: 'interaction_Rows', class: 'flex-row flex-wrap'});
+        $(rowCntnr).append(builders.map(buildField));
+        return [rowCntnr, buildFormBttns('interaction', 'top', action)];
     }
     function buildField(builder) {
         const field = builder();                                                //console.log("field = %O", field);
@@ -642,7 +644,6 @@ $(document).ready(function(){
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, fLvl); }
         $('#CitationTitle_row').after(initSubForm(
             'publication', fLvl, 'flex-row med-form', {'Title': val}, '#Publication-sel'));
-        moveFieldsIntoVolatileContainer('Publication', 'med-form-sub', fLvl);
         initComboboxes('publication', 'sub');
         $('#Title_row input').focus();
         return { 'value': '', 'text': 'Creating Publication...' };
@@ -710,10 +711,9 @@ $(document).ready(function(){
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
         $('#CitationTitle_row').after(initSubForm(
             'citation', fLvl, 'flex-row med-form', {'Title': val}, '#CitationTitle-sel'));
-        moveFieldsIntoVolatileContainer('Citation', 'med-form-sub', fLvl);
         initComboboxes('citation', 'sub');
         enableCombobox('#Publication-sel', false);
-        addExistingPubContribs();
+        addExistingPubContribs(fLvl);
         $('#Abstract_row textarea').focus();
         return { 'value': '', 'text': 'Creating Citation...' };
     }
@@ -728,11 +728,12 @@ $(document).ready(function(){
      * If the parent publication has existing contributors, add them to the new 
      * citation form's author field(s). 
      */
-    function addExistingPubContribs(val) {  
-        var pubRcrd = fParams.records.source[$('#Publication-sel').val()];      //console.log('pubRcrd = %O', pubRcrd) 
-        if (pubRcrd.contributors.length > 0) {
-            selectExistingAuthors(pubRcrd.contributors);
-        }
+    function addExistingPubContribs(fLvl) {  
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       
+        const pubRcrd = fParams.records.source[$('#Publication-sel').val()];    
+        if (!pubRcrd.contributors.length) { return; }
+        vals.Authors = {};
+        vals.Authors.val = pubRcrd.contributors;
     }
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
@@ -746,14 +747,14 @@ $(document).ready(function(){
      */
     function loadSrcTypeFields(type, typeId, elem) {
         const fLvl = getSubFormLvl('sub');
-        const capsType = _util.ucfirst(type);
-        resetOnFormTypeChange(capsType, typeId, fLvl);
-        $('#'+capsType+'_Rows').append(getTypeFieldRows(type, typeId));
+        resetOnFormTypeChange(type, typeId, fLvl);
+        $('#'+type+'_Rows').append(getTypeFieldRows(type, typeId));
         initComboboxes(type, fLvl);
         fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
     }
-    function resetOnFormTypeChange(capsType, typeId, fLvl) {  
+    function resetOnFormTypeChange(type, typeId, fLvl) {  
+        const capsType = _util.ucfirst(type);
         fParams.forms[fLvl].fieldConfg.vals[capsType+'Type'].val = typeId;
         fParams.forms[fLvl].reqElems = [];
         disableSubmitBttn('#'+fLvl+'-submit'); 
@@ -765,7 +766,7 @@ $(document).ready(function(){
     function getTypeFieldRows(entity, typeId) {
         const fVals = getCurrentFormFieldVals('sub');
         setSourceTypeConfg(entity, typeId); 
-        resetVolatileRows(_util.ucfirst(entity), 'sub');      
+        $('#'+entity+'_Rows').empty();     
         return getFormFieldRows(entity, getFormConfg(entity), fVals, 'sub');
     }
     /** Sets the type confg for the selected source type in form params. */
@@ -810,7 +811,7 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
-        const opts = [];
+        let opts = [];
         for (var id in fParams.records.location) {
             opts.push({ 
                 value: id, text: fParams.records.location[id].displayName });
@@ -830,7 +831,7 @@ $(document).ready(function(){
     }          
     /** Returns an array of options for the locations of the passed country/region. */
     function getOptsForLoc(loc) {
-        const opts = loc.children.map(function(id) {  
+        let opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
         opts = opts.concat([{ value: loc.id, text: loc.displayName }])
@@ -880,7 +881,6 @@ $(document).ready(function(){
         }; 
         $('#Location_row').after(initSubForm(
             'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
-        moveFieldsIntoVolatileContainer('Location', 'med-form-sub', fLvl);
         initComboboxes('location', 'sub');
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
@@ -1049,7 +1049,7 @@ $(document).ready(function(){
     function showNewTaxonForm(val, selLvl, fLvl) {                              //console.log("showNewTaxonForm. val, selVal, fLvl = %O", arguments)
         fParams.forms.taxonPs.formTaxonLvl = selLvl;
         buildTaxonForm();
-        disableSubmitBttn('#sub2-submit');
+        if (!val) { disableSubmitBttn('#sub2-submit'); }
         return { 'value': '', 'text': 'Creating '+selLvl+'...' };
 
         function buildTaxonForm() {
@@ -1088,7 +1088,7 @@ $(document).ready(function(){
      */
     function buildAndAppendRealmElems(realm, fLvl) {
         const realmElems = _util.buildElem('div', { id: 'realm-lvls' });
-        $(realmElems).append(buildSubForm(realm, {}, fLvl, null));
+        $(realmElems).append(buildFormRows(realm, {}, fLvl, null));
         $('#Realm_row').append(realmElems);
         fParams.forms[fLvl].fieldConfg.vals.Realm = { val: null, type: 'select' };
     }
@@ -1387,18 +1387,18 @@ $(document).ready(function(){
         return hdr;
     }
     function getParentEditFields(prnt) {  
-        var realm = _util.lcfirst(prnt.realm.displayName);      
-        var lvlSelRows = buildSubForm(realm, {}, 'sub', null, 'edit');
-        var realmSelRow = getRealmLvlRow(prnt);
+        const realm = _util.lcfirst(prnt.realm.displayName);      
+        const realmSelRow = getRealmLvlRow(prnt);
+        const lvlSelRows = buildFormRows(realm, {}, 'sub', null, 'edit');
         fParams.forms.taxonPs.prntSubFormLvl = 'sub2';
-        return realmSelRow.concat(lvlSelRows);
+        return [realmSelRow, lvlSelRows];
     }
     function getRealmLvlRow(taxon) {
         var realmLvl = fParams.forms.taxonPs.realmLvls[0];
         var lbl = _util.buildElem('label', { text: realmLvl });
         var taxonym = _util.buildElem('span', { text: fParams.records.taxon.realm });
         $(taxonym).css({ 'padding-top': '.55em' });
-        return [buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub')];
+        return buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub');
     }
     /**
      * Initializes the edit-parent form's comboboxes. Selects the current parent.
@@ -1562,6 +1562,9 @@ $(document).ready(function(){
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
     /*-------------- Publisher -----------------------------------------------*/
+    function onPublSelection(val) {
+        if (val === 'create') { return openCreateForm('Publisher'); }        
+    }
     /**
      * When a user enters a new publisher into the combobox, a create-publisher
      * form is built, appended to the publisher field row and an option object is 
@@ -1571,14 +1574,14 @@ $(document).ready(function(){
      * Note: The publisher form inits with the submit button enabled, as display 
      *     name, aka val, is it's only required field.
      */
-    function initPublisherForm (val) {                                          //console.log("Adding new publisher! val = %s", val);
+    function initPublisherForm (value) {                                        //console.log("Adding new publisher! val = %s", val);
+        const val = value === 'create' ? '' : value;
         const fLvl = getSubFormLvl('sub2');
         const prntLvl = getNextFormLevel('parent', fLvl);
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, fLvl); }
         $('#Publisher_row').append(initSubForm(
             'publisher', fLvl, 'sml-right sml-form', {'DisplayName': val}, '#Publisher-sel'));
         disableSubmitBttn('#'+prntLvl+'-submit');
-        moveFieldsIntoVolatileContainer('Publisher', 'sml-form-sub', fLvl);
         $('#DisplayName_row input').focus();
         return { 'value': '', 'text': 'Creating Publisher...' };
     }
@@ -1606,8 +1609,9 @@ $(document).ready(function(){
      * the last author combobox. The total count of authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
-        if (val === "" || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
-        var cnt = $("#Authors_sel-cntnr").data("cnt") + 1;                          
+        let cnt = $('#Authors_sel-cntnr').data('cnt') + 1;                          
+        if (val === 'create') { return openCreateForm('Authors', --cnt); }        
+        if (val === '' || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
         buildNewAuthorSelect(cnt, val);
         focusCombobox('#Authors-sel'+cnt);
     }
@@ -1630,19 +1634,19 @@ $(document).ready(function(){
      * this level , where a message will be shown telling the user to complete 
      * the open form and the form init will be canceled.
      */
-    function initAuthForm (val) {                                               //console.log("Adding new auth! val = %s", val);
-        var authCnt = $("#Authors_sel-cntnr").data("cnt");
-        var parentSelId = "#Authors-sel"+authCnt;
-        var fLvl = getSubFormLvl("sub2");
-        var prntLvl = getNextFormLevel("parent", fLvl);
+    function initAuthForm (value) {                                             //console.log("Adding new auth! val = %s", val);
+        const authCnt = $('#Authors_sel-cntnr').data('cnt');
+        const parentSelId = '#Authors-sel'+authCnt;
+        const fLvl = getSubFormLvl('sub2');
+        const prntLvl = getNextFormLevel('parent', fLvl);
+        const val = value === 'create' ? '' : value;
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, fLvl); }
         $('#Authors_row').append(initSubForm(
-            "author", fLvl, "sml-left sml-form", {"Last Name": val}, parentSelId));
-        enableSubmitBttn("#"+fLvl+"-submit");
-        disableSubmitBttn("#"+prntLvl+"-submit");
-        moveFieldsIntoVolatileContainer('Author', 'sml-form-sub', fLvl);
+            'author', fLvl, 'sml-left sml-form', {'LastName': val}, parentSelId));
+        enableSubmitBttn('#'+fLvl+'-submit');
+        disableSubmitBttn('#'+prntLvl+'-submit');
         $('#FirstName_row input').focus();
-        return { "value": "", "text": "Creating Author..." };
+        return { 'value': '', 'text': 'Creating Author...' };
     }
     /**
      * When an author combobox is cleared, all empty author comboboxes are cleared
@@ -1737,7 +1741,7 @@ $(document).ready(function(){
             'Order': { name: 'Order', change: onLevelSelection, add: initTaxonForm },
             'Phylum': { name: 'Phylum', change: false, add: false },
             'PublicationType': { name: 'Publication Type', change: loadPubTypeFields, add: false },
-            'Publisher': { name: 'Publisher', change: Function.prototype, add: initPublisherForm },
+            'Publisher': { name: 'Publisher', change: onPublSelection, add: initPublisherForm },
             'Realm': { name: 'Realm', change: onRealmSelection, add: false },
             'Species': { name: 'Species', change: onLevelSelection, add: initTaxonForm },
             // 'Tags':  { name: 'Tag', change: false, add: false, 
@@ -1784,9 +1788,9 @@ $(document).ready(function(){
             id: fLvl+'-form', class: formClasses + ' flex-wrap'}); 
         const hdr = _util.buildElem(
             'p', { 'text': 'New '+_util.ucfirst(formEntity), 'id': fLvl+'-hdr' });
-        const subForm = buildSubForm(formEntity, fVals, fLvl, selId);
-        subForm.push(buildFormBttns(formEntity, fLvl, 'create'));
-        $(subFormContainer).append([hdr].concat(subForm));
+        const fieldRows = buildFormRows(formEntity, fVals, fLvl, selId);
+        const bttns = buildFormBttns(formEntity, fLvl, 'create');
+        $(subFormContainer).append([hdr, fieldRows, bttns]);
         fParams.forms[fLvl].pSelId = selId; 
         enableCombobox(selId, false)
         return subFormContainer;
@@ -1795,10 +1799,13 @@ $(document).ready(function(){
      * Builds and returns the default fields for entity sub-form and returns the 
      * row elems. Inits the params for the sub-form in the global fParams obj.
      */
-    function buildSubForm(entity, fVals, level, pSel, action) {                 //console.log('buildSubForm. args = %O', arguments)
+    function buildFormRows(entity, fVals, level, pSel, action) {                //console.log('buildFormRows. args = %O', arguments)
+        const rowCntnr = _util.buildElem('div', {
+            id: entity+'_Rows', class: 'flex-row flex-wrap'});
         const formConfg = getFormConfg(entity);                                 
         initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));        
-        return getFormFieldRows(entity, formConfg, fVals, level, false);
+        $(rowCntnr).append(getFormFieldRows(entity, formConfg, fVals, level, false));
+        return rowCntnr;
     }
     /**
      * Returns a form-config object for the passed entity. 
@@ -2109,23 +2116,6 @@ $(document).ready(function(){
         return fields[coreEntityMap[entity]];
     }    
     /** -------------------- Form Row Builders ------------------------------ */
-    /** Forms with optional fields are wrapped in a container. */
-    function moveFieldsIntoVolatileContainer(entity, fClasses, fLvl) {          //console.log('entity = %s, fLvl = %s, form = %O', entity, fLvl, $('#'+fLvl+'-form')[0])
-        resetVolatileRows(entity, fClasses, fLvl);
-        $('#'+fLvl+'-form').children().each(moveIntoVolatileCntnr);
-
-        function moveIntoVolatileCntnr(i, elem) {  
-            if (!elem.id.includes('_row')) { return; }          
-            $(elem).appendTo('#'+entity+'_Rows');
-        }
-    }
-    /** Empties or creates the entity-form's field container. */
-    function resetVolatileRows(entity, fClasses, fLvl) {                        //console.log('reseting rows--------')
-        if ($('#'+entity+'_Rows').length) { return $('#'+entity+'_Rows').empty(); }
-        const rowCntnr = _util.buildElem('div', {
-            id: entity+'_Rows', class: 'flex-row flex-wrap ' + fClasses});  
-        $('#'+fLvl+'-hdr').after(rowCntnr);
-    }
     /**
      * Toggles between displaying all fields for the entity and only showing the 
      * default (required and suggested) fields.
@@ -2133,10 +2123,9 @@ $(document).ready(function(){
     function toggleShowAllFields(entity, fLvl) {                                //console.log('--- Showing all Fields [%s] -------', this.checked);
         fParams.forms.expanded[entity] = this.checked;         
         const fVals = getCurrentFormFieldVals(fLvl);
-        const capsEnt = _util.ucfirst(entity);
         const fConfg = fParams.forms[fLvl].confg;                               //console.log('toggling optional fields. Show? [%s]', fParams.forms.expanded[entity]);
-        resetVolatileRows(capsEnt, fLvl);
-        $('#'+capsEnt+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
+        $('#'+entity+'_Rows').empty();
+        $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
         initComboboxes(entity, fLvl);
         fillComplexFormFields(fLvl);
     }
@@ -2370,13 +2359,13 @@ $(document).ready(function(){
         const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
             'authSrcs': 'Author' };
         const ids = _util.getDataFromStorage(prop);
-        const opts = getRcrdOpts(ids, fParams.records.source);
+        let opts = getRcrdOpts(ids, fParams.records.source);
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
         return opts;
     }
     /** Returns an array of taxonyms for the passed level and the form's realm. */
     function getTaxonOpts(level) {
-        const opts = getOptsFromStoredData(fParams.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fParams.forms.taxonPs.realm+level+"Names", opts)        
+        let opts = getOptsFromStoredData(fParams.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fParams.forms.taxonPs.realm+level+"Names", opts)        
         opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
         return opts;
     }
@@ -2579,8 +2568,9 @@ $(document).ready(function(){
             intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
     }
 /*--------------------------- Misc Form Helpers ------------------------------*/
-    function openCreateForm(entity) {
-         $('#'+entity+'-sel')[0].selectize.createItem('create'); 
+    function openCreateForm(entity, cnt) {
+        const selId = cnt ? '#'+entity+'-sel'+cnt : '#'+entity+'-sel';
+         $(selId)[0].selectize.createItem('create'); 
     }
 /*--------------------------- Fill Form Fields -------------------------------*/
     /** Returns an object with field names(k) and values(v) of all form fields*/
@@ -2638,38 +2628,33 @@ $(document).ready(function(){
             class: 'overlay waiting', id: 'c-overlay'}));
         $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
     }
-    function getFormValuesAndSubmit(id, fLvl, entity) {                         console.log("getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
-        const elems = getFormFieldElems(id, entity);
-        const formVals = getFormValueData(elems, entity);
+    function getFormValuesAndSubmit(id, fLvl, entity) {                         //console.log("getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
+        const formVals = getFormValueData(entity);
         buildFormDataAndSubmit(fLvl, formVals);  
-    }
-    function getFormFieldElems(id, entity) {
-        const $fieldCntnr = $('#'+_util.ucfirst(entity)+'_Rows');
-        return $fieldCntnr.length ? $fieldCntnr[0].children : $(id)[0].children;   
     }
     /**
      * Loops through all rows in the form with the passed id and returns an object 
      * of the form values. Entity data not contained in an input on the form is 
      * added @handleAdditionalEntityData.
      */
-    function getFormValueData(elems, entity) {                                  //console.log('getFormValueData. [%s] elems = %O', entity, elems);
+    function getFormValueData(entity) {
+        const elems = $('#'+entity+'_Rows')[0].children;                        //console.log('getFormValueData. [%s] elems = %O', entity, elems);
         const formVals = {};
-        for (let i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  
+        for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
         handleAdditionalEntityData(entity);
         return formVals;
         /** Get's the value from the form elem and set it into formVals. */
         function getInputData(elem) {                                           //console.log("elem = %O", elem)
-            if (elem.id.includes('-hdr')) { return; }
-            var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            var input = elem.children[1].children[1];                           //console.log("fieldName = ", fieldName)
+            const fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
+            const input = elem.children[1].children[1];                         //console.log("fieldName = ", fieldName)
             if ($(input).data('inputType')) { 
                 getInputVals(fieldName, input, $(input).data('inputType')); 
             } else { formVals[fieldName] = input.value || null; }
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {
-            var typeHandlers = {
-                "multiSelect": getMultiSelectVals, "tags": getTagVals
+            const typeHandlers = {
+                'multiSelect': getMultiSelectVals, 'tags': getTagVals
             };
             typeHandlers[type](fieldName, input);
         }
@@ -2709,16 +2694,16 @@ $(document).ready(function(){
         /** -------------------- Additional Author Data ----------------------*/ 
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
         function getAuthFullName() { 
-            var nameFields = ["firstName", "middleName", "lastName", "suffix"];
-            var fullName = [];
+            const nameFields = ['firstName', 'middleName', 'lastName', 'suffix'];
+            const fullName = [];
             nameFields.forEach(function(field) {
                 if (formVals[field]) { fullName.push(formVals[field]) };
             });
             formVals.fullName = fullName.join(" ");
         }
         /** Concats author Last, First Middle Suffix as the author display name.*/
-        function getAuthDisplayName() {
-            var displayName = formVals.lastName + ',';
+        function getAuthDisplayName() {  
+            let displayName = formVals.lastName + ',';
             ["firstName", "middleName", "suffix"].forEach(function(name){
                 if (formVals[name]) { displayName += ' '+formVals[name]; };
             });
@@ -2893,8 +2878,8 @@ $(document).ready(function(){
      * Builds a form data object @buildFormData. Sends it to the server @submitFormData
      */
     function buildFormDataAndSubmit(fLvl, formVals) {                        
-        const entity = fParams.forms[fLvl].entity;                                //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
-        const formData = buildFormData(entity, formVals);                         //console.log("formData = %O", formData);
+        const entity = fParams.forms[fLvl].entity;                              //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
+        const formData = buildFormData(entity, formVals);                       //console.log("formData = %O", formData);
         submitFormData(formData, fLvl);
     }                
     /**
