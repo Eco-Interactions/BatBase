@@ -17,19 +17,15 @@ Questions:
     ## Citation full text ##
     -Thoughts-
     -Todo-
-
-        - Also store the entered values of elems with custom change events
-            - Handle authors
-        - fix required fields and form submit
-
-        - alphabetize form params
-
+        ## before update ##
+        -- elimate the ability to accidently click submit twice and create duplicate interactions
         - check all edit forms
 
-
+        ## moving forward with auto-gen ##
         - Remove publisher type code? 
-        - redownload all autocomplete(?)
 
+        ## before complete ## 
+        - redownload all autocomplete(?)
         -- fix taxon lvl fills. 
 
 ________________________________________________________________________________

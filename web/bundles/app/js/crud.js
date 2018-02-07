@@ -595,13 +595,14 @@ $(document).ready(function(){
      * current publication titles.
      */
     function buildPubFieldRow() {
-        const selElem = _util.buildSelectElem(getSrcOpts('pubSrcs'), 
-            { id: "Publication-sel", class: "lrg-field" });
-        return buildFormRow("Publication", selElem, "top", true);
+        const selElem = _util.buildSelectElem( getSrcOpts('pubSrcs'), 
+            { id: 'Publication-sel', class: 'lrg-field' });
+        return buildFormRow('Publication', selElem, 'top', true);
     }
     /** When a publication is selected fill citation dropdown @fillCitationField.  */
     function onPubSelection(val) { 
-        if (val === "" || isNaN(parseInt(val)) ) { return onPubClear(); }                                
+        if (val === 'create') { return openCreateForm('Publication'); }        
+        if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
         fillPubDetailPanel(val);
         if (!fParams.editing) { $('#Publication_pin').focus(); }
@@ -635,8 +636,9 @@ $(document).ready(function(){
      * form is built and appended to the interaction form. An option object is 
      * returned to be selected in the interaction form's publication combobox.
      */
-    function initPubForm(val) {                                                 //console.log("Adding new pub! val = %s", val);
+    function initPubForm(value) {                                               //console.log("Adding new pub! val = %s", value);
         const fLvl = getSubFormLvl('sub');
+        const val = value === 'create' ? '' : value;
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, fLvl); }
         $('#CitationTitle_row').after(initSubForm(
             'publication', fLvl, 'flex-row med-form', {'Title': val}, '#Publication-sel'));
@@ -655,7 +657,7 @@ $(document).ready(function(){
     /*-------------- Citation ------------------------------------------------*/
     /** Returns a form row with an empty citation select dropdown. */
     function buildCitFieldRow() {
-        var selElem = _util.buildSelectElem([], {id: "CitationTitle-sel", class: "lrg-field"});
+        const selElem = _util.buildSelectElem([], {id: 'CitationTitle-sel', class: 'lrg-field'});
         return buildFormRow('CitationTitle', selElem, 'top', true);
     }
     /** Fills the citation combobox with all citations for the selected publication. */
@@ -665,16 +667,19 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with citations for this publication.  */
     function getPubCitationOpts(pubId) {
-        var pubRcrd = fParams.records.source[pubId];  
-        if (!pubRcrd) { return []; }
-        return getRcrdOpts(pubRcrd.children, fParams.records.source);
+        const pubRcrd = fParams.records.source[pubId];  
+        if (!pubRcrd) { return [{ value: 'create', text: 'Add a new Citation...'}]; }
+        const opts = getRcrdOpts(pubRcrd.children, fParams.records.source);
+        opts.unshift({ value: 'create', text: 'Add a new Citation...'});
+        return opts;
     }
     /** 
      * When a Citation is selected, both 'top' location fields are initialized
      * and the publication combobox is reenabled. 
      */    
     function onCitSelection(val) {  
-        if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
+        if (val === 'create') { return openCreateForm('CitationTitle'); }
+        if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
         fillCitDetailPanel(val);
         if (!fParams.editing) { $('#CitationTitle_pin').focus(); }
     }    
@@ -699,8 +704,9 @@ $(document).ready(function(){
         };
     }
     /** Shows the Citation sub-form and disables the publication combobox. */
-    function initCitForm(val) {                                                 //console.log("Adding new cit! val = %s", val);
-        var fLvl = getSubFormLvl("sub");
+    function initCitForm(value) {                                               //console.log("Adding new cit! val = %s", val);
+        const fLvl = getSubFormLvl('sub');
+        const val = value === 'create' ? '' : value;
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
         $('#CitationTitle_row').after(initSubForm(
             'citation', fLvl, 'flex-row med-form', {'Title': val}, '#CitationTitle-sel'));
@@ -732,7 +738,7 @@ $(document).ready(function(){
     function enablePubField() {
         enableCombobox('#Publication-sel');
     }
-    /** ----- Publication and Citation Shared form helpers ------------------ */
+        /** ----- Publication and Citation Shared form helpers ------------ */
     /**
      * Loads the deafult fields for the selected Source Type's type. Clears any 
      * previous type-fields and initializes the selectized dropdowns.  
@@ -804,13 +810,13 @@ $(document).ready(function(){
     }
     /** Returns an array of option objects with all unique locations.  */
     function getLocationOpts() {
-        var opts = [];
+        const opts = [];
         for (var id in fParams.records.location) {
             opts.push({ 
                 value: id, text: fParams.records.location[id].displayName });
         }
         opts = opts.sort(alphaOptionObjs);
-        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        opts.unshift({ value: 'create', text: 'Add a new Location...'});
         return opts;
     }
     /**
@@ -824,12 +830,12 @@ $(document).ready(function(){
     }          
     /** Returns an array of options for the locations of the passed country/region. */
     function getOptsForLoc(loc) {
-        var opts = loc.children.map(function(id) {  
+        const opts = loc.children.map(function(id) {  
             return { value: id, text: fParams.records.location[id].displayName };
         });  
         opts = opts.concat([{ value: loc.id, text: loc.displayName }])
             .sort(alphaOptionObjs);
-        opts.unshift({ value: "create", text: 'Add a new Location...'});
+        opts.unshift({ value: 'create', text: 'Add a new Location...'});
         return opts;
     }
     /** 
@@ -838,8 +844,8 @@ $(document).ready(function(){
      * the location was cleared, the detail panel is cleared. 
      */     
     function onLocSelection(val) {                                              //console.log("location selected 'val' = '"+ val+"'");
-        if (val === "create") { return $('#Location-sel')[0].selectize.createItem("create"); }
-        if (val === "" || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
+        if (val === 'create') { return openCreateForm('Location'); }
+        if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
         var locRcrd = fParams.records.location[val];                            //console.log("location = %O", locRcrd);
         var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
         $('#Country-Region-sel')[0].selectize.addItem(prntVal, true);
@@ -1030,7 +1036,8 @@ $(document).ready(function(){
         updateComboboxOptions('#'+role+'-sel', []);
     }
     /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
-    function initTaxonForm(val) { 
+    function initTaxonForm(value) { 
+        const val = value === 'create' ? '' : value;
         const selLvl = this.$control_input[0].id.split('-sel-selectize')[0]; 
         const fLvl = fParams.forms.taxonPs.prntSubFormLvl || getSubFormLvl('sub2'); //refact
         if (selLvl === 'Species' && !$('#Genus-sel').val()) {
@@ -1042,6 +1049,7 @@ $(document).ready(function(){
     function showNewTaxonForm(val, selLvl, fLvl) {                              //console.log("showNewTaxonForm. val, selVal, fLvl = %O", arguments)
         fParams.forms.taxonPs.formTaxonLvl = selLvl;
         buildTaxonForm();
+        disableSubmitBttn('#sub2-submit');
         return { 'value': '', 'text': 'Creating '+selLvl+'...' };
 
         function buildTaxonForm() {
@@ -1177,11 +1185,15 @@ $(document).ready(function(){
      * NOTE: Change event fires twice upon selection. Worked around using @captureSecondFire
      */
     function onLevelSelection(val) {                                            //console.log("onLevelSelection. val = [%s] isNaN?", val, isNaN(parseInt(val)))
+        if (val === 'create') { return openLevelCreateForm(this.$input[0]); }
         if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
         const fLvl = getSubFormLvl('sub');
         fParams.forms.taxonPs.recentChange = true;  // Flag used to filter out the second change event
         repopulateCombosWithRelatedTaxa(val);
         enableSubmitBttn('#'+fLvl+'-submit');             
+    }
+    function openLevelCreateForm(selElem) {
+        openCreateForm(selElem.id.split('-sel')[0]);
     }
     function syncTaxonCombos(elem) {                                            //console.log("syncTaxonCombos. elem = %O", elem)
         if (fParams.forms.taxonPs.recentChange) { return captureSecondFire(); }
@@ -1844,12 +1856,12 @@ $(document).ready(function(){
                     'Issue': 'text', 'Pages': 'text', 'CitationType': 'select', 
                     'CitationText': 'fullTextArea'},
                 'exclude': ['DisplayName', 'Description', 'Tags'], 
-                'required': ['Title', 'CitationType'],  
+                'required': ['CitationText', 'Title', 'CitationType'],  
                 'suggested': [], 
                 'optional': ['Abstract'],
                 'order': {
-                    'sug': ['Title', 'CitationType'], 
-                    'opt': ['Abstract', 'Title', 'CitationType']},  
+                    'sug': ['CitationText', 'Title', 'CitationType'], 
+                    'opt': ['CitationText', 'Abstract', 'Title', 'CitationType']},  
                 'types': {
                     'Article': {
                         'required': ['Authors', 'Year'],
@@ -2355,12 +2367,18 @@ $(document).ready(function(){
     }
     /** Returns an array of source-type (prop) options objects. */
     function getSrcOpts(prop) {
-        var ids = _util.getDataFromStorage(prop);
-        return getRcrdOpts(ids, fParams.records.source);
+        const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
+            'authSrcs': 'Author' };
+        const ids = _util.getDataFromStorage(prop);
+        const opts = getRcrdOpts(ids, fParams.records.source);
+        opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
+        return opts;
     }
     /** Returns an array of taxonyms for the passed level and the form's realm. */
     function getTaxonOpts(level) {
-        return getOptsFromStoredData(fParams.forms.taxonPs.realm+level+"Names");//console.log("taxon opts for [%s] = %O", fParams.forms.taxonPs.realm+level+"Names", opts)
+        const opts = getOptsFromStoredData(fParams.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fParams.forms.taxonPs.realm+level+"Names", opts)        
+        opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
+        return opts;
     }
     function getRealmOpts() {
         return getOptsFromStoredData('objectRealmNames');  
@@ -2561,6 +2579,9 @@ $(document).ready(function(){
             intFormLvl : fLvls[fLvls.indexOf(intFormLvl) - 1];
     }
 /*--------------------------- Misc Form Helpers ------------------------------*/
+    function openCreateForm(entity) {
+         $('#'+entity+'-sel')[0].selectize.createItem('create'); 
+    }
 /*--------------------------- Fill Form Fields -------------------------------*/
     /** Returns an object with field names(k) and values(v) of all form fields*/
     function getCurrentFormFieldVals(fLvl) {
