@@ -54,6 +54,7 @@ class CrudController extends Controller
         $returnData->detailEntity = $this->handleDetailEntity(
             $coreFormData, $formData, $returnData, $em
         );
+        $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Edit ----------------------------------------*/
@@ -87,6 +88,7 @@ class CrudController extends Controller
         $returnData->detailEntity = $this->handleDetailEntity(
             $coreFormData, $formData, $returnData, $em
         );
+        $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Shared Helpers ------------------------------*/
@@ -99,6 +101,11 @@ class CrudController extends Controller
         $edits = new \stdClass;
         $edits->editing = $editing;
         return $edits;
+    }
+    private function removeEditingFlag($coreObj, $detailObj)
+    {
+        unset($coreObj->editing);
+        unset($detailObj->editing);
     }
     /*---------- Detail Entity ------------------------------------------*/
     /** If the core-entity is 'Source', process any detail-entity data. */

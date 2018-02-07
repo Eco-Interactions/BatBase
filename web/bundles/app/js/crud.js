@@ -719,16 +719,6 @@ $(document).ready(function(){
         loadSrcTypeFields('citation', typeId, this.$input[0]);
     }
     /**
-     * Loads the deafult fields for the selected Citation Type. Clears any 
-     * previous type-fields and initializes the selectized dropdowns.
-     */
-    function loadCitTypeFields(typeId) {
-        resetTypeRows('Citation');      
-        const formConfg = getSourceTypeConfg('citation', typeId);              
-        $('#CitationTypeRows').append(getTypeFieldRows('citation', formConfg));
-        initComboboxes('citation');
-    }
-    /**
      * If the parent publication has existing contributors, add them to the new 
      * citation form's author field(s). 
      */
@@ -2628,18 +2618,22 @@ $(document).ready(function(){
         $('#c-overlay').css({'z-index': '1000', 'display': 'block'});
     }
     function getFormValuesAndSubmit(id, fLvl, entity) {                         console.log("getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
-        const formVals = getFormValueData(id, entity);
+        const elems = getFormFieldElems(id, entity);
+        const formVals = getFormValueData(elems, entity);
         buildFormDataAndSubmit(fLvl, formVals);  
+    }
+    function getFormFieldElems(id, entity) {
+        const $fieldCntnr = $('#'+_util.ucfirst(entity)+'_Rows');
+        return $fieldCntnr.length ? $fieldCntnr[0].children : $(id)[0].children;   
     }
     /**
      * Loops through all rows in the form with the passed id and returns an object 
      * of the form values. Entity data not contained in an input on the form is 
      * added @handleAdditionalEntityData.
      */
-    function getFormValueData(id, entity) {      
-        var elems = $(id)[0].children;   
-        var formVals = {};
-        for (var i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  
+    function getFormValueData(elems, entity) {                                  //console.log('getFormValueData. [%s] elems = %O', entity, elems);
+        const formVals = {};
+        for (let i = 0; i < elems.length-1; i++) { getInputData(elems[i]); }  
         handleAdditionalEntityData(entity);
         return formVals;
         /** Get's the value from the form elem and set it into formVals. */
@@ -2647,8 +2641,8 @@ $(document).ready(function(){
             if (elem.id.includes('-hdr')) { return; }
             var fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
             var input = elem.children[1].children[1];                           //console.log("fieldName = ", fieldName)
-            if ($(input).data("inputType")) { 
-                getInputVals(fieldName, input, $(input).data("inputType")); 
+            if ($(input).data('inputType')) { 
+                getInputVals(fieldName, input, $(input).data('inputType')); 
             } else { formVals[fieldName] = input.value || null; }
         }
         /** Edge case input type values are processed via their type handlers. */
