@@ -79,7 +79,8 @@
         }
     } /* End ajaxNewData */ 
     /** Sends each entity's ajax return to be processed and stored. */
-    function processUpdatedData() {               
+    function processUpdatedData() {    
+        if (arguments[1] === "success") { return processUpdatedEntityData(...arguments); }
         for (let data in arguments) { 
             processUpdatedEntityData(arguments[data][0]);
         }
@@ -201,7 +202,7 @@
      * Updates the stored core-records array and the stored entityType array. 
      * Note: Taxa are the only core entity without 'types'.
      */
-    function updateCoreData(entity, rcrd) {                                     //console.log("Updating Core data");
+    function updateCoreData(entity, rcrd) {                                     //console.log("Updating [%s] Core data", entity);
         addToRcrdProp(entity, rcrd);
         if (entity === "taxon") { return; }
         addToTypeProp(entity+"Type", rcrd, entity); 
@@ -447,7 +448,7 @@
      * the entity data.
      */
     function storeServerData(data) {                                            //console.log("data received = %O", data);
-        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
+        for (let entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
             storeData(entity, parseData(data[entity]));
         }
     }
