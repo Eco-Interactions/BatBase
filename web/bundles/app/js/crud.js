@@ -216,7 +216,7 @@ $(document).ready(function(){
             ids are added later). False if not editing.
      * > entity - Name of this form's entity     
      * > forms - Container for form-specific params 
-     *  >> expanded - Object with form entity names(k) and fields-expanded state(v)
+     *  >> expanded - Obj of form entities(k) and their showAll/showDefault fields state(v)
      * > formLevels - An array of the form level names/tags/prefixes/etc.
      * > records - An object of all records, with id keys, for each of the 
      *   root entities- Interaction, Location, Source and Taxa.
@@ -224,17 +224,18 @@ $(document).ready(function(){
             form submission. Will be used on form-exit.
      */
     function initFormParams(action, entity, id) {   
-        var prevSubmitFocus = fParams.submitFocus;
+        const prevSubmitFocus = fParams.submitFocus;
+        const xpandedForms = fParams.forms ? fParams.forms.expanded : {};
         fParams = {
             action: action,
-            editing: action === "edit" ? { core: id || null, detail: null } : false,
+            editing: action === 'edit' ? { core: id || null, detail: null } : false,
             entity: entity,
-            forms: { expanded: {} },
-            formLevels: ["top", "sub", "sub2"],
-            records: _util.getDataFromStorage(["source", "location", "taxon"]),
+            forms: { expanded: xpandedForms },
+            formLevels: ['top', 'sub', 'sub2'],
+            records: _util.getDataFromStorage(['source', 'location', 'taxon']),
             submitFocus: prevSubmitFocus || false
         };
-        initFormLevelParamsObj(entity, "top", null, getFormConfg(entity), action); console.log("####fPs = %O", fParams)
+        initFormLevelParamsObj(entity, 'top', null, getFormConfg(entity), action); console.log("####fPs = %O", fParams)
     }
     /**
      * Adds the properties and confg that will be used throughout the code for 
@@ -893,6 +894,7 @@ $(document).ready(function(){
         $('#Location_row').after(initSubForm(
             'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
         initComboboxes('location', 'sub');
+        $('#Country-sel').change();
         enableCombobox('#Country-Region-sel', false);
         $('#DisplayName_row input').focus();
         clearCombobox('#Location-sel'); 
@@ -1235,9 +1237,11 @@ $(document).ready(function(){
      * and ancestor levels are populated with all taxa at the level and the direct 
      * ancestors selected. Child levels populate with only decendant taxa and
      * have no initial selection.
+     * TODO: Fix bug with child taxa opt refill sometimes filling with all taxa.
      */
     function repopulateCombosWithRelatedTaxa(selId) {
         var opts = {}, selected = {};                                           //console.log("repopulateCombosWithRelatedTaxa. opts = %O, selected = %O", opts, selected);
+        var lvls = fParams.forms.taxonPs.lvls;  
         var taxon = fParams.records.taxon[selId];
         repopulateTaxonCombos();
 
@@ -1245,6 +1249,7 @@ $(document).ready(function(){
             taxon.children.forEach(addRelatedChild);                                
             getSiblingAndAncestorTaxaOpts(taxon);
             buildOptsForEmptyLevels(taxon.level.id);
+            addCreateOpts();
             repopulateLevelCombos(opts, selected);
         }
         /** Adds all taxa from the selected taxon's level up until the realm-taxon level. */
@@ -1272,7 +1277,6 @@ $(document).ready(function(){
          * the 'none' value selected.
          */
         function buildOptsForEmptyLevels(selLvl) {
-            var lvls = fParams.forms.taxonPs.lvls;  
             var topLvl = fParams.forms.taxonPs.realm === "Arthropod" ? 3 : 5; 
             for (var i = 7; i >= topLvl; i--) {
                 if (opts[i]) { continue; }
@@ -1281,6 +1285,11 @@ $(document).ready(function(){
                     opts[i] = opts[i].concat(getTaxonOpts(lvls[i-1]));                    
                     selected[i] = "";
                 }
+            }
+        }
+        function addCreateOpts() {
+            for (let lvl in opts) {                                             //console.log("lvl = %s, name = ", lvl, lvls[lvl-1]);
+                opts[lvl].unshift({ value: 'create', text: 'Add a new '+lvls[lvl-1]+'...'});
             }
         }
     } /* End fillAncestorTaxa */    
@@ -1567,12 +1576,14 @@ $(document).ready(function(){
         if (!fParams.editing) { $('#InteractionType_pin').focus(); }
     }
     function buildIntTagField() {
-        var elem = buildTagsElem('interaction', 'InteractionTags', 'top');
+        const elem = buildTagsElem('interaction', 'InteractionTags', 'top');
         elem.className = 'lrg-field';
+        $(elem).change(checkIntFieldsAndEnableSubmit);
         return buildFormRow('InteractionTags', elem, 'top', false);
     }
     function buildIntNoteField() {
-        var txtElem = buildLongTextArea('interaction', 'Note', 'top');
+        const txtElem = buildLongTextArea('interaction', 'Note', 'top');
+        $(txtElem).change(checkIntFieldsAndEnableSubmit);
         return buildFormRow('Note', txtElem, 'top', false);
     }
     /*-------------- Sub Form Helpers ----------------------------------------------------------*/
@@ -2428,9 +2439,7 @@ $(document).ready(function(){
         var relFields = ["CitationTitle", "Country-Region", "Location", "Publication"];
         var pinClasses = 'top-pin' + (fParams.editing ? ' invis' : '');
         var pin = _util.buildElem("input", {type: "checkbox", id: field+"_pin", class: pinClasses});
-        $(pin).keypress(function(e){ //Enter
-            if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
-        });
+        _util.addEnterKeypressClick(pin);
         if (relFields.indexOf(field) !== -1) { $(pin).click(checkConnectedFieldPin); }
         return pin;
     }
@@ -2483,6 +2492,15 @@ $(document).ready(function(){
             enableSubmitBttn(subBttnId);
         }
     }
+    /**
+     * After the interaction form is submitted, the submit button is disabled to 
+     * eliminate accidently creating duplicate interactions. This change event is
+     * added to the non-required fields of the form to enable to submit as soon as 
+     * any change happens in the form, and the required fields are filled.
+     */
+    function checkIntFieldsAndEnableSubmit() {
+        if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
+    }
     /** Returns true if all the required elements for the current form have a value. */
     function ifAllRequiredFieldsFilled(fLvl) {                                  //console.log("ifAllRequiredFieldsFilled... fLvl = %s. fPs = %O", fLvl, fParams)
         const reqElems = fParams.forms[fLvl].reqElems;                          
@@ -2525,6 +2543,7 @@ $(document).ready(function(){
             text: 'Show all fields.' }); 
         if (fParams.forms.expanded[entity]) { chckBox.checked = true; }
         $(chckBox).change(toggleShowAllFields.bind(chckBox, _util.lcfirst(entity), level));
+        _util.addEnterKeypressClick(chckBox);
         $(cntnr).append([chckBox, lbl]);
         return cntnr;
     }
@@ -3124,6 +3143,7 @@ $(document).ready(function(){
         initFormParams("create", "interaction");
         resetIntFields(vals);
         $('#top-cancel').val(" Close "); 
+        disableSubmitBttn('#top-submit');
     }
     /** Shows a form-submit success message at the top of the interaction form. */
     function showSuccessMsg(msg) {

@@ -108,7 +108,7 @@
         resetGridParams();
         toggleTimeUpdatedFilter('disable');
         selectInitialSearchFocus();
-        initNoFiltersStatus();      
+        resetFilterStatusBar();      
         setUpFutureDevInfoBttn();
         selectSearchFocus();
     } 
@@ -151,6 +151,7 @@
     /** Grid-rebuild entry point after form-window close. */
     function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
         resetToggleTreeBttn(false);
+        resetFilterStatusBar();
         if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
         selectSearchFocus(null, focus);
     }
@@ -171,7 +172,7 @@
         if (focus !== gParams.curFocus) {
             _util.populateStorage("curFocus", focus);
             dataStorage.removeItem("curRealm");
-            initNoFiltersStatus();
+            resetFilterStatusBar();
             resetGridParams();
             resetToggleTreeBttn(false);
             clearPastHtmlOptions(); //buildGridFunc called here. 
@@ -1870,7 +1871,7 @@
         }
         function setFilterStatus() {
             if (activeFilters.length > 0) { setGridFilterStatus(getFilterStatus()); 
-            } else { initNoFiltersStatus() }
+            } else { resetFilterStatusBar() }
         }
         function getFilterStatus() {
             var tempStatusTxt;
@@ -1894,7 +1895,7 @@
     function clearGridStatus() {
         $('#grid-filter-status, #xtrnl-filter-status').empty();
     }
-    function initNoFiltersStatus() {
+    function resetFilterStatusBar() {
         $('#xtrnl-filter-status').text('Filtering on: ');
         $('#grid-filter-status').text('No Active Filters.');
         gParams.focusFltrs = [];

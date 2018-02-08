@@ -108,7 +108,7 @@
     } 
     function retryFailedUpdatesAndLoadGrid() {                                  console.log('retryFailedUpdatesAndLoadGrid')
         retryFailedUpdates();
-        initSearchGrid(); //send errors during init update to search page and show error message to user.
+        initSearchGrid(); //TODO: send errors during init update to search page and show error message to user.
     }
     /**
      * Updates the stored data's updatedAt flag, and initializes the search-page 

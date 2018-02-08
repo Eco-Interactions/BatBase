@@ -2,6 +2,7 @@
     var eif = ECO_INT_FMWK;
     var dataStorage;
     eif.util = {
+        addEnterKeypressClick: addEnterKeypressClick,
         buildElem: buildElem,
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
@@ -15,6 +16,12 @@
 
     extendPrototypes();
 
+    /*---------- Keypress event Helpers --------------------------------------*/
+    function addEnterKeypressClick(elem) {
+        $(elem).keypress(function(e){ //Enter
+            if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
+        });
+    }
     /*---------- String Helpers ----------------------------------------------*/
     function ucfirst(str) { 
         return str.charAt(0).toUpperCase() + str.slice(1); 

@@ -18,8 +18,7 @@ Questions:
     -Thoughts-
     -Todo-
         ## before update ##
-        -- elimate the ability to accidently click submit twice and create duplicate interactions
-        - check all edit forms
+        - run tests
 
         ## moving forward with auto-gen ##
         - Remove publisher type code? 
@@ -27,6 +26,7 @@ Questions:
         ## before complete ## 
         - redownload all autocomplete(?)
         -- fix taxon lvl fills. 
+        -- make it so you can't toggle fields while sub-form open
 
 ________________________________________________________________________________
 
