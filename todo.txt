@@ -12,6 +12,11 @@ Tullenda:
 =======================================
 Notes::
     ## Change Log ##
+        - Eliminated possibility of accidently creating duplicate interactions
+        - Forms now show the required and most likely to be used fields by default
+            - They remember their expanded state
+        - Fixed a few small bugs along the way
+        - All combos that can create now show the 'Add new...' option first    
 
 Questions:
     ## Citation full text ##
