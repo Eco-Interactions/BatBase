@@ -253,6 +253,9 @@ $(document).ready(function(){
      * > selElems - Contains all selElems until they are initialized with selectize.
      * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
      * > vals - Stores all values entered in the form's fields.
+     * --- Misc entity specific properties
+     * > Citation forms: pub - { src: pubSrc, pub: pub } (parent publication)
+     * > Taxon forms: taxonPs - added to fParams.forms (see props @initTaxonParams)
      */
     function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //console.log("initLvlParams. fP = %O, arguments = %O", fParams, arguments)
         fParams.forms[entity] = level;
@@ -567,6 +570,7 @@ $(document).ready(function(){
         $('#Country-Region_row label')[0].innerText = 'Country/Region';
         addReqElemsToConfg();    
         $('.all-fields-cntnr').hide();
+        $('#Publication-sel')[0].selectize.focus();
     }
     /** Displays the [Role] Taxon select form when the field gains focus. */ 
     function addTaxonFocusListener(role) {
@@ -613,12 +617,17 @@ $(document).ready(function(){
             { id: 'Publication-sel', class: 'lrg-field' });
         return buildFormRow('Publication', selElem, 'top', true);
     }
-    /** When a publication is selected fill citation dropdown @fillCitationField.  */
+    /** 
+     * When an existing publication is selected, the citation field is filled with 
+     * all current citations for the publciation. When a publication is created, 
+     * the citation form is automatically opened. 
+     */
     function onPubSelection(val) { 
         if (val === 'create') { return openCreateForm('Publication'); }        
         if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
         fillPubDetailPanel(val);
+        if (!fParams.records.source[val].children.length) { return initCitForm(); }
         if (!fParams.editing) { $('#Publication_pin').focus(); }
     }
     function onPubClear() {
@@ -724,17 +733,23 @@ $(document).ready(function(){
         $('#CitationTitle_row').after(initSubForm(
             'citation', fLvl, 'flex-row med-form', {'Title': val}, '#CitationTitle-sel'));
         initComboboxes('citation', 'sub');
+        setPublicationData(fLvl);
         enableCombobox('#Publication-sel', false);
-        addExistingPubContribs(fLvl);
         $('#Abstract_row textarea').focus();
         return { 'value': '', 'text': 'Creating Citation...' };
     }
-    /**
-     * Loads the deafult fields for the selected Citation Type. Clears any 
-     * previous type-fields and initializes the selectized dropdowns.
+    /** 
+     * Sets all relevant publication data in the citation form and selects the 
+     * default citation type.
      */
-    function loadCitTypeFields(typeId) {
-        loadSrcTypeFields('citation', typeId, this.$input[0]);
+    function setPublicationData(fLvl) {
+        addExistingPubData(fLvl);
+        selectDefaultCitType(fLvl);
+    }
+    function addExistingPubData(fLvl) {
+        addExistingPubContribs(fLvl);
+        addPublicationTitle(fLvl);
+        addPublicationYear(fLvl);
     }
     /**
      * If the parent publication has existing contributors, add them to the new 
@@ -742,10 +757,60 @@ $(document).ready(function(){
      */
     function addExistingPubContribs(fLvl) {  
         const vals = fParams.forms[fLvl].fieldConfg.vals;                       
-        const pubRcrd = fParams.records.source[$('#Publication-sel').val()];    
-        if (!pubRcrd.contributors.length) { return; }
+        const pubSrc = fParams.forms[fLvl].pub.src;
+        if (!pubSrc.contributors.length) { return; }
         vals.Authors = {};
-        vals.Authors.val = pubRcrd.contributors;
+        vals.Authors.val = pubSrc.contributors;
+    }
+    function addPublicationTitle(fLvl) {
+        const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
+        if (pubType === 'Journal') { return; }
+        addPubTitle(true, fLvl);
+    }
+    function addPublicationYear(fLvl) {
+        const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
+        if (pubType === 'Journal') { return; }
+        addPubYear(true, fLvl);
+    }
+    function selectDefaultCitType(fLvl) {
+        const dfaults = {
+            'Book': 'Book', 'Journal': 'Article', 'Other': 'Other',
+            'Thesis/Ph.D. Dissertation': 'Thesis/Ph.D. Dissertation'
+        };
+        const citTypes = _util.getDataFromStorage('citTypeNames');
+        const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
+        const dfaultType = dfaults[pubType];
+        $('#CitationType-sel')[0].selectize.addItem(citTypes[dfaultType]); 
+    }
+    /**
+     * Loads the deafult fields for the selected Citation Type. Clears any 
+     * previous type-fields and initializes the selectized dropdowns.
+     */
+    function loadCitTypeFields(typeId) {
+        handlePubData(typeId, this.$input[0], getSubFormLvl('sub'))
+        loadSrcTypeFields('citation', typeId, this.$input[0]);
+    }
+    /** Adds or removes publication data from the form's values, depending on type. */
+    function handlePubData(typeId, citTypeElem, fLvl) {
+        const type = citTypeElem.innerText;                                     //console.log('citType = ', type);
+        const addSameData = ['Book', 'Thesis/Ph.D. Dissertation', 'Other', 
+            'Report', 'Symposium proceeding'].indexOf(
+            type) !== -1;
+        addPubValues(fLvl, addSameData);
+    }
+    function addPubValues(fLvl, addValues) {
+        addPubTitle(addValues, fLvl);
+        addPubYear(addValues, fLvl);
+    }
+    function addPubTitle(addTitle, fLvl) {                                      
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       
+        vals.Title = {};
+        vals.Title.val = addTitle ? fParams.forms[fLvl].pub.src.displayName : '';
+    }
+    function addPubYear(addYear, fLvl) {  
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       
+        vals.Year = {};
+        vals.Year.val = addYear ? fParams.forms[fLvl].pub.src.year : '';
     }
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
@@ -1706,7 +1771,7 @@ $(document).ready(function(){
     /*------------------- Shared Form Builders ---------------------------------------------------*/
     /** Returns the record for the passed id and entity-type. */
     function getEntityRecord(entity, id) {
-        var rcrds = _util.getDataFromStorage(entity);                           //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
+        const rcrds = _util.getDataFromStorage(entity);                         //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
         return rcrds[id];
     }
     /*------------------- Combobox (selectized) Methods ----------------------*/
@@ -1938,50 +2003,40 @@ $(document).ready(function(){
                     'Other': {
                         'name': 'Other',
                         'required': ['Authors', 'Year'],
-                        'suggested': ['Issue', 'Pages', 'Volume'],
+                        'suggested': ['Issue', 'Pages', 'Volume', 'Year'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
-                            'opt': ['Pages', 'Volume', 'Issue', 
+                            'opt': ['Year', 'Pages', 'Volume', 'Issue', 
                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
-                    },
-                    'Page range': {
-                        'name': 'Page range',
-                        'required': ['Authors', 'Pages'],
-                        'suggested': [],
-                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                        'order': {
-                            'sug': ['Pages', 'Authors'],
-                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                                'Authors']},
                     },
                     'Report': {
                         'name': 'Report',
-                        'required': ['Authors'],
+                        'required': ['Authors', 'Year'],
                         'suggested': [],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Authors'],
-                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                            'sug': ['Year', 'Authors'],
+                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 'Authors']},
                     },
                     'Symposium proceeding': {
                         'name': 'Symposium proceeding',
-                        'required': ['Authors', 'Pages'],
+                        'required': ['Authors', 'Pages','Year'],
                         'suggested': [],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Pages', "Authors"],
-                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                                'Authors']},
+                            'sug': ['Year', 'Pages', "Authors"],
+                            'opt': ['Year', 'Pages', 'LinkDisplay', 'LinkUrl', 
+                                'Doi', 'Authors']},
                     },
-                    'Thesis/Ph. D. Dissertation': {
+                    'Thesis/Ph.D. Dissertation': {
                         'name': 'Thesis/Ph.D. Dissertation',
-                        'required': ['Authors'],
+                        'required': ['Authors', 'Year'],
                         'suggested': [],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Authors'],
-                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                            'sug': ['Year', 'Authors'],
+                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 'Authors']},
                     },
 
                 },
@@ -2340,7 +2395,7 @@ $(document).ready(function(){
     function getSelectOpts(field) {                                             //console.log("getSelectOpts. for %s", field);
         var optMap = {
             "Authors": [ getSrcOpts, 'authSrcs'],
-            "CitationType": [ getOptsFromStoredData, 'citTypeNames'],
+            "CitationType": [ getCitTypeOpts, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
             "Family": [ getTaxonOpts, 'Family' ],
@@ -2402,6 +2457,32 @@ $(document).ready(function(){
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
         return opts;
     }
+    /**
+     * Return the citation type options available for the parent publication type.
+     * Also adds the parent publication and source records to the fParams obj. 
+     */
+    function getCitTypeOpts(prop) {
+        const fLvl = getSubFormLvl('sub');
+        const citTypesObj = _util.getDataFromStorage(prop);
+        const curTypeNames = getCitTypeNames();                                 //console.log('curTypeNames = %O', curTypeNames);
+        return buildOptsObj(citTypesObj, curTypeNames.sort());
+
+        function getCitTypeNames() {
+            const opts = {
+                'Book': ['Book', 'Chapter'], 'Journal': ['Article'],
+                'Other': ['Museum record', 'Other', 'Report', 'Symposium proceeding'],
+                'Thesis/Ph.D. Dissertation': ['Thesis/Ph.D. Dissertation', 'Chapter']
+            };
+            setPubInParams();                                                   //console.log('type = ', fParams.forms[fLvl].pub.pub.publicationType.displayName)
+            return opts[fParams.forms[fLvl].pub.pub.publicationType.displayName];
+        }
+        function setPubInParams() {
+            const pubSrc = fParams.records.source[$('#Publication-sel').val()];    
+            const pub = getEntityRecord('publication', pubSrc.publication);
+            fParams.forms[fLvl].pub = { src: pubSrc, pub: pub };  
+            return pub.publicationType.displayName;
+        }
+    } /* End getCitTypeOpts */
     /** Returns an array of taxonyms for the passed level and the form's realm. */
     function getTaxonOpts(level) {
         let opts = getOptsFromStoredData(fParams.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fParams.forms.taxonPs.realm+level+"Names", opts)        
@@ -2778,8 +2859,7 @@ $(document).ready(function(){
             const type = getTypeName('citType', formVals.citationType);         console.log("type = ", type);
             const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
                 'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
-                'Page range': chapterSympCit, 'Museum record': articleRecordCit,
-                'Symposium proceeding': chapterSympCit };
+                'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit };
             // formVals.fullText = getFullText[type]();                            console.log('Full text = ', formVals.fullText);
         }
         /**
