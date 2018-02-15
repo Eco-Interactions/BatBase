@@ -514,7 +514,7 @@ $(document).ready(function(){
         let cnt = 0;
         if (['publication', 'citation'].indexOf(entity) == -1) { return; }
         srcRcrd.contributors.forEach(function(authId) {
-            selectAuthor(cnt++, authId)
+            selectAuthor(cnt++, authId, 'top')
         });
         fParams.forms.top.fieldConfg.vals.Authors.val = srcRcrd.contributors;
     }
@@ -787,7 +787,8 @@ $(document).ready(function(){
      * previous type-fields and initializes the selectized dropdowns.
      */
     function loadCitTypeFields(typeId) {
-        handlePubData(typeId, this.$input[0], getSubFormLvl('sub'))
+        const fLvl = getSubFormLvl('sub');
+        handlePubData(typeId, this.$input[0], fLvl)
         loadSrcTypeFields('citation', typeId, this.$input[0]);
     }
     /** Adds or removes publication data from the form's values, depending on type. */
@@ -812,6 +813,116 @@ $(document).ready(function(){
         vals.Year = {};
         vals.Year.val = addYear ? fParams.forms[fLvl].pub.src.year : '';
     }
+    /**
+     * Checks all required citation fields and sets the Citation Text field.
+     * If all required fields are filled, the citation text is generated and displayed.
+     * If not, the default text is displayed in the disabled textarea.
+     */
+    function handleCitText(formLvl) {                                           //console.log('handleCitText')
+        const fLvl = formLvl || getSubFormLvl('sub');
+        const dfault = 'The citation will display here once all required fields '+
+            'are filled.';
+        if (ifAllRequiredFieldsFilled(fLvl)) { addCitationText();
+        } else if ($('#CitationText_row textarea').val() !== dfault) {
+            $('#CitationText_row textarea').val(dfault)
+                .prop('disabled', true).change();
+        }
+    }
+    /**
+     * Generates and displays the full citation text after all required fields 
+     * are filled.
+     */
+    function addCitationText() {
+        const type = $('#CitationType-sel option:selected').text();             //console.log("type = ", type);
+        const formVals = getFormValueData('citation');
+        const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
+            'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
+            'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit,
+            'Thesis/Ph.D. Dissertation': thesisCit };
+        const citText = getFullText[type](); console.log('Full text = ', citText);
+        if ($('#CitationText_row textarea').val() !== citText) {
+            $('#CitationText_row textarea').val(citText)
+        }              
+        /**
+         * Returns: 1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *   [Initials. Last]. Year. Title of article. Title of Journal. Volume 
+         *   (Issue): Pages.
+         */
+        function articleRecordCit() {                                           //console.log("articleRecordCit called.")
+            const athrs = getCitAuthors();
+            let fullText = [athrs, formVals.year, formVals.title, getPubName()].join('. '); 
+            fullText += ' ' + [getVolAndIss(), formVals.pages].join(' ');
+            return fullText+'.';
+        }
+        /**
+         * 1st Author last name, initials. Year. Book Title. Edition. Publisher 
+         *   Name, City, Country.
+         */
+        function bookCit() {
+            // body...
+        }
+        /** 
+         * 1st Author last name, initials, & 2nd Author initials, last name. Year. 
+         *   Chapter Title. In: Book Title (Editor 1 [initials, last name], & 
+         *   Editor X [initials, last name], eds.). Pages of Chapter. Publisher Name, 
+         *   City, Country.
+         */
+        function chapterSympCit() {
+            // body...
+        }
+        /**
+         * Authors, Year. Title. Academic degree. Academic Institution, City, Country.
+         */
+        function reportCit() {
+            // body...
+        }
+        function thesisCit() {
+            // body...
+        }
+        function otherCit() {
+            // body...
+        }
+        /** ---------- citation full text helpers ------------------ */
+        /** 
+         * Returns a string with all author names formatted with the first author
+         * [Last, Initials.], all following authors as [Initials. Last], and each 
+         * are seperated by commas until the final author, which is seperated with '&'.
+         */
+        function getCitAuthors() { 
+            const auths = getSelectedVals($('#Authors_sel-cntnr')[0]);          //console.log('auths = %O', auths);
+            let athrs = '';
+            $(auths).each(function(i, srcId){
+                const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
+                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
+                const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
+                const name = getCitAuthName(i, athr);
+                athrs += i == 0 ? name : (i == auths.length-1 ?
+                    ' & '+ name : ', '+ name); 
+            }); 
+            return athrs;
+        }
+        /**
+         * Returns the last name and initials of the passed author. The first 
+         * author is formatted [Last, Initials.] and all others [Initials. Last];
+         */
+        function getCitAuthName(cnt, athr) {                                       
+            const last = athr.lastName;                                         
+            let initials = ["firstName", "middleName"].map(function(name) {
+                return athr[name] ? athr[name].charAt(0)+'.' : null;
+            }).filter(function(i) {return i;}).join(' '); //removes null values and joins
+            return cnt > 0 ? initials +' '+ last : last+', '+initials; 
+        }
+        function getPubName() {
+            const pub = fParams.records.source[$('#Publication-sel').val()];
+            return pub.displayName+'.';
+        }
+        /** Returns: Volume (Issue): || Volume: || (Issue): || null */
+        function getVolAndIss() {  //append ':'
+            let iss = formVals.issue ? '('+formVals.issue+'):' : null;
+            return formVals.volume && iss ? formVals.volume +' '+ iss :
+                formVals.volume ? formVals.volume+':' : iss ? iss : null;
+        }
+    } /* End addCitationText */
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
@@ -829,6 +940,7 @@ $(document).ready(function(){
         initComboboxes(type, fLvl);
         fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
+        if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
     }
     function resetOnFormTypeChange(type, typeId, fLvl) {  
         const capsType = _util.ucfirst(type);
@@ -1681,34 +1793,39 @@ $(document).ready(function(){
     /** Reselects authors after source-type fields are regenerated */
     function reselectAuthors(field, fieldObj, fLvl) {                               
         const valConfg = fParams.forms[fLvl].fieldConfg.vals; 
-        selectExistingAuthors(valConfg.Authors.val);
+        selectExistingAuthors(valConfg.Authors.val, fLvl);
     }
     /** Loops through author array and selects each author in the form */ 
-    function selectExistingAuthors(authAry) { 
+    function selectExistingAuthors(authAry, fLvl) { 
         $.each(authAry, function(i, authId) {  
-            selectAuthor(i, authId);
+            selectAuthor(i, authId, fLvl);
         });
     }
     /** Selects the passed author and builds a new, empty author combobox. */
-    function selectAuthor(cnt, authId) {
+    function selectAuthor(cnt, authId, fLvl) {
         const selId = '#Authors-sel'+ ++cnt;
         $(selId)[0].selectize.addItem(authId, true);
-        buildNewAuthorSelect(++cnt, authId);
+        buildNewAuthorSelect(++cnt, authId, fLvl);
     }
     /**
      * When an author is selected, a new author combobox is initialized underneath
      * the last author combobox. The total count of authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
+        const fLvl = getSubFormLvl('sub');
         let cnt = $('#Authors_sel-cntnr').data('cnt') + 1;                          
         if (val === 'create') { return openCreateForm('Authors', --cnt); }        
-        if (val === '' || parseInt(val) === NaN) { return clearUnusedAuthElems(); }
-        buildNewAuthorSelect(cnt, val);
+        if (val === '' || parseInt(val) === NaN) { return handleAuthFieldClear(fLvl); }
+        buildNewAuthorSelect(cnt, val, fLvl);
         focusCombobox('#Authors-sel'+cnt);
+        if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
+    }
+    function handleAuthFieldClear(fLvl) {
+        if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
+        clearUnusedAuthElems();
     }
     /** Builds a new, empty author combobox */
-    function buildNewAuthorSelect(cnt, val) {                                   //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
-        const prntLvl = getSubFormLvl('sub');
+    function buildNewAuthorSelect(cnt, val, prntLvl) {                          //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
         const parentFormEntity = fParams.forms[prntLvl].entity;
         const selConfg = { name: 'Author', id: '#Authors-sel'+cnt, 
                          change: onAuthSelection, add: initAuthForm };
@@ -1954,8 +2071,8 @@ $(document).ready(function(){
                     'Issue': 'text', 'Pages': 'text', 'CitationType': 'select', 
                     'CitationText': 'fullTextArea'},
                 'exclude': ['DisplayName', 'Description', 'Tags'], 
-                'required': ['CitationText', 'Title', 'CitationType'],  
-                'suggested': [], 
+                'required': ['Title', 'CitationType'],  
+                'suggested': ['CitationText'], 
                 'optional': ['Abstract'],
                 'order': {
                     'sug': ['CitationText', 'Title', 'CitationType'], 
@@ -2057,12 +2174,13 @@ $(document).ready(function(){
                 "add": {},  
                 "exclude": [], 
                 "required": ["DisplayName", "Country"],
-                "suggested": ["Description", "HabitatType"],
-                "optional": ["Elevation", "ElevationMax", "Latitude", "Longitude"],
+                "suggested": ["Description", "HabitatType", "Latitude", "Longitude",
+                    "Elevation", "ElevationMax"],
+                "optional": [],
                 "order": {
-                    "sug": ["DisplayName", "Description", "Country", "HabitatType"],
-                    "opt": ["DisplayName", "Description", "Country", "HabitatType", 
-                        "Elevation", "ElevationMax", "Latitude", "Longitude" ]},
+                    "sug": ["DisplayName", "Description", "Country", "HabitatType", 
+                        "Elevation", "ElevationMax", "Latitude", "Longitude"],
+                    "opt": false },
                 "exitHandler": { create: enableCountryRegionField }
             },
             "object": {
@@ -2318,10 +2436,14 @@ $(document).ready(function(){
     function isFieldRequried(field, fLvl, reqFields) {                          //console.log('isFieldRequried. fLvl = [%s], fParams = %O', fLvl, fParams);
         return reqFields.indexOf(field) !== -1;
     }
-    /** Adds field value to the form's confg object. */
+    /**
+     * Adds field value to the form's confg object. Calls @handleCitText to check
+     * citation fields for any changes to the generated and displayed citation text.
+     */
     function storeFieldValue(elem, fieldName, fLvl, value) {                    //console.log('store fields value. args = %O', arguments);
         const val = value || $(elem).val();                                     //console.log("val = %s, formValObj = %O", val, fParams.forms[fLvl]);
         if (fieldName === 'Authors') { return; }
+        if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
         fParams.forms[fLvl].fieldConfg.vals[fieldName].val = val;
     }
     /** Author values are stored in an array at the combo's 'cnt' index. */
@@ -2793,15 +2915,6 @@ $(document).ready(function(){
         function getMultiSelectVals(fieldName, cntnr) {
             formVals[fieldName] = getSelectedVals(cntnr);
         }
-        /** Returns an array of the selected values inside of a container elem. */
-        function getSelectedVals(cntnr) {
-            var vals = [];
-            var elems = cntnr.children;  
-            for (var i = 0; i <= elems.length-1; i+= 2) { 
-                if (elems[i].value) { vals.push(elems[i].value); }
-            }
-            return vals;
-        }
         /** Adds an array of tag values. */
         function getTagVals(fieldName, input) {                                 
             var selId = '#'+_util.ucfirst(fieldName)+'-sel';
@@ -2810,7 +2923,7 @@ $(document).ready(function(){
         function handleAdditionalEntityData(entity) {
             const dataHndlrs = {
                 'author': [ getAuthFullName, getAuthDisplayName ],
-                'citation': [ getPubFieldData, addCitDisplayName, ifBookType, addCitFullText ], 
+                'citation': [ getPubFieldData, addCitDisplayName, ifFullWorkCited ], 
                 'interaction': [ handleUnspecifiedLocs ],
                 'location': [ addElevUnits, padLatLong, getLocType ], 
                 'taxon': [ getTaxonData ],
@@ -2848,101 +2961,18 @@ $(document).ready(function(){
          * Appends '-citation' to citations that are attributed to entire books 
          * to maintain unique display names for both the publication and its citation.
          */
-        function ifBookType() { 
-            if (getTypeName('citType', formVals.citationType) !== "Book" || 
-                getTypeName('citType', formVals.citationType) !== "Report") { return; }
+        function ifFullWorkCited() { 
+            const type = $('#CitationType-sel option:selected').text();
+            const full = ['Book', 'Ph.D. Dissertation'];
+            if (full.indexOf(type) === -1) { return; }
             if (formVals.displayName.includes('-citation')) { return; }
             formVals.displayName += '-citation';
         }
-        /** Adds the full text for the citation formatted based on citation type. */
-        function addCitFullText() {
-            const type = getTypeName('citType', formVals.citationType);         console.log("type = ", type);
-            const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
-                'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
-                'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit };
-            // formVals.fullText = getFullText[type]();                            console.log('Full text = ', formVals.fullText);
-        }
-        /**
-         * Returns: 1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-         *   [Initials. Last]. Year. Title of article. Title of Journal. Volume 
-         *   (Issue): Pages.
-         */
-        function articleRecordCit() {                                           console.log("articleRecordCit called.")
-            const athrs = getCitAuthors();
-            let fullText = [athrs, formVals.year, formVals.title, getPubName()].join('. '); 
-            fullText += ' ' + [getVolAndIss(), formVals.pages].join(' ');
-            return fullText+'.';
-        }
-        /**
-         * 1st Author last name, initials. Year. Book Title. Edition. Publisher 
-         *   Name, City, Country.
-         */
-        function bookCit() {
-            // body...
-        }
-        /** 
-         * 1st Author last name, initials, & 2nd Author initials, last name. Year. 
-         *   Chapter Title. In: Book Title (Editor 1 [initials, last name], & 
-         *   Editor X [initials, last name], eds.). Pages of Chapter. Publisher Name, 
-         *   City, Country.
-         */
-        function chapterSympCit() {
-            // body...
-        }
-        /**
-         * Authors, Year. Title. Academic degree. Academic Institution, City, Country.
-         */
-        function reportCit() {
-            // body...
-        }
-        function otherCit() {
-            // body...
-        }
-                /** -------- Additional Citation data helpers --------*/
         function getTypeName(type, id) {            
             const types = _util.getDataFromStorage(type+'Names');               
             for (name in types) {
                 if (types[name] === id) { return name; }
             }
-        }
-        /** 
-         * Returns a string with all author names formatted with the first author
-         * [Last, Initials.], all following authors as [Initials. Last], and each 
-         * are seperated by commas until the final author, which is seperated with '&'.
-         */
-        function getCitAuthors() { 
-            const auths = getSelectedVals($('#Authors_sel-cntnr')[0]);          //console.log('auths = %O', auths);
-            let athrs = '';
-            $(auths).each(function(i, srcId){
-                const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
-                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
-                const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
-                const name = getAuthName(i, athr);
-                athrs += i == 0 ? name : (i == auths.length-1 ?
-                    ' & '+ name : ', '+ name); 
-            }); 
-            return athrs;
-        }
-        /**
-         * Returns the last name and initials of the passed author. The first 
-         * author is formatted [Last, Initials.] and all others [Initials. Last];
-         */
-        function getAuthName(cnt, athr) {                                       
-            const last = athr.lastName;                                         
-            let initials = ["firstName", "middleName"].map(function(name) {
-                return athr[name] ? athr[name].charAt(0)+'.' : null;
-            }).filter(function(i) {return i;}).join(' '); //removes null values and joins
-            return cnt > 0 ? initials +' '+ last : last+', '+initials; 
-        }
-        function getPubName() {
-            const pub = fParams.records.source[$('#Publication-sel').val()];
-            return pub.displayName+'.';
-        }
-        /** Returns: Volume (Issue): || Volume: || (Issue): || null */
-        function getVolAndIss() {  //append ':'
-            let iss = formVals.issue ? '('+formVals.issue+'):' : null;
-            return formVals.volume && iss ? formVals.volume +' '+ iss :
-                formVals.volume ? formVals.volume+':' : iss ? iss : null;
         }
         /** -------------------- Additional Location Data _-------------------*/ 
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
@@ -3000,6 +3030,16 @@ $(document).ready(function(){
             return fParams.forms.taxonPs.realmTaxon.id;
         }
     } /* End getFormValueData */
+    /** -------------- Form Data Helpers ------------ */
+    /** Returns an array of the selected values inside of a container elem. */
+    function getSelectedVals(cntnr) {
+        var vals = [];
+        var elems = cntnr.children;  
+        for (var i = 0; i <= elems.length-1; i+= 2) { 
+            if (elems[i].value) { vals.push(elems[i].value); }
+        }
+        return vals;
+    }
     /**
      * Builds a form data object @buildFormData. Sends it to the server @submitFormData
      */
