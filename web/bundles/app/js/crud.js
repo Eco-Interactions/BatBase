@@ -839,24 +839,30 @@ $(document).ready(function(){
             'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
             'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit,
             'Thesis/Ph.D. Dissertation': thesisCit };
-        const citText = getFullText[type](); console.log('Full text = ', citText);
+        const citText = getFullText[type]();                                    //console.log('Full text = ', citText);
         if ($('#CitationText_row textarea').val() !== citText) {
             $('#CitationText_row textarea').val(citText)
         }              
         /**
-         * Returns: 1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-         *   [Initials. Last]. Year. Title of article. Title of Journal. Volume 
-         *   (Issue): Pages.
+         * Articles, Museum records, etc.
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title of article. Title of Journal 
+         *     Volume (Issue): Pages.
          */
         function articleRecordCit() {                                           //console.log("articleRecordCit called.")
-            const athrs = getCitAuthors();
-            let fullText = [athrs, formVals.year, formVals.title, getPubName()].join('. '); 
-            fullText += ' ' + [getVolAndIss(), formVals.pages].join(' ');
-            return fullText+'.';
+            const athrs = stripEndingPeriod(getCitAuthors());
+            const year = stripEndingPeriod(formVals.year);
+            const title = stripEndingPeriod(formVals.title);
+            const pub = stripEndingPeriod(getPubName());
+            const vip = getVolumeIssueAndPages(); 
+            let fullText = [athrs, year, title, pub].join('. '); 
+            fullText += vip ? (' '+vip) : '';
+            return fullText + '.';
         }
         /**
-         * 1st Author last name, initials. Year. Book Title. Edition. Publisher 
-         *   Name, City, Country.
+         * Returns: 1st Author [Last name, Initials.] Year. Book Title. Edition. 
+         *     Publisher Name, City, Country.
          */
         function bookCit() {
             // body...
@@ -916,11 +922,23 @@ $(document).ready(function(){
             const pub = fParams.records.source[$('#Publication-sel').val()];
             return pub.displayName+'.';
         }
-        /** Returns: Volume (Issue): || Volume: || (Issue): || null */
-        function getVolAndIss() {  //append ':'
-            let iss = formVals.issue ? '('+formVals.issue+'):' : null;
-            return formVals.volume && iss ? formVals.volume +' '+ iss :
-                formVals.volume ? formVals.volume+':' : iss ? iss : null;
+        /** 
+         * Formats volume, issue, and page range data and returns either: 
+         *     Volume (Issue): pag-es || Volume (Issue) || Volume: pag-es || 
+         *     Volume || (Issue): pag-es || Issue || pag-es || null
+         * Note: all possible returns wrapped in parentheses.
+         */
+        function getVolumeIssueAndPages() {  
+            let iss = formVals.issue ? '('+formVals.issue+')' : null;
+            let vol = formVals.volume ? formVals.volume : null;
+            let pgs = formVals.pages ? formVals.pages : null;
+            return vol && iss && pgs ? (vol+' '+iss+': '+pgs) :
+                vol && iss ? (vol+' '+iss) : vol && pgs ? (vol+': '+pgs) :
+                    vol ? (vol) : iss && pgs ? (iss+': '+pgs) : iss ? (iss) : 
+                        pgs ? (pgs) : (null);
+        }
+        function stripEndingPeriod(text) {
+            return text.charAt(text.length-1) === '.' ? text.slice(0, -1) : text;
         }
     } /* End addCitationText */
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
