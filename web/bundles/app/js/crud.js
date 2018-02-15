@@ -815,34 +815,39 @@ $(document).ready(function(){
     }
     /**
      * Checks all required citation fields and sets the Citation Text field.
-     * If all required fields are filled, the citation text is generated and displayed.
-     * If not, the default text is displayed in the disabled textarea.
+     * If all required fields are filled, the citation text is generated and 
+     * displayed. If not, the default text is displayed in the disabled textarea.
      */
     function handleCitText(formLvl) {                                           //console.log('handleCitText')
-        const fLvl = formLvl || getSubFormLvl('sub');
-        const dfault = 'The citation will display here once all required fields '+
-            'are filled.';
-        if (ifAllRequiredFieldsFilled(fLvl)) { addCitationText();
-        } else if ($('#CitationText_row textarea').val() !== dfault) {
-            $('#CitationText_row textarea').val(dfault)
-                .prop('disabled', true).change();
+        const $elem = $('#CitationText_row textarea');
+        if (!$elem.val()) { initializeCitField(); } 
+        const citText = getCitationFieldText();                                 //console.log('Citation field text = ', citText);
+        if (!citText) { return; }
+        $elem.val(citText).change();
+        /** Returns the citation field text or false if there are no updates. */
+        function getCitationFieldText() {
+            const fLvl = formLvl || getSubFormLvl('sub');
+            const dfault = 'The citation will display here once all required fields '+
+                'are filled.';
+            return ifAllRequiredFieldsFilled(fLvl) ? buildCitationText(fLvl) :
+                $elem.val() === dfault ? false : dfault;
         }
-    }
+        function initializeCitField() {
+            $elem.prop('disabled', true).unbind('change');
+        }
+    } /* End handleCitText */
     /**
      * Generates and displays the full citation text after all required fields 
      * are filled.
      */
-    function addCitationText() {
-        const type = $('#CitationType-sel option:selected').text();             //console.log("type = ", type);
+    function buildCitationText(fLvl) {
+        const type = $('#CitationType-sel option:selected').text();             console.log("type = ", type);
         const formVals = getFormValueData('citation');
         const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
             'Chapter': chapterSympCit, 'Other': otherCit, 'Report': reportCit, 
             'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit,
             'Thesis/Ph.D. Dissertation': thesisCit };
-        const citText = getFullText[type]();                                    //console.log('Full text = ', citText);
-        if ($('#CitationText_row textarea').val() !== citText) {
-            $('#CitationText_row textarea').val(citText)
-        }              
+        return getFullText[type]();                                    
         /**
          * Articles, Museum records, etc.
          * Citation example with all data available: 
@@ -854,7 +859,7 @@ $(document).ready(function(){
             const athrs = stripEndingPeriod(getCitAuthors());
             const year = stripEndingPeriod(formVals.year);
             const title = stripEndingPeriod(formVals.title);
-            const pub = stripEndingPeriod(getPubName());
+            const pub = stripEndingPeriod(getPublicationName());
             const vip = getVolumeIssueAndPages(); 
             let fullText = [athrs, year, title, pub].join('. '); 
             fullText += vip ? (' '+vip) : '';
@@ -864,8 +869,12 @@ $(document).ready(function(){
          * Returns: 1st Author [Last name, Initials.] Year. Book Title. Edition. 
          *     Publisher Name, City, Country.
          */
-        function bookCit() {
-            // body...
+        function bookCit() {                                                    console.log("bookCit called.")
+            const athrs = stripEndingPeriod(getCitAuthors());
+            const year = stripEndingPeriod(formVals.year);
+            const title = stripEndingPeriod(formVals.title);
+            const publ = getPublisherData();
+            return [athrs, year, title, publ].join('. ');
         }
         /** 
          * 1st Author last name, initials, & 2nd Author initials, last name. Year. 
@@ -888,7 +897,7 @@ $(document).ready(function(){
         function otherCit() {
             // body...
         }
-        /** ---------- citation full text helpers ------------------ */
+                /** ---------- citation full text helpers ------------------ */
         /** 
          * Returns a string with all author names formatted with the first author
          * [Last, Initials.], all following authors as [Initials. Last], and each 
@@ -918,10 +927,23 @@ $(document).ready(function(){
             }).filter(function(i) {return i;}).join(' '); //removes null values and joins
             return cnt > 0 ? initials +' '+ last : last+', '+initials; 
         }
-        function getPubName() {
-            const pub = fParams.records.source[$('#Publication-sel').val()];
-            return pub.displayName+'.';
+        function getPublicationName() {
+            return fParams.records.source[$('#Publication-sel').val()].displayName;
         }
+        /** Formats publisher data and returns the Name, City, Country. */
+        function getPublisherData() {
+            const publ = getPublRcrd($('#Publication-sel').val());
+            const name = publ.displayName;
+            const city = publ.city ? publ.city : '[ADD CITY]';
+            const cntry = publ.country ? publ.Country : '[ADD COUNTRY]';
+            return [name, city, cntry].join(', ')+'.';
+
+            function getPublRcrd(pubId) {
+                const pub = fParams.records.source[pubId];
+                const publSrc = fParams.records.source[pub.parent];
+                return getEntityRecord('publisher', publSrc.publisher);
+            }
+        } /* End getPublisherData */
         /** 
          * Formats volume, issue, and page range data and returns either: 
          *     Volume (Issue): pag-es || Volume (Issue) || Volume: pag-es || 
@@ -940,12 +962,12 @@ $(document).ready(function(){
         function stripEndingPeriod(text) {
             return text.charAt(text.length-1) === '.' ? text.slice(0, -1) : text;
         }
-    } /* End addCitationText */
+    } /* End buildCitationText */
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
     }
-        /** ----- Publication and Citation Shared form helpers ------------ */
+    /** ----- Publication and Citation Shared form helpers ------------ */
     /**
      * Loads the deafult fields for the selected Source Type's type. Clears any 
      * previous type-fields and initializes the selectized dropdowns.  
@@ -2085,7 +2107,7 @@ $(document).ready(function(){
                 "order": {
                     "sug": ["Family", "Genus", "Species"],
                     "opt": false }, 
-                //Becase there is only one subject realm, the exitahandler lives in the subject confg 
+                //Becase there is only one subject realm, the exithandler lives in the subject confg 
             },
             'citation': {
                 'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
@@ -2111,12 +2133,13 @@ $(document).ready(function(){
                     },
                     'Book': {
                         'name': 'Book',
-                        'required': ['Authors'],
-                        'suggested': [],
+                        'required': ['Year', 'Authors'],
+                        'suggested': ['Volume'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Authors'],
-                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                            'sug': ['Year', 'Volume', 'Authors'],
+                            'opt': ['Year', 'Volume', 'LinkDisplay', 'LinkUrl', 
+                                'Doi', 'Authors']},
                     },
                     'Chapter': {
                         'name': 'Chapter',
