@@ -1809,31 +1809,48 @@ $(document).ready(function(){
     }
     /**
      * When an author is selected, a new author combobox is initialized underneath
-     * the last author combobox. The total count of authors is added to the new id.
+     * the last author combobox, unless the last is empty. The total count of 
+     * authors is added to the new id.
      */
     function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
         const fLvl = getSubFormLvl('sub');
         let cnt = $('#Authors_sel-cntnr').data('cnt') + 1;                          
         if (val === 'create') { return openCreateForm('Authors', --cnt); }        
         if (val === '' || parseInt(val) === NaN) { return handleAuthFieldClear(fLvl); }
-        buildNewAuthorSelect(cnt, val, fLvl);
-        focusCombobox('#Authors-sel'+cnt);
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
+        addAuthSelectionToFormVals(val, fLvl);
+        if (lastAuthComboEmpty(cnt-1)) { return; }
+        buildNewAuthorSelect(cnt, val, fLvl);
     }
+    /** Updates the citation text, if displayed. */
     function handleAuthFieldClear(fLvl) {
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
-        clearUnusedAuthElems();
+    }
+    function addAuthSelectionToFormVals(val, fLvl) {
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', vals);
+        if (!Array.isArray(vals.Authors.val)) { vals.Authors.val = []; }
+        vals.Authors.val.push(val);        
+    }
+    /** Stops the form from adding multiple empty combos to the end of the field. */
+    function lastAuthComboEmpty(cnt) {  
+        return $("#Authors-sel"+cnt).val() === '';
     }
     /** Builds a new, empty author combobox */
     function buildNewAuthorSelect(cnt, val, prntLvl) {                          //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
         const parentFormEntity = fParams.forms[prntLvl].entity;
         const selConfg = { name: 'Author', id: '#Authors-sel'+cnt, 
-                         change: onAuthSelection, add: initAuthForm };
+            change: onAuthSelection, add: initAuthForm };
         const sel = buildSelectCombo(parentFormEntity, 'Authors', prntLvl, cnt);  
         $(sel).change(storeAuthorValue.bind(null, prntLvl, cnt)); 
         $("#Authors_sel-cntnr").append(sel).data("cnt", cnt);
         initSelectCombobox(selConfg, prntLvl);
-        $("#Authors-sel"+cnt)[0].selectize.removeOption(val);
+        removeAllSelectedAuths(cnt, prntLvl);
+    }
+    /** Removes the already selected authors from the new dropdown options. */
+    function removeAllSelectedAuths(cnt, fLvl) {
+        const auths = fParams.forms[fLvl].fieldConfg.vals.Authors.val;   
+        const $selApi = $("#Authors-sel"+cnt)[0].selectize;
+        auths.forEach(id => $selApi.removeOption(id));
     }
     /**
      * When a user enters a new author into the combobox, a create-author form is 
@@ -1856,20 +1873,6 @@ $(document).ready(function(){
         $('#FirstName_row input').focus();
         return { 'value': '', 'text': 'Creating Author...' };
     }
-    /**
-     * When an author combobox is cleared, all empty author comboboxes are cleared
-     * and an empty combobox is added/left at the bottom of the author comboboxes.
-     */
-    function clearUnusedAuthElems() {  
-        // for (var i = 1; i < ($("#Authors_sel-cntnr").data("cnt") + 1); i++ ) { console.log("i = ", i);console.log("val = ", $("#Authors-sel"+i).val())
-        //     if ($("#Authors-sel"+i).val() == "") { console.log("empty select for %O", $("#Authors-sel"+i));
-        //         $("#Authors-sel"+i)[0].selectize._events = {change: []};
-        //         $("#Authors-sel"+i)[0].selectize.destroy();
-        //         // $("#Authors-sel"+i).remove();     
-        //     }
-        // }
-    }
-
     /** Returns a comma seperated sting of all authors attributed to the source. */
     function getAuthorNames(srcRcrd) {
         var authStr = [];
