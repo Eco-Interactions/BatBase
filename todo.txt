@@ -1,6 +1,31 @@
 ============ MEETING ==================
 TASK LIST
 TODO
+    - citation generation
+
+        ## ended day figuring out why empty author fields are registering as 
+            filled for citation generation
+
+        - update tree nodes referencing full pubs to say 'whole work cited'
+        - Combine pub and cit data in detail panel to 'Source'
+        - remove extra author fields when changing authors
+        - elimate dup periods
+        - How many authors should be cited until we "et. all" in the citation?
+        - add 1st, 2nd, 3rd labels to authors
+        - remove the selected authors from the new dropdowns.
+        - Don't add author to chapter citation form. change that field to editors.
+
+        ##misc
+            - clear location filter options when time-updated changes
+
+        ## Eventually ##
+        - Update source fields with the more appropriate label for the editor and 
+            the form type, ie: books should have editions instead of volumes,  
+            the cases for editors/authors (chapters in books), dissertations have Unviersities 
+            instead of Publishers, etc.
+        - Combine all source fields into a single form.
+    - (Will we ultimate care about who edits/new data was 'approvedBy' ?)
+
 NOTES
 ============ EMAIL ====================
     --- General ---
@@ -12,11 +37,19 @@ Tullenda:
 =======================================
 Notes::
     ## Change Log ##
-        - Eliminated possibility of accidently creating duplicate interactions
-        - Forms now show the required and most likely to be used fields by default
-            - They remember their expanded state
-        - Fixed a few small bugs along the way
-        - All combos that can create now show the 'Add new...' option first    
+        - Previously selected authors are not included in the new dropdowns
+        - Fixed bug with author comboboxes clearing and adding multiple empty combos 
+        - "whole work cited" in data tree
+
+        ##Prev
+        - Eliminated possibility of accidently creating duplicate interactions 
+        - Forms now show the required and most likely to be used fields by default 
+            - They remember their expanded state 
+        - Fixed a few small bugs along the way 
+        - All combos that can create now show the 'Add new...' option first   
+
+    ##for tests##
+        - changes author container elem from Authors-sel-cntnr to Authors-sel-cntnr  
 
 Questions:
     ## Citation full text ##
@@ -68,6 +101,7 @@ ________________________________________________________________________________
         REFACTOR
         -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
         -- Move interaction create form functions into the same func chain building the rest? 
+        -- initAuthForm
         --Bugs-
             -- fix tabs on selectize (test whether firefox bug only??): 
                 https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9

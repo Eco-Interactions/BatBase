@@ -1277,11 +1277,13 @@
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
         var entity = getSrcEntity(src, treeLvl);
         var detailId = entity === "Publication" ? src.publication.id : null;  
+        const displayName = src.displayName.includes('-citation') ? 
+            'Whole work cited.' : src.displayName;
         return {
             id: src.id,
             entity: entity,
             pubId: detailId,
-            name: src.displayName,
+            name: displayName,
             isParent: true,      
             parentSource: src.parent,
             open: gParams.openRows.indexOf(src.id.toString()) !== -1, 
