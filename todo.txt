@@ -1,19 +1,16 @@
 ============ MEETING ==================
 TASK LIST
 TODO
+    - Task list -   
+        - Combine source forms
+        - add 1st, 2nd, 3rd labels to authors
+
     - citation generation
-
-        ## ended day figuring out why empty author fields are registering as 
-            filled for citation generation
-
-        - update tree nodes referencing full pubs to say 'whole work cited'
-        - Combine pub and cit data in detail panel to 'Source'
-        - remove extra author fields when changing authors
+        - thesis : select degree by default
         - elimate dup periods
         - How many authors should be cited until we "et. all" in the citation?
-        - add 1st, 2nd, 3rd labels to authors
         - remove the selected authors from the new dropdowns.
-        - Don't add author to chapter citation form. change that field to editors.
+        - Remove editor field from chapters
 
         ##misc
             - clear location filter options when time-updated changes
@@ -23,6 +20,7 @@ TODO
             the form type, ie: books should have editions instead of volumes,  
             the cases for editors/authors (chapters in books), dissertations have Unviersities 
             instead of Publishers, etc.
+        - Combine pub and cit data in detail panel to 'Source'
         - Combine all source fields into a single form.
     - (Will we ultimate care about who edits/new data was 'approvedBy' ?)
 
