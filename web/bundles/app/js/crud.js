@@ -775,7 +775,7 @@ $(document).ready(function(){
     function selectDefaultCitType(fLvl) {
         const dfaults = {
             'Book': 'Book', 'Journal': 'Article', 'Other': 'Other',
-            'Thesis/Ph.D. Dissertation': 'Thesis/Ph.D. Dissertation'
+            'Thesis/Dissertation': 'Ph.D. Dissertation'
         };
         const citTypes = _util.getDataFromStorage('citTypeNames');
         const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
@@ -794,8 +794,8 @@ $(document).ready(function(){
     /** Adds or removes publication data from the form's values, depending on type. */
     function handlePubData(typeId, citTypeElem, fLvl) {
         const type = citTypeElem.innerText;                                     //console.log('citType = ', type);
-        const copy = ['Book', 'Thesis/Ph.D. Dissertation', 'Other', 'Report', 
-            'Symposium proceeding', 'Museum record'];
+        const copy = ['Book', "Master's Thesis", 'Museum record', 'Other', 
+            'Ph.D. Dissertation', 'Report' ];
         const addSameData = copy.indexOf(type) !== -1;
         addPubValues(fLvl, addSameData, type);
     }
@@ -806,11 +806,11 @@ $(document).ready(function(){
     }
     /** 
      * Adds the pub title to the citations form vals, unless the type should 
-     * be skipped, ie. have it's own title.
+     * be skipped, ie. have it's own title. (may not actually be needed. REFACTOR and check in later)
      */
     function addPubTitle(addTitle, fLvl, type) {                                      
         const vals = fParams.forms[fLvl].fieldConfg.vals;                       
-        const skip = ['Museum record']; 
+        const skip = []; 
         vals.Title = {};
         vals.Title.val = addTitle && skip.indexOf(type) === -1 ? 
             fParams.forms[fLvl].pub.src.displayName : '';  
@@ -856,10 +856,10 @@ $(document).ready(function(){
     function buildCitationText(fLvl) {
         const type = $('#CitationType-sel option:selected').text();             console.log("type = ", type);
         const formVals = getFormValueData('citation', null, null);
-        const getFullText = { 'Article': articleRecordCit, 'Book': bookCit, 
-            'Chapter': chapterSympCit, 'Other': otherCit, 'Report': thesisReportCit, 
-            'Museum record': articleRecordCit, 'Symposium proceeding': chapterSympCit,
-            'Thesis/Ph.D. Dissertation': thesisReportCit };
+        const getFullText = { 'Article': articleCit, 'Book': bookCit, 
+            'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
+            'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
+            "Master's Thesis": dissertThesisCit };
         return getFullText[type](type);                                    
         /**
          * Articles, Museum records, etc.
@@ -868,7 +868,7 @@ $(document).ready(function(){
          *     [Initials. Last]. Year. Title of article. Title of Journal 
          *     Volume (Issue): Pages.
          */
-        function  articleRecordCit(type) {                                      
+        function  articleCit(type) {                                      
             const athrs = stripString(getFormAuthors());
             const year = stripString(formVals.year);
             const title = stripString(formVals.title);
@@ -890,8 +890,8 @@ $(document).ready(function(){
             const title = stripString(formVals.title);
             const ed = formVals.edition;
             const publ = getPublisherData();
-            let cit = [athrs, year, title].join('. ');
-            return ed ? (cit +'. '+ ed +'. '+ publ+'.') : (cit +'. '+ publ+'.');
+            const allFields = [athrs, year, title, ed, publ];
+            return allFields.filter(f=>f).join('. ')+'.';
         }
         /** 
          * Citation example with all data available: 
@@ -900,13 +900,14 @@ $(document).ready(function(){
          *     [initials, last name], & Editor X [initials, last name], eds.). 
          *     pp. pages. Publisher Name, City, Country.
          */
-        function chapterSympCit(type) {
+        function chapterCit(type) {
             const athrs = stripString(getPubAuthors());
             const year = stripString(getPublicationYear());
             const titlesAndEds = getTitlesAndEditors();
             const pages = getBookPages();
             const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
-            return [athrs, year, titlesAndEds, pages, publ].join('. ')+'.';
+            const allFields = [athrs, year, titlesAndEds, pages, publ]; 
+            return allFields.filter(f => f).join('. ')+'.';
         }
         /**
          * Citation example with all data available: 
@@ -914,13 +915,12 @@ $(document).ready(function(){
          *     [Initials. Last]. Year. Title.  Academic degree. Academic 
          *     Institution, City, Country.
          */
-        function thesisReportCit(type) {
+        function dissertThesisCit(type) {
             const athrs = stripString(getFormAuthors());
             const year = stripString(formVals.year);
             const title = stripString(formVals.title);
-            const degree = type === 'Report' ? '[ACADEMIC DEGREE]' : 'Ph.D. Dissertation';
             const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
-            return [athrs, year, title, degree, publ].join('. ')+'.';
+            return [athrs, year, title, type, publ].join('. ')+'.';
         }
         /**
          * Citation example with all data available: 
@@ -929,14 +929,12 @@ $(document).ready(function(){
          *     Name, City, Country.
          */
         function otherCit(type) {
-            const athrs = stripString(getFormAuthors());
-            const year = stripString(formVals.year);
+            const athrs = getFormAuthors();
+            const year = formVals.year ? stripString(formVals.year) : false;
             const title = stripString(formVals.title);
             const vip = getVolumeIssueAndPages();
             const publ = getPublisherData();
-            let text = [athrs, year, title].join('. '); //minimum data for citation
-            text += vip ? '. '+ vip : '';
-            return publ ? text +'. '+ publ +'.' : text +'.';
+            return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
         }
                 /** ---------- citation full text helpers ------------------ */
         function getFormEditors() {
@@ -945,6 +943,7 @@ $(document).ready(function(){
         }
         function getFormAuthors(eds) { 
             const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
+            if (!auths.length) { return false; }
             return getFormattedAuthorNames(auths, eds);
         }
         function getPubAuthors() {
@@ -956,31 +955,40 @@ $(document).ready(function(){
          * [Last, Initials.], all following authors as [Initials. Last], and each 
          * are seperated by commas until the final author, which is seperated 
          * with '&'. If the names are of editors, they are returned [Initials. Last].
+         * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
          */
-        function getFormattedAuthorNames(auths, eds) {
+        function getFormattedAuthorNames(auths, eds) { 
+            if (auths.length > 3) { return getFirstEtAl(auths[0]); }
             let athrs = '';
             $(auths).each(function(i, srcId){
+                const name = getFormattedName(srcId);
+                athrs += (i == 0 ? name : (i == auths.length-1 ?
+                    ' & '+ name : ', '+ name)); 
+            });                                                                 //console.log('athrs = ', athrs);
+            return athrs;
+
+            function getFirstEtAl(authId) {
+                const name = getFormattedName(authId);
+                return name +', et al';
+            }
+            function getFormattedName(srcId) {              
                 const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
                 const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
                 const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
-                const name = getCitAuthName(i, athr, eds);
-                athrs += i == 0 ? name : (i == auths.length-1 ?
-                    ' & '+ name : ', '+ name); 
-            });                                                                 //console.log('athrs = ', athrs);
-            return athrs;
-        }
-        /**
-         * Returns the last name and initials of the passed author. The first 
-         * author is formatted [Last, Initials.] and all others [Initials. Last].
-         * If editors (eds), [Initials. Last].
-         */
-        function getCitAuthName(cnt, athr, eds) {                                       
-            const last = athr.lastName;                                         
-            let initials = ["firstName", "middleName"].map(function(name) {
-                return athr[name] ? athr[name].charAt(0)+'.' : null;
-            }).filter(function(i) {return i;}).join(' '); //removes null values and joins
-            return cnt > 0 || eds ? initials +' '+ last : last+', '+initials; 
-        }
+                return getCitAuthName(i, athr, eds);
+            }
+            /**
+             * Returns the last name and initials of the passed author. The first 
+             * author is formatted [Last, Initials.] and all others [Initials. Last].
+             * If editors (eds), [Initials. Last].
+             */
+            function getCitAuthName(cnt, a, eds) {                                       
+                const last = a.lastName;                     
+                const initials = ["firstName", "middleName"].map(name => 
+                    a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
+                return cnt > 0 || eds ? initials +' '+ last : last+', '+initials; 
+            }
+        } /* End getFormattedAuthorNames */
         function getBookPages(argument) {
             if (!formVals.pages) { return false; }
             return 'pp. ' + stripString(formVals.pages);
@@ -997,7 +1005,7 @@ $(document).ready(function(){
             if (!publ) { return false; }
             const name = publ.displayName;
             const city = publ.city ? publ.city : '[ADD CITY]';
-            const cntry = publ.country ? publ.Country : '[ADD COUNTRY]';
+            const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
             return [name, city, cntry].join(', ');
 
             function getPublRcrd(pubId) {
@@ -1011,11 +1019,11 @@ $(document).ready(function(){
          * Returns: Chapter title. In: Publication title [if there are editors,
          * they are added in parentheses here.]. 
          */
-        function getTitlesAndEditors() {
+        function getTitlesAndEditors() { //only titles for now
             const chap = stripString(formVals.chapterTitle);
             const pub = fParams.forms[fLvl].pub.src.displayName;
             const titles = stripString(chap + '. In: ' + pub);
-            const eds = getFormEditors();
+            const eds = false;// getFormEditors();
             return eds ? (titles + ' ' + eds) : titles;
         }
         /** 
@@ -1102,9 +1110,8 @@ $(document).ready(function(){
         function getLabelTrans() {
             const trans =  {
                 'Book': {'Volume': 'Edition'}, 
-                'Chapter': {'Title': 'Chapter Title', 'Authors': 'Editors'},
-                'Symposium proceeding': { 'Title': 'Chapter Title'},
-                'Thesis/Ph.D. Dissertation': { 'Publisher': 'Publisher / University' }
+                'Chapter': {'Title': 'Chapter Title'},
+                'Thesis/Dissertation': { 'Publisher': 'Publisher / University' }
             };
             return trans[type];  
         }
@@ -1181,9 +1188,8 @@ $(document).ready(function(){
     }          
     /** Returns an array of options for the locations of the passed country/region. */
     function getOptsForLoc(loc) {
-        let opts = loc.children.map(function(id) {  
-            return { value: id, text: fParams.records.location[id].displayName };
-        });  
+        let opts = loc.children.map(id => ({
+            value: id, text: fParams.records.location[id].displayName}));
         opts = opts.concat([{ value: loc.id, text: loc.displayName }])
             .sort(alphaOptionObjs);
         opts.unshift({ value: 'create', text: 'Add a new Location...'});
@@ -2033,26 +2039,26 @@ $(document).ready(function(){
         const fLvl = getSubFormLvl('sub2');
         const prntLvl = getNextFormLevel('parent', fLvl);
         const val = value === 'create' ? '' : value;
-        const authType = getAuthorType();
+        const authType = 'Author';//       getAuthorType();
         if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, fLvl); }
         $('#Authors_row').append(initSubForm(
             'author', fLvl, 'sml-left sml-form', {'LastName': val}, parentSelId));
         enableSubmitBttn('#'+fLvl+'-submit');
         disableSubmitBttn('#'+prntLvl+'-submit');
-        if (authType === 'Editor') { updateFormForEditors(); }
+        // if (authType === 'Editor') { updateFormForEditors(); }
         $('#FirstName_row input').focus();
         return { 'value': '', 'text': 'Creating '+authType+'...' };
     }
-    function getAuthorType() {
-        const fLvl = getSubFormLvl('sub');
-        if (!fParams.forms[fLvl] || !fParams.forms[fLvl].typeConfg) { return 'Author'; }
-        return fParams.forms[fLvl].typeConfg.name === 'Chapter' ? 
-            'Editor' : 'Author';
-    }
-    function updateFormForEditors() {
-        $('#sub2-hdr').text('New Editor');
-        $('#sub2-submit').val('Create Editor');
-    }
+    // function getAuthorType() {
+    //     const fLvl = getSubFormLvl('sub');
+    //     if (!fParams.forms[fLvl] || !fParams.forms[fLvl].typeConfg) { return 'Author'; }
+    //     return fParams.forms[fLvl].typeConfg.name === 'Chapter' ? 
+    //         'Editor' : 'Author';
+    // }
+    // function updateFormForEditors() {
+    //     $('#sub2-hdr').text('New Editor');
+    //     $('#sub2-submit').val('Create Editor');
+    // }
     /** Returns a comma seperated sting of all authors attributed to the source. */
     function getAuthorNames(srcRcrd) {
         var authStr = [];
@@ -2203,20 +2209,17 @@ $(document).ready(function(){
      * -- Property descriptions:  
      * > add - Additonal fields for a detail-entity. E.g. Citation is a detail-entity
      *   of Source with a unique combination of fields from Source and itself.
-     * > exclude - Fields to exclude in a detail-entity form. E.g. Citation doesn't 
-     *   use Source's 'displayName' field as it's 'title' is it's display name. 
      * > required - Required fields for the entity.
      * > suggested - Suggested fields for the entity.
      *   NOTE: The required and suggested fields will be the default shown in form. 
      * > optional - All remaining available fields for the entity.
-     * > order - Order to display the fields in the form. 
+     * > order - Order to display the fields in both the default and expanded forms. 
      * > exitHandler - optional Obj with handlers for exiting create/edit forms.
      */
     function getFormConfg(entity) {
         const fieldMap = { 
             "arthropod": {
                 "add": {},  
-                "exclude": [],
                 "required": [],
                 "suggested": ["Class", "Order", "Family", "Genus", "Species"],
                 "optional": [],
@@ -2228,8 +2231,6 @@ $(document).ready(function(){
             "author": { 
                 "add": { "FirstName": "text", "MiddleName": "text", 
                     "LastName": "text", "Suffix": "text"}, 
-                "exclude": ["DisplayName", "Description", "Year", "Doi", 
-                    "Authors", "Tags"],
                 "required": ["LastName"], 
                 "suggested": ["FirstName", "MiddleName"],
                 "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
@@ -2240,20 +2241,18 @@ $(document).ready(function(){
             },
             "bat": {
                 "add": {},  
-                "exclude": ["Class", "Order"],
                 "required": [],
                 "suggested": ["Family", "Genus", "Species"],
                 "optional": [],
                 "order": {
                     "sug": ["Family", "Genus", "Species"],
                     "opt": false }, 
-                //Becase there is only one subject realm, the exithandler lives in the subject confg 
+                //Because there is only one subject realm, the exithandler lives in the subject confg 
             },
             'citation': {
                 'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
                     'Issue': 'text', 'Pages': 'text', 'CitationType': 'select', 
                     'CitationText': 'fullTextArea'},
-                'exclude': ['DisplayName', 'Description', 'Tags'], 
                 'required': ['Title', 'CitationType'],  
                 'suggested': ['CitationText'], 
                 'optional': ['Abstract'],
@@ -2273,7 +2272,7 @@ $(document).ready(function(){
                     },
                     'Book': {
                         'name': 'Book',
-                        'required': ['Year', 'Authors'],
+                        'required': ['Authors', 'Year'],
                         'suggested': ['Volume'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
@@ -2291,8 +2290,27 @@ $(document).ready(function(){
                             'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
                                 'Authors']},
                     },
+                    "Master's Thesis": {
+                        'name': "Master's Thesis",
+                        'required': ['Authors', 'Year'],
+                        'suggested': [],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
+                        'order': {
+                            'sug': ['Year', 'Authors'],
+                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 
+                                'Authors']},
+                    },
                     'Museum record': {
                         'name': 'Museum record',
+                        'required': [],
+                        'suggested': ['Authors', 'Year', 'Pages'],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
+                        'order': {
+                            'sug': ['Year', 'Pages', 'Authors'],
+                            'opt': ['Year', 'Pages',                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                    },
+                    'Other': {
+                        'name': 'Other',
                         'required': ['Authors', 'Year'],
                         'suggested': ['Issue', 'Pages', 'Volume'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
@@ -2301,51 +2319,31 @@ $(document).ready(function(){
                             'opt': ['Year', 'Pages', 'Volume', 'Issue', 
                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
                     },
-                    'Other': {
-                        'name': 'Other',
+                    'Ph.D. Dissertation': {
+                        'name': 'Ph.D. Dissertation',
                         'required': ['Authors', 'Year'],
-                        'suggested': ['Issue', 'Pages', 'Volume', 'Year'],
+                        'suggested': [],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
+                        'order': {
+                            'sug': ['Year', 'Authors'],
+                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 
+                                'Authors']},
+                    },
+                    'Report': {
+                        'name': 'Report',
+                        'required': ['Authors', 'Year'],
+                        'suggested': ['Pages'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
                             'opt': ['Year', 'Pages', 'Volume', 'Issue', 
                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
-                    },
-                    'Report': {
-                        'name': 'Report',
-                        'required': ['Authors', 'Year'],
-                        'suggested': [],
-                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                        'order': {
-                            'sug': ['Year', 'Authors'],
-                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 'Authors']},
-                    },
-                    'Symposium proceeding': {
-                        'name': 'Symposium proceeding',
-                        'required': ['Authors', 'Year'],
-                        'suggested': ['Pages'],
-                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                        'order': {
-                            'sug': ['Year', 'Pages', "Authors"],
-                            'opt': ['Year', 'Pages', 'LinkDisplay', 'LinkUrl', 
-                                'Doi', 'Authors']},
-                    },
-                    'Thesis/Ph.D. Dissertation': {
-                        'name': 'Thesis/Ph.D. Dissertation',
-                        'required': ['Authors', 'Year'],
-                        'suggested': [],
-                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                        'order': {
-                            'sug': ['Year', 'Authors'],
-                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 'Authors']},
-                    },
-
+                    }
                 },
                 'exitHandler': { create: enablePubField }
             },                                      
             "interaction": {
                 "add": {},  
-                "exclude": [],
                 "required": ["InteractionType"],
                 "suggested": ["InteractionTags", "Note"],
                 "optional": [],
@@ -2356,7 +2354,6 @@ $(document).ready(function(){
             },
             "location": {
                 "add": {},  
-                "exclude": [], 
                 "required": ["DisplayName", "Country"],
                 "suggested": ["Description", "HabitatType", "Latitude", "Longitude",
                     "Elevation", "ElevationMax"],
@@ -2369,7 +2366,6 @@ $(document).ready(function(){
             },
             "object": {
                 "add": {"Realm": "select"},  
-                "exclude": ["Class", "Order", "Family", "Genus", "Species" ],
                 "required": [],
                 "suggested": ["Realm"],
                 "optional": [],
@@ -2379,7 +2375,6 @@ $(document).ready(function(){
             },
             "plant": {
                 "add": {},  
-                "exclude": ["Class", "Order"],
                 "required": [],
                 "suggested": ["Family", "Genus", "Species"],
                 "optional": [],
@@ -2390,8 +2385,7 @@ $(document).ready(function(){
             },
             "publication": {
                 "add": { "Title" : "text", "PublicationType": "select", 
-                    "Publisher": "select" },  
-                "exclude": ["DisplayName", "Tags"],
+                    "Publisher": "select"},  
                 "required": ["PublicationType", "Title"],
                 "suggested": [],
                 "optional": [],
@@ -2422,29 +2416,28 @@ $(document).ready(function(){
                     },
                     "Other": {
                         "name": 'Other',
-                        "required": ["Authors"],
-                        "suggested": ["Publisher", "Year"],
+                        "required": ["Authors", 'Year'],
+                        "suggested": ["Publisher"],
                         "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order":  {
                             "sug": ["Year", "Publisher", "Authors"],
                             "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
                                 "Description", "Publisher", "Authors"]},
                     },
-                    "Thesis/Ph.D. Dissertation": {
-                        "name": 'Thesis/Ph.D. Dissertation',
+                    "Thesis/Dissertation": {
+                        "name": 'Thesis/Dissertation',
                         "required": ["Authors", "Publisher", "Year"],
                         "suggested": [],
                         "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order":  {
                             "sug": ["Year", "Publisher", "Authors"],
-                            "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
-                                "Description", "Publisher", "Authors"]},
-                    }
+                            "opt": ["Year", "Description", "LinkDisplay", 
+                                "LinkUrl", "Doi", "Publisher", "Authors"]},
+                    },
                 }
             },
             "publisher": { 
                 "add": { "City": "text", "Country": "text"}, 
-                "exclude": ["Year", "Doi", "Authors", "Tags"],
                 "required": ["DisplayName", "City", "Country"],
                 "suggested": [],
                 "optional": ["Description", "LinkUrl", "LinkDisplay"],
@@ -2455,7 +2448,6 @@ $(document).ready(function(){
             },
             "subject": {
                 "add": {},  
-                "exclude": ["Class", "Order"],
                 "required": [],
                 "suggested": ["Family", "Genus", "Species"],
                 "optional": [],
@@ -2466,7 +2458,6 @@ $(document).ready(function(){
             },
             "taxon": {
                 "add": {},  
-                "exclude": [],
                 "required": ["DisplayName"],
                 "suggested": [],
                 "optional": [],
@@ -2761,7 +2752,7 @@ $(document).ready(function(){
     /** Returns an array of source-type (prop) options objects. */
     function getSrcOpts(prop) {
         const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
-            'authSrcs': getAuthorType() };
+            'authSrcs': 'Author' };
         const ids = _util.getDataFromStorage(prop);
         let opts = getRcrdOpts(ids, fParams.records.source);
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
@@ -2780,8 +2771,8 @@ $(document).ready(function(){
         function getCitTypeNames() {
             const opts = {
                 'Book': ['Book', 'Chapter'], 'Journal': ['Article'],
-                'Other': ['Museum record', 'Other', 'Report', 'Symposium proceeding'],
-                'Thesis/Ph.D. Dissertation': ['Thesis/Ph.D. Dissertation', 'Chapter']
+                'Other': ['Museum record', 'Other', 'Report'],
+                'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
             };
             setPubInParams();                                                   //console.log('type = ', fParams.forms[fLvl].pub.pub.publicationType.displayName)
             return opts[fParams.forms[fLvl].pub.pub.publicationType.displayName];
@@ -3147,18 +3138,18 @@ $(document).ready(function(){
             formVals.displayName = formVals.title ? formVals.title : formVals.chapterTitle;
         }
         /** 
-         * Appends '-citation' to citations that are attributed to entire books 
+         * Appends '(citation)' to citations that are attributed to entire books 
          * to maintain unique display names for both the publication and its citation.
          */
         function ifFullWorkCited() { 
             const type = $('#CitationType-sel option:selected').text();
-            const fulls = ['Book', 'Thesis/Ph.D. Dissertation', 'Other', 'Report', 
-            'Symposium proceeding', 'Museum record'];
+            const fulls = ['Book', "Master's Thesis", 'Museum record', 'Other', 
+                'Ph.D. Dissertation', 'Report' ];
             if (fulls.indexOf(type) === -1) { return; }
             const pubTitle = fParams.forms[fLvl].pub.src.displayName;
-            if (formVals.displayName.includes('-citation')) { return; }
+            if (formVals.displayName.includes('(citation)')) { return; }
             if (pubTitle != formVals.displayName) { return; }
-            formVals.displayName += '-citation';
+            formVals.displayName += '(citation)';
         }
         function getTypeName(type, id) {            
             const types = _util.getDataFromStorage(type+'Names');               
@@ -3335,7 +3326,7 @@ $(document).ready(function(){
             },
             "citation": { 
                 "authors": { "source": "contributor" },
-                "editors": { "source": "contributor" },
+                // "editors": { "source": "contributor" },
                 "citationText": { "source": "description", "citation": "fullText" }, 
                 "publication": { "source": "parentSource" },
                 "title": { "source": "displayName", "citation": ["displayName", "title"] },
@@ -3345,6 +3336,7 @@ $(document).ready(function(){
                 "edition": { "citation": "publicationVolume" },
                 "issue": { "citation": "publicationIssue" },
                 "pages": { "citation": "publicationPages" },
+                'reportType': { 'citation': 'subType' }
                 // "tags": { "source": "tags" }
             },
             "interaction": {
@@ -3377,7 +3369,7 @@ $(document).ready(function(){
     function getRelationshipFields(entity) {
         var relationships = {
             "author": ["sourceType"], 
-            "citation": ["citationType", "authors", 'editors', "publication"], 
+            "citation": ["citationType", "authors", "publication"], //'editors', 
             "location": ["locationType", "habitatType", "country"],
             "publication": ["publicationType", "authors", "publisher", "publisher/University"],
             "publisher": [],
