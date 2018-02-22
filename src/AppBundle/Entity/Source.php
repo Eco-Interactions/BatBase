@@ -818,19 +818,37 @@ class Source
     }
 
     /**
-     * Get Contributor Ids.
+     * Get Author Ids.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("contributors")
+     * @JMS\SerializedName("authors")
      *
      * @return array
      */
-    public function getContributorIds()
+    public function getAuthorData()
     {
-        $contribIds = [];
+        $contribs = [];
         foreach ($this->contributors as $contributor) {
-            array_push($contribIds, $contributor->getAuthorSource()->getId());
+            if ($contributor->getIsEditor()) { return; }
+            array_push($contribs, $contributor->getWorkSource()->getId());
         }
-        return $contribIds;
+        return $contribs;
+    }
+
+    /**
+     * Get Editor Ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("editors")
+     *
+     * @return array
+     */
+    public function getEditorData()
+    {
+        $contribs = [];
+        foreach ($this->contributors as $contributor) {
+            if (!$contributor->getIsEditor()) { return; }
+            array_push($contribs, $contributor->getWorkSource()->getId());
+        }
+        return $contribs;
     }
 
     /**
