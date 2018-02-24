@@ -157,10 +157,10 @@
         var update = {
             'source': {
                 'author': { 'authSrcs': addToRcrdAryProp },
-                'citation': { 'contributors': addContribData, 'source': addToParentRcrd,
+                'citation': { 'contributors': addAuthorData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
-                'publication': { 'pubSrcs': addToRcrdAryProp, 'contributors': addContribData,
-                    'source': addToParentRcrd },
+                'publication': { 'pubSrcs': addToRcrdAryProp, 'authors': addAuthorData, 
+                    'source': addToParentRcrd, 'editors': addEditorData },
                 'publisher': { 'publSrcs': addToRcrdAryProp },
 
             },
@@ -292,11 +292,20 @@
         addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);        
     }
-    /** When a Publication or Citation have been updated, update contribution data. */
-    function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
-        if (rcrd.contributors.length == 0) { return; }
+    /** When a Publication or Citation have been updated, add new author data. */
+    function addAuthorData(prop, rcrd, entity) {  
+        if (rcrd.authors.length == 0) { return; }
+        const srcObj = _util.getDataFromStorage('source');
+        rcrd.authors.forEach(function(authId) { 
+            addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
+        });
+        storeData('source', srcObj);
+    }
+    /** When a Publication was updated, add new editor data. */
+    function addEditorData(prop, rcrd, entity) {                                
+        if (rcrd.editors.length == 0) { return; }
         var srcObj = _util.getDataFromStorage('source');
-        rcrd.contributors.forEach(function(authId) {
+        rcrd.editors.forEach(function(authId) { 
             addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
         });
         storeData('source', srcObj);
@@ -384,15 +393,26 @@
         });
         storeData(prop, tagObj);
     }
-    /** Removes a record from the pub's array of contributor ids. */
+    /**
+     * Removes the author/editor from the source's auth/ed collection to sync with 
+     * the [editor/author] changes. Removes the contributions of removed auth/eds. 
+     */
     function rmvContrib(prop, rcrd, entity, edits) {                            //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
-        if (!edits.contributor.removed) { return; }
-        var srcObj = _util.getDataFromStorage('source');
-        edits.contributor.removed.forEach(function(authId) {
-            rmvIdFromAry(srcObj[authId].contributions, rcrd.id);
-        });
+        const srcObj = _util.getDataFromStorage('source');
+        if (edits.contributor.updated) { updateAuthStatus(edits.contributor.updated); }
+        if (edits.contributor.removed) { rmvContribs(edits.contributor.removed); }
         storeData('source', srcObj);
-    }
+
+        function updateAuthStatus(updated) { 
+            for (let id in updated) {
+                if (!updated[id]) { rmvIdFromAry(srcObj[id].editors, rcrd.id);
+                } else { rmvIdFromAry(srcObj[id].authors, rcrd.id); } 
+            }
+        }
+        function rmvContribs(removed) {
+            removed.forEach(id => rmvIdFromAry(srcObj[id].contributions, rcrd.id));
+        }
+    } /* End rmvContrib */
     function rmvFromNameProp(prop, rcrd, entity, edits) { 
         var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
         var realm = rcrd.realm.displayName;
@@ -623,11 +643,12 @@
             addToFailedUpdates(updateFunc, params, edits);       
         }
     }
-    function addToFailedUpdates(updateFunc, params, edits) {
+    function addToFailedUpdates(updateFunc, params, edits) { 
         if (!failed[params.entity]) { failed[params.entity] = {}; }
-        const errObj = edits || failed[params.entity];
+        const errObj = edits ? edits : {};
         failed[params.entity][params.prop] = {
-            edits: errObj, entity: params.entity, rcrd: params.rcrd, updateFunc: updateFunc
+            edits: errObj, entity: params.entity, rcrd: params.rcrd, 
+            stage: params.stage, updateFunc: updateFunc
         };
     }
     /** Retries any updates that failed in the first pass. */
