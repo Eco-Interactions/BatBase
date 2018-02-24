@@ -223,7 +223,7 @@ class CrudController extends Controller
         $cur = $pubSrc->getContributorData();
         foreach ($ary as $authId => $isEd) { 
             if (array_key_exists($authId, $cur) ) { 
-                $this->checkForContribUpdates($cur[$authId], $authId, $isEd, $em);
+                $this->checkAuthStatus($cur[$authId], $authId, $isEd, $edits, $em);
                 continue;
             } 
             $this->addContrib($authId, $isEd, $pubSrc, $em);
@@ -231,15 +231,16 @@ class CrudController extends Controller
         }  
         $this->addContribEdits($edits, 'added', $added);
     }
-    /** Checks that there are no changes to the author/editor status. */
-    private function checkForContribUpdates($contribData, $authId, $isEd, &$em)
-    {
-        $curIsEd = reset($contribData);
-        if ($isEd === $curIsEd) { return; }
+    /** Updates any changes to the author/editor status. */
+    private function checkAuthStatus($contribData, $authId, $isEd, &$edits, &$em)
+    {   
+        $curIsEd = reset($contribData); 
+        if ($isEd === $curIsEd) { return; }  
         $contrib = $em->getRepository('AppBundle:Contribution')
-            ->findOneBy(['id' => key($contribData) ]);
+            ->findOneBy(['id' => key($contribData) ]); 
         $contrib->setIsEditor($isEd);
         $em->persist($contrib);
+        $this->addContribEdit($edits, 'updated', $authId, $isEd);
     }
     private function addContrib($id, $isEd, &$pubSrc, &$em)
     {  
@@ -273,6 +274,14 @@ class CrudController extends Controller
         }
         $this->addContribEdits($edits, 'removed', $removed);
     }
+    /** Add author/editor status change to edits obj. */
+    private function addContribEdit(&$edits, $action, $authId, $isEd)
+    {  
+        if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
+        if (!array_key_exists($action, $edits->contributor)) { $edits->contributor[$action] = [];}
+        $edits->contributor[$action][$authId] = $isEd; 
+    }
+    /** Add added/removed array to edits obj. */
     private function addContribEdits(&$edits, $action, $ary)
     {
         if (count($ary)) { 
