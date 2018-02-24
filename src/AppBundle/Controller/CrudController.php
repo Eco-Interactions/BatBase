@@ -174,11 +174,11 @@ class CrudController extends Controller
     private function setRelatedEntityData($formData, &$entity, &$edits, &$em)
     {
         $edgeCases = [
-            "contributor" => function($ary) use ($entity, &$edits, &$em) { 
+            "contributor" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleContributors($ary, $entity, $edits, $em); },
-            "tags" => function($ary) use ($entity, &$edits, &$em) { 
+            "tags" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleTags($ary, $entity, $edits, $em); },
-            "source" => function($id) use ($entity, &$edits, &$em) {
+            "source" => function($id) use (&$entity, &$edits, &$em) {
                 $this->addInteractionToSource($id, $entity, $edits, $em);
             }
         ];
@@ -216,46 +216,69 @@ class CrudController extends Controller
         $this->removeContributors($ary, $entity, $edits, $em);
         $this->addContributors($ary, $entity, $edits, $em);
     }
-    /** Creates a new Contribution for each author source in the array. */
-    private function addContributors($ary, &$pub, $edits, &$em)
+    /** Creates a new Contribution for each author/editor source in the array. */
+    private function addContributors($ary, &$pubSrc, &$edits, &$em)
     {
         $added = []; 
-        $curContribs = $pub->getContributorIds();
-        $contribs = $pub->getContributors();
-        foreach ($ary as $authId) { 
-            if (in_array($authId, $curContribs)) { continue; } 
-            $auth = $em->getRepository('AppBundle:Source')
-                ->findOneBy(['id' => $authId ]);
-            $contribEntity = $this->createContrib($pub, $auth, $em);
-            $pub->addContributor($contribEntity);  //$pub persisted later
-            $auth->addContribution($contribEntity);
-            $em->persist($auth);
-            array_push($added, $authId);
+        $cur = $pubSrc->getContributorData();
+        foreach ($ary as $authId => $isEd) { 
+            if (array_key_exists($authId, $cur) ) { 
+                $this->checkForContribUpdates($cur[$authId], $authId, $isEd, $em);
+                continue;
+            } 
+            $this->addContrib($authId, $isEd, $pubSrc, $em);
+            $added = $added + [$authId => $isEd]; 
         }  
-        if (count($added) > 0) {
-            $edits->contributor = [ 'added' => $added ]; 
-        }
+        $this->addContribEdits($edits, 'added', $added);
     }
-    private function createContrib($pub, $auth, &$em)
+    /** Checks that there are no changes to the author/editor status. */
+    private function checkForContribUpdates($contribData, $authId, $isEd, &$em)
+    {
+        $curIsEd = reset($contribData);
+        if ($isEd === $curIsEd) { return; }
+        $contrib = $em->getRepository('AppBundle:Contribution')
+            ->findOneBy(['id' => key($contribData) ]);
+        $contrib->setIsEditor($isEd);
+        $em->persist($contrib);
+    }
+    private function addContrib($id, $isEd, &$pubSrc, &$em)
+    {  
+        $authSrc = $em->getRepository('AppBundle:Source')
+            ->findOneBy(['id' => $id ]);
+        $contribEntity = $this->createContrib($pubSrc, $authSrc, $isEd, $em);
+        $pubSrc->addContributor($contribEntity);  //$pubSrc persisted later
+        $authSrc->addContribution($contribEntity);
+        $em->persist($authSrc);        
+    }
+    private function createContrib($pubSrc, $authSrc, $isEd, &$em)
     {
         $entity = new Contribution();
-        $entity->setWorkSource($pub);
-        $entity->setAuthorSource($auth);
+        $entity->setWorkSource($pubSrc);
+        $entity->setAuthorSource($authSrc);
+        $entity->setIsEditor($isEd);
+
         $em->persist($entity);  
         return $entity;
     }
-    /** Removes any entities currently in the $coll that are not in the new $ary.  */
-    private function removeContributors($ary, &$entity, &$edits, &$em)
-    {
+    /** Removes any of the current contributors that are not in the new $authObj. */
+    private function removeContributors($authObj, &$entity, &$edits, &$em)
+    { 
         $contributors = $entity->getContributors();
         $removed = [];  
         foreach ($contributors as $contrib) { 
             $authId = $contrib->getAuthorSource()->getId();
-            if (in_array($authId, $ary)) { continue; }
+            if (property_exists($authObj, $authId)) { continue; }
             $entity->removeContributor($contrib);
             array_push($removed, $authId); 
         }
-        if (count($removed)) { $edits->contributor = [ 'removed' => $removed ]; }
+        $this->addContribEdits($edits, 'removed', $removed);
+    }
+    private function addContribEdits(&$edits, $action, $ary)
+    {
+        if (count($ary)) { 
+            if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
+            $edits->contributor[$action] = $ary; 
+        }
     }
     /** Handles adding and removing tags from the entity. */  
     private function handleTags($ary, &$entity, &$edits, &$em)
@@ -264,7 +287,7 @@ class CrudController extends Controller
         $this->removeFromCollection('tag', $curTags, $ary, $entity, $edits, $em);
         $this->addToCollection('tag', $curTags, $ary, $entity, $edits, $em);
     }
-    /** Removes any entities currently in the $coll that are not in the new $ary.  */
+    /** Removes any entities currently in the $coll(ection) that are not in $ary.  */
     private function removeFromCollection($field, $coll, $ary, &$entity, &$edits, $em)
     {
         $removed = [];  
