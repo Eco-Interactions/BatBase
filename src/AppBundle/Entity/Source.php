@@ -824,12 +824,12 @@ class Source
      *
      * @return array
      */
-    public function getAuthorData()
-    {
+    public function getAuthorIds()
+    { 
         $contribs = [];
         foreach ($this->contributors as $contributor) {
-            if ($contributor->getIsEditor()) { return; }
-            array_push($contribs, $contributor->getWorkSource()->getId());
+            if ($contributor->getIsEditor()) { continue; }  
+            array_push($contribs, $contributor->getAuthorSource()->getId());
         }
         return $contribs;
     }
@@ -839,14 +839,33 @@ class Source
      * @JMS\VirtualProperty
      * @JMS\SerializedName("editors")
      *
-     * @return array
-     */
-    public function getEditorData()
+     * @return array     
+     */     
+    public function getEditorIds()
     {
         $contribs = [];
         foreach ($this->contributors as $contributor) {
-            if (!$contributor->getIsEditor()) { return; }
-            array_push($contribs, $contributor->getWorkSource()->getId());
+            if (!$contributor->getIsEditor()) { continue; }
+            array_push($contribs, $contributor->getAuthorSource()->getId());
+        }
+        return $contribs;
+    }
+
+    /**
+     * Get Author Ids with contribId and isEditor flag.
+     *
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("contributors")
+     * @return array
+     */
+    public function getContributorData()
+    { 
+        $contribs = [];
+        foreach ($this->contributors as $contributor) { 
+            $contribId = $contributor->getId(); 
+            $authId = $contributor->getAuthorSource()->getId();
+            $isEd = $contributor->getIsEditor() || false;
+            $contribs = $contribs + [ $authId => [$contribId => $isEd]];
         }
         return $contribs;
     }
