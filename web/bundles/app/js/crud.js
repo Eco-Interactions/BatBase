@@ -452,10 +452,10 @@ $(document).ready(function(){
         });
         return ints;
     }
-    function fillFields(rcrd, fields) {
+    function fillFields(rcrd, fields) {                                         //console.log('rcrd = %O, fields = %O', rcrd, fields);
         const fieldHndlrs = {
             'text': setText, 'textArea': setTextArea, 'select': setSelect, 
-            'fullTextArea': setTextArea, 'multiSelect': Function.prototype,
+            'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
             'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
             'taxon': addTaxon
         };
@@ -468,6 +468,12 @@ $(document).ready(function(){
         var elemId = field.split(' ').join('');
         var prop = _util.lcfirst(elemId);
         fieldHndlr(elemId, prop, rcrd);
+    }
+    /** Adds multiSelect values to the form's val object. */
+    function addToFormVals(fieldId, prop, rcrd) {                               //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+        const vals = fParams.forms.top.fieldConfg.vals;
+        vals[fieldId] = {type: 'multiSelect'};
+        vals[fieldId].val = rcrd[prop]; 
     }
     function setText(fieldId, prop, rcrd) {                                     //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
         $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
@@ -492,7 +498,6 @@ $(document).ready(function(){
         setTitleField(entity, srcRcrd);
         setPublisherField(entity, srcRcrd);
         setCitationEdgeCaseFields(entity, detail);
-        addAuthorsToEditForm(entity, srcRcrd);
     }
     function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
         if (["publication", "citation"].indexOf(entity) !== -1) {
@@ -509,14 +514,6 @@ $(document).ready(function(){
         $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
         $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
         $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
-    }
-    function addAuthorsToEditForm(entity, srcRcrd) {
-        let cnt = 0;
-        if (['publication', 'citation'].indexOf(entity) == -1) { return; }
-        srcRcrd.contributors.forEach(function(authId) {
-            selectAuthor(cnt++, authId, 'top')
-        });
-        fParams.forms.top.fieldConfg.vals.Authors.val = srcRcrd.contributors;
     }
     function addTaxon(fieldId, prop, rcrd) {                                    //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
         var selApi = $('#'+ fieldId + '-sel')[0].selectize;
@@ -647,7 +644,8 @@ $(document).ready(function(){
         return {
             'Title': srcRcrd.displayName, 'Description': srcRcrd.description || '',            
             'Publication Type': pubRcrd.publicationType ? pubRcrd.publicationType.displayName : '', 
-            'Publisher': getPublisher(srcRcrd), 'Authors': getAuthorNames(srcRcrd), 
+            'Publisher': getPublisher(srcRcrd), 'Authors': getAuthorNames(srcRcrd),
+            'Editors': getAuthorNames(srcRcrd, true)
         };
     }
     function getPublisher(srcRcrd) {
@@ -752,15 +750,13 @@ $(document).ready(function(){
         addPublicationYear(fLvl);
     }
     /**
-     * If the parent publication has existing contributors, add them to the new 
+     * If the parent publication has existing authors, they are added to the new 
      * citation form's author field(s). 
      */
     function addExistingPubContribs(fLvl) {  
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       
-        const pubSrc = fParams.forms[fLvl].pub.src;
-        if (!pubSrc.contributors.length) { return; }
-        vals.Authors = {type: "multiSelect"};
-        vals.Authors.val = pubSrc.contributors;
+        const vals = fParams.forms[fLvl].fieldConfg.vals;
+        vals.Authors = { type: "multiSelect" };
+        vals.Authors.val = vals.length > 0 ? vals : null;
     }
     function addPublicationTitle(fLvl) {
         const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
@@ -784,11 +780,12 @@ $(document).ready(function(){
     }
     /**
      * Adds relevant data from the parent publication into formVals before 
-     * loading the default fields for the selected Citation Type. 
+     * loading the default fields for the selected Citation Type. If this is an 
+     * edit form, skip loading pub data... 
      */
     function loadCitTypeFields(typeId) {
         const fLvl = getSubFormLvl('sub');
-        handlePubData(typeId, this.$input[0], fLvl);
+        if (!fParams.editing) { handlePubData(typeId, this.$input[0], fLvl); }
         loadSrcTypeFields('citation', typeId, this.$input[0]);
     }
     /** Adds or removes publication data from the form's values, depending on type. */
@@ -881,16 +878,17 @@ $(document).ready(function(){
         /**
          * Citation example with all data available: 
          *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-         *     [Initials. Last]. Year. Book Title. Edition. 
-         *     Publisher Name, City, Country.
+         *     [Initials. Last]. Year. Book Title (Editor 1 [initials, last name],
+         *      & Editor X [initials, last name], eds.). Edition. Publisher Name, 
+         *      City, Country.
          */
-        function bookCit(type) {                                                
-            const athrs = stripString(getFormAuthors());
-            const year = stripString(formVals.year);
-            const title = stripString(formVals.title);
+        function bookCit(type) {
+            const athrs = stripString(getPubAuthors());
+            const year = stripString(getPubYear());
+            const titlesAndEds = getTitlesAndEditors();
             const ed = formVals.edition;
             const publ = getPublisherData();
-            const allFields = [athrs, year, title, ed, publ];
+            const allFields = [athrs, year, titlesAndEds, ed, publ];
             return allFields.filter(f=>f).join('. ')+'.';
         }
         /** 
@@ -936,19 +934,24 @@ $(document).ready(function(){
             const publ = getPublisherData();
             return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
         }
-                /** ---------- citation full text helpers ------------------ */
-        function getFormEditors() {
-            const eds = getFormAuthors(true);
-            return eds.length ? '('+ eds +', eds.)' : false; 
-        }
+            /** ---------- citation full text helpers ----------------------- */
         function getFormAuthors(eds) { 
             const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
             if (!auths.length) { return false; }
             return getFormattedAuthorNames(auths, eds);
         }
         function getPubAuthors() {
-            const auths = fParams.forms[fLvl].pub.src.contributors;
+            const auths = fParams.forms[fLvl].pub.src.authors;
             return getFormattedAuthorNames(auths);
+        }
+        function getPubEditors() {
+            const eds = fParams.forms[fLvl].pub.src.editors;
+            if (!eds.length) { return false }
+            const names = getFormattedAuthorNames(eds, true);
+            return '('+ names +', eds.)';
+        }
+        function getPubYear() {
+            return fParams.forms[fLvl].pub.src.year;
         }
         /** 
          * Returns a string with all author names formatted with the first author
@@ -957,21 +960,21 @@ $(document).ready(function(){
          * with '&'. If the names are of editors, they are returned [Initials. Last].
          * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
          */
-        function getFormattedAuthorNames(auths, eds) { 
+        function getFormattedAuthorNames(auths, eds) {                          
             if (auths.length > 3) { return getFirstEtAl(auths[0]); }
             let athrs = '';
             $(auths).each(function(i, srcId){
-                const name = getFormattedName(srcId);
+                const name = getFormattedName(i, srcId);
                 athrs += (i == 0 ? name : (i == auths.length-1 ?
                     ' & '+ name : ', '+ name)); 
-            });                                                                 //console.log('athrs = ', athrs);
+            });                                                                 
             return athrs;
 
             function getFirstEtAl(authId) {
                 const name = getFormattedName(authId);
                 return name +', et al';
             }
-            function getFormattedName(srcId) {              
+            function getFormattedName(i, srcId) {              
                 const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
                 const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
                 const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
@@ -986,7 +989,7 @@ $(document).ready(function(){
                 const last = a.lastName;                     
                 const initials = ["firstName", "middleName"].map(name => 
                     a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
-                return cnt > 0 || eds ? initials +' '+ last : last+', '+initials; 
+                return cnt > 1 || eds ? initials +' '+ last : last+', '+initials; 
             }
         } /* End getFormattedAuthorNames */
         function getBookPages(argument) {
@@ -994,22 +997,21 @@ $(document).ready(function(){
             return 'pp. ' + stripString(formVals.pages);
         }
         function getPublicationName() {
-            return fParams.records.source[$('#Publication-sel').val()].displayName;
+            return fParams.forms[fLvl].pub.src.displayName;
         }
         function getPublicationYear() {
-            return fParams.records.source[$('#Publication-sel').val()].year;
+            return fParams.forms[fLvl].pub.src.year;
         }
         /** Formats publisher data and returns the Name, City, Country. */
         function getPublisherData() {
-            const publ = getPublRcrd($('#Publication-sel').val());
+            const publ = getPublRcrd(fParams.forms[fLvl].pub);
             if (!publ) { return false; }
             const name = publ.displayName;
             const city = publ.city ? publ.city : '[ADD CITY]';
             const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
             return [name, city, cntry].join(', ');
 
-            function getPublRcrd(pubId) {
-                const pub = fParams.records.source[pubId];
+            function getPublRcrd(pub) {
                 if (!pub.parent) { return false; }
                 const publSrc = fParams.records.source[pub.parent];
                 return getEntityRecord('publisher', publSrc.publisher);
@@ -1019,11 +1021,12 @@ $(document).ready(function(){
          * Returns: Chapter title. In: Publication title [if there are editors,
          * they are added in parentheses here.]. 
          */
-        function getTitlesAndEditors() { //only titles for now
-            const chap = stripString(formVals.chapterTitle);
-            const pub = fParams.forms[fLvl].pub.src.displayName;
-            const titles = stripString(chap + '. In: ' + pub);
-            const eds = false;// getFormEditors();
+        function getTitlesAndEditors() { 
+            const chap = formVals.chapterTitle ? 
+                stripString(formVals.chapterTitle) : false;
+            const pub = stripString(getPublicationName());
+            const titles = chap ? (chap + '. In: ' + pub) : pub;
+            const eds = getPubEditors();
             return eds ? (titles + ' ' + eds) : titles;
         }
         /** 
@@ -1058,7 +1061,7 @@ $(document).ready(function(){
      * any type-specific labels for fields.  
      * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
      */
-    function loadSrcTypeFields(type, typeId, elem) {
+    function loadSrcTypeFields(type, typeId, elem) {                            //console.log('loadSrcTypeFields');
         const fLvl = getSubFormLvl('sub');
         resetOnFormTypeChange(type, typeId, fLvl);
         $('#'+type+'_Rows').append(getSrcTypeRows(type, typeId, fLvl));
@@ -1957,113 +1960,114 @@ $(document).ready(function(){
     }
 
     /*-------------- Author --------------------------------------------------*/
-    /** Reselects authors after source-type fields are regenerated */
-    function reselectAuthors(field, fieldObj, fLvl) {                               
-        const valConfg = fParams.forms[fLvl].fieldConfg.vals; 
-        selectExistingAuthors(valConfg.Authors.val, fLvl);
-    }
-    /** Loops through author array and selects each author in the form */ 
-    function selectExistingAuthors(authAry, fLvl) { 
+
+    /** Loops through author array and selects each author/editor in the form. */
+    function selectExistingAuthors(field, authAry, fLvl) {                      //console.log('reselectAuthors. field = [%s] auths = %O', field, authAry);
         $.each(authAry, function(i, authId) {  
-            selectAuthor(i, authId, fLvl);
+            selectAuthor(i, authId, field, fLvl);
         });
     }
     /** Selects the passed author and builds a new, empty author combobox. */
-    function selectAuthor(cnt, authId, fLvl) {
-        const selId = '#Authors-sel'+ ++cnt;
+    function selectAuthor(cnt, authId, field, fLvl) {
+        const selId = '#'+field+'-sel'+ ++cnt;      
         $(selId)[0].selectize.addItem(authId, true);
-        buildNewAuthorSelect(++cnt, authId, fLvl);
+        buildNewAuthorSelect(++cnt, authId, fLvl, field);
     }
     /**
      * When an author is selected, a new author combobox is initialized underneath
      * the last author combobox, unless the last is empty. The total count of 
      * authors is added to the new id.
      */
-    function onAuthSelection(val) {                                             //console.log("Add existing author = %s", val);
+    function onAuthSelection(val, ed) {                                         //console.log("Add existing author = %s", val);
+        handleAuthSelect(val);
+    }
+    function onEdSelection(val) {                                               //console.log("Add existing author = %s", val);
+        handleAuthSelect(val, 'editor');
+    }
+    function handleAuthSelect(val, ed) {
         const fLvl = getSubFormLvl('sub');
-        let cnt = $('#Authors-sel-cntnr').data('cnt') + 1;                          
-        if (val === 'create') { return openCreateForm('Authors', --cnt); }        
+        const authType = ed ? 'Editors' : 'Authors';
+        let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
+        if (val === 'create') { return openCreateForm(authType, --cnt); }        
         if (val === '' || parseInt(val) === NaN) { return handleAuthFieldClear(fLvl); }
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
-        addAuthSelectionToFormVals(val, fLvl);
-        if (lastAuthComboEmpty(cnt-1)) { return; }
-        buildNewAuthorSelect(cnt, val, fLvl);
+        addAuthSelectionToFormVals(val, fLvl, authType);
+        if (lastAuthComboEmpty(cnt-1, authType)) { return; }
+        buildNewAuthorSelect(cnt, val, fLvl, authType);
     }
     /** Updates the citation text, if displayed. */
     function handleAuthFieldClear(fLvl) {
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
     }
-    function addAuthSelectionToFormVals(val, fLvl) {
+    function addAuthSelectionToFormVals(val, fLvl, authType) {
         const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', vals);
-        if (!Array.isArray(vals.Authors.val)) { vals.Authors.val = []; }
-        vals.Authors.val.push(val);        
+        if (!Array.isArray(vals[authType].val)) { vals[authType].val = []; }
+        vals[authType].val.push(val);        
     }
     /** Stops the form from adding multiple empty combos to the end of the field. */
-    function lastAuthComboEmpty(cnt) {  
-        return $("#Authors-sel"+cnt).val() === '';
+    function lastAuthComboEmpty(cnt, authType) {  
+        return $('#'+authType+'-sel'+cnt).val() === '';
     }
     /** Builds a new, empty author combobox */
-    function buildNewAuthorSelect(cnt, val, prntLvl) {                          //console.log("buildNewAuthorSelect. cnt [%s] val [%s]", cnt, val)
+    function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                //console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
         const parentFormEntity = fParams.forms[prntLvl].entity;
-        const selConfg = { name: 'Author', id: '#Authors-sel'+cnt, 
-            change: onAuthSelection, add: initAuthForm };
-        const sel = buildSelectCombo(parentFormEntity, 'Authors', prntLvl, cnt);  
-        $(sel).change(storeAuthorValue.bind(null, prntLvl, cnt)); 
-        $("#Authors-sel-cntnr").append(sel).data("cnt", cnt);
+        const singular = authType.slice(0, -1);
+        const change = authType === 'Editors' ? onEdSelection : onAuthSelection;
+        const add = authType === 'Editors' ? initEdForm : initAuthForm;
+        const selConfg = { name: singular, id: '#'+authType+'-sel'+cnt, 
+            change: change, add: add };
+        const sel = buildSelectCombo(parentFormEntity, authType, prntLvl, cnt);  
+        $(sel).change(storeMultiSelectValue.bind(null, prntLvl, cnt, authType)); 
+        $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
         initSelectCombobox(selConfg, prntLvl);
-        removeAllSelectedAuths(sel, prntLvl);
-        updatePlaceholderforChapterCitations(sel, prntLvl);
     }
     /** Removes the already selected authors from the new dropdown options. */
-    function removeAllSelectedAuths(sel, fLvl) { 
-        const auths = fParams.forms[fLvl].fieldConfg.vals.Authors.val;   
-        const $selApi = $(sel).data('selectize');                          
-        if (auths) { auths.forEach(id => $selApi.removeOption(id)); } 
+    // function removeAllSelectedAuths(sel, fLvl, authType) { 
+    //     const auths = fParams.forms[fLvl].fieldConfg.vals[authType].val;   
+    //     const $selApi = $(sel).data('selectize');                          
+    //     if (auths) { auths.forEach(id => $selApi.removeOption(id)); } 
+    // }
+    function initAuthForm(value) {                                              //console.log("Adding new auth! val = %s", val);      
+        handleNewAuthForm(value, 'Authors');
     }
-    function updatePlaceholderforChapterCitations(selElem, fLvl) {
-        if (fParams.forms[fLvl].typeConfg.name === 'Chapter') {
-            updatePlaceholderText(selElem, 'Editor');
-        }
+    function initEdForm(value) {                                                //console.log("Adding new auth! val = %s", val);
+        handleNewAuthForm(value, 'Editors');
     }
     /**
-     * When a user enters a new author into the combobox, a create-author form is 
-     * built, appended to the author field row, and an option object is returned 
-     * to be selected in the combobox. Unless there is already an open form at
-     * this level , where a message will be shown telling the user to complete 
-     * the open form and the form init will be canceled.
-     * ##Refactor!!
+     * When a user enters a new author (or editor) into the combobox, a create 
+     * form is built and appended to the field row. An option object is returned 
+     * to be selected in the combobox. If there is already an open form at
+     * this level , a message will be shown telling the user to complete the open 
+     * form and the form init will be canceled.
      */
-    function initAuthForm (value) {                                             //console.log("Adding new auth! val = %s", val);
-        const authCnt = $('#Authors-sel-cntnr').data('cnt');
-        const parentSelId = '#Authors-sel'+authCnt;
+    function handleNewAuthForm(value, authType) {
+        const parentSelId = getParentSelId(); 
         const fLvl = getSubFormLvl('sub2');
-        const prntLvl = getNextFormLevel('parent', fLvl);
+        const singular = authType.slice(0, -1);
         const val = value === 'create' ? '' : value;
-        const authType = 'Author';//       getAuthorType();
-        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Authors', parentSelId, fLvl); }
-        $('#Authors_row').append(initSubForm(
-            'author', fLvl, 'sml-left sml-form', {'LastName': val}, parentSelId));
-        enableSubmitBttn('#'+fLvl+'-submit');
-        disableSubmitBttn('#'+prntLvl+'-submit');
-        // if (authType === 'Editor') { updateFormForEditors(); }
+        if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr(authType, parentSelId, fLvl); }
+        $('#'+authType+'_row').append(initSubForm( _util.lcfirst(singular), 
+            fLvl, 'sml-left sml-form', {'LastName': val}, parentSelId));
+        handleSubmitBttns(fLvl);
         $('#FirstName_row input').focus();
-        return { 'value': '', 'text': 'Creating '+authType+'...' };
-    }
-    // function getAuthorType() {
-    //     const fLvl = getSubFormLvl('sub');
-    //     if (!fParams.forms[fLvl] || !fParams.forms[fLvl].typeConfg) { return 'Author'; }
-    //     return fParams.forms[fLvl].typeConfg.name === 'Chapter' ? 
-    //         'Editor' : 'Author';
-    // }
-    // function updateFormForEditors() {
-    //     $('#sub2-hdr').text('New Editor');
-    //     $('#sub2-submit').val('Create Editor');
-    // }
+        return { 'value': '', 'text': 'Creating '+singular+'...' };
+
+        function getParentSelId() {
+            const authCnt = $('#'+authType+'-sel-cntnr').data('cnt');
+            return '#'+authType+'-sel'+authCnt;
+        }
+        function handleSubmitBttns(fLvl) {
+            const prntLvl = getNextFormLevel('parent', fLvl);
+            enableSubmitBttn('#'+fLvl+'-submit');
+            disableSubmitBttn('#'+prntLvl+'-submit');
+        }
+    } /* End handleNewAuthForm */
     /** Returns a comma seperated sting of all authors attributed to the source. */
-    function getAuthorNames(srcRcrd) {
+    function getAuthorNames(srcRcrd, editors) {
         var authStr = [];
-        if (srcRcrd.contributors.length > 0) {
-            srcRcrd.contributors.forEach(function(authId){
+        const prop = editors ? 'editors' : 'authors';
+        if (srcRcrd[prop].length > 0) {
+            srcRcrd[prop].forEach(function(authId){
                 authStr.push(getAuthName(authId));
             });
         }
@@ -2127,6 +2131,8 @@ $(document).ready(function(){
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
             'Country': { name: 'Country', change: false, add: false },
+            'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
+                add: initEdForm },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },
             'Genus': { name: 'Genus', change: onLevelSelection, add: initTaxonForm },
             'HabitatType':  { name: 'Habitat Type', change: false, add: false },
@@ -2341,7 +2347,18 @@ $(document).ready(function(){
                     }
                 },
                 'exitHandler': { create: enablePubField }
-            },                                      
+            },    
+            "editor": { 
+                "add": { "FirstName": "text", "MiddleName": "text", 
+                    "LastName": "text", "Suffix": "text"}, 
+                "required": ["LastName"], 
+                "suggested": ["FirstName", "MiddleName"],
+                "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
+                "order": {
+                    "sug": ["FirstName", "MiddleName", "LastName"],
+                    "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
+                        "LinkUrl", "LinkDisplay"]},
+            },                                  
             "interaction": {
                 "add": {},  
                 "required": ["InteractionType"],
@@ -2396,12 +2413,12 @@ $(document).ready(function(){
                     "Book": {
                         "name": 'Book',
                         "required": ["Authors", "Publisher", "Year"],
-                        "suggested": [],
+                        "suggested": ['Editors'],
                         "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
                         "order": {
-                            "sug": ["Year", "Publisher", "Authors"],
+                            "sug": ["Year", "Publisher", "Authors", 'Editors'],
                             "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
-                                "Description", "Publisher", "Authors"]},
+                                "Description", "Publisher", "Authors", 'Editors']},
                     },
                     "Journal": {
                         "name": 'Journal',
@@ -2481,6 +2498,7 @@ $(document).ready(function(){
             "object": "taxonLvls",      "plant": "taxonLvls",
             "arthropod": "taxonLvls",   "taxon": "taxon",
             "interaction": "interaction","bat": "taxonLvls",          
+            'editor': 'source',
         };
         const fields = {
             "location": { "DisplayName": "text", "Description": "textArea", 
@@ -2492,7 +2510,7 @@ $(document).ready(function(){
             },
             "source": { "DisplayName": "text", "Description": "textArea", 
                 "Year": "text", "Doi": "text", "LinkDisplay": "text", 
-                "LinkUrl": "text", "Authors": "multiSelect"
+                "LinkUrl": "text", "Authors": "multiSelect", "Editors": "multiSelect"
             },
             "taxonLvls": {
                 "Class": "select", "Order": "select", "Family": "select", 
@@ -2565,8 +2583,8 @@ $(document).ready(function(){
             fConfg.order.opt.concat(typeConfg.order.opt) : 
             typeConfg ? 
                 fConfg.order.sug.concat(typeConfg.order.sug) : 
-                shwAll ? fConfg.order.opt : fConfg.order.sug; 
-        return order.map(field => field);
+                shwAll && fConfg.order.opt ? fConfg.order.opt : fConfg.order.sug; 
+        return order.map(field => field); //removes references to confg obj.
     }
     /** @return {ary} Rows for each field in the entity field obj. */
     function buildRows(fieldObj, entity, fVals, fLvl) {                         //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
@@ -2595,7 +2613,7 @@ $(document).ready(function(){
         /** Sets the value for the field if it is in the passed 'fVals' obj. */
         function fillFieldIfValuePassed() {
             if (field in fVals) { 
-                if (field === 'Authors') { return; }
+                if (fieldsObj.fields[field] === "multiSelect") { return; }
                 $(input).val(fVals[field]); 
             }
         }
@@ -2621,7 +2639,7 @@ $(document).ready(function(){
      */
     function storeFieldValue(elem, fieldName, fLvl, value) {                    //console.log('store fields value. args = %O', arguments);
         const val = value || $(elem).val();                                     //console.log("val = %s, formValObj = %O", val, fParams.forms[fLvl]);
-        if (fieldName === 'Authors') { return; }
+        if (fieldName === 'Authors' || fieldName === 'Editors') { return; }
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
         fParams.forms[fLvl].fieldConfg.vals[fieldName].val = val;
     }
@@ -2632,6 +2650,14 @@ $(document).ready(function(){
         const val = e.target.value || null;
         const pos = cnt - 1;
         valConfg.Authors.val.splice(pos, 1, val);  
+    }
+    /** Stores value at index of the order on form, ie the cnt position. */
+    function storeMultiSelectValue(fLvl, cnt, field, e) {                       //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
+        const valConfg = fParams.forms[fLvl].fieldConfg.vals; 
+        if (!Array.isArray(valConfg[field].val)) { valConfg[field].val = []; }
+        const val = e.target.value || null;
+        const pos = cnt - 1;
+        valConfg[field].val.splice(pos, 1, val);  
     }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -2674,7 +2700,7 @@ $(document).ready(function(){
     function buildMultiSelectElem(entity, field, fLvl) {                        //console.log("entity = %s. field = ", entity, field);
        const cntnr = _util.buildElem('div', { id: field+'-sel-cntnr'});
        const selElem = buildSelectCombo(entity, field, fLvl, 1);
-       $(selElem).change(storeAuthorValue.bind(null, fLvl, 1));
+       $(selElem).change(storeMultiSelectValue.bind(null, fLvl, 1, field));
        $(cntnr).data('cnt', 1);
        $(cntnr).data('inputType', 'multiSelect');
        $(cntnr).append(selElem);
@@ -2699,6 +2725,7 @@ $(document).ready(function(){
             "CitationType": [ getCitTypeOpts, 'citTypeNames'],
             "Class": [ getTaxonOpts, 'Class' ],
             "Country": [ getOptsFromStoredData, 'countryNames' ],
+            "Editors": [ getSrcOpts, 'authSrcs'],
             "Family": [ getTaxonOpts, 'Family' ],
             "Genus": [ getTaxonOpts, 'Genus' ],
             "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
@@ -2713,7 +2740,7 @@ $(document).ready(function(){
         };
         var getOpts = optMap[field][0];
         var fieldKey = optMap[field][1];
-        return getOpts(fieldKey);
+        return getOpts(fieldKey, field);
     }
     /** Sorts an array of options via sort method. */
     function alphaOptionObjs(a, b) {
@@ -2750,9 +2777,9 @@ $(document).ready(function(){
         return getOptsFromStoredData(entity+"Tags");
     }
     /** Returns an array of source-type (prop) options objects. */
-    function getSrcOpts(prop) {
+    function getSrcOpts(prop, field) {
         const map = { 'pubSrcs': 'Publication', 'publSrcs': 'Publisher', 
-            'authSrcs': 'Author' };
+            'authSrcs': field ? field.slice(0, -1) : 'Author' };
         const ids = _util.getDataFromStorage(prop);
         let opts = getRcrdOpts(ids, fParams.records.source);
         opts.unshift({ value: 'create', text: 'Add a new '+map[prop]+'...'});
@@ -2778,10 +2805,15 @@ $(document).ready(function(){
             return opts[fParams.forms[fLvl].pub.pub.publicationType.displayName];
         }
         function setPubInParams() {
-            const pubSrc = fParams.records.source[$('#Publication-sel').val()];    
+            const pubSrc = getPubSrc();    
             const pub = getEntityRecord('publication', pubSrc.publication);
-            fParams.forms[fLvl].pub = { src: pubSrc, pub: pub };  
-            return pub.publicationType.displayName;
+            fParams.forms[fLvl].pub = { src: pubSrc, pub: pub };
+        }
+        function getPubSrc() {
+            const pubId = $('#Publication-sel').val() ? 
+                $('#Publication-sel').val() : 
+                getEntityRecord('source', fParams.editing.core).parent;
+            return fParams.records.source[pubId];
         }
     } /* End getCitTypeOpts */
     /** Returns an array of taxonyms for the passed level and the form's realm. */
@@ -3004,7 +3036,7 @@ $(document).ready(function(){
 /*--------------------------- Fill Form Fields -------------------------------*/
     /** Returns an object with field names(k) and values(v) of all form fields*/
     function getCurrentFormFieldVals(fLvl) {
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', vals);
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', JSON.parse(JSON.stringify(vals)));
         const valObj = {};
         for (let field in vals) {
             valObj[field] = vals[field].val;
@@ -3018,17 +3050,17 @@ $(document).ready(function(){
      * reinitiation are handled here.
      */
     function fillComplexFormFields(fLvl) {
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('fillComplexFormFields. vals = %O, curFields = %O', vals,fParams.forms[fLvl].fieldConfg.fields);
-        const fieldHndlrs = { 'multiSelect': reselectAuthors };
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('fillComplexFormFields. vals = %O, curFields = %O', JSON.parse(JSON.stringify(vals)),fParams.forms[fLvl].fieldConfg.fields);
+        const fieldHndlrs = { 'multiSelect': selectExistingAuthors };
 
-        for (var field in vals) {                                               //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
-            if (!vals[field].val) { continue; } 
+        for (let field in vals) {                                               //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
+            if (!vals[field].val || !vals[field].val.length) { continue; } 
             if (Object.keys(fieldHndlrs).indexOf(vals[field].type) == -1) {continue;}
-            addValueIfFieldShown(field, vals[field], fLvl);
+            addValueIfFieldShown(field, vals[field].val, fLvl);
         }
-        function addValueIfFieldShown(field, fieldObj, fLvl) {                  //console.log('addValueIfFieldShown [%s] field, obj = %O', field, fieldObj);
+        function addValueIfFieldShown(field, val, fLvl) {                       //console.log('addValueIfFieldShown [%s] field, val = %O', field, val);
             if (!fieldIsDisplayed) { return; }
-            fieldHndlrs[vals[field].type](vals[field].val, field, fLvl);        
+            fieldHndlrs[vals[field].type](field, val, fLvl);        
         }
     } /* End fillComplexFormFields */
     function fieldIsDisplayed(field, fLvl) {
@@ -3103,15 +3135,18 @@ $(document).ready(function(){
             if (!submitting) { return; }
             const dataHndlrs = {
                 'author': [ getAuthFullName, getAuthDisplayName ],
-                'citation': [ getPubFieldData, addCitDisplayName, ifFullWorkCited ], 
+                'editor': [ getAuthFullName, getAuthDisplayName ],
+                'citation': [ getPublicationData, addCitDisplayName, ifFullWorkCited,
+                    addContributorData ], 
                 'interaction': [ handleUnspecifiedLocs ],
                 'location': [ addElevUnits, padLatLong, getLocType ], 
+                'publication': [ addContributorData ],
                 'taxon': [ getTaxonData ],
             };
             if (!dataHndlrs[entity]) { return; }
             dataHndlrs[entity].forEach(function(func) { func(); });
         }
-        /** -------------------- Additional Author Data ----------------------*/ 
+        /** ---- Additional Author data ------ */
         /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
         function getAuthFullName() { 
             const nameFields = ['firstName', 'middleName', 'lastName', 'suffix'];
@@ -3129,9 +3164,10 @@ $(document).ready(function(){
             });
             formVals.displayName = displayName;
         }
-        /** -------------------- Additional Citation Data --------------------*/ 
-        function getPubFieldData() {
-            formVals.publication = $('#Publication-sel').val();
+        /** ---- Additional Citation data ------ */
+        function getPublicationData() {
+            formVals.publication = fParams.editing ? 
+                fParams.forms[fLvl].pub.src.id : $('#Publication-sel').val();
         }
         /** Adds 'displayName', which will be added to both the form data objects. */
         function addCitDisplayName() { 
@@ -3157,7 +3193,7 @@ $(document).ready(function(){
                 if (types[name] === id) { return name; }
             }
         }
-        /** -------------------- Additional Location Data _-------------------*/ 
+        /** ---- Additional Location data ------ */
         /** Adds the elevation unit abbrevation, meters, if an elevation was entered. */
         function addElevUnits() {
             if (formVals.elevation) { formVals.elevUnitAbbrv = 'm'; }
@@ -3194,6 +3230,20 @@ $(document).ready(function(){
             if (formVals.location) { return; }
             formVals.location = formVals.country || getUnspecifiedLocId();   
         }
+        /** ---- Additional Publication data ------ */
+        /**
+         * Builds contributor object with all contributing authors and editors, 
+         * distinguished by an isEditor flag.  
+         */
+        function addContributorData() {
+            if (!formVals.contributor) { formVals.contributor = {}; } 
+            if (formVals.editors) { addContribs(formVals.editors, true); }
+            if (formVals.authors) { addContribs(formVals.authors, false); }
+            function addContribs(ary, isEditor) {
+                ary.forEach(id => formVals.contributor[id] = isEditor);
+            }
+        } /* End addContributorData */
+        /** ---- Additional Taxon data ------ */
         function getTaxonData() {
             const formTaxonLvl = fParams.forms.taxonPs.formTaxonLvl;
             formVals.parentTaxon = getParentTaxon(formTaxonLvl);
@@ -3227,9 +3277,10 @@ $(document).ready(function(){
      * Builds a form data object @buildFormData. Sends it to the server @submitFormData
      */
     function buildFormDataAndSubmit(fLvl, formVals) {                        
-        const entity = fParams.forms[fLvl].entity;                              //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
+        let entity = fParams.forms[fLvl].entity;                                //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
+        if (entity === 'editor') { entity = 'author'; }
         const formData = buildFormData(entity, formVals);                       //console.log("formData = %O", formData);
-        submitFormData(formData, fLvl);
+        submitFormData(formData, fLvl, entity);
     }                
     /**
      * Returns an object with the entity names' as keys for their field-val objects, 
@@ -3296,22 +3347,22 @@ $(document).ready(function(){
     /** Returns the core entity. (eg, Source is returned for author, citation, etc.) */
     function getCoreFormEntity(entity) {
         var coreEntities = {
-            "author": "source",         "citation": "source",
-            "publication": "source",    "publisher": "source",
-            "location": "location",     "taxon": "taxon",
-            "interaction": "interaction"
+            'author': 'source',         'citation': 'source', 
+            'publication': 'source',    'publisher': 'source', 
+            'location': 'location',     'taxon': 'taxon', 
+            'interaction': 'interaction'
         };
         return coreEntities[entity];
     }
     function getParentEntity(entity) {                                          
-        var details = ["author", "citation", "publication", "publisher"];       //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
-        return details.indexOf(entity) !== -1 ? "source" : false;
+        const details = ['author', 'citation', 'publication', 'publisher'];     //console.log("hasParentEntity? [%s]. Entity = %s", details.indexOf(entity) !== -1, entity);
+        return details.indexOf(entity) !== -1 ? 'source' : false;
     }
     /** Returns an array of the parent entity's field names. */
     function getParentFields(entity) {
         var parentFields = Object.keys(getCoreFieldDefs(entity));
         return  parentFields.map(function(field) {
-            return _util.lcfirst(field.split(" ").join(""));
+            return _util.lcfirst(field.split(' ').join(''));
         });
     }
     /**
@@ -3325,8 +3376,8 @@ $(document).ready(function(){
                 "displayName": { "source": "displayName", "author": "displayName" }
             },
             "citation": { 
-                "authors": { "source": "contributor" },
-                // "editors": { "source": "contributor" },
+                "authors": { "source": false },
+                'contributor': { 'source': 'contributor' },
                 "citationText": { "source": "description", "citation": "fullText" }, 
                 "publication": { "source": "parentSource" },
                 "title": { "source": "displayName", "citation": ["displayName", "title"] },
@@ -3350,7 +3401,9 @@ $(document).ready(function(){
                 "country": { "location": "parentLoc" },
             },
             "publication": { 
-                "authors": { "source": "contributor" },
+                "authors": { "source": false },
+                "editors": { "source": false }, 
+                'contributor': { 'source': 'contributor' },
                 "publisher": { "source": "parentSource" }, 
                 "description": { "source": "description", "publication": "description" },
                 "title": { "source": "displayName", "publication": "displayName" },
@@ -3369,9 +3422,10 @@ $(document).ready(function(){
     function getRelationshipFields(entity) {
         var relationships = {
             "author": ["sourceType"], 
-            "citation": ["citationType", "authors", "publication"], //'editors', 
+            "citation": ["citationType", 'contributor', "publication"], 
             "location": ["locationType", "habitatType", "country"],
-            "publication": ["publicationType", "authors", "publisher", "publisher/University"],
+            "publication": ["publicationType", 'contributor', "publisher", 
+                "publisher/University"],
             "publisher": [],
             "taxon": ["level", "parentTaxon"],
             "interaction": ["citationTitle", "location", "subject", "object", 
@@ -3381,8 +3435,8 @@ $(document).ready(function(){
     }
     /*------------------ Form Submit Methods ---------------------------------*/
     /** Sends the passed form data object via ajax to the appropriate controller. */
-    function submitFormData(formData, fLvl) {                                   console.log("submitFormData [ %s ]= %O", fLvl, formData);
-        var coreEntity = getCoreFormEntity(fParams.forms[fLvl].entity);         //console.log("entity = ", coreEntity);
+    function submitFormData(formData, fLvl, entity) {                           console.log("submitFormData [ %s ]= %O", fLvl, formData);
+        var coreEntity = getCoreFormEntity(entity);       
         var url = getEntityUrl(coreEntity, fParams.forms[fLvl].action);
         if (fParams.editing) { formData.ids = fParams.editing; }
         formData.coreEntity = coreEntity;
@@ -3439,12 +3493,12 @@ $(document).ready(function(){
      * Note: The location elevUnitAbbrv is updated automatically for locations with
      * elevation data, and is ignored here. 
      */
-    function hasChngs(data) {
-        var chngs = Object.keys(data.coreEdits).length > 0 || 
+    function hasChngs(data) {   
+        const chngs = Object.keys(data.coreEdits).length > 0 || 
             Object.keys(data.detailEdits).length > 0;
-        if (chngs && data.core == 'location' && Object.keys(data.coreEdits).length == 2) {
-            if ('elevUnitAbbrv' in data.coreEdits) { return false; }
-        }
+        if (chngs && data.core == 'location' && 
+            Object.keys(data.coreEdits).length == 2 && 
+            'elevUnitAbbrv' in data.coreEdits) { return false; }
         return chngs;
     }
     /** Resets the interactions form leaving only the pinned values. */
@@ -3555,7 +3609,8 @@ $(document).ready(function(){
     }
     /**
      * Returns an error tag based on the server error text. Reports duplicated 
-     * authors, non-unique display names, or returns a generic form-error message.
+     * authors or editors, non-unique display names, or returns a generic 
+     * form-error message.
      */
     function getFormErrTag(errTxt) {                                            //console.log("errTxt = %O", errTxt) 
         return isDuplicateAuthorErr(errTxt) ?
