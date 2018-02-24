@@ -753,10 +753,10 @@ $(document).ready(function(){
      * If the parent publication has existing authors, they are added to the new 
      * citation form's author field(s). 
      */
-    function addExistingPubContribs(fLvl) {  
+    function addExistingPubContribs(fLvl, auths) {  
         const vals = fParams.forms[fLvl].fieldConfg.vals;
         vals.Authors = { type: "multiSelect" };
-        vals.Authors.val = vals.length > 0 ? vals : null;
+        vals.Authors.val = auths ? auths : (vals.length > 0 ? vals : null);
     }
     function addPublicationTitle(fLvl) {
         const pubType = fParams.forms[fLvl].pub.pub.publicationType.displayName;
@@ -817,9 +817,10 @@ $(document).ready(function(){
         vals.Year = {};
         vals.Year.val = addYear ? fParams.forms[fLvl].pub.src.year : '';
     }
-    function addAuthorsToCitation(addAuths, fLvl) {
-        const vals = fParams.forms[fLvl].fieldConfg.vals;                       
-        if (addAuths) { return addExistingPubContribs(fLvl); }
+    function addAuthorsToCitation(addAuths, fLvl) { 
+        const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('addAuthorsToCitation ? %s, vals = %O', addAuths, vals);
+        const pubAuths = fParams.forms[fLvl].pub.src.authors;
+        if (addAuths) { return addExistingPubContribs(fLvl, pubAuths); }
         vals.Authors = { type: "multiSelect" };
         vals.Authors.val = [];    
     }
@@ -866,10 +867,10 @@ $(document).ready(function(){
          *     Volume (Issue): Pages.
          */
         function  articleCit(type) {                                      
-            const athrs = stripString(getFormAuthors());
+            const athrs = getFormAuthors();
             const year = stripString(formVals.year);
             const title = stripString(formVals.title);
-            const pub = stripString(getPublicationName());
+            const pub = getPublicationName();
             const vip = getVolumeIssueAndPages(); 
             let fullText = [athrs, year, title, pub].join('. '); 
             fullText += vip ? (' '+vip) : '';
@@ -883,8 +884,8 @@ $(document).ready(function(){
          *      City, Country.
          */
         function bookCit(type) {
-            const athrs = stripString(getPubAuthors());
-            const year = stripString(getPubYear());
+            const athrs =getPubAuthors();
+            const year = getPubYear();
             const titlesAndEds = getTitlesAndEditors();
             const ed = formVals.edition;
             const publ = getPublisherData();
@@ -899,8 +900,8 @@ $(document).ready(function(){
          *     pp. pages. Publisher Name, City, Country.
          */
         function chapterCit(type) {
-            const athrs = stripString(getPubAuthors());
-            const year = stripString(getPublicationYear());
+            const athrs = getPubAuthors();
+            const year = getPubYear();
             const titlesAndEds = getTitlesAndEditors();
             const pages = getBookPages();
             const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
@@ -914,8 +915,8 @@ $(document).ready(function(){
          *     Institution, City, Country.
          */
         function dissertThesisCit(type) {
-            const athrs = stripString(getFormAuthors());
-            const year = stripString(formVals.year);
+            const athrs = getPubAuthors();
+            const year = getPubYear();
             const title = stripString(formVals.title);
             const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
             return [athrs, year, title, type, publ].join('. ')+'.';
@@ -927,14 +928,24 @@ $(document).ready(function(){
          *     Name, City, Country.
          */
         function otherCit(type) {
-            const athrs = getFormAuthors();
-            const year = formVals.year ? stripString(formVals.year) : false;
+            const athrs = getFormAuthors() ? getFormAuthors() : getPubAuthors();
+            const year = formVals.year ? stripString(formVals.year) : getPubYear();
             const title = stripString(formVals.title);
             const vip = getVolumeIssueAndPages();
             const publ = getPublisherData();
             return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
         }
             /** ---------- citation full text helpers ----------------------- */
+        function getPubYear() {
+            return stripString(fParams.forms[fLvl].pub.src.year);
+        }
+        function getPublicationName() {
+            return stripString(fParams.forms[fLvl].pub.src.displayName);
+        }
+        function getBookPages(argument) {
+            if (!formVals.pages) { return false; }
+            return 'pp. ' + stripString(formVals.pages);
+        }
         function getFormAuthors(eds) { 
             const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
             if (!auths.length) { return false; }
@@ -949,9 +960,6 @@ $(document).ready(function(){
             if (!eds.length) { return false }
             const names = getFormattedAuthorNames(eds, true);
             return '('+ names +', eds.)';
-        }
-        function getPubYear() {
-            return fParams.forms[fLvl].pub.src.year;
         }
         /** 
          * Returns a string with all author names formatted with the first author
@@ -968,16 +976,16 @@ $(document).ready(function(){
                 athrs += (i == 0 ? name : (i == auths.length-1 ?
                     ' & '+ name : ', '+ name)); 
             });                                                                 
-            return athrs;
+            return stripString(athrs);
 
             function getFirstEtAl(authId) {
-                const name = getFormattedName(authId);
+                const name = getFormattedName(0, authId);
                 return name +', et al';
             }
-            function getFormattedName(i, srcId) {              
-                const src = fParams.records.source[srcId];                      //console.log('src = %O', src);
-                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  //console.log('athrId = %O', athrId);
-                const athr = _util.getDataFromStorage('author')[athrId];        //console.log('athr = %O', athr);
+            function getFormattedName(i, srcId) {          
+                const src = fParams.records.source[srcId];                      
+                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  
+                const athr = _util.getDataFromStorage('author')[athrId];        
                 return getCitAuthName(i, athr, eds);
             }
             /**
@@ -992,19 +1000,9 @@ $(document).ready(function(){
                 return cnt > 1 || eds ? initials +' '+ last : last+', '+initials; 
             }
         } /* End getFormattedAuthorNames */
-        function getBookPages(argument) {
-            if (!formVals.pages) { return false; }
-            return 'pp. ' + stripString(formVals.pages);
-        }
-        function getPublicationName() {
-            return fParams.forms[fLvl].pub.src.displayName;
-        }
-        function getPublicationYear() {
-            return fParams.forms[fLvl].pub.src.year;
-        }
         /** Formats publisher data and returns the Name, City, Country. */
         function getPublisherData() {
-            const publ = getPublRcrd(fParams.forms[fLvl].pub);
+            const publ = getPublRcrd(fParams.forms[fLvl].pub.src);
             if (!publ) { return false; }
             const name = publ.displayName;
             const city = publ.city ? publ.city : '[ADD CITY]';
@@ -1053,6 +1051,7 @@ $(document).ready(function(){
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
+        fillCitationField($('#Publication-sel').val());
     }
     /** ----- Publication and Citation Shared form helpers ------------ */
     /**
@@ -2278,33 +2277,30 @@ $(document).ready(function(){
                     },
                     'Book': {
                         'name': 'Book',
-                        'required': ['Authors', 'Year'],
+                        'required': [],
                         'suggested': ['Volume'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Year', 'Volume', 'Authors'],
-                            'opt': ['Year', 'Volume', 'LinkDisplay', 'LinkUrl', 
-                                'Doi', 'Authors']},
+                            'sug': ['Volume'],
+                            'opt': ['Volume', 'Doi', 'LinkDisplay', 'LinkUrl']},
                     },
                     'Chapter': {
                         'name': 'Chapter',
                         'required': ['Pages'],
-                        'suggested': ['Authors'],
-                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                        'order': {
-                            'sug': ['Pages', 'Authors'],
-                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                                'Authors']},
-                    },
-                    "Master's Thesis": {
-                        'name': "Master's Thesis",
-                        'required': ['Authors', 'Year'],
                         'suggested': [],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Year', 'Authors'],
-                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                                'Authors']},
+                            'sug': ['Pages'],
+                            'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl' ]},
+                    },
+                    "Master's Thesis": {
+                        'name': "Master's Thesis",
+                        'required': [],
+                        'suggested': [],
+                        'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
+                        'order': {
+                            'sug': [],
+                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi']},
                     },
                     'Museum record': {
                         'name': 'Museum record',
@@ -2313,12 +2309,13 @@ $(document).ready(function(){
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Authors'],
-                            'opt': ['Year', 'Pages',                                 'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
+                            'opt': ['Year', 'Pages', 'LinkDisplay', 'LinkUrl', 
+                                'Doi', 'Authors']},
                     },
                     'Other': {
                         'name': 'Other',
-                        'required': ['Authors', 'Year'],
-                        'suggested': ['Issue', 'Pages', 'Volume'],
+                        'required': [],
+                        'suggested': ['Authors', 'Year', 'Issue', 'Pages', 'Volume'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
@@ -2327,18 +2324,17 @@ $(document).ready(function(){
                     },
                     'Ph.D. Dissertation': {
                         'name': 'Ph.D. Dissertation',
-                        'required': ['Authors', 'Year'],
+                        'required': [],
                         'suggested': [],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
-                            'sug': ['Year', 'Authors'],
-                            'opt': ['Year', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                                'Authors']},
+                            'sug': [],
+                            'opt': ['LinkDisplay', 'LinkUrl', 'Doi']},
                     },
                     'Report': {
                         'name': 'Report',
-                        'required': ['Authors', 'Year'],
-                        'suggested': ['Pages'],
+                        'required': [],
+                        'suggested': ['Authors', 'Year', 'Pages'],
                         'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
                         'order': {
                             'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
@@ -2752,7 +2748,9 @@ $(document).ready(function(){
     function getRcrdOpts(ids, rcrds) {
         var idAry = ids || Object.keys(rcrds);
         return idAry.map(function(id) {
-            return { value: id, text: rcrds[id].displayName };
+            let text = rcrds[id].displayName.includes('(citation)') ? 
+                rcrds[id].displayName.split('(citation)')[0] : rcrds[id].displayName;
+            return { value: id, text: text };
         });
     }
     function getOptsFromStoredRcrds(prop) {
@@ -3059,12 +3057,12 @@ $(document).ready(function(){
             addValueIfFieldShown(field, vals[field].val, fLvl);
         }
         function addValueIfFieldShown(field, val, fLvl) {                       //console.log('addValueIfFieldShown [%s] field, val = %O', field, val);
-            if (!fieldIsDisplayed) { return; }
+            if (!fieldIsDisplayed(field, fLvl)) { return; }
             fieldHndlrs[vals[field].type](field, val, fLvl);        
         }
     } /* End fillComplexFormFields */
     function fieldIsDisplayed(field, fLvl) {
-        const curFields = fParams.forms[fLvl].fieldConfg.fields;                //console.log('field [%s] is displayed? ', field, Object.keys(curFields).indexOf(field) !== -1)
+        const curFields = fParams.forms[fLvl].fieldConfg.fields;                //console.log('field [%s] is displayed? ', field, Object.keys(curFields).indexOf(field) !== -1);
         return Object.keys(curFields).indexOf(field) !== -1;
     }
     /*------------------ Form Submission Data-Prep Methods -------------------*/

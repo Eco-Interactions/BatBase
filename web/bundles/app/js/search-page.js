@@ -1277,7 +1277,7 @@
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
         var entity = getSrcEntity(src, treeLvl);
         var detailId = entity === "Publication" ? src.publication.id : null;  
-        const displayName = src.displayName.includes('-citation') ? 
+        const displayName = src.displayName.includes('(citation)') ? 
             'Whole work cited.' : src.displayName;
         return {
             id: src.id,
