@@ -15,6 +15,8 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
 {
 
     private $container;
+    private $em;
+    private $admin;
 
     public function setContainer(ContainerInterface $container = null)
     {
@@ -26,8 +28,8 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
      */
     public function up(Schema $schema)
     {
-        $em = $this->container->get('doctrine.orm.entity_manager');
-        $admin = $em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->em = $this->container->get('doctrine.orm.entity_manager');
+        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
 
     }
 

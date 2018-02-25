@@ -40,6 +40,13 @@ class Contribution
     private $isEditor;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="ord", type="integer", nullable=false)
+     */
+    private $ord;
+
+    /**
      * @var \AppBundle\Entity\Source
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source", inversedBy="contributors")
@@ -149,6 +156,28 @@ class Contribution
     public function getIsEditor()
     {
         return $this->isEditor;
+    }
+
+    /**
+     * Set ord.
+     *
+     * @return Contribution
+     */
+    public function setOrd($ord)
+    {
+        $this->ord = $ord;
+
+        return $this;
+    }
+
+    /**
+     * Get ord.
+     *
+     * @return int
+     */
+    public function getOrd()
+    {
+        return $this->ord;
     }
 
     /**
