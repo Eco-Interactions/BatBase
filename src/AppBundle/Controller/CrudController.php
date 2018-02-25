@@ -233,22 +233,22 @@ class CrudController extends Controller
     private function checkAuthStatus($curData, $newData, &$em)
     {   
         $contrib = $em->getRepository('AppBundle:Contribution')
-            ->findOneBy(['id' => $curData->contribId ]); 
+            ->findOneBy(['id' => $curData['contribId'] ]); 
         $this->updateEditorStatus($curData, $newData, $contrib);
         $this->updateOrder($curData, $newData, $contrib);
         $em->persist($contrib);
     }
-    private function updateEditorStatus($curIsEd, $newIsEd, &$contrib)
+    private function updateEditorStatus($curData, $newData, &$contrib)
     {
-        $curIsEd = $curData->isEditor;
+        $curIsEd = $curData['isEditor'];
         $newIsEd = $newData->isEditor;
         if ($curIsEd === $newIsEd) { return; }
         $contrib->setIsEditor($newIsEd);
     }
     /** Stores auth/ed order for the citation/publication source. */
-    private function updateOrder($curOrd, $newOrd, &$contrib)
+    private function updateOrder($curData, $newData, &$contrib)
     {
-        $curOrd = $curData->ord;
+        $curOrd = $curData['ord'];
         $newOrd = $newData->ord;
         if ($curOrd === $newOrd) { return; }
         $contrib->setOrd($newOrd);

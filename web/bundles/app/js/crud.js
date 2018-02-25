@@ -997,7 +997,7 @@ $(document).ready(function(){
                 const last = a.lastName;                     
                 const initials = ["firstName", "middleName"].map(name => 
                     a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
-                return cnt > 1 || eds ? initials +' '+ last : last+', '+initials; 
+                return cnt > 0 || eds ? initials +' '+ last : last+', '+initials; 
             }
         } /* End getFormattedAuthorNames */
         /** Formats publisher data and returns the Name, City, Country. */
