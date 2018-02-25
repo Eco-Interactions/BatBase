@@ -221,42 +221,54 @@ class CrudController extends Controller
     {
         $added = []; 
         $cur = $pubSrc->getContributorData();
-        foreach ($ary as $authId => $isEd) { 
+        foreach ($ary as $authId => $newData) { 
             if (array_key_exists($authId, $cur) ) { 
-                $this->checkAuthStatus($cur[$authId], $authId, $isEd, $edits, $em);
+                $this->checkAuthStatus($cur[$authId], $newData, $em);
                 continue;
             } 
-            $this->addContrib($authId, $isEd, $pubSrc, $em);
-            $added = $added + [$authId => $isEd]; 
+            $this->addContrib($authId, $newData, $pubSrc, $em);
         }  
-        $this->addContribEdits($edits, 'added', $added);
     }
-    /** Updates any changes to the author/editor status. */
-    private function checkAuthStatus($contribData, $authId, $isEd, &$edits, &$em)
+    /** Updates any changes to the author/editor status and/or auth/ed ord(er). */
+    private function checkAuthStatus($curData, $newData, &$em)
     {   
-        $curIsEd = reset($contribData); 
-        if ($isEd === $curIsEd) { return; }  
         $contrib = $em->getRepository('AppBundle:Contribution')
-            ->findOneBy(['id' => key($contribData) ]); 
-        $contrib->setIsEditor($isEd);
+            ->findOneBy(['id' => $curData->contribId ]); 
+        $this->updateEditorStatus($curData, $newData, $contrib);
+        $this->updateOrder($curData, $newData, $contrib);
         $em->persist($contrib);
-        $this->addContribEdit($edits, 'updated', $authId, $isEd);
     }
-    private function addContrib($id, $isEd, &$pubSrc, &$em)
+    private function updateEditorStatus($curIsEd, $newIsEd, &$contrib)
+    {
+        $curIsEd = $curData->isEditor;
+        $newIsEd = $newData->isEditor;
+        if ($curIsEd === $newIsEd) { return; }
+        $contrib->setIsEditor($newIsEd);
+    }
+    /** Stores auth/ed order for the citation/publication source. */
+    private function updateOrder($curOrd, $newOrd, &$contrib)
+    {
+        $curOrd = $curData->ord;
+        $newOrd = $newData->ord;
+        if ($curOrd === $newOrd) { return; }
+        $contrib->setOrd($newOrd);
+    }
+    private function addContrib($id, $data, &$pubSrc, &$em)
     {  
         $authSrc = $em->getRepository('AppBundle:Source')
             ->findOneBy(['id' => $id ]);
-        $contribEntity = $this->createContrib($pubSrc, $authSrc, $isEd, $em);
+        $contribEntity = $this->createContrib($pubSrc, $authSrc, $data, $em);
         $pubSrc->addContributor($contribEntity);  //$pubSrc persisted later
         $authSrc->addContribution($contribEntity);
         $em->persist($authSrc);        
     }
-    private function createContrib($pubSrc, $authSrc, $isEd, &$em)
+    private function createContrib($pubSrc, $authSrc, $data, &$em)
     {
         $entity = new Contribution();
         $entity->setWorkSource($pubSrc);
         $entity->setAuthorSource($authSrc);
-        $entity->setIsEditor($isEd);
+        $entity->setIsEditor($data->isEditor);
+        $entity->setOrd($data->ord);
 
         $em->persist($entity);  
         return $entity;
@@ -273,13 +285,6 @@ class CrudController extends Controller
             array_push($removed, $authId); 
         }
         $this->addContribEdits($edits, 'removed', $removed);
-    }
-    /** Add author/editor status change to edits obj. */
-    private function addContribEdit(&$edits, $action, $authId, $isEd)
-    {  
-        if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
-        if (!array_key_exists($action, $edits->contributor)) { $edits->contributor[$action] = [];}
-        $edits->contributor[$action][$authId] = $isEd; 
     }
     /** Add added/removed array to edits obj. */
     private function addContribEdits(&$edits, $action, $ary)

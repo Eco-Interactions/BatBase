@@ -829,7 +829,9 @@ class Source
         $contribs = [];
         foreach ($this->contributors as $contributor) {
             if ($contributor->getIsEditor()) { continue; }  
-            array_push($contribs, $contributor->getAuthorSource()->getId());
+            $id = $contributor->getAuthorSource()->getId();
+            $ord = $contributor->getOrd();
+            $contribs[$ord] = $id;
         }
         return $contribs;
     }
@@ -846,7 +848,9 @@ class Source
         $contribs = [];
         foreach ($this->contributors as $contributor) {
             if (!$contributor->getIsEditor()) { continue; }
-            array_push($contribs, $contributor->getAuthorSource()->getId());
+            $id = $contributor->getAuthorSource()->getId();
+            $ord = $contributor->getOrd();
+            $contribs[$ord] = $id;
         }
         return $contribs;
     }
@@ -864,8 +868,10 @@ class Source
         foreach ($this->contributors as $contributor) { 
             $contribId = $contributor->getId(); 
             $authId = $contributor->getAuthorSource()->getId();
-            $isEd = $contributor->getIsEditor() || false;
-            $contribs = $contribs + [ $authId => [$contribId => $isEd]];
+            $isEd = $contributor->getIsEditor();
+            $ord =  $contributor->getOrd();
+            $contribs = $contribs + [ $authId => [ 
+                'contribId' => $contribId, 'isEditor' => $isEd, 'ord' => $ord]];
         }
         return $contribs;
     }

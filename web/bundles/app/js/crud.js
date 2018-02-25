@@ -1960,15 +1960,15 @@ $(document).ready(function(){
 
     /*-------------- Author --------------------------------------------------*/
 
-    /** Loops through author array and selects each author/editor in the form. */
-    function selectExistingAuthors(field, authAry, fLvl) {                      //console.log('reselectAuthors. field = [%s] auths = %O', field, authAry);
-        $.each(authAry, function(i, authId) {  
-            selectAuthor(i, authId, field, fLvl);
-        });
+    /** Loops through author object and adds each author/editor to the form. */
+    function selectExistingAuthors(field, authObj, fLvl) {                      //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
+        for (ord in authObj) { //ord(er)
+            selectAuthor(ord, authObj[ord], field, fLvl);
+        }
     }
     /** Selects the passed author and builds a new, empty author combobox. */
     function selectAuthor(cnt, authId, field, fLvl) {
-        const selId = '#'+field+'-sel'+ ++cnt;      
+        const selId = '#'+field+'-sel'+ cnt;      
         $(selId)[0].selectize.addItem(authId, true);
         buildNewAuthorSelect(++cnt, authId, fLvl, field);
     }
@@ -3052,7 +3052,7 @@ $(document).ready(function(){
         const fieldHndlrs = { 'multiSelect': selectExistingAuthors };
 
         for (let field in vals) {                                               //console.log('field = [%s] type = [%s], types = %O', field, vals[field].type, Object.keys(fieldHndlrs));
-            if (!vals[field].val || !vals[field].val.length) { continue; } 
+            if (!vals[field].val) { continue; } 
             if (Object.keys(fieldHndlrs).indexOf(vals[field].type) == -1) {continue;}
             addValueIfFieldShown(field, vals[field].val, fLvl);
         }
@@ -3236,9 +3236,10 @@ $(document).ready(function(){
         function addContributorData() {
             if (!formVals.contributor) { formVals.contributor = {}; } 
             if (formVals.editors) { addContribs(formVals.editors, true); }
-            if (formVals.authors) { addContribs(formVals.authors, false); }
-            function addContribs(ary, isEditor) {
-                ary.forEach(id => formVals.contributor[id] = isEditor);
+            if (formVals.authors) { addContribs(formVals.authors, false); }  
+            function addContribs(ary, isEd) {
+                $(ary).each((i, id) => {
+                    formVals.contributor[id] = { isEditor: isEd, ord: i+1 }});
             }
         } /* End addContributorData */
         /** ---- Additional Taxon data ------ */

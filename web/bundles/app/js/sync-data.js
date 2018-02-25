@@ -157,7 +157,7 @@
         var update = {
             'source': {
                 'author': { 'authSrcs': addToRcrdAryProp },
-                'citation': { 'contributors': addAuthorData, 'source': addToParentRcrd,
+                'citation': { 'authors': addAuthorData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
                 'publication': { 'pubSrcs': addToRcrdAryProp, 'authors': addAuthorData, 
                     'source': addToParentRcrd, 'editors': addEditorData },
@@ -304,7 +304,7 @@
     /** When a Publication was updated, add new editor data. */
     function addEditorData(prop, rcrd, entity) {                                
         if (rcrd.editors.length == 0) { return; }
-        var srcObj = _util.getDataFromStorage('source');
+        const srcObj = _util.getDataFromStorage('source');
         rcrd.editors.forEach(function(authId) { 
             addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
         });
@@ -393,26 +393,12 @@
         });
         storeData(prop, tagObj);
     }
-    /**
-     * Removes the author/editor from the source's auth/ed collection to sync with 
-     * the [editor/author] changes. Removes the contributions of removed auth/eds. 
-     */
     function rmvContrib(prop, rcrd, entity, edits) {                            //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
         const srcObj = _util.getDataFromStorage('source');
-        if (edits.contributor.updated) { updateAuthStatus(edits.contributor.updated); }
-        if (edits.contributor.removed) { rmvContribs(edits.contributor.removed); }
+        edits.contributor.removed.forEach(id => 
+            rmvIdFromAry(srcObj[id].contributions, rcrd.id));
         storeData('source', srcObj);
-
-        function updateAuthStatus(updated) { 
-            for (let id in updated) {
-                if (!updated[id]) { rmvIdFromAry(srcObj[id].editors, rcrd.id);
-                } else { rmvIdFromAry(srcObj[id].authors, rcrd.id); } 
-            }
-        }
-        function rmvContribs(removed) {
-            removed.forEach(id => rmvIdFromAry(srcObj[id].contributions, rcrd.id));
-        }
-    } /* End rmvContrib */
+    }
     function rmvFromNameProp(prop, rcrd, entity, edits) { 
         var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
         var realm = rcrd.realm.displayName;
