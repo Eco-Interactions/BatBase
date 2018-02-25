@@ -831,7 +831,7 @@ class Source
             if ($contributor->getIsEditor()) { continue; }  
             $id = $contributor->getAuthorSource()->getId();
             $ord = $contributor->getOrd();
-            $contribs[$ord] = $id;
+            $contribs = $contribs + [$ord => $id]; 
         }
         return $contribs;
     }
@@ -850,7 +850,7 @@ class Source
             if (!$contributor->getIsEditor()) { continue; }
             $id = $contributor->getAuthorSource()->getId();
             $ord = $contributor->getOrd();
-            $contribs[$ord] = $id;
+            $contribs = $contribs + [$ord => $id]; 
         }
         return $contribs;
     }
