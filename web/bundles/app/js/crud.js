@@ -2640,9 +2640,26 @@ $(document).ready(function(){
     /** Stores value at index of the order on form, ie the cnt position. */
     function storeMultiSelectValue(fLvl, cnt, field, e) {                       //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
         const vals = fParams.forms[fLvl].fieldConfg.vals;                       //console.log('getCurrentFormFieldVals. vals = %O', vals);
-        const val = e.target.value || null;
+        const value = e.target.value || null;
         if (typeof vals[field].val !== 'object') { vals[field].val = {}; }
-        vals[field].val[cnt] = val;     
+        vals[field].val[cnt] = value;
+        checkForBlanksInOrder(vals[field].val, field, fLvl);    
+    }
+    /**
+     * Author/editor fields must have all fields filled continuously. There can 
+     * be extra blanks on the end, but none at the beginning. If blanks are found,
+     * an error is shown to the user, otherwise any active errors are cleared. 
+     */
+    function checkForBlanksInOrder(vals, field, fLvl) {                         //console.log('checkForBlanksInOrder. [%s] vals = %O', field, vals);
+        const map = { 'Authors': 'fillAuthBlanks', 'Editors': 'fillEdBlanks' };
+        let blank = false;
+
+        for (let ord in vals) {
+            blank = vals[ord] && blank ? "found" :
+                !vals[ord] && !blank ? "maybe" : blank;  
+        } 
+        if (blank === "found") { return reportFormFieldErr(field, map[field], fLvl); }
+        if ($('#'+field+'_errs.active-errs')) { clrContribFieldErr(field, fLvl); }
     }
     /** Reorders the rows into the order set in the form config obj. */
     function orderRows(rows, order) {                                           //console.log("    ordering rows = %O, order = %O", rows, order);
@@ -2919,7 +2936,9 @@ $(document).ready(function(){
         const reqElems = fParams.forms[fLvl].reqElems;                          
         return reqElems.every(isRequiredFieldFilled);
     }
+    /** Note: checks the first input of multiSelect container elems.  */
     function isRequiredFieldFilled(elem) {
+        if ($('.active-errs').length) { return false; }
         return elem.value ? true : 
             elem.id.includes('-cntnr') ? elem.firstChild.children[1].value : false;  
     }
@@ -3079,7 +3098,7 @@ $(document).ready(function(){
         $(bttnId).attr("disabled", false).css({"opacity": "1", "cursor": "pointer"}); 
     }  
     /** Enables passed submit button */
-    function disableSubmitBttn(bttnId) {
+    function disableSubmitBttn(bttnId) {                                        //console.log('disabling bttn = ', bttnId)
         $(bttnId).attr("disabled", true).css({"opacity": ".6", "cursor": "initial"}); 
     }  
     function toggleWaitOverlay(waiting) {                                        //console.log("toggling wait overlay")
@@ -3684,6 +3703,8 @@ $(document).ready(function(){
             'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
             'needsHigherLvl': handleNeedsHigherLvl,
             'openSubForm': handleOpenSubForm,
+            'fillAuthBlanks': handleAuthBlanks,
+            'fillEdBlanks': handleEdBlanks
         };
         const errElem = getFieldErrElem(fieldName);
         errMsgMap[errTag](errElem, errTag, fLvl);
@@ -3722,7 +3743,7 @@ $(document).ready(function(){
     /** Note: error for the edit-taxon form. */
     function handleNeedsHigherLvlPrnt(elem, errTag, fLvl) { 
         const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
-        setErrElemAndExitBttn(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     }
     /** Clears the cause, either the parent-selection process or the taxon's level. */
     function clrNeedsHigherLvlPrnt(elem, fLvl, e) {                                    
@@ -3740,7 +3761,7 @@ $(document).ready(function(){
         var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
             'Please select a level higher than '+lvlName+'</div>';
         $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-        setErrElemAndExitBttn(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     }
     function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
         var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
@@ -3758,13 +3779,35 @@ $(document).ready(function(){
     function handleOpenSubForm(elem, errTag, fLvl) {  
         var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
         var msg = '<p>Please finish the open '+ _util.ucfirst(subEntity) + ' form.</p>';
-        setErrElemAndExitBttn(elem, msg, errTag);
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+        setOnFormCloseListenerToClearErr(elem, fLvl);
+    }
+    /** Note: error used for the publication/citation form. */
+    function handleAuthBlanks(elem, errTag, fLvl) {  
+        var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
+        var msg = '<p>Please fill the blank in the order of authors.</p>';
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+        setOnFormCloseListenerToClearErr(elem, fLvl);
+    }
+    /** Note: error used for the publication form. */
+    function handleEdBlanks(elem, errTag, fLvl) {  
+        var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
+        var msg = '<p>Please fill the blank in the order of editors.</p>';
+        setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+        setOnFormCloseListenerToClearErr(elem, fLvl);
+    }
+    function clrContribFieldErr(field, fLvl) { 
+        const elem = $('#'+field+'_errs')[0];    
+        clearErrElemAndEnableSubmit(elem);
+        if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-form'); }
+    }
+    /* ----------- Error-Elem Methods -------------- */
+    function setOnFormCloseListenerToClearErr(elem, fLvl) {
         $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem));
     }
     function clrOpenSubForm(elem, e) {   
         clearLvlErrs(elem);
     }
-    /* ----------- Error-Elem Methods -------------- */
     /** Returns the error div for the passed field. */
     function getFieldErrElem(fieldName) {                                       //console.log("getFieldErrElem for %s", fieldName);
         var field = fieldName.split(' ').join('');
@@ -3788,8 +3831,10 @@ $(document).ready(function(){
             'noGenus': clrNoGenusErr, 'needsHigherLvl': clrNeedsHigherLvl, 
             'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt, 'openSubForm': clrOpenSubForm,
             'dupAuth': clrFormLvlErr, 'dupEnt': clrFormLvlErr, 
-            'genSubmitErr': clrFormLvlErr
+            'genSubmitErr': clrFormLvlErr, 'fillAuthBlanks': false,
+            'fillEdBlanks': false
         };
+        if (!exitHdnlrs[errTag]) { return []; }
         const bttn = getExitButton();
         bttn.className += ' err-exit';
         $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
