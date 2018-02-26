@@ -188,6 +188,8 @@ $(document).ready(function(){
         $('#'+ent+'-det div').append(html);
     }
     function emptySidePanel(ent, reset) {
+        if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
+        if (ent === 'pub') { ent = 'src'; }
         $('#'+ent+'-det div').empty();
         if (reset) { $('#'+ent+'-det div').append('None selected.') }
     }
