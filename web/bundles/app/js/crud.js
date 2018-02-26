@@ -139,10 +139,10 @@ $(document).ready(function(){
         return cntnr;
     }
     function getInteractionDetailElems(entity, id, cntnr) {
-        return ['pub','cit','loc'].map(en => initDetailDiv(en));
+        return ['src','loc'].map(en => initDetailDiv(en));
     }
     function initDetailDiv(ent) {
-        var entities = {'pub': 'Publication', 'cit': 'Citation', 'loc': 'Location'};
+        var entities = {'src': 'Source', 'loc': 'Location'};
         var div = _util.buildElem('div', { 'id': ent+'-det', 'class': 'det-div' });
         $(div).append(_util.buildElem('h5', { 'text': entities[ent]+':' }));        
         $(div).append(_util.buildElem('div', { 'text': 'None selected.' }));
@@ -195,7 +195,7 @@ $(document).ready(function(){
     function getDataHtmlString(props) {
         var html = [];
         for (var prop in props) {
-            html.push('<li>'+prop+': <b>'+ props[prop]+ '</b></li>');
+            html.push('<li><b>'+prop+'</b>: '+ props[prop]+ '</li>');
         }
         return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
     }
@@ -623,7 +623,7 @@ $(document).ready(function(){
         if (val === 'create') { return openCreateForm('Publication'); }        
         if (val === '' || isNaN(parseInt(val)) ) { return onPubClear(); }                                
         fillCitationField(val);
-        fillPubDetailPanel(val);
+        updateSrcDetailPanel('pub');
         if (!fParams.records.source[val].children.length) { return initCitForm(); }
         if (!fParams.editing) { $('#Publication_pin').focus(); }
     }
@@ -700,29 +700,9 @@ $(document).ready(function(){
     function onCitSelection(val) {  
         if (val === 'create') { return openCreateForm('CitationTitle'); }
         if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
-        fillCitDetailPanel(val);
+        updateSrcDetailPanel('cit');
         if (!fParams.editing) { $('#CitationTitle_pin').focus(); }
     }    
-    /** Displays the selected citation's data in the side detail panel. */
-    function fillCitDetailPanel(id) {  
-        var srcRcrd = fParams.records.source[id];  
-        var propObj = getCitDetailDataObj(srcRcrd);
-        addDataToIntDetailPanel('cit', propObj);
-    }
-    /** Returns an object with selected citation's data. */
-    function getCitDetailDataObj(srcRcrd) {  
-        var citRcrd = getEntityRecord('citation', srcRcrd.citation);            //console.log("srcRcrd = %O, citRcrd = %O", srcRcrd, citRcrd);
-        return {
-            'Title': citRcrd.title, 
-            'Full Text': srcRcrd.description || '',            
-            'Abstract': citRcrd.abstract || '',            
-            'Citation Type': citRcrd.citationType ? citRcrd.citationType.displayName : '', 
-            'Publication Vol': citRcrd.publicationVolume || '',            
-            'Publication Issue': citRcrd.publicationIssue || '',            
-            'Publication Pages': citRcrd.publicationPages || '',   
-            'Authors': getAuthorNames(srcRcrd),
-        };
-    }
     /** Shows the Citation sub-form and disables the publication combobox. */
     function initCitForm(value) {                                               //console.log("Adding new cit! val = %s", val);
         const fLvl = getSubFormLvl('sub');
@@ -884,7 +864,7 @@ $(document).ready(function(){
          *      City, Country.
          */
         function bookCit(type) {
-            const athrs =getPubAuthors();
+            const athrs = getPubAuthors();
             const year = getPubYear();
             const titlesAndEds = getTitlesAndEditors();
             const ed = formVals.edition;
@@ -1054,6 +1034,67 @@ $(document).ready(function(){
         fillCitationField($('#Publication-sel').val());
     }
     /** ----- Publication and Citation Shared form helpers ------------ */
+    /** Adds source data to the interaction form's detail panel. */
+    function updateSrcDetailPanel(entity) {
+        const data = {}; 
+        buildSourceData();
+        addDataToIntDetailPanel('src', data);
+
+        function buildSourceData() {
+            const pubSrc = fParams.records.source[$('#Publication-sel').val()];
+            const pub = getEntityRecord('publication', pubSrc.publication);
+
+            const citId = $('#CitationTitle-sel').val();
+            const citSrc = citId ? fParams.records.source[citId] : false;
+            const cit = citSrc ? getEntityRecord('citation', citSrc.citation) : false;
+            
+            addCitationText();
+            addPubTitleData();
+            addCitTitleData();
+            addAuthsAndEds();
+            addAbstract();
+
+            function addCitationText() {
+                data['Citation'] = cit ? cit.fullText : '(Select Citation)';
+            }
+            function addPubTitleData() {
+                const pubType = getSrcType(pub, 'publication');  
+                const pubTitleField = pubType && pubType !== 'Other' ? 
+                    pubType + ' Title' : 'Publication Title';  
+                data[pubTitleField] = pub.displayName;
+            }
+            function addCitTitleData() {
+                const citType =  getSrcType(cit, 'citation'); 
+                const subTitle = getCitTitle();
+                if (!subTitle) { return; }
+                const citTitleField = citType && citType !== 'Other' ? 
+                    citType + ' Title' : 'Citation Title';
+                data[citTitleField] = subTitle;
+                
+                function getCitTitle() {
+                    if (!cit) { return false; }
+                    const citTitle = cit.displayName.split('(citation)')[0];
+                    return citTitle === pub.displayName ? false : citTitle;
+                }
+            } /* End addCitTitleData */
+            function addAuthsAndEds() {
+                const rcrdWithAuths = Object.keys(pubSrc.authors).length ? pubSrc : 
+                    citSrc && Object.keys(citSrc.authors).length ? citSrc : false; 
+                if (!rcrdWithAuths) { return; }
+                data.Authors = getAuthorNames(rcrdWithAuths);
+                if (Object.keys(pubSrc.editors).length) {
+                    data.Editors =  getAuthorNames(pubSrc, true);
+                }
+            }
+            function addAbstract() {
+                if (!cit || !cit.abstract) { return; }
+                data.Abstract = cit.abstract;
+            }
+            function getSrcType(rcrd, entity) { 
+                return rcrd[entity+'Type'] ? rcrd[entity+'Type'].displayName : false;
+            }
+        } /* End buildSourceData */
+    } /* End updateSrcDetailPanel */
     /**
      * Loads the deafult fields for the selected Source Type's type. Clears any 
      * previous type-fields and initializes the selectized dropdowns. Updates 
@@ -1227,6 +1268,16 @@ $(document).ready(function(){
     }
     /** Returns an object with selected location's data. */
     function getLocDetailDataObj(locRcrd) {  
+        const data = {};
+        const allData = getAllLocData(locRcrd);
+
+        for (let field in allData) {
+            if (!allData[field]) { continue; }
+            data[field] = allData[field];
+        }
+        return data;
+    }
+    function getAllLocData(locRcrd) {
         return {
             'Name': locRcrd.displayName, 
             'Description': locRcrd.description || '',            
@@ -2064,13 +2115,13 @@ $(document).ready(function(){
     } /* End handleNewAuthForm */
     /** Returns a comma seperated sting of all authors attributed to the source. */
     function getAuthorNames(srcRcrd, editors) {
-        const authStr = [];
-        const prop = editors ? 'editors' : 'authors';
+        const authStr = [];  
+        const prop = editors ? 'editors' : 'authors'; 
         for (let ord in srcRcrd[prop]) {
             let authId = srcRcrd[prop][ord];
             authStr.push(getAuthName(authId));
         }
-        return authStr.join('. ')+'.';
+        return authStr.length ? authStr.join('. ')+'.' : authStr;
     }
     /** Returns the name of the author with the passed id. */
     function getAuthName(id) {
@@ -3565,6 +3616,7 @@ $(document).ready(function(){
         disableSubmitBttn("#top-submit");
         initInteractionParams();
         resetUnpinnedFields(vals);
+        fillPubDetailsIfPinned(vals.Publication);
         $(fParams.forms.top.reqElems[0]).change();
     }
     function resetUnpinnedFields(vals) {
@@ -3579,10 +3631,13 @@ $(document).ready(function(){
     }
     function clearDetailPanel(field) {
         let detailFields = {
-            'Location': 'loc', 'CitationTitle': 'cit', 'Publication': 'pub' };
+            'Location': 'loc', 'CitationTitle': 'src', 'Publication': 'src' };
         if (Object.keys(detailFields).indexOf(field) !== -1) {  
             emptySidePanel(detailFields[field], true);
         }
+    }
+    function fillPubDetailsIfPinned(pub) {
+        if (pub) { updateSrcDetailPanel('pub'); }
     }
     /** Inits the necessary interaction form params after form reset. */
     function initInteractionParams() {
@@ -3796,10 +3851,10 @@ $(document).ready(function(){
         setErrElemAndExitBttn(elem, msg, errTag, fLvl);
         setOnFormCloseListenerToClearErr(elem, fLvl);
     }
-    function clrContribFieldErr(field, fLvl) { 
+    function clrContribFieldErr(field, fLvl) {                                  //console.log('clrContribFieldErr.')
         const elem = $('#'+field+'_errs')[0];    
         clearErrElemAndEnableSubmit(elem);
-        if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-form'); }
+        if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-submit'); }
     }
     /* ----------- Error-Elem Methods -------------- */
     function setOnFormCloseListenerToClearErr(elem, fLvl) {
