@@ -833,7 +833,7 @@ class Source
             $ord = $contributor->getOrd();
             $contribs = $contribs + [$ord => $id]; 
         }
-        return $contribs;
+        return count($contribs) > 0 ? $contribs : null;
     }
 
     /**
@@ -852,7 +852,7 @@ class Source
             $ord = $contributor->getOrd();
             $contribs = $contribs + [$ord => $id]; 
         }
-        return $contribs;
+        return count($contribs) > 0 ? $contribs : null;
     }
 
     /**

@@ -295,7 +295,7 @@
     }
     /** When a Publication/Citation has been updated, add new author contributions. */
     function addContribData(prop, rcrd, entity) {                               //console.log("-----addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
-        if (rcrd[prop].length == 0) { return; }
+        if (!rcrd[prop]) { return; }
         const srcObj = _util.getDataFromStorage('source');
         for (let ord in rcrd[prop]) {
             let authId = rcrd[prop][ord];
