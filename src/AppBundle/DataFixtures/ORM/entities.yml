@@ -372,31 +372,55 @@ AppBundle\Entity\ContentBlock:
         updated: '<(new \DateTime("2016-10-10 15:21:04", new \DateTimeZone("America/Los_Angeles")))>'
         updatedBy: '@User-2'
 AppBundle\Entity\Contribution:
-    Contribution-1:  #517
-        workSource: '@Source-1' #1
-        authorSource: '@Source-10'  #634
-        created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>'
-    Contribution-2:  #541
-        workSource: '@Source-3' #12
-        authorSource: '@Source-11'  #666
-        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-    Contribution-3:  #475
-        workSource: '@Source-6'  #36
-        authorSource: '@Source-12'  #110
-        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>'
-    Contribution-4:  #504
-        workSource: '@Source-8'  #75
-        authorSource: '@Source-13' #624
-        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-        createdBy: '@User-1'
-        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
-AppBundle\Entity\Realm:
+    Contribution-1:  #517 
+        workSource: '@Source-1' #1 
+        authorSource: '@Source-10'  #634 
+        isEditor: false  #634  ---- 
+        ord: '1'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:39:29", new \DateTimeZone("America/Los_Angeles")))>' 
+    Contribution-2:  #541 
+        workSource: '@Source-3' #12 
+        authorSource: '@Source-11'  #666 
+        isEditor: false  #634  ---- 
+        ord: '1'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+    Contribution-3:  #475 
+        workSource: '@Source-6'  #36 
+        authorSource: '@Source-12'  #110 
+        isEditor: false  #634  ---- 
+        ord: '1'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+    Contribution-4:  #504 
+        workSource: '@Source-8'  #75 
+        authorSource: '@Source-13' #624 
+        isEditor: false  #634  ---- 
+        ord: '1'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>' 
+    Contribution-5:  #541 ---- 
+        workSource: '@Source-2' #12 
+        authorSource: '@Source-11'  #666 
+        isEditor: true  #634  ---- 
+        ord: '1'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+    Contribution-6:  #541 ---- 
+        workSource: '@Source-2' #12 
+        authorSource: '@Source-13'  #666 
+        isEditor: true  #634  ---- 
+        ord: '2'  #634  ---- 
+        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+        createdBy: '@User-1' 
+        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
+AppBundle\Entity\Realm: 
     Realm-1: #1
         slug: bat
         displayName: Bat

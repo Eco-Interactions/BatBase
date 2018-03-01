@@ -41,7 +41,7 @@ HOW TO RUN TESTS
         php bin/console doctrine:database:drop --force --env=test 
         php bin/console doctrine:database:create --env=test
         php bin/console doctrine:schema:update --force --env=test
-        php bin/console hautelook_alice:fixtures:load --env=test
+        php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
     >> Start Selenium << 
         $ java -jar [selenium-server-standalone-3.5.3.jar]
