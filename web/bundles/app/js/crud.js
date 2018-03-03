@@ -323,7 +323,7 @@ $(document).ready(function(){
             'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
         const fieldBldr = entity in edges ? edges[entity] : buildEditFormFields;  
         fParams.forms.expanded[entity] = true;
-        $(rowCntnr).append(fieldBldr(entity, id));                              //console.log("fields = %O, hndlr = %O", fields, hndlr);     
+        $(rowCntnr).append(fieldBldr(entity, id));                              
         return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
     }   
     function getIntFormFields(entity, id) {
@@ -363,12 +363,12 @@ $(document).ready(function(){
         const rcrd = getEntityRecord(ent, id);                                  //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
         hndlrs[ent](ent, id, rcrd);
     }
-    function fillIntData(entity, id, rcrd) {
+    function fillIntData(entity, id, rcrd) {  
         var fields = {
             "InteractionType": "select", "Location": "select", "Note": "textArea", 
             "Object": "taxon", "Source": "source", "Subject": "taxon", 
             "InteractionTags": "tags" };
-        fillFields(rcrd, fields);
+        fillFields(rcrd, fields, true);
     }
     function fillLocData(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
@@ -456,7 +456,7 @@ $(document).ready(function(){
         });
         return ints;
     }
-    function fillFields(rcrd, fields) {                                         //console.log('rcrd = %O, fields = %O', rcrd, fields);
+    function fillFields(rcrd, fields, shwAll) {                                 //console.log('rcrd = %O, fields = %O', rcrd, fields);
         const fieldHndlrs = {
             'text': setText, 'textArea': setTextArea, 'select': setSelect, 
             'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
@@ -464,7 +464,7 @@ $(document).ready(function(){
             'taxon': addTaxon
         };
         for (let field in fields) {                                             //console.log('------- Setting field [%s]', field);
-            if (!fieldIsDisplayed(field, 'top')) { continue; }                  //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+            if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }                  console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
             addDataToField(field, fieldHndlrs[fields[field]], rcrd);
         }  
     }
@@ -553,7 +553,7 @@ $(document).ready(function(){
     function initCreateForm() {
         const form = buildFormElem();
         const formFields = buildIntFormFields('create');                        //console.log("formFields = %O", formFields);
-        $(form).append(formFields);
+        $(form).append(formFields.concat(buildFormBttns('interaction', 'top', 'create')));
         $('#form-main').append(form);      
         finishIntFormBuild();
         finishCreateFormBuild();
@@ -595,10 +595,7 @@ $(document).ready(function(){
         const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
             buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
             buildIntTagField, buildIntNoteField ];
-        const rowCntnr = _util.buildElem('div', {
-            id: 'interaction_Rows', class: 'flex-row flex-wrap'});
-        $(rowCntnr).append(builders.map(buildField));
-        return [rowCntnr, buildFormBttns('interaction', 'top', action)];
+        return builders.map(buildField);
     }
     function buildField(builder) {
         const field = builder();                                                //console.log("field = %O", field);
@@ -802,10 +799,10 @@ $(document).ready(function(){
                 }
             } /* End removeAuthorField */
         } /* End updateBookFields */
-        function disableTitleField() {
+        function disableTitleField() { console.log('---disabling title field')
             $('#Title_row input').prop('disabled', true);
         }
-        function enableTitleField() {
+        function enableTitleField() {  console.log('---enable title field')
             $('#Title_row input').prop('disabled', false);
         }
     } /* End handleSpecialCaseTypeUpdates */
@@ -880,7 +877,7 @@ $(document).ready(function(){
      * are filled.
      */
     function buildCitationText(fLvl) {
-        const type = $('#CitationType-sel option:selected').text();             console.log("type = ", type);
+        const type = $('#CitationType-sel option:selected').text();             //console.log("type = ", type);
         const formVals = getFormValueData('citation', null, null);
         const getFullText = { 'Article': articleCit, 'Book': bookCit, 
             'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
@@ -916,7 +913,7 @@ $(document).ready(function(){
             const year = getPubYear();
             const titlesAndEds = getTitlesAndEditors();
             const ed = formVals.edition;
-            const publ = getPublisherData();
+            const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';  
             const allFields = [athrs, year, titlesAndEds, ed, publ];
             return allFields.filter(f=>f).join('. ')+'.';
         }
@@ -3056,7 +3053,7 @@ $(document).ready(function(){
      * For book publications, either authors or editors are required. If there is 
      * no author value, the first editor value is returned instead. 
      */
-    function isCntnrFilled(elem) {  console.log('isCntnrFilled? elem = %O', elem);
+    function isCntnrFilled(elem) {                                              //console.log('isCntnrFilled? elem = %O', elem);
         const authVal = $('#Authors-sel-cntnr')[0].firstChild.children[1].value;
         const edVal = $('#Editors-sel-cntnr').length ? 
             $('#Editors-sel-cntnr')[0].firstChild.children[1].value : false;
@@ -3249,26 +3246,23 @@ $(document).ready(function(){
         function getInputData(elem) {                                           
             if (elem.className === 'skipFormData') { return; }                  //console.log("elem = %O", elem)
             const fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            const input = elem.children[1].children[1];                         //console.log("fieldName = ", fieldName)
-            if ($(input).data('inputType')) { 
-                getInputVals(fieldName, input, $(input).data('inputType')); 
-            } else { formVals[fieldName] = input.value || null; }
+            const input = elem.children[1].children[1];                         console.log("---------fieldName = ", fieldName)
+            
+            formVals[fieldName] = $(input).data('inputType') ? 
+                getInputVals(fieldName, input, $(input).data('inputType')) : 
+                input.value || null;                                            console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {
             const typeHandlers = {
-                'multiSelect': getMultiSelectVals, 'tags': getTagVals
+                'multiSelect': getSelectedVals, 'tags': getTagVals
             };
-            typeHandlers[type](fieldName, input);
-        }
-        /** Adds an array of selected values from the passed select container.*/
-        function getMultiSelectVals(fieldName, cntnr) {
-            formVals[fieldName] = getSelectedVals(cntnr);
+            return typeHandlers[type](input, fieldName);
         }
         /** Adds an array of tag values. */
-        function getTagVals(fieldName, input) {                                 
-            var selId = '#'+_util.ucfirst(fieldName)+'-sel';
-            formVals[fieldName] = $(selId)[0].selectize.getValue();       
+        function getTagVals(input, fieldName) {                                 
+            const selId = '#'+_util.ucfirst(fieldName)+'-sel';
+            return $(selId)[0].selectize.getValue();       
         }
         function handleAdditionalEntityData(entity) {
             if (!submitting) { return; }
@@ -3408,7 +3402,7 @@ $(document).ready(function(){
     } /* End getFormValueData */
     /** -------------- Form Data Helpers ------------ */
     /** Returns an obj with the order (k) of the values (v) inside of the container. */
-    function getSelectedVals(cntnr) {
+    function getSelectedVals(cntnr, fieldName) {
         let vals = {};
         const elems = cntnr.children; 
         for (let i = 0; i <= elems.length-1; ++i) {                             //console.log('getSelectedVals. elem = %O', elems[i]);

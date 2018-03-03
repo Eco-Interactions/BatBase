@@ -49,8 +49,10 @@ AppBundle\Entity\Citation:
     Citation-1: #237
         displayName: 'Feeding habits'
         title: 'Feeding habits'
-        fullText: 'Gardner, A. L. 1977. Feeding habits. In Biology of bats of the New World family Phyllostomatidae. Part II (R.J. Baker, J.K. Jones, Jr. & D.C. Carter, ed.), pp. 293-350, Special Publications, The Museum, Texas Tech Univ. Press.'
-        citationType: '@CitationType-3'  #changed
+        fullText: 'Will be auto-generated'
+        publicationIssue: '36'
+        publicationPages: 232-235
+        citationType: '@CitationType-2'  #changed
         source: '@Source-1' #1
         created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -58,10 +60,8 @@ AppBundle\Entity\Citation:
     Citation-2:  #225
         displayName: 'Observations on the life histories of Panama bats'
         title: 'Observations on the life histories of Panama bats'
-        fullText: 'Bloedel, P. 1955. Observations on the life histories of Panama bats. Journal of Mammalogy 36: 232-235.'
-        publicationIssue: '36'
-        publicationPages: 232-235
-        citationType: '@CitationType-2' #
+        fullText: 'Will be auto-generated' #'Bloedel, P. 1955. Observations on the life histories of Panama bats. Journal of Mammalogy 36: 232-235.'
+        citationType: '@CitationType-3' #
         source: '@Source-3'  #12
         created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -69,7 +69,7 @@ AppBundle\Entity\Citation:
     Citation-3:   #223
         displayName: 'Two cases of bat pollination in Central America'
         title: 'Two cases of bat pollination in Central America'
-        fullText: 'Baker, H. G. 1970. Two cases of bat pollination in Central America. Revista de Biologia Tropical. 17: 187-197.'
+        fullText: 'Will be auto-generated' #'Baker, H. G. 1970. Two cases of bat pollination in Central America. Revista de Biologia Tropical. 17: 187-197.'
         publicationIssue: '17'
         publicationPages: 187-197
         citationType: '@CitationType-1' #
@@ -80,8 +80,8 @@ AppBundle\Entity\Citation:
     Citation-4:  #144
         displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
         title: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
-        fullText: 'Cockle, A. 1997. Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise. Ph.D. Dissertation. Université de Paris 6, Paris.'
-        citationType: '@CitationType-4' #
+        fullText: 'Will be auto-generated' #'Cockle, A. 1997. Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise. Ph.D. Dissertation. Université de Paris 6, Paris.'
+        citationType: '@CitationType-8' #
         source: '@Source-8' #75 
         created: '<(new \DateTime("2016-07-15 23:19:42", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -94,20 +94,44 @@ AppBundle\Entity\CitationType:
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-2: #added
-        slug: page-range
-        displayName: Page Range
-        citations: ['@Citation-2'] #
-        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
-    CitationType-3: #added
         slug: chapter
         displayName: Chapter
         citations: ['@Citation-1'] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    CitationType-3: #added
+        slug: book
+        displayName: Book
+        citations: ['@Citation-2'] #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
     CitationType-4: #added
+        slug: museum-record
+        displayName: Museum Record
+        citations: [] #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    CitationType-5: #added
+        slug: masters-thesis
+        displayName: Master's Thesis
+        citations: [] #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    CitationType-6: #added
         slug: report
         displayName: Report
+        citations: [] #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    CitationType-7: #added
+        slug: other
+        displayName: Other
+        citations: [] #
+        created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
+    CitationType-8: #added
+        slug: ph-d-dissertation
+        displayName: Ph.D. Dissertation
         citations: ['@Citation-4'] #
         created: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-12-16 19:22:26", new \DateTimeZone("America/Los_Angeles")))>'
@@ -409,14 +433,6 @@ AppBundle\Entity\Contribution:
         authorSource: '@Source-11'  #666 
         isEditor: true  #634  ---- 
         ord: '1'  #634  ---- 
-        created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
-        createdBy: '@User-1' 
-        updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
-    Contribution-6:  #541 ---- 
-        workSource: '@Source-2' #12 
-        authorSource: '@Source-13'  #666 
-        isEditor: true  #634  ---- 
-        ord: '2'  #634  ---- 
         created: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
         createdBy: '@User-1' 
         updated: '<(new \DateTime("2016-11-24 02:37:11", new \DateTimeZone("America/Los_Angeles")))>' 
@@ -1399,8 +1415,8 @@ AppBundle\Entity\LocationType:
         updated: '<(new \DateTime("2017-05-18 14:27:27", new \DateTimeZone("America/Los_Angeles")))>'
 AppBundle\Entity\Publication:
     Publication-1:  #100
-        slug: in-biology-of-bats-of-the-new-world-family-phyllostomatidae
-        displayName: 'In Biology of bats of the New World family Phyllostomatidae'
+        slug: biology-of-bats-of-the-new-world-family-phyllostomatidae
+        displayName: 'Biology of bats of the New World family Phyllostomatidae'
         publicationType: '@PublicationType-2' #added
         source: '@Source-2' #2
         created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
@@ -1446,8 +1462,8 @@ AppBundle\Entity\PublicationType:
         createdBy: '@User-1'
         updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
     PublicationType-3: #3
-        slug: ph-d-dissertation
-        displayName: 'Thesis/Ph.D. Dissertation'
+        slug: thesis-dissertation
+        displayName: 'Thesis/Dissertation'
         publications: ['@Publication-4'] #
         created: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1469,11 +1485,19 @@ AppBundle\Entity\Publisher: #added
         created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
+    Publisher-2:
+        displayName: 'Britanica Books'
+        city: 'Wellingsworth'
+        country: 'Britan'
+        description: 'A quaint publisher house.'
+        source: '@Source-14'
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
 AppBundle\Entity\Source:
     Source-1: #1
         displayName: 'Feeding habits'
-        description: 'Gardner, A. L. 1977. Feeding habits. In Biology of bats of the New World family Phyllostomatidae. Part II (R.J. Baker, J.K. Jones, Jr. & D.C. Carter, ed.), pp. 293-350, Special Publications, The Museum, Texas Tech Univ. Press.'
-        year: '1977'
+        description: 'Gardner, A. L. 1977. Feeding habits. Biology of bats of the New World family Phyllostomatidae. Part II (R.J. Baker, J.K. Jones, Jr. & D.C. Carter, ed.), pp. 293-350, Special Publications, The Museum, Texas Tech Univ. Press.'
         isDirect: true
         parentSource: '@Source-2' #
         sourceType: '@SourceType-2' #
@@ -1485,10 +1509,13 @@ AppBundle\Entity\Source:
         updated: '<(new \DateTime("2016-12-16 20:50:11", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
     Source-2: #2
-        displayName: 'In Biology of bats of the New World family Phyllostomatidae'
+        displayName: 'Biology of bats of the New World family Phyllostomatidae'
         childSources: ['@Source-1'] #
+        year: '1977'
         sourceType: '@SourceType-1' #
         publication: '@Publication-1'  #100
+        parentSource: '@Source-14'  #--
+        contributors: ['@Contribution-5']  #517
         created: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2016-11-24 06:20:58", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
@@ -1598,6 +1625,14 @@ AppBundle\Entity\Source:
         author: '@Author-4' #274
         created: '<(new \DateTime("2016-11-23 01:20:28", new \DateTimeZone("America/Los_Angeles")))>'
         updated: '<(new \DateTime("2017-01-24 15:44:15", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+    Source-14:  #---
+        displayName: 'Britanica Books'
+        description: ''
+        childSources: ['@Source-2']  #74
+        sourceType: '@SourceType-4'  # 
+        created: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
+        updated: '<(new \DateTime("2016-11-24 02:28:20", new \DateTimeZone("America/Los_Angeles")))>'
         createdBy: '@User-1'
 AppBundle\Entity\SourceType:
     SourceType-1:
