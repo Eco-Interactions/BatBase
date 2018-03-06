@@ -464,7 +464,7 @@ $(document).ready(function(){
             'taxon': addTaxon
         };
         for (let field in fields) {                                             //console.log('------- Setting field [%s]', field);
-            if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }                  console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+            if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }       //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
             addDataToField(field, fieldHndlrs[fields[field]], rcrd);
         }  
     }
@@ -1398,14 +1398,7 @@ $(document).ready(function(){
         const dataProp = realmName + lvls[realmName] + 'Names'; 
         const realmRcrds = _util.getDataFromStorage(dataProp); 
         return fParams.records.taxon[realmRcrds[Object.keys(realmRcrds)[0]]];  
-    }     
-    /** Returns the realm taxon's lower-case name for a selected object taxon. */
-    function getSelectedRealmName(selVal) {
-        if (!selVal) { return _util.lcfirst(getObjectRealm()); }
-        const taxon = fParams.records.taxon[selVal]; 
-        fParams.forms.taxonPs.objectRealm = taxon.realm.displayName; 
-        return _util.lcfirst(taxon.realm.displayName);
-    }
+    }    
     /** Returns either the preivously selected object realm or the default. */
     function getObjectRealm() {
         return !fParams.forms.taxonPs ? 'Plant' :
@@ -1448,13 +1441,18 @@ $(document).ready(function(){
     function initObjectSelect() {                                               //console.log("########### initObjectSelect fieldVal = [%s]", $('#Object-sel').val());
         const fLvl = getSubFormLvl('sub');
         if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', fLvl); }
-        const realmName = _util.ucfirst(getSelectedRealmName($('#Object-sel').val()));
+        const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
         initTaxonParams('Object', realmName);
         $('#Object_row').append(initSubForm(
             'object', fLvl, 'sml-right sml-form', {}, '#Object-sel'));
         initComboboxes('object', fLvl);             
         $('#Realm-sel')[0].selectize.addItem(fParams.forms.taxonPs.realmTaxon.realm.id);
         enableCombobox('#Subject-sel', false);
+    } 
+    /** Returns the realm taxon's lower-case name for a selected object taxon. */
+    function getSelectedObjectRealm(id) {                                       
+        if (!id) { return getObjectRealm(); }
+        return fParams.records.taxon[id].realm.displayName;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, fLvl) {

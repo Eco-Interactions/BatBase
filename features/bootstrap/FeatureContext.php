@@ -55,8 +55,6 @@ class FeatureContext extends RawMinkContext implements Context
     public static function afterFeature()
     {
         self::$dbChanges = false;
-        print("Closed Feature.");
-        // exec('php bin/console hautelook:fixtures:load --no-interaction --purge-with-truncate --env=test');        
     }
 
     /**
@@ -66,7 +64,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->getUserSession()->wait( 10000, "$('.ag-row').length" );
         $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
-        assertNotNull($row, "There are no rows in the database grid.");
+        $this->handleNullAssert($row, false, 'There are no rows in the database grid.');
     }
 
     /** -------------------------- Search Page Interactions ------------------*/
@@ -76,7 +74,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iExitTheTutorial()
     {
         $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
-        assertNotNull($tutorial, 'Tutorial is not displayed.');
+        $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
         $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
         usleep(500000);
     }
@@ -136,7 +134,8 @@ class FeatureContext extends RawMinkContext implements Context
         $selId = '#sel'.str_replace(' ','',$label);
         $selector = $selId.' option:selected';  
         $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
-        assertEquals($text, $selected); 
+        $this->handleEqualAssert($text, $selected, true, 
+            'Found [$selected] in the [$label] ($selId) field. Expected [$text].');
     }
 
     /**------------------- Form Functions ------------------------------------*/
@@ -175,7 +174,7 @@ class FeatureContext extends RawMinkContext implements Context
         $selector = '#'.str_replace(' ','',$prop).'_pin';
         $this->getUserSession()->executeScript("$('$selector').click();");
         $checked = $this->getUserSession()->evaluateScript("$('$selector').prop('checked');");
-        assertTrue($checked, $prop.' field is not checked.');
+        $this->handleEqualAssert($checked, true, true, 'The [$prop] field is not checked.');
     }
     
     /**
@@ -233,11 +232,9 @@ class FeatureContext extends RawMinkContext implements Context
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;
-        $this->handleAddValueToFormInput($selector, $text);
-        // $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
-        // $this->getUserSession()->executeScript("$('$selector').change();");    
+        $this->addValueToFormInput($selector, $text);
         usleep(500000);
-        $this->textSelectedInField($text, $selector);
+        $this->assertFieldValueIs($text, $selector);
     }
 
     /**
@@ -247,21 +244,17 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->selectValueInCombobox($selId, $text);
-        // $val = $this->getValueToSelect($selId, $text);
-        // $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
-        // usleep(500000);
-        // $this->textSelectedInField($text, $selId);
     }
 
     /**
      * @When I select :text from the :prop field dynamic dropdown
-     * Note: Changes the last filled dropdown (!$new), or the last empty ($new).
+     * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
      */
     public function iSelectFromTheFieldDynamicDropdown($text, $prop, $new)
     {
-        $count = $this->getCurrentFieldCount($prop);
+        $count = $this->getCurrentFieldCount($prop); 
         $cnt = $new ? $count : --$count;
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.--$cnt;  
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$cnt;                     
         $this->selectValueInCombobox($selId, $text);
         $this->blurNextDynamicDropdown($selId, $count);
     }
@@ -323,7 +316,7 @@ class FeatureContext extends RawMinkContext implements Context
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;      
-        $this->textSelectedInField($text, $selector);        
+        $this->assertFieldValueIs($text, $selector);        
     }
 
     /**
@@ -355,18 +348,18 @@ class FeatureContext extends RawMinkContext implements Context
             $selId = substr($selId, 0, -1).--$count;
             $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
         }
-        $this->textSelectedInField($text, $selId.'+div>div>div');
+        $this->assertFieldValueIs($text, $selId.'+div>div>div');
     }
 
     /**
      * @Then I should see :text in the :prop field
      * Works with interaction form select elems
      */
-    public function iShouldSeeInTheField($text, $prop)
+    public function iShouldSeeInTheInteractionField($text, $prop)
     {
         usleep(500000);
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->textSelectedInField($text, $selId.'+div>div>div');
+        $this->assertFieldValueIs($text, $selId.'+div>div>div');
     }
 
     /**
@@ -376,18 +369,21 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $elemId = '#'.strtolower(substr($entity , 0, 3)).'-det'; 
         $elem = $this->getUserSession()->getPage()->find('css', $elemId);
-        assertContains($text, $elem->getHtml()); 
+        $this->handleContainsAssert($text, $elem->getHtml(), true, 
+             "Should have found [$text] in [$entity] details");
     }
 
     /**
      * @Then I should see :text in the :prop field :type
      */
-    public function iShouldSeeInTheField2($text, $prop, $type)
+    public function iShouldSeeInTheField($text, $prop, $type)
     {
-        $field = '#'.str_replace(' ','',$prop).'_row '.$type;
+        $map = [ 'Edition' => 'Volume' ];
+        $name = array_key_exists($prop, $map) ? $map[$prop] : $prop;
+        $field = '#'.str_replace(' ','',$name).'_row '.$type;
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;      
-        $this->textSelectedInField($text, $selector);        
+        $this->assertFieldValueIs($text, $selector);        
     }
 
     /**
@@ -397,7 +393,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->getUserSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
-        $this->textSelectedInField($text, $selId.'+div>div>div');
+        $this->assertFieldValueIs($text, $selId.'+div>div>div');
     }
     /**
      * @Then I (should) see :text in the form header
@@ -406,7 +402,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->getUserSession()->wait( 10000, "$('#form-main p').length;");
         $elem = $this->getUserSession()->getPage()->find('css', '#form-main p');
-        assertContains($text, $elem->getHtml()); 
+        $this->handleContainsAssert($text, $elem->getHtml(), true, 
+             "Should have found [$text] in the form header.");
     }
 
     /**
@@ -417,7 +414,7 @@ class FeatureContext extends RawMinkContext implements Context
         $map = [ 'Note' => '#Note_row textarea' ];
         $selector = $map[str_replace(' ','',$prop)];
         $val = $this->getUserSession()->evaluateScript("$('$selector')[0].innerText"); 
-        assertEquals($val, '');
+        $this->handleEqualAssert($val, '', true, 'The [$field] should be empty.');
     }
 
     /**
@@ -431,7 +428,7 @@ class FeatureContext extends RawMinkContext implements Context
             foreach ($val as $value) { if ($value) { $val = false; } }
             if ($val !== false) { $val = ''; }
         }
-        assertEquals($val, '');
+        $this->handleEqualAssert($val, '', true, 'The [$field] should be empty.');
     }
 
     /**
@@ -441,7 +438,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $map = [ 'Location' => 'locs', 'Taxon' => 'taxa', 'Source' => 'srcs' ];
         $view = $this->getUserSession()->evaluateScript("$('#search-focus').val();");
-        assertEquals($view, $map[$entity]);
+        $this->handleEqualAssert($view, $map[$entity], true, 
+            'DB in [$view] view. Expected [$vals[$entity]]');
     }
 
     /**
@@ -451,9 +449,10 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
-        assertTrue($checked, 'Filter is not checked.');
+        $this->handleEqualAssert($checked, true, true, 'Updates-since filter is not checked.');
         $filter = $this->getUserSession()->evaluateScript("$('input[name=shw-chngd]:checked').val();");
-        assertEquals(lcfirst($time), $filter);
+        $this->handleEqualAssert(lcfirst($time), $filter, true, 
+            'Showing updates-since [$filter]. Expected since [$time]');
     }
 
     /**------------------ Grid Funcs -----------------------------------------*/
@@ -474,8 +473,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $row = $this->getGridRow($text);
-        // assertNotNull($row, );
-        $this->handleNullAssert($row, false, 'Couldn\'t find row for = '.$text);
+        $this->handleNullAssert($row, false, 'Couldn\'t find row for = ['.$text.']');
         $this->clickRowEditPencil($row, $text);
     }
 
@@ -489,8 +487,8 @@ class FeatureContext extends RawMinkContext implements Context
         $field = array_key_exists($prop, $map) ? $map[$prop] :
             '#'.str_replace(' ','',$prop).'_row '.$type; 
         $selector = $curForm.' '.$field;
-        $this->handleAddValueToFormInput($selector, $text);
-        $this->textSelectedInField($text, $selector);
+        $this->addValueToFormInput($selector, $text);
+        $this->assertFieldValueIs($text, $selector);
     }
 
     /**
@@ -502,10 +500,6 @@ class FeatureContext extends RawMinkContext implements Context
         $selId = array_key_exists($prop, $map) ? $map[$prop] :
             '#'.str_replace(' ','',$prop).'-sel';  
         $this->selectValueInCombobox($selId, $text);
-        // $val = $this->getValueToSelect($field, $text); print("Value to select in CitTypeTags = ".$val);
-        // $this->getUserSession()->executeScript("$('$field')[0].selectize.addItem('$val');");
-        // usleep(500000);
-        // $this->textSelectedInField($text, $field);
     }
 
     /**
@@ -531,8 +525,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $row = $this->getTreeNode($text);  
-        $this->handleNullAssert($row, false, 'Couldn\'t find row for = '.$text);
-        // if (!$row) { $this->iPutABreakpoint('Couldn\'t find row = '.$text); }
         $row->doubleClick();
     }
 
@@ -543,7 +535,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row-level-'.--$num.' [colid="name"]');  
-        assertNotNull($treeNodes, 'No nodes found at level $num of the data tree.');  
+        $this->handleNullAssert($row, false, 'No nodes found at level $num of the data tree.');
         $row = null;
         for ($i=0; $i < count($treeNodes); $i++) { 
             if ($treeNodes[$i]->getText() === $txt) { $row = $treeNodes[$i]; break;}
@@ -558,15 +550,17 @@ class FeatureContext extends RawMinkContext implements Context
     public function theCountColumnShouldShowInteractions($count)
     {
         $cell = $this->getUserSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
-        assertContains($cell->getText(), $count, 'No interaction count found.');
+        $this->handleContainsAssert($cell->getText(), $count, 'No interaction count found.');
     }
     /**
      * @Then data in the interaction rows
+     * Note: Data is checked in the Subject Taxon column only.
      */
     public function dataInTheInteractionRows()
-    {   /** Data pulled from the Subject Taxon column. */
+    {   
         $data = $this->getUserSession()->getPage()->find('css', '[colid="subject"] span');
-        assertNotNull($data->getText(), 'No data found in the interaction rows.');
+        $this->handleNullAssert($data->getText(), false, 
+            'No data found in the interaction rows.');
     }
 
     /**
@@ -576,7 +570,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
-        assertCount(intval($count), $rows, "Expected [$count] rows; Found [".count($rows)."]");
+        $this->handleEqualAssert(intval($count), count($rows), true, 
+            "Found [". count($rows)."] interaction rows. Expected [$count]");
     }
 
     /**
@@ -585,19 +580,20 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInTheTree($text)
     {   
         usleep(500000);
-        $treeNode = $this->isInDataTree($text);
-        assertTrue($treeNode, '"'.$text.'" is not displayed in grid data-tree.');
+        $inTree = $this->isInDataTree($text);
+        $this->handleEqualAssert($inTree, true, true, '[$text] is not displayed in grid data-tree.');
     }    
 
     /**
-     * @Then the database grid should be in :entity view
+     * @Then I should not see :text in the tree
      */
-    public function theDatabaseGridShouldBeInView($entity)
-    {
-        $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
-        $view = $this->getUserSession()->evaluateScript("$('#search-focus').val();");
-        assertEquals($vals[$entity], $view);
-    }
+    public function iShouldNotSeeInTheTree($text)
+    {   
+        usleep(500000);
+        $inTree = $this->isInDataTree($text);
+        $this->handleEqualAssert($inTree, false, true, 
+            '[$text] should not be displayed in grid data-tree.');
+    }    
 
     /**
      * @Then I should see :count interaction(s) under :nodeTxt
@@ -606,9 +602,8 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->iExpandInTheDataTree($nodeTxt);
         $rows = $this->getInteractionsRows($nodeTxt); 
-        assertNotNull($rows, "Didn't find any interaction rows.");
-        if ($count != count($rows)) { $this->iPutABreakpoint("Found ". count($rows)." rows under $nodeTxt. Expected $count"); }
-        assertEquals($count, count($rows));
+        $this->handleEqualAssert(count($rows), $count, true, 
+            "Found [". count($rows)."] rows under $nodeTxt. Expected $count");
     } 
 
     /**
@@ -617,8 +612,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInteractionsAttributed($count)
     {
         $rows = $this->getInteractionsRows(); 
-        assertNotNull($rows, "Didn't find any interaction rows.");
-        assertEquals($count, count($rows));
+        $this->handleEqualAssert(count($rows), $count, true, 
+            "Found [". count($rows)."] interaction rows. Expected [$count]");
     }
 
     /**
@@ -634,7 +629,8 @@ class FeatureContext extends RawMinkContext implements Context
             foreach ($cols as $colId) {            
                 $selector = '[colid="'.$colId.'"]';
                 $data = $row->find('css', $selector); 
-                assertNotNull($data->getText(), 'No data found in the interaction\'s "$colId" column.');
+                $this->handleNullAssert($data->getText(), false, 
+                    'No data found in the interaction\'s [$colId] column.');
             }
         }
     }
@@ -647,7 +643,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->iExpandInTheDataTree($parentNode);
         $row = $this->getGridRow($text);
-        $this->handleNullAssert($row, false, "Couldn't find $text in the tree");
+        $this->handleNullAssert($row, false, 'Couldn\'t find row for = ['.$text.']');
         $this->collapseDataTreeNode($parentNode);
     }
 
@@ -703,33 +699,26 @@ class FeatureContext extends RawMinkContext implements Context
     /** -------------------- Asserts ---------------------------------------- */
     private function isInDataTree($text)
     {
-        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
-        $this->handleNullAssert($treeNodes, false, "Didn't find the [$text] column.");
+        $treeNodes = $this->getAllTreeNodes();
+        $inTree = false;
         for ($i=0; $i < count($treeNodes); $i++) { 
-            if ($treeNodes[$i]->getText() === $text) { return true; }
+            if ($treeNodes[$i]->getText() === $text) { $inTree = true; }
         }
-        return false;
+        return $inTree;
     }
     private function textContainedInField($text, $fieldId, $isIn = true)
     {  
-        $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
-        if ($selected === null || $selected === "") {
-            $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
-        }
+        $fieldVal = $this->getFieldData($fieldId);
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleContainsAssert($text, $selected, $isIn, 
+        $this->handleContainsAssert($text, $fieldVal, $isIn, 
             "$should_nt have found [$text] in [$fieldId]"); 
     }
-    private function textSelectedInField($text, $fieldId, $isIn = true)
+    private function assertFieldValueIs($text, $fieldId, $isIn = true)
     {  
-        $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
-        if ($selected === null || $selected === "") {
-            $selected = $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
-        }
-        $msg = 'Found ['.$selected."] \nExpected [".$text.'] in ['.$fieldId.']';
+        $fieldVal = $this->getFieldData($fieldId);
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleEqualAssert($text, $selected, $isIn,  
-            "$should_nt have found [$text] in [$fieldId]. Actually found: [$selected]."); 
+        $this->handleEqualAssert($text, $fieldVal, $isIn,  
+            "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
     }
     /** ------------------ Get From Page -------------------------------------*/
     private function getAllGridRows()
@@ -737,6 +726,28 @@ class FeatureContext extends RawMinkContext implements Context
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         $this->handleNullAssert($rows, false, 'No nodes found in data tree.');
         return $rows;
+    }
+    private function getAllTreeNodes()
+    {
+        $nodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
+        $this->handleNullAssert($nodes, false, 'No nodes found in data tree.');
+        return $nodes;
+    }
+    private function getFieldData($fieldId)
+    {
+        $val = $this->getFieldInnerText($fieldId);
+        if ($val === null || $val === "") {
+            $val = $this->getFieldValue($fieldId);
+        }  
+        return $val;
+    }
+    private function getFieldInnerText($fieldId)
+    {
+        return $this->getUserSession()->evaluateScript("$('$fieldId')[0].innerText;"); 
+    }
+    private function getFieldValue($fieldId)
+    {
+        return  $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
     }
     private function getCurrentFieldCount($prop)
     {
@@ -768,26 +779,25 @@ class FeatureContext extends RawMinkContext implements Context
             if ($subSet && $nodeText === '') { array_push($intRows, $row); }
             if ($subSet && $node && $nodeText !== '') { break; } 
         } 
+        $this->handleNullAssert($intRows, false, 'No interaction rows found.');
         return $intRows;
     }
-    private function getTreeNode($text)
+    private function getTreeNode($text) 
     {
         usleep(500000);
-        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]');  
-        assertNotNull($treeNodes, 'No nodes found in data tree.');  
+        $treeNodes = $this->getAllTreeNodes();
         $row = null;
         for ($i=0; $i < count($treeNodes); $i++) { 
             if ($treeNodes[$i]->getText() === $text) { $row = $treeNodes[$i]; break;}
         }
         $this->handleNullAssert($row, false, "Didn't find the [$text] tree node.");
-        // assertNotNull($row, );
         return $row;
     }
     private function getValueToSelect($selId, $text)
     {
         $opts = $this->getUserSession()->evaluateScript("$('$selId')[0].selectize.options;");
         foreach ($opts as $key => $optAry) {
-            if ($optAry['text'] === $text) { print_r($optAry); return $optAry['value']; }
+            if ($optAry['text'] === $text) { return $optAry['value']; }
         } 
         $this->iPutABreakpoint("Couldn't find the option for [".$text.'] in ['.$selId.']');
     }
@@ -830,13 +840,13 @@ class FeatureContext extends RawMinkContext implements Context
 
     /** -------- Asserts ----------- */
     private function handleContainsAssert($ndl, $hystk, $isIn, $msg)
-    {
-        if (strpos($hystk, $ndl) !== $isIn) { 
+    {                                                                           //print('fieldVal = '.$hystk.', needle = '.$ndl);
+        if ($isIn && strpos($hystk, $ndl) === false || !$isIn && strpos($hystk, $ndl) != false) { 
             $this->iPutABreakpoint($msg);
         }
     }
     private function handleEqualAssert($frst, $scnd, $isEq, $msg)
-    {       print("handleEqualAssert. [$frst] ($isEq)== [$scnd]");
+    {       
         if ($isEq && $frst != $scnd || !$isEq && $frst == $scnd) { 
             $this->iPutABreakpoint($msg);
         }
@@ -848,7 +858,7 @@ class FeatureContext extends RawMinkContext implements Context
         }
     }
     /** -------- Page Interactions ----------- */
-    private function handleAddValueToFormInput($selector, $text)
+    private function addValueToFormInput($selector, $text)
     {
         $msg = "\nCouldn't set [".$text."] into [".$selector."].";
         try {
@@ -864,10 +874,10 @@ class FeatureContext extends RawMinkContext implements Context
         $val = $this->getValueToSelect($selId, $text); 
         $elem = $this->getUserSession()->evaluateScript("$('$selId').length"); 
         if ($elem > 0) {  
-            $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");             }
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");            
         } else { $this->iPutABreakpoint($msg); }
         usleep(500000);
-        $this->textSelectedInField($text, $selId);
+        $this->assertFieldValueIs($text, $selId);
     }
     /** ---------- Misc ----------- */
     private function getUserSession()
