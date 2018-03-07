@@ -4,7 +4,8 @@ Feature: Edit data in the database
 	I need to be able to edit the data in the database
 
 	Background:
-		Given I am on "/login"
+		Given the fixtures have been reloaded
+		And I am on "/login"
 		And I fill in "Username" with "TestEditor"
 		And I fill in "Password" with "passwordhere"
 		And I press the "_submit" button

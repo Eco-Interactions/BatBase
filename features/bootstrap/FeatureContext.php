@@ -12,9 +12,14 @@ require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Asser
  * Defines application features from the specific context.
  */
 class FeatureContext extends RawMinkContext implements Context
-{
+{    
     private static $dbChanges;
-    
+    /** Used for mutli-editor testing. */
+    private $curUser;
+    private $editor1; 
+    private $editor2;
+
+
     /**
      * Initializes context.
      *
@@ -22,9 +27,7 @@ class FeatureContext extends RawMinkContext implements Context
      * You can also pass arbitrary arguments to the
      * context constructor through behat.yml.
      */
-    public function __construct(){
-        self::$dbChanges = false;
-    }
+    public function __construct(){}
     /** --------------------------- Database Funcs ---------------------------*/
     /**
      * @BeforeSuite
@@ -39,21 +42,22 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @AfterScenario
-     */
-    public static function afterScenario()
-    {
-        if (!self::$dbChanges) { return; }
-        fwrite(STDOUT, "\n\n\nReloading fixtures.\n\n");
-        exec('php bin/console hautelook:fixtures:load --no-interaction --purge-with-truncate --env=test');        
-        self::$dbChanges = false;
-    }
-
-    /**
      * @AfterFeature
      */
     public static function afterFeature()
     {
+        fwrite(STDOUT, "\n\n\nReloading fixtures.\n\n");
+        exec('php bin/console hautelook:fixtures:load --no-interaction --purge-with-truncate --env=test');        
+        self::$dbChanges = false;
+    }
+    /**
+     * @Given the fixtures have been reloaded 
+     */
+    public function theFixturesHaveBeenReloaded()
+    {
+        if (!self::$dbChanges) { return; }
+        fwrite(STDOUT, "\n\n\nReloading fixtures.\n\n");
+        exec('php bin/console hautelook:fixtures:load --no-interaction --purge-with-truncate --env=test');        
         self::$dbChanges = false;
     }
 
@@ -153,7 +157,11 @@ class FeatureContext extends RawMinkContext implements Context
     public function iEnterInTheFieldDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        try {
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Couldn't find dropdown [".$selId."]");
+        }
     }
 
     /**
@@ -270,7 +278,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iUncheckTheTimeUpdatedFilter()
     {
-        usleep(1000000);
+        usleep(1000000); //refactor to  [wait(test)]
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
         usleep(500000);
@@ -455,7 +463,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Showing updates-since [$filter]. Expected since [$time]');
     }
 
-    /**------------------ Grid Funcs -----------------------------------------*/
+    /**------------------ Grid Interaction Steps -----------------------------*/
     /**
      * @Given I filter the grid to interactions created since :time
      */
@@ -656,27 +664,72 @@ class FeatureContext extends RawMinkContext implements Context
         $row = $this->getGridRow($text);
         $this->handleNullAssert($row, true, 'Shouldn\'t have found $text under $parentNode.');
     }
-
-    private function getOpenFormId()
+    /** ------------------ Data Sync Feature -----------------------------------*/
+    /**
+     * @Given two editors are logged into the website
+     */
+    public function twoEditorsAreLoggedIntoTheWebsite()
     {
-        $forms = ['sub2', 'sub', 'top'];
-        foreach ($forms as $prefix) {
-            $selector = '#'.$prefix.'-form';
-            $elem = $this->getUserSession()->getPage()->find('css', $selector);
-            if ($elem !== null) { return $selector; }
-        }
+        $this->editor1 = $this->getEditorSession();
+        $this->editorLogIn($this->editor1, 'testeditor');
+
+        $this->editor2 = $this->getEditorSession();
+        $this->editorLogIn($this->editor2, 'testAdmin');
+    }
+
+    /**
+     * @When each user creates two interactions
+     */
+    public function eachUserCreatesTwoInteractions()
+    {
+        $this->userCreatesInteractions($this->editor1, [1, 2]);
+        $this->userCreatesInteractions($this->editor2, [3, 4]);
+    }
+
+    /**
+     * @When each edits some sub-entity data
+     */
+    public function eachEditsSomeSubEntityData()
+    {   // move interaction from one taxa, location, and source to another
+    }
+
+    /**
+     * @When each reloads the search page
+     */
+    public function eachReloadsTheSearchPage()
+    {
+        $this->editorVisitsSearchPage($this->editor1);
+        $this->editorVisitsSearchPage($this->editor2);
+    }
+
+    /**
+     * @Then the new data should sync between the editors
+     */
+    public function theNewDataShouldSyncBetweenTheEditors()
+    {
+        $this->editorGridLoads($this->editor1);
+        $this->editorGridLoads($this->editor2);
+    }
+
+    /**
+     * @Then they should see the expected changes in the data grid
+     */
+    public function theyShouldSeeTheExpectedChangesInTheDataGrid()
+    {
+        $this->editorSeesExpectedInteractions($this->editor1);
+        $this->editorSeesExpectedInteractions($this->editor2);
     }
     /** ------------------ Helper Steps --------------------------------------*/
     /**
-     * @Given I see :text
+     * @When I check the :text box
      */
-    public function iSee($text)
+    public function iCheckTheBox($text)
     {
-        try {
-            $this->assertSession()->pageTextContains($text);
-        } catch (Exception $e) {
-            $this->iPutABreakpoint('Did not find ['.$text.'] anywhere on page.');
-        }
+        $form = $this->getOpenFormPrefix();
+        $selector = '#'.$form.'-all-fields';
+        $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
+        $this->handleNullAssert($checkbox, false, "Couldn't find the show all fields checkbox");  
+        $checkbox->check();  
     }
     /**
      * @When I press :bttnText :count times
@@ -695,6 +748,17 @@ class FeatureContext extends RawMinkContext implements Context
         if (stripos($bttnText, "Update") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
         usleep(500000);
+    }
+    /**
+     * @Given I see :text
+     */
+    public function iSee($text)
+    {
+        try {
+            $this->assertSession()->pageTextContains($text);
+        } catch (Exception $e) {
+            $this->iPutABreakpoint('Did not find ['.$text.'] anywhere on page.');
+        }
     }
     /** -------------------- Asserts ---------------------------------------- */
     private function isInDataTree($text)
@@ -733,6 +797,11 @@ class FeatureContext extends RawMinkContext implements Context
         $this->handleNullAssert($nodes, false, 'No nodes found in data tree.');
         return $nodes;
     }
+    private function getCurrentFieldCount($prop)
+    {
+        $selCntnrId = '#'.str_replace(' ','',$prop).'-sel-cntnr';
+        return $this->getUserSession()->evaluateScript("$('$selCntnrId').data('cnt');");
+    }
     private function getFieldData($fieldId)
     {
         $val = $this->getFieldInnerText($fieldId);
@@ -748,11 +817,6 @@ class FeatureContext extends RawMinkContext implements Context
     private function getFieldValue($fieldId)
     {
         return  $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
-    }
-    private function getCurrentFieldCount($prop)
-    {
-        $selCntnrId = '#'.str_replace(' ','',$prop).'-sel-cntnr';
-        return $this->getUserSession()->evaluateScript("$('$selCntnrId').data('cnt');");
     }
     private function getGridRow($text)
     {
@@ -781,6 +845,21 @@ class FeatureContext extends RawMinkContext implements Context
         } 
         $this->handleNullAssert($intRows, false, 'No interaction rows found.');
         return $intRows;
+    }
+    /** Returns the id for the deepest open form.  */
+    private function getOpenFormId()
+    {
+        $prefix = $this->getOpenFormPrefix();
+        return '#'.$prefix.'-form';
+    }
+    private function getOpenFormPrefix()
+    {
+        $forms = ['sub2', 'sub', 'top'];
+        foreach ($forms as $prefix) {
+            $selector = '#'.$prefix.'-form';
+            $elem = $this->getUserSession()->getPage()->find('css', $selector);
+            if ($elem !== null) { return $prefix; }
+        }
     }
     private function getTreeNode($text) 
     {
@@ -879,42 +958,78 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->assertFieldValueIs($text, $selId);
     }
+    /** ------------------ multi-editor feature helpers ----------------- */
+    private function getEditorSession()
+    {
+        $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome');
+        $session = new \Behat\Mink\Session($driver);
+        $session->start();
+        return $session;
+    }
+
+    private function editorLogIn($editor, $name)
+    {
+        $editor->visit('http://localhost/batplant/web/app_test.php/login');
+        $editor->getPage()->fillField('_username', $name);
+        $editor->getPage()->fillField('_password', 'passwordhere');
+        $editor->getPage()->pressButton('_submit');
+    }
+
+    private function userCreatesInteractions($editor, $cntAry)
+    {
+        $this->curUser = $editor;
+        $this->editorVisitsSearchPage($this->curUser);
+        $this->iExitTheTutorial();
+        $this->curUser->getPage()->pressButton('New');
+        foreach ($cntAry as $cnt) {
+            $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
+        }
+        $this->iExitTheFormWindow();
+    }
+
+    private function editorVisitsSearchPage($editor)
+    {
+        $editor->visit('http://localhost/batplant/web/app_test.php/search');
+        usleep(500000);
+    }
+
+    private function iSubmitTheNewInteractionFormWithTheFixtureEntities($count)
+    {
+        $this->iSelectFromTheFieldDropdown('Revista de Biologia Tropical', 'Publication'); 
+        $this->iSelectFromTheFieldDropdown('Two cases of bat pollination in Central America', 'Citation Title');
+        $this->iSelectFromTheFieldDropdown('Central America', 'Country-Region');
+        $this->iSelectFromTheFieldDropdown('Panama', 'Location');
+        $this->iFocusOnTheTaxonField('Subject');
+        $this->iSelectFromTheFieldDropdown('Phyllostomidae', 'Family');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iFocusOnTheTaxonField('Object');
+        $this->iSelectFromTheFieldDropdown('Plant', 'Realm');
+        $this->iSelectFromTheFieldDropdown('Fabaceae', 'Family');
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iSelectFromTheFieldDropdown('Consumption', 'Interaction Type');
+        $this->iSelectFromTheFieldDropdown('Arthropod', 'Interaction Tags');
+        $this->iTypeInTheField('Interaction '.$count, 'Note', 'textarea');
+        $this->curUser->getPage()->pressButton('Create Interaction');
+        usleep(500000);
+    }
+
+    private function editorGridLoads($editor)
+    {
+        $editor->wait( 5000, "$('.ag-row').length" );
+        $gridRows = $editor->evaluateScript("$('.ag-row').length > 0");
+        assertTrue($gridRows);
+    }
+
+    private function editorSeesExpectedInteractions($editor)
+    {
+        $this->curUser = $editor;
+        $this->iExpandInTheDataTree('Revista de Biologia Tropical');
+        $this->iExpandInTheDataTree('Two cases of bat pollination in Central America');
+        $this->iShouldSeeInteractionsAttributed(6);
+    }    
     /** ---------- Misc ----------- */
     private function getUserSession()
     {
         return isset($this->curUser) ? $this->curUser : $this->getSession();
     }
-    // /**
-    //  * @When I press the edit pencil for the :section
-    //  */
-    // public function iPressTheEditPencilForThe($section)
-    // {
-    //     $map = [ 'home page second column' => '#home-pg-second-col-edit'];
-    //     $this->getUserSession()->executeScript("$('$map[$section]').click();");
-    //     usleep(500000);
-    // }
-
-    // /**
-    //  * @When I change the header to :text
-    //  */
-    // public function iChangeTheHeaderTo($text)
-    // {
-    //     $this->getUserSession()->executeScript("$('.trumbowyg-editor h3').val('$text');");
-    //     // $this->getUserSession()->executeScript("$('.trumbowyg-editor').change();");
-    // }
-
-    // /**
-    //  * @When I wait for the wysiwyg editor to update and close successfully
-    //  */
-    // public function iWaitForTheWysiwygEditorToUpdateAndCloseSuccessfully()
-    // {
-    // }
-    // /**
-    //  * @When I save and close the wysiwyg editor
-    //  */
-    // public function iSaveAndCloseTheWysiwygEditor()
-    // {
-    //     $this->getUserSession()->getPage()->pressButton('Save');
-    //     $this->getUserSession()->wait( 5000, "!$('.wysiwyg').length" );
-    // }
 }

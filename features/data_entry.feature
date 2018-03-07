@@ -9,7 +9,9 @@ Feature: Add new data to the database
 		And I fill in "Password" with "passwordhere"
 		And I press the "_submit" button
 		And I am on "/search"
-		Then I should see "TestEditor"
+		And I should see "TestEditor"
+		Given the database has loaded
+		And I exit the tutorial
 
 	# @javascript
 	# Scenario:  Setup: Database loads and the welcome tutorial is exited.
@@ -21,78 +23,107 @@ Feature: Add new data to the database
 		Given I open the New Interaction form
 		And I enter "Test Publication" in the "Publication" field dropdown
 		And I see "New Publication"
+		And I select "Book" from the "Publication Type" field dropdown
 		When I enter "Test Publisher" in the "Publisher" field dropdown
 		And I see "New Publisher"
-		And I type "Publisher Description" in the "Description" field "textarea"
 		And I type "Nice" in the "City" field "input"
 		And I type "France" in the "Country" field "input"
+		And  I check the "Show all fields" box
+		And I type "Publisher Description" in the "Description" field "textarea"
 		And I type "www.publisher.com" in the "Link Url" field "input"
 		And I type "Test Publisher Webiste" in the "Link Display" field "input"
 		And I press the "Create Publisher" button
 		Then I should see "Test Publisher" in the "Publisher" field
+		And I break
 
 	@javascript
 	Scenario:  I should be able to create an author with its sub-form
 		Given I open the New Interaction form
 		And I enter "Test Publication" in the "Publication" field dropdown
 		And I see "New Publication"
-		When I enter "Smith, George" in the "Authors" field dynamic dropdown
-		And I type "George" in the "First Name" field "input"
-		And I type "Michael" in the "Middle Name" field "input"
-		And I type "Smith" in the "Last Name" field "input"
-		And I type "Sr" in the "Suffix" field "input"
-		And I type "www.author.com" in the "Link Url" field "input"
-		And I type "Test Author Webiste" in the "Link Display" field "input"
-		And I press the "Create Author" button
-		Then I should see "Smith, George Michael Sr" in the "Authors" field dynamic dropdown
-
-	@javascript
-	Scenario:  I should be able to create a publication with its sub-form
-		Given I open the New Interaction form
-		And I enter "Test Publication" in the "Publication" field dropdown
-		And I see "New Publication"
-		When I type "Test description" in the "Description" field "textarea"
 		And I select "Book" from the "Publication Type" field dropdown
-		And I type "www.publication.com" in the "Link Url" field "input"
-		And I type "Test Publication Webiste" in the "Link Display" field "input"
-		And I type "10.1037/rmh0000008" in the "Doi" field "input"
-		And I select "Test Publisher" from the "Publisher" field dropdown
-		And I select "Smith, George Michael Sr" from the "Authors" field dynamic dropdown
-		And I press the "Create Publication" button
-		Then I should see "Test Publication" in the "Publication" field
-		And I should see "Test Publication" in the "Publication" detail panel
-		And I should see "Test description" in the "Publication" detail panel
-		And I should see "Book" in the "Publication" detail panel
-		And I should see "Test Publisher" in the "Publication" detail panel
-		And I should see "Smith, George Michael Sr" in the "Publication" detail panel
+		When I enter "Smith, George" in the "Authors" field dynamic dropdown
+		And I check the "show-all-fields" box
+		And I type "Bendry" in the "First Name" field "input"
+		And I type "J" in the "Middle Name" field "input"
+		And I type "Callaye" in the "Last Name" field "input"
+		And I type "Jr" in the "Suffix" field "input"
+		And I type "www.author.com" in the "Link Url" field "input"
+		And I type "Test Author Website" in the "Link Display" field "input"
+		And I press the "Create Author" button
+		Then I should see "Callaye, Bendry J Jr" in the "Authors" field dynamic dropdown
 
-	@javascript
-	Scenario:  I should be able to create a citation with its sub-form
-		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I enter "Test Citation Title" in the "Citation Title" field dropdown
-		And I see "New Citation"
-		When I type "Test Citation Text" in the "Citation Text" field "textarea"
-		And I type "Test Abstract Text" in the "Abstract" field "textarea"
-		And I select "Article" from the "Citation Type" field dropdown
-		And I type "1990" in the "Year" field "input"
-		And I type "29" in the "Volume" field "input"
-		And I type "3" in the "Issue" field "input"
-		And I type "333-666" in the "Pages" field "input"
-		And I type "www.citation.com" in the "Link Url" field "input"
-		And I type "Test Citation Webiste" in the "Link Display" field "input"
-		And I type "10.1037/rmh0000008" in the "Doi" field "input"
-		And I select "Cockel, Joy Karen Jr" from the "Authors" field dynamic dropdown
-		And I press the "Create Citation" button
-		Then I should see "Test Citation Title" in the "Citation Title" field
-		And I should see "Test Citation Title" in the "Citation" detail panel
-		And I should see "Test Citation Text" in the "Citation" detail panel
-		And I should see "Test Abstract Text" in the "Citation" detail panel
-		And I should see "Article" in the "Citation" detail panel
-		And I should see "29" in the "Citation" detail panel
-		And I should see "3" in the "Citation" detail panel
-		And I should see "333-666" in the "Citation" detail panel
-		And I should see "Smith, George Michael Sr, Cockel, Joy Karen Jr" in the "Citation" detail panel
+	# @javascript
+	# Scenario:  I should be able to create a [BOOK] publication with its sub-form
+	# 	Given I open the New Interaction form
+	# 	And I enter "Test Publication" in the "Publication" field dropdown
+	# 	And I see "New Publication"
+	# 	When I type "Test description" in the "Description" field "textarea"
+	# 	And I select "Book" from the "Publication Type" field dropdown
+	# 	And I check the "show-all-fields" box
+	# 	And I type "www.publication.com" in the "Link Url" field "input"
+	# 	And I type "Test Publication Webiste" in the "Link Display" field "input"
+	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
+	# 	And I select "Test Publisher" from the "Publisher" field dropdown
+	# 	And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+	# 	And I press the "Create Publication" button
+	# 	Then I should see "Test Publication" in the "Publication" field
+	# 	And I should see "Test Publication" in the "Src" detail panel
+	# 	And I should see "Test description" in the "Src" detail panel
+	# 	And I should see "Book" in the "Src" detail panel
+	# 	And I should see "Britanica Books" in the "Src" detail panel
+	# 	And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+
+	# @javascript
+	# Scenario:  I should be able to create a [JOURNAL] publication with its sub-form
+	# 	Given I open the New Interaction form
+	# 	And I enter "Test Publication" in the "Publication" field dropdown
+	# 	And I see "New Publication"
+	# 	When I type "Test description" in the "Description" field "textarea"
+	# 	And I select "Journal" from the "Publication Type" field dropdown
+	# 	And I check the "show-all-fields" box
+	# 	And I type "www.publication.com" in the "Link Url" field "input"
+	# 	And I type "Test Publication Webiste" in the "Link Display" field "input"
+	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
+	# 	And I select "Britanica Books" from the "Publisher" field dropdown
+	# 	And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+	# 	And I press the "Create Publication" button
+	# 	Then I should see "Test Publication" in the "Publication" field
+	# 	And I should see "Test Publication" in the "Src" detail panel
+	# 	And I should see "Test description" in the "Src" detail panel
+	# 	And I should see "Book" in the "Src" detail panel
+	# 	And I should see "Britanica Books" in the "Src" detail panel
+	# 	And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+
+	# @javascript
+	# Scenario:  I should be able to create a [ARTICLE] citation with its sub-form
+	# 	Given I open the New Interaction form
+	# 	And I select "Test Publication" from the "Publication" field dropdown
+	# 	And I enter "Test Citation Title" in the "Citation Title" field dropdown
+	# 	And I see "New Citation"
+	# 	And I see "Article" from the "Citation Type" field dropdown
+	# 	And I check the "show-all-fields" box
+	# 	When I type "Test Citation Text" in the "Citation Text" field "textarea"
+	# 	And I type "Test Abstract Text" in the "Abstract" field "textarea"
+	# 	And I select "Article" from the "Citation Type" field dropdown
+	# 	And I type "1990" in the "Year" field "input"
+	# 	And I type "29" in the "Volume" field "input"
+	# 	And I type "3" in the "Issue" field "input"
+	# 	And I type "333-666" in the "Pages" field "input"
+	# 	And I type "www.citation.com" in the "Link Url" field "input"
+	# 	And I type "Test Citation Webiste" in the "Link Display" field "input"
+	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
+	# 	And I select "Cockel, Joy Karen Jr" from the "Authors" field dynamic dropdown
+	# 	And I press the "Create Citation" button
+	# 	Then I should see "Test Citation Title" in the "Citation Title" field
+	# 	And I should see "Test Citation Title" in the "Citation" detail panel
+	# 	And I should see "Test Citation Text" in the "Citation" detail panel
+	# 	And I should see "Test Abstract Text" in the "Citation" detail panel
+	# 	And I should see "Article Title" in the "Citation" detail panel
+	# 	And I should see "29" in the "Citation" detail panel
+	# 	And I should see "3" in the "Citation" detail panel
+	# 	And I should see "333-666" in the "Citation" detail panel
+	# 	And I should see "Smith, George Michael Sr, Cockel, Joy Karen Jr" in the "Citation" detail panel
 
 	@javascript
 	Scenario:  I should be able to create a location with its sub-form
@@ -285,13 +316,13 @@ Feature: Add new data to the database
 		And I type "Detailed interaction notes." in the "Note" field "textarea"
 		And I press the "Create Interaction" button
 		Then I should see "New Interaction successfully created." in the form header
-		And I should see "Test Publication" in the "Publication" field
-		And I should see "Test Citation Title" in the "Citation Title" field
-		And I should see "Costa Rica" in the "Country-Region" field
-		And I should see "Test Location" in the "Location" field
-		And I should see "Subject Species" in the "Subject" field
+		And I should see "Test Publication" in the "Publication" interaction field
+		And I should see "Test Citation Title" in the "Citation Title" interaction field
+		And I should see "Costa Rica" in the "Country-Region" interaction field
+		And I should see "Test Location" in the "Location" interaction field
+		And I should see "Subject Species" in the "Subject" interaction field
 		And the "Object" select field should be empty
-		And I should see "Consumption" in the "Interaction Type" field
+		And I should see "Consumption" in the "Interaction Type" interaction field
 		And the "Interaction Tags" select field should be empty
 		And the "Note" field should be empty
 

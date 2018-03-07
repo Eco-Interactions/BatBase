@@ -12,6 +12,7 @@ TODO
         ## test
             - that contribs are updated from author->editor & vice versa
             -- added two contributors (one's an editor)
+            -- test that each pub/cit type are created 
 
         ##b4 release
 

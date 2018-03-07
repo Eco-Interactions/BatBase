@@ -18,3 +18,11 @@ default:
             contexts:
                 - FeatureContext
                 - Behat\MinkExtension\Context\MinkContext
+        #     paths: [ %paths.base%/features/default ]
+        # dataEntry:
+        #     contexts: 
+        #         - BaseContext
+        #         - DataEntryContext
+        #         - Behat\MinkExtension\Context\MinkContext
+        #     paths: [ %paths.base%/features/dataEntry ]
+
