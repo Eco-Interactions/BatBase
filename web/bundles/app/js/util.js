@@ -199,26 +199,25 @@
     function getDataStorage() {
         const env = $('body').data('env');
         const storageType = env === 'test' ? 'sessionStorage' : 'localStorage'; //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
-        if (storageAvailable(storageType)) { 
-            dataStorage = window[storageType]; 
-            return dataStorage;                                                 //console.log("Storage available. Setting now. dataStorage = %O", dataStorage);
-        } else { 
-            return false;                                                       //console.log("No Local Storage Available"); 
-        }
-    }
-    function storageAvailable(type) {
-        try {
-            var storage = window[type];
-            var x = '__storage_test__';
+        if (!storageAvailable(storageType)) { return false; } 
+        dataStorage = window[storageType]; 
+        if (env === 'test') { dataStorage.clear(); }
+        return dataStorage;  
+        
+        function storageAvailable(type) {
+            try {
+                var storage = window[type];
+                var x = '__storage_test__';
 
-            storage.setItem(x, x);
-            storage.removeItem(x);
-            return true;
+                storage.setItem(x, x);
+                storage.removeItem(x);
+                return true;
+            }
+            catch(e) {
+                return false;
+            }
         }
-        catch(e) {
-            return false;
-        }
-    }
+    } /* End getDataStorage */
     function populateStorage(key, val) {
         if (dataStorage) {                                                      //console.log("dataStorage active.");
             dataStorage.setItem(key, val);

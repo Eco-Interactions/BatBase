@@ -15,16 +15,17 @@
      * dataKey = String checked in data storage to indicate whether the stored 
      *      data should be cleared and redownloaded.
      */
-    var userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-    var dataKey =  'Fight for love!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!! <3';
-    var eif = ECO_INT_FMWK;
-    var _util = eif.util;
-    var gridOptions = getDefaultGridOptions();
+    let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
+    const dataKey =  'Fight for love!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <3';
+    const eif = ECO_INT_FMWK;
+    const _util = eif.util;
+    const gridOptions = getDefaultGridOptions();
     eif.search = {
-        initSearchPage: initSearchPage,
+        reloadLocalDb: clearDataStorage.bind(null, dataKey),
+        handleReset: onDataReset,
         initSearchGrid: resetSearchGrid,
+        initSearchPage: initSearchPage,
         showUpdates: showTodaysUpdates,
-        handleReset: handleDataReset
     };
 
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded); 
@@ -38,21 +39,16 @@
         authDependentInit();
         initSearchState();
     }
+    /** --------------- local storage methods ------------------------------- */
     /** If data storage needs to be cleared, the datakey is updated */ 
     function clearDataStorageCheck() {
         if (dataStorage && !dataStorage.getItem(dataKey)) {  
-            dataStorage.clear();
-            _util.populateStorage(dataKey, true);
+            clearDataStorage(dataKey);
         }
     }
-    /**
-     * The first time a browser visits the search page, all data is downloaded
-     * from the server and stored in dataStorage. The intro-walkthrough is shown 
-     * for the user @showIntroWalkthrough.
-     */
-    function initSearchPage() {
-        showLoadingDataPopUp();
-        showIntroWalkthrough();
+    function clearDataStorage(dataKey) {
+        dataStorage.clear();
+        _util.populateStorage(dataKey, true);
     }
     /** Updates locally stored data with any modified data since the last page load. */
     function syncStoredData(pgDataUpdatedAt) {
@@ -63,10 +59,20 @@
      * When the stored data is reset from another file, the loading data popup 
      * message is shown and the dataKey is restored.
      */
-    function handleDataReset(prevFocus) {
+    function onDataReset(prevFocus) {
         showLoadingDataPopUp();
         _util.populateStorage(dataKey, true);
         _util.populateStorage('curFocus', prevFocus);
+    }
+    /** ------------- Page Init --------------------------------------------- */
+    /**
+     * The first time a browser visits the search page, all data is downloaded
+     * from the server and stored in dataStorage. The intro-walkthrough is shown 
+     * for the user @showIntroWalkthrough.
+     */
+    function initSearchPage() {
+        showLoadingDataPopUp();
+        showIntroWalkthrough();
     }
     /** Shows a loading popup message for the inital data-download wait. */
     function showLoadingDataPopUp() {
@@ -2643,13 +2649,15 @@
         return gParams.fltrdRows || gParams.rowData;
     }
     function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
-        var popUpMsg = msg || "Loading...";
-        $("#grid-popup").text(popUpMsg);
+        const popUpMsg = msg || 'Loading...';
+        $('#grid-popup').text(popUpMsg);
+        $('#grid-popup').addClass('loading'); //used in testing
         $('#grid-popup, #grid-overlay').show();
         fadeGrid();
     }
     function hidePopUpMsg() {
         $('#grid-popup, #grid-overlay').hide();
+        $('#grid-popup').removeClass('loading'); //used in testing
         showGrid();
     }
     function fadeGrid() {

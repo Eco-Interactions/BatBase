@@ -323,7 +323,7 @@ $(document).ready(function(){
             'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
         const fieldBldr = entity in edges ? edges[entity] : buildEditFormFields;  
         fParams.forms.expanded[entity] = true;
-        $(rowCntnr).append(fieldBldr(entity, id));                              //console.log("fields = %O, hndlr = %O", fields, hndlr);     
+        $(rowCntnr).append(fieldBldr(entity, id));                              
         return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
     }   
     function getIntFormFields(entity, id) {
@@ -363,12 +363,12 @@ $(document).ready(function(){
         const rcrd = getEntityRecord(ent, id);                                  //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
         hndlrs[ent](ent, id, rcrd);
     }
-    function fillIntData(entity, id, rcrd) {
+    function fillIntData(entity, id, rcrd) {  
         var fields = {
             "InteractionType": "select", "Location": "select", "Note": "textArea", 
             "Object": "taxon", "Source": "source", "Subject": "taxon", 
             "InteractionTags": "tags" };
-        fillFields(rcrd, fields);
+        fillFields(rcrd, fields, true);
     }
     function fillLocData(entity, id, rcrd) {
         var fields = getCoreFieldDefs(entity);
@@ -456,7 +456,7 @@ $(document).ready(function(){
         });
         return ints;
     }
-    function fillFields(rcrd, fields) {                                         //console.log('rcrd = %O, fields = %O', rcrd, fields);
+    function fillFields(rcrd, fields, shwAll) {                                 //console.log('rcrd = %O, fields = %O', rcrd, fields);
         const fieldHndlrs = {
             'text': setText, 'textArea': setTextArea, 'select': setSelect, 
             'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
@@ -464,7 +464,7 @@ $(document).ready(function(){
             'taxon': addTaxon
         };
         for (let field in fields) {                                             //console.log('------- Setting field [%s]', field);
-            if (!fieldIsDisplayed(field, 'top')) { continue; }                  //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+            if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }       //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
             addDataToField(field, fieldHndlrs[fields[field]], rcrd);
         }  
     }
@@ -553,7 +553,7 @@ $(document).ready(function(){
     function initCreateForm() {
         const form = buildFormElem();
         const formFields = buildIntFormFields('create');                        //console.log("formFields = %O", formFields);
-        $(form).append(formFields);
+        $(form).append(formFields.concat(buildFormBttns('interaction', 'top', 'create')));
         $('#form-main').append(form);      
         finishIntFormBuild();
         finishCreateFormBuild();
@@ -572,6 +572,7 @@ $(document).ready(function(){
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
         $('#Note_row label')[0].innerText += 's';
+        $('#Note_row').css({'padding': '.2em 0 .3em 0'});
         $('#Country-Region_row label')[0].innerText = 'Country/Region';
         addReqElemsToConfg();    
         $('.all-fields-cntnr').hide();
@@ -595,10 +596,7 @@ $(document).ready(function(){
         const builders = [ buildPubFieldRow, buildCitFieldRow, buildCntryRegFieldRow,
             buildLocFieldRow, initSubjField, initObjField, buildIntTypeField,
             buildIntTagField, buildIntNoteField ];
-        const rowCntnr = _util.buildElem('div', {
-            id: 'interaction_Rows', class: 'flex-row flex-wrap'});
-        $(rowCntnr).append(builders.map(buildField));
-        return [rowCntnr, buildFormBttns('interaction', 'top', action)];
+        return builders.map(buildField);
     }
     function buildField(builder) {
         const field = builder();                                                //console.log("field = %O", field);
@@ -685,8 +683,9 @@ $(document).ready(function(){
     }
     /** Shows the user a note above the author and editor elems. */
     function ifBookAddAuthEdNote(id, typeElem) {                                
-        const $typeElem = typeElem || $('#PublicationType-sel')[0];
-        const type = $typeElem.selectize.getItem(id)[0].innerText;
+        const $typeElem = typeElem || $('#PublicationType-sel')[0];  
+        const type = $typeElem.selectize.getItem(id).length ? 
+            $typeElem.selectize.getItem(id)[0].innerText : false;
         if (type !== 'Book') { return; }
         const note = _util.buildElem('div', { class: 'skipFormData' });
         $(note).html('<i>Note: there must be at least one author OR editor ' +
@@ -771,7 +770,7 @@ $(document).ready(function(){
         const type = elem.innerText;    
         const hndlrs = { 
             'Book': updateBookFields, 'Chapter': updateBookFields,
-            "Master's Thesis": disableTitleField, 
+            "Master's Thesis": disableTitleField, 'Other': disableFilledFields,
             'Ph.D. Dissertation': disableTitleField };
             if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
         hndlrs[type](type, fLvl);
@@ -802,10 +801,13 @@ $(document).ready(function(){
                 }
             } /* End removeAuthorField */
         } /* End updateBookFields */
-        function disableTitleField() {
+        function disableFilledFields() {
+            //TODO. Also maybe add a seperate 'subTitle' field for this type.
+        }
+        function disableTitleField() { console.log('---disabling title field')
             $('#Title_row input').prop('disabled', true);
         }
-        function enableTitleField() {
+        function enableTitleField() {  console.log('---enable title field')
             $('#Title_row input').prop('disabled', false);
         }
     } /* End handleSpecialCaseTypeUpdates */
@@ -880,7 +882,7 @@ $(document).ready(function(){
      * are filled.
      */
     function buildCitationText(fLvl) {
-        const type = $('#CitationType-sel option:selected').text();             console.log("type = ", type);
+        const type = $('#CitationType-sel option:selected').text();             //console.log("type = ", type);
         const formVals = getFormValueData('citation', null, null);
         const getFullText = { 'Article': articleCit, 'Book': bookCit, 
             'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
@@ -916,7 +918,7 @@ $(document).ready(function(){
             const year = getPubYear();
             const titlesAndEds = getTitlesAndEditors();
             const ed = formVals.edition;
-            const publ = getPublisherData();
+            const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';  
             const allFields = [athrs, year, titlesAndEds, ed, publ];
             return allFields.filter(f=>f).join('. ')+'.';
         }
@@ -1092,38 +1094,47 @@ $(document).ready(function(){
         function buildSourceData() {
             const pubSrc = fParams.records.source[$('#Publication-sel').val()];
             const pub = getEntityRecord('publication', pubSrc.publication);
+            const pubType = getSrcType(pub, 'publication');  
+            
 
             const citId = $('#CitationTitle-sel').val();
             const citSrc = citId ? fParams.records.source[citId] : false;
             const cit = citSrc ? getEntityRecord('citation', citSrc.citation) : false;
+            const citType = cit ? getSrcType(cit, 'citation') : false; 
             
             addCitationText();
             addPubTitleData();
             addCitTitleData();
             addAuths();
             addEds();
+            addYear();
             addAbstract();
 
             function addCitationText() {
                 data['Citation'] = cit ? cit.fullText : '(Select Citation)';
             }
             function addPubTitleData() {
-                const pubType = getSrcType(pub, 'publication');  
                 const pubTitleField = pubType && pubType !== 'Other' ? 
                     pubType + ' Title' : 'Publication Title';  
                 data[pubTitleField] = pub.displayName;
-            }
+                addDescription(pubSrc.description, pubType);
+
+                function addDescription(desc, type) {
+                    if (!desc) { return; }  console
+                    const prefix = type !== 'Other' ? type : 'Publication';
+                    data[prefix+' Description'] = desc;
+                }
+            } /* End addPubTitleData */
             function addCitTitleData() {
-                const citType =  getSrcType(cit, 'citation'); 
-                const subTitle = getCitTitle();
+                const subTitle = getCitTitle();  
                 if (!subTitle) { return; }
                 const citTitleField = citType && citType !== 'Other' ? 
                     citType + ' Title' : 'Citation Title';
                 data[citTitleField] = subTitle;
                 
-                function getCitTitle(cit, pub) {
+                function getCitTitle() {  
                     if (!cit) { return false; }
-                    return cit.displayName === pub.displayName ? false : citTitle;
+                    return cit.displayName === pub.displayName ? false : cit.displayName;
                 }
             } /* End addCitTitleData */
             function addAuths() {
@@ -1135,6 +1146,11 @@ $(document).ready(function(){
             function addEds() {  
                 if (!pubSrc.editors) { return; }
                 data.Editors =  getAuthorNames(pubSrc, true);
+            }
+            function addYear() {
+                const yr = pubSrc.year ? pubSrc.year : citSrc ? citSrc.year : false;
+                if (!yr) { return; }
+                data['Year'] = yr;
             }
             function addAbstract() {
                 if (!cit || !cit.abstract) { return; }
@@ -1158,7 +1174,7 @@ $(document).ready(function(){
         initComboboxes(type, fLvl);
         fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
-        updateFieldLabelsForType(type, typeId, elem, fLvl);
+        updateFieldLabelsForType(type, fLvl);
         focusFieldInput(type);
     }
     function resetOnFormTypeChange(type, typeId, fLvl) {  
@@ -1187,13 +1203,13 @@ $(document).ready(function(){
      * Changes form-field labels to more specific and user-friendly labels for 
      * the selected type. 
      */
-    function updateFieldLabelsForType(entity, typeId, elem, fLvl) { 
+    function updateFieldLabelsForType(entity, fLvl) {                           //console.log('--updating field labels.');
         const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
-        const type = $(typeElemId)[0].selectize.getItem(typeId)[0].innerText;
-        const trans = getLabelTrans();
+        const type = $(typeElemId)[0].innerText;
+        const trans = getLabelTrans();  
         const fId = '#'+fLvl+'-form';
 
-        for (let field in trans) {                                              //console.log('updating field [%s] to [%s]', field, trans[type][field]);
+        for (let field in trans) {                                              //console.log('updating field [%s] to [%s]', field, trans[field]);
             const $lbl = $(fId+' label:contains('+field+')'); 
             $lbl.text(trans[field]);
             if ($(fId+' [id^='+field+'-sel]').length) { 
@@ -1202,11 +1218,15 @@ $(document).ready(function(){
         }
         function getLabelTrans() {
             const trans =  {
-                'Book': {'Volume': 'Edition'}, 
-                'Chapter': {'Title': 'Chapter Title'},
-                'Thesis/Dissertation': { 'Publisher': 'Publisher / University' }
+                'publication': {
+                    'Thesis/Dissertation': { 'Publisher': 'Publisher / University' }
+                },
+                'citation': {
+                    'Book': {'Volume': 'Edition'}, 
+                    'Chapter': {'Title': 'Chapter Title'},
+                }
             };
-            return trans[type];  
+            return trans[entity][type];  
         }
         function updateComboText(lblElem, fieldTxt, newTxt) { 
             return lblElem.nextSibling.id.includes('-cntnr') ?
@@ -1401,14 +1421,7 @@ $(document).ready(function(){
         const dataProp = realmName + lvls[realmName] + 'Names'; 
         const realmRcrds = _util.getDataFromStorage(dataProp); 
         return fParams.records.taxon[realmRcrds[Object.keys(realmRcrds)[0]]];  
-    }     
-    /** Returns the realm taxon's lower-case name for a selected object taxon. */
-    function getSelectedRealmName(selVal) {
-        if (!selVal) { return _util.lcfirst(getObjectRealm()); }
-        const taxon = fParams.records.taxon[selVal]; 
-        fParams.forms.taxonPs.objectRealm = taxon.realm.displayName; 
-        return _util.lcfirst(taxon.realm.displayName);
-    }
+    }    
     /** Returns either the preivously selected object realm or the default. */
     function getObjectRealm() {
         return !fParams.forms.taxonPs ? 'Plant' :
@@ -1451,13 +1464,18 @@ $(document).ready(function(){
     function initObjectSelect() {                                               //console.log("########### initObjectSelect fieldVal = [%s]", $('#Object-sel').val());
         const fLvl = getSubFormLvl('sub');
         if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', fLvl); }
-        const realmName = _util.ucfirst(getSelectedRealmName($('#Object-sel').val()));
+        const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
         initTaxonParams('Object', realmName);
         $('#Object_row').append(initSubForm(
             'object', fLvl, 'sml-right sml-form', {}, '#Object-sel'));
         initComboboxes('object', fLvl);             
         $('#Realm-sel')[0].selectize.addItem(fParams.forms.taxonPs.realmTaxon.realm.id);
         enableCombobox('#Subject-sel', false);
+    } 
+    /** Returns the realm taxon's lower-case name for a selected object taxon. */
+    function getSelectedObjectRealm(id) {                                       
+        if (!id) { return getObjectRealm(); }
+        return fParams.records.taxon[id].realm.displayName;
     }
     /** Note: Taxon fields often fire their focus event twice. */
     function errIfAnotherSubFormOpen(role, fLvl) {
@@ -2636,6 +2654,7 @@ $(document).ready(function(){
                 handleCitText(fLvl); 
                 handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
             }
+            updateFieldLabelsForType(entity, fLvl);
         }
     } /* End toggleShowAllFields */
     /**
@@ -3046,7 +3065,7 @@ $(document).ready(function(){
         return reqElems.every(isRequiredFieldFilled);
     }
     /** Note: checks the first input of multiSelect container elems.  */
-    function isRequiredFieldFilled(elem) {
+    function isRequiredFieldFilled(elem) {                                      //console.log('checking elem = %O, id = ', elem, elem.id);
         if ($('.active-errs').length) { return false; }
         return elem.value ? true : 
             elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;  
@@ -3056,7 +3075,7 @@ $(document).ready(function(){
      * For book publications, either authors or editors are required. If there is 
      * no author value, the first editor value is returned instead. 
      */
-    function isCntnrFilled(elem) {  console.log('isCntnrFilled? elem = %O', elem);
+    function isCntnrFilled(elem) {                                              //console.log('isCntnrFilled? elem = %O', elem);
         const authVal = $('#Authors-sel-cntnr')[0].firstChild.children[1].value;
         const edVal = $('#Editors-sel-cntnr').length ? 
             $('#Editors-sel-cntnr')[0].firstChild.children[1].value : false;
@@ -3249,26 +3268,23 @@ $(document).ready(function(){
         function getInputData(elem) {                                           
             if (elem.className === 'skipFormData') { return; }                  //console.log("elem = %O", elem)
             const fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            const input = elem.children[1].children[1];                         //console.log("fieldName = ", fieldName)
-            if ($(input).data('inputType')) { 
-                getInputVals(fieldName, input, $(input).data('inputType')); 
-            } else { formVals[fieldName] = input.value || null; }
+            const input = elem.children[1].children[1];                         //console.log("---------fieldName = ", fieldName)
+            
+            formVals[fieldName] = $(input).data('inputType') ? 
+                getInputVals(fieldName, input, $(input).data('inputType')) : 
+                input.value || null;                                            //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {
             const typeHandlers = {
-                'multiSelect': getMultiSelectVals, 'tags': getTagVals
+                'multiSelect': getSelectedVals, 'tags': getTagVals
             };
-            typeHandlers[type](fieldName, input);
-        }
-        /** Adds an array of selected values from the passed select container.*/
-        function getMultiSelectVals(fieldName, cntnr) {
-            formVals[fieldName] = getSelectedVals(cntnr);
+            return typeHandlers[type](input, fieldName);
         }
         /** Adds an array of tag values. */
-        function getTagVals(fieldName, input) {                                 
-            var selId = '#'+_util.ucfirst(fieldName)+'-sel';
-            formVals[fieldName] = $(selId)[0].selectize.getValue();       
+        function getTagVals(input, fieldName) {                                 
+            const selId = '#'+_util.ucfirst(fieldName)+'-sel';
+            return $(selId)[0].selectize.getValue();       
         }
         function handleAdditionalEntityData(entity) {
             if (!submitting) { return; }
@@ -3408,7 +3424,7 @@ $(document).ready(function(){
     } /* End getFormValueData */
     /** -------------- Form Data Helpers ------------ */
     /** Returns an obj with the order (k) of the values (v) inside of the container. */
-    function getSelectedVals(cntnr) {
+    function getSelectedVals(cntnr, fieldName) {
         let vals = {};
         const elems = cntnr.children; 
         for (let i = 0; i <= elems.length-1; ++i) {                             //console.log('getSelectedVals. elem = %O', elems[i]);
