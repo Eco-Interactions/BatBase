@@ -35,7 +35,7 @@ Feature: Edit data in the database
 		And I see "Editing Taxon"
 		When I press "Change Parent"
 		And I see "Select New Taxon Parent"
-		When I select "Artibeus" from the "Genus" field dropdown
+		When I select "Artibeus" from the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Taxon" button
 		And I expand "Family Phyllostomidae" in the data tree
@@ -221,7 +221,7 @@ Feature: Edit data in the database
 		And I see "Editing Interaction"
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		When I select "Artibeus lituratus" from the "Species" field dropdown
+		When I select "Artibeus lituratus" from the "Species" dropdown field
 		And I should see "Artibeus" in the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Interaction" button
@@ -240,7 +240,7 @@ Feature: Edit data in the database
 		And I see "Editing Interaction"
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Philodendron sphalerum" from the "Species" field dropdown
+		When I select "Philodendron sphalerum" from the "Species" dropdown field
 		And I should see "Philodendron" in the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Interaction" button

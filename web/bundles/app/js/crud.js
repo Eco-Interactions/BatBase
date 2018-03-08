@@ -572,6 +572,7 @@ $(document).ready(function(){
         ['Subject', 'Object'].forEach(addTaxonFocusListener);
         $('#top-cancel').unbind('click').click(exitFormPopup);
         $('#Note_row label')[0].innerText += 's';
+        $('#Note_row').css({'padding': '.2em 0 .3em 0'});
         $('#Country-Region_row label')[0].innerText = 'Country/Region';
         addReqElemsToConfg();    
         $('.all-fields-cntnr').hide();
@@ -682,8 +683,9 @@ $(document).ready(function(){
     }
     /** Shows the user a note above the author and editor elems. */
     function ifBookAddAuthEdNote(id, typeElem) {                                
-        const $typeElem = typeElem || $('#PublicationType-sel')[0];
-        const type = $typeElem.selectize.getItem(id)[0].innerText;
+        const $typeElem = typeElem || $('#PublicationType-sel')[0];  
+        const type = $typeElem.selectize.getItem(id).length ? 
+            $typeElem.selectize.getItem(id)[0].innerText : false;
         if (type !== 'Book') { return; }
         const note = _util.buildElem('div', { class: 'skipFormData' });
         $(note).html('<i>Note: there must be at least one author OR editor ' +
@@ -768,7 +770,7 @@ $(document).ready(function(){
         const type = elem.innerText;    
         const hndlrs = { 
             'Book': updateBookFields, 'Chapter': updateBookFields,
-            "Master's Thesis": disableTitleField, 
+            "Master's Thesis": disableTitleField, 'Other': disableFilledFields,
             'Ph.D. Dissertation': disableTitleField };
             if (Object.keys(hndlrs).indexOf(type) === -1) { return; }
         hndlrs[type](type, fLvl);
@@ -799,6 +801,9 @@ $(document).ready(function(){
                 }
             } /* End removeAuthorField */
         } /* End updateBookFields */
+        function disableFilledFields() {
+            //TODO. Also maybe add a seperate 'subTitle' field for this type.
+        }
         function disableTitleField() { console.log('---disabling title field')
             $('#Title_row input').prop('disabled', true);
         }
@@ -1089,38 +1094,47 @@ $(document).ready(function(){
         function buildSourceData() {
             const pubSrc = fParams.records.source[$('#Publication-sel').val()];
             const pub = getEntityRecord('publication', pubSrc.publication);
+            const pubType = getSrcType(pub, 'publication');  
+            
 
             const citId = $('#CitationTitle-sel').val();
             const citSrc = citId ? fParams.records.source[citId] : false;
             const cit = citSrc ? getEntityRecord('citation', citSrc.citation) : false;
+            const citType = cit ? getSrcType(cit, 'citation') : false; 
             
             addCitationText();
             addPubTitleData();
             addCitTitleData();
             addAuths();
             addEds();
+            addYear();
             addAbstract();
 
             function addCitationText() {
                 data['Citation'] = cit ? cit.fullText : '(Select Citation)';
             }
             function addPubTitleData() {
-                const pubType = getSrcType(pub, 'publication');  
                 const pubTitleField = pubType && pubType !== 'Other' ? 
                     pubType + ' Title' : 'Publication Title';  
                 data[pubTitleField] = pub.displayName;
-            }
+                addDescription(pubSrc.description, pubType);
+
+                function addDescription(desc, type) {
+                    if (!desc) { return; }  console
+                    const prefix = type !== 'Other' ? type : 'Publication';
+                    data[prefix+' Description'] = desc;
+                }
+            } /* End addPubTitleData */
             function addCitTitleData() {
-                const citType =  getSrcType(cit, 'citation'); 
-                const subTitle = getCitTitle();
+                const subTitle = getCitTitle();  
                 if (!subTitle) { return; }
                 const citTitleField = citType && citType !== 'Other' ? 
                     citType + ' Title' : 'Citation Title';
                 data[citTitleField] = subTitle;
                 
-                function getCitTitle(cit, pub) {
+                function getCitTitle() {  
                     if (!cit) { return false; }
-                    return cit.displayName === pub.displayName ? false : citTitle;
+                    return cit.displayName === pub.displayName ? false : cit.displayName;
                 }
             } /* End addCitTitleData */
             function addAuths() {
@@ -1132,6 +1146,11 @@ $(document).ready(function(){
             function addEds() {  
                 if (!pubSrc.editors) { return; }
                 data.Editors =  getAuthorNames(pubSrc, true);
+            }
+            function addYear() {
+                const yr = pubSrc.year ? pubSrc.year : citSrc ? citSrc.year : false;
+                if (!yr) { return; }
+                data['Year'] = yr;
             }
             function addAbstract() {
                 if (!cit || !cit.abstract) { return; }
@@ -1155,7 +1174,7 @@ $(document).ready(function(){
         initComboboxes(type, fLvl);
         fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
-        updateFieldLabelsForType(type, typeId, elem, fLvl);
+        updateFieldLabelsForType(type, fLvl);
         focusFieldInput(type);
     }
     function resetOnFormTypeChange(type, typeId, fLvl) {  
@@ -1184,13 +1203,13 @@ $(document).ready(function(){
      * Changes form-field labels to more specific and user-friendly labels for 
      * the selected type. 
      */
-    function updateFieldLabelsForType(entity, typeId, elem, fLvl) { 
+    function updateFieldLabelsForType(entity, fLvl) {                           //console.log('--updating field labels.');
         const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
-        const type = $(typeElemId)[0].selectize.getItem(typeId)[0].innerText;
-        const trans = getLabelTrans();
+        const type = $(typeElemId)[0].innerText;
+        const trans = getLabelTrans();  
         const fId = '#'+fLvl+'-form';
 
-        for (let field in trans) {                                              //console.log('updating field [%s] to [%s]', field, trans[type][field]);
+        for (let field in trans) {                                              //console.log('updating field [%s] to [%s]', field, trans[field]);
             const $lbl = $(fId+' label:contains('+field+')'); 
             $lbl.text(trans[field]);
             if ($(fId+' [id^='+field+'-sel]').length) { 
@@ -1199,11 +1218,15 @@ $(document).ready(function(){
         }
         function getLabelTrans() {
             const trans =  {
-                'Book': {'Volume': 'Edition'}, 
-                'Chapter': {'Title': 'Chapter Title'},
-                'Thesis/Dissertation': { 'Publisher': 'Publisher / University' }
+                'publication': {
+                    'Thesis/Dissertation': { 'Publisher': 'Publisher / University' }
+                },
+                'citation': {
+                    'Book': {'Volume': 'Edition'}, 
+                    'Chapter': {'Title': 'Chapter Title'},
+                }
             };
-            return trans[type];  
+            return trans[entity][type];  
         }
         function updateComboText(lblElem, fieldTxt, newTxt) { 
             return lblElem.nextSibling.id.includes('-cntnr') ?
@@ -2631,6 +2654,7 @@ $(document).ready(function(){
                 handleCitText(fLvl); 
                 handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
             }
+            updateFieldLabelsForType(entity, fLvl);
         }
     } /* End toggleShowAllFields */
     /**
@@ -3041,7 +3065,7 @@ $(document).ready(function(){
         return reqElems.every(isRequiredFieldFilled);
     }
     /** Note: checks the first input of multiSelect container elems.  */
-    function isRequiredFieldFilled(elem) {
+    function isRequiredFieldFilled(elem) {                                      //console.log('checking elem = %O, id = ', elem, elem.id);
         if ($('.active-errs').length) { return false; }
         return elem.value ? true : 
             elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;  
@@ -3244,11 +3268,11 @@ $(document).ready(function(){
         function getInputData(elem) {                                           
             if (elem.className === 'skipFormData') { return; }                  //console.log("elem = %O", elem)
             const fieldName = _util.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
-            const input = elem.children[1].children[1];                         console.log("---------fieldName = ", fieldName)
+            const input = elem.children[1].children[1];                         //console.log("---------fieldName = ", fieldName)
             
             formVals[fieldName] = $(input).data('inputType') ? 
                 getInputVals(fieldName, input, $(input).data('inputType')) : 
-                input.value || null;                                            console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
+                input.value || null;                                            //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         }
         /** Edge case input type values are processed via their type handlers. */
         function getInputVals(fieldName, input, type) {

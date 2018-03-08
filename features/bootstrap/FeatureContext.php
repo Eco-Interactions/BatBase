@@ -154,7 +154,7 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * @Given I enter :text in the :prop field dropdown 
      */
-    public function iEnterInTheFieldDropdown($text, $prop)
+    public function iEnterInTheDropdownField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         try {
@@ -190,20 +190,15 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iFillTheNewInteractionFormWithTheTestValues()
     {
-        $this->iSelectFromTheFieldDropdown('Test Publication', 'Publication');
-        $this->iSelectFromTheFieldDropdown('Test Citation Title', 'Citation Title');
-        $this->iSelectFromTheFieldDropdown('Costa Rica', 'Country-Region');
-        $this->iSelectFromTheFieldDropdown('Test Location', 'Location');
-        $this->iFocusOnTheTaxonField('Subject');
-        $this->iSelectFromTheFieldDropdown('Subject Species', 'Species');
-        $this->getUserSession()->getPage()->pressButton('Confirm');
-        $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFieldDropdown('Arthropod', 'Realm');
-        $this->iSelectFromTheFieldDropdown('Object Species', 'Species');
-        $this->getUserSession()->getPage()->pressButton('Confirm');
-        $this->iSelectFromTheFieldDropdown('Consumption', 'Interaction Type');
-        $this->iSelectFromTheFieldDropdown('Arthropod', 'Interaction Tags');
-        $this->iTypeInTheField('Detailed interaction notes.', 'Note', 'textarea');
+        $srcLocData = [ 'Publication' => 'Test Book with Editors', 
+            'Citation Title' => 'Test Title for Chapter', 
+            'Country-Region' => 'Costa Rica', 'Location' => 'Test Location'];
+        $this->fillSrcAndLocFields($srcLocData);
+        $taxaData = ['Genus' => 'Subject Genus', 'Species' => 'Object Species'];
+        $this->fillTaxaFields($taxaData);
+        $miscData = [ 'Interaction Type' => 'Consumption', 
+            'Interaction Tags' => 'Arthropod', 'Note' => 'Detailed interaction notes.'];
+        $this->fillMiscIntFields($miscData);
     }
 
     /**
@@ -237,7 +232,9 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iTypeInTheField($text, $prop, $type)
     {
-        $field = '#'.str_replace(' ','',$prop).'_row '.$type;
+        $map = [ 'Edition' => 'Volume', 'Chapter Title' => 'Title' ];
+        $name = array_key_exists($prop, $map) ? $map[$prop] : $prop;
+        $field = '#'.str_replace(' ','',$name).'_row '.$type;
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;
         $this->addValueToFormInput($selector, $text);
@@ -246,9 +243,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @When I select :text from the :prop field dropdown
+     * @When I select :text from the :prop dropdown field
      */
-    public function iSelectFromTheFieldDropdown($text, $prop)
+    public function iSelectFromTheDropdownField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->selectValueInCombobox($selId, $text);
@@ -258,7 +255,7 @@ class FeatureContext extends RawMinkContext implements Context
      * @When I select :text from the :prop field dynamic dropdown
      * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
      */
-    public function iSelectFromTheFieldDynamicDropdown($text, $prop, $new)
+    public function iSelectFromTheFieldDynamicDropdown($text, $prop, $new = true)
     {
         $count = $this->getCurrentFieldCount($prop); 
         $cnt = $new ? $count : --$count;
@@ -360,17 +357,6 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :prop field
-     * Works with interaction form select elems
-     */
-    public function iShouldSeeInTheInteractionField($text, $prop)
-    {
-        usleep(500000);
-        $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->assertFieldValueIs($text, $selId.'+div>div>div');
-    }
-
-    /**
      * @Then I should see :text in the :entity detail panel
      */
     public function iShouldSeeInTheDetailPanel($text, $entity)
@@ -410,7 +396,9 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->getUserSession()->wait( 10000, "$('#form-main p').length;");
         $elem = $this->getUserSession()->getPage()->find('css', '#form-main p');
-        $this->handleContainsAssert($text, $elem->getHtml(), true, 
+        $html = $elem->getHtml();
+        $this->handleNullAssert($html, false, 'Nothing found in header. Expected ['.$text.']');
+        $this->handleContainsAssert($text, $html, true, 
              "Should have found [$text] in the form header.");
     }
 
@@ -745,7 +733,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPressTheButton($bttnText)
     {
-        if (stripos($bttnText, "Update") !== false) { self::$dbChanges = true; }
+        if (stripos($bttnText, "Update") !== false || 
+            stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
         usleep(500000);
     }
@@ -906,11 +895,11 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
      *
-     * @Then (I )break
+     * @Then (I )break :msg
      */
-    public function iPutABreakpoint($errMsg = null)
+    public function iPutABreakpoint($msg = null)
     {
-        if ($errMsg !== null) { fwrite(STDOUT, "\n".$errMsg."\n"); } 
+        if ($msg !== null) { fwrite(STDOUT, "\n".$msg."\n"); } 
         fwrite(STDOUT, "\033[s    \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
         while (fgets(STDIN, 1024) == '') {}
         fwrite(STDOUT, "\033[u");
@@ -947,14 +936,12 @@ class FeatureContext extends RawMinkContext implements Context
             $this->iPutABreakpoint($msg);
         }
     }
+    /** Couldn't find a way to check whether elem exists before set value attempt. */
     private function selectValueInCombobox($selId, $text)
-    {        
+    {                                                                           //print('selId = '.$selId);
         $msg = 'Error while selecting ['.$text.'] in ['.$selId.'].';
         $val = $this->getValueToSelect($selId, $text); 
-        $elem = $this->getUserSession()->evaluateScript("$('$selId').length"); 
-        if ($elem > 0) {  
-            $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");            
-        } else { $this->iPutABreakpoint($msg); }
+        $this->getUserSession()->executeScript("$('$selId').length ? $('$selId')[0].selectize.addItem('$val') : null;");
         usleep(500000);
         $this->assertFieldValueIs($text, $selId);
     }
@@ -992,25 +979,46 @@ class FeatureContext extends RawMinkContext implements Context
         $editor->visit('http://localhost/batplant/web/app_test.php/search');
         usleep(500000);
     }
-
-    private function iSubmitTheNewInteractionFormWithTheFixtureEntities($count)
+    /**
+     * @Given I create an interaction 
+     */
+    public function iSubmitTheNewInteractionFormWithTheFixtureEntities($count = 1)
     {
-        $this->iSelectFromTheFieldDropdown('Revista de Biologia Tropical', 'Publication'); 
-        $this->iSelectFromTheFieldDropdown('Two cases of bat pollination in Central America', 'Citation Title');
-        $this->iSelectFromTheFieldDropdown('Central America', 'Country-Region');
-        $this->iSelectFromTheFieldDropdown('Panama', 'Location');
-        $this->iFocusOnTheTaxonField('Subject');
-        $this->iSelectFromTheFieldDropdown('Phyllostomidae', 'Family');
-        $this->getUserSession()->getPage()->pressButton('Confirm');
-        $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheFieldDropdown('Plant', 'Realm');
-        $this->iSelectFromTheFieldDropdown('Fabaceae', 'Family');
-        $this->getUserSession()->getPage()->pressButton('Confirm');
-        $this->iSelectFromTheFieldDropdown('Consumption', 'Interaction Type');
-        $this->iSelectFromTheFieldDropdown('Arthropod', 'Interaction Tags');
-        $this->iTypeInTheField('Interaction '.$count, 'Note', 'textarea');
+        $srcLocData = [ 'Publication' => 'Revista de Biologia Tropical', 
+            'Citation Title' => 'Two cases of bat pollination in Central America', 
+            'Country-Region' => 'Central America', 'Location' => 'Panama'];
+        $this->fillSrcAndLocFields($srcLocData);
+        $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Fabaceae'];
+        $this->fillTaxaFields($taxaData);
+        $miscData = [ 'Interaction Type' => 'Consumption', 
+            'Interaction Tags' => 'Flower', 'Note' => 'Interaction '.$count];
+        $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
         usleep(500000);
+    }
+    private function fillSrcAndLocFields($data)
+    {   fwrite(STDOUT, "\nFilling Source and Location fields.\n");
+        foreach ($data as $field => $value) { //print_r('$field = '.$field.' $val = '.$value);
+            $this->iSelectFromTheDropdownField($value, $field); 
+        }
+    }
+    private function fillTaxaFields($data) 
+    {   fwrite(STDOUT, "\nFilling Taxa fields.\n");  
+        $lvls = array_keys($data);
+        $this->iFocusOnTheTaxonField('Subject');
+        $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iFocusOnTheTaxonField('Object');
+        $this->iSelectFromTheDropdownField('Plant', 'Realm');
+        $this->iSelectFromTheDropdownField($data[$lvls[1]], $lvls[1]);
+        $this->getUserSession()->getPage()->pressButton('Confirm');
+    }
+    private function fillMiscIntFields($data)
+    {   fwrite(STDOUT, "\nFilling remaining fields.\n");
+        $fields = array_keys($data);  print_r($fields);
+        $this->iSelectFromTheDropdownField($data[$fields[0]], $fields[0]);
+        $this->iSelectFromTheDropdownField($data[$fields[1]], $fields[1]);
+        $this->iTypeInTheField($data[$fields[2]], $fields[2], 'textarea');
     }
 
     private function editorGridLoads($editor)

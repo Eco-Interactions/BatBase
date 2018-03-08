@@ -17,14 +17,15 @@ Feature: Add new data to the database
 	# Scenario:  Setup: Database loads and the welcome tutorial is exited.
 	# 	Given the database has loaded
 	# 	And I exit the tutorial
-
+	## -------------------------- Source ---------------------------------------##
+	
 	@javascript
 	Scenario:  I should be able to create a publisher with its sub-form
 		Given I open the New Interaction form
-		And I enter "Test Publication" in the "Publication" field dropdown
+		And I enter "Test Book" in the "Publication" dropdown field
 		And I see "New Publication"
-		And I select "Book" from the "Publication Type" field dropdown
-		When I enter "Test Publisher" in the "Publisher" field dropdown
+		And I select "Book" from the "Publication Type" dropdown field
+		When I enter "Test Publisher" in the "Publisher" dropdown field
 		And I see "New Publisher"
 		And I type "Nice" in the "City" field "input"
 		And I type "France" in the "Country" field "input"
@@ -33,17 +34,16 @@ Feature: Add new data to the database
 		And I type "www.publisher.com" in the "Link Url" field "input"
 		And I type "Test Publisher Webiste" in the "Link Display" field "input"
 		And I press the "Create Publisher" button
-		Then I should see "Test Publisher" in the "Publisher" field
-		And I break
+		Then I should see "Test Publisher" in the "Publisher" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create an author with its sub-form
 		Given I open the New Interaction form
-		And I enter "Test Publication" in the "Publication" field dropdown
-		And I see "New Publication"
-		And I select "Book" from the "Publication Type" field dropdown
+		And I enter "Test Book" in the "Publication" dropdown field
+		And I see "New publication"
+		And I select "Book" from the "Publication Type" dropdown field
 		When I enter "Smith, George" in the "Authors" field dynamic dropdown
-		And I check the "show-all-fields" box
+		And I check the "Show all fields" box
 		And I type "Bendry" in the "First Name" field "input"
 		And I type "J" in the "Middle Name" field "input"
 		And I type "Callaye" in the "Last Name" field "input"
@@ -53,276 +53,382 @@ Feature: Add new data to the database
 		And I press the "Create Author" button
 		Then I should see "Callaye, Bendry J Jr" in the "Authors" field dynamic dropdown
 
-	# @javascript
-	# Scenario:  I should be able to create a [BOOK] publication with its sub-form
-	# 	Given I open the New Interaction form
-	# 	And I enter "Test Publication" in the "Publication" field dropdown
-	# 	And I see "New Publication"
-	# 	When I type "Test description" in the "Description" field "textarea"
-	# 	And I select "Book" from the "Publication Type" field dropdown
-	# 	And I check the "show-all-fields" box
-	# 	And I type "www.publication.com" in the "Link Url" field "input"
-	# 	And I type "Test Publication Webiste" in the "Link Display" field "input"
-	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
-	# 	And I select "Test Publisher" from the "Publisher" field dropdown
-	# 	And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
-	# 	And I press the "Create Publication" button
-	# 	Then I should see "Test Publication" in the "Publication" field
-	# 	And I should see "Test Publication" in the "Src" detail panel
-	# 	And I should see "Test description" in the "Src" detail panel
-	# 	And I should see "Book" in the "Src" detail panel
-	# 	And I should see "Britanica Books" in the "Src" detail panel
-	# 	And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+	## ------------------- Books ----------------- ##
+	@javascript
+	Scenario:  I should be able to create a [BOOK] publication with its sub-form
+		Given I open the New Interaction form
+		And I enter "Test Book" in the "Publication" dropdown field
+		And I see "New Publication"
+		And I select "Book" from the "Publication Type" dropdown field
+		When I type "1990" in the "Year" field "input"
+		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Test Publisher" from the "Publisher" dropdown field
+		And I check the "Show all fields" box
+		And I type "10.1037/rmh0000008" in the "Doi" field "input"
+		And I type "Test description" in the "Description" field "textarea"
+		And I type "www.publication.com" in the "Link Url" field "input"
+		And I type "Test Book Webiste" in the "Link Display" field "input"
+		And I press the "Create Publication" button
+		Then I should see "Test Book" in the "Publication" dropdown field
+		And I should see "Test Book" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Book Title" in the "Src" detail panel
+		And I should see "Test Book" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "New Citation" in the form header
+		And I should see "Callaye, B. J. 1990. Test Book. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
-	# @javascript
-	# Scenario:  I should be able to create a [JOURNAL] publication with its sub-form
-	# 	Given I open the New Interaction form
-	# 	And I enter "Test Publication" in the "Publication" field dropdown
-	# 	And I see "New Publication"
-	# 	When I type "Test description" in the "Description" field "textarea"
-	# 	And I select "Journal" from the "Publication Type" field dropdown
-	# 	And I check the "show-all-fields" box
-	# 	And I type "www.publication.com" in the "Link Url" field "input"
-	# 	And I type "Test Publication Webiste" in the "Link Display" field "input"
-	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
-	# 	And I select "Britanica Books" from the "Publisher" field dropdown
-	# 	And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
-	# 	And I press the "Create Publication" button
-	# 	Then I should see "Test Publication" in the "Publication" field
-	# 	And I should see "Test Publication" in the "Src" detail panel
-	# 	And I should see "Test description" in the "Src" detail panel
-	# 	And I should see "Book" in the "Src" detail panel
-	# 	And I should see "Britanica Books" in the "Src" detail panel
-	# 	And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+	# TEST THAT AUTHOR FIELD IS NOT SHOWN.
+	@javascript
+	Scenario:  I should be able to create a [BOOK] citation with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Book" from the "Publication" dropdown field
+		And I enter "" in the "Citation Title" dropdown field
+		And I see "New Citation"
+		And I should see "Book" in the "Citation Type" dropdown field
+		When I type "29" in the "Edition" field "input"
+		And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+		And I press the "Create Citation" button
+		Then I should see "Test Book" in the "Citation Title" dropdown field
+		And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Src" detail panel
+		And I should see "Book Title" in the "Src" detail panel
+		And I should see "Test Book" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
 
-	# @javascript
-	# Scenario:  I should be able to create a [ARTICLE] citation with its sub-form
-	# 	Given I open the New Interaction form
-	# 	And I select "Test Publication" from the "Publication" field dropdown
-	# 	And I enter "Test Citation Title" in the "Citation Title" field dropdown
-	# 	And I see "New Citation"
-	# 	And I see "Article" from the "Citation Type" field dropdown
-	# 	And I check the "show-all-fields" box
-	# 	When I type "Test Citation Text" in the "Citation Text" field "textarea"
-	# 	And I type "Test Abstract Text" in the "Abstract" field "textarea"
-	# 	And I select "Article" from the "Citation Type" field dropdown
-	# 	And I type "1990" in the "Year" field "input"
-	# 	And I type "29" in the "Volume" field "input"
-	# 	And I type "3" in the "Issue" field "input"
-	# 	And I type "333-666" in the "Pages" field "input"
-	# 	And I type "www.citation.com" in the "Link Url" field "input"
-	# 	And I type "Test Citation Webiste" in the "Link Display" field "input"
-	# 	And I type "10.1037/rmh0000008" in the "Doi" field "input"
-	# 	And I select "Cockel, Joy Karen Jr" from the "Authors" field dynamic dropdown
-	# 	And I press the "Create Citation" button
-	# 	Then I should see "Test Citation Title" in the "Citation Title" field
-	# 	And I should see "Test Citation Title" in the "Citation" detail panel
-	# 	And I should see "Test Citation Text" in the "Citation" detail panel
-	# 	And I should see "Test Abstract Text" in the "Citation" detail panel
-	# 	And I should see "Article Title" in the "Citation" detail panel
-	# 	And I should see "29" in the "Citation" detail panel
-	# 	And I should see "3" in the "Citation" detail panel
-	# 	And I should see "333-666" in the "Citation" detail panel
-	# 	And I should see "Smith, George Michael Sr, Cockel, Joy Karen Jr" in the "Citation" detail panel
+	@javascript
+	Scenario:  I should be able to create a [BOOK WITH EDITORS] publication with its sub-form
+		Given I open the New Interaction form
+		And I enter "Test Book with Editors" in the "Publication" dropdown field
+		And I see "New Publication"
+		And I select "Book" from the "Publication Type" dropdown field
+		When I type "1990" in the "Year" field "input"
+		And I select "Callaye, Bendry J Jr" from the "Editors" field dynamic dropdown
+		And I select "Test Publisher" from the "Publisher" dropdown field
+		And I check the "Show all fields" box
+		And I type "10.1037/rmh0000008" in the "Doi" field "input"
+		And I type "Test description" in the "Description" field "textarea"
+		And I type "www.publication.com" in the "Link Url" field "input"
+		And I type "Test Book Webiste" in the "Link Display" field "input"
+		And I press the "Create Publication" button
+		Then I should see "Test Book with Editors" in the "Publication" dropdown field
+		And I should see "Test Book with Editors" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Book Description" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Book Title" in the "Src" detail panel
+		And I should see "Test Book" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "New Citation" in the form header
+		And I should see "The citation will display here once all required fields are filled." in the "Citation Text" field "textarea"
 
+	@javascript
+	Scenario:  I should be able to create a [CHAPTER] citation with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Book with Editors" from the "Publication" dropdown field
+		And I see "New Citation"
+		When I select "Chapter" from the "Citation Type" dropdown field
+		And I type "Test Title for Chapter" in the "Chapter Title" dropdown field "input"
+		And I type "666-999" in the "Pages" field "input"
+		And I select "Cockle, Anya" from the "Authors" field dynamic dropdown
+		And I check the "Show all fields" box
+		And I type "Test Abstract Text" in the "Abstract" field "textarea"
+		And I see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, eds.). pp. 666-999. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+		And I press the "Create Citation" button
+		Then I should see "Test Title for Chapter" in the "Citation Title" dropdown field
+		And I should see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, eds.). pp. 666-999. Test Publisher, Nice, France." in the "Src" detail panel
+		And I should see "Book Title" in the "Src" detail panel
+		And I should see "Test Book" in the "Src" detail panel
+		And I should see "Chapter Title" in the "Src" detail panel
+		And I should see "Test Title for Chapter" in the "Src" detail panel
+		And I should see "Test Abstract Text" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Cockle, Anya" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+	
+	## ------------------- Journal ----------------- ##
+
+	@javascript
+	Scenario:  I should be able to create a [JOURNAL] publication with its sub-form
+		Given I open the New Interaction form
+		And I enter "Test Journal" in the "Publication" dropdown field
+		And I see "New Publication"
+		And I select "Journal" from the "Publication Type" dropdown field
+		And I check the "Show all fields" box
+		And I press the "Create Publication" button
+		Then I should see "Test Journal" in the "Publication" dropdown field
+		And I should see "Journal Title" in the "Src" detail panel
+		And I should see "Test Journal" in the "Src" detail panel
+		And I should see "New Citation" in the form header
+		And I should see "The citation will display here once all required fields are filled." in the "Citation Text" field "textarea"
+
+	@javascript
+	Scenario:  I should be able to create a [ARTICLE] citation with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Journal" from the "Publication" dropdown field
+		And I see "New Citation"
+		And I should see "Article" in the "Citation Type" dropdown field
+		And I type "1990" in the "Year" field "input"
+		And I type "Test Title for Article" in the "Title" field "input"
+		And I check the "Show all fields" box
+		And I type "666-999" in the "Pages" field "input"
+		And I type "4" in the "Volume" field "input"
+		And I type "1" in the "Issue" field "input"
+		And I select "Cockle, Anya" from the "Authors" field dynamic dropdown
+		And I type "Test Abstract Text" in the "Abstract" field "textarea"
+		And I see "Cockle, A. 1990. Test Title for Article. Test Journal 4 (1): 666-999." in the "Citation Text" field "textarea"
+		And I press the "Create Citation" button
+		Then I should see "Test Title for Article" in the "Citation Title" dropdown field
+		And I should see "Cockle, A. 1990. Test Title for Article. Test Journal 4 (1): 666-999." in the "Src" detail panel
+		And I should see "Journal Title" in the "Src" detail panel
+		And I should see "Test Journal" in the "Src" detail panel
+		And I should see "Article Title" in the "Src" detail panel
+		And I should see "Test Title for Article" in the "Src" detail panel
+		And I should see "Test Abstract Text" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Cockle, Anya" in the "Src" detail panel
+	
+	## ------------------- Thesis/Dissertation ----------------- ##
+	@javascript
+	Scenario:  I should be able to create a [Thesis/Dissertation] publication with its sub-form
+		Given I open the New Interaction form
+		And I enter "Test Dissertation" in the "Publication" dropdown field
+		And I see "New Publication"
+		When I select "Thesis/Dissertation" from the "Publication Type" dropdown field
+		And I type "1990" in the "Year" field "input"
+		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Test Publisher" from the "Publisher" dropdown field
+		And I check the "Show all fields" box
+		And I type "10.1037/rmh0000008" in the "Doi" field "input"
+		And I type "Test description" in the "Description" field "textarea"
+		And I type "www.publication.com" in the "Link Url" field "input"
+		And I type "Test Book Webiste" in the "Link Display" field "input"
+		And I press the "Create Publication" button
+		Then I should see "Test Dissertation" in the "Publication" dropdown field
+		And I should see "Thesis/Dissertation Title" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "New Citation" in the form header
+		And I should see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+
+  # Add Master's thesis citation
+	@javascript
+	Scenario:  I should be able to create a [Ph.D. Dissertation] citation with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Dissertation" from the "Publication" dropdown field
+		And I see "New Citation"
+		And I should see "Ph.D. Dissertation" in the "Citation Type" dropdown field
+		And I see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+		And I check the "Show all fields" box
+		And I press the "Create Citation" button
+		Then I should see "Test Dissertation" in the "Citation Title" dropdown field
+		And I should see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Src" detail panel
+		And I should see "Thesis/Dissertation Title" in the "Src" detail panel
+		And I should see "Test Dissertation" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+
+	## ------------------- TODO: OTHER ----------------- ##
+	@javascript
+	Scenario:  I should be able to create a [OTHER] publication with its sub-form
+		Given I open the New Interaction form
+		And I enter "Test Other" in the "Publication" dropdown field
+		And I see "New Publication"
+		When I select "Other" from the "Publication Type" dropdown field
+		And I type "1990" in the "Year" field "input"
+		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Test Publisher" from the "Publisher" dropdown field
+		And I check the "Show all fields" box
+		And I type "10.1037/rmh0000008" in the "Doi" field "input"
+		And I type "Test description" in the "Description" field "textarea"
+		And I type "www.publication.com" in the "Link Url" field "input"
+		And I type "Test Other Webiste" in the "Link Display" field "input"
+		And I press the "Create Publication" button
+		Then I should see "Test Other" in the "Publication" dropdown field
+		And I should see "Publication Title" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Test description" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "New Citation" in the form header
+		And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+
+	## Add for Museum record and report types as well.
+	@javascript
+	Scenario:  I should be able to create a [Other] citation with its sub-form
+		Given I open the New Interaction form
+		And I select "Test Other" from the "Publication" dropdown field
+		And I see "New Citation"
+		And I should see "Other" in the "Citation Type" dropdown field
+		And I see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+		And I check the "Show all fields" box
+		And I press the "Create Citation" button
+		Then I should see "Test Other" in the "Citation Title" dropdown field
+		And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Src" detail panel
+		And I should see "Publication Title" in the "Src" detail panel
+		And I should see "1990" in the "Src" detail panel
+		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Publication Description" in the "Src" detail panel
+
+	## -------------------------- Location -------------------------------------##
 	@javascript
 	Scenario:  I should be able to create a location with its sub-form
 		Given I open the New Interaction form
-		And I enter "Test Location" in the "Location" field dropdown
+		And I enter "Test Location" in the "Location" dropdown field
 		Then I should see "New Location"
 		When I type "Test Description" in the "Description" field "textarea"
-		And I select "Costa Rica" from the "Country" field dropdown
-		And I select "Savanna" from the "Habitat Type" field dropdown
+		And I select "Costa Rica" from the "Country" dropdown field
+		And I select "Savanna" from the "Habitat Type" dropdown field
 		And I type "1500" in the "Elevation" field "input"
 		And I type "2500" in the "Elevation Max" field "input"
 		And I type "-58.864905" in the "Latitude" field "input"
 		And I type "3.339844" in the "Longitude" field "input"
 		And I press the "Create Location" button
-		Then I should see "Test Location" in the "Location" field
+		Then I should see "Test Location" in the "Location" dropdown field
 		And I should see "Test Description" in the "Location" detail panel
 		And I should see "Savanna" in the "Location" detail panel
 		And I should see "1500" in the "Location" detail panel
 		And I should see "2500" in the "Location" detail panel
 		And I should see "-58.864905" in the "Location" detail panel
 		And I should see "3.339844" in the "Location" detail panel
-
+	## -------------------------- Taxon ----------------------------------------##
 	@javascript
 	Scenario:  I should be able to create a taxon Family within the subject taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		When I enter "Subject Family" in the "Family" field dropdown
+		When I enter "Subject Family" in the "Family" dropdown field
 		And I see "New Taxon Family"
 		And I press the "Create Taxon" button
-		Then I should see "Subject Family" in the "Family" field
+		Then I should see "Subject Family" in the "Family" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Genus within the subject taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		And I select "Subject Family" from the "Family" field dropdown
-		When I enter "Subject Genus" in the "Genus" field dropdown
+		And I select "Subject Family" from the "Family" dropdown field
+		When I enter "Subject Genus" in the "Genus" dropdown field
 		And I see "New Taxon Genus"
 		And I press the "Create Taxon" button
-		Then I should see "Subject Genus" in the "Genus" field
+		Then I should see "Subject Genus" in the "Genus" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Species within the subject taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		And I select "Subject Family" from the "Family" field dropdown
-		And I select "Subject Genus" from the "Genus" field dropdown
-		When I enter "Subject Species" in the "Species" field dropdown
+		And I select "Subject Genus" from the "Genus" dropdown field
+		When I enter "Subject Species" in the "Species" dropdown field
 		And I see "New Taxon Species"
 		And I press the "Create Taxon" button
-		Then I should see "Subject Species" in the "Species" field
+		Then I should see "Subject Species" in the "Species" dropdown field
 
 	@javascript
 	Scenario:  I should be able to select a taxon with the subject taxon select form
 		Given I open the New Interaction form
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		And I select "Subject Family" from the "Family" field dropdown
-		And I select "Subject Genus" from the "Genus" field dropdown
-		And I select "Subject Species" from the "Species" field dropdown
+		And I select "Subject Species" from the "Species" dropdown field
 		When I press "Confirm"
-		Then I should see "Subject Species" in the "Subject" field
+		Then I should see "Subject Species" in the "Subject" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Class within the object taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I enter "Object Class" in the "Class" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I enter "Object Class" in the "Class" dropdown field
 		And I see "New Taxon Class"
 		And I press the "Create Taxon" button
-		Then I should see "Object Class" in the "Class" field
+		Then I should see "Object Class" in the "Class" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Order within the object taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Class" from the "Class" field dropdown
-		And I enter "Object Order" in the "Order" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I select "Object Class" from the "Class" dropdown field
+		And I enter "Object Order" in the "Order" dropdown field
 		And I see "New Taxon Order"
 		And I press the "Create Taxon" button
-		Then I should see "Object Order" in the "Order" field
+		Then I should see "Object Order" in the "Order" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Family within the object taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Class" from the "Class" field dropdown
-		And I select "Object Order" from the "Order" field dropdown
-		And I enter "Object Family" in the "Family" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I select "Object Order" from the "Order" dropdown field
+		And I enter "Object Family" in the "Family" dropdown field
 		And I see "New Taxon Family"
 		And I press the "Create Taxon" button
-		Then I should see "Object Family" in the "Family" field
+		Then I should see "Object Family" in the "Family" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Genus within the object taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Class" from the "Class" field dropdown
-		And I select "Object Order" from the "Order" field dropdown
-		And I select "Object Family" from the "Family" field dropdown
-		When I enter "Object Genus" in the "Genus" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I select "Object Family" from the "Family" dropdown field
+		When I enter "Object Genus" in the "Genus" dropdown field
 		And I see "New Taxon Genus"
 		And I press the "Create Taxon" button
-		Then I should see "Object Genus" in the "Genus" field
+		Then I should see "Object Genus" in the "Genus" dropdown field
 
 	@javascript
 	Scenario:  I should be able to create a taxon Species within the object taxon sub-form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Class" from the "Class" field dropdown
-		And I select "Object Order" from the "Order" field dropdown
-		And I select "Object Family" from the "Family" field dropdown
-		And I select "Object Genus" from the "Genus" field dropdown
-		When I enter "Object Species" in the "Species" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I select "Object Genus" from the "Genus" dropdown field
+		When I enter "Object Species" in the "Species" dropdown field
 		And I see "New Taxon Species"
 		And I press the "Create Taxon" button
-		Then I should see "Object Species" in the "Species" field
+		Then I should see "Object Species" in the "Species" dropdown field
 
 	@javascript
 	Scenario:  I should be able to select a taxon with the object taxon select form
 		Given I open the New Interaction form
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Class" from the "Class" field dropdown
-		And I select "Object Order" from the "Order" field dropdown
-		And I select "Object Family" from the "Family" field dropdown
-		And I select "Object Genus" from the "Genus" field dropdown
-		And I select "Object Species" from the "Species" field dropdown
+		When I select "Arthropod" from the "Realm" dropdown field
+		And I select "Object Species" from the "Species" dropdown field
 		When I press "Confirm"
-		Then I should see "Object Species" in the "Object" field
-
+		Then I should see "Object Species" in the "Object" dropdown field
+	## -------------------------- Interaction ----------------------------------##
 	@javascript
 	Scenario:  I should be able to create a new interaction with all fields filled
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation Title" from the "Citation Title" field dropdown
-		And I select "Costa Rica" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
-		And I focus on the "Subject" taxon field
-		And I see "Select Subject Taxon"
-		And I select "Subject Species" from the "Species" field dropdown
-		And I press the "Confirm" button
-		And I focus on the "Object" taxon field
-		And I see "Select Object Taxon"
-		And I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Species" from the "Species" field dropdown
-		And I press the "Confirm" button
-		When I select "Consumption" from the "Interaction Type" field dropdown
-		And I select "Arthropod" from the "Interaction Tags" field dropdown
-		And I type "Detailed interaction notes." in the "Note" field "textarea"
+		And I fill the new interaction form with the test values
 		And I press the "Create Interaction" button
 		Then I should see "New Interaction successfully created." in the form header
 
 	@javascript
 	Scenario:  Pinned field values should remain after interaction form submission (all others should clear)
 		Given I open the New Interaction form
-		And I select "Test Publication" from the "Publication" field dropdown
-		And I select "Test Citation Title" from the "Citation Title" field dropdown
-		And I pin the "Citation Title" field
-		And I select "Costa Rica" from the "Country-Region" field dropdown
-		And I select "Test Location" from the "Location" field dropdown
+		And I fill the new interaction form with the test values
+		When I pin the "Citation Title" dropdown field
 		And I pin the "Location" field
-		And I focus on the "Subject" taxon field
-		And I see "Select Subject Taxon"
-		And I select "Subject Species" from the "Species" field dropdown
-		And I press the "Confirm" button
 		And I pin the "Subject" field
-		And I focus on the "Object" taxon field
-		And I see "Select Object Taxon"
-		And I select "Arthropod" from the "Realm" field dropdown
-		And I select "Object Species" from the "Species" field dropdown
-		And I press the "Confirm" button
-		When I select "Consumption" from the "Interaction Type" field dropdown
 		And I pin the "Interaction Type" field
-		And I select "Arthropod" from the "Interaction Tags" field dropdown
-		And I type "Detailed interaction notes." in the "Note" field "textarea"
 		And I press the "Create Interaction" button
 		Then I should see "New Interaction successfully created." in the form header
-		And I should see "Test Publication" in the "Publication" interaction field
-		And I should see "Test Citation Title" in the "Citation Title" interaction field
-		And I should see "Costa Rica" in the "Country-Region" interaction field
-		And I should see "Test Location" in the "Location" interaction field
-		And I should see "Subject Species" in the "Subject" interaction field
+		And I should see "Test Book with Editors" in the "Publication" dropdown field
+		And I should see "Test Title for Chapter" in the "Citation Title" dropdown field
+		And I should see "Costa Rica" in the "Country-Region" dropdown field
+		And I should see "Test Location" in the "Location" dropdown field
+		And I should see "Subject Species" in the "Subject" dropdown field
+		And I should see "Consumption" in the "Interaction Type" dropdown field
 		And the "Object" select field should be empty
-		And I should see "Consumption" in the "Interaction Type" interaction field
 		And the "Interaction Tags" select field should be empty
 		And the "Note" field should be empty
 
@@ -342,14 +448,15 @@ Feature: Add new data to the database
 		When I exit the form window
 		Then I should see the grid displayed in "Source" view
 		And the grid should be filtered to interactions created since "today"
+		And I break "How many rows are in the grid?"
 		And I should see "4" row in the grid data tree
 
 	@javascript
 	Scenario:  I should see the newly created interactions under the publication source
 		Given the database grid is in "Source" view
 		And I filter the grid to interactions created since "today"
-		When I expand "Test Publication" in the data tree
-		Then I should see "3" interactions under "Test Citation Title"
+		When I expand "Test Book with Editors" in the data tree
+		Then I should see "3" interactions under "Whole work cited"
 		And the expected data in the interaction row
 
 	@javascript
@@ -358,7 +465,7 @@ Feature: Add new data to the database
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
 		When I expand "Cockel, Joy Karen Jr" in the data tree
-		Then I should see "3" interactions under "Test Citation Title"
+		Then I should see "3" interactions under "Whole work cited"
 		And the expected data in the interaction row
 
 	@javascript
@@ -367,9 +474,9 @@ Feature: Add new data to the database
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
 		When I expand "Smith, George Michael Sr" in the data tree
-		And I expand "Test Citation Title" in the data tree
-		And I expand "Test Publication" in the data tree
-		And I expand "Test Citation Title" in level "3" of the data tree
+		And I expand "Test Book" in the data tree
+		And I expand "Test Book" in the data tree
+		And I expand "Whole work cited" in level "3" of the data tree
 		Then I should see "6" interactions attributed
 		And the expected data in the interaction row
 

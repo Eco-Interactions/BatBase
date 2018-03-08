@@ -92,6 +92,12 @@ Questions:
         - redownload all autocomplete(?)
         -- fix taxon lvl fills. 
         -- make it so you can't toggle fields while sub-form open
+        -- fix citation title setting for chapters
+            -- text entered into top title field isn't added to the chapter form
+
+        ## eventually ##
+        - disable filled fields for the 'other' publication's citation.
+        - change the title field to 'subTitle', or add a seperate subtitle field. 
 
 ________________________________________________________________________________
 

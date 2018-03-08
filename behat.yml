@@ -5,7 +5,7 @@ default:
             sessions:
                 javascript:
                   selenium2:
-                    capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=900,1440']}, "marionette": true}
+                    capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']}, "marionette": true}
             goutte: ~
             selenium2: 
                 wd_host: "http://127.0.0.1:4444/wd/hub"

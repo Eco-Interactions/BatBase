@@ -470,7 +470,7 @@ select[id$="txn-lvl"] + div {
         margin: 11px 0 10px 60px;
     }
     #b-overlay .full-row {
-        padding: .2em 0 .3em  0;
+        padding: .2em 0 .3em  .75em;
         width: 96%;
     }
     #b-overlay #Note_row div.field-row {        
@@ -485,7 +485,7 @@ select[id$="txn-lvl"] + div {
         width: 700px;
     }
     #b-overlay .xlrg-field {
-        width: 595px;
+        width: 610px;
     }
     #b-overlay .lrg-field {
         width: 262px;
