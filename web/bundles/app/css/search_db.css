@@ -349,7 +349,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .3em;
     justify-content: center;
 }
-.active-errs {
+[class$="active-errs"] {
     padding: .3em;
     margin-bottom: .3em;
 }

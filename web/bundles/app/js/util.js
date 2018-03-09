@@ -11,6 +11,7 @@
         getDataStorage: getDataStorage,
         populateStorage: populateStorage,
         removeFromStorage: removeFromStorage,
+        stripString: stripString,
         ucfirst: ucfirst, 
     };
 
@@ -29,6 +30,11 @@
     function lcfirst(str) {
         var f = str.charAt(0).toLowerCase();
         return f + str.substr(1);
+    }
+    /** Removes white space at beginning and end, and any ending period. */
+    function stripString(text) {
+        let str = text.trim();
+        return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
     }
     /*---------- Object Helpers ----------------------------------------------*/
     function sortProperties(obj) {
