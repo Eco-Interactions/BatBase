@@ -51,7 +51,7 @@ Feature: Add new data to the database
 		And I type "www.author.com" in the "Link Url" field "input"
 		And I type "Test Author Website" in the "Link Display" field "input"
 		And I press the "Create Author" button
-		Then I should see "Callaye, Bendry J Jr" in the "Authors" field dynamic dropdown
+		Then I should see "Callaye, Bendry J. Jr" in the "Authors" field dynamic dropdown
 
 	## ------------------- Books ----------------- ##
 	@javascript
@@ -61,7 +61,7 @@ Feature: Add new data to the database
 		And I see "New Publication"
 		And I select "Book" from the "Publication Type" dropdown field
 		When I type "1990" in the "Year" field "input"
-		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Callaye, Bendry J. Jr" from the "Authors" field dynamic dropdown
 		And I select "Test Publisher" from the "Publisher" dropdown field
 		And I check the "Show all fields" box
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
@@ -75,7 +75,7 @@ Feature: Add new data to the database
 		And I should see "Test description" in the "Src" detail panel
 		And I should see "Book Title" in the "Src" detail panel
 		And I should see "Test Book" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 		And I should see "New Citation" in the form header
 		And I should see "Callaye, B. J. 1990. Test Book. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
@@ -96,7 +96,7 @@ Feature: Add new data to the database
 		And I should see "Test Book" in the "Src" detail panel
 		And I should see "1990" in the "Src" detail panel
 		And I should see "Test description" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 
 	@javascript
 	Scenario:  I should be able to create a [BOOK WITH EDITORS] publication with its sub-form
@@ -105,7 +105,7 @@ Feature: Add new data to the database
 		And I see "New Publication"
 		And I select "Book" from the "Publication Type" dropdown field
 		When I type "1990" in the "Year" field "input"
-		And I select "Callaye, Bendry J Jr" from the "Editors" field dynamic dropdown
+		And I select "Callaye, Bendry J. Jr" from the "Editors" field dynamic dropdown
 		And I select "Test Publisher" from the "Publisher" dropdown field
 		And I check the "Show all fields" box
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
@@ -120,7 +120,7 @@ Feature: Add new data to the database
 		And I should see "Test description" in the "Src" detail panel
 		And I should see "Book Title" in the "Src" detail panel
 		And I should see "Test Book" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 		And I should see "New Citation" in the form header
 		And I should see "The citation will display here once all required fields are filled." in the "Citation Text" field "textarea"
 
@@ -130,7 +130,7 @@ Feature: Add new data to the database
 		And I select "Test Book with Editors" from the "Publication" dropdown field
 		And I see "New Citation"
 		When I select "Chapter" from the "Citation Type" dropdown field
-		And I type "Test Title for Chapter" in the "Chapter Title" dropdown field "input"
+		And I type "Test Title for Chapter" in the "Chapter Title" dropdown field
 		And I type "666-999" in the "Pages" field "input"
 		And I select "Cockle, Anya" from the "Authors" field dynamic dropdown
 		And I check the "Show all fields" box
@@ -147,7 +147,7 @@ Feature: Add new data to the database
 		And I should see "1990" in the "Src" detail panel
 		And I should see "Test description" in the "Src" detail panel
 		And I should see "Cockle, Anya" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 	
 	## ------------------- Journal ----------------- ##
 
@@ -199,7 +199,7 @@ Feature: Add new data to the database
 		And I see "New Publication"
 		When I select "Thesis/Dissertation" from the "Publication Type" dropdown field
 		And I type "1990" in the "Year" field "input"
-		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Callaye, Bendry J. Jr" from the "Authors" field dynamic dropdown
 		And I select "Test Publisher" from the "Publisher" dropdown field
 		And I check the "Show all fields" box
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
@@ -211,7 +211,7 @@ Feature: Add new data to the database
 		And I should see "Thesis/Dissertation Title" in the "Src" detail panel
 		And I should see "1990" in the "Src" detail panel
 		And I should see "Test description" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 		And I should see "New Citation" in the form header
 		And I should see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
@@ -230,7 +230,7 @@ Feature: Add new data to the database
 		And I should see "Thesis/Dissertation Title" in the "Src" detail panel
 		And I should see "Test Dissertation" in the "Src" detail panel
 		And I should see "1990" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 
 	## ------------------- TODO: OTHER ----------------- ##
 	@javascript
@@ -240,7 +240,7 @@ Feature: Add new data to the database
 		And I see "New Publication"
 		When I select "Other" from the "Publication Type" dropdown field
 		And I type "1990" in the "Year" field "input"
-		And I select "Callaye, Bendry J Jr" from the "Authors" field dynamic dropdown
+		And I select "Callaye, Bendry J. Jr" from the "Authors" field dynamic dropdown
 		And I select "Test Publisher" from the "Publisher" dropdown field
 		And I check the "Show all fields" box
 		And I type "10.1037/rmh0000008" in the "Doi" field "input"
@@ -252,7 +252,7 @@ Feature: Add new data to the database
 		And I should see "Publication Title" in the "Src" detail panel
 		And I should see "1990" in the "Src" detail panel
 		And I should see "Test description" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 		And I should see "New Citation" in the form header
 		And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
@@ -270,7 +270,7 @@ Feature: Add new data to the database
 		And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Src" detail panel
 		And I should see "Publication Title" in the "Src" detail panel
 		And I should see "1990" in the "Src" detail panel
-		And I should see "Callaye, Bendry J Jr" in the "Src" detail panel
+		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 		And I should see "Publication Description" in the "Src" detail panel
 
 	## -------------------------- Location -------------------------------------##

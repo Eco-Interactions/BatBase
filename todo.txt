@@ -5,53 +5,74 @@ TODO
         - Combine source forms
 
     - citation generation
+        - Refresh citations for 
+            - American journal of botany "Ecological constraints on fruit initiation by Calyptrogyne ghiesbreghtiana (Arecaceae):"
+            - Biological Journal of the Linnean Society
+            - Flora "Pollination of three species of Abutilon (Malvaceae) in"
+            - Ciencia "The fruit bat Artibeus lituratus as a forest and cit"
+            - Revista Brasileira de Biologi "Lista provisoria dos quiropteros dos estados do Ri"
+            - Boletim do Museu de Biologia Mello Leitão "Taxonomic assemblages of bats from Panga Reserv"
+            - journal of tropical biology "Feeding strategy and activity budget of the frugivorous"
+            - 'tropical biology'
 
-        ## now
-            - testing! 
-
-        ## test
-            - that contribs are updated from author->editor & vice versa
-            -- added two contributors (one's an editor)
-            -- test that each pub/cit type are created 
-
-        ##b4 release
 
         ##misc
-            - clear location filter options when time-updated changes
             - format 'ok' button for form errors
                 - make it impossible to close out of form without pressing 'ok'
 
         ## Eventually ##
-        - Refactor citation text generation code
-        -- figure out how to  (removeAllSelectedAuths(sel, prntLvl, authType);)
-        -- add error to interaction form for when an 'invisible' error occurs on 
-            entity selection
-
+        -- Testing --
+            -- Refactor tests away from sleeping after js changes to programatically
+                'spinning' to run js or find elems on page. 
+            - Refactor citation text generation code
+            -- figure out how to  (removeAllSelectedAuths(sel, prntLvl, authType);)
+            -- add error to interaction form for when an 'invisible' error occurs on 
+                entity selection
+            -- check that edit forms show all data they should on load (ie, authors)
+        -- forms --
+            -- refactor handleCitText calls. Getting called so many times on edit form load!
+            -- Author / source --
+                -- When an author name is updated, update the citation text for their
+                    contriubtions
+        -- bugs --  
+            - Fix author field after create form exited
+            - 'no changes detected' when only author/editor data is changed
 
     - (Will we ultimate care about who edits/new data was 'approvedBy' ?)
 
 NOTES
-    ## Cit Data ##
-    - Genereated without changes = [932, ]
-    - added space between issue and volume = [1014, ]
 
     ## Cleanup
         - merge: 
-            - donald w thomas and donald w. thomas
-            - Petr Benda (472) with P. Benda (473)
-            - Stefan Pettersson (382) with Stefan Petterson (410)
+            - Tropical Ecology (22) with Journal of Tropical Ecology (12)
+            - A. Radosoa Andrianaivoarivelo (406) with Radosoa Andrianaivoarivelo (404)
+            - D. A. R. Taylor (488) and D. Taylor (489)
             - Donald W. Thomas (403) with Donald W Thomas (347) 
-                (The only difference here is a period with the middle initial. 
-                    Why was this created?)
+            - Petr Benda (472) with P. Benda (473) //update display name to full petr
+            - Stefan Pettersson (382) with Stefan Petterson (410)
 
             # maybe? 
-                - A. Radosoa Andrianaivoarivelo (406) with Radosoa Andrianaivoarivelo (404)
-                    (these were created one right after the other, was this a mistake?)
-                - A Orozco-Segovia (255) with Alma Orozco (254)
+                    -these were created one day apart, was this a mistake?
+                    - Is [A] the first name and Radosoa the middle?
+        -- Empty citations --
+            - American Journal of Botany 
+                - Pollination ecology of Agave macroacantha (Agavaceae) in a Mexican tropical desert.  I. Floral biology and pollination mechanisms.
+        -- Change publication:
+            Move to 'Journal of Tropical Ecology'
+            -- (755) de Figueiredo, R. A. 1996. Vertebrates at neotropical fig species in a forest fragment. Tropical Ecology 37 (1): 139-141.
+
+    --Email--
+        - Chanda - 
+            - noticed you are using the first name fields for both first and middle. Please separate them.
+                    - Created about 10 minutes apart.
+        - Consolidate all the citation weirdness in the emails -- 
+
 
 
 ============ EMAIL ====================
     --- General ---
+        - After changes are made to authors or publications, the citation need to 
+        be updated manually until I am able to come back around to automating the updates. 
 TAYLOR:
     > Publication display name does not require it to be unique. Intentional?
         ## Check other entities before email ##
@@ -74,9 +95,6 @@ Notes::
         //- Previously selected authors are not included in the new dropdowns
         - Fixed bug with author comboboxes clearing and adding multiple empty combos 
         - "whole work cited" in data tree
-
-    ##for tests##
-        - changes author container elem from Authors-sel-cntnr to Authors-sel-cntnr  
 
 Questions:
     ## Citation full text ##

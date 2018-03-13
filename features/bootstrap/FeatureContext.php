@@ -152,7 +152,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given I enter :text in the :prop field dropdown 
+     * @Given I enter :text in the :prop dropdown field 
      */
     public function iEnterInTheDropdownField($text, $prop)
     {

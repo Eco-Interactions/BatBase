@@ -164,13 +164,13 @@ Feature: Edit data in the database
 		And I change the "Doi" field "input" to "10.1037/rmh0000008"
 		And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
 		And I add "Baker, Herbert G" to the "Authors" dynamic dropdown field 
-		And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, eds.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+		And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
 		And I press the "Update Citation" button
 		And I should not see "Gardner, Alfred L" in the tree 
 		And I expand "Baker, Herbert G" in the data tree
 		And I click on the edit pencil for the "Feeding habits" row
 		And I see "Editing Citation"
-		Then I should see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, eds.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+		Then I should see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
 		And I should see "Test Abstract" in the "Abstract" field "textarea"
 		And I should see "Feeding habits" in the "Title" field "input"
 		And I should see "Book" in the "Citation Type" dropdown field

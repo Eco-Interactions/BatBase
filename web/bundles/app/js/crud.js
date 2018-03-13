@@ -2129,14 +2129,10 @@ $(document).ready(function(){
         const authType = ed ? 'Editors' : 'Authors';
         let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
         if (val === 'create') { return openCreateForm(authType, --cnt); }        
-        if (val === '' || parseInt(val) === NaN) { return handleAuthFieldClear(fLvl); }
+        if (val === '' || parseInt(val) === NaN) { return; }
         if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
         if (lastAuthComboEmpty(cnt-1, authType)) { return; }
         buildNewAuthorSelect(cnt, val, fLvl, authType);
-    }
-    /** Updates the citation text, if displayed. */
-    function handleAuthFieldClear(fLvl) {
-        if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
     }
     /** Stops the form from adding multiple empty combos to the end of the field. */
     function lastAuthComboEmpty(cnt, authType) {  
@@ -2664,7 +2660,6 @@ $(document).ready(function(){
             if (['citation', 'publication'].indexOf(entity) === -1) { return; }
             if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
             if (entity === 'citation') { 
-                handleCitText(fLvl); 
                 handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
             }
             updateFieldLabelsForType(entity, fLvl);
