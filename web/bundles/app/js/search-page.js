@@ -1159,7 +1159,7 @@
             const publ = getDetachedRcrd(pub.parent, gParams.rcrdsById);
             tree[publ.displayName] = getPublData(publ); 
         }
-    }
+    } /* End buildPublTree */
     function getPublData(rcrd) {
         rcrd.children = getPublChildren(rcrd);
         return rcrd;
@@ -1169,7 +1169,7 @@
         return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
     }
     function getPubsWithoutPubls(pubs) {
-        let publ = { id: 0, displayName: "Unspecified", parent: null };
+        let publ = { id: 0, displayName: "Unspecified", parent: null, sourceType: { displayName: 'Publisher' } };
         publ.children = pubs.map(pub => getPubData(pub));
         return publ;
     }
@@ -1281,7 +1281,7 @@
         loadGrid(treeName);
     }
     function getSrcRowData(src, treeLvl) {                                      //console.log("getSrcRowData. source = %O", src);
-        var entity = getSrcEntity(src, treeLvl);
+        var entity = src.sourceType.displayName;
         var detailId = entity === "Publication" ? src.publication.id : null;  
         const displayName = src.displayName.includes('(citation)') ? 
             'Whole work cited.' : src.displayName;
@@ -1298,11 +1298,6 @@
             interactions: src.isDirect,   //Only rows with interaction are colored
         };  
     } 
-    function getSrcEntity(src, treeLvl) {  
-        const subEntities = ['author', 'citation', 'publication'];
-        const subEntity = subEntities.find(entity => src[entity]);
-        return subEntity ? _util.ucfirst(subEntity) : "Publisher";
-    }
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
      * for each source node in the tree.

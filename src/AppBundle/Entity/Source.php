@@ -730,6 +730,18 @@ class Source
     }
 
     /**
+     * Remove publication.
+     *
+     * @return Source
+     */
+    public function removePublication()
+    {
+        $this->publication = null;
+
+        return $this;
+    }
+
+    /**
      * Get publication.
      *
      * @return \AppBundle\Entity\Publication
