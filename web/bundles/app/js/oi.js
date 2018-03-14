@@ -2,12 +2,11 @@ $(document).ready(function() {
 	var tableName = $('#pg-container').data("has-tbl");
 	ECO_INT_FMWK.framePlayer.init();
 	ECO_INT_FMWK.menuMngr.initMenus('#oimenu');
-//	$( document ).tooltip();
-
+	
+	/** Initiates tables and rearranges realted UI. */
 	if (tableName !== false) {
 		ECO_INT_FMWK.dTblMngr.initTables(tableName);
 		ECO_INT_FMWK.dTblMngr.relocCtrls(tableName);
-//		delete ECO_INT_FMWK.dTblMngr;
 	}
 	stickyHeader();
 

@@ -418,6 +418,10 @@ class CrudController extends Controller
         return $response;
     }
     /** ----------------- Set Entity/System UpdatedAt ----------------------- */
+    /**
+     * Sets the updatedAt timestamp for modified entities. This will be used to 
+     * ensure local data stays updated with any changes.
+     */
     private function setUpdatedAtTimes($entityData, &$em)
     {
         $this->updateUpdatedAt($entityData->core, $em);

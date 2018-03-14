@@ -1,71 +1,70 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
-    - Talk with T about their research and break down steps from here.
+    - Move site to new host
+    - add https cert
+    - research google map api and 'places' service
+    - begin to implement
 
 >======== Email ============
 TAYLOR:
-    - Publication display name does not require it to be unique. Intentional?
-        ## Check other entities before email ##
+    -
         
 Tullenda:
-    - 
+    -
 
 >==== Change Log ====
-    - 
+    - Added Bibliography
     - 
     - 
 
 >---- Add to Client Task List ---
-    - Combine source forms
-    - Build Bibliography
-    - Add event listener for changes to data related to citations to regen citations.
+    - 
 
 >================ DEV Internal Task List ===================
 ##(Category){priority}[difficulty]##
 TODOs:
 (CRUD FORMS/BACKEND)
+    - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
+    - {high}[easy] add error to interaction form for when an 'invisible' error 
+        occurs on entity selection
     - {med}[med] add err in CRUD controllers eliminating the possibility of creating orphans
-    - {low}[easy] Comment the crud controller method 'setupdatedattimes'
-    - {low}[easy] If a new authors display name is identical to another's, prompt 
-        user to check for existing author and to add initials if not. 
-    - {low}[easy] Validate that genus and species have the same genus names.
     - {med}[easy] When nothing is selected but a country, a habitat type, and the 
         displayname, suggest to user they use the country-habitat combo.
-    - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
     - {med} For 'other' citations-- 
         - [easy] change the title field to 'subTitle', or add a seperate subtitle field. 
         - [med] disable filled fields for the 'other' publication's citation.
-    - {high}[easy] add error to interaction form for when an 'invisible' error 
-        occurs on entity selection
     - {med}[easy] Format 'ok' button for form errors
         - Make it impossible to close out of the form without pressing 'ok'.
+    - {low}[easy] If a new authors display name is identical to another's, prompt 
+        user to check for existing author and to add initials if not. 
+    - {low}[easy] Validate that genus and species have the same genus names.
 
 (DATA)
     - {high}[med] write SQL script to get only records with updates/newly created  
+    - {med}[easy] Remove publisher-type code
     - {low}[med] add 'role' to realms to be able to grab all object/subject realms
         without hardcoding them.
-    - {med}[easy] Remove publisher-type code
 
 
 (SEARCH PAGE)
     - {medium}[easy] Check CSV Exports
-    - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
-        elem hasn't loaded yet.
+    - {med}[med, long] Add data-entry tutorial.
     - {low}[med] Implement selectize library
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters- updated at for example.
-    - {med}[med, long] Add data-entry tutorial.
+    - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
+        elem hasn't loaded yet.
 
 
 (STATIC/MISC SITE)
+    - {low}[???] Find out how to tell how many users are online
     - {high}[easy] Biliography (all cites in alphabetical order)
     - {med}[easy] Add EXIT click event for nav menu
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
         - update profile page (/profile/edit)
-    - {low}[easy] Resize slider-header when screen size changes 
-    - {low}[???] Find out how to tell how many users are online
     - {low}[med] Update read me for site.
+    - {low}[easy] Resize slider-header when screen size changes 
 
 (SYNC-DATA)
     - {high}[med] Add error handling for pending updates that can't be resolved 
@@ -104,10 +103,12 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-(Testing):
+>(Testing):
+    ~Static Site~
+        - Bibliography
     ~Search Page~
+    ~DB Grid~
         - CSV downloads
-    ~Grid~
         - Unq Vals col filter
     ~Forms~
         - css displays as expected.

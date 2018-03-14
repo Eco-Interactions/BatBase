@@ -1,0 +1,26 @@
+{% extends "layout.html.twig" %}
+
+{% block datatable %}biblio_tbl{% endblock datatable %}
+
+{# {% block pagedata %}data-frames="citFrames"{% endblock %} #}
+
+{% block headline %}
+	Biblography
+{% endblock headline %}
+
+{% block detail %}
+    <table id="biblio_tbl" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Bibliography</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for citation in citations %}
+            <tr>
+                <td>{{citation.fullText}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock detail %}
