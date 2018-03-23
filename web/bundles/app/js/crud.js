@@ -1009,60 +1009,10 @@ $(document).ready(function(){
             const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
             return '('+ names + edStr + ')';
         }
-        /** 
-         * Returns a string with all author names formatted with the first author
-         * [Last, Initials.], all following authors as [Initials. Last], and each 
-         * are seperated by commas until the final author, which is seperated 
-         * with '&'. If the names are of editors, they are returned [Initials. Last].
-         * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
-         */
-        function getFormattedAuthorNames(auths, eds) {                          //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
-            if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
-            let athrs = '';
-            for (let ord in auths) {  
-                let name = getFormattedName(ord, auths[ord]); 
-                athrs += (ord == 1 ? name : (ord == Object.keys(auths).length ?
-                    ' & '+ name : ', '+ name));                 
-            }
-            return _util.stripString(athrs);
-
-            function getFirstEtAl(authId) {
-                const name = getFormattedName(1, authId);
-                return name +', et al';
-            }
-            function getFormattedName(i, srcId) {                               //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
-                const src = fParams.records.source[srcId];                      
-                const athrId = src[_util.lcfirst(src.sourceType.displayName)];  
-                const athr = _util.getDataFromStorage('author')[athrId];        
-                return getCitAuthName(i, athr, eds);
-            }
-            /**
-             * Returns the last name and initials of the passed author. The first 
-             * author is formatted [Last, Initials.] and all others [Initials. Last].
-             * If editors (eds), [Initials. Last].
-             */
-            function getCitAuthName(cnt, a, eds) {                              //console.log('getCitAuthName. cnt = [%s], auth = %O, eds = ', cnt, a, eds);
-                const last = a.lastName;                     
-                const initials = ["firstName", "middleName"].map(name => 
-                    a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
-                return cnt > 1 || eds ? initials +' '+ last : last+', '+initials; 
-            }
-        } /* End getFormattedAuthorNames */
         /** Formats publisher data and returns the Name, City, Country. */
         function getPublisherData() {
-            const publ = getPublRcrd(fParams.forms[fLvl].pub.src);
-            if (!publ) { return false; }
-            const name = publ.displayName;
-            const city = publ.city ? publ.city : '[ADD CITY]';
-            const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
-            return [name, city, cntry].join(', ');
-
-            function getPublRcrd(pub) {
-                if (!pub.parent) { return false; }
-                const publSrc = fParams.records.source[pub.parent];
-                return getEntityRecord('publisher', publSrc.publisher);
-            }
-        } /* End getPublisherData */
+            return buildPublString(fParams.forms[fLvl].pub.src);
+        } 
         /**
          * Returns: Chapter title. In: Publication title [if there are editors,
          * they are added in parentheses here.]. 
@@ -1090,16 +1040,31 @@ $(document).ready(function(){
                     vol ? (vol) : iss && pgs ? (iss+': '+pgs) : iss ? (iss) : 
                         pgs ? (pgs) : (null);
         }
-        /** Handles adding the punctuation for the data in the citation. */
-        function addPunc(data) {  
-            return /[.!?,;:]$/.test(data) ? data : data+'.';
-        }
     } /* End buildCitationText */
+    /** Handles adding the punctuation for the data in the citation. */
+    function addPunc(data) {  
+        return /[.!?,;:]$/.test(data) ? data : data+'.';
+    }
     /** When the Citation sub-form is exited, the Publication combo is reenabled. */
     function enablePubField() {
         enableCombobox('#Publication-sel');
         fillCitationField($('#Publication-sel').val());
     }
+    /** Formats publisher data and returns the Name, City, Country. */
+    function buildPublString(pub) {
+        const publ = getPublRcrd(pub);
+        if (!publ) { return false; }
+        const name = publ.displayName;
+        const city = publ.city ? publ.city : '[ADD CITY]';
+        const cntry = publ.country ? publ.country : '[ADD COUNTRY]';
+        return [name, city, cntry].join(', ');
+
+        function getPublRcrd(pub) {
+            if (!pub.parent) { return false; }
+            const publSrc = fParams.records.source[pub.parent];
+            return getEntityRecord('publisher', publSrc.publisher);
+        }
+    } /* End buildPublString */
     /** ----- Publication and Citation Shared form helpers ------------ */
     /** Adds source data to the interaction form's detail panel. */
     function updateSrcDetailPanel(entity) {
@@ -2203,6 +2168,46 @@ $(document).ready(function(){
         const auth = fParams.records.source[id];
         return auth.displayName;  
     }
+    /** ------ Citation Text Helper -------------- */
+    /** 
+     * Returns a string with all author names formatted with the first author
+     * [Last, Initials.], all following authors as [Initials. Last], and each 
+     * are seperated by commas until the final author, which is seperated 
+     * with '&'. If the names are of editors, they are returned [Initials. Last].
+     * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
+     */
+    function getFormattedAuthorNames(auths, eds) {                          //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
+        if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
+        let athrs = '';
+        for (let ord in auths) {  
+            let name = getFormattedName(ord, auths[ord]); 
+            athrs += (ord == 1 ? name : (ord == Object.keys(auths).length ?
+                ' & '+ name : ', '+ name));                 
+        }
+        return _util.stripString(athrs);
+
+        function getFirstEtAl(authId) {
+            const name = getFormattedName(1, authId);
+            return name +', et al';
+        }
+        function getFormattedName(i, srcId) {                               //console.log('getFormattedName cnt =%s, id = %s', i, srcId);        
+            const src = fParams.records.source[srcId];                      
+            const athrId = src[_util.lcfirst(src.sourceType.displayName)];  
+            const athr = _util.getDataFromStorage('author')[athrId];        
+            return getCitAuthName(i, athr, eds);
+        }
+        /**
+         * Returns the last name and initials of the passed author. The first 
+         * author is formatted [Last, Initials.] and all others [Initials. Last].
+         * If editors (eds), [Initials. Last].
+         */
+        function getCitAuthName(cnt, a, eds) {                              //console.log('getCitAuthName. cnt = [%s], auth = %O, eds = ', cnt, a, eds);
+            const last = a.lastName;                     
+            const initials = ["firstName", "middleName"].map(name => 
+                a[name] ? a[name].charAt(0)+'.' : null).filter(i=>i).join(' '); //removes null values and joins
+            return cnt > 1 || eds ? initials +' '+ last : last+', '+initials; 
+        }
+    } /* End getFormattedAuthorNames */
     /*------------------- Shared Form Builders ---------------------------------------------------*/
     /** Returns the record for the passed id and entity-type. */
     function getEntityRecord(entity, id) {
@@ -3644,6 +3649,8 @@ $(document).ready(function(){
     function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
         toggleWaitOverlay(false);
         if (errTag) { return errUpdatingData(msg, errTag); }
+        if (data.citationUpdate) { return; }
+        if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
         if (isEditForm() && !hasChngs(data)) { 
             return showSuccessMsg("No changes detected."); }  
         updateStoredFormParamsData(data);
@@ -3680,6 +3687,7 @@ $(document).ready(function(){
             'elevUnitAbbrv' in data.coreEdits) { return false; }
         return chngs;
     }
+    /** ---------------- After Interaction Created -------------------------- */
     /** Resets the interactions form leaving only the pinned values. */
     function resetInteractionForm() {
         var vals = getPinnedFieldVals();                                        //console.log("vals = %O", vals);
@@ -3750,7 +3758,184 @@ $(document).ready(function(){
             "interaction", "top", null, getFormConfg("interaction"), "create");
         addReqElemsToConfg();
     }
-    /*------------------ Sub-Form Success Methods ----------------------------*/
+    /** ---------------- After Source Data Edited --------------------------- */
+    /**
+     * Updates the full text of related citations for edited Authors, Publications 
+     * or Publishers.
+     */
+    function updateRelatedCitations(data) {                                     //console.log('updateRelatedCitations. data = %O', data);
+        const srcData = data.coreEntity;
+        const srcType = srcData.sourceType.displayName;
+        const cites = srcType == 'Author' ? getChildCites(srcData.contributions) : 
+            srcType == 'Publication' ? srcData.children : 
+            srcType == 'Publisher' ? getChildCites(srcData.children) : false;
+        if (!cites) { return; }
+        updateCitations();
+
+        function getChildCites(srcs) {  
+            const cites = [];
+            srcs.forEach(id => {
+                const src = getEntityRecord('source', id); 
+                if (src.citation) { return cites.push(id); }
+                src.children.forEach(cId => cites.push(cId))
+            });
+            return cites;
+        }
+        function updateCitations() {                                            //console.log('updateCitations. cites = %O', cites);
+            cites.forEach(id => updateCitText(id, srcData));
+        }
+        function updateCitText(id, chngdSrc) {
+            const citSrc = getEntityRecord('source', id);
+            const cit = getEntityRecord('citation', citSrc.citation);
+            const citText = rebuildCitationText(citSrc, cit, chngdSrc);         //console.log('citation text = ', citText);
+            updatedCitationData(citSrc, citText);
+        }
+    } /* End updateRelatedCitations */
+    /** Sends ajax data to update citation and source entities. */
+    function updatedCitationData(citSrc, text) { 
+        const data = { srcId: citSrc.id, text: text };
+        sendAjaxQuery(data, 'crud/citation/edit', formSubmitSucess, formSubmitError);
+    }
+        /**
+     * Generates and displays the full citation text after all required fields 
+     * are filled.
+     */
+    function rebuildCitationText(citSrc, cit) {
+        const pubSrc = getEntityRecord('source', citSrc.parent);                //console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+        const type = cit.citationType.displayName;                              //console.log("type = ", type);
+        const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
+            'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
+            'Other': rbldOtherCit, 'Report': rbldOtherCit, 
+            "Master's Thesis": rbldDissertThesisCit, 'Museum record': rbldOtherCit };
+        return getFullText[type](type);                                    
+        /**
+         * Articles, Museum records, etc.
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title of article. Title of Journal 
+         *     Volume (Issue): Pages.
+         */
+        function  rbldArticleCit(type) {                                      
+            const athrs = getCitAuthors();                                      
+            const year = _util.stripString(citSrc.year);
+            const title = _util.stripString(cit.title);
+            const pub = _util.stripString(pubSrc.displayName);
+            const vip = getCiteVolumeIssueAndPages(); 
+            let fullText = [athrs, year, title].map(addPunc).join(' ')+' '; 
+            fullText += vip ? (pub+' '+vip) : pub;
+            return fullText + '.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Book Title (Editor 1 [initials, last name],
+         *      & Editor X [initials, last name], eds.). Edition. Publisher Name, 
+         *      City, Country.
+         */
+        function rbldBookCit(type) {
+            const athrs = getPubSrcAuthors() || getCitAuthors();
+            const year = pubSrc.year;
+            const titlesAndEds = getCitTitlesAndEditors();
+            const ed = citSrc.publicationVolume;
+            const pages = getCitBookPages();
+            const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';  
+            const allFields = [athrs, year, titlesAndEds, ed, pages, publ];
+            return allFields.filter(f=>f).map(addPunc).join(' ');
+        }
+        /** 
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Chapter Title. In: Book Title (Editor 1 
+         *     [initials, last name], & Editor X [initials, last name], eds.). 
+         *     pp. pages. Publisher Name, City, Country.
+         */
+        function rbldChapterCit(type) {
+            const athrs = getPubSrcAuthors() || getCitAuthors();
+            const year = pubSrc.year;
+            const titlesAndEds = getCitTitlesAndEditors();
+            const pages = getCitBookPages();
+            const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';
+            const allFields = [athrs, year, titlesAndEds, pages, publ]; 
+            return allFields.filter(f => f).join('. ')+'.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title.  Academic degree. Academic 
+         *     Institution, City, Country.
+         */
+        function rbldDissertThesisCit(type) {
+            const athrs = getPubSrcAuthors();
+            const year = pubSrc.year;
+            const title = _util.stripString(cit.title);
+            const degree = type === "Master's Thesis" ? 'M.S. Thesis' : type;
+            const publ = buildPublString(pubSrc) || '[NEEDS PUBLISHER DATA]';
+            return [athrs, year, title, degree, publ].join('. ')+'.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title. Volume (Issue): Pages. Publisher 
+         *     Name, City, Country.
+         */
+        function rbldOtherCit(type) {
+            const athrs = getCitAuthors() || getPubSrcAuthors();
+            const year = citSrc.year ? _util.stripString(citSrc.year) : pubSrc.year;
+            const title = _util.stripString(cit.title);
+            const vip = getCiteVolumeIssueAndPages();
+            const publ = buildPublString(pubSrc);
+            return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
+        }
+            /** ---------- citation full text helpers ----------------------- */
+        function getCitBookPages(argument) {
+            if (!cit.publicationPages) { return false; }
+            return 'pp. ' + _util.stripString(cit.publicationPages);
+        }
+        function getCitAuthors() { 
+            const auths = citSrc.authors;                                       //console.log('auths = %O', auths);
+            if (!Object.keys(auths).length) { return false; }
+            return getFormattedAuthorNames(auths);
+        }
+        function getPubSrcAuthors() {
+            const auths = pubSrc.authors;
+            if (!auths) { return false; }
+            return getFormattedAuthorNames(auths);
+        }
+        function getPubEditors() {
+            const eds = pubSrc.editors;  
+            if (!eds) { return false }
+            const names = getFormattedAuthorNames(eds, true);
+            const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
+            return '('+ names + edStr + ')';
+        }
+        /**
+         * Returns: Chapter title. In: Publication title [if there are editors,
+         * they are added in parentheses here.]. 
+         */
+        function getCitTitlesAndEditors() { 
+            const chap = type === 'Chapter' ? _util.stripString(cit.title) : false;
+            const pub = _util.stripString(pubSrc.displayName);
+            const titles = chap ? (chap + '. In: ' + pub) : pub;
+            const eds = getPubEditors();
+            return eds ? (titles + ' ' + eds) : titles;
+        }
+        /** 
+         * Formats volume, issue, and page range data and returns either: 
+         *     Volume (Issue): pag-es || Volume (Issue) || Volume: pag-es || 
+         *     Volume || (Issue): pag-es || Issue || pag-es || null
+         * Note: all possible returns wrapped in parentheses.
+         */
+        function getCiteVolumeIssueAndPages() {  
+            const iss = cit.publicationIssue ? '('+cit.publicationIssue+')' : null; 
+            const vol = cit.publicationVolume ? cit.publicationVolume : null;  
+            const pgs = cit.publicationPages ? cit.publicationPages : null;   
+            return vol && iss && pgs ? (vol+' '+iss+': '+pgs) :
+                vol && iss ? (vol+' '+iss) : vol && pgs ? (vol+': '+pgs) :
+                    vol ? (vol) : iss && pgs ? (iss+': '+pgs) : iss ? (iss) : 
+                        pgs ? (pgs) : (null);
+        }
+    } /* End rebuildCitationText */
+    /*------------------ After Sub-Entity Created ----------------------------*/
     /**
      * Exits the successfully submitted form @exitForm. Adds and selects the new 
      * entity in the form's parent elem @addAndSelectEntity.
@@ -3768,6 +3953,7 @@ $(document).ready(function(){
         });
         selApi.addItem(data.coreEntity.id);
     }
+    /** --------------- Helpers --------------------- */
     /**
      * Parses the nested objects in the returned JSON data. This is because the 
      * data comes back from the server having been double JSON-encoded, due to the 

@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 /**
  * Crud-form controller.
  *
- * @Route("/crud")
+ * @Route("/crud", name="app_")
  */
 class CrudController extends Controller
 {
@@ -27,7 +27,7 @@ class CrudController extends Controller
     /**
      * Creates a new Entity, and any new detail-entities, from the form data. 
      *
-     * @Route("/entity/create", name="app_entity_create")
+     * @Route("/entity/create", name="entity_create")
      */
     public function entityCreateAction(Request $request)
     {
@@ -61,7 +61,7 @@ class CrudController extends Controller
     /**
      * Updates an Entity, and any detail-entities, with the submitted form data. 
      *
-     * @Route("/entity/edit", name="app_entity_edit")
+     * @Route("/entity/edit", name="entity_edit")
      */
     public function entityEditAction(Request $request)
     {
@@ -89,6 +89,39 @@ class CrudController extends Controller
             $coreFormData, $formData, $returnData, $em
         );
         $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
+        return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+    /*--------------------- Update Citation Text -----------------------------*/
+    /**
+     * Updates the Citation and Source entities with the updated citation text. 
+     *
+     * @Route("/citation/edit", name="citation_edit")
+     */
+    public function citationTextupdate(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $data = json_decode($requestContent); 
+        
+        $src =  $em->getRepository('AppBundle:Source')
+            ->findOneBy(['id' => $data->srcId ]);
+        $src->setDescription($data->text);
+        $em->persist($src);
+
+        $cit = $src->getCitation();
+        $cit->setFullText($data->text);
+        $em->persist($cit);
+
+        $returnData = new \stdClass; 
+        $returnData->core = 'source';
+        $returnData->coreEntity = $src;
+        $returnData->detail = 'citation';
+        $returnData->detailEntity = $cit;
+        $returnData->citationUpdate = true;
+
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Shared Helpers ------------------------------*/

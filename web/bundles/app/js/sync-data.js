@@ -306,10 +306,10 @@
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
     function updateAffectedData(data) {                                         //console.log("updateAffectedData called. data = %O", data);
-        if (hasEdits(data.coreEdits)) { 
+        if (data.coreEdits && hasEdits(data.coreEdits)) { 
             updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
         }
-        if (hasEdits(data.detailEdits)) { 
+        if (data.detailEdits && hasEdits(data.detailEdits)) { 
             updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
         }
     }
