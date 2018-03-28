@@ -85,6 +85,7 @@ TODOs:
         - {low}[easy] remove eif declarations in js files.
         - {ongoing}[easy] update all quotes to singles unless escaping
     --Search Page--
+        - {med}{easy} update Loc and Taxa views to alternate color rows as Src is now. 
         - {low}[easy] update all the comments that mention the updates-since filter 
             to 'ints-updated-at'
         - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
