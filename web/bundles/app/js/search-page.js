@@ -16,7 +16,7 @@
      *      data should be cleared and redownloaded.
      */
     let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-    const dataKey =  'Fight for Justice!!!!!!!!!!!!!!!!!!!!! <3';
+    const dataKey =  'Fight for Justice!!!!!!!!!!!! <3';
     const eif = ECO_INT_FMWK;
     const _util = eif.util;
     const gridOptions = getDefaultGridOptions();
