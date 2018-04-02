@@ -77,6 +77,25 @@
 #grid-filter-status {
     flex-grow: 1;
 }
+/*--------- Search Tips Popup -----------------*/
+#tips-close-bttn {
+    position: relative;
+    margin-top: .5em;
+    left: 91%;
+    bottom: -2vh;
+}
+.tips-popup {
+    top: 4vh;
+    /*position: relative;*/
+    font-size: 1.1em;
+    height: 88vh;
+    width: 44vw;
+    padding: 2.2em;
+    text-align: left;
+    margin: auto;
+    overflow-y: scroll;
+}
+/**-------------- Data Grid Styes -------------------------- */
 #search-grid {
     height: 86vh;
     border: black 1px solid;
@@ -111,23 +130,9 @@
 .row-red {
     background-color: rgba(255,0,0,.15) !important; /* red */
 }
-/*--------- Search Tips Popup -----------------*/
-#tips-close-bttn {
-    position: relative;
-    margin-top: .5em;
-    left: 91%;
-    bottom: -2vh;
-}
-.tips-popup {
-    top: 4vh;
-    /*position: relative;*/
-    font-size: 1.1em;
-    height: 88vh;
-    width: 44vw;
-    padding: 2.2em;
-    text-align: left;
-    margin: auto;
-    overflow-y: scroll;
+/**-------------- Data Map Styes -------------------------- */
+#map {
+    height: 100%;
 }
 /*------- Buttons ---------------*/
 #filter-bttns {

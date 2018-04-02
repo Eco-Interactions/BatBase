@@ -4,6 +4,14 @@
     - add https cert
     - research google map api and 'places' service
     - begin to implement
+        - gMaps API Key: AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw
+
+
+Before Release:
+    - update "Application restrictions" for the gMaps API Key to 'HTTP referrers (web sites)'
+
+    ## Testing ##
+    - Added Loc Views: tree and map
 
 >======== Email ============
 TAYLOR:

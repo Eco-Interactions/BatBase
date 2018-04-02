@@ -1,1 +1,1 @@
-var ECO_INT_FMWK = {};
+ECO_INT_FMWK = {};

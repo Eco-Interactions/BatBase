@@ -755,9 +755,9 @@
 /*------------------Location Search Methods-----------------------------------*/
     /** Get location data from data storage and sends it to @startLocGridBuild. */
     function buildLocationGrid() {
-        var data = getLocData();
-        if( data ) {  startLocGridBuild(data);
-        } else { console.log("Error loading location data from storage."); }
+        const data = getLocData();
+        if( data ) {  initLocSearchUi(data);
+        } else { console.log('Error loading location data from storage.'); }
     }
     function getLocData() {
         var locDataStorageProps = [
@@ -766,39 +766,79 @@
         return _util.getDataFromStorage(locDataStorageProps);
     }
     /**
-     * Store the location records as 'rcrdsById' in gParams. Gets top region 
-     * ids and sends them to @buildLocTreeAndGrid.
+     * Builds location view html and initializes grid load. Either builds the grid 
+     * data-tree view, by default, or loads the data-map view, if previously 
+     * selected. 
      */ 
-    function startLocGridBuild(data) {                   
+    function initLocSearchUi(locData) {
+        addLocDataToGridParams(locData);
+        if (!$("#map-view").length) { buildLocViewHtml(); }  
+        setLocView();  
+        onLocViewChange();
+        
+        function setLocView() {
+            const storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
+            const locRealm = storedRealm || "tree";
+            if ($('#sel-realm').val() === null) { $('#sel-realm').val(locRealm); }
+        }
+    } /* End initLocSearchUi */
+    function addLocDataToGridParams(data) {
         gParams.rcrdsById = data.location;                                    
         gParams.data = data;
-        buildLocTreeAndGrid(getTopRegionIds());
+    }
+    function buildLocViewHtml() {                   
+        const viewElems = _util.buildElem('span', { id:'grid-view', text: 'View: ' });
+        const opts = getViewOpts();                                       
+        $(viewElems).append(_util.buildSelectElem(opts, { class: 'opts-box', id: 'sel-realm' }));
+        $('#sort-opts').append(viewElems);
+        $('#sel-realm').change(onLocViewChange);
+        $('#sort-opts').fadeTo(0, 1);
+
+        function getViewOpts() {
+            return [{ value: 'map', text: 'Map Data' },
+                    { value: 'tree', text: 'Tree Data' }];   
+        } 
+    } /* End buildLocViewHtml /*
+    /** Event fired when the source realm select box has been changed. */
+    function onLocViewChange(e) {                                               //console.log('onLocViewChange') 
+        clearPreviousGrid();
+        resetCurTreeState();
+        resetToggleTreeBttn(false);
+        showLocInteractionData($('#sel-realm').val());
+    }
+    /** Starts the grid build depending on the view selected. */
+    function showLocInteractionData(view) {                                     //console.log('showLocInteractionData. view = ', view);
+        const regions = getTopRegionIds();
+        return view === 'tree' ? 
+            buildLocGridTree(regions) : buildLocGridMap(regions);
     }
     function getTopRegionIds() {
-        var ids = [];
-        var regions = gParams.data.topRegionNames;
-        for (var name in regions) { ids.push(regions[name]); } 
+        const ids = [];
+        const regions = gParams.data.topRegionNames;
+        for (let name in regions) { ids.push(regions[name]); } 
         return ids;
     }
+    /** ------------ Location Grid Tree Methods ------------------- */
     /** 
      * Builds a tree of location data with regions at the top level, and sub-regions, 
      * countries, areas, and points as nested children @buildLocTree. Fills tree
      * with interactions and continues building the grid @getInteractionsAndFillTree.
      */
-    function buildLocTreeAndGrid(topLocs) {
+    function buildLocGridTree(topLocs) {  console.log('buildLocGridTree')
+        _util.populateStorage('curRealm', 'tree');                      //console.log("storedRealm = ", storedRealm)
         buildLocTree(topLocs);
         getInteractionsAndFillTree();
     }
     /**
      * Rebuilds loc tree with passed location, or the default top regions, as the
      * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
-     * Resets 'openRows' and clears grid. Continues @buildLocTreeAndGrid.
+     * Resets 'openRows' and clears grid. Continues @buildLocGridTree.
      */
     function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
         var topLocs = topLoc || getTopRegionIds();
         gParams.openRows = topLocs.length === 1 ? topLocs[0] : [];
         clearPreviousGrid();
-        buildLocTreeAndGrid(topLocs);
+        buildLocGridTree(topLocs);
     }
     /**
      * Builds a tree of location data with passed locations at the top level, and 
@@ -1035,6 +1075,15 @@
             return childRow.interactions || hasChildInteractions(childRow);  
         });
     }
+    /** ------------ Location Grid Map Methods ------------------- */
+    /** Initializes the google map in the data grid. */
+    function buildLocGridMap(topRegions) {                                      console.log('buildLocGridMap');
+        _util.populateStorage('curRealm', 'map');                      
+        $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
+        eif.map.initMap();
+    }
+
+
 /*------------------Source Search Methods ------------------------------------*/
     /**
      * Get all data needed for the Source-focused grid from data storage and send  
@@ -2805,8 +2854,9 @@
         return true;
     }     
 /*-----------------Grid Manipulation------------------------------------------*/
-    function clearPreviousGrid() {                                              //console.log("clearing grid");
-        if (gridOptions.api) { gridOptions.api.destroy(); }     
+    function clearPreviousGrid() {                                              console.log("clearing grid");
+        if (gridOptions.api) { gridOptions.api.destroy(); }  
+        $('#search-grid').empty(); //Clears location map view
     }
     /**
      * Resets grid state to top focus options: Taxon and source are reset at current

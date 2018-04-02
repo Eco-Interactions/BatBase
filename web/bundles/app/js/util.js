@@ -227,7 +227,7 @@
     function populateStorage(key, val) {
         if (dataStorage) {                                                      //console.log("dataStorage active.");
             dataStorage.setItem(key, val);
-        } else { console.log("No Local Storage Available"); }
+        } else { console.log("####__ No Local Storage Available__####"); }
     }
     function removeFromStorage(key) {
         dataStorage.removeItem(key);
