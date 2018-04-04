@@ -128,6 +128,13 @@ class Location
     private $locationType;
 
     /**
+     * @var \AppBundle\Entity\GeoJSON
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJSON", mappedBy="location")
+     */
+    private $geoJSON;
+
+    /**
      * @var \Doctrine\Common\Collections\Collection
      *
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="location")
@@ -526,7 +533,7 @@ class Location
     {
         return $this->locationType;
     }
-
+    /** -------- Serialize Location Type Data ------------------------ */
     /**
      * Get locationType id and displayName.
      * @JMS\VirtualProperty
@@ -585,6 +592,30 @@ class Location
     private function getLocObj($loc)
     {
         return [ "id" => $loc->getId(), "displayName" => $loc->getDisplayName() ]; 
+    }
+    /** ---- End Location Type Data ---- */
+    /**
+     * Set geoJSON.
+     *
+     * @param \AppBundle\Entity\GeoJSON $geoJSON
+     *
+     * @return Source
+     */
+    public function setGeoJSON(\AppBundle\Entity\GeoJSON $geoJSON)
+    {
+        $this->geoJSON = $geoJSON;
+
+        return $this;
+    }
+
+    /**
+     * Get geoJSON.
+     *
+     * @return \AppBundle\Entity\GeoJSON
+     */
+    public function getGeoJSON()
+    {
+        return $this->geoJSON;
     }
 
     /**
