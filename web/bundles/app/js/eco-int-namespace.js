@@ -1,1 +1,1 @@
-ECO_INT_FMWK = {};
+const ECO_INT_FMWK = {};
