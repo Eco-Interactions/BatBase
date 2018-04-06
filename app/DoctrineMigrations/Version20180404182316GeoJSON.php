@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Schema;
 
 /**
  * Adds the GeoJSON entity and arranges the table columns. 
+ * Adds an iso_code field to the Location entity.
  */
 class Version20180404182316GeoJSON extends AbstractMigration
 {
@@ -26,6 +27,9 @@ class Version20180404182316GeoJSON extends AbstractMigration
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN coordinates LONGTEXT NOT NULL AFTER type;');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN created_by INT DEFAULT NULL AFTER created;');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN updated_by INT DEFAULT NULL AFTER updated;');
+
+        $this->addSql('ALTER TABLE location ADD iso_code VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE location MODIFY COLUMN iso_code VARCHAR(255) DEFAULT NULL AFTER description;');
     }
 
     /**
@@ -36,5 +40,6 @@ class Version20180404182316GeoJSON extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
         $this->addSql('DROP TABLE geo_json');
+        $this->addSql('ALTER TABLE location DROP iso_code');
     }
 }

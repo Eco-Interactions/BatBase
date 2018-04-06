@@ -44,6 +44,14 @@ class Location
     private $description;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="iso_code", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $isoCode;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="elevation", type="integer", nullable=true)
@@ -256,6 +264,31 @@ class Location
     {
         return $this->description;
     }
+
+    /**
+     * Set isoCode.
+     *
+     * @param string $isoCode
+     *
+     * @return Location
+     */
+    public function setIsoCode($isoCode)
+    {
+        $this->isoCode = $isoCode;
+
+        return $this;
+    }
+
+    /**
+     * Get isoCode.
+     *
+     * @return string
+     */
+    public function getIsoCode()
+    {
+        return $this->isoCode;
+    }
+
 
     /**
      * Set elevation.
