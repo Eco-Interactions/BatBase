@@ -643,6 +643,8 @@ class Location
 
     /**
      * Get geoJSON.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("geoJson")
      *
      * @return \AppBundle\Entity\GeoJSON
      */

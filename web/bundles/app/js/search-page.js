@@ -16,7 +16,7 @@
      *      data should be cleared and redownloaded.
      */
     let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-    const dataKey =  'Fight for Justice!!!!!!!!!!!! <3';
+    const dataKey =  'Fight for Justice!!!!!!!!!!!!!! <3';
     const eif = ECO_INT_FMWK;
     const _util = eif.util;
     const gridOptions = getDefaultGridOptions();
@@ -1077,10 +1077,18 @@
     }
     /** ------------ Location Grid Map Methods ------------------- */
     /** Initializes the google map in the data grid. */
-    function buildLocGridMap(topRegions) {                                      console.log('buildLocGridMap');
+    function buildLocGridMap(topRegions) {                                      console.log('buildLocGridMap. topRegions = %O', topRegions);
         _util.populateStorage('curRealm', 'map');                      
         $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
-        eif.map.initMap();
+        eif.map.initMap(buildLocCoordAry(topRegions));
+    }
+    function buildLocCoordAry(locIds) {
+        const coords = locIds.map(getLocCoords);
+
+    }
+    function getLocCoords(locId) {
+        const loc = getDetachedRcrd(locId); console.log('region = %O', loc);
+        return loc.geoJson;
     }
 
 

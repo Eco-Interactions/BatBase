@@ -1,4 +1,7 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
+>ASAP<
+- Add db backup cronjob to new host
+
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
     - Move site to new host
     - add https cert
@@ -6,12 +9,17 @@
     - begin to implement
         - gMaps API Key: AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw
 
+Data Changes:
+    
+
+
 
 Before Release:
     - update "Application restrictions" for the gMaps API Key to 'HTTP referrers (web sites)'
 
     ## Testing ##
     - Added Loc Views: tree and map
+
 
 >======== Email ============
 TAYLOR:
@@ -21,8 +29,8 @@ Tullenda:
     -
 
 >==== Change Log ====
-    - Added Bibliography
-    - 
+    - Added  ISO_codes for continents and countries
+    - Added geoJSON data for continents and countries
     - 
 
 >---- Add to Client Task List ---
@@ -46,6 +54,7 @@ TODOs:
     - {low}[easy] If a new authors display name is identical to another's, prompt 
         user to check for existing author and to add initials if not. 
     - {low}[easy] Validate that genus and species have the same genus names.
+    - {low}[easy] Remove PublisherType code
 
 (DATA)
     - {high}[med] write SQL script to get only records with updates/newly created  

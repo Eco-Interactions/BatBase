@@ -8,10 +8,27 @@
         initMap: initMap
     };
 
-    function initMap() { 
+    function initMap(locCoordAry) {                                             console.log('initMap. locCoordAry = %O', locCoordAry)
         const map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 2
+            center: {lat: -34.397, lng: 150.644},
+            zoom: 2,
+            styles: hideBusinessRoadPoiNames()
         });
+
+        function hideBusinessRoadPoiNames() {
+            return [
+                { featureType: 'poi.business',
+                  stylers: [{visibility: 'off'}] },
+                { featureType: 'transit',
+                  elementType: 'labels.icon',
+                  stylers: [{visibility: 'off'}] },
+                { featureType: 'poi',
+                  elementType: 'labels.icon',
+                  stylers: [{visibility: 'off'}] }];
+        }
+    } /* End initMap */
+
+    function drawOnMap(argument) {
+        // map.data.add({geometry: new google.maps.Data.Polygon(coordArray)});
     }
 }());
