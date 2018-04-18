@@ -28,6 +28,9 @@
 !/web/bundles/app
 /web/uploads/taxon/*
 
+# Node modules
+/node_modules/
+
 # PHPUnit
 /app/phpunit.xml
 /phpunit.xml
