@@ -74,6 +74,7 @@ TODOs:
 
 
 (STATIC/MISC SITE)
+    - {med}[complicated] Implement Encore for assets
     - {low}[???] Find out how to tell how many users are online
     - {high}[easy] Biliography (all cites in alphabetical order)
     - {med}[easy] Add EXIT click event for nav menu
@@ -132,3 +133,17 @@ TODOs:
         - css displays as expected.
         - all errors are caught and handled as expected
         -- check that edit forms show all data they should on load (ie, all authors/editors load)
+
+
+>Steps taken to build npm and encore
+    - Follow directions to install npm and yarn - https://symfony.com/doc/3.4/frontend.html
+    - Install jquery - $ npm install --save jquery
+    - After changing webpack config: 
+        - yarn run encore dev
+        - yarn run encore dev --watch
+        - yarn run encore production
+
+
+
+>Add to TODO
+    - CHANGE FEEDBACK DATATABLE TO AG-GRID 

@@ -38,58 +38,20 @@
         <meta name="keywords" content="bats plants insects biology taxonomy" />
         <meta name="robots" content="index, follow" />
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-        {% block stylesheets %}
-            <!-- Data Tables -->
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/jquery.dataTables.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/buttons.dataTables.min.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/fixedHeader.dataTables.min.css') }}" />
-            <!-- AgGrid -->
-            <link rel="stylesheet" href="{{ asset('bundles/app/grid/ag-grid.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/grid/theme-fresh.css') }}" />
-            <!-- wysiwyg -->
-            <link rel="stylesheet" href="{{ asset('bundles/app/trumbowyg/ui/trumbowyg.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/flatpickr.css') }}">
-            <!-- calendar -->
-            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/flatpickr.css') }}">
-            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/confirmDate.css') }}">
-            <!-- Custom -->
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/ei-reset.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/header.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/search_db.css') }}" />
-            <link rel="stylesheet" href="{{ asset('bundles/app/css/oi.css') }}" />
-        {% endblock stylesheets %}
-        {% block javascripts %}
-            <script src="{{ asset('bundles/app/js/eco-int-namespace.js') }}"></script>
-            <!-- switch to minified libs for production -->
-            <script src="{{ asset('bundles/app/js/jquery/jquery-2.1.4.js') }}"></script>
-            <script src="{{ asset('bundles/app/grid/ag-grid.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/slider/eif-frames.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/slider/oislider-config.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/slider/beaverslider-full.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/slider/oislider.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/menus/menu-manager.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/menus/menu-helper.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/menus/menu-helper-init.js') }}"></script>
-            <!-- Data Tables -->
-            <script src="{{ asset('bundles/app/js/data-tables/jquery.dataTables.min.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/data-tables/dataTables.buttons.min.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/data-tables/buttons.html5.min.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/data-tables/dataTables.fixedHeader.min.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/data-tables/oi-tables.js') }}"></script>
-            <!-- wysiwyg -->
-            <script src="{{ asset('bundles/app/trumbowyg/trumbowyg.js') }}"></script>
-            <!-- calendar -->
-            <script src="{{ asset('bundles/app/flatpickr/flatpickr.js') }}"></script>
-            <script src="{{ asset('bundles/app/flatpickr/confirmDate.js') }}"></script>
-            <!-- customs -->
-            <script src="{{ asset('bundles/app/js/util.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/tos.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/crud.js') }}"></script>
-            <script src="{{ asset('bundles/app/js/oi.js') }}"></script>
+        <meta name="viewport" content="width=device-width, user-scalable=no" />
+        <link rel="manifest" href="{{ asset('bundles/app/build/manifest.json') }}" />
 
-            {% if is_granted("ROLE_USER") %}
-                <script src="{{ asset('bundles/app/js/feedback.js') }}"></script>
-            {% endif %}
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/app/wysiwyg/ui/trumbowyg.min.css') }}">
+        {% endblock stylesheets %}
+        
+        {% block javascripts %}
+            <script src="{{ asset('build/manifest.js') }}"></script>            
+            <script src="{{ asset('build/libs.js') }}"></script>
+            <script src="{{ asset('build/static.js') }}"></script>
+            <script src="{{ asset('build/app.js') }}"></script>
+            <script src="{{ asset('bundles/app/wysiwyg/trumbowyg.min.js') }}"></script>
         {% endblock javascripts %}
     </head>
 

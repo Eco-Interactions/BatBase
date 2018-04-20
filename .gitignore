@@ -30,6 +30,10 @@
 
 # Node modules
 /node_modules/
+/yarn-error.log
+
+# Generated assets
+/web/build/*
 
 # PHPUnit
 /app/phpunit.xml
@@ -42,3 +46,6 @@
 /composer.phar
 /composer-setup.php
 composer.lock
+
+# Local Backups
+/web/bundles/app/hide/*

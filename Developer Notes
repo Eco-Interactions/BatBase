@@ -20,6 +20,15 @@ Cache busting:
         $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
 - Extend php.ini memory-limit
 
+>Steps taken to build npm and encore
+    - Follow directions to install npm and yarn - https://symfony.com/doc/3.4/frontend.html
+    - Install jquery - $ npm install --save jquery
+    - Install ag-grid - $ npm install --save ag-grid
+    - Asset generation commands: 
+        - yarn run encore dev
+        - yarn run encore dev --watch (run while working on asset code)
+        - yarn run encore production
+
 
 ## TESTING ##
 >Testing software setup

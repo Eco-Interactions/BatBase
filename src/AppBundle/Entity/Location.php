@@ -650,7 +650,7 @@ class Location
      */
     public function getGeoJSON()
     {
-        return $this->geoJSON;
+        // return $this->geoJSON;
     }
 
     /**
