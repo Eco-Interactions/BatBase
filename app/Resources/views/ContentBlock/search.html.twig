@@ -1,19 +1,16 @@
 {% extends "layout.html.twig" %}
 
 {# {% set interaction = entity %} #}
+
 {% block stylesheets %}
     {{parent()}}
     <link rel="stylesheet" href="{{ asset('build/search.css') }}" />
 {% endblock %}
 
-{% block javascripts %}
-    {{parent()}}
-    <script src="{{ asset('build/search.js') }}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw&callback=Function.prototype"></script>
-{% endblock %}
+{# Javascript after detail block. #}
 
 {% block headline %}
-	Database Search
+    Database Search
 {% endblock headline %}
 
 {% block detail %}
@@ -65,4 +62,11 @@
         <div id="grid-overlay"></div>
         <div id="grid-popup"></div>
     </div>
+
 {% endblock detail %}
+
+{% block javascripts %}
+    {{parent()}}
+    <script src="{{ asset('build/search.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw&callback=Function.prototype"></script>
+{% endblock %}

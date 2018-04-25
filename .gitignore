@@ -48,4 +48,4 @@
 composer.lock
 
 # Local Backups
-/web/bundles/app/hide/*
+/assets/hide/*

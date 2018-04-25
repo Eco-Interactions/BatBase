@@ -2,13 +2,10 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('bundles/app/css/feedback-viewer.css') }}" />
+    <link rel="stylesheet" href="{{ asset('build/feedback.css') }}" />
 {% endblock stylesheets %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="{{ asset('bundles/app/js/feedback-viewer.js') }}"></script>
-{% endblock javascripts %}
+{# Javascript after detail block. #}
 
 {% block pageid %}
     exprtContnt
@@ -70,3 +67,8 @@
         </tbody>
     </table>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('build/feedback.js') }}"></script>
+{% endblock javascripts %}

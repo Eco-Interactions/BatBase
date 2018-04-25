@@ -45,14 +45,7 @@
             <link rel="stylesheet" href="{{ asset('build/app.css') }}">
             <link rel="stylesheet" href="{{ asset('bundles/app/wysiwyg/ui/trumbowyg.min.css') }}">
         {% endblock stylesheets %}
-        
-        {% block javascripts %}
-            <script src="{{ asset('build/manifest.js') }}"></script>            
-            <script src="{{ asset('build/libs.js') }}"></script>
-            <script src="{{ asset('build/static.js') }}"></script>
-            <script src="{{ asset('build/app.js') }}"></script>
-            <script src="{{ asset('bundles/app/wysiwyg/trumbowyg.min.js') }}"></script>
-        {% endblock javascripts %}
+        <!-- Javascript at end of body. -->
     </head>
 
     <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}" data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
@@ -107,5 +100,13 @@
         </div>
         {# <div id="b-popup"></div> #}
     {% endblock body %}
+
+    {% block javascripts %}
+        <script src="{{ asset('build/manifest.js') }}"></script>            
+        <script src="{{ asset('build/libs.js') }}"></script>
+        <script src="{{ asset('build/static.js') }}"></script>
+        <script src="{{ asset('build/app.js') }}"></script>
+        <script src="{{ asset('bundles/app/wysiwyg/trumbowyg.min.js') }}"></script>
+    {% endblock javascripts %}
     </body>
 </html>
