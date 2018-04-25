@@ -2,9 +2,8 @@ const tableMngr = require('./oi-tables.js');
 
 requireCss();
 requireGlobalJs();
-initImageSlider();
-initDataTable();
-initStickyHeader();
+initUi();
+authDependantInit();  
 
 function requireCss() {
     require('../../css/ei-reset.css');
@@ -13,9 +12,19 @@ function requireCss() {
 function requireGlobalJs() {
     
 }
+/** ---------------------------- UI ----------------------------------------- */
+function initUi() {
+    initImageSlider();
+    initDataTable();
+    initStickyHeader();
+}
+function initImageSlider() {                                                
+    const imageSlider  =  require('./oislider.js'); 
+    imageSlider.init();
+}
 /**
- * Initiates tables and rearranges realted UI. Used on feedback and bilio pages.
- * Refactor to use ag-grid.
+ * Initiates tables and rearranges realted UI. Used on the feedback and bilio pages.
+ * TODO: Refactor to use ag-grid.
  */ 
 function initDataTable() { 
     const tableName = $('#pg-container').data("has-tbl"); 
@@ -23,10 +32,6 @@ function initDataTable() {
     tableMngr.initTables(tableName); 
     tableMngr.relocCtrls(tableName); 
 } 
-function initImageSlider() {                                                
-    const imageSlider  =  require('./oislider.js'); 
-    imageSlider.init();
-}
 function initStickyHeader() {
     var $stickyMenu = $('#sticky-hdr');
     $(window).scroll(function () {
@@ -37,3 +42,13 @@ function initStickyHeader() {
             }
     });
 };
+/** ------------------ Auth Dependant --------------------- */
+function authDependantInit() { 
+    const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
+    if (['admin', 'super'].indexOf(userRole) !== -1) { initEditContentUi(); }
+    
+    function initEditContentUi() {
+        const wysiwyg = require('./wysiwyg.js');
+        wysiwyg.init(userRole);
+    }
+}  /* End authDependantInit */
