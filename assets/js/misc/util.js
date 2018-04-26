@@ -60,6 +60,31 @@ function sortProperties(obj) {
         returnObj[key] = val;
     }
 }
+/*-------- - CSS Helpers ------------------------------------------------*/
+// function addOrRemoveCssClass(element, className, add) {
+//     if (add) { addCssClass(element, className);
+//     } else { removeCssClass(element, className); }
+// }
+// function removeCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         var index = cssClasses.indexOf(className);
+//         if (index >= 0) {
+//             cssClasses.splice(index, 1);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+// };
+// function addCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         if (cssClasses.indexOf(className) < 0) {
+//             cssClasses.push(className);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+//     else { element.className = className; }
+// };
 /*-------- - HTML Helpers ------------------------------------------------*/
 function buildElem(tag, attrs) {                                           //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     var elem = document.createElement(tag);
@@ -173,7 +198,6 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
       }
 }
 /*--------------------------Storage Methods-------------------------------*/
-
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 

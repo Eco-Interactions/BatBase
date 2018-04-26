@@ -1,23 +1,25 @@
-const exports = module.exports = {};  /*framePlayer init*/  
-exports.stickyOffset = 423;
-exports.initTables = function(tableName) {  /*  lastExpt                */
+const exports = module.exports = {
+    stickyOffset: 423,
+    init: init,
+};  /*framePlayer init*/  
+
+function init(tableName) { 
     requireJs();
     requireCss();
     initTable(tableName);
 } 
 function requireJs() {
-    require('../../DT/js/jquery.dataTables.min.js'); 
-    require('../../DT/js/dataTables.buttons.min.js');
-    require('../../DT/js/buttons.html5.min.js'); 
-    require('../../DT/js/dataTables.fixedHeader.min.js');
+    require('../../libs/DT/js/jquery.dataTables.min.js'); 
+    require('../../libs/DT/js/dataTables.buttons.min.js');
+    require('../../libs/DT/js/buttons.html5.min.js'); 
+    require('../../libs/DT/js/dataTables.fixedHeader.min.js');
 } 
 function requireCss() { 
-    require('../../DT/css/dataTable.css');
-    require('../../DT/css/jquery.dataTables.min.css');
-    require('../../DT/css/buttons.dataTables.min.css');
-    require('../../DT/css/fixedHeader.dataTables.min.css');
+    require('../../libs/DT/css/dataTable.css');
+    require('../../libs/DT/css/jquery.dataTables.min.css');
+    require('../../libs/DT/css/buttons.dataTables.min.css');
+    require('../../libs/DT/css/fixedHeader.dataTables.min.css');
 }
-
 function initTable(tableName) {
     var tables = {  /*      sortCol  pgLngth    Col  hideSlider scroll  */
                 feedback_tbl: [   0,  'onehund',  5,    true,   false],
@@ -26,6 +28,7 @@ function initTable(tableName) {
     var tblParams = tables[tableName];
     tblParams.push('#' + tableName);
     initOiDataTable.apply(null, tblParams);
+    relocCtrls(tableName);
 
     function initOiDataTable(dfltSrtCol, pgLgthList, lastExptCol, hideSlider, scroll, selector) {
         var xportCols = getExportColArray(lastExptCol);  
@@ -84,8 +87,7 @@ function initTable(tableName) {
         }/* End dataTblCfg */
     }  /* END initOiDataTable */
 } /* END initTables */
-
-exports.relocCtrls = function(tableName) {
+function relocCtrls(tableName) {
     var tblFilter = '#' + tableName + "_filter";            
     var tblLength = '#' + tableName + "_length";            
     var $filterDiv = $(tblFilter);

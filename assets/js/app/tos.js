@@ -1,111 +1,82 @@
-$(document).ready(function() {
+const exports = module.exports = { init: init };
+
+function init() {
     $('#reg-tos, #footer-tos, .tos-trigger').click(showTos);
     hideRegistrationSubmit();
+}
 
-    /** If this is the registration page, diable the submit button. */
-    function hideRegistrationSubmit() {
-        if ($("#reg-submit")) { replaceWithAcceptTosBttn(); }
+/** If this is the registration page, diable the submit button. */
+function hideRegistrationSubmit() {
+    if ($("#reg-submit")) { replaceWithAcceptTosBttn(); }
+}
+function replaceWithAcceptTosBttn() {
+    $('#reg-submit').hide()
+}
+/** Show the ToS. If this is the registration page, show the 'accept' elements */
+function showTos() {  
+    if ($(this)[0].id === "reg-tos") { 
+        showTosWindow();
+        addRegistrationTosElems();
+    } else { showTosWindow(); }
+    addCloseButton();
+}
+function addCloseButton() {
+    $("#b-overlay-popup").append(`
+        <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
+    $('#close-tos-bttn').click(closeTosWindow)
+}
+function showTosWindow() {  console.log("showTosWindow called")
+    $("#b-overlay-popup").html(getTosHtml);
+    $("#b-overlay-popup").addClass("tos-popup");
+    bindEscEvents();
+    $('#b-overlay, #b-overlay-popup').fadeIn(500);
+
+    function bindEscEvents() {
+        $(document).on('keyup',function(evt) {
+            if (evt.keyCode == 27) { closeTosWindow(); }
+        });
+        $("#b-overlay").click(closeTosWindow);
+        $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
     }
-    function replaceWithAcceptTosBttn() {
-        $('#reg-submit').hide()
-    }
-    /** Show the ToS. If this is the registration page, show the 'accept' elements */
-    function showTos() {  
-        if ($(this)[0].id === "reg-tos") { 
-            showTosWindow();
-            addRegistrationTosElems();
-        } else { showTosWindow(); }
-        addCloseButton();
-    }
-    function addCloseButton() {
-        $("#b-overlay-popup").append(`
-            <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
-        $('#close-tos-bttn').click(closeTosWindow)
-    }
-    function showTosWindow() {  console.log("showTosWindow called")
-        $("#b-overlay-popup").html(getTosHtml);
-        $("#b-overlay-popup").addClass("tos-popup");
-        bindEscEvents();
-        $('#b-overlay, #b-overlay-popup').fadeIn(500);
+} /* End showTosWindow */
+function closeTosWindow() {
+    $("#b-overlay").css({ "display": "none" });
+    unbindEscEvents();
+    removeTosStyles();
+}
+function unbindEscEvents() {
+    $(document).on('keyup',function(){});
+    $("#b-overlay").click(function(){});
+}
+function removeTosStyles() {
+    $("#b-overlay-popup").removeClass("tos-popup");
+    $("#b-overlay").removeClass("flex-col");
+    $("#b-overlay-popup").empty();
+}
+function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
+    var acceptDiv = document.createElement("div");
+    acceptDiv.id = "accept-tos-cntnr";
+    acceptDiv.className = "flex-col";
+    $(acceptDiv).append(acceptTosHtml());
+    $("#b-overlay-popup").append(acceptDiv);
 
-        function bindEscEvents() {
-            $(document).on('keyup',function(evt) {
-                if (evt.keyCode == 27) { closeTosWindow(); }
-            });
-            $("#b-overlay").click(closeTosWindow);
-            $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
-        }
-    } /* End showTosWindow */
-    function closeTosWindow() {
-        $("#b-overlay").css({ "display": "none" });
-        unbindEscEvents();
-        removeTosStyles();
-    }
-    function unbindEscEvents() {
-        $(document).on('keyup',function(){});
-        $("#b-overlay").click(function(){});
-    }
-    function removeTosStyles() {
-        $("#b-overlay-popup").removeClass("tos-popup");
-        $("#b-overlay").removeClass("flex-col");
-        $("#b-overlay-popup").empty();
-    }
-    function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
-        var acceptDiv = document.createElement("div");
-        acceptDiv.id = "accept-tos-cntnr";
-        acceptDiv.className = "flex-col";
-        $(acceptDiv).append(acceptTosHtml());
-        $("#b-overlay-popup").append(acceptDiv);
+    $("#accept-tos").click(acceptTos);
+}
+function acceptTosHtml() {
+    return `
+        <span>These Terms of Use are always available in bottom right of any page on this website.</span>
+        <label id="accept-tos" class="top-em-mrg">
+            <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
+        </label>`;
+}
+function acceptTos() {
+    $('#reg-tos').hide();
+    $('#reg-submit').show();
+}
 
-        $("#accept-tos").click(acceptTos);
-    }
-    function acceptTosHtml() {
-        return `
-            <span>These Terms of Use are always available in bottom right of any page on this website.</span>
-            <label id="accept-tos" class="top-em-mrg">
-                <input type="checkbox"> I agree to the Bat Eco-Interactions Terms and Conditions of Use.
-            </label>`;
-    }
-    function acceptTos() {
-        $('#reg-tos').hide();
-        $('#reg-submit').show();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    function getTosHtml() {
-        return `<div id="terms-div">
-    <h3>batplant.org Terms of use</h3>
+function getTosHtml() {
+    return `<div id="terms-div">
+<h3>batplant.org Terms of use</h3>
 <span class="lbl top-em-mrg">General</span>
 <p>These Terms of Use apply to the use of the information at The Bat Eco-Interactions project. By submitting information to, accessing, using or downloading data from Bat Eco-Interactions, users enter into a binding agreement to accept the Terms of Use described herein.</p>
 
@@ -141,5 +112,4 @@ $(document).ready(function() {
 <span class="lbl">Changes to the Terms of Use</span>
 <p>Bat Eco-Interactions may alter these Terms of Use at any time or apply different Terms of Use to certain material. These Terms of Use will not be altered retrospectively.</p>
 </div>`;
-    }
-});
+}

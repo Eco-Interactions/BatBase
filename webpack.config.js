@@ -27,30 +27,20 @@ Encore
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
-        agGrid: 'ag-grid',
-        introJs: './assets/js/libs/intro.js'
+        agGrid: 'ag-grid'
     })
     
     /** ------- Site Js/Style Entries ----------------- */
     
     // will create web/build/app.js and web/build/app.css
-    .addEntry('app', ['./assets/js/app/util.js', './assets/js/app/oi.js', 
-        './assets/js/app/wysiwyg.js', './assets/js/app/feedback.js'  ])
+    .addEntry('app', './assets/js/app/oi.js' )
 
-    .addEntry('static', [ './assets/js/app/global.js', './assets/js/app/tos.js', 
-        './assets/js/app/slider/eif-frames.js', './assets/js/app/slider/oislider-config.js',
-        './assets/js/app/slider/oislider.js' ])
+    .addEntry('db', './assets/js/db/db-page.js')
 
-    .addEntry('search', [ './assets/js/srch/sync-data.js', './assets/js/srch/map-data.js', 
-        './assets/js/srch/crud.js', './assets/js/srch/search-page.js' ])
-
-    .addEntry('feedback', [ './assets/js/fdbk/buttons.html5.min.js', 
-        './assets/js/fdbk/dataTables.buttons.min.js', './assets/js/fdbk/dataTables.fixedHeader.min.js',
-        './assets/js/fdbk/dataTables.responsive.min.js', './assets/js/fdbk/jquery.dataTables.min.js',
-        './assets/js/fdbk/oi-tables.js'])
+    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
 
     .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js'  ])
+        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js' ])
 ; 
 
 // export the final configuration

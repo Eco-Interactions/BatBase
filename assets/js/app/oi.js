@@ -1,5 +1,4 @@
-const tableMngr = require('./oi-tables.js');                                    
-
+/* ============================== MAIN JS =================================== */
 requireCss();
 requireGlobalJs();
 initUi();
@@ -10,29 +9,34 @@ function requireCss() {
     require('../../css/oi.css');    
 }
 function requireGlobalJs() {
-    
+    // const $ = require('jquery');
+    // global.$ = $;
+    // global.jQuery = $;
 }
-/** ---------------------------- UI ----------------------------------------- */
+/* ---------------------------- UI ------------------------------------------ */
 function initUi() {
+    initTos();
     initImageSlider();
-    initDataTable();
-    initStickyHeader();
+    initStickyHeaderAndDataTable();
+}
+function initTos() {
+    require('./tos.js').init();
 }
 function initImageSlider() {                                                
-    const imageSlider  =  require('./oislider.js'); 
-    imageSlider.init();
+    require('./oislider.js').init();
 }
 /**
  * Initiates tables and rearranges realted UI. Used on the feedback and bilio pages.
  * TODO: Refactor to use ag-grid.
  */ 
-function initDataTable() { 
+function initStickyHeaderAndDataTable() { 
+    const tableMngr = require('../misc/oi-tables.js');                                    
     const tableName = $('#pg-container').data("has-tbl"); 
-    if (tableName === false) { return; } 
-    tableMngr.initTables(tableName); 
-    tableMngr.relocCtrls(tableName); 
+    if (tableName === false) { return initStickyHeader(tableMngr); } 
+    tableMngr.init(tableName); 
+    initStickyHeader(tableMngr);
 } 
-function initStickyHeader() {
+function initStickyHeader(tableMngr) {
     var $stickyMenu = $('#sticky-hdr');
     $(window).scroll(function () {
         if ($(window).scrollTop() > tableMngr.stickyOffset) {
@@ -42,13 +46,19 @@ function initStickyHeader() {
             }
     });
 };
-/** ------------------ Auth Dependant --------------------- */
+/* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
+    if (userRole === 'visitor') { return; }
     if (['admin', 'super'].indexOf(userRole) !== -1) { initEditContentUi(); }
+    initFeedbackUi();     
     
     function initEditContentUi() {
         const wysiwyg = require('./wysiwyg.js');
         wysiwyg.init(userRole);
     }
 }  /* End authDependantInit */
+function initFeedbackUi() {
+    const feedback = require('./feedback.js');
+    feedback.init();
+}

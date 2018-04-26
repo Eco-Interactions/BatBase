@@ -43,7 +43,6 @@
 
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('build/app.css') }}">
-            <link rel="stylesheet" href="{{ asset('bundles/app/wysiwyg/ui/trumbowyg.min.css') }}">
         {% endblock stylesheets %}
         <!-- Javascript at end of body. -->
     </head>
@@ -104,9 +103,8 @@
     {% block javascripts %}
         <script src="{{ asset('build/manifest.js') }}"></script>            
         <script src="{{ asset('build/libs.js') }}"></script>
-        <script src="{{ asset('build/static.js') }}"></script>
         <script src="{{ asset('build/app.js') }}"></script>
-        <script src="{{ asset('bundles/app/wysiwyg/trumbowyg.min.js') }}"></script>
+        <!-- <script src="{{ asset('build/static.js') }}"></script> -->
     {% endblock javascripts %}
     </body>
 </html>

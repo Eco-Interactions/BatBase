@@ -147,3 +147,7 @@ TODOs:
 
 >Add to TODO
     - CHANGE FEEDBACK DATATABLE TO AG-GRID 
+
+    >Email
+        - agrid and datatables have super depreceated code
+        - dt icons aren't accesible easily with webpack processing

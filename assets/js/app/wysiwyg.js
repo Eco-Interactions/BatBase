@@ -1,13 +1,17 @@
 const exports = module.exports = {};
 /*=================== Content Block WYSIWYG ======================================================*/
-const _util = require('./util.js');                                             //console.log('util = %O', _util);    
+require('../../libs/wysiwyg/trumbowyg.min.js');
+require('../../libs/wysiwyg/ui/trumbowyg.min.css');
+
+const _util = require('../misc/util.js');                                             //console.log('util = %O', _util);    
+
 let userRole;                                        
 /**
  *  Adds edit content button to the top of any page with editable content blocks.
  */
 exports.init = function(role) { 
     userRole = role;
-    var contentBlocks = $('.wysiwyg');                                      //console.log("contentBlocks = %O", contentBlocks);
+    var contentBlocks = $('.wysiwyg');                                          //console.log("contentBlocks = %O", contentBlocks);
     if (contentBlocks.length > 0) { addEditContentButton(); }
 } /* End initWysiwyg */
 function addEditContentButton() {
@@ -30,7 +34,7 @@ function addEditContentButton() {
  * Manages init and exit 'edit states' and related ui on the page.
  */
 function toggleContentBlockEditing() { 
-    var editorElem = $('#editContentBttn').data('editing');                 //console.log("toggling.  editorElem = %O", editorElem)
+    var editorElem = $('#editContentBttn').data('editing');                     //console.log("toggling.  editorElem = %O", editorElem)
     if (editorElem !== false) {
         $('#editContentBttn').text("Refreshing...");
         location.reload(true);

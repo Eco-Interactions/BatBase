@@ -1,3 +1,4 @@
+const exports = module.exports = { init: init };
 var minTopicChars = 3; 
 var minContentChars = 10;
 var maxTopicChars = 50;
@@ -8,31 +9,26 @@ var $masthead = $('#masthead');
 var feedbackUrl = $body.data('ajax-target-url') + 'feedback/post';
 var thisUrl = $body.data('this-url');
 var $lastTopMenu = $('#oimenu>li.last');
-
-if ($('body').data("user-role") !== 'visitor') { initFeedbackUi(); };     
     
 /** Creates the "Leave Feedback" menu option for all registered users. */
-function initFeedbackUi() {
+function init() {
     if (feedbackUrl !== "false") {
         createFeedbackPopUp();
         $lastTopMenu.after('<li id="feedback-menu"><a href="#">Leave Feedback</a></li>');
         $('#feedback-menu').on('click', showFeedbackPopup);
     }
 }
-
 function showFeedbackPopup() {
     addPopupEvents();               
     submitDisabled && hasValidData() && enableSubmit();
     $('#feedback-popup').fadeIn("slow");
 }
-
 function hasValidData() {
     return $('#feedback-popup input').val().length >= minTopicChars && 
         $('#feedback-popup>textarea').val().length >= minContentChars;
 }
-
 function postFeedback() {
-    const _util = require('./util.js'); console.log('util = %O', _util);
+    const _util = require('../misc/util.js');                                   console.log('util = %O', _util);
     var data = {
             routeStr: thisUrl, 
             topicStr: $('#feedback-popup input').val(), 
@@ -40,13 +36,11 @@ function postFeedback() {
         };
     closePopup() && _util.sendAjaxQuery(data, feedbackUrl, feedbackSubmitted);
 }
-
 function closePopup() {
     console.log('closePopup called');
     $('#feedback-popup').fadeOut("slow");
     return true;
 }
-
 function feedbackSubmitted(data, textStatus, jqXHR) {
     console.log("feedbackSubmitted - data = %O", data);
     $('#feedback-popup>textarea').val('');
@@ -54,15 +48,12 @@ function feedbackSubmitted(data, textStatus, jqXHR) {
     setTopicsChars(0);
     setContentChars(0);
 }
-
 function setTopicsChars(charCnt) {
     $('#topic-chars').text(getCharStr(charCnt, minTopicChars, maxTopicChars))
 }
-
 function setContentChars(charCnt) {
     $('#content-chars').text(getCharStr(charCnt, minContentChars, maxContentChars))
 }
-
 function getCharStr(curCnt, min, max) {
     if (curCnt < min) {
         submitDisabled || disableSubmit();
@@ -74,32 +65,27 @@ function getCharStr(curCnt, min, max) {
 
     }
 }
-
 function enableSubmit() {
     console.log("enableSubmit called");
     $('#feedback-popup').on('click', "button[name='post-feedback']", postFeedback);
     $("#feedback-popup>button[name='post-feedback']").fadeTo( 'fast', 1);
     submitDisabled = false;
 }
-
 function disableSubmit() {
     console.log("disableSubmit called");
     $("#feedback-popup>button[name='post-feedback']").fadeTo( 'fast' , .35);
     $('#feedback-popup').off('click', "button[name='post-feedback']", postFeedback);
     submitDisabled = true;
 }
-
 function removePopupEvents() {
     $('#feedback-popup').off('click');
     $('#feedback-popup').off('keyup');
 }
-
 function addPopupEvents() {
     $('#feedback-popup').on('click', "button[name='cancel-feedback']", closePopup);
     $('#feedback-popup').on('keyup', 'input', function(){ setTopicsChars($(this).val().length); });
     $('#feedback-popup').on('keyup','textarea' ,function(){ setContentChars($(this).val().length); });
 }
-
 function createFeedbackPopUp() {
     var helpTxt = 'Leave us some feedback about you experience ' + 
         'of using the Bat Eco-Interactions database. ' +
