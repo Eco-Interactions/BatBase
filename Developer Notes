@@ -1,161 +1,109 @@
-Developer Notes:
+##Tip: Syntax highlight file with YAML to see highlighting##
+>Deployment Steps
+## 
+Cache busting:
+    - {config.yml} Update assets version
+    - {search-page.js} Change dataKey    
 
-=========================================================================
-
-READ ME
-
-<<<<<<< HEAD
-HOW TO RUN TESTS
-    phpunit -c app/ tests   
-    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
-
-=======
-
-## DEPLOYMENT / INSTALLATION ##
->>>>>>> js-crud
-
-Deployment Steps:
-    >Cache busting:
-        config.yml:
-            "Framework":
-                assets:
-                    version: 'v%'"              
-
-Install Cmds
-  > composer update
-  > Set file permissions:
-    > Ubuntu : 
-      $ sudo chgrp www-data /var/www/* -R //Make sure the group is www-data on '/var/www'
-      $ sudo chmod 775 /var/www/* -R  //Make '/var/www' writable for the group
-      $ sudo chmod g+s /var/www/* -R  //Set the GID for www-data for all sub-folders
-      $ sudo usermod -a -G www-data [YOURUSERNAME]  // add your username to the www-data group
-      Or/And (from symfony docs, didn't work before cmds above... probably user err)
-       $ HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx' | grep -v root | head -1 | cut -d\  -f1)
-       $ sudo setfacl -dR -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
-       $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
-<<<<<<< HEAD
-
-
-
-
-
-Best practices:
-    comments:
-        //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-External Todo:
-    --Zenbol-
-        --PAYMENT PAGE FOR WHM
-        --CRON JOB BACKUPS
-=======
-    > Extend php.ini memory-limit
+>Install Steps 
+## 
+- composer update
+- Set file permissions:
+    * debian
+        $ sudo chgrp www-data /var/www/* -R //Make sure the group is www-data on '/var/www'
+        $ sudo chmod 775 /var/www/* -R  //Make '/var/www' writable for the group
+        $ sudo chmod g+s /var/www/* -R  //Set the GID for www-data for all sub-folders
+        $ sudo usermod -a -G www-data [YOURUSERNAME]  // add your username to the www-data group
+        Or/And (from symfony docs, didn't work before cmds above... probably user err)
+        $ HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx' | grep -v root | head -1 | cut -d\  -f1)
+        $ sudo setfacl -dR -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
+        $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
+- Extend php.ini memory-limit
 
 
 ## TESTING ##
-HOW TO RUN TESTS
-    >> Pre-test installs <<
-        > Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
-            > Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
-        > Install Chrome Driver (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
-
-    >> Set up test db before tests: <<
-        (generate fixtures as needed: php bin/console generate:fixtures)
-        php bin/console doctrine:database:drop --force --env=test 
-        php bin/console doctrine:database:create --env=test
-        php bin/console doctrine:schema:update --force --env=test
-        php bin/console hautelook_alice:fixtures:load --env=test
-
-    >> Start Selenium << 
-        $ java -jar [selenium-server-standalone-3.5.3.jar]
-
-    >> Run Tests <<
-        > Unit Tests <
-          phpunit = ./vendor/bin/simple-phpunit
-            [phpunit] -c app/ tests   
-            [phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
-        > Functional Tests (Behat/Mink) <
-          >> all test: ./vendor/bin/behat 
-          >> test feature: ./vendor/bin/behat features/[FeatureName].feature
-
-    >> Resources used during set-up <<
-        > https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
-        > https://knpuniversity.com/screencast/behat
+>Testing software setup
+- Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
+    - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
+- Install Chrome Driver (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
 
 
-## BEST PRACTICES ##
-    comments:
-        //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
+>HOW TO RUN TESTS: 
+##Automatically ran at the start of tests:
+##  (generate fixtures as needed: php bin/console generate:fixtures)
+##  php bin/console doctrine:database:drop --force --env=test 
+##  php bin/console doctrine:database:create --env=test
+##  php bin/console doctrine:schema:update --force --env=test
+##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
+Start Selenium: 
+    $ java -jar [selenium-server-standalone-3.5.3.jar]
 
->>>>>>> js-crud
+Run Tests:
+    - Unit Tests:
+        $phpunit = ./vendor/bin/simple-phpunit
+        [$phpunit] -c app/ tests   
+        [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+    - Functional Tests (Behat/Mink):
+        all tests: ./vendor/bin/behat 
+        single feature: ./vendor/bin/behat features/[FeatureName].feature
 
--------------------------------------------------------------------------------------------------------
+##Resources used during set-up 
+# https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
+# https://knpuniversity.com/screencast/behat
 
 
+>BEST PRACTICES
+## Standards decided upon and why
+comments:
+    //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
 
-<<<<<<< HEAD
-=======
-
-
-::BUGS::
-    ## Search Page ##
-    >> The grid filter menus seem to not get cleared and/or destroyed properly with 
-      each call to setRowData. If that menu was displayed with previous grid instances, 
-      the previous filter menu options will be displayed and the new ones on top of 
-      them, causing the text to appear boldened and difficult to read-- even worse 
-      the menu is obviously inaccurrate. 
-    ## Forms ##
-        >> Citation
-          --Removing previously selected authors from the dropdowns of new authors will 
-            require a bit of creativity. Currently, only the last selected author name 
-            is removed from the new combobox's options.  
-          --Removing empty author comboboxes has proven more complicated than expected. 
-            There is a some weirdness on 'destroy' in the selectize library that needs 
-            to be isolated.
-
-    ## composer.json ## 
+>::Known BUGS::
+## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 
+Search Page:
+    - The grid filter menus seem to not get cleared and/or destroyed properly with 
+    each call to setRowData. If that menu was displayed with previous grid instances, 
+    the previous filter menu options will be displayed and the new ones on top of 
+    them, causing the text to appear boldened and difficult to read-- even worse 
+    the menu is obviously inaccurrate. 
+Forms:
+    - Citation
+        * Removing previously selected authors from the dropdowns of new authors will 
+        require a bit of creativity. Currently, only the last selected author name 
+        is removed from the new combobox's options.  
+        * Removing empty author comboboxes has proven more complicated than expected. 
+        There is a some weirdness on 'destroy' in the selectize library that needs 
+        to be isolated.
+composer.json:
     -- Removed from symfony-scripts because it deletes everything in the web/bundles 
       folder... The resoures/public is supposed to be symlinked into web/bundles folder 
-      on update, but it is not working. (waiting to fix, potentially after the 3.4 update):
-      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",  
-
-
-
-
-
->>>>>>> js-crud
-::Checked data wonkiness::
-    -'northern mariana islands' is the name from red list.
+      on update, but it is not working. (waiting to fix, potentially after the 3.4 update)
+      ("Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets") 
+data wonkiness:
     - Id inconsistencies in the db are from early testing with the interaction 
       form before Sarah was conscious of the need to 'remove' entities via doctrine, 
       rather than just deleting test rows from the db. There is now a db-migration, 
       000EraseTests, that removes test entities so they can be safely deleted from 
       the db without remaining in memory.
-
-
-
-## Serialization ##
--- Data not serialized  
-    - Taxon
-        - Namings (and Taxonym)
-    - Tag
-        - IntTypeConstraints
-    - Authority
-
-
----- To the future dev ----
   
-~ Tips for jumping to specific areas of the code ~
-
-search-page.js
-    >> Jump to the start of a grid-tree build <<
+>Tips for jumping to specific areas of the code
+search-page.js:
+    - Jump to the start of a grid-tree build
         * Search for "--[Taxon, Location, Source] Search Methods"
-    >> Jump to the data formatting <<
+    - Jump to the data formatting
         * Search for "-- [Taxon, Location, Source] Data Formatting"
 
-sync-data.js
-    ~ Data storage init ~
-        >> Jump to start of data storage - @deriveAndStoreData
+sync-data.js:
+    - Data storage init -
+        - Jump to start of data storage - @deriveAndStoreData
 
-    ~ Data storage updates ~
-        >> Jump to the start of adding data - @updateEntityData
-        >> Jump to the start of removing data - @updateAffectedData
+    - Data storage updates -
+        - Jump to the start of adding data - @updateEntityData
+        - Jump to the start of removing data - @updateAffectedData
   
+>JSYK
+Errors: 
+    TAXON errors being caught:
+        -- Can't change taxon to a level equal/beneath any children,
+            -- or equal/above the parent.
+        -- Species must have genus parent
+        -- Can't change genus that has species children

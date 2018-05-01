@@ -18,6 +18,161 @@ use Symfony\Component\HttpFoundation\Request;
 class ContentBlockController extends Controller
 {
     /**
+     * Finds and displays Definition page content blocks.
+     *
+     * @Route("/", name="app_home")
+     */
+    public function homeAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("home");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+        return $this->render('ContentBlock/home.html.twig', array(
+            'entities' => $returnData
+            )
+        );
+    }
+
+    /**
+     * Finds and displays about page content blocks.
+     *
+     * @Route("/about", name="app_about")
+     */
+    public function aboutAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("about");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+
+        return $this->render('ContentBlock/about.html.twig', array(
+                "entities" => $returnData,
+            )
+        );
+    }
+
+    /**
+     * Finds and displays a bibliography of all citations in the database.
+     *
+     * @Route("bibliography", name="app_biblio")
+     */
+    public function bibilographyAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $citations = $em->getRepository('AppBundle:Citation')->findAll();
+        
+        usort($citations, function($a, $b)
+        {
+            return strcmp($a->getFullText(), $b->getFullText());
+        });
+
+        return $this->render('Bibliography/biblio.html.twig', 
+            ['citations' => $citations]);
+    }
+
+    /**
+     * Finds and displays Definition page content blocks.
+     *
+     * @Route("definitions", name="app_definitions")
+     */
+    public function definitionsAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("definitions");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+        return $this->render('ContentBlock/definitions.html.twig', array(
+            'entities' => $returnData,
+            )
+        );
+    }
+
+    /**
+     * Finds and displays Search Page content blocks.
+     *
+     * @Route("/search", name="app_search_show")
+     */
+    public function searchAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+
+        return $this->render('ContentBlock/search.html.twig', array());
+    }
+
+    /**
+     * Finds and displays Source page content blocks.
+     *
+     * @Route("/sources", name="app_sources")
+     */
+    public function sourcesAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("sources");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+
+        return $this->render('ContentBlock/sources.html.twig', array(
+            "entities" => $returnData,
+            )
+        );
+    }
+
+    /**
+     * Finds and displays about page content blocks.
+     *
+     * @Route("/db", name="app_db_top")
+     */
+    public function dbAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("about-db");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+        return $this->render('ContentBlock/db_top.html.twig', array(
+            'entities' => $returnData,
+            )
+        );
+    }
+
+    /**
+     * Finds and displays the future developments page content blocks.
+     *
+     * @Route("/future-developments", name="app_future_dev")
+     */
+    public function futureDevelopmentsAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("future-developments");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+        return $this->render('ContentBlock/future_dev.html.twig', array(
+            'entities' => $returnData,
+            )
+        );
+    }
+
+    /**
      * Lists all Content Block entities.
      *
      * @Route("/admin/contentblock", name="admin_content_block")
@@ -239,142 +394,6 @@ class ContentBlockController extends Controller
             ->add('submit', 'submit', array('label' => 'Delete'))
             ->getForm()
         ;
-    }
-
-    /**
-     * Finds and displays Definition page content blocks.
-     *
-     * @Route("/", name="app_home")
-     */
-    public function homeAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("home");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-        return $this->render('ContentBlock/home.html.twig', array(
-            'entities' => $returnData
-            )
-        );
-    }
-
-    /**
-     * Finds and displays about page content blocks.
-     *
-     * @Route("/about", name="app_about")
-     */
-    public function aboutAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("about");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-
-        return $this->render('ContentBlock/about.html.twig', array(
-                "entities" => $returnData,
-            )
-        );
-    }
-
-    /**
-     * Finds and displays Definition page content blocks.
-     *
-     * @Route("definitions", name="app_definitions")
-     */
-    public function definitionsAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("definitions");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-        return $this->render('ContentBlock/definitions.html.twig', array(
-            'entities' => $returnData,
-            )
-        );
-    }
-
-    /**
-     * Finds and displays Search Page content blocks.
-     *
-     * @Route("/search", name="app_search_show")
-     */
-    public function searchAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-
-        return $this->render('ContentBlock/search.html.twig', array());
-    }
-
-    /**
-     * Finds and displays Source page content blocks.
-     *
-     * @Route("/sources", name="app_sources")
-     */
-    public function sourcesAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("sources");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-
-        return $this->render('ContentBlock/sources.html.twig', array(
-            "entities" => $returnData,
-            )
-        );
-    }
-
-    /**
-     * Finds and displays about page content blocks.
-     *
-     * @Route("/db", name="app_db_top")
-     */
-    public function dbAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("about-db");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-        return $this->render('ContentBlock/db_top.html.twig', array(
-            'entities' => $returnData,
-            )
-        );
-    }
-
-    /**
-     * Finds and displays the future developments page content blocks.
-     *
-     * @Route("/future-developments", name="app_future_dev")
-     */
-    public function futureDevelopmentsAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("future-developments");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-        return $this->render('ContentBlock/future_dev.html.twig', array(
-            'entities' => $returnData,
-            )
-        );
     }
 
     /** Returns an associative array of the content blocks relevant data for a page. */

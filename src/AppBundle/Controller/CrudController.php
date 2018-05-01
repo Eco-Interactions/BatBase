@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 /**
  * Crud-form controller.
  *
- * @Route("/crud")
+ * @Route("/crud", name="app_")
  */
 class CrudController extends Controller
 {
@@ -27,7 +27,7 @@ class CrudController extends Controller
     /**
      * Creates a new Entity, and any new detail-entities, from the form data. 
      *
-     * @Route("/entity/create", name="app_entity_create")
+     * @Route("/entity/create", name="entity_create")
      */
     public function entityCreateAction(Request $request)
     {
@@ -54,13 +54,14 @@ class CrudController extends Controller
         $returnData->detailEntity = $this->handleDetailEntity(
             $coreFormData, $formData, $returnData, $em
         );
+        $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Edit ----------------------------------------*/
     /**
      * Updates an Entity, and any detail-entities, with the submitted form data. 
      *
-     * @Route("/entity/edit", name="app_entity_edit")
+     * @Route("/entity/edit", name="entity_edit")
      */
     public function entityEditAction(Request $request)
     {
@@ -87,6 +88,40 @@ class CrudController extends Controller
         $returnData->detailEntity = $this->handleDetailEntity(
             $coreFormData, $formData, $returnData, $em
         );
+        $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
+        return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+    /*--------------------- Update Citation Text -----------------------------*/
+    /**
+     * Updates the Citation and Source entities with the updated citation text. 
+     *
+     * @Route("/citation/edit", name="citation_edit")
+     */
+    public function citationTextupdate(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $data = json_decode($requestContent); 
+        
+        $src =  $em->getRepository('AppBundle:Source')
+            ->findOneBy(['id' => $data->srcId ]);
+        $src->setDescription($data->text);
+        $em->persist($src);
+
+        $cit = $src->getCitation();
+        $cit->setFullText($data->text);
+        $em->persist($cit);
+
+        $returnData = new \stdClass; 
+        $returnData->core = 'source';
+        $returnData->coreEntity = $src;
+        $returnData->detail = 'citation';
+        $returnData->detailEntity = $cit;
+        $returnData->citationUpdate = true;
+
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
 /*------------------------------ Shared Helpers ------------------------------*/
@@ -99,6 +134,11 @@ class CrudController extends Controller
         $edits = new \stdClass;
         $edits->editing = $editing;
         return $edits;
+    }
+    private function removeEditingFlag($coreObj, $detailObj)
+    {
+        unset($coreObj->editing);
+        unset($detailObj->editing);
     }
     /*---------- Detail Entity ------------------------------------------*/
     /** If the core-entity is 'Source', process any detail-entity data. */
@@ -167,11 +207,11 @@ class CrudController extends Controller
     private function setRelatedEntityData($formData, &$entity, &$edits, &$em)
     {
         $edgeCases = [
-            "contributor" => function($ary) use ($entity, &$edits, &$em) { 
+            "contributor" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleContributors($ary, $entity, $edits, $em); },
-            "tags" => function($ary) use ($entity, &$edits, &$em) { 
+            "tags" => function($ary) use (&$entity, &$edits, &$em) { 
                 $this->handleTags($ary, $entity, $edits, $em); },
-            "source" => function($id) use ($entity, &$edits, &$em) {
+            "source" => function($id) use (&$entity, &$edits, &$em) {
                 $this->addInteractionToSource($id, $entity, $edits, $em);
             }
         ];
@@ -209,46 +249,83 @@ class CrudController extends Controller
         $this->removeContributors($ary, $entity, $edits, $em);
         $this->addContributors($ary, $entity, $edits, $em);
     }
-    /** Creates a new Contribution for each author source in the array. */
-    private function addContributors($ary, &$pub, $edits, &$em)
+    /** Creates a new Contribution for each author/editor source in the array. */
+    private function addContributors($ary, &$pubSrc, &$edits, &$em)
     {
         $added = []; 
-        $curContribs = $pub->getContributorIds();
-        $contribs = $pub->getContributors();
-        foreach ($ary as $authId) { 
-            if (in_array($authId, $curContribs)) { continue; } 
-            $auth = $em->getRepository('AppBundle:Source')
-                ->findOneBy(['id' => $authId ]);
-            $contribEntity = $this->createContrib($pub, $auth, $em);
-            $pub->addContributor($contribEntity);  //$pub persisted later
-            $auth->addContribution($contribEntity);
-            $em->persist($auth);
-            array_push($added, $authId);
+        $cur = $pubSrc->getContributorData();
+        foreach ($ary as $authId => $newData) { 
+            if (array_key_exists($authId, $cur) ) { 
+                $this->checkAuthStatus($cur[$authId], $newData, $em);
+                continue;
+            } 
+            $this->addContrib($authId, $newData, $pubSrc, $em);
         }  
-        if (count($added) > 0) {
-            $edits->contributor = [ 'added' => $added ]; 
-        }
     }
-    private function createContrib($pub, $auth, &$em)
+    /** Updates any changes to the author/editor status and/or auth/ed ord(er). */
+    private function checkAuthStatus($curData, $newData, &$em)
+    {   
+        $contrib = $em->getRepository('AppBundle:Contribution')
+            ->findOneBy(['id' => $curData['contribId'] ]); 
+        $this->updateEditorStatus($curData, $newData, $contrib);
+        $this->updateOrder($curData, $newData, $contrib);
+        $em->persist($contrib);
+    }
+    private function updateEditorStatus($curData, $newData, &$contrib)
+    {
+        $curIsEd = $curData['isEditor'];
+        $newIsEd = $newData->isEditor;
+        if ($curIsEd === $newIsEd) { return; }
+        $contrib->setIsEditor($newIsEd);
+    }
+    /** Stores auth/ed order for the citation/publication source. */
+    private function updateOrder($curData, $newData, &$contrib)
+    {
+        $curOrd = $curData['ord'];
+        $newOrd = $newData->ord;
+        if ($curOrd === $newOrd) { return; }
+        $contrib->setOrd($newOrd);
+    }
+    private function addContrib($id, $data, &$pubSrc, &$em)
+    {  
+        $authSrc = $em->getRepository('AppBundle:Source')
+            ->findOneBy(['id' => $id ]);
+        $contribEntity = $this->createContrib($pubSrc, $authSrc, $data, $em);
+        $pubSrc->addContributor($contribEntity);  //$pubSrc persisted later
+        $authSrc->addContribution($contribEntity);
+        $em->persist($authSrc);        
+    }
+    private function createContrib($pubSrc, $authSrc, $data, &$em)
     {
         $entity = new Contribution();
-        $entity->setWorkSource($pub);
-        $entity->setAuthorSource($auth);
+        $entity->setWorkSource($pubSrc);
+        $entity->setAuthorSource($authSrc);
+        $entity->setIsEditor($data->isEditor);
+        $entity->setOrd($data->ord);
+
         $em->persist($entity);  
         return $entity;
     }
-    /** Removes any entities currently in the $coll that are not in the new $ary.  */
-    private function removeContributors($ary, &$entity, &$edits, &$em)
-    {
+    /** Removes any of the current contributors that are not in the new $authObj. */
+    private function removeContributors($authObj, &$entity, &$edits, &$em)
+    { 
         $contributors = $entity->getContributors();
         $removed = [];  
         foreach ($contributors as $contrib) { 
             $authId = $contrib->getAuthorSource()->getId();
-            if (in_array($authId, $ary)) { continue; }
+            if (property_exists($authObj, $authId)) { continue; }
             $entity->removeContributor($contrib);
             array_push($removed, $authId); 
         }
-        if (count($removed)) { $edits->contributor = [ 'removed' => $removed ]; }
+        $this->addContribEdits($edits, 'removed', $removed);
+    }
+    /** Add added/removed array to edits obj. */
+    private function addContribEdits(&$edits, $action, $ary)
+    {
+        if (count($ary)) { 
+            if (!property_exists($edits, 'contributor')) { $edits->contributor = []; }
+            $edits->contributor[$action] = $ary; 
+        }
     }
     /** Handles adding and removing tags from the entity. */  
     private function handleTags($ary, &$entity, &$edits, &$em)
@@ -257,7 +334,7 @@ class CrudController extends Controller
         $this->removeFromCollection('tag', $curTags, $ary, $entity, $edits, $em);
         $this->addToCollection('tag', $curTags, $ary, $entity, $edits, $em);
     }
-    /** Removes any entities currently in the $coll that are not in the new $ary.  */
+    /** Removes any entities currently in the $coll(ection) that are not in $ary.  */
     private function removeFromCollection($field, $coll, $ary, &$entity, &$edits, $em)
     {
         $removed = [];  
@@ -374,6 +451,10 @@ class CrudController extends Controller
         return $response;
     }
     /** ----------------- Set Entity/System UpdatedAt ----------------------- */
+    /**
+     * Sets the updatedAt timestamp for modified entities. This will be used to 
+     * ensure local data stays updated with any changes.
+     */
     private function setUpdatedAtTimes($entityData, &$em)
     {
         $this->updateUpdatedAt($entityData->core, $em);

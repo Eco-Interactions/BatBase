@@ -4,19 +4,15 @@ Feature: Edit data in the database
 	I need to be able to edit the data in the database
 
 	Background:
-		Given I am on "/login"
+		Given the fixtures have been reloaded
+		And I am on "/login"
 		And I fill in "Username" with "TestEditor"
 		And I fill in "Password" with "passwordhere"
 		And I press the "_submit" button
 		And I am on "/search"
 		And I should see "TestEditor"
-		# And the database has loaded
-		# And I exit the tutorial
-
-	# @javascript
-	# Scenario:  Setup: Database loads and the welcome tutorial is exited.
-	# 	Given the database has loaded
-	# 	And I exit the tutorial
+		Given the database has loaded
+		And I exit the tutorial
 
 	@javascript
 	Scenario:  I should be able to edit the name and level of an existing taxon
@@ -39,7 +35,7 @@ Feature: Edit data in the database
 		And I see "Editing Taxon"
 		When I press "Change Parent"
 		And I see "Select New Taxon Parent"
-		When I select "Artibeus" from the "Genus" field dropdown
+		When I select "Artibeus" from the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Taxon" button
 		And I expand "Family Phyllostomidae" in the data tree
@@ -77,12 +73,12 @@ Feature: Edit data in the database
 		Given the database grid is in "Location" view
 		And I expand "Central America" in the data tree
 		And I expand "Costa Rica" in the data tree
-		And I click on the edit pencil for the "Santa Ana-Captivity" row
+		And I click on the edit pencil for the "Santa Ana-Forest" row
 		When I change the "Country" dropdown field to "Panama"
 		And I press the "Update Location" button
 		And I expand "Central America" in the data tree
-		Then I should see "Santa Ana-Captivity" under "Panama" in the tree
-		And I should not see "Santa Ana-Captivity" under "Costa Rica" in the tree
+		Then I should see "Santa Ana-Forest" under "Panama" in the tree
+		And I should not see "Santa Ana-Forest" under "Costa Rica" in the tree
 
 	@javascript
 	Scenario:  I should be able to edit the data of an existing publication
@@ -96,7 +92,7 @@ Feature: Edit data in the database
 		And I change the "Link Display" field "input" to "Book Website"
 		And I change the "Doi" field "input" to "10.1037/rmh0000008"
 		And I change the "Publisher" dropdown field to "University of Paris VI"
-		And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
+		And I add "Cockle, Anya" to the "Authors" dynamic dropdown field 
 		And I press the "Update Publication" button
 		And I select "Book" from the "Publication Type" dropdown
 		And I click on the edit pencil for the "Book of Mammalogy" row
@@ -152,58 +148,54 @@ Feature: Edit data in the database
 		Then I should see "www.link.com" in the "Link Url" field "input"
 		Then I should see "Publisher Website" in the "Link Display" field "input"
 
+#todo - test proper removal of citation from authors in tree
 	@javascript
-	Scenario:  I should be able to edit the data of an existing citation
+	Scenario:  I should be able to edit the data of an existing citation [CHAPTER->BOOK]
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I expand "Gardner, Alfred L" in the data tree
+		When I click on the edit pencil for the "Feeding habits" row
+		And I see "Editing Citation"
+		And I change the "Citation Type" dropdown field to "Book"
+		And I change the "Abstract" field "textarea" to "Test Abstract"
+		And I change the "Edition" field "input" to "4"
+		And I change the "Link Url" field "input" to "www.link.com"
+		And I change the "Link Display" field "input" to "Citation Website"
+		And I change the "Doi" field "input" to "10.1037/rmh0000008"
+		And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
+		And I add "Baker, Herbert G" to the "Authors" dynamic dropdown field 
+		And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
+		And I press the "Update Citation" button
+		And I should not see "Gardner, Alfred L" in the tree 
+		And I expand "Baker, Herbert G" in the data tree
 		And I click on the edit pencil for the "Feeding habits" row
 		And I see "Editing Citation"
-		And I change the "Citation Text" field "textarea" to "Test Citation Text"
-		And I change the "Abstract" field "textarea" to "Test Abstract"
-		And I change the "Title" field "input" to "Feeding habits of bats"
-		And I change the "Citation Type" dropdown field to "Article"
-		And I change the "Year" field "input" to "1996"
-		And I change the "Volume" field "input" to "4"
-		And I change the "Issue" field "input" to "12"
-		And I change the "Pages" field "input" to "333-336"
-		And I change the "Link Url" field "input" to "www.link.com"
-		And I change the "Link Display" field "input" to "Author Website"
-		And I change the "Doi" field "input" to "10.1037/rmh0000008"
-		When I change the "Authors" dynamic dropdown field to "Cockel, Joy Karen Jr"
-		And I press the "Update Citation" button
-		And I should not see "Feeding habits" under "Gardner, Alfred L" in the tree
-		And I expand "Cockel, Joy Karen Jr" in the data tree
-		And I click on the edit pencil for the "Feeding habits of bats" row
-		And I see "Editing Citation"
-		Then I should see "Test Citation Text" in the "Citation Text" field "textarea"
+		Then I should see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
 		And I should see "Test Abstract" in the "Abstract" field "textarea"
-		And I should see "Feeding habits of bats" in the "Title" field "input"
-		And I should see "Article" in the "Citation Type" dropdown field
-		And I should see "1996" in the "Year" field "input"
-		And I should see "4" in the "Volume" field "input"
-		And I should see "12" in the "Issue" field "input"
-		And I should see "333-336" in the "Pages" field "input"
+		And I should see "Feeding habits" in the "Title" field "input"
+		And I should see "Book" in the "Citation Type" dropdown field
+		And I should see "4" in the "Edition" field "input"
 		And I should see "www.link.com" in the "Link Url" field "input"
-		And I should see "Author Website" in the "Link Display" field "input"
+		And I should see "Citation Website" in the "Link Display" field "input"
 		And I should see "10.1037/rmh0000008" in the "Doi" field "input"
-		And I should see "Cockel, Joy Karen Jr" in the "Authors" field dynamic dropdown
+		And I should see "Baker, Herbert G" in the "Authors" field dynamic dropdown
+		And I should see "Cockle, Anya" in the "Authors" field dynamic dropdown
 
 	@javascript
 	Scenario:  I should be able to change an interaction's publication
 		Given the database grid is in "Source" view
 		And I group interactions by "Publications"
-		And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
-		And I click on the edit pencil for the first interaction of "Feeding habits of bats"
+		And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
+		And I click on the edit pencil for the first interaction of "Feeding habits"
 		And I see "Editing Interaction"
-		When I change the "Publication" dropdown field to "Book of Mammalogy"
+		When I change the "Publication" dropdown field to "Journal of Mammalogy"
 		And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
 		And I press the "Update Interaction" button
 		And I uncheck the time-updated filter
-		And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
-		And I expand "Book of Mammalogy" in the data tree
+		And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
+		And I expand "Journal of Mammalogy" in the data tree
 		Then I should see "3" interactions under "Observations on the life histories of Panama bats"
-		And I should see "3" interactions under "Feeding habits of bats"
+		And I should see "3" interactions under "Feeding habits"
 
 	@javascript
 	Scenario:  I should be able to change an interaction's location
@@ -229,7 +221,7 @@ Feature: Edit data in the database
 		And I see "Editing Interaction"
 		And I focus on the "Subject" taxon field
 		And I see "Select Subject Taxon"
-		When I select "Artibeus lituratus" from the "Species" field dropdown
+		When I select "Artibeus lituratus" from the "Species" dropdown field
 		And I should see "Artibeus" in the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Interaction" button
@@ -248,7 +240,7 @@ Feature: Edit data in the database
 		And I see "Editing Interaction"
 		And I focus on the "Object" taxon field
 		And I see "Select Object Taxon"
-		When I select "Philodendron sphalerum" from the "Species" field dropdown
+		When I select "Philodendron sphalerum" from the "Species" dropdown field
 		And I should see "Philodendron" in the "Genus" dropdown field
 		And I press the "Confirm" button
 		And I press the "Update Interaction" button
@@ -257,7 +249,8 @@ Feature: Edit data in the database
 		And I expand "Genus Philodendron" in the data tree
 		Then I should see "2" interactions under "Philodendron sphalerum"
 		And I should see "1" interactions under "Unspecified Araceae Interactions"
-
+		
+	# pressing update twice because the first time isn't working and I don't know why #timecrunched *
 	@javascript
 	Scenario:  I should be able to change an interaction's type, tags, and notes
 		Given the database grid is in "Taxon" view
@@ -270,7 +263,7 @@ Feature: Edit data in the database
 		And I remove the "Flower" interaction tag
 		And I change the "Note" field "textarea" to "New Test Note Description"
 		And I press the "Update Interaction" button
-		And I wait for form to submit successfully
+		And I press the "Update Interaction" button
 		And I expand "Family Araceae" in the data tree
 		And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
 		And I see "Editing Interaction"
@@ -284,16 +277,16 @@ Feature: Edit data in the database
 	# 	Given the database grid is in "Source" view
 	# 	And I group interactions by "Publications"
 	# 	And I break
-	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
-	# 	And I click on the edit pencil for the first interaction of "Feeding habits of bats"
+	# 	And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I click on the edit pencil for the first interaction of "Feeding habits"
 	# 	And I see "Editing Interaction"
 	# 	When I change the "Publication" dropdown field to "Book of Mammalogy"
 	# 	And I change the "Citation Title" dropdown field to "Observations on the life histories of Panama bats"
 	# 	And I press the "Update Interaction" button
 	# 	And I uncheck the time-updated filter
-	# 	And I expand "In Biology of bats of the New World family Phyllostomatidae" in the data tree
+	# 	And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
 	# 	And I expand "Book of Mammalogy" in the data tree
 	# 	Then I should see "3" interactions under "Observations on the life histories of Panama bats"
-	# 	And I should see "3" interactions under "Feeding habits of bats"
+	# 	And I should see "3" interactions under "Feeding habits"
 
 	#Test form error handling

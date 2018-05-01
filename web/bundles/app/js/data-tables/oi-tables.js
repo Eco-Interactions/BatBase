@@ -4,36 +4,27 @@ $(function(){
 	ECO_INT_FMWK.stickyOffset = 423;
 
 	dTblMngr.initTables = function(tableName) {	/* 	lastExpt 				*/
-		var tables = { 	/* 		sortCol	 pgLngth  	Col		exprt 	scroll  */
-					 locs_list: [	2,	'fivehund',	9,		false,	false],
-			  interaction_list: [	3,	'sevenk',	8,		false,	false],
-				  loc_det_list: [	1,	'onehund',	3,		false,	false],
-					 cits_list: [	1,	'fivehund',	6,		false,	false],
-					 pubs_list: [	1,	'onehund',	5,		false,	false],
-					auths_list: [	0,	'fivehund',	4,		false,	false],
-				 int_exprt_tbl: [	0,	'sevenk',	19,		true,	true ],
-				 cit_exprt_tbl: [	0,	'fivehund',	11,		true,	false],
-				auth_exprt_tbl: [	0,	'fivehund',	4,		true,	false],
-				  feedback_tbl: [   0,  'onehund',  5,  	true, 	false]
-								};
+		var tables = { 	/* 		sortCol	 pgLngth  	Col	 hideSlider scroll  */
+					feedback_tbl: [   0,  'onehund',  5,  	true, 	false],
+				    biblio_tbl:   [   0,  'fivehund', 0,	false,	false],
+		};
 		var tblParams = tables[tableName];
 		tblParams.push('#' + tableName);
 		initOiDataTable.apply(null, tblParams);
 
-		function initOiDataTable(dfltSrtCol, pgLgthList, lastExptCol, isExprtPg, scroll, selector) {
-			var xportCols = getExportColArray(lastExptCol);
+		function initOiDataTable(dfltSrtCol, pgLgthList, lastExptCol, hideSlider, scroll, selector) {
+			var xportCols = getExportColArray(lastExptCol);  
 			var $tableElem = $(selector);
 			var editCol = $tableElem.data('editcol');
 			var sortCol = $tableElem.data('sortcol') || dfltSrtCol;
-			if (isExprtPg === true) { ECO_INT_FMWK.stickyOffset = 1; }
+			if (hideSlider === true) { ECO_INT_FMWK.stickyOffset = 1; }
 			$tableElem.DataTable(getTblCfg(sortCol, editCol, pgLgthList, xportCols, scroll));
 			new $.fn.dataTable.FixedHeader( $tableElem, { header: true, headerOffset: 86 } );
 			return $tableElem;
 
 			function getExportColArray(lastShownColIdx) {
 				var ary = [];
-				var firstExtCol = isExprtPg ? 0 : 1;
-				for (var i = firstExtCol; i <= lastShownColIdx; i++) {
+				for (var i = 0; i <= lastShownColIdx; i++) {
 					ary.push(i);
 				}
 				return ary;
@@ -58,11 +49,13 @@ $(function(){
 									exportOptions: { columns: xportCols }
 								},
 								{	extend: 'csv',
-									exportOptions: { columns: xportCols }
+									exportOptions: { columns: xportCols },
+									filename: 'Bat Eco-Interactions Bibliography '
+										+ new Date().today,
 								}
 							]
-				};
-				if (!isExprtPg) {
+				};  
+				if (!hideSlider) {
 					if (editCol !== false) {
 						colDefs.targets.push(editCol);
 					}
@@ -71,15 +64,15 @@ $(function(){
 				if (scroll === true) {
 					dataTablesCfg.scrollX = true;
 					dataTablesCfg.scrollY = '75vh';
-				}
+				}  
 				return dataTablesCfg;
 			}/* End dataTblCfg */
 		}  /* END initOiDataTable */
 	} /* END initTables */
 
 	dTblMngr.relocCtrls = function(tableName) {
-		var tblFilter = '#' + tableName + "_filter";			//console.log(filter);
-		var tblLength = '#' + tableName + "_length";			//console.log(length);
+		var tblFilter = '#' + tableName + "_filter";			
+		var tblLength = '#' + tableName + "_length";			
 		var $filterDiv = $(tblFilter);
 		var $pgLngthDiv = $(tblLength);
 		var $btnDiv = $( "#tbl-ctrl-div .dt-buttons" );

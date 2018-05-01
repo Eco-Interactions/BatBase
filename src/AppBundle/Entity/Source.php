@@ -730,6 +730,18 @@ class Source
     }
 
     /**
+     * Remove publication.
+     *
+     * @return Source
+     */
+    public function removePublication()
+    {
+        $this->publication = null;
+
+        return $this;
+    }
+
+    /**
      * Get publication.
      *
      * @return \AppBundle\Entity\Publication
@@ -818,19 +830,62 @@ class Source
     }
 
     /**
-     * Get Contributor Ids.
+     * Get Author Ids.
      * @JMS\VirtualProperty
-     * @JMS\SerializedName("contributors")
+     * @JMS\SerializedName("authors")
      *
      * @return array
      */
-    public function getContributorIds()
-    {
-        $contribIds = [];
+    public function getAuthorIds()
+    { 
+        $contribs = [];
         foreach ($this->contributors as $contributor) {
-            array_push($contribIds, $contributor->getAuthorSource()->getId());
+            if ($contributor->getIsEditor()) { continue; }  
+            $id = $contributor->getAuthorSource()->getId();
+            $ord = $contributor->getOrd();
+            $contribs = $contribs + [$ord => $id]; 
         }
-        return $contribIds;
+        return count($contribs) > 0 ? $contribs : null;
+    }
+
+    /**
+     * Get Editor Ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("editors")
+     *
+     * @return array     
+     */     
+    public function getEditorIds()
+    {
+        $contribs = [];
+        foreach ($this->contributors as $contributor) {
+            if (!$contributor->getIsEditor()) { continue; }
+            $id = $contributor->getAuthorSource()->getId();
+            $ord = $contributor->getOrd();
+            $contribs = $contribs + [$ord => $id]; 
+        }
+        return count($contribs) > 0 ? $contribs : null;
+    }
+
+    /**
+     * Get Author Ids with contribId and isEditor flag.
+     *
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("contributors")
+     * @return array
+     */
+    public function getContributorData()
+    { 
+        $contribs = [];
+        foreach ($this->contributors as $contributor) { 
+            $contribId = $contributor->getId(); 
+            $authId = $contributor->getAuthorSource()->getId();
+            $isEd = $contributor->getIsEditor();
+            $ord =  $contributor->getOrd();
+            $contribs = $contribs + [ $authId => [ 
+                'contribId' => $contribId, 'isEditor' => $isEd, 'ord' => $ord]];
+        }
+        return $contribs;
     }
 
     /**

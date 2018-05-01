@@ -1,7 +1,7 @@
 (function(){
     const eif = ECO_INT_FMWK;
     const _util = eif.util;
-    let failed = {};
+    let failed = { errors: [], updates: {}};
     eif.syncData = {
         update: updateStoredData,
         reset: resetStoredData
@@ -79,7 +79,8 @@
         }
     } /* End ajaxNewData */ 
     /** Sends each entity's ajax return to be processed and stored. */
-    function processUpdatedData() {               
+    function processUpdatedData() {    
+        if (arguments[1] === "success") { return processUpdatedEntityData(...arguments); }
         for (let data in arguments) { 
             processUpdatedEntityData(arguments[data][0]);
         }
@@ -107,7 +108,7 @@
     } 
     function retryFailedUpdatesAndLoadGrid() {                                  console.log('retryFailedUpdatesAndLoadGrid')
         retryFailedUpdates();
-        initSearchGrid(); //send errors during init update to search page and show error message to user.
+        initSearchGrid(); //TODO: send errors during init update to search page and show error message to user.
     }
     /**
      * Updates the stored data's updatedAt flag, and initializes the search-page 
@@ -125,14 +126,15 @@
      */
     function updateStoredData(data) {                                           console.log("updateStoredData data recieved = %O", data);
         updateEntityData(data);
-        storeData('pgDataUpdatedAt', getCurrentDate());                         console.log('pgDataUpdatedAt = ', getCurrentDate())
+        storeData('pgDataUpdatedAt', getCurrentDate());                         //console.log('pgDataUpdatedAt = ', getCurrentDate())
+        retryFailedUpdates();
         sendDataUpdateStatus(data);
     }
-    function sendDataUpdateStatus(data) {
-        var errs = data.coreEdits.errors ? data.coreEdits.errors : 
-             data.detailEdits.errors ? data.detailEdits.errors : false;
-        var msg = errs ? errs[0] : null;
-        var tag = errs ? errs[1] : null;
+    function sendDataUpdateStatus(data) {                                       //console.log('sendDataUpdateStatus. data = %O, errs = %O', data, failed.errors);  
+        const errs = failed.errors;  
+        const msg = errs.length ? errs[0][0] : null;
+        const tag = errs.length ? errs[0][1] : null;
+        data.errors = errs.length ? errs : false;
         eif.form.dataSynced(data, msg, tag);
     }
     /** Stores both core and detail entity data, and updates data affected by edits. */
@@ -156,10 +158,10 @@
         var update = {
             'source': {
                 'author': { 'authSrcs': addToRcrdAryProp },
-                'citation': { 'contributors': addContribData, 'source': addToParentRcrd,
+                'citation': { 'authors': addContribData, 'source': addToParentRcrd,
                     'tag': addToTagProp },
-                'publication': { 'pubSrcs': addToRcrdAryProp, 'contributors': addContribData,
-                    'source': addToParentRcrd },
+                'publication': { 'pubSrcs': addToRcrdAryProp, 'authors': addContribData, 
+                    'source': addToParentRcrd, 'editors': addContribData },
                 'publisher': { 'publSrcs': addToRcrdAryProp },
 
             },
@@ -201,7 +203,7 @@
      * Updates the stored core-records array and the stored entityType array. 
      * Note: Taxa are the only core entity without 'types'.
      */
-    function updateCoreData(entity, rcrd) {                                     //console.log("Updating Core data");
+    function updateCoreData(entity, rcrd) {                                     //console.log("Updating [%s] Core data", entity);
         addToRcrdProp(entity, rcrd);
         if (entity === "taxon") { return; }
         addToTypeProp(entity+"Type", rcrd, entity); 
@@ -291,22 +293,23 @@
         addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
         storeData("taxon", taxa);        
     }
-    /** When a Publication or Citation have been updated, update contribution data. */
-    function addContribData(prop, rcrd, entity) {                               //console.log("addContribData. [%s] rcrd = %O. for %s", prop, rcrd, entity);
-        if (rcrd.contributors.length == 0) { return; }
-        var srcObj = _util.getDataFromStorage('source');
-        rcrd.contributors.forEach(function(authId) {
+    /** When a Publication/Citation has been updated, add new author contributions. */
+    function addContribData(prop, rcrd, entity) {                               //console.log("-----addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
+        if (!rcrd[prop]) { return; }
+        const srcObj = _util.getDataFromStorage('source');
+        for (let ord in rcrd[prop]) {
+            let authId = rcrd[prop][ord];
             addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
-        });
+        }
         storeData('source', srcObj);
     }
     /*------------ Remove-from-Storage Methods -------------------------------*/
     /** Updates any stored data that was affected during editing. */
     function updateAffectedData(data) {                                         //console.log("updateAffectedData called. data = %O", data);
-        if (hasEdits(data.coreEdits)) { 
+        if (data.coreEdits && hasEdits(data.coreEdits)) { 
             updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
         }
-        if (hasEdits(data.detailEdits)) { 
+        if (data.detailEdits && hasEdits(data.detailEdits)) { 
             updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
         }
     }
@@ -383,13 +386,10 @@
         });
         storeData(prop, tagObj);
     }
-    /** Removes a record from the pub's array of contributor ids. */
     function rmvContrib(prop, rcrd, entity, edits) {                            //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
-        if (!edits.contributor.removed) { return; }
-        var srcObj = _util.getDataFromStorage('source');
-        edits.contributor.removed.forEach(function(authId) {
-            rmvIdFromAry(srcObj[authId].contributions, rcrd.id);
-        });
+        const srcObj = _util.getDataFromStorage('source');
+        edits.contributor.removed.forEach(id => 
+            rmvIdFromAry(srcObj[id].contributions, rcrd.id));
         storeData('source', srcObj);
     }
     function rmvFromNameProp(prop, rcrd, entity, edits) { 
@@ -404,8 +404,8 @@
 /*------------------ Init Stored Data Methods --------------------------------*/
     /** When there is an error while storing data, all data is redownloaded. */
     function resetStoredData() {
-        const prevFocus = Window.localstorage.getItem('curFocus');
-        Window.localstorage.clear();
+        const prevFocus = window.localStorage.getItem('curFocus');
+        window.localStorage.clear();
         ajaxAndStoreAllEntityData();
         eif.search.handleReset(prevFocus);
     }
@@ -447,7 +447,7 @@
      * the entity data.
      */
     function storeServerData(data) {                                            //console.log("data received = %O", data);
-        for (var entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
+        for (let entity in data) {                                              //console.log("entity = %s, data = %O", entity, rcrdData);
             storeData(entity, parseData(data[entity]));
         }
     }
@@ -470,10 +470,19 @@
     /** Stores an object of taxon names and ids for each level in each realm. */
     function deriveAndStoreTaxonData(data) {                                    //console.log("deriveAndStoreTaxonData called. data = %O", data);
         storeData('levelNames', getNameDataObj(Object.keys(data.level), data.level));
+        storeData('objectRealmNames', getObjectRealmNames(data.realm));
         storeTaxaByLevelAndRealm(data.taxon);
     }
+    function getObjectRealmNames(realms) {                                      //console.log('getObjectRealmNames. [%s] realms = %O',Object.keys(realms).length, realms);
+        let data = {};
+        for (let i=1; i <= Object.keys(realms).length; i++) { 
+            if (realms[i].displayName === 'Bat') { continue; }  
+            data[realms[i].displayName] = realms[i].id;
+        }
+        return data;
+    }
     function storeTaxaByLevelAndRealm(taxa) {
-        var realmData = separateTaxaByLevelAndRealm(taxa);                     //console.log("taxonym name data = %O", nameData);
+        var realmData = separateTaxaByLevelAndRealm(taxa);                      //console.log("taxonym name data = %O", nameData);
         for (var realm in realmData) {  
             storeTaxaByLvl(realm, realmData[realm]);
         }
@@ -486,7 +495,7 @@
     /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
     function separateTaxaByLevelAndRealm(taxa) {  
         const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-        for (let id = 1; id < Object.keys(taxa).length+1; id++) {
+        for (let id = 1; id <= Object.keys(taxa).length; id++) {
             if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
             addTaxonData(taxa[id]);
         }
@@ -541,7 +550,6 @@
         storeData('publSrcs', publSrcs);
         storeData('citTypeNames', getTypeNameData(data.citationType));        
         storeData('pubTypeNames', getTypeNameData(data.publicationType));        
-        // storeData('sourceTags', getTagData(data.tag, "Source"));        
     }
     /**
      * [entity]Names - an object with each entity's displayName(k) and id.
@@ -604,41 +612,42 @@
     /**
      * If this is the first failure, it is added to other failed updates to be 
      * retried at the end of the update process. If this is the second error, 
-     * the error is reported to the user. (<--todo) 
+     * the error is reported to the user. (<--todo for onPageLoad sync) 
      */
-    function handleFailedUpdate(prop, updateFunc, params, edits) {
+    function handleFailedUpdate(prop, updateFunc, params, edits) {              console.log('handleFailedUpdate [%s]. params = %O edits = %O, failed = %O',prop, params, edits, failed);
         if (failed.twice) { 
             reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
         } else {
-            addToFailedUpdates(updateFunc, params, edits);       
+            addToFailedUpdates(updateFunc, prop, params, edits);       
         }
     }
-    function addToFailedUpdates(updateFunc, params, edits) {
-        if (!failed[params.entity]) { failed[params.entity] = {}; }
-        const errObj = edits || failed[params.entity];
-        failed[params.entity][params.prop] = {
-            edits: errObj, entity: params.entity, rcrd: params.rcrd, updateFunc: updateFunc
+    function addToFailedUpdates(updateFunc, prop, params, edits) {              console.log('addToFailedUpdates. edits = %O', edits);
+        if (!failed.updates[params.entity]) { failed.updates[params.entity] = {}; }
+        failed.updates[params.entity][prop] = {
+            edits: edits, entity: params.entity, rcrd: params.rcrd, 
+            stage: params.stage, updateFunc: updateFunc
         };
     }
     /** Retries any updates that failed in the first pass. */
-    function retryFailedUpdates() {
-        failed.twice = true;                                                    console.log('failed updates = %O', failed);
-        for (let entity in failed) {  
-            for (let prop in failed[entity]) {
-                let params = failed[entity][prop];
+    function retryFailedUpdates() {                                             console.log('retryFailedUpdates. failed = %O', failed);
+        failed.twice = true;                                                    
+        for (let entity in failed.updates) {  
+            for (let prop in failed.updates[entity]) {
+                let params = failed.updates[entity][prop];   
                 updateData(params.updateFunc, prop, params, params.edits);
             }            
         }
+        delete failed.twice;
     }
     /** Sends a message and error tag back to the form to be displayed to the user. */
     function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {
         var trans = {
-            'addData': 'adding data to ', 'rmvData': 'removing data from '
+            'addData': 'adding to', 'rmvData': 'removing from'
         };
         var msg = 'There was an error while '+trans[stage]+' the '+ entity +
             '\'s stored data.';
         var errTag = stage + ':' +  prop + ':' + entity + ':' + rcrd.id;
-        edits.errors = [ msg, errTag ];
+        failed.errors.push([ msg, errTag ]);
     }
     /*----------------- AJAX -------------------------------------------------*/
     function sendAjaxQuery(dataPkg, url, successCb) {                           //console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)

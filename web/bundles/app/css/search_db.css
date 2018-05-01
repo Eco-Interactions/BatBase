@@ -298,19 +298,25 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     min-width: 385px;
     margin-top: .5em;
 }
+div[id$="_Rows"] {
+    min-width: 100%;
+}
 .sml-left {
     position: relative;
-    left: 25px;
+    left: 10px;
 }
 .sml-right {
     position: relative;
-    right: 15px;
+    right: 25px;
 }
 #sub-hdr, #sub2-hdr {
     font-size: 1.1em;
 }
 form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 100%;
+}
+.all-fields-cntnr {
+    padding-top: 1em; 
 }
 .field-row {
     justify-content: space-between;
@@ -343,7 +349,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .3em;
     justify-content: center;
 }
-.active-errs {
+[class$="active-errs"] {
     padding: .3em;
     margin-bottom: .3em;
 }
@@ -366,7 +372,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     font-size: .95em;
 }
 .xlrg-field {
-    width: 655px;
+    width: 643px;
 }
 .top.xlrg-field {
     width: 816px;
@@ -464,7 +470,7 @@ select[id$="txn-lvl"] + div {
         margin: 11px 0 10px 60px;
     }
     #b-overlay .full-row {
-        padding: .2em 0 .3em  0;
+        padding: .2em 0 .3em  .75em;
         width: 96%;
     }
     #b-overlay #Note_row div.field-row {        
@@ -479,7 +485,7 @@ select[id$="txn-lvl"] + div {
         width: 700px;
     }
     #b-overlay .xlrg-field {
-        width: 595px;
+        width: 610px;
     }
     #b-overlay .lrg-field {
         width: 262px;

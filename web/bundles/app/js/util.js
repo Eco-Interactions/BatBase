@@ -2,6 +2,7 @@
     var eif = ECO_INT_FMWK;
     var dataStorage;
     eif.util = {
+        addEnterKeypressClick: addEnterKeypressClick,
         buildElem: buildElem,
         buildSelectElem: buildSelectElem,
         buildSimpleOpts: buildSimpleOpts,
@@ -10,11 +11,18 @@
         getDataStorage: getDataStorage,
         populateStorage: populateStorage,
         removeFromStorage: removeFromStorage,
+        stripString: stripString,
         ucfirst: ucfirst, 
     };
 
     extendPrototypes();
 
+    /*---------- Keypress event Helpers --------------------------------------*/
+    function addEnterKeypressClick(elem) {
+        $(elem).keypress(function(e){ //Enter
+            if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
+        });
+    }
     /*---------- String Helpers ----------------------------------------------*/
     function ucfirst(str) { 
         return str.charAt(0).toUpperCase() + str.slice(1); 
@@ -22,6 +30,11 @@
     function lcfirst(str) {
         var f = str.charAt(0).toLowerCase();
         return f + str.substr(1);
+    }
+    /** Removes white space at beginning and end, and any ending period. */
+    function stripString(text) {
+        let str = text.trim();
+        return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
     }
     /*---------- Object Helpers ----------------------------------------------*/
     function sortProperties(obj) {
@@ -69,7 +82,7 @@
             });
         }
         function addAttrProps() {
-            var attrProps = [ "name", "type", "value", "placeholder" ];
+            var attrProps = [ "name", "type", "value", "placeholder", "for" ];
             var attrsToAdd = {};
             attrProps.forEach(function(prop) {
                if (prop in attrs) { attrsToAdd[prop] = attrs[prop]; } 
@@ -192,26 +205,25 @@
     function getDataStorage() {
         const env = $('body').data('env');
         const storageType = env === 'test' ? 'sessionStorage' : 'localStorage'; //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
-        if (storageAvailable(storageType)) { 
-            dataStorage = window[storageType]; 
-            return dataStorage;                                                 //console.log("Storage available. Setting now. dataStorage = %O", dataStorage);
-        } else { 
-            return false;                                                       //console.log("No Local Storage Available"); 
-        }
-    }
-    function storageAvailable(type) {
-        try {
-            var storage = window[type];
-            var x = '__storage_test__';
+        if (!storageAvailable(storageType)) { return false; } 
+        dataStorage = window[storageType]; 
+        if (env === 'test') { dataStorage.clear(); }
+        return dataStorage;  
+        
+        function storageAvailable(type) {
+            try {
+                var storage = window[type];
+                var x = '__storage_test__';
 
-            storage.setItem(x, x);
-            storage.removeItem(x);
-            return true;
+                storage.setItem(x, x);
+                storage.removeItem(x);
+                return true;
+            }
+            catch(e) {
+                return false;
+            }
         }
-        catch(e) {
-            return false;
-        }
-    }
+    } /* End getDataStorage */
     function populateStorage(key, val) {
         if (dataStorage) {                                                      //console.log("dataStorage active.");
             dataStorage.setItem(key, val);

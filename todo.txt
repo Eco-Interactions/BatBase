@@ -1,235 +1,117 @@
-============ MEETING ==================
-TASK LIST
-TODO
-NOTES
-============ EMAIL ====================
-    --- General ---
+##Tip: Syntax highlight file with YAML to see highlighting##
+>{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
+    - Move site to new host
+    - add https cert
+    - research google map api and 'places' service
+    - begin to implement
+
+>======== Email ============
 TAYLOR:
-    > Publication display name does not require it to be unique. Intentional?
-        ## Check other entities before email ##
+    -
+        
 Tullenda:
-    > Publication that should be publisher? - Goteborg University, University of Aberdeen
-=======================================
-Notes::
-    ## Change Log ##
+    -
 
-Questions:
-    ## Citation full text ##
-    -Thoughts-
-        - Show citation full text to user before submit? 
-        - What is necessary to show user?
-    -Todo-
-        - Remove publisher type code?
-________________________________________________________________________________
+>==== Change Log ====
+    - Added Bibliography
+    - 
+    - 
 
--- Short Range TODO [priority, difficulty]--
-    --Tests-- 
-        - Add tests and breakpoints before asserts to allow for exploring the page 
-            where the error occured
-            - Use the step name in description printed 
-    --misc--
-        -- Refactor use of 'main' and 'top' entities to 'core' entities.
-        -- Resize slider-header when screen size changes 
-        -- Style the 'change password' page
-        -- remove eif declarations in js files.
-        -- Added header to FOS pages 
-            -- change password page (/profile/change-password)
-            -- update profile page (/profile/edit)
-    --Search--
-        -- csv exports
-            -- Refactor fillHiddenTaxaColumns... The comments and code are confusing
-        -- Add publisher to source-type view
-        -- refactor enable/disable submit-button methods to one method with 'enable' param
-        -- Add data-entry tutorial.
-        -- update 'shw-changd' 'custom' value on date selection
-        -- add bibliography of all the citations
-            -- the same text that is coming up in the Citation column and putting it in alphabetical order by author.
-    --FORM--
-        -- Add inline help tooltips to guide data-entry/edit
-        -- Change description to 'translation'
-        -- [low, easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        --Bugs-
-            -- fix tabs on selectize (test whether firefox bug only??): 
-                https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
-    --Asac---
-        --form--
-            -- Location --
-                -- When nothing is selected but a country, a habitat type, and the 
-                    displayname, suggest to user they use the country-habitat combo
-                    that already exists.
-            -- Auto generate citation full text from filled fields
-            -- Validate that genus and species have the same genus names.
-            -- refactor initcomboboxes to need only the form-lvl param
-            -- Refactor disableSubmitBttn away from passing in '#' and 'submit' 
-                > or refactor into using it to general disable and dim buttons
-                > or refactor both enable/disable submit methods into one func to rule them all
-            -- data creation --
-                -> If a new authors display name is identical to another's, prompt 
-                   user to check existing author for duplication, and then prompt 
-                   them to add initials if not.  
-            -- Data storage err - Ensure user can't close the form any other way 
-                than clicking the 'ok' in the error meseage.
-            -- Pub form
-                -- Change Doi field to DOI
-                -- update test
-        --search----
-            --popup Editor options 
-                -sort interactions by which editor created them.     
-            -- Add an 'All' option to taxon and location dropdowns to reset data 
-                to that level and retain other filters- updated at for example.
-            -- add selectize library
-            -- add note to the walkthrough to wait for load if the taxon-domain elem hasn't laoded yet.
-            -- add text search to all views.
-            -- update all the comments that mention the updates-since filter to 
-                'ints-updated-at'
-            -- Refactor focus search filters to sync together better
-                -- Add publication name search
-        -- Data storage --
-        --css--
-            --refactor to use parital, effectively 'group', selectors
-        --Bugs--
-            - [low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
-        -- Ongoing --
-            -- Add more sophisticated logging
-        --Refactor--
-            -- Add '-sel' to the edit taxon form's 'txn-lvl' field 
+>---- Add to Client Task List ---
+    - 
 
-    --Asap--   
-        -- Data sync --
-            -- write SQL script to get only records with updates/newly created  
-        -- CRUD --
-            -- add err in controllers eliminating the possibility of creating orphans
-                -- Finish
-        -- sync data --
-            -- Add error handling for pending updates that can't be resolved 
-        -- MISC --
-            -- Comment the crud controller method 'setupdatedattimes'
+>================ DEV Internal Task List ===================
+##(Category){priority}[difficulty]##
+TODOs:
+(CRUD FORMS/BACKEND)
+    - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
+    - {high}[easy] add error to interaction form for when an 'invisible' error 
+        occurs on entity selection
+    - {med}[med] add err in CRUD controllers eliminating the possibility of creating orphans
+    - {med}[easy] When nothing is selected but a country, a habitat type, and the 
+        displayname, suggest to user they use the country-habitat combo.
+    - {med} For 'other' citations-- 
+        - [easy] change the title field to 'subTitle', or add a seperate subtitle field. 
+        - [med] disable filled fields for the 'other' publication's citation.
+    - {med}[easy] Format 'ok' button for form errors
+        - Make it impossible to close out of the form without pressing 'ok'.
+    - {low}[easy] If a new authors display name is identical to another's, prompt 
+        user to check for existing author and to add initials if not. 
+    - {low}[easy] Validate that genus and species have the same genus names.
 
-        -- Bug fix --
-            - enable 'update location' button when country is filled from int form on init 
-            - clear cit detail panel when pub cleared.
+(DATA)
+    - {high}[med] write SQL script to get only records with updates/newly created  
+    - {med}[easy] Remove publisher-type code
+    - {low}[med] add 'role' to realms to be able to grab all object/subject realms
+        without hardcoding them.
 
 
-
-~~~ What to test ~~~
-    > Search Page
-        > CSV downloads
-        > Grid
-            > Unq Vals col filter
-        > Forms
-            -- displays correctly.
-            -- all errors are caught and handled as expected
-
-##CHANGES##
-
-::Testing!::
-    - Tests written for
-        > Data entry form (new interaction)
-        > Search page features
-        > Website top pages load with content
-
-~ Data Cleanup ~
-    pub 561 - delete (dup of 338)
-    pub388 - Change srcId -> 967 
-    >> Change my team desc to lower case title.
-
-    !! Refactor !!
-        > Change sel-domain vals to slugs of realm
-        > change search-focus to search-view
-        > Change test at end of 'change views/groups' to test view dependent elems rather than sel value
+(SEARCH PAGE)
+    - {medium}[easy] Check CSV Exports
+    - {med}[med, long] Add data-entry tutorial.
+    - {low}[med] Implement selectize library
+    - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
+        to that level and retain other filters- updated at for example.
+    - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
+        elem hasn't loaded yet.
 
 
+(STATIC/MISC SITE)
+    - {low}[???] Find out how to tell how many users are online
+    - {high}[easy] Biliography (all cites in alphabetical order)
+    - {med}[easy] Add EXIT click event for nav menu
+    - {med}[easy] Add headers and css styles to FOS pages 
+        - change password page (/profile/change-password)
+        - update profile page (/profile/edit)
+    - {low}[med] Update read me for site.
+    - {low}[easy] Resize slider-header when screen size changes 
 
-:: Dev Docs ::
-    -- Location naming:
-        --To select a region or country habitat, type in the region/country name 
-            in the location combobox. Look for the [name]- [habitat]. 
-    -- Errors: 
-        -- TAXON errors being caught:
-            -- Can't change taxon to a level equal/beneath any children,
-                -- or equal/above the parent.
-            -- Species must have genus parent
-            -- Can't change genus that has species children
-    
+(SYNC-DATA)
+    - {high}[med] Add error handling for pending updates that can't be resolved 
 
--------------------- PLANNED ADDITIONS -----------------------------------------
+(REFACTORING):
+    --CRUD--
+        - {med}[crud.js] Add '-sel' to the edit taxon form's 'txn-lvl' field 
+        - {low}[easy] Refactor disableSubmitBttn away from passing in '#' and 'submit' 
+            - or into using it to general disable and dim buttons
+            - or both enable/disable submit methods into one func to rule them all
+        - {low}[easy] refactor initcomboboxes to need only the form-lvl param
+        - {low}[med] Move interaction create form functions into the same func chain building the rest? 
+        - {low}[easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
+        - {med}[easy] Citation text generation code
 
---SHORTTERM--
-    --Future Search Grid Ui
-        --Popup panel with additional data about selected tree item
-        --sticky column headers for search page
-        --Fill search opts-col3 with easy cols to filter on
-        --popup Editor options 
-            -sort interactions by which editor created them.  
-        --Set up hide/show columns options
-            -Config colDefs
-            -Pop up with col selects 
-        --Save filters through changes in the view options
-        -- add bibliography of all the citations
-            -- the same text that is coming up in the Citation column and putting it in alphabetical order by author.
+    --General--
+        - {med}[easy] use parital, effectively 'group', css selectors
+        - {low}[easy] remove eif declarations in js files.
+        - {ongoing}[easy] update all quotes to singles unless escaping
+    --Search Page--
+        - {med}{easy} update Loc and Taxa views to alternate color rows as Src is now. 
+        - {low}[easy] update all the comments that mention the updates-since filter 
+            to 'ints-updated-at'
+        - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
+        - {low}[med] Refactor use of 'main' and 'top' entities to 'core' entities.
+    --Testing--
+        - Refactor tests away from sleeping after js changes to attempting to run 
+            js or find elems on page multiple times before failing, 'spinning'.
 
-    --Site-
-        --CSS
-            --Firefox does not look the same as chrome. Spend a day fixing this!!!
-                --team section styles
-                    #team-sect .second-col, #team-sect .first-col {
-                        width: 420px;
-                        flex-shrink: 0;
-                    }
-                    #team-sect .four-col-outer>div.fourth-col {
-                        width: 220px;
-                        flex-shrink: 0;
-                    }
-                -- Definition Pg
-                    #def-frame .first-col {
-                        width: 550px;
-                        flex-shrink: 0;
-                    }
-        --ENTITIES
-            -- Rename deletedAt field to deleted_at
-        -- add exit click event for menu
-        -- add tips and search page static content to content blocks and wysiwyg
-        -- revisit tag constraint system 
-        -- add copy csv
-        -- fix csv exports??
-        -- t&c sitemap & presentation
-
---LONGTERM--
-    --Site-
-        -- test for optimizations
-        -- responsive
-        -- Taxonym need a collection of namings
+(BUGS):
+    --CRUD FORMS--
+        - {med}[low] new taxon form isn't returning the 'Creating [lvl]' option to select properly
+        - {low}[med] fix tabs on selectize (test whether firefox bug only??)
+            - https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
+        - {high}[med] Fix taxon-lvl combobox fills on taxon selection.
+        - {low}[easy] Fix author field after create form exited
+        - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-
-
----------------------------------------------------------------------------------------------------------------------
-
-Best practices:
-    comments:
-        //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-External Todo:
-    --Zenbol-
-        --PAYMENT PAGE FOR WHM
-        --CRON JOB BACKUPS
-
--------------------------------------------------------------------------------------------------------
-=========================================================================
-
-READ ME
-
-HOW TO RUN TESTS
-    phpunit -c app/ tests   
-    phpunit -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php       
-
-
-Deployment Steps:
-    >Cache busting:
-        config.yml:
-            "Framework":
-                assets:
-                    version: 'v%'"              
-
-
-
-
+>(Testing):
+    ~Static Site~
+        - Bibliography
+    ~Search Page~
+    ~DB Grid~
+        - CSV downloads
+        - Unq Vals col filter
+    ~Forms~
+        - css displays as expected.
+        - all errors are caught and handled as expected
+        -- check that edit forms show all data they should on load (ie, all authors/editors load)
