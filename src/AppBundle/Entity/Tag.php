@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -52,7 +52,7 @@ class Tag
     private $constrainedToEntity;
 
     /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", inversedBy="tags")
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Interaction", mappedBy="tags")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $interactions;

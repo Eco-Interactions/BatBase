@@ -2,27 +2,28 @@
 
 namespace AppBundle\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-
-use AppBundle\Entity\Source;
 use AppBundle\Entity\Contribution;
 use AppBundle\Entity\Interaction;
 use AppBundle\Entity\Location;
+use AppBundle\Entity\Source;
 use AppBundle\Entity\Taxon;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 
 /**
  * Crud-form controller.
  *
- * @Route("/admin/crud")
+ * @Route("/crud")
  */
 class CrudController extends Controller
 {
+/*------------------------------ CREATE --------------------------------------*/
     /**
      * Creates a new Entity, and any new detail-entities, from the form data. 
      *
@@ -39,145 +40,302 @@ class CrudController extends Controller
         
         $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
         $coreClass = 'AppBundle\\Entity\\'. ucfirst($coreName);                 //print("\ncoreClass = ". $coreClass);
-        $coreFormData = $formData->$coreName;
-        $returnData = new \stdClass; 
-
         $coreEntity = new $coreClass();
-        $this->setEntityData(ucfirst($coreName), $coreFormData, $coreEntity, $em);
+        $coreFormData = $formData->$coreName;
+
+        $returnData = new \stdClass; 
         $returnData->core = $coreName;
         $returnData->coreEntity = $coreEntity;
+        $returnData->coreEdits = $this->getEditsObj(false); 
+        $returnData->detailEdits = $this->getEditsObj(false); 
+
+        $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
 
         $returnData->detailEntity = $this->handleDetailEntity(
             $coreFormData, $formData, $returnData, $em
         );
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
-    /** If the core-entity is 'Source', process any detail-entity data. */
-    private function handleDetailEntity($coreFormData, $formData, &$returnData, $em)
+/*------------------------------ Edit ----------------------------------------*/
+    /**
+     * Updates an Entity, and any detail-entities, with the submitted form data. 
+     *
+     * @Route("/entity/edit", name="app_entity_edit")
+     */
+    public function entityEditAction(Request $request)
     {
-        if (property_exists($coreFormData->rel, "sourceType")) { 
-            return $this->setDetailEntityData(
-                $coreFormData, $formData, $returnData, $em
-            );  
-        }
-        return false;
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       //print("\nCreating Source.\n");
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
+        
+        $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
+        $coreFormData = $formData->$coreName;
+        $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
+            ->findOneBy(['id' => $formData->ids->core ]);
+        
+        $returnData = new \stdClass; 
+        $returnData->core = $coreName;
+        $returnData->coreEntity = $coreEntity;
+        $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
+        $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
+
+        $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
+
+        $returnData->detailEntity = $this->handleDetailEntity(
+            $coreFormData, $formData, $returnData, $em
+        );
+        return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+/*------------------------------ Shared Helpers ------------------------------*/
+    /**
+     * Builds and returns an object that will track any edits made to the entity. 
+     * The editing prop holds the id of the entity being edited, or false if creating.
+     */
+    private function getEditsObj($editing)
+    {
+        $edits = new \stdClass;
+        $edits->editing = $editing;
+        return $edits;
+    }
+    /*---------- Detail Entity ------------------------------------------*/
+    /** If the core-entity is 'Source', process any detail-entity data. */
+    private function handleDetailEntity($cFormData, $dFormData, &$returnData, $em)
+    {
+        if (!property_exists($cFormData->rel, "sourceType")) { return false; }
+        return $this->setDetailEntityData($cFormData, $dFormData, $returnData, $em);  
     }
     /**
      * Sets all detail-entity data and returns the entity. 
      * Note: Publishers are the only 'sourceType' with no detail-entity.
      */
-    private function setDetailEntityData($cFormData, $formData, &$returnData, &$em)
+    private function setDetailEntityData($cFormData, $dFormData, &$returnData, &$em)
     {
-        $detailName = $cFormData->rel->sourceType;
-        $returnData->detail = $detailName;
+        $dName = $cFormData->rel->sourceType;
+        $returnData->detail = $dName;
         if (!$cFormData->hasDetail) { return false; }
-        $detailData = $formData->$detailName;
-        return $this->setDetailData(
-            $detailData, $detailName, $returnData, $em
-        );
+        $dData = $dFormData->$dName;
+        
+        return $this->setDetailData( $dData, $dName, $returnData, $em );
     }
-    private function setDetailData($detailData, $detailName, &$returnData, &$em)
+    private function setDetailData($dData, $dName, &$returnData, &$em)
     {
-        $detailEntClass = 'AppBundle\\Entity\\'. ucfirst($detailName);
-        $detailEntity = new $detailEntClass();
-        $detailEntity->setSource($returnData->coreEntity);
-        $this->addDetailToCoreEntity($returnData->coreEntity, $detailEntity, $detailName, $em);
-        $this->setEntityData($detailName, $detailData, $detailEntity, $em);  
+        $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
+        $dEntity->setSource($returnData->coreEntity);
+        $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
+        $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
 
-        return $detailEntity;
+        return $dEntity;
     }
-    private function addDetailToCoreEntity(&$coreEntity, &$detailEntity, $detailName, &$em)
+    /** Returns either a newly created entity or an existing entity to edit. */
+    private function getDetailEntity($dName, $edits, $em)
     {
-        $setMethod = 'set'. ucfirst($detailName);
-        $coreEntity->$setMethod($detailEntity);
+        if ($edits->editing !== false) {
+            return $this->getEntity(ucfirst($dName), $edits->editing, $em);
+        }
+        $dClass = 'AppBundle\\Entity\\'. ucfirst($dName);
+        return new $dClass();
+    }
+    /** Adds the detail entity to the core entity. Eg, A Publication to it's Source record. */
+    private function addDetailToCoreEntity(&$coreEntity, &$dEntity, $dName, &$em)
+    {
+        $setMethod = 'set'. ucfirst($dName);
+        $coreEntity->$setMethod($dEntity);
         $em->persist($coreEntity);
     }
-
+    /*---------- Set Entity Data ---------------------------------------------*/
     /**
      * Calls the set method for both types of entity data, flat and relational, 
      * and persists the entity.
      */
-    private function setEntityData($entName, $formData, &$entity, &$em)
+    private function setEntityData($formData, &$entity, &$edits, &$em)
     {
-        $this->setFlatData($formData->flat, $entity, $em);
-        $this->setRelatedEntityData($formData->rel, $entity, $em);
+        $this->setFlatData($formData->flat, $entity, $edits, $em);
+        $this->setRelatedEntityData($formData->rel, $entity, $edits, $em);
         $em->persist($entity);
     }
     /** Sets all scalar data. */ 
-    private function setFlatData($formData, &$entity, &$em)
+    private function setFlatData($formData, &$entity, &$edits, &$em)
     {
         foreach ($formData as $field => $val) {
-            $setField = 'set'. ucfirst($field);                                 //print("\nsetFlatField = ".$setField."\n");
-            $entity->$setField($val);
+            $this->setFlatDataAndTrackEdits($entity, $field, $val, $edits);  
         }
     }
     /** Sets all realtional data. */
-    private function setRelatedEntityData($formData, &$entity, &$em)
+    private function setRelatedEntityData($formData, &$entity, &$edits, &$em)
     {
         $edgeCases = [
-            "contributor" => function($ary) use ($entity, &$em) { 
-                $this->addContributors($ary, $entity, $em); },
-            "tags" => function($ary) use ($entity, &$em) { 
-                $this->addTags($ary, $entity, $em); },
+            "contributor" => function($ary) use ($entity, &$edits, &$em) { 
+                $this->handleContributors($ary, $entity, $edits, $em); },
+            "tags" => function($ary) use ($entity, &$edits, &$em) { 
+                $this->handleTags($ary, $entity, $edits, $em); },
+            "source" => function($id) use ($entity, &$edits, &$em) {
+                $this->addInteractionToSource($id, $entity, $edits, $em);
+            }
         ];
         foreach ($formData as $rEntityName => $val) {  
-            $setField = 'set'. ucfirst($rEntityName);                           
             if (array_key_exists($rEntityName, $edgeCases)) {
                 call_user_func($edgeCases[$rEntityName], $val);
             } else {
-                $relEntity = $this->getRelatedEntity($rEntityName, $val, $em);
-                $entity->$setField($relEntity);
+                $relEntity = $this->getEntity($rEntityName, $val, $em);
+                $this->setRelDataAndTrackEdits($entity, $rEntityName, $relEntity, $edits);
             }
         }
     }
-    /** Returns the related-entity object after deriving the class and prop to use. */
-    private function getRelatedEntity($relField, $val, $em)
+    /** Returns the entity. */
+    private function getEntity($relField, $val, $em)
     {
-        $relClass = $this->getRelatedEntityClass($relField);
+        $relClass = $this->getEntityClass($relField);
         $prop = is_numeric($val) ? 'id'  : 'displayName';                       
-        return $this->returnRelatedEntity($relClass, $prop, $val, $em);
+        return $this->returnEntity($relClass, $prop, $val, $em);
     }
-    private function getRelatedEntityClass($relField)
+    /** Handles field name to class name translations. */
+    private function getEntityClass($relField)
     {
         $classMap = [ "parentSource" => "Source", "parentLoc" => "Location", 
             "parentTaxon" => "Taxon", "subject" => "Taxon", "object" => "Taxon" ];
         return array_key_exists($relField, $classMap) ? 
             $classMap[$relField] : ucfirst($relField);
     }
-    private function returnRelatedEntity($class, $prop, $val, $em)
+    private function returnEntity($class, $prop, $val, $em)
     {
         return $em->getRepository("AppBundle:".$class)
             ->findOneBy([$prop => $val]);
     }
-    /** Creates a new Contribution for each author source in the array. */
-    private function addContributors($ary, &$srcEntity, &$em)
+    private function handleContributors($ary, &$entity, &$edits, &$em)
     {
-        foreach ($ary as $contributorId) {
-            $authSrc = $em->getRepository("AppBundle:Source")
-                ->findOneBy(['id' => $contributorId]);
-            $contribEntity = new Contribution();
-            $contribEntity->setWorkSource($srcEntity);
-            $contribEntity->setAuthorSource($authSrc);
-            $em->persist($contribEntity);
+        $this->removeContributors($ary, $entity, $edits, $em);
+        $this->addContributors($ary, $entity, $edits, $em);
+    }
+    /** Creates a new Contribution for each author source in the array. */
+    private function addContributors($ary, &$pub, $edits, &$em)
+    {
+        $added = []; 
+        $curContribs = $pub->getContributorIds();
+        $contribs = $pub->getContributors();
+        foreach ($ary as $authId) { 
+            if (in_array($authId, $curContribs)) { continue; } 
+            $auth = $em->getRepository('AppBundle:Source')
+                ->findOneBy(['id' => $authId ]);
+            $contribEntity = $this->createContrib($pub, $auth, $em);
+            $pub->addContributor($contribEntity);  //$pub persisted later
+            $auth->addContribution($contribEntity);
+            $em->persist($auth);
+            array_push($added, $authId);
+        }  
+        if (count($added) > 0) {
+            $edits->contributor = [ 'added' => $added ]; 
+        }
+    }
+    private function createContrib($pub, $auth, &$em)
+    {
+        $entity = new Contribution();
+        $entity->setWorkSource($pub);
+        $entity->setAuthorSource($auth);
+        $em->persist($entity);  
+        return $entity;
+    }
+    /** Removes any entities currently in the $coll that are not in the new $ary.  */
+    private function removeContributors($ary, &$entity, &$edits, &$em)
+    {
+        $contributors = $entity->getContributors();
+        $removed = [];  
+        foreach ($contributors as $contrib) { 
+            $authId = $contrib->getAuthorSource()->getId();
+            if (in_array($authId, $ary)) { continue; }
+            $entity->removeContributor($contrib);
+            array_push($removed, $authId); 
+        }
+        if (count($removed)) { $edits->contributor = [ 'removed' => $removed ]; }
+    }
+    /** Handles adding and removing tags from the entity. */  
+    private function handleTags($ary, &$entity, &$edits, &$em)
+    {
+        $curTags = $entity->getTagIds();
+        $this->removeFromCollection('tag', $curTags, $ary, $entity, $edits, $em);
+        $this->addToCollection('tag', $curTags, $ary, $entity, $edits, $em);
+    }
+    /** Removes any entities currently in the $coll that are not in the new $ary.  */
+    private function removeFromCollection($field, $coll, $ary, &$entity, &$edits, $em)
+    {
+        $removed = [];  
+        $removeField = 'remove'.ucfirst($field);
+        foreach ($coll as $id) { 
+            if (in_array($id, $ary)) { continue; }
+            $collEnt = $this->getEntity($field, $id, $em);
+            $entity->$removeField($collEnt);
+            array_push($removed, $id); 
+        }
+        if (count($removed)) { $edits->$field = [ 'removed' => $removed ]; }
+    }
+    /** Adds each new entity in ary to the collection.  */
+    private function addToCollection($field, $coll, $ary, &$entity, &$edits, $em)
+    {
+        $added = []; 
+        $addField = 'add'.ucfirst($field);  
+        foreach ($ary as $id) { 
+            if (in_array($id, $coll)) { continue; }
+            array_push($added, intval($id));  
+            $collEnt = $this->getEntity($field, $id, $em);
+            $entity->$addField($collEnt);
+        }
+        if ($edits->editing && count($added)) {
+            $edits->$field = property_exists($edits, $field) ? 
+                array_merge($edits->$field, ['added' => $added]) : ['added' => $added]; 
+        }
+    }
+    /** If adding an interaction to a source, ensures it's 'isDirect' flag to true. */
+    private function addInteractionToSource($id, $entity, &$edits, &$em)
+    {
+        $relEntity = $this->getEntity("Source", $id, $em);
+        $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits);
+        $className = $em->getClassMetadata(get_class($entity))->getName(); 
+        if ($className === "AppBundle\Entity\Interaction" && !$relEntity->getIsDirect()) {
+            $relEntity->setIsDirect(true);
+            $em->persist($relEntity);
+        }
+    }
+    /**
+     * Checks whether current value is equal to the passed value. If not, the 
+     * entity is updated with the new value and the field is added to the edits obj.   
+     */
+    private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits) 
+    {
+        $setField = 'set'. ucfirst($field);                                     
+        $getField = 'get'. ucfirst($field);                                     
+        
+        $curVal = $entity->$getField();
+        if ($curVal == $newVal) { return; }
 
-            $srcEntity->addContributor($contribEntity);  //$srcEntity persisted later
-            $authSrc->addContribution($contribEntity);
-            $em->persist($authSrc);
-        }  
+        if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
+        $entity->$setField($newVal);
     }
-    /** Creates a new Contribution for each author source in the array. */
-    private function addTags($ary, &$entity, &$em)
+    /**
+     * Checks whether current value is equal to the passed value. If not, the 
+     * entity is updated with the new value and the field is added to the edits obj.   
+     */
+    private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits) 
     {
-        foreach ($ary as $tag) {
-            $tagEnt = $em->getRepository("AppBundle:Tag")
-                ->findOneBy(['id' => $tag]);
-            $entity->addTag($tagEnt);
-        }  
+        $setField = 'set'. ucfirst($field);                                     
+        $getField = 'get'. ucfirst($field);                                     
+        
+        $curVal = $entity->$getField() ? $entity->$getField()->getId() : null;
+        if ($newVal === null) { 
+            if ($curVal === null) { return; }
+        } else if ($curVal === $newVal->getId()) { return; }
+
+        if ($edits->editing) { 
+            $newValue = $newVal === null ? null : $newVal->getId();
+            $edits->$field = [ "old" => $curVal, "new" => $newValue ]; }
+        $entity->$setField($newVal);
     }
+    /*---------- Flush and Return Data ---------------------------------------*/
     /**
      * Attempts to flush all persisted data. If there are no errors, the created/updated 
      * data is sent back to the crud form; otherise, an error message is sent back.
-     */
+     */                                                                                                                                     
     private function attemptFlushAndSendResponse($entityData, &$em)
     {        
         try {
@@ -187,6 +345,7 @@ class CrudController extends Controller
         } catch (\Exception $e) {
             return $this->sendErrorResponse($e, "\Exception");
         }
+        $this->setUpdatedAtTimes($entityData, $em);
         return $this->sendDataAndResponse($entityData);
     }
     /** Logs the error message and returns an error response message. */
@@ -213,5 +372,32 @@ class CrudController extends Controller
             'results' => $entityData
         ));
         return $response;
+    }
+    /** ----------------- Set Entity/System UpdatedAt ----------------------- */
+    private function setUpdatedAtTimes($entityData, &$em)
+    {
+        $this->updateUpdatedAt($entityData->core, $em);
+        if ($entityData->detailEntity) {
+            $this->updateUpdatedAt($entityData->detail, $em);
+        }
+        $this->setUpdatedAt(1, $em); //System updateAt
+        $em->flush();
+    }
+    private function updateUpdatedAt($className, &$em)
+    {
+        $dateEntities = ["System", "Author", "Authority", "Citation", "CitationType", 
+            "ContentBlock", "Contribution", "Realm", "Feedback", "HabitatType", 
+            "ImageUpload", "Interaction", "InteractionType", "Level", "Location", 
+            "LocationType", "Naming", "NamingType", "Publication", "PublicationType", 
+            "Source", "SourceType", "Tag", "Taxon", "Taxonym"];
+        $entityDateId = array_search(ucfirst($className), $dateEntities) + 1;
+        $this->setUpdatedAt($entityDateId, $em);                                
+    }
+    private function setUpdatedAt($id, &$em)
+    {
+        $entity = $em->getRepository('AppBundle:SystemDate')
+            ->findOneBy(['id' => $id]);
+        $entity->setDateVal(new \DateTime());
+        $em->persist($entity);
     }
 }

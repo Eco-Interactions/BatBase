@@ -2,11 +2,11 @@
 
 namespace Application\Migrations;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use AppBundle\Entity\SystemDate;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
-use AppBundle\Entity\SystemDate;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @up- Removes test entities created after a certain datetime for specified entites.
@@ -33,7 +33,7 @@ class Version000EraseTests extends AbstractMigration implements ContainerAwareIn
     {
         $classes = ['Author', 'Citation', 'Contribution', 'Interaction', 'Location',
             'Publication', 'Source', 'Taxon'];
-        $date = '2017-02-04 00:00:00';
+        $date = '2017-05-17 16:27:49'; //When habitats were added as locations
 
         foreach ($classes as $className) {                                      print("className = ". $className."\n");
             $repo = $em->getRepository('AppBundle:'.$className);

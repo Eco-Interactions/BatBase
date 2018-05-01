@@ -1,0 +1,28 @@
+AppBundle\Entity\Domain:
+    Domain-1: #1
+        slug: bat
+        displayName: Bat
+        pluralName: Bats
+        taxon: '@Taxon-2' #7
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Domain-2: #3
+        slug: plant
+        displayName: Plant
+        pluralName: Plants
+        taxon: '@Taxon-3' #20
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Domain-3: #2
+        slug: arthropod
+        displayName: Arthropod
+        pluralName: Arthropods
+        taxon: '@Taxon-4'  #11
+        created: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-07-15 23:21:48", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'

@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Feedback.
@@ -132,7 +132,7 @@ class Feedback
     /**
      * Get status.
      *
-     * @return string
+     * @return int
      */
     public function getStatus()
     {

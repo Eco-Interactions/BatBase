@@ -36,18 +36,19 @@ $(document).ready(function() {
             $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
         }
     } /* End showTosWindow */
-    function unbindEscEvents() {
-        $(document).on('keyup',function(){});
-        $("#b-overlay").click(function(){});
-    }
     function closeTosWindow() {
         $("#b-overlay").css({ "display": "none" });
         unbindEscEvents();
         removeTosStyles();
     }
+    function unbindEscEvents() {
+        $(document).on('keyup',function(){});
+        $("#b-overlay").click(function(){});
+    }
     function removeTosStyles() {
         $("#b-overlay-popup").removeClass("tos-popup");
         $("#b-overlay").removeClass("flex-col");
+        $("#b-overlay-popup").empty();
     }
     function addRegistrationTosElems() {  console.log("addRegistrationTosElems called")
         var acceptDiv = document.createElement("div");

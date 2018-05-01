@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -55,6 +55,15 @@ class Citation
     /**
      * @var string
      *
+     * @ORM\Column(name="abstract", type="text", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("abstract")
+     */
+    private $abstract;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="publication_volume", type="string", length=255, nullable=true)
      * @JMS\Expose
      * @JMS\SerializedName("publicationVolume")
@@ -83,7 +92,7 @@ class Citation
      * @var \AppBundle\Entity\CitationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CitationType", inversedBy="publication")
-     * @ORM\JoinColumn(name="cit_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $citationType;
 
@@ -225,6 +234,31 @@ class Citation
     {
         return $this->fullText;
     }
+
+    /**
+     * Set abstract.
+     *
+     * @param string $abstract
+     *
+     * @return Citation
+     */
+    public function setAbstract($abstract)
+    {
+        $this->abstract = $abstract;
+
+        return $this;
+    }
+
+    /**
+     * Get abstract.
+     *
+     * @return string
+     */
+    public function getAbstract()
+    {
+        return $this->abstract;
+    }
+
 
     /**
      * Set publicationVolume.

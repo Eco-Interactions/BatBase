@@ -2,29 +2,29 @@
 <html lang="en">
 
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-	<!-- {% set eifisuser = true %} -->
-	{% set eifusername = app.user.username %}
-	{% if is_granted('ROLE_SUPER_ADMIN') %}
-		{% set eifrole = 'super' %}
-	{% elseif is_granted('ROLE_ADMIN') %}
-		{% set eifrole = 'admin' %}
-	{% elseif is_granted('ROLE_EDITOR') %}
-		{% set eifrole = 'editor' %}
-	{% elseif is_granted('ROLE_USER') %}
-		{% set eifrole = 'user' %}
-	{% else %}
-		{% set eifrole = 'visitor' %}
-	{% endif %}
+    <!-- {% set eifisuser = true %} -->
+    {% set eifusername = app.user.username %}
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+        {% set eifrole = 'super' %}
+    {% elseif is_granted('ROLE_ADMIN') %}
+        {% set eifrole = 'admin' %}
+    {% elseif is_granted('ROLE_EDITOR') %}
+        {% set eifrole = 'editor' %}
+    {% elseif is_granted('ROLE_USER') %}
+        {% set eifrole = 'user' %}
+    {% else %}
+        {% set eifrole = 'visitor' %}
+    {% endif %}
 {% else %}
-<!-- 	{% set eifisuser = false %} -->
-	{% set eifusername = '' %}
-	{% set eifrole = 'visitor' %}
+<!--    {% set eifisuser = false %} -->
+    {% set eifusername = '' %}
+    {% set eifrole = 'visitor' %}
 {% endif %}
 
 {% if is_granted("ROLE_USER") %}
-	{% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
+    {% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% else %}
-	{% set targeturl = "false" %}
+    {% set targeturl = "false" %}
 {% endif %}
 
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
@@ -38,25 +38,29 @@
         <meta name="keywords" content="bats plants insects biology taxonomy" />
         <meta name="robots" content="index, follow" />
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-		{% block stylesheets %}
+        {% block stylesheets %}
             <!-- Data Tables -->
             <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/jquery.dataTables.min.css') }}" />
             <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/buttons.dataTables.min.css') }}" />
             <link rel="stylesheet" href="{{ asset('bundles/app/css/data-tables/fixedHeader.dataTables.min.css') }}" />
             <!-- AgGrid -->
-    		<link rel="stylesheet" href="{{ asset('bundles/app/grid/ag-grid.css') }}" />
-		    <link rel="stylesheet" href="{{ asset('bundles/app/grid/theme-fresh.css') }}" />
+            <link rel="stylesheet" href="{{ asset('bundles/app/grid/ag-grid.css') }}" />
+            <link rel="stylesheet" href="{{ asset('bundles/app/grid/theme-fresh.css') }}" />
             <!-- wysiwyg -->
             <link rel="stylesheet" href="{{ asset('bundles/app/trumbowyg/ui/trumbowyg.css') }}" />
+            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/flatpickr.css') }}">
+            <!-- calendar -->
+            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/flatpickr.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/app/flatpickr/confirmDate.css') }}">
             <!-- Custom -->
             <link rel="stylesheet" href="{{ asset('bundles/app/css/ei-reset.css') }}" />
             <link rel="stylesheet" href="{{ asset('bundles/app/css/header.css') }}" />
+            <link rel="stylesheet" href="{{ asset('bundles/app/css/search_db.css') }}" />
             <link rel="stylesheet" href="{{ asset('bundles/app/css/oi.css') }}" />
         {% endblock stylesheets %}
         {% block javascripts %}
-            <!-- remove zart-ez-logs and switch to minified libs for production -->
             <script src="{{ asset('bundles/app/js/eco-int-namespace.js') }}"></script>
-            {# // <script src="{{ asset('bundles/app/js/zart-ez-logs-0.1.js') }}"></script> #}
+            <!-- switch to minified libs for production -->
             <script src="{{ asset('bundles/app/js/jquery/jquery-2.1.4.js') }}"></script>
             <script src="{{ asset('bundles/app/grid/ag-grid.js') }}"></script>
             <script src="{{ asset('bundles/app/js/slider/eif-frames.js') }}"></script>
@@ -74,64 +78,67 @@
             <script src="{{ asset('bundles/app/js/data-tables/oi-tables.js') }}"></script>
             <!-- wysiwyg -->
             <script src="{{ asset('bundles/app/trumbowyg/trumbowyg.js') }}"></script>
-
+            <!-- calendar -->
+            <script src="{{ asset('bundles/app/flatpickr/flatpickr.js') }}"></script>
+            <script src="{{ asset('bundles/app/flatpickr/confirmDate.js') }}"></script>
+            <!-- customs -->
             <script src="{{ asset('bundles/app/js/util.js') }}"></script>
             <script src="{{ asset('bundles/app/js/tos.js') }}"></script>
             <script src="{{ asset('bundles/app/js/crud.js') }}"></script>
-			<script src="{{ asset('bundles/app/js/oi.js') }}"></script>
+            <script src="{{ asset('bundles/app/js/oi.js') }}"></script>
 
-			{% if is_granted("ROLE_USER") %}
-				<script src="{{ asset('bundles/app/js/feedback.js') }}"></script>
-			{% endif %}
-		{% endblock javascripts %}
+            {% if is_granted("ROLE_USER") %}
+                <script src="{{ asset('bundles/app/js/feedback.js') }}"></script>
+            {% endif %}
+        {% endblock javascripts %}
     </head>
 
     <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}" data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
-	{% block body %}
-		<div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
-			{% block masthead %}
-			<div id="masthead"  data-img-path="{{ asset('bundles/app/images/') }}">
-				<div id="logo-overlay">
-					<img src="{{ asset('bundles/app/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org" width="375">
-				</div>
-				<div id="prev-btn-frame" title="Previous">
-					<img id="prev-btn" class="step-btn" src="{{ asset('bundles/app/images/prev.png') }}" alt="<|">
-				</div>
-				<div id="pause-btn-frame" title="Pause">
-					<img id="pause-btn" src="{{ asset('bundles/app/images/pause.png') }}" alt="||">
-				</div>
-				<div id="next-btn-frame" title="Next">
-					<img id="next-btn" class="step-btn" src="{{ asset('bundles/app/images/next.png') }}" alt="|>">
-				</div>
-			</div>
-			{% endblock %}
-			<div id="sticky-hdr">
-				<div id="hdrmenu">
-					{{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
-					<div id="menu-bar-title">batplant.org</div>
-				</div>
-				<div id="hdrtext">
-					<div id="headln-txt">
-						{% block headline %}{% endblock %}
-					</div>
-					<div id="tbl-ctrls-reloc"></div>
-				</div>
-			</div>
-			<div id="{% block pageid %}content-detail{% endblock pageid %}">
-				<div id="detail-block">{% block detail %}{% endblock %}</div>
-				<div id="footer" class="flex-row">
-					{% block footer %}
-						<span>Site and Data Copyright 2015 batplant.org -
-							Bat photos Copyright: Merlin D. Tuttle/Bat Conservation International
-							<a href="http://www.batcon.org/">www.batcon.org</a>
-						</span>
+    {% block body %}
+        <div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
+            {% block masthead %}
+            <div id="masthead"  data-img-path="{{ asset('bundles/app/images/') }}">
+                <div id="logo-overlay">
+                    <img src="{{ asset('bundles/app/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org" width="375">
+                </div>
+                <div id="prev-btn-frame" title="Previous">
+                    <img id="prev-btn" class="step-btn" src="{{ asset('bundles/app/images/prev.png') }}" alt="<|">
+                </div>
+                <div id="pause-btn-frame" title="Pause">
+                    <img id="pause-btn" src="{{ asset('bundles/app/images/pause.png') }}" alt="||">
+                </div>
+                <div id="next-btn-frame" title="Next">
+                    <img id="next-btn" class="step-btn" src="{{ asset('bundles/app/images/next.png') }}" alt="|>">
+                </div>
+            </div>
+            {% endblock %}
+            <div id="sticky-hdr">
+                <div id="hdrmenu">
+                    {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
+                    <div id="menu-bar-title">batplant.org</div>
+                </div>
+                <div id="hdrtext">
+                    <div id="headln-txt">
+                        {% block headline %}{% endblock %}
+                    </div>
+                    <div id="tbl-ctrls-reloc"></div>
+                </div>
+            </div>
+            <div id="{% block pageid %}content-detail{% endblock pageid %}">
+                <div id="detail-block">{% block detail %}{% endblock %}</div>
+                <div id="footer" class="flex-row">
+                    {% block footer %}
+                        <span>Site and Data Copyright 2015 batplant.org -
+                            Bat photos Copyright: Merlin D. Tuttle/Bat Conservation International
+                            <a href="http://www.batcon.org/">www.batcon.org</a>
+                        </span>
                         <span>
                             <a id="footer-tos" href="Javascript:void(0)">
                                 batplant.org Terms of Use</a>
                         </span>
                     {% endblock %}
-				</div>
-			</div>
+                </div>
+            </div>
         </div>
         <div id="b-overlay" class="flex-col">
             <div id="b-overlay-popup"></div>

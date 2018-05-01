@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -29,7 +29,7 @@ class Location
     /**
      * @var string
      *
-     * @ORM\Column(name="display_name", type="string", length=255)
+     * @ORM\Column(name="display_name", type="string", length=255, unique=true)
      * @JMS\Expose
      * @JMS\SerializedName("displayName")
      */
@@ -123,7 +123,7 @@ class Location
      * @var \AppBundle\Entity\LocationType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\LocationType", inversedBy="locations")
-     * @ORM\JoinColumn(name="location_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $locationType;
 
@@ -548,8 +548,8 @@ class Location
     public function getRegionData()
     {   
         $locType = $this->locationType; // print("Region loc Type = ".$locType->getId());
-        if ($locType->getId() === 1) { return $this->getLocObj($this); }
-        return $this->findParentLocType($this, 1);
+        if ($locType->getSlug() === 'region') { return $this->getLocObj($this); }
+        return $this->findParentLocType($this, 'region');
     }
 
     /**
@@ -560,20 +560,25 @@ class Location
     public function getCountryData()
     {   
         $locType = $this->locationType; //print("Country loc Type = ".$locType->getId()." for ".$this->displayName);
-        if ($locType->getId() === 1) { return null; }
-        if ($locType->getId() === 2) { return $this->getLocObj($this); }
-        return $this->findParentLocType($this, 2);
+        if ($locType->getSlug() === 'region') { return false; }
+        if ($locType->getSlug() === 'country') { return $this->getLocObj($this); }
+        return $this->findParentLocType($this, 'country');
     }
     
     /** Get the parent location of the passed type, region or country, if it exists. */
-    private function findParentLocType($loc, $locTypeId)
+    private function findParentLocType($loc, $typeSlug)
     {
         $parent = $loc->getParentLoc();
-        if (!$parent || $parent->getLocationType()->getId() < $locTypeId) { return null; }
-        if ($parent->getLocationType()->getId() === $locTypeId) { 
+        if (!$parent) { return null; }
+        if ($typeSlug=='country' && $this->hasRegionParent($parent)) {return null;}
+        if ($parent->getLocationType()->getSlug() === $typeSlug) { 
             return $this->getLocObj($parent); 
         }
-        return $this->findParentLocType($parent, $locTypeId);
+        return $this->findParentLocType($parent, $typeSlug);
+    }
+    private function hasRegionParent($parent)
+    {
+        return $parent->getLocationType()->getSlug() == 'region';
     }
     
     /** Get the Location id and displayName. */
@@ -762,6 +767,6 @@ class Location
      */
     public function __toString()
     {
-        return $this->getDescription();
+        return $this->getDisplayName();
     }
 }

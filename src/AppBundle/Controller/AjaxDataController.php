@@ -2,12 +2,12 @@
 
 namespace AppBundle\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
  * Ajax Data controller.
@@ -69,15 +69,15 @@ class AjaxDataController extends Controller
      * All entities updated since the lastUpdatedAt time are serialized and 
      * returned in a data object keyed by id.  
      */
-    private function getAllUpdatedData($entity, $lastUpdatedAt, &$em)
-    {  
+    private function getAllUpdatedData($entityType, $lastUpdatedAt, &$em)
+    {    
         $serializer = $this->container->get('jms_serializer');
         $data = new \stdClass;
 
-        $entities = $this->getEntitiesWithUpdates($entity, $lastUpdatedAt, $em);
+        $entities = $this->getEntitiesWithUpdates($entityType, $lastUpdatedAt, $em);
 
-        foreach ($entities as $entity) {
-            $id = $entity->getId();
+        foreach ($entities as $entity) {   
+            $id = $entity->getId();    
             $data->$id = $serializer->serialize($entity, 'json');
         }
         return $data;
@@ -93,7 +93,7 @@ class AjaxDataController extends Controller
         return $query->getResult();
     }
     /**
-     * Returns serialized data objects for the Domain, Level, and Taxon entities.
+     * Returns serialized data objects for the Realm, Level, and Taxon entities.
      *
      * @Route("/taxon", name="app_serialize_taxon")
      */
@@ -105,13 +105,13 @@ class AjaxDataController extends Controller
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
 
-        $domain = $this->serializeEntity('Domain', $serializer, $em);
+        $realm = $this->serializeEntity('Realm', $serializer, $em);
         $level = $this->serializeEntity('Level', $serializer, $em);
         $taxon = $this->serializeEntity('Taxon', $serializer, $em);
 
         $response = new JsonResponse(); 
         $response->setData(array(                                    
-            'domain' => $domain,    'level' => $level,
+            'realm' => $realm,    'level' => $level,
             'taxon' => $taxon            
         )); 
         return $response;
@@ -133,29 +133,13 @@ class AjaxDataController extends Controller
         $habitatType = $this->serializeEntity('HabitatType', $serializer, $em);
         $location = $this->serializeEntity('Location', $serializer, $em);
         $locType = $this->serializeEntity('LocationType', $serializer, $em);
-        $unspecifiedLocInts = $this->getInteractionsWithNoLocation($em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'location' => $location,    'habitatType' => $habitatType,   
-            'locationType' => $locType, 'noLocIntIds' => $unspecifiedLocInts
-        ));
+            'locationType' => $locType
+        )); 
         return $response;
-    }
-    /** The only properties are those that later affect how this 'region' will be handled. */
-    private function getInteractionsWithNoLocation($em)
-    {
-        $intRcrdIds = []; 
-        $interactions = $em->getRepository('AppBundle:Interaction')
-            ->findBy(array('location'=> null));   
-        if ( count($interactions) === 0 ) { return null; } 
-        
-        foreach ($interactions as $int)  
-        { 
-            array_push( $intRcrdIds, $int->getId() ); 
-        } 
-
-        return $intRcrdIds; 
     }
     /**
      * Returns serialized data objects for all entities related to Source. 
@@ -175,16 +159,16 @@ class AjaxDataController extends Controller
         $citType = $this->serializeEntity('CitationType', $serializer, $em);
         $publication = $this->serializeEntity('Publication', $serializer, $em);
         $pubType = $this->serializeEntity('PublicationType', $serializer, $em);
+        $publisher = $this->serializeEntity('Publisher', $serializer, $em);
         $source = $this->serializeEntity('Source', $serializer, $em);
         $srcType = $this->serializeEntity('SourceType', $serializer, $em);
-        $tag = $this->serializeEntity('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
             'author' => $author,        'citation' => $citation,
             'source' => $source,        'citationType' => $citType, 
             'sourceType' => $srcType,   'publication' => $publication,  
-            'tag' => $tag,              'publicationType' => $pubType
+            'publicationType' => $pubType, 'publisher' => $publisher
         ));
         return $response;
     }
@@ -203,10 +187,12 @@ class AjaxDataController extends Controller
 
         $interaction = $this->serializeEntity('Interaction', $serializer, $em);
         $intType = $this->serializeEntity('InteractionType', $serializer, $em);
+        $tag = $this->serializeEntity('Tag', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array(
-            'interaction' => $interaction,  'interactionType' => $intType
+            'interaction' => $interaction,  'interactionType' => $intType,
+            'tag' => $tag
         ));
         return $response;
     }

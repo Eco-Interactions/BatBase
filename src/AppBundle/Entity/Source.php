@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -108,7 +108,7 @@ class Source
      * @var \AppBundle\Entity\SourceType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\SourceType", inversedBy="sources")
-     * @ORM\JoinColumn(name="source_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $sourceType;
 
@@ -126,31 +126,6 @@ class Source
     private $interactions;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource")
-     *
-     * A collection of all Authors that contributed to a source work.
-     */
-    private $contributors;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource")
-     *
-     * A collection of all works an Author source contributed to.
-     */
-    private $contributions;
-
-    /**
-     * @var \AppBundle\Entity\Publication
-     *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", mappedBy="source")
-     */
-    private $publication;
-
-    /**
      * @var \AppBundle\Entity\Author
      *
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Author", mappedBy="source")
@@ -163,6 +138,40 @@ class Source
      * @ORM\OneToOne(targetEntity="AppBundle\Entity\Citation", mappedBy="source")
      */
     private $citation;
+
+    /**
+     * @var \AppBundle\Entity\Publication
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publication", mappedBy="source")
+     */
+    private $publication;
+
+    /**
+     * @var \AppBundle\Entity\Publisher
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Publisher", mappedBy="source")
+     */
+    private $publisher;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="workSource", 
+     *     cascade={"persist", "remove"}, orphanRemoval=true)
+     *
+     * A collection of all Authors that contributed to a source work.
+     */
+    private $contributors;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Contribution", mappedBy="authorSource", 
+     *     cascade={"persist", "remove"}, orphanRemoval=true)
+     *
+     * A collection of all works an Author source contributed to.
+     */
+    private $contributions;
 
     /**
      * @var \DateTime
@@ -402,7 +411,7 @@ class Source
      *
      * @return Source
      */
-    public function setParentSource(\AppBundle\Entity\Source $parentSource)
+    public function setParentSource(\AppBundle\Entity\Source $parentSource = null)
     {
         $this->parentSource = $parentSource;
 
@@ -424,7 +433,7 @@ class Source
      * @JMS\VirtualProperty
      * @JMS\SerializedName("parent")
      */
-    public function getParentSourceSId()
+    public function getParentSourceId()
     {
         return $this->parentSource ? $this->parentSource->getId() : null;
     }
@@ -562,7 +571,7 @@ class Source
      *
      * @return array 
      */
-    public function getTagIds()
+    public function getTagData()
     {
         if ($this->tags) {
             $tagIds = [];
@@ -574,6 +583,20 @@ class Source
             }
             return $tagIds;
         }
+    }
+
+    /**
+     * Get an array of tag ids.
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        $tagIds = [];
+        if ($this->tags) {
+            foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
+        }
+        return $tagIds;
     }
 
     /**
@@ -622,6 +645,142 @@ class Source
             array_push($intIds, $interaction->getId());
         }
         return $intIds;
+    }
+
+    /**
+     * Set author.
+     *
+     * @param \AppBundle\Entity\Author $author
+     *
+     * @return Source
+     */
+    public function setAuthor(\AppBundle\Entity\Author $author)
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * Get author.
+     *
+     * @return \AppBundle\Entity\Author
+     */
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    /**
+     * If this is an Author Source, get the Author id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("author")
+     */
+    public function getAuthorId()
+    {
+        return $this->author ? $this->author->getId() : null;
+    }
+
+    /**
+     * Set citation.
+     *
+     * @param \AppBundle\Entity\Citation $citation
+     *
+     * @return Source
+     */
+    public function setCitation(\AppBundle\Entity\Citation $citation)
+    {
+        $this->citation = $citation;
+
+        return $this;
+    }
+
+    /**
+     * Get citation.
+     *
+     * @return \AppBundle\Entity\Citation
+     */
+    public function getCitation()
+    {
+        return $this->citation;
+    }
+
+    /**
+     * If this is a Citation Source, get the Citation id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("citation")
+     */
+    public function getCitationId()
+    {
+        return $this->citation ? $this->citation->getId() : null;
+    }
+
+    /**
+     * Set publication.
+     *
+     * @param \AppBundle\Entity\Publication $publication
+     *
+     * @return Source
+     */
+    public function setPublication(\AppBundle\Entity\Publication $publication)
+    {
+        $this->publication = $publication;
+
+        return $this;
+    }
+
+    /**
+     * Get publication.
+     *
+     * @return \AppBundle\Entity\Publication
+     */
+    public function getPublication()
+    {
+        return $this->publication;
+    }
+
+    /**
+     * If this is a Publication Source, get the Publication id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publication")
+     */
+    public function getPublicationId()
+    {
+        return $this->publication ? $this->publication->getId() : null;
+    }
+
+    /**
+     * Set publisher.
+     *
+     * @param \AppBundle\Entity\Publisher $publisher
+     *
+     * @return Source
+     */
+    public function setPublisher(\AppBundle\Entity\Publisher $publisher)
+    {
+        $this->publisher = $publisher;
+
+        return $this;
+    }
+
+    /**
+     * Get publisher.
+     *
+     * @return \AppBundle\Entity\Publisher
+     */
+    public function getPublisher()
+    {
+        return $this->publisher;
+    }
+
+    /**
+     * If this is a Publisher Source, get the Publisher id.   
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("publisher")
+     */
+    public function getPublisherId()
+    {
+        return $this->publisher ? $this->publisher->getId() : null;
     }
 
     /**
@@ -724,108 +883,6 @@ class Source
         return $contribIds;
     }
     
-    /**
-     * Set publication.
-     *
-     * @param \AppBundle\Entity\Publication $publication
-     *
-     * @return Source
-     */
-    public function setPublication(\AppBundle\Entity\Publication $publication)
-    {
-        $this->publication = $publication;
-
-        return $this;
-    }
-
-    /**
-     * Get publication.
-     *
-     * @return \AppBundle\Entity\Publication
-     */
-    public function getPublication()
-    {
-        return $this->publication;
-    }
-
-    /**
-     * If this is a Publication Source, get the Publication id.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("publication")
-     */
-    public function getPublicationId()
-    {
-        return $this->publication ? $this->publication->getId() : null;
-    }
-
-    /**
-     * Set author.
-     *
-     * @param \AppBundle\Entity\Author $author
-     *
-     * @return Source
-     */
-    public function setAuthor(\AppBundle\Entity\Author $author)
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
-    /**
-     * Get author.
-     *
-     * @return \AppBundle\Entity\Author
-     */
-    public function getAuthor()
-    {
-        return $this->author;
-    }
-
-    /**
-     * If this is an Author Source, get the Author id.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("author")
-     */
-    public function getAuthorId()
-    {
-        return $this->author ? $this->author->getId() : null;
-    }
-
-    /**
-     * Set citation.
-     *
-     * @param \AppBundle\Entity\Citation $citation
-     *
-     * @return Source
-     */
-    public function setCitation(\AppBundle\Entity\Citation $citation)
-    {
-        $this->citation = $citation;
-
-        return $this;
-    }
-
-    /**
-     * Get citation.
-     *
-     * @return \AppBundle\Entity\Citation
-     */
-    public function getCitation()
-    {
-        return $this->citation;
-    }
-
-    /**
-     * If this is a Citation Source, get the Citation id.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("citation")
-     */
-    public function getCitationId()
-    {
-        return $this->citation ? $this->citation->getId() : null;
-    }
-
     /**
      * Set createdBy user.
      *

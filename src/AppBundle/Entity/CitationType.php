@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -200,6 +200,24 @@ class CitationType
     public function getCitations()
     {
         return $this->citations;
+    }
+
+    /**
+     * Get an array of Citation ids.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("citations")
+     *
+     * @return array
+     */
+    public function getCitationIds()
+    {
+        if ($this->citations) {
+            $ids = [];
+            foreach ($this->citations as $cit) {
+                array_push($ids, $cit->getId());
+            }
+            return $ids;
+        }
     }
 
     /**

@@ -22,33 +22,45 @@
 {% block detail %}
     <div id="search-opts" class="flex-row">
         <div id="opts-col1" class="opts-col flex-col">
-            <label id="filter-opts">
+            <div id="filter-opts">
                 <span>Group Interactions by: </span>
                 <select id="search-focus" class="opts-box">
                     <option value="locs">Location</option>
                     <option value="srcs">Source</option>
                     <option value="taxa">Taxon</option>
                 </select>
-            </label>
+            </div>
             <div id="sort-opts" class="flex-row"></div>
         </div>
         <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
-        <div id="opts-col3" class="opts-col flex-col flex-wrap"></div>
+        <div id="opts-col3" class="opts-col flex-col flex-wrap">
+            <div>
+                <input type="checkbox" id="shw-chngd">
+                <label for="shw-chngd">Show only interactions updated since:</label>
+                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
+                <label for="fltr-tdy">Today</label>
+                <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
+                <label for="fltr-cstm">Custom</label>
+                <input type="text" id="time-fltr" disabled="disabled">
+            </div>
+        </div>
         <div id="opts-col4" class="flex-col">
             <button id="strt-tut" class="ag-fresh grid-bttn">Tutorial</button>
             <button id="show-tips" class="ag-fresh grid-bttn">Search Tips</button>
         </div>
     </div>
     <div id="grid-tools" class="flex-row">
-        <button id="xpand-tree" class="ag-fresh ag-header-cell grid-bttn" name="xpand-tree">Expand All</button>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="xpand-1">+</button>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="collapse-1">-</button>
+        <div id='xpand-tree'>
+            <button id="xpand-all" class="ag-fresh ag-header-cell grid-bttn" name="xpand-all">Expand All</button>
+            <button class="ag-fresh ag-header-cell grid-bttn" name="xpand-1">+</button>
+            <button class="ag-fresh ag-header-cell grid-bttn" name="collapse-1">-</button>
+        </div>
         <button class="ag-fresh ag-header-cell grid-bttn" name="reset-grid">Reset Data</button>
         <div id="grid-status" class="flex-row">
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="grid-filter-status"></div>
         </div>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="show-hide-col">Show/Hide Columns</button>
+        <button class="ag-fresh ag-header-cell grid-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
         <button class="ag-fresh ag-header-cell grid-bttn" name="csv">Download CSV</button>
     </div>
     

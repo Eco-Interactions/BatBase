@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -53,8 +53,8 @@ class Publication
     /**
      * @var \AppBundle\Entity\PublicationType
      *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publication")
-     * @ORM\JoinColumn(name="pub_type_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublicationType", inversedBy="publications")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $publicationType;
 

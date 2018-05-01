@@ -1,16 +1,16 @@
 imports:
     - { resource: config_dev.yml }
 
+doctrine:
+    dbal:
+        dbname:   "%database_name%_test"
+        server_version: 10.0.30
+
 framework:
+    profiler: { only_exceptions: true }
     test: ~
     session:
         storage_id: session.storage.mock_file
-    profiler:
-        collect: false
-
-web_profiler:
-    toolbar: false
-    intercept_redirects: false
 
 swiftmailer:
     disable_delivery: true

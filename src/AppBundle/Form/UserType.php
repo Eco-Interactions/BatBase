@@ -3,8 +3,9 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserType extends AbstractType
 {
@@ -19,7 +20,7 @@ class UserType extends AbstractType
             ->add('username')
             ->add('first_name')
             ->add('last_name')
-            ->add('password', 'password')
+            ->add('password', PasswordType::class)
             ->add('email')
             ->add('created_at')
             ->add('updated_at')
@@ -29,7 +30,7 @@ class UserType extends AbstractType
     /**
      * @param OptionsResolverInterface $resolver
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => 'AppBundle\Entity\User',
@@ -39,7 +40,7 @@ class UserType extends AbstractType
     /**
      * @return string
      */
-    public function getName()
+    public function getBlockPrefix()
     {
         return 'appbundle_user';
     }

@@ -1,0 +1,33 @@
+AppBundle\Entity\Publication:
+    Publication-1:  #100
+        slug: in-biology-of-bats-of-the-new-world-family-phyllostomatidae
+        displayName: 'In Biology of bats of the New World family Phyllostomatidae'
+        publicationType: '@PublicationType-2' #added
+        source: '@Source-2' #2
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:21", new \DateTimeZone("America/Los_Angeles")))>'
+    Publication-2:  #97
+        slug: journal-of-mammalogy
+        displayName: 'Journal of Mammalogy'
+        publicationType: '@PublicationType-1' #added
+        source: '@Source-4' #11
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    Publication-3:  #91
+        slug: revista-de-biologia-tropical
+        displayName: 'Revista de Biologia Tropical'
+        publicationType: '@PublicationType-1' #added
+        source: '@Source-5' #35
+        created: '<(new \DateTime("2016-07-15 23:19:40", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-23 01:20:20", new \DateTimeZone("America/Los_Angeles")))>'
+    Publication-4:  #22
+        slug: modalites-de-dissemination-et-d-etablissement-de-lianes-cyclanthaceae-et-philodendron-en-foret-guyanaise
+        displayName: 'Modalités de dissemination et d''etablissement de lianes (Cyclanthaceae) et Philodendron) en forêt Guyanaise'
+        publicationType: '@PublicationType-3'  #
+        source: '@Source-7' #74
+        created: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-11-24 02:37:13", new \DateTimeZone("America/Los_Angeles")))>'

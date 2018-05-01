@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -68,6 +68,15 @@ class Author
      * @JMS\SerializedName("lastName")
      */
     private $lastName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="suffix", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("suffix")
+     */
+    private $suffix;
 
     /**
      * @var string
@@ -254,6 +263,31 @@ class Author
     {
         return $this->lastName;
     }
+    
+    /**
+     * Set suffix.
+     *
+     * @param string $suffix
+     *
+     * @return Author
+     */
+    public function setSuffix($suffix)
+    {
+        $this->suffix = $suffix;
+
+        return $this;
+    }
+
+    /**
+     * Get suffix.
+     *
+     * @return string
+     */
+    public function getSuffix()
+    {
+        return $this->suffix;
+    }
+
 
     /**
      * Set fullName.

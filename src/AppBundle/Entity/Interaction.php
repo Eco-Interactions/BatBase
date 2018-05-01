@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -64,7 +64,7 @@ class Interaction
      * @var \AppBundle\Entity\InteractionType
      *
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\InteractionType", inversedBy="interactions")
-     * @ORM\JoinColumn(name="interaction_type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $interactionType;
 
@@ -93,7 +93,7 @@ class Interaction
     private $object;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", mappedBy="interactions")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="interactions")
      * @ORM\JoinTable(name="interaction_tag")
      */
     private $tags;
@@ -120,6 +120,8 @@ class Interaction
      *
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
+     * @JMS\Expose
+     * @JMS\SerializedName("updatedAt")
      */
     private $updated;
 
@@ -458,6 +460,20 @@ class Interaction
         }
     }
 
+    /**
+     * Get an array of tag ids.
+     *
+     * @return array 
+     */
+    public function getTagIds()
+    {
+        $tagIds = [];
+        if ($this->tags) { 
+            foreach ($this->tags as $tag) { array_push($tagIds, $tag->getId()); }
+        }
+        return $tagIds;
+    }
+    
     /**
      * Set createdBy user.
      *

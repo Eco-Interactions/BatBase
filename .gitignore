@@ -1,28 +1,32 @@
 # Cache and logs
-/app/cache/*
-/app/logs/*
-!app/cache/.gitkeep
-!app/logs/.gitkeep
+/var/*
+!/var/cache
+/var/cache/*
+!var/cache/.gitkeep
+!/var/logs
+/var/logs/*
+!var/logs/.gitkeep
+!/var/sessions
+/var/sessions/*
+!var/sessions/.gitkeep
+!var/SymfonyRequirements.php
 
-# Parameters
+# Parameters 
 /app/config/parameters_prod.yml
 /app/config/parameters.yml
 /app/config/parameters.ini
-
+ 
 # Managed by Composer
-/app/bootstrap.php.cache
 /var/bootstrap.php.cache
 /bin/*
-!app/console
-!app/symfony_requirements
+!bin/console
 /vendor/
+/web/config.php
 
 # Assets and user uploads
-# /web/bundles/
+/web/bundles/*
+!/web/bundles/app
 /web/uploads/taxon/*
-
-# Assets managed by Bower
-/web/assets/vendor/
 
 # PHPUnit
 /app/phpunit.xml
@@ -34,3 +38,4 @@
 # Composer PHAR
 /composer.phar
 /composer-setup.php
+composer.lock

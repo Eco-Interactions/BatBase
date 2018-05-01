@@ -1,0 +1,19 @@
+AppBundle\Entity\Feedback:
+    Feedback-1:
+        status: 3
+        topic: Testing
+        route: /publication/
+        content: 'Testing: one, two, three.'
+        created: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-1'
+        updated: '<(new \DateTime("2016-06-15 04:58:19", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-1'
+    Feedback-2:
+        status: 3
+        topic: 'Date is shown as page number'
+        route: /citation/
+        content: 'Muchhala et al. 2005. The date ''2005'' shows up in the page field.'
+        created: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        createdBy: '@User-3'
+        updated: '<(new \DateTime("2016-07-11 13:40:28", new \DateTimeZone("America/Los_Angeles")))>'
+        updatedBy: '@User-3'

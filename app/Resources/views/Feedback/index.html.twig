@@ -17,7 +17,7 @@
 {% block datatable %}feedback_tbl{% endblock datatable %}
 
 {% block masthead %}
-    <div class="invis" id="masthead"  data-hide-slider="true"></div>
+    <div class="hiddenElem" id="masthead"  data-hide-slider="true"></div>
 {% endblock %}
 
 {% block headline %}
@@ -46,6 +46,9 @@
                     {% set routeParts = feedback.route|split('/') %}
                     {% set route = routeParts|join(' ') %}
                 {% endif %}
+                {% set trans = { 
+                    0: 'Closed', 1: 'Follow-up', 2: 'Read', 3: 'Unread' }
+                %}
                 <tr>
                     <td>{{ feedback.created|date("F jS \\a\\t g:ia") }}</td>
                     <td><a href="mailto:{{ user.email }}?subject=website%20feedback">{{ user }}</a></td>
@@ -61,7 +64,7 @@
                     <td>{{ feedback.content }}</td>
                     <td>{{ feedback.adminNotes }}</td>
                     <td>{{ feedback.assignedUser }}</td>
-                    <td>{{ feedback.status }}</td>
+                    <td>{{ attribute(trans, feedback.status) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

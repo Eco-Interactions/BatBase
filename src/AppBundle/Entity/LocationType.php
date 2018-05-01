@@ -2,8 +2,8 @@
 
 namespace AppBundle\Entity;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
@@ -257,11 +257,11 @@ class LocationType
     public function getLocationIds()
     {
         if ($this->locations) {
-            $locIds = [];
+            $ids = [];
             foreach ($this->locations as $loc) {
-                array_push($locIds, $loc->getId());
+                array_push($ids, $loc->getId());
             }
-            return $locIds;
+            return $ids;
         }
     }
 
