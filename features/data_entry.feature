@@ -130,15 +130,16 @@ Feature: Add new data to the database
 		And I select "Test Book with Editors" from the "Publication" dropdown field
 		And I see "New Citation"
 		When I select "Chapter" from the "Citation Type" dropdown field
-		And I type "Test Title for Chapter" in the "Chapter Title" dropdown field
+		And I type "Test Title for Chapter" in the "Title" field "input"
 		And I type "666-999" in the "Pages" field "input"
 		And I select "Cockle, Anya" from the "Authors" field dynamic dropdown
 		And I check the "Show all fields" box
 		And I type "Test Abstract Text" in the "Abstract" field "textarea"
-		And I see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, eds.). pp. 666-999. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+		And I see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, ed.). pp. 666-999. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 		And I press the "Create Citation" button
 		Then I should see "Test Title for Chapter" in the "Citation Title" dropdown field
-		And I should see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, eds.). pp. 666-999. Test Publisher, Nice, France." in the "Src" detail panel
+
+		And I should see "Cockle, A. 1990. Test Title for Chapter. In: Test Book with Editors (B. J. Callaye, ed.). pp. 666-999. Test Publisher, Nice, France." in the "Src" detail panel
 		And I should see "Book Title" in the "Src" detail panel
 		And I should see "Test Book" in the "Src" detail panel
 		And I should see "Chapter Title" in the "Src" detail panel
@@ -232,7 +233,6 @@ Feature: Add new data to the database
 		And I should see "1990" in the "Src" detail panel
 		And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 
-	## ------------------- TODO: OTHER ----------------- ##
 	@javascript
 	Scenario:  I should be able to create a [OTHER] publication with its sub-form
 		Given I open the New Interaction form
@@ -256,6 +256,7 @@ Feature: Add new data to the database
 		And I should see "New Citation" in the form header
 		And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
+	## ------------------- TODO: OTHER ----------------- ##
 	## Add for Museum record and report types as well.
 	@javascript
 	Scenario:  I should be able to create a [Other] citation with its sub-form
@@ -416,7 +417,7 @@ Feature: Add new data to the database
 	Scenario:  Pinned field values should remain after interaction form submission (all others should clear)
 		Given I open the New Interaction form
 		And I fill the new interaction form with the test values
-		When I pin the "Citation Title" dropdown field
+		When I pin the "Citation Title" field
 		And I pin the "Location" field
 		And I pin the "Subject" field
 		And I pin the "Interaction Type" field
@@ -426,7 +427,7 @@ Feature: Add new data to the database
 		And I should see "Test Title for Chapter" in the "Citation Title" dropdown field
 		And I should see "Costa Rica" in the "Country-Region" dropdown field
 		And I should see "Test Location" in the "Location" dropdown field
-		And I should see "Subject Species" in the "Subject" dropdown field
+		And I should see "Genus Subject Genus" in the "Subject" dropdown field
 		And I should see "Consumption" in the "Interaction Type" dropdown field
 		And the "Object" select field should be empty
 		And the "Interaction Tags" select field should be empty
@@ -448,24 +449,23 @@ Feature: Add new data to the database
 		When I exit the form window
 		Then I should see the grid displayed in "Source" view
 		And the grid should be filtered to interactions created since "today"
-		And I break "How many rows are in the grid?"
-		And I should see "4" row in the grid data tree
+		And I should see "1" row in the grid data tree
 
 	@javascript
 	Scenario:  I should see the newly created interactions under the publication source
 		Given the database grid is in "Source" view
 		And I filter the grid to interactions created since "today"
 		When I expand "Test Book with Editors" in the data tree
-		Then I should see "3" interactions under "Whole work cited"
+		Then I should see "3" interactions under "Test Title for Chapter"
 		And the expected data in the interaction row
 
 	@javascript
-	Scenario:  I should see the newly created interactions under the author [Cockel, Joy Karen Jr]
+	Scenario:  I should see the newly created interactions under the author [Cockle, Anya]
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
-		When I expand "Cockel, Joy Karen Jr" in the data tree
-		Then I should see "3" interactions under "Whole work cited"
+		When I expand "Cockle, Anya" in the data tree
+		Then I should see "3" interactions under "Test Title for Chapter"
 		And the expected data in the interaction row
 
 	@javascript
@@ -473,11 +473,10 @@ Feature: Add new data to the database
 		Given the database grid is in "Source" view
 		And I group interactions by "Authors"
 		And I filter the grid to interactions created since "today"
-		When I expand "Smith, George Michael Sr" in the data tree
-		And I expand "Test Book" in the data tree
-		And I expand "Test Book" in the data tree
-		And I expand "Whole work cited" in level "3" of the data tree
-		Then I should see "6" interactions attributed
+		When I expand "Callaye, Bendry J. Jr" in the data tree
+		And I expand "Test Book with Editors" in the data tree
+		And I expand "Test Title for Chapter" in level "3" of the data tree
+		Then I should see "3" interactions attributed
 		And the expected data in the interaction row
 
 	@javascript
@@ -496,7 +495,7 @@ Feature: Add new data to the database
 		And I filter the grid to interactions created since "today"
 		When I expand "Family Subject Family" in the data tree
 		And I expand "Genus Subject Genus" in the data tree
-		Then I should see "3" interactions under "Subject Species"
+		Then I should see "3" interactions under "Unspecified Subject Genus Interactions"
 		And the expected data in the interaction row
 
 	@javascript

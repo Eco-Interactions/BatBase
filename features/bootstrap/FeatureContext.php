@@ -34,6 +34,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public static function beforeSuite()
     {   
+        exec('echo -n \'\' > var/logs/test.log');
         fwrite(STDOUT, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLoading database.\n");
         exec('php bin/console doctrine:database:drop --force --env=test');
         exec('php bin/console doctrine:database:create --env=test');
@@ -1009,7 +1010,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
         $this->getUserSession()->getPage()->pressButton('Confirm');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdownField('Plant', 'Realm');
+        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
         $this->iSelectFromTheDropdownField($data[$lvls[1]], $lvls[1]);
         $this->getUserSession()->getPage()->pressButton('Confirm');
     }

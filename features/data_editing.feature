@@ -14,32 +14,32 @@ Feature: Edit data in the database
 		Given the database has loaded
 		And I exit the tutorial
 
-	@javascript
-	Scenario:  I should be able to edit the name and level of an existing taxon
-		Given the database grid is in "Taxon" view
-		And I group interactions by "Arthropoda"
-		And I click on the edit pencil for the "Order Lepidoptera" row
-		And I see "Editing Taxon"
-		When I change the "taxon name" field "input" to "Leopardil"
-		When I change the "taxon level" dropdown field to "Class"
-		And I press the "Update Taxon" button
-		Then I should see "Class Leopardil" in the tree
+	# @javascript
+	# Scenario:  I should be able to edit the name and level of an existing taxon
+	# 	Given the database grid is in "Taxon" view
+	# 	And I group interactions by "Arthropoda"
+	# 	And I click on the edit pencil for the "Order Lepidoptera" row
+	# 	And I see "Editing Taxon"
+	# 	When I change the "taxon name" field "input" to "Leopardil"
+	# 	When I change the "taxon level" dropdown field to "Class"
+	# 	And I press the "Update Taxon" button
+	# 	Then I should see "Class Leopardil" in the tree
 
-	@javascript
-	Scenario:  I should be able to edit the parent taxon of an existing taxon
-		Given the database grid is in "Taxon" view
-		And I group interactions by "Bats"
-		And I expand "Family Phyllostomidae" in the data tree
-		And I expand "Genus Rhinophylla" in the data tree
-		And I click on the edit pencil for the "Rhinophylla pumilio" row
-		And I see "Editing Taxon"
-		When I press "Change Parent"
-		And I see "Select New Taxon Parent"
-		When I select "Artibeus" from the "Genus" dropdown field
-		And I press the "Confirm" button
-		And I press the "Update Taxon" button
-		And I expand "Family Phyllostomidae" in the data tree
-		Then I should see "Rhinophylla pumilio" under "Genus Artibeus" in the tree
+	# @javascript
+	# Scenario:  I should be able to edit the parent taxon of an existing taxon
+	# 	Given the database grid is in "Taxon" view
+	# 	And I group interactions by "Bats"
+	# 	And I expand "Family Phyllostomidae" in the data tree
+	# 	And I expand "Genus Rhinophylla" in the data tree
+	# 	And I click on the edit pencil for the "Rhinophylla pumilio" row
+	# 	And I see "Editing Taxon"
+	# 	When I press "Change Parent"
+	# 	And I see "Select New Taxon Parent"
+	# 	When I select "Artibeus" from the "Genus" dropdown field
+	# 	And I press the "Confirm" button
+	# 	And I press the "Update Taxon" button
+	# 	And I expand "Family Phyllostomidae" in the data tree
+	# 	Then I should see "Rhinophylla pumilio" under "Genus Artibeus" in the tree
 
 	@javascript
 	Scenario:  I should be able to edit the data of an existing location

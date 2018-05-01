@@ -64,6 +64,8 @@ TODOs:
 
 
 (SEARCH PAGE)
+    - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
+    - {high}[med] Upgrade to the latest AgGrid. Super out of date at this point.
     - {medium}[easy] Check CSV Exports
     - {med}[med, long] Add data-entry tutorial.
     - {low}[med] Implement selectize library
@@ -144,9 +146,7 @@ TODOs:
         - yarn run encore production
 
 
-
 >Add to TODO
-    - CHANGE FEEDBACK DATATABLE TO AG-GRID 
 
     >Email
         - agrid and datatables have super depreceated code
