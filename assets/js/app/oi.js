@@ -1,17 +1,19 @@
 /* ============================== MAIN JS =================================== */
 requireCss();
-requireGlobalJs();
+requireGlobalJquery();
 initUi();
 authDependantInit();  
+initOfflineCache();
 
+/* ------------ Styles and Scripts ------------------*/
 function requireCss() {
-    require('../../css/ei-reset.css');
+    require('../../css/ei-reset.css');   
     require('../../css/oi.css');    
 }
-function requireGlobalJs() {
-    // const $ = require('jquery');
-    // global.$ = $;
-    // global.jQuery = $;
+function requireGlobalJquery() { 
+    const $ = require('jquery');
+    global.$ = $;
+    global.jQuery = $;
 }
 /* ---------------------------- UI ------------------------------------------ */
 function initUi() {
@@ -61,4 +63,7 @@ function authDependantInit() {
 function initFeedbackUi() {
     const feedback = require('./feedback.js');
     feedback.init();
+}
+function initOfflineCache() {
+    require('offline-plugin/runtime').install();
 }
