@@ -39,6 +39,10 @@ Tullenda:
 >================ DEV Internal Task List ===================
 ##(Category){priority}[difficulty]##
 TODOs:
+(PWA)
+    - {low}[easy] Configure webpack's manifest plugin
+    - {high}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
+
 (CRUD FORMS/BACKEND)
     - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
     - {high}[easy] add error to interaction form for when an 'invisible' error 
@@ -145,9 +149,17 @@ TODOs:
         - yarn run encore dev --watch
         - yarn run encore production
 
+        - sudo yarn install 
+
 
 >Add to TODO
 
     >Email
         - agrid and datatables have super depreceated code
         - dt icons aren't accesible easily with webpack processing
+
+
+        Add manifest plugin :
+
+
+})

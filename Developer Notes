@@ -20,14 +20,19 @@ Cache busting:
         $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
 - Extend php.ini memory-limit
 
->Steps taken to build npm and encore
+## Yarn, NPM, & Encore ##
+> Steps taken to build npm and encore
     - Follow directions to install npm and yarn - https://symfony.com/doc/3.4/frontend.html
     - Install jquery - $ npm install --save jquery
     - Install ag-grid - $ npm install --save ag-grid
-    - Asset generation commands: 
-        - yarn run encore dev
-        - yarn run encore dev --watch (run while working on asset code)
-        - yarn run encore production
+    - Install webpack - $ npm install webpack@^3.0.0 --save-dev
+    - Install webpack-workbox - $ npm install workbox-webpack-plugin --save-dev
+> After installing new plugin/package
+    - run $ sudo yarn install
+> Asset generation commands: 
+        - $ yarn run encore dev
+        - $ yarn run encore dev --watch (run while working on asset code)
+        - $ yarn run encore production
 
 
 ## TESTING ##
@@ -35,15 +40,11 @@ Cache busting:
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
     - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
 - Install Chrome Driver (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
-
+>Resources used during tests set-up 
+# https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
+# https://knpuniversity.com/screencast/behat
 
 >HOW TO RUN TESTS: 
-##Automatically ran at the start of tests:
-##  (generate fixtures as needed: php bin/console generate:fixtures)
-##  php bin/console doctrine:database:drop --force --env=test 
-##  php bin/console doctrine:database:create --env=test
-##  php bin/console doctrine:schema:update --force --env=test
-##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 Start Selenium: 
     $ java -jar [selenium-server-standalone-3.5.3.jar]
 
@@ -55,11 +56,12 @@ Run Tests:
     - Functional Tests (Behat/Mink):
         all tests: ./vendor/bin/behat 
         single feature: ./vendor/bin/behat features/[FeatureName].feature
-
-##Resources used during set-up 
-# https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
-# https://knpuniversity.com/screencast/behat
-
+##Automatically ran at the start of tests:
+##  (generate fixtures as needed: php bin/console generate:fixtures)
+##  php bin/console doctrine:database:drop --force --env=test 
+##  php bin/console doctrine:database:create --env=test
+##  php bin/console doctrine:schema:update --force --env=test
+##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
 >BEST PRACTICES
 ## Standards decided upon and why

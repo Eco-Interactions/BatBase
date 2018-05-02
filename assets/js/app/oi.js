@@ -3,7 +3,7 @@ requireCss();
 requireGlobalJquery();
 initUi();
 authDependantInit();  
-initOfflineCache();
+registerServiceWorker();
 
 /* ------------ Styles and Scripts ------------------*/
 function requireCss() {
@@ -64,6 +64,17 @@ function initFeedbackUi() {
     const feedback = require('./feedback.js');
     feedback.init();
 }
-function initOfflineCache() {
-    require('offline-plugin/runtime').install();
+
+
+function registerServiceWorker() { //console.log('env = ', $)
+     if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
+                .then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+        });
+    }
 }
