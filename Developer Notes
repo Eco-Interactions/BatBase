@@ -27,6 +27,7 @@ Cache busting:
     - Install ag-grid - $ npm install --save ag-grid
     - Install webpack - $ npm install webpack@^3.0.0 --save-dev
     - Install webpack-workbox - $ npm install workbox-webpack-plugin --save-dev
+    - Install idb-keyval - $ npm install --save idb-keyval
 > After installing new plugin/package
     - run $ sudo yarn install
 > Asset generation commands: 

@@ -141,25 +141,4 @@ TODOs:
         -- check that edit forms show all data they should on load (ie, all authors/editors load)
 
 
->Steps taken to build npm and encore
-    - Follow directions to install npm and yarn - https://symfony.com/doc/3.4/frontend.html
-    - Install jquery - $ npm install --save jquery
-    - After changing webpack config: 
-        - yarn run encore dev
-        - yarn run encore dev --watch
-        - yarn run encore production
-
-        - sudo yarn install 
-
-
 >Add to TODO
-
-    >Email
-        - agrid and datatables have super depreceated code
-        - dt icons aren't accesible easily with webpack processing
-
-
-        Add manifest plugin :
-
-
-})
