@@ -1,65 +1,66 @@
-module.exports = {
-    addEnterKeypressClick: addEnterKeypressClick,
-    buildElem: buildElem,
-    buildSelectElem: buildSelectElem,
-    buildSimpleOpts: buildSimpleOpts,
-    getDataFromStorage: getDataFromStorage,
-    lcfirst: lcfirst, 
-    getDataStorage: getDataStorage,
-    populateStorage: populateStorage,
-    removeFromStorage: removeFromStorage,
-    stripString: stripString,
-    sendAjaxQuery: sendAjaxQuery,
-    ucfirst: ucfirst, 
-};
+/* 
+ * Exports:
+ *   addEnterKeypressClick
+ *   buildElem
+ *   buildSelectElem
+ *   buildSimpleOpts
+ *   getDataFromStorage
+ *   lcfirst 
+ *   getDataStorage
+ *   populateStorage
+ *   removeFromStorage
+ *   stripString
+ *   sendAjaxQuery
+ *   ucfirst 
+*/
 let dataStorage;
 
 extendPrototypes();
 
 /*---------- Keypress event Helpers --------------------------------------*/
-function addEnterKeypressClick(elem) {
+export function addEnterKeypressClick(elem) {
     $(elem).keypress(function(e){ //Enter
         if((e.keyCode || e.which) == 13){ $(this).trigger('click'); }
     });
 }
 /*---------- String Helpers ----------------------------------------------*/
-function ucfirst(str) { 
+export function ucfirst(str) { 
     return str.charAt(0).toUpperCase() + str.slice(1); 
 }
-function lcfirst(str) {
+export function lcfirst(str) {
     var f = str.charAt(0).toLowerCase();
     return f + str.substr(1);
 }
 /** Removes white space at beginning and end, and any ending period. */
-function stripString(text) {
+export function stripString(text) {
     let str = text.trim();
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
 }
 /*---------- Object Helpers ----------------------------------------------*/
-function sortProperties(obj) {
-    var sortable=[];
-    var returnObj = {};
+// function alphaProperties(obj) {
+//     var sortable=[];
+//     var returnObj = {};
 
-    for(var key in obj) {                   // convert object into array
-        if(obj.hasOwnProperty(key))
-            sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-    }
+//     for(var key in obj) {                   // convert object into array
+//         if(obj.hasOwnProperty(key))
+//             sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+//     }
     
-    sortable.sort(function(a, b) {          // sort items by value
-        var x=a[1].toLowerCase(),
-            y=b[1].toLowerCase();
-        return x<y ? -1 : x>y ? 1 : 0;
-    });
-    sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+//     sortable.sort(function(a, b) {          // sort items by value
+//         var x=a[1].toLowerCase(),
+//             y=b[1].toLowerCase();
+//         return x<y ? -1 : x>y ? 1 : 0;
+//     });
+//     sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
 
-    return returnObj;
+//     return returnObj;
 
-    function rebuildObj(keyValAry) {
-        var key = keyValAry[0];
-        var val = keyValAry[1];
-        returnObj[key] = val;
-    }
-}
+//     function rebuildObj(keyValAry) {
+//         var key = keyValAry[0];
+//         var val = keyValAry[1];
+//         returnObj[key] = val;
+//     }
+// }
 /*-------- - CSS Helpers ------------------------------------------------*/
 // function addOrRemoveCssClass(element, className, add) {
 //     if (add) { addCssClass(element, className);
@@ -86,10 +87,11 @@ function sortProperties(obj) {
 //     else { element.className = className; }
 // };
 /*-------- - HTML Helpers ------------------------------------------------*/
-function buildElem(tag, attrs) {                                           //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
+export function buildElem(tag, attrs) {                                         //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     var elem = document.createElement(tag);
     if (attrs) { addAttributes(elem, attrs); }
     return elem;
+ 
 }
 function addAttributes(elem, attrs) {
     addElemProps();
@@ -100,7 +102,7 @@ function addAttributes(elem, attrs) {
         var transProps = { "class": "className", "text": "textContent" };
         elemProps.forEach(function(orgProp) {
             if (orgProp in attrs) { 
-                prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
+                let prop = (orgProp in transProps) ? transProps[orgProp] : orgProp;
                 elem[prop] = attrs[orgProp]; 
             } 
         });
@@ -118,7 +120,7 @@ function addAttributes(elem, attrs) {
  * Builds a select drop down with the options, attributes and change method 
  * passed. Sets the selected option as the passed 'selected' or the default 'all'.
  */
-function buildSelectElem(options, attrs, changeFunc, selected) {
+export function buildSelectElem(options, attrs, changeFunc, selected) {
     var selectElem = buildElem('select', attrs); 
     var selected = selected || 'all';
     
@@ -134,17 +136,18 @@ function buildSelectElem(options, attrs, changeFunc, selected) {
     $(selectElem).change(changeFunc);
     hidePlaceholder(selectElem);
     return selectElem;
-}
-function hidePlaceholder(selectElem) {
-    if ($(selectElem).find("option[value='placeholder']")) {
-        $(selectElem).find("option[value='placeholder']").hide();
+    
+    function hidePlaceholder(selectElem) {
+        if ($(selectElem).find("option[value='placeholder']")) {
+            $(selectElem).find("option[value='placeholder']").hide();
+        }
     }
 }
 /**
  * Creates an opts obj for each 'item' in array with the index as the value and 
  * the 'item' as the text.
  */
-function buildSimpleOpts(optAry, placeholder) {                             //console.log("buildSimpleOpts(optAry= %O, placeholder= %s)", optAry, placeholder);
+export function buildSimpleOpts(optAry, placeholder) {                          //console.log("buildSimpleOpts(optAry= %O, placeholder= %s)", optAry, placeholder);
     var opts = []
     optAry.forEach(function(option, idx){
         opts.push({
@@ -203,7 +206,7 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-function getDataFromStorage(props) {
+export function getDataFromStorage(props) {
     if (!Array.isArray(props)) { return getStoredData(); }
     return getStoredDataObj();
 
@@ -225,7 +228,7 @@ function getDataFromStorage(props) {
         }
     } /* End getDataObj */
 } /* End getDataFromStorage */
-function getDataStorage() {
+export function getDataStorage() {
     const env = $('body').data('env');
     const storageType = env === 'test' ? 'sessionStorage' : 'localStorage'; //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
     if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
@@ -249,20 +252,20 @@ function getDataStorage() {
         }
     }
 } /* End getDataStorage */
-function populateStorage(key, val) {
-    if (dataStorage) {                                                      //console.log("dataStorage active.");
+export function populateStorage(key, val) {
+    if (dataStorage) {                                                          //console.log("dataStorage active.");
         dataStorage.setItem(key, val);
     } else { console.log("####__ No Local Storage Available__####"); }
 }
-function removeFromStorage(key) {
+export function removeFromStorage(key) {
     dataStorage.removeItem(key);
 }
-function getRemainingStorageSpace() {
-     var limit = 1024 * 1024 * 5; // 5 MB
-     return limit - unescape(encodeURIComponent(JSON.stringify(dataStorage))).length;
-}
+// function getRemainingStorageSpace() {
+//      var limit = 1024 * 1024 * 5; // 5 MB
+//      return limit - unescape(encodeURIComponent(JSON.stringify(dataStorage))).length;
+// }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-function sendAjaxQuery(dataPkg, url, successCb, errCb) {                    console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     $.ajax({
         method: "POST",
         url: url,
@@ -270,15 +273,11 @@ function sendAjaxQuery(dataPkg, url, successCb, errCb) {                    cons
         error: errCb || ajaxError,
         data: JSON.stringify(dataPkg)
     });
-}
-/**
- * Stores reference objects for posted entities with each record's temporary 
- * reference id and the new database id.     
- * Interactions are sent in sets of 1000, so the returns are collected in an array.
- */
-function dataSubmitSucess(data, textStatus, jqXHR) { 
-    console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
-}
-function ajaxError(jqXHR, textStatus, errorThrown) {
-    console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    
+    function dataSubmitSucess(data, textStatus, jqXHR) { 
+        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+    }
+    function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    }
 }

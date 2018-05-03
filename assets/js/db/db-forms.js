@@ -5,14 +5,14 @@
  * >> All Content Blocks will have an edit icon attached to the top left of their 
  * container. When clicked, a wysiwyg interface will encapsulate that block and 
  * allow editing and saving of the content within using the trumbowyg library.
+ * Exports: 
+ *     editEntity
+ *     dataSynced
  */
-const exports = module.exports = {
-    editEntity: editEntity,
-    dataSynced: afterStoredDataUpdated 
-};
-const _util = require('../misc/util.js');
-const db_sync = require('./db-sync.js');
-const db_page = require('./db-page.js');
+import * as _util from '../misc/util.js';
+import * as db_sync from './db-sync.js';
+import * as db_page from './db-page.js';
+
 let fParams = {};
 
 authDependentInit();    
@@ -272,14 +272,14 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {   //co
         selElems: [], 
         typeConfg: false,
         vals: {}
-    };                                                                      //console.log("fLvl params = %O", fParams.forms[level]);
+    };                                                                          //console.log("fLvl params = %O", fParams.forms[level]);
 }
 /**
  * Returns the exitHandler stored in the form confg for the current action, or, 
  * if no handler is stored, edit forms have a default of @exitFormHandler
  * and create forms default to noOp.
  */
-function getFormExitHandler(confg, action) {                                //console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
+function getFormExitHandler(confg, action) {                                    //console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
     return confg.exitHandler && confg.exitHandler[action] ? 
         confg.exitHandler[action] :
         action === 'edit' ? exitFormPopup : Function.prototype;
@@ -287,7 +287,7 @@ function getFormExitHandler(confg, action) {                                //co
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form --------------------------------------*/
 /** Shows the entity's edit form in a pop-up window on the search page. */
-function editEntity(id, entity) {                                           console.log("Editing [%s] [%s]", entity, id);  
+export function editEntity(id, entity) {                                        console.log("Editing [%s] [%s]", entity, id);  
     initFormParams("edit", entity, id);
     showFormPopup('Editing', _util.ucfirst(entity), id);
     initEditForm(id, entity);    
@@ -3641,11 +3641,12 @@ function getEntityUrl(entityName, action) {
  * stored core records in the fParams object. Exit's the successfully submitted 
  * form @exitFormAndSelectNewEntity.  
  */
-function formSubmitSucess(ajaxData, textStatus, jqXHR) {                    console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
+function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
     var data = parseData(ajaxData.results);
     storeData(data);
 }
-function afterStoredDataUpdated(data, msg, errTag) {                        //console.log('data update complete. args = %O', arguments);
+/** afterStoredDataUpdated */
+export function dataSynced(data, msg, errTag) {                                 //console.log('data update complete. args = %O', arguments);
     toggleWaitOverlay(false);
     if (errTag) { return errUpdatingData(msg, errTag); }
     if (data.citationUpdate) { return; }

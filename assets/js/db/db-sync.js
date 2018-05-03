@@ -1,10 +1,13 @@
-const exports = module.exports = {
-    update: updateStoredData,
-    reset: resetStoredData
-};
-const _util = require('../misc/util.js');
-const db_page = require('./db-page.js');
-const db_forms = require('./db-forms.js')
+/**
+ * Handles adding and removing data from local storage after edits via crud forms.
+ * Exports:
+ *     reset
+ *     sync
+ *     update
+ */
+import * as _util from '../misc/util.js';
+import * as db_forms from './db-forms.js';
+import * as db_page from './db-page.js';
 
 let failed = { errors: [], updates: {}};
 
@@ -25,6 +28,9 @@ function getCurrentDate() {
 }
 /*-------------- Stored Data Methods -----------------------------------------*/
 /*------------------ Page Load Data Sync ---------------------------------*/
+export function sync(dataUpdatedAt) {
+    addNewDataToStorage(dataUpdatedAt);
+}
 /**
  * On search page load, the system updatedAt flag is compared against the page's. 
  * If there they system data has updates more recent than the last sync, the 
@@ -121,6 +127,9 @@ function initSearchGrid() {                                                 cons
     db_page.initSearchGrid(); 
 }
 /*------------------ Update Submitted Form Data --------------------------*/
+export function update(data) {
+    updateStoredData(data);
+}
 /**
  * On crud-form submit success, the returned data is added to, or updated in, 
  * all relevant stored data @updateEntityData. The stored data's lastUpdated 
@@ -404,6 +413,9 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     storeData(realm+level+'Names', nameObj);
 }
 /*------------------ Init Stored Data Methods --------------------------------*/
+export function reset() {
+    resetStoredData();
+}
 /** When there is an error while storing data, all data is redownloaded. */
 function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');

@@ -2,18 +2,16 @@
  * The search grid is built to display the eco-interaction records organized by
  * a selected "focus": taxa (grouped further by realm: bat, plant, arthropod), 
  * locations, or sources (grouped by either authors, publications, or publishers). 
+ * Exports:
+ *     handleReset
+ *     initSearchPage
+ *     initSearchGrid
+ *     showUpdates
  */
-const exports = module.exports = {
-    // reloadLocalDb: clearDataStorage.bind(null, dataKey),
-    handleReset: onDataReset,
-    initSearchGrid: resetSearchGrid,
-    initSearchPage: initSearchPage,
-    showUpdates: showTodaysUpdates,
-};
-const _util = require('../misc/util.js');
-const db_sync = require('./db-sync.js');
-const db_forms = require('./db-forms.js');
-const db_map = require('./db-map.js');
+import * as _util from '../misc/util.js';
+import * as db_sync from './db-sync.js';
+import * as db_forms from './db-forms.js';
+import * as db_map from './db-map.js';
 /**
  * userRole = Stores the role of the user.
  * dataStorage = window.localStorage (sessionStorage for tests)
@@ -71,7 +69,11 @@ function syncStoredData(pgDataUpdatedAt) {
 /** 
  * When the stored data is reset from another file, the loading data popup 
  * message is shown and the dataKey is restored.
+ * Refactor to combine with: onDataReset
  */
+export function handleReset(prevFocus) {
+    onDataReset(prevFocus);
+}
 function onDataReset(prevFocus) {
     showLoadingDataPopUp();
     _util.populateStorage(dataKey, true);
@@ -83,7 +85,7 @@ function onDataReset(prevFocus) {
  * from the server and stored in dataStorage. The intro-walkthrough is shown 
  * for the user @showIntroWalkthrough.
  */
-function initSearchPage() {
+export function initSearchPage() {
     showLoadingDataPopUp();
     showIntroWalkthrough();
 }
@@ -174,6 +176,10 @@ function resetSearchGrid(focus) {                                           //co
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(null, focus);
 }
+/** Refactor: combine with resetSearchGrid. */
+export function initSearchGrid(focus) {                                           //console.log('resetting search grid.')
+    resetSearchGrid(focus);
+}
 function selectSearchFocus(e, focus) { 
     var focus = focus || $('#search-focus').val();                          //console.log("---select(ing)SearchFocus = ", focus)
     var builderMap = { 
@@ -220,6 +226,9 @@ function showTodaysUpdates(focus) {                                         //co
         $('#shw-chngd')[0].checked = true;
         toggleTimeUpdatedFilter();
     }, 200);        
+}
+export function showUpdates(focus) {
+    showTodaysUpdates(focus);
 }
 /*------------------ Interaction Search Methods--------------------------------------*/
 /**
