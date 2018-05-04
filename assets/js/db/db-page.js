@@ -25,7 +25,7 @@ import * as db_map from './db-map.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey =  'Fight for Justice!!!!!!!!!!!!!! <3';
+const dataKey =  'Fight for Justice!!!!!!!!!!!!!!!!! <3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();
@@ -1835,7 +1835,7 @@ function uneditableEntityRow(params) {                                      //co
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
-    var editPencil = `<img src="../bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
+    var editPencil = `<img src="bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
         class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
     $('#search-grid').off('click', '#edit'+entity+id);
     $('#search-grid').on(

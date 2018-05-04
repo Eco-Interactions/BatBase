@@ -642,15 +642,25 @@ class Location
     }
 
     /**
-     * Get geoJSON.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("geoJson")
+     * Get geoJSON Entity.
      *
      * @return \AppBundle\Entity\GeoJSON
      */
     public function getGeoJSON()
     {
-        // return $this->geoJSON;
+        return $this->geoJSON;
+    }
+
+    /**
+     * Get geoJSON ID.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("geoJsonId")
+     *
+     * @return integer
+     */
+    public function getGeoJSONId()
+    {
+        return $this->geoJSON ? $this->geoJSON->getId() : null;
     }
 
     /**

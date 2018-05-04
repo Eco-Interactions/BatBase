@@ -3,9 +3,6 @@
 - Add db backup cronjob to new host
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
-    - Move site to new host
-    - add https cert
-    - research google map api and 'places' service
     - begin to implement
         - gMaps API Key: AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw
 

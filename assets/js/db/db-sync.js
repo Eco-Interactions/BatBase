@@ -19,7 +19,7 @@ function getServerDataLastUpdatedTimes() {
 }
 /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
 function storeDataUpdatedTimes(ajaxData) {
-    storeData('dataUpdatedAt', ajaxData.dataState);                         console.log("dataState = %O", ajaxData.dataState);
+    storeData('dataUpdatedAt', ajaxData.dataState);                             console.log("dataState = %O", ajaxData.dataState);
     addNewDataToStorage(ajaxData.dataState);
 }
 /** Returns the current date time in the format: Y-m-d H:i:s */
@@ -39,7 +39,7 @@ export function sync(dataUpdatedAt) {
  * search page ui is initialized @initStoredData.
  */
 function addNewDataToStorage(dataUpdatedAt) {  
-    var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');          console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
+    var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');              console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
     if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) { console.log("Data up to date.");return; }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
@@ -51,14 +51,14 @@ function addNewDataToStorage(dataUpdatedAt) {
  */
 function firstTimeIsMoreRecent(timeOne, timeTwo) {  
     var time1 = timeOne.replace(/-/g,'/');  
-    var time2 = timeTwo.replace(/-/g,'/');                                  //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
+    var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
 }
 /** Filter updatedAt entities and send those with updates to @ajaxNewData. */
-function syncUpdatedData(updatedAt, pgUpdatedAt) {                          console.log("Synching data updated since - ", pgUpdatedAt);
+function syncUpdatedData(updatedAt, pgUpdatedAt) {                              console.log("Synching data updated since - ", pgUpdatedAt);
     var withUpdates = Object.keys(updatedAt).filter(function(entity){
         return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
-    });                                                                     console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
+    });                                                                         console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
     if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
     ajaxNewData(withUpdates, pgUpdatedAt);
 }
