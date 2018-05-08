@@ -136,11 +136,11 @@ class Location
     private $locationType;
 
     /**
-     * @var \AppBundle\Entity\GeoJSON
+     * @var \AppBundle\Entity\GeoJson
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJSON", mappedBy="location")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location")
      */
-    private $geoJSON;
+    private $geoJson;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -628,39 +628,39 @@ class Location
     }
     /** ---- End Location Type Data ---- */
     /**
-     * Set geoJSON.
+     * Set geoJson.
      *
-     * @param \AppBundle\Entity\GeoJSON $geoJSON
+     * @param \AppBundle\Entity\GeoJson $geoJson
      *
      * @return Source
      */
-    public function setGeoJSON(\AppBundle\Entity\GeoJSON $geoJSON)
+    public function setGeoJson(\AppBundle\Entity\GeoJson $geoJson)
     {
-        $this->geoJSON = $geoJSON;
+        $this->geoJson = $geoJson;
 
         return $this;
     }
 
     /**
-     * Get geoJSON Entity.
+     * Get geoJson Entity.
      *
-     * @return \AppBundle\Entity\GeoJSON
+     * @return \AppBundle\Entity\GeoJson
      */
-    public function getGeoJSON()
+    public function getGeoJson()
     {
-        return $this->geoJSON;
+        return $this->geoJson;
     }
 
     /**
-     * Get geoJSON ID.
+     * Get geoJson ID.
      * @JMS\VirtualProperty
      * @JMS\SerializedName("geoJsonId")
      *
      * @return integer
      */
-    public function getGeoJSONId()
+    public function getGeoJsonId()
     {
-        return $this->geoJSON ? $this->geoJSON->getId() : null;
+        return $this->geoJson ? $this->geoJson->getId() : null;
     }
 
     /**

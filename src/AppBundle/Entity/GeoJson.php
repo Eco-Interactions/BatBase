@@ -7,14 +7,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use JMS\Serializer\Annotation as JMS;
 
 /**
- * GeoJSON.
+ * GeoJson.
  *
  * @ORM\Table(name="geo_json")
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @JMS\ExclusionPolicy("all")
  */
-class GeoJSON
+class GeoJson
 {
     /**
      * @var int
@@ -45,7 +45,7 @@ class GeoJSON
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJSON")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Location", inversedBy="geoJson")
      * @ORM\JoinColumn(name="loc_id", referencedColumnName="id", unique=true)
      */
     private $location;
@@ -131,7 +131,7 @@ class GeoJSON
      *
      * @param string $type
      *
-     * @return GeoJSON
+     * @return GeoJson
      */
     public function setType($type)
     {
@@ -155,7 +155,7 @@ class GeoJSON
      *
      * @param text $coordinates
      *
-     * @return GeoJSON
+     * @return GeoJson
      */
     public function setCoordinates($coordinates)
     {
@@ -179,7 +179,7 @@ class GeoJSON
      *
      * @param \AppBundle\Entity\Source $location
      *
-     * @return GeoJSON
+     * @return GeoJson
      */
     public function setLocation(\AppBundle\Entity\Location $location)
     {
@@ -265,6 +265,6 @@ class GeoJSON
      */
     public function __toString()
     {
-        return $this->getLocation()->getDisplayName() + ' - GeoJSON';
+        return $this->getLocation()->getDisplayName() + ' - GeoJson';
     }
 }

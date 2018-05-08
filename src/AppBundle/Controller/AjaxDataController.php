@@ -144,7 +144,7 @@ class AjaxDataController extends Controller
     /**
      * Returns an object keyed with location ids with their geoJson as values. 
      *
-     * @Route("/geoJson", name="app_serialize_geojson")
+     * @Route("/geo-json", name="app_serialize_geojson")
      */
     public function serializeGeoJsonDataAction(Request $request) 
     {
@@ -154,19 +154,11 @@ class AjaxDataController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $serializer = $this->container->get('jms_serializer');
-
-        $locs = $em->getRepository('AppBundle:Location')->findAll();
-        // $returnObj = new \stdClass;
-        $returnObj = [];
-
-        foreach ($locs as $loc) {
-            $id = $loc->getId();
-            $returnObj[$id] = $loc->getGeoJSON()->getCoordinates();
-        }
+        $geoJson = $this->serializeEntity('GeoJson', $serializer, $em);
 
         $response = new JsonResponse();
         $response->setData(array( 
-            'geoJson' => $returnObj
+            'geoJson' => $geoJson
         )); 
         return $response;
     }
