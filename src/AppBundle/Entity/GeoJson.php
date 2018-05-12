@@ -199,6 +199,30 @@ class GeoJson
     }
 
     /**
+     * Get location Id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("location")
+     *
+     * @return integer
+     */
+    public function getLocationId()
+    {
+        return $this->location->getId();
+    }
+
+    /**
+     * Get location Id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("displayName")
+     *
+     * @return string
+     */
+    public function getLocationName()
+    {
+        return $this->location->getDisplayName();
+    }
+
+    /**
      * Set createdBy user.
      *
      * @return \AppBundle\Entity\User
