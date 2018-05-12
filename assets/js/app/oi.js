@@ -71,7 +71,7 @@ function registerServiceWorker() { //console.log('env = ', $)
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
                 .then(registration => {
-                    console.log('SW registered: ', registration);
+                    //console.log('SW registered: ', registration);
                 }).catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
                 });

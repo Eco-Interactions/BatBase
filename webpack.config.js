@@ -28,7 +28,8 @@ Encore
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
-        agGrid: 'ag-grid'
+        agGrid: 'ag-grid',
+        L: 'leaflet'
     })
 
     .addPlugin(
