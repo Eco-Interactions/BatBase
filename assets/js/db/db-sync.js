@@ -496,13 +496,13 @@ function getObjectRealmNames(realms) {                                      //co
     return data;
 }
 function storeTaxaByLevelAndRealm(taxa) {
-    var realmData = separateTaxaByLevelAndRealm(taxa);                      //console.log("taxonym name data = %O", nameData);
+    var realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym name data = %O", nameData);
     for (var realm in realmData) {  
         storeTaxaByLvl(realm, realmData[realm]);
     }
 }
 function storeTaxaByLvl(realm, taxonObj) {
-    for (var level in taxonObj) {                                           //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
+    for (var level in taxonObj) {                                               //console.log("storing as [%s] = %O", realm+level+'Names', taxonObj[level]);
         storeData(realm+level+'Names', taxonObj[level]);
     }
 }
@@ -527,15 +527,19 @@ function separateTaxaByLevelAndRealm(taxa) {
         return data[key];
     }
 } /* End separateTaxaByLevelAndRealm */
-/** [entity]Names - an object with each entity's displayName(k) and id. */
-function deriveAndStoreLocationData(data) {                                 //console.log('loc data to store = %O', data);
+/** 
+ * [entity]Names - an object with each entity's displayName(k) and id.
+ * location - resaved locations with an additional data point for countries. 
+ */
+function deriveAndStoreLocationData(data) {                                     //console.log('loc data to store = %O', data);
     const regns = getTypeObj(data.locationType, 'region', 'locations');
-    const cntrys = getTypeObj(data.locationType, 'country', 'locations');   //console.log('reg = %O, cntry = %O', regns, cntrys);
+    const cntrys = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntrys);
     storeData('countryNames', getNameDataObj(cntrys, data.location));
     storeData('regionNames', getNameDataObj(regns, data.location));
     storeData('topRegionNames', getTopRegionNameData(data, regns));
     storeData('habTypeNames', getTypeNameData(data.habitatType));
     storeData('locTypeNames', getTypeNameData(data.locationType));
+    storeData('location', addInteractionTotalsToLocs(data.location));
 }
 function getTopRegionNameData(locData, regns) {  
     const data = {};
@@ -545,17 +549,29 @@ function getTopRegionNameData(locData, regns) {
     }
     return data;
 }
-function getTypeObj(types, type, collection) { 
-    for (const t in types) {
-        if (types[t].slug === type) { return types[t][collection]; }
+/** Adds the total interaction count of the location and it's children. */
+function addInteractionTotalsToLocs(locs) {  
+    for (let id in locs) {  console.log('id = %s', id);
+        locs[id].totalInts = getTotalInteractionCount(locs[id]);                //console.log('[%s] total = [%s]', locs[id].displayName, locs[id].totalInts);
     }
-}
+    return locs;
+
+    function getTotalInteractionCount(loc) {    
+        let ttl = loc.interactions.length;
+        if (!loc.children) { return ttl; }
+        loc.children.forEach(function(id) {
+            let child = locs[id];
+            ttl += getTotalInteractionCount(child);
+        });
+        return ttl;
+    }
+} /* End addInteractionTotalsToLocs */
 /** Note: Top regions are the trunk of the location data tree. */
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
  * [entity]Sources - an array with of all source records for the entity type.
  */
-function deriveAndStoreSourceData(data) {                                   //console.log("source data = %O", data);
+function deriveAndStoreSourceData(data) {                                       //console.log("source data = %O", data);
     const authSrcs = getTypeObj(data.sourceType, 'author', 'sources');
     const pubSrcs = getTypeObj(data.sourceType, 'publication', 'sources');
     const publSrcs = getTypeObj(data.sourceType, 'publisher', 'sources'); 
@@ -564,6 +580,11 @@ function deriveAndStoreSourceData(data) {                                   //co
     storeData('publSrcs', publSrcs);
     storeData('citTypeNames', getTypeNameData(data.citationType));        
     storeData('pubTypeNames', getTypeNameData(data.publicationType));        
+}
+function getTypeObj(types, type, collection) { 
+    for (const t in types) {
+        if (types[t].slug === type) { return types[t][collection]; }
+    }
 }
 /**
  * [entity]Names - an object with each entity's displayName(k) and id.
@@ -582,7 +603,7 @@ function getEntityRcrds(ids, rcrds) {
 /** Returns an object with each entity record's displayName (key) and id. */
 function getNameDataObj(ids, rcrds) {
     var data = {};
-    ids.forEach(function(id) { data[rcrds[id].displayName] = id; });        //console.log("nameDataObj = %O", data);
+    ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
     return data;
 }
 /** Returns an object with each entity types's displayName (key) and id. */
@@ -615,7 +636,7 @@ function storeData(key, data) {
  * @param  {obj}  params Has props shown, as well as the current update stage. 
  * @param  {obj}  edits  Edit obj returned from server 
  */
-function updateData(updateFunc, prop, params, edits) {                      //console.log('prop [%s] -> params [%O]', prop, params);
+function updateData(updateFunc, prop, params, edits) {                          //console.log('prop [%s] -> params [%O]', prop, params);
     try {
         updateFunc(prop, params.rcrd, params.entity, edits);
     } catch (e) { 
@@ -628,14 +649,14 @@ function updateData(updateFunc, prop, params, edits) {                      //co
  * retried at the end of the update process. If this is the second error, 
  * the error is reported to the user. (<--todo for onPageLoad sync) 
  */
-function handleFailedUpdate(prop, updateFunc, params, edits) {              console.log('handleFailedUpdate [%s]. params = %O edits = %O, failed = %O',prop, params, edits, failed);
+function handleFailedUpdate(prop, updateFunc, params, edits) {                  console.log('handleFailedUpdate [%s]. params = %O edits = %O, failed = %O',prop, params, edits, failed);
     if (failed.twice) { 
         reportDataUpdateErr(edits, prop, params.rcrd, params.entity, params.stage);
     } else {
         addToFailedUpdates(updateFunc, prop, params, edits);       
     }
 }
-function addToFailedUpdates(updateFunc, prop, params, edits) {              console.log('addToFailedUpdates. edits = %O', edits);
+function addToFailedUpdates(updateFunc, prop, params, edits) {                  console.log('addToFailedUpdates. edits = %O', edits);
     if (!failed.updates[params.entity]) { failed.updates[params.entity] = {}; }
     failed.updates[params.entity][prop] = {
         edits: edits, entity: params.entity, rcrd: params.rcrd, 
@@ -643,7 +664,7 @@ function addToFailedUpdates(updateFunc, prop, params, edits) {              cons
     };
 }
 /** Retries any updates that failed in the first pass. */
-function retryFailedUpdates() {                                             console.log('retryFailedUpdates. failed = %O', failed);
+function retryFailedUpdates() {                                                 console.log('retryFailedUpdates. failed = %O', failed);
     failed.twice = true;                                                    
     for (let entity in failed.updates) {  
         for (let prop in failed.updates[entity]) {
