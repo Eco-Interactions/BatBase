@@ -25,7 +25,7 @@ import * as db_map from './db-map.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey =  'Fight for Justice!!!!!!!!!!!!!!!!! <3';
+const dataKey = 'Live for Justice!!! <3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();
@@ -1099,17 +1099,17 @@ function hasChildInteractions(row) {
 }
 /** ------------ Location Grid Map Methods ------------------- */
 /** Initializes the google map in the data grid. */
-function buildLocGridMap(topRegions) {                                      console.log('buildLocGridMap. topRegions = %O', topRegions);
+function buildLocGridMap(topRegions) {                                          //console.log('buildLocGridMap. topRegions = %O', topRegions);
     _util.populateStorage('curRealm', 'map');                      
     $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
-    db_map.initMap(buildLocCoordAry(topRegions));
+    db_map.initMap(); //buildLocCoordAry(topRegions)
 }
 function buildLocCoordAry(locIds) {
     const coords = locIds.map(getLocCoords);
 
 }
 function getLocCoords(locId) {
-    const loc = getDetachedRcrd(locId); console.log('region = %O', loc);
+    const loc = getDetachedRcrd(locId);                                         //console.log('region = %O', loc);
     return loc.geoJson;
 }
 
@@ -2878,7 +2878,7 @@ function getCurTreeRowCount() {
 /**
  * If there are no child rows, or if the child rows are closed, this is the open leaf.
  */
-function isNextOpenLeafRow(node) {                                          //console.log("node = %O", node);
+function isNextOpenLeafRow(node) {                                              //console.log("node = %O", node);
     if (node.childrenAfterFilter) {
         return node.childrenAfterFilter.every(function(childNode){
             return !childNode.expanded;
@@ -2887,7 +2887,7 @@ function isNextOpenLeafRow(node) {                                          //co
     return true;
 }     
 /*-----------------Grid Manipulation------------------------------------------*/
-function clearPreviousGrid() {                                              console.log("clearing grid");
+function clearPreviousGrid() {                                                  //console.log("clearing grid");
     if (gridOptions.api) { gridOptions.api.destroy(); }  
     $('#search-grid').empty(); //Clears location map view
 }
@@ -2895,17 +2895,17 @@ function clearPreviousGrid() {                                              cons
  * Resets grid state to top focus options: Taxon and source are reset at current
  * realm; locations are reset to the top regions.
  */
-function resetDataGrid() {                                                  //console.log("---reseting grid---")
+function resetDataGrid() {                                                      //console.log("---reseting grid---")
     var resetMap = { taxa: onTaxonRealmChange, locs: rebuildLocTree, srcs: onSrcRealmChange };
     var focus = gParams.curFocus; 
     resetCurTreeState();
     resetMap[focus](); 
 } 
 /** Resets storage props, buttons and filter status. */
-function resetCurTreeState() {                                              //console.log('\n### Restting tree state ###')
+function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; } //resets updatedAt grid filter
+    if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; }     //resets updatedAt grid filter
     updateGridFilterStatusMsg();
 }
 /** Deltes the props uesd for only the displayed grid in the global gParams. */
@@ -2919,19 +2919,19 @@ function resetCurTreeStorageProps() {
  * tree node, displayed in the "count" column, is updated to count only displayed
  * interactions. Any rows filtered out will not be included in the totals.
  */
-function onModelUpdated() {                                                 //console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
-    updateTtlRowIntCount( gridOptions.api.getModel().rootNode );
+function onModelUpdated() {                                                     //console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
+    updateTotalRowIntCount( gridOptions.api.getModel().rootNode );
 }
 /**
  * Sets new interaction totals for each tree node @getChildrenCnt and then 
  * calls the grid's softRefresh method, which refreshes any rows with "volatile"
  * set "true" in the columnDefs - currently only "Count".
  */
-function updateTtlRowIntCount(rootNode) {
+function updateTotalRowIntCount(rootNode) {
     getChildrenCnt(rootNode.childrenAfterFilter);  
     gridOptions.api.softRefreshView();
 }
-function getChildrenCnt(nodeChildren) {  //console.log("nodeChildren =%O", nodeChildren)
+function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
     var nodeCnt, ttl = 0;
     nodeChildren.forEach(function(child) {
         nodeCnt = 0;

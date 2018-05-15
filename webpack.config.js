@@ -29,7 +29,7 @@ Encore
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
         agGrid: 'ag-grid',
-        L: 'leaflet'
+        L: 'leaflet',
     })
 
     .addPlugin(
@@ -51,7 +51,8 @@ Encore
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
 
     .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js' ])
+        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
+        'leaflet' ])
 ; 
 
 // export the final configuration

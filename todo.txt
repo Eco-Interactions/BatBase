@@ -4,7 +4,10 @@
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
     - begin to implement
-        - gMaps API Key: AIzaSyAKk61TBHNnhBMTKBRzWktDogLP4hKYDIw
+        -- Update stored geoJson when any updates have happened to locations
+
+    - FIX -
+        - vulnerability with webpack 
 
 Data Changes:
     
