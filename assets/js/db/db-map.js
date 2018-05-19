@@ -12,10 +12,10 @@ import * as _util from '../misc/util.js';
 import 'leaflet.markercluster';
 
 let geoJson, map, showMap;
-idb.get('geoJson').then(storeGeoJson);
 
 requireCss();
-fixLeafletIconIssue();
+fixLeafletBug();
+getGeoJsonData();
 
 function requireCss() {
     require('../../../node_modules/leaflet/dist/leaflet.css');
@@ -23,7 +23,7 @@ function requireCss() {
     require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
 }
 /** For more information on this fix: github.com/PaulLeCam/react-leaflet/issues/255 */
-function fixLeafletIconIssue() {
+function fixLeafletBug() {
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -31,14 +31,17 @@ function fixLeafletIconIssue() {
       shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
     });
 }
-function storeGeoJson(geoData) {
+function getGeoJsonData() {                                                     console.log('getGeoJsonData')
+    idb.get('geoJson').then(storeGeoJson);
+}
+function storeGeoJson(geoData) {                                                console.log('storeGeoJson. geoData ? ', geoData !== undefined);
     if (geoData === undefined) { return downloadGeoJson(); }
-    geoJson = parseData(geoData); 
+    geoJson = geoData; 
     if (showMap) { console.log('showing map');initMap(); }
 }
-function storeServerGeoJson(data) {                                             //console.log('geoJson data = %O', data);
-    idb.set('geoJson', JSON.stringify(data.geoJson));
-    storeGeoJson(JSON.stringify(data.geoJson));
+function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
+    idb.set('geoJson', data.geoJson);
+    storeGeoJson(data.geoJson);
 }
 /**
  * Loops through the passed data object to parse the nested objects. This is 
@@ -56,8 +59,8 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
     // body...
 }
 /** Initializes the search database map using leaflet and mapbox. */
-export function initMap() {  
-    if (!geoJson) { showMap = true; return }  console.log('initMap');
+export function initMap() {                                                     console.log('attempting to initMap')
+    if (!geoJson) { showMap = true; return }                                    console.log('initMap');
     map = L.map('map');
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
@@ -103,13 +106,15 @@ function addCountryIntCounts() {
         addMarkerForEachInteraction(cntry.totalInts, markerCoords);
     }        
     function getCenterCoordsOfLoc(loc) { 
-        if (!loc.geoJsonId) { return console.log('###### No geoJson for [%s] %O', loc.displayName, loc); }  
+        if (!loc.geoJsonId) { 
+            return loc.interactions.length ? console.log('###### No geoJson for [%s] %O', loc.displayName, loc) : null; }  
         if (loc.displayName == 'United States') { return {lat: 39.8333333, lng: -98.585522}}
-        const feature = buildPlaceGeoJson(geoJson[loc.geoJsonId]);
+        const feature = buildPlaceGeoJson(loc, geoJson[loc.geoJsonId]);
         const polygon = L.geoJson(feature);//.addTo(map);
         return polygon.getBounds().getCenter(); 
     }
-    function buildPlaceGeoJson(place) {                                         //console.log('place = %O', place);
+    function buildPlaceGeoJson(loc, geoData) {                                  //console.log('place geoData = %O', geoData);
+        const place = JSON.parse(geoData);
         return {
                 "type": "Feature",
                 "geometry": {
@@ -126,7 +131,6 @@ function addCountryIntCounts() {
         for (let i = 0; i < intCnt; i++) {  
             markers.addLayer(L.marker(coords));
         }
-        
         map.addLayer(markers);
     }
 } /* End addCountryIntCounts */
