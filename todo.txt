@@ -3,8 +3,11 @@
 - Add db backup cronjob to new host
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
-    - begin to implement
+    - implement
+        -- update db page tutorial
         -- Update stored geoJson when any updates have happened to locations
+
+
 
     - FIX -
         - vulnerability with webpack 
@@ -15,7 +18,6 @@ Data Changes:
 
 
 Before Release:
-    - update "Application restrictions" for the gMaps API Key to 'HTTP referrers (web sites)'
 
     ## Testing ##
     - Added Loc Views: tree and map

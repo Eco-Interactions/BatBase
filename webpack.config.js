@@ -4,10 +4,12 @@ const WorkboxPlugin = require('workbox-webpack-plugin');
 Encore
     // the project directory where all compiled assets will be stored
     .setOutputPath('web/build/')
+
     // the public path used by the web server to access the previous directory
-    .setPublicPath('/batplant/web/build/')
-    
-    .setManifestKeyPrefix('build/')
+    .setPublicPath('/batplant/web/build')
+
+    /** The prefix isn't being recognized for some reason */
+    .setManifestKeyPrefix('build')
 
     // allow legacy applications to use $/jQuery as an app variable 
     // Note: Doesn't work if js not processed through webpack
@@ -19,7 +21,7 @@ Encore
     // empty the outputPath dir before each build
     .cleanupOutputBeforeBuild()
 
-    // show OS notifications when builds finish/fail
+    // show OS notifications when builds finish/fail /** Stopped working and I don't know why. */
     .enableBuildNotifications()
 
     // filenames include a hash that changes whenever the file contents change
