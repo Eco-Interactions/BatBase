@@ -14,7 +14,6 @@ import 'leaflet.markercluster';
 let geoJson, map, showMap;
 
 // idb.clear();
-
 requireCss();
 fixLeafletBug();
 getGeoJsonData();

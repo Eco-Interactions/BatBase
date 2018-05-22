@@ -31,7 +31,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
 
-        $cntrys = $this->getCountryCenterPoints();
+        $cntrys = $this->getCenterPoints();
 
         foreach ($cntrys as $cntry => $point) {
             $this->addPointToGeoJson($cntry, $this->flipPointAryReturnString($point));
@@ -72,9 +72,12 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
         $this->em->flush();       
     }
 
-    private function getCountryCenterPoints()
+    private function getCenterPoints()
     {
         return [
+            "Africa" => [ 10.965031679524095, 19.599609375000004 ],
+            "Central America, South America-Forest" => [ 6.857472618910672, -79.13452148437501 ],
+            "South America" => [ -6.35693973013903, -60.38085937500001 ],
             "China" => [ 34.672410587, 104.187417847 ],
             "French Antilles" =>[16.4167, -62.1441],
             "Borneo" =>[0.9619, 114.5548],
