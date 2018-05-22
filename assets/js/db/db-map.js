@@ -88,7 +88,7 @@ export function initMap() {                                                     
 } /* End initMap */
 /**
  * Adds a marker for each interaction within each country. The markers are placed
- * at the center of the country's polygon.
+ * at the center of the country's polygon. A popup with the country's name is added.
  */
 function addCountryIntCounts() {                                               
     const cntrys = getCountryLocs();                                            //console.log('countries = %O', cntrys);
@@ -102,8 +102,8 @@ function addCountryIntCounts() {
     }
     function addMarkersForInts(cntry) {
         const markerCoords = getCenterCoordsOfLoc(cntry);                       //console.log('markerCoords = ', markerCoords)
-        if (!markerCoords) { return; }
-        addMarkerForEachInteraction(cntry.totalInts, markerCoords);
+        if (!markerCoords || !cntry.totalInts) { return; }
+        addMarkerForEachInteraction(cntry.totalInts, markerCoords, cntry);
     }        
     function getCenterCoordsOfLoc(loc) { 
         if (!loc.geoJsonId) { 
@@ -126,11 +126,31 @@ function addCountryIntCounts() {
                 }
             };   
     }
-    function addMarkerForEachInteraction(intCnt, coords) {                      //console.log('adding [%s] markers at [%s]', intCnt, coords);
+    function addMarkerForEachInteraction(intCnt, coords, cntry) {               //console.log('adding [%s] markers at [%s]', intCnt, coords);
+        if (intCnt === 1) { return addSingleMarker(coords, cntry); }
         const markers = L.markerClusterGroup();
         for (let i = 0; i < intCnt; i++) {  
             markers.addLayer(L.marker(coords));
         }
         map.addLayer(markers);
+        addPopupToCluster(markers, cntry.displayName);
+    }
+    function addSingleMarker(coords, cntry) {
+        L.marker(coords).bindPopup(cntry.displayName)
+            .on('mouseover', function (e) { this.openPopup(); })
+            .on('mouseout', function (e) { this.closePopup(); })
+            .addTo(map);
+    }
+    function addPopupToCluster(markers, text) {
+        markers.on('clustermouseover', createClusterPopup)
+            .on('clustermouseout',function(c){ map.closePopup(); })
+            .on('clusterclick',function(c){ map.closePopup(); }); 
+        
+        function createClusterPopup(c) {
+            const popup = L.popup()
+                .setLatLng(c.layer.getLatLng())
+                .setContent(text)
+                .openOn(map);
+        }
     }
 } /* End addCountryIntCounts */
