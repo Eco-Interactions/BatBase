@@ -25,7 +25,7 @@ import * as db_map from './db-map.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey = 'Live for Justice!!! <3';
+const dataKey = 'Live for Justice!!!!!!!! <3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();

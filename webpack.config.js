@@ -68,8 +68,7 @@ Encore
     .enableBuildNotifications()
     // filenames include a hash that changes whenever the file contents change
     .enableVersioning()
-    // you can use this method to provide other common global variables,
-    // such as '_' for the 'underscore' library
+    // use this method to provide common global variables
     .autoProvideVariables({
         agGrid: 'ag-grid',
         L: 'leaflet',

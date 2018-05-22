@@ -13,6 +13,8 @@ import 'leaflet.markercluster';
 
 let geoJson, map, showMap;
 
+// idb.clear();
+
 requireCss();
 fixLeafletBug();
 getGeoJsonData();
@@ -72,8 +74,8 @@ export function initMap() {                                                     
         console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
     }
     function getMapBounds() {
-        const southWest = L.latLng(-90, 180);
-        const northEast = L.latLng(90, -180);
+        const southWest = L.latLng(-100, 190);
+        const northEast = L.latLng(100, -190);
         return L.latLngBounds(southWest, northEast);
     }
     function addMapTiles() {
@@ -106,23 +108,37 @@ function addCountryIntCounts() {
         addMarkerForEachInteraction(cntry.totalInts, markerCoords, cntry);
     }        
     function getCenterCoordsOfLoc(loc) { 
-        if (!loc.geoJsonId) { 
-            return loc.interactions.length ? console.log('###### No geoJson for [%s] %O', loc.displayName, loc) : null; }  
-        if (loc.displayName == 'United States') { return {lat: 39.8333333, lng: -98.585522}}
-        const feature = buildPlaceGeoJson(loc, geoJson[loc.geoJsonId]);
-        const polygon = L.geoJson(feature);//.addTo(map);
-        return polygon.getBounds().getCenter(); 
-    }
-    function buildPlaceGeoJson(loc, geoData) {                                  //console.log('place geoData = %O', geoData);
-        const place = JSON.parse(geoData);
+        if (!loc.geoJsonId) { return logNoGeoJsonError(); } 
+        const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);                  //console.log('locGeoJson = %O', locGeoJson);
+        return locGeoJson.centerPoint ? 
+            formatPoint(locGeoJson.centerPoint) 
+            : getLocCenterPoint();
+
+        function logNoGeoJsonError() {
+            return loc.interactions.length ? 
+                console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+                : null;
+        }
+        function formatPoint(point) {  //console.log('point = ', point)
+            let array = JSON.parse(point); 
+            return L.latLng(array[1], array[0]);
+        }
+        function getLocCenterPoint() {
+            const feature = buildFeature(loc, locGeoJson);
+            const polygon = L.geoJson(feature);//.addTo(map);
+            console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
+            return polygon.getBounds().getCenter(); 
+        }
+    } /* End getCenterCoordsOfLoc */
+    function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
         return {
                 "type": "Feature",
                 "geometry": {
-                    "type": place.type,
-                    "coordinates": JSON.parse(place.coordinates)
+                    "type": geoData.type,
+                    "coordinates": JSON.parse(geoData.coordinates)
                 },
                 "properties": {
-                    "name": place.displayName
+                    "name": loc.displayName
                 }
             };   
     }

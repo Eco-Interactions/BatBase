@@ -551,7 +551,7 @@ function getTopRegionNameData(locData, regns) {
 }
 /** Adds the total interaction count of the location and it's children. */
 function addInteractionTotalsToLocs(locs) {  
-    for (let id in locs) {  console.log('id = %s', id);
+    for (let id in locs) {  
         locs[id].totalInts = getTotalInteractionCount(locs[id]);                //console.log('[%s] total = [%s]', locs[id].displayName, locs[id].totalInts);
     }
     return locs;
