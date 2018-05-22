@@ -28,7 +28,7 @@ class GeoJson
     /**
      * @var string
      *
-     * @ORM\Column(name="type", type="string", length=255)
+     * @ORM\Column(name="type", type="string", length=255, nullable=false)
      * @JMS\Expose
      * @JMS\SerializedName("type")
      */
@@ -41,6 +41,14 @@ class GeoJson
      * @JMS\Expose
      */
     private $coordinates;
+
+    /**
+     * @var string 
+     * String array of coordinates - [ long, lat ]
+     *
+     * @ORM\Column(name="center_point", type="string", length=255, nullable=true)
+     */
+    private $centerPoint;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -172,6 +180,42 @@ class GeoJson
     public function getCoordinates()
     {
         return $this->coordinates;
+    }
+
+    /**
+     * Set centerPoint.
+     *
+     * @param text $centerPoint
+     *
+     * @return GeoJson
+     */
+    public function setCenterPoint($centerPoint)
+    {
+        $this->centerPoint = $centerPoint;
+
+        return $this;
+    }
+
+    /**
+     * Get centerPoint.
+     *
+     * @return text
+     */
+    public function getCenterPoint()
+    {
+        return $this->centerPoint;
+    }
+
+    /**
+     * Get center point.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("centerPoint")
+     *
+     * @return int
+     */
+    public function serializeCenterPoint()
+    {
+        return $this->centerPoint;
     }
 
     /**
