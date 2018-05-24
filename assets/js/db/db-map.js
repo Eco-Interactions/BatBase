@@ -14,6 +14,7 @@ import 'leaflet.markercluster';
 let geoJson, map, showMap;
 
 // idb.clear();
+
 requireCss();
 fixLeafletBug();
 getGeoJsonData();
@@ -65,7 +66,7 @@ export function initMap() {                                                     
     map = L.map('map');
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
-    map.on('load', addCountryIntCounts);
+    map.on('load', addInteractionMarkersToMap);
     addMapTiles();
     map.setView([22,22], 2)
     
@@ -88,84 +89,207 @@ export function initMap() {                                                     
     }
 } /* End initMap */
 /**
+ * Adds a marker to the map for each interaction with any location data. Each 
+ * marker has a popup with either the location name and the country, just the  
+ * country or region name. Locations without gps data are added to markers at  
+ * the country level with "Unspecified" as the location name.
+ */
+function addInteractionMarkersToMap() {
+    const locations = _util.getDataFromStorage('location');
+    const regions = getRegionLocs();
+    for (let id in regions) { addMarkersForRegion(regions[id]) }; 
+
+    function getRegionLocs() {
+        const regionIds = _util.getDataFromStorage('topRegionNames');
+        return Object.values(regionIds).map(id => locations[id]);
+    }
+    function addMarkersForRegion(region) {
+        if (region.displayName === "Unspecified") { return; }
+        addMarkersForLocAndChildren(region);
+    }
+    function addMarkersForLocAndChildren(loc) {                                 
+        if (!loc.totalInts) { return; }                                         console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
+        let intCnt = loc.interactions.length; 
+        buildMarkersForLocChildren(loc.children);
+        if (intCnt) { buildLocationMarkers(intCnt, loc); }
+
+        function buildMarkersForLocChildren(locs) {
+            locs.forEach(id => {
+                let loc = locations[id];
+                if (loc.locationType.displayName == 'Country') { 
+                    return addMarkersForLocAndChildren(loc, false); 
+                }
+                buildLocationIntMarkers(loc, loc.interactions.length);
+            });
+        }
+        function buildLocationIntMarkers(loc, locIntCnt) {                      //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
+            if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
+            if (!locIntCnt) { return; }
+            buildLocationMarkers(locIntCnt, loc);
+        }
+        function buildLocationMarkers(intCnt, loc) {                            //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
+            const markerCoords = getCenterCoordsOfLoc(loc);                     //console.log('        markerCoords = ', markerCoords)
+            if (!markerCoords) { return; }
+            addMarkerForEachInteraction(intCnt, markerCoords, loc);
+        }
+        function getCenterCoordsOfLoc(loc) { 
+            if (!loc.geoJsonId) { return logNoGeoJsonError(); }                 //console.log('geoJson obj = %O', geoJson[loc.geoJsonId]);
+            const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);              //console.log('        locGeoJson = %O', locGeoJson);
+            return locGeoJson.centerPoint ? 
+                formatPoint(locGeoJson.centerPoint) 
+                : getLocCenterPoint();
+
+            function logNoGeoJsonError() {
+                if (!loc.interactions.length) { return null; }
+                intCnt += loc.interactions.length;
+                console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+            }
+            /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
+            function formatPoint(point) {                                       //console.log('point = ', point)
+                let array = JSON.parse(point); 
+                return L.latLng(array[1], array[0]);
+            }
+            function getLocCenterPoint() {
+                const feature = buildFeature(loc, locGeoJson);
+                const polygon = L.geoJson(feature);//.addTo(map);
+                console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
+                return polygon.getBounds().getCenter(); 
+                    
+                function buildFeature(loc, geoData) {                           //console.log('place geoData = %O', geoData);
+                    return {
+                            "type": "Feature",
+                            "geometry": {
+                                "type": geoData.type,
+                                "coordinates": JSON.parse(geoData.coordinates)
+                            },
+                            "properties": {
+                                "name": loc.displayName
+                            }
+                        };   
+                }
+            } /* End getLocCenterPoint */
+        } /* End getCenterCoordsOfLoc */
+        function addMarkerForEachInteraction(intCnt, coords, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, coords);
+            return intCnt === 1 ? addMarker() : addCluster();
+
+            function addMarker() {
+                map.addLayer(addSingleMarker(coords, loc));
+            }
+            function addCluster() {
+                let cluster = L.markerClusterGroup();
+                for (let i = 0; i < intCnt; i++) {  
+                    cluster.addLayer(L.marker(coords)); 
+                }
+                addPopupToCluster(cluster, getPopupText(loc));
+                map.addLayer(cluster);
+            }
+        } /* End addMarkerForEachInteraction */
+        function addSingleMarker(coords, loc) {
+            return L.marker(coords).bindPopup(getPopupText(loc))
+                .on('mouseover', function (e) { this.openPopup(); })
+                .on('mouseout', function (e) { this.closePopup(); });
+        }
+        function addPopupToCluster(cluster, text) {
+            cluster.on('clustermouseover', createClusterPopup)
+                .on('clustermouseout',function(c){ map.closePopup(); })
+                .on('clusterclick',function(c){ map.closePopup(); }); 
+            
+            function createClusterPopup(c) {
+                const popup = L.popup()
+                    .setLatLng(c.layer.getLatLng())
+                    .setContent(text)
+                    .openOn(map);
+            }
+        }  /* End addMarkersForLocation */
+        function getPopupText(loc) {  
+            let cntry = loc.country ? loc.country.displayName : 'Continent';
+            const locName = loc.locationType.displayName === "Country" ?
+                "Unspecified" : loc.displayName;
+            return "<b>"+locName+"</b><br>"+cntry;
+        }
+    } /* End addMarkersForLocAndChildren */
+} /* End addInteractionMarkersToMap */
+
+
+/**
  * Adds a marker for each interaction within each country. The markers are placed
  * at the center of the country's polygon. A popup with the country's name is added.
  */
-function addCountryIntCounts() {                                               
-    const cntrys = getCountryLocs();                                            //console.log('countries = %O', cntrys);
-    for (let id in cntrys) { 
-        addMarkersForInts(cntrys[id]) 
-    }
+// function addCountryIntCounts() {                                               
+//     const cntrys = getCountryLocs();                                            //console.log('countries = %O', cntrys);
+//     for (let id in cntrys) { 
+//         addMarkersForInts(cntrys[id]) 
+//     }
 
-    function getCountryLocs() {
-        let data = _util.getDataFromStorage(['location', 'countryNames']);
-        return Object.values(data.countryNames).map(id => data.location[id]);
-    }
-    function addMarkersForInts(cntry) {
-        const markerCoords = getCenterCoordsOfLoc(cntry);                       //console.log('markerCoords = ', markerCoords)
-        if (!markerCoords || !cntry.totalInts) { return; }
-        addMarkerForEachInteraction(cntry.totalInts, markerCoords, cntry);
-    }        
-    function getCenterCoordsOfLoc(loc) { 
-        if (!loc.geoJsonId) { return logNoGeoJsonError(); } 
-        const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);                  //console.log('locGeoJson = %O', locGeoJson);
-        return locGeoJson.centerPoint ? 
-            formatPoint(locGeoJson.centerPoint) 
-            : getLocCenterPoint();
+//     function getCountryLocs() {
+//         let data = _util.getDataFromStorage(['location', 'countryNames']);
+//         return Object.values(data.countryNames).map(id => data.location[id]);
+//     }
+//     function addMarkersForInts(cntry) {
+//         const markerCoords = getCenterCoordsOfLoc(cntry);                       //console.log('markerCoords = ', markerCoords)
+//         if (!markerCoords || !cntry.totalInts) { return; }
+//         addMarkerForEachInteraction(cntry.totalInts, markerCoords, cntry);
+//     }        
+//     function getCenterCoordsOfLoc(loc) { 
+//         if (!loc.geoJsonId) { return logNoGeoJsonError(); } 
+//         const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);                  //console.log('locGeoJson = %O', locGeoJson);
+//         return locGeoJson.centerPoint ? 
+//             formatPoint(locGeoJson.centerPoint) 
+//             : getLocCenterPoint();
 
-        function logNoGeoJsonError() {
-            return loc.interactions.length ? 
-                console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
-                : null;
-        }
-        function formatPoint(point) {  //console.log('point = ', point)
-            let array = JSON.parse(point); 
-            return L.latLng(array[1], array[0]);
-        }
-        function getLocCenterPoint() {
-            const feature = buildFeature(loc, locGeoJson);
-            const polygon = L.geoJson(feature);//.addTo(map);
-            console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
-            return polygon.getBounds().getCenter(); 
-        }
-    } /* End getCenterCoordsOfLoc */
-    function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
-        return {
-                "type": "Feature",
-                "geometry": {
-                    "type": geoData.type,
-                    "coordinates": JSON.parse(geoData.coordinates)
-                },
-                "properties": {
-                    "name": loc.displayName
-                }
-            };   
-    }
-    function addMarkerForEachInteraction(intCnt, coords, cntry) {               //console.log('adding [%s] markers at [%s]', intCnt, coords);
-        if (intCnt === 1) { return addSingleMarker(coords, cntry); }
-        const markers = L.markerClusterGroup();
-        for (let i = 0; i < intCnt; i++) {  
-            markers.addLayer(L.marker(coords));
-        }
-        map.addLayer(markers);
-        addPopupToCluster(markers, cntry.displayName);
-    }
-    function addSingleMarker(coords, cntry) {
-        L.marker(coords).bindPopup(cntry.displayName)
-            .on('mouseover', function (e) { this.openPopup(); })
-            .on('mouseout', function (e) { this.closePopup(); })
-            .addTo(map);
-    }
-    function addPopupToCluster(markers, text) {
-        markers.on('clustermouseover', createClusterPopup)
-            .on('clustermouseout',function(c){ map.closePopup(); })
-            .on('clusterclick',function(c){ map.closePopup(); }); 
+//         function logNoGeoJsonError() {
+//             return loc.interactions.length ? 
+//                 console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+//                 : null;
+//         }
+//         function formatPoint(point) {  //console.log('point = ', point)
+//             let array = JSON.parse(point); 
+//             return L.latLng(array[1], array[0]);
+//         }
+//         function getLocCenterPoint() {
+//             const feature = buildFeature(loc, locGeoJson);
+//             const polygon = L.geoJson(feature);//.addTo(map);
+//             console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
+//             return polygon.getBounds().getCenter(); 
+//         }
+//     } /* End getCenterCoordsOfLoc */
+//     function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
+//         return {
+//                 "type": "Feature",
+//                 "geometry": {
+//                     "type": geoData.type,
+//                     "coordinates": JSON.parse(geoData.coordinates)
+//                 },
+//                 "properties": {
+//                     "name": loc.displayName
+//                 }
+//             };   
+//     }
+//     function addMarkerForEachInteraction(intCnt, coords, cntry) {               //console.log('adding [%s] markers at [%s]', intCnt, coords);
+//         if (intCnt === 1) { return addSingleMarker(coords, cntry); }
+//         const markers = L.markerClusterGroup();
+//         for (let i = 0; i < intCnt; i++) {  
+//             markers.addLayer(L.marker(coords));
+//         }
+//         map.addLayer(markers);
+//         addPopupToCluster(markers, cntry.displayName);
+//     }
+//     function addSingleMarker(coords, cntry) {
+//         L.marker(coords).bindPopup(cntry.displayName)
+//             .on('mouseover', function (e) { this.openPopup(); })
+//             .on('mouseout', function (e) { this.closePopup(); })
+//             .addTo(map);
+//     }
+//     function addPopupToCluster(markers, text) {
+//         markers.on('clustermouseover', createClusterPopup)
+//             .on('clustermouseout',function(c){ map.closePopup(); })
+//             .on('clusterclick',function(c){ map.closePopup(); }); 
         
-        function createClusterPopup(c) {
-            const popup = L.popup()
-                .setLatLng(c.layer.getLatLng())
-                .setContent(text)
-                .openOn(map);
-        }
-    }
-} /* End addCountryIntCounts */
+//         function createClusterPopup(c) {
+//             const popup = L.popup()
+//                 .setLatLng(c.layer.getLatLng())
+//                 .setContent(text)
+//                 .openOn(map);
+//         }
+//     }
+// } /* End addCountryIntCounts */
