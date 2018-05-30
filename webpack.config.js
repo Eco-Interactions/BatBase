@@ -43,9 +43,9 @@ Encore
         './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
         'leaflet' ])
 ; 
-const lclConfig = Encore.getWebpackConfig();
+const local = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
-lclConfig.name = 'local';
+local.name = 'local';
 // reset Encore to build the second config
 Encore.reset();
 
@@ -90,11 +90,11 @@ Encore
         './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
         'leaflet' ])
 ; 
-const serverConfg = Encore.getWebpackConfig();
+const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
-serverConfg.name = 'server';
+server.name = 'server';
 
 // export the final configuration
-module.exports = lclConfig;
+module.exports = [server, local];
 
 // Run [yarn run encore dev --config-name server] to generate assets for sites on server

@@ -6,7 +6,7 @@
     - implement
         -- update db page tutorial
         -- Update stored geoJson when any updates have happened to locations
-
+        -- Find way to show how many interactions have no location to display?
 
 
     - FIX -

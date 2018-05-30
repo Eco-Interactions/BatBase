@@ -12,13 +12,13 @@ import * as _util from '../misc/util.js';
 import 'leaflet.markercluster';
 
 let geoJson, map, showMap;
+const dataKey = 'Live for justice!!!!!! <3';
 
-// idb.clear();
-
+initDb();
 requireCss();
 fixLeafletBug();
-getGeoJsonData();
 
+/** =================== Init Methods ======================================== */
 function requireCss() {
     require('../../../node_modules/leaflet/dist/leaflet.css');
     require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
@@ -33,13 +33,31 @@ function fixLeafletBug() {
       shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
     });
 }
+/** ------------------ Stored Data Methods ---------------------------------- */
+/**
+ * Checks whether the dataKey exists in indexDB cache. 
+ * If it is, the stored geoJson is fetched and stored in the global variable. 
+ * If not, the db is cleared and geoJson is redownloaded. 
+ */
+function initDb() {
+    idb.get(dataKey).then(clearIdbCheck);
+}
+function clearIdbCheck(storedKey) { console.log('clearing Idb? ', storedKey === undefined);
+    if (storedKey) { return getGeoJsonData(); } 
+    idb.clear();  console.log('actually clearing');
+    idb.set(dataKey, true);
+    downloadGeoJson();
+}
 function getGeoJsonData() {                                                     console.log('getGeoJsonData')
     idb.get('geoJson').then(storeGeoJson);
 }
 function storeGeoJson(geoData) {                                                console.log('storeGeoJson. geoData ? ', geoData !== undefined);
     if (geoData === undefined) { return downloadGeoJson(); }
     geoJson = geoData; 
-    if (showMap) { console.log('showing map');initMap(); }
+    if (showMap) { initMap(); }
+}
+function downloadGeoJson() {                                                    console.log('downloading all geoJson data!');
+    _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
 }
 function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
     idb.set('geoJson', data.geoJson);
@@ -54,15 +72,13 @@ function parseData(data) {
     for (var id in data) { data[id] = JSON.parse(data[id]); } 
     return data;
 }
-function downloadGeoJson() {                                                    console.log('downloading all geoJson data!');
-    _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-}
 export function updateGeoJsonData(argument) { //TODO: When db_sync checks for entity updates, send geoJson updates here
     // body...
 }
+/** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
 export function initMap() {                                                     console.log('attempting to initMap')
-    if (!geoJson) { showMap = true; return }                                    console.log('initMap');
+    if (!geoJson) { showMap = true; return }                                    console.log('  initializing');
     map = L.map('map');
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
@@ -108,7 +124,7 @@ function addInteractionMarkersToMap() {
         addMarkersForLocAndChildren(region);
     }
     function addMarkersForLocAndChildren(loc) {                                 
-        if (!loc.totalInts) { return; }                                         console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
+        if (!loc.totalInts) { return; }                                         //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
         let intCnt = loc.interactions.length; 
         buildMarkersForLocChildren(loc.children);
         if (intCnt) { buildLocationMarkers(intCnt, loc); }
@@ -205,91 +221,7 @@ function addInteractionMarkersToMap() {
             let cntry = loc.country ? loc.country.displayName : 'Continent';
             const locName = loc.locationType.displayName === "Country" ?
                 "Unspecified" : loc.displayName;
-            return "<b>"+locName+"</b><br>"+cntry;
+            return "<b>"+locName+"</b><br>"+cntry+'<input type="button" value="Show Summary">';
         }
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
-
-
-/**
- * Adds a marker for each interaction within each country. The markers are placed
- * at the center of the country's polygon. A popup with the country's name is added.
- */
-// function addCountryIntCounts() {                                               
-//     const cntrys = getCountryLocs();                                            //console.log('countries = %O', cntrys);
-//     for (let id in cntrys) { 
-//         addMarkersForInts(cntrys[id]) 
-//     }
-
-//     function getCountryLocs() {
-//         let data = _util.getDataFromStorage(['location', 'countryNames']);
-//         return Object.values(data.countryNames).map(id => data.location[id]);
-//     }
-//     function addMarkersForInts(cntry) {
-//         const markerCoords = getCenterCoordsOfLoc(cntry);                       //console.log('markerCoords = ', markerCoords)
-//         if (!markerCoords || !cntry.totalInts) { return; }
-//         addMarkerForEachInteraction(cntry.totalInts, markerCoords, cntry);
-//     }        
-//     function getCenterCoordsOfLoc(loc) { 
-//         if (!loc.geoJsonId) { return logNoGeoJsonError(); } 
-//         const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);                  //console.log('locGeoJson = %O', locGeoJson);
-//         return locGeoJson.centerPoint ? 
-//             formatPoint(locGeoJson.centerPoint) 
-//             : getLocCenterPoint();
-
-//         function logNoGeoJsonError() {
-//             return loc.interactions.length ? 
-//                 console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
-//                 : null;
-//         }
-//         function formatPoint(point) {  //console.log('point = ', point)
-//             let array = JSON.parse(point); 
-//             return L.latLng(array[1], array[0]);
-//         }
-//         function getLocCenterPoint() {
-//             const feature = buildFeature(loc, locGeoJson);
-//             const polygon = L.geoJson(feature);//.addTo(map);
-//             console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
-//             return polygon.getBounds().getCenter(); 
-//         }
-//     } /* End getCenterCoordsOfLoc */
-//     function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
-//         return {
-//                 "type": "Feature",
-//                 "geometry": {
-//                     "type": geoData.type,
-//                     "coordinates": JSON.parse(geoData.coordinates)
-//                 },
-//                 "properties": {
-//                     "name": loc.displayName
-//                 }
-//             };   
-//     }
-//     function addMarkerForEachInteraction(intCnt, coords, cntry) {               //console.log('adding [%s] markers at [%s]', intCnt, coords);
-//         if (intCnt === 1) { return addSingleMarker(coords, cntry); }
-//         const markers = L.markerClusterGroup();
-//         for (let i = 0; i < intCnt; i++) {  
-//             markers.addLayer(L.marker(coords));
-//         }
-//         map.addLayer(markers);
-//         addPopupToCluster(markers, cntry.displayName);
-//     }
-//     function addSingleMarker(coords, cntry) {
-//         L.marker(coords).bindPopup(cntry.displayName)
-//             .on('mouseover', function (e) { this.openPopup(); })
-//             .on('mouseout', function (e) { this.closePopup(); })
-//             .addTo(map);
-//     }
-//     function addPopupToCluster(markers, text) {
-//         markers.on('clustermouseover', createClusterPopup)
-//             .on('clustermouseout',function(c){ map.closePopup(); })
-//             .on('clusterclick',function(c){ map.closePopup(); }); 
-        
-//         function createClusterPopup(c) {
-//             const popup = L.popup()
-//                 .setLatLng(c.layer.getLatLng())
-//                 .setContent(text)
-//                 .openOn(map);
-//         }
-//     }
-// } /* End addCountryIntCounts */
