@@ -108,7 +108,9 @@ export function initMap() {                                                     
  * Adds a marker to the map for each interaction with any location data. Each 
  * marker has a popup with either the location name and the country, just the  
  * country or region name. Locations without gps data are added to markers at  
- * the country level with "Unspecified" as the location name.
+ * the country level with "Unspecified" as the location name. Inside the popups
+ * is a "Location Summary" button that will replace the name popup with a 
+ * summary of the interactions at the location.
  */
 function addInteractionMarkersToMap() {
     const locations = _util.getDataFromStorage('location');
@@ -158,7 +160,7 @@ function addInteractionMarkersToMap() {
             function logNoGeoJsonError() {
                 if (!loc.interactions.length) { return null; }
                 intCnt += loc.interactions.length;
-                console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+                //console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
             }
             /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
             function formatPoint(point) {                                       //console.log('point = ', point)
@@ -196,32 +198,69 @@ function addInteractionMarkersToMap() {
                 for (let i = 0; i < intCnt; i++) {  
                     cluster.addLayer(L.marker(coords)); 
                 }
-                addPopupToCluster(cluster, getPopupText(loc));
+                addPopupToCluster(cluster, getLocNamePopup(loc));
                 map.addLayer(cluster);
             }
         } /* End addMarkerForEachInteraction */
         function addSingleMarker(coords, loc) {
-            return L.marker(coords).bindPopup(getPopupText(loc))
-                .on('mouseover', function (e) { this.openPopup(); })
-                .on('mouseout', function (e) { this.closePopup(); });
-        }
+            let timeout;
+            return L.marker(coords).bindPopup(getLocNamePopup(loc))
+                .on('mouseover', openPopup)
+                .on('mouseout', delayPopupClose);
+
+            function openPopup(e) {
+                if (timeout) { clearTimeout(timeout); timeout = null; }
+                this.openPopup();
+            }
+            function delayPopupClose(e) {
+                const popup = this;
+                timeout = window.setTimeout(() => popup.closePopup(), 700);
+            }
+        } /* End addSingleMarker */
         function addPopupToCluster(cluster, text) {
+            let timeout;
             cluster.on('clustermouseover', createClusterPopup)
-                .on('clustermouseout',function(c){ map.closePopup(); })
-                .on('clusterclick',function(c){ map.closePopup(); }); 
+                .on('clustermouseout', delayClusterPopupClose)
+                .on('clusterclick', preventSpiderfyAndOpenPopup); 
             
             function createClusterPopup(c) {
+                if (timeout) { clearTimeout(timeout); timeout = null; }
                 const popup = L.popup()
                     .setLatLng(c.layer.getLatLng())
                     .setContent(text)
                     .openOn(map);
             }
-        }  /* End addMarkersForLocation */
-        function getPopupText(loc) {  
+            function delayClusterPopupClose(e) {
+                timeout = window.setTimeout(() => map.closePopup(), 700);
+            }
+            function preventSpiderfyAndOpenPopup(c) {
+                c.layer.unspiderfy();
+                createClusterPopup(c);
+            }
+        }  /* End addPopupToCluster */
+        function getLocNamePopup(loc) {  
             let cntry = loc.country ? loc.country.displayName : 'Continent';
-            const locName = loc.locationType.displayName === "Country" ?
-                "Unspecified" : loc.displayName;
-            return "<b>"+locName+"</b><br>"+cntry+'<input type="button" value="Show Summary">';
-        }
+            const locName = loc.locationType.displayName === 'Country' ?
+                'Unspecified' : loc.displayName;
+            return buildPopupElems(locName, cntry);
+
+            function buildPopupElems(name, parent) {
+                const cntnr = _util.buildElem('div', {class:'flex-col'});
+                const nameText = '<div style="font-size:1.2em"><b>'+name+'</b></div>'+parent;  
+                $(cntnr).append(nameText).append(buildLocSummaryBttn());
+                return cntnr;
+
+                function buildLocSummaryBttn() {
+                    const bttn = _util.buildElem('input', {type: 'button',
+                        class:'ag-fresh grid-bttn', value: 'Location Summary'});
+                    $(bttn).click(showLocDetailsPopup);
+                    return bttn;
+
+                    function showLocDetailsPopup() {
+                        console.log('showLocDetailsPopup')
+                    }
+                }
+            }
+        } /* End getLocNamePopup */
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
