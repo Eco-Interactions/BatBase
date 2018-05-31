@@ -86,24 +86,25 @@ export function initMap() {                                                     
     addMapTiles();
     map.setView([22,22], 2)
     
-    function logLatLng(e) {
-        console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
-    }
-    function getMapBounds() {
-        const southWest = L.latLng(-100, 190);
-        const northEast = L.latLng(100, -190);
-        return L.latLngBounds(southWest, northEast);
-    }
-    function addMapTiles() {
-        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            minZoom: 3, //Don't zoom out passed 
-            maxZoom: 16,
-            id: 'mapbox.run-bike-hike',
-            accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
-        }).addTo(map);
-    }
 } /* End initMap */
+function logLatLng(e) {
+    console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+}
+function getMapBounds() {
+    const southWest = L.latLng(-100, 190);
+    const northEast = L.latLng(100, -190);
+    return L.latLngBounds(southWest, northEast);
+}
+function addMapTiles() {
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        minZoom: 3, //Don't zoom out passed 
+        maxZoom: 16,
+        id: 'mapbox.run-bike-hike',
+        accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
+    }).addTo(map);
+}
+/** ================= Map Marker Methods ==================================== */
 /**
  * Adds a marker to the map for each interaction with any location data. Each 
  * marker has a popup with either the location name and the country, just the  
@@ -162,105 +163,110 @@ function addInteractionMarkersToMap() {
                 intCnt += loc.interactions.length;
                 //console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
             }
-            /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-            function formatPoint(point) {                                       //console.log('point = ', point)
-                let array = JSON.parse(point); 
-                return L.latLng(array[1], array[0]);
-            }
-            function getLocCenterPoint() {
-                const feature = buildFeature(loc, locGeoJson);
-                const polygon = L.geoJson(feature);//.addTo(map);
-                console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
-                return polygon.getBounds().getCenter(); 
-                    
-                function buildFeature(loc, geoData) {                           //console.log('place geoData = %O', geoData);
-                    return {
-                            "type": "Feature",
-                            "geometry": {
-                                "type": geoData.type,
-                                "coordinates": JSON.parse(geoData.coordinates)
-                            },
-                            "properties": {
-                                "name": loc.displayName
-                            }
-                        };   
-                }
-            } /* End getLocCenterPoint */
         } /* End getCenterCoordsOfLoc */
-        function addMarkerForEachInteraction(intCnt, coords, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, coords);
-            return intCnt === 1 ? addMarker() : addCluster();
-
-            function addMarker() {
-                map.addLayer(addSingleMarker(coords, loc));
-            }
-            function addCluster() {
-                let cluster = L.markerClusterGroup();
-                for (let i = 0; i < intCnt; i++) {  
-                    cluster.addLayer(L.marker(coords)); 
-                }
-                addPopupToCluster(cluster, getLocNamePopup(loc));
-                map.addLayer(cluster);
-            }
-        } /* End addMarkerForEachInteraction */
-        function addSingleMarker(coords, loc) {
-            let timeout;
-            return L.marker(coords).bindPopup(getLocNamePopup(loc))
-                .on('mouseover', openPopup)
-                .on('mouseout', delayPopupClose);
-
-            function openPopup(e) {
-                if (timeout) { clearTimeout(timeout); timeout = null; }
-                this.openPopup();
-            }
-            function delayPopupClose(e) {
-                const popup = this;
-                timeout = window.setTimeout(() => popup.closePopup(), 700);
-            }
-        } /* End addSingleMarker */
-        function addPopupToCluster(cluster, text) {
-            let timeout;
-            cluster.on('clustermouseover', createClusterPopup)
-                .on('clustermouseout', delayClusterPopupClose)
-                .on('clusterclick', preventSpiderfyAndOpenPopup); 
-            
-            function createClusterPopup(c) {
-                if (timeout) { clearTimeout(timeout); timeout = null; }
-                const popup = L.popup()
-                    .setLatLng(c.layer.getLatLng())
-                    .setContent(text)
-                    .openOn(map);
-            }
-            function delayClusterPopupClose(e) {
-                timeout = window.setTimeout(() => map.closePopup(), 700);
-            }
-            function preventSpiderfyAndOpenPopup(c) {
-                c.layer.unspiderfy();
-                createClusterPopup(c);
-            }
-        }  /* End addPopupToCluster */
-        function getLocNamePopup(loc) {  
-            let cntry = loc.country ? loc.country.displayName : 'Continent';
-            const locName = loc.locationType.displayName === 'Country' ?
-                'Unspecified' : loc.displayName;
-            return buildPopupElems(locName, cntry);
-
-            function buildPopupElems(name, parent) {
-                const cntnr = _util.buildElem('div', {class:'flex-col'});
-                const nameText = '<div style="font-size:1.2em"><b>'+name+'</b></div>'+parent;  
-                $(cntnr).append(nameText).append(buildLocSummaryBttn());
-                return cntnr;
-
-                function buildLocSummaryBttn() {
-                    const bttn = _util.buildElem('input', {type: 'button',
-                        class:'ag-fresh grid-bttn', value: 'Location Summary'});
-                    $(bttn).click(showLocDetailsPopup);
-                    return bttn;
-
-                    function showLocDetailsPopup() {
-                        console.log('showLocDetailsPopup')
-                    }
-                }
-            }
-        } /* End getLocNamePopup */
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
+/** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
+function formatPoint(point) {                                                   //console.log('point = ', point)
+    let array = JSON.parse(point); 
+    return L.latLng(array[1], array[0]);
+}
+function getLocCenterPoint() {
+    const feature = buildFeature(loc, locGeoJson);
+    const polygon = L.geoJson(feature);//.addTo(map);
+    console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
+    return polygon.getBounds().getCenter(); 
+        
+    function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
+        return {
+                "type": "Feature",
+                "geometry": {
+                    "type": geoData.type,
+                    "coordinates": JSON.parse(geoData.coordinates)
+                },
+                "properties": {
+                    "name": loc.displayName
+                }
+            };   
+    }
+} /* End getLocCenterPoint */
+function addMarkerForEachInteraction(intCnt, coords, loc) {                     //console.log('       adding [%s] markers at [%O]', intCnt, coords);
+    return intCnt === 1 ? addMarker() : addCluster();
+
+    function addMarker() {
+        map.addLayer(addSingleMarker(coords, loc));
+    }
+    function addCluster() {
+        let cluster = L.markerClusterGroup();
+        for (let i = 0; i < intCnt; i++) {  
+            cluster.addLayer(L.marker(coords)); 
+        }
+        addPopupToCluster(cluster, getLocNamePopup(loc));
+        map.addLayer(cluster);
+    }
+} /* End addMarkerForEachInteraction */
+/** ----------------- Marker Popup Methods ---------------------------------- */
+function addSingleMarker(coords, loc) {
+    let timeout;
+    return L.marker(coords).bindPopup(getLocNamePopup(loc))
+        .on('mouseover', openPopup)
+        .on('click', openPopup)
+        .on('mouseout', delayPopupClose);
+
+    function openPopup(e) {
+        if (timeout) { clearTimeout(timeout); timeout = null; }
+        this.openPopup();
+    }
+    function delayPopupClose(e) {
+        const popup = this;
+        timeout = window.setTimeout(() => popup.closePopup(), 700);
+    }
+} /* End addSingleMarker */
+function addPopupToCluster(cluster, text) {
+    let timeout;
+    cluster.on('clustermouseover', createClusterPopup)
+        .on('clustermouseout', delayClusterPopupClose)
+        .on('clusterclick', preventSpiderfyAndOpenPopup); 
+    
+    function createClusterPopup(c) {
+        if (timeout) { clearTimeout(timeout); timeout = null; }
+        const popup = L.popup()
+            .setLatLng(c.layer.getLatLng())
+            .setContent(text)
+            .openOn(map);
+    }
+    function delayClusterPopupClose(e) {
+        timeout = window.setTimeout(() => map.closePopup(), 700);
+    }
+    function preventSpiderfyAndOpenPopup(c) {
+        c.layer.unspiderfy();
+        createClusterPopup(c);
+    }
+}  /* End addPopupToCluster */
+/** --------- Show Location Name Popup ------------------- */
+/**
+ * Builds the popup for each marker that shows location and region name. Adds a 
+ * "Location Summary" button to the popup connected to @showLocDetailsPopup.
+ */
+function getLocNamePopup(loc) {  
+    let cntry = loc.country ? loc.country.displayName : 'Continent';
+    const locName = loc.locationType.displayName === 'Country' ?
+        'Unspecified' : loc.displayName;
+    return buildPopupElems(locName, cntry);
+} /* End getLocNamePopup */
+function buildPopupElems(name, parent) {
+    const cntnr = _util.buildElem('div', {class:'flex-col'});
+    const nameText = '<div style="font-size:1.2em"><b>'+name+'</b></div>'+parent;  
+    $(cntnr).append(nameText).append(buildLocSummaryBttn());
+    return cntnr;
+}
+function buildLocSummaryBttn() {
+    const bttn = _util.buildElem('input', {type: 'button',
+        class:'ag-fresh grid-bttn', value: 'Location Summary'});
+    $(bttn).click(showLocDetailsPopup);
+    return bttn;
+}
+/** --------- Show Location Details Popup ------------------- */
+function showLocDetailsPopup() {
+    console.log('showLocDetailsPopup')
+}
