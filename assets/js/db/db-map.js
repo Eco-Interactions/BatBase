@@ -201,20 +201,50 @@ function addMarkerForEachInteraction(intCnt, coords, loc) {                     
         for (let i = 0; i < intCnt; i++) {  
             cluster.addLayer(L.marker(coords)); 
         }
-        addPopupToCluster(cluster, getLocNamePopup(loc));
+        addPopupToCluster(cluster, getLocNameHtml(loc));
         map.addLayer(cluster);
     }
 } /* End addMarkerForEachInteraction */
 /** ----------------- Marker Popup Methods ---------------------------------- */
-function addSingleMarker(coords, loc) {
+function addSingleMarker(coords, loc) {                                         //Refactor into class Marker
     let timeout;
-    return L.marker(coords).bindPopup(getLocNamePopup(loc))
+    const marker = L.marker(coords).bindPopup(getMarkerNamePopup())
         .on('mouseover', openPopup)
         .on('click', openPopup)
-        .on('mouseout', delayPopupClose);
+        .on('mouseout', delayPopupClose);  
+    return marker;
 
+    function getMarkerNamePopup() {
+        const div = _util.buildElem('div');
+        const text = getLocNameHtml(loc);
+        const bttn = buildLocSummaryBttn();
+        $(div).append(text).append(bttn);
+        return div;
+    }
+    function buildLocSummaryBttn() {
+        const bttn = _util.buildElem('input', {type: 'button',
+            class:'ag-fresh grid-bttn', value: 'Location Summary'});
+        $(bttn).click(buildLocSummaryPopup);
+        return bttn;
+    }
+    /**
+     * Replaces original popup with a description of the interactions at this
+     * location. Popup will remain open until manually closed, when the original
+     * location name popup will be restored. 
+     */
+    function buildLocSummaryPopup() {                                           console.log('building loc summary')
+        const popup = marker.getPopup();
+        clearMarkerTimeout(timeout);
+        updateMouseout(marker, Function.prototype);
+        popup.setContent('you did it for realzies!');
+        popup.options.autoClose = false;
+        marker.on('popupclose', restoreLocNamePopup);
+    }
+    function restoreLocNamePopup() {
+        console.log('restoring original popup');
+    }
     function openPopup(e) {
-        if (timeout) { clearTimeout(timeout); timeout = null; }
+        if (timeout) { clearMarkerTimeout(timeout); }
         this.openPopup();
     }
     function delayPopupClose(e) {
@@ -242,31 +272,28 @@ function addPopupToCluster(cluster, text) {
         c.layer.unspiderfy();
         createClusterPopup(c);
     }
+    function buildLocSummaryBttn() {
+        const bttn = _util.buildElem('input', {type: 'button',
+            class:'ag-fresh grid-bttn', value: 'Location Summary'});
+        $(bttn).click(showLocDetailsPopup);
+        return bttn;
+    }
 }  /* End addPopupToCluster */
-/** --------- Show Location Name Popup ------------------- */
+/** ------- Marker/Popup Helpers ------------- */
 /**
  * Builds the popup for each marker that shows location and region name. Adds a 
  * "Location Summary" button to the popup connected to @showLocDetailsPopup.
  */
-function getLocNamePopup(loc) {  
-    let cntry = loc.country ? loc.country.displayName : 'Continent';
+function getLocNameHtml(loc) {  
+    let parent = loc.country ? loc.country.displayName : 'Continent';
     const locName = loc.locationType.displayName === 'Country' ?
         'Unspecified' : loc.displayName;
-    return buildPopupElems(locName, cntry);
-} /* End getLocNamePopup */
-function buildPopupElems(name, parent) {
-    const cntnr = _util.buildElem('div', {class:'flex-col'});
-    const nameText = '<div style="font-size:1.2em"><b>'+name+'</b></div>'+parent;  
-    $(cntnr).append(nameText).append(buildLocSummaryBttn());
-    return cntnr;
+    return '<div style="font-size:1.2em"><b>'+locName+'</b></div>'+parent+'<br>';
+} 
+function updateMouseout(elem, func) {
+    elem.off('mouseout').on('mouseout', func);
 }
-function buildLocSummaryBttn() {
-    const bttn = _util.buildElem('input', {type: 'button',
-        class:'ag-fresh grid-bttn', value: 'Location Summary'});
-    $(bttn).click(showLocDetailsPopup);
-    return bttn;
-}
-/** --------- Show Location Details Popup ------------------- */
-function showLocDetailsPopup() {
-    console.log('showLocDetailsPopup')
+function clearMarkerTimeout(timeout) {
+    clearTimeout(timeout); 
+    timeout = null;                                                             //console.log('timout cleared')       
 }
