@@ -208,44 +208,57 @@ function addMarkerForEachInteraction(intCnt, coords, loc) {                     
 /** ----------------- Marker Popup Methods ---------------------------------- */
 function addSingleMarker(coords, loc) {                                         //Refactor into class Marker
     let timeout;
-    const marker = L.marker(coords).bindPopup(getMarkerNamePopup())
+    const marker = L.marker(coords)
+        .bindPopup(getMarkerNamePopup(), {offset: new L.Point(5, 20)})
         .on('mouseover', openPopup)
-        .on('click', openPopup)
+        .on('click', openPopupAndPauseAutoClose)
         .on('mouseout', delayPopupClose);  
+    const popup = marker.getPopup();
     return marker;
 
     function getMarkerNamePopup() {
         const div = _util.buildElem('div');
         const text = getLocNameHtml(loc);
-        const bttn = buildLocSummaryBttn();
+        const bttn = buildLocSummaryBttn(buildLocSummaryPopup);
         $(div).append(text).append(bttn);
         return div;
     }
-    function buildLocSummaryBttn() {
-        const bttn = _util.buildElem('input', {type: 'button',
-            class:'ag-fresh grid-bttn', value: 'Location Summary'});
-        $(bttn).click(buildLocSummaryPopup);
-        return bttn;
-    }
     /**
-     * Replaces original popup with a description of the interactions at this
+     * Replaces original popup with more details on the interactions at this
      * location. Popup will remain open until manually closed, when the original
      * location name popup will be restored. 
      */
-    function buildLocSummaryPopup() {                                           console.log('building loc summary')
-        const popup = marker.getPopup();
+    function buildLocSummaryPopup() {                                           //console.log('building loc summary')
         clearMarkerTimeout(timeout);
         updateMouseout(marker, Function.prototype);
-        popup.setContent('you did it for realzies!');
+        popup.setContent(getLocationSummaryHtml(loc));
         popup.options.autoClose = false;
+        popup.update();
         marker.on('popupclose', restoreLocNamePopup);
     }
-    function restoreLocNamePopup() {
-        console.log('restoring original popup');
-    }
+    function restoreLocNamePopup() {                                            //console.log('restoring original popup');
+        window.setTimeout(restoreOrgnlPopup, 400);
+        /** Event fires before popup is fully closed. Restores after closed. */
+        function restoreOrgnlPopup() {
+            updateMouseout(marker, delayPopupClose);
+            popup.setContent(getMarkerNamePopup());
+            popup.options.autoClose = true;
+            marker.off('popupclose');
+        }
+    } /* End restoreOrgPopup */
+    /** --- Event Handlers --- */
     function openPopup(e) {
         if (timeout) { clearMarkerTimeout(timeout); }
-        this.openPopup();
+        marker.openPopup();
+    }
+    /** 
+     * Delays auto-close of popup if a nearby marker popup is opened while trying
+     * to click the location summary button. 
+     */
+    function openPopupAndPauseAutoClose(e) {
+        openPopup();
+        popup.options.autoClose = false;
+        window.setTimeout(() => popup.options.autoClose = true, 400);
     }
     function delayPopupClose(e) {
         const popup = this;
@@ -272,14 +285,8 @@ function addPopupToCluster(cluster, text) {
         c.layer.unspiderfy();
         createClusterPopup(c);
     }
-    function buildLocSummaryBttn() {
-        const bttn = _util.buildElem('input', {type: 'button',
-            class:'ag-fresh grid-bttn', value: 'Location Summary'});
-        $(bttn).click(showLocDetailsPopup);
-        return bttn;
-    }
 }  /* End addPopupToCluster */
-/** ------- Marker/Popup Helpers ------------- */
+/** ---------------- Marker/Popup Helpers ------------------------ */
 /**
  * Builds the popup for each marker that shows location and region name. Adds a 
  * "Location Summary" button to the popup connected to @showLocDetailsPopup.
@@ -296,4 +303,67 @@ function updateMouseout(elem, func) {
 function clearMarkerTimeout(timeout) {
     clearTimeout(timeout); 
     timeout = null;                                                             //console.log('timout cleared')       
+}
+/** ------- Location Summary Popup ------------- */
+function buildLocSummaryBttn(showSummaryFunc) {
+    const bttn = _util.buildElem('input', {type: 'button',
+        class:'ag-fresh grid-bttn', value: 'Location Summary'});
+    $(bttn).click(showSummaryFunc);
+    $(bttn).css({'margin': '.5em 0 0 0'});
+    return bttn;
+}
+/** Returns additional details (html) for interactions at the location. */
+function getLocationSummaryHtml(loc) {  console.log('loc = %O', loc);
+    const cntnr = _util.buildElem('div');
+    const html = buildLocDetailsHtml(loc) 
+    const bttn = buildToGridButton(loc);
+    $(cntnr).append(html).append(bttn);
+    return cntnr;
+}
+function buildLocDetailsHtml(loc) {
+    const name = '<h1 style="font-size:1.2em; margin: 0 0 .5em 0;">' + 
+        loc.displayName+'</h1>';
+    const cnt = 'Interactions: ' + loc.interactions.length; 
+    const coords = getCoordsHtml(loc);
+    const habType = getHabTypeHtml(loc);
+    const bats = getBatsCitedHtml(loc);  
+    return name + [coords, habType, bats].filter(el => el).join('<br>');  
+}
+function getCoordsHtml(loc) {
+    const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
+    if (geoData.type !== 'point') { return false; }
+    let coords = JSON.parse(geoData.coordinates)
+    coords = coords.map(c => Number(c).toFixed(6)); 
+    return 'Coordinates: <b>' + coords.join(', ') +'</b>';
+}
+function getHabTypeHtml(loc) {
+    if (!loc.habitatType) { return false; }
+    return 'Habitat Type: <b>' + loc.habitatType.displayName + '</b>';
+}
+function getBatsCitedHtml(loc) {
+    const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
+    const ints = loc.interactions.map(id => rcrds.interaction[id]);
+    const bats = getBatsCitedHere(loc, ints, rcrds.taxon);
+    return 'Cited bats: <b>'+ bats + '</b>';
+}
+function getBatsCitedHere(loc, ints, batRcrds) {
+    const bats = [];
+    ints.forEach(int => {                                                       //console.log('int = %O', int)
+        let name = '';
+        let bat = batRcrds[int.subject];                                        //console.log('bat = %O', bat);
+        if (bat.level.displayName !== 'Species') { name += bat.level.displayName + ' '; }
+        name += bat.displayName;
+        if (bats.indexOf(name) === -1) { bats.push(name); }
+    });
+    return bats.join(', ');
+}
+function buildToGridButton(loc) {
+    const bttn = _util.buildElem('input', {type: 'button',
+        class:'ag-fresh grid-bttn', value: 'Show Interactions In Data-Grid'});
+    $(bttn).click(showLocGridView.bind(null, loc));
+    $(bttn).css({'margin': '.5em 0 0 -.4em'});
+    return bttn;
+}
+function showLocGridView(loc) {
+    console.log('Switch to grid view and show location.');
 }
