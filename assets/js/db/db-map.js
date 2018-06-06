@@ -226,6 +226,7 @@ function addSingleMarker(coords, loc) {                                         
         popup.setContent(getLocationSummaryHtml(loc));
         popup.options.autoClose = false;
         marker.on('popupclose', restoreLocNamePopup);
+        marker.openPopup(popup);
     }
     function restoreLocNamePopup() {                                            //console.log('restoring original popup');
         window.setTimeout(restoreOrgnlPopup, 400);
@@ -286,10 +287,11 @@ function addPopupToCluster(cluster, loc) {
         popup.options.autoClose = false;
         map.on('popupclose', closeLayerPopup);
         removeClusterEvents();
+        map.openPopup(popup);
     }
+    /** Event fires before popup is fully closed. Restores after closed. */
     function closeLayerPopup(e) {
         if (e.popup._latlng === clusterLatLng) {
-        /** Event fires before popup is fully closed. Restores after closed. */
             window.setTimeout(restoreOrgnlPopup, 400);
         }
     }
@@ -368,25 +370,80 @@ function getCoordsHtml(loc) {
     return 'Coordinates: <b>' + coords.join(', ') +'</b>';
 }
 function getHabTypeHtml(loc) {
-    if (!loc.habitatType) { return false; }
+    if (!loc.habitatType) { return 'Habitat Type:'; }
     return 'Habitat Type: <b>' + loc.habitatType.displayName + '</b>';
 }
 function getBatsCitedHtml(loc) {
     const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
     const ints = loc.interactions.map(id => rcrds.interaction[id]);
-    const bats = getBatsCitedHere(loc, ints, rcrds.taxon);
+    const bats = getBatsCitedHere(ints, rcrds.taxon);
     return 'Cited bats: <b>'+ bats + '</b>';
 }
-function getBatsCitedHere(loc, ints, batRcrds) {
-    const bats = [];
-    ints.forEach(int => {                                                       //console.log('int = %O', int)
-        let name = '';
-        let bat = batRcrds[int.subject];                                        //console.log('bat = %O', bat);
-        if (bat.level.displayName !== 'Species') { name += bat.level.displayName + ' '; }
-        name += bat.displayName;
-        if (bats.indexOf(name) === -1) { bats.push(name); }
-    });
-    return bats.join(', ');
+/** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
+function getBatsCitedHere(ints, batRcrds) {
+    const bats = {};
+    ints.forEach(int => trackBatInteraction(int, batRcrds, bats));
+    console.log('bats = %O', bats);
+    return getReportString(bats);
+}
+function trackBatInteraction(int, rcrds, bats) {
+    let bat = rcrds[int.subject];                                               //console.log('bat = %O', bat);
+    let name = buildBatName(bat);
+    if (Object.keys(bats).indexOf(name) === -1) { bats[name] = 0; }
+    ++bats[name];
+}
+function buildBatName(bat) {
+    let name = '';
+    if (bat.level.displayName !== 'Species') { name += bat.level.displayName + ' '; }
+    return name + bat.displayName;
+}
+function getReportString(bats) {
+    const ttl = Object.keys(bats).length;                                       
+    const sorted = { 1: [], 2: [], 3: [] };
+    const posKeys = Object.keys(sorted);
+    for (let name in bats) {
+        sortBat(bats[name], name);
+    }                                                                           //console.log('sorted bats = %O', sorted)
+    return buildReportString(bats, sorted, ttl);
+
+    function sortBat(count, name) {                                             
+        posKeys.some((pos) => {
+            if (count > sorted[pos][0] || !sorted[pos][0]) {                    
+                replacePosition(count, name, pos); 
+                return true;
+            }
+        });
+    }
+    function replacePosition(count, name, pos) {
+        if (pos > ttl || !sorted[pos]) { return; }
+        replacePosition(sorted[pos][0], sorted[pos][1], Number(pos) + 1);
+        sorted[pos] = [ count, name ];
+    }
+} /* End getReportString */
+/** Returns string with the names of top 3 reported taxa and total taxa count. */
+function buildReportString(bats, sorted, ttl) {
+    if (ttl < 2) { return ttl ? sorted[1][1] : 
+        'Bats recorded at sub-locations without GPS data.<br>'; }
+    return formatString();
+
+    function formatString() {
+        const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;';
+        let str = '';
+        concatBatNames();
+        return finishReportString();
+
+        function concatBatNames() {
+            for (let i = 1; i <= 3; i++) {
+                str += i === 1 ? sorted[i][1] :
+                    sorted[i].length ? ',<br>' + tabs + sorted[i][1] : '';
+            }
+        }
+        function finishReportString() {
+            if (ttl > 3) { str += ',<br></b>' + tabs + '(' + ttl + 
+                ' total taxa cited here.)'}
+            return str + '<br>';
+        } 
+    }
 }
 function buildToGridButton(loc) {
     const bttn = _util.buildElem('input', {type: 'button',
