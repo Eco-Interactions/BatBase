@@ -126,11 +126,16 @@ function addInteractionMarkersToMap() {
         if (region.displayName === "Unspecified") { return; }
         addMarkersForLocAndChildren(region);
     }
+    /** 
+     * intCnt - Total interactions for loc and all sub-locs without GPS data. 
+     * subCnt - Number of sub-locs that need GPS data in order to display on map.
+     */
     function addMarkersForLocAndChildren(loc) {                                 
         if (!loc.totalInts) { return; }                                         //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
         let intCnt = loc.interactions.length; 
-        buildMarkersForLocChildren(loc.children);
-        if (intCnt) { buildLocationMarkers(intCnt, loc); }
+        let subCnt = 0;
+        buildMarkersForLocChildren(loc.children);                               
+        if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, loc); }
 
         function buildMarkersForLocChildren(locs) {
             locs.forEach(id => {
@@ -144,12 +149,12 @@ function addInteractionMarkersToMap() {
         function buildLocationIntMarkers(loc, locIntCnt) {                      //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
             if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
             if (!locIntCnt) { return; }
-            buildLocationMarkers(locIntCnt, loc);
+            buildLocationMarkers(locIntCnt, null, loc);
         }
-        function buildLocationMarkers(intCnt, loc) {                            //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
+        function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
             const markerCoords = getCenterCoordsOfLoc(loc);                     //console.log('        markerCoords = ', markerCoords)
             if (!markerCoords) { return; }
-            addMarkerForEachInteraction(intCnt, markerCoords, loc);
+            addMarkerForEachInteraction(intCnt, subCnt, markerCoords, loc);
         }
         function getCenterCoordsOfLoc(loc) { 
             if (!loc.geoJsonId) { return logNoGeoJsonError(); }                 //console.log('geoJson obj = %O', geoJson[loc.geoJsonId]);
@@ -161,7 +166,8 @@ function addInteractionMarkersToMap() {
             function logNoGeoJsonError() {
                 if (!loc.interactions.length) { return null; }
                 intCnt += loc.interactions.length;
-                //console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+                ++subCnt;
+                // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
             }
         } /* End getCenterCoordsOfLoc */
     } /* End addMarkersForLocAndChildren */
@@ -190,23 +196,23 @@ function getLocCenterPoint() {
             };   
     }
 } /* End getLocCenterPoint */
-function addMarkerForEachInteraction(intCnt, coords, loc) {                     //console.log('       adding [%s] markers at [%O]', intCnt, coords);
+function addMarkerForEachInteraction(intCnt, subCnt, coords, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, coords);
     return intCnt === 1 ? addMarker() : addCluster();
 
     function addMarker() {
-        map.addLayer(addSingleMarker(coords, loc));
+        map.addLayer(addSingleMarker(subCnt, coords, loc));
     }
     function addCluster() {
         let cluster = L.markerClusterGroup();
         for (let i = 0; i < intCnt; i++) {  
             cluster.addLayer(L.marker(coords)); 
         }
-        addPopupToCluster(cluster, loc);
+        addPopupToCluster(subCnt, cluster, loc);
         map.addLayer(cluster);
     }
 } /* End addMarkerForEachInteraction */
 /** ----------------- Marker/Popup Methods ---------------------------------- */
-function addSingleMarker(coords, loc) {                                         //Refactor into class Marker
+function addSingleMarker(subCnt, coords, loc) {                                 //Refactor into class Marker
     let timeout;
     const marker = L.marker(coords)
         .bindPopup(getLocNamePopupHtml(loc, buildLocSummaryPopup)) //, {offset: new L.Point(5, 20)}
@@ -223,7 +229,7 @@ function addSingleMarker(coords, loc) {                                         
     function buildLocSummaryPopup() {                                           //console.log('building loc summary')
         clearMarkerTimeout(timeout);
         updateMouseout(Function.prototype);
-        popup.setContent(getLocationSummaryHtml(loc));
+        popup.setContent(getLocationSummaryHtml(loc, subCnt));
         popup.options.autoClose = false;
         marker.on('popupclose', restoreLocNamePopup);
         marker.openPopup(popup);
@@ -260,7 +266,7 @@ function addSingleMarker(coords, loc) {                                         
         marker.off('mouseout').on('mouseout', func);
     }
 } /* End addSingleMarker */
-function addPopupToCluster(cluster, loc) {
+function addPopupToCluster(subCnt, cluster, loc) {
     let timeout, popup, clusterLatLng;
     addClusterEvents();
 
@@ -283,7 +289,7 @@ function addPopupToCluster(cluster, loc) {
     function buildSummaryPopup() {                                              console.log('building cluster loc summary')
         clearMarkerTimeout(timeout);
         updateMouseout(Function.prototype);
-        popup.setContent(getLocationSummaryHtml(loc));
+        popup.setContent(getLocationSummaryHtml(loc, subCnt));
         popup.options.autoClose = false;
         map.on('popupclose', closeLayerPopup);
         removeClusterEvents();
@@ -316,6 +322,10 @@ function addPopupToCluster(cluster, loc) {
     }
 }  /* End addPopupToCluster */
 /** ---------------- Marker/Popup Helpers ------------------------ */
+/**
+ * Builds the popup for each marker that shows location and region name. Adds a 
+ * "Location Summary" button to the popup connected to @showLocDetailsPopup.
+ */
 function getLocNamePopupHtml(loc, summaryFunc) {
         const div = _util.buildElem('div');
         const text = getLocNameHtml(loc);
@@ -323,15 +333,12 @@ function getLocNamePopupHtml(loc, summaryFunc) {
         $(div).append(text).append(bttn);
         return div;
 }
-/**
- * Builds the popup for each marker that shows location and region name. Adds a 
- * "Location Summary" button to the popup connected to @showLocDetailsPopup.
- */
 function getLocNameHtml(loc) {  
-    let parent = loc.country ? loc.country.displayName : 'Continent';
-    const locName = loc.locationType.displayName === 'Country' ?
-        'Unspecified' : loc.displayName;
-    return '<div style="font-size:1.2em"><b>'+locName+'</b></div>'+parent+'<br>';
+    let parent = loc.locationType.displayName === 'Country' ? '' :
+        loc.country ? loc.country.displayName : 'Continent';
+    const locName = loc.displayName;
+    return '<div style="font-size:1.2em;"><b>' + 
+        locName + '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
 } 
 function clearMarkerTimeout(timeout) {
     clearTimeout(timeout); 
@@ -346,21 +353,29 @@ function buildLocSummaryBttn(showSummaryFunc) {
     return bttn;
 }
 /** Returns additional details (html) for interactions at the location. */
-function getLocationSummaryHtml(loc) {  console.log('loc = %O', loc);
+function getLocationSummaryHtml(loc, subCnt) {                                  console.log('loc = %O', loc);
     const div = _util.buildElem('div');
-    const html = buildLocDetailsHtml(loc) 
+    const html = buildLocDetailsHtml(loc, subCnt);
     const bttn = buildToGridButton(loc);
     $(div).append(html).append(bttn);
     return div;
 }
-function buildLocDetailsHtml(loc) {
-    const name = '<h1 style="font-size:1.2em; margin: 0 0 .5em 0;">' + 
-        loc.displayName+'</h1>';
-    const cnt = 'Interactions: ' + loc.interactions.length; 
+function buildLocDetailsHtml(loc, subCnt) {
+    const name = getLocNameHtml(loc);
+    const cnt = ifCountryGetIntCnt(loc);
+    const subs = getSubLocsWithoutGpsData(subCnt);
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
     const bats = getBatsCitedHtml(loc);  
-    return name + [coords, habType, bats].filter(el => el).join('<br>');  
+    return name + [cnt, subs, coords, habType, bats].filter(el => el).join('<br>');  
+}
+function ifCountryGetIntCnt(loc) {
+    return loc.locationType.displayName !== 'Country' ? false : 
+        'Interactions in Country: <b>' + loc.totalInts + '</b>'; 
+}
+function getSubLocsWithoutGpsData(cnt) {
+    if (!cnt) { return false; }
+    return 'Sub-Locations without GPS data: ' + cnt + '<br>'; 
 }
 function getCoordsHtml(loc) {
     const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
@@ -383,7 +398,6 @@ function getBatsCitedHtml(loc) {
 function getBatsCitedHere(ints, batRcrds) {
     const bats = {};
     ints.forEach(int => trackBatInteraction(int, batRcrds, bats));
-    console.log('bats = %O', bats);
     return getReportString(bats);
 }
 function trackBatInteraction(int, rcrds, bats) {
