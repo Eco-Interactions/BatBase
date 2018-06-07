@@ -9,6 +9,7 @@
  */
 import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _util from '../misc/util.js';
+import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
 let geoJson, map, showMap;
@@ -44,22 +45,22 @@ function initDb() {
 }
 function clearIdbCheck(storedKey) { console.log('clearing Idb? ', storedKey === undefined);
     if (storedKey) { return getGeoJsonData(); } 
-    idb.clear();  console.log('actually clearing');
+    idb.clear();                                                                //console.log('actually clearing');
     idb.set(dataKey, true);
     downloadGeoJson();
 }
-function getGeoJsonData() {                                                     console.log('getGeoJsonData')
+function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
     idb.get('geoJson').then(storeGeoJson);
 }
-function storeGeoJson(geoData) {                                                console.log('storeGeoJson. geoData ? ', geoData !== undefined);
+function storeGeoJson(geoData) {                                                //console.log('storeGeoJson. geoData ? ', geoData !== undefined);
     if (geoData === undefined) { return downloadGeoJson(); }
     geoJson = geoData; 
     if (showMap) { initMap(); }
 }
-function downloadGeoJson() {                                                    console.log('downloading all geoJson data!');
+function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
     _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
 }
-function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
+function storeServerGeoJson(data) {                                             //console.log('server geoJson = %O', data.geoJson);
     idb.set('geoJson', data.geoJson);
     storeGeoJson(data.geoJson);
 }
@@ -91,8 +92,8 @@ function logLatLng(e) {
     console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
 }
 function getMapBounds() {
-    const southWest = L.latLng(-100, 190);
-    const northEast = L.latLng(100, -190);
+    const southWest = L.latLng(-100, 200);
+    const northEast = L.latLng(100, -200);
     return L.latLngBounds(southWest, northEast);
 }
 function addMapTiles() {
@@ -182,20 +183,19 @@ function getLocCenterPoint() {
     const polygon = L.geoJson(feature);//.addTo(map);
     console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
     return polygon.getBounds().getCenter(); 
-        
-    function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
-        return {
-                "type": "Feature",
-                "geometry": {
-                    "type": geoData.type,
-                    "coordinates": JSON.parse(geoData.coordinates)
-                },
-                "properties": {
-                    "name": loc.displayName
-                }
-            };   
-    }
 } /* End getLocCenterPoint */
+function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
+    return {
+            "type": "Feature",
+            "geometry": {
+                "type": geoData.type,
+                "coordinates": JSON.parse(geoData.coordinates)
+            },
+            "properties": {
+                "name": loc.displayName
+            }
+        };   
+}
 function addMarkerForEachInteraction(intCnt, subCnt, coords, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, coords);
     return intCnt === 1 ? addMarker() : addCluster();
 
@@ -256,7 +256,7 @@ function addSingleMarker(subCnt, coords, loc) {                                 
     function openPopupAndDelayAutoClose(e) {
         openPopup();
         popup.options.autoClose = false;
-        window.setTimeout(() => popup.options.autoClose = true, 400);
+        window.setTimeout(() => popup.options.autoClose = true, 700);
     }
     function delayPopupClose(e) {
         const popup = this;
@@ -337,8 +337,8 @@ function getLocNameHtml(loc) {
     let parent = loc.locationType.displayName === 'Country' ? '' :
         loc.country ? loc.country.displayName : 'Continent';
     const locName = loc.displayName;
-    return '<div style="font-size:1.2em;"><b>' + 
-        locName + '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
+    return '<div style="font-size:1.2em;"><b>' + locName + 
+        '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
 } 
 function clearMarkerTimeout(timeout) {
     clearTimeout(timeout); 
@@ -468,4 +468,5 @@ function buildToGridButton(loc) {
 }
 function showLocGridView(loc) {
     console.log('Switch to grid view and show location.');
+    db_page.showLocInDataGrid(loc.id);
 }

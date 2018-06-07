@@ -7,6 +7,7 @@
  *     initSearchPage
  *     initSearchGrid
  *     showUpdates
+ *     showLocInDataGrid
  */
 import * as _util from '../misc/util.js';
 import * as db_sync from './db-sync.js';
@@ -822,17 +823,17 @@ function buildLocViewHtml() {
     } 
 } /* End buildLocViewHtml /*
 /** Event fired when the source realm select box has been changed. */
-function onLocViewChange(e) {                                               //console.log('onLocViewChange') 
+function onLocViewChange(e) {                                                   //console.log('onLocViewChange') 
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
     showLocInteractionData($('#sel-realm').val());
 }
 /** Starts the grid build depending on the view selected. */
-function showLocInteractionData(view) {                                     //console.log('showLocInteractionData. view = ', view);
+function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
     return view === 'tree' ? 
-        buildLocGridTree(regions) : buildLocGridMap(regions);
+        buildLocGridTree(regions) : buildLocGridMap();
 }
 function getTopRegionIds() {
     const ids = [];
@@ -846,8 +847,8 @@ function getTopRegionIds() {
  * countries, areas, and points as nested children @buildLocTree. Fills tree
  * with interactions and continues building the grid @getInteractionsAndFillTree.
  */
-function buildLocGridTree(topLocs) {  console.log('buildLocGridTree')
-    _util.populateStorage('curRealm', 'tree');                      //console.log("storedRealm = ", storedRealm)
+function buildLocGridTree(topLocs) {                                            console.log('buildLocGridTree')
+    _util.populateStorage('curRealm', 'tree');                                  //console.log("storedRealm = ", storedRealm)
     buildLocTree(topLocs);
     getInteractionsAndFillTree();
 }
@@ -856,9 +857,9 @@ function buildLocGridTree(topLocs) {  console.log('buildLocGridTree')
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
  * Resets 'openRows' and clears grid. Continues @buildLocGridTree.
  */
-function rebuildLocTree(topLoc) {                                           //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+function rebuildLocTree(topLoc) {                                               //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
     var topLocs = topLoc || getTopRegionIds();
-    gParams.openRows = topLocs.length === 1 ? topLocs[0] : [];
+    gParams.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousGrid();
     buildLocGridTree(topLocs);
 }
@@ -867,9 +868,9 @@ function rebuildLocTree(topLoc) {                                           //co
  * sub-locations as nested children. Adds the alphabetized tree to the global 
  * gParams obj as 'curTree'. 
  */ 
-function buildLocTree(topLocs) {                                            //console.log("passed 'top' locIds = %O", topLocs)
+function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
     var topLoc;
-    var tree = {};                                                          //console.log("tree = %O", tree);
+    var tree = {};                                                              //console.log("tree = %O", tree);
     topLocs.forEach(function(id){  
         topLoc = getDetachedRcrd(id);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
@@ -913,7 +914,7 @@ function buildLocSelectOpts() {
     gridOptions.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     sortLocOpts();
     removeTopRegionIfFiltering();
-    addAllAndNoneOpts();
+    addAllAndNoneOpts();                                                        console.log('opts = %O', opts);
     return opts; 
     /**
      * Recurses through the tree and builds a option object for each unique 
@@ -921,7 +922,7 @@ function buildLocSelectOpts() {
      */
     function buildLocOptsForNode(row) {                                 
         var rowData = row.data;  
-        if (rowData.interactionType) {return;}                              //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
+        if (rowData.interactionType) {return;}                                  console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
         if (rowData.type === 'Region' || rowData.type === 'Country') {
             getLocOpts(rowData, rowData.name, rowData.type); 
         }
@@ -932,7 +933,7 @@ function buildLocSelectOpts() {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
         var id = gParams.data[_util.lcfirst(type) + "Names"][name];             
-        opts[type].push({ value: id, text: name }); 
+        opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
     }
     function sortLocOpts() {
@@ -957,7 +958,7 @@ function buildLocSelectOpts() {
      * Otherwise, add one for 'all'. 
      */
     function addAllAndNoneOpts() {
-        for (var type in opts) {                                            //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
+        for (var type in opts) {                                                //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
             var option = opts[type].length === 0 ? checkSelectedVals(type) 
                 : (opts[type].length > 1 ? {value: 'all', text: '- All -'} : null);   
             if (option) { opts[type].unshift(option); }
@@ -996,9 +997,9 @@ function createSelectedOptsObj() {
     gParams.selectedOpts = {};
     return gParams.selectedOpts;
 }
-function setSelectedLocVals() {                                             //console.log("openRows = %O", gParams.openRows);           
+function setSelectedLocVals() {                                                 console.log("openRows = %O", gParams.openRows);           
     var selId;
-    var selected = gParams.selectedOpts;                                    //console.log("selected in setSelectedLocVals = %O", selected);
+    var selected = gParams.selectedOpts;                                        console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(function(selName) {
         selId = '#sel' + _util.ucfirst(selName);
         $(selId).val(selected[selName]); 
@@ -1012,15 +1013,15 @@ function setSelectedLocVals() {                                             //co
  * data in the global gParams object as 'rowData'. Calls @loadGrid.
  */
 function transformLocDataAndLoadGrid(locTree) {
-    var finalRowData = [];                                                  //console.log("locTree = %O", locTree);
-    for (var topNode in locTree) {                                          //console.log("topNode = ", topNode)
+    var finalRowData = [];                                                      //console.log("locTree = %O", locTree);
+    for (var topNode in locTree) {                                              //console.log("topNode = ", topNode)
         finalRowData.push( getLocRowData(locTree[topNode], 0)); 
     }
-    gParams.rowData = removeLocsWithoutInteractions(finalRowData);          //console.log("rowData = %O", gParams.rowData);
+    gParams.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", gParams.rowData);
     loadGrid("Location Tree");
 }
 /** Returns a row data object for the passed location and it's children.  */
-function getLocRowData(locRcrd, treeLvl) {                                  //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+function getLocRowData(locRcrd, treeLvl) {                                      //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
     return {
         id: locRcrd.id,
         entity: "Location",
@@ -1099,21 +1100,20 @@ function hasChildInteractions(row) {
 }
 /** ------------ Location Grid Map Methods ------------------- */
 /** Initializes the google map in the data grid. */
-function buildLocGridMap(topRegions) {                                          //console.log('buildLocGridMap. topRegions = %O', topRegions);
+function buildLocGridMap() {                                                    console.log('buildLocGridMap.');
+    fadeGrid();
+    clearCol2();
     _util.populateStorage('curRealm', 'map');                      
     $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
-    db_map.initMap(); //buildLocCoordAry(topRegions)
-}
-function buildLocCoordAry(locIds) {
-    const coords = locIds.map(getLocCoords);
-
-}
-function getLocCoords(locId) {
-    const loc = getDetachedRcrd(locId);                                         //console.log('region = %O', loc);
-    return loc.geoJson;
+    db_map.initMap(); 
 }
 
-
+/** Filters the data-grid to the location selected from the map view. */
+export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
+    setLocView('tree');
+    rebuildLocTree([loc]);
+    $('#sel-realm').val('tree');
+}
 /*------------------Source Search Methods ------------------------------------*/
 /**
  * Get all data needed for the Source-focused grid from data storage and send  
@@ -1130,7 +1130,7 @@ function buildSourceGrid() {
  * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
  * If no realm selected, set the default realm value. Start grid build @buildSrcTree.
  */
-function initSrcSearchUi(srcData) {                                         //console.log("init source search ui");
+function initSrcSearchUi(srcData) {                                             //console.log("init source search ui");
     addSrcDataToGridParams(srcData);
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
@@ -1159,7 +1159,7 @@ function buildSrcRealmHtml() {
 } /* End buildSrcRealmHtml */
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcRealm() {
-    var storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
+    var storedRealm = dataStorage.getItem('curRealm');                          //console.log("storedRealm = ", storedRealm)
     var srcRealm = storedRealm || "pubs";
     if ($('#sel-realm').val() === null) { $('#sel-realm').val(srcRealm); }
 }
@@ -1172,14 +1172,14 @@ function onSrcRealmChange(e) {
 }
 /** (Re)builds source tree for the selected source realm. */
 function buildSrcTree() {
-    var realmRcrds = storeAndReturnCurRealmRcrds();                         //console.log("---Search Change. realmRcrds = %O", realmRcrds);
+    var realmRcrds = storeAndReturnCurRealmRcrds();                             //console.log("---Search Change. realmRcrds = %O", realmRcrds);
     initSrcTree(gParams.curRealm, realmRcrds);
     getInteractionsAndFillTree();
 }
 /** Returns the records for the source realm currently selected. */
 function storeAndReturnCurRealmRcrds() {
     var valMap = { "auths": "authSrcs", "pubs": "pubSrcs", "publ": "pubSrcs" };
-    var realmVal = $('#sel-realm').val();                                   //console.log("realmVal = ", realmVal)                     
+    var realmVal = $('#sel-realm').val();                                       //console.log("realmVal = ", realmVal)                     
     gParams.curRealm = realmVal;
     _util.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
@@ -1197,7 +1197,7 @@ function getTreeRcrdAry(realm) {
  * Publications->Citations->Interactions. 
  * Publishers->Publications->Citations->Interactions. 
  */
-function initSrcTree(focus, rcrds) {                                        //console.log("initSrcTree realmRcrds = %O", realmRcrds);
+function initSrcTree(focus, rcrds) {                                            //console.log("initSrcTree realmRcrds = %O", realmRcrds);
     const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
     let tree = treeMap[focus](rcrds);
     gParams.curTree = sortDataTree(tree);
@@ -1212,21 +1212,21 @@ function initSrcTree(focus, rcrds) {                                        //co
  * ->->Citation Title
  * ->->->Interactions Records
  */
-function buildPubTree(pubSrcRcrds) {                                        //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+function buildPubTree(pubSrcRcrds) {                                            //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
     var tree = {};
     pubSrcRcrds.forEach(function(pub) { 
         tree[pub.displayName] = getPubData(pub); 
     });
     return tree;
 }
-function getPubData(rcrd) {                                                 //console.log("getPubData. rcrd = %O", rcrd);
+function getPubData(rcrd) {                                                     //console.log("getPubData. rcrd = %O", rcrd);
     rcrd.children = getPubChildren(rcrd);
-    if (rcrd.publication) {                                                 //console.log("rcrd with pub = %O", rcrd)
+    if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
         rcrd.publication = getDetachedRcrd(rcrd.publication, gParams.publication);
     }
     return rcrd;
 }
-function getPubChildren(rcrd) {                                             //console.log("getPubChildren rcrd = %O", rcrd)
+function getPubChildren(rcrd) {                                                 //console.log("getPubChildren rcrd = %O", rcrd)
     if (rcrd.children.length === 0) { return []; }
     return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
 }
@@ -1240,7 +1240,7 @@ function getPubChildren(rcrd) {                                             //co
  * ->->->Citation Title
  * ->->->->Interactions Records
  */
-function buildPublTree(pubRcrds) {                                          //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+function buildPublTree(pubRcrds) {                                              //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
     let tree = {};
     let noPubl = [];
     pubRcrds.forEach(function(pub) { addPubl(pub); });
@@ -1257,7 +1257,7 @@ function getPublData(rcrd) {
     rcrd.children = getPublChildren(rcrd);
     return rcrd;
 }
-function getPublChildren(rcrd) {                                            //console.log("getPubChildren rcrd = %O", rcrd)
+function getPublChildren(rcrd) {                                                //console.log("getPubChildren rcrd = %O", rcrd)
     if (rcrd.children.length === 0) { return []; }
     return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
 }
@@ -1276,14 +1276,14 @@ function getPubsWithoutPubls(pubs) {
  * ->->Citation Title (Publication Title)
  * ->->->Interactions Records
  */
-function buildAuthTree(authSrcRcrds) {                                      //console.log("----buildAuthSrcTree");
+function buildAuthTree(authSrcRcrds) {                                          //console.log("----buildAuthSrcTree");
     var tree = {};
     for (var id in authSrcRcrds) { 
         getAuthData(getDetachedRcrd(id, authSrcRcrds)); 
     }  
     return tree;  
 
-    function getAuthData(authSrc) {                                         //console.log("rcrd = %O", authSrc);
+    function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
         if (authSrc.contributions.length > 0) {
             authSrc.author = getDetachedRcrd(authSrc.author, gParams.author);
             authSrc.children = getAuthChildren(authSrc.contributions); 
@@ -1294,7 +1294,7 @@ function buildAuthTree(authSrcRcrds) {                                      //co
 /** For each source work contribution, gets any additional publication children
  * @getPubData and return's the source record.
  */
-function getAuthChildren(contribs) {                                        //console.log("getAuthChildren contribs = %O", contribs);
+function getAuthChildren(contribs) {                                            //console.log("getAuthChildren contribs = %O", contribs);
     return contribs.map(wrkSrcid => getPubData(getDetachedRcrd(wrkSrcid)));
 }
 /**
@@ -1304,7 +1304,7 @@ function getAuthChildren(contribs) {                                        //co
  * NOTE: This is the entry point for source grid rebuilds as filters alter data
  * contained in the data tree.
  */
-function buildSrcSearchUiAndGrid(srcTree) {                                 //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+function buildSrcSearchUiAndGrid(srcTree) {                                     //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
     clearPreviousGrid();
@@ -1327,7 +1327,7 @@ function loadPubSearchHtml(srcTree) {
     
     function buildPubTypeSelect() {
         const pubTypeOpts = buildPubSelectOpts();
-        return pubSelElem = buildPubSelects(pubTypeOpts);
+        return buildPubSelects(pubTypeOpts);
     }
     function buildPubSelectOpts() {
         var pubTypes = _util.getDataFromStorage("publicationType");
@@ -1362,7 +1362,7 @@ function loadPublSearchHtml(srcTree) {
  * Transforms the tree's source record data into grid row format and set as 
  * 'rowData' in the global gParams object as 'rowData'. Calls @loadGrid.
  */
-function transformSrcDataAndLoadGrid(srcTree) {                             //console.log("transformSrcDataAndLoadGrid called.")
+function transformSrcDataAndLoadGrid(srcTree) {                                 //console.log("transformSrcDataAndLoadGrid called.")
     var prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
     var treeName = prefix[gParams.curRealm] + ' Tree';
     let rowColorIdx = 0;
@@ -1372,10 +1372,10 @@ function transformSrcDataAndLoadGrid(srcTree) {                             //co
         rowColorIdx = rowColorIdx < 6 ? ++rowColorIdx : 0; 
         finalRowData.push( getSrcRowData(srcTree[topNode], 0, rowColorIdx) );
     }
-    gParams.rowData = finalRowData;                                         //console.log("rowData = %O", gParams.rowData);
+    gParams.rowData = finalRowData;                                             //console.log("rowData = %O", gParams.rowData);
     loadGrid(treeName);
 }
-function getSrcRowData(src, treeLvl, idx) {                                 //console.log("getSrcRowData. source = %O", src);
+function getSrcRowData(src, treeLvl, idx) {                                     //console.log("getSrcRowData. source = %O", src);
     var entity = src.sourceType.displayName;
     var detailId = entity === "Publication" ? src.publication.id : null;  
     const displayName = src.displayName.includes('(citation)') ? 
@@ -1403,7 +1403,7 @@ function getSrcRowData(src, treeLvl, idx) {                                 //co
         return curSrc.children === null ? [] : getChildSrcData(curSrc, treeLvl, idx);
        
         function getChildSrcData(src, treeLvl, idx) {
-            return src.children.map(function(childSrc) {                            //console.log("childSrc = %O", childSrc);
+            return src.children.map(function(childSrc) {                        //console.log("childSrc = %O", childSrc);
                 idx = idx < 6 ? ++idx : 0; 
                 return getSrcRowData(childSrc, treeLvl +1, idx);
             });
@@ -1432,7 +1432,7 @@ function buildTreeSearchHtml(entity, hndlr) {
  * by clicking on the 'search' button, the tree is rebuilt with only rows that  
  * contain the case insensitive substring.
  */
-function searchTreeText(entity) {                                           //console.log("----- Search Tree Text");
+function searchTreeText(entity) {                                               //console.log("----- Search Tree Text");
     const text = getFilterTreeTextVal(entity);
     const allRows = getAllCurRows(); 
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
@@ -1441,7 +1441,7 @@ function searchTreeText(entity) {                                           //co
     updateGridFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
-function getFilterTreeTextVal(entity) {                                     //console.log('getFilterTreeTextVal entity = ', entity);
+function getFilterTreeTextVal(entity) {                                         //console.log('getFilterTreeTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
 function getTreeRowsWithText(rows, text) {
@@ -1453,10 +1453,10 @@ function getTreeRowsWithText(rows, text) {
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-function updateTaxonSearch() {                                              //console.log("updateTaxonSearch val = ", $(this).val())
-    var selectedTaxonId = $(this).val();                                    //console.log("selectedTaxonId = %O", selectedTaxonId);
+function updateTaxonSearch() {                                                  //console.log("updateTaxonSearch val = ", $(this).val())
+    var selectedTaxonId = $(this).val();                                        //console.log("selectedTaxonId = %O", selectedTaxonId);
     var selTaxonRcrd = getDetachedRcrd(selectedTaxonId);  
-    gParams.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);            //console.log("selectedVals = %O", gParams.selectedVals);
+    gParams.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);                //console.log("selectedVals = %O", gParams.selectedVals);
     updateFilterStatus();
     rebuildTaxonTree(selTaxonRcrd);
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
@@ -1469,15 +1469,15 @@ function updateTaxonSearch() {                                              //co
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
-function getRelatedTaxaToSelect(selTaxonObj) {                              //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
+function getRelatedTaxaToSelect(selTaxonObj) {                                  //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
     var topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
-    var selected = {};                                                      //console.log("selected = %O", selected)
+    var selected = {};                                                          //console.log("selected = %O", selected)
     selectAncestorTaxa(selTaxonObj);
     return selected;
     /** Adds parent taxa to selected object, until the realm parent. */
-    function selectAncestorTaxa(taxon) {                                    //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
+    function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
         if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-            selected[taxon.level.displayName] = taxon.id;                   //console.log("setting lvl = ", taxon.level)
+            selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
             selectAncestorTaxa(getDetachedRcrd(taxon.parent))
         }
     }
@@ -1488,7 +1488,7 @@ function getRelatedTaxaToSelect(selTaxonObj) {                              //co
  * and the grid is updated with the filtered data tree. Selected values are 
  * derived and stored @getSelectedVals.      
  * */
-function updateLocSearch() {                                                //console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
+function updateLocSearch() {                                                    //console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
     var selElemId = $(this).attr("id");
     var selVal = $(this).val();
     var selTypeMap = { selCountry: "country", selRegion: "region" };
@@ -1497,7 +1497,7 @@ function updateLocSearch() {                                                //co
     gParams.selectedOpts = getSelectedVals(selVal, selType);
     filterGridOnLocCol(selVal, selType);
     /** Retuns the vals to select. If 'country' was selected, add it's region. */
-    function getSelectedVals(val, type) {                                   //console.log("getSelectedVals. val = %s, selType = ", val, type)
+    function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
         var selected = {};
         if (type === "country") { selectRegion(val); }
         if (val !== 'none' && val !== 'all') { selected[type] = val; }
@@ -1513,7 +1513,7 @@ function updateLocSearch() {                                                //co
  * Uses column filter to rebuild the grid. Rebuilds tree and the location
  * search option dropdowns from the displayed tree data in the grid after filter.
  */
-function filterGridOnLocCol(selVal, colName) {                              //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
+function filterGridOnLocCol(selVal, colName) {                                  //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
     var filterVal = gParams.rcrdsById[selVal].displayName.split('[')[0].trim(); 
     var colModel = getColFilterModel(filterVal);
     gridOptions.api.getFilterApi(colName).setModel(colModel);
@@ -1538,16 +1538,16 @@ function getColFilterModel(filterVal) {
  * grid is displayed opened to the selected row.
  */
 function buildFilteredLocTree(selVal, colName) {
-    var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
+    var gridModel = gridOptions.api.getModel();                                 //console.log("gridModel = %O", gridModel);
     var tree = {};
     var selectedOpened = isNaN(selVal);
 
-    gridModel.rowsToDisplay.forEach(function(topNode) {                     //console.log("rowToDisplay = %O", topNode)
+    gridModel.rowsToDisplay.forEach(function(topNode) {                         //console.log("rowToDisplay = %O", topNode)
         tree[topNode.data.name] = getFilteredChildData(topNode);
     });
     gParams.curTree = tree;
     /** Recurses through displayed children until finding the leaf interaction records. */
-    function getFilteredChildData(treeNode) {                               //console.log("getHabTreeData. node = %O", treeNode);
+    function getFilteredChildData(treeNode) {                                   //console.log("getHabTreeData. node = %O", treeNode);
         if (treeNode.data.hasOwnProperty("interactionType")) { return treeNode.data; }
         if (!selectedOpened) { addParentOpenRows(treeNode); }
         var locNode = getDetachedRcrd(treeNode.data.id); 
@@ -1601,13 +1601,13 @@ function updatePubSearch() {
 /**
  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
  */
-function fillHiddenTaxonColumns(curTaxonTree) {                             //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
+function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
     var curTaxonHeirarchy = {};
-    var lvls = Object.keys(_util.getDataFromStorage('levelNames'));         //console.log('lvls = %O', lvls);
+    var lvls = Object.keys(_util.getDataFromStorage('levelNames'));             //console.log('lvls = %O', lvls);
     getTaxonDataAtTreeLvl(curTaxonTree);
 
     function getTaxonDataAtTreeLvl(treeLvl) {
-        for (var topTaxon in treeLvl) {                                     //console.log('curTaxon = %O', treeLvl[topTaxon])
+        for (var topTaxon in treeLvl) {                                         //console.log('curTaxon = %O', treeLvl[topTaxon])
             syncTaxonHeir( treeLvl[topTaxon] ); 
             fillInteractionRcrdsWithTaxonTreeData( treeLvl[topTaxon] );
             if (treeLvl[topTaxon].children) { 
@@ -1621,7 +1621,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                             //co
      */
     function syncTaxonHeir(taxon) {                        
         var lvl = taxon.level.displayName;
-        var prntId = taxon.parent;                                          //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
+        var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
         if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
         } else { clearLowerLvls(gParams.rcrdsById[prntId].level.displayName); }
         curTaxonHeirarchy[lvl] = taxon.displayName;
@@ -1640,8 +1640,8 @@ function fillHiddenTaxonColumns(curTaxonTree) {                             //co
         var topIdx = lvls.indexOf(parentLvl);
         for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
     }
-    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                 //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
-        $(['subjectRoles', 'objectRoles']).each(function(i, role) {         //console.log('role = ', role)
+    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
+        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             //console.log('role = ', role)
             if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
         });
     } 
@@ -1650,7 +1650,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                             //co
             var colName = 'tree' + lvl; 
             intRcrdObj[colName] = lvl === 'Species' ? 
                 getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
-        }                                                                   //console.log('intRcrd after taxon fill = %O', intRcrdObj);
+        }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
     }
     function getSpeciesName(speciesName) {
         return speciesName === null ? null : _util.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
@@ -1756,7 +1756,7 @@ function getTreeWidth() {
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
 function onBeforeSortChanged() {                                            
     if (gParams.curFocus !== "taxa") { return; }                       
-    var sortModel = gridOptions.api.getSortModel();                         //console.log("model obj = %O", sortModel)
+    var sortModel = gridOptions.api.getSortModel();                             //console.log("model obj = %O", sortModel)
     if (!sortModel.length) { return gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]); }
     ifNameUnsorted(sortModel);        
 }
@@ -1774,7 +1774,7 @@ function ifNameUnsorted(model) {
  * Sorts the tree column alphabetically for all views. If in Taxon view, the 
  * rows are sorted first by rank and then alphabetized by name @sortTaxonRows. 
  */
-function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {               //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
+function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
     if (!a) { return 0; } //Interaction rows are returned unsorted
     if (gParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
