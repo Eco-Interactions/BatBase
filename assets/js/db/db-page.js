@@ -1026,6 +1026,7 @@ function getLocRowData(locRcrd, treeLvl) {                                      
         id: locRcrd.id,
         entity: "Location",
         name: getLocDisplayName(),  /* Interaction rows have no name to display. */
+        onMap: isMappable(locRcrd),
         isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
         open: gParams.openRows.indexOf(locRcrd.id) !== -1, 
         children: getLocRowDataForRowChildren(locRcrd, treeLvl),
@@ -1038,6 +1039,9 @@ function getLocRowData(locRcrd, treeLvl) {                                      
         var trans = { 'Unspecified': 'Unspecified / Habitat Only' };
         return trans[locRcrd.displayName] || locRcrd.displayName;
     }     
+    function isMappable(loc) {                                                  
+        return loc.geoJsonId;
+    }
     /**
      * Returns rowData for interactions at this location and for any children.
      * If there are both interactions and children, the interactions rows are 
@@ -1732,14 +1736,14 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
             {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
-            {headerName: "Map", field: "map", width: 39, headerTooltip: "Show on Map", hide: isNotLocView(false), cellRenderer: addMapIcon },
+            {headerName: "Map", field: "map", width: 39, headerTooltip: "Show on Map", hide: ifLocView(false), cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
             {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells, hide: isNotLocView(true), },
+            {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells, hide: ifLocView(true), },
             {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             // {headerName: "Elevation", field: "elev", width: 150, hide: true },
@@ -1844,13 +1848,18 @@ function getPencilHtml(id, entity, editFunc) {
     return editPencil;
 }
 /** -------- Map Column ---------- */
-function isNotLocView(isLocView) {                                           
-    return gParams.curFocus !== 'locs';
+function ifLocView(isLocView) {                                           
+    return (gParams.curFocus === 'locs') === isLocView;
 }
 function addMapIcon(params) {                                                   console.log('row params = %O', params);
+    if (!params.data.onMap) { return '<span>'; }
+    const id = params.data.id;
     const path = require('../../css/images/marker-icon.png');
-    const icon = `<img src='${path}' alt='Map Icon' style='height: 22px; margin-left: 9px'>`;
-
+    const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
+        title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
+    $('#search-grid').off('click', '#map'+id);
+    $('#search-grid').on('click', '#map'+id, db_map.showLoc.bind(null, id));
+    return icon;
 }
 /*================== Row Styling =========================================*/
 /**

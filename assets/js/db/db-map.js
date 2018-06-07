@@ -5,6 +5,7 @@
 /**
  * Exports:
  *   initMap
+ *   showLoc
  *   updateGeoJsonData
  */
 import * as idb from 'idb-keyval'; //set, get, del, clear
@@ -74,6 +75,10 @@ function parseData(data) {
     return data;
 }
 export function updateGeoJsonData(argument) { //TODO: When db_sync checks for entity updates, send geoJson updates here
+    // body...
+}
+/** ======================= Show Loc on Map ================================= */
+export function showLoc(id) {  console.log('show loc = ', id)
     // body...
 }
 /** ======================= Init Map ======================================== */
