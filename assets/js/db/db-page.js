@@ -799,12 +799,12 @@ function initLocSearchUi(locData) {
     setLocView();  
     onLocViewChange();
     
-    function setLocView() {
-        const storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
-        const locRealm = storedRealm || "tree";
-        if ($('#sel-realm').val() === null) { $('#sel-realm').val(locRealm); }
-    }
 } /* End initLocSearchUi */
+function setLocView() {
+    const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
+    const locRealm = storedRealm || "tree";
+    if ($('#sel-realm').val() === null) { $('#sel-realm').val(locRealm); }
+}
 function addLocDataToGridParams(data) {
     gParams.rcrdsById = data.location;                                    
     gParams.data = data;
@@ -914,7 +914,7 @@ function buildLocSelectOpts() {
     gridOptions.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     sortLocOpts();
     removeTopRegionIfFiltering();
-    addAllAndNoneOpts();                                                        console.log('opts = %O', opts);
+    addAllAndNoneOpts();                                                        //console.log('opts = %O', opts);
     return opts; 
     /**
      * Recurses through the tree and builds a option object for each unique 
@@ -922,7 +922,7 @@ function buildLocSelectOpts() {
      */
     function buildLocOptsForNode(row) {                                 
         var rowData = row.data;  
-        if (rowData.interactionType) {return;}                                  console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
+        if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
         if (rowData.type === 'Region' || rowData.type === 'Country') {
             getLocOpts(rowData, rowData.name, rowData.type); 
         }
@@ -1110,7 +1110,6 @@ function buildLocGridMap() {                                                    
 
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
-    setLocView('tree');
     rebuildLocTree([loc]);
     $('#sel-realm').val('tree');
 }
@@ -1733,13 +1732,14 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
             {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
+            {headerName: "Map", field: "map", width: 39, headerTooltip: "Show on Map", hide: isNotLocView(false), cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
             {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells },
+            {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells, hide: isNotLocView(true), },
             {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             // {headerName: "Elevation", field: "elev", width: 150, hide: true },
@@ -1807,9 +1807,6 @@ function sortTaxonRows(a, b) {
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }  /* End sortTaxonRows */
-function isNotEditor() {  
-    return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
-}
 /** Adds tooltip to Tree cells */
 function innerCellRenderer(params) {      
     var name = params.data.name || null;                                    //console.log("params in cell renderer = %O", params)         
@@ -1820,12 +1817,16 @@ function addToolTipToCells(params) {
     var value = params.value || null;
     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
 }
+/** ------ Edit Column ---------- */
+function isNotEditor() {  
+    return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
+}
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
 function addEditPencil(params) {   
     if (uneditableEntityRow(params)) { return "<span>"; }                     
     return getPencilHtml(params.data.id, params.data.entity, db_forms.editEntity);
 }
-function uneditableEntityRow(params) {                                      //console.log('focus = [%s] params = %O', gParams.curFocus, params);
+function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', gParams.curFocus, params);
     const uneditables = [
         gParams.curFocus === 'locs' && 
             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
@@ -1842,12 +1843,21 @@ function getPencilHtml(id, entity, editFunc) {
         'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _util.lcfirst(entity)));
     return editPencil;
 }
+/** -------- Map Column ---------- */
+function isNotLocView(isLocView) {                                           
+    return gParams.curFocus !== 'locs';
+}
+function addMapIcon(params) {                                                   console.log('row params = %O', params);
+    const path = require('../../css/images/marker-icon.png');
+    const icon = `<img src='${path}' alt='Map Icon' style='height: 22px; margin-left: 9px'>`;
+
+}
 /*================== Row Styling =========================================*/
 /**
  * Adds a css background-color class to interaction record rows. Source-focused 
  * interaction rows are not colored, their name rows are colored instead. 
  */
-function getRowStyleClass(params) {                                         //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
+function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
     if (params.data.name !== "") { return; } 
     return gParams.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
@@ -2755,14 +2765,23 @@ function finishGridAndUiLoad() {
     hideUnusedColFilterMenus();
 } 
 /**
- * Hides the "tree" column's filter button. Filtering on the group 
- * column only filters the leaf nodes, by design. It is not useful here.
- * Also hides the filter button on the 'edit' and 'count' columns.
+ * Hides the "tree" column's filter button. (Filtering on the group 
+ * column only filters the leaf nodes, by design. It is not useful here.)
+ * Hides the filter button on the 'edit', 'count', and 'map' columns.
+ * Hides the sort icons for the 'edit' and 'map' columns.
  */
 function hideUnusedColFilterMenus() {
     $('.ag-header-cell-menu-button.name').hide();
     $('.ag-header-cell-menu-button.edit').hide();
     $('.ag-header-cell-menu-button.intCnt').hide();
+    $('.ag-header-cell-menu-button.map').hide();
+    /** Hides sort icons for the map & edit columns. */
+    $('div[colId="map"] .ag-sort-none-icon').hide();
+    $('div[colId="map"] .ag-sort-ascending-icon').hide();
+    $('div[colId="map"] .ag-sort-descending-icon').hide();
+    $('div[colId="edit"] .ag-sort-none-icon').hide();
+    $('div[colId="edit"] .ag-sort-ascending-icon').hide();
+    $('div[colId="edit"] .ag-sort-descending-icon').hide();
 }
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
