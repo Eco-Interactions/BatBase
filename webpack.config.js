@@ -23,7 +23,7 @@ Encore
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
-        agGrid: 'ag-grid',
+        // agGrid: 'ag-grid',
         L: 'leaflet',
     })
     // .addPlugin(
@@ -88,7 +88,7 @@ Encore
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
         './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet' ])
+        'leaflet', 'ag-grid' ])
 ; 
 const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
