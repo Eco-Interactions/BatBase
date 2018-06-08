@@ -13,7 +13,7 @@ import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
-let geoJson, locations, map, showMap;
+let geoJson, locations, map, showMap, popups = {};
 const dataKey = 'Live for justice!!!!!!!! <3';
 
 initDb();
@@ -82,8 +82,9 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
 export function showLoc(id, zoom) {                                             console.log('show loc = %s, zoom = %s', id, zoom)
     const loc = locations[id];
     const point = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
-    map.setView(point, zoom, {animate: true});
- 
+    map.setView(point, zoom, {animate: true});  
+    map.openPopup(popups[loc.displayName]);
+
     function noGeoDataErr() {
         // const geoData = JSON.parse(geoJson[id]);                                console.log('geoData = %O', geoData);
         console.log('###### No geoJson found for geoJson [%s] ###########', id);
@@ -220,7 +221,7 @@ function addMarkerForEachInteraction(intCnt, subCnt, coords, loc) {             
         for (let i = 0; i < intCnt; i++) {  
             cluster.addLayer(L.marker(coords)); 
         }
-        addPopupToCluster(subCnt, cluster, loc);
+        addPopupToCluster(subCnt, cluster, loc, L.latLng(coords));
         map.addLayer(cluster);
     }
 } /* End addMarkerForEachInteraction */
@@ -233,6 +234,7 @@ function addSingleMarker(subCnt, coords, loc) {                                 
         .on('click', openPopupAndDelayAutoClose)
         .on('mouseout', delayPopupClose);  
     const popup = marker.getPopup();
+    popups[loc.displayName] = popup;
     return marker;
     /**
      * Replaces original popup with more details on the interactions at this
@@ -279,9 +281,10 @@ function addSingleMarker(subCnt, coords, loc) {                                 
         marker.off('mouseout').on('mouseout', func);
     }
 } /* End addSingleMarker */
-function addPopupToCluster(subCnt, cluster, loc) {
-    let timeout, popup, clusterLatLng;
+function addPopupToCluster(subCnt, cluster, loc, latLng) {                      
+    let timeout, popup;
     addClusterEvents();
+    buildPopup();
 
     function addClusterEvents() { 
         cluster.on('clustermouseover', openClusterPopup)
@@ -291,15 +294,17 @@ function addPopupToCluster(subCnt, cluster, loc) {
     function removeClusterEvents() {
         cluster.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
     }
-    function openClusterPopup(c) {
-        if (timeout) { clearTimeout(timeout); timeout = null; }
-        clusterLatLng = c.layer.getLatLng();
+    function buildPopup() {
         popup = L.popup()
-            .setLatLng(c.layer.getLatLng())
+            .setLatLng(latLng)
             .setContent(getLocNamePopupHtml(loc, buildSummaryPopup))
-            .openOn(map);
+        popups[loc.displayName] = popup;
     }
-    function buildSummaryPopup() {                                              console.log('building cluster loc summary')
+    function openClusterPopup(c) {
+        if (timeout) { clearTimeout(timeout); timeout = null; }  
+        map.openPopup(popup);
+    }
+    function buildSummaryPopup() {                                              //console.log('building cluster loc summary')
         clearMarkerTimeout(timeout);
         updateMouseout(Function.prototype);
         popup.setContent(getLocationSummaryHtml(loc, subCnt));
@@ -310,7 +315,7 @@ function addPopupToCluster(subCnt, cluster, loc) {
     }
     /** Event fires before popup is fully closed. Restores after closed. */
     function closeLayerPopup(e) {
-        if (e.popup._latlng === clusterLatLng) {
+        if (e.popup._latlng === latLng) {
             window.setTimeout(restoreOrgnlPopup, 400);
         }
     }
