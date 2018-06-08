@@ -13,8 +13,8 @@ import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
-let geoJson, map, showMap;
-const dataKey = 'Live for justice!!!!!! <3';
+let geoJson, locations, map, showMap;
+const dataKey = 'Live for justice!!!!!!!! <3';
 
 initDb();
 requireCss();
@@ -78,8 +78,16 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
     // body...
 }
 /** ======================= Show Loc on Map ================================= */
-export function showLoc(id) {  console.log('show loc = ', id)
-    // body...
+/** Centers the map on the location and zooms according to type of location. */
+export function showLoc(id, zoom) {                                             console.log('show loc = %s, zoom = %s', id, zoom)
+    const loc = locations[id];
+    const point = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
+    map.setView(point, zoom, {animate: true});
+ 
+    function noGeoDataErr() {
+        // const geoData = JSON.parse(geoJson[id]);                                console.log('geoData = %O', geoData);
+        console.log('###### No geoJson found for geoJson [%s] ###########', id);
+    }
 }
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
@@ -120,7 +128,7 @@ function addMapTiles() {
  * summary of the interactions at the location.
  */
 function addInteractionMarkersToMap() {
-    const locations = _util.getDataFromStorage('location');
+    locations = _util.getDataFromStorage('location');
     const regions = getRegionLocs();
     for (let id in regions) { addMarkersForRegion(regions[id]) }; 
 
@@ -158,38 +166,38 @@ function addInteractionMarkersToMap() {
             buildLocationMarkers(locIntCnt, null, loc);
         }
         function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
-            const markerCoords = getCenterCoordsOfLoc(loc);                     //console.log('        markerCoords = ', markerCoords)
+            const markerCoords = getCenterCoordsOfLoc(loc, loc.geoJsonId, logNoGeoJsonError);       //console.log('        markerCoords = ', markerCoords)
             if (!markerCoords) { return; }
             addMarkerForEachInteraction(intCnt, subCnt, markerCoords, loc);
         }
-        function getCenterCoordsOfLoc(loc) { 
-            if (!loc.geoJsonId) { return logNoGeoJsonError(); }                 //console.log('geoJson obj = %O', geoJson[loc.geoJsonId]);
-            const locGeoJson = JSON.parse(geoJson[loc.geoJsonId]);              //console.log('        locGeoJson = %O', locGeoJson);
-            return locGeoJson.centerPoint ? 
-                formatPoint(locGeoJson.centerPoint) 
-                : getLocCenterPoint();
-
-            function logNoGeoJsonError() {
-                if (!loc.interactions.length) { return null; }
-                intCnt += loc.interactions.length;
-                ++subCnt;
-                // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
-            }
-        } /* End getCenterCoordsOfLoc */
+        function logNoGeoJsonError() {
+            if (!loc.interactions.length) { return null; }
+            intCnt += loc.interactions.length;
+            ++subCnt;
+            // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+        }
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
+function getCenterCoordsOfLoc(loc, geoJsonId, noGeoDataErrFunc) { 
+    if (!geoJsonId) { return noGeoDataErrFunc(); }                              //console.log('geoJson obj = %O', geoJson[geoJsonId]);
+    const locGeoJson = JSON.parse(geoJson[geoJsonId]);                          //console.log('        locGeoJson = %O', locGeoJson);
+    return locGeoJson.centerPoint ? 
+        formatPoint(locGeoJson.centerPoint) 
+        : getLocCenterPoint(loc, locGeoJson);
+
+} /* End getCenterCoordsOfLoc */
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
 function formatPoint(point) {                                                   //console.log('point = ', point)
     let array = JSON.parse(point); 
     return L.latLng(array[1], array[0]);
 }
-function getLocCenterPoint() {
+function getLocCenterPoint(loc, locGeoJson) {
     const feature = buildFeature(loc, locGeoJson);
     const polygon = L.geoJson(feature);//.addTo(map);
     console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
     return polygon.getBounds().getCenter(); 
 } /* End getLocCenterPoint */
-function buildFeature(loc, geoData) {                                       //console.log('place geoData = %O', geoData);
+function buildFeature(loc, geoData) {                                           //console.log('place geoData = %O', geoData);
     return {
             "type": "Feature",
             "geometry": {

@@ -1040,7 +1040,7 @@ function getLocRowData(locRcrd, treeLvl) {                                      
         return trans[locRcrd.displayName] || locRcrd.displayName;
     }     
     function isMappable(loc) {                                                  
-        return loc.geoJsonId;
+        return loc.geoJsonId ? loc.id : false;
     }
     /**
      * Returns rowData for interactions at this location and for any children.
@@ -1111,7 +1111,11 @@ function buildLocGridMap() {                                                    
     $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
     db_map.initMap(); 
 }
-
+/** Switches to map view and centeres map on selected location. */
+function showLocOnMap(geoJsonId, zoom) {
+    $('#sel-realm').val('map').change();
+    db_map.showLoc(geoJsonId, zoom);
+}
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
     rebuildLocTree([loc]);
@@ -1851,15 +1855,19 @@ function getPencilHtml(id, entity, editFunc) {
 function ifLocView(isLocView) {                                           
     return (gParams.curFocus === 'locs') === isLocView;
 }
-function addMapIcon(params) {                                                   console.log('row params = %O', params);
+function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
     const id = params.data.id;
+    const zoomLvl = getZoomLvl(params.data);  
     const path = require('../../css/images/marker-icon.png');
     const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
         title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
     $('#search-grid').off('click', '#map'+id);
-    $('#search-grid').on('click', '#map'+id, db_map.showLoc.bind(null, id));
+    $('#search-grid').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
     return icon;
+}
+function getZoomLvl(loc) {  
+    return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;   
 }
 /*================== Row Styling =========================================*/
 /**
