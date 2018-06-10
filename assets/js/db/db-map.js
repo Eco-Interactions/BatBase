@@ -79,16 +79,24 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
 }
 /** ======================= Show Loc on Map ================================= */
 /** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom) {                                             console.log('show loc = %s, zoom = %s', id, zoom)
-    const loc = locations[id];
-    const point = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
-    map.setView(point, zoom, {animate: true});  
-    map.openPopup(popups[loc.displayName]);
+export function showLoc(id, zoom) {                                             
+    const loc = locations[id];                                                  console.log('show loc = %O, zoom = %s', loc, zoom)
+    const coords = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
+    const popup = popups[loc.displayName] || buildSummaryPopup(loc, coords);
+    map.setView(coords, zoom, {animate: true});  
+    map.openPopup(popup); 
 
     function noGeoDataErr() {
         // const geoData = JSON.parse(geoJson[id]);                                console.log('geoData = %O', geoData);
         console.log('###### No geoJson found for geoJson [%s] ###########', id);
     }
+}
+function buildSummaryPopup(loc, coords) {
+    const popup = L.popup()
+        .setLatLng(coords)
+        .setContent(getLocationSummaryHtml(loc, null));
+    popups[loc.displayName] = popup;
+    return popup;
 }
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
@@ -388,12 +396,13 @@ function buildLocDetailsHtml(loc, subCnt) {
     return name + [cnt, subs, coords, habType, bats].filter(el => el).join('<br>');  
 }
 function ifCountryGetIntCnt(loc) {
-    return loc.locationType.displayName !== 'Country' ? false : 
-        'Interactions in Country: <b>' + loc.totalInts + '</b>'; 
+    const locType = loc.locationType.displayName;
+    return ['Region', 'Country'].indexOf(locType) === -1 ? false : 
+        `Interactions in ${locType}: <b> ${loc.totalInts}</b>`;
 }
 function getSubLocsWithoutGpsData(cnt) {
     if (!cnt) { return false; }
-    return 'Sub-Locations without GPS data: ' + cnt + '<br>'; 
+    return `Sub-Locations without GPS data: ${cnt}<br>`; 
 }
 function getCoordsHtml(loc) {
     const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
