@@ -1,11 +1,9 @@
 {% extends "layout.html.twig" %}
 
 {# {% set interaction = entity %} #}
-{# Grid code is here because webpack wasn't handling loading grid svg-icons #}
+
 {% block stylesheets %}
     {{parent()}}
-    <link rel="stylesheet" href="{{ asset('bundles/app/grid/ag-grid.css') }}" />
-    <link rel="stylesheet" href="{{ asset('bundles/app/grid/theme-fresh.css') }}" />
     <link rel="stylesheet" href="{{ asset('build/db.css') }}" />
 {% endblock %}
 
@@ -68,7 +66,6 @@
 {% endblock detail %}
 
 {% block javascripts %} 
-    {{parent()}}
-    <script src="{{ asset('bundles/app/grid/ag-grid.js') }}"></script>
+    {{parent()}}    
     <script src="{{ asset('build/db.js') }}"></script>
 {% endblock %}

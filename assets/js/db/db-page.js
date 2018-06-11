@@ -13,6 +13,7 @@ import * as _util from '../misc/util.js';
 import * as db_sync from './db-sync.js';
 import * as db_forms from './db-forms.js';
 import * as db_map from './db-map.js';
+import * as agGrid from '../../grid/ag-grid.js';
 /**
  * userRole = Stores the role of the user.
  * dataStorage = window.localStorage (sessionStorage for tests)

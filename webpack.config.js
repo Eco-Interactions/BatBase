@@ -23,7 +23,6 @@ Encore
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
-        // agGrid: 'ag-grid',
         L: 'leaflet',
     })
     // .addPlugin(
@@ -35,7 +34,6 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    // will create web/build/app.js and web/build/app.css
     .addEntry('app', './assets/js/app/oi.js' )
     .addEntry('db', './assets/js/db/db-page.js')
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
@@ -70,8 +68,7 @@ Encore
     .enableVersioning()
     // use this method to provide common global variables
     .autoProvideVariables({
-        agGrid: 'ag-grid',
-        L: 'leaflet',
+        L: 'leaflet'
     })
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
@@ -82,13 +79,12 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    // will create web/build/app.js and web/build/app.css
     .addEntry('app', './assets/js/app/oi.js' )
     .addEntry('db', './assets/js/db/db-page.js')
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
         './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet', 'ag-grid' ])
+        'leaflet' ])
 ; 
 const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
