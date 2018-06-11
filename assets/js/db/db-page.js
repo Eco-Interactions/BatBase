@@ -1741,20 +1741,20 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
             {headerName: "Cnt", field: "intCnt", width: 47, volatile: true, headerTooltip: "Interaction Count" },
-            {headerName: "Map", field: "map", width: 39, hide: ifLocView(false), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
+            {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Location", field: "location", width: 122, hide: ifLocView(true), cellRenderer: addToolTipToCells },
+            {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Elev", field: "elev", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
+            {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
-            {headerName: "Lat", field: "lat", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
-            {headerName: "Long", field: "lng", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
+            {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+            {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
 }
 /** Adds tooltip to Interaction row cells */
@@ -1856,7 +1856,7 @@ function getPencilHtml(id, entity, editFunc) {
 }
 /** -------- Map Column ---------- */
 function ifLocView(isLocView) {                                           
-    return (gParams.curFocus === 'locs') === isLocView;
+    return gParams.curFocus === 'locs';
 }
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
@@ -2807,6 +2807,12 @@ function hideUnusedColFilterMenus() {
     $('.ag-header-cell-menu-button.elev').hide();
     $('.ag-header-cell-menu-button.lat').hide();
     $('.ag-header-cell-menu-button.lng').hide();
+    $('div[colId="lat"] .ag-sort-none-icon').hide();
+    $('div[colId="lat"] .ag-sort-ascending-icon').hide();
+    $('div[colId="lat"] .ag-sort-descending-icon').hide();
+    $('div[colId="lng"] .ag-sort-none-icon').hide();
+    $('div[colId="lng"] .ag-sort-ascending-icon').hide();
+    $('div[colId="lng"] .ag-sort-descending-icon').hide();
 }
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {

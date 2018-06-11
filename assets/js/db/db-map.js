@@ -14,7 +14,7 @@ import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
 let geoJson, locations, map, showMap, popups = {};
-const dataKey = 'Live for justice!!!!!!!! <3';
+const dataKey = 'Live for justice!!!!!!!!!! <3';
 
 initDb();
 requireCss();
@@ -81,21 +81,21 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom) {                                             
     const loc = locations[id];                                                  console.log('show loc = %O, zoom = %s', loc, zoom)
-    const coords = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
-    const popup = popups[loc.displayName] || buildSummaryPopup(loc, coords);
-    map.setView(coords, zoom, {animate: true});  
+    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
+    const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
+    popup.setContent(getLocationSummaryHtml(loc, null));  
+    popup.options.autoClose = false;
     map.openPopup(popup); 
+    map.setView(latLng, zoom, {animate: true});  
 
     function noGeoDataErr() {
         // const geoData = JSON.parse(geoJson[id]);                                console.log('geoData = %O', geoData);
         console.log('###### No geoJson found for geoJson [%s] ###########', id);
     }
 }
-function buildSummaryPopup(loc, coords) {
-    const popup = L.popup()
-        .setLatLng(coords)
-        .setContent(getLocationSummaryHtml(loc, null));
-    popups[loc.displayName] = popup;
+function buildLocPopup(loc, latLng) {  
+    const popup = L.popup().setLatLng(latLng).setContent('');
+    popups[loc.displayName] = popup;  
     return popup;
 }
 /** ======================= Init Map ======================================== */
@@ -175,9 +175,9 @@ function addInteractionMarkersToMap() {
             buildLocationMarkers(locIntCnt, null, loc);
         }
         function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
-            const markerCoords = getCenterCoordsOfLoc(loc, loc.geoJsonId, logNoGeoJsonError);       //console.log('        markerCoords = ', markerCoords)
-            if (!markerCoords) { return; }
-            addMarkerForEachInteraction(intCnt, subCnt, markerCoords, loc);
+            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId, logNoGeoJsonError);       //console.log('        latLng = ', latLng)
+            if (!latLng) { return; }
+            addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
         }
         function logNoGeoJsonError() {
             if (!loc.interactions.length) { return null; }
@@ -218,31 +218,31 @@ function buildFeature(loc, geoData) {                                           
             }
         };   
 }
-function addMarkerForEachInteraction(intCnt, subCnt, coords, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, coords);
+function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
     return intCnt === 1 ? addMarker() : addCluster();
 
     function addMarker() {
-        map.addLayer(addSingleMarker(subCnt, coords, loc));
+        map.addLayer(addSingleMarker(subCnt, latLng, loc));
     }
     function addCluster() {
         let cluster = L.markerClusterGroup();
         for (let i = 0; i < intCnt; i++) {  
-            cluster.addLayer(L.marker(coords)); 
+            cluster.addLayer(L.marker(latLng)); 
         }
-        addPopupToCluster(subCnt, cluster, loc, L.latLng(coords));
+        addPopupToCluster(subCnt, cluster, loc, latLng);
         map.addLayer(cluster);
     }
 } /* End addMarkerForEachInteraction */
 /** ----------------- Marker/Popup Methods ---------------------------------- */
-function addSingleMarker(subCnt, coords, loc) {                                 //Refactor into class Marker
+function addSingleMarker(subCnt, latLng, loc) {                                 //Refactor into class Marker
     let timeout;
-    const marker = L.marker(coords)
-        .bindPopup(getLocNamePopupHtml(loc, buildLocSummaryPopup)) //, {offset: new L.Point(5, 20)}
+    const marker = L.marker(latLng)
+        .bindPopup(getLocNamePopupHtml(loc, buildLocSummaryPopup))
         .on('mouseover', openPopup)
         .on('click', openPopupAndDelayAutoClose)
         .on('mouseout', delayPopupClose);  
-    const popup = marker.getPopup();
-    popups[loc.displayName] = popup;
+    const popup = marker.getPopup().setLatLng(latLng);
+    popups[loc.displayName] = popup;  
     return marker;
     /**
      * Replaces original popup with more details on the interactions at this
@@ -361,7 +361,7 @@ function getLocNamePopupHtml(loc, summaryFunc) {
 }
 function getLocNameHtml(loc) {  
     let parent = loc.locationType.displayName === 'Country' ? '' :
-        loc.country ? loc.country.displayName : 'Continent';
+        loc.country ? loc.country.displayName : 'Region';
     const locName = loc.displayName;
     return '<div style="font-size:1.2em;"><b>' + locName + 
         '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
@@ -395,6 +395,10 @@ function buildLocDetailsHtml(loc, subCnt) {
     const bats = getBatsCitedHtml(loc);  
     return name + [cnt, subs, coords, habType, bats].filter(el => el).join('<br>');  
 }
+function isRegionOrCountry(loc) {
+    const locType = loc.locationType.displayName;  
+    return ['Region', 'Country'].indexOf(locType) !== -1;
+}
 function ifCountryGetIntCnt(loc) {
     const locType = loc.locationType.displayName;
     return ['Region', 'Country'].indexOf(locType) === -1 ? false : 
@@ -406,20 +410,22 @@ function getSubLocsWithoutGpsData(cnt) {
 }
 function getCoordsHtml(loc) {
     const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
-    if (geoData.type !== 'point') { return false; }
+    if (geoData.type !== 'point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.coordinates)
     coords = coords.map(c => Number(c).toFixed(6)); 
     return 'Coordinates: <b>' + coords.join(', ') +'</b>';
 }
 function getHabTypeHtml(loc) {
-    if (!loc.habitatType) { return 'Habitat Type:'; }
-    return 'Habitat Type: <b>' + loc.habitatType.displayName + '</b>';
+    const lbl = !isRegionOrCountry(loc) ? 'Habitat Type:' 
+        : 'Habitat Types: <b>(Will list types recorded within)</b>';
+    if (!loc.habitatType) { return lbl; }
+    return `${lbl} <b>${loc.habitatType.displayName}</b>`;
 }
 function getBatsCitedHtml(loc) {
     const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
     const ints = loc.interactions.map(id => rcrds.interaction[id]);
     const bats = getBatsCitedHere(ints, rcrds.taxon);
-    return 'Cited bats: <b>'+ bats + '</b>';
+    return `Cited bats: <b>${bats}</b>`;
 }
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getBatsCitedHere(ints, batRcrds) {
@@ -464,7 +470,7 @@ function getReportString(bats) {
 /** Returns string with the names of top 3 reported taxa and total taxa count. */
 function buildReportString(bats, sorted, ttl) {
     if (ttl < 2) { return ttl ? sorted[1][1] : 
-        'Bats recorded at sub-locations without GPS data.<br>'; }
+        '(Will list bats recorded within)<br>'; }
     return formatString();
 
     function formatString() {
