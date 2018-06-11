@@ -383,7 +383,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){                            //co
             var props = {
                 location: 'displayName',    gps: 'gpsData',
                 elev: 'elevation',          elevMax: 'elevationMax',
-                lat: 'latitude',            long: 'longitude',
+                lat: 'latitude',            lng: 'longitude',
             };
             for (var p in props) {
                if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
@@ -1730,7 +1730,7 @@ function getColumnDefs(mainCol) {
     var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
 
     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-                cellRendererParams: { innerRenderer: innerCellRenderer, padding: 20 }, 
+                cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
                 cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
             {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Phylum", field: "treePhylum", width: 150, hide: true },
@@ -1739,27 +1739,39 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-            {headerName: "Edit", field: "edit", width: 50, headerTooltip: "Edit", hide: isNotEditor(), cellRenderer: addEditPencil },
-            {headerName: "Cnt", field: "intCnt", width: 47, headerTooltip: "Interaction Count", volatile: true },
-            {headerName: "Map", field: "map", width: 39, headerTooltip: "Show on Map", hide: ifLocView(false), cellRenderer: addMapIcon },
-            {headerName: "Subject Taxon", field: "subject", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Object Taxon", field: "object", width: 133, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Interaction Type", field: "interactionType", width: 146, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Tags", field: "tags", width: 75, filter: UniqueValuesFilter},
-            {headerName: "Citation", field: "citation", width: 122, cellRenderer: addToolTipToCells},
-            {headerName: "Habitat", field: "habitat", width: 90, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Location", field: "location", width: 122, cellRenderer: addToolTipToCells, hide: ifLocView(true), },
-            {headerName: "Country", field: "country", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Region", field: "region", width: 88, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            // {headerName: "Elevation", field: "elev", width: 150, hide: true },
+            {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
+            {headerName: "Cnt", field: "intCnt", width: 47, volatile: true, headerTooltip: "Interaction Count" },
+            {headerName: "Map", field: "map", width: 39, hide: ifLocView(false), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
+            {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+            {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
+            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter},
+            {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
+            {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Location", field: "location", width: 122, hide: ifLocView(true), cellRenderer: addToolTipToCells },
+            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Elev", field: "elev", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
             // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
-            // {headerName: "Latitude", field: "lat", width: 150, hide: true },
-            // {headerName: "Longitude", field: "long", width: 150, hide: true },
+            {headerName: "Lat", field: "lat", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
+            {headerName: "Long", field: "lng", width: 60, hide: ifLocView(false), cellRenderer: addToolTipToCells },
             {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
+}
+/** Adds tooltip to Interaction row cells */
+function addToolTipToCells(params) {
+    var value = params.value || null;
+    return value === null ? null : '<span title="'+value+'">'+value+'</span>';
+}
+/** --------- Tree Column ---------------------- */
+/** Adds tooltip to Tree cells */
+function addToolTipToTree(params) {      
+    var name = params.data.name || null;                                    //console.log("params in cell renderer = %O", params)         
+    return name === null ? null : '<span title="'+name+'">'+name+'</span>';
 }
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
     var offset = ['admin', 'super', 'editor'].indexOf(userRole) === -1 ? 0 : 50;
+    if (gParams.curFocus === 'locs') { offset = offset + 60; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
@@ -1816,16 +1828,6 @@ function sortTaxonRows(a, b) {
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }  /* End sortTaxonRows */
-/** Adds tooltip to Tree cells */
-function innerCellRenderer(params) {      
-    var name = params.data.name || null;                                    //console.log("params in cell renderer = %O", params)         
-    return name === null ? null : '<span title="'+name+'">'+name+'</span>';
-}
-/** Adds tooltip to Interaction row cells */
-function addToolTipToCells(params) {
-    var value = params.value || null;
-    return value === null ? null : '<span title="'+value+'">'+value+'</span>';
-}
 /** ------ Edit Column ---------- */
 function isNotEditor() {  
     return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
@@ -2785,8 +2787,9 @@ function finishGridAndUiLoad() {
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
  * column only filters the leaf nodes, by design. It is not useful here.)
- * Hides the filter button on the 'edit', 'count', and 'map' columns.
  * Hides the sort icons for the 'edit' and 'map' columns.
+ * Hides the filter button on the 'edit' and 'count' columns.
+ *    Also hides for the map, elevation, latitude, longitude location columns.
  */
 function hideUnusedColFilterMenus() {
     $('.ag-header-cell-menu-button.name').hide();
@@ -2800,6 +2803,10 @@ function hideUnusedColFilterMenus() {
     $('div[colId="edit"] .ag-sort-none-icon').hide();
     $('div[colId="edit"] .ag-sort-ascending-icon').hide();
     $('div[colId="edit"] .ag-sort-descending-icon').hide();
+    /* Hides filters for these loc data columns */
+    $('.ag-header-cell-menu-button.elev').hide();
+    $('.ag-header-cell-menu-button.lat').hide();
+    $('.ag-header-cell-menu-button.lng').hide();
 }
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
