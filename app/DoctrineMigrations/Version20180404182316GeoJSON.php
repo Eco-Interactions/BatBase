@@ -23,11 +23,13 @@ class Version20180404182316GeoJSON extends AbstractMigration
         $this->addSql('ALTER TABLE geo_json ADD CONSTRAINT FK_6F200A456505CAD1 FOREIGN KEY (loc_id) REFERENCES location (id)');
         $this->addSql('ALTER TABLE geo_json ADD CONSTRAINT FK_6F200A45DE12AB56 FOREIGN KEY (created_by) REFERENCES `user` (id)');
         $this->addSql('ALTER TABLE geo_json ADD CONSTRAINT FK_6F200A4516FE72E1 FOREIGN KEY (updated_by) REFERENCES `user` (id)');
+        $this->addSql('ALTER TABLE geo_json ADD center_point VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN type VARCHAR(255) NOT NULL AFTER loc_id;');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN coordinates LONGTEXT NOT NULL AFTER type;');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN created_by INT DEFAULT NULL AFTER created;');
         $this->addSql('ALTER TABLE geo_json MODIFY COLUMN updated_by INT DEFAULT NULL AFTER updated;');
-
+        $this->addSql('ALTER TABLE geo_json MODIFY COLUMN center_point VARCHAR(255) DEFAULT NULL AFTER type;');
+    
         $this->addSql('ALTER TABLE location ADD iso_code VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE location MODIFY COLUMN iso_code VARCHAR(255) DEFAULT NULL AFTER description;');
     }

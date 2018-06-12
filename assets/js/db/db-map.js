@@ -14,7 +14,7 @@ import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
 let geoJson, locations, map, showMap, popups = {};
-const dataKey = 'Live for justice!!!!!!!!!! <3';
+const dataKey = 'Live for justice!!!!!! <3<3';
 
 initDb();
 requireCss();
@@ -47,7 +47,6 @@ function initDb() {
 function clearIdbCheck(storedKey) { console.log('clearing Idb? ', storedKey === undefined);
     if (storedKey) { return getGeoJsonData(); } 
     idb.clear();                                                                //console.log('actually clearing');
-    idb.set(dataKey, true);
     downloadGeoJson();
 }
 function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
@@ -61,9 +60,10 @@ function storeGeoJson(geoData) {                                                
 function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
     _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
 }
-function storeServerGeoJson(data) {                                             //console.log('server geoJson = %O', data.geoJson);
+function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
     idb.set('geoJson', data.geoJson);
     storeGeoJson(data.geoJson);
+    idb.set(dataKey, true);
 }
 /**
  * Loops through the passed data object to parse the nested objects. This is 

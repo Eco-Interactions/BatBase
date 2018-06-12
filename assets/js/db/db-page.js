@@ -27,7 +27,7 @@ import * as agGrid from '../../grid/ag-grid.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey = 'Live for Justice!!!!!!!!!!!! <3';
+const dataKey = 'Live for Justice!!!!!!! <3<3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();
@@ -2833,7 +2833,7 @@ function sortDataTree(tree) {
     } 
 } /* End sortDataTree */
 /** Alphabetizes array via sort method. */
-function alphaEntityNames(a, b) {                                           //console.log("alphaSrcNames a = %O b = %O", a, b);
+function alphaEntityNames(a, b) {                                               //console.log("alphaSrcNames a = %O b = %O", a, b);
     var x = a.displayName.toLowerCase();
     var y = b.displayName.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
