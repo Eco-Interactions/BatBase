@@ -44,7 +44,7 @@ function fixLeafletBug() {
 function initDb() {
     idb.get(dataKey).then(clearIdbCheck);
 }
-function clearIdbCheck(storedKey) { console.log('clearing Idb? ', storedKey === undefined);
+function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
     if (storedKey) { return getGeoJsonData(); } 
     idb.clear();                                                                //console.log('actually clearing');
     downloadGeoJson();
@@ -133,7 +133,7 @@ function addMapTiles() {
  * marker has a popup with either the location name and the country, just the  
  * country or region name. Locations without gps data are added to markers at  
  * the country level with "Unspecified" as the location name. Inside the popups
- * is a "Location Summary" button that will replace the name popup with a 
+ * is a "Location" button that will replace the name popup with a 
  * summary of the interactions at the location.
  */
 function addInteractionMarkersToMap() {
@@ -501,5 +501,5 @@ function buildToGridButton(loc) {
 }
 function showLocGridView(loc) {
     console.log('Switch to grid view and show location.');
-    db_page.showLocInDataGrid(loc.id);
+    db_page.showLocInDataGrid(loc);
 }

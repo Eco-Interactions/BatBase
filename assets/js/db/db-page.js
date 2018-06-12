@@ -893,7 +893,7 @@ function getLocChildData(childId) {
  * data into grid rows and load the grid @transformLocDataAndLoadGrid.
  * Note: This is also the entry point for filter-related grid rebuilds.
  */
-function buildLocSearchUiAndGrid(locTree) {                                 //console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
+function buildLocSearchUiAndGrid(locTree) {                                     //console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
     transformLocDataAndLoadGrid(locTree);
     loadLocComboboxes();
 }
@@ -905,7 +905,6 @@ function loadLocComboboxes() {
     var locOpts = buildLocSelectOpts();
     var selElems = buildLocSelects(locOpts);
     clearCol2();        
-    selectNoneVals(locOpts);
     $('#opts-col2').append(selElems);
     setSelectedLocVals();
 }/** Builds arrays of options objects for the location comboboxes. */
@@ -913,9 +912,7 @@ function buildLocSelectOpts() {
     var processedOpts = { Region: [], Country: [] };
     var opts = { Region: [], Country: [] };  
     gridOptions.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
-    sortLocOpts();
-    removeTopRegionIfFiltering();
-    addAllAndNoneOpts();                                                        //console.log('opts = %O', opts);
+    modifyOpts();
     return opts; 
     /**
      * Recurses through the tree and builds a option object for each unique 
@@ -943,35 +940,53 @@ function buildLocSelectOpts() {
         }
     }
     /** 
-     * When filtering grid by country, only include the option for the direct 
-     * region parent.
+     * If both top & sub regions are in the grid, only the sub-region opt is included.
+     * If the Region or Country aren't in the grid, they are added as options here.
+     * Alphabetizes the options.
+     * Adds an 'all' option when there are multiple regions and/or countries. 
+     * Added the ids of added loc opts to the selected-options obj.
      */
-    function removeTopRegionIfFiltering() {  
-        if (!gParams.selectedOpts || !gParams.selectedOpts.country) { return; }
-        if (opts.Region.length === 2) {  
-            opts.Region = opts.Region.filter(function(region) {
-                return region.value === gParams.selectedOpts.region;
-            });  
-        }
+    function modifyOpts() {  
+        if (!gParams.openRows.length) { return; } //!gParams.selectedOpts && 
+        if (opts.Region.length === 2) { return rmvTopRegion(); }        
+        addMissingOpts();
+        sortLocOpts();
+        addAllOption();
+        selectAddedVals(opts);        
     }
-    /**
-     * If there are no options for a location type, add a 'none' option. 
-     * Otherwise, add one for 'all'. 
-     */
-    function addAllAndNoneOpts() {
+    function addMissingOpts() {                                                 console.log('open rows = %O', gParams.openRows);
+        // if (gParams.openRows.length !== 1) { return; }
+        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  console.log('selected loc = %O', selLoc);
+        if (!opts.Country.length) { opts.Country.push(buildOpt(selLoc.country)); }
+        if (!opts.Region.length) { opts.Region.push(buildOpt(selLoc.region)); }
+    }
+    function buildOpt(loc) {
+        return { value: loc.id, text: loc.displayName };
+    }         
+    /** Only include sub-region when both it and the top region are in the grid. */
+    function rmvTopRegion() {
+        opts.Region = opts.Region.filter(function(region) {
+            return region.value === gParams.selectedOpts.region;
+        });             
+    }
+    /** Adds an 'all' option when there are multiple regions and/or countries. */
+    function addAllOption() {
         for (var type in opts) {                                                //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
-            var option = opts[type].length === 0 ? checkSelectedVals(type) 
-                : (opts[type].length > 1 ? {value: 'all', text: '- All -'} : null);   
+            var option = (opts[type].length > 1 ? 
+                {value: 'all', text: '- All -'} : null);   
             if (option) { opts[type].unshift(option); }
         }
     } 
 } /* End buildLocSelectOpts */
-function checkSelectedVals(type) {
-    if (gParams.selectedOpts && gParams.selectedOpts[type]) {
-        var loc = getDetachedRcrd(gParams.selectedOpts[type]);
-        return { value: loc.id, text: loc.displayName };
-    }
-    return {value: 'none', text: '- None -'};
+function selectAddedVals(locOpts) {
+    var sel = gParams.selectedOpts || createSelectedOptsObj();  
+    for (var type in locOpts) {
+        if (locOpts[type].length === 1) { sel[type] = locOpts[type][0].value; }
+    }          
+}
+function createSelectedOptsObj() {
+    gParams.selectedOpts = {};
+    return gParams.selectedOpts;
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
@@ -986,17 +1001,6 @@ function buildLocSelects(locOptsObj) {
         selElems.push(lblElem);
     }
     return selElems;
-}
-function selectNoneVals(locOpts) {
-    var sel = gParams.selectedOpts || createSelectedOptsObj();
-    for (var type in locOpts) {
-        if (locOpts[type][0].value === 'none') { sel[type] = 'none'; }
-    }          
-}
-/** If selectedOpts is undefined, add it as an empty object. */
-function createSelectedOptsObj() {
-    gParams.selectedOpts = {};
-    return gParams.selectedOpts;
 }
 function setSelectedLocVals() {                                                 console.log("openRows = %O", gParams.openRows);           
     var selId;
@@ -1749,12 +1753,12 @@ function getColumnDefs(mainCol) {
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
-            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
             {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
+            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
 }
 /** Adds tooltip to Interaction row cells */
