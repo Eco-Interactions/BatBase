@@ -81,7 +81,8 @@ export function updateGeoJsonData(argument) { //TODO: When db_sync checks for en
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom) {                                             
     const loc = locations[id];                                                  console.log('show loc = %O, zoom = %s', loc, zoom)
-    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId, noGeoDataErr);       //console.log('point = %s', point);
+    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
+    if (!latLng) { return noGeoDataErr(); }
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
     popup.setContent(getLocationSummaryHtml(loc, null));  
     popup.options.autoClose = false;
@@ -89,7 +90,7 @@ export function showLoc(id, zoom) {
     map.setView(latLng, zoom, {animate: true});  
 
     function noGeoDataErr() {
-        // const geoData = JSON.parse(geoJson[id]);                                console.log('geoData = %O', geoData);
+        // const geoData = JSON.parse(geoJson[id]);                             console.log('geoData = %O', geoData);
         console.log('###### No geoJson found for geoJson [%s] ###########', id);
     }
 }
@@ -175,11 +176,11 @@ function addInteractionMarkersToMap() {
             buildLocationMarkers(locIntCnt, null, loc);
         }
         function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
-            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId, logNoGeoJsonError);       //console.log('        latLng = ', latLng)
-            if (!latLng) { return; }
+            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);            //console.log('        latLng = ', latLng)
+            if (!latLng) { return logNoGeoJsonError(loc); }
             addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
         }
-        function logNoGeoJsonError() {
+        function logNoGeoJsonError(loc) {
             if (!loc.interactions.length) { return null; }
             intCnt += loc.interactions.length;
             ++subCnt;
@@ -187,14 +188,13 @@ function addInteractionMarkersToMap() {
         }
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
-function getCenterCoordsOfLoc(loc, geoJsonId, noGeoDataErrFunc) { 
-    if (!geoJsonId) { return noGeoDataErrFunc(); }                              //console.log('geoJson obj = %O', geoJson[geoJsonId]);
+function getCenterCoordsOfLoc(loc, geoJsonId) { 
+    if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
     const locGeoJson = JSON.parse(geoJson[geoJsonId]);                          //console.log('        locGeoJson = %O', locGeoJson);
     return locGeoJson.centerPoint ? 
         formatPoint(locGeoJson.centerPoint) 
         : getLocCenterPoint(loc, locGeoJson);
-
-} /* End getCenterCoordsOfLoc */
+} 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
 function formatPoint(point) {                                                   //console.log('point = ', point)
     let array = JSON.parse(point); 
@@ -390,10 +390,11 @@ function buildLocDetailsHtml(loc, subCnt) {
     const name = getLocNameHtml(loc);
     const cnt = ifCountryGetIntCnt(loc);
     const subs = getSubLocsWithoutGpsData(subCnt);
+    const pLocData = (cnt||subs) ? [cnt, subs].filter(el=>el).join('<br>')+'<br>' : false;
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
     const bats = getBatsCitedHtml(loc);  
-    return name + [cnt, subs, coords, habType, bats].filter(el => el).join('<br>');  
+    return name + [pLocData, coords, habType, bats].filter(el => el).join('<br>');  
 }
 function isRegionOrCountry(loc) {
     const locType = loc.locationType.displayName;  
@@ -406,7 +407,7 @@ function ifCountryGetIntCnt(loc) {
 }
 function getSubLocsWithoutGpsData(cnt) {
     if (!cnt) { return false; }
-    return `Sub-Locations without GPS data: ${cnt}<br>`; 
+    return `Sub-Locations without GPS data: ${cnt}`; 
 }
 function getCoordsHtml(loc) {
     const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
@@ -425,7 +426,7 @@ function getHabTypeHtml(loc) {
 function getAllHabitatsWithin(loc) {                                            //console.log('getting habitats for = %O', loc);
     const habitats = {};
     addHabitatsForLocAndChildren(loc.id);
-    return Object.keys(habitats).length ? buildHabHtml() : ''; 
+    return Object.keys(habitats).length ? buildHabHtml() : 'Habitat Types:'; 
 
     function addHabitatsForLocAndChildren(id) { 
         let loc = locations[id]; 
@@ -452,7 +453,7 @@ function getBatsCitedHtml(loc) {
     const bats = getTopThreeReportStr(allBats);
     return `Cited bats: <b>${bats}</b>`;
     
-    function getAllBatsWithin(id) {  console.log('getAllBatsWithin = ', id)
+    function getAllBatsWithin(id) {  
         const loc = locations[id];
         if (loc.interactions.length) { addBats(loc.interactions); }
         if (loc.children.length) { loc.children.forEach(getAllBatsWithin); }

@@ -558,7 +558,7 @@ function addInteractionTotalsToLocs(locs) {
 
     function getTotalInteractionCount(loc) {    
         let ttl = loc.interactions.length;
-        if (!loc.children) { return ttl; }
+        if (!loc.children.length) { return ttl; }
         loc.children.forEach(function(id) {
             let child = locs[id];
             ttl += getTotalInteractionCount(child);

@@ -922,15 +922,16 @@ function buildLocSelectOpts() {
         var rowData = row.data;  
         if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
         if (rowData.type === 'Region' || rowData.type === 'Country') {
-            getLocOpts(rowData, rowData.name, rowData.type); 
+            buildLocOpt(rowData, rowData.name, rowData.type); 
         }
         if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
     }
     /** If the location has interactions an option object is built for it. */
-    function getLocOpts(rowData, name, type) {
+    function buildLocOpt(rowData, name, type) {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
         var id = gParams.data[_util.lcfirst(type) + "Names"][name];             
+        if (gParams.openRows.indexOf(id) !== -1) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
     }
@@ -961,12 +962,15 @@ function buildLocSelectOpts() {
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
     function buildOpt(loc, type) {
-        const sel = gParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : 'none';
         const txt = loc && loc[type] ?  loc[type].displayName : '- None -';
-        sel[type] = val;
+        addToSelectedObj(loc[type].id, type);
         return { value: val, text: txt };
     }         
+    function addToSelectedObj(id, type) {
+        const sel = gParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
+        sel[type] = id;
+    }
     /** Alphabetizes the options. */
     function sortLocOpts() {
         for (let type in opts) {
