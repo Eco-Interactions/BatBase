@@ -9,8 +9,9 @@
  *   getDataStorage
  *   populateStorage
  *   removeFromStorage
- *   stripString
  *   sendAjaxQuery
+ *   stripString
+ *   snapshot
  *   ucfirst 
 */
 let dataStorage;
@@ -37,6 +38,9 @@ export function stripString(text) {
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
 }
 /*---------- Object Helpers ----------------------------------------------*/
+export function snapshot(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
 // function alphaProperties(obj) {
 //     var sortable=[];
 //     var returnObj = {};

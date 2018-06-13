@@ -322,7 +322,7 @@ function fillTree(focus, curTree, intRcrds) {
     /** Replace the interaction ids with their interaction records. */
     function replaceInteractions(interactionsAry) {                         //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
         return interactionsAry.map(function(intId){
-            if (typeof intId === "number") {                                //console.log("new record = %O",  JSON.parse(JSON.stringify(intRcrds[intId])));
+            if (typeof intId === "number") {                                //console.log("new record = %O",  _util.snapshot(intRcrds[intId]));
                 return fillIntRcrd(getDetachedRcrd(intId, intRcrds)); 
             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
         });
@@ -934,56 +934,54 @@ function buildLocSelectOpts() {
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
     }
+    /** Handles all modification of the location options. */
+    function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _util.snapshot(opts));
+        if (opts.Region.length === 2) { rmvTopRegion(); }        
+        addMissingOpts();
+        sortLocOpts();
+        addAllOptions();
+    }
+    /** 
+     * If both top & sub regions are in the grid, only the sub-region opt is 
+     * included, unless the top region is the location being filtered on. 
+     */
+    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, gParams.selectedOpts)
+        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
+        if (!selLoc.parent) { return; }
+        opts.Region = opts.Region.filter(function(region) {
+            return region.value == gParams.selectedOpts.region;
+        });             
+    }
+    /** If the Region or Country aren't in the grid, they are added as options here. */
+    function addMissingOpts() {                                                 
+        if (!gParams.openRows.length && !gParams.selectedOpts) { return; }
+        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
+        if (!opts.Country.length) { opts.Country.push(buildOpt(selLoc, "country")); }
+        if (!opts.Region.length) { opts.Region.push(buildOpt(selLoc, "region")); }
+    }
+    /** build the new opts and adds their loc ids to the selected-options obj. */
+    function buildOpt(loc, type) {
+        const sel = gParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
+        const val = loc && loc[type] ?  loc[type].id : 'none';
+        const txt = loc && loc[type] ?  loc[type].displayName : '- None -';
+        sel[type] = val;
+        return { value: val, text: txt };
+    }         
+    /** Alphabetizes the options. */
     function sortLocOpts() {
-        for (var type in opts) {
+        for (let type in opts) {
             opts[type] = opts[type].sort(alphaOptionObjs); 
         }
     }
-    /** 
-     * If both top & sub regions are in the grid, only the sub-region opt is included.
-     * If the Region or Country aren't in the grid, they are added as options here.
-     * Alphabetizes the options.
-     * Adds an 'all' option when there are multiple regions and/or countries. 
-     * Added the ids of added loc opts to the selected-options obj.
-     */
-    function modifyOpts() {  
-        if (!gParams.openRows.length) { return; } //!gParams.selectedOpts && 
-        if (opts.Region.length === 2) { return rmvTopRegion(); }        
-        addMissingOpts();
-        sortLocOpts();
-        addAllOption();
-        selectAddedVals(opts);        
-    }
-    function addMissingOpts() {                                                 console.log('open rows = %O', gParams.openRows);
-        // if (gParams.openRows.length !== 1) { return; }
-        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  console.log('selected loc = %O', selLoc);
-        if (!opts.Country.length) { opts.Country.push(buildOpt(selLoc.country)); }
-        if (!opts.Region.length) { opts.Region.push(buildOpt(selLoc.region)); }
-    }
-    function buildOpt(loc) {
-        return { value: loc.id, text: loc.displayName };
-    }         
-    /** Only include sub-region when both it and the top region are in the grid. */
-    function rmvTopRegion() {
-        opts.Region = opts.Region.filter(function(region) {
-            return region.value === gParams.selectedOpts.region;
-        });             
-    }
     /** Adds an 'all' option when there are multiple regions and/or countries. */
-    function addAllOption() {
-        for (var type in opts) {                                                //console.log("addAllAndNoneOpts for %s = %O", selName, opts[selName])
-            var option = (opts[type].length > 1 ? 
-                {value: 'all', text: '- All -'} : null);   
+    function addAllOptions() {
+        for (let type in opts) {                                                
+            let option = opts[type].length > 1 ? 
+                {value: 'all', text: '- All -'} : null;   
             if (option) { opts[type].unshift(option); }
         }
     } 
 } /* End buildLocSelectOpts */
-function selectAddedVals(locOpts) {
-    var sel = gParams.selectedOpts || createSelectedOptsObj();  
-    for (var type in locOpts) {
-        if (locOpts[type].length === 1) { sel[type] = locOpts[type][0].value; }
-    }          
-}
 function createSelectedOptsObj() {
     gParams.selectedOpts = {};
     return gParams.selectedOpts;
@@ -1002,9 +1000,9 @@ function buildLocSelects(locOptsObj) {
     }
     return selElems;
 }
-function setSelectedLocVals() {                                                 console.log("openRows = %O", gParams.openRows);           
+function setSelectedLocVals() {                                                 
     var selId;
-    var selected = gParams.selectedOpts;                                        console.log("selected in setSelectedLocVals = %O", selected);
+    var selected = gParams.selectedOpts;                                        //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(function(selName) {
         selId = '#sel' + _util.ucfirst(selName);
         $(selId).val(selected[selName]); 
@@ -1123,7 +1121,7 @@ function showLocOnMap(geoJsonId, zoom) {
 }
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
-    rebuildLocTree([loc]);
+    rebuildLocTree([loc.id]);
     $('#sel-realm').val('tree');
 }
 /*------------------Source Search Methods ------------------------------------*/
@@ -1506,7 +1504,8 @@ function updateLocSearch() {                                                    
     var selTypeMap = { selCountry: "country", selRegion: "region" };
     var selType = selTypeMap[selElemId];
 
-    gParams.selectedOpts = getSelectedVals(selVal, selType);
+    gParams.selectedOpts = getSelectedVals(selVal, selType);                    console.log('selected = %O', _util.snapshot(gParams.selectedOpts));
+    gParams.openRows = [selVal];
     filterGridOnLocCol(selVal, selType);
     /** Retuns the vals to select. If 'country' was selected, add it's region. */
     function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
@@ -1526,7 +1525,7 @@ function updateLocSearch() {                                                    
  * search option dropdowns from the displayed tree data in the grid after filter.
  */
 function filterGridOnLocCol(selVal, colName) {                                  //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-    var filterVal = gParams.rcrdsById[selVal].displayName.split('[')[0].trim(); 
+    var filterVal = gParams.rcrdsById[selVal].displayName.trim(); 
     var colModel = getColFilterModel(filterVal);
     gridOptions.api.getFilterApi(colName).setModel(colModel);
     buildFilteredLocTree(selVal, colName);
@@ -1569,6 +1568,7 @@ function buildFilteredLocTree(selVal, colName) {
     }
     /** Expands the parent rows of a selected location. */
     function addParentOpenRows(node) {
+        if (node.data.name === "Central & South America-Forest") { return; }
         node.expanded = true;
         node.data.open = true;
         if (node.data.id == selVal) { selectedOpened = true; }
@@ -2097,7 +2097,7 @@ function showInteractionsUpdatedToday() {
  * since the datetime specified by the user.
  */
 function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("\nfilterInteractionsUpdatedSince called.");
-    var rowData = JSON.parse(JSON.stringify(gParams.rowData));
+    var rowData = _util.snapshot(gParams.rowData);
     var fltrSince = dateStr || gParams.timeFltr;
     var sinceTime = new Date(fltrSince).getTime();                          
     var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
@@ -2238,6 +2238,7 @@ UniqueValuesFilter.prototype.createApi = function () {
         selectValue: function (value) {
             model.selectValue(value);
             that.refreshVirtualRows();
+            expandTree();
         },
         isValueSelected: function (value) {
             return model.isValueSelected(value);
@@ -2277,7 +2278,7 @@ UniqueValuesFilter.prototype.onAnyFilterChanged = function () {
     var colFilterModel = this.model.getModel();                             
     if ( colFilterModel === null ) { return; }
     var col = Object.keys(colFilterModel)[0];
-    var colFilterIconName = col + 'ColFilterIcon';                          //console.log("colFilterIconName = %O", colFilterIconName)
+    var colFilterIconName = col + 'ColFilterIcon';                              //console.log("colFilterIconName = %O", colFilterIconName)
     var selectedStr = colFilterModel[col].length > 0 ? colFilterModel[col].join(', ') : "None";
 
     $('a[name=' + colFilterIconName + ']').attr("title", "Showing:\n" + selectedStr);
@@ -2756,7 +2757,7 @@ function clearCol2() {
 function getDetachedRcrd(rcrdKey, rcrds) {                                  
     var orgnlRcrds = rcrds || gParams.rcrdsById;                            //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
     try {
-       return JSON.parse(JSON.stringify(orgnlRcrds[rcrdKey]));
+       return _util.snapshot(orgnlRcrds[rcrdKey]);
     }
     catch (e) { 
        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
@@ -2860,23 +2861,25 @@ function alphaSortVals(a, b) {
  */
 function getIntRowData(intRcrdAry, treeLvl, idx) {
     if (intRcrdAry) {
-        return intRcrdAry.map(function(intRcrd){                            //console.log("intRcrd = %O", intRcrd);
+        return intRcrdAry.map(function(intRcrd){                                //console.log("intRcrd = %O", intRcrd);
             return buildIntRowData(intRcrd, treeLvl, idx);
         });
     }
     return [];
 }
 /*--------------------- Grid Button Methods ------------------------------*/
-function toggleExpandTree() {                                               //console.log("toggleExpandTree")
+function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
     var expanded = $('#xpand-all').data('xpanded');
-    if (expanded) { 
-        gridOptions.api.collapseAll();
-        $('#xpand-all').html("Expand All");
-    } else { 
-        gridOptions.api.expandAll();    
-        $('#xpand-all').html("Collapse All");
-    }
     $('#xpand-all').data("xpanded", !expanded);
+    return expanded ? collapseTree() : expandTree();
+}
+function expandTree() {
+    gridOptions.api.expandAll();    
+    $('#xpand-all').html("Collapse All");
+}
+function collapseTree() {
+    gridOptions.api.collapseAll();
+    $('#xpand-all').html("Expand All");
 }
 /**
  * Resets button based on passed boolean xpanded state. True for fully 
@@ -2899,11 +2902,11 @@ function collapseTreeByOne() {
  * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
  */
 function toggleTreeByOneLvl(opening) {
-    var gridModel = gridOptions.api.getModel();                             //console.log("gridModel = %O", gridModel);
+    var gridModel = gridOptions.api.getModel();                                 //console.log("gridModel = %O", gridModel);
     var bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
-    gridModel.rowsToDisplay.forEach(function(row) {                         //console.log("rowToDisplay = %O", row)
+    gridModel.rowsToDisplay.forEach(function(row) {                             //console.log("rowToDisplay = %O", row)
         if (!opening && !isNextOpenLeafRow(row)) { return; }
         row.expanded = opening;
         row.data.open = opening;
