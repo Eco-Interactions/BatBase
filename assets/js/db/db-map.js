@@ -415,45 +415,81 @@ function getCoordsHtml(loc) {
     coords = coords.map(c => Number(c).toFixed(6)); 
     return 'Coordinates: <b>' + coords.join(', ') +'</b>';
 }
+/** --- Habitat Types --- */
+/** Build string of 3 most reported habitats and the count of remaining reported. */
 function getHabTypeHtml(loc) {
-    const lbl = !isRegionOrCountry(loc) ? 'Habitat Type:' 
-        : 'Habitat Types: <b>(Will list types recorded within)</b>';
-    if (!loc.habitatType) { return lbl; }
-    return `${lbl} <b>${loc.habitatType.displayName}</b>`;
+    if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
+    if (!loc.habitatType) { return 'Habitat Type:'; }
+    return `Habitat: <b>${loc.habitatType.displayName}</b>`;
 }
-function getBatsCitedHtml(loc) {
-    const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
-    const ints = loc.interactions.map(id => rcrds.interaction[id]);
-    const bats = getBatsCitedHere(ints, rcrds.taxon);
-    return `Cited bats: <b>${bats}</b>`;
+function getAllHabitatsWithin(loc) {                                            //console.log('getting habitats for = %O', loc);
+    const habitats = {};
+    addHabitatsForLocAndChildren(loc.id);
+    return Object.keys(habitats).length ? buildHabHtml() : ''; 
+
+    function addHabitatsForLocAndChildren(id) { 
+        let loc = locations[id]; 
+        if (loc.interactions.length) { addLocHabitat(loc); }
+        if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }        
+    }
+    function addLocHabitat(loc) {
+        if (!loc.habitatType) { return; }
+        const name = loc.habitatType.displayName;
+        if (!habitats[name]) { habitats[name] = 0; }
+        ++habitats[name];
+    }
+    function buildHabHtml() {  console.log('habitats = %O', habitats);
+        const str = getTopThreeReportStr(habitats);  console.log
+        return `Habitats: <b>&ensp; ${str}</b>`;
+    }
 }
+/** --- Cited Bats --- */
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
-function getBatsCitedHere(ints, batRcrds) {
-    const bats = {};
-    ints.forEach(int => trackBatInteraction(int, batRcrds, bats));
-    return getReportString(bats);
-}
-function trackBatInteraction(int, rcrds, bats) {
+function getBatsCitedHtml(loc) {    
+    const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
+    const allBats = {};
+    getAllBatsWithin(loc.id);
+    const bats = getTopThreeReportStr(allBats);
+    return `Cited bats: <b>${bats}</b>`;
+    
+    function getAllBatsWithin(id) {  console.log('getAllBatsWithin = ', id)
+        const loc = locations[id];
+        if (loc.interactions.length) { addBats(loc.interactions); }
+        if (loc.children.length) { loc.children.forEach(getAllBatsWithin); }
+    }
+    function addBats(interactions) {
+        const ints = interactions.map(id => rcrds.interaction[id]);
+        ints.forEach(int => trackBatInteraction(int, rcrds.taxon, allBats));
+    }
+} /* End getBatsCitedHtml */
+function trackBatInteraction(int, rcrds, allBats) {
     let bat = rcrds[int.subject];                                               //console.log('bat = %O', bat);
     let name = buildBatName(bat);
-    if (Object.keys(bats).indexOf(name) === -1) { bats[name] = 0; }
-    ++bats[name];
+    if (Object.keys(allBats).indexOf(name) === -1) { allBats[name] = 0; }
+    ++allBats[name];
 }
 function buildBatName(bat) {
     let name = '';
     if (bat.level.displayName !== 'Species') { name += bat.level.displayName + ' '; }
     return name + bat.displayName;
 }
-function getReportString(bats) {
-    const ttl = Object.keys(bats).length;                                       
+/** ---- Habitat and Bat Helper ---- */
+/**
+ * Sorts an object with unique name keys and values with the number of time this
+ * item was present in the cited records (habitats in locs or bats in interactions). 
+ * Returns a string with the three names with the highest count, and a total of 
+ * all items (habitats/bats) counted.
+ */
+function getTopThreeReportStr(obj) {
+    const ttl = Object.keys(obj).length;                                       
     const sorted = { 1: [], 2: [], 3: [] };
     const posKeys = Object.keys(sorted);
-    for (let name in bats) {
-        sortBat(bats[name], name);
-    }                                                                           //console.log('sorted bats = %O', sorted)
-    return buildReportString(bats, sorted, ttl);
+    for (let name in obj) {
+        sortItem(obj[name], name);
+    }                                                                           //console.log('sorted habs = %O', sorted)
+    return buildReportString(obj, sorted, ttl);
 
-    function sortBat(count, name) {                                             
+    function sortItem(count, name) {                                             
         posKeys.some((pos) => {
             if (count > sorted[pos][0] || !sorted[pos][0]) {                    
                 replacePosition(count, name, pos); 
@@ -468,30 +504,28 @@ function getReportString(bats) {
     }
 } /* End getReportString */
 /** Returns string with the names of top 3 reported taxa and total taxa count. */
-function buildReportString(bats, sorted, ttl) {
-    if (ttl < 2) { return ttl ? sorted[1][1] : 
-        '(Will list bats recorded within)<br>'; }
-    return formatString();
+function buildReportString(obj, sorted, ttl) {
+    return ttl == 1 ? sorted[1][1] : formatString();
 
     function formatString() {
         const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;';
         let str = '';
-        concatBatNames();
+        concatNames();
         return finishReportString();
 
-        function concatBatNames() {
+        function concatNames() {
             for (let i = 1; i <= 3; i++) {
-                str += i === 1 ? sorted[i][1] :
-                    sorted[i].length ? ',<br>' + tabs + sorted[i][1] : '';
+                str += i === 1 ? sorted[i][1] : //+ ` </b>(${sorted[i][0]})<b>`
+                    !sorted[i].length ? '' : ',<br>' + tabs + sorted[i][1];
             }
         }
         function finishReportString() {
-            if (ttl > 3) { str += ',<br></b>' + tabs + '(' + ttl + 
-                ' total taxa cited here.)'}
-            return str + '<br>';
+            if (ttl > 3) { str += ',<br></b>' + tabs + '(' + ttl + ' total cited here.)'}
+            return str;
         } 
     }
 }
+/** --- Button to show interactions in the data-grid --- */
 function buildToGridButton(loc) {
     const bttn = _util.buildElem('input', {type: 'button',
         class:'ag-fresh grid-bttn', value: 'Show Interactions In Data-Grid'});
