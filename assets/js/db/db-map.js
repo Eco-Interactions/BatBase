@@ -155,12 +155,12 @@ function addInteractionMarkersToMap() {
      * intCnt - Total interactions for loc and all sub-locs without GPS data. 
      * subCnt - Number of sub-locs that need GPS data in order to display on map.
      */
-    function addMarkersForLocAndChildren(loc) {                                 
-        if (!loc.totalInts) { return; }                                         //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
-        let intCnt = loc.interactions.length; 
+    function addMarkersForLocAndChildren(topLoc) {                                 
+        if (!topLoc.totalInts) { return; }                                      //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
+        let intCnt = topLoc.interactions.length; 
         let subCnt = 0;
-        buildMarkersForLocChildren(loc.children);                               
-        if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, loc); }
+        buildMarkersForLocChildren(topLoc.children);                               
+        if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, topLoc); }
 
         function buildMarkersForLocChildren(locs) {
             locs.forEach(id => {
@@ -183,9 +183,15 @@ function addInteractionMarkersToMap() {
         }
         function logNoGeoJsonError(loc) {
             if (!loc.interactions.length) { return null; }
-            intCnt += loc.interactions.length;
+            intCnt += loc.interactions.length;  
+            if (locIsHabitatOfTopLoc(loc)) { return; }
             ++subCnt;
             // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+        }
+        function locIsHabitatOfTopLoc(loc) {
+            const subName = loc.displayName.split('-')[0];
+            const topName = topLoc.displayName;  console.log('locIsHabitatOfTopLoc? sub [%s], top [%s]', subName, topName);
+            return topName.indexOf(subName) !== -1;
         }
     } /* End addMarkersForLocAndChildren */
 } /* End addInteractionMarkersToMap */
