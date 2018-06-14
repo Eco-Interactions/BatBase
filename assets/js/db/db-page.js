@@ -27,7 +27,7 @@ import * as agGrid from '../../grid/ag-grid.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey = 'Live for Justice!!!!!!! <3<3';
+const dataKey = 'Live for Justice!!!!!!!! <3<3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();
@@ -173,10 +173,12 @@ function getFutureDevMsg() {                                                //co
 }
 /** Grid-rebuild entry point after form-window close. */
 function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
+    clearCol2();
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(null, focus);
+
 }
 /** Refactor: combine with resetSearchGrid. */
 export function initSearchGrid(focus) {                                           //console.log('resetting search grid.')
@@ -796,7 +798,7 @@ function getLocData() {
  */ 
 function initLocSearchUi(locData) {
     addLocDataToGridParams(locData);
-    if (!$("#map-view").length) { buildLocViewHtml(); }  
+    if (!$("#grid-view").length) { buildLocViewHtml(); }  
     setLocView();  
     onLocViewChange();
     
@@ -879,7 +881,7 @@ function buildLocTree(topLocs) {                                                
     gParams.curTree = sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
-function getLocChildren(rcrd) {     
+function getLocChildren(rcrd) {     if (rcrd.displayName == 'Afghanistan') { console.log('Afghanistan = %O', rcrd);}
     if (rcrd.children.length > 0) { 
         rcrd.children = rcrd.children.map(getLocChildData);
     }
@@ -1855,8 +1857,9 @@ function uneditableEntityRow(params) {                                          
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
-    var editPencil = `<img src="bundles/app/images/eif.pencil.svg" id="edit`+entity+id+`"
-        class="grid-edit" title="Edit `+entity+` `+id+`" alt="Edit `+entity+`">`;
+    const path = require('../../css/images/eif.pencil.svg');
+    var editPencil = `<img src=${path} id="edit${entity}${id}"
+        class="grid-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-grid').off('click', '#edit'+entity+id);
     $('#search-grid').on(
         'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _util.lcfirst(entity)));

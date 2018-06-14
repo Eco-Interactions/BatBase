@@ -8,13 +8,13 @@
  *   showLoc
  *   updateGeoJsonData
  */
-import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
+import * as idb from 'idb-keyval'; //set, get, del, clear
 import 'leaflet.markercluster';
 
 let geoJson, locations, map, showMap, popups = {};
-const dataKey = 'Live for justice!!!!!! <3<3';
+const dataKey = 'Live for justice!!!!!!!! <3<3';
 
 initDb();
 requireCss();
@@ -75,7 +75,8 @@ function parseData(data) {
     return data;
 }
 export function updateGeoJsonData(argument) { //TODO: When db_sync checks for entity updates, send geoJson updates here
-    // body...
+    geoJson = false;
+    downloadGeoJson();
 }
 /** ======================= Show Loc on Map ================================= */
 /** Centers the map on the location and zooms according to type of location. */
@@ -202,7 +203,7 @@ function formatPoint(point) {                                                   
 }
 function getLocCenterPoint(loc, locGeoJson) {
     const feature = buildFeature(loc, locGeoJson);
-    const polygon = L.geoJson(feature);//.addTo(map);
+    const polygon = L.geoJson(feature);
     console.log('### New Center Coordinates ### "%s" => ', loc.displayName, polygon.getBounds().getCenter());
     return polygon.getBounds().getCenter(); 
 } /* End getLocCenterPoint */
