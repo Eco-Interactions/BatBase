@@ -128,7 +128,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
             "Bolivia" => [ -16.28853953, -63.566076518500005 ],
             "Tanzania, United Republic of" => [ -6.3585513309999095, 34.885211829 ],
             "Northern Mariana Islands" => [ 17.3330345725, 145.3855086595 ],
-            "Micronesia, Federated States of" => [ 5.346869207500125, 150.555186394 ],
+            "Micronesia, Federated States of" => [ 6.146869207500125, 160.395186394 ],
             "Virgin Islands, U.S." => [ 18.034682316, -64.8004451905 ],
             "Curacao" => [ 12.216416734, -68.955738899 ],
             "Dominica" => [ 15.417832748999999, -61.369089322 ],

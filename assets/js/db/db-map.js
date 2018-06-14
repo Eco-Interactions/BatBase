@@ -190,7 +190,7 @@ function addInteractionMarkersToMap() {
         }
         function locIsHabitatOfTopLoc(loc) {
             const subName = loc.displayName.split('-')[0];
-            const topName = topLoc.displayName;  console.log('locIsHabitatOfTopLoc? sub [%s], top [%s]', subName, topName);
+            const topName = topLoc.displayName;  
             return topName.indexOf(subName) !== -1;
         }
     } /* End addMarkersForLocAndChildren */

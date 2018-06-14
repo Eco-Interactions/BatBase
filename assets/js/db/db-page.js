@@ -882,7 +882,7 @@ function buildLocTree(topLocs) {                                                
     gParams.curTree = sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
-function getLocChildren(rcrd) {     if (rcrd.displayName == 'Afghanistan') { console.log('Afghanistan = %O', rcrd);}
+function getLocChildren(rcrd) {   
     if (rcrd.children.length > 0) { 
         rcrd.children = rcrd.children.map(getLocChildData);
     }
@@ -934,9 +934,12 @@ function buildLocSelectOpts() {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
         var id = gParams.data[_util.lcfirst(type) + "Names"][name];             
-        if (gParams.openRows.indexOf(id) !== -1) { addToSelectedObj(id, type); }
+        if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
+    }
+    function isOpenRow(id) {  
+        return gParams.openRows.indexOf(id) !== -1
     }
     /** Handles all modification of the location options. */
     function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _util.snapshot(opts));
@@ -967,7 +970,8 @@ function buildLocSelectOpts() {
     function buildOpt(loc, type) {                                              //console.log('building opt for [%s]. loc = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : 'none';
         const txt = loc && loc[type] ?  loc[type].displayName : '- None -';
-        addToSelectedObj(val, type);  
+        addToSelectedObj(val, _util.ucfirst(type));  
+        if (val !== 'none') { gParams.openRows.push(val); }
         return { value: val, text: txt };
     }         
     function addToSelectedObj(id, type) {
@@ -982,11 +986,12 @@ function buildLocSelectOpts() {
     }
     /** Adds an 'all' option when there are multiple regions and/or countries. */
     function addAllOptions() {
-        for (let type in opts) {                                                
-            let option = opts[type].length > 1 ? 
-                {value: 'all', text: '- All -'} : null;   
-            if (option) { opts[type].unshift(option); }
-        }
+        for (let type in opts) {               
+            let firstVal = opts[type][0].value;
+            if (firstVal == 'none' || isOpenRow(firstVal)) { continue; }                                
+            opts[type].unshift({value: 'all', text: '- All -'});
+            addToSelectedObj('all', type);
+        }                                                          
     } 
 } /* End buildLocSelectOpts */
 function createSelectedOptsObj() {
@@ -1011,7 +1016,7 @@ function setSelectedLocVals() {
     var selId;
     var selected = gParams.selectedOpts;                                        //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(function(selName) {
-        selId = '#sel' + _util.ucfirst(selName);
+        selId = '#sel' + selName;
         $(selId).val(selected[selName]); 
         $(selId).find('option[value="all"]').hide();
         $(selId).find('option[value="none"]').hide();
@@ -1500,87 +1505,29 @@ function getRelatedTaxaToSelect(selTaxonObj) {                                  
     }
 } /* End getRelatedTaxaToSelect */
 /*------------------ Location Filter Updates -----------------------------*/
-/**
- * When a location dropdown is changed, the column for that dropdown is filtered 
- * and the grid is updated with the filtered data tree. Selected values are 
- * derived and stored @getSelectedVals.      
- * */
-function updateLocSearch() {                                                    //console.log("\n\n\n\n-----updateLocSearch 'this' = ", $(this));
-    var selElemId = $(this).attr("id");
-    var selVal = $(this).val();
-    var selTypeMap = { selCountry: "country", selRegion: "region" };
-    var selType = selTypeMap[selElemId];
+function updateLocSearch() {
+    const selVal = parseInt($(this).val());
+    const locType = $(this).attr("id").split('sel')[1];
+    gParams.selectedOpts = getSelectedVals(selVal, locType);
+    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(gParams.selectedOpts));
+    updateFilter();
 
-    gParams.selectedOpts = getSelectedVals(selVal, selType);                    console.log('selected = %O', _util.snapshot(gParams.selectedOpts));
-    gParams.openRows = [selVal];
-    filterGridOnLocCol(selVal, selType);
-    /** Retuns the vals to select. If 'country' was selected, add it's region. */
     function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
-        var selected = {};
-        if (type === "country") { selectRegion(val); }
+        const selected = {};
+        if (type === "Country") { selectRegion(val); }
         if (val !== 'none' && val !== 'all') { selected[type] = val; }
         return selected;  
 
         function selectRegion(val) {
             var loc = getDetachedRcrd(val);
-            selected["region"] = loc.region.id;
+            selected["Region"] = loc.region.id;
         }
     } /* End getSelectedVals */
+    function updateFilter() {
+        gParams.focusFltrs = [locType];
+        updateGridFilterStatusMsg();
+    }
 } /* End updateLocSearch */
-/**
- * Uses column filter to rebuild the grid. Rebuilds tree and the location
- * search option dropdowns from the displayed tree data in the grid after filter.
- */
-function filterGridOnLocCol(selVal, colName) {                                  //console.log("filterGridOnLocCol selected = %s for %s", selVal, colName);
-    var filterVal = gParams.rcrdsById[selVal].displayName.trim(); 
-    var colModel = getColFilterModel(filterVal);
-    gridOptions.api.getFilterApi(colName).setModel(colModel);
-    buildFilteredLocTree(selVal, colName);
-    loadLocComboboxes(gParams.curTree);
-    gridOptions.api.onGroupExpandedOrCollapsed();
-}
-/** When a top region is selected, it's sub-regions are also selected. */
-function getColFilterModel(filterVal) {
-    var models = {
-        "Asia": ["East Asia", "South & Southeast Asia", "West & Central Asia"],
-        "Africa": ["Africa", "Sub-Saharan Africa"],
-        "Central America": ["Central America", "Central & South America"],
-        "South America": ["South America", "Central & South America"],
-        "Unspecified": [null]
-    };
-    return models[filterVal] || [filterVal];
-}
-/**
- * Builds new tree out of displayed rows after filter. When a location has been 
- * selected, each parent row is added to the openRows collection so that the 
- * grid is displayed opened to the selected row.
- */
-function buildFilteredLocTree(selVal, colName) {
-    var gridModel = gridOptions.api.getModel();                                 //console.log("gridModel = %O", gridModel);
-    var tree = {};
-    var selectedOpened = isNaN(selVal);
-
-    gridModel.rowsToDisplay.forEach(function(topNode) {                         //console.log("rowToDisplay = %O", topNode)
-        tree[topNode.data.name] = getFilteredChildData(topNode);
-    });
-    gParams.curTree = tree;
-    /** Recurses through displayed children until finding the leaf interaction records. */
-    function getFilteredChildData(treeNode) {                                   //console.log("getHabTreeData. node = %O", treeNode);
-        if (treeNode.data.hasOwnProperty("interactionType")) { return treeNode.data; }
-        if (!selectedOpened) { addParentOpenRows(treeNode); }
-        var locNode = getDetachedRcrd(treeNode.data.id); 
-        var locNodeChildren = treeNode.childrenAfterFilter;
-        if (locNodeChildren) { locNode.children = locNodeChildren.map(getFilteredChildData); }
-        return locNode; 
-    }
-    /** Expands the parent rows of a selected location. */
-    function addParentOpenRows(node) {
-        if (node.data.name === "Central & South America-Forest") { return; }
-        node.expanded = true;
-        node.data.open = true;
-        if (node.data.id == selVal) { selectedOpened = true; }
-    }
-} /* End buildFilteredLocTree */
 /*------------------ Source Filter Updates -------------------------------*/
 /**
  * When the publication type dropdown is changed or the grid is filtered by 
@@ -2135,6 +2082,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  */
 function syncFiltersAndUi(sinceTime) {
     if (gParams.curFocus === "srcs") { applySrcFltrs(); }
+    if (gParams.curFocus === "locs") { loadLocComboboxes(); }    
     updateGridFilterStatusMsg();  
     syncTimeUpdatedRadios(sinceTime);
 }
