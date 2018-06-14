@@ -65,7 +65,7 @@ function clearDataStorage(dataKey) {
 }
 /** Updates locally stored data with any modified data since the last page load. */
 function syncStoredData(pgDataUpdatedAt) {
-    var dataUpdatedAt = _util.getDataFromStorage('dataUpdatedAt');          //console.log("dataUpdatedAt = %O", dataUpdatedAt);
+    var dataUpdatedAt = _util.getDataFromStorage('dataUpdatedAt');              //console.log("dataUpdatedAt = %O", dataUpdatedAt);
     db_sync.sync(pgDataUpdatedAt);
 }
 /** 
@@ -109,7 +109,7 @@ function addDomEventListeners() {
     $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
 function authDependentInit() {
-    userRole = $('body').data("user-role");                                 //console.log("----userRole === visitor ", userRole === "visitor")
+    userRole = $('body').data("user-role");                                     //console.log("----userRole === visitor ", userRole === "visitor")
     if (userRole === "visitor") {
         $('button[name="csv"]').prop('disabled', true);
         $('button[name="csv"]').prop('title', "Register to download.");
@@ -149,7 +149,7 @@ function initSearchState() {
 function resetGridParams() {                                              
     gParams = {}; 
     gParams.curFocus = getResetFocus();  
-    gParams.openRows = [];                                                  //console.log("gParams = %O", gParams);
+    gParams.openRows = [];                                                      //console.log("gParams = %O", gParams);
 }
 function getResetFocus() {
     var foci = ['locs', 'srcs', 'taxa'];
@@ -165,14 +165,14 @@ function setUpFutureDevInfoBttn() {
             text: 'Hover for details about future search options.'});  
     $(bttn).appendTo('#opts-col3');        
 }
-function getFutureDevMsg() {                                                //console.log("addFutureDevMsg")
+function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
     return "Future options include year and elevation range, habitat and interaction type, " +
         "as well as other criteria that would be helpful to focus the data. \n" +
         "Below is a 'Show/Hide Columns' button that will allow users to specify " +
         "the data shown in the grid and/or csv export.";
 }
 /** Grid-rebuild entry point after form-window close. */
-function resetSearchGrid(focus) {                                           //console.log('resetting search grid.')
+function resetSearchGrid(focus) {                                               //console.log('resetting search grid.')
     clearCol2();
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
@@ -181,11 +181,11 @@ function resetSearchGrid(focus) {                                           //co
 
 }
 /** Refactor: combine with resetSearchGrid. */
-export function initSearchGrid(focus) {                                           //console.log('resetting search grid.')
+export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
     resetSearchGrid(focus);
 }
 function selectSearchFocus(e, focus) { 
-    var focus = focus || $('#search-focus').val();                          //console.log("---select(ing)SearchFocus = ", focus)
+    var focus = focus || $('#search-focus').val();                              //console.log("---select(ing)SearchFocus = ", focus)
     var builderMap = { 
         "locs": buildLocationGrid, "srcs": buildSourceGrid,
         "taxa": buildTaxonGrid 
@@ -196,7 +196,7 @@ function selectSearchFocus(e, focus) {
 /**
  * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
  */
-function ifChangedFocus(focus, buildGridFunc) {                             //console.log("ifChangedFocus called. focus = ", focus)
+function ifChangedFocus(focus, buildGridFunc) {                                 //console.log("ifChangedFocus called. focus = ", focus)
     clearPreviousGrid();
     if (focus !== gParams.curFocus) {
         _util.populateStorage("curFocus", focus);
@@ -211,7 +211,7 @@ function ifChangedFocus(focus, buildGridFunc) {                             //co
         $('#opts-col2').fadeTo(100, 0);
         $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
     }
-    function emptySearchOpts() {                                            //console.log("emptying search options");
+    function emptySearchOpts() {                                                //console.log("emptying search options");
         $('#opts-col2').empty();
         $('#sort-opts').empty();
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
@@ -223,7 +223,7 @@ function ifChangedFocus(focus, buildGridFunc) {                             //co
  * When the interaction form is exited, the passed focus is selected and the 
  * grid is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-function showTodaysUpdates(focus) {                                         //console.log("showingUpdated from today")
+function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
     if (focus) { $('#search-focus').val(focus); }
     selectSearchFocus();
     window.setTimeout(function() {
@@ -241,7 +241,7 @@ export function showUpdates(focus) {
  * an ajax call gets the data which is stored @storeInteractions before being
  * sent to @fillTreeWithInteractions.    
  */
-function getInteractionsAndFillTree() {                                     //console.log("getInteractionsAndFillTree called. Tree = %O", gParams.curTree);
+function getInteractionsAndFillTree() {                                         //console.log("getInteractionsAndFillTree called. Tree = %O", gParams.curTree);
     var entityData = _util.getDataFromStorage('interaction');
     fadeGrid();
     if (entityData) { fillTreeWithInteractions(entityData); 
@@ -252,7 +252,7 @@ function getInteractionsAndFillTree() {                                     //co
  * the grid-building method chain for the current focus @buildGrid. Finally, 
  * calls @finishGridAndUiLoad for the final stage of the grid build. 
  */
-function fillTreeWithInteractions(intRcrds) {                               //console.log("fillTreeWithInteractionscalled.");
+function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
     var focus = gParams.curFocus; 
     var curTree = gParams.curTree; 
 
@@ -267,18 +267,18 @@ function fillTree(focus, curTree, intRcrds) {
     var fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     fillMethods[focus](curTree, intRcrds);
 
-    function fillTaxonTree(curTree) {                                        //console.log("fillingTaxonTree. curTree = %O", curTree);
+    function fillTaxonTree(curTree) {                                           //console.log("fillingTaxonTree. curTree = %O", curTree);
         fillTaxaInteractions(curTree);  
         fillHiddenTaxonColumns(curTree, intRcrds);
 
-        function fillTaxaInteractions(treeLvl) {                            //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
+        function fillTaxaInteractions(treeLvl) {                                //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
             for (var taxon in treeLvl) {   
                 fillTaxonInteractions(treeLvl[taxon]);
                 if (treeLvl[taxon].children !== null) { 
                     fillTaxaInteractions(treeLvl[taxon].children); }
             }
         }
-        function fillTaxonInteractions(taxon) {                             //console.log("fillTaxonInteractions. taxon = %O", taxon);
+        function fillTaxonInteractions(taxon) {                                 //console.log("fillTaxonInteractions. taxon = %O", taxon);
             var roles = ['subjectRoles', 'objectRoles'];
             for (var r in roles) {
                 taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
@@ -289,8 +289,8 @@ function fillTree(focus, curTree, intRcrds) {
      * Recurses through each location's 'children' property and replaces all 
      * interaction ids with the interaction records.
      */
-    function fillLocTree(treeBranch) {                                      //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
-        for (var curNode in treeBranch) {                                   //console.log("curNode = %O", treeBranch[curNode]);
+    function fillLocTree(treeBranch) {                                          //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
+        for (var curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
             if (treeBranch[curNode].interactions.length > 0) { 
                 treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
             if (treeBranch[curNode].children) { 
@@ -302,14 +302,14 @@ function fillTree(focus, curTree, intRcrds) {
      * direct source, then replacing its interaction id's with their records.
      */
     function fillSrcTree(curTree) { 
-        for (var srcName in curTree) {                                      //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
+        for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
             fillSrcInteractions(curTree[srcName]);
         }
         /**
          * Recurses through each source's 'children' property until all sources 
          * have any interaction ids replaced with the interaction records. 
          */
-        function fillSrcInteractions(curSrc) {                              //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+        function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
            var srcChildren = [];
             if (curSrc.isDirect) { replaceSrcInts(curSrc); }
             curSrc.children.forEach(function(childSrc){
@@ -322,9 +322,9 @@ function fillTree(focus, curTree, intRcrds) {
 
     } /* End fillSrcTree */
     /** Replace the interaction ids with their interaction records. */
-    function replaceInteractions(interactionsAry) {                         //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+    function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
         return interactionsAry.map(function(intId){
-            if (typeof intId === "number") {                                //console.log("new record = %O",  _util.snapshot(intRcrds[intId]));
+            if (typeof intId === "number") {                                    //console.log("new record = %O",  _util.snapshot(intRcrds[intId]));
                 return fillIntRcrd(getDetachedRcrd(intId, intRcrds)); 
             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
         });
@@ -357,7 +357,7 @@ function buildGrid(focus, curTree) {
     gridBuilderMap[focus](curTree);
 }
 /** Returns an interaction rowData object with flat data in grid-ready format. */
-function buildIntRowData(intRcrd, treeLvl, idx){                            //console.log("intRcrd = %O", intRcrd);
+function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log("intRcrd = %O", intRcrd);
     var rowData = {
         isParent: false,
         name: "",
@@ -414,7 +414,7 @@ function getTaxonName(taxon) {
  * Get all data needed for the Taxon-focused grid from data storage and send 
  * to @initTaxonSearchUi to begin the data-grid build.  
  */
-function buildTaxonGrid() {                                                 //console.log("Building Taxon Grid.");
+function buildTaxonGrid() {                                                     //console.log("Building Taxon Grid.");
     var data = _util.getDataFromStorage(['realm', 'taxon', 'level']); 
     if( data ) { initTaxonSearchUi(data);
     } else { console.log("Error loading taxon data from storage."); }
@@ -425,7 +425,7 @@ function buildTaxonGrid() {                                                 //co
  * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
  * Continues grid build @getInteractionsAndFillTree.  
  */
-function initTaxonSearchUi(data) {                                          //console.log("initTaxonSearchUi. data = %O", data);
+function initTaxonSearchUi(data) {                                              //console.log("initTaxonSearchUi. data = %O", data);
     var realmTaxonRcrd;
     gParams.rcrdsById = data.taxon;
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
@@ -439,7 +439,7 @@ function initTaxonSearchUi(data) {                                          //co
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonRealm() {
     var realmVal;
-    var storedRealm = dataStorage.getItem('curRealm');                      //console.log("storedRealm = ", storedRealm)
+    var storedRealm = dataStorage.getItem('curRealm');                          //console.log("storedRealm = ", storedRealm)
     if ($('#sel-realm').val() === null) { 
         realmVal = storedRealm !== null ? storedRealm : "3";  
         $('#sel-realm').val(realmVal);
@@ -452,11 +452,11 @@ function setTaxonRealm() {
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
 function storeLevelData(topTaxon) {
-    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", gParams.taxaByLvl)
     gParams["allRealmLvls"] = Object.keys(gParams.taxaByLvl);
 }
 function updateTaxaByLvl(topTaxon) {
-    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", gParams.taxaByLvl)
 }
 /** Returns an object with taxon records by level and keyed with display names. */
 function seperateTaxonTreeByLvl(topTaxon) {
@@ -474,7 +474,7 @@ function seperateTaxonTreeByLvl(topTaxon) {
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        var levels = Object.keys(_util.getDataFromStorage('levelNames'));   //console.log("levels = %O", levels)
+        var levels = Object.keys(_util.getDataFromStorage('levelNames'));       //console.log("levels = %O", levels)
         var obj = {};
         levels.forEach(function(lvl){
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
@@ -495,7 +495,7 @@ function onTaxonRealmChange(e) {
  */
 function storeAndReturnRealm() {
     var realmId = $('#sel-realm').val();
-    var realmTaxonRcrd = getDetachedRcrd(realmId);                          //console.log("realmTaxon = %O", realmTaxonRcrd);
+    var realmTaxonRcrd = getDetachedRcrd(realmId);                              //console.log("realmTaxon = %O", realmTaxonRcrd);
     var realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
     gParams.curRealm = realmId;
@@ -507,7 +507,7 @@ function storeAndReturnRealm() {
  * the tree are stored or updated before continuing @getInteractionsAndFillTree.. 
  * Note: This is the entry point for filter-related taxon-grid rebuilds.
  */
-function rebuildTaxonTree(topTaxon, realmInit) {                            //console.log("realmTaxon=%O", realmTaxon)
+function rebuildTaxonTree(topTaxon, realmInit) {                                //console.log("realmTaxon=%O", realmTaxon)
     clearPreviousGrid();
     initTaxonTree(topTaxon);
     if (realmInit) { storeLevelData(topTaxon); 
@@ -521,15 +521,15 @@ function rebuildTaxonTree(topTaxon, realmInit) {                            //co
  */
 function initTaxonTree(topTaxon) {
     buildTaxonTree(topTaxon);                                 
-    gParams.openRows = [topTaxon.id.toString()];                            //console.log("openRows=", openRows)
+    gParams.openRows = [topTaxon.id.toString()];                                //console.log("openRows=", openRows)
 }
 /**
  * Returns a heirarchical tree of taxon record data from the top, parent, 
  * realm taxon through all children. The tree is stored as 'curTree' in the 
  * global gParams obj. 
  */
-function buildTaxonTree(topTaxon) {                                         //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
-    var tree = {};                                                          //console.log("tree = %O", tree);
+function buildTaxonTree(topTaxon) {                                             //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
+    var tree = {};                                                              //console.log("tree = %O", tree);
     tree[topTaxon.displayName] = topTaxon;  
     topTaxon.children = getChildTaxa(topTaxon.children);    
     gParams.curTree = tree;  
@@ -537,12 +537,12 @@ function buildTaxonTree(topTaxon) {                                         //co
      * Recurses through each taxon's 'children' property and returns a record 
      * for each child ID found. 
      */
-    function getChildTaxa(children) {                                       //console.log("getChildTaxa called. children = %O", children);
+    function getChildTaxa(children) {                                           //console.log("getChildTaxa called. children = %O", children);
         if (children === null) { return null; }
         return children.map(function(child){
             if (typeof child === "object") { return child; }
 
-            var childRcrd = getDetachedRcrd(child);                         //console.log("child = %O", child);
+            var childRcrd = getDetachedRcrd(child);                             //console.log("child = %O", child);
             if (childRcrd.children.length >= 1) { 
                 childRcrd.children = getChildTaxa(childRcrd.children);
             } else { childRcrd.children = null; }
@@ -555,7 +555,7 @@ function buildTaxonTree(topTaxon) {                                         //co
  * Initialize a search-combobox for each level in the tree @loadTaxonComboboxes.
  * Transform tree data into grid rows and load grid @transformTaxonDataAndLoadGrid.
  */
-function buildTaxonSearchUiAndGrid(taxonTree) {                               //console.log("taxaByLvl = %O", gParams.taxaByLvl);
+function buildTaxonSearchUiAndGrid(taxonTree) {                                   //console.log("taxaByLvl = %O", gParams.taxaByLvl);
     loadTaxonComboboxes();
     transformTaxonDataAndLoadGrid(taxonTree);
 } 
@@ -564,9 +564,9 @@ function buildTaxonSearchUiAndGrid(taxonTree) {                               //
  * Builds the select box for the taxon realms that will become the data tree 
  * nodes displayed in the grid.
  */
-function buildTaxonRealmHtml(data) {                                        //console.log("buildTaxonRealmHtml called. ");
+function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
     var browseElems = _util.buildElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-    var realmOpts = getRealmOpts(data);                                     //console.log("realmOpts = %O", realmOpts);
+    var realmOpts = getRealmOpts(data);                                         //console.log("realmOpts = %O", realmOpts);
     $(browseElems).append(_util.buildSelectElem( realmOpts, { class: 'opts-box', id: 'sel-realm' }));
 
     $('#sort-opts').append(browseElems);
@@ -575,7 +575,7 @@ function buildTaxonRealmHtml(data) {                                        //co
 
     function getRealmOpts(data) {  
         var optsAry = [];
-        for (var id in data) {                                              //console.log("taxon = %O", data[taxonId]);
+        for (var id in data) {                                                  //console.log("taxon = %O", data[taxonId]);
             optsAry.push({ value: data[id].taxon, text: data[id].displayName });
         }
         return optsAry;
@@ -588,7 +588,7 @@ function buildTaxonRealmHtml(data) {                                        //co
  * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
  */
 function loadTaxonComboboxes() {
-    var curTaxaByLvl = gParams.taxaByLvl;                                   //console.log("curTaxaByLvl = %O", curTaxaByLvl);
+    var curTaxaByLvl = gParams.taxaByLvl;                                       //console.log("curTaxaByLvl = %O", curTaxaByLvl);
     var lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
     var levels = Object.keys(lvlOptsObj);
     if (levels.indexOf(gParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
@@ -601,9 +601,9 @@ function loadTaxonComboboxes() {
  * If there is no data after filtering at a level, a 'none' option obj is built
  * and will be selected.
  */
-function buildTaxonSelectOpts(rcrdsByLvl) {                                 //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
+function buildTaxonSelectOpts(rcrdsByLvl) {                                     //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     var optsObj = {};
-    var curRealmLvls = gParams.allRealmLvls.slice(1);                       //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+    var curRealmLvls = gParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
     curRealmLvls.forEach(function(lvl) {
         if (lvl in rcrdsByLvl) { getLvlOptsObjs(rcrdsByLvl[lvl], lvl);
         } else { fillInLvlOpts(lvl); }
@@ -611,13 +611,13 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                 //co
     return optsObj;
 
     function getLvlOptsObjs(rcrds, lvl) {
-        var taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();               //console.log("taxonNames = %O", taxonNames);
+        var taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                   //console.log("taxonNames = %O", taxonNames);
         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
         if (taxonNames.length > 0 && taxonNames[0] !== "None") {
             optsObj[lvl].unshift({value: 'all', text: '- All -'});
         }
     }
-    function fillInLvlOpts(lvl) {                                           //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
+    function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         var taxon;
         if (lvl in gParams.selectedVals) {
             taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
@@ -636,7 +636,7 @@ function buildTaxonOptions(taxonNames, taxonData) {
         };
     });
 }
-function loadLevelSelects(levelOptsObj, levels) {                           //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
+function loadLevelSelects(levelOptsObj, levels) {                               //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     var elems = buildTaxonSelects(levelOptsObj, levels);
     clearCol2();        
     $('#opts-col2').append(elems);
@@ -654,12 +654,12 @@ function buildTaxonSelects(lvlOpts, levels) {
     });
     return selElems;
 }
-function setSelectedTaxonVals(selected) {                                   //console.log("selected in setSelectedTaxonVals = %O", selected);
+function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (selected === undefined) {return;}
-    gParams.allRealmLvls.forEach(function(lvl) {                           //console.log("lvl ", lvl)
+    gParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
         var selId = '#sel' + lvl;
         $(selId).find('option[value="all"]').hide();
-        if (selected[lvl]) {                                                //console.log("selecting = ", lvl, selected[lvl])
+        if (selected[lvl]) {                                                    //console.log("selecting = ", lvl, selected[lvl])
             $(selId).val(selected[lvl]); 
             $(selId).find('option[value="none"]').hide();
         }
@@ -670,19 +670,19 @@ function setSelectedTaxonVals(selected) {                                   //co
  * Transforms the tree's taxon record data into the grid format and sets the 
  * row data in the global gParams object as 'rowData'. Calls @loadGrid.
  */
-function transformTaxonDataAndLoadGrid(taxonTree) {                         //console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
+function transformTaxonDataAndLoadGrid(taxonTree) {                             //console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
     var finalRowData = [];
     for (var topTaxon in taxonTree) {
         finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
     }
-    gParams.rowData = finalRowData;                                         //console.log("rowData = %O", finalRowData);
+    gParams.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
     loadGrid("Taxon Tree");
 }
 /**
  * Recurses through each taxon's 'children' property and returns a row data obj 
  * for each taxon in the tree.
  */
-function getTaxonRowData(taxon, treeLvl) {                                  //console.log("taxonRowData. taxon = %O", taxon);
+function getTaxonRowData(taxon, treeLvl) {                                      //console.log("taxonRowData. taxon = %O", taxon);
     var lvl = taxon.level.displayName;
     var name = lvl === "Species" ? taxon.displayName : lvl+" "+taxon.displayName;
     var intCount = getIntCount(taxon); 
@@ -761,7 +761,7 @@ function getTaxonChildRowData(curTaxon, curTreeLvl) {
         });
     }
 } /* End getTaxonChildRowData */
-function getTaxonIntRows(taxon, treeLvl) {                                  //console.log("getTaxonInteractions for = %O", taxon);
+function getTaxonIntRows(taxon, treeLvl) {                                      //console.log("getTaxonInteractions for = %O", taxon);
     var ints = [];
     ['subjectRoles', 'objectRoles'].forEach(function(role) {
         taxon[role].forEach(function(intRcrd){
@@ -827,6 +827,7 @@ function buildLocViewHtml() {
 } /* End buildLocViewHtml /*
 /** Event fired when the source realm select box has been changed. */
 function onLocViewChange(e) {                                                   //console.log('onLocViewChange') 
+    clearCol2();
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
@@ -963,10 +964,10 @@ function buildLocSelectOpts() {
         if (!opts.Region.length) { opts.Region.push(buildOpt(selLoc, "region")); }
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type) {
+    function buildOpt(loc, type) {                                              //console.log('building opt for [%s]. loc = %O', type, loc);
         const val = loc && loc[type] ?  loc[type].id : 'none';
         const txt = loc && loc[type] ?  loc[type].displayName : '- None -';
-        addToSelectedObj(loc[type].id, type);
+        addToSelectedObj(val, type);  
         return { value: val, text: txt };
     }         
     function addToSelectedObj(id, type) {
@@ -1697,7 +1698,7 @@ function getDefaultGridOptions() {
  * Builds the grid options object and passes everyting into agGrid, which 
  * creates and shows the grid.
  */
-function loadGrid(treeColTitle, gridOpts) {  //console.log("loading grid. rowdata = %s", JSON.stringify(rowData, null, 2));
+function loadGrid(treeColTitle, gridOpts) {                                     //console.log("loading grid. rowdata = %s", JSON.stringify(rowData, null, 2));
     var gridDiv = document.querySelector('#search-grid');
     var gridOptObj = gridOpts || gridOptions;
     gridOptObj.rowData = gParams.rowData;
@@ -1775,7 +1776,7 @@ function addToolTipToCells(params) {
 /** --------- Tree Column ---------------------- */
 /** Adds tooltip to Tree cells */
 function addToolTipToTree(params) {      
-    var name = params.data.name || null;                                    //console.log("params in cell renderer = %O", params)         
+    var name = params.data.name || null;                                        //console.log("params in cell renderer = %O", params)         
     return name === null ? null : '<span title="'+name+'">'+name+'</span>';
 }
 /** Returns the initial width of the tree column according to role and screen size. */
@@ -1899,15 +1900,15 @@ function getRowStyleClass(params) {                                             
  * for Africa will be highlighted, as well as the 'Unspecified Africa Interactions'
  * cell Africa's interaction record rows are still grouped within. 
  */
-function getCellStyleClass(params) {                                        //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
+function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
     if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
-        isNameRowforClosedGroupedInts(params)) {                            //console.log("setting style class")
+        isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
         return gParams.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
     } 
 }
 function isOpenRowWithChildInts(params) {
-    if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); } //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
+    if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
     return params.data.interactions === true && params.data.name !== "";
 }
 /**
@@ -1925,16 +1926,16 @@ function isNameRowforClosedGroupedInts(params) {
 /** Returns a color based on the tree level of the row. */
 function getRowColorClass(treeLvl) {
     var rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
-    var styleClass = 'row-' + rowColorArray[treeLvl];                       //console.log("styleClass = ", styleClass);
+    var styleClass = 'row-' + rowColorArray[treeLvl];                           //console.log("styleClass = ", styleClass);
     return styleClass;
 }
 /** Returns a color based on the tree level of the row. */
 function getSrcRowColorClass(params) {
     const rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
-    const styleClass = 'row-' + rowColorArray[params.rowColorIdx];          //console.log("styleClass = ", styleClass);
+    const styleClass = 'row-' + rowColorArray[params.rowColorIdx];              //console.log("styleClass = ", styleClass);
     return styleClass;
 }
-function getNodeChildDetails(rcrd) {                                        //console.log("rcrd = %O", rcrd)  
+function getNodeChildDetails(rcrd) {                                            //console.log("rcrd = %O", rcrd)  
     if (rcrd.isParent) {
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
@@ -1943,9 +1944,9 @@ function getNodeChildDetails(rcrd) {                                        //co
 function onFilterChange() {
     gridOptions.api.onFilterChanged();
 }
-function afterFilterChanged() {} //console.log("afterFilterChange") 
+function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Grid Status' Active Filter display */
-function beforeFilterChange() {  //console.log("beforeFilterChange")
+function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
     updateGridFilterStatusMsg();    
 } 
 /** Returns an obj with all filter models. */
@@ -1969,7 +1970,7 @@ function getAllFilterModels() {
  * for grid columns, and then checks/adds the 'interactions updated since' filter. 
  * Sets grid-status with the resulting active-filters messasge.
  */
-function updateGridFilterStatusMsg() {                                      //console.log("updateGridFilterStatusMsg called.")
+function updateGridFilterStatusMsg() {                                          //console.log("updateGridFilterStatusMsg called.")
     if (gridOptions.api === undefined) { return; }
     var activeFilters = [];
 
@@ -2016,7 +2017,7 @@ function updateGridFilterStatusMsg() {                                      //co
         }
     }
 }
-function setGridFilterStatus(status) {                                      //console.log("setGridFilterStatus. status = ", status)
+function setGridFilterStatus(status) {                                          //console.log("setGridFilterStatus. status = ", status)
     $('#grid-filter-status').text(status);
 }
 function setExternalFilterStatus(status) {
@@ -2103,11 +2104,11 @@ function showInteractionsUpdatedToday() {
  * Filters all interactions in the grid leaving only the records with updates
  * since the datetime specified by the user.
  */
-function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //console.log("\nfilterInteractionsUpdatedSince called.");
+function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
     var rowData = _util.snapshot(gParams.rowData);
     var fltrSince = dateStr || gParams.timeFltr;
     var sinceTime = new Date(fltrSince).getTime();                          
-    var updatedRows = rowData.filter(addAllRowsWithUpdates);                //console.log("updatedRows = %O", updatedRows);
+    var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
     gParams.timeFltr = fltrSince;
     gridOptions.api.setRowData(updatedRows);
     gParams.fltrdRows = updatedRows;
@@ -2121,7 +2122,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {         //co
         return rowObj.children.length > 0;
 
         function checkIntRowForUpdates(row) { 
-            var rowUpdatedAt = new Date(row.updatedAt).getTime();           //console.log("row [%O}.data.updatedAt = [%s], sinceTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
+            var rowUpdatedAt = new Date(row.updatedAt).getTime();               //console.log("row [%O}.data.updatedAt = [%s], sinceTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
             return rowUpdatedAt > sinceTime;
         }
     } /* End addAllRowsWithUpdates */
@@ -2152,7 +2153,7 @@ function applySrcFltrs() {
     resets[realm]();
 }
 function reapplyTreeTextFltr() {                                            
-    const entity = getGridEntityName();                                     //console.log("reapplying [%s] text filter", entity);
+    const entity = getGridEntityName();                                         //console.log("reapplying [%s] text filter", entity);
     if (getFilterTreeTextVal(entity) === "") { return; }
     searchTreeText();
 }
@@ -2162,7 +2163,7 @@ function getGridEntityName() {
     const ent = gParams.curFocus === "srcs" ? gParams.curRealm : gParams.curFocus;
     return names[ent];
 }
-function reapplyPubFltr() {                                                 //console.log("reapplying pub filter");
+function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
     if ($('#selPublicationType').val() === "all") { return; }
     updatePubSearch();
 }
@@ -2172,7 +2173,7 @@ function reapplyPubFltr() {                                                 //co
  * This filter presents all unique values of column to potentially filter on.
  */
 function UniqueValuesFilter() {}
-UniqueValuesFilter.prototype.init = function (params) {                     //console.log("UniqueValuesFilter.prototype.init. params = %O", params)
+UniqueValuesFilter.prototype.init = function (params) {                         //console.log("UniqueValuesFilter.prototype.init. params = %O", params)
     this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
     this.filterModifiedCallback = params.filterModifiedCallback;
     this.valueGetter = params.valueGetter;
@@ -2327,7 +2328,7 @@ UniqueValuesFilter.prototype.clearVirtualRows = function () {
     this.removeVirtualRows(rowsToRemove);
 };
 //takes array of row id's
-UniqueValuesFilter.prototype.removeVirtualRows = function (rowsToRemove) {  //console.log("removeVirtualRows called. rows = %O", rowsToRemove)
+UniqueValuesFilter.prototype.removeVirtualRows = function (rowsToRemove) {      //console.log("removeVirtualRows called. rows = %O", rowsToRemove)
     var _this = this;
     rowsToRemove.forEach(function (indexToRemove) {
         var eRowToRemove = _this.rowsInBodyContainer[indexToRemove];
@@ -2387,11 +2388,11 @@ UniqueValuesFilter.prototype.onCheckboxClicked = function (eCheckbox, value) {
 /*------------------------UnqValsColumnFilterModel----------------------------------*/
 /** Class Function */
 function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOtherFilters) { //console.log("UnqValsColumnFilterModel.prototype.init. arguments = %O", arguments);
-    this.colDef = colDef;           //console.log("colDef = %O", this.colDef);
-    this.rowModel = rowModel;       //console.log("rowModel = %O", this.rowModel);
-    this.valueGetter = valueGetter; //console.log("valueGetter = %O", this.valueGetter);
-    this.doesRowPassOtherFilters = doesRowPassOtherFilters; //console.log("doesRowPassOtherFilters = %O", this.doesRowPassOtherFilters);
-    this.filterParams = this.colDef.filterParams;  //console.log("filterParams = %O", this.filterParams);
+    this.colDef = colDef;                                                       
+    this.rowModel = rowModel;                                                   
+    this.valueGetter = valueGetter; 
+    this.doesRowPassOtherFilters = doesRowPassOtherFilters; 
+    this.filterParams = this.colDef.filterParams;  
     this.usingProvidedSet = this.filterParams && this.filterParams.values;
     this.createAllUniqueValues();
     this.createAvailableUniqueValues();
@@ -2533,7 +2534,7 @@ function showOverlayAndTaxonCols() {
     gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
 
 }
-function getCurTaxonLvlCols() {                                             //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+function getCurTaxonLvlCols() {                                                 //console.log("taxaByLvl = %O", gParams.taxaByLvl)
     var lvls = Object.keys(gParams.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
@@ -2546,7 +2547,7 @@ function hideOverlayAndTaxonCols() {
  */
 function selectRowsForExport() {
     gridOptions.api.expandAll();
-    gridOptions.api.getModel().rowsToDisplay.forEach(selectInteractions);   //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
+    gridOptions.api.getModel().rowsToDisplay.forEach(selectInteractions);       //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
 }
 /**
  * A row is identified as an interaction row by the 'interactionType' property
@@ -2562,12 +2563,12 @@ function showIntroWalkthrough() {
     window.setTimeout(startIntroWalkthrough, 250); 
 }
 function startIntroWalkthrough(startStep){
-    if (miscObj.intro) { return; }                                          //console.log("intro = %O", miscObj.intro)
+    if (miscObj.intro) { return; }                                              //console.log("intro = %O", miscObj.intro)
     buildIntro();
     setGridState();
     miscObj.intro.start();
 
-    function buildIntro() {                                                 //console.log("buildIntro called")
+    function buildIntro() {                                                     //console.log("buildIntro called")
         var startStep = startStep || 0; 
         const lib = require('../libs/intro.js');  
         miscObj.intro = lib.introJs();
@@ -2687,7 +2688,7 @@ function initSearchTips() {
     $('#b-overlay-popup').html(searchTips());
     bindEscEvents();
 }
-function showTips() {  //console.log("show tips called.")
+function showTips() {                                                           //console.log("show tips called.")
     if (!$('#tips-close-bttn').length) { initSearchTips(); }
     // addPopUpStyles();
     $('#b-overlay-popup').addClass("tips-popup");
@@ -2704,7 +2705,7 @@ function hideTips() {
     $('#b-overlay-popup').removeClass("tips-popup");
     $('#b-overlay-popup').empty();
 }
-function removeTips() {  //console.log("removeTips called.")
+function removeTips() {                                                         //console.log("removeTips called.")
     $('#b-overlay, #b-overlay-popup').css("display", "none");
     $('#b-overlay-popup').removeClass("tips-popup");
 }
@@ -2762,7 +2763,7 @@ function clearCol2() {
  * focus' records are used.
  */
 function getDetachedRcrd(rcrdKey, rcrds) {                                  
-    var orgnlRcrds = rcrds || gParams.rcrdsById;                            //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+    var orgnlRcrds = rcrds || gParams.rcrdsById;                                //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
     try {
        return _util.snapshot(orgnlRcrds[rcrdKey]);
     }
@@ -2774,7 +2775,7 @@ function getDetachedRcrd(rcrdKey, rcrds) {
 function getAllCurRows() {
     return gParams.fltrdRows || gParams.rowData;
 }
-function showPopUpMsg(msg) {                                                //console.log("showPopUpMsg. msg = ", msg)
+function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#grid-popup').text(popUpMsg);
     $('#grid-popup').addClass('loading'); //used in testing
@@ -2928,7 +2929,7 @@ function toggleTreeByOneLvl(opening) {
     function updateToggleTreeButton() {
         var shownRows = gridModel.rowsToDisplay.length; 
         var allRows = getCurTreeRowCount();
-        var closedRows = shownRows < allRows;                               //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
+        var closedRows = shownRows < allRows;                                   //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
 
         if (!closedRows) { resetToggleTreeBttn(true); 
         } else if (bttXpandedAll === true) { resetToggleTreeBttn(false); }
