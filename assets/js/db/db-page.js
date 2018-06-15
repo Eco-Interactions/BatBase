@@ -592,9 +592,7 @@ function loadTaxonComboboxes() {
     var lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
     var levels = Object.keys(lvlOptsObj);
     if (levels.indexOf(gParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-
     loadLevelSelects(lvlOptsObj, levels);
-    // initComboboxes();
 }
 /**
  * Builds select options for each level with taxon data in the current realm.
@@ -637,22 +635,26 @@ function buildTaxonOptions(taxonNames, taxonData) {
     });
 }
 function loadLevelSelects(levelOptsObj, levels) {                               //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
-    var elems = buildTaxonSelects(levelOptsObj, levels);
+    const elems = buildTaxonSelects(levelOptsObj, levels);
+    // const levelNames = [];
     clearCol2();        
     $('#opts-col2').append(elems);
+    // initComboboxes(levelNames);
     setSelectedTaxonVals(gParams.selectedVals);
-}
-function buildTaxonSelects(lvlOpts, levels) {  
-    var selElems = [];
-    levels.forEach(function(level) {
-        var lblElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = _util.buildElem('span', { text: level + ': ', class: "opts-span" });
-        var selectElem = _util.buildSelectElem(
-            lvlOpts[level], { class: "opts-box", id: 'sel' + level }, updateTaxonSearch);
-        $(lblElem).append([spanElem, selectElem]);
-        selElems.push(lblElem);
-    });
-    return selElems;
+    
+    function buildTaxonSelects(lvlOpts, levels) {  
+        const selElems = [];
+        levels.forEach(function(level) {                                        console.log('----- building select box for level = [%s]', level);
+            const lblElem = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+            const spanElem = _util.buildElem('span', { text: level + ': ', class: 'opts-span' });
+            const selectElem = _util.buildSelectElem(
+                lvlOpts[level], { class: 'opts-box', id: 'sel' + level }, updateTaxonSearch);
+            $(lblElem).append([spanElem, selectElem]);
+            selElems.push(lblElem);
+            // levelNames.push(level);
+        });
+        return selElems;
+    }
 }
 function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (selected === undefined) {return;}
@@ -905,10 +907,11 @@ function buildLocSearchUiAndGrid(locTree) {                                     
  * set any previously 'selected' values.
  */
 function loadLocComboboxes() {  
-    var locOpts = buildLocSelectOpts();
+    const opts = buildLocSelectOpts();
     var selElems = buildLocSelects(locOpts);
     clearCol2();        
     $('#opts-col2').append(selElems);
+    // initComboboxes(['Region', 'Country']);
     setSelectedLocVals();
 }/** Builds arrays of options objects for the location comboboxes. */
 function buildLocSelectOpts() {
@@ -1000,17 +1003,21 @@ function createSelectedOptsObj() {
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
-    var selElems = [];
-    for (var locSelName in locOptsObj) {
-        var selName = _util.ucfirst(locSelName);
-        var lblElem = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        var spanElem = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
-        var selectElem = _util.buildSelectElem(
-            locOptsObj[locSelName], { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
-        $(lblElem).append([spanElem, selectElem]);
-        selElems.push(lblElem);
+    const selElems = [];
+    for (let locSelName in locOptsObj) {
+        let elem = buildLocSel(_util.ucfirst(locSelName), locOptsObj[locSelName]); 
+        selElems.push(elem);
     }
     return selElems;
+    
+    function buildLocSel(selName, opts) {
+        const lbl = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        const span = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
+        const sel = _util.buildSelectElem(
+            opts, { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
+        $(lbl).append([span, sel]);
+        return elem;
+    }
 }
 function setSelectedLocVals() {                                                 
     var selId;
@@ -1170,7 +1177,7 @@ function buildSrcRealmHtml() {
     var realmOpts = getRealmOpts();                                       
     $(browseElems).append(_util.buildSelectElem(realmOpts, { class: 'opts-box', id: 'sel-realm' }));
     $('#sort-opts').append(browseElems);
-    //initComboboxes
+    // initCombobox('Source Type');
     $('#sel-realm').change(onSrcRealmChange);
     $('#sort-opts').fadeTo(0, 1);
     function getRealmOpts() {
@@ -1338,7 +1345,6 @@ function loadAuthSearchHtml(srcTree) {
     const searchTreeElem = buildTreeSearchHtml('Author');
     clearCol2();        
     $('#opts-col2').append(searchTreeElem);
-    //initComboboxes
 }
 function loadPubSearchHtml(srcTree) {
     const pubTypeElem = buildPubTypeSelect();
@@ -1346,6 +1352,7 @@ function loadPubSearchHtml(srcTree) {
     clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
     $('#selPublicationType').val('all');
+    // initCombobox('Publication Type');
     
     function buildPubTypeSelect() {
         const pubTypeOpts = buildPubSelectOpts();
@@ -1366,7 +1373,7 @@ function loadPubSearchHtml(srcTree) {
             { text: 'Publication Type:', class: 'opts-span'});
         var selectElem = _util.buildSelectElem(
             pubTypeOpts, 
-            { class: "opts-box", id: 'selPublicationType' }, updatePubSearch);
+            { class: "opts-box", id: 'selPublicationType', updatePubSearch });
         $(selectElem).css('width', '115px');
         $(spanElem).css('width', '124px');
         $(lblElem).css('width', '255px');
@@ -2824,6 +2831,46 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
     }
     return [];
 }
+/* ------------- Selectize Library -------------------------------------- */
+/**
+ * Inits 'selectize' for each select elem in the form's 'selElems' array
+ * according to the 'selMap' config. Empties array after intializing.
+ */
+// function initCombobox(field) {                                                  console.log("initCombobox [%s]", field);
+//     const confg = getSelConfgObj(field);
+//     initSelectCombobox(confg);  
+// } /* End initComboboxes */
+// function initComboboxes(fieldAry) {
+//     fieldAry.forEach(field => initCombobox(field));
+// }
+// function getSelConfgObj(field) {
+//     const confgs = { 
+//         'Class' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Country' : { name: field, id: 'sel'+field, change: updateLocSearch },
+//         'Family' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Genus' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Order' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Publication Type' : {name: field, id: 'selPublicationType', change: updatePubSearch },
+//         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
+//         'Species' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Realm' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
+//         'Region' : { name: field, id: 'sel'+field, change: updateLocSearch },
+//     };
+//     return confgs[field];
+// }
+// /**
+//  * Inits the combobox, using 'selectize', according to the passed config.
+//  * Note: The 'selectize' library turns select dropdowns into input comboboxes
+//  * that allow users to search by typing.
+//  */
+// function initSelectCombobox(confg) {                                            console.log("initSelectCombobox. CONFG = %O", confg)
+//     const options = {
+//         create: false,
+//         onChange: confg.change,
+//         placeholder: 'Select ' + confg.name
+//     };
+//     $(confg.id).selectize(options);  
+// } /* End initSelectCombobox */
 /*--------------------- Grid Button Methods ------------------------------*/
 function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
     var expanded = $('#xpand-all').data('xpanded');
