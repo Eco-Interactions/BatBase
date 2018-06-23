@@ -283,19 +283,20 @@ function addToTagProp(prop, rcrd, entity) {
 function addToTaxonNames(prop, rcrd, entity) {
     const realm = rcrd.realm.displayName;
     const level = rcrd.level.displayName;  
-    addPropIfNewLevel(level, realm);
+    const nameProp = realm+level+"Names";
+    addPropIfNewLevel(nameProp);
     addToNameProp(realm+level+"Names", rcrd, entity);
 }
 /** Creates the level property if no taxa have been saved at this level and realm.  */
-function addPropIfNewLevel(level, realm) {
-    var lvlObj = allRcrds[prop] || getDataFromLocalStorage(prop);
-    if (lvlObj) { return; }                                                     //console.log("creating new level for [", realm+level+"]Names")
-    storeData(realm+level+"Names", {});
+function addPropIfNewLevel(nameProp) {
+    var lvlObj = allRcrds[nameProp] || getDataFromLocalStorage(nameProp);
+    if (lvlObj) { return; }                                                     //console.log(`creating new level for [${nameProp}]`);
+    storeData(nameProp, {});
 }
 /** Adds the Interaction to the stored entity's collection.  */
 function addInteractionToEntity(prop, rcrd, entity) {
     if (!rcrd[prop]) {return;}
-    var rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);               //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+    var rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);                //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
     var storedEntity = rcrds[rcrd[prop]];
     addIfNewRcrd(storedEntity.interactions, rcrd.id);
     if (prop === 'source') { storedEntity.isDirect = true; }

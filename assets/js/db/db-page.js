@@ -954,7 +954,7 @@ function buildLocSelectOpts() {
      */
     function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, gParams.selectedOpts)
         const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
-        if (!selLoc.parent) { return; }
+        if (!selLoc || !selLoc.parent) { return; }
         opts.Region = opts.Region.filter(function(region) {
             return region.value == gParams.selectedOpts.region;
         });             
