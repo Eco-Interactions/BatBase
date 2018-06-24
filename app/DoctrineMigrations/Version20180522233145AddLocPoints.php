@@ -45,12 +45,11 @@ class Version20180522233145AddLocPoints extends AbstractMigration implements Con
     {
         $lat = $loc->getLatitude();
         $lng = $loc->getLongitude();
-        $point = json_encode([$lng, $lat]);
 
         $geoJson = new GeoJson();
-        $geoJson->setCenterPoint($point);
-        $geoJson->setCoordinates($point);
-        $geoJson->setType('point');
+        $geoJson->setCenterPoint("[$lng, $lat]");
+        $geoJson->setCoordinates("[$lng, $lat]");
+        $geoJson->setType('Point');
         $geoJson->setLocation($loc);
         $geoJson->setCreatedBy($this->admin);
 

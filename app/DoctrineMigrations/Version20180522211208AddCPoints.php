@@ -61,7 +61,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
         $geoJson = new GeoJson();
         $geoJson->setCenterPoint($point);
         $geoJson->setCoordinates($point);
-        $geoJson->setType('point');
+        $geoJson->setType('Point');
         $geoJson->setLocation($loc);
         $geoJson->setCreatedBy($this->admin);
 

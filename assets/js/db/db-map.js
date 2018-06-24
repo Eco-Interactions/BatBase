@@ -418,7 +418,7 @@ function getSubLocsWithoutGpsData(cnt) {
 }
 function getCoordsHtml(loc) {
     const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
-    if (geoData.type !== 'point' || isRegionOrCountry(loc)) { return false; }
+    if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.coordinates)
     coords = coords.map(c => Number(c).toFixed(6)); 
     return 'Coordinates: <b>' + coords.join(', ') +'</b>';
