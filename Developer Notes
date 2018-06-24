@@ -36,7 +36,7 @@ Cache busting:
         - $ yarn run encore production
 
 
-## TESTING ##
+##------------------- TESTING ------------------------------------------------##
 >Testing software setup
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
     - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)

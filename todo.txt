@@ -4,31 +4,56 @@
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
     - implement
-        -- update db page tutorial
-        -- Update stored geoJson when any updates have happened to locations
         -- Find way to show how many interactions have no location to display?
+        -- Create 'custom' icon for single markers
+        -- add editing to countries/regions for supers/admins with modified forms so gps data can be added.
 
+    - TODO:
 
-    - FIX -
-        - vulnerability with webpack 
+    - AFTER: 
+        -- Update db page tutorial
 
+        - 
+    - Next Round:
+        - Programmatically load sets of data accoding to zoom size and map viewport
+            - Allow for clustering at higher levels with helpful popups
 Data Changes:
     
-
+BUG:
+    - loc summary popups for markers aren't reverting to originals when 2 are opened
+        and closed at the time.
 
 
 Before Release:
 
     ## Testing ##
     - Added Loc Views: tree and map
+    - Map
+        - Map loads correctly
+        - Location name/summary popups work
+        - grid loads from loc summary
+    - grid
+        - Map pin icons show
+            - when clicked, map loads zoomed to loc and shows summary
+
+MEETING NOTES:
+    - Country/region-habitat locations still need to be configured to display on the map
+    - Locations with the exact same gpd coordinates will be right on top of eachother 
+        in the map view. This can be fixed with some intelligence that will tell if another 
+        pin exists at that location already and can add them to a cluster.
+    - look to "next round" for more notes.
 
 
 >======== Email ============
 TAYLOR:
-    -
+    - What number should I round the coordinates to?
+    - For regions and countries, show all bat taxa recorded from children?
+    - Changed 'Interaction Type' to 'Type' in order to give space for additional data. Thoughts?
+    - On data-grid, I have adjusted the tree column size to fit more loc data in loc view. 
         
 Tullenda:
-    -
+    - Would ya like to be able to move the loc summary popups around?
+    - On data-grid, I have adjusted the column sizes to fit more loc data in loc view. 
 
 >==== Change Log ====
     - Added  ISO_codes for continents and countries
@@ -43,12 +68,13 @@ Tullenda:
 TODOs:
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin
-    - {high}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
+    - {med}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
 
 (CRUD FORMS/BACKEND)
     - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
     - {high}[easy] add error to interaction form for when an 'invisible' error 
         occurs on entity selection
+    - {high}[med] Switch from localStorage to idb everywhere.
     - {med}[med] add err in CRUD controllers eliminating the possibility of creating orphans
     - {med}[easy] When nothing is selected but a country, a habitat type, and the 
         displayname, suggest to user they use the country-habitat combo.
@@ -65,9 +91,10 @@ TODOs:
 (DATA)
     - {high}[med] write SQL script to get only records with updates/newly created  
     - {med}[easy] Remove publisher-type code
+    - {med} [easy] Change 'center point' to 'display point' - GeoJson entity
     - {low}[med] add 'role' to realms to be able to grab all object/subject realms
         without hardcoding them.
-
+    - {med}[med] Why are some point-type geoJson's center coordinates in quotes and others aren't
 
 (SEARCH PAGE)
     - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
@@ -79,7 +106,6 @@ TODOs:
         to that level and retain other filters- updated at for example.
     - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
         elem hasn't loaded yet.
-
 
 (STATIC/MISC SITE)
     - {med}[complicated] Implement Encore for assets
@@ -94,6 +120,10 @@ TODOs:
 
 (SYNC-DATA)
     - {high}[med] Add error handling for pending updates that can't be resolved 
+
+(TESTS)
+    - {high}[med] Update data_sync tests to test multi-editor syncing.
+    - {med}[med] Refactor fixtures so that entity changes are easier to handle
 
 (REFACTORING):
     --CRUD--
@@ -141,6 +171,3 @@ TODOs:
         - css displays as expected.
         - all errors are caught and handled as expected
         -- check that edit forms show all data they should on load (ie, all authors/editors load)
-
-
->Add to TODO

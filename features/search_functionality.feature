@@ -8,8 +8,7 @@ Feature: Filtering the data displayed in the database grid
         Given the database has loaded
         Then I exit the tutorial
 
-    ## -------------------------- Location -------------------------------------##
-    
+    ## -------------------------- Location -----------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific country.
         Given the database grid is in "Location" view
@@ -18,7 +17,31 @@ Feature: Filtering the data displayed in the database grid
         And I should see "3" rows in the grid data tree
         And data in the interaction rows  
 
-    ## -------------------------- Source ---------------------------------------##
+    @javascript
+    Scenario:  I should be able to view interactions on the map 
+        Given the database grid is in "Location" view
+        When I select the Location view "Map Data"
+        Then I should see the map with markers
+
+    @javascript
+    Scenario:  I should be able to show interactions in the grid from a map marker
+        Given the database grid is in "Location" view
+        And I select the Location view "Map Data"
+        When I click on a map marker
+        And I press the "Location Summary" button
+        And I press the "Show Interactions In Data-Grid" button
+        Then I should see data in the interaction rows
+
+    @javascript
+    Scenario:  I should be able to view a specific location on the map 
+        Given the database grid is in "Location" view
+        When I expand "Central America" in the data tree
+        And I expand "Panama" in the data tree
+        And I click on the map pin for "Summit Experimental Gardens"
+        Then I should see the map with the location summary popup
+        And I should see "Habitat: forest"
+        And I should see "Cited bats: Artibeus lituratus"
+    ## -------------------------- Source -------------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific publication type.
       Given the database grid is in "Source" view
@@ -43,7 +66,7 @@ Feature: Filtering the data displayed in the database grid
       And I should see "1" rows in the grid data tree
       And data in the interaction rows
         
-    ## -------------------------- Taxon ----------------------------------------##
+    ## -------------------------- Taxon --------------------------------------##
     @javascript
     Scenario:  I should be able to filter the data tree to a specific taxon.
       Given the database grid is in "Taxon" view

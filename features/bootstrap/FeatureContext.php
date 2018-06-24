@@ -108,13 +108,30 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @When I select the Location view :view
+     */
+    public function iSelectTheLocationView($view)
+    {
+        $this->changeGridSort('#sel-realm', 'map', '#map');
+    }
+    /**
+     * @When I click on a map marker
+     */
+    public function iClickOnAMapMarker()
+    {
+        $marker = $this->getUserSession()->getPage()->find('css', '.leaflet-marker-icon');
+        $this->handleNullAssert($marker, false, "Couldn't find marker on the map.");
+        $marker->click();    
+    }
+
+    /**
      * @When I select :text from the :label dropdown
      * Search page elems.
      */
     public function iSelectFromTheDropdown($text, $label)
     {
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
-            'Book' => 2, 'Article' => 3 ];
+            'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
         $selId = '#sel'.str_replace(' ','',$label);
         $this->getUserSession()->executeScript("$('$selId').val('$vals[$text]').change();");
     }
@@ -131,6 +148,27 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @When I click on the map pin for :text
+     */
+    public function iClickOnTheMapPinFor($text)
+    {
+        usleep(500000);
+        $row = $this->getGridRow($text);
+        $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
+        $this->clickRowMapPin($row, $text);
+    }
+
+    /**
+     * @Then I should see the map with the location summary popup
+     */
+    public function iShouldSeeTheMapWithTheLocationSummaryPopup()
+    {
+        $popup = $this->getUserSession()
+            ->evaluateScript("$('.leaflet-popup-content-wrapper').length > 0;");
+        $this->handleEqualAssert($popup, true, true, "Location summary popup not displayed.");
+    }
+
+    /**
      * @Then I should see :text in the :label dropdown
      */
     public function iShouldSeeInTheDropdown($text, $label)
@@ -141,6 +179,14 @@ class FeatureContext extends RawMinkContext implements Context
         $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
         $this->handleEqualAssert($text, $selected, true, 
             "Found [$selected] in the [$label] ($selId) field. Expected [$text].");
+    }
+    /**
+     * @Then I should see the map with markers
+     */
+    public function iShouldSeeTheMapWithMarkers()
+    {
+        $markers = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0;");
+        $this->handleNullAssert($markers, false, "Map did not update as expected. No markers found.");
     }
 
     /**------------------- Form Functions ------------------------------------*/
@@ -209,7 +255,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->iExpandInTheDataTree($nodeTxt);
         $intRows = $this->getInteractionsRows();
-        $this->clickRowEditPencil(reset($intRows), $nodeTxt);
+        $this->clickRowEditPencil(reset($intRows));
     }
 
     /**
@@ -551,6 +597,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     /**
      * @Then data in the interaction rows
+     * @Then I should see data in the interaction rows
      * Note: Data is checked in the Subject Taxon column only.
      */
     public function dataInTheInteractionRows()
@@ -893,6 +940,12 @@ class FeatureContext extends RawMinkContext implements Context
         $pencil = $row->find('css', '.grid-edit');
         $this->handleNullAssert($pencil, false, "Couldn't find the edit pencil for row.");
         $pencil->click();
+    }
+    private function clickRowMapPin($row)
+    {
+        $pin = $row->find('css', '[alt="Map Icon"]');
+        $this->handleNullAssert($pin, false, "Couldn't find the map pin for row.");
+        $pin->click();
     }
     /** -------------------- Error Handling --------------------------------- */        
     /**
