@@ -545,3 +545,22 @@ function showLocGridView(loc) {
     console.log('Switch to grid view and show location.');
     db_page.showLocInDataGrid(loc);
 }
+/* --- Grid Popup --- */
+function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
+    const popUpMsg = msg || 'Loading...';
+    $('#grid-popup').text(popUpMsg);
+    $('#grid-popup').addClass('loading'); //used in testing
+    $('#grid-popup, #grid-overlay').show();
+    fadeGrid();
+}
+function hidePopUpMsg() {
+    $('#grid-popup, #grid-overlay').hide();
+    $('#grid-popup').removeClass('loading'); //used in testing
+    showGrid();
+}
+function fadeGrid() {
+    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
+}
+function showGrid() {
+    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
+}

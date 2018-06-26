@@ -2463,31 +2463,28 @@ function exportCsvData() {
         // customHeader: "This is a custom header.\n\n",
         // customFooter: "This is a custom footer."
     };
-    if (gParams.curFocus === 'taxa') { showOverlayAndTaxonCols(); }
-    gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], false);
+    if (gParams.curFocus === 'taxa') { showTaxonCols(); }
+    gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit', 'map'], false);
     selectRowsForExport();
     gridOptions.api.exportDataAsCsv(params);
     returnGridState();
 }
 function returnGridState() {
-    if (gParams.curFocus === "taxa") { hideOverlayAndTaxonCols(); }
+    collapseTree();
     gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
-    // gridOptions.api.deselectAll();
-    // gridOptions.api.refreshCells();
-    gridOptions.api.refreshView();
-    hidePopUpMsg();
+    if (gParams.curFocus === 'locs') { gridOptions.columnApi.setColumnsVisible(['map'], true); }
+    if (gParams.curFocus === 'taxa') { revertTaxonGrid(); }
 }
-function showOverlayAndTaxonCols() {
-    showPopUpMsg('Exporting...');
+function showTaxonCols() {
     gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
-
 }
 function getCurTaxonLvlCols() {                                                 //console.log("taxaByLvl = %O", gParams.taxaByLvl)
     var lvls = Object.keys(gParams.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
-function hideOverlayAndTaxonCols() {
+function revertTaxonGrid() {
     gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), false)
+    expandTreeByOne(); 
 }
 /**
  * Selects every interaction row in the currently displayed grid by expanding all
