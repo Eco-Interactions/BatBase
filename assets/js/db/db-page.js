@@ -1507,14 +1507,18 @@ function getRelatedTaxaToSelect(selTaxonObj) {                                  
 /*------------------ Location Filter Updates -----------------------------*/
 function updateLocSearch() {
     const selVal = parseInt($(this).val());
-    const locType = $(this).attr("id").split('sel')[1];
+    const locType = getLocType($(this).attr("id"));
     gParams.selectedOpts = getSelectedVals(selVal, locType);
     rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(gParams.selectedOpts));
     updateFilter();
 
+    function getLocType(selId) {
+        const selTypes = { selCountry: "country", selRegion: "region" };
+        return selTypes[selId];
+    }
     function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
         const selected = {};
-        if (type === "Country") { selectRegion(val); }
+        if (type === "country") { selectRegion(val); }
         if (val !== 'none' && val !== 'all') { selected[type] = val; }
         return selected;  
 
@@ -1524,7 +1528,7 @@ function updateLocSearch() {
         }
     } /* End getSelectedVals */
     function updateFilter() {
-        gParams.focusFltrs = [locType];
+        gParams.focusFltrs = [_util.ucfirst(locType)];
         updateGridFilterStatusMsg();
     }
 } /* End updateLocSearch */
