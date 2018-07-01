@@ -97,7 +97,6 @@ function showLoadingDataPopUp() {
         "allow for a ~30 second download.");   
 }
 function addDomEventListeners() {
-    $("#search-focus").change(selectSearchFocus);
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
@@ -130,10 +129,9 @@ function adaptUiToScreenSize() {
 function initSearchState() {
     resetGridParams();
     toggleTimeUpdatedFilter('disable');
-    selectInitialSearchFocus();
     resetFilterStatusBar();      
     setUpFutureDevInfoBttn();
-    selectSearchFocus();
+    selectInitialSearchFocus();
 } 
 /**
  * Container for param data needed for a selected focus. Resets on focus change.
@@ -157,8 +155,11 @@ function getResetFocus() {
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
 /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
-function selectInitialSearchFocus() {
-    $('#search-focus').val(gParams.curFocus);
+function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
+    $('#filter-opts').show(400);  
+    initCombobox('Focus');
+    setSelVal('Focus', 'srcs');
+    $('#sort-opts').show(400);
 }
 function setUpFutureDevInfoBttn() {
     var bttn = _util.buildElem('button', { name: 'futureDevBttn', title: getFutureDevMsg(),
@@ -184,28 +185,31 @@ function resetSearchGrid(focus) {                                               
 export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
     resetSearchGrid(focus);
 }
-function selectSearchFocus(e, focus) { 
-    var focus = focus || $('#search-focus').val();                              //console.log("---select(ing)SearchFocus = ", focus)
-    var builderMap = { 
+function selectSearchFocus(e, f) { 
+    const focus = f || getSelVal('Focus');                                      //console.log("---select(ing)SearchFocus = ", focus); 
+    const builderMap = { 
         "locs": buildLocationGrid, "srcs": buildSourceGrid,
         "taxa": buildTaxonGrid 
     };  
     if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
-    ifChangedFocus(focus, builderMap[focus]); 
+    updateFocusAndBuildGrid(focus, builderMap[focus]); 
 }
 /**
- * Updates and resets the focus 'state' of the search, either 'taxa', 'locs' or 'srcs'.
+ * Updates the top sort (focus) of the data grid, either 'taxa', 'locs' or 'srcs'.
  */
-function ifChangedFocus(focus, buildGridFunc) {                                 //console.log("ifChangedFocus called. focus = ", focus)
+function updateFocusAndBuildGrid(focus, gridBuilder) {                          //console.log("updateFocusAndBuildGrid called. focus = ", focus)
     clearPreviousGrid();
-    if (focus !== gParams.curFocus) {
-        _util.populateStorage("curFocus", focus);
-        dataStorage.removeItem("curRealm");
-        resetFilterStatusBar();
-        resetGridParams();
-        resetToggleTreeBttn(false);
-        clearPastHtmlOptions(); //buildGridFunc called here. 
-    } else { buildGridFunc(); }
+    if (focusNotChanged()) { return gridBuilder(); }                            //console.log('--- Focus reset to [%s]', focus);
+    _util.populateStorage("curFocus", focus);
+    dataStorage.removeItem("curRealm");
+    resetFilterStatusBar();
+    resetGridParams();
+    resetToggleTreeBttn(false); 
+    clearPastHtmlOptions(); //gridBuilder called here. 
+
+    function focusNotChanged() {
+        return focus === gParams.curFocus;
+    }
     /** Called seperately so @emptySearchOpts is called once. */
     function clearPastHtmlOptions() {    
         $('#opts-col2').fadeTo(100, 0);
@@ -215,10 +219,10 @@ function ifChangedFocus(focus, buildGridFunc) {                                 
         $('#opts-col2').empty();
         $('#sort-opts').empty();
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
-        buildGridFunc();
+        gridBuilder();
         if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
     }
-} /* End ifChangedFocus */
+} /* End updateFocusAndBuildGrid */
 /**
  * When the interaction form is exited, the passed focus is selected and the 
  * grid is refreshed with the 'interactions updates since' filter set to 'today'.
@@ -494,9 +498,9 @@ function onTaxonRealmChange(e) {
  * the taxon's record.
  */
 function storeAndReturnRealm() {
-    var realmId = $('#sel-realm').val();
-    var realmTaxonRcrd = getDetachedRcrd(realmId);                              //console.log("realmTaxon = %O", realmTaxonRcrd);
-    var realmLvl = realmTaxonRcrd.level;
+    const realmId = getSelVal('Realm');
+    const realmTaxonRcrd = getDetachedRcrd(realmId);                            //console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
     gParams.curRealm = realmId;
     gParams.realmLvl = realmLvl;
@@ -908,7 +912,7 @@ function buildLocSearchUiAndGrid(locTree) {                                     
  */
 function loadLocComboboxes() {  
     const opts = buildLocSelectOpts();
-    var selElems = buildLocSelects(locOpts);
+    var selElems = buildLocSelects(opts);
     clearCol2();        
     $('#opts-col2').append(selElems);
     // initComboboxes(['Region', 'Country']);
@@ -1016,7 +1020,7 @@ function buildLocSelects(locOptsObj) {
         const sel = _util.buildSelectElem(
             opts, { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
         $(lbl).append([span, sel]);
-        return elem;
+        return lbl;
     }
 }
 function setSelectedLocVals() {                                                 
@@ -1159,11 +1163,10 @@ function buildSourceGrid() {
  * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
  * If no realm selected, set the default realm value. Start grid build @buildSrcTree.
  */
-function initSrcSearchUi(srcData) {                                             //console.log("init source search ui");
+function initSrcSearchUi(srcData) {                                             //console.log("=========init source search ui");
     addSrcDataToGridParams(srcData);
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
-    buildSrcTree();
 }
 /** Add source data to gParams to be available while in a source focus. */
 function addSrcDataToGridParams(srcData) {
@@ -1173,13 +1176,17 @@ function addSrcDataToGridParams(srcData) {
 }
 /** Builds the combobox for the source realm types. */
 function buildSrcRealmHtml() {                                             
-    var browseElems = _util.buildElem('span', { id:"sort-srcs-by", text: "Source Type: " });
-    var realmOpts = getRealmOpts();                                       
-    $(browseElems).append(_util.buildSelectElem(realmOpts, { class: 'opts-box', id: 'sel-realm' }));
-    $('#sort-opts').append(browseElems);
-    // initCombobox('Source Type');
-    $('#sel-realm').change(onSrcRealmChange);
+    $('#sort-opts').append(buildSrcTypeElems());
+    initCombobox('Source Type');
     $('#sort-opts').fadeTo(0, 1);
+
+    function buildSrcTypeElems() {
+        const types = getRealmOpts();                                       
+        const span = _util.buildElem('span', { id:'sort-srcs-by', class: 'flex-row', 
+            text: 'Source Type: ' });
+        const sel = _util.buildSelectElem(types, { id: 'sel-realm', class: 'opts-box' });
+        return [span, sel];
+    }
     function getRealmOpts() {
         return [{ value: "auths", text: "Authors" },
                 { value: "pubs", text: "Publications" },
@@ -1188,12 +1195,12 @@ function buildSrcRealmHtml() {
 } /* End buildSrcRealmHtml */
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcRealm() {
-    var storedRealm = dataStorage.getItem('curRealm');                          //console.log("storedRealm = ", storedRealm)
-    var srcRealm = storedRealm || "pubs";
-    if ($('#sel-realm').val() === null) { $('#sel-realm').val(srcRealm); }
+    const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
+    const srcRealm = storedRealm || 'pubs';  
+    if (!getSelVal('Source Type')) { setSelVal('Source Type', srcRealm); }
 }
 /** Event fired when the source realm select box has been changed. */
-function onSrcRealmChange(e) {  
+function onSrcRealmChange(e) {                                                  //console.log('-------- SrcRealmChange')
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
@@ -1201,15 +1208,15 @@ function onSrcRealmChange(e) {
 }
 /** (Re)builds source tree for the selected source realm. */
 function buildSrcTree() {
-    var realmRcrds = storeAndReturnCurRealmRcrds();                             //console.log("---Search Change. realmRcrds = %O", realmRcrds);
+    const realmRcrds = storeAndReturnCurRealmRcrds();                           //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
     initSrcTree(gParams.curRealm, realmRcrds);
     getInteractionsAndFillTree();
 }
 /** Returns the records for the source realm currently selected. */
 function storeAndReturnCurRealmRcrds() {
-    var valMap = { "auths": "authSrcs", "pubs": "pubSrcs", "publ": "pubSrcs" };
-    var realmVal = $('#sel-realm').val();                                       //console.log("realmVal = ", realmVal)                     
-    gParams.curRealm = realmVal;
+    const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
+    const realmVal = getSelVal('Source Type');                                  //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
+    gParams.curRealm = realmVal;    
     _util.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
 }
@@ -1713,7 +1720,7 @@ function getColumnDefs(mainCol) {
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Type", field: "type", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
@@ -1908,19 +1915,28 @@ function beforeFilterChange() {                                                 
     updateGridFilterStatusMsg();    
 } 
 /** Returns an obj with all filter models. */
-function getAllFilterModels() {
+function getAllFilterModels() {  
+    const filters = Object.keys(gridOptions.api.filterManager.allFilters);
     return {
-        "Subject Taxon": gridOptions.api.getFilterApi("subject").getModel(),
-        "Object Taxon": gridOptions.api.getFilterApi("object").getModel(),
-        "Interaction Type": gridOptions.api.getFilterApi("interactionType").getModel(),
-        "Tags": gridOptions.api.getFilterApi("tags").getModel(),
-        "Habitat": gridOptions.api.getFilterApi("habitat").getModel(),
-        "Country": gridOptions.api.getFilterApi("country").getModel(),
-        "Region": gridOptions.api.getFilterApi("region").getModel(),
-        "Location Desc.": gridOptions.api.getFilterApi("location").getModel(),
-        "Citation": gridOptions.api.getFilterApi("citation").getModel(),
-        "Note": gridOptions.api.getFilterApi("note").getModel()
+        'Subject Taxon': getColumnFilterApi('subject'),
+        'Object Taxon': getColumnFilterApi('object'),
+        'Type': getColumnFilterApi('type'),
+        'Tags': getColumnFilterApi('tags'),
+        'Habitat': getColumnFilterApi('habitat'),
+        'Country': getColumnFilterApi('country'),
+        'Region': getColumnFilterApi('region'),
+        'Location Desc.': getColumnFilterApi('location'),
+        'Elev.': getColumnFilterApi('elev'),
+        'Lat.': getColumnFilterApi('lat'),
+        'Long.': getColumnFilterApi('lng'),
+        'Citation': getColumnFilterApi('citation'),
+        'Note': getColumnFilterApi('note') 
     };  
+    
+    function getColumnFilterApi(colName) {
+        return filters.indexOf(colName) === -1 ? null : 
+            gridOptions.api.getFilterApi(colName).getModel()
+    }
 }
 /**
  * Adds all active filters to the grid's status message. First adding any 
@@ -1930,7 +1946,7 @@ function getAllFilterModels() {
  */
 function updateGridFilterStatusMsg() {                                          //console.log("updateGridFilterStatusMsg called.")
     if (gridOptions.api === undefined) { return; }
-    var activeFilters = [];
+    const activeFilters = [];
 
     addActiveExternalFilters();
     addActiveGridFilters();
@@ -1951,9 +1967,9 @@ function updateGridFilterStatusMsg() {                                          
         } 
     }
     function addActiveGridFilters() {
-        var filterModels = getAllFilterModels();        
-        var columns = Object.keys(filterModels);        
-        for (var i=0; i < columns.length; i++) {
+        const filterModels = getAllFilterModels();        
+        const columns = Object.keys(filterModels);        
+        for (let i=0; i < columns.length; i++) {
             if (filterModels[columns[i]] !== null) { 
                 activeFilters.push(columns[i]); }
         }
@@ -2719,7 +2735,7 @@ function clearCol2() {
  * focus' records are used.
  */
 function getDetachedRcrd(rcrdKey, rcrds) {                                  
-    var orgnlRcrds = rcrds || gParams.rcrdsById;                                //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+    const orgnlRcrds = rcrds || gParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
     try {
        return _util.snapshot(orgnlRcrds[rcrdKey]);
     }
@@ -2836,41 +2852,62 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-// function initCombobox(field) {                                                  console.log("initCombobox [%s]", field);
-//     const confg = getSelConfgObj(field);
-//     initSelectCombobox(confg);  
-// } /* End initComboboxes */
-// function initComboboxes(fieldAry) {
-//     fieldAry.forEach(field => initCombobox(field));
+function initCombobox(field) {                                                  console.log("initCombobox [%s]", field);
+    const confg = getSelConfgObj(field);  console.log9
+    initSelectCombobox(confg);  
+} /* End initComboboxes */
+function initComboboxes(fieldAry) {
+    fieldAry.forEach(field => initCombobox(field));
+}
+function getSelConfgObj(field) {
+    const confgs = { 
+        'Focus' : { name: field, id: '#search-focus', change: selectSearchFocus },
+        'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
+        'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Publication Type' : {name: field, id: '#selPublicationType', change: updatePubSearch },
+        'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
+        'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
+        'Source Type' : { name: 'Realm', id: '#sel-realm', change: onSrcRealmChange },
+        'Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
+        'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
+    };
+    return confgs[field];
+}
+/**
+ * Inits the combobox, using 'selectize', according to the passed config.
+ * Note: The 'selectize' library turns select dropdowns into input comboboxes
+ * that allow users to search by typing.
+ */
+function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+    const options = {
+        create: false,
+        onChange: confg.change,
+        placeholder: 'Select ' + confg.name
+    };
+    $(confg.id).selectize(options);  
+} /* End initSelectCombobox */
+function getSelVal(field) {
+    const confg = getSelConfgObj(field);                                        console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+    return $(confg.id)[0].selectize.getValue();  
+}
+function getSelTxt(field) {
+    const confg = getSelConfgObj(field);
+    const $selApi = $(confg.id)[0].selectize; 
+    return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
+}
+function setSelVal(field, val) {                                                console.log('setSelVal [%s] = [%s]', field, val);
+    const confg = getSelConfgObj(field);
+    const $selApi = $(confg.id)[0].selectize; 
+    $selApi.addItem(val); 
+}
+// function updatePlaceholderText(elem, newTxt) {                              //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+//     elem.selectize.settings.placeholder = 'Select ' + newTxt;
+//     elem.selectize.updatePlaceholder();
 // }
-// function getSelConfgObj(field) {
-//     const confgs = { 
-//         'Class' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Country' : { name: field, id: 'sel'+field, change: updateLocSearch },
-//         'Family' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Genus' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Order' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Publication Type' : {name: field, id: 'selPublicationType', change: updatePubSearch },
-//         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
-//         'Species' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Realm' : { name: field, id: 'sel'+field, change: updateTaxonSearch },
-//         'Region' : { name: field, id: 'sel'+field, change: updateLocSearch },
-//     };
-//     return confgs[field];
-// }
-// /**
-//  * Inits the combobox, using 'selectize', according to the passed config.
-//  * Note: The 'selectize' library turns select dropdowns into input comboboxes
-//  * that allow users to search by typing.
-//  */
-// function initSelectCombobox(confg) {                                            console.log("initSelectCombobox. CONFG = %O", confg)
-//     const options = {
-//         create: false,
-//         onChange: confg.change,
-//         placeholder: 'Select ' + confg.name
-//     };
-//     $(confg.id).selectize(options);  
-// } /* End initSelectCombobox */
 /*--------------------- Grid Button Methods ------------------------------*/
 function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
     var expanded = $('#xpand-all').data('xpanded');

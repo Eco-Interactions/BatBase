@@ -16,7 +16,7 @@
 {% block detail %}
     <div id="search-opts" class="flex-row">
         <div id="opts-col1" class="opts-col flex-col">
-            <div id="filter-opts">
+            <div id="filter-opts" class="flex-row" style="display: none;">
                 <span>Group Interactions by: </span>
                 <select id="search-focus" class="opts-box">
                     <option value="locs">Location</option>
@@ -24,7 +24,7 @@
                     <option value="taxa">Taxon</option>
                 </select>
             </div>
-            <div id="sort-opts" class="flex-row"></div>
+            <div id="sort-opts" class="flex-row" style="display: none;"></div>
         </div>
         <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
         <div id="opts-col3" class="opts-col flex-col flex-wrap">
