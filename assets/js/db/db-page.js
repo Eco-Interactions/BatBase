@@ -150,19 +150,21 @@ function resetGridParams() {
     gParams.openRows = [];                                                      //console.log("gParams = %O", gParams);
 }
 function getResetFocus() {
-    var foci = ['locs', 'srcs', 'taxa'];
-    var storedFocus = dataStorage.getItem('curFocus');
+    const foci = ['locs', 'srcs', 'taxa'];
+    const storedFocus = dataStorage.getItem('curFocus');
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
 /** Selects either Taxon, Location or Source in the grid-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     $('#filter-opts').show(400);  
     initCombobox('Focus');
-    setSelVal('Focus', 'srcs');
+    setSelVal('Focus', gParams.curFocus, 'silent');
     $('#sort-opts').show(400);
+    selectSearchFocus();
 }
 function setUpFutureDevInfoBttn() {
-    var bttn = _util.buildElem('button', { name: 'futureDevBttn', title: getFutureDevMsg(),
+    const bttn = _util.buildElem('button', { name: 'futureDevBttn', 
+            title: getFutureDevMsg(),
             text: 'Hover for details about future search options.'});  
     $(bttn).appendTo('#opts-col3');        
 }
@@ -188,8 +190,8 @@ export function initSearchGrid(focus) {                                         
 function selectSearchFocus(e, f) { 
     const focus = f || getSelVal('Focus');                                      //console.log("---select(ing)SearchFocus = ", focus); 
     const builderMap = { 
-        "locs": buildLocationGrid, "srcs": buildSourceGrid,
-        "taxa": buildTaxonGrid 
+        'locs': buildLocationGrid, 'srcs': buildSourceGrid,
+        'taxa': buildTaxonGrid 
     };  
     if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
     updateFocusAndBuildGrid(focus, builderMap[focus]); 
@@ -200,8 +202,8 @@ function selectSearchFocus(e, f) {
 function updateFocusAndBuildGrid(focus, gridBuilder) {                          //console.log("updateFocusAndBuildGrid called. focus = ", focus)
     clearPreviousGrid();
     if (focusNotChanged()) { return gridBuilder(); }                            //console.log('--- Focus reset to [%s]', focus);
-    _util.populateStorage("curFocus", focus);
-    dataStorage.removeItem("curRealm");
+    _util.populateStorage('curFocus', focus);
+    dataStorage.removeItem('curRealm');
     resetFilterStatusBar();
     resetGridParams();
     resetToggleTreeBttn(false); 
@@ -788,7 +790,7 @@ function buildTaxonIntRowData(intRcrd, treeLvl) {
 /** Get location data from data storage and sends it to @startLocGridBuild. */
 function buildLocationGrid() {
     const data = getLocData();
-    if( data ) {  initLocSearchUi(data);
+    if( data ) { initLocSearchUi(data);
     } else { console.log('Error loading location data from storage.'); }
 }
 function getLocData() {
@@ -812,18 +814,18 @@ function initLocSearchUi(locData) {
 function setLocView() {
     const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
     const locRealm = storedRealm || "tree";
-    if ($('#sel-realm').val() === null) { $('#sel-realm').val(locRealm); }
+    if (!getSelVal('Loc View')) { setSelVal('Loc View', locRealm); }
 }
 function addLocDataToGridParams(data) {
     gParams.rcrdsById = data.location;                                    
     gParams.data = data;
 }
 function buildLocViewHtml() {                   
-    const viewElems = _util.buildElem('span', { id:'grid-view', text: 'View: ' });
-    const opts = getViewOpts();                                       
-    $(viewElems).append(_util.buildSelectElem(opts, { class: 'opts-box', id: 'sel-realm' }));
-    $('#sort-opts').append(viewElems);
-    $('#sel-realm').change(onLocViewChange);
+    const span = _util.buildElem('span', { id:'grid-view', class: 'flex-row',
+        text: 'View: ' });
+    const sel = _util.buildSelectElem(getViewOpts(), { class: 'opts-box', id: 'sel-realm' });
+    $('#sort-opts').append([span, sel]);
+    initCombobox('Loc View');
     $('#sort-opts').fadeTo(0, 1);
 
     function getViewOpts() {
@@ -837,11 +839,12 @@ function onLocViewChange(e) {                                                   
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
-    showLocInteractionData($('#sel-realm').val());
+    showLocInteractionData(getSelVal('Loc View'));
 }
 /** Starts the grid build depending on the view selected. */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
+    _util.populateStorage('curRealm', view);                      
     return view === 'tree' ? 
         buildLocGridTree(regions) : buildLocGridMap();
 }
@@ -858,7 +861,6 @@ function getTopRegionIds() {
  * with interactions and continues building the grid @getInteractionsAndFillTree.
  */
 function buildLocGridTree(topLocs) {                                            console.log('buildLocGridTree')
-    _util.populateStorage('curRealm', 'tree');                                  //console.log("storedRealm = ", storedRealm)
     buildLocTree(topLocs);
     getInteractionsAndFillTree();
 }
@@ -915,7 +917,7 @@ function loadLocComboboxes() {
     var selElems = buildLocSelects(opts);
     clearCol2();        
     $('#opts-col2').append(selElems);
-    // initComboboxes(['Region', 'Country']);
+    initComboboxes(['Region', 'Country']);
     setSelectedLocVals();
 }/** Builds arrays of options objects for the location comboboxes. */
 function buildLocSelectOpts() {
@@ -953,7 +955,7 @@ function buildLocSelectOpts() {
         if (opts.Region.length === 2) { rmvTopRegion(); }        
         addMissingOpts();
         sortLocOpts();
-        addAllOptions();
+        // addAllOptions();
     }
     /** 
      * If both top & sub regions are in the grid, only the sub-region opt is 
@@ -1018,19 +1020,16 @@ function buildLocSelects(locOptsObj) {
         const lbl = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         const span = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
         const sel = _util.buildSelectElem(
-            opts, { class: "opts-box", id: 'sel' + selName }, updateLocSearch);
-        $(lbl).append([span, sel]);
+            opts, { class: "opts-box", id: 'sel' + selName });
+        $(sel).css('width', '202px');
+        $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
     }
 }
 function setSelectedLocVals() {                                                 
-    var selId;
-    var selected = gParams.selectedOpts;                                        //console.log("selected in setSelectedLocVals = %O", selected);
-    Object.keys(selected).forEach(function(selName) {
-        selId = '#sel' + selName;
-        $(selId).val(selected[selName]); 
-        $(selId).find('option[value="all"]').hide();
-        $(selId).find('option[value="none"]').hide();
+    const selected = gParams.selectedOpts;                                        console.log("selected in setSelectedLocVals = %O", selected);
+    Object.keys(selected).forEach(locType => {
+        setSelVal(locType, selected[locType], 'silent');
     });
 }
 /*--------- Location Data Formatting -----------------------------------------*/
@@ -1133,7 +1132,6 @@ function hasChildInteractions(row) {
 function buildLocGridMap() {                                                    console.log('buildLocGridMap.');
     fadeGrid();
     clearCol2();
-    _util.populateStorage('curRealm', 'map');                      
     $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
     db_map.initMap(); 
 }
@@ -1358,34 +1356,29 @@ function loadPubSearchHtml(srcTree) {
     const searchTreeElem = buildTreeSearchHtml('Publication', updatePubSearch);
     clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
-    $('#selPublicationType').val('all');
-    // initCombobox('Publication Type');
+    initCombobox('Pub Type');
+    setSelVal('Pub Type', 'all', 'silent');
     
     function buildPubTypeSelect() {
         const pubTypeOpts = buildPubSelectOpts();
         return buildPubSelects(pubTypeOpts);
     }
     function buildPubSelectOpts() {
-        var pubTypes = _util.getDataFromStorage("publicationType");
-        var opts = [{value: 'all', text: '- All -'}];                           //console.log("pubTypes = %O", pubTypes);
-        for (var t in pubTypes) {
+        const pubTypes = _util.getDataFromStorage('publicationType');
+        const opts = [{value: 'all', text: '- All -'}];                         //console.log("pubTypes = %O", pubTypes);
+        for (let t in pubTypes) {
             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
         }
         return opts.sort(alphaOptionObjs);  
     }
     /** Builds the publication type dropdown */
-    function buildPubSelects(pubTypeOpts) {                                     //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        var lblElem = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
-        var spanElem = _util.buildElem('span', 
-            { text: 'Publication Type:', class: 'opts-span'});
-        var selectElem = _util.buildSelectElem(
-            pubTypeOpts, 
-            { class: "opts-box", id: 'selPublicationType', updatePubSearch });
-        $(selectElem).css('width', '115px');
-        $(spanElem).css('width', '124px');
-        $(lblElem).css('width', '255px');
-        $(lblElem).append([spanElem, selectElem]);
-        return lblElem;
+    function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+        const lbl = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
+        const span = _util.buildElem('span', { text: 'Type:' });
+        const sel = _util.buildSelectElem( opts, { id: 'selPubType' });
+        $(sel).css('width', '166px');
+        $(lbl).css('width', '212px').append([span, sel]);
+        return lbl;
     }
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml(srcTree) {
@@ -1450,18 +1443,18 @@ function getSrcRowData(src, treeLvl, idx) {                                     
 /** Returns a text input with submit button that will filter tree by text string. */
 function buildTreeSearchHtml(entity, hndlr) {
     const func = hndlr || searchTreeText.bind(null, entity);
-    let labelCntnr = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-    let inputElem = _util.buildElem('input', { 
-        name: 'sel'+entity, type: 'text', placeholder: entity+" Name"  });
-    let bttn = _util.buildElem('button', 
-        { text: 'Search', name: 'sel'+entity+'_submit', class: "ag-fresh grid-bttn" });
+    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+    const input = _util.buildElem('input', { 
+        name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
+    const bttn = _util.buildElem('button', 
+        { text: 'Search', name: 'sel'+entity+'_submit', class: 'ag-fresh grid-bttn' });
     $(bttn).css('margin-left', '5px');
-    $(labelCntnr).css('width', '249px');
-    $(inputElem).css('width', '180px');
-    $(inputElem).onEnter(func);
+    $(lbl).css('width', '212px');
+    $(input).css('width', '150px');
+    $(input).onEnter(func);
     $(bttn).click(func);
-    $(labelCntnr).append([inputElem, bttn]);
-    return labelCntnr;
+    $(lbl).append([input, bttn]);
+    return lbl;
 }
 /**
  * When the search-tree text-input is submitted, by either pressing 'enter' or
@@ -1519,30 +1512,30 @@ function getRelatedTaxaToSelect(selTaxonObj) {                                  
     }
 } /* End getRelatedTaxaToSelect */
 /*------------------ Location Filter Updates -----------------------------*/
-function updateLocSearch() {
-    const selVal = parseInt($(this).val());
-    const locType = getLocType($(this).attr("id"));
+function updateLocSearch(val) { 
+    const selVal = val ? parseInt(val) : 'all';  
+    const locType = getLocType(this.$input[0].id);
     gParams.selectedOpts = getSelectedVals(selVal, locType);
     rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(gParams.selectedOpts));
     updateFilter();
 
     function getLocType(selId) {
-        const selTypes = { selCountry: "country", selRegion: "region" };
+        const selTypes = { selCountry: 'Country', selRegion: 'Region' };
         return selTypes[selId];
     }
     function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
         const selected = {};
-        if (type === "country") { selectRegion(val); }
+        if (type === 'Country') { selectRegion(val); }
         if (val !== 'none' && val !== 'all') { selected[type] = val; }
         return selected;  
 
         function selectRegion(val) {
             var loc = getDetachedRcrd(val);
-            selected["Region"] = loc.region.id;
+            selected['Region'] = loc.region.id;
         }
     } /* End getSelectedVals */
     function updateFilter() {
-        gParams.focusFltrs = [_util.ucfirst(locType)];
+        gParams.focusFltrs = [locType];
         updateGridFilterStatusMsg();
     }
 } /* End updateLocSearch */
@@ -1552,7 +1545,7 @@ function updateLocSearch() {
  * publication text, the grid is rebuilt with the filtered data.
  */
 function updatePubSearch() {
-    const val = $("#selPublicationType").val();
+    const val = getSelVal('Pub Type');
     const text = getFilterTreeTextVal('Publication');
     const newRows = getFilteredPubRows(val, text);
     gParams.focusFltrs = getPubFilters();
@@ -1578,7 +1571,7 @@ function updatePubSearch() {
     function getPubFilters() {
         return val === 'all' && text === '' ? [] :
             (val === 'all' ? ['"' + text + '"'] : 
-            [$("#selPublicationType option[value='"+val+"']").text()+'s']);
+            [$("#selPubType option[value='"+val+"']").text()+'s']);
     }
 } /* End updatePubSearch */
 /*================ Grid Build Methods ==============================================*/
@@ -1720,7 +1713,7 @@ function getColumnDefs(mainCol) {
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Type", field: "type", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
+            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: UniqueValuesFilter },
@@ -1926,9 +1919,6 @@ function getAllFilterModels() {
         'Country': getColumnFilterApi('country'),
         'Region': getColumnFilterApi('region'),
         'Location Desc.': getColumnFilterApi('location'),
-        'Elev.': getColumnFilterApi('elev'),
-        'Lat.': getColumnFilterApi('lat'),
-        'Long.': getColumnFilterApi('lng'),
         'Citation': getColumnFilterApi('citation'),
         'Note': getColumnFilterApi('note') 
     };  
@@ -2139,7 +2129,7 @@ function getGridEntityName() {
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-    if ($('#selPublicationType').val() === "all") { return; }
+    if ($('#selPubType').val() === "all") { return; }
     updatePubSearch();
 }
 /*-------------------- Unique Values Column Filter -----------------------*/
@@ -2867,7 +2857,8 @@ function getSelConfgObj(field) {
         'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Publication Type' : {name: field, id: '#selPublicationType', change: updatePubSearch },
+        'Pub Type' : {name: field, id: '#selPubType', change: updatePubSearch },
+        'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
         'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
@@ -2899,12 +2890,12 @@ function getSelTxt(field) {
     const $selApi = $(confg.id)[0].selectize; 
     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
 }
-function setSelVal(field, val) {                                                console.log('setSelVal [%s] = [%s]', field, val);
+function setSelVal(field, val, silent) {                                        console.log('setSelVal [%s] = [%s]', field, val);
     const confg = getSelConfgObj(field);
     const $selApi = $(confg.id)[0].selectize; 
-    $selApi.addItem(val); 
+    $selApi.addItem(val, silent); 
 }
-// function updatePlaceholderText(elem, newTxt) {                              //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+// function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
 //     elem.selectize.updatePlaceholder();
 // }

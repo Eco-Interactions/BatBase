@@ -26,39 +26,29 @@ BUG:
 
 Before Release:
 
-    ## Testing ##
-    - Added Loc Views: tree and map
-    - Map
-        - Map loads correctly
-        - Location name/summary popups work
-        - grid loads from loc summary
-    - grid
-        - Map pin icons show
-            - when clicked, map loads zoomed to loc and shows summary
-
 MEETING NOTES:
     - Country/region-habitat locations still need to be configured to display on the map
-    - Locations with the exact same gpd coordinates will be right on top of eachother 
+    - Locations with the exact same gps coordinates will be right on top of eachother 
         in the map view. This can be fixed with some intelligence that will tell if another 
         pin exists at that location already and can add them to a cluster.
-    - look to "next round" for more notes.
+    Next/future round:
+        - Programmatically load sets of data accoding to zoom size and map viewport
+            - Allow for clustering at higher levels with helpful popups
+        -- Update db page tutorial
+        -- Create 'custom' icon for single markers
+        -- add editing to countries/regions for supers/admins with modified forms so gps data can be added.
+    Feedback:
+        - Changed location tree column to fit additional loc data
+        - Changed 'Interaction Type' to 'Type' in order to give space for additional data. Thoughts?
+        - Would ya like to be able to move the loc summary popups around?
 
 
 >======== Email ============
 TAYLOR:
-    - What number should I round the coordinates to?
-    - For regions and countries, show all bat taxa recorded from children?
-    - Changed 'Interaction Type' to 'Type' in order to give space for additional data. Thoughts?
-    - On data-grid, I have adjusted the tree column size to fit more loc data in loc view. 
         
 Tullenda:
-    - Would ya like to be able to move the loc summary popups around?
-    - On data-grid, I have adjusted the column sizes to fit more loc data in loc view. 
 
 >==== Change Log ====
-    - Added  ISO_codes for continents and countries
-    - Added geoJSON data for continents and countries
-    - 
 
 >---- Add to Client Task List ---
     - 
@@ -106,6 +96,8 @@ TODOs:
         to that level and retain other filters- updated at for example.
     - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
         elem hasn't loaded yet.
+    -- Selectized --
+        - Add 'all' option that will reset locs at that level
 
 (STATIC/MISC SITE)
     - {med}[complicated] Implement Encore for assets
