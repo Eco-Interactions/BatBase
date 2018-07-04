@@ -446,9 +446,9 @@ function initTaxonSearchUi(data) {                                              
 function setTaxonRealm() {
     var realmVal;
     var storedRealm = dataStorage.getItem('curRealm');                          //console.log("storedRealm = ", storedRealm)
-    if ($('#sel-realm').val() === null) { 
+    if (!getSelVal('Taxon Realm')) { 
         realmVal = storedRealm !== null ? storedRealm : "3";  
-        $('#sel-realm').val(realmVal);
+        setSelVal('Taxon Realm', realmVal);
     }
 }
 /**
@@ -500,7 +500,7 @@ function onTaxonRealmChange(e) {
  * the taxon's record.
  */
 function storeAndReturnRealm() {
-    const realmId = getSelVal('Realm');
+    const realmId = getSelVal('Taxon Realm');
     const realmTaxonRcrd = getDetachedRcrd(realmId);                            //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
@@ -571,12 +571,14 @@ function buildTaxonSearchUiAndGrid(taxonTree) {                                 
  * nodes displayed in the grid.
  */
 function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
-    var browseElems = _util.buildElem('span', { id:"sort-taxa-by", text: "Group Taxa by: " });
-    var realmOpts = getRealmOpts(data);                                         //console.log("realmOpts = %O", realmOpts);
-    $(browseElems).append(_util.buildSelectElem( realmOpts, { class: 'opts-box', id: 'sel-realm' }));
+    const browseElems = _util.buildElem('span', { id:'sort-taxa-by', 
+        class: 'flex-row', text: 'Group Taxa by: ' });
+    const realmOpts = getRealmOpts(data);                                         //console.log("realmOpts = %O", realmOpts);
+    $(browseElems).append(_util.buildSelectElem( realmOpts, 
+        { class: 'opts-box', id: 'sel-realm' }));
 
     $('#sort-opts').append(browseElems);
-    $('#sel-realm').change(onTaxonRealmChange);
+    initCombobox('Taxon Realm');
     $('#sort-opts').fadeTo(0, 1);
 
     function getRealmOpts(data) {  
@@ -606,29 +608,27 @@ function loadTaxonComboboxes() {
  * and will be selected.
  */
 function buildTaxonSelectOpts(rcrdsByLvl) {                                     //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
-    var optsObj = {};
-    var curRealmLvls = gParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
-    curRealmLvls.forEach(function(lvl) {
-        if (lvl in rcrdsByLvl) { getLvlOptsObjs(rcrdsByLvl[lvl], lvl);
-        } else { fillInLvlOpts(lvl); }
-    });
+    const optsObj = {};
+    const curRealmLvls = gParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+    curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
-    function getLvlOptsObjs(rcrds, lvl) {
-        var taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                   //console.log("taxonNames = %O", taxonNames);
+    function buildLvlOptions(lvl) {
+        return lvl in rcrdsByLvl ? 
+            getTaxaOptsAtLvl(rcrdsByLvl[lvl], lvl) : fillInLvlOpts(lvl)
+    }
+    /** Child levels can have multiple taxa.  */
+    function getTaxaOptsAtLvl(rcrds, lvl) {
+        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                   //console.log("taxonNames = %O", taxonNames);
         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
-        if (taxonNames.length > 0 && taxonNames[0] !== "None") {
-            optsObj[lvl].unshift({value: 'all', text: '- All -'});
-        }
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-        var taxon;
         if (lvl in gParams.selectedVals) {
-            taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
+            const taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];    
         } else {
             optsObj[lvl] = [{value: 'none', text: '- None -'}];
-            gParams.selectedVals[lvl] = "none";
+            gParams.selectedVals[lvl] = 'none';
         }
     }
 } /* End buildTaxonSelectOpts */
@@ -642,35 +642,30 @@ function buildTaxonOptions(taxonNames, taxonData) {
 }
 function loadLevelSelects(levelOptsObj, levels) {                               //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
-    // const levelNames = [];
     clearCol2();        
     $('#opts-col2').append(elems);
-    // initComboboxes(levelNames);
+    initComboboxes(gParams.allRealmLvls.slice(1));
     setSelectedTaxonVals(gParams.selectedVals);
     
-    function buildTaxonSelects(lvlOpts, levels) {  
-        const selElems = [];
+    function buildTaxonSelects(opts, levels) {  
+        const elems = [];
         levels.forEach(function(level) {                                        console.log('----- building select box for level = [%s]', level);
-            const lblElem = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
-            const spanElem = _util.buildElem('span', { text: level + ': ', class: 'opts-span' });
-            const selectElem = _util.buildSelectElem(
-                lvlOpts[level], { class: 'opts-box', id: 'sel' + level }, updateTaxonSearch);
-            $(lblElem).append([spanElem, selectElem]);
-            selElems.push(lblElem);
-            // levelNames.push(level);
+            const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+            const span = _util.buildElem('span', { text: level + ': ' });
+            const sel = _util.buildSelectElem(
+                opts[level], { class: 'opts-box', id: 'sel' + level });
+            $(sel).css('width', '142px');
+            $(lbl).css('margin', '.3em 0em 0em.3em').append([span, sel]);
+            elems.push(lbl);
         });
-        return selElems;
+        return elems;
     }
 }
 function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (selected === undefined) {return;}
     gParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
-        var selId = '#sel' + lvl;
-        $(selId).find('option[value="all"]').hide();
-        if (selected[lvl]) {                                                    //console.log("selecting = ", lvl, selected[lvl])
-            $(selId).val(selected[lvl]); 
-            $(selId).find('option[value="none"]').hide();
-        }
+        if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
+        setSelVal(lvl, selected[lvl], 'silent');
     });
 }
 /*-------- Taxon Data Formatting ------------------------------------------*/
@@ -1482,19 +1477,25 @@ function getTreeRowsWithText(rows, text) {
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-function updateTaxonSearch() {                                                  //console.log("updateTaxonSearch val = ", $(this).val())
-    var selectedTaxonId = $(this).val();                                        //console.log("selectedTaxonId = %O", selectedTaxonId);
-    var selTaxonRcrd = getDetachedRcrd(selectedTaxonId);  
-    gParams.selectedVals = getRelatedTaxaToSelect(selTaxonRcrd);                //console.log("selectedVals = %O", gParams.selectedVals);
+function updateTaxonSearch(val) {                                               console.log("updateTaxonSearch val = ", val)
+    if (!val) { return; }
+    const rcrd = getDetachedRcrd(val);  
+    gParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", gParams.selectedVals);
     updateFilterStatus();
-    rebuildTaxonTree(selTaxonRcrd);
+    rebuildTaxonTree(rcrd);
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function updateFilterStatus() {
-        var curLevel = selTaxonRcrd.level.displayName;
-        var taxonName = selTaxonRcrd.displayName;
-        gParams.focusFltrs.push(curLevel + " " + taxonName); 
-        updateGridFilterStatusMsg();
+        const curLevel = rcrd.level.displayName;
+        const taxonName = rcrd.displayName;
+        updateFilters();
+
+        function updateFilters() {
+            if (gParams.focusFltrs) { 
+                gParams.focusFltrs.push(curLevel + " " + taxonName); 
+            } else { gParams.focusFltrs = [curLevel + " " + taxonName] }
+            updateGridFilterStatusMsg();
+        }
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */

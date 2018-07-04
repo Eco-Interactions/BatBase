@@ -581,7 +581,6 @@ function finishIntFormBuild() {
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
     $('#top-cancel').unbind('click').click(exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
-    $('#Note_row').css({'padding': '.2em 0 .3em 0'});
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     addReqElemsToConfg();    
     $('.all-fields-cntnr').hide();

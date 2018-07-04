@@ -1,9 +1,12 @@
 /*--- Database Search Page Styles ---*/
 #search-opts {  /* .flex-row also on elem */
     margin: 1em auto 0 auto;
-    height: 115px;
+    height: 130px;
     width: 100%;
     font-size: 1.1em;
+}
+#search-opts span {
+    padding-top: 6px;
 }
 .opts-col {
     padding: .3em;
@@ -11,21 +14,14 @@
     justify-content: space-around;
 }
 .opts-box {
-    flex: 0 0 auto;       
-    height: 25px;
-    width: 130px;
     margin: 0 .7em 0 .5em;
-    z-index: 20;
 }
 .selectize-input {
     padding: 4px;
 }
-/*.selectize-dropdown-content .option {
-    background: #f3f3f3;
-    border-color: #b8b8b8;
-    box-shadow: 0 1px 0 rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.5);
-    background-image: linear-gradient(to bottom, #fefefe, #f2f2f2);
-}*/
+.selectize-input, .selectize-control.single .selectize-input.input-active {
+    display: inline-flex;
+}
 #opts-col1 {
     border-right: black 1px solid;
     flex: 0 0 326px;
@@ -33,9 +29,6 @@
 }
 #opts-col1 .opts-box {
     width: 116px;
-}
-#opts-col1 span {
-    padding-top: 6px;
 }
 #opts-col2, #opts-col3 {
     font-size: .9em;
@@ -63,12 +56,8 @@
 .lbl-sel-opts {          /* .flex-row also on elems */
     margin: .3em;
     flex: 0 0 auto;
-    width: 208px;    
+    width: 222px;    
     justify-content: space-between;
-}
-.opts-span {
-    padding-top: 3px;
-    width: 65px;
 }
 #grid-tools {
     margin: .7em auto .2em auto;
@@ -337,6 +326,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 .field-row {
     justify-content: space-between;
+    margin-top: .3em;
+}
+#form-main .selectize-input {
+    height: 33px;
 }
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
