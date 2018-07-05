@@ -25,7 +25,7 @@ BUG:
 
 
 Before Release:
-
+    -- update tests with the new selectized elem apis
 MEETING NOTES:
     - Country/region-habitat locations still need to be configured to display on the map
     - Locations with the exact same gps coordinates will be right on top of eachother 

@@ -187,8 +187,9 @@ function resetSearchGrid(focus) {                                               
 export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
     resetSearchGrid(focus);
 }
-function selectSearchFocus(e, f) { 
+function selectSearchFocus(f) { 
     const focus = f || getSelVal('Focus');                                      //console.log("---select(ing)SearchFocus = ", focus); 
+    if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationGrid, 'srcs': buildSourceGrid,
         'taxa': buildTaxonGrid 
@@ -489,8 +490,12 @@ function seperateTaxonTreeByLvl(topTaxon) {
     }
 } /* End seperateTaxonTreeByLvl */
 /** Event fired when the taxon realm select box has been changed. */
-function onTaxonRealmChange(e) {  
-    var realmTaxon = storeAndReturnRealm();
+function onTaxonRealmChange(val) {  
+    if (!val) { return; }
+    resetTaxonRealm(val);
+}
+function resetTaxonRealm(val) {
+    const realmTaxon = storeAndReturnRealm(val);
     resetCurTreeState();
     rebuildTaxonTree(realmTaxon, true);
 }
@@ -499,8 +504,8 @@ function onTaxonRealmChange(e) {
  * stores both it's id and level in the global focusStorag, and returns 
  * the taxon's record.
  */
-function storeAndReturnRealm() {
-    const realmId = getSelVal('Taxon Realm');
+function storeAndReturnRealm(val) {
+    const realmId = val || getSelVal('Taxon Realm');
     const realmTaxonRcrd = getDetachedRcrd(realmId);                            //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
@@ -573,10 +578,8 @@ function buildTaxonSearchUiAndGrid(taxonTree) {                                 
 function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
     const browseElems = _util.buildElem('span', { id:'sort-taxa-by', 
         class: 'flex-row', text: 'Group Taxa by: ' });
-    const realmOpts = getRealmOpts(data);                                         //console.log("realmOpts = %O", realmOpts);
-    $(browseElems).append(_util.buildSelectElem( realmOpts, 
-        { class: 'opts-box', id: 'sel-realm' }));
-
+    const opts = getRealmOpts(data);                                            //console.log("realmOpts = %O", realmOpts);
+    $(browseElems).append(newSelEl(opts, 'opts-box', 'sel-realm', 'Taxon Realm'));
     $('#sort-opts').append(browseElems);
     initCombobox('Taxon Realm');
     $('#sort-opts').fadeTo(0, 1);
@@ -596,9 +599,9 @@ function buildTaxonRealmHtml(data) {                                            
  * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
  */
 function loadTaxonComboboxes() {
-    var curTaxaByLvl = gParams.taxaByLvl;                                       //console.log("curTaxaByLvl = %O", curTaxaByLvl);
-    var lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
-    var levels = Object.keys(lvlOptsObj);
+    const curTaxaByLvl = gParams.taxaByLvl;                                     //console.log("curTaxaByLvl = %O", curTaxaByLvl);
+    const lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
+    const levels = Object.keys(lvlOptsObj);
     if (levels.indexOf(gParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     loadLevelSelects(lvlOptsObj, levels);
 }
@@ -625,10 +628,9 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                     
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in gParams.selectedVals) {
             const taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
-            optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];    
+            optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
         } else {
             optsObj[lvl] = [{value: 'none', text: '- None -'}];
-            gParams.selectedVals[lvl] = 'none';
         }
     }
 } /* End buildTaxonSelectOpts */
@@ -649,11 +651,10 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
-        levels.forEach(function(level) {                                        console.log('----- building select box for level = [%s]', level);
+        levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
             const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
             const span = _util.buildElem('span', { text: level + ': ' });
-            const sel = _util.buildSelectElem(
-                opts[level], { class: 'opts-box', id: 'sel' + level });
+            const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
             $(sel).css('width', '142px');
             $(lbl).css('margin', '.3em 0em 0em.3em').append([span, sel]);
             elems.push(lbl);
@@ -818,7 +819,7 @@ function addLocDataToGridParams(data) {
 function buildLocViewHtml() {                   
     const span = _util.buildElem('span', { id:'grid-view', class: 'flex-row',
         text: 'View: ' });
-    const sel = _util.buildSelectElem(getViewOpts(), { class: 'opts-box', id: 'sel-realm' });
+    const sel = newSelEl(getViewOpts(), 'opts-box', 'sel-realm', 'Loc View');
     $('#sort-opts').append([span, sel]);
     initCombobox('Loc View');
     $('#sort-opts').fadeTo(0, 1);
@@ -829,7 +830,8 @@ function buildLocViewHtml() {
     } 
 } /* End buildLocViewHtml /*
 /** Event fired when the source realm select box has been changed. */
-function onLocViewChange(e) {                                                   //console.log('onLocViewChange') 
+function onLocViewChange(val) {                                                 //console.log('onLocViewChange') 
+    if (!val) { return; }
     clearCol2();
     clearPreviousGrid();
     resetCurTreeState();
@@ -1014,8 +1016,7 @@ function buildLocSelects(locOptsObj) {
     function buildLocSel(selName, opts) {
         const lbl = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
         const span = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
-        const sel = _util.buildSelectElem(
-            opts, { class: "opts-box", id: 'sel' + selName });
+        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
         $(sel).css('width', '202px');
         $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
@@ -1177,7 +1178,7 @@ function buildSrcRealmHtml() {
         const types = getRealmOpts();                                       
         const span = _util.buildElem('span', { id:'sort-srcs-by', class: 'flex-row', 
             text: 'Source Type: ' });
-        const sel = _util.buildSelectElem(types, { id: 'sel-realm', class: 'opts-box' });
+        const sel = newSelEl(types, 'opts-box', 'sel-realm', 'Source Type');
         return [span, sel];
     }
     function getRealmOpts() {
@@ -1193,22 +1194,26 @@ function setSrcRealm() {
     if (!getSelVal('Source Type')) { setSelVal('Source Type', srcRealm); }
 }
 /** Event fired when the source realm select box has been changed. */
-function onSrcRealmChange(e) {                                                  //console.log('-------- SrcRealmChange')
+function onSrcRealmChange(val) {                                                //console.log('-------- SrcRealmChange')
+    if (!val) { return; }
+    resetSourceRealm(val);
+}
+function resetSourceRealm(val) {
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
     buildSrcTree();
 }
 /** (Re)builds source tree for the selected source realm. */
-function buildSrcTree() {
-    const realmRcrds = storeAndReturnCurRealmRcrds();                           //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
+function buildSrcTree(val) {
+    const realmRcrds = storeAndReturnCurRealmRcrds(val);                        //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
     initSrcTree(gParams.curRealm, realmRcrds);
     getInteractionsAndFillTree();
 }
 /** Returns the records for the source realm currently selected. */
-function storeAndReturnCurRealmRcrds() {
+function storeAndReturnCurRealmRcrds(val) {
     const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
-    const realmVal = getSelVal('Source Type');                                  //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
+    const realmVal = val || getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
     gParams.curRealm = realmVal;    
     _util.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
@@ -1348,7 +1353,7 @@ function loadAuthSearchHtml(srcTree) {
 }
 function loadPubSearchHtml(srcTree) {
     const pubTypeElem = buildPubTypeSelect();
-    const searchTreeElem = buildTreeSearchHtml('Publication', updatePubSearch);
+    const searchTreeElem = buildTreeSearchHtml('Publication', updatePubSearchByTxt);
     clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
     initCombobox('Pub Type');
@@ -1370,7 +1375,7 @@ function loadPubSearchHtml(srcTree) {
     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
         const lbl = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
         const span = _util.buildElem('span', { text: 'Type:' });
-        const sel = _util.buildSelectElem( opts, { id: 'selPubType' });
+        const sel = newSelEl(opts, '', 'selPubType', 'Pub Type');
         $(sel).css('width', '166px');
         $(lbl).css('width', '212px').append([span, sel]);
         return lbl;
@@ -1477,7 +1482,7 @@ function getTreeRowsWithText(rows, text) {
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-function updateTaxonSearch(val) {                                               console.log("updateTaxonSearch val = ", val)
+function updateTaxonSearch(val) {                                               //console.log("updateTaxonSearch val = ", val)
     if (!val) { return; }
     const rcrd = getDetachedRcrd(val);  
     gParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", gParams.selectedVals);
@@ -1514,7 +1519,8 @@ function getRelatedTaxaToSelect(selTaxonObj) {                                  
 } /* End getRelatedTaxaToSelect */
 /*------------------ Location Filter Updates -----------------------------*/
 function updateLocSearch(val) { 
-    const selVal = val ? parseInt(val) : 'all';  
+    if (!val) { return; }
+    const selVal = parseInt(val);  
     const locType = getLocType(this.$input[0].id);
     gParams.selectedOpts = getSelectedVals(selVal, locType);
     rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(gParams.selectedOpts));
@@ -1541,24 +1547,32 @@ function updateLocSearch(val) {
     }
 } /* End updateLocSearch */
 /*------------------ Source Filter Updates -------------------------------*/
+function updatePubSearchByTxt() {
+    const text = getFilterTreeTextVal('Publication');
+    updatePubSearch(null, text);
+}
+function updatePubSearchByType(val) {                                           //console.log('updatePubSearchByType. val = ', val)
+    if (!val) { return; }
+    updatePubSearch(val, null);
+}
 /**
  * When the publication type dropdown is changed or the grid is filtered by 
  * publication text, the grid is rebuilt with the filtered data.
  */
-function updatePubSearch() {
-    const val = getSelVal('Pub Type');
-    const text = getFilterTreeTextVal('Publication');
-    const newRows = getFilteredPubRows(val, text);
+function updatePubSearch(typeVal, text) {                                       //console.log('updatePubSearch. typeVal = ', typeVal)
+    const typeId = typeVal || getSelVal('Pub Type');
+    const txt = text || getFilterTreeTextVal('Publication');
+    const newRows = getFilteredPubRows();
     gParams.focusFltrs = getPubFilters();
     gridOptions.api.setRowData(newRows);
     updateGridFilterStatusMsg();
     resetToggleTreeBttn(false);
 
-    function getFilteredPubRows(typeId, txt) {
+    function getFilteredPubRows() {                             
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
         if (txt === '') { return getPubTypeRows(typeId); }
         const pubTypes = _util.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[val].publications;         
+        const pubIds = pubTypes[typeId].publications;         
         return getAllCurRows().filter(row => 
             pubIds.indexOf(row.pubId) !== -1 && 
             row.name.toLowerCase().indexOf(text) !== -1);
@@ -1566,13 +1580,13 @@ function updatePubSearch() {
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows() { 
         const pubTypes = _util.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[val].publications;      
+        const pubIds = pubTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
     function getPubFilters() {
-        return val === 'all' && text === '' ? [] :
-            (val === 'all' ? ['"' + text + '"'] : 
-            [$("#selPubType option[value='"+val+"']").text()+'s']);
+        return typeId === 'all' && text === '' ? [] :
+            (typeId === 'all' ? ['"' + text + '"'] : 
+            [$("#selPubType option[value='"+typeId+"']").text()+'s']);
     }
 } /* End updatePubSearch */
 /*================ Grid Build Methods ==============================================*/
@@ -2633,8 +2647,7 @@ function startIntroWalkthrough(startStep){
     } /* End buildIntro */
     function setGridState() {
         $('#search-grid').css("height", "444px");
-        $('#search-focus').val("taxa");
-        selectSearchFocus();
+        setSelVal('Focus', 'taxa');
         $('#show-tips').off("click");
         $('#search-focus').off("change");
     }
@@ -2642,8 +2655,7 @@ function startIntroWalkthrough(startStep){
         var focus = gParams.curFocus || "taxa";
         $('#search-grid').css("height", "888px");
         $('#show-tips').click(showTips);
-        $('#search-focus').change(selectSearchFocus);
-        $('#search-focus').val(focus);
+        setSelVal('Focus', focus);
         miscObj.intro = null;
     }
 }   /* End startIntroWalkthrough */
@@ -2843,8 +2855,8 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-function initCombobox(field) {                                                  console.log("initCombobox [%s]", field);
-    const confg = getSelConfgObj(field);  console.log9
+function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
+    const confg = getSelConfgObj(field); 
     initSelectCombobox(confg);  
 } /* End initComboboxes */
 function initComboboxes(fieldAry) {
@@ -2858,13 +2870,11 @@ function getSelConfgObj(field) {
         'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Pub Type' : {name: field, id: '#selPubType', change: updatePubSearch },
+        'Pub Type' : {name: field, id: '#selPubType', change: updatePubSearchByType },
         'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
         'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
-        'Source Type' : { name: 'Realm', id: '#sel-realm', change: onSrcRealmChange },
-        'Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
         'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
     };
     return confgs[field];
@@ -2878,12 +2888,13 @@ function initSelectCombobox(confg) {                                            
     const options = {
         create: false,
         onChange: confg.change,
+        onBlur: saveOrRestoreSelection,
         placeholder: 'Select ' + confg.name
     };
-    $(confg.id).selectize(options);  
+    const sel = $(confg.id).selectize(options); 
 } /* End initSelectCombobox */
-function getSelVal(field) {
-    const confg = getSelConfgObj(field);                                        console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
+    const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     return $(confg.id)[0].selectize.getValue();  
 }
 function getSelTxt(field) {
@@ -2891,10 +2902,30 @@ function getSelTxt(field) {
     const $selApi = $(confg.id)[0].selectize; 
     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
 }
-function setSelVal(field, val, silent) {                                        console.log('setSelVal [%s] = [%s]', field, val);
+function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
     const confg = getSelConfgObj(field);
     const $selApi = $(confg.id)[0].selectize; 
     $selApi.addItem(val, silent); 
+    saveSelVal($(confg.id), val);
+}
+function saveSelVal($elem, val) {
+    $elem.data('val', val);
+}
+/**
+ * onBlur: the elem is checked for a value. If one is selected, it is saved. 
+ * If none, the previous is restored. 
+ */
+function saveOrRestoreSelection() {                                             //console.log('----------- saveOrRestoreSelection')
+    const $elem = this.$input;  
+    const field = $elem.data('field'); 
+    const prevVal = $elem.data('val');          
+    const curVal = getSelVal(field);                                 
+    return curVal ? saveSelVal($elem, curVal) : setSelVal(field, prevVal, 'silent');
+} /* End saveOrRestoreSelection */
+function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
+    const elem = _util.buildSelectElem(opts, { class: c, id: i });
+    $(elem).data('field', field);
+    return elem;
 }
 // function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
@@ -2986,10 +3017,9 @@ function clearPreviousGrid() {                                                  
  * realm; locations are reset to the top regions.
  */
 function resetDataGrid() {                                                      //console.log("---reseting grid---")
-    var resetMap = { taxa: onTaxonRealmChange, locs: rebuildLocTree, srcs: onSrcRealmChange };
-    var focus = gParams.curFocus; 
+    const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTree, srcs: resetSourceRealm };
     resetCurTreeState();
-    resetMap[focus](); 
+    resetMap[gParams.curFocus](); 
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
