@@ -629,9 +629,7 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                     
         if (lvl in gParams.selectedVals) {
             const taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
-        } else {
-            optsObj[lvl] = [{value: 'none', text: '- None -'}];
-        }
+        } else { optsObj[lvl] = []; }
     }
 } /* End buildTaxonSelectOpts */
 function buildTaxonOptions(taxonNames, taxonData) {
@@ -952,7 +950,6 @@ function buildLocSelectOpts() {
         if (opts.Region.length === 2) { rmvTopRegion(); }        
         addMissingOpts();
         sortLocOpts();
-        // addAllOptions();
     }
     /** 
      * If both top & sub regions are in the grid, only the sub-region opt is 
@@ -969,16 +966,17 @@ function buildLocSelectOpts() {
     function addMissingOpts() {                                                 
         if (!gParams.openRows.length && !gParams.selectedOpts) { return; }
         const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
-        if (!opts.Country.length) { opts.Country.push(buildOpt(selLoc, "country")); }
-        if (!opts.Region.length) { opts.Region.push(buildOpt(selLoc, "region")); }
+        if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
+        if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
     /** build the new opts and adds their loc ids to the selected-options obj. */
-    function buildOpt(loc, type) {                                              //console.log('building opt for [%s]. loc = %O', type, loc);
-        const val = loc && loc[type] ?  loc[type].id : 'none';
-        const txt = loc && loc[type] ?  loc[type].displayName : '- None -';
+    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
+        const val = loc && loc[type] ?  loc[type].id : false;
+        const txt = loc && loc[type] ?  loc[type].displayName : false;
+        if (!val) { return }
         addToSelectedObj(val, _util.ucfirst(type));  
-        if (val !== 'none') { gParams.openRows.push(val); }
-        return { value: val, text: txt };
+        gParams.openRows.push(val);
+        opts[optProp].push({ value: val, text: txt });
     }         
     function addToSelectedObj(id, type) {
         const sel = gParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
@@ -990,15 +988,6 @@ function buildLocSelectOpts() {
             opts[type] = opts[type].sort(alphaOptionObjs); 
         }
     }
-    /** Adds an 'all' option when there are multiple regions and/or countries. */
-    function addAllOptions() {
-        for (let type in opts) {               
-            let firstVal = opts[type][0].value;
-            if (firstVal == 'none' || isOpenRow(firstVal)) { continue; }                                
-            opts[type].unshift({value: 'all', text: '- All -'});
-            addToSelectedObj('all', type);
-        }                                                          
-    } 
 } /* End buildLocSelectOpts */
 function createSelectedOptsObj() {
     gParams.selectedOpts = {};
@@ -1356,16 +1345,16 @@ function loadPubSearchHtml(srcTree) {
     const searchTreeElem = buildTreeSearchHtml('Publication', updatePubSearchByTxt);
     clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
-    initCombobox('Pub Type');
-    setSelVal('Pub Type', 'all', 'silent');
+    initCombobox('Publication Type');
+    setSelVal('Publication Type', 'all', 'silent');
     
     function buildPubTypeSelect() {
         const pubTypeOpts = buildPubSelectOpts();
         return buildPubSelects(pubTypeOpts);
     }
     function buildPubSelectOpts() {
-        const pubTypes = _util.getDataFromStorage('publicationType');
-        const opts = [{value: 'all', text: '- All -'}];                         //console.log("pubTypes = %O", pubTypes);
+        const pubTypes = _util.getDataFromStorage('publicationType');           
+        const opts = [{value: 'all', text: '- All -'}];
         for (let t in pubTypes) {
             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
         }
@@ -1375,9 +1364,9 @@ function loadPubSearchHtml(srcTree) {
     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
         const lbl = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
         const span = _util.buildElem('span', { text: 'Type:' });
-        const sel = newSelEl(opts, '', 'selPubType', 'Pub Type');
-        $(sel).css('width', '166px');
-        $(lbl).css('width', '212px').append([span, sel]);
+        const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+        $(sel).css('width', '177px');
+        $(lbl).css('width', '222px').append([span, sel]);
         return lbl;
     }
 } /* End loadPubSearchHtml */
@@ -1449,8 +1438,8 @@ function buildTreeSearchHtml(entity, hndlr) {
     const bttn = _util.buildElem('button', 
         { text: 'Search', name: 'sel'+entity+'_submit', class: 'ag-fresh grid-bttn' });
     $(bttn).css('margin-left', '5px');
-    $(lbl).css('width', '212px');
-    $(input).css('width', '150px');
+    $(lbl).css('width', '222px');
+    $(input).css('width', '160px');
     $(input).onEnter(func);
     $(bttn).click(func);
     $(lbl).append([input, bttn]);
@@ -1560,7 +1549,7 @@ function updatePubSearchByType(val) {                                           
  * publication text, the grid is rebuilt with the filtered data.
  */
 function updatePubSearch(typeVal, text) {                                       //console.log('updatePubSearch. typeVal = ', typeVal)
-    const typeId = typeVal || getSelVal('Pub Type');
+    const typeId = typeVal || getSelVal('Publication Type');
     const txt = text || getFilterTreeTextVal('Publication');
     const newRows = getFilteredPubRows();
     gParams.focusFltrs = getPubFilters();
@@ -2870,7 +2859,7 @@ function getSelConfgObj(field) {
         'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
         'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Pub Type' : {name: field, id: '#selPubType', change: updatePubSearchByType },
+        'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearchByType },
         'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
         'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
@@ -2889,9 +2878,15 @@ function initSelectCombobox(confg) {                                            
         create: false,
         onChange: confg.change,
         onBlur: saveOrRestoreSelection,
-        placeholder: 'Select ' + confg.name
+        placeholder: getPlaceholer(confg.id)
     };
     const sel = $(confg.id).selectize(options); 
+
+    function getPlaceholer(id) {
+        const optCnt = $(id + ' > option').length;  
+        const placeholder = 'Select ' + confg.name
+        return optCnt ? 'Select ' + confg.name : '- None -';
+    }
 } /* End initSelectCombobox */
 function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
