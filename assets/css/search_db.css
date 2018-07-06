@@ -43,6 +43,12 @@
     flex: 1 0 484px;     /*Don't grow or shrink, width.*/ 
     justify-content: space-between;
 }
+#opts-col3 .bttm-row {
+    justify-content: space-between;
+}
+#shw-map {
+    width: 193px;
+}
 #time-fltr, .flatpickr-input {
     margin-top: .2em;
 }

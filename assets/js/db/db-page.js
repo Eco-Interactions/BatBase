@@ -101,6 +101,7 @@ function addDomEventListeners() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('button[name="reset-grid"]').click(resetDataGrid);
+    $('#shw-map').click(showGridRecordsOnMap);
     $("#strt-tut").click(startIntroWalkthrough);
     $("#show-tips").click(showTips);
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
@@ -166,10 +167,11 @@ function setUpFutureDevInfoBttn() {
     const bttn = _util.buildElem('button', { name: 'futureDevBttn', 
             title: getFutureDevMsg(),
             text: 'Hover for details about future search options.'});  
-    $(bttn).appendTo('#opts-col3');        
+    $(bttn).appendTo('#opts-col3 .bttm-row');        
 }
 function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
-    return "Future options include year and elevation range, habitat and interaction type, " +
+    return "Future options include year and elevation range, habitat and interaction " +
+        "type (currently available by filtering the grid columns), " +
         "as well as other criteria that would be helpful to focus the data. \n" +
         "Below is a 'Show/Hide Columns' button that will allow users to specify " +
         "the data shown in the grid and/or csv export.";
@@ -1125,11 +1127,15 @@ function showLocOnMap(geoJsonId, zoom) {
     $('#sel-realm').val('map').change();
     db_map.showLoc(geoJsonId, zoom);
 }
+function showGridRecordsOnMap() { console.log('showGridRecordsOnMap');
+    
+}
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
     rebuildLocTree([loc.id]);
     $('#sel-realm').val('tree');
 }
+
 /*------------------Source Search Methods ------------------------------------*/
 /**
  * Get all data needed for the Source-focused grid from data storage and send  
