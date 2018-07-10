@@ -26,6 +26,8 @@ BUG:
 
 Before Release:
     -- update tests with the new selectized elem apis
+
+    
 MEETING NOTES:
     - Country/region-habitat locations still need to be configured to display on the map
     - Locations with the exact same gps coordinates will be right on top of eachother 
@@ -91,7 +93,6 @@ TODOs:
     - {high}[med] Upgrade to the latest AgGrid. Super out of date at this point.
     - {medium}[easy] Check CSV Exports
     - {med}[med, long] Add data-entry tutorial.
-    - {low}[med] Implement selectize library
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters- updated at for example.
     - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
@@ -138,6 +139,7 @@ TODOs:
             to 'ints-updated-at'
         - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
         - {low}[med] Refactor use of 'main' and 'top' entities to 'core' entities.
+        - {low}[med] Download records once and store in memory. (miscObj, maybe?)
     --Testing--
         - Refactor tests away from sleeping after js changes to attempting to run 
             js or find elems on page multiple times before failing, 'spinning'.

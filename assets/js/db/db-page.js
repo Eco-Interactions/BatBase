@@ -1127,9 +1127,67 @@ function showLocOnMap(geoJsonId, zoom) {
     $('#sel-realm').val('map').change();
     db_map.showLoc(geoJsonId, zoom);
 }
-function showGridRecordsOnMap() { console.log('showGridRecordsOnMap');
-    
+/**
+ * Build an object with all relevant data to display the interactions in the 
+ * data-grid in map-view. Sends it to the map to handle the display.
+ */
+function showGridRecordsOnMap() {                                               //console.log('showGridRecordsOnMap');
+    storeIntAndLocRcrds();
+    gridOptions.api.expandAll();
+    const gridData = buildGridLocDataObj(gridOptions.api.getModel().rowsToDisplay);
+    db_map.showInts(gridData);
 }
+function storeIntAndLocRcrds() {
+    const rcrds = _util.getDataFromStorage(['interaction', 'location']);
+    gParams.interaction = rcrds.interaction;
+    gParams.location = rcrds.location;
+}
+function buildGridLocDataObj(rows) {
+    return rows.map(getIntData).filter(data => data);  
+}
+function getIntData(row) {                                                  
+    if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
+    const rowRcrd = getDetachedRcrd(row.data.id);  
+    return getRowRcrdInteractionData(row.data, rowRcrd);
+}
+function getRowRcrdInteractionData(rowData, rcrd) {
+    const data = { 
+        name: getRowRcrdName(rowData, rcrd),
+        locs: {/*id: { loc: rcrd, intCnt: 0 } */},
+        intsWithoutLocData: 0 
+    };
+    rowData.children.forEach(addIntData);
+    return data;
+    /** 
+     * If the interaction has geoJson data, it is added to the 'locs' prop. 
+     * Otherwise, it is added to the count of interactions without loc data.
+     */
+    function addIntData(childData) {        
+        if (!childData.location) { return ++data.intsWithoutLocData; }
+        const intRcrd = getDetachedRcrd(childData.id, gParams.interaction);
+        const loc = getDetachedRcrd(intRcrd.location, gParams.location);
+        if (!loc.geoJsonId) { return ++data.intsWithoutLocData; }
+        if (locDataObjNotSet(loc)) { initDataObj(loc); }
+        ++data.locs[loc.id].intCnt;
+    }
+    function locDataObjNotSet(loc) {
+        return Object.keys(data.locs).indexOf(String(loc.id)) === -1;
+    }
+    function initDataObj(loc) { 
+        data.locs[loc.id] = { loc: loc, intCnt: 0 };
+    }
+} /* End getRowRcrdInteractionData */
+function hasUnspecifiedRow(rowData) {
+    return rowData.children[0].name.indexOf('Unspecified') !== -1;
+}
+function getRowRcrdName(rowData, rcrd) {
+    return rowData.name.indexOf('Unspecified') !== -1 ?
+        getUnspecifiedRowEntityName(rowData, rcrd) : rowData.name;
+}
+function getUnspecifiedRowEntityName(row, rcrd) {
+    return gParams.curFocus === 'taxa' ? getTaxonName(rcrd) : rcrd.displayName;
+}
+/* --- End showGridRecordsOnMap --- */
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
     rebuildLocTree([loc.id]);

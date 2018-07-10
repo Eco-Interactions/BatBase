@@ -660,7 +660,15 @@ class Location
      */
     public function getGeoJsonId()
     {
-        return $this->geoJson ? $this->geoJson->getId() : null;
+        $geoJson = $this->geoJson ? $this->geoJson->getId() : null;
+        if (!$geoJson && $this->isHabitat()) {
+            $geoJson = $this->parentLoc->getGeoJsonId();
+        }
+        return $geoJson;
+    }
+    private function isHabitat()
+    {
+        return $this->locationType->getDisplayName() === 'Habitat';
     }
 
     /**
