@@ -1,6 +1,7 @@
 const Encore = require('@symfony/webpack-encore');
-const WorkboxPlugin = require('workbox-webpack-plugin');
-
+const CircularDependencyPlugin = require('circular-dependency-plugin')
+// const WorkboxPlugin = require('workbox-webpack-plugin');
+ 
 /** ================= Create local development config ======================= */
 Encore
     // the project directory where all compiled assets will be stored
@@ -25,6 +26,12 @@ Encore
     .autoProvideVariables({
         L: 'leaflet',
     })
+    .addPlugin(
+        new CircularDependencyPlugin({
+            exclude: /a\.js|node_modules/,  // exclude detection of files based on a RegExp
+            failOnError: true,  // add errors to webpack instead of warnings
+            cwd: process.cwd(),  // set the current working directory for displaying module paths
+    }))     
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
     //         // these options encourage the ServiceWorkers to get in there fast 

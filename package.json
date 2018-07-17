@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "ag-grid": "^4.2.6",
+    "circular-dependency-plugin": "^4.4.0",
     "datatables": "^1.10.9",
     "idb-keyval": "^3.0.3",
     "jquery": "^3.3.1",
