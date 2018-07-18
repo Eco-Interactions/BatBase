@@ -7,7 +7,6 @@
  */
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
-import * as db_map from './db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let failed = { errors: [], updates: {}};
@@ -324,7 +323,7 @@ function addGeoJson(prop, rcrd, entity) {                                       
     function storeGeoJson(geoJson) {
         geoJson[rcrd.id] = JSON.stringify(rcrd);
         idb.set('geoJson', geoJson);
-        db_map.updateGeoJsonData();
+        _util.updateGeoJsonData();
     }
 }
 /*------------ Remove-from-Storage Methods -------------------------------*/

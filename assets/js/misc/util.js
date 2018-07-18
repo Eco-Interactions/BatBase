@@ -1,3 +1,4 @@
+import * as idb from 'idb-keyval'; //set, get, del, clear
 /* 
  * Exports:
  *   addEnterKeypressClick
@@ -7,6 +8,8 @@
  *   getDataFromStorage
  *   lcfirst 
  *   getDataStorage
+ *   getGeoJsonEntity
+ *   initGeoJsonData
  *   populateStorage
  *   removeFromStorage
  *   sendAjaxQuery
@@ -14,7 +17,8 @@
  *   snapshot
  *   ucfirst 
 */
-let dataStorage;
+let dataStorage, geoJson;
+const geoJsonDataKey = 'Live for justice!!!!!!!! <3<3';
 
 extendPrototypes();
 
@@ -205,6 +209,7 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
       }
 }
 /*--------------------------Storage Methods-------------------------------*/
+/** --------- Local Storage --------------- */
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
@@ -264,10 +269,49 @@ export function populateStorage(key, val) {
 export function removeFromStorage(key) {
     dataStorage.removeItem(key);
 }
-// function getRemainingStorageSpace() {
-//      var limit = 1024 * 1024 * 5; // 5 MB
-//      return limit - unescape(encodeURIComponent(JSON.stringify(dataStorage))).length;
-// }
+/** --------- IDB Storage --------------- */
+export function initGeoJsonData() {
+    idb.get(geoJsonDataKey).then(clearIdbCheck);
+}
+function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
+    if (storedKey) { return getGeoJsonData(); } 
+    idb.clear();                                                                //console.log('actually clearing');
+    downloadGeoJson();
+}
+function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
+    idb.get('geoJson').then(storeGeoJson);
+}
+function storeGeoJson(geoData) {                                                //console.log('storeGeoJson. geoData ? ', geoData !== undefined);
+    if (geoData === undefined) { return downloadGeoJson(); }
+    geoJson = geoData; 
+}
+function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
+    _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
+}
+function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
+    idb.set('geoJson', data.geoJson);
+    storeGeoJson(data.geoJson);
+    idb.set(geoJsonDataKey, true);
+}
+/**
+ * Loops through the passed data object to parse the nested objects. This is 
+ * because the data comes back from the server having been double JSON-encoded,
+ * due to the 'serialize' library and the JSONResponse object. 
+ */
+function parseData(data) {
+    for (var id in data) { data[id] = JSON.parse(data[id]); } 
+    return data;
+}
+export function isGeoJsonDataAvailable() {
+    return geoJson;
+}
+export function updateGeoJsonData() { //TODO: When db_sync checks for entity updates, send geoJson updates here
+    geoJson = false;
+    downloadGeoJson();
+}
+export function getGeoJsonEntity(id) {
+    return JSON.parse(geoJson[id]);                                             console.log('        locGeoJson = %O', locGeoJson);
+}
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     $.ajax({

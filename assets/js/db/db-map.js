@@ -6,15 +6,12 @@
  * Exports:
  *   initMap
  *   showLoc
- *   updateGeoJsonData
  */
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
-import * as idb from 'idb-keyval'; //set, get, del, clear
 import 'leaflet.markercluster';
 
-let geoJson, locations, map, showMap, popups = {};
-const dataKey = 'Live for justice!!!!!!!! <3<3';
+let locRcrds, map, popups = {};
 
 initDb();
 requireCss();
@@ -42,41 +39,10 @@ function fixLeafletBug() {
  * If not, the db is cleared and geoJson is redownloaded. 
  */
 function initDb() {
-    idb.get(dataKey).then(clearIdbCheck);
+    _util.initGeoJsonData();
 }
-function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
-    if (storedKey) { return getGeoJsonData(); } 
-    idb.clear();                                                                //console.log('actually clearing');
-    downloadGeoJson();
-}
-function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
-    idb.get('geoJson').then(storeGeoJson);
-}
-function storeGeoJson(geoData) {                                                //console.log('storeGeoJson. geoData ? ', geoData !== undefined);
-    if (geoData === undefined) { return downloadGeoJson(); }
-    geoJson = geoData; 
-    if (showMap) { initMap(); }
-}
-function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
-    _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-}
-function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
-    idb.set('geoJson', data.geoJson);
-    storeGeoJson(data.geoJson);
-    idb.set(dataKey, true);
-}
-/**
- * Loops through the passed data object to parse the nested objects. This is 
- * because the data comes back from the server having been double JSON-encoded,
- * due to the 'serialize' library and the JSONResponse object. 
- */
-function parseData(data) {
-    for (var id in data) { data[id] = JSON.parse(data[id]); } 
-    return data;
-}
-export function updateGeoJsonData(argument) { //TODO: When db_sync checks for entity updates, send geoJson updates here
-    geoJson = false;
-    downloadGeoJson();
+function geoJsonDataAvailable() {
+    return _util.isGeoJsonDataAvailable();
 }
 /** ======================= Show Loc on Map ================================= */
 /** Centers the map on the location and zooms according to type of location. */
@@ -102,8 +68,6 @@ function buildLocPopup(loc, latLng) {
 }
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
-export function initMap() {                                                     console.log('attempting to initMap')
-    if (!geoJson) { showMap = true; return }                                    console.log('  initializing');
     map = L.map('map');
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
@@ -128,6 +92,14 @@ function addMapTiles() {
         id: 'mapbox.run-bike-hike',
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(map);
+}
+export function initMap() {                                                     console.log('attempting to initMap')
+    waitForStorageAndLoadMap();                                                 
+}
+function waitForStorageAndLoadMap() {
+    return geoJsonDataAvailable() ? 
+    buildAndShowMap(addAllIntMrkrsToMap) : 
+    window.setTimeout(waitForStorageAndLoadMap, 500);
 }
 /** ================= Map Marker Methods ==================================== */
 /**
@@ -197,7 +169,7 @@ function addInteractionMarkersToMap() {
 } /* End addInteractionMarkersToMap */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
-    const locGeoJson = JSON.parse(geoJson[geoJsonId]);                          //console.log('        locGeoJson = %O', locGeoJson);
+    const locGeoJson = _util.getGeoJsonEntity(geoJsonId);
     return locGeoJson.centerPoint ? 
         formatPoint(locGeoJson.centerPoint) 
         : getLocCenterPoint(loc, locGeoJson);
@@ -417,7 +389,7 @@ function getSubLocsWithoutGpsData(cnt) {
     return `Sub-Locations without GPS data: ${cnt}`; 
 }
 function getCoordsHtml(loc) {
-    const geoData = JSON.parse(geoJson[loc.geoJsonId]);                         //console.log('geoJson = %O', geoData); 
+    const geoData = _util.getGeoJsonEntity(loc.geoJsonId);                      //console.log('geoJson = %O', geoData); 
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.coordinates)
     coords = coords.map(c => Number(c).toFixed(6)); 
