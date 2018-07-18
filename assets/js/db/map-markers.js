@@ -4,80 +4,150 @@ import 'leaflet.markercluster';
 
 let locRcrds = null;
 
-export class MapMarker {
+class Marker {
     constructor (subLocCnt, latLng, loc, rcrds) {
-        bindClassContextToMethods(this); // library binds class methods with 'this' instance
-        this._coords = latLng;
-        this._loc = loc;
-        this._popup = L.popup()
-            .setLatLng(latLng)
-            .setContent(getLocNamePopupHtml(loc, this.buildLocSummaryPopup));
-        this._self = L.marker(latLng)
-            .bindPopup(this._popup)
-            .on('mouseover', this.openPopup)
-            .on('click', this.openPopupAndDelayAutoClose)
-            .on('mouseout', this.delayPopupClose);
-        this._subCnt = subLocCnt;
-        this._timeout = null;
+        this.latLng = latLng;
+        this.loc = loc;
+        this._popup = L.popup().setLatLng(latLng);
+        this.self = null;
+        this.subCnt = subLocCnt;
+        this.timeout = null;
         locRcrds = rcrds;
     }
     get layer() {
-        return this._self;
+        return this.self;
     }
     get popup() {
         return this._popup;
+    }
+    set popup(val) {
+       this._popup = val;
     }
     /**
      * Replaces original popup with more details on the interactions at this
      * location. Popup will remain open until manually closed, when the original
      * location name popup will be restored. 
      */
-    buildLocSummaryPopup() {                                                    //console.log('buildLocSummaryPopup. this = %O', this);                                 
-        this._popup.setContent(getLocationSummaryHtml(this._loc, this._subCnt));
-        this._popup.options.autoClose = false;
-        this.openPopup(); 
+    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+        this.popup.options.autoClose = false;
         this.updateMouseout(Function.prototype);
-        this._self.on('popupclose', this.restoreLocNamePopup);
+        // reset onPopupClose
+        // open popup 
+    }
+    updateMouseout(func) {                                                      //console.log('updateMouseout this = %O', this)
+        this.self.off('mouseout').on('mouseout', func);
+    }
+} /* End Marker Super Class */
+export class MapMarker extends Marker {
+    constructor (subLocCnt, latLng, loc, rcrds) {
+        super(subLocCnt, latLng, loc, rcrds);
+        bindClassContextToMethods(this); 
+        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+        this.self = L.marker(latLng)
+            .bindPopup(this.popup)
+            .on('mouseover', this.openPopup)
+            .on('click', this.openPopupAndDelayAutoClose)
+            .on('mouseout', this.delayPopupClose);
+    }
+    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. this = %O', this);
+        super.buildSummaryPopup();
+        this.openPopup(); 
+        this.self.on('popupclose', this.restoreLocNamePopup);
     }
     restoreLocNamePopup() {                                                     //console.log('restoring locName popup')                                        
         window.setTimeout(restoreOrgnlPopup.bind(this), 400);
         /** Event fires before popup is fully closed. Restores after closed. */
         function restoreOrgnlPopup() {
             this.updateMouseout(this.delayPopupClose);
-            this._popup.setContent(
-                getLocNamePopupHtml(this._loc, this.buildLocSummaryPopup));
-            this._popup.options.autoClose = true;
-            this._self.off('popupclose');
+            this.popup.setContent(
+                getLocNamePopupHtml(this.loc, this.buildLocSummaryPopup));
+            this.popup.options.autoClose = true;
+            this.self.off('popupclose');
         }
     } /* End restoreLocNamePopup */
     /** --- Event Handlers --- */
     openPopup(e) {                                                              
-        if (this._timeout) { clearMarkerTimeout(this._timeout); }
-        this._self.openPopup();
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        this.self.openPopup();
     }
     /** 
      * Delays auto-close of popup if a nearby marker popup is opened while trying
      * to click the location summary button. 
      */
     openPopupAndDelayAutoClose(e) {                                             //console.log('openPopupAndDelayAutoClose')
-        this._self.openPopup();
-        this._popup.options.autoClose = false;
-        window.setTimeout(() => this._popup.options.autoClose = true, 700);
+        this.self.openPopup();
+        this.popup.options.autoClose = false;
+        window.setTimeout(() => this.popup.options.autoClose = true, 700);
     }
     closePopup() { 
-        this._self.closePopup();
+        this.self.closePopup();
     }
     delayPopupClose(e) {  
-        this._timeout = window.setTimeout(this.closePopup, 700);
-    }
-    updateMouseout(func) {                                                      //console.log('updateMouseout this = %O', this)
-        this._self.off('mouseout').on('mouseout', func);
+        this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End Marker Class */
-
-export class MapCluster {
-
-}
+export class MapCluster extends Marker {
+    constructor (map, intCnt, subCnt, latLng, loc, rcrds) {
+        super(subCnt, latLng, loc, rcrds);
+        bindClassContextToMethods(this); 
+        this.map = map;
+        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+        this.self = L.markerClusterGroup();
+        this.addClusterEvents();
+        this.addMarkersToCluser(intCnt);
+    }
+    buildSummaryPopup() {                                              //console.log('building cluster loc summary')
+        super.buildSummaryPopup();
+        this.map.on('popupclose', this.closeLayerPopup);
+        this.removeClusterEvents();
+        this.map.openPopup(this.popup);
+    }
+    addClusterEvents() {
+        this.self.on('clustermouseover', this.openClusterPopup)
+            .on('clustermouseout', this.delayClusterPopupClose)
+            .on('clusterclick', this.openPopupAndDelayAutoClose); 
+    }
+    removeClusterEvents() {
+        this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
+    }
+    addMarkersToCluser(intCnt) {  
+        for (let i = 0; i < intCnt; i++) {  
+            this.self.addLayer(L.marker(this.latLng)); 
+        }
+    }
+    /** --- Event Handlers --- */
+    openClusterPopup(c) {
+        if (this.timeout) { clearTimeout(this.timeout); this.timeout = null; }  
+        this.map.openPopup(this.popup);
+    }
+    /** Event fires before popup is fully closed. Restores after closed. */
+    closeLayerPopup(e) {  
+        if (e.popup._latlng === this.latLng) {
+            window.setTimeout(this.restoreOrgnlPopup.bind(this), 400);
+        }
+    }
+    restoreOrgnlPopup() {
+        super.updateMouseout(this.delayClusterPopupClose);
+        this.popup.setContent(getLocNamePopupHtml(this.loc, this.buildSummaryPopup));
+        this.popup.options.autoClose = true;
+        this.self.off('clusterpopupclose');
+        this.addClusterEvents();
+    }
+    closePopup(){
+        this.map.closePopup();
+    }
+    delayClusterPopupClose(e) {
+        this.timeout = window.setTimeout(this.closePopup.bind(this), 700);
+    }
+    openPopupAndDelayAutoClose(c) {
+        c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
+        this.openClusterPopup(c);
+        this.popup.options.autoClose = false;
+        window.setTimeout(() => this.popup.options.autoClose = true, 400);
+    }
+} /* End Marker Cluster Class */
 /** ------ Class Bind Methods ---------- */
 /** Taken from the npm 'auto-bind' library */
 function bindClassContextToMethods(self) {
@@ -94,7 +164,7 @@ function bindClassContextToMethods(self) {
  * Builds the popup for each marker that shows location and region name. Adds a 
  * "Location Summary" button to the popup connected to @showLocDetailsPopup.
  */
-function getLocNamePopupHtml(loc, summaryFunc) {
+function getLocNamePopupHtml(loc, summaryFunc) {                                //console.log('getLocNamePopupHtml. loc = %O', loc)
         const div = _util.buildElem('div');
         const text = getLocNameHtml(loc);
         const bttn = buildLocSummaryBttn(summaryFunc);
@@ -108,7 +178,7 @@ function getLocNameHtml(loc) {
     return '<div style="font-size:1.2em;"><b>' + locName + 
         '</b></div><div style="margin: 0 0 .5em 0;">'+parent+'</div>';
 } 
-function clearMarkerTimeout(timeout) {  console.log('clear marker timout')
+function clearMarkerTimeout(timeout) { 
     clearTimeout(timeout); 
     timeout = null;                                                             //console.log('timout cleared')       
 }
@@ -121,7 +191,7 @@ function buildLocSummaryBttn(showSummaryFunc) {
     return bttn;
 }
 /** Returns additional details (html) for interactions at the location. */
-function getLocationSummaryHtml(loc, subCnt) {                                  console.log('loc = %O', loc);
+function getLocationSummaryHtml(loc, subCnt) {                                  //console.log('loc = %O', loc);
     const div = _util.buildElem('div');
     const html = buildLocDetailsHtml(loc, subCnt);
     const bttn = buildToGridButton(loc);
@@ -181,7 +251,7 @@ function getAllHabitatsWithin(loc) {                                            
         if (!habitats[name]) { habitats[name] = 0; }
         ++habitats[name];
     }
-    function buildHabHtml() {  console.log('habitats = %O', habitats);
+    function buildHabHtml() {  
         const str = getTopThreeReportStr(habitats);  console.log
         return `Habitats: <b>&ensp; ${str}</b>`;
     }
