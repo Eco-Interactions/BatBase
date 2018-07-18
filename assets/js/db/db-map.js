@@ -6,6 +6,7 @@
  * Exports:
  *   initMap
  *   showLoc
+ *   showInts
  */
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
@@ -47,7 +48,11 @@ function geoJsonDataAvailable() {
 /** ======================= Show Loc on Map ================================= */
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom) {                                             
-    const loc = locations[id];                                                  console.log('show loc = %O, zoom = %s', loc, zoom)
+    buildAndShowMap(showLocInMap.bind(null, id, zoom));
+    addAllIntMrkrsToMap();
+}
+function showLocInMap(id, zoom) {
+    const loc = locRcrds[id];                                                   console.log('show loc = %O, zoom = %s', loc, zoom)
     const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
     if (!latLng) { return noGeoDataErr(); }
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
@@ -66,16 +71,28 @@ function buildLocPopup(loc, latLng) {
     popups[loc.displayName] = popup;  
     return popup;
 }
+/** ================= Show Interaction Sets on Map ========================== */
+/** Shows the interactions displayed in the data-grid on the map. */
+export function showInts(gridData) {                                            //console.log('----------- showInts. gridData = %O', gridData);
+    buildAndShowMap(showIntsOnMap.bind(null, gridData));
+} 
+function showIntsOnMap(data) {  console.log('showIntsOnMap! data = %O', data);
+    data.forEach(addMarkersToMap);
+}
+function addMarkersToMap(entityObj) {
+    // body...
+}
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
+function buildAndShowMap(loadFunc) {                                            console.log('buildAndShowMap. loadFunc = %O', loadFunc);
+    locRcrds = locRcrds || _util.getDataFromStorage('location');
     map = L.map('map');
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
-    map.on('load', addInteractionMarkersToMap);
+    map.on('load', loadFunc);
     addMapTiles();
-    map.setView([22,22], 2)
-    
-} /* End initMap */
+    map.setView([22,22], 2); console.log('map built.')
+}
 function logLatLng(e) {
     console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
 }
@@ -110,63 +127,57 @@ function waitForStorageAndLoadMap() {
  * is a "Location" button that will replace the name popup with a 
  * summary of the interactions at the location.
  */
-function addInteractionMarkersToMap() {
-    locations = _util.getDataFromStorage('location');
+function addAllIntMrkrsToMap() {  
     const regions = getRegionLocs();
     for (let id in regions) { addMarkersForRegion(regions[id]) }; 
+} /* End addAllIntMrkrsToMap */
+function getRegionLocs() {
+    const regionIds = _util.getDataFromStorage('topRegionNames');
+    return Object.values(regionIds).map(id => locRcrds[id]);
+}
+function addMarkersForRegion(region) {
+    if (region.displayName === "Unspecified") { return; }
+    addMarkersForLocAndChildren(region);
+}
+function addMarkersForLocAndChildren(topLoc) {                                 
+    if (!topLoc.totalInts) { return; }                                      //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
+    let intCnt = topLoc.interactions.length; 
+    let subCnt = 0;
+    buildMarkersForLocChildren(topLoc.children);                               
+    if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, topLoc); }
 
-    function getRegionLocs() {
-        const regionIds = _util.getDataFromStorage('topRegionNames');
-        return Object.values(regionIds).map(id => locations[id]);
+    function buildMarkersForLocChildren(locs) {
+        locs.forEach(id => {
+            let loc = locRcrds[id];
+            if (loc.locationType.displayName == 'Country') { 
+                return addMarkersForLocAndChildren(loc, false); 
+            }
+            buildLocationIntMarkers(loc, loc.interactions.length);
+        });
     }
-    function addMarkersForRegion(region) {
-        if (region.displayName === "Unspecified") { return; }
-        addMarkersForLocAndChildren(region);
+    function buildLocationIntMarkers(loc, locIntCnt) {                      //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
+        if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
+        if (!locIntCnt) { return; }
+        buildLocationMarkers(locIntCnt, null, loc);
     }
-    /** 
-     * intCnt - Total interactions for loc and all sub-locs without GPS data. 
-     * subCnt - Number of sub-locs that need GPS data in order to display on map.
-     */
-    function addMarkersForLocAndChildren(topLoc) {                                 
-        if (!topLoc.totalInts) { return; }                                      //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
-        let intCnt = topLoc.interactions.length; 
-        let subCnt = 0;
-        buildMarkersForLocChildren(topLoc.children);                               
-        if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, topLoc); }
-
-        function buildMarkersForLocChildren(locs) {
-            locs.forEach(id => {
-                let loc = locations[id];
-                if (loc.locationType.displayName == 'Country') { 
-                    return addMarkersForLocAndChildren(loc, false); 
-                }
-                buildLocationIntMarkers(loc, loc.interactions.length);
-            });
-        }
-        function buildLocationIntMarkers(loc, locIntCnt) {                      //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
-            if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
-            if (!locIntCnt) { return; }
-            buildLocationMarkers(locIntCnt, null, loc);
-        }
-        function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
-            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);            //console.log('        latLng = ', latLng)
-            if (!latLng) { return logNoGeoJsonError(loc); }
-            addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
-        }
-        function logNoGeoJsonError(loc) {
-            if (!loc.interactions.length) { return null; }
-            intCnt += loc.interactions.length;  
-            if (locIsHabitatOfTopLoc(loc)) { return; }
-            ++subCnt;
-            // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
-        }
-        function locIsHabitatOfTopLoc(loc) {
-            const subName = loc.displayName.split('-')[0];
-            const topName = topLoc.displayName;  
-            return topName.indexOf(subName) !== -1;
-        }
-    } /* End addMarkersForLocAndChildren */
-} /* End addInteractionMarkersToMap */
+    function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
+        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);            //console.log('        latLng = ', latLng)
+        if (!latLng) { return logNoGeoJsonError(loc); }
+        addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
+    }
+    function logNoGeoJsonError(loc) {
+        if (!loc.interactions.length) { return null; }
+        intCnt += loc.interactions.length;  
+        if (locIsHabitatOfTopLoc(loc)) { return; }
+        ++subCnt;
+        // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
+    }
+    function locIsHabitatOfTopLoc(loc) {
+        const subName = loc.displayName.split('-')[0];
+        const topName = topLoc.displayName;  
+        return topName.indexOf(subName) !== -1;
+    }
+} /* End addMarkersForLocAndChildren */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
     const locGeoJson = _util.getGeoJsonEntity(geoJsonId);
