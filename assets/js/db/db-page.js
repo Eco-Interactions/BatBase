@@ -17,7 +17,7 @@ import * as agGrid from '../../grid/ag-grid.js';
 /**
  * userRole = Stores the role of the user.
  * dataStorage = window.localStorage (sessionStorage for tests)
- * miscObj = Container for misc data used at the global level--
+ * misc = Container for misc data used at the global level--
  *      cal: Stores the flatpickr calendar instance. 
  *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
  *      intro: Stores an active tutorial/walk-through instance.
@@ -26,8 +26,8 @@ import * as agGrid from '../../grid/ag-grid.js';
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded.
  */
-let userRole, dataStorage, miscObj = {}, columnDefs = [], gParams = {}; 
-const dataKey = 'Live for Justice!!!!!!!! <3<3';
+let userRole, dataStorage, misc = {}, columnDefs = [], gParams = {}; 
+const dataKey = 'Live for Justice!!!!!!!!!!!! <3<3';
 const gridOptions = getDefaultGridOptions();
 
 requireCss();
@@ -176,73 +176,7 @@ function getFutureDevMsg() {                                                    
         "Below is a 'Show/Hide Columns' button that will allow users to specify " +
         "the data shown in the grid and/or csv export.";
 }
-/** Grid-rebuild entry point after form-window close. */
-function resetSearchGrid(focus) {                                               //console.log('resetting search grid.')
-    clearCol2();
-    resetToggleTreeBttn(false);
-    resetFilterStatusBar();
-    if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
-    selectSearchFocus(null, focus);
 
-}
-/** Refactor: combine with resetSearchGrid. */
-export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
-    resetSearchGrid(focus);
-}
-function selectSearchFocus(f) { 
-    const focus = f || getSelVal('Focus');                                      //console.log("---select(ing)SearchFocus = ", focus); 
-    if (!focus) { return; }
-    const builderMap = { 
-        'locs': buildLocationGrid, 'srcs': buildSourceGrid,
-        'taxa': buildTaxonGrid 
-    };  
-    if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
-    updateFocusAndBuildGrid(focus, builderMap[focus]); 
-}
-/**
- * Updates the top sort (focus) of the data grid, either 'taxa', 'locs' or 'srcs'.
- */
-function updateFocusAndBuildGrid(focus, gridBuilder) {                          //console.log("updateFocusAndBuildGrid called. focus = ", focus)
-    clearPreviousGrid();
-    if (focusNotChanged()) { return gridBuilder(); }                            //console.log('--- Focus reset to [%s]', focus);
-    _util.populateStorage('curFocus', focus);
-    dataStorage.removeItem('curRealm');
-    resetFilterStatusBar();
-    resetGridParams();
-    resetToggleTreeBttn(false); 
-    clearPastHtmlOptions(); //gridBuilder called here. 
-
-    function focusNotChanged() {
-        return focus === gParams.curFocus;
-    }
-    /** Called seperately so @emptySearchOpts is called once. */
-    function clearPastHtmlOptions() {    
-        $('#opts-col2').fadeTo(100, 0);
-        $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
-    }
-    function emptySearchOpts() {                                                //console.log("emptying search options");
-        $('#opts-col2').empty();
-        $('#sort-opts').empty();
-        $('#opts-col1, #opts-col2').fadeTo(0, 1);
-        gridBuilder();
-        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
-    }
-} /* End updateFocusAndBuildGrid */
-/**
- * When the interaction form is exited, the passed focus is selected and the 
- * grid is refreshed with the 'interactions updates since' filter set to 'today'.
- */
-function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
-    if (focus) { $('#search-focus').val(focus); }
-    selectSearchFocus();
-    window.setTimeout(function() {
-        $('#shw-chngd')[0].checked = true;
-        toggleTimeUpdatedFilter();
-    }, 200);        
-}
-export function showUpdates(focus) {
-    showTodaysUpdates(focus);
-}
 /*------------------ Interaction Search Methods--------------------------------------*/
 /**
  * If interaction data is already in data storage, the data is sent to 
@@ -434,7 +368,7 @@ function buildTaxonGrid() {                                                     
  * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
  * Continues grid build @getInteractionsAndFillTree.  
  */
-function initTaxonSearchUi(data) {                                              //console.log("initTaxonSearchUi. data = %O", data);
+function initTaxonSearchUi(data) {                                              console.log("initTaxonSearchUi. data = %O", data);
     var realmTaxonRcrd;
     gParams.rcrdsById = data.taxon;
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
@@ -448,10 +382,10 @@ function initTaxonSearchUi(data) {                                              
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonRealm() {
     var realmVal;
-    var storedRealm = dataStorage.getItem('curRealm');                          //console.log("storedRealm = ", storedRealm)
+    var storedRealm = dataStorage.getItem('curRealm');                          console.log("storedRealm = ", storedRealm)
     if (!getSelVal('Taxon Realm')) { 
         realmVal = storedRealm !== null ? storedRealm : "3";  
-        setSelVal('Taxon Realm', realmVal);
+        setSelVal('Taxon Realm', realmVal, 'silent');
     }
 }
 /**
@@ -496,7 +430,7 @@ function onTaxonRealmChange(val) {
     if (!val) { return; }
     resetTaxonRealm(val);
 }
-function resetTaxonRealm(val) {
+function resetTaxonRealm(val) {  console.log('resetTaxonRealm')
     const realmTaxon = storeAndReturnRealm(val);
     resetCurTreeState();
     rebuildTaxonTree(realmTaxon, true);
@@ -508,7 +442,7 @@ function resetTaxonRealm(val) {
  */
 function storeAndReturnRealm(val) {
     const realmId = val || getSelVal('Taxon Realm');
-    const realmTaxonRcrd = getDetachedRcrd(realmId);                            //console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmTaxonRcrd = getDetachedRcrd(realmId);                            console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
     gParams.curRealm = realmId;
@@ -783,10 +717,13 @@ function buildTaxonIntRowData(intRcrd, treeLvl) {
     return rowData;                
 }
 /*------------------Location Search Methods-----------------------------------*/
-/** Get location data from data storage and sends it to @startLocGridBuild. */
-function buildLocationGrid() {
+/** 
+ * Get location data from data storage and sends it to @startLocGridBuild or to 
+ * an optional calback (cb) that redirects the standard load sequence.
+ */
+function buildLocationGrid(view, cb) {
     const data = getLocData();
-    if( data ) { initLocSearchUi(data);
+    if( data ) { initLocSearchUi(data, view, cb);
     } else { console.log('Error loading location data from storage.'); }
 }
 function getLocData() {
@@ -798,19 +735,19 @@ function getLocData() {
 /**
  * Builds location view html and initializes grid load. Either builds the grid 
  * data-tree view, by default, or loads the data-map view, if previously 
- * selected. 
+ * selected. An optional calback (cb) will redirect the standard map-load sequence.
  */ 
-function initLocSearchUi(locData) {
+function initLocSearchUi(locData, view, cb) {
     addLocDataToGridParams(locData);
     if (!$("#grid-view").length) { buildLocViewHtml(); }  
-    setLocView();  
-    onLocViewChange();
+    setLocView(view);  
+    updateLocView(view, cb);
     
 } /* End initLocSearchUi */
-function setLocView() {
-    const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
-    const locRealm = storedRealm || "tree";
-    if (!getSelVal('Loc View')) { setSelVal('Loc View', locRealm); }
+function setLocView(view) {
+    const storedRealm = view || dataStorage.getItem('curRealm');                //console.log("setLocView. storedRealm = ", storedRealm)
+    const locRealm = storedRealm || 'tree';
+    setSelVal('Loc View', locRealm, 'silent');
 }
 function addLocDataToGridParams(data) {
     gParams.rcrdsById = data.location;                                    
@@ -828,22 +765,31 @@ function buildLocViewHtml() {
         return [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Tree Data' }];   
     } 
-} /* End buildLocViewHtml /*
-/** Event fired when the source realm select box has been changed. */
-function onLocViewChange(val) {                                                 //console.log('onLocViewChange') 
+} /* End buildLocViewHtml */
+function onLocViewChange(val) {
     if (!val) { return; }
+    updateLocView(val);
+}
+/** 
+ * Event fired when the source realm select box has been changed.
+ * An optional calback (cb) will redirect the standard map-load sequence.
+ */
+function updateLocView(v, cb) {                                                 //console.log('updateLocView. view = [%s] cb = [%O]', val, cb);
+    const val = v || getSelVal('Loc View');
     clearCol2();
     clearPreviousGrid();
     resetCurTreeState();
     resetToggleTreeBttn(false);
-    showLocInteractionData(getSelVal('Loc View'));
+    showLocInteractionData(val, cb);
 }
-/** Starts the grid build depending on the view selected. */
-function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
+/** 
+ * Starts the grid build depending on the view selected.
+ * The optional calback (cb) will redirect the standard map-load sequence.
+ */
+function showLocInteractionData(view, cb) {                                     //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
     _util.populateStorage('curRealm', view);                      
-    return view === 'tree' ? 
-        buildLocGridTree(regions) : buildLocGridMap();
+    return view === 'tree' ? buildLocGridTree(regions) : buildLocGridMap(cb);
 }
 function getTopRegionIds() {
     const ids = [];
@@ -857,7 +803,7 @@ function getTopRegionIds() {
  * countries, areas, and points as nested children @buildLocTree. Fills tree
  * with interactions and continues building the grid @getInteractionsAndFillTree.
  */
-function buildLocGridTree(topLocs) {                                            console.log('buildLocGridTree')
+function buildLocGridTree(topLocs) {                                            //console.log('buildLocGridTree')
     buildLocTree(topLocs);
     getInteractionsAndFillTree();
 }
@@ -1116,26 +1062,30 @@ function hasChildInteractions(row) {
 }
 /** ------------ Location Grid Map Methods ------------------- */
 /** Initializes the google map in the data grid. */
-function buildLocGridMap() {                                                    console.log('buildLocGridMap.');
+function buildLocGridMap(cb) {                                                  //console.log('buildLocGridMap. cb = %O', cb || db_map.initMap);
     fadeGrid();
     clearCol2();
     $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
-    db_map.initMap(); 
+    if (cb) { cb(); } else { db_map.initMap(); }
 }
 /** Switches to map view and centeres map on selected location. */
 function showLocOnMap(geoJsonId, zoom) {
-    $('#sel-realm').val('map').change();
-    db_map.showLoc(geoJsonId, zoom);
+    switchToLocMapView(db_map.showLoc.bind(null, geoJsonId, zoom));
+}
+function switchToLocMapView(cb) {                                               //console.log('switchToLocMapView. cb = %O', cb);
+    $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
+    setSelVal('Focus', 'locs', 'silent');
+    updateFocusAndBuildGrid('locs', buildLocationGrid.bind(null, 'map', cb));
 }
 /**
  * Build an object with all relevant data to display the interactions in the 
  * data-grid in map-view. Sends it to the map to handle the display.
  */
-function showGridRecordsOnMap() {                                               //console.log('showGridRecordsOnMap');
+function showGridRecordsOnMap() {                                               console.log('-----------showGridRecordsOnMap');
     storeIntAndLocRcrds();
     gridOptions.api.expandAll();
     const gridData = buildGridLocDataObj(gridOptions.api.getModel().rowsToDisplay);
-    db_map.showInts(gridData);
+    switchToLocMapView(db_map.showInts.bind(null, gridData));
 }
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
@@ -1191,7 +1141,7 @@ function getUnspecifiedRowEntityName(row, rcrd) {
 /** Filters the data-grid to the location selected from the map view. */
 export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
     rebuildLocTree([loc.id]);
-    $('#sel-realm').val('tree');
+    setSelVal('Loc View', 'tree', 'silent');
 }
 
 /*------------------Source Search Methods ------------------------------------*/
@@ -1893,7 +1843,7 @@ function getPencilHtml(id, entity, editFunc) {
     return editPencil;
 }
 /** -------- Map Column ---------- */
-function ifLocView(isLocView) {                                           
+function ifLocView() {                                           
     return gParams.curFocus === 'locs';
 }
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
@@ -2106,12 +2056,12 @@ function filterInteractionsByTimeUpdated(e) {
  * was previously selected and stored, it is reapplied.
  */
 function showFlatpickrCal(elem) {  
-    miscObj.cal = miscObj.cal || initCal(elem); 
-    if (miscObj.cstmTimeFltr) {
-        miscObj.cal.setDate(miscObj.cstmTimeFltr);
-        filterInteractionsUpdatedSince([], miscObj.cstmTimeFltr, null);
+    misc.cal = misc.cal || initCal(elem); 
+    if (misc.cstmTimeFltr) {
+        misc.cal.setDate(misc.cstmTimeFltr);
+        filterInteractionsUpdatedSince([], misc.cstmTimeFltr, null);
     } else {
-        miscObj.cal.open();                                                             
+        misc.cal.open();                                                             
         $('.today').focus();                                                   
     }
 }    
@@ -2128,8 +2078,8 @@ function initCal(elem) {
 }
 /** Filters grid to show interactions with updates since midnight 'today'. */
 function showInteractionsUpdatedToday() {
-    miscObj.cal = miscObj.cal || initCal();
-    miscObj.cal.setDate(new Date().today());
+    misc.cal = misc.cal || initCal();
+    misc.cal.setDate(new Date().today());
     filterInteractionsUpdatedSince([], new Date().today(), null);
 }
 /**
@@ -2174,7 +2124,7 @@ function syncFiltersAndUi(sinceTime) {
 function syncTimeUpdatedRadios(sinceTime) {
     if (new Date(new Date().today()).getTime() > sinceTime) { 
         $('#fltr-cstm')[0].checked = true;  
-        miscObj.cstmTimeFltr = sinceTime;
+        misc.cstmTimeFltr = sinceTime;
     } else {
         $('#fltr-tdy')[0].checked = true; }
 }
@@ -2593,19 +2543,19 @@ function showIntroWalkthrough() {
     window.setTimeout(startIntroWalkthrough, 250); 
 }
 function startIntroWalkthrough(startStep){
-    if (miscObj.intro) { return; }                                              //console.log("intro = %O", miscObj.intro)
+    if (misc.intro) { return; }                                              //console.log("intro = %O", misc.intro)
     buildIntro();
     setGridState();
-    miscObj.intro.start();
+    misc.intro.start();
 
     function buildIntro() {                                                     //console.log("buildIntro called")
         var startStep = startStep || 0; 
         const lib = require('../libs/intro.js');  
-        miscObj.intro = lib.introJs();
-        miscObj.intro.onexit(function() { resetGridState(); });
-        miscObj.intro.oncomplete(function() { resetGridState(); });
+        misc.intro = lib.introJs();
+        misc.intro.onexit(function() { resetGridState(); });
+        misc.intro.oncomplete(function() { resetGridState(); });
 
-        miscObj.intro.setOptions({
+        misc.intro.setOptions({
             showStepNumbers: false,
             skipLabel: "Exit",
             doneLabel: "I'm done.",
@@ -2625,7 +2575,7 @@ function startIntroWalkthrough(startStep){
                     /*element: document.querySelector("#filter-opts"),*/
                     element: "#filter-opts",
                     intro: "<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3> <br> " + 
-                        "<b>The serach results will be grouped under the outline tree in the first column of the grid.</b><br><br>" +
+                        "<b>The search results will be grouped under the outline tree in the first column of the grid.</b><br><br>" +
                         "The Location view has a Region-Country-Location outline. <br>The Source view groups by either publication or author."+
                         "<br>The Taxon view groups by realm (bat, plant, or arthropod) and taxonomic rank.",
                 },
@@ -2709,7 +2659,7 @@ function startIntroWalkthrough(startStep){
         $('#search-grid').css("height", "888px");
         $('#show-tips').click(showTips);
         setSelVal('Focus', focus);
-        miscObj.intro = null;
+        misc.intro = null;
     }
 }   /* End startIntroWalkthrough */
 function initSearchTips() { 
@@ -3067,6 +3017,75 @@ function isNextOpenLeafRow(node) {                                              
     return true;
 }     
 /*-----------------Grid Manipulation------------------------------------------*/
+/** Grid-rebuild entry point after form-window close. */
+function resetSearchGrid(focus) {                                               //console.log('resetting search grid.')
+    clearCol2();
+    resetToggleTreeBttn(false);
+    resetFilterStatusBar();
+    if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
+    selectSearchFocus(null, focus);
+}
+/** Refactor: combine with resetSearchGrid. */
+export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
+    resetSearchGrid(focus);
+}
+function selectSearchFocus(f) { 
+    const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
+    if (!focus) { return; }
+    const builderMap = { 
+        'locs': buildLocationGrid, 'srcs': buildSourceGrid,
+        'taxa': buildTaxonGrid 
+    };  
+    if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
+    updateFocusAndBuildGrid(focus, builderMap[focus]); 
+}
+/**
+ * Updates the top sort (focus) of the data grid, either 'taxa', 'locs' or 'srcs'.
+ */
+function updateFocusAndBuildGrid(focus, gridBuilder) {                          //console.log("updateFocusAndBuildGrid called. focus = [%s], gridBuilder = %O", focus, gridBuilder)
+    clearPreviousGrid();
+    if (focusNotChanged(focus)) { return gridBuilder(); }                       //console.log('--- Focus reset to [%s]', focus);
+    _util.populateStorage('curFocus', focus);
+    clearOnFocusChange(gridBuilder);
+} 
+function focusNotChanged(focus) {
+    return focus === gParams.curFocus;
+}
+function clearOnFocusChange(gridBuilder) {
+    dataStorage.removeItem('curRealm');
+    resetFilterStatusBar();
+    resetGridParams();
+    resetToggleTreeBttn(false); 
+    clearPastHtmlOptions(gridBuilder); 
+}
+/** Called seperately so @emptySearchOpts is called once. */
+function clearPastHtmlOptions(gridBuilder) {    
+    $('#opts-col2').fadeTo(100, 0);
+    $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
+    
+    function emptySearchOpts() {                                                //console.log("emptying search options");
+        $('#opts-col2').empty();
+        $('#sort-opts').empty();
+        $('#opts-col1, #opts-col2').fadeTo(0, 1);
+        gridBuilder();
+        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
+    }
+} /* End clearPastHtmlOptions */
+/**
+ * When the interaction form is exited, the passed focus is selected and the 
+ * grid is refreshed with the 'interactions updates since' filter set to 'today'.
+ */
+function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
+    if (focus) { $('#search-focus').val(focus); }
+    selectSearchFocus();
+    window.setTimeout(function() {
+        $('#shw-chngd')[0].checked = true;
+        toggleTimeUpdatedFilter();
+    }, 200);        
+}
+export function showUpdates(focus) {
+    showTodaysUpdates(focus);
+}
 function clearPreviousGrid() {                                                  //console.log("clearing grid");
     if (gridOptions.api) { gridOptions.api.destroy(); }  
     $('#search-grid').empty(); //Clears location map view
