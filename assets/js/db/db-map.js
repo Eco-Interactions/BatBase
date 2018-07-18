@@ -9,6 +9,7 @@
  */
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
+import { MapMarker, MapCluster } from './map-markers.js'; 
 import 'leaflet.markercluster';
 
 let locRcrds, map, popups = {};
@@ -200,8 +201,10 @@ function buildFeature(loc, geoData) {                                           
 function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
     return intCnt === 1 ? addMarker() : addCluster();
 
-    function addMarker() {
-        map.addLayer(addSingleMarker(subCnt, latLng, loc));
+    function addMarker() {  
+        let Marker = new MapMarker(subCnt, latLng, loc, locRcrds);
+        popups[loc.displayName] = Marker.popup;  
+        map.addLayer(Marker.layer);
     }
     function addCluster() {
         let cluster = L.markerClusterGroup();
@@ -213,61 +216,6 @@ function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             
     }
 } /* End addMarkerForEachInteraction */
 /** ----------------- Marker/Popup Methods ---------------------------------- */
-function addSingleMarker(subCnt, latLng, loc) {                                 //Refactor into class Marker
-    let timeout;
-    const marker = L.marker(latLng)
-        .bindPopup(getLocNamePopupHtml(loc, buildLocSummaryPopup))
-        .on('mouseover', openPopup)
-        .on('click', openPopupAndDelayAutoClose)
-        .on('mouseout', delayPopupClose);  
-    const popup = marker.getPopup().setLatLng(latLng);
-    popups[loc.displayName] = popup;  
-    return marker;
-    /**
-     * Replaces original popup with more details on the interactions at this
-     * location. Popup will remain open until manually closed, when the original
-     * location name popup will be restored. 
-     */
-    function buildLocSummaryPopup() {                                           //console.log('building loc summary')
-        clearMarkerTimeout(timeout);
-        updateMouseout(Function.prototype);
-        popup.setContent(getLocationSummaryHtml(loc, subCnt));
-        popup.options.autoClose = false;
-        marker.on('popupclose', restoreLocNamePopup);
-        marker.openPopup(popup);
-    }
-    function restoreLocNamePopup() {                                            //console.log('restoring original popup');
-        window.setTimeout(restoreOrgnlPopup, 400);
-        /** Event fires before popup is fully closed. Restores after closed. */
-        function restoreOrgnlPopup() {
-            updateMouseout(delayPopupClose);
-            popup.setContent(getLocNamePopupHtml(loc, buildLocSummaryPopup));
-            popup.options.autoClose = true;
-            marker.off('popupclose');
-        }
-    } /* End restoreLocNamePopup */
-    /** --- Event Handlers --- */
-    function openPopup(e) {
-        if (timeout) { clearMarkerTimeout(timeout); }
-        marker.openPopup();
-    }
-    /** 
-     * Delays auto-close of popup if a nearby marker popup is opened while trying
-     * to click the location summary button. 
-     */
-    function openPopupAndDelayAutoClose(e) {
-        openPopup();
-        popup.options.autoClose = false;
-        window.setTimeout(() => popup.options.autoClose = true, 700);
-    }
-    function delayPopupClose(e) {
-        const popup = this;
-        timeout = window.setTimeout(() => popup.closePopup(), 700);
-    }
-    function updateMouseout(func) {
-        marker.off('mouseout').on('mouseout', func);
-    }
-} /* End addSingleMarker */
 function addPopupToCluster(subCnt, cluster, loc, latLng) {                      
     let timeout, popup;
     addClusterEvents();
