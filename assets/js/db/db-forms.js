@@ -7,7 +7,6 @@
  * allow editing and saving of the content within using the trumbowyg library.
  * Exports: 
  *     editEntity
- *     dataSynced
  */
 import * as _util from '../misc/util.js';
 import * as db_sync from './db-sync.js';
@@ -3675,8 +3674,12 @@ function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        
     var data = parseData(ajaxData.results);
     storeData(data);
 }
-/** afterStoredDataUpdated */
-export function dataSynced(data, msg, errTag) {                                 //console.log('data update complete. args = %O', arguments);
+/** Calls the appropriate data storage method and updates fParams. */  
+function storeData(data) {  
+    db_sync.updateEditedData(data, onDataSynced);
+}
+/** afterStoredDataUpdated callback */
+function onDataSynced(data, msg, errTag) {                                 //console.log('data update complete. args = %O', arguments);
     toggleWaitOverlay(false);
     if (errTag) { return errUpdatingData(msg, errTag); }
     if (data.citationUpdate) { return; }
@@ -3690,10 +3693,6 @@ export function dataSynced(data, msg, errTag) {                                 
         return fParams.forms[fParams.ajaxFormLvl].action === 'edit'
     }
 } /* End afterStoredDataUpdated */
-/** Calls the appropriate data storage method and updates fParams. */  
-function storeData(data) {  
-    db_sync.updateEditedData(data);
-}
 /** Updates the core records in the global form params object. */
 function updateStoredFormParamsData(data) {                                     //console.log('updateStoredFormParams. fPs = %O', fParams);
     fParams.records[data.core] = _util.getDataFromStorage(data.core);

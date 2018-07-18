@@ -6,7 +6,6 @@
  *     updateEditedData
  */
 import * as _util from '../misc/util.js';
-import * as db_forms from './db-forms.js';
 import * as db_page from './db-page.js';
 import * as db_map from './db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
@@ -130,26 +129,26 @@ function initSearchGrid() {                                                     
     db_page.initSearchGrid(); 
 }
 /*------------------ Update Submitted Form Data --------------------------*/
-export function updateEditedData(data) {
-    updateStoredData(data);
+export function updateEditedData(data, cb) {
+    updateStoredData(data, cb);
 }
 /**
  * On crud-form submit success, the returned data is added to, or updated in, 
  * all relevant stored data @updateEntityData. The stored data's lastUpdated 
- * flag, 'pgDataUpdatedAt', is updated. 
+ * flag, 'pgDataUpdatedAt', is updated. The callback returns to db_forms.
  */
-function updateStoredData(data) {                                               console.log("updateStoredData data recieved = %O", data);
+function updateStoredData(data, cb) {                                           console.log("updateStoredData data recieved = %O", data);
     updateEntityData(data);
     storeData('pgDataUpdatedAt', getCurrentDate());                             //console.log('pgDataUpdatedAt = ', getCurrentDate())
     retryFailedUpdates();
-    sendDataUpdateStatus(data);
+    sendDataUpdateStatus(data, cb);
 }
-function sendDataUpdateStatus(data) {                                           //console.log('sendDataUpdateStatus. data = %O, errs = %O', data, failed.errors);  
+function sendDataUpdateStatus(data, onDataSynced) {                             //console.log('sendDataUpdateStatus. data = %O, errs = %O', data, failed.errors);  
     const errs = failed.errors;  
     const msg = errs.length ? errs[0][0] : null;
     const tag = errs.length ? errs[0][1] : null;
     data.errors = errs.length ? errs : false;
-    db_forms.dataSynced(data, msg, tag);
+    onDataSynced(data, msg, tag);
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
 function updateEntityData(data) {
