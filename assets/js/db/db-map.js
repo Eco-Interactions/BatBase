@@ -87,9 +87,35 @@ export function showInts(gridData) {                                            
     buildAndShowMap(showIntsOnMap.bind(null, gridData));
 } 
 function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
-    // data.forEach(addMarkersToMap);
+    const sortedData = sortDataByGeoJson(data);                                 console.log('sortedData = %O', sortedData);
+    addIntMarkersToMap(sortedData)
 }
-function addMarkersToMap(entityObj) { console.log('addMarkersToMap. entityObj = %O', entityObj);
+/** Sorts interaction data by geoJsonId, ie map-marker location. */
+function sortDataByGeoJson(data) {                                              console.log('sort(ing)DataByGeoJson');
+    const sorted = {/* geoJsonId: {loc: loc, ints: [{name: , intCnt:}] */};
+    data.forEach(sortIntData);
+    return sorted;
+
+    function sortIntData(entity) {                                              
+        for (let id in entity.locs) {
+            addGeoData(entity, entity.locs[id], entity.locs[id].loc.geoJsonId);
+        }
+    }
+    function addGeoData(entity, locObj, geoId) {                                //console.log('addGeoData. [%s] entity = %O, locObj = %O', geoId, entity, locObj);
+        if (!sorted[geoId]) { sorted[geoId] = { locs:[], ints:[] }; }
+        addIfNewLoc(locObj.loc, geoId);
+        sorted[geoId].ints.push({
+            name: entity.name, intCnt: locObj.intCnt});
+    }
+    /** Some locations share geoJson with their parent, eg habitats. */
+    function addIfNewLoc(newLoc, geoId) {
+        const exists = sorted[geoId].locs.find(
+            loc => loc.displayName === newLoc.displayName); 
+        if (exists) { return; }  
+        sorted[geoId].locs.push(newLoc);
+    }
+}
+function addIntMarkersToMap(intData) {                                          console.log('addMarkersToMap. intData = %O', intData);
     
 }
 /** ======================= Show Location on Map ============================ */
