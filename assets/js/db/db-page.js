@@ -776,11 +776,24 @@ function onLocViewChange(val) {
  */
 function updateLocView(v, cb) {                                                 //console.log('updateLocView. view = [%s] cb = [%O]', val, cb);
     const val = v || getSelVal('Loc View');
-    clearCol2();
-    clearPreviousGrid();
+    resetLocUi();
     resetCurTreeState();
     resetToggleTreeBttn(false);
     showLocInteractionData(val, cb);
+}
+function resetLocUi() {
+    clearCol2();
+    clearPreviousGrid();
+    enableGridButtons();
+}
+function enableGridButtons() {
+    $('#shw-chngd, .grid-tools button')
+        .attr('disabled', false).css('cursor', 'pointer');
+    $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
+    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+    $('.grid-tools, #opts-col3').fadeTo(100, 1);
+    authDependentInit();
+    toggleTimeUpdatedFilter('disable');
 }
 /** 
  * Starts the grid build depending on the view selected.
@@ -1062,18 +1075,27 @@ function hasChildInteractions(row) {
 }
 /** ------------ Location Grid Map Methods ------------------- */
 /** Initializes the google map in the data grid. */
-function buildLocGridMap(cb) {                                                  //console.log('buildLocGridMap. cb = %O', cb || db_map.initMap);
-    fadeGrid();
-    clearCol2();
-    $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
+function buildLocGridMap(cb) {    
+    updateUiForMapView();                                                       //console.log('buildLocGridMap. cb = %O', cb || db_map.initMap);
     if (cb) { cb(); } else { db_map.initMap(); }
+}
+function updateUiForMapView() {
+    clearCol2();
+    $('#tool-bar').fadeTo(100, 1);
+    disableGridButtons();
+    $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
+}
+function disableGridButtons() {
+    $('#shw-chngd, #fltr-tdy, #fltr-cstm, .grid-tools button')
+        .attr('disabled', 'disabled').css('cursor', 'not-allowed');
+    $('.grid-tools, #opts-col3').fadeTo(100, .3);
 }
 /** Switches to map view and centeres map on selected location. */
 function showLocOnMap(geoJsonId, zoom) {
     switchToLocMapView(db_map.showLoc.bind(null, geoJsonId, zoom));
 }
 function switchToLocMapView(cb) {                                               //console.log('switchToLocMapView. cb = %O', cb);
-    $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
+    updateUiForMapView();
     setSelVal('Focus', 'locs', 'silent');
     updateFocusAndBuildGrid('locs', buildLocationGrid.bind(null, 'map', cb));
 }
@@ -2022,7 +2044,8 @@ function resetFilterStatusBar() {
 function toggleTimeUpdatedFilter(state) { 
     var filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
     var opac = filtering ? 1 : .3;
-    $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
+    $('#time-fltr, .flatpickr-input, #fltr-tdy, #fltr-cstm')
+        .attr({'disabled': !filtering});  
     $('#fltr-tdy')[0].checked = true;
     $('#shw-chngd')[0].checked = filtering;
     $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
@@ -2036,7 +2059,7 @@ function resetTimeUpdatedFilter() {
     // $('.flatpickr-input').attr({'disabled': true});
     gParams.fltrdRows = null;
     gParams.fltrSince = null;
-    if (gridOptions.api) { 
+    if (gridOptions.api && gParams.rowData) { 
         gridOptions.api.setRowData(gParams.rowData);
         syncFiltersAndUi();
     }
@@ -2765,14 +2788,15 @@ function hidePopUpMsg() {
     $('#grid-popup').removeClass('loading'); //used in testing
     showGrid();
 }
-function fadeGrid() {
-    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
+function fadeGrid() {  
+    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
 }
 function showGrid() {
-    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
+    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
 function finishGridAndUiLoad() {
     hidePopUpMsg();
+    enableGridButtons();
     hideUnusedColFilterMenus();
 } 
 /**

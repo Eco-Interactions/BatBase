@@ -37,7 +37,7 @@
                 <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
                 <input type="text" id="time-fltr" disabled="disabled">
             </div>
-            <div class="bttm-row flex-row">
+            <div class="bttm-row flex-row grid-tools">
                 <button id="shw-map" class="ag-fresh grid-bttn">
                     Show records in grid on map</button>
             </div>
@@ -47,19 +47,23 @@
             <button id="show-tips" class="ag-fresh grid-bttn">Search Tips</button>
         </div>
     </div>
-    <div id="grid-tools" class="flex-row">
-        <div id='xpand-tree'>
-            <button id="xpand-all" class="ag-fresh ag-header-cell grid-bttn" name="xpand-all">Expand All</button>
-            <button class="ag-fresh ag-header-cell grid-bttn" name="xpand-1">+</button>
-            <button class="ag-fresh ag-header-cell grid-bttn" name="collapse-1">-</button>
+    <div id="tool-bar" class="flex-row">
+        <div class='flex-row grid-tools'>
+            <div id='xpand-tree'>
+                <button id="xpand-all" class="ag-fresh ag-header-cell grid-bttn" name="xpand-all">Expand All</button>
+                <button class="ag-fresh ag-header-cell grid-bttn" name="xpand-1">+</button>
+                <button class="ag-fresh ag-header-cell grid-bttn" name="collapse-1">-</button>
+            </div>
+            <button class="ag-fresh ag-header-cell grid-bttn" name="reset-grid">Reset Data</button>
         </div>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="reset-grid">Reset Data</button>
         <div id="grid-status" class="flex-row">
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="grid-filter-status"></div>
         </div>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
-        <button class="ag-fresh ag-header-cell grid-bttn" name="csv">Download CSV</button>
+        <div class='grid-tools' style='align-self: flex-end;'>
+            <button class="ag-fresh ag-header-cell grid-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
+            <button class="ag-fresh ag-header-cell grid-bttn" name="csv">Download CSV</button>
+        </div>
     </div>
     
     <div id="search-grid" class="ag-fresh">
