@@ -40,7 +40,7 @@ class Marker {
         this.self.off('mouseout').on('mouseout', func);
     }
 } /* End Marker Super Class */
-export class MapMarker extends Marker {
+export class LocMarker extends Marker {
     constructor (subLocCnt, latLng, loc, rcrds) {
         super(subLocCnt, latLng, loc, rcrds);
         bindClassContextToMethods(this); 
@@ -88,7 +88,7 @@ export class MapMarker extends Marker {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End Marker Class */
-export class MapCluster extends Marker {
+export class LocCluster extends Marker {
     constructor (map, intCnt, subCnt, latLng, loc, rcrds) {
         super(subCnt, latLng, loc, rcrds);
         bindClassContextToMethods(this); 

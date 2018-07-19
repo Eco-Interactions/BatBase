@@ -10,7 +10,7 @@
  */
 import * as _util from '../misc/util.js';
 import * as db_page from './db-page.js';
-import { MapMarker, MapCluster } from './map-markers.js'; 
+import * as MM from './map-markers.js'; 
 
 let locRcrds, map, popups = {};
 
@@ -44,43 +44,6 @@ function initDb() {
 }
 function geoJsonDataAvailable() {
     return _util.isGeoJsonDataAvailable();
-}
-/** ======================= Show Loc on Map ================================= */
-/** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom) {                                             
-    buildAndShowMap(showLocInMap.bind(null, id, zoom));
-    addAllIntMrkrsToMap();
-}
-function showLocInMap(id, zoom) {
-    const loc = locRcrds[id];                                                   console.log('show loc = %O, zoom = %s', loc, zoom)
-    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
-    if (!latLng) { return noGeoDataErr(); }
-    const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
-    popup.setContent(getLocationSummaryHtml(loc, null));  
-    popup.options.autoClose = false;
-    map.openPopup(popup); 
-    map.setView(latLng, zoom, {animate: true});  
-
-    function noGeoDataErr() {
-        // const geoData = JSON.parse(geoJson[id]);                             console.log('geoData = %O', geoData);
-        console.log('###### No geoJson found for geoJson [%s] ###########', id);
-    }
-}
-function buildLocPopup(loc, latLng) {  
-    const popup = L.popup().setLatLng(latLng).setContent('');
-    popups[loc.displayName] = popup;  
-    return popup;
-}
-/** ================= Show Interaction Sets on Map ========================== */
-/** Shows the interactions displayed in the data-grid on the map. */
-export function showInts(gridData) {                                            //console.log('----------- showInts. gridData = %O', gridData);
-    buildAndShowMap(showIntsOnMap.bind(null, gridData));
-} 
-function showIntsOnMap(data) {  console.log('showIntsOnMap! data = %O', data);
-    data.forEach(addMarkersToMap);
-}
-function addMarkersToMap(entityObj) {
-    // body...
 }
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
@@ -118,8 +81,46 @@ function waitForStorageAndLoadMap() {
     buildAndShowMap(addAllIntMrkrsToMap) : 
     window.setTimeout(waitForStorageAndLoadMap, 500);
 }
-/** ================= Map Marker Methods ==================================== */
+/** ================= Show Interaction Sets on Map ========================== */
+/** Shows the interactions displayed in the data-grid on the map. */
+export function showInts(gridData) {                                            //console.log('----------- showInts. gridData = %O', gridData);
+    buildAndShowMap(showIntsOnMap.bind(null, gridData));
+} 
+function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
+    // data.forEach(addMarkersToMap);
+}
+function addMarkersToMap(entityObj) { console.log('addMarkersToMap. entityObj = %O', entityObj);
+    
+}
+/** ======================= Show Location on Map ============================ */
+/** Centers the map on the location and zooms according to type of location. */
+export function showLoc(id, zoom) {                                             
+    buildAndShowMap(showLocInMap.bind(null, id, zoom));
+    addAllIntMrkrsToMap();
+}
+function showLocInMap(id, zoom) {
+    const loc = locRcrds[id];                                                   console.log('show loc = %O, zoom = %s', loc, zoom)
+    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
+    if (!latLng) { return noGeoDataErr(); }
+    const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
+    popup.setContent(getLocationSummaryHtml(loc, null));  
+    popup.options.autoClose = false;
+    map.openPopup(popup); 
+    map.setView(latLng, zoom, {animate: true});  
+
+    function noGeoDataErr() {
+        // const geoData = JSON.parse(geoJson[id]);                             console.log('geoData = %O', geoData);
+        console.log('###### No geoJson found for geoJson [%s] ###########', id);
+    }
+}
+function buildLocPopup(loc, latLng) {  
+    const popup = L.popup().setLatLng(latLng).setContent('');
+    popups[loc.displayName] = popup;  
+    return popup;
+}
+/** ================= Show All Interaction Markers ========================== */
 /**
+ * Default Location "Map View":
  * Adds a marker to the map for each interaction with any location data. Each 
  * marker has a popup with either the location name and the country, just the  
  * country or region name. Locations without gps data are added to markers at  
@@ -212,12 +213,12 @@ function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             
     return intCnt === 1 ? addMarker() : addCluster();
 
     function addMarker() {  
-        let Marker = new MapMarker(subCnt, latLng, loc, locRcrds);
+        let Marker = new MM.LocMarker(subCnt, latLng, loc, locRcrds);
         popups[loc.displayName] = Marker.popup;  
         map.addLayer(Marker.layer);
     }
     function addCluster() {
-        let Cluster = new MapCluster(map, intCnt, subCnt, latLng, loc, locRcrds);
+        let Cluster = new MM.LocCluster(map, intCnt, subCnt, latLng, loc, locRcrds);
         popups[loc.displayName] = Cluster.popup;  
         map.addLayer(Cluster.layer);
     }
