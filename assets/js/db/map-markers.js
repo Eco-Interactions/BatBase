@@ -5,14 +5,11 @@ import 'leaflet.markercluster';
 let locRcrds = null;
 
 class Marker {
-    constructor (subLocCnt, latLng, loc, rcrds) {
+    constructor (latLng) {
         this.latLng = latLng;
-        this.loc = loc;
         this._popup = L.popup().setLatLng(latLng);
         this.self = null;
-        this.subCnt = subLocCnt;
         this.timeout = null;
-        locRcrds = rcrds;
     }
     get layer() {
         return this.self;
@@ -22,6 +19,24 @@ class Marker {
     }
     set popup(val) {
        this._popup = val;
+    }
+    updateMouseout(func) {                                                      //console.log('updateMouseout this = %O', this)
+        this.self.off('mouseout').on('mouseout', func);
+    }
+} /* End Marker Super Class */
+export class LocMarker extends Marker {
+    constructor (subLocCnt, latLng, loc, rcrds) {
+        super(latLng);
+        bindClassContextToMethods(this); 
+        this.loc = loc;
+        locRcrds = rcrds;
+        this.subCnt = subLocCnt;
+        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+        this.self = L.marker(latLng)
+            .bindPopup(this.popup)
+            .on('mouseover', this.openPopup)
+            .on('click', this.openPopupAndDelayAutoClose)
+            .on('mouseout', this.delayPopupClose);
     }
     /**
      * Replaces original popup with more details on the interactions at this
@@ -33,26 +48,6 @@ class Marker {
         this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
         this.popup.options.autoClose = false;
         this.updateMouseout(Function.prototype);
-        // reset onPopupClose
-        // open popup 
-    }
-    updateMouseout(func) {                                                      //console.log('updateMouseout this = %O', this)
-        this.self.off('mouseout').on('mouseout', func);
-    }
-} /* End Marker Super Class */
-export class LocMarker extends Marker {
-    constructor (subLocCnt, latLng, loc, rcrds) {
-        super(subLocCnt, latLng, loc, rcrds);
-        bindClassContextToMethods(this); 
-        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
-        this.self = L.marker(latLng)
-            .bindPopup(this.popup)
-            .on('mouseover', this.openPopup)
-            .on('click', this.openPopupAndDelayAutoClose)
-            .on('mouseout', this.delayPopupClose);
-    }
-    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. this = %O', this);
-        super.buildSummaryPopup();
         this.openPopup(); 
         this.self.on('popupclose', this.restoreLocNamePopup);
     }
@@ -87,19 +82,86 @@ export class LocMarker extends Marker {
     delayPopupClose(e) {  
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
-} /* End Marker Class */
+} /* End LocMarker Class */
+
+export class IntMarker extends Marker {
+    constructor (latLng, intData, rcrds) {
+        super(latLng);
+        bindClassContextToMethods(this); 
+        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+        this.self = L.marker(latLng)
+            .bindPopup(this.popup)
+            .on('mouseover', this.openPopup)
+            .on('click', this.openPopupAndDelayAutoClose)
+            .on('mouseout', this.delayPopupClose);
+    }
+    /**
+     * Replaces original popup with more details on the interactions at this
+     * location. Popup will remain open until manually closed, when the original
+     * location name popup will be restored. 
+     */
+    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+        this.popup.options.autoClose = false;
+        this.updateMouseout(Function.prototype);
+        this.openPopup(); 
+        this.self.on('popupclose', this.restoreLocNamePopup);
+    }
+    restoreLocNamePopup() {                                                     //console.log('restoring locName popup')                                        
+        window.setTimeout(restoreOrgnlPopup.bind(this), 400);
+        /** Event fires before popup is fully closed. Restores after closed. */
+        function restoreOrgnlPopup() {
+            this.updateMouseout(this.delayPopupClose);
+            this.popup.setContent(
+                getLocNamePopupHtml(this.loc, this.buildLocSummaryPopup));
+            this.popup.options.autoClose = true;
+            this.self.off('popupclose');
+        }
+    } /* End restoreLocNamePopup */
+    /** --- Event Handlers --- */
+    openPopup(e) {                                                              
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        this.self.openPopup();
+    }
+    /** 
+     * Delays auto-close of popup if a nearby marker popup is opened while trying
+     * to click the location summary button. 
+     */
+    openPopupAndDelayAutoClose(e) {                                             //console.log('openPopupAndDelayAutoClose')
+        this.self.openPopup();
+        this.popup.options.autoClose = false;
+        window.setTimeout(() => this.popup.options.autoClose = true, 700);
+    }
+    closePopup() { 
+        this.self.closePopup();
+    }
+    delayPopupClose(e) {  
+        this.timeout = window.setTimeout(this.closePopup, 700);
+    }
+} /* End IntMarker Class */
 export class LocCluster extends Marker {
     constructor (map, intCnt, subCnt, latLng, loc, rcrds) {
-        super(subCnt, latLng, loc, rcrds);
+        super(latLng);
         bindClassContextToMethods(this); 
         this.map = map;
+        this.loc = loc;
+        locRcrds = rcrds;
         this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
     }
-    buildSummaryPopup() {                                              //console.log('building cluster loc summary')
-        super.buildSummaryPopup();
+    /**
+     * Replaces original popup with more details on the interactions at this
+     * location. Popup will remain open until manually closed, when the original
+     * location name popup will be restored. 
+     */
+    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+        this.popup.options.autoClose = false;
+        this.updateMouseout(Function.prototype);
         this.map.on('popupclose', this.closeLayerPopup);
         this.removeClusterEvents();
         this.map.openPopup(this.popup);
@@ -147,7 +209,7 @@ export class LocCluster extends Marker {
         this.popup.options.autoClose = false;
         window.setTimeout(() => this.popup.options.autoClose = true, 400);
     }
-} /* End Marker Cluster Class */
+} /* End LocCluster Class */
 /** ------ Class Bind Methods ---------- */
 /** Taken from the npm 'auto-bind' library */
 function bindClassContextToMethods(self) {
@@ -159,7 +221,7 @@ function bindClassContextToMethods(self) {
         }
     }
 }
-/** ---------------- Marker/Popup Helpers ------------------------ */
+/** ---------------- Location Marker/Popup Helpers ------------------------ */
 /**
  * Builds the popup for each marker that shows location and region name. Adds a 
  * "Location Summary" button to the popup connected to @showLocDetailsPopup.

@@ -973,7 +973,7 @@ function buildLocSelects(locOptsObj) {
     }
 }
 function setSelectedLocVals() {                                                 
-    const selected = gParams.selectedOpts;                                        console.log("selected in setSelectedLocVals = %O", selected);
+    const selected = gParams.selectedOpts;                                      //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
         setSelVal(locType, selected[locType], 'silent');
     });
