@@ -114,9 +114,31 @@ function sortDataByGeoJson(data) {                                              
         if (exists) { return; }  
         sorted[geoId].locs.push(newLoc);
     }
+} /* End sortDataByGeoJson */
+function addIntMarkersToMap(intData) {                                          //console.log('addMarkersToMap. intData = %O', intData);
+    for (let geoId in intData) {
+        buildAndAddIntMarker(geoId, intData[geoId]);
+    }
 }
-function addIntMarkersToMap(intData) {                                          console.log('addMarkersToMap. intData = %O', intData);
-    
+function buildAndAddIntMarker(geoId, data) {  
+    const coords = getCoords(geoId);
+    const intCnt = getTotalInts(data);
+    const MapMarker = buildIntMarker(intCnt, coords, data);                     //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
+    map.addLayer(MapMarker.layer);
+}
+function buildIntMarker(intCnt, coords, data) {  
+     return intCnt === 1 ? 
+        new MM.IntMarker(coords, data) : 
+        new MM.IntCluster(map, intCnt, coords, data);
+}
+function getCoords(geoId) {
+    const geoJson = _util.getGeoJsonEntity(geoId);                         
+    return getLatLngObj(geoJson.centerPoint);
+}
+function getTotalInts(data) {
+    let ttl = 0;
+    data.ints.forEach(d => ttl += d.intCnt);
+    return ttl;
 }
 /** ======================= Show Location on Map ============================ */
 /** Centers the map on the location and zooms according to type of location. */
@@ -167,7 +189,7 @@ function addMarkersForRegion(region) {
     addMarkersForLocAndChildren(region);
 }
 function addMarkersForLocAndChildren(topLoc) {                                 
-    if (!topLoc.totalInts) { return; }                                      //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
+    if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
     let intCnt = topLoc.interactions.length; 
     let subCnt = 0;
     buildMarkersForLocChildren(topLoc.children);                               
@@ -182,13 +204,13 @@ function addMarkersForLocAndChildren(topLoc) {
             buildLocationIntMarkers(loc, loc.interactions.length);
         });
     }
-    function buildLocationIntMarkers(loc, locIntCnt) {                      //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
+    function buildLocationIntMarkers(loc, locIntCnt) {                          //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
         if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
         if (!locIntCnt) { return; }
         buildLocationMarkers(locIntCnt, null, loc);
     }
-    function buildLocationMarkers(intCnt, subCnt, loc) {                    //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
-        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);            //console.log('        latLng = ', latLng)
+    function buildLocationMarkers(intCnt, subCnt, loc) {                        //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
+        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                //console.log('        latLng = ', latLng)
         if (!latLng) { return logNoGeoJsonError(loc); }
         addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
     }
@@ -209,11 +231,11 @@ function getCenterCoordsOfLoc(loc, geoJsonId) {
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
     const locGeoJson = _util.getGeoJsonEntity(geoJsonId);
     return locGeoJson.centerPoint ? 
-        formatPoint(locGeoJson.centerPoint) 
+        getLatLngObj(locGeoJson.centerPoint) 
         : getLocCenterPoint(loc, locGeoJson);
 } 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-function formatPoint(point) {                                                   //console.log('point = ', point)
+function getLatLngObj(point) {                                                  //console.log('point = ', point)
     let array = JSON.parse(point); 
     return L.latLng(array[1], array[0]);
 }
@@ -236,18 +258,11 @@ function buildFeature(loc, geoData) {                                           
         };   
 }
 function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
-    return intCnt === 1 ? addMarker() : addCluster();
-
-    function addMarker() {  
-        let Marker = new MM.LocMarker(subCnt, latLng, loc, locRcrds);
-        popups[loc.displayName] = Marker.popup;  
-        map.addLayer(Marker.layer);
-    }
-    function addCluster() {
-        let Cluster = new MM.LocCluster(map, intCnt, subCnt, latLng, loc, locRcrds);
-        popups[loc.displayName] = Cluster.popup;  
-        map.addLayer(Cluster.layer);
-    }
+    const MapMarker = intCnt === 1 ? 
+        new MM.LocMarker(subCnt, latLng, loc, locRcrds) :
+        new MM.LocCluster(map, intCnt, subCnt, latLng, loc, locRcrds);
+    popups[loc.displayName] = MapMarker.popup;  
+    map.addLayer(MapMarker.layer);
 } /* End addMarkerForEachInteraction */
 /* --- Grid Popup --- */
 function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
