@@ -113,7 +113,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
             "Nigeria" => [ 9.076226504500049, 8.67050907350005 ],
             "Seychelles [includes the island of Aldabra]" => [ -6.7733293594999, 51.2474064465 ],
             "Brazil" => [ -14.23752777099995, -51.4477696365 ],
-            "Costa Rica" => [ 8.36250956500005, -84.840251021 ],
+            "Costa Rica" => [ 10.16250956500005, -83.940251021 ],
             "Mexico" => [ 23.629559664682, -102.53469791500001 ],
             "Colombia" => [ 4.6709353665001, -74.299382084 ],
             "Trinidad and Tobago" => [ 10.696559962999999, -61.2253922195 ],
