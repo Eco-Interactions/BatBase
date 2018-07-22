@@ -54,6 +54,7 @@ function buildAndShowMap(loadFunc) {                                            
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles();
+    addMapLegend();
     map.setView([22,22], 2); console.log('map built.')
 }
 function logLatLng(e) {
@@ -73,6 +74,28 @@ function addMapTiles() {
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(map);
 }
+function addMapLegend() {
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = addLegendHtml;
+    legend.addTo(map);
+}
+function addLegendHtml(map) {
+    const div = _util.buildElem('div', { class: 'info legend flex-col'});
+    div.innerHTML += `<h4> Interaction Density </h4>`;
+    addDensityHtml()
+    return div;
+    
+    function addDensityHtml() {    
+        const densities = ['Light', 'Medium', 'Heavy'];
+        const colors = ['110, 204, 57', '240, 194, 12', '241, 128, 23'];
+
+        for (var i = 0; i < densities.length; i++) {
+            div.innerHTML +=
+                `<span><i style="background: rgba(${colors[i]}, .9);"></i> 
+                    ${densities[i]}</span>`;
+        }
+    }
+};
 export function initMap() {                                                     console.log('attempting to initMap')
     waitForStorageAndLoadMap();                                                 
 }
@@ -179,7 +202,7 @@ function buildLocPopup(loc, latLng) {
 function addAllIntMrkrsToMap() {  
     const regions = getRegionLocs();
     for (let id in regions) { addMarkersForRegion(regions[id]) }; 
-} /* End addAllIntMrkrsToMap */
+} 
 function getRegionLocs() {
     const regionIds = _util.getDataFromStorage('topRegionNames');
     return Object.values(regionIds).map(id => locRcrds[id]);
@@ -227,6 +250,7 @@ function addMarkersForLocAndChildren(topLoc) {
         return topName.indexOf(subName) !== -1;
     }
 } /* End addMarkersForLocAndChildren */
+/* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
     const locGeoJson = _util.getGeoJsonEntity(geoJsonId);

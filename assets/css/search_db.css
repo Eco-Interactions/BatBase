@@ -141,6 +141,31 @@
 #map {
     height: 100%;
 }
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    color: #555;
+    background: white;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.info h4 {
+    margin: 0 0 5px 5px !important;
+    color: #777;
+}
+.legend {
+    line-height: 18px;
+}
+.legend i {
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin: 2px 8px 2px 8px;
+    padding-right: 3px;
+    opacity: 0.8;
+}
 .single-marker {
     width: 33px !important;
     height: 33px !important;
