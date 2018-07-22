@@ -32,11 +32,19 @@ export class LocMarker extends Marker {
         locRcrds = rcrds;
         this.subCnt = subLocCnt;
         this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
-        this.self = L.marker(latLng)
+        this.self = L.marker(latLng, this.getCustomIcon())
             .bindPopup(this.popup)
             .on('mouseover', this.openPopup)
             .on('click', this.openPopupAndDelayAutoClose)
             .on('mouseout', this.delayPopupClose);
+    }
+    getCustomIcon() {
+        return {
+            icon: L.divIcon({
+                className: 'single-marker info',
+                html: "1",
+            })
+        }
     }
     /**
      * Replaces original popup with more details on the interactions at this

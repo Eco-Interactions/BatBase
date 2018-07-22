@@ -141,6 +141,19 @@
 #map {
     height: 100%;
 }
+.single-marker {
+    width: 33px !important;
+    height: 33px !important;
+    margin-left: -12px;
+    margin-top: -15px;
+    border-radius: 25px;
+    border: 4px solid rgba(181, 226, 140, 0.7);
+    text-align: center;
+    color: #222;
+    padding-top: 4px;
+    background-color: rgba(110, 204, 57, 0.9);
+    font-size: 11px;
+}
 /*------- Buttons ---------------*/
 #filter-bttns {
     display: inline-flex;
