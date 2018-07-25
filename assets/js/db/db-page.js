@@ -138,6 +138,7 @@ function initSearchState() {
  * Container for param data needed for a selected focus. Resets on focus change.
  * - curFocus: Top grid sort - Taxon (taxa), Location (locs), or Source (srcs).
  * - openRows: Array of entity ids whose grid rows will be expanded on grid load.
+ * - persistFilters: Persists filters through grid update into map view
  * Notable properties stored later: 
  * rcrdsById - all records for the current focus.
  * curRealm - focus' realm-level sort (eg, Taxon realms: Bat, Plant, Arthropod).
@@ -145,10 +146,12 @@ function initSearchState() {
  * rowData - array of rows displayed in the grid.
  * selectedOpts - search combobox values 'selected' for the current tree.
  */
-function resetGridParams() {                                              
+function resetGridParams() {  
+    const prevFilters = gParams.persistFilters;                                            
     gParams = {}; 
     gParams.curFocus = getResetFocus();  
     gParams.openRows = [];                                                      //console.log("gParams = %O", gParams);
+    if (prevFilters) { gParams.persistFilters = prevFilters; }
 }
 function getResetFocus() {
     const foci = ['locs', 'srcs', 'taxa'];
@@ -742,8 +745,7 @@ function initLocSearchUi(locData, view, cb) {
     if (!$("#grid-view").length) { buildLocViewHtml(); }  
     setLocView(view);  
     updateLocView(view, cb);
-    
-} /* End initLocSearchUi */
+} 
 function setLocView(view) {
     const storedRealm = view || dataStorage.getItem('curRealm');                //console.log("setLocView. storedRealm = ", storedRealm)
     const locRealm = storedRealm || 'tree';
@@ -755,7 +757,7 @@ function addLocDataToGridParams(data) {
 }
 function buildLocViewHtml() {                   
     const span = _util.buildElem('span', { id:'grid-view', class: 'flex-row',
-        text: 'View: ' });
+        text: 'View all as: ' });
     const sel = newSelEl(getViewOpts(), 'opts-box', 'sel-realm', 'Loc View');
     $('#sort-opts').append([span, sel]);
     initCombobox('Loc View');
@@ -1078,6 +1080,7 @@ function hasChildInteractions(row) {
 function buildLocGridMap(cb) {    
     updateUiForMapView();                                                       //console.log('buildLocGridMap. cb = %O', cb || db_map.initMap);
     if (cb) { cb(); } else { db_map.initMap(); }
+    delete gParams.persistFilters;
 }
 function updateUiForMapView() {
     clearCol2();
@@ -1095,6 +1098,7 @@ function showLocOnMap(geoJsonId, zoom) {
     switchToLocMapView(db_map.showLoc.bind(null, geoJsonId, zoom));
 }
 function switchToLocMapView(cb) {                                               //console.log('switchToLocMapView. cb = %O', cb);
+    persistFilters();  
     updateUiForMapView();
     setSelVal('Focus', 'locs', 'silent');
     updateFocusAndBuildGrid('locs', buildLocationGrid.bind(null, 'map', cb));
@@ -1953,7 +1957,7 @@ function getAllFilterModels() {
     return {
         'Subject Taxon': getColumnFilterApi('subject'),
         'Object Taxon': getColumnFilterApi('object'),
-        'Type': getColumnFilterApi('type'),
+        'Interaction Type': getColumnFilterApi('interactionType'),
         'Tags': getColumnFilterApi('tags'),
         'Habitat': getColumnFilterApi('habitat'),
         'Country': getColumnFilterApi('country'),
@@ -1969,56 +1973,63 @@ function getAllFilterModels() {
     }
 }
 /**
+ * Either displays all filters currently applied, or applies the previous filter 
+ * message persisted through grid update into map view.
+ */
+function updateGridFilterStatusMsg() {                                          //console.log("updateGridFilterStatusMsg called.")
+    if (gridOptions.api === undefined) { return; }
+    if (gParams.persistFilters) { return setGridFilterStatus(gParams.persistFilters); }
+    getFiltersAndUpdateStatus();
+}
+/**
  * Adds all active filters to the grid's status message. First adding any 
  * focus-level filters, such as author name or taxon, then any active filters
  * for grid columns, and then checks/adds the 'interactions updated since' filter. 
  * Sets grid-status with the resulting active-filters messasge.
  */
-function updateGridFilterStatusMsg() {                                          //console.log("updateGridFilterStatusMsg called.")
-    if (gridOptions.api === undefined) { return; }
+function getFiltersAndUpdateStatus() {
     const activeFilters = [];
-
-    addActiveExternalFilters();
-    addActiveGridFilters();
-    setFilterStatus();
+    addActiveExternalFilters(activeFilters);
+    addActiveGridFilters(activeFilters);
+    setFilterStatus(activeFilters);
+}
+function addActiveExternalFilters(filters) {
+    addFocusFilters();
+    addUpdatedSinceFilter();
     
-    function addActiveExternalFilters() {
-        addFocusFilters();
-        addUpdatedSinceFilter();
-    }
     function addFocusFilters() {
         if (gParams.focusFltrs && gParams.focusFltrs.length > 0) { 
-            activeFilters.push(gParams.focusFltrs.map(filter => filter));
+            filters.push(gParams.focusFltrs.map(filter => filter));
         } 
     }
     function addUpdatedSinceFilter() {
         if ($('#shw-chngd')[0].checked) { 
-            activeFilters.push("Time Updated");
+            filters.push("Time Updated");
         } 
     }
-    function addActiveGridFilters() {
-        const filterModels = getAllFilterModels();        
-        const columns = Object.keys(filterModels);        
-        for (let i=0; i < columns.length; i++) {
-            if (filterModels[columns[i]] !== null) { 
-                activeFilters.push(columns[i]); }
-        }
+} /* End addActiveExternalFilters */
+function addActiveGridFilters(filters) {
+    const filterModels = gParams.persistFilters || getAllFilterModels();        
+    const columns = Object.keys(filterModels);        
+    for (let i=0; i < columns.length; i++) {
+        if (filterModels[columns[i]] !== null) { 
+            filters.push(columns[i]); }
     }
-    function setFilterStatus() {
-        if (activeFilters.length > 0) { setGridFilterStatus(getFilterStatus()); 
-        } else { resetFilterStatusBar() }
-    }
-    function getFilterStatus() {
-        var tempStatusTxt;
-        if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
-            return activeFilters.join(', ') + '.';
-        } else {
-            tempStatusTxt = $('#xtrnl-filter-status').text();
-            if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-                setExternalFilterStatus(tempStatusTxt + ', ');
-            }
-            return activeFilters.join(', ') + '.'; 
+}
+function setFilterStatus(filters) {
+    if (filters.length > 0) { setGridFilterStatus(getFilterStatus(filters)); 
+    } else { resetFilterStatusBar() }
+}
+function getFilterStatus(filters) {
+    var tempStatusTxt;
+    if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
+        return filters.join(', ') + '.';
+    } else {
+        tempStatusTxt = $('#xtrnl-filter-status').text();
+        if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
+            setExternalFilterStatus(tempStatusTxt + ', ');
         }
+        return filters.join(', ') + '.'; 
     }
 }
 function setGridFilterStatus(status) {                                          //console.log("setGridFilterStatus. status = ", status)
@@ -2030,10 +2041,18 @@ function setExternalFilterStatus(status) {
 function clearGridStatus() {
     $('#grid-filter-status, #xtrnl-filter-status').empty();
 }
-function resetFilterStatusBar() {
+function resetFilterStatusBar() {  
+    if (gParams.persistFilters) { return; }  
     $('#xtrnl-filter-status').text('Filtering on: ');
     $('#grid-filter-status').text('No Active Filters.');
     gParams.focusFltrs = [];
+}
+/** Persists active filters through the switch into map view. */
+function persistFilters() {
+    const activeFilters = [];
+    addActiveExternalFilters(activeFilters);
+    addActiveGridFilters(activeFilters);
+    gParams.persistFilters = getFilterStatus(activeFilters);
 }
 /*-------------------- Filter By Time Updated ----------------------------*/
 /**
