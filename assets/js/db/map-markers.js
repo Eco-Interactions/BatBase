@@ -32,19 +32,11 @@ export class LocMarker extends Marker {
         locRcrds = rcrds;
         this.subCnt = subLocCnt;
         this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
-        this.self = L.marker(latLng, this.getCustomIcon())
+        this.self = L.marker(latLng, getCustomIcon())
             .bindPopup(this.popup)
             .on('mouseover', this.openPopup)
             .on('click', this.openPopupAndDelayAutoClose)
             .on('mouseout', this.delayPopupClose);
-    }
-    getCustomIcon() {
-        return {
-            icon: L.divIcon({
-                className: 'single-marker info',
-                html: "1",
-            })
-        }
     }
     /**
      * Replaces original popup with more details on the interactions at this
@@ -97,7 +89,7 @@ export class IntMarker extends Marker {
         super(latLng);
         bindClassContextToMethods(this); 
         this.popup.setContent(getIntPopupHtml(intData));
-        this.self = L.marker(latLng)
+        this.self = L.marker(latLng, getCustomIcon())
             .bindPopup(this.popup)
             .on('mouseover', this.openPopup)
             .on('click', this.openPopupAndDelayAutoClose)
@@ -259,10 +251,26 @@ function bindClassContextToMethods(self) {
         }
     }
 }
+/** ------- Shared Helpers --------- */
+function getCustomIcon() {
+    return {
+        icon: L.divIcon({
+            className: 'single-marker info',
+            html: "1",
+        })
+    }
+}
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
-
-function getIntPopupHtml(intData) {
-    return "<div> [INSERT INTERACTION DATA HERE] </div>";
+function getIntPopupHtml(intData) {                                             //console.log('getIntPopupHtml. data = %O', intData);
+    const locHtml = getLocNameHtml(intData.locs[0]);
+    const intHtml = getIntSummaryHtml(intData.ints);
+    return `<div>${locHtml}${intHtml}</div>`;
+}
+function getIntSummaryHtml(ints) {
+    let html = '';
+    ints.forEach(int => {html += `<span><b>${int.intCnt}</b>
+        interactions:</span> <b>${int.name}</b><br>`});
+    return `<div>${html}</div>`; 
 }
 /** ---------------- Location Marker/Popup Helpers -------------------------- */
 /**

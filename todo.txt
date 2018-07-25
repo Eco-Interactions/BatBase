@@ -11,6 +11,7 @@
     - TODO:
 
     - AFTER: 
+        -- show filters on map view
         -- Update db page tutorial
 
         - 
@@ -26,6 +27,8 @@ BUG:
 
 Before Release:
     -- update tests with the new selectized elem apis
+    -- Add loading popup for geodata on map view
+    -- blur button on db load: 'show interactions in grid on map'
 
     
 MEETING NOTES:
@@ -81,7 +84,7 @@ TODOs:
     - {low}[easy] Remove PublisherType code
 
 (DATA)
-    - {high}[med] write SQL script to get only records with updates/newly created  
+    - {med}[med] write SQL script to get only records with updates/newly created  
     - {med}[easy] Remove publisher-type code
     - {med} [easy] Change 'center point' to 'display point' - GeoJson entity
     - {low}[med] add 'role' to realms to be able to grab all object/subject realms

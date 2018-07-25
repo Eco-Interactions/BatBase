@@ -26,12 +26,12 @@ Encore
     .autoProvideVariables({
         L: 'leaflet',
     })
-    .addPlugin(
-        new CircularDependencyPlugin({
-            exclude: /a\.js|node_modules/,  // exclude detection of files based on a RegExp
-            failOnError: false,  // add errors to webpack instead of warnings
-            cwd: process.cwd(),  // set the current working directory for displaying module paths
-    }))     
+    // .addPlugin(
+    //     new CircularDependencyPlugin({
+    //         exclude: /a\.js|node_modules/,  // exclude detection of files based on a RegExp
+    //         failOnError: false,  // add errors to webpack instead of warnings
+    //         cwd: process.cwd(),  // set the current working directory for displaying module paths
+    // }))     
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
     //         // these options encourage the ServiceWorkers to get in there fast 

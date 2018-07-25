@@ -76,13 +76,14 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
     {
         return [
             "Africa" => [ 10.965031679524095, 19.599609375000004 ],
-            "Central & South America-Forest" => [ 6.857472618910672, -79.13452148437501 ],
-            "Central & South America" => [ 6.857472618910672, -79.13452148437501 ],
+            "Central & South America-Forest" => [ 8.497472618910672, -77.73452148437501 ],
+            "Central & South America" => [ 8.497472618910672, -77.73452148437501 ],
             "South America" => [ -6.35693973013903, -60.38085937500001 ],
             "Asia" => [ 34.0479, 100.6197 ],
             "Europe" => [ 15.2551, 54.5260 ], 
             "North America" => [ 39.5260, -105.2551 ],
             "Central America" => [ 12.7690, -85.6024 ],
+            "French Guiana" => [ 5.9332383, -58.0875742 ],
             "Oceania" => [ 140.0188, -22.7359 ],
             "Caribbean Islands" => [ -68.6569, 20.4691 ],
             "China" => [ 34.672410587, 104.187417847 ],
