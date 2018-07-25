@@ -1158,10 +1158,18 @@ function hasUnspecifiedRow(rowData) {
 }
 function getRowRcrdName(rowData, rcrd) {
     return rowData.name.indexOf('Unspecified') !== -1 ?
-        getUnspecifiedRowEntityName(rowData, rcrd) : rowData.name;
+        getUnspecifiedRowEntityName(rowData, rcrd) : 
+        getRcrdDisplayName(rowData.name, rcrd);
 }
 function getUnspecifiedRowEntityName(row, rcrd) {
-    return gParams.curFocus === 'taxa' ? getTaxonName(rcrd) : rcrd.displayName;
+    return gParams.curFocus === 'taxa' ? 
+        getTaxonName(rcrd) : getRcrdDisplayName(rcrd.displayName, rcrd);
+}
+function getRcrdDisplayName(name, rcrd) {
+    return name === 'Whole work cited.' ? getParentName(rcrd) : name;
+}
+function getParentName(rcrd) {  
+    return rcrd.displayName.split('(citation)')[0];
 }
 /* --- End showGridRecordsOnMap --- */
 /** Filters the data-grid to the location selected from the map view. */
