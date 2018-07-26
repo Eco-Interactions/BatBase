@@ -41,6 +41,7 @@ function fixLeafletBug() {
  */
 function initDb() {
     _util.initGeoJsonData();
+    showPopUpMsg();
 }
 function geoJsonDataAvailable() {
     return _util.isGeoJsonDataAvailable();
@@ -56,6 +57,7 @@ function buildAndShowMap(loadFunc) {                                            
     addMapTiles();
     addMapLegend();
     map.setView([22,22], 2); console.log('map built.')
+    hidePopUpMsg();
 }
 function logLatLng(e) {
     console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)

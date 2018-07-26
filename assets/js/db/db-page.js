@@ -3139,7 +3139,7 @@ export function showUpdates(focus) {
 }
 function clearPreviousGrid() {                                                  //console.log("clearing grid");
     if (gridOptions.api) { gridOptions.api.destroy(); }  
-    $('#search-grid').empty(); //Clears location map view
+    $('#map').remove(); //Clears location map view
 }
 /**
  * Resets grid state to top focus options: Taxon and source are reset at current

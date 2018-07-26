@@ -286,7 +286,7 @@ function storeGeoJson(geoData) {                                                
     geoJson = geoData; 
 }
 function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
-    _util.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
+    sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
 }
 function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
     idb.set('geoJson', data.geoJson);
