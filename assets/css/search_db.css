@@ -157,6 +157,9 @@
 .legend {
     line-height: 18px;
 }
+#int-legend span {
+    padding-left: 16px;
+}
 .legend i {
     border-radius: 50%;
     width: 18px;

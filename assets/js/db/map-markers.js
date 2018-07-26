@@ -35,6 +35,7 @@ export class LocMarker extends Marker {
         this.self = L.marker(latLng, getCustomIcon())
             .bindPopup(this.popup)
             .on('mouseover', this.openPopup)
+            .on('mouseenter', this.openPopup)
             .on('click', this.openPopupAndDelayAutoClose)
             .on('mouseout', this.delayPopupClose);
     }
@@ -144,6 +145,7 @@ export class LocCluster extends Marker {
     }
     addClusterEvents() {
         this.self.on('clustermouseover', this.openClusterPopup)
+            .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
             .on('clusterclick', this.openPopupAndDelayAutoClose); 
     }
@@ -157,12 +159,13 @@ export class LocCluster extends Marker {
     }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
-        if (this.timeout) { clearTimeout(this.timeout); this.timeout = null; }  
+        clearTimeout(this.timeout); 
+        this.timeout = null;  
         this.map.openPopup(this.popup);
     }
     /** Event fires before popup is fully closed. Restores after closed. */
     closeLayerPopup(e) {  
-        if (e.popup._latlng === this.latLng) {
+        if (e.popup._latlng === this.latLng) { 
             window.setTimeout(this.restoreOrgnlPopup.bind(this), 400);
         }
     }
@@ -198,6 +201,7 @@ export class IntCluster extends Marker {
     }
     addClusterEvents() {
         this.self.on('clustermouseover', this.openClusterPopup)
+            .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
             .on('clusterclick', this.openPopupAndDelayAutoClose); 
     }
@@ -304,7 +308,7 @@ function buildLocSummaryBttn(showSummaryFunc) {
     return bttn;
 }
 /** Returns additional details (html) for interactions at the location. */
-function getLocationSummaryHtml(loc, subCnt) {                                  //console.log('loc = %O', loc);
+export function getLocationSummaryHtml(loc, subCnt) {                           //console.log('loc = %O', loc);
     const div = _util.buildElem('div');
     const html = buildLocDetailsHtml(loc, subCnt);
     const bttn = buildToGridButton(loc);

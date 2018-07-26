@@ -55,7 +55,8 @@ function buildAndShowMap(loadFunc) {                                            
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles();
-    addMapLegend();
+    addMarkerLegend();
+    addIntCountLegend();
     map.setView([22,22], 2); console.log('map built.')
     hidePopUpMsg();
 }
@@ -76,12 +77,12 @@ function addMapTiles() {
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(map);
 }
-function addMapLegend() {
+function addMarkerLegend() {
     const legend = L.control({position: 'bottomright'});
-    legend.onAdd = addLegendHtml;
+    legend.onAdd = addMarkerLegendHtml;
     legend.addTo(map);
 }
-function addLegendHtml(map) {
+function addMarkerLegendHtml(map) {
     const div = _util.buildElem('div', { class: 'info legend flex-col'});
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
@@ -98,22 +99,60 @@ function addLegendHtml(map) {
         }
     }
 };
-export function initMap() {                                                     console.log('attempting to initMap')
-    waitForStorageAndLoadMap();                                                 
+function addIntCountLegend() {
+    const legend = L.control({position: 'topright'});
+    legend.onAdd = addIntCntLegendHtml;
+    legend.addTo(map);
 }
-function waitForStorageAndLoadMap() {
+function addIntCntLegendHtml(map) {
+    const div = _util.buildElem('div', { id: 'int-legend', class: 'info legend flex-col'});
+    return div;
+}
+function fillIntCntLegend(shown, notShown) {
+    const legend = $('#int-legend')[0];
+    legend.innerHTML += `<h4>${shown + notShown} Interactions Total </h4>`;
+    legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
+        ${notShown} without GPS data</span>`;
+}
+export function initMap() {                                                     console.log('attempting to initMap')
+    waitForStorageAndLoadMap(addAllIntMrkrsToMap);                                                 
+}
+function waitForStorageAndLoadMap(onLoad) {
     return geoJsonDataAvailable() ? 
-    buildAndShowMap(addAllIntMrkrsToMap) : 
-    window.setTimeout(waitForStorageAndLoadMap, 500);
+        buildAndShowMap(onLoad) : 
+        window.setTimeout(waitForStorageAndLoadMap.bind(null, onLoad), 500);
 }
 /** ================= Show Interaction Sets on Map ========================== */
 /** Shows the interactions displayed in the data-grid on the map. */
 export function showInts(gridData) {                                            //console.log('----------- showInts. gridData = %O', gridData);
-    buildAndShowMap(showIntsOnMap.bind(null, gridData));
+    waitForStorageAndLoadMap(showIntsOnMap.bind(null, gridData));
 } 
 function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
+    addIntMarkersToMap(data);
+    addIntCntsToLegend(data);
+}
+function addIntCntsToLegend(data) {
+    let shwn = 0, notShwn = 0;
+    data.forEach(trackIntCnts);
+    fillIntCntLegend(shwn, notShwn);
+
+    function trackIntCnts(entity) {
+        notShwn += entity.intsWithoutLocData;
+        shwn += getEntityIntCnt(entity.locs);
+    }
+    function getEntityIntCnt(locs) {
+        let ttl = 0;
+        for (let id in locs) {
+            ttl += locs[id].intCnt;
+        }
+        return ttl;
+    }
+}
+function addIntMarkersToMap(data) {                                             //console.log('addMarkersToMap. data = %O', data);
     const sortedData = sortDataByGeoJson(data);                                 console.log('sortedData = %O', sortedData);
-    addIntMarkersToMap(sortedData)
+    for (let geoId in sortedData) {
+        buildAndAddIntMarker(geoId, sortedData[geoId]);
+    }
 }
 /** Sorts interaction data by geoJsonId, ie map-marker location. */
 function sortDataByGeoJson(data) {                                              console.log('sort(ing)DataByGeoJson');
@@ -140,11 +179,6 @@ function sortDataByGeoJson(data) {                                              
         sorted[geoId].locs.push(newLoc);
     }
 } /* End sortDataByGeoJson */
-function addIntMarkersToMap(intData) {                                          //console.log('addMarkersToMap. intData = %O', intData);
-    for (let geoId in intData) {
-        buildAndAddIntMarker(geoId, intData[geoId]);
-    }
-}
 function buildAndAddIntMarker(geoId, data) {  
     const coords = getCoords(geoId);
     const intCnt = getTotalInts(data);
@@ -168,7 +202,7 @@ function getTotalInts(data) {
 /** ======================= Show Location on Map ============================ */
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom) {                                             
-    buildAndShowMap(showLocInMap.bind(null, id, zoom));
+    waitForStorageAndLoadMap(showLocInMap.bind(null, id, zoom));
     addAllIntMrkrsToMap();
 }
 function showLocInMap(id, zoom) {
@@ -176,7 +210,7 @@ function showLocInMap(id, zoom) {
     const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
     if (!latLng) { return noGeoDataErr(); }
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
-    popup.setContent(getLocationSummaryHtml(loc, null));  
+    popup.setContent(MM.getLocationSummaryHtml(loc, null));  
     popup.options.autoClose = false;
     map.openPopup(popup); 
     map.setView(latLng, zoom, {animate: true});  
@@ -202,8 +236,24 @@ function buildLocPopup(loc, latLng) {
  * summary of the interactions at the location.
  */
 function addAllIntMrkrsToMap() {  
+    let ttlShown = 0, 
+    ttlNotShown = 0;
     const regions = getRegionLocs();
-    for (let id in regions) { addMarkersForRegion(regions[id]) }; 
+    addMapMarkers();
+    fillIntCntLegend(ttlShown, ttlNotShown);
+
+    function addMapMarkers() {
+        for (let id in regions) { 
+            trackIntCnt(regions[id]);
+            addMarkersForRegion(regions[id]) 
+        };
+    }
+    function trackIntCnt(region) {
+        if (region.displayName === "Unspecified") { 
+            return ttlNotShown += region.totalInts; 
+        }
+        ttlShown += region.totalInts;
+    }
 } 
 function getRegionLocs() {
     const regionIds = _util.getDataFromStorage('topRegionNames');
