@@ -218,19 +218,6 @@ export class IntCluster extends Marker {
         if (this.timeout) { clearTimeout(this.timeout); this.timeout = null; }  
         this.map.openPopup(this.popup);
     }
-    /** Event fires before popup is fully closed. Restores after closed. */
-    closeLayerPopup(e) {  
-        if (e.popup._latlng === this.latLng) {
-            window.setTimeout(this.restoreOrgnlPopup.bind(this), 400);
-        }
-    }
-    restoreOrgnlPopup() {
-        super.updateMouseout(this.delayClusterPopupClose);
-        this.popup.setContent(getLocNamePopupHtml(this.loc, this.buildSummaryPopup));
-        this.popup.options.autoClose = true;
-        this.self.off('clusterpopupclose');
-        this.addClusterEvents();
-    }
     closePopup(){
         this.map.closePopup();
     }
@@ -308,7 +295,11 @@ function buildLocSummaryBttn(showSummaryFunc) {
     return bttn;
 }
 /** Returns additional details (html) for interactions at the location. */
-export function getLocationSummaryHtml(loc, subCnt) {                           //console.log('loc = %O', loc);
+export function getLocationSummaryHtml(loc, subCnt, rcrds) {                 //console.log('loc = %O', loc);
+    locRcrds = rcrds;
+    return getLocSummaryPopup(loc, subCnt);
+}
+function getLocSummaryPopup(loc, subCnt) {
     const div = _util.buildElem('div');
     const html = buildLocDetailsHtml(loc, subCnt);
     const bttn = buildToGridButton(loc);

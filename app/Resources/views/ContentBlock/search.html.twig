@@ -28,7 +28,7 @@
         </div>
         <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
         <div id="opts-col3" class="opts-col flex-col flex-wrap">
-            <div>
+            <div id="shw-chngd-ints">
                 <input type="checkbox" id="shw-chngd">
                 <label for="shw-chngd">Show records updated since:</label>
                 <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
@@ -37,9 +37,9 @@
                 <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
                 <input type="text" id="time-fltr" disabled="disabled">
             </div>
-            <div class="bttm-row flex-row grid-tools">
+            <div class="bttm-row flex-row">
                 <button id="shw-map" class="ag-fresh grid-bttn">
-                    Show records in grid on map</button>
+                    Show interactions on map</button>
             </div>
         </div>
         <div id="opts-col4" class="flex-col">
@@ -66,7 +66,9 @@
         </div>
     </div>
     
-    <div id="search-grid" class="ag-fresh">
+    <div id="db-view">
+        <div id="search-grid" class="ag-fresh"></div>
+        <div id="map" style="display: none;"></div>
         <div id="grid-overlay"></div>
         <div id="grid-popup"></div>
     </div>

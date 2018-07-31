@@ -22,6 +22,9 @@
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
 }
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 0;
+}
 #opts-col1 {
     border-right: black 1px solid;
     flex: 0 0 326px;
@@ -103,9 +106,12 @@
     overflow-y: scroll;
 }
 /**-------------- Data Grid Styes -------------------------- */
-#search-grid {
+#db-view {
     height: 86vh;
     border: black 1px solid;
+}
+#search-grid {
+    height: 100%;
 }
 .grid-edit { 
     height: 22px;

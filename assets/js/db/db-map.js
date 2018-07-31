@@ -50,7 +50,7 @@ function geoJsonDataAvailable() {
 /** Initializes the search database map using leaflet and mapbox. */
 function buildAndShowMap(loadFunc) {                                            console.log('buildAndShowMap. loadFunc = %O', loadFunc);
     locRcrds = locRcrds || _util.getDataFromStorage('location');
-    map = L.map('map');
+    map = getMapInstance();
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
     map.on('load', loadFunc);
@@ -59,6 +59,11 @@ function buildAndShowMap(loadFunc) {                                            
     addIntCountLegend();
     map.setView([22,22], 2); console.log('map built.')
     hidePopUpMsg();
+}
+function getMapInstance() {
+    if (map) { map.remove(); }
+    popups = {};
+    return L.map('map'); 
 }
 function logLatLng(e) {
     console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
@@ -110,7 +115,7 @@ function addIntCntLegendHtml(map) {
 }
 function fillIntCntLegend(shown, notShown) {
     const legend = $('#int-legend')[0];
-    legend.innerHTML += `<h4>${shown + notShown} Interactions Total </h4>`;
+    legend.innerHTML = `<h4>${shown + notShown} Interactions Total </h4>`;
     legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
         ${notShown} without GPS data</span>`;
 }
@@ -210,7 +215,7 @@ function showLocInMap(id, zoom) {
     const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
     if (!latLng) { return noGeoDataErr(); }
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
-    popup.setContent(MM.getLocationSummaryHtml(loc, null));  
+    popup.setContent(MM.getLocationSummaryHtml(loc, null, locRcrds));  
     popup.options.autoClose = false;
     map.openPopup(popup); 
     map.setView(latLng, zoom, {animate: true});  

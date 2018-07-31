@@ -721,12 +721,11 @@ function buildTaxonIntRowData(intRcrd, treeLvl) {
 }
 /*------------------Location Search Methods-----------------------------------*/
 /** 
- * Get location data from data storage and sends it to @startLocGridBuild or to 
- * an optional calback (cb) that redirects the standard load sequence.
+ * Get location data from data storage and sends it to @initLocSearchUi
  */
-function buildLocationGrid(view, cb) {
+function buildLocationGrid(view) {
     const data = getLocData();
-    if( data ) { initLocSearchUi(data, view, cb);
+    if( data ) { initLocSearchUi(data, view);
     } else { console.log('Error loading location data from storage.'); }
 }
 function getLocData() {
@@ -738,13 +737,13 @@ function getLocData() {
 /**
  * Builds location view html and initializes grid load. Either builds the grid 
  * data-tree view, by default, or loads the data-map view, if previously 
- * selected. An optional calback (cb) will redirect the standard map-load sequence.
+ * selected. 
  */ 
-function initLocSearchUi(locData, view, cb) {
+function initLocSearchUi(locData, view) {
     addLocDataToGridParams(locData);
     if (!$("#grid-view").length) { buildLocViewHtml(); }  
     setLocView(view);  
-    updateLocView(view, cb);
+    updateLocView(view);
 } 
 function setLocView(view) {
     const storedRealm = view || dataStorage.getItem('curRealm');                //console.log("setLocView. storedRealm = ", storedRealm)
@@ -776,35 +775,25 @@ function onLocViewChange(val) {
  * Event fired when the source realm select box has been changed.
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
-function updateLocView(v, cb) {                                                 //console.log('updateLocView. view = [%s] cb = [%O]', val, cb);
+function updateLocView(v) {                                                     //console.log('updateLocView. view = [%s] cb = [%O]', val, cb);
     const val = v || getSelVal('Loc View');
     resetLocUi();
     resetCurTreeState();
     resetToggleTreeBttn(false);
-    showLocInteractionData(val, cb);
+    showLocInteractionData(val);
 }
 function resetLocUi() {
     clearCol2();
     clearPreviousGrid();
-    enableGridButtons();
-}
-function enableGridButtons() {
-    $('#shw-chngd, .grid-tools button')
-        .attr('disabled', false).css('cursor', 'pointer');
-    $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
-    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.grid-tools, #opts-col3').fadeTo(100, 1);
-    authDependentInit();
-    toggleTimeUpdatedFilter('disable');
+    enableTableButtons();
 }
 /** 
  * Starts the grid build depending on the view selected.
- * The optional calback (cb) will redirect the standard map-load sequence.
  */
-function showLocInteractionData(view, cb) {                                     //console.log('showLocInteractionData. view = ', view);
+function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
     _util.populateStorage('curRealm', view);                      
-    return view === 'tree' ? buildLocGridTree(regions) : buildLocGridMap(cb);
+    return view === 'tree' ? buildLocGridTree(regions) : buildLocGridMap();
 }
 function getTopRegionIds() {
     const ids = [];
@@ -1076,55 +1065,48 @@ function hasChildInteractions(row) {
     });
 }
 /** ------------ Location Grid Map Methods ------------------- */
+/** Filters the data-grid to the location selected from the map view. */
+export function showLocInDataGrid(loc) {                                        //console.log('showing Loc = %O', loc);
+    updateUiForTableView();
+    rebuildLocTree([loc.id]);
+    setSelVal('Loc View', 'tree', 'silent');
+}
 /** Initializes the google map in the data grid. */
-function buildLocGridMap(cb) {    
-    updateUiForMapView();                                                       //console.log('buildLocGridMap. cb = %O', cb || db_map.initMap);
-    if (cb) { cb(); } else { db_map.initMap(); }
-    delete gParams.persistFilters;
-}
-function updateUiForMapView() {
-    clearCol2();
-    $('#tool-bar').fadeTo(100, 1);
-    disableGridButtons();
-    $('#search-grid').append(_util.buildElem('div', {id: 'map'}));
-}
-function disableGridButtons() {
-    $('#shw-chngd, #fltr-tdy, #fltr-cstm, .grid-tools button')
-        .attr('disabled', 'disabled').css('cursor', 'not-allowed');
-    $('.grid-tools, #opts-col3').fadeTo(100, .3);
+function buildLocGridMap() {    
+    updateUiForMapView();            
+    db_map.initMap();           
 }
 /** Switches to map view and centeres map on selected location. */
 function showLocOnMap(geoJsonId, zoom) {
-    switchToLocMapView(db_map.showLoc.bind(null, geoJsonId, zoom));
-}
-function switchToLocMapView(cb) {                                               //console.log('switchToLocMapView. cb = %O', cb);
-    persistFilters();  
     updateUiForMapView();
-    setSelVal('Focus', 'locs', 'silent');
-    updateFocusAndBuildGrid('locs', buildLocationGrid.bind(null, 'map', cb));
+    clearCol2();
+    setSelVal('Loc View', 'map', 'silent');
+    db_map.showLoc(geoJsonId, zoom);
 }
 /**
  * Build an object with all relevant data to display the interactions in the 
  * data-grid in map-view. Sends it to the map to handle the display.
  */
 function showGridRecordsOnMap() {                                               console.log('-----------showGridRecordsOnMap');
-    storeIntAndLocRcrds();
-    gridOptions.api.expandAll();
-    const gridData = buildGridLocDataObj(gridOptions.api.getModel().rowsToDisplay);
-    switchToLocMapView(db_map.showInts.bind(null, gridData));
+    updateUiForMappingInts();
+    db_map.showInts(buildGridLocDataObj());
 }
+function buildGridLocDataObj() {
+    let data = [];
+    storeIntAndLocRcrds();
+    gridOptions.api.forEachNodeAfterFilter(getIntData); 
+    return data.filter(data => data);  
+    
+    function getIntData(row) {                                                  
+        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
+        const rowRcrd = getDetachedRcrd(row.data.id);  
+        data.push(getRowRcrdInteractionData(row.data, rowRcrd));
+    }
+} /* End buildGridLocDataObj */
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
     gParams.interaction = rcrds.interaction;
     gParams.location = rcrds.location;
-}
-function buildGridLocDataObj(rows) {
-    return rows.map(getIntData).filter(data => data);  
-}
-function getIntData(row) {                                                  
-    if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
-    const rowRcrd = getDetachedRcrd(row.data.id);  
-    return getRowRcrdInteractionData(row.data, rowRcrd);
 }
 function getRowRcrdInteractionData(rowData, rcrd) {
     const data = { 
@@ -1172,10 +1154,34 @@ function getParentName(rcrd) {
     return rcrd.displayName.split('(citation)')[0];
 }
 /* --- End showGridRecordsOnMap --- */
-/** Filters the data-grid to the location selected from the map view. */
-export function showLocInDataGrid(loc) {                                        console.log('showing Loc = %O', loc);
-    rebuildLocTree([loc.id]);
-    setSelVal('Loc View', 'tree', 'silent');
+function updateUiForMapView() {
+    $('#tool-bar').fadeTo(100, 1);
+    $('#search-grid').hide();
+    $('#map').show();
+    disableTableButtons();
+}
+function updateUiForTableView() {
+    $('#search-grid').show();
+    $('#map').hide();
+    enableTableButtons();
+}
+function updateUiForMappingInts() {
+    updateUiForMapView();
+    updateBttnToReturnRcrdsToTable()
+    enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));
+}
+function updateBttnToReturnRcrdsToTable() {
+    $('#shw-map').text('Return to table view');
+    $('#shw-map').off('click').on('click', returnRcrdsToTable);
+}
+function updateBttnToShowRcrdsOnMap() {
+    $('#shw-map').text('Show interactions on map');
+    $('#shw-map').off('click').on('click', showGridRecordsOnMap);
+}
+function returnRcrdsToTable() {
+    updateUiForTableView();
+    updateBttnToShowRcrdsOnMap();
+    enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
 }
 
 /*------------------Source Search Methods ------------------------------------*/
@@ -2823,9 +2829,22 @@ function showGrid() {
 }
 function finishGridAndUiLoad() {
     hidePopUpMsg();
-    enableGridButtons();
+    enableTableButtons();
     hideUnusedColFilterMenus();
 } 
+function enableTableButtons() {
+    $('#shw-chngd, .grid-tools button')
+        .attr('disabled', false).css('cursor', 'pointer');
+    $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
+    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+    $('.grid-tools, #shw-chngd-ints').fadeTo(100, 1);
+    authDependentInit();
+}
+function disableTableButtons() {
+    $('#shw-chngd, #fltr-tdy, #fltr-cstm, .grid-tools button')
+        .attr('disabled', 'disabled').css('cursor', 'default');
+    $('.grid-tools, #shw-chngd-ints').fadeTo(100, .3);
+}
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
  * column only filters the leaf nodes, by design. It is not useful here.)
@@ -2987,6 +3006,18 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
+function enableComboboxes(enable, $pElems) {
+    $pElems.each((i, elem) => {  console.log('elem = %O', elem);
+        if (enable) { enableCombobox(elem);
+        } else { elem.selectize.disable() }
+    });
+}
+function enableCombobox(elem) {
+    elem.selectize.enable();
+}
+function disableCombobox(elem) {
+    elem.selectize.disable();
+}
 // function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
 //     elem.selectize.updatePlaceholder();
@@ -3139,7 +3170,8 @@ export function showUpdates(focus) {
 }
 function clearPreviousGrid() {                                                  //console.log("clearing grid");
     if (gridOptions.api) { gridOptions.api.destroy(); }  
-    $('#map').remove(); //Clears location map view
+    $('#map').hide(); //Clears location map view
+    $('#search-grid').show();
 }
 /**
  * Resets grid state to top focus options: Taxon and source are reset at current
