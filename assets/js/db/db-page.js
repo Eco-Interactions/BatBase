@@ -782,10 +782,10 @@ function updateLocView(v) {                                                     
     resetToggleTreeBttn(false);
     showLocInteractionData(val);
 }
-function resetLocUi() {
+function resetLocUi(view) { 
     clearCol2();
     clearPreviousGrid();
-    enableTableButtons();
+    if (view === 'tree') { enableTableButtons(); }
 }
 /** 
  * Starts the grid build depending on the view selected.
@@ -1073,7 +1073,8 @@ export function showLocInDataGrid(loc) {                                        
 }
 /** Initializes the google map in the data grid. */
 function buildLocGridMap() {    
-    updateUiForMapView();            
+    updateUiForMapView();       
+    $('#shw-map').attr('disabled', 'disabled').css('opacity', '.3');
     db_map.initMap();           
 }
 /** Switches to map view and centeres map on selected location. */
@@ -1183,7 +1184,6 @@ function returnRcrdsToTable() {
     updateBttnToShowRcrdsOnMap();
     enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
 }
-
 /*------------------Source Search Methods ------------------------------------*/
 /**
  * Get all data needed for the Source-focused grid from data storage and send  
@@ -2832,12 +2832,12 @@ function finishGridAndUiLoad() {
     enableTableButtons();
     hideUnusedColFilterMenus();
 } 
-function enableTableButtons() {
-    $('#shw-chngd, .grid-tools button')
+function enableTableButtons() {  
+    $('#shw-chngd, .grid-tools button, #shw-map')
         .attr('disabled', false).css('cursor', 'pointer');
     $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.grid-tools, #shw-chngd-ints').fadeTo(100, 1);
+    $('.grid-tools, #shw-chngd-ints, #shw-map').fadeTo(100, 1);
     authDependentInit();
 }
 function disableTableButtons() {
@@ -3007,9 +3007,8 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 function enableComboboxes(enable, $pElems) {
-    $pElems.each((i, elem) => {  console.log('elem = %O', elem);
-        if (enable) { enableCombobox(elem);
-        } else { elem.selectize.disable() }
+    $pElems.each((i, elem) => {  
+        if (enable) { enableCombobox(elem); } else { disableCombobox(elem); }
     });
 }
 function enableCombobox(elem) {
