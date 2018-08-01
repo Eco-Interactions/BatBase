@@ -764,7 +764,7 @@ function buildLocViewHtml() {
 
     function getViewOpts() {
         return [{ value: 'map', text: 'Map Data' },
-                { value: 'tree', text: 'Tree Data' }];   
+                { value: 'tree', text: 'Table Data' }];   
     } 
 } /* End buildLocViewHtml */
 function onLocViewChange(val) {
@@ -1074,8 +1074,17 @@ export function showLocInDataGrid(loc) {                                        
 /** Initializes the google map in the data grid. */
 function buildLocGridMap() {    
     updateUiForMapView();       
-    $('#shw-map').attr('disabled', 'disabled').css('opacity', '.3');
+    $('#shw-map').attr('disabled', 'disabled')
+    $('#opts-col3 button').css('opacity', '.3');
+    addNoteAboutHowToFilterInteractionsDisplayed();
     db_map.initMap();           
+}
+function addNoteAboutHowToFilterInteractionsDisplayed() {
+    $('#opts-col2').html(`
+        <div style="margin: 1em; font-size: 18px;">To filter the interactions 
+        diplayed, return to viewing Table Data and filter using the options 
+        available. Then click "Show interactions on map" to see them displayed 
+        here. </div>`);
 }
 /** Switches to map view and centeres map on selected location. */
 function showLocOnMap(geoJsonId, zoom) {
@@ -1486,11 +1495,11 @@ function getSrcRowData(src, treeLvl, idx) {                                     
 /** Returns a text input with submit button that will filter tree by text string. */
 function buildTreeSearchHtml(entity, hndlr) {
     const func = hndlr || searchTreeText.bind(null, entity);
-    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row grid-tools' });
     const input = _util.buildElem('input', { 
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
-    const bttn = _util.buildElem('button', 
-        { text: 'Search', name: 'sel'+entity+'_submit', class: 'ag-fresh grid-bttn' });
+    const bttn = _util.buildElem('button', { text: 'Search', 
+        name: 'sel'+entity+'_submit', class: 'ag-fresh grid-bttn' });
     $(bttn).css('margin-left', '5px');
     $(lbl).css('width', '222px');
     $(input).css('width', '160px');
@@ -2833,17 +2842,18 @@ function finishGridAndUiLoad() {
     hideUnusedColFilterMenus();
 } 
 function enableTableButtons() {  
-    $('#shw-chngd, .grid-tools button, #shw-map')
-        .attr('disabled', false).css('cursor', 'pointer');
+    $(`#shw-chngd, .grid-tools button, #shw-map, .grid-tools input, 
+        button[name="futureDevBttn"]`).attr('disabled', false).css('cursor', 'pointer');
     $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.grid-tools, #shw-chngd-ints, #shw-map').fadeTo(100, 1);
+    $('.grid-tools, #shw-chngd-ints, #shw-map, button[name="futureDevBttn"]').fadeTo(100, 1);
     authDependentInit();
 }
 function disableTableButtons() {
-    $('#shw-chngd, #fltr-tdy, #fltr-cstm, .grid-tools button')
+    $(`#shw-chngd-intsngd, #fltr-tdy, #fltr-cstm, .grid-tools button, 
+        .grid-tools input, button[name="futureDevBttn"]`)
         .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.grid-tools, #shw-chngd-ints').fadeTo(100, .3);
+    $('.grid-tools, #shw-chngd-ints, button[name="futureDevBttn"]').fadeTo(100, .3);
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
