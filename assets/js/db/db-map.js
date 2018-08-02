@@ -135,6 +135,7 @@ export function showInts(gridData) {                                            
 function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
     addIntMarkersToMap(data);
     addIntCntsToLegend(data);
+    if (data.length === 1) { zoomAndFocusMap(data[0].locs); }
 }
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
@@ -203,6 +204,16 @@ function getTotalInts(data) {
     let ttl = 0;
     data.ints.forEach(d => ttl += d.intCnt);
     return ttl;
+}
+function zoomAndFocusMap(locs) {  console.log('locs = %O', locs)
+    const loc = locs[Object.keys(locs)[0]].loc;  console.log('loc = %O', loc);
+    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
+    const zoom = getZoomLvl(loc);
+    map.setView(latLng, zoom, {animate: true});  
+}
+function getZoomLvl(loc) {
+    const type = loc.locationType.displayName;
+    return type === 'Region' ? 4 : type === 'Country' ? 5 : 7; 
 }
 /** ======================= Show Location on Map ============================ */
 /** Centers the map on the location and zooms according to type of location. */
