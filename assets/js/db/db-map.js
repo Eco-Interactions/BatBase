@@ -269,8 +269,8 @@ function addMarkersForRegion(region) {
     addMarkersForLocAndChildren(region);
 }
 function addMarkersForLocAndChildren(topLoc) {                                 
-    if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', loc.displayName, loc);
-    let intCnt = topLoc.interactions.length; 
+    if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', topLoc.displayName, topLoc);
+    let intCnt = topLoc.totalInts; 
     let subCnt = 0;
     buildMarkersForLocChildren(topLoc.children);                               
     if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, topLoc); }

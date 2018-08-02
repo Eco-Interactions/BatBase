@@ -296,7 +296,7 @@ function buildLocSummaryBttn(showSummaryFunc) {
 }
 /** Returns additional details (html) for interactions at the location. */
 export function getLocationSummaryHtml(loc, subCnt, rcrds) {                 //console.log('loc = %O', loc);
-    locRcrds = rcrds;
+    locRcrds = locRcrds || rcrds;
     return getLocSummaryPopup(loc, subCnt);
 }
 function getLocSummaryPopup(loc, subCnt) {
@@ -309,7 +309,7 @@ function getLocSummaryPopup(loc, subCnt) {
 function buildLocDetailsHtml(loc, subCnt) {
     const name = getLocNameHtml(loc);
     const cnt = ifCountryGetIntCnt(loc);
-    const subs = getSubLocsWithoutGpsData(subCnt);
+    const subs = null; //getSubLocsWithoutGpsData(subCnt);
     const pLocData = (cnt||subs) ? [cnt, subs].filter(el=>el).join('<br>')+'<br>' : false;
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
