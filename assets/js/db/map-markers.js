@@ -289,7 +289,7 @@ function clearMarkerTimeout(timeout) {
 /** ------- Location Summary Popup ------------- */
 function buildLocSummaryBttn(showSummaryFunc) {
     const bttn = _util.buildElem('input', {type: 'button',
-        class:'ag-fresh grid-bttn', value: 'Location Summary'});
+        class:'ag-fresh tbl-bttn', value: 'Location Summary'});
     $(bttn).click(showSummaryFunc);
     $(bttn).css({'margin': '.5em 0 0 0'});
     return bttn;
@@ -302,7 +302,7 @@ export function getLocationSummaryHtml(loc, subCnt, rcrds) {                 //c
 function getLocSummaryPopup(loc, subCnt) {
     const div = _util.buildElem('div');
     const html = buildLocDetailsHtml(loc, subCnt);
-    const bttn = buildToGridButton(loc);
+    const bttn = buildToTableButton(loc);
     $(div).append(html).append(bttn);
     return div;
 }
@@ -446,15 +446,15 @@ function buildReportString(obj, sorted, ttl) {
         } 
     }
 }
-/** --- Button to show interactions in the data-grid --- */
-function buildToGridButton(loc) {
+/** --- Button to show interactions in the data-table --- */
+function buildToTableButton(loc) {
     const bttn = _util.buildElem('input', {type: 'button',
-        class:'ag-fresh grid-bttn', value: 'Show Interactions In Data-Grid'});
-    $(bttn).click(showLocGridView.bind(null, loc));
+        class:'ag-fresh tbl-bttn', value: 'Show Interactions In Data-Table'});
+    $(bttn).click(showLocTableView.bind(null, loc));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});
     return bttn;
 }
-function showLocGridView(loc) {
-    console.log('Switch to grid view and show location.');
-    db_page.showLocInDataGrid(loc);
+function showLocTableView(loc) {
+    console.log('Switch to table view and show location.');
+    db_page.showLocInDataTable(loc);
 }

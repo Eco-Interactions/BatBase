@@ -76,7 +76,7 @@ function ajaxNewData(entities, lastUpdated) {
         entities.splice(entities.indexOf('Interaction'), 1) : false;    
     const promises = entities.map(e => getNewData(e)); 
     $.when(...promises).then(processUpdatedData).then(updateInteractions)
-        .done(retryFailedUpdatesAndLoadGrid);
+        .done(retryFailedUpdatesAndLoadTable);
      
     function getNewData(entity, func) {                                         //console.log('getting new data for ', entity); 
         let data = { entity: entity, updatedAt: lastUpdated }; 
@@ -110,22 +110,22 @@ function storeUpdatedData(rcrds, entity) {
         entityHndlr(_util.lcfirst(entity), rcrds[id]); 
     } 
 } 
-/** Stores interaction data and inits the search-page grid.*/ 
+/** Stores interaction data and inits the search-page table.*/ 
 function storeDataAndRetryFailedUpdates(results) { 
     processUpdatedData(results); 
-    retryFailedUpdatesAndLoadGrid();
+    retryFailedUpdatesAndLoadTable();
 } 
-function retryFailedUpdatesAndLoadGrid() {                                      console.log('retryFailedUpdatesAndLoadGrid')
+function retryFailedUpdatesAndLoadTable() {                                      console.log('retryFailedUpdatesAndLoadTable')
     retryFailedUpdates();
-    initSearchGrid(); //TODO: send errors during init update to search page and show error message to user.
+    initDataTable(); //TODO: send errors during init update to search page and show error message to user.
 }
 /**
  * Updates the stored data's updatedAt flag, and initializes the search-page 
- * grid with the updated data @db_page.initSearchGrid. 
+ * table with the updated data @db_page.initDataTable. 
  */
-function initSearchGrid() {                                                     console.log('Finished updating! Loading search grid.')
+function initDataTable() {                                                     console.log('Finished updating! Loading search table.')
     storeData('pgDataUpdatedAt', getCurrentDate()); 
-    db_page.initSearchGrid(); 
+    db_page.initDataTable(); 
 }
 /*------------------ Update Submitted Form Data --------------------------*/
 export function updateEditedData(data, cb) {
@@ -464,8 +464,8 @@ function initStoredData() {
 /**
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @storeEntityData. The stored data's 
- * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Search page 
- * grid-build begins @db_page.initSearchGrid.
+ * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Database search page 
+ * table build begins @db_page.initDataTable.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
@@ -481,7 +481,7 @@ function ajaxAndStoreAllEntityData() {                                          
         $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
         storeData('pgDataUpdatedAt', getCurrentDate());
-        db_page.initSearchGrid();
+        db_page.initDataTable();
     });
 }
 /**

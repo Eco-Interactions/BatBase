@@ -24,7 +24,7 @@ function authDependentInit() {
     }
 }
 /*--------------------- SEARCH PAGE CRUD-FORM ----------------------------------------------------*/
-/** Adds a "New" button under the top grid focus options. */
+/** Adds a "New" button under the top table focus options. */
 function buildSearchPgFormUi() {
     var bttn = _util.buildElem('button', { 
             text: 'New', name: 'createbttn', class: 'adminbttn' });
@@ -84,7 +84,7 @@ function getExitButtonRow() {
 }
 function getExitButton() {
     var bttn = _util.buildElem('input', {
-       'id':'exit-form', 'class':'grid-bttn exit-bttn', 'type':'button', 'value':'X' });
+       'id':'exit-form', 'class':'tbl-bttn exit-bttn', 'type':'button', 'value':'X' });
     $(bttn).click(exitFormPopup);
     return bttn;
 }
@@ -104,22 +104,22 @@ function getHeaderHtml(title) {
 /** Returns popup and overlay to their original/default state. */
 function exitFormPopup(e, skipReset) { 
     hideSearchFormPopup();
-    if (!skipReset) { refocusGridIfFormWasSubmitted(); }
+    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
     $("#b-overlay").removeClass("form-ovrly");
     $("#b-overlay-popup").removeClass("form-popup");
     $("#b-overlay-popup").empty();
     fParams = {};
 }
 /**
- * If the form was not submitted the grid does not reload. Otherwise, if exiting 
- * the edit-forms, the grid will reload with the current focus; or, after creating 
- * an interaction, the grid will refocus into source-view. Exiting the interaction
+ * If the form was not submitted the table does not reload. Otherwise, if exiting 
+ * the edit-forms, the table will reload with the current focus; or, after creating 
+ * an interaction, the table will refocus into source-view. Exiting the interaction
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
-function refocusGridIfFormWasSubmitted() {                                      console.log('submitFocus = [%s]', fParams.submitFocus);
+function refocusTableIfFormWasSubmitted() {                                      console.log('submitFocus = [%s]', fParams.submitFocus);
     if (!fParams.submitFocus) { return; }
     if (fParams.submitFocus == 'int') { return refocusAndShowUpdates(); }   
-    db_page.initSearchGrid(fParams.submitFocus);
+    db_page.initDataTable(fParams.submitFocus);
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
     var focus  = fParams.action === 'create' ? 'srcs' : null;
@@ -219,7 +219,7 @@ function buildFormElem() {
  * > formLevels - An array of the form level names/tags/prefixes/etc.
  * > records - An object of all records, with id keys, for each of the 
  *   root entities- Interaction, Location, Source and Taxa.
- * > submitFocus - Stores the grid-focus for the entity of the most recent 
+ * > submitFocus - Stores the table-focus for the entity of the most recent 
         form submission. Will be used on form-exit.
  */
 function initFormParams(action, entity, id) {   
@@ -1808,7 +1808,7 @@ function setTaxonPrntNameElem(prnt, elem, pText) {
 }
 function buildEditPrntBttn(prnt) {
     var bttn = _util.buildElem('input', { type: 'button', value: 'Change Parent', 
-        id: 'chng-prnt', class: 'ag-fresh grid-bttn' });
+        id: 'chng-prnt', class: 'ag-fresh tbl-bttn' });
     $(bttn).click(buildParentTaxonEditFields);
     return bttn;
 }
@@ -3152,7 +3152,7 @@ function buildSubmitAndCancelBttns(level, action, entity) {
 /** Returns a (submit or cancel) button for the form level. */
 function buildFormButton(action, level, val) {
     return _util.buildElem("input", { id: level +'-'+action, 
-        class: "ag-fresh grid-bttn", type: "button", value: val});
+        class: "ag-fresh tbl-bttn", type: "button", value: val});
 }
 /**
  * Returns an object with 'submit' and 'cancel' events bound to the passed level's
@@ -4037,14 +4037,14 @@ function errUpdatingData(errMsg, errTag) {                                      
     var confirm = _util.buildElem('span', { class: 'flex-row', 
             'text': "Please click \"OK\" to continue." });
     var bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
-            class: 'grid-bttn exit-bttn' });
+            class: 'tbl-bttn exit-bttn' });
     $(confirm).append(bttn);
     $(cntnr).append([msg, confirm]);
     $('#top-hdr').after(cntnr);
     $(bttn).click(reloadAndRedownloadData);
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fParams.submitFocus);
-    exitFormPopup(null, 'skipGridReset');
+    exitFormPopup(null, 'skipTableReset');
     db_sync.reset();
 }
 /**

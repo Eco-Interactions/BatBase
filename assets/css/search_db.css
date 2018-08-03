@@ -75,7 +75,7 @@ input[type="radio"], input[type="checkbox"] {
     height: 28px;
     font-size: 1.1em;
 }
-#grid-status {
+#tbl-status {
     margin: 0 0 0 .2em;
     flex-grow: 1;
     padding: .2em;  
@@ -84,7 +84,7 @@ input[type="radio"], input[type="checkbox"] {
     flex-shrink: 1;
     margin-right: .3em;
 }
-#grid-filter-status {
+#tbl-filter-status {
     flex-grow: 1;
 }
 /*--------- Search Tips Popup -----------------*/
@@ -105,15 +105,15 @@ input[type="radio"], input[type="checkbox"] {
     margin: auto;
     overflow-y: scroll;
 }
-/**-------------- Data Grid Styes -------------------------- */
+/**-------------- Data Table Styes -------------------------- */
 #db-view {
     height: 86vh;
     border: black 1px solid;
 }
-#search-grid {
+#search-tbl {
     height: 100%;
 }
-.grid-edit { 
+.tbl-edit { 
     height: 22px;
     width: 20px;
     position: relative;
@@ -194,7 +194,7 @@ input[type="radio"], input[type="checkbox"] {
     justify-content: space-between;
     height: 44px;
 }
-.grid-bttn, .tos-bttn {
+.tbl-bttn, .tos-bttn {
     margin: 0 .3em 0 .2em;
     background: linear-gradient(#fff, #d3d3d3);
     border-radius: 4px;
@@ -229,11 +229,11 @@ button[name="futureDevBttn"] {
     width: 420px;
     text-align: justify;
 }
-a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
+a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     cursor: pointer;
 }
-/*------------ Search Grid Popup -----------------*/
-#grid-popup {
+/*------------ Search Table Popup -----------------*/
+#db-popup {
     background: #FFF;
     display: none;
     position: relative;
@@ -250,7 +250,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .grid-edit {
     margin-top: -50px;
     border-radius: 5px;
 }
-#grid-overlay {
+#db-overlay {
     display: none;
     position: absolute;
     z-index: 100;               

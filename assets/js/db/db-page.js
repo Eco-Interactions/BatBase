@@ -1,13 +1,15 @@
 /**
- * The search grid is built to display the eco-interaction records organized by
- * a selected "focus": taxa (grouped further by realm: bat, plant, arthropod), 
- * locations, or sources (grouped by either authors, publications, or publishers). 
+ * The Database Search page entry point. The data table is built to display the 
+ * eco-interaction records organized by a selected "focus": taxa (grouped further 
+ * by realm: bat, plant, arthropod), locations, or sources (grouped by either 
+ * authors, publications, or publishers). The data map displays interactions
+ * geographically. Filtered interactions can be viewed in either form. 
  * Exports:
  *     handleReset
  *     initSearchPage
- *     initSearchGrid
+ *     initDataTable
  *     showUpdates
- *     showLocInDataGrid
+ *          
  */
 import * as _util from '../misc/util.js';
 import * as db_sync from './db-sync.js';
@@ -21,14 +23,14 @@ import * as agGrid from '../../grid/ag-grid.js';
  *      cal: Stores the flatpickr calendar instance. 
  *      cstmTimeFltr: Stores the specified datetime for the time-updated filter.
  *      intro: Stores an active tutorial/walk-through instance.
- * columnDefs = Array of column definitions for the grid.
- * gParams = obj container for misc params used for the search grid.
+ * columnDefs = Array of column definitions for the table.
+ * tParams = obj container for misc params used for the search table.
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded.
  */
-let userRole, dataStorage, misc = {}, columnDefs = [], gParams = {}; 
+let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
 const dataKey = 'Live for Justice!!!!!!!!!!!! <3<3';
-const gridOptions = getDefaultGridOptions();
+const tblOpts = getDefaultTblOpts();
 
 requireCss();
 initDbPage();
@@ -100,8 +102,8 @@ function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
-    $('button[name="reset-grid"]').click(resetDataGrid);
-    $('#shw-map').click(showGridRecordsOnMap);
+    $('button[name="reset-tbl"]').click(resetDataTable);
+    $('#shw-map').click(showTableRecordsOnMap);
     $("#strt-tut").click(startIntroWalkthrough);
     $("#show-tips").click(showTips);
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
@@ -128,7 +130,7 @@ function adaptUiToScreenSize() {
 }
 /*-------------------- Top "State" Managment Methods -------------------------*/
 function initSearchState() {
-    resetGridParams();
+    resetTableParams();
     toggleTimeUpdatedFilter('disable');
     resetFilterStatusBar();      
     setUpFutureDevInfoBttn();
@@ -136,33 +138,30 @@ function initSearchState() {
 } 
 /**
  * Container for param data needed for a selected focus. Resets on focus change.
- * - curFocus: Top grid sort - Taxon (taxa), Location (locs), or Source (srcs).
- * - openRows: Array of entity ids whose grid rows will be expanded on grid load.
- * - persistFilters: Persists filters through grid update into map view
+ * - curFocus: Top table sort - Taxon (taxa), Location (locs), or Source (srcs).
+ * - openRows: Array of entity ids whose table rows will be expanded on load.
  * Notable properties stored later: 
  * rcrdsById - all records for the current focus.
  * curRealm - focus' realm-level sort (eg, Taxon realms: Bat, Plant, Arthropod).
- * curTree - data 'tree' object to be displayed in grid.
- * rowData - array of rows displayed in the grid.
+ * curTree - data 'tree' object to be displayed in table.
+ * rowData - array of rows displayed in the table.
  * selectedOpts - search combobox values 'selected' for the current tree.
  */
-function resetGridParams() {  
-    const prevFilters = gParams.persistFilters;                                            
-    gParams = {}; 
-    gParams.curFocus = getResetFocus();  
-    gParams.openRows = [];                                                      //console.log("gParams = %O", gParams);
-    if (prevFilters) { gParams.persistFilters = prevFilters; }
+function resetTableParams() {  
+    tParams = {}; 
+    tParams.curFocus = getResetFocus();  
+    tParams.openRows = [];                                                      //console.log("tParams = %O", tParams);
 }
 function getResetFocus() {
     const foci = ['locs', 'srcs', 'taxa'];
     const storedFocus = dataStorage.getItem('curFocus');
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
-/** Selects either Taxon, Location or Source in the grid-focus dropdown. */
+/** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     $('#filter-opts').show(400);  
     initCombobox('Focus');
-    setSelVal('Focus', gParams.curFocus, 'silent');
+    setSelVal('Focus', tParams.curFocus, 'silent');
     $('#sort-opts').show(400);
     selectSearchFocus();
 }
@@ -174,43 +173,42 @@ function setUpFutureDevInfoBttn() {
 }
 function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
     return "Future options include year and elevation range, habitat and interaction " +
-        "type (currently available by filtering the grid columns), " +
+        "type (currently available by filtering the table columns), " +
         "as well as other criteria that would be helpful to focus the data. \n" +
         "Below is a 'Show/Hide Columns' button that will allow users to specify " +
-        "the data shown in the grid and/or csv export.";
+        "the data shown in the table and/or csv export.";
 }
 
 /*------------------ Interaction Search Methods--------------------------------------*/
 /**
  * If interaction data is already in data storage, the data is sent to 
- * @fillTreeWithInteractions to begin rebuilding the data grid. Otherwise, 
+ * @fillTreeWithInteractions to begin rebuilding the data table. Otherwise, 
  * an ajax call gets the data which is stored @storeInteractions before being
  * sent to @fillTreeWithInteractions.    
  */
-function getInteractionsAndFillTree() {                                         //console.log("getInteractionsAndFillTree called. Tree = %O", gParams.curTree);
+function getInteractionsAndFillTable() {                                         //console.log("getInteractionsAndFillTable called. Tree = %O", tParams.curTree);
     var entityData = _util.getDataFromStorage('interaction');
-    fadeGrid();
+    fadeTable();
     if (entityData) { fillTreeWithInteractions(entityData); 
     } else { console.log("Error loading interaction data from storage."); }
 }
 /**
  * Fills the current tree data with interaction records @fillTree and starts 
- * the grid-building method chain for the current focus @buildGrid. Finally, 
- * calls @finishGridAndUiLoad for the final stage of the grid build. 
+ * the table-building method chain for the current focus @buildTable. Finally, 
+ * calls @finishTableAndUiLoad for the final stage of the build. 
  */
 function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
-    var focus = gParams.curFocus; 
-    var curTree = gParams.curTree; 
-
+    const focus = tParams.curFocus; 
+    const curTree = tParams.curTree; 
     fillTree(focus, curTree, intRcrds);
-    buildGrid(focus, curTree);
-    finishGridAndUiLoad();
+    buildTable(focus, curTree);
+    finishTableAndUiLoad();
 } 
 /** Replaces all interaction ids with records for every node in the tree.  */
 function fillTree(focus, curTree, intRcrds) {  
-    var intEntities = ['taxon', 'location', 'source'];
-    var entityData = _util.getDataFromStorage(intEntities);
-    var fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
+    const intEntities = ['taxon', 'location', 'source'];
+    const entityData = _util.getDataFromStorage(intEntities);
+    const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     fillMethods[focus](curTree, intRcrds);
 
     function fillTaxonTree(curTree) {                                           //console.log("fillingTaxonTree. curTree = %O", curTree);
@@ -218,15 +216,15 @@ function fillTree(focus, curTree, intRcrds) {
         fillHiddenTaxonColumns(curTree, intRcrds);
 
         function fillTaxaInteractions(treeLvl) {                                //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
-            for (var taxon in treeLvl) {   
+            for (let taxon in treeLvl) {   
                 fillTaxonInteractions(treeLvl[taxon]);
                 if (treeLvl[taxon].children !== null) { 
                     fillTaxaInteractions(treeLvl[taxon].children); }
             }
         }
         function fillTaxonInteractions(taxon) {                                 //console.log("fillTaxonInteractions. taxon = %O", taxon);
-            var roles = ['subjectRoles', 'objectRoles'];
-            for (var r in roles) {
+            const roles = ['subjectRoles', 'objectRoles'];
+            for (let r in roles) {
                 taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
             }
         }
@@ -236,7 +234,7 @@ function fillTree(focus, curTree, intRcrds) {
      * interaction ids with the interaction records.
      */
     function fillLocTree(treeBranch) {                                          //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
-        for (var curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
+        for (let curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
             if (treeBranch[curNode].interactions.length > 0) { 
                 treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
             if (treeBranch[curNode].children) { 
@@ -248,7 +246,7 @@ function fillTree(focus, curTree, intRcrds) {
      * direct source, then replacing its interaction id's with their records.
      */
     function fillSrcTree(curTree) { 
-        for (var srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
+        for (let srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
             fillSrcInteractions(curTree[srcName]);
         }
         /**
@@ -256,7 +254,7 @@ function fillTree(focus, curTree, intRcrds) {
          * have any interaction ids replaced with the interaction records. 
          */
         function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
-           var srcChildren = [];
+            const srcChildren = [];
             if (curSrc.isDirect) { replaceSrcInts(curSrc); }
             curSrc.children.forEach(function(childSrc){
                 fillSrcInteractions(childSrc); 
@@ -277,7 +275,7 @@ function fillTree(focus, curTree, intRcrds) {
     }
     /** Returns a filled record with all references replaced with entity records. */
     function fillIntRcrd(intRcrd) {
-        for (var prop in intRcrd) { 
+        for (let prop in intRcrd) { 
             if (prop in entityData) { 
                 intRcrd[prop] = entityData[prop][intRcrd[prop]];
             } else if (prop === "subject" || prop === "object") {
@@ -290,19 +288,19 @@ function fillTree(focus, curTree, intRcrds) {
         return intRcrd;
     }
     function getIntTags(tagAry) { 
-        var tags = tagAry.map(function(tag){ return tag.displayName; });
+        const tags = tagAry.map(function(tag){ return tag.displayName; });
         return tags.join(", ");
     }
 } /* End fillTree */
-/** Calls the start of the grid-building method chain for the current focus. */
-function buildGrid(focus, curTree) {
-    var gridBuilderMap = { 
-        locs: buildLocSearchUiAndGrid,  srcs: buildSrcSearchUiAndGrid,
-        taxa: buildTaxonSearchUiAndGrid 
+/** Calls the start of the table-building method chain for the current focus. */
+function buildTable(focus, curTree) {
+    const tblBuilderMap = { 
+        locs: buildLocSearchUiAndTable,  srcs: buildSrcSearchUiAndTable,
+        taxa: buildTaxonSearchUiAndTable 
     };    
-    gridBuilderMap[focus](curTree);
+    tblBuilderMap[focus](curTree);
 }
-/** Returns an interaction rowData object with flat data in grid-ready format. */
+/** Returns an interaction rowData object with flat data in table-ready format. */
 function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log("intRcrd = %O", intRcrd);
     var rowData = {
         isParent: false,
@@ -357,10 +355,10 @@ function getTaxonName(taxon) {
 }   
 /*------------------ Taxon Search Methods ------------------------------------*/
 /**
- * Get all data needed for the Taxon-focused grid from data storage and send 
- * to @initTaxonSearchUi to begin the data-grid build.  
+ * Get all data needed for the Taxon-focused table from data storage and send 
+ * to @initTaxonSearchUi to begin the data-table build.  
  */
-function buildTaxonGrid() {                                                     //console.log("Building Taxon Grid.");
+function buildTaxonTable() {                                                     //console.log("Building Taxon Table.");
     var data = _util.getDataFromStorage(['realm', 'taxon', 'level']); 
     if( data ) { initTaxonSearchUi(data);
     } else { console.log("Error loading taxon data from storage."); }
@@ -369,18 +367,18 @@ function buildTaxonGrid() {                                                     
  * If the taxon search comboboxes aren't displayed, build them @buildTaxonRealmHtml.
  * If no realm is selected, the default realm value is set. The realm-tree 
  * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
- * Continues grid build @getInteractionsAndFillTree.  
+ * Continues table build @getInteractionsAndFillTable.  
  */
 function initTaxonSearchUi(data) {                                              console.log("initTaxonSearchUi. data = %O", data);
     var realmTaxonRcrd;
-    gParams.rcrdsById = data.taxon;
+    tParams.rcrdsById = data.taxon;
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
     setTaxonRealm();  
     
     realmTaxonRcrd = storeAndReturnRealm();
     initTaxonTree(realmTaxonRcrd);
     storeLevelData(realmTaxonRcrd);
-    getInteractionsAndFillTree();
+    getInteractionsAndFillTable();
 }
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonRealm() {
@@ -392,17 +390,17 @@ function setTaxonRealm() {
     }
 }
 /**
- * Stores in the global gParams obj:
+ * Stores in the global tParams obj:
  * > taxonByLvl - object with taxon records in the current tree organized by 
  *   level and keyed under their display name.
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
 function storeLevelData(topTaxon) {
-    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", gParams.taxaByLvl)
-    gParams["allRealmLvls"] = Object.keys(gParams.taxaByLvl);
+    tParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", tParams.taxaByLvl)
+    tParams["allRealmLvls"] = Object.keys(tParams.taxaByLvl);
 }
 function updateTaxaByLvl(topTaxon) {
-    gParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", gParams.taxaByLvl)
+    tParams["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                    //console.log("taxaByLvl = %O", tParams.taxaByLvl)
 }
 /** Returns an object with taxon records by level and keyed with display names. */
 function seperateTaxonTreeByLvl(topTaxon) {
@@ -448,41 +446,41 @@ function storeAndReturnRealm(val) {
     const realmTaxonRcrd = getDetachedRcrd(realmId);                            console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
-    gParams.curRealm = realmId;
-    gParams.realmLvl = realmLvl;
+    tParams.curRealm = realmId;
+    tParams.realmLvl = realmLvl;
     return realmTaxonRcrd;
 }
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
- * the tree are stored or updated before continuing @getInteractionsAndFillTree.. 
- * Note: This is the entry point for filter-related taxon-grid rebuilds.
+ * the tree are stored or updated before continuing @getInteractionsAndFillTable.. 
+ * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
 function rebuildTaxonTree(topTaxon, realmInit) {                                //console.log("realmTaxon=%O", realmTaxon)
-    clearPreviousGrid();
+    clearPreviousTable();
     initTaxonTree(topTaxon);
     if (realmInit) { storeLevelData(topTaxon); 
     } else { updateTaxaByLvl(topTaxon); }
-    getInteractionsAndFillTree();
+    getInteractionsAndFillTable();
 }
 /**
  * Builds a family tree of taxon data with passed taxon as the top of the tree. 
  * The top taxon's id is added to the global focus storage obj's 'openRows' 
- * and will be expanded on grid load. 
+ * and will be expanded on table load. 
  */
 function initTaxonTree(topTaxon) {
     buildTaxonTree(topTaxon);                                 
-    gParams.openRows = [topTaxon.id.toString()];                                //console.log("openRows=", openRows)
+    tParams.openRows = [topTaxon.id.toString()];                                //console.log("openRows=", openRows)
 }
 /**
  * Returns a heirarchical tree of taxon record data from the top, parent, 
  * realm taxon through all children. The tree is stored as 'curTree' in the 
- * global gParams obj. 
+ * global tParams obj. 
  */
 function buildTaxonTree(topTaxon) {                                             //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
     var tree = {};                                                              //console.log("tree = %O", tree);
     tree[topTaxon.displayName] = topTaxon;  
     topTaxon.children = getChildTaxa(topTaxon.children);    
-    gParams.curTree = tree;  
+    tParams.curTree = tree;  
     /**
      * Recurses through each taxon's 'children' property and returns a record 
      * for each child ID found. 
@@ -503,16 +501,16 @@ function buildTaxonTree(topTaxon) {                                             
 } /* End buildTaxonTree */
 /**
  * Initialize a search-combobox for each level in the tree @loadTaxonComboboxes.
- * Transform tree data into grid rows and load grid @transformTaxonDataAndLoadGrid.
+ * Transform tree data into table rows and load table @transformTaxonDataAndLoadTable.
  */
-function buildTaxonSearchUiAndGrid(taxonTree) {                                   //console.log("taxaByLvl = %O", gParams.taxaByLvl);
+function buildTaxonSearchUiAndTable(taxonTree) {                                   //console.log("taxaByLvl = %O", tParams.taxaByLvl);
     loadTaxonComboboxes();
-    transformTaxonDataAndLoadGrid(taxonTree);
+    transformTaxonDataAndLoadTable(taxonTree);
 } 
 /*------------------ Build Taxon Search Ui --------------------------------*/
 /**
  * Builds the select box for the taxon realms that will become the data tree 
- * nodes displayed in the grid.
+ * nodes displayed in the table.
  */
 function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
     const browseElems = _util.buildElem('span', { id:'sort-taxa-by', 
@@ -534,14 +532,14 @@ function buildTaxonRealmHtml(data) {                                            
 /**
  * Builds and initializes a search-combobox for each level present in the 
  * the unfiltered realm tree. Each level's box is populated with the names 
- * of every taxon at that level in the displayed, filtered, grid-tree. After 
+ * of every taxon at that level in the displayed, filtered, table-tree. After 
  * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
  */
 function loadTaxonComboboxes() {
-    const curTaxaByLvl = gParams.taxaByLvl;                                     //console.log("curTaxaByLvl = %O", curTaxaByLvl);
+    const curTaxaByLvl = tParams.taxaByLvl;                                     //console.log("curTaxaByLvl = %O", curTaxaByLvl);
     const lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
     const levels = Object.keys(lvlOptsObj);
-    if (levels.indexOf(gParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
+    if (levels.indexOf(tParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     loadLevelSelects(lvlOptsObj, levels);
 }
 /**
@@ -551,7 +549,7 @@ function loadTaxonComboboxes() {
  */
 function buildTaxonSelectOpts(rcrdsByLvl) {                                     //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     const optsObj = {};
-    const curRealmLvls = gParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+    const curRealmLvls = tParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
     curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
@@ -565,8 +563,8 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                     
         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-        if (lvl in gParams.selectedVals) {
-            const taxon = getDetachedRcrd(gParams.selectedVals[lvl]);
+        if (lvl in tParams.selectedVals) {
+            const taxon = getDetachedRcrd(tParams.selectedVals[lvl]);
             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
         } else { optsObj[lvl] = []; }
     }
@@ -583,8 +581,8 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     const elems = buildTaxonSelects(levelOptsObj, levels);
     clearCol2();        
     $('#opts-col2').append(elems);
-    initComboboxes(gParams.allRealmLvls.slice(1));
-    setSelectedTaxonVals(gParams.selectedVals);
+    initComboboxes(tParams.allRealmLvls.slice(1));
+    setSelectedTaxonVals(tParams.selectedVals);
     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
@@ -601,23 +599,23 @@ function loadLevelSelects(levelOptsObj, levels) {                               
 }
 function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (selected === undefined) {return;}
-    gParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
+    tParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
         if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
         setSelVal(lvl, selected[lvl], 'silent');
     });
 }
 /*-------- Taxon Data Formatting ------------------------------------------*/
 /**
- * Transforms the tree's taxon record data into the grid format and sets the 
- * row data in the global gParams object as 'rowData'. Calls @loadGrid.
+ * Transforms the tree's taxon record data into the table format and sets the 
+ * row data in the global tParams object as 'rowData'. Calls @loadTable.
  */
-function transformTaxonDataAndLoadGrid(taxonTree) {                             //console.log("transformTaxonDataAndLoadGrid called. taxonTree = %O", taxonTree)
+function transformTaxonDataAndLoadTable(taxonTree) {                             //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
     var finalRowData = [];
     for (var topTaxon in taxonTree) {
         finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
     }
-    gParams.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
-    loadGrid("Taxon Tree");
+    tParams.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
+    loadTable("Taxon Tree");
 }
 /**
  * Recurses through each taxon's 'children' property and returns a row data obj 
@@ -633,7 +631,7 @@ function getTaxonRowData(taxon, treeLvl) {                                      
         name: name,
         isParent: true,                     
         parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
-        open: gParams.openRows.indexOf(taxon.id.toString()) !== -1, 
+        open: tParams.openRows.indexOf(taxon.id.toString()) !== -1, 
         children: getTaxonChildRowData(taxon, treeLvl),
         treeLvl: treeLvl,
         interactions: intCount !== null,          
@@ -688,7 +686,7 @@ function getTaxonChildRowData(curTaxon, curTreeLvl) {
                 name: 'Unspecified ' + taxonName + ' Interactions',
                 isParent: true,
                 open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
-                    gParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
+                    tParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
                 children: getTaxonIntRows(curTaxon, treeLvl),
                 treeLvl: treeLvl,
                 interactions: true,
@@ -723,7 +721,7 @@ function buildTaxonIntRowData(intRcrd, treeLvl) {
 /** 
  * Get location data from data storage and sends it to @initLocSearchUi
  */
-function buildLocationGrid(view) {
+function buildLocationTable(view) {
     const data = getLocData();
     if( data ) { initLocSearchUi(data, view);
     } else { console.log('Error loading location data from storage.'); }
@@ -735,12 +733,12 @@ function getLocData() {
     return _util.getDataFromStorage(locDataStorageProps);
 }
 /**
- * Builds location view html and initializes grid load. Either builds the grid 
+ * Builds location view html and initializes table load. Either builds the table 
  * data-tree view, by default, or loads the data-map view, if previously 
  * selected. 
  */ 
 function initLocSearchUi(locData, view) {
-    addLocDataToGridParams(locData);
+    addLocDataToTableParams(locData);
     if (!$("#grid-view").length) { buildLocViewHtml(); }  
     setLocView(view);  
     updateLocView(view);
@@ -750,9 +748,9 @@ function setLocView(view) {
     const locRealm = storedRealm || 'tree';
     setSelVal('Loc View', locRealm, 'silent');
 }
-function addLocDataToGridParams(data) {
-    gParams.rcrdsById = data.location;                                    
-    gParams.data = data;
+function addLocDataToTableParams(data) {
+    tParams.rcrdsById = data.location;                                    
+    tParams.data = data;
 }
 function buildLocViewHtml() {                   
     const span = _util.buildElem('span', { id:'grid-view', class: 'flex-row',
@@ -784,48 +782,48 @@ function updateLocView(v) {                                                     
 }
 function resetLocUi(view) { 
     clearCol2();
-    clearPreviousGrid();
+    clearPreviousTable();
     if (view === 'tree') { enableTableButtons(); }
 }
 /** 
- * Starts the grid build depending on the view selected.
+ * Starts the Table build depending on the view selected.
  */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
     _util.populateStorage('curRealm', view);                      
-    return view === 'tree' ? buildLocGridTree(regions) : buildLocGridMap();
+    return view === 'tree' ? buildLocTableTree(regions) : buildLocMap();
 }
 function getTopRegionIds() {
     const ids = [];
-    const regions = gParams.data.topRegionNames;
+    const regions = tParams.data.topRegionNames;
     for (let name in regions) { ids.push(regions[name]); } 
     return ids;
 }
-/** ------------ Location Grid Tree Methods ------------------- */
+/** ------------ Location Table Methods ------------------------------------- */
 /** 
  * Builds a tree of location data with regions at the top level, and sub-regions, 
  * countries, areas, and points as nested children @buildLocTree. Fills tree
- * with interactions and continues building the grid @getInteractionsAndFillTree.
+ * with interactions and continues building the table @getInteractionsAndFillTable.
  */
-function buildLocGridTree(topLocs) {                                            //console.log('buildLocGridTree')
+function buildLocTableTree(topLocs) {                                            //console.log('buildLocTableTree')
     buildLocTree(topLocs);
-    getInteractionsAndFillTree();
+    getInteractionsAndFillTable();
 }
 /**
  * Rebuilds loc tree with passed location, or the default top regions, as the
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
- * Resets 'openRows' and clears grid. Continues @buildLocGridTree.
+ * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  */
 function rebuildLocTree(topLoc) {                                               //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
     var topLocs = topLoc || getTopRegionIds();
-    gParams.openRows = topLocs.length === 1 ? topLocs : [];
-    clearPreviousGrid();
-    buildLocGridTree(topLocs);
+    tParams.openRows = topLocs.length === 1 ? topLocs : [];
+    clearPreviousTable();
+    buildLocTableTree(topLocs);
 }
 /**
  * Builds a tree of location data with passed locations at the top level, and 
  * sub-locations as nested children. Adds the alphabetized tree to the global 
- * gParams obj as 'curTree'. 
+ * tParams obj as 'curTree'. 
  */ 
 function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
     var topLoc;
@@ -834,7 +832,7 @@ function buildLocTree(topLocs) {                                                
         topLoc = getDetachedRcrd(id);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
-    gParams.curTree = sortDataTree(tree);
+    tParams.curTree = sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
 function getLocChildren(rcrd) {   
@@ -848,11 +846,11 @@ function getLocChildData(childId) {
 }
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
- * data into grid rows and load the grid @transformLocDataAndLoadGrid.
- * Note: This is also the entry point for filter-related grid rebuilds.
+ * data into table rows and load the table @transformLocDataAndLoadTable.
+ * Note: This is also the entry point for filter-related table rebuilds.
  */
-function buildLocSearchUiAndGrid(locTree) {                                     //console.log("buildLocSearchUiAndGrid called. locTree = %O", locTree)
-    transformLocDataAndLoadGrid(locTree);
+function buildLocSearchUiAndTable(locTree) {                                     //console.log("buildLocSearchUiAndTable called. locTree = %O", locTree)
+    transformLocDataAndLoadTable(locTree);
     loadLocComboboxes();
 }
 /**
@@ -870,12 +868,12 @@ function loadLocComboboxes() {
 function buildLocSelectOpts() {
     var processedOpts = { Region: [], Country: [] };
     var opts = { Region: [], Country: [] };  
-    gridOptions.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
+    tblOpts.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     modifyOpts();
     return opts; 
     /**
      * Recurses through the tree and builds a option object for each unique 
-     * country and region in the current grid with interactions.
+     * country and region in the current table with interactions.
      */
     function buildLocOptsForNode(row) {                                 
         var rowData = row.data;  
@@ -889,13 +887,13 @@ function buildLocSelectOpts() {
     function buildLocOpt(rowData, name, type) {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        var id = gParams.data[_util.lcfirst(type) + "Names"][name];             
+        var id = tParams.data[_util.lcfirst(type) + "Names"][name];             
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
     }
     function isOpenRow(id) {  
-        return gParams.openRows.indexOf(id) !== -1
+        return tParams.openRows.indexOf(id) !== -1
     }
     /** Handles all modification of the location options. */
     function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _util.snapshot(opts));
@@ -904,20 +902,20 @@ function buildLocSelectOpts() {
         sortLocOpts();
     }
     /** 
-     * If both top & sub regions are in the grid, only the sub-region opt is 
+     * If both top & sub regions are in the table, only the sub-region opt is 
      * included, unless the top region is the location being filtered on. 
      */
-    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, gParams.selectedOpts)
-        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
+    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tParams.selectedOpts)
+        const selLoc = tParams.rcrdsById[tParams.openRows[0]];                  
         if (!selLoc || !selLoc.parent) { return; }
         opts.Region = opts.Region.filter(function(region) {
-            return region.value == gParams.selectedOpts.region;
+            return region.value == tParams.selectedOpts.region;
         });             
     }
-    /** If the Region or Country aren't in the grid, they are added as options here. */
+    /** If the Region or Country aren't in the table, they are added as options here. */
     function addMissingOpts() {                                                 
-        if (!gParams.openRows.length && !gParams.selectedOpts) { return; }
-        const selLoc = gParams.rcrdsById[gParams.openRows[0]];                  
+        if (!tParams.openRows.length && !tParams.selectedOpts) { return; }
+        const selLoc = tParams.rcrdsById[tParams.openRows[0]];                  
         if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
@@ -927,11 +925,11 @@ function buildLocSelectOpts() {
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
         addToSelectedObj(val, _util.ucfirst(type));  
-        gParams.openRows.push(val);
+        tParams.openRows.push(val);
         opts[optProp].push({ value: val, text: txt });
     }         
     function addToSelectedObj(id, type) {
-        const sel = gParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
+        const sel = tParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
         sel[type] = id;
     }
     /** Alphabetizes the options. */
@@ -942,8 +940,8 @@ function buildLocSelectOpts() {
     }
 } /* End buildLocSelectOpts */
 function createSelectedOptsObj() {
-    gParams.selectedOpts = {};
-    return gParams.selectedOpts;
+    tParams.selectedOpts = {};
+    return tParams.selectedOpts;
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
@@ -964,23 +962,23 @@ function buildLocSelects(locOptsObj) {
     }
 }
 function setSelectedLocVals() {                                                 
-    const selected = gParams.selectedOpts;                                      //console.log("selected in setSelectedLocVals = %O", selected);
+    const selected = tParams.selectedOpts;                                      //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
         setSelVal(locType, selected[locType], 'silent');
     });
 }
 /*--------- Location Data Formatting -----------------------------------------*/
 /**
- * Transforms the tree's location data into the grid format and sets the row 
- * data in the global gParams object as 'rowData'. Calls @loadGrid.
+ * Transforms the tree's location data into the table format and sets the row 
+ * data in the global tParams object as 'rowData'. Calls @loadTable.
  */
-function transformLocDataAndLoadGrid(locTree) {
+function transformLocDataAndLoadTable(locTree) {
     var finalRowData = [];                                                      //console.log("locTree = %O", locTree);
     for (var topNode in locTree) {                                              //console.log("topNode = ", topNode)
         finalRowData.push( getLocRowData(locTree[topNode], 0)); 
     }
-    gParams.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", gParams.rowData);
-    loadGrid("Location Tree");
+    tParams.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", tParams.rowData);
+    loadTable("Location Tree");
 }
 /** Returns a row data object for the passed location and it's children.  */
 function getLocRowData(locRcrd, treeLvl) {                                      //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
@@ -990,7 +988,7 @@ function getLocRowData(locRcrd, treeLvl) {                                      
         name: getLocDisplayName(),  /* Interaction rows have no name to display. */
         onMap: isMappable(locRcrd),
         isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
-        open: gParams.openRows.indexOf(locRcrd.id) !== -1, 
+        open: tParams.openRows.indexOf(locRcrd.id) !== -1, 
         children: getLocRowDataForRowChildren(locRcrd, treeLvl),
         treeLvl: treeLvl,
         interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
@@ -1064,15 +1062,15 @@ function hasChildInteractions(row) {
         return childRow.interactions || hasChildInteractions(childRow);  
     });
 }
-/** ------------ Location Grid Map Methods ------------------- */
-/** Filters the data-grid to the location selected from the map view. */
-export function showLocInDataGrid(loc) {                                        //console.log('showing Loc = %O', loc);
+/** ------------ Location Map Methods --------------------------------------- */
+/** Filters the data-table to the location selected from the map view. */
+export function showLocInDataTable(loc) {                                        //console.log('showing Loc = %O', loc);
     updateUiForTableView();
     rebuildLocTree([loc.id]);
     setSelVal('Loc View', 'tree', 'silent');
 }
-/** Initializes the google map in the data grid. */
-function buildLocGridMap() {    
+/** Initializes the google map in the data table. */
+function buildLocMap() {    
     updateUiForMapView();       
     $('#shw-map').attr('disabled', 'disabled')
     $('#opts-col3 button').css('opacity', '.3');
@@ -1082,8 +1080,8 @@ function buildLocGridMap() {
 function addNoteAboutHowToFilterInteractionsDisplayed() {
     $('#opts-col2').html(`
         <div style="margin: 1em; font-size: 18px;">To filter the interactions 
-        diplayed, return to viewing Table Data and filter using the options 
-        available. Then click "Show interactions on map" to see them displayed 
+        diplayed, return to viewing "Table Data" and filter using the options 
+        available. Then click "Show Interactions on Map" to see them displayed 
         here. </div>`);
 }
 /** Switches to map view and centeres map on selected location. */
@@ -1095,16 +1093,16 @@ function showLocOnMap(geoJsonId, zoom) {
 }
 /**
  * Build an object with all relevant data to display the interactions in the 
- * data-grid in map-view. Sends it to the map to handle the display.
+ * data-table in map-view. Sends it to the map to handle the display.
  */
-function showGridRecordsOnMap() {                                               console.log('-----------showGridRecordsOnMap');
+function showTableRecordsOnMap() {                                               console.log('-----------showTableRecordsOnMap');
     updateUiForMappingInts();
-    db_map.showInts(buildGridLocDataObj());
+    db_map.showInts(buildTableLocDataObj());
 }
-function buildGridLocDataObj() {
+function buildTableLocDataObj() {
     let data = [];
     storeIntAndLocRcrds();
-    gridOptions.api.forEachNodeAfterFilter(getIntData); 
+    tblOpts.api.forEachNodeAfterFilter(getIntData); 
     return data.filter(data => data);  
     
     function getIntData(row) {                                                  
@@ -1112,11 +1110,11 @@ function buildGridLocDataObj() {
         const rowRcrd = getDetachedRcrd(row.data.id);  
         data.push(getRowRcrdInteractionData(row.data, rowRcrd));
     }
-} /* End buildGridLocDataObj */
+} /* End buildTableLocDataObj */
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
-    gParams.interaction = rcrds.interaction;
-    gParams.location = rcrds.location;
+    tParams.interaction = rcrds.interaction;
+    tParams.location = rcrds.location;
 }
 function getRowRcrdInteractionData(rowData, rcrd) {
     const data = { 
@@ -1132,8 +1130,8 @@ function getRowRcrdInteractionData(rowData, rcrd) {
      */
     function addIntData(childData) {        
         if (!childData.location) { return ++data.intsWithoutLocData; }
-        const intRcrd = getDetachedRcrd(childData.id, gParams.interaction);
-        const loc = getDetachedRcrd(intRcrd.location, gParams.location);
+        const intRcrd = getDetachedRcrd(childData.id, tParams.interaction);
+        const loc = getDetachedRcrd(intRcrd.location, tParams.location);
         if (!loc.geoJsonId) { return ++data.intsWithoutLocData; }
         if (locDataObjNotSet(loc)) { initDataObj(loc); }
         ++data.locs[loc.id].intCnt;
@@ -1154,7 +1152,7 @@ function getRowRcrdName(rowData, rcrd) {
         getRcrdDisplayName(rowData.name, rcrd);
 }
 function getUnspecifiedRowEntityName(row, rcrd) {
-    return gParams.curFocus === 'taxa' ? 
+    return tParams.curFocus === 'taxa' ? 
         getTaxonName(rcrd) : getRcrdDisplayName(rcrd.displayName, rcrd);
 }
 function getRcrdDisplayName(name, rcrd) {
@@ -1163,15 +1161,15 @@ function getRcrdDisplayName(name, rcrd) {
 function getParentName(rcrd) {  
     return rcrd.displayName.split('(citation)')[0];
 }
-/* --- End showGridRecordsOnMap --- */
+/* --- End showTableRecordsOnMap --- */
 function updateUiForMapView() {
     $('#tool-bar').fadeTo(100, 1);
-    $('#search-grid').hide();
+    $('#search-tbl').hide();
     $('#map').show();
     disableTableButtons();
 }
 function updateUiForTableView() {
-    $('#search-grid').show();
+    $('#search-tbl').show();
     $('#map').hide();
     enableTableButtons();
 }
@@ -1181,12 +1179,12 @@ function updateUiForMappingInts() {
     enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));
 }
 function updateBttnToReturnRcrdsToTable() {
-    $('#shw-map').text('Return to table view');
+    $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
 }
 function updateBttnToShowRcrdsOnMap() {
-    $('#shw-map').text('Show interactions on map');
-    $('#shw-map').off('click').on('click', showGridRecordsOnMap);
+    $('#shw-map').text('Show Interactions on Map');
+    $('#shw-map').off('click').on('click', showTableRecordsOnMap);
 }
 function returnRcrdsToTable() {
     updateUiForTableView();
@@ -1195,10 +1193,10 @@ function returnRcrdsToTable() {
 }
 /*------------------Source Search Methods ------------------------------------*/
 /**
- * Get all data needed for the Source-focused grid from data storage and send  
- * to @initSrcSearchUi to begin the data-grid build.  
+ * Get all data needed for the Source-focused table from data storage and send  
+ * to @initSrcSearchUi to begin the data-table build.  
  */
-function buildSourceGrid() {
+function buildSrcTable() {
     var entities = [ 'source', 'author', 'publication' ];
     var entityData = _util.getDataFromStorage(entities);
     if( entityData ) { initSrcSearchUi(entityData);
@@ -1207,18 +1205,18 @@ function buildSourceGrid() {
 
 /**
  * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
- * If no realm selected, set the default realm value. Start grid build @buildSrcTree.
+ * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 function initSrcSearchUi(srcData) {                                             //console.log("=========init source search ui");
-    addSrcDataToGridParams(srcData);
+    addSrcDataToTableParams(srcData);
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
 }
-/** Add source data to gParams to be available while in a source focus. */
-function addSrcDataToGridParams(srcData) {
-    gParams.rcrdsById = srcData.source;
-    gParams.author = srcData.author;
-    gParams.publication = srcData.publication;
+/** Add source data to tParams to be available while in a source focus. */
+function addSrcDataToTableParams(srcData) {
+    tParams.rcrdsById = srcData.source;
+    tParams.author = srcData.author;
+    tParams.publication = srcData.publication;
 }
 /** Builds the combobox for the source realm types. */
 function buildSrcRealmHtml() {                                             
@@ -1251,7 +1249,7 @@ function onSrcRealmChange(val) {                                                
     resetSourceRealm(val);
 }
 function resetSourceRealm(val) {
-    clearPreviousGrid();
+    clearPreviousTable();
     resetCurTreeState();
     resetToggleTreeBttn(false);
     buildSrcTree();
@@ -1259,14 +1257,14 @@ function resetSourceRealm(val) {
 /** (Re)builds source tree for the selected source realm. */
 function buildSrcTree(val) {
     const realmRcrds = storeAndReturnCurRealmRcrds(val);                        //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
-    initSrcTree(gParams.curRealm, realmRcrds);
-    getInteractionsAndFillTree();
+    initSrcTree(tParams.curRealm, realmRcrds);
+    getInteractionsAndFillTable();
 }
 /** Returns the records for the source realm currently selected. */
 function storeAndReturnCurRealmRcrds(val) {
     const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
     const realmVal = val || getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
-    gParams.curRealm = realmVal;    
+    tParams.curRealm = realmVal;    
     _util.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
 }
@@ -1277,7 +1275,7 @@ function getTreeRcrdAry(realm) {
 }
 /**
  * Builds the source data tree for the selected source realm (source type) and 
- * adds it to the global gParams obj as 'curTree', 
+ * adds it to the global tParams obj as 'curTree', 
  * NOTE: Sources have three realms and tree-data structures:
  * Authors->Citations/Publications->Interactions
  * Publications->Citations->Interactions. 
@@ -1286,7 +1284,7 @@ function getTreeRcrdAry(realm) {
 function initSrcTree(focus, rcrds) {                                            //console.log("initSrcTree realmRcrds = %O", realmRcrds);
     const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
     let tree = treeMap[focus](rcrds);
-    gParams.curTree = sortDataTree(tree);
+    tParams.curTree = sortDataTree(tree);
 }  
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
@@ -1308,7 +1306,7 @@ function buildPubTree(pubSrcRcrds) {                                            
 function getPubData(rcrd) {                                                     //console.log("getPubData. rcrd = %O", rcrd);
     rcrd.children = getPubChildren(rcrd);
     if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
-        rcrd.publication = getDetachedRcrd(rcrd.publication, gParams.publication);
+        rcrd.publication = getDetachedRcrd(rcrd.publication, tParams.publication);
     }
     return rcrd;
 }
@@ -1335,7 +1333,7 @@ function buildPublTree(pubRcrds) {                                              
 
     function addPubl(pub) {
         if (!pub.parent) { noPubl.push(pub); return; }
-        const publ = getDetachedRcrd(pub.parent, gParams.rcrdsById);
+        const publ = getDetachedRcrd(pub.parent, tParams.rcrdsById);
         tree[publ.displayName] = getPublData(publ); 
     }
 } /* End buildPublTree */
@@ -1371,7 +1369,7 @@ function buildAuthTree(authSrcRcrds) {                                          
 
     function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
         if (authSrc.contributions.length > 0) {
-            authSrc.author = getDetachedRcrd(authSrc.author, gParams.author);
+            authSrc.author = getDetachedRcrd(authSrc.author, tParams.author);
             authSrc.children = getAuthChildren(authSrc.contributions); 
             tree[authSrc.displayName] = authSrc;
         }
@@ -1385,17 +1383,17 @@ function getAuthChildren(contribs) {                                            
 }
 /**
  * Will build the select elems for the source search options. Clears previous 
- * grid. Calls @transformSrcDataAndLoadGrid to transform tree data into grid 
- * format and load the data grid.
- * NOTE: This is the entry point for source grid rebuilds as filters alter data
+ * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
+ * format and load the data table.
+ * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-function buildSrcSearchUiAndGrid(srcTree) {                                     //console.log("buildSrcSearchUiAndGrid called. tree = %O", srcTree);
+function buildSrcSearchUiAndTable(srcTree) {                                     //console.log("buildSrcSearchUiAndTable called. tree = %O", srcTree);
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
-    clearPreviousGrid();
-    buildUi[gParams.curRealm](srcTree); 
-    transformSrcDataAndLoadGrid(srcTree);
+    clearPreviousTable();
+    buildUi[tParams.curRealm](srcTree); 
+    transformSrcDataAndLoadTable(srcTree);
 } 
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml(srcTree) {
@@ -1440,12 +1438,12 @@ function loadPublSearchHtml(srcTree) {
 }
 /*--------- Source Data Formatting ---------------------------------------*/
 /**
- * Transforms the tree's source record data into grid row format and set as 
- * 'rowData' in the global gParams object as 'rowData'. Calls @loadGrid.
+ * Transforms the tree's source record data into table row format and set as 
+ * 'rowData' in the global tParams object as 'rowData'. Calls @loadTable.
  */
-function transformSrcDataAndLoadGrid(srcTree) {                                 //console.log("transformSrcDataAndLoadGrid called.")
+function transformSrcDataAndLoadTable(srcTree) {                                 //console.log("transformSrcDataAndLoadTable called.")
     var prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
-    var treeName = prefix[gParams.curRealm] + ' Tree';
+    var treeName = prefix[tParams.curRealm] + ' Tree';
     let rowColorIdx = 0;
     var finalRowData = [];
 
@@ -1453,8 +1451,8 @@ function transformSrcDataAndLoadGrid(srcTree) {                                 
         rowColorIdx = rowColorIdx < 6 ? ++rowColorIdx : 0; 
         finalRowData.push( getSrcRowData(srcTree[topNode], 0, rowColorIdx) );
     }
-    gParams.rowData = finalRowData;                                             //console.log("rowData = %O", gParams.rowData);
-    loadGrid(treeName);
+    tParams.rowData = finalRowData;                                             //console.log("rowData = %O", tParams.rowData);
+    loadTable(treeName);
 }
 function getSrcRowData(src, treeLvl, idx) {                                     //console.log("getSrcRowData. source = %O", src);
     var entity = src.sourceType.displayName;
@@ -1468,7 +1466,7 @@ function getSrcRowData(src, treeLvl, idx) {                                     
         name: displayName,
         isParent: true,      
         parentSource: src.parent,
-        open: gParams.openRows.indexOf(src.id.toString()) !== -1, 
+        open: tParams.openRows.indexOf(src.id.toString()) !== -1, 
         children: getChildSrcRowData(src, treeLvl, idx),
         treeLvl: treeLvl,
         interactions: src.isDirect,   //Only rows with interaction are colored
@@ -1495,11 +1493,11 @@ function getSrcRowData(src, treeLvl, idx) {                                     
 /** Returns a text input with submit button that will filter tree by text string. */
 function buildTreeSearchHtml(entity, hndlr) {
     const func = hndlr || searchTreeText.bind(null, entity);
-    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row grid-tools' });
+    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
     const input = _util.buildElem('input', { 
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
     const bttn = _util.buildElem('button', { text: 'Search', 
-        name: 'sel'+entity+'_submit', class: 'ag-fresh grid-bttn' });
+        name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
     $(bttn).css('margin-left', '5px');
     $(lbl).css('width', '222px');
     $(input).css('width', '160px');
@@ -1517,9 +1515,9 @@ function searchTreeText(entity) {                                               
     const text = getFilterTreeTextVal(entity);
     const allRows = getAllCurRows(); 
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
-    gridOptions.api.setRowData(newRows);
-    gParams.focusFltrs = text === "" ? [] : ['"' + text + '"'];
-    updateGridFilterStatusMsg();
+    tblOpts.api.setRowData(newRows);
+    tParams.focusFltrs = text === "" ? [] : ['"' + text + '"'];
+    updateTableFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
 function getFilterTreeTextVal(entity) {                                         //console.log('getFilterTreeTextVal entity = ', entity);
@@ -1530,14 +1528,14 @@ function getTreeRowsWithText(rows, text) {
 }
 /*------------------ Taxon Filter Updates ---------------------------------*/
 /**
- * When a taxon is selected from one of the taxon-level comboboxes, the grid 
+ * When a taxon is selected from one of the taxon-level comboboxes, the table 
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 function updateTaxonSearch(val) {                                               //console.log("updateTaxonSearch val = ", val)
     if (!val) { return; }
     const rcrd = getDetachedRcrd(val);  
-    gParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", gParams.selectedVals);
+    tParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
     rebuildTaxonTree(rcrd);
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
@@ -1548,10 +1546,10 @@ function updateTaxonSearch(val) {                                               
         updateFilters();
 
         function updateFilters() {
-            if (gParams.focusFltrs) { 
-                gParams.focusFltrs.push(curLevel + " " + taxonName); 
-            } else { gParams.focusFltrs = [curLevel + " " + taxonName] }
-            updateGridFilterStatusMsg();
+            if (tParams.focusFltrs) { 
+                tParams.focusFltrs.push(curLevel + " " + taxonName); 
+            } else { tParams.focusFltrs = [curLevel + " " + taxonName] }
+            updateTableFilterStatusMsg();
         }
     }
 } /* End updateTaxonSearch */
@@ -1574,8 +1572,8 @@ function updateLocSearch(val) {
     if (!val) { return; }
     const selVal = parseInt(val);  
     const locType = getLocType(this.$input[0].id);
-    gParams.selectedOpts = getSelectedVals(selVal, locType);
-    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(gParams.selectedOpts));
+    tParams.selectedOpts = getSelectedVals(selVal, locType);
+    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(tParams.selectedOpts));
     updateFilter();
 
     function getLocType(selId) {
@@ -1594,8 +1592,8 @@ function updateLocSearch(val) {
         }
     } /* End getSelectedVals */
     function updateFilter() {
-        gParams.focusFltrs = [locType];
-        updateGridFilterStatusMsg();
+        tParams.focusFltrs = [locType];
+        updateTableFilterStatusMsg();
     }
 } /* End updateLocSearch */
 /*------------------ Source Filter Updates -------------------------------*/
@@ -1608,16 +1606,16 @@ function updatePubSearchByType(val) {                                           
     updatePubSearch(val, null);
 }
 /**
- * When the publication type dropdown is changed or the grid is filtered by 
- * publication text, the grid is rebuilt with the filtered data.
+ * When the publication type dropdown is changed or the table is filtered by 
+ * publication text, the table is rebuilt with the filtered data.
  */
 function updatePubSearch(typeVal, text) {                                       //console.log('updatePubSearch. typeVal = ', typeVal)
     const typeId = typeVal || getSelVal('Publication Type');
     const txt = text || getFilterTreeTextVal('Publication');
     const newRows = getFilteredPubRows();
-    gParams.focusFltrs = getPubFilters();
-    gridOptions.api.setRowData(newRows);
-    updateGridFilterStatusMsg();
+    tParams.focusFltrs = getPubFilters();
+    tblOpts.api.setRowData(newRows);
+    updateTableFilterStatusMsg();
     resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {                             
@@ -1641,7 +1639,7 @@ function updatePubSearch(typeVal, text) {                                       
             [$("#selPubType option[value='"+typeId+"']").text()+'s']);
     }
 } /* End updatePubSearch */
-/*================ Grid Build Methods ==============================================*/
+/*================ Table Build Methods ==============================================*/
 /**
  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
  */
@@ -1667,7 +1665,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         var lvl = taxon.level.displayName;
         var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
         if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
-        } else { clearLowerLvls(gParams.rcrdsById[prntId].level.displayName); }
+        } else { clearLowerLvls(tParams.rcrdsById[prntId].level.displayName); }
         curTaxonHeirarchy[lvl] = taxon.displayName;
     }
     /**
@@ -1700,7 +1698,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         return speciesName === null ? null : _util.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
-function getDefaultGridOptions() {
+function getDefaultTblOpts() {
     return {
         columnDefs: getColumnDefs(),
         rowSelection: 'multiple',   //Used for csv export
@@ -1720,21 +1718,21 @@ function getDefaultGridOptions() {
     };
 }
 /**
- * Builds the grid options object and passes everyting into agGrid, which 
- * creates and shows the grid.
+ * Builds the table options object and passes everyting into agGrid, which 
+ * creates and shows the table.
  */
-function loadGrid(treeColTitle, gridOpts) {                                     //console.log("loading grid. rowdata = %s", JSON.stringify(rowData, null, 2));
-    var gridDiv = document.querySelector('#search-grid');
-    var gridOptObj = gridOpts || gridOptions;
-    gridOptObj.rowData = gParams.rowData;
-    gridOptObj.columnDefs = getColumnDefs(treeColTitle);
-    new agGrid.Grid(gridDiv, gridOptObj);
+function loadTable(treeColTitle, tOpts) {                                       //console.log("loading table. rowdata = %s", JSON.stringify(rowData, null, 2));
+    const tblDiv = document.querySelector('#search-tbl');
+    const tblOptsObj = tOpts || tblOpts;
+    tblOptsObj.rowData = tParams.rowData;
+    tblOptsObj.columnDefs = getColumnDefs(treeColTitle);
+    new agGrid.Grid(tblDiv, tblOptsObj);
     sortTreeColumnIfTaxonFocused();
 }
-/** If the grid is Taxon focused, sort the tree column by taxon-rank and name. */
+/** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
 function sortTreeColumnIfTaxonFocused() {
-    if (gParams.curFocus === 'taxa') {
-        gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]);
+    if (tParams.curFocus === 'taxa') {
+        tblOpts.api.setSortModel([{colId: "name", sort: "asc"}]);
     }
 }
 /**
@@ -1746,7 +1744,7 @@ function getHeaderCellTemplate(params) {
     return '<div class="ag-header-cell">' +
         '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
         '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column, 
-        '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +                                 //which breaks the grid. The provided 'supressFilter' option doesn't work.
+        '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +                                 //which breaks the table. The provided 'supressFilter' option doesn't work.
         '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
         '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
         '    <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
@@ -1755,14 +1753,14 @@ function getHeaderCellTemplate(params) {
         '  </div>' +
         '</div>'; 
 }
-function softRefresh() { gridOptions.api.refreshView(); }
+function softRefresh() { tblOpts.api.refreshView(); }
 /**
  * Tree columns are hidden until taxon export and are used for the flattened 
  * taxon-tree data. The role is set to subject for 'bats' exports, object for 
  * plants and arthropods.
  */
 function getColumnDefs(mainCol) { 
-    var realm = gParams.curRealm || false;  
+    var realm = tParams.curRealm || false;  
     var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
 
     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
@@ -1807,14 +1805,14 @@ function addToolTipToTree(params) {
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
     var offset = ['admin', 'super', 'editor'].indexOf(userRole) === -1 ? 0 : 50;
-    if (gParams.curFocus === 'locs') { offset = offset + 60; }
+    if (tParams.curFocus === 'locs') { offset = offset + 60; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
 function onBeforeSortChanged() {                                            
-    if (gParams.curFocus !== "taxa") { return; }                       
-    var sortModel = gridOptions.api.getSortModel();                             //console.log("model obj = %O", sortModel)
-    if (!sortModel.length) { return gridOptions.api.setSortModel([{colId: "name", sort: "asc"}]); }
+    if (tParams.curFocus !== "taxa") { return; }                       
+    var sortModel = tblOpts.api.getSortModel();                             //console.log("model obj = %O", sortModel)
+    if (!sortModel.length) { return tblOpts.api.setSortModel([{colId: "name", sort: "asc"}]); }
     ifNameUnsorted(sortModel);        
 }
 /** Sorts the tree column if it is not sorted. */
@@ -1824,7 +1822,7 @@ function ifNameUnsorted(model) {
     });
     if (!nameSorted) { 
         model.push({colId: "name", sort: "asc"}); 
-        gridOptions.api.setSortModel(model);
+        tblOpts.api.setSortModel(model);
     }
 }
 /**
@@ -1833,7 +1831,7 @@ function ifNameUnsorted(model) {
  */
 function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
     if (!a) { return 0; } //Interaction rows are returned unsorted
-    if (gParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
+    if (tParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
 /** Sorts each row by taxonomic rank and then alphabetizes by name. */
@@ -1873,27 +1871,27 @@ function addEditPencil(params) {
     if (uneditableEntityRow(params)) { return "<span>"; }                     
     return getPencilHtml(params.data.id, params.data.entity, db_forms.editEntity);
 }
-function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', gParams.curFocus, params);
+function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tParams.curFocus, params);
     const uneditables = [
-        gParams.curFocus === 'locs' && 
+        tParams.curFocus === 'locs' && 
             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
-        gParams.curFocus === 'taxa' && //Realm Taxa 
+        tParams.curFocus === 'taxa' && //Realm Taxa 
             (!params.data.parentTaxon && !params.data.interactionType),
-        gParams.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
+        tParams.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
     const path = require('../../css/images/eif.pencil.svg');
     var editPencil = `<img src=${path} id="edit${entity}${id}"
-        class="grid-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
-    $('#search-grid').off('click', '#edit'+entity+id);
-    $('#search-grid').on(
+        class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
+    $('#search-tbl').off('click', '#edit'+entity+id);
+    $('#search-tbl').on(
         'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _util.lcfirst(entity)));
     return editPencil;
 }
 /** -------- Map Column ---------- */
 function ifLocView() {                                           
-    return gParams.curFocus === 'locs';
+    return tParams.curFocus === 'locs';
 }
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
@@ -1902,8 +1900,8 @@ function addMapIcon(params) {                                                   
     const path = require('../../css/images/marker-icon.png');
     const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
         title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
-    $('#search-grid').off('click', '#map'+id);
-    $('#search-grid').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
+    $('#search-tbl').off('click', '#map'+id);
+    $('#search-tbl').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
     return icon;
 }
 function getZoomLvl(loc) {  
@@ -1916,7 +1914,7 @@ function getZoomLvl(loc) {
  */
 function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
     if (params.data.name !== "") { return; } 
-    return gParams.curFocus === "srcs" ? 
+    return tParams.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
 }
 /**
@@ -1928,7 +1926,7 @@ function getRowStyleClass(params) {                                             
 function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
     if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
         isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
-        return gParams.curFocus === "srcs" ? 
+        return tParams.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
     } 
 }
@@ -1965,18 +1963,18 @@ function getNodeChildDetails(rcrd) {                                            
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
 }
-/*================== Grid Filter Functions ===============================*/
+/*================== Table Filter Functions ===============================*/
 function onFilterChange() {
-    gridOptions.api.onFilterChanged();
+    tblOpts.api.onFilterChanged();
 }
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
-/** Resets Grid Status' Active Filter display */
+/** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    updateGridFilterStatusMsg();    
+    updateTableFilterStatusMsg();    
 } 
 /** Returns an obj with all filter models. */
 function getAllFilterModels() {  
-    const filters = Object.keys(gridOptions.api.filterManager.allFilters);
+    const filters = Object.keys(tblOpts.api.filterManager.allFilters);
     return {
         'Subject Taxon': getColumnFilterApi('subject'),
         'Object Taxon': getColumnFilterApi('object'),
@@ -1992,28 +1990,29 @@ function getAllFilterModels() {
     
     function getColumnFilterApi(colName) {
         return filters.indexOf(colName) === -1 ? null : 
-            gridOptions.api.getFilterApi(colName).getModel()
+            tblOpts.api.getFilterApi(colName).getModel()
     }
 }
 /**
- * Either displays all filters currently applied, or applies the previous filter 
- * message persisted through grid update into map view.
+ * Either displays all filters currently applied
+ * , or applies the previous filter 
+ * message persisted through table update into map view.
  */
-function updateGridFilterStatusMsg() {                                          //console.log("updateGridFilterStatusMsg called.")
-    if (gridOptions.api === undefined) { return; }
-    if (gParams.persistFilters) { return setGridFilterStatus(gParams.persistFilters); }
+function updateTableFilterStatusMsg() {                                          //console.log("updateTableFilterStatusMsg called.")
+    if (tblOpts.api === undefined) { return; }
+    // if (tParams.persistFilters) { return setTableFilterStatus(tParams.persistFilters); }
     getFiltersAndUpdateStatus();
 }
 /**
- * Adds all active filters to the grid's status message. First adding any 
+ * Adds all active filters to the table's status message. First adding any 
  * focus-level filters, such as author name or taxon, then any active filters
- * for grid columns, and then checks/adds the 'interactions updated since' filter. 
- * Sets grid-status with the resulting active-filters messasge.
+ * for table columns, and then checks/adds the 'interactions updated since' filter. 
+ * Sets table-status with the resulting active-filters messasge.
  */
 function getFiltersAndUpdateStatus() {
     const activeFilters = [];
     addActiveExternalFilters(activeFilters);
-    addActiveGridFilters(activeFilters);
+    addActiveTableFilters(activeFilters);
     setFilterStatus(activeFilters);
 }
 function addActiveExternalFilters(filters) {
@@ -2021,8 +2020,8 @@ function addActiveExternalFilters(filters) {
     addUpdatedSinceFilter();
     
     function addFocusFilters() {
-        if (gParams.focusFltrs && gParams.focusFltrs.length > 0) { 
-            filters.push(gParams.focusFltrs.map(filter => filter));
+        if (tParams.focusFltrs && tParams.focusFltrs.length > 0) { 
+            filters.push(tParams.focusFltrs.map(filter => filter));
         } 
     }
     function addUpdatedSinceFilter() {
@@ -2031,8 +2030,8 @@ function addActiveExternalFilters(filters) {
         } 
     }
 } /* End addActiveExternalFilters */
-function addActiveGridFilters(filters) {
-    const filterModels = gParams.persistFilters || getAllFilterModels();        
+function addActiveTableFilters(filters) {
+    const filterModels = getAllFilterModels();        
     const columns = Object.keys(filterModels);        
     for (let i=0; i < columns.length; i++) {
         if (filterModels[columns[i]] !== null) { 
@@ -2040,7 +2039,7 @@ function addActiveGridFilters(filters) {
     }
 }
 function setFilterStatus(filters) {
-    if (filters.length > 0) { setGridFilterStatus(getFilterStatus(filters)); 
+    if (filters.length > 0) { setTableFilterStatus(getFilterStatus(filters)); 
     } else { resetFilterStatusBar() }
 }
 function getFilterStatus(filters) {
@@ -2055,28 +2054,28 @@ function getFilterStatus(filters) {
         return filters.join(', ') + '.'; 
     }
 }
-function setGridFilterStatus(status) {                                          //console.log("setGridFilterStatus. status = ", status)
-    $('#grid-filter-status').text(status);
+function setTableFilterStatus(status) {                                          //console.log("setTableFilterStatus. status = ", status)
+    $('#tbl-filter-status').text(status);
 }
 function setExternalFilterStatus(status) {
     $('#xtrnl-filter-status').text(status);
 }
-function clearGridStatus() {
-    $('#grid-filter-status, #xtrnl-filter-status').empty();
+function clearTableStatus() {
+    $('#tbl-filter-status, #xtrnl-filter-status').empty();
 }
 function resetFilterStatusBar() {  
-    if (gParams.persistFilters) { return; }  
+    // if (tParams.persistFilters) { return; }  
     $('#xtrnl-filter-status').text('Filtering on: ');
-    $('#grid-filter-status').text('No Active Filters.');
-    gParams.focusFltrs = [];
+    $('#tbl-filter-status').text('No Active Filters.');
+    tParams.focusFltrs = [];
 }
 /** Persists active filters through the switch into map view. */
-function persistFilters() {
-    const activeFilters = [];
-    addActiveExternalFilters(activeFilters);
-    addActiveGridFilters(activeFilters);
-    gParams.persistFilters = getFilterStatus(activeFilters);
-}
+// function persistFilters() {
+//     const activeFilters = [];
+//     addActiveExternalFilters(activeFilters);
+//     addActiveTableFilters(activeFilters);
+//     tParams.persistFilters = getFilterStatus(activeFilters);
+// }
 /*-------------------- Filter By Time Updated ----------------------------*/
 /**
  * The time-updated filter is enabled when the filter option in opts-col3 is 
@@ -2096,18 +2095,18 @@ function toggleTimeUpdatedFilter(state) {
     } else { resetTimeUpdatedFilter(); }
     resetToggleTreeBttn(false);
 }
-/** Disables the calendar, if shown, and resets grid with active filters reapplied. */
+/** Disables the calendar, if shown, and resets table with active filters reapplied. */
 function resetTimeUpdatedFilter() {
     // $('.flatpickr-input').attr({'disabled': true});
-    gParams.fltrdRows = null;
-    gParams.fltrSince = null;
-    if (gridOptions.api && gParams.rowData) { 
-        gridOptions.api.setRowData(gParams.rowData);
+    tParams.fltrdRows = null;
+    tParams.fltrSince = null;
+    if (tblOpts.api && tParams.rowData) { 
+        tblOpts.api.setRowData(tParams.rowData);
         syncFiltersAndUi();
     }
 }
 /** 
- * Filters the interactions in the grid to show only those modified since the 
+ * Filters the interactions in the table to show only those modified since the 
  * selected time - either 'Today' or a 'Custom' datetime selected using the 
  * flatpickr calendar.
  */
@@ -2141,24 +2140,24 @@ function initCal(elem) {
     }; 
     return $('#time-fltr').flatpickr(calOpts);
 }
-/** Filters grid to show interactions with updates since midnight 'today'. */
+/** Filters table to show interactions with updates since midnight 'today'. */
 function showInteractionsUpdatedToday() {
     misc.cal = misc.cal || initCal();
     misc.cal.setDate(new Date().today());
     filterInteractionsUpdatedSince([], new Date().today(), null);
 }
 /**
- * Filters all interactions in the grid leaving only the records with updates
+ * Filters all interactions in the table leaving only the records with updates
  * since the datetime specified by the user.
  */
 function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
-    var rowData = _util.snapshot(gParams.rowData);
-    var fltrSince = dateStr || gParams.timeFltr;
+    var rowData = _util.snapshot(tParams.rowData);
+    var fltrSince = dateStr || tParams.timeFltr;
     var sinceTime = new Date(fltrSince).getTime();                          
     var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
-    gParams.timeFltr = fltrSince;
-    gridOptions.api.setRowData(updatedRows);
-    gParams.fltrdRows = updatedRows;
+    tParams.timeFltr = fltrSince;
+    tblOpts.api.setRowData(updatedRows);
+    tParams.fltrdRows = updatedRows;
     resetToggleTreeBttn(false);
     syncFiltersAndUi(sinceTime);
 
@@ -2178,12 +2177,12 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  * When filtering by time updated, some filters will need to be reapplied.
  * (Taxa and loation filter rowdata directly, and so do not need to be reapplied.
  * Source, both auth and pub views, must be reapplied.)
- * The grid filter's status message is updated. The time-updated radios are synced.
+ * The table filter's status message is updated. The time-updated radios are synced.
  */
 function syncFiltersAndUi(sinceTime) {
-    if (gParams.curFocus === "srcs") { applySrcFltrs(); }
-    if (gParams.curFocus === "locs") { loadLocComboboxes(); }    
-    updateGridFilterStatusMsg();  
+    if (tParams.curFocus === "srcs") { applySrcFltrs(); }
+    if (tParams.curFocus === "locs") { loadLocComboboxes(); }    
+    updateTableFilterStatusMsg();  
     syncTimeUpdatedRadios(sinceTime);
 }
 function syncTimeUpdatedRadios(sinceTime) {
@@ -2197,18 +2196,18 @@ function syncTimeUpdatedRadios(sinceTime) {
 function applySrcFltrs() {
     var resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
-    var realm = gParams.curRealm;  
+    var realm = tParams.curRealm;  
     resets[realm]();
 }
 function reapplyTreeTextFltr() {                                            
-    const entity = getGridEntityName();                                         //console.log("reapplying [%s] text filter", entity);
+    const entity = getTableEntityName();                                         //console.log("reapplying [%s] text filter", entity);
     if (getFilterTreeTextVal(entity) === "") { return; }
     searchTreeText();
 }
-function getGridEntityName() {
+function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
         'publ': 'Publisher', 'pubs': 'Publication' };
-    const ent = gParams.curFocus === "srcs" ? gParams.curRealm : gParams.curFocus;
+    const ent = tParams.curFocus === "srcs" ? tParams.curRealm : tParams.curFocus;
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
@@ -2321,7 +2320,7 @@ UniqueValuesFilter.prototype.createApi = function () {
             that.filterChangedCallback();
         }, 
         refreshHeader: function() {
-            gridOptions.api.refreshHeader();
+            tblOpts.api.refreshHeader();
         }
     };  
 }  
@@ -2542,7 +2541,7 @@ UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
             if (this.allUniqueValues.indexOf(newValue) >= 0) {
                 this.selectValue(model[i]);
             } else {
-                gridOptions.api.showNoRowsOverlay(); 
+                tblOpts.api.showNoRowsOverlay(); 
                 console.warn('Value ' + newValue + ' is not a valid value for filter'); 
             }
         }
@@ -2550,49 +2549,49 @@ UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
 };
 /*=================CSV Methods================================================*/
 /**
- * Exports a csv of the interaction records displayed in the grid, removing 
+ * Exports a csv of the interaction records displayed in the table, removing 
  * tree rows and flattening tree data where possible: currently only taxon.
  * For taxon csv export: The relevant tree columns are shown and also exported. 
  */
 function exportCsvData() {
     var views = { 'locs': 'Location', 'srcs': 'Source', 'taxa': 'Taxon' };
-    var fileName = 'Bat Eco-Interaction Records by '+ views[gParams.curFocus] +'.csv';
+    var fileName = 'Bat Eco-Interaction Records by '+ views[tParams.curFocus] +'.csv';
     var params = {
         onlySelected: true,
         fileName: fileName,
         // customHeader: "This is a custom header.\n\n",
         // customFooter: "This is a custom footer."
     };
-    if (gParams.curFocus === 'taxa') { showTaxonCols(); }
-    gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit', 'map'], false);
+    if (tParams.curFocus === 'taxa') { showTaxonCols(); }
+    tblOpts.columnApi.setColumnsVisible(['name', 'intCnt', 'edit', 'map'], false);
     selectRowsForExport();
-    gridOptions.api.exportDataAsCsv(params);
-    returnGridState();
+    tblOpts.api.exportDataAsCsv(params);
+    returnTableState();
 }
-function returnGridState() {
+function returnTableState() {
     collapseTree();
-    gridOptions.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
-    if (gParams.curFocus === 'locs') { gridOptions.columnApi.setColumnsVisible(['map'], true); }
-    if (gParams.curFocus === 'taxa') { revertTaxonGrid(); }
+    tblOpts.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
+    if (tParams.curFocus === 'locs') { tblOpts.columnApi.setColumnsVisible(['map'], true); }
+    if (tParams.curFocus === 'taxa') { revertTaxonTable(); }
 }
 function showTaxonCols() {
-    gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
+    tblOpts.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
 }
-function getCurTaxonLvlCols() {                                                 //console.log("taxaByLvl = %O", gParams.taxaByLvl)
-    var lvls = Object.keys(gParams.taxaByLvl);
+function getCurTaxonLvlCols() {                                                 //console.log("taxaByLvl = %O", tParams.taxaByLvl)
+    var lvls = Object.keys(tParams.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
-function revertTaxonGrid() {
-    gridOptions.columnApi.setColumnsVisible(getCurTaxonLvlCols(), false)
+function revertTaxonTable() {
+    tblOpts.columnApi.setColumnsVisible(getCurTaxonLvlCols(), false)
     expandTreeByOne(); 
 }
 /**
- * Selects every interaction row in the currently displayed grid by expanding all
+ * Selects every interaction row in the currently displayed table by expanding all
  * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
  */
 function selectRowsForExport() {
-    gridOptions.api.expandAll();
-    gridOptions.api.getModel().rowsToDisplay.forEach(selectInteractions);       //console.log("selected rows = %O", gridOptions.api.getSelectedNodes())   
+    tblOpts.api.expandAll();
+    tblOpts.api.getModel().rowsToDisplay.forEach(selectInteractions);           //console.log("selected rows = %O", tblOpts.api.getSelectedNodes())   
 }
 /**
  * A row is identified as an interaction row by the 'interactionType' property
@@ -2608,17 +2607,17 @@ function showIntroWalkthrough() {
     window.setTimeout(startIntroWalkthrough, 250); 
 }
 function startIntroWalkthrough(startStep){
-    if (misc.intro) { return; }                                              //console.log("intro = %O", misc.intro)
+    if (misc.intro) { return; }                                                 //console.log("intro = %O", misc.intro)
     buildIntro();
-    setGridState();
+    setTableState();
     misc.intro.start();
 
     function buildIntro() {                                                     //console.log("buildIntro called")
         var startStep = startStep || 0; 
         const lib = require('../libs/intro.js');  
         misc.intro = lib.introJs();
-        misc.intro.onexit(function() { resetGridState(); });
-        misc.intro.oncomplete(function() { resetGridState(); });
+        misc.intro.onexit(function() { resetTableState(); });
+        misc.intro.oncomplete(function() { resetTableState(); });
 
         misc.intro.setOptions({
             showStepNumbers: false,
@@ -2628,7 +2627,7 @@ function startIntroWalkthrough(startStep){
             steps: [
                 {
                     element: "#opts-col4", 
-                    intro: "<h2><center>Welcome to Bat Eco-Interactions Search Page!</center></h2><br>" +
+                    intro: "<h2><center>Welcome to Bat Eco-Interactions Database Search Page!</center></h2><br>" +
                         "<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
                         "clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +
                         "creative searches to filter your results that you can explore once the tutorial ends.<br><br>" +
@@ -2640,7 +2639,7 @@ function startIntroWalkthrough(startStep){
                     /*element: document.querySelector("#filter-opts"),*/
                     element: "#filter-opts",
                     intro: "<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3> <br> " + 
-                        "<b>The search results will be grouped under the outline tree in the first column of the grid.</b><br><br>" +
+                        "<b>The search results will be grouped under the outline tree in the first column of the table.</b><br><br>" +
                         "The Location view has a Region-Country-Location outline. <br>The Source view groups by either publication or author."+
                         "<br>The Taxon view groups by realm (bat, plant, or arthropod) and taxonomic rank.",
                 },
@@ -2650,7 +2649,7 @@ function startIntroWalkthrough(startStep){
                     position: "right"
                 },
                 {
-                    element: "#search-grid",
+                    element: "#search-tbl",
                     intro: "<b><center>When first displayed all interactions in the database are available for further filtering" + 
                         " or sorting.</center></b><br>The <b>'Count'</b> column shows the number of interactions attributed " +
                         "to each node in the outline tree.<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon" +
@@ -2667,7 +2666,7 @@ function startIntroWalkthrough(startStep){
                     position: "right"
                 },
                 {
-                    element: "#search-grid",
+                    element: "#search-tbl",
                     intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br><b>Hovering over a " +
                         "column header reveals the filter menu for that column.</b><br><br>Some columns can be filtered by text, " +
                         "and others by selecting or deselecting values in that column.<br><br><center><b>Try exploring the filter menus " +
@@ -2675,7 +2674,7 @@ function startIntroWalkthrough(startStep){
                     position: "top"
                 },
                 {
-                    element: "button[name=\"reset-grid\"]",
+                    element: "button[name=\"reset-tbl\"]",
                     intro: "<b>Click here at any point to clear all filters and reset the results.</b>",
                     position: "right"
                 },
@@ -2702,8 +2701,8 @@ function startIntroWalkthrough(startStep){
                 },
                 {
                     element: "button[name=\"csv\"]",
-                    intro: "<h3><center>As a member of batplant.org, data displayed in the grid can be exported in csv format.</center></h3>" +
-                        "<br>The columns are exported in the order they are displayed in the grid.<br><br>For Taxon exports, " +
+                    intro: "<h3><center>As a member of batplant.org, data displayed in the table can be exported in csv format.</center></h3>" +
+                        "<br>The columns are exported in the order they are displayed in the table.<br><br>For Taxon exports, " +
                         "the outline tree will be translated into additional columns at the start of each interaction. " +
                         "The Location and Source outlines are not translated into the interaction data at this time.<br><br>" +
                         "All columns to the right of the 'Count' column will export.<br><br>For an explanation of the csv " +
@@ -2713,15 +2712,15 @@ function startIntroWalkthrough(startStep){
             ]
         });
     } /* End buildIntro */
-    function setGridState() {
-        $('#search-grid').css("height", "444px");
+    function setTableState() {
+        $('#search-tbl').css("height", "444px");
         setSelVal('Focus', 'taxa');
         $('#show-tips').off("click");
         $('#search-focus').off("change");
     }
-    function resetGridState() {
-        var focus = gParams.curFocus || "taxa";
-        $('#search-grid').css("height", "888px");
+    function resetTableState() {
+        var focus = tParams.curFocus || "taxa";
+        $('#search-tbl').css("height", "888px");
         $('#show-tips').click(showTips);
         setSelVal('Focus', focus);
         misc.intro = null;
@@ -2793,7 +2792,7 @@ function searchTips() {
             of the search functionality.</b></li><br>
         </ul>
         <p style="font-size: 1.1em text-align: justify"> Note: "csv" stands for comma seperated values. The interaction
-        data in the grid can be downloaded in this format, as a plain-text file containing tabular 
+        data in the table can be downloaded in this format, as a plain-text file containing tabular 
         data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
     `;
 }
@@ -2806,7 +2805,7 @@ function clearCol2() {
  * focus' records are used.
  */
 function getDetachedRcrd(rcrdKey, rcrds) {                                  
-    const orgnlRcrds = rcrds || gParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+    const orgnlRcrds = rcrds || tParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
     try {
        return _util.snapshot(orgnlRcrds[rcrdKey]);
     }
@@ -2814,46 +2813,46 @@ function getDetachedRcrd(rcrdKey, rcrds) {
        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
     }
 }
-/** If grid is filtered by an external filter, the rows are stored in fltrdRows. */
+/** If table is filtered by an external filter, the rows are stored in fltrdRows. */
 function getAllCurRows() {
-    return gParams.fltrdRows || gParams.rowData;
+    return tParams.fltrdRows || tParams.rowData;
 }
 function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
-    $('#grid-popup').text(popUpMsg);
-    $('#grid-popup').addClass('loading'); //used in testing
-    $('#grid-popup, #grid-overlay').show();
-    fadeGrid();
+    $('#db-popup').text(popUpMsg);
+    $('#db-popup').addClass('loading'); //used in testing
+    $('#db-popup, #db-overlay').show();
+    fadeTable();
 }
 function hidePopUpMsg() {
-    $('#grid-popup, #grid-overlay').hide();
-    $('#grid-popup').removeClass('loading'); //used in testing
-    showGrid();
+    $('#db-popup, #db-overlay').hide();
+    $('#db-popup').removeClass('loading'); //used in testing
+    showTable();
 }
-function fadeGrid() {  
+function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
 }
-function showGrid() {
+function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 }
-function finishGridAndUiLoad() {
+function finishTableAndUiLoad() {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
 } 
 function enableTableButtons() {  
-    $(`#shw-chngd, .grid-tools button, #shw-map, .grid-tools input, 
+    $(`#shw-chngd, .tbl-tools button, #shw-map, .tbl-tools input, 
         button[name="futureDevBttn"]`).attr('disabled', false).css('cursor', 'pointer');
     $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.grid-tools, #shw-chngd-ints, #shw-map, button[name="futureDevBttn"]').fadeTo(100, 1);
+    $('.tbl-tools, #shw-chngd-ints, #shw-map, button[name="futureDevBttn"]').fadeTo(100, 1);
     authDependentInit();
 }
 function disableTableButtons() {
-    $(`#shw-chngd-intsngd, #fltr-tdy, #fltr-cstm, .grid-tools button, 
-        .grid-tools input, button[name="futureDevBttn"]`)
+    $(`#shw-chngd-intsngd, #fltr-tdy, #fltr-cstm, .tbl-tools button, 
+        .tbl-tools input, button[name="futureDevBttn"]`)
         .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.grid-tools, #shw-chngd-ints, button[name="futureDevBttn"]').fadeTo(100, .3);
+    $('.tbl-tools, #shw-chngd-ints, button[name="futureDevBttn"]').fadeTo(100, .3);
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
@@ -2922,7 +2921,7 @@ function alphaSortVals(a, b) {
     return x<y ? -1 : x>y ? 1 : 0;
 }
 /**
- * Returns an array with grid-row objects for each interaction record.
+ * Returns an array with table-row objects for each interaction record.
  * Note: var idx is used for row coloring.
  */
 function getIntRowData(intRcrdAry, treeLvl, idx) {
@@ -3031,18 +3030,18 @@ function disableCombobox(elem) {
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
 //     elem.selectize.updatePlaceholder();
 // }
-/*--------------------- Grid Button Methods ------------------------------*/
+/*--------------------- Table Button Methods ------------------------------*/
 function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
     var expanded = $('#xpand-all').data('xpanded');
     $('#xpand-all').data("xpanded", !expanded);
     return expanded ? collapseTree() : expandTree();
 }
 function expandTree() {
-    gridOptions.api.expandAll();    
+    tblOpts.api.expandAll();    
     $('#xpand-all').html("Collapse All");
 }
 function collapseTree() {
-    gridOptions.api.collapseAll();
+    tblOpts.api.collapseAll();
     $('#xpand-all').html("Expand All");
 }
 /**
@@ -3066,16 +3065,16 @@ function collapseTreeByOne() {
  * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
  */
 function toggleTreeByOneLvl(opening) {
-    var gridModel = gridOptions.api.getModel();                                 //console.log("gridModel = %O", gridModel);
+    var tblModel = tblOpts.api.getModel();                                      //console.log("tblModel = %O", tblModel);
     var bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
-    gridModel.rowsToDisplay.forEach(function(row) {                             //console.log("rowToDisplay = %O", row)
+    tblModel.rowsToDisplay.forEach(function(row) {                             //console.log("rowToDisplay = %O", row)
         if (!opening && !isNextOpenLeafRow(row)) { return; }
         row.expanded = opening;
         row.data.open = opening;
     });
-    gridOptions.api.onGroupExpandedOrCollapsed();
+    tblOpts.api.onGroupExpandedOrCollapsed();
     updateToggleTreeButton();
     /**
      * Checks displayed rows against total rows after filters to determine
@@ -3083,7 +3082,7 @@ function toggleTreeByOneLvl(opening) {
      * if necessary.
      */
     function updateToggleTreeButton() {
-        var shownRows = gridModel.rowsToDisplay.length; 
+        var shownRows = tblModel.rowsToDisplay.length; 
         var allRows = getCurTreeRowCount();
         var closedRows = shownRows < allRows;                                   //console.log("%s < %s ? %s... treeBttn = %s ", shownRows, allRows, closedRows, bttXpandedAll);
 
@@ -3093,7 +3092,7 @@ function toggleTreeByOneLvl(opening) {
 } /* End toggleTreeByOneLvl */
 function getCurTreeRowCount() {
     var cnt = 0;
-    gridOptions.api.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
+    tblOpts.api.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
     return cnt;
 }
 /**
@@ -3107,50 +3106,50 @@ function isNextOpenLeafRow(node) {                                              
     } 
     return true;
 }     
-/*-----------------Grid Manipulation------------------------------------------*/
-/** Grid-rebuild entry point after form-window close. */
-function resetSearchGrid(focus) {                                               //console.log('resetting search grid.')
+/*----------------- Table Manipulation ------------------------------------------*/
+/** Table-rebuild entry point after form-window close. */
+function resetDataSearchTable(focus) {                                          //console.log('resetting search table.')
     clearCol2();
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(null, focus);
 }
-/** Refactor: combine with resetSearchGrid. */
-export function initSearchGrid(focus) {                                         //console.log('resetting search grid.')
-    resetSearchGrid(focus);
+/** Refactor: combine with resetDataSearchTable. */
+export function initDataTable(focus) {                                          //console.log('resetting search table.')
+    resetDataSearchTable(focus);
 }
 function selectSearchFocus(f) { 
     const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
     if (!focus) { return; }
     const builderMap = { 
-        'locs': buildLocationGrid, 'srcs': buildSourceGrid,
-        'taxa': buildTaxonGrid 
+        'locs': buildLocationTable, 'srcs': buildSrcTable,
+        'taxa': buildTaxonTable 
     };  
     if (!dataStorage.getItem('pgDataUpdatedAt')) { return; } 
-    updateFocusAndBuildGrid(focus, builderMap[focus]); 
+    updateFocusAndBuildTable(focus, builderMap[focus]); 
 }
 /**
- * Updates the top sort (focus) of the data grid, either 'taxa', 'locs' or 'srcs'.
+ * Updates the top sort (focus) of the data table, either 'taxa', 'locs' or 'srcs'.
  */
-function updateFocusAndBuildGrid(focus, gridBuilder) {                          //console.log("updateFocusAndBuildGrid called. focus = [%s], gridBuilder = %O", focus, gridBuilder)
-    clearPreviousGrid();
-    if (focusNotChanged(focus)) { return gridBuilder(); }                       //console.log('--- Focus reset to [%s]', focus);
+function updateFocusAndBuildTable(focus, tableBuilder) {                          //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
+    clearPreviousTable();
+    if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     _util.populateStorage('curFocus', focus);
-    clearOnFocusChange(gridBuilder);
+    clearOnFocusChange(tableBuilder);
 } 
 function focusNotChanged(focus) {
-    return focus === gParams.curFocus;
+    return focus === tParams.curFocus;
 }
-function clearOnFocusChange(gridBuilder) {
+function clearOnFocusChange(tableBuilder) {
     dataStorage.removeItem('curRealm');
     resetFilterStatusBar();
-    resetGridParams();
+    resetTableParams();
     resetToggleTreeBttn(false); 
-    clearPastHtmlOptions(gridBuilder); 
+    clearPastHtmlOptions(tableBuilder); 
 }
 /** Called seperately so @emptySearchOpts is called once. */
-function clearPastHtmlOptions(gridBuilder) {    
+function clearPastHtmlOptions(tableBuilder) {    
     $('#opts-col2').fadeTo(100, 0);
     $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
     
@@ -3158,13 +3157,13 @@ function clearPastHtmlOptions(gridBuilder) {
         $('#opts-col2').empty();
         $('#sort-opts').empty();
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
-        gridBuilder();
-        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt grid filter
+        tableBuilder();
+        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     }
 } /* End clearPastHtmlOptions */
 /**
  * When the interaction form is exited, the passed focus is selected and the 
- * grid is refreshed with the 'interactions updates since' filter set to 'today'.
+ * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
 function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
     if (focus) { $('#search-focus').val(focus); }
@@ -3177,49 +3176,49 @@ function showTodaysUpdates(focus) {                                             
 export function showUpdates(focus) {
     showTodaysUpdates(focus);
 }
-function clearPreviousGrid() {                                                  //console.log("clearing grid");
-    if (gridOptions.api) { gridOptions.api.destroy(); }  
+function clearPreviousTable() {                                                 //console.log("clearing table");
+    if (tblOpts.api) { tblOpts.api.destroy(); }  
     $('#map').hide(); //Clears location map view
-    $('#search-grid').show();
+    $('#search-tbl').show();
 }
 /**
- * Resets grid state to top focus options: Taxon and source are reset at current
+ * Resets table state to top focus options: Taxon and source are reset at current
  * realm; locations are reset to the top regions.
  */
-function resetDataGrid() {                                                      //console.log("---reseting grid---")
+function resetDataTable() {                                                     //console.log("---reseting table---")
     const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTree, srcs: resetSourceRealm };
     resetCurTreeState();
-    resetMap[gParams.curFocus](); 
+    resetMap[tParams.curFocus](); 
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; }     //resets updatedAt grid filter
-    updateGridFilterStatusMsg();
+    if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; }     //resets updatedAt table filter
+    updateTableFilterStatusMsg();
 }
-/** Deltes the props uesd for only the displayed grid in the global gParams. */
+/** Deltes the props uesd for only the displayed table in the global tParams. */
 function resetCurTreeStorageProps() {
     var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltrs'];
-    props.forEach(function(prop){ delete gParams[prop]; });
-    gParams.selectedOpts = {};
+    props.forEach(function(prop){ delete tParams[prop]; });
+    tParams.selectedOpts = {};
 }
 /**
- * When the grid rowModel is updated, the total interaction count for each 
+ * When the table rowModel is updated, the total interaction count for each 
  * tree node, displayed in the "count" column, is updated to count only displayed
  * interactions. Any rows filtered out will not be included in the totals.
  */
-function onModelUpdated() {                                                     //console.log("--displayed rows = %O", gridOptions.api.getModel().rowsToDisplay);
-    updateTotalRowIntCount( gridOptions.api.getModel().rootNode );
+function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblOpts.api.getModel().rowsToDisplay);
+    updateTotalRowIntCount( tblOpts.api.getModel().rootNode );
 }
 /**
  * Sets new interaction totals for each tree node @getChildrenCnt and then 
- * calls the grid's softRefresh method, which refreshes any rows with "volatile"
+ * calls the table's softRefresh method, which refreshes any rows with "volatile"
  * set "true" in the columnDefs - currently only "Count".
  */
 function updateTotalRowIntCount(rootNode) {
     getChildrenCnt(rootNode.childrenAfterFilter);  
-    gridOptions.api.softRefreshView();
+    tblOpts.api.softRefreshView();
 }
 function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
     var nodeCnt, ttl = 0;

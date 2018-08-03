@@ -128,9 +128,9 @@ function waitForStorageAndLoadMap(onLoad) {
         window.setTimeout(waitForStorageAndLoadMap.bind(null, onLoad), 500);
 }
 /** ================= Show Interaction Sets on Map ========================== */
-/** Shows the interactions displayed in the data-grid on the map. */
-export function showInts(gridData) {                                            //console.log('----------- showInts. gridData = %O', gridData);
-    waitForStorageAndLoadMap(showIntsOnMap.bind(null, gridData));
+/** Shows the interactions displayed in the data-table on the map. */
+export function showInts(tableData) {                                           //console.log('----------- showInts. tableData = %O', tableData);
+    waitForStorageAndLoadMap(showIntsOnMap.bind(null, tableData));
 } 
 function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
     addIntMarkersToMap(data);
@@ -205,8 +205,10 @@ function getTotalInts(data) {
     data.ints.forEach(d => ttl += d.intCnt);
     return ttl;
 }
-function zoomAndFocusMap(locs) {  console.log('locs = %O', locs)
-    const loc = locs[Object.keys(locs)[0]].loc;  console.log('loc = %O', loc);
+function zoomAndFocusMap(locs) {                                                //console.log('locs = %O', locs)
+    const keys = Object.keys(locs);
+    if (!keys.length) { return; }
+    const loc = locs[Object.keys(locs)[0]].loc;                                 //console.log('loc = %O', loc);
     const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
     const zoom = getZoomLvl(loc);
     map.setView(latLng, zoom, {animate: true});  
@@ -356,22 +358,22 @@ function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             
     popups[loc.displayName] = MapMarker.popup;  
     map.addLayer(MapMarker.layer);
 } /* End addMarkerForEachInteraction */
-/* --- Grid Popup --- */
+/* --- Table Popup --- */
 function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
-    $('#grid-popup').text(popUpMsg);
-    $('#grid-popup').addClass('loading'); //used in testing
-    $('#grid-popup, #grid-overlay').show();
-    fadeGrid();
+    $('#db-popup').text(popUpMsg);
+    $('#db-popup').addClass('loading'); //used in testing
+    $('#db-popup, #db-overlay').show();
+    fadeTable();
 }
 function hidePopUpMsg() {
-    $('#grid-popup, #grid-overlay').hide();
-    $('#grid-popup').removeClass('loading'); //used in testing
-    showGrid();
+    $('#db-popup, #db-overlay').hide();
+    $('#db-popup').removeClass('loading'); //used in testing
+    showTable();
 }
-function fadeGrid() {
-    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, .3);
+function fadeTable() {
+    $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, .3);
 }
-function showGrid() {
-    $('#borderLayout_eRootPanel, #grid-tools, #grid-opts').fadeTo(100, 1);
+function showTable() {
+    $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }

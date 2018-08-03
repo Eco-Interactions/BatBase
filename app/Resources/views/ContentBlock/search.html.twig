@@ -38,39 +38,39 @@
                 <input type="text" id="time-fltr" disabled="disabled">
             </div>
             <div class="bttm-row flex-row">
-                <button id="shw-map" class="ag-fresh grid-bttn">
-                    Show interactions on map</button>
+                <button id="shw-map" class="ag-fresh tbl-bttn">
+                    Show Interactions on Map</button>
             </div>
         </div>
         <div id="opts-col4" class="flex-col">
-            <button id="strt-tut" class="ag-fresh grid-bttn">Tutorial</button>
-            <button id="show-tips" class="ag-fresh grid-bttn">Search Tips</button>
+            <button id="strt-tut" class="ag-fresh tbl-bttn">Tutorial</button>
+            <button id="show-tips" class="ag-fresh tbl-bttn">Search Tips</button>
         </div>
     </div>
     <div id="tool-bar" class="flex-row">
-        <div class='flex-row grid-tools'>
+        <div class='flex-row tbl-tools'>
             <div id='xpand-tree'>
-                <button id="xpand-all" class="ag-fresh ag-header-cell grid-bttn" name="xpand-all">Expand All</button>
-                <button class="ag-fresh ag-header-cell grid-bttn" name="xpand-1">+</button>
-                <button class="ag-fresh ag-header-cell grid-bttn" name="collapse-1">-</button>
+                <button id="xpand-all" class="ag-fresh ag-header-cell tbl-bttn" name="xpand-all">Expand All</button>
+                <button class="ag-fresh ag-header-cell tbl-bttn" name="xpand-1">+</button>
+                <button class="ag-fresh ag-header-cell tbl-bttn" name="collapse-1">-</button>
             </div>
-            <button class="ag-fresh ag-header-cell grid-bttn" name="reset-grid">Reset Data</button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="reset-tbl">Reset Data</button>
         </div>
-        <div id="grid-status" class="flex-row">
+        <div id="tbl-status" class="flex-row">
             <div id="xtrnl-filter-status">Filtering on:</div>
-            <div id="grid-filter-status"></div>
+            <div id="tbl-filter-status"></div>
         </div>
-        <div class='grid-tools' style='align-self: flex-end;'>
-            <button class="ag-fresh ag-header-cell grid-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
-            <button class="ag-fresh ag-header-cell grid-bttn" name="csv">Download CSV</button>
+        <div class='tbl-tools' style='align-self: flex-end;'>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="csv">Download CSV</button>
         </div>
     </div>
     
     <div id="db-view">
-        <div id="search-grid" class="ag-fresh"></div>
+        <div id="search-tbl" class="ag-fresh"></div>
         <div id="map" style="display: none;"></div>
-        <div id="grid-overlay"></div>
-        <div id="grid-popup"></div>
+        <div id="db-overlay"></div>
+        <div id="db-popup"></div>
     </div>
 
 {% endblock detail %}
