@@ -3,6 +3,7 @@ requireCss();
 requireGlobalJquery();
 initUi();
 authDependantInit();  
+ifNotChromeShowOptimizedMsg();
 // registerServiceWorker();
 
 /* ------------ Styles and Scripts ------------------*/
@@ -39,7 +40,7 @@ function initStickyHeaderAndDataTable() {
     initStickyHeader(tableMngr);
 } 
 function initStickyHeader(tableMngr) {
-    var $stickyMenu = $('#sticky-hdr');
+    const $stickyMenu = $('#sticky-hdr');
     $(window).scroll(function () {
         if ($(window).scrollTop() > tableMngr.stickyOffset) {
                 $stickyMenu.addClass("top-sticky");
@@ -64,17 +65,41 @@ function initFeedbackUi() {
     const feedback = require('./feedback.js');
     feedback.init();
 }
-
-
-function registerServiceWorker() { //console.log('env = ', $)
-     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
-                .then(registration => {
-                    console.log('SW registered: ', registration);
-                }).catch(registrationError => {
-                    console.log('SW registration failed: ', registrationError);
-                });
-        });
-    }
+function ifNotChromeShowOptimizedMsg() {
+    const isChrome = checkIfChrome();
+    if (isChrome) { return; }
+    addMsgAboutChromeOptimization();
 }
+function checkIfChrome() {
+    const isChromium = window.chrome;
+    const winNav = window.navigator;
+    const vendorName = winNav.vendor;
+    const isOpera = typeof window.opr !== "undefined";
+    const isIEedge = winNav.userAgent.indexOf("Edge") > -1;
+    const isIOSChrome = winNav.userAgent.match("CriOS");
+
+    return isIOSChrome ? true : 
+            (isChromium !== null && typeof isChromium !== "undefined" &&
+            vendorName === "Google Inc." && isOpera === false && 
+            isIEedge === false) ? true : false;
+}
+function addMsgAboutChromeOptimization() {
+    const div = document.createElement("div");
+    div.id = 'chrome-opt-msg';
+    div.innerHTML = `<b>This site is developed and tested with chrome.</b> If 
+        you encounter issues with other browsers, please log in and leave 
+        feedback to let us know.`;
+    $('#slider-overlay').prepend(div);
+}
+// function registerServiceWorker() { //console.log('env = ', $)
+//      if ('serviceWorker' in navigator) {
+//         window.addEventListener('load', () => {
+//             navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
+//                 .then(registration => {
+//                     console.log('SW registered: ', registration);
+//                 }).catch(registrationError => {
+//                     console.log('SW registration failed: ', registrationError);
+//                 });
+//         });
+//     }
+// }
