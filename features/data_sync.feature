@@ -3,6 +3,7 @@ Feature: Local Data Storage updates with changes made by other editors
     As an editor
     The remote and local databases needs to sync on search page load
 
+    #Needs to be updated
     # @javascript
     # Scenario: Two editors make changes to the data and their local databases sync
     #     Given two editors are logged into the website

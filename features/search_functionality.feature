@@ -1,7 +1,11 @@
 Feature: Filtering the data displayed in the database grid
     In order to find specific data about bat eco-interactions
     As a web visitor
-    I should be able to use the various search options of the search page
+    I should be able to use the various view and filter options of the search page
+
+    ### WHAT IS BEING TESTED ### 
+        # EACH VIEW'S FILTER OPTIONS: comboboxes and text filters in the options panel.
+        ## TODO: Test table column filters
 
     Background:
         Given I am on "/search"

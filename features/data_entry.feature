@@ -3,6 +3,12 @@ Feature: Add new data to the database
     As an editor
     I need to be able to add new data to the database
 
+    ### WHAT IS BEING TESTED ### 
+        # INTERACTION CREATE FORM FILL, SUBMISSION, AND TABLE RELOADS 
+        # ALL SUB-ENTITY CREATE FORMS
+        ## TODO
+        # VARIOUS SOURCE TYPE SELECTIONS and their respective UI changes
+
     Background:
         Given I am on "/login"
         And I fill in "Username" with "TestEditor"
@@ -14,7 +20,7 @@ Feature: Add new data to the database
         And I exit the tutorial
 
     ## -------------------------- Source ---------------------------------------##
-    
+    ## ------------------- PUBLICATION ----------------- ##
     @javascript
     Scenario:  I should be able to create a publisher with its sub-form
         Given I open the New Interaction form
@@ -31,7 +37,7 @@ Feature: Add new data to the database
         And I type "Test Publisher Webiste" in the "Link Display" field "input"
         And I press the "Create Publisher" button
         Then I should see "Test Publisher" in the "Publisher" dropdown field
-
+    ## ------------------- AUTHOR ----------------- ##
     @javascript
     Scenario:  I should be able to create an author with its sub-form
         Given I open the New Interaction form
@@ -48,8 +54,7 @@ Feature: Add new data to the database
         And I type "Test Author Website" in the "Link Display" field "input"
         And I press the "Create Author" button
         Then I should see "Callaye, Bendry J. Jr" in the "Authors" field dynamic dropdown
-
-    ## ------------------- Books ----------------- ##
+    ## ------------------- BOOKS ----------------- ##
     @javascript
     Scenario:  I should be able to create a [BOOK] publication with its sub-form
         Given I open the New Interaction form
@@ -74,25 +79,6 @@ Feature: Add new data to the database
         And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
         And I should see "New Citation" in the form header
         And I should see "Callaye, B. J. 1990. Test Book. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
-
-    # TEST THAT AUTHOR FIELD IS NOT SHOWN.
-    @javascript
-    Scenario:  I should be able to create a [BOOK] citation with its sub-form
-        Given I open the New Interaction form
-        And I select "Test Book" from the "Publication" dropdown field
-        And I enter "" in the "Citation Title" dropdown field
-        And I see "New Citation"
-        And I should see "Book" in the "Citation Type" dropdown field
-        When I type "29" in the "Edition" field "input"
-        And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
-        And I press the "Create Citation" button
-        Then I should see "Test Book" in the "Citation Title" dropdown field
-        And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Src" detail panel
-        And I should see "Book Title" in the "Src" detail panel
-        And I should see "Test Book" in the "Src" detail panel
-        And I should see "1990" in the "Src" detail panel
-        And I should see "Test description" in the "Src" detail panel
-        And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 
     @javascript
     Scenario:  I should be able to create a [BOOK WITH EDITORS] publication with its sub-form
@@ -119,6 +105,25 @@ Feature: Add new data to the database
         And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
         And I should see "New Citation" in the form header
         And I should see "The citation will display here once all required fields are filled." in the "Citation Text" field "textarea"
+    ## -------- CITATION --------- ##
+    # TODO: TEST THAT AUTHOR FIELD IS NOT SHOWN.
+    @javascript
+    Scenario:  I should be able to create a [BOOK] citation with its sub-form
+        Given I open the New Interaction form
+        And I select "Test Book" from the "Publication" dropdown field
+        And I enter "" in the "Citation Title" dropdown field
+        And I see "New Citation"
+        And I should see "Book" in the "Citation Type" dropdown field
+        When I type "29" in the "Edition" field "input"
+        And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
+        And I press the "Create Citation" button
+        Then I should see "Test Book" in the "Citation Title" dropdown field
+        And I should see "Callaye, B. J. 1990. Test Book. 29. Test Publisher, Nice, France." in the "Src" detail panel
+        And I should see "Book Title" in the "Src" detail panel
+        And I should see "Test Book" in the "Src" detail panel
+        And I should see "1990" in the "Src" detail panel
+        And I should see "Test description" in the "Src" detail panel
+        And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
 
     @javascript
     Scenario:  I should be able to create a [CHAPTER] citation with its sub-form
@@ -161,7 +166,7 @@ Feature: Add new data to the database
         And I should see "Test Journal" in the "Src" detail panel
         And I should see "New Citation" in the form header
         And I should see "The citation will display here once all required fields are filled." in the "Citation Text" field "textarea"
-
+    ## -------- CITATION --------- ##
     @javascript
     Scenario:  I should be able to create a [ARTICLE] citation with its sub-form
         Given I open the New Interaction form
@@ -211,7 +216,7 @@ Feature: Add new data to the database
         And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
         And I should see "New Citation" in the form header
         And I should see "Callaye, B. J. 1990. Test Dissertation. Ph.D. Dissertation. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
-
+    ## -------- CITATION --------- ##
   # Add Master's thesis citation
     @javascript
     Scenario:  I should be able to create a [Ph.D. Dissertation] citation with its sub-form
@@ -228,7 +233,7 @@ Feature: Add new data to the database
         And I should see "Test Dissertation" in the "Src" detail panel
         And I should see "1990" in the "Src" detail panel
         And I should see "Callaye, Bendry J. Jr" in the "Src" detail panel
-
+    ## ------------------- OTHER ----------------- ##
     @javascript
     Scenario:  I should be able to create a [OTHER] publication with its sub-form
         Given I open the New Interaction form
@@ -252,8 +257,8 @@ Feature: Add new data to the database
         And I should see "New Citation" in the form header
         And I should see "Callaye, B. J. 1990. Test Other. Test Publisher, Nice, France." in the "Citation Text" field "textarea"
 
-    ## ------------------- TODO: OTHER ----------------- ##
-    ## Add for Museum record and report types as well.
+    ## TODO: Add for Museum record and report types as well.
+    ## -------- CITATION --------- ##
     @javascript
     Scenario:  I should be able to create a [Other] citation with its sub-form
         Given I open the New Interaction form

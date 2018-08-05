@@ -3,6 +3,9 @@ Feature: Search Page Database Initialization
     As a web visitor
     I need to be able to load the database
 
+    ### WHAT IS BEING TESTED ### 
+        # INITIAL DATA LOADS, STORES, AND DISPLAYS AS EXPECTED
+
     Background:
         Given I am on "/search"
         And the database has loaded

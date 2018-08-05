@@ -2,9 +2,14 @@ Feature: Edit data in the database
     In order to have accurate data about bat eco-interactions
     As an editor
     I need to be able to edit the data in the database
+
+    ### WHAT IS BEING TESTED ### 
+        # ENTITY EDITS AND RELATED UPDATES TO STORED DATA AND TABLE DISPLAY
+        ## TODO
+        # Test form error handling 
+        # Test changing an interaction's citation
+    
     ## Todo: 
-    # Test form error handling 
-    # Test changing an interaction's citation
     Background:
         Given the fixtures have been reloaded
         And I am on "/login"
