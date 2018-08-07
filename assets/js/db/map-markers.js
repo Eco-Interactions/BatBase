@@ -86,32 +86,37 @@ export class LocMarker extends Marker {
 } /* End LocMarker Class */
 
 export class IntMarker extends Marker {
-    constructor (latLng, intData) {
+    constructor (focus, latLng, intData) {
         super(latLng);
         bindClassContextToMethods(this); 
-        this.popup.setContent(getIntPopupHtml(intData));
+        this.popup.setContent(getIntPopupHtml(focus, intData));
         this.self = L.marker(latLng, getCustomIcon())
-            .bindPopup(this.popup)
-            .on('mouseover', this.openPopup)
-            .on('click', this.openPopupAndDelayAutoClose)
+            .bindPopup(this.popup, {closeOnClick: false});
+        this.addMarkerEvents();
+    }
+    addMarkerEvents() {
+        this.self.on('mouseover', this.openPopup)
+            .on('click', this.openAndFreezePopup)
             .on('mouseout', this.delayPopupClose);
+    }
+    removeMarkerEvents() {
+        this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
     openPopup(e) {                                                              
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         this.self.openPopup();
     }
-    /** 
-     * Delays auto-close of popup if a nearby marker popup is opened while trying
-     * to click the location summary button. 
-     */
-    openPopupAndDelayAutoClose(e) {                                             //console.log('openPopupAndDelayAutoClose')
-        this.self.openPopup();
+    openAndFreezePopup(c) {
+        if (this.timeout) { clearMarkerTimeout(this.timeout); } 
         this.popup.options.autoClose = false;
-        window.setTimeout(() => this.popup.options.autoClose = true, 700);
+        this.removeMarkerEvents();
+        this.self.openPopup();
     }
     closePopup() { 
+        this.popup.options.autoClose = true;
         this.self.closePopup();
+        this.addMarkerEvents();
     }
     delayPopupClose(e) {  
         this.timeout = window.setTimeout(this.closePopup, 700);
@@ -190,11 +195,12 @@ export class LocCluster extends Marker {
     }
 } /* End LocCluster Class */
 export class IntCluster extends Marker {
-    constructor (map, intCnt, latLng, data) {
+    constructor (map, intCnt, focus, latLng, data) {
         super(latLng);
         bindClassContextToMethods(this); 
         this.map = map;
-        this.popup.setContent(getIntPopupHtml(data));
+        this.popup.setContent(getIntPopupHtml(focus, data));
+        this.popup.options.closeOnClick = false;
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
@@ -203,7 +209,7 @@ export class IntCluster extends Marker {
         this.self.on('clustermouseover', this.openClusterPopup)
             .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
-            .on('clusterclick', this.openPopupAndDelayAutoClose); 
+            .on('clusterclick', this.openAndFreezeClusterPopup); 
     }
     removeClusterEvents() {
         this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
@@ -215,20 +221,30 @@ export class IntCluster extends Marker {
     }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
-        if (this.timeout) { clearTimeout(this.timeout); this.timeout = null; }  
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }  
         this.map.openPopup(this.popup);
+    }
+    openAndFreezeClusterPopup(c) {
+        if (this.timeout) { clearMarkerTimeout(this.timeout); } 
+        c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
+        this.popup.options.autoClose = false;
+        this.map.on('popupclose', this.closeLayerPopup);
+        this.removeClusterEvents();
+        this.map.openPopup(this.popup);
+    }
+    /** Event fires before popup is fully closed. Restores after closed. */
+    closeLayerPopup(e) {  
+        if (e.popup._latlng === this.latLng) { 
+            this.closePopup()
+        }
     }
     closePopup(){
         this.map.closePopup();
+        this.popup.options.autoClose = true;
+        this.addClusterEvents();
     }
     delayClusterPopupClose(e) {
         this.timeout = window.setTimeout(this.closePopup.bind(this), 700);
-    }
-    openPopupAndDelayAutoClose(c) {
-        c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
-        this.openClusterPopup(c);
-        this.popup.options.autoClose = false;
-        window.setTimeout(() => this.popup.options.autoClose = true, 400);
     }
 } /* End IntCluster Class */
 /** ------ Class Bind Methods ---------- */
@@ -252,16 +268,80 @@ function getCustomIcon() {
     }
 }
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
-function getIntPopupHtml(intData) {                                             //console.log('getIntPopupHtml. data = %O', intData);
+function getIntPopupHtml(focus, intData) {                                      console.log('getIntPopupHtml. intData = %O', intData);
     const locHtml = getLocNameHtml(intData.locs[0]);
-    const intHtml = getIntSummaryHtml(intData.ints);
+    const intHtml = getIntSummaryHtml(focus, intData.ints);
     return `<div>${locHtml}${intHtml}</div>`;
 }
-function getIntSummaryHtml(ints) {
-    let html = '';
-    ints.forEach(int => {html += `<span><b>${int.intCnt}</b>
-        interactions:</span> <b>${int.name}</b><br>`});
-    return `<div>${html}</div>`; 
+function getIntSummaryHtml(focus, intObj) {
+    const bldrs = { locs: buildLocIntSummary, src: buildSrcIntSummary, 
+        taxa: buildTaxaIntSummary };
+    let summary = '';
+
+    for (let name in intObj) {
+        summary += bldrs[focus](name, intObj[name]);
+    } 
+    return summary;
+}
+function buildLocIntSummary(name, ints) {                                       console.log('buildLocIntSummary. ints = %O', ints)
+    const batStr = getTop3CitedBats(ints);  
+    return buildIntSummary(name, batStr, ints.length);
+}
+function buildTaxaIntSummary(name, ints) {                                      console.log('buildTaxaIntSummary. ints = %O', ints)
+    const batStr = getTop3CitedBats(ints);  
+    return buildIntSummary(name, batStr, ints.length);
+}
+function buildSrcIntSummary(name, ints) {
+    // body...
+}
+/** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
+function getTop3CitedBats(ints) {    
+    const taxa = _util.getDataFromStorage('taxon');
+    const allBats = {};
+    getAllBatsCited();
+    const bats = getTopThreeReportStr(allBats, buildBatSummaryStr);
+    return `Bats: ${bats}`;
+    
+    function getAllBatsCited() {
+        ints.forEach(int => trackBatInteraction(taxa[int.subject], allBats));
+    }
+} /* End getTop3CitedBats */
+/**
+ * Returns string with the names of top 3 reported taxa and total taxa count.
+ * Formatted for the Interaction summary popups.
+ */
+function buildBatSummaryStr(sorted, ttl) {
+    return ttl == 1 ? sorted[1][1] : formatBatString(sorted, ttl);
+}
+function formatBatString(sorted, ttl) {
+    let str = concatBatNames(sorted);
+    return getIntTop3ReportString(str, ttl);
+}
+function concatBatNames(sorted) {
+    let str = '';
+    for (let i = 1; i <= 3; i++) { str += formatBatName(sorted[i], i, sorted); }
+    return str;
+}
+function formatBatName(bat, i, sorted) {  
+    const name = !bat.length ? '' : (i === 1 ? '' : ', ') + bat[1];
+    return name;
+}
+function getIntTop3ReportString(str, ttl) {
+    if (ttl > 3) { str += `</b> (${ttl} total cited here.)`;}
+    return str;
+} /* ---- End Top 3 Cited Bats string build ---- */
+/**
+ * 
+ * Cnt - Name (restrict char to one line, with tooltip)
+ *     subjects (objects if in bat taxa view)
+ */
+function buildIntSummary(name, bats, intCnt) { 
+    return `<div class="flex-row"><b>${intCnt} interactions - &nbsp;</b>
+        ${getNameDiv(name)}</div>${bats}`;
+}
+function getNameDiv(name) {  
+    return `<div title="${name}"><b>
+        ${name.length > 30 ? name.substring(0, 30) + `...` : name}</b></div>`;
 }
 /** ---------------- Location Marker/Popup Helpers -------------------------- */
 /**
@@ -360,7 +440,7 @@ function getAllHabitatsWithin(loc) {                                            
         ++habitats[name];
     }
     function buildHabHtml() {  
-        const str = getTopThreeReportStr(habitats);  console.log
+        const str = getTopThreeReportStr(habitats, buildLocSummaryStr);
         return `Habitats: <b>&ensp; ${str}</b>`;
     }
 }
@@ -370,7 +450,7 @@ function getBatsCitedHtml(loc) {
     const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
     const allBats = {};
     getAllBatsWithin(loc.id);
-    const bats = getTopThreeReportStr(allBats);
+    const bats = getTopThreeReportStr(allBats, buildLocSummaryStr);
     return `Cited bats: <b>${bats}</b>`;
     
     function getAllBatsWithin(id) {  
@@ -380,11 +460,10 @@ function getBatsCitedHtml(loc) {
     }
     function addBats(interactions) {
         const ints = interactions.map(id => rcrds.interaction[id]);
-        ints.forEach(int => trackBatInteraction(int, rcrds.taxon, allBats));
+        ints.forEach(int => trackBatInteraction(rcrds.taxon[int.subject], allBats));
     }
 } /* End getBatsCitedHtml */
-function trackBatInteraction(int, rcrds, allBats) {
-    let bat = rcrds[int.subject];                                               //console.log('bat = %O', bat);
+function trackBatInteraction(bat, allBats) {                                    //console.log('bat = %O', bat);
     let name = buildBatName(bat);
     if (Object.keys(allBats).indexOf(name) === -1) { allBats[name] = 0; }
     ++allBats[name];
@@ -395,20 +474,21 @@ function buildBatName(bat) {
     return name + bat.displayName;
 }
 /** ---- Habitat and Bat Helper ---- */
+
 /**
  * Sorts an object with unique name keys and values with the number of time this
  * item was present in the cited records (habitats in locs or bats in interactions). 
- * Returns a string with the three names with the highest count, and a total of 
- * all items (habitats/bats) counted.
+ * Callback builds a string with the three names with the highest count, and a 
+ * total of all items (habitats/bats) counted.
  */
-function getTopThreeReportStr(obj) {
+function getTopThreeReportStr(obj, cb) {
     const ttl = Object.keys(obj).length;                                       
     const sorted = { 1: [], 2: [], 3: [] };
     const posKeys = Object.keys(sorted);
     for (let name in obj) {
         sortItem(obj[name], name);
     }                                                                           //console.log('sorted habs = %O', sorted)
-    return buildReportString(obj, sorted, ttl);
+    return cb(sorted, ttl);
 
     function sortItem(count, name) {                                             
         posKeys.some((pos) => {
@@ -424,28 +504,30 @@ function getTopThreeReportStr(obj) {
         sorted[pos] = [ count, name ];
     }
 } /* End getReportString */
-/** Returns string with the names of top 3 reported taxa and total taxa count. */
-function buildReportString(obj, sorted, ttl) {
-    return ttl == 1 ? sorted[1][1] : formatString();
-
-    function formatString() {
-        const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;';
-        let str = '';
-        concatNames();
-        return finishReportString();
-
-        function concatNames() {
-            for (let i = 1; i <= 3; i++) {
-                str += i === 1 ? sorted[i][1] : //+ ` </b>(${sorted[i][0]})<b>`
-                    !sorted[i].length ? '' : ',<br>' + tabs + sorted[i][1];
-            }
-        }
-        function finishReportString() {
-            if (ttl > 3) { str += ',<br></b>' + tabs + '(' + ttl + ' total cited here.)'}
-            return str;
-        } 
-    }
+/**
+ * Returns string with the names of top 3 reported taxa and total taxa count.
+ * Formatted for the Map View  Location summary popups.
+ */
+function buildLocSummaryStr(sorted, ttl) {
+    return ttl == 1 ? sorted[1][1] : formatString(sorted, ttl);
 }
+function formatString(sorted, ttl) {
+    const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;';
+    let str = concatNames(sorted, tabs);
+    return finishLocTop3ReportString(str, ttl, tabs);
+}
+function concatNames(sorted, tabs) {
+    let str = '';
+    for (let i = 1; i <= 3; i++) { str += formatName(i, sorted, tabs); }
+    return str;
+}
+function formatName(i, sorted, tabs) {
+    return !sorted[i][1] ? '' : (i === 1 ? '': `,<br>${tabs}`) + sorted[i][1];
+}
+function finishLocTop3ReportString(str, ttl, tabs) {
+    if (ttl > 3) { str += `<br></b>${tabs}(${ttl} total cited here.)`;}
+    return str;
+} /* ---- End Location Summary string build ---- */
 /** --- Button to show interactions in the data-table --- */
 function buildToTableButton(loc) {
     const bttn = _util.buildElem('input', {type: 'button',

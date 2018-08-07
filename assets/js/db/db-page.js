@@ -1098,7 +1098,7 @@ function showLocOnMap(geoJsonId, zoom) {
 function showTableRecordsOnMap() {                                               console.log('-----------showTableRecordsOnMap');
     updateUiForMappingInts();
     storeIntAndLocRcrds();
-    db_map.showInts(buildTableLocDataObj());
+    db_map.showInts(tParams.curFocus, buildTableLocDataObj());
 }
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
@@ -1110,7 +1110,7 @@ function storeIntAndLocRcrds() {
  * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
  */
 function buildTableLocDataObj() {
-    const mapData = { 'none': { ttl: 0, ints: {/*name, rcrds */} }}; 
+    const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
     tblOpts.api.forEachNodeAfterFilter(getIntMapData);
     return mapData;  
     

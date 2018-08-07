@@ -129,12 +129,12 @@ function waitForStorageAndLoadMap(onLoad) {
 }
 /** ================= Show Interaction Sets on Map ========================== */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(tableData) {                                           //console.log('----------- showInts. tableData = %O', tableData);
-    waitForStorageAndLoadMap(showIntsOnMap.bind(null, tableData));
+export function showInts(focus, tableData) {                                    //console.log('----------- showInts. tableData = %O', tableData);
+    waitForStorageAndLoadMap(showIntsOnMap.bind(null, focus, tableData));
 } 
-function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
+function showIntsOnMap(focus, data) {                                           console.log('showIntsOnMap! data = %O', data);
     addIntCntsToLegend(data);
-    addIntMarkersToMap(data);
+    addIntMarkersToMap(focus, data);
     if (data.length === 1) { zoomAndFocusMap(data[0].locs); }
 }
 function addIntCntsToLegend(data) {
@@ -147,22 +147,22 @@ function addIntCntsToLegend(data) {
         } else { shwn += data[geoId].ttl; }
     }
 }
-function addIntMarkersToMap(data) {                                             //console.log('addMarkersToMap. data = %O', data);
+function addIntMarkersToMap(focus, data) {                                      //console.log('addMarkersToMap. data = %O', data);
     for (let geoId in data) {
         if (geoId === 'none') { continue; }
-        buildAndAddIntMarker(geoId, data[geoId]);
+        buildAndAddIntMarker(focus, geoId, data[geoId]);
     }
 }
-function buildAndAddIntMarker(geoId, data) {  
+function buildAndAddIntMarker(focus, geoId, data) {  
     const coords = getCoords(geoId);
     const intCnt = data.ttl;
-    const MapMarker = buildIntMarker(intCnt, coords, data);                     //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
+    const MapMarker = buildIntMarker(focus, intCnt, coords, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
     map.addLayer(MapMarker.layer);
 }
-function buildIntMarker(intCnt, coords, data) {  
+function buildIntMarker(focus, intCnt, coords, data) {  
      return intCnt === 1 ? 
-        new MM.IntMarker(coords, data) : 
-        new MM.IntCluster(map, intCnt, coords, data);
+        new MM.IntMarker(focus, coords, data) : 
+        new MM.IntCluster(map, intCnt, focus, coords, data);
 }
 function getCoords(geoId) {
     const geoJson = _util.getGeoJsonEntity(geoId);                         
