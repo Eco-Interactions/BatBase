@@ -268,31 +268,33 @@ function getCustomIcon() {
     }
 }
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
-function getIntPopupHtml(focus, intData) {                                      console.log('getIntPopupHtml. intData = %O', intData);
+function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
     const locHtml = getLocNameHtml(intData.locs[0]);
     const intHtml = getIntSummaryHtml(focus, intData.ints);
     return `<div>${locHtml}${intHtml}</div>`;
 }
-function getIntSummaryHtml(focus, intObj) {
-    const bldrs = { locs: buildLocIntSummary, src: buildSrcIntSummary, 
+function getIntSummaryHtml(focus, intObj) {  
+    const bldrs = { locs: buildLocIntSummary, srcs: buildSrcIntSummary, 
         taxa: buildTaxaIntSummary };
     let summary = '';
 
     for (let name in intObj) {
-        summary += bldrs[focus](name, intObj[name]);
+        summary += bldrs[focus](name, intObj[name], focus);
     } 
     return summary;
 }
-function buildLocIntSummary(name, ints) {                                       console.log('buildLocIntSummary. ints = %O', ints)
+function buildLocIntSummary(name, ints, focus) {                                //console.log('buildLocIntSummary. ints = %O', ints)
     const batStr = getTop3CitedBats(ints);  
     return buildIntSummary(name, batStr, ints.length);
 }
-function buildTaxaIntSummary(name, ints) {                                      console.log('buildTaxaIntSummary. ints = %O', ints)
+function buildTaxaIntSummary(name, ints, focus) {                               //console.log('buildTaxaIntSummary. ints = %O', ints)
     const batStr = getTop3CitedBats(ints);  
     return buildIntSummary(name, batStr, ints.length);
 }
-function buildSrcIntSummary(name, ints) {
-    // body...
+function buildSrcIntSummary(name, ints, focus) {                                //console.log('buildSrcIntSummary. ints = %O', ints)
+    if (!ints.length) { return ''; }
+    const batStr = getTop3CitedBats(ints);  
+    return buildIntSummary(name, batStr, ints.length, focus);
 }
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getTop3CitedBats(ints) {    
@@ -335,13 +337,16 @@ function getIntTop3ReportString(str, ttl) {
  * Cnt - Name (restrict char to one line, with tooltip)
  *     subjects (objects if in bat taxa view)
  */
-function buildIntSummary(name, bats, intCnt) { 
-    return `<div class="flex-row"><b>${intCnt} interactions - &nbsp;</b>
-        ${getNameDiv(name)}</div>${bats}`;
+function buildIntSummary(name, bats, intCnt, focus) { 
+    return `<div class="flex-row flex-wrap"title="${name}"><div><b>${intCnt} 
+        interactions - &nbsp;</b>${getName(name, focus)}</div></div>${bats}`;
 }
-function getNameDiv(name) {  
-    return `<div title="${name}"><b>
-        ${name.length > 30 ? name.substring(0, 30) + `...` : name}</b></div>`;
+function getName(name, focus) {  
+    const lngth = focus !== 'srcs' ? 30 : 77;
+    let nameStr = name.length > lngth ? name.substring(0, lngth) + `...)` : name;
+    const namePieces = nameStr.split(' - (');  
+    namePieces.splice(1, 0, '</b> - ('); 
+    return `<b>${namePieces.join('')}`;
 }
 /** ---------------- Location Marker/Popup Helpers -------------------------- */
 /**

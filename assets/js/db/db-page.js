@@ -1111,10 +1111,12 @@ function storeIntAndLocRcrds() {
  */
 function buildTableLocDataObj() {
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
+    let curBaseNodeName; //used for Source rows
     tblOpts.api.forEachNodeAfterFilter(getIntMapData);
     return mapData;  
     
-    function getIntMapData(row) {                                                  
+    function getIntMapData(row) {                         
+        if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }                         
         if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
         buildInteractionMapData(row.data, getDetachedRcrd(row.data.id));
     }
@@ -1123,7 +1125,7 @@ function buildTableLocDataObj() {
         let noLocCnt = 0;
         const data = { 
             intCnt: 0, 
-            name: getRowRcrdName(rowData, rcrd),
+            name: getRowRcrdName(rowData, rcrd, curBaseNodeName),
             rcrd: rcrd
         };
         rowData.children.forEach(addRowData); //interactions
@@ -1162,8 +1164,31 @@ function buildTableLocDataObj() {
     function addIntData(locObj, entData, geoId) {
         const mapDataProp = mapData[geoId].ints[entData.name]
         if (!mapData[geoId].ints[entData.name]) { initIntDataObj(entData, geoId); }
-        mapData[geoId].ints[entData.name] = 
-            mapData[geoId].ints[entData.name].concat(locObj.ints);
+        if (tParams.curRealm == 'auths') { return sanitizeAndAddInt(); }
+        addToIntObj(entData.name)
+
+        function addToIntObj(key) {
+            mapData[geoId].ints[key] = mapData[geoId].ints[key].concat(locObj.ints);
+        }
+        /**
+         * When author interactions are displayed, they often duplicate if two 
+         * authors attrbuted to the same work are shown. This combines the author
+         * names in that case, thus showing the interaction once.
+         */
+        function sanitizeAndAddInt() { 
+            const keyStr = entData.name.split(' - (')[1];
+            const curAuth = entData.name.split(' - (')[0];
+            const toCombine = Object.keys(mapData[geoId].ints).find(
+                key => key.includes(keyStr) && !key.includes(curAuth)); 
+            if (!toCombine) { addToIntObj(entData.name); 
+            } else { modifyAndCombineInt(toCombine, keyStr, curAuth); }
+        }
+        function modifyAndCombineInt(keyName, work, curAuth) {  
+            let auths = keyName.split(' - (')[0]; 
+            auths += `, ${curAuth} - (${work}`; 
+            mapData[geoId].ints[auths] = mapData[geoId].ints[keyName];
+            delete mapData[geoId].ints[keyName];  
+        }
     }
     function initIntDataObj(entData, geoId) {
         mapData[geoId].ints[entData.name] = [];
@@ -1182,10 +1207,17 @@ function buildTableLocDataObj() {
 function hasUnspecifiedRow(rowData) {
     return rowData.children[0].name.indexOf('Unspecified') !== -1;
 }
-function getRowRcrdName(rowData, rcrd) {
+function getRowRcrdName(rowData, rcrd, baseNode) {
+    if (tParams.curFocus === 'srcs') { return getSrcRowName(rowData, rcrd, baseNode)}
     return rowData.name.indexOf('Unspecified') !== -1 ?
         getUnspecifiedRowEntityName(rowData, rcrd) : 
         getRcrdDisplayName(rowData.name, rcrd);
+}
+/** Adds the base entity name before the name of the work, eg Author (work) */
+function getSrcRowName(rowData, rcrd, baseNode) {  
+    const work = getRcrdDisplayName(rowData.name, rcrd);
+    if (work == baseNode) { return baseNode; }
+    return `${baseNode} - (${work})`;
 }
 function getUnspecifiedRowEntityName(row, rcrd) {
     return tParams.curFocus === 'taxa' ? 
