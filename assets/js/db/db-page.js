@@ -1097,52 +1097,88 @@ function showLocOnMap(geoJsonId, zoom) {
  */
 function showTableRecordsOnMap() {                                               console.log('-----------showTableRecordsOnMap');
     updateUiForMappingInts();
+    storeIntAndLocRcrds();
     db_map.showInts(buildTableLocDataObj());
 }
-function buildTableLocDataObj() {
-    let data = [];
-    storeIntAndLocRcrds();
-    tblOpts.api.forEachNodeAfterFilter(getIntData); 
-    return data.filter(data => data);  
-    
-    function getIntData(row) {                                                  
-        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
-        const rowRcrd = getDetachedRcrd(row.data.id);  
-        data.push(getRowRcrdInteractionData(row.data, rowRcrd));
-    }
-} /* End buildTableLocDataObj */
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
     tParams.interaction = rcrds.interaction;
     tParams.location = rcrds.location;
 }
-function getRowRcrdInteractionData(rowData, rcrd) {
-    const data = { 
-        name: getRowRcrdName(rowData, rcrd),
-        locs: {/*id: { loc: rcrd, intCnt: 0 } */},
-        intsWithoutLocData: 0 
-    };
-    rowData.children.forEach(addIntData);
-    return data;
-    /** 
-     * If the interaction has geoJson data, it is added to the 'locs' prop. 
-     * Otherwise, it is added to the count of interactions without loc data.
-     */
-    function addIntData(childData) {        
-        if (!childData.location) { return ++data.intsWithoutLocData; }
-        const intRcrd = getDetachedRcrd(childData.id, tParams.interaction);
-        const loc = getDetachedRcrd(intRcrd.location, tParams.location);
-        if (!loc.geoJsonId) { return ++data.intsWithoutLocData; }
-        if (locDataObjNotSet(loc)) { initDataObj(loc); }
-        ++data.locs[loc.id].intCnt;
+/**
+ * Builds an object sorted by geoJsonId with all interaction data at that location.
+ * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
+ */
+function buildTableLocDataObj() {
+    const mapData = { 'none': { ttl: 0, ints: {/*name, rcrds */} }}; 
+    tblOpts.api.forEachNodeAfterFilter(getIntMapData);
+    return mapData;  
+    
+    function getIntMapData(row) {                                                  
+        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
+        buildInteractionMapData(row.data, getDetachedRcrd(row.data.id));
     }
-    function locDataObjNotSet(loc) {
-        return Object.keys(data.locs).indexOf(String(loc.id)) === -1;
+    function buildInteractionMapData(rowData, rcrd) {
+        const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
+        let noLocCnt = 0;
+        const data = { 
+            intCnt: 0, 
+            name: getRowRcrdName(rowData, rcrd),
+            rcrd: rcrd
+        };
+        rowData.children.forEach(addRowData); //interactions
+        addToMapDataObj(data, locs, noLocCnt);
+        /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
+        function addRowData(intRowData) {  
+            if (!intRowData.location) { return ++noLocCnt; }
+            const intRcrd = getDetachedRcrd(intRowData.id, tParams.interaction);
+            const loc = getDetachedRcrd(intRcrd.location, tParams.location);
+            addLocAndIntData(loc, intRcrd);
+            ++data.intCnt;
+        }
+        function addLocAndIntData(newLoc, intRcrd) {
+            if (!locs[newLoc.id]) { initLocObj() }
+            locs[newLoc.id].ints.push(intRcrd);
+
+            function initLocObj() {
+                locs[newLoc.id] = { loc: newLoc, ints: [] }; 
+            }
+        }
+    }    
+    function addToMapDataObj(entData, locs, noLocCnt) { 
+        mapData.none.ttl += noLocCnt;
+        for (let id in locs) {
+            addData(locs[id], entData);
+        }
     }
-    function initDataObj(loc) { 
-        data.locs[loc.id] = { loc: loc, intCnt: 0 };
+    function addData(locObj, entData) {
+        const geoId = locObj.loc.geoJsonId;
+        if (!geoId) { return mapData.none.ttl += locObj.ints.length; }
+        if (!mapData[geoId]) { initDataObj(geoId, locObj.loc); }
+        mapData[geoId].ttl += locObj.ints.length;
+        addIfNewLoc(locObj.loc, geoId);
+        addIntData(locObj, entData, geoId);
     }
-} /* End getRowRcrdInteractionData */
+    function addIntData(locObj, entData, geoId) {
+        const mapDataProp = mapData[geoId].ints[entData.name]
+        if (!mapData[geoId].ints[entData.name]) { initIntDataObj(entData, geoId); }
+        mapData[geoId].ints[entData.name] = 
+            mapData[geoId].ints[entData.name].concat(locObj.ints);
+    }
+    function initIntDataObj(entData, geoId) {
+        mapData[geoId].ints[entData.name] = [];
+    }
+    /** Some locations share geoJson with their parent, eg habitats. */
+    function addIfNewLoc(newLoc, geoId) {
+        const alreadyAdded = mapData[geoId].locs.find(
+            loc => loc.displayName === newLoc.displayName); 
+        if (alreadyAdded) { return; }  
+        mapData[geoId].locs.push(newLoc);
+    }
+    function initDataObj(geoId, loc) {
+        mapData[geoId] = { ints: {/* name: [rcrds] */}, locs: [loc], ttl: 0 };
+    }
+} /* End buildTableLocDataObj */
 function hasUnspecifiedRow(rowData) {
     return rowData.children[0].name.indexOf('Unspecified') !== -1;
 }

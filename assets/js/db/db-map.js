@@ -133,61 +133,29 @@ export function showInts(tableData) {                                           
     waitForStorageAndLoadMap(showIntsOnMap.bind(null, tableData));
 } 
 function showIntsOnMap(data) {                                                  console.log('showIntsOnMap! data = %O', data);
-    addIntMarkersToMap(data);
     addIntCntsToLegend(data);
+    addIntMarkersToMap(data);
     if (data.length === 1) { zoomAndFocusMap(data[0].locs); }
 }
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
-    data.forEach(trackIntCnts);
+    Object.keys(data).forEach(trackIntCnts);
     fillIntCntLegend(shwn, notShwn);
 
-    function trackIntCnts(entity) {
-        notShwn += entity.intsWithoutLocData;
-        shwn += getEntityIntCnt(entity.locs);
-    }
-    function getEntityIntCnt(locs) {
-        let ttl = 0;
-        for (let id in locs) {
-            ttl += locs[id].intCnt;
-        }
-        return ttl;
+    function trackIntCnts(geoId) {  console.log('geo data = %O', data[geoId]);
+        if (geoId === 'none') { notShwn += data[geoId].ttl; 
+        } else { shwn += data[geoId].ttl; }
     }
 }
 function addIntMarkersToMap(data) {                                             //console.log('addMarkersToMap. data = %O', data);
-    const sortedData = sortDataByGeoJson(data);                                 console.log('sortedData = %O', sortedData);
-    for (let geoId in sortedData) {
-        buildAndAddIntMarker(geoId, sortedData[geoId]);
+    for (let geoId in data) {
+        if (geoId === 'none') { continue; }
+        buildAndAddIntMarker(geoId, data[geoId]);
     }
 }
-/** Sorts interaction data by geoJsonId, ie map-marker location. */
-function sortDataByGeoJson(data) {                                              console.log('sort(ing)DataByGeoJson');
-    const sorted = {/* geoJsonId: {loc: loc, ints: [{name: , intCnt:}] */};
-    data.forEach(sortIntData);
-    return sorted;
-
-    function sortIntData(entity) {                                              
-        for (let id in entity.locs) {
-            addGeoData(entity, entity.locs[id], entity.locs[id].loc.geoJsonId);
-        }
-    }
-    function addGeoData(entity, locObj, geoId) {                                //console.log('addGeoData. [%s] entity = %O, locObj = %O', geoId, entity, locObj);
-        if (!sorted[geoId]) { sorted[geoId] = { locs:[], ints:[] }; }
-        addIfNewLoc(locObj.loc, geoId);
-        sorted[geoId].ints.push({
-            name: entity.name, intCnt: locObj.intCnt});
-    }
-    /** Some locations share geoJson with their parent, eg habitats. */
-    function addIfNewLoc(newLoc, geoId) {
-        const exists = sorted[geoId].locs.find(
-            loc => loc.displayName === newLoc.displayName); 
-        if (exists) { return; }  
-        sorted[geoId].locs.push(newLoc);
-    }
-} /* End sortDataByGeoJson */
 function buildAndAddIntMarker(geoId, data) {  
     const coords = getCoords(geoId);
-    const intCnt = getTotalInts(data);
+    const intCnt = data.ttl;
     const MapMarker = buildIntMarker(intCnt, coords, data);                     //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
     map.addLayer(MapMarker.layer);
 }
@@ -199,11 +167,6 @@ function buildIntMarker(intCnt, coords, data) {
 function getCoords(geoId) {
     const geoJson = _util.getGeoJsonEntity(geoId);                         
     return getLatLngObj(geoJson.centerPoint);
-}
-function getTotalInts(data) {
-    let ttl = 0;
-    data.ints.forEach(d => ttl += d.intCnt);
-    return ttl;
 }
 function zoomAndFocusMap(locs) {                                                //console.log('locs = %O', locs)
     const keys = Object.keys(locs);
