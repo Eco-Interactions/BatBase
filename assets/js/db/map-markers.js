@@ -345,8 +345,8 @@ function getName(name, focus) {
     const lngth = focus !== 'srcs' ? 30 : 77;
     let nameStr = name.length > lngth ? name.substring(0, lngth) + `...)` : name;
     const namePieces = nameStr.split(' - (');  
-    namePieces.splice(1, 0, '</b> - ('); 
-    return `<b>${namePieces.join('')}`;
+    namePieces.splice(1, 0, '</b><i> - ('); 
+    return `<b>${namePieces.join('')}</i>`;
 }
 /** ---------------- Location Marker/Popup Helpers -------------------------- */
 /**

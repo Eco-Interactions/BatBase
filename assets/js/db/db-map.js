@@ -144,9 +144,10 @@ export function showInts(focus, tableData) {                                    
     waitForStorageAndLoadMap(showIntsOnMap.bind(null, focus, tableData));
 } 
 function showIntsOnMap(focus, data) {                                           console.log('showIntsOnMap! data = %O', data);
+    const keys = Object.keys(data);                                     
     addIntCntsToLegend(data);
     addIntMarkersToMap(focus, data);
-    if (data.length === 1) { zoomAndFocusMap(data[0].locs); }
+    if (keys.length === 2) { zoomAndFocusMap(data[keys[0]].locs[0]); }
 }
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
@@ -179,10 +180,7 @@ function getCoords(geoId) {
     const geoJson = _util.getGeoJsonEntity(geoId);                         
     return getLatLngObj(geoJson.centerPoint);
 }
-function zoomAndFocusMap(locs) {                                                //console.log('locs = %O', locs)
-    const keys = Object.keys(locs);
-    if (!keys.length) { return; }
-    const loc = locs[Object.keys(locs)[0]].loc;                                 //console.log('loc = %O', loc);
+function zoomAndFocusMap(loc) {                                                 //console.log('loc = %O', loc)
     const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
     const zoom = getZoomLvl(loc);
     map.setView(latLng, zoom, {animate: true});  

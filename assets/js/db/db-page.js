@@ -1096,9 +1096,11 @@ function showLocOnMap(geoJsonId, zoom) {
  * data-table in map-view. Sends it to the map to handle the display.
  */
 function showTableRecordsOnMap() {                                               console.log('-----------showTableRecordsOnMap');
-    updateUiForMappingInts();
-    storeIntAndLocRcrds();
-    db_map.showInts(tParams.curFocus, buildTableLocDataObj());
+    $('#search-tbl').fadeTo('100', 0.3, () => {
+        updateUiForMappingInts();
+        storeIntAndLocRcrds();
+        db_map.showInts(tParams.curFocus, buildTableLocDataObj());
+    });
 }
 function storeIntAndLocRcrds() {
     const rcrds = _util.getDataFromStorage(['interaction', 'location']);
@@ -1237,7 +1239,7 @@ function updateUiForMapView() {
     disableTableButtons();
 }
 function updateUiForTableView() {
-    $('#search-tbl').show();
+    $('#search-tbl').fadeTo('100', 1);
     $('#map').hide();
     enableTableButtons();
 }
