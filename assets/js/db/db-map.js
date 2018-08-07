@@ -57,6 +57,7 @@ function buildAndShowMap(loadFunc) {                                            
     addMapTiles();
     addMarkerLegend();
     addIntCountLegend();
+    addTipsLegend();
     map.setView([22,22], 2); console.log('map built.')
     hidePopUpMsg();
 }
@@ -119,6 +120,16 @@ function fillIntCntLegend(shown, notShown) {
     legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
         ${notShown} without GPS data</span>`;
 }
+function addTipsLegend() {
+    const legend = L.control({position: 'bottomleft'});
+    legend.onAdd = addViewTips;
+    legend.addTo(map);
+}
+function addViewTips(map) {
+    const div = _util.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
+    div.innerHTML = '- Map Tips (Coming Soon) -'
+    return div;
+}
 export function initMap() {                                                     console.log('attempting to initMap')
     waitForStorageAndLoadMap(addAllIntMrkrsToMap);                                                 
 }
@@ -142,7 +153,7 @@ function addIntCntsToLegend(data) {
     Object.keys(data).forEach(trackIntCnts);
     fillIntCntLegend(shwn, notShwn);
 
-    function trackIntCnts(geoId) {  console.log('geo data = %O', data[geoId]);
+    function trackIntCnts(geoId) {  
         if (geoId === 'none') { notShwn += data[geoId].ttl; 
         } else { shwn += data[geoId].ttl; }
     }
