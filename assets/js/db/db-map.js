@@ -147,7 +147,7 @@ function showIntsOnMap(focus, data) {                                           
     const keys = Object.keys(data);                                     
     addIntCntsToLegend(data);
     addIntMarkersToMap(focus, data);
-    if (keys.length === 2) { zoomAndFocusMap(data[keys[0]].locs[0]); }
+    zoomIfAllInSameRegion(data);
 }
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
@@ -180,14 +180,32 @@ function getCoords(geoId) {
     const geoJson = _util.getGeoJsonEntity(geoId);                         
     return getLatLngObj(geoJson.centerPoint);
 }
-function zoomAndFocusMap(loc) {                                                 //console.log('loc = %O', loc)
-    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
-    const zoom = getZoomLvl(loc);
-    map.setView(latLng, zoom, {animate: true});  
-}
-function getZoomLvl(loc) {
-    const type = loc.locationType.displayName;
-    return type === 'Region' ? 4 : type === 'Country' ? 5 : 7; 
+function zoomIfAllInSameRegion(data) {  
+    let region, latLng;
+    getRegionData();
+    zoomIfSharedRegion();
+
+    function getRegionData() {
+        locRcrds = _util.getDataFromStorage('location');
+        for (let geoId in data) {
+            if (geoId === 'none') { continue; }
+            if (region === false) { return; }
+            getRegion(data[geoId], geoId);
+        }
+    }
+    function getRegion(geoData, geoId) {
+        geoData.locs.forEach(loc => {  
+            if (!latLng) { latLng = getCenterCoordsOfLoc(loc, geoId); }
+            const regionName = getRegionName(loc);
+            region = regionName == region || !region ? regionName : false;  
+        });
+    }
+    function getRegionName(loc) {
+        return loc.region ? loc.region.displayName : loc.displayName;  
+    }
+    function zoomIfSharedRegion() {  
+        if (region) { map.setView(latLng, 3, {animate: true}); }
+    }
 }
 /** ======================= Show Location on Map ============================ */
 /** Centers the map on the location and zooms according to type of location. */
