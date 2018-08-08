@@ -1072,8 +1072,6 @@ export function showLocInDataTable(loc) {                                       
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
     updateUiForMapView();       
-    $('#shw-map').attr('disabled', 'disabled')
-    $('#opts-col3 button').css('opacity', '.3');
     addNoteAboutHowToFilterInteractionsDisplayed();
     db_map.initMap();           
 }
@@ -1233,10 +1231,10 @@ function getParentName(rcrd) {
 }
 /* --- End showTableRecordsOnMap --- */
 function updateUiForMapView() {
+    disableTableButtons();
     $('#tool-bar').fadeTo(100, 1);
     $('#search-tbl').hide();
     $('#map').show();
-    disableTableButtons();
 }
 function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
@@ -1251,6 +1249,7 @@ function updateUiForMappingInts() {
 function updateBttnToReturnRcrdsToTable() {
     $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
+    $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
@@ -2911,18 +2910,16 @@ function finishTableAndUiLoad() {
     hideUnusedColFilterMenus();
 } 
 function enableTableButtons() {  
-    $(`#shw-chngd, .tbl-tools button, #shw-map, .tbl-tools input, 
-        button[name="futureDevBttn"]`).attr('disabled', false).css('cursor', 'pointer');
-    $('#fltr-tdy, #fltr-cstm').css('cursor', 'pointer');
+    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
+        .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools, #shw-chngd-ints, #shw-map, button[name="futureDevBttn"]').fadeTo(100, 1);
-    authDependentInit();
+    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, 1);
+    authDependentInit(); 
 }
 function disableTableButtons() {
-    $(`#shw-chngd-intsngd, #fltr-tdy, #fltr-cstm, .tbl-tools button, 
-        .tbl-tools input, button[name="futureDevBttn"]`)
+    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
         .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, #shw-chngd-ints, button[name="futureDevBttn"]').fadeTo(100, .3);
+    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
