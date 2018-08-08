@@ -188,6 +188,11 @@ input[type="radio"], input[type="checkbox"] {
     background-color: rgba(110, 204, 57, 0.9);
     font-size: 11px;
 }
+#filter-in-tbl-msg {
+    position: absolute;    
+    top: 101px;
+    left: 810px;
+}
 /*------- Buttons ---------------*/
 #filter-bttns {
     display: inline-flex;

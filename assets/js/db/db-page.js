@@ -1238,13 +1238,20 @@ function updateUiForMapView() {
 }
 function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
-    $('#map').hide();
+    $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
 }
 function updateUiForMappingInts() {
     updateUiForMapView();
-    updateBttnToReturnRcrdsToTable()
+    updateBttnToReturnRcrdsToTable();
+    addMsgAboutTableViewFiltering();
     enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));
+}
+function addMsgAboutTableViewFiltering() {
+    if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
+    const div = _util.buildElem('div', {id:'filter-in-tbl-msg'});
+    div.innerHTML = `Return to filter data shown.`;
+    $('#content-detail').prepend(div);
 }
 function updateBttnToReturnRcrdsToTable() {
     $('#shw-map').text('Return to Table View');
