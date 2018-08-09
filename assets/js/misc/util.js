@@ -314,7 +314,7 @@ export function getGeoJsonEntity(id) {
 }
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
-    $.ajax({
+    return $.ajax({
         method: "POST",
         url: url,
         success: successCb || dataSubmitSucess,
