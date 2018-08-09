@@ -47,6 +47,7 @@ function requireCss() {
 }
 function initDbPage () {    
     dataStorage = _util.getDataStorage();  
+    db_sync.init();
     clearDataStorageCheck();
     showPopUpMsg('Loading...');
     addDomEventListeners();
@@ -61,14 +62,9 @@ function clearDataStorageCheck() {
         clearDataStorage(dataKey);
     }
 }
-function clearDataStorage(dataKey) {
+function clearDataStorage(dataKey) {  
     dataStorage.clear();
     _util.populateStorage(dataKey, true);
-}
-/** Updates locally stored data with any modified data since the last page load. */
-function syncStoredData(pgDataUpdatedAt) {
-    var dataUpdatedAt = _util.getDataFromStorage('dataUpdatedAt');              //console.log("dataUpdatedAt = %O", dataUpdatedAt);
-    db_sync.sync(pgDataUpdatedAt);
 }
 /** 
  * When the stored data is reset from another file, the loading data popup 

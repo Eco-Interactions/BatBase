@@ -225,21 +225,21 @@ export function getDataFromStorage(props) {
     }
     function getStoredDataObj() {
         var data = {};
-        var allFound = props.every(function(prop){                          //console.log("getting [%s] data", prop)
+        var allFound = props.every(function(prop){                              //console.log("getting [%s] data", prop)
             return getPropData(prop);                             
         });  
         return allFound ? data : false;
         function getPropData(prop) {
                 var jsonData = dataStorage.getItem(prop) || false;                              
                 if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
-                data[prop] = JSON.parse(jsonData);                          //console.log("data for %s - %O", entity, data[entity]);
+                data[prop] = JSON.parse(jsonData);                              //console.log("data for %s - %O", entity, data[entity]);
                 return true;   
         }
     } /* End getDataObj */
 } /* End getDataFromStorage */
 export function getDataStorage() {
     const env = $('body').data('env');
-    const storageType = env === 'test' ? 'sessionStorage' : 'localStorage'; //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
+    const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
     if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
         return false; 
     } 
@@ -285,13 +285,15 @@ function storeGeoJson(geoData) {                                                
     if (geoData === undefined) { return downloadGeoJson(); }
     geoJson = geoData; 
 }
-function downloadGeoJson() {                                                    //console.log('downloading all geoJson data!');
+function downloadGeoJson(cb) {                                                  //console.log('downloading all geoJson data!');
     sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-}
-function storeServerGeoJson(data) {                                             console.log('server geoJson = %O', data.geoJson);
-    idb.set('geoJson', data.geoJson);
-    storeGeoJson(data.geoJson);
-    idb.set(geoJsonDataKey, true);
+    
+    function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
+        idb.set('geoJson', data.geoJson);
+        storeGeoJson(data.geoJson);
+        idb.set(geoJsonDataKey, true);
+        if (cb) { cb(); }
+    }
 }
 /**
  * Loops through the passed data object to parse the nested objects. This is 
@@ -305,12 +307,13 @@ function parseData(data) {
 export function isGeoJsonDataAvailable() {
     return geoJson;
 }
-export function updateGeoJsonData() { //TODO: When db_sync checks for entity updates, send geoJson updates here
+export function updateGeoJsonData(cb) {
     geoJson = false;
-    downloadGeoJson();
+    downloadGeoJson(cb);
 }
-export function getGeoJsonEntity(id) {
-    return JSON.parse(geoJson[id]);                                             console.log('        locGeoJson = %O', locGeoJson);
+export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
+    if (!isGeoJsonDataAvailable) { updateGeoJsonData(getGeoJsonEntity.bind(null, id))}
+    return JSON.parse(geoJson[id]);                                             
 }
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)

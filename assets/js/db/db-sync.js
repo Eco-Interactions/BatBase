@@ -1,6 +1,7 @@
 /**
  * Handles adding and removing data from local storage after edits via crud forms.
  * Exports:
+ *     init
  *     reset
  *     sync
  *     updateEditedData
@@ -12,8 +13,9 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
 let failed = { errors: [], updates: {}};
 let allRcrds = {};
 
-getServerDataLastUpdatedTimes();
-
+export function init() {
+    getServerDataLastUpdatedTimes();
+}
 /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
 function getServerDataLastUpdatedTimes() {
     _util.sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes);
@@ -97,7 +99,7 @@ function processUpdatedData() {
 /** Parses and sends the returned data to @storeUpdatedData. */ 
 function processUpdatedEntityData() { 
     const results = arguments[0]; 
-    const entity = Object.keys(results)[0];                                     console.log("[%s] data returned from server = %O", entity, results); 
+    const entity = Object.keys(results)[0];                                     //console.log("[%s] data returned from server = %O", entity, results); 
     const data = parseData(results[entity]); 
     storeUpdatedData(data, entity); 
 }
@@ -115,7 +117,7 @@ function storeDataAndRetryFailedUpdates(results) {
     processUpdatedData(results); 
     retryFailedUpdatesAndLoadTable();
 } 
-function retryFailedUpdatesAndLoadTable() {                                      console.log('retryFailedUpdatesAndLoadTable')
+function retryFailedUpdatesAndLoadTable() {                                     //console.log('retryFailedUpdatesAndLoadTable')
     retryFailedUpdates();
     initDataTable(); //TODO: send errors during init update to search page and show error message to user.
 }
@@ -123,7 +125,7 @@ function retryFailedUpdatesAndLoadTable() {                                     
  * Updates the stored data's updatedAt flag, and initializes the search-page 
  * table with the updated data @db_page.initDataTable. 
  */
-function initDataTable() {                                                     console.log('Finished updating! Loading search table.')
+function initDataTable() {                                                      //console.log('Finished updating! Loading search table.')
     storeData('pgDataUpdatedAt', getCurrentDate()); 
     db_page.initDataTable(); 
 }
@@ -136,7 +138,7 @@ export function updateEditedData(data, cb) {
  * all relevant stored data @updateEntityData. The stored data's lastUpdated 
  * flag, 'pgDataUpdatedAt', is updated. The callback returns to db_forms.
  */
-function updateStoredData(data, cb) {                                           console.log("updateStoredData data recieved = %O", data);
+function updateStoredData(data, cb) {                                           //console.log("updateStoredData data recieved = %O", data);
     updateEntityData(data);
     storeData('pgDataUpdatedAt', getCurrentDate());                             //console.log('pgDataUpdatedAt = ', getCurrentDate())
     retryFailedUpdates();
@@ -159,7 +161,7 @@ function updateEntityData(data) {
 }
 /*------------------ Add-to-Storage Methods ------------------------------*/
 /** Updates stored-data props related to a core-entity record with new data. */
-function addCoreEntityData(entity, rcrd) {                                      console.log("Updating Core entity. %s. %O", entity, rcrd);
+function addCoreEntityData(entity, rcrd) {                                      //console.log("Updating Core entity. %s. %O", entity, rcrd);
     var propHndlrs = getAddDataHndlrs(entity, rcrd);
     updateDataProps(propHndlrs, entity, rcrd);
     updateCoreData(entity, rcrd);
@@ -205,7 +207,7 @@ function getSourceType(entity, rcrd) {
     return _util.lcfirst(rcrd[type].displayName);
 }
 /** Sends entity-record data to each storage property-type handler. */
-function updateDataProps(propHndlrs, entity, rcrd) {                            console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
+function updateDataProps(propHndlrs, entity, rcrd) {                            //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
     var params = { entity: entity, rcrd: rcrd, stage: 'addData' };
     for (var prop in propHndlrs) {
         updateData(propHndlrs[prop], prop, params);
@@ -224,7 +226,7 @@ function updateCoreData(entity, rcrd) {                                         
 function addDetailEntityData(entity, rcrd) {                                    //console.log("Updating Detail entity. %s. %O", entity, rcrd);
     var update = {
         'author': { 'author': addToRcrdProp },
-        'citation': { 'citation': addToRcrdProp }, //Not currently necessary to add to citation type object.
+        'citation': { 'citation': addToRcrdProp }, //Not necessary to add to citation type object.
         'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
         'publisher': { 'publisher': addToRcrdProp },
         'geoJson': { 'geoJson': addGeoJson } 
@@ -317,18 +319,17 @@ function addContribData(prop, rcrd, entity) {                                   
     }
     storeData('source', srcObj);
 }
-function addGeoJson(prop, rcrd, entity) {                                       console.log('addGeoJson. prop = [%s], rcrd = %O, entity = [%s]', prop, rcrd, entity); //'geoJson', obvi, 'location'
-    idb.get('geoJson').then(storeGeoJson);
-    
-    function storeGeoJson(geoJson) {
-        geoJson[rcrd.id] = JSON.stringify(rcrd);
-        idb.set('geoJson', geoJson);
-        _util.updateGeoJsonData();
-    }
+/**
+ * As IDB is only used for geoJson at this point, the geoJson prob is set to false
+ * so that all geoJson will be fetched from the server fresh the next time it is
+ * used. This is to reduce the number of calls to the server.
+ */
+function addGeoJson(prop, rcrd, entity) {                                       //console.log('addGeoJson. prop = [%s], rcrd = %O, entity = [%s]', prop, rcrd, entity); //'geoJson', obvi, 'location'
+    idb.set('geoJson', false);
 }
 /*------------ Remove-from-Storage Methods -------------------------------*/
 /** Updates any stored data that was affected during editing. */
-function updateAffectedData(data) {                                             console.log("updateAffectedData called. data = %O", data);
+function updateAffectedData(data) {                                             //console.log("updateAffectedData called. data = %O", data);
     if (data.coreEdits && hasEdits(data.coreEdits)) { 
         updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
     }
@@ -340,7 +341,7 @@ function hasEdits(editObj) {
     return Object.keys(editObj).length > 0;
 }
 /** Updates relational storage props for the entity. */
-function updateAffectedDataProps(entity, rcrd, edits) {                         console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
+function updateAffectedDataProps(entity, rcrd, edits) {                         //console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
     var propHndlrs = getRmvDataPropHndlrs(entity);
     var params = { entity: entity, rcrd: rcrd, stage: 'rmvData' };
     for (var prop in edits) {                                               

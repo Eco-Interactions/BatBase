@@ -463,27 +463,18 @@ class CrudController extends Controller
      */
     private function setUpdatedAtTimes($entityData, &$em)
     {
-        $this->updateUpdatedAt($entityData->core, $em);
+        $this->setUpdatedAt($entityData->core, $em);
         if ($entityData->detailEntity) {
-            $this->updateUpdatedAt($entityData->detail, $em);
+            $this->setUpdatedAt($entityData->detail, $em);
         }
-        $this->setUpdatedAt(1, $em); //System updateAt
+        $this->setUpdatedAt('System', $em); 
         $em->flush();
     }
-    private function updateUpdatedAt($className, &$em)
-    {
-        $dateEntities = ["System", "Author", "Authority", "Citation", "CitationType", 
-            "ContentBlock", "Contribution", "Realm", "Feedback", "HabitatType", 
-            "ImageUpload", "Interaction", "InteractionType", "Level", "Location", 
-            "LocationType", "Naming", "NamingType", "Publication", "PublicationType", 
-            "Source", "SourceType", "Tag", "Taxon", "Taxonym"];
-        $entityDateId = array_search(ucfirst($className), $dateEntities) + 1;
-        $this->setUpdatedAt($entityDateId, $em);                                
-    }
-    private function setUpdatedAt($id, &$em)
+    private function setUpdatedAt($name, &$em)
     {
         $entity = $em->getRepository('AppBundle:SystemDate')
-            ->findOneBy(['id' => $id]);
+            ->findOneBy(['description' => $name]);
+        if (!$entity) { return; }
         $entity->setDateVal(new \DateTime());
         $em->persist($entity);
     }
