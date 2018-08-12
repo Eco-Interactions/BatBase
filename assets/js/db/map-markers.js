@@ -89,7 +89,8 @@ export class IntMarker extends Marker {
     constructor (focus, latLng, intData) {
         super(latLng);
         bindClassContextToMethods(this); 
-        this.popup.setContent(getIntPopupHtml(focus, intData));
+        this.data = intData;
+        this.focus = focus;
         this.self = L.marker(latLng, getCustomIcon())
             .bindPopup(this.popup, {closeOnClick: false});
         this.addMarkerEvents();
@@ -103,8 +104,11 @@ export class IntMarker extends Marker {
         this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
-    openPopup(e) {                                                              
+    openPopup(e) {                       
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        if (!this.popup.getContent()) { 
+            this.popup.setContent(getIntPopupHtml(this.focus, this.data));
+        }
         this.self.openPopup();
     }
     openAndFreezePopup(c) {
@@ -199,7 +203,8 @@ export class IntCluster extends Marker {
         super(latLng);
         bindClassContextToMethods(this); 
         this.map = map;
-        this.popup.setContent(getIntPopupHtml(focus, data));
+        this.focus = focus,
+        this.data = data
         this.popup.options.closeOnClick = false;
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
@@ -221,7 +226,10 @@ export class IntCluster extends Marker {
     }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
-        if (this.timeout) { clearMarkerTimeout(this.timeout); }  
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        if (!this.popup.getContent()) { 
+            this.popup.setContent(getIntPopupHtml(this.focus, this.data));
+        }
         this.map.openPopup(this.popup);
     }
     openAndFreezeClusterPopup(c) {
@@ -270,17 +278,25 @@ function getCustomIcon() {
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
     const locHtml = getLocNameHtml(intData.locs[0]);
-    const intHtml = getIntSummaryHtml(focus, intData.ints);
+    const intHtml = getIntSummaryHtml(focus, intData.ints, intData.ttl);
     return `<div>${locHtml}${intHtml}</div>`;
 }
-function getIntSummaryHtml(focus, intObj) {  
+function getIntSummaryHtml(focus, intObj, ttl) {  
     const bldrs = { locs: buildLocIntSummary, srcs: buildSrcIntSummary, 
         taxa: buildTaxaIntSummary };
     let summary = '';
+    let intCnt = 1;
 
     for (let name in intObj) {
+        if (intCnt > 4) { return truncateSummary(summary, ttl); }
         summary += bldrs[focus](name, intObj[name], focus);
+        intCnt++;
     } 
+
+    return summary;
+}
+function truncateSummary(summary, ttl) { 
+    summary += `<br><b>${ttl} interactions total.</b>`;
     return summary;
 }
 function buildLocIntSummary(name, ints, focus) {                                //console.log('buildLocIntSummary. ints = %O', ints)
@@ -302,7 +318,7 @@ function getTop3CitedBats(ints) {
     const allBats = {};
     getAllBatsCited();
     const bats = getTopThreeReportStr(allBats, buildBatSummaryStr);
-    return `Bats: ${bats}`;
+    return `Bat${Object.keys(allBats).length == 1 ? '' : 's'}: ${bats}`;
     
     function getAllBatsCited() {
         ints.forEach(int => trackBatInteraction(taxa[int.subject], allBats));
