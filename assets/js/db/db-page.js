@@ -16,6 +16,7 @@ import * as db_sync from './db-sync.js';
 import * as db_forms from './db-forms.js';
 import * as db_map from './db-map.js';
 import * as agGrid from '../../grid/ag-grid.js';
+import * as db_tips from './tips.js';
 /**
  * userRole = Stores the role of the user.
  * dataStorage = window.localStorage (sessionStorage for tests)
@@ -40,8 +41,7 @@ function requireCss() {
     require('../../css/lib/ag-grid.css');
     require('../../css/lib/theme-fresh.css');
     require('../../css/lib/confirmDate.css');
-    require('../../css/lib/flatpickr.min.css');
-    require('../../css/lib/introjs.min.css');
+    require('../../css/lib/flatpickr.min.css');    
     require('../../css/lib/selectize.default.css');
     require('../../css/search_db.css');
 }
@@ -87,7 +87,7 @@ function onDataReset(prevFocus) {
  */
 export function initSearchPage() {
     showLoadingDataPopUp();
-    showIntroWalkthrough();
+    db_tips.startWalkthrough(tParams.curFocus);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 function showLoadingDataPopUp() {
@@ -100,8 +100,6 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('button[name="reset-tbl"]').click(resetDataTable);
     $('#shw-map').click(showTableRecordsOnMap);
-    $("#strt-tut").click(startIntroWalkthrough);
-    $("#show-tips").click(showTips);
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
     $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
     $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
@@ -438,13 +436,17 @@ function resetTaxonRealm(val) {  console.log('resetTaxonRealm')
  * the taxon's record.
  */
 function storeAndReturnRealm(val) {
-    const realmId = val || getSelVal('Taxon Realm');
+    const realmId = val || getSelValOrDefault(getSelVal('Taxon Realm'));        //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = getDetachedRcrd(realmId);                            console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _util.populateStorage('curRealm', realmId);
     tParams.curRealm = realmId;
     tParams.realmLvl = realmLvl;
     return realmTaxonRcrd;
+}
+/** This catches errors in realm value caused by exiting mid-tutorial.  */
+function getSelValOrDefault(val) {
+    return !val ? 3 : isNaN(val) ? 3 : val;
 }
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
@@ -769,9 +771,9 @@ function onLocViewChange(val) {
  * Event fired when the source realm select box has been changed.
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
-function updateLocView(v) {                                                     //console.log('updateLocView. view = [%s] cb = [%O]', val, cb);
-    const val = v || getSelVal('Loc View');
-    resetLocUi();
+function updateLocView(v) {                                                     
+    const val = v || getSelVal('Loc View');                                     console.log('updateLocView. view = [%s]', val);
+    resetLocUi(val);
     resetCurTreeState();
     resetToggleTreeBttn(false);
     showLocInteractionData(val);
@@ -779,7 +781,7 @@ function updateLocView(v) {                                                     
 function resetLocUi(view) { 
     clearCol2();
     clearPreviousTable();
-    if (view === 'tree') { enableTableButtons(); }
+    if (view === 'tree') { updateUiForTableView(); }
 }
 /** 
  * Starts the Table build depending on the view selected.
@@ -1105,7 +1107,7 @@ function storeIntAndLocRcrds() {
  * Builds an object sorted by geoJsonId with all interaction data at that location.
  * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
  */
-function buildTableLocDataObj() {
+function buildTableLocDataObj() {  
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
     let curBaseNodeName; //used for Source rows
     tblOpts.api.forEachNodeAfterFilter(getIntMapData);
@@ -1236,6 +1238,7 @@ function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
+    enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
 }
 function updateUiForMappingInts() {
     updateUiForMapView();
@@ -1261,7 +1264,6 @@ function updateBttnToShowRcrdsOnMap() {
 function returnRcrdsToTable() {
     updateUiForTableView();
     updateBttnToShowRcrdsOnMap();
-    enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
 }
 /*------------------Source Search Methods ------------------------------------*/
 /**
@@ -2136,18 +2138,10 @@ function clearTableStatus() {
     $('#tbl-filter-status, #xtrnl-filter-status').empty();
 }
 function resetFilterStatusBar() {  
-    // if (tParams.persistFilters) { return; }  
     $('#xtrnl-filter-status').text('Filtering on: ');
     $('#tbl-filter-status').text('No Active Filters.');
     tParams.focusFltrs = [];
 }
-/** Persists active filters through the switch into map view. */
-// function persistFilters() {
-//     const activeFilters = [];
-//     addActiveExternalFilters(activeFilters);
-//     addActiveTableFilters(activeFilters);
-//     tParams.persistFilters = getFilterStatus(activeFilters);
-// }
 /*-------------------- Filter By Time Updated ----------------------------*/
 /**
  * The time-updated filter is enabled when the filter option in opts-col3 is 
@@ -2674,200 +2668,6 @@ function selectInteractions(rowNode) {
         rowNode.setSelected(true);
     }
 }
-/*========================= Walkthrough ======================================*/
-function showIntroWalkthrough() {
-    window.setTimeout(startIntroWalkthrough, 250); 
-}
-function startIntroWalkthrough(startStep){
-    if (misc.intro) { return; }                                                 //console.log("intro = %O", misc.intro)
-    buildIntro();
-    setTableState();
-    misc.intro.start();
-
-    function buildIntro() {                                                     //console.log("buildIntro called")
-        var startStep = startStep || 0; 
-        const lib = require('../libs/intro.js');  
-        misc.intro = lib.introJs();
-        misc.intro.onexit(function() { resetTableState(); });
-        misc.intro.oncomplete(function() { resetTableState(); });
-
-        misc.intro.setOptions({
-            showStepNumbers: false,
-            skipLabel: "Exit",
-            doneLabel: "I'm done.",
-            tooltipClass: "intro-tips", 
-            steps: [
-                {
-                    element: "#opts-col4", 
-                    intro: "<h2><center>Welcome to Bat Eco-Interactions Database Search Page!</center></h2><br>" +
-                        "<b>This tutorial is a demonstration the search functionality.</b><br><br>It is available to you by " +
-                        "clicking on the \"Tutorial\" button at any time. There are also \"Search tips\" for " +
-                        "creative searches to filter your results that you can explore once the tutorial ends.<br><br>" +
-                        "You can exit the tutorial by clicking 'Exit', or anywhere on the greyed background." +
-                        "<br><br><center><h2>Use your right arrow key or click 'Next' to start the tutorial.</h2></center>",
-                    position: "left",
-                },
-                {
-                    /*element: document.querySelector("#filter-opts"),*/
-                    element: "#filter-opts",
-                    intro: "<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3> <br> " + 
-                        "<b>The search results will be grouped under the outline tree in the first column of the table.</b><br><br>" +
-                        "The Location view has a Region-Country-Location outline. <br>The Source view groups by either publication or author."+
-                        "<br>The Taxon view groups by realm (bat, plant, or arthropod) and taxonomic rank.",
-                },
-                {
-                    element:"#sort-opts",
-                    intro: "<br><center>This tutorial will continue in the Taxon view with the Plant realm selected.</center><br>",
-                    position: "right"
-                },
-                {
-                    element: "#search-tbl",
-                    intro: "<b><center>When first displayed all interactions in the database are available for further filtering" + 
-                        " or sorting.</center></b><br>The <b>'Count'</b> column shows the number of interactions attributed " +
-                        "to each node in the outline tree.<br><br>The <b>'Subject Taxon'</b> column shows the bat taxon" +
-                        " that each interaction is attributed to.<br><br>The <b>'Object Taxon'</b> column shows the plant" +
-                        " or arthropod interacted <i>with</i>.<br><br> Columns can be resized by dragging the column header" +
-                        " dividers and rearranged by dragging the header iteself.<br><br>Note on Taxon names: Species use scientific " +
-                        "naming and all other taxa have their taxonomic rank prepended to their name.",
-                    position: "top"
-                },
-                {
-                    element: "#xpand-tree",   
-                    intro: "<b><center>Click here to expand and collapse the outline tree.</center></b><br><center>The tree can be expanded or collapsed" +
-                        " by a single level or by all at once.</center></b><br><center>You can try it now.</center>",
-                    position: "right"
-                },
-                {
-                    element: "#search-tbl",
-                    intro: "<h3><center>There are a few different ways to filter the results.</center></h3><br><b>Hovering over a " +
-                        "column header reveals the filter menu for that column.</b><br><br>Some columns can be filtered by text, " +
-                        "and others by selecting or deselecting values in that column.<br><br><center><b>Try exploring the filter menus " +
-                        "a bit now.</b></center>",
-                    position: "top"
-                },
-                {
-                    element: "button[name=\"reset-tbl\"]",
-                    intro: "<b>Click here at any point to clear all filters and reset the results.</b>",
-                    position: "right"
-                },
-                {
-                    element: "#opts-col2",
-                    intro: "<h3><center>View-specific filtering options are in this panel.</center></h3><br>" + 
-                        "<b>These dropdowns show all taxon levels that are used in the outline tree.</b> When first displayed, " +
-                        "all taxa for each level will be available in the dropdown selection lists.<br><br><b>You can focus  " +
-                        "on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The outline " +
-                        "will change to show the selected taxon as the top of the outline.<br><br><b>When a dropdown is used " +
-                        "to filter the data, the other dropdowns will also change to reflect the data shown.</b><br><br>- Dropdowns " +
-                        "below the selected level will contain only decendents of the selected Taxon.<br>- Dropdowns above the selected " +
-                        "level will have the direct ancestor selected, but will also contain all of the taxa at that higher level, allowing " +
-                        "the search to be broadened.<br>- Any levels that are not recorded in the selected Taxon's ancestry chain will have 'None' selected.",
-                    position: "left"
-                },
-                {
-                    element: "#opts-col3",
-                    intro: "<h3><center>Filter options in this panel are available in all views.</center></h3><br>" + 
-                        "<b>Check the box to filter interaction records by time updated/created.</b> The time defaults to post midnight " +
-                        "of the current date. Clicking on 'Custom' allows the selection of any date/time.<br><br>Hover over the text " +
-                        "at the bottom of this panel to see what future search options are planned.",
-                    position: "left"
-                },
-                {
-                    element: "button[name=\"csv\"]",
-                    intro: "<h3><center>As a member of batplant.org, data displayed in the table can be exported in csv format.</center></h3>" +
-                        "<br>The columns are exported in the order they are displayed in the table.<br><br>For Taxon exports, " +
-                        "the outline tree will be translated into additional columns at the start of each interaction. " +
-                        "The Location and Source outlines are not translated into the interaction data at this time.<br><br>" +
-                        "All columns to the right of the 'Count' column will export.<br><br>For an explanation of the csv " +
-                        "format and how to use the file, see a note at the bottom of the \"Search Tips\"",
-                    position: "left"
-                },
-            ]
-        });
-    } /* End buildIntro */
-    function setTableState() {
-        $('#search-tbl').css("height", "444px");
-        setSelVal('Focus', 'taxa');
-        $('#show-tips').off("click");
-        $('#search-focus').off("change");
-    }
-    function resetTableState() {
-        var focus = tParams.curFocus || "taxa";
-        $('#search-tbl').css("height", "888px");
-        $('#show-tips').click(showTips);
-        setSelVal('Focus', focus);
-        misc.intro = null;
-    }
-}   /* End startIntroWalkthrough */
-function initSearchTips() { 
-    $('#b-overlay-popup').html(searchTips());
-    bindEscEvents();
-}
-function showTips() {                                                           //console.log("show tips called.")
-    if (!$('#tips-close-bttn').length) { initSearchTips(); }
-    // addPopUpStyles();
-    $('#b-overlay-popup').addClass("tips-popup");
-    $('#b-overlay, #b-overlay-popup').fadeIn(500);
-    $('#show-tips').html("Hide Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-}
-function hideTips() {
-    $('#b-overlay').fadeOut(500, removeTips);
-    $('#show-tips').html("Search Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(showTips);
-    $('#b-overlay-popup').removeClass("tips-popup");
-    $('#b-overlay-popup').empty();
-}
-function removeTips() {                                                         //console.log("removeTips called.")
-    $('#b-overlay, #b-overlay-popup').css("display", "none");
-    $('#b-overlay-popup').removeClass("tips-popup");
-}
-function bindEscEvents() {
-    addCloseButton();
-    $(document).on('keyup',function(evt) {
-        if (evt.keyCode == 27) { hideTips(); }
-    });
-    $("#b-overlay").click(hideTips);
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-    $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
-}
-function addCloseButton() {
-    $("#b-overlay-popup").append(`
-        <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
-    $('#tips-close-bttn').click(hideTips)
-}
-function searchTips() {
-    return `
-        <h3>Tips for searching</h3>
-        <ul class="disc-list" style="font-size: 1.1em width: 755px margin: auto"> 
-            <br><li style="padding-left: 1em"><strong>To search by specific interaction or habitat types</strong> hover on 
-            “Interaction Type” header, click on the revealed filter menu, and select which type 
-            to include in your search. (<a href="definitions">Click here to see definitions</a> 
-            for each interaction and habitat type.)</li>
-            <br><li style="padding-left: 1em"><strong>Interested in knowing all the fruit species known from a bat species’ 
-            diet?</strong> Search for the bat species, then select only “Fruit” and “Seed” in the filter 
-            menu for the Tags column. This will provide you with a list of all plant species known to have their 
-            fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
-            <br><li style="padding-left: 1em"><strong>Or all of the flower species known from a bat species’ diet?</strong> 
-            Search for the bat species, then only “Flower” in the filter menu for the Tags column. This will provide 
-            you with a list of all plant species known to have their flowers visited, consumed, 
-            or pollinated by that particular bat species.</li>
-            <br><li style="padding-left: 1em"><strong>Interested in knowing all of the bat species known to visit or 
-            pollinate a particular plant species?</strong> Select Taxon for "Group interactions by" 
-            and then Plant for “Group Taxa by”. You can the optionally narrow to the most specific 
-            level you would like: family, genus, species. Next, select only “Flower” in the filter menu for the 
-            Tags column. This will provide information on the bats that visited 
-            the flower as well as those that have been confirmed pollinating it.</li>
-            <br><li style="padding-left: 1em"><b>Follow along with the tutorial for a guided tour 
-            of the search functionality.</b></li><br>
-        </ul>
-        <p style="font-size: 1.1em text-align: justify"> Note: "csv" stands for comma seperated values. The interaction
-        data in the table can be downloaded in this format, as a plain-text file containing tabular 
-        data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
-    `;
-}
 /*================= Utility ==================================================*/
 function clearCol2() {
     $('#opts-col2').empty();
@@ -3188,6 +2988,7 @@ function resetDataSearchTable(focus) {                                          
 /** Refactor: combine with resetDataSearchTable. */
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
     resetDataSearchTable(focus);
+    updateUiForTableView();
 }
 function selectSearchFocus(f) { 
     const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 

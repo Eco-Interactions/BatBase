@@ -296,7 +296,7 @@ function getIntSummaryHtml(focus, intObj, ttl) {
     return summary;
 }
 function truncateSummary(summary, ttl) { 
-    summary += `<br><b>${ttl} interactions total.</b>`;
+    summary += `<br><b>... ${ttl} interactions total.</b>`;
     return summary;
 }
 function buildLocIntSummary(name, ints, focus) {                                //console.log('buildLocIntSummary. ints = %O', ints)
@@ -420,7 +420,7 @@ function buildLocDetailsHtml(loc, subCnt) {
     const name = getLocNameHtml(loc);
     const cnt = ifCountryGetIntCnt(loc);
     const subs = null; //getSubLocsWithoutGpsData(subCnt);
-    const pLocData = (cnt||subs) ? [cnt, subs].filter(el=>el).join('<br>')+'<br>' : false;
+    const pLocData = (cnt||subs) ? [cnt, subs].filter(el=>el).join('<br>') : false;
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
     const bats = getBatsCitedHtml(loc);  

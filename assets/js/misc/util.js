@@ -41,59 +41,6 @@ export function stripString(text) {
     let str = text.trim();
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
 }
-/*---------- Object Helpers ----------------------------------------------*/
-export function snapshot(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-// function alphaProperties(obj) {
-//     var sortable=[];
-//     var returnObj = {};
-
-//     for(var key in obj) {                   // convert object into array
-//         if(obj.hasOwnProperty(key))
-//             sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-//     }
-    
-//     sortable.sort(function(a, b) {          // sort items by value
-//         var x=a[1].toLowerCase(),
-//             y=b[1].toLowerCase();
-//         return x<y ? -1 : x>y ? 1 : 0;
-//     });
-//     sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
-
-//     return returnObj;
-
-//     function rebuildObj(keyValAry) {
-//         var key = keyValAry[0];
-//         var val = keyValAry[1];
-//         returnObj[key] = val;
-//     }
-// }
-/*-------- - CSS Helpers ------------------------------------------------*/
-// function addOrRemoveCssClass(element, className, add) {
-//     if (add) { addCssClass(element, className);
-//     } else { removeCssClass(element, className); }
-// }
-// function removeCssClass(element, className) {
-//     if (element.className && element.className.length > 0) {
-//         var cssClasses = element.className.split(' ');
-//         var index = cssClasses.indexOf(className);
-//         if (index >= 0) {
-//             cssClasses.splice(index, 1);
-//             element.className = cssClasses.join(' ');
-//         }
-//     }
-// };
-// function addCssClass(element, className) {
-//     if (element.className && element.className.length > 0) {
-//         var cssClasses = element.className.split(' ');
-//         if (cssClasses.indexOf(className) < 0) {
-//             cssClasses.push(className);
-//             element.className = cssClasses.join(' ');
-//         }
-//     }
-//     else { element.className = className; }
-// };
 /*-------- - HTML Helpers ------------------------------------------------*/
 export function buildElem(tag, attrs) {                                         //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
     var elem = document.createElement(tag);
@@ -332,3 +279,57 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
+
+/*---------- Object Helpers ----------------------------------------------*/
+export function snapshot(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+// function alphaProperties(obj) {
+//     var sortable=[];
+//     var returnObj = {};
+
+//     for(var key in obj) {                   // convert object into array
+//         if(obj.hasOwnProperty(key))
+//             sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+//     }
+    
+//     sortable.sort(function(a, b) {          // sort items by value
+//         var x=a[1].toLowerCase(),
+//             y=b[1].toLowerCase();
+//         return x<y ? -1 : x>y ? 1 : 0;
+//     });
+//     sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
+
+//     return returnObj;
+
+//     function rebuildObj(keyValAry) {
+//         var key = keyValAry[0];
+//         var val = keyValAry[1];
+//         returnObj[key] = val;
+//     }
+// }
+/*-------- - CSS Helpers ------------------------------------------------*/
+// function addOrRemoveCssClass(element, className, add) {
+//     if (add) { addCssClass(element, className);
+//     } else { removeCssClass(element, className); }
+// }
+// function removeCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         var index = cssClasses.indexOf(className);
+//         if (index >= 0) {
+//             cssClasses.splice(index, 1);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+// };
+// function addCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         if (cssClasses.indexOf(className) < 0) {
+//             cssClasses.push(className);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+//     else { element.className = className; }
+// };

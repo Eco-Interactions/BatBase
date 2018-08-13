@@ -204,6 +204,10 @@ input[type="radio"], input[type="checkbox"] {
     background: linear-gradient(#fff, #d3d3d3);
     border-radius: 4px;
 }
+.intro-bttn {
+    width: 144px;
+    height: 22px;
+}
 button[name="csv"], #close-tos-bttn {
     align-self: flex-end;
 }
