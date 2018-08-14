@@ -162,7 +162,7 @@ function selectInitialSearchFocus() {                                           
 function setUpFutureDevInfoBttn() {
     const bttn = _util.buildElem('button', { name: 'futureDevBttn', 
             title: getFutureDevMsg(),
-            text: 'Hover for details about future search options.'});  
+            text: 'Hover here for future search options.'});  
     $(bttn).appendTo('#opts-col3 .bttm-row');        
 }
 function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
@@ -3031,6 +3031,7 @@ function clearPastHtmlOptions(tableBuilder) {
         $('#opts-col2').empty();
         $('#sort-opts').empty();
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
+        $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
         tableBuilder();
         if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     }

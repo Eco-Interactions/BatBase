@@ -714,16 +714,16 @@ label[for=fos_user_registration_form_about_me] {
     background: #2D7853;
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
-@media screen and (max-width: 1500px) { 
+@media screen and (max-width: 1500px) {
     #pg-container {
-        max-width: 1350px;
+        max-width: 1313px;
     }
     /*--- About DB Pg ---*/
     #about-db-maps, #db-new-data {
-        height: 540px;
-        width: 660px;
+        height: 529px;
+        width: 639px;
     }
     #sticky-hdr, #hdrmenu {
-        width: 1350px;
+        width: 1313px;
     }
 }
