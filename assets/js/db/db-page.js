@@ -1228,20 +1228,23 @@ function getParentName(rcrd) {
     return rcrd.displayName.split('(citation)')[0];
 }
 /* --- End showTableRecordsOnMap --- */
-function updateUiForMapView() {
+function updateUiForMapView(showingInts) {
     disableTableButtons();
     $('#tool-bar').fadeTo(100, 1);
     $('#search-tbl').hide();
     $('#map').show();
+    if (showingInts) { return; }
+    $('#shw-map').attr('disabled', 'disabled').css({'opacity': .3, 'cursor': 'default'});
 }
 function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
     enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
+    $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
 }
 function updateUiForMappingInts() {
-    updateUiForMapView();
+    updateUiForMapView('showingInts');
     updateBttnToReturnRcrdsToTable();
     addMsgAboutTableViewFiltering();
     enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));

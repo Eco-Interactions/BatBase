@@ -105,6 +105,14 @@ input[type="radio"], input[type="checkbox"] {
     margin: auto;
     overflow-y: scroll;
 }
+.tips-popup li {
+    display: block;
+    padding-left: 1em;
+}
+.tips-popup ul {
+    width: 755px;
+    margin: auto;
+}
 /**-------------- Data Table Styes -------------------------- */
 #db-view {
     height: 86vh;

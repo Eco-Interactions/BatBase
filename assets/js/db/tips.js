@@ -292,29 +292,30 @@ function addCloseButton() {
 function getSearchTipsHtml() {
     return `
         <h3>Tips for searching</h3>
-        <ul class="disc-list" style="font-size: 1.1em width: 755px margin: auto"> 
-            <br><li style="padding-left: 1em"><strong>To search by specific interaction or habitat types</strong> hover on 
-            “Interaction Type” header, click on the revealed filter menu, and select which type 
+        <ul> 
+            <br><li><strong>To search by specific interaction or habitat types</strong> hover on 
+            "Type” header on the table, click on the revealed filter menu, and select which type 
             to include in your search. (<a href="definitions">Click here to see definitions</a> 
             for each interaction and habitat type.)</li>
-            <br><li style="padding-left: 1em"><strong>Interested in knowing all the fruit species known from a bat species’ 
-            diet?</strong> Search for the bat species, then select only “Fruit” and “Seed” in the filter 
-            menu for the Tags column. This will provide you with a list of all plant species known to have their 
+            <br><li><strong>Interested in knowing all the fruit species known from a bat species’ 
+            diet?</strong> Search for the bat species by selecting "Taxon" in the "Group Interactions by"
+            field, then select "Bat" below in the "Group Taxon by" field, and then select only “Fruit” and “Seed” in the filter 
+            menu for the Tags column on the table. This will provide you with a list of all plant species known to have their 
             fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
-            <br><li style="padding-left: 1em"><strong>Or all of the flower species known from a bat species’ diet?</strong> 
-            Search for the bat species, then only “Flower” in the filter menu for the Tags column. This will provide 
-            you with a list of all plant species known to have their flowers visited, consumed, 
+            <br><li><strong>Or all of the flower species known from a bat species’ diet?</strong> 
+            Search for the bat species as described above, then select only “Flower” in the filter menu for the Tags column
+            on the table. This will provide you with a list of all plant species known to have their flowers visited, consumed, 
             or pollinated by that particular bat species.</li>
-            <br><li style="padding-left: 1em"><strong>Interested in knowing all of the bat species known to visit or 
-            pollinate a particular plant species?</strong> Select Taxon for "Group interactions by" 
-            and then Plant for “Group Taxa by”. You can the optionally narrow to the most specific 
-            level you would like: family, genus, species. Next, select only “Flower” in the filter menu for the 
-            Tags column. This will provide information on the bats that visited 
+            <br><li><strong>Interested in knowing all of the bat species known to visit or 
+            pollinate a particular plant species/genus/family?</strong> Select "Taxon" for "Group Interactions by" 
+            and then "Plant" for “Group Taxa by” in the field below. You can narrow the search by selecting
+            family, genus, or species in the menu to the right. Next, select only “Flower” in the filter menu for the 
+            Tags column on the table. This will provide information on the bats that visited 
             the flower as well as those that have been confirmed pollinating it.</li>
-            <br><li style="padding-left: 1em"><b>Follow along with the tutorial for a guided tour 
+            <br><li><b>Follow along with the tutorial for a guided tour 
             of the search functionality.</b></li><br>
         </ul>
-        <p style="font-size: 1.1em text-align: justify"> Note: "csv" stands for comma seperated values. The interaction
+        <p> Note: "csv" stands for comma separated values. The interaction
         data in the table can be downloaded in this format, as a plain-text file containing tabular 
         data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
     `.replace(/\n\s+/g, '');
