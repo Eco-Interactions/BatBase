@@ -24,6 +24,7 @@ class Marker {
         this.self.off('mouseout').on('mouseout', func);
     }
 } /* End Marker Super Class */
+
 export class LocMarker extends Marker {
     constructor (subLocCnt, latLng, loc, rcrds) {
         super(latLng);
@@ -31,51 +32,44 @@ export class LocMarker extends Marker {
         this.loc = loc;
         locRcrds = rcrds;
         this.subCnt = subLocCnt;
-        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
         this.self = L.marker(latLng, getCustomIcon())
-            .bindPopup(this.popup)
+            .bindPopup(this.popup, {closeOnClick: false})
             .on('mouseover', this.openPopup)
             .on('mouseenter', this.openPopup)
-            .on('click', this.openPopupAndDelayAutoClose)
+            .on('click', this.openAndFreezePopup)
+            .on('mouseout', this.delayPopupClose);
+        this.self.on('popupclose', this.onPopupClose);
+    }
+    addMarkerEvents() {
+        this.self
+            .on('mouseover', this.openPopup)
+            .on('mouseenter', this.openPopup)
+            .on('click', this.openAndFreezePopup)
             .on('mouseout', this.delayPopupClose);
     }
-    /**
-     * Replaces original popup with more details on the interactions at this
-     * location. Popup will remain open until manually closed, when the original
-     * location name popup will be restored. 
-     */
-    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
-        if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
-        this.popup.options.autoClose = false;
-        this.updateMouseout(Function.prototype);
-        this.openPopup(); 
-        this.self.on('popupclose', this.restoreLocNamePopup);
+    removeMarkerEvents() {
+        this.self.off('mouseover').off('click').off('mouseout');
     }
-    restoreLocNamePopup() {                                                     //console.log('restoring locName popup')                                        
-        window.setTimeout(restoreOrgnlPopup.bind(this), 400);
-        /** Event fires before popup is fully closed. Restores after closed. */
-        function restoreOrgnlPopup() {
-            this.updateMouseout(this.delayPopupClose);
-            this.popup.setContent(
-                getLocNamePopupHtml(this.loc, this.buildLocSummaryPopup));
-            this.popup.options.autoClose = true;
-            this.self.off('popupclose');
-        }
-    } /* End restoreLocNamePopup */
     /** --- Event Handlers --- */
     openPopup(e) {                                                              
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        if (!this.popup.getContent()) {
+            this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+        }
         this.self.openPopup();
     }
     /** 
      * Delays auto-close of popup if a nearby marker popup is opened while trying
      * to click the location summary button. 
      */
-    openPopupAndDelayAutoClose(e) {                                             //console.log('openPopupAndDelayAutoClose')
+    openAndFreezePopup(e) {                                                     //console.log('openPopupAndDelayAutoClose')
         this.self.openPopup();
         this.popup.options.autoClose = false;
-        window.setTimeout(() => this.popup.options.autoClose = true, 700);
+        this.removeMarkerEvents();
+    }
+    onPopupClose() {
+        this.popup.options.autoClose = true;
+        this.addMarkerEvents();
     }
     closePopup() { 
         this.self.closePopup();
@@ -84,6 +78,67 @@ export class LocMarker extends Marker {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End LocMarker Class */
+
+// export class LocMarker extends Marker {
+//     constructor (subLocCnt, latLng, loc, rcrds) {
+//         super(latLng);
+//         bindClassContextToMethods(this); 
+//         this.loc = loc;
+//         locRcrds = rcrds;
+//         this.subCnt = subLocCnt;
+//         this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+//         this.self = L.marker(latLng, getCustomIcon())
+//             .bindPopup(this.popup)
+//             .on('mouseover', this.openPopup)
+//             .on('mouseenter', this.openPopup)
+//             .on('click', this.openPopupAndDelayAutoClose)
+//             .on('mouseout', this.delayPopupClose);
+//     }
+//     /**
+//      * Replaces original popup with more details on the interactions at this
+//      * location. Popup will remain open until manually closed, when the original
+//      * location name popup will be restored. 
+//      */
+//     buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
+//         if (this.timeout) { clearMarkerTimeout(this.timeout); }
+//         this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+//         this.popup.options.autoClose = false;
+//         this.updateMouseout(Function.prototype);
+//         this.openPopup(); 
+//         this.self.on('popupclose', this.restoreLocNamePopup);
+//     }
+//     restoreLocNamePopup() {                                                     //console.log('restoring locName popup')                                        
+//         window.setTimeout(restoreOrgnlPopup.bind(this), 400);
+//         /** Event fires before popup is fully closed. Restores after closed. */
+//         function restoreOrgnlPopup() {
+//             this.updateMouseout(this.delayPopupClose);
+//             this.popup.setContent(
+//                 getLocNamePopupHtml(this.loc, this.buildLocSummaryPopup));
+//             this.popup.options.autoClose = true;
+//             this.self.off('popupclose');
+//         }
+//     } /* End restoreLocNamePopup */
+//     /** --- Event Handlers --- */
+//     openPopup(e) {                                                              
+//         if (this.timeout) { clearMarkerTimeout(this.timeout); }
+//         this.self.openPopup();
+//     }
+//     /** 
+//      * Delays auto-close of popup if a nearby marker popup is opened while trying
+//      * to click the location summary button. 
+//      */
+//     openPopupAndDelayAutoClose(e) {                                             //console.log('openPopupAndDelayAutoClose')
+//         this.self.openPopup();
+//         this.popup.options.autoClose = false;
+//         window.setTimeout(() => this.popup.options.autoClose = true, 700);
+//     }
+//     closePopup() { 
+//         this.self.closePopup();
+//     }
+//     delayPopupClose(e) {  
+//         this.timeout = window.setTimeout(this.closePopup, 700);
+//     }
+// } /* End LocMarker Class */
 
 export class IntMarker extends Marker {
     constructor (focus, latLng, intData) {
@@ -94,6 +149,7 @@ export class IntMarker extends Marker {
         this.self = L.marker(latLng, getCustomIcon())
             .bindPopup(this.popup, {closeOnClick: false});
         this.addMarkerEvents();
+        this.self.on('popupclose', this.onPopupClose);
     }
     addMarkerEvents() {
         this.self.on('mouseover', this.openPopup)
@@ -117,10 +173,12 @@ export class IntMarker extends Marker {
         this.removeMarkerEvents();
         this.self.openPopup();
     }
-    closePopup() { 
+    onPopupClose() {
         this.popup.options.autoClose = true;
-        this.self.closePopup();
         this.addMarkerEvents();
+    }
+    closePopup() { 
+        this.self.closePopup();
     }
     delayPopupClose(e) {  
         this.timeout = window.setTimeout(this.closePopup, 700);
@@ -133,30 +191,17 @@ export class LocCluster extends Marker {
         this.map = map;
         this.loc = loc;
         locRcrds = rcrds;
-        this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+        this.popup.options.closeOnClick = false;
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
-    }
-    /**
-     * Replaces original popup with more details on the interactions at this
-     * location. Popup will remain open until manually closed, when the original
-     * location name popup will be restored. 
-     */
-    buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
-        if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
-        this.popup.options.autoClose = false;
-        this.updateMouseout(Function.prototype);
         this.map.on('popupclose', this.closeLayerPopup);
-        this.removeClusterEvents();
-        this.map.openPopup(this.popup);
     }
     addClusterEvents() {
         this.self.on('clustermouseover', this.openClusterPopup)
             .on('clustermouseenter', this.openClusterPopup)
             .on('clustermouseout', this.delayClusterPopupClose)
-            .on('clusterclick', this.openPopupAndDelayAutoClose); 
+            .on('clusterclick', this.openAndFreezePopup); 
     }
     removeClusterEvents() {
         this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
@@ -168,22 +213,16 @@ export class LocCluster extends Marker {
     }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
-        clearTimeout(this.timeout); 
-        this.timeout = null;  
+        if (this.timeout) { clearMarkerTimeout(this.timeout); }
+        if (!this.popup.getContent()) {
+            this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+        }
         this.map.openPopup(this.popup);
     }
-    /** Event fires before popup is fully closed. Restores after closed. */
     closeLayerPopup(e) {  
         if (e.popup._latlng === this.latLng) { 
-            window.setTimeout(this.restoreOrgnlPopup.bind(this), 400);
+            this.addClusterEvents();
         }
-    }
-    restoreOrgnlPopup() {
-        super.updateMouseout(this.delayClusterPopupClose);
-        this.popup.setContent(getLocNamePopupHtml(this.loc, this.buildSummaryPopup));
-        this.popup.options.autoClose = true;
-        this.self.off('clusterpopupclose');
-        this.addClusterEvents();
     }
     closePopup(){
         this.map.closePopup();
@@ -191,13 +230,86 @@ export class LocCluster extends Marker {
     delayClusterPopupClose(e) {
         this.timeout = window.setTimeout(this.closePopup.bind(this), 700);
     }
-    openPopupAndDelayAutoClose(c) {
+    openAndFreezePopup(c) {  
         c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
-        this.openClusterPopup(c);
         this.popup.options.autoClose = false;
-        window.setTimeout(() => this.popup.options.autoClose = true, 400);
+        this.openClusterPopup(c);
+        this.removeClusterEvents();
     }
 } /* End LocCluster Class */
+
+// export class LocCluster extends Marker {
+//     constructor (map, intCnt, subCnt, latLng, loc, rcrds) {
+//         super(latLng);
+//         bindClassContextToMethods(this); 
+//         this.map = map;
+//         this.loc = loc;
+//         locRcrds = rcrds;
+//         this.popup.setContent(getLocNamePopupHtml(loc, this.buildSummaryPopup));
+//         this.self = L.markerClusterGroup();
+//         this.addClusterEvents();
+//         this.addMarkersToCluser(intCnt);
+//     }
+//     /**
+//      * Replaces original popup with more details on the interactions at this
+//      * location. Popup will remain open until manually closed, when the original
+//      * location name popup will be restored. 
+//      */
+//     buildSummaryPopup() {                                                       //console.log('buildLocSummaryPopup. SUPER this = %O', this);
+//         if (this.timeout) { clearMarkerTimeout(this.timeout); }
+//         this.popup.setContent(getLocationSummaryHtml(this.loc, this.subCnt));
+//         this.popup.options.autoClose = false;
+//         this.updateMouseout(Function.prototype);
+//         this.map.on('popupclose', this.closeLayerPopup);
+//         this.removeClusterEvents();
+//         this.map.openPopup(this.popup);
+//     }
+//     addClusterEvents() {
+//         this.self.on('clustermouseover', this.openClusterPopup)
+//             .on('clustermouseenter', this.openClusterPopup)
+//             .on('clustermouseout', this.delayClusterPopupClose)
+//             .on('clusterclick', this.openPopupAndDelayAutoClose); 
+//     }
+//     removeClusterEvents() {
+//         this.self.off('clustermouseover').off('clustermouseout').off('clusterclick'); 
+//     }
+//     addMarkersToCluser(intCnt) {  
+//         for (let i = 0; i < intCnt; i++) {  
+//             this.self.addLayer(L.marker(this.latLng)); 
+//         }
+//     }
+//     /** --- Event Handlers --- */
+//     openClusterPopup(c) {
+//         clearTimeout(this.timeout); 
+//         this.timeout = null;  
+//         this.map.openPopup(this.popup);
+//     }
+//     /** Event fires before popup is fully closed. Restores after closed. */
+//     closeLayerPopup(e) {  
+//         if (e.popup._latlng === this.latLng) { 
+//             window.setTimeout(this.restoreOrgnlPopup.bind(this), 400);
+//         }
+//     }
+//     restoreOrgnlPopup() {
+//         super.updateMouseout(this.delayClusterPopupClose);
+//         this.popup.setContent(getLocNamePopupHtml(this.loc, this.buildSummaryPopup));
+//         this.popup.options.autoClose = true;
+//         this.self.off('clusterpopupclose');
+//         this.addClusterEvents();
+//     }
+//     closePopup(){
+//         this.map.closePopup();
+//     }
+//     delayClusterPopupClose(e) {
+//         this.timeout = window.setTimeout(this.closePopup.bind(this), 700);
+//     }
+//     openPopupAndDelayAutoClose(c) {
+//         c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
+//         this.openClusterPopup(c);
+//         this.popup.options.autoClose = false;
+//         window.setTimeout(() => this.popup.options.autoClose = true, 400);
+//     }
+// } /* End LocCluster Class */
 export class IntCluster extends Marker {
     constructor (map, intCnt, focus, latLng, data) {
         super(latLng);
@@ -209,6 +321,7 @@ export class IntCluster extends Marker {
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
+        this.map.on('popupclose', this.closeLayerPopup);
     }
     addClusterEvents() {
         this.self.on('clustermouseover', this.openClusterPopup)
@@ -236,14 +349,13 @@ export class IntCluster extends Marker {
         if (this.timeout) { clearMarkerTimeout(this.timeout); } 
         c.layer.unspiderfy(); //Prevents the 'spiderfy' animation for contained markers
         this.popup.options.autoClose = false;
-        this.map.on('popupclose', this.closeLayerPopup);
         this.removeClusterEvents();
         this.map.openPopup(this.popup);
     }
     /** Event fires before popup is fully closed. Restores after closed. */
     closeLayerPopup(e) {  
         if (e.popup._latlng === this.latLng) { 
-            this.closePopup()
+            this.addClusterEvents();
         }
     }
     closePopup(){

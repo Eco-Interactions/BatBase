@@ -127,7 +127,9 @@ function addTipsLegend() {
 }
 function addViewTips(map) {
     const div = _util.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
-    div.innerHTML = '- Map Tips (Coming Soon) -'
+    $(div).css({'text-align': 'center'});
+    div.innerHTML = `<b>- Map Tips -</b>
+        - Click on a marker to keep popup open.`;
     return div;
 }
 export function initMap() {                                                     console.log('attempting to initMap')

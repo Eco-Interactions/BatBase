@@ -2986,7 +2986,7 @@ function resetDataSearchTable(focus) {                                          
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
-    selectSearchFocus(null, focus);
+    selectSearchFocus(focus);
 }
 /** Refactor: combine with resetDataSearchTable. */
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
@@ -3031,7 +3031,7 @@ function clearPastHtmlOptions(tableBuilder) {
         $('#opts-col2').empty();
         $('#sort-opts').empty();
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
-        $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
+        updateUiForTableView();
         tableBuilder();
         if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     }

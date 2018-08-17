@@ -238,14 +238,14 @@ function setTableState() { //handle potentially opened map
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.addItem('taxa');
     window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
-    db_page.initDataTable(focus);
+    // db_page.initDataTable(focus);
     $('#show-tips').off("click");
 }
 function resetTableState() { //handle potentially opened map
     focus = focus || "taxa";
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
-    $('#search-focus')[0].selectize.addItem(focus);
+    $('#search-focus')[0].selectize.addItem(focus, 'silent');
     db_page.initDataTable(focus);
     intro = null;
 }
@@ -315,7 +315,7 @@ function getSearchTipsHtml() {
             <br><li><b>Follow along with the tutorial for a guided tour 
             of the search functionality.</b></li><br>
         </ul>
-        <p> Note: "csv" stands for comma separated values. The interaction
+        <p> Note: "csv" stands for comma separated values. The interaction 
         data in the table can be downloaded in this format, as a plain-text file containing tabular 
         data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
     `.replace(/\n\s+/g, '');
