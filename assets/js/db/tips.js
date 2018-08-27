@@ -49,40 +49,43 @@ function getIntroOptions() {
 function getSteps(step) {
     return [ 
         {
-            element: '#strt-tut', 
-            intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database Search Page!</center></b><br>
-                <b>This tutorial demonstrates the various database features and search tools available.</b> There 
-                are also "Search tips" for creative searches to explore after.<br><br>
-                <b>Use the right arrow key or click 'Next' to move through the slides.</b> You can exit the 
-                tutorial by clicking 'Exit', or anywhere on the greyed background.<br><br>
-                <b><center>Move to the next slide or select an area to begin.<br></center></b><br>
-                <button class="intro-bttn tbl-bttn" style="margin: 0 25px 5px 45px">Full Tutorial</button><button 
-                class="intro-bttn tbl-bttn">Table View</button>
-                <button class="intro-bttn tbl-bttn" style="margin: 0 25px 5px 45px">Map View</button><button 
-                class="intro-bttn tbl-bttn" disabled="disabled" title="Coming soon" 
-                    style="opacity: 0.3; cursor: default;">Data Entry</button>`,
+            element: '#opts-col4', 
+            intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database 
+                Search Page!</center></b><br><b>This tutorial demonstrates the 
+                various database features and search tools available.</b> There 
+                are also "Search tips" to help you refine your search in various 
+                ways.<br><br><b>Use the right arrow key or click 'Next' to move 
+                through the slides.</b> You can exit the tutorial by clicking 
+                'Exit', or anywhere on the greyed background.<br><br><b><center>
+                Move to the next slide or select an area to begin.<br></center>
+                </b><br><button class="intro-bttn tbl-bttn" style="margin: 0 25px 
+                5px 45px">Full Tutorial</button><button class="intro-bttn tbl-bttn">
+                Table View</button><button class="intro-bttn tbl-bttn" style="
+                margin: 0 25px 5px 45px">Map View</button><button class="intro-bttn 
+                tbl-bttn" disabled="disabled" title="Coming soon" style="opacity: 
+                0.3; cursor: default;">Data Entry</button>`,
             position: 'left',
+            setUpFunc: addBttnEvents
         },
         {
             element: '#filter-opts',
-            intro: `<h3><center>The interaction records are displayed by either <br>Location, Source, or Taxon.<center></h3>
-                <br>
-                <b>Location</b> - Where the interaction(s) were observed. Can be displayed in 
-                a Region-Country-Location structure or on a map. You can select a Region and/or a Country to 
-                narrow your search to a particular part of the world. 
-                <br><br>
-                <b>Source</b> - Where the data was obtained. You can select Publications, which will list journals,
+            intro: `<h3><center>The interaction records are displayed by either 
+                <br>Location, Source, or Taxon.<center></h3><br><b>Location</b> 
+                - Where the interaction(s) were observed. Can be displayed in a 
+                Region-Country-Location structure or on a map. You can select a 
+                Region and/or a Country to narrow your search to a particular 
+                part of the world. <br><br><b>Source</b> - Where the data were 
+                obtained. You can select Publications, which will list journals,
                 books, etc or Authors, which will provide a list of authors.
-                <br><br>
-                <b>Taxon</b> - The Bat/Plant/Arthropod in the interaction. Taxon
-                is the default mode and where we will begin.`,
+                <br><br><b>Taxon</b> - The Bat/Plant/Arthropod in the interaction. 
+                Taxon is the default mode and where we will begin.`,
             position: 'right'
         },
         {
             element:'#sort-opts',
             intro: `<h3><center>Select the Taxon Tree grouping.<center></h3>
-                <br>Once Taxon has been selected in the “Group Interactions by” box, 
-                select one of the following: Bat, Plant, or Arthropod.<br><br>
+                <br>Once Taxon has been selected in the “Group Interactions by” 
+                box, select one of the following: Bat, Plant, or Arthropod.<br><br>
                 We have selected “Plant” for this tutorial.`,
             position: 'right'
         },
@@ -90,133 +93,161 @@ function getSteps(step) {
             element: '#search-tbl',
             intro: `<b><center>All interactions that involve plants are displayed 
                 and are available for further sorting and filtering.</center></b>
-                <br>"Cnt" (count) shows the number of interactions attributed to each 
-                Taxon, Location, or Source.<br><br>"Subject Taxon" shows the bat taxon
-                that each interaction is attributed to.<br><br>"Object Taxon" shows the plant
-                or arthropod interacted with.<br><br>Columns can be resized by dragging the column header
-                dividers and rearranged by dragging the header iteself.<br><br>Note on Taxon names: 
-                Species names include the genus name and names at all other
-                levels have the level added to the start.`,
+                <br>"Cnt" (count) shows the number of interactions attributed to 
+                each Taxon, Location, or Source.<br><br>"Subject Taxon" shows the 
+                bat taxon that each interaction is attributed to.<br><br>"Object 
+                Taxon" shows the plant or arthropod interacted with.<br><br>
+                Columns can be resized by dragging the column header dividers and 
+                rearranged by dragging the header iteself.<br><br>Note on Taxon 
+                names: Aside from genus species binomials, names at all other 
+                taxonomic levels begin with the level (e.g., Family Acanthaceae 
+                for the plant family Acanthaceae).`,
             position: 'top'
         },
         {
             element: '#xpand-tree',   
-            intro: `<center>The table can be expanded or collapsed by a single level or all at once.
-                <br><br>You can try it now.</center>`,
+            intro: `<center>The table can be expanded or collapsed by a single 
+                level or all at once.<br><br>You can try it now.</center>`,
             position: 'right'
         },
         {
             element: '#search-tbl',
-            intro: `<h3><center>Table header filters.</center></h3><br>Hovering over a 
-                column header reveals the filter menu for that column.<br><br>Some columns can be filtered by text, 
-                others by selecting or deselecting values in that column.<br><br><center><b>Try exploring the filter menus 
-                a bit now.</b></center>`,
+            intro: `<h3><center>Column filters.</center></h3><br>Hovering over a 
+                column header reveals the filter menu for that column.<br><br>
+                Some columns can be filtered by text, others by selecting or 
+                deselecting values in that column.<br><br><center><b>Try 
+                exploring the filter menus a bit now.</b></center>`,
             position: 'top'
         },
         {
             element: 'button[name="reset-tbl"]',
-            intro: '<b>Click here at any point to clear all filters and reset the results.</b>',
+            intro: `<b>Click here at any point to clear all filters and reset 
+                the results.</b>`,
             position: 'right'
         },
         {
             element: '#opts-col2',
-            intro: `<h3><center>Dynamic filtering options are in this panel.</center></h3><br>
-                <b>In Taxon mode, these dropdowns show all taxon levels that are used in the Taxon Tree.</b> When first displayed, 
-                all taxa for each level will be available in the dropdown selection lists.<br><br><b>You can focus  
-                on any part of the taxon tree by selecting a specific taxon from a dropdown.</b> The Taxon Tree
-                will change to show the selected taxon as the top of the tree.<br><br><b>When a dropdown is used 
-                to filter the data, the other dropdowns will also change to reflect the data shown.</b><br><br>- Dropdowns 
-                below the selected level will contain only decendants of the Taxon.<br>- Dropdowns above the selected 
-                level will have the direct ancestor selected.<br>- Any levels that are not recorded in the Taxon's 
-                ancestry chain will have 'None' selected.`, //, but will also contain all of the taxa at that higher level, allowing the search to be broadened
+            intro: `<h3><center>Dynamic filtering options are in this panel.
+                </center></h3><br><b>In Taxon mode, these dropdowns show all 
+                taxon levels that are used in the Taxon Tree.</b> When first 
+                displayed, all taxa for each level will be available in the 
+                dropdown selection lists.<br><br><b>You can focus on any part of 
+                the taxon tree by selecting a specific taxon from a dropdown.</b> 
+                The Taxon Tree will change to show the selected taxon as the top 
+                of the tree.<br><br><b>When a dropdown is used to filter the data, 
+                the other dropdowns will also change to reflect the data shown.
+                </b><br><br>- Higher level rankings will be fixed and only lower 
+                ones associated with the selected taxon will be shown.<br>- Any 
+                levels that are not recorded in the Taxon's ancestry chain will 
+                have 'None' selected.`, 
             position: 'right'
         },
         {
             element: '#shw-chngd-ints',
-            intro: `<h3><center>Check this box to filter interaction records by time updated/created.</center></h3><br>
-                <b></b>The time defaults to the current date. Clicking on 'Custom' allows the selection of any date/time.<br><br>
-                Only interactions created/updated after the selected time will be displayed.`,
+            intro: `<h3><center>Check this box to filter interaction records by 
+                time updated/created.</center></h3><br><b></b>The time defaults 
+                to the current date. Clicking on 'Custom' allows the selection 
+                of any date/time.<br><br>Only interactions created/updated after 
+                the selected time will be displayed.`,
             position: 'left'
         },
         {
             element: 'button[name="csv"]',
-            intro: `<h3><center>As a member of batplant.org, data displayed in the table can be exported in csv format.</center></h3>
-                <br>The columns are exported in the order they are displayed in the table below.<br><br>For an explanation of the csv
-                format and how to use the file, see a note at the bottom of the "Search Tips"`,
+            intro: `<h3><center>As a member of batplant.org, data displayed in 
+                the table can be exported in csv format.</center></h3><br>The 
+                columns are exported in the order they are displayed in the table 
+                below.<br><br>For an explanation of the csv format and how to 
+                use the file, see a note at the bottom of the "Search Tips"`,
             position: 'left'
         },
         {
             element: '#shw-map',
-            intro: `<h3><center>Interactions in the table can be displayed on a map.</h3><br>
-                After filtering the interactions, click here to display them. 
-                <br><br><center>You can try it now.</center>`,
+            intro: `<h3><center>Interactions in the table can be displayed on a 
+                map.</h3><br>After filtering the interactions, click here to 
+                display them geographically.<br><br><center>You can try it now.
+                </center>`,
             position: 'left'
         },
         {
             element: '#db-view',
-            intro: `<h3><center>On the map, there is a marker for each location with interactions
-                in the filtered table data.</h3></center><br>
-                Mouse over or click on a marker to see a popup summary of the interactions.<br><br>
-                The summary shows details from 4 interaction sets at the location. 
-                Details include the name of the Taxon/Location/Source filtered to,
-                the count of their interactions, and the 
-                top 3 most reported bats in the set of interactions.
-                <br><br>Click on a marker to keep its popup open.<br><br>`,
-            position: 'top'
+            intro: `<h3><center>On the map, a marker identifies each location 
+                with interactions from the filtered data.</h3></center><br>
+                <b>Mouse over or click on a marker to see a popup summary of the 
+                interactions.</b><br><br>The summary shows details from 4 
+                interaction sets at the location. Details include the name of the 
+                Taxon/Location/Source filtered to, the count of their interactions, 
+                and the top 3 most reported bats in the set of interactions.<br>
+                <br><b>Click on a marker to keep its popup open.<b><br><br>`,
+            position: 'top',
+            setUpFunc: loadIntsOnMap
         },
         {
             element: '#shw-map',
-            intro: `<h3><center>Click here to return to the interaction table data or to filter 
-                the interactions further.</center></h3>`,
+            intro: `<h3><center>Click here to return to the interaction table 
+                data or to filter the interactions further.</center></h3>`,
             position: 'top'
         },
         {
             element: '#opts-col1',
-            intro: `<h3><center>The map is also available in Location mode.</center></h3><br>
-                Group interactions by "Location" and then select "Map Data" from the "View all as:" box.<br><br>
-                <b>Every interaction with GPS data is loaded in the map.</b>`,
-            position: 'right'
-        },
-        {
-            element: '#map',
-            intro: `<h3>There is a marker for each region, country, and sub-location with interactions in the database.</h3><br>
-                Mouse over or click on a marker to see a popup summary of the location, inluding the top 
-                three most frequent bat taxa and habitat types recorded at the location.<br><br>
-                Clicking on 'Show Interactions In Data-Table' will open the table on the selected location
-                and show every interaction recorded there.` ,
-            position: 'top'
+            intro: `<h3><center>The map is also available in Location mode.
+                </center></h3><br>Group interactions by "Location" and then select 
+                "Map Data" from the "View all as:" box.<br><br><b>Every 
+                interaction with GPS data is loaded in the map.</b>`,
+            position: 'right',
+            setUpFunc: loadLocView.bind(null, 'map')
         },
         {
             element: '#db-view',
-            intro: `<center><h3>Location mode also has an additional "map" column.</h3></center><br>
-                All locations with GPS data have a map pin in this column. Click one to load
-                the Map View centered on that location with its popup opened.<br><br>
-                <center>You can try it now.</center>` ,
-            position: 'top'
+            intro: `<h3>There is a marker for each region, country, and sub-
+                location with interactions in the database.</h3><br><b>Mouse over 
+                or click on a marker to see a popup summary of the location</b>, 
+                including the top three most frequent bat taxa and habitat types 
+                recorded at the location.<br><br><b>Clicking on 'Show Interactions 
+                In Data-Table' will open the table on the selected location</b>
+                and show every interaction recorded there.` ,
+            position: 'top',
+            setUpFunc: loadLocView.bind(null, 'map')
+        },
+        {
+            element: '#db-view',
+            intro: `<center><h3>Location mode also has an additional "map" column.
+                </h3></center><br>All locations with GPS data have a map pin in 
+                this column. Click one to load the Map View centered on that 
+                location with its popup opened.<br><br><center>You can try it 
+                now.</center>` ,
+            position: 'top',
+            setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
             element: '#opts-col4',
-            intro: `<b><center>Thank you for taking the time to learn about the <br> Bat Eco-Interactions 
-                Database Search Page!</b></center><br>
-                You can start this tutorial again at anytime. There are also "Search tips" for 
-                creative searches that you can explore. <br><br>
-                <b><center>Register and log in to leave us feedback.<br> We'd love to hear from you!</b></center>` ,
+            intro: `<b><center>Thank you for taking the time to learn about the 
+                <br>Bat Eco-Interactions Database Search Page!</b></center><br>
+                You can start this tutorial again at anytime. There are also 
+                "Search tips" to help you refine your search in various ways.<br>
+                <br><b><center>Register and log in to leave us feedback.<br> 
+                We'd love to hear from you!</b></center>` ,
             position: 'left'
         },
     ];
 }
-function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = ', stepElem, intro._currentStep);
-    if (stepElem.id === 'strt-tut') { addBttnEvents(); } 
-    if (stepElem.id === 'db-view'&& intro._currentStep === 15) { loadLocView('tree'); } 
-    if (stepElem.id === 'db-view' && intro._currentStep === 11) { loadMapView(); } 
-    if (stepElem.id === 'opts-col1') { loadLocView('map'); } 
+function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
+    const stepConfg = intro._introItems[intro._currentStep];
+    if (!stepConfg.setUpFunc) { return; }
+    stepConfg.setUpFunc();
 }
-function loadMapView() {                                                        //console.log('loadMapView. display = ', $('#map')[0].style.display)
+function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
 }
 function loadLocView(view) {
-    $('#search-focus')[0].selectize.addItem('locs');
-    window.setTimeout(() => { $('#sel-realm')[0].selectize.addItem(view)}, 400);
+    if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
+        $('#search-focus')[0].selectize.addItem('locs');
+    }
+    window.setTimeout(loadLocRealm(view), 400);  
+}
+function loadLocRealm(view) {
+    if ($('#sel-realm')[0].selectize.getValue() !== view) {
+        $('#sel-realm')[0].selectize.addItem(view);
+    }
 }
 function addBttnEvents() {  
     const map = {  
@@ -234,7 +265,7 @@ function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
     if (tutKey === 'map') { intro.goToStep(11); }
 }
-function setTableState() { //handle potentially opened map
+function setTableState() { 
     $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.addItem('taxa');
@@ -242,7 +273,7 @@ function setTableState() { //handle potentially opened map
         window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
     }
 }
-function resetTableState() { //handle potentially opened map
+function resetTableState() {
     focus = focus || "taxa";
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
