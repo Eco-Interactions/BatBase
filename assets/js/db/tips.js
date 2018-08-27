@@ -235,11 +235,12 @@ function showTutorial(tutKey) {
     if (tutKey === 'map') { intro.goToStep(11); }
 }
 function setTableState() { //handle potentially opened map
+    $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.addItem('taxa');
-    window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
-    // db_page.initDataTable(focus);
-    $('#show-tips').off("click");
+    if ($('#sel-realm').length) {
+        window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
+    }
 }
 function resetTableState() { //handle potentially opened map
     focus = focus || "taxa";

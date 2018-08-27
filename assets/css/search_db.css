@@ -399,9 +399,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     justify-content: space-between;
     margin-top: .3em;
 }
-#form-main .selectize-input {
-    height: 33px;
-}
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
 }

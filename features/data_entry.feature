@@ -316,7 +316,8 @@ Feature: Add new data to the database
         When I enter "Subject Genus" in the "Genus" dropdown field
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
-        Then I should see "Subject Genus" in the "Genus" dropdown field
+        Then I should see "Subject Family" in the "Family" dropdown field
+        And I should see "Subject Genus" in the "Genus" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Species within the subject taxon sub-form
@@ -328,6 +329,8 @@ Feature: Add new data to the database
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
         Then I should see "Subject Species" in the "Species" dropdown field
+        And I should see "Subject Family" in the "Family" dropdown field
+        And I should see "Subject Genus" in the "Genus" dropdown field
 
     @javascript
     Scenario:  I should be able to select a taxon with the subject taxon select form
@@ -360,6 +363,7 @@ Feature: Add new data to the database
         And I see "New Taxon Order"
         And I press the "Create Taxon" button
         Then I should see "Object Order" in the "Order" dropdown field
+        And I should see "Object Class" in the "Class" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Family within the object taxon sub-form
@@ -371,7 +375,9 @@ Feature: Add new data to the database
         And I enter "Object Family" in the "Family" dropdown field
         And I see "New Taxon Family"
         And I press the "Create Taxon" button
-        Then I should see "Object Family" in the "Family" dropdown field
+        Then I should see "Object Family" in the "Family" dropdown field        
+        And I should see "Object Class" in the "Class" dropdown field
+        And I should see "Object Order" in the "Order" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Genus within the object taxon sub-form
@@ -383,7 +389,10 @@ Feature: Add new data to the database
         When I enter "Object Genus" in the "Genus" dropdown field
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
-        Then I should see "Object Genus" in the "Genus" dropdown field
+        Then I should see "Object Genus" in the "Genus" dropdown field     
+        And I should see "Object Order" in the "Order" dropdown field
+        And I should see "Object Class" in the "Class" dropdown field
+        And I should see "Object Order" in the "Order" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Species within the object taxon sub-form
@@ -396,6 +405,11 @@ Feature: Add new data to the database
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
         Then I should see "Object Species" in the "Species" dropdown field
+        And I should see "Object Genus" in the "Genus" dropdown field     
+        And I should see "Object Family" in the "Family" dropdown field
+        And I should see "Object Order" in the "Order" dropdown field
+        And I should see "Object Class" in the "Class" dropdown field
+
 
     @javascript
     Scenario:  I should be able to select a taxon with the object taxon select form
@@ -435,45 +449,45 @@ Feature: Add new data to the database
         And the "Note" field should be empty
 
     @javascript
-    Scenario:  The grid should not change views when form closes without submitting 
+    Scenario:  The table should not change views when form closes without submitting 
         Given I open the New Interaction form
-        And the database grid is in "Location" view
+        And the database table is in "Location" view
         When I exit the form window
-        Then I should see the grid displayed in "Location" view
+        Then I should see the table displayed in "Location" view
 
     @javascript
-    Scenario:  The grid should reload in Source view after creating an interaction.
+    Scenario:  The table should reload in Source view after creating an interaction.
         Given I open the New Interaction form
         And I fill the new interaction form with the test values
         And I press the "Create Interaction" button
         And I see "New Interaction successfully created." in the form header
         When I exit the form window
-        Then I should see the grid displayed in "Source" view
-        And the grid should be filtered to interactions created since "today"
-        And I should see "1" row in the grid data tree
+        Then I should see the table displayed in "Source" view
+        And the table should be filtered to interactions created since "today"
+        And I should see "1" row in the table data tree
 
     @javascript
     Scenario:  I should see the newly created interactions under the publication source
-        Given the database grid is in "Source" view
-        And I filter the grid to interactions created since "today"
+        Given the database table is in "Source" view
+        And I filter the table to interactions created since "today"
         When I expand "Test Book with Editors" in the data tree
         Then I should see "3" interactions under "Test Title for Chapter"
         And the expected data in the interaction row
 
     @javascript
     Scenario:  I should see the newly created interactions under the author [Cockle, Anya]
-        Given the database grid is in "Source" view
+        Given the database table is in "Source" view
         And I group interactions by "Authors"
-        And I filter the grid to interactions created since "today"
+        And I filter the table to interactions created since "today"
         When I expand "Cockle, Anya" in the data tree
         Then I should see "3" interactions under "Test Title for Chapter"
         And the expected data in the interaction row
 
     @javascript
     Scenario:  I should see the newly created interactions under the author [Smith, George Michael Sr]
-        Given the database grid is in "Source" view
+        Given the database table is in "Source" view
         And I group interactions by "Authors"
-        And I filter the grid to interactions created since "today"
+        And I filter the table to interactions created since "today"
         When I expand "Callaye, Bendry J. Jr" in the data tree
         And I expand "Test Book with Editors" in the data tree
         And I expand "Test Title for Chapter" in level "3" of the data tree
@@ -482,8 +496,8 @@ Feature: Add new data to the database
 
     @javascript
     Scenario:  I should see the newly created interactions under the location
-        Given the database grid is in "Location" view
-        And I filter the grid to interactions created since "today"
+        Given the database table is in "Location" view
+        And I filter the table to interactions created since "today"
         When I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         Then I should see "3" interactions under "Test Location"
@@ -491,9 +505,9 @@ Feature: Add new data to the database
 
     @javascript
     Scenario:  I should see the newly created interactions under the subject taxon
-        Given the database grid is in "Taxon" view
+        Given the database table is in "Taxon" view
         And I group interactions by "Bats"
-        And I filter the grid to interactions created since "today"
+        And I filter the table to interactions created since "today"
         When I expand "Family Subject Family" in the data tree
         And I expand "Genus Subject Genus" in the data tree
         Then I should see "3" interactions under "Unspecified Subject Genus Interactions"
@@ -501,9 +515,9 @@ Feature: Add new data to the database
 
     @javascript
     Scenario:  I should see the newly created interactions under the object taxon
-        Given the database grid is in "Taxon" view
+        Given the database table is in "Taxon" view
         And I group interactions by "Arthropoda"
-        And I filter the grid to interactions created since "today"
+        And I filter the table to interactions created since "today"
         When I expand "Class Object Class" in the data tree
         When I expand "Order Object Order" in the data tree
         When I expand "Family Object Family" in the data tree

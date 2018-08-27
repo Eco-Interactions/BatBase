@@ -69,7 +69,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->getUserSession()->wait( 10000, "$('.ag-row').length" );
         $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
-        $this->handleNullAssert($row, false, 'There are no rows in the database grid.');
+        $this->handleNullAssert($row, false, 'There are no rows in the database table.');
     }
 
     /** -------------------------- Search Page Interactions ------------------*/
@@ -84,13 +84,23 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
     }
     /**
-     * @Given the database grid is in :view view
+     * @Given the database table is in :entity view
      */
-    public function theDatabaseGridIsInSelectedView($view)
+    public function theDatabaseTableIsInSelectedView($entity)
     {
         $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
         $newElems = ['Taxon' => '#selSpecies', 'Location' => '#selRegion', 'Source' => '#selPubTypes'];
-        $this->changeGridSort('#search-focus', $vals[$view], $newElems[$view]);
+        $this->changeTableSort('#search-focus', $vals[$entity], $newElems[$entity]);
+        usleep(500000);
+    }
+    /**
+     * @Given I display locations in :loc View
+     */
+    public function iDisplayLocationsInView($loc)
+    {        
+        $vals = ['Map' => 'map', 'Table' => 'tbl'];
+        $newElems = ['Map' => '#map', 'Table' => '#search-tbl'];
+        $this->changeTableSort('#sel-realm', $vals[$loc], $newElems[$loc]);
         usleep(500000);
     }
 
@@ -104,7 +114,7 @@ class FeatureContext extends RawMinkContext implements Context
         $newElems = ['Authors' => '[name="srchTree"]', 'Publications' => '#selPubTypes', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
             'Publishers' => '[name="srchTree"]'];
-        $this->changeGridSort('#sel-realm', $vals[$type], $newElems[$type]);
+        $this->changeTableSort('#sel-realm', $vals[$type], $newElems[$type]);
     }
 
     /**
@@ -112,7 +122,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSelectTheLocationView($view)
     {
-        $this->changeGridSort('#sel-realm', 'map', '#map');
+        $this->changeTableSort('#sel-realm', 'map', '#map');
     }
     /**
      * @When I click on a map marker
@@ -133,7 +143,8 @@ class FeatureContext extends RawMinkContext implements Context
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
             'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
         $selId = '#sel'.str_replace(' ','',$label);
-        $this->getUserSession()->executeScript("$('$selId').val('$vals[$text]').change();");
+        $this->getUserSession()->
+            executeScript("$('$selId')[0].selectize.addItem('$vals[$text]');");
     }
 
     /**
@@ -153,7 +164,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iClickOnTheMapPinFor($text)
     {
         usleep(500000);
-        $row = $this->getGridRow($text);
+        $row = $this->getTableRow($text);
         $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
         $this->clickRowMapPin($row, $text);
     }
@@ -181,12 +192,33 @@ class FeatureContext extends RawMinkContext implements Context
             "Found [$selected] in the [$label] ($selId) field. Expected [$text].");
     }
     /**
-     * @Then I should see the map with markers
+     * @Then I should see the map with markers 
+     * @Then I should see markers on the map
      */
     public function iShouldSeeTheMapWithMarkers()
     {
         $markers = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0;");
         $this->handleNullAssert($markers, false, "Map did not update as expected. No markers found.");
+    }
+
+    /**
+     * @Then I should see :count interactions shown on the map
+     */
+    public function iShouldSeeInteractionsShownOnTheMap($count)
+    {
+        $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
+        $this->handleContainsAssert($count, $elem->getHtml(), true, 
+             "Should have found [$count] in the interaction count legend.");
+    }
+
+    /**
+     * @Then I should see :text in popup
+     */
+    public function iShouldSeeInPopup($text)
+    {
+        $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
+        $this->handleContainsAssert($text, $elem->getHtml(), true, 
+             "Should have found [$text] in popup.");
     }
 
     /**------------------- Form Functions ------------------------------------*/
@@ -243,8 +275,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'Subject Genus', 'Species' => 'Object Species'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Interaction Type' => 'Consumption', 
-            'Interaction Tags' => 'Arthropod', 'Note' => 'Detailed interaction notes.'];
+        $miscData = [ 'Consumption', 'Arthropod', 'Detailed interaction notes.'];
         $this->fillMiscIntFields($miscData);
     }
 
@@ -254,7 +285,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iClickOnTheEditPencilForTheFirstInteractionOf($nodeTxt)
     {
         $this->iExpandInTheDataTree($nodeTxt);
-        $intRows = $this->getInteractionsRows();
+        $intRows = $this->getInteractionsRows();  
         $this->clickRowEditPencil(reset($intRows));
     }
 
@@ -475,20 +506,21 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see the grid displayed in :entity view
+     * @Then I should see the table displayed in :entity view
      */
-    public function iShouldSeeTheGridDisplayedInView($entity)
+    public function iShouldSeeTheTableDisplayedInView($entity)
     {
         $map = [ 'Location' => 'locs', 'Taxon' => 'taxa', 'Source' => 'srcs' ];
-        $view = $this->getUserSession()->evaluateScript("$('#search-focus').val();");
+        $view = $this->getUserSession()->
+            evaluateScript("$('#search-focus')[0].selectize.getValue();");
         $this->handleEqualAssert($view, $map[$entity], true, 
             "DB in [$view] view. Expected [$map[$entity]]");
     }
 
     /**
-     * @Then the grid should be filtered to interactions created since :time
+     * @Then the table should be filtered to interactions created since :time
      */
-    public function theGridShouldBeFilteredToInteractionsCreatedSince($time)
+    public function theTableShouldBeFilteredToInteractionsCreatedSince($time)
     {
         usleep(500000);
         $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
@@ -498,14 +530,14 @@ class FeatureContext extends RawMinkContext implements Context
             "Showing updates-since [$filter]. Expected since [$time]");
     }
 
-    /**------------------ Grid Interaction Steps -----------------------------*/
+    /**------------------ Table Interaction Steps -----------------------------*/
     /**
-     * @Given I filter the grid to interactions created since :time
+     * @Given I filter the table to interactions created since :time
      */
-    public function iFilterTheGridToInteractionsCreatedSince($time)
+    public function iFilterTheTableToInteractionsCreatedSince($time)
     {
         $this->getUserSession()->executeScript("$('#shw-chngd').click().change();");
-        $this->theGridShouldBeFilteredToInteractionsCreatedSince($time);
+        $this->theTableShouldBeFilteredToInteractionsCreatedSince($time);
         usleep(500000);
     }
 
@@ -515,7 +547,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iClickOnTheEditPencilForTheRow($text)
     {
         usleep(500000);
-        $row = $this->getGridRow($text);
+        $row = $this->getTableRow($text);
         $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
         $this->clickRowEditPencil($row, $text);
     }
@@ -608,9 +640,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I (should) see :count row(s) in the grid data tree
+     * @Then I (should) see :count row(s) in the table data tree
      */
-    public function iShouldSeeRowsInTheGridDataTree($count)
+    public function iShouldSeeRowsInTheTableDataTree($count)
     {
         usleep(500000);
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
@@ -625,7 +657,7 @@ class FeatureContext extends RawMinkContext implements Context
     {   
         usleep(500000);
         $inTree = $this->isInDataTree($text);
-        $this->handleEqualAssert($inTree, true, true, "[$text] is not displayed in grid data-tree.");
+        $this->handleEqualAssert($inTree, true, true, "[$text] is not displayed in table data-tree.");
     }    
 
     /**
@@ -636,7 +668,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $inTree = $this->isInDataTree($text);
         $this->handleEqualAssert($inTree, false, true, 
-            "[$text] should not be displayed in grid data-tree.");
+            "[$text] should not be displayed in table data-tree.");
     }    
 
     /**
@@ -688,7 +720,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $this->iExpandInTheDataTree($parentNode);
-        $row = $this->getGridRow($text);
+        $row = $this->getTableRow($text);
         $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
         $this->collapseDataTreeNode($parentNode);
     }
@@ -699,7 +731,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldNotSeeUnderInTheTree($text, $parentNode)
     {
         $this->iExpandInTheDataTree($parentNode);
-        $row = $this->getGridRow($text);
+        $row = $this->getTableRow($text);
         $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
     }
     /** ------------------ Data Sync Feature -----------------------------------*/
@@ -745,14 +777,14 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theNewDataShouldSyncBetweenTheEditors()
     {
-        $this->editorGridLoads($this->editor1);
-        $this->editorGridLoads($this->editor2);
+        $this->editorTableLoads($this->editor1);
+        $this->editorTableLoads($this->editor2);
     }
 
     /**
-     * @Then they should see the expected changes in the data grid
+     * @Then they should see the expected changes in the data table
      */
-    public function theyShouldSeeTheExpectedChangesInTheDataGrid()
+    public function theyShouldSeeTheExpectedChangesInTheDataTable()
     {
         $this->editorSeesExpectedInteractions($this->editor1);
         $this->editorSeesExpectedInteractions($this->editor2);
@@ -824,7 +856,7 @@ class FeatureContext extends RawMinkContext implements Context
             "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
     }
     /** ------------------ Get From Page -------------------------------------*/
-    private function getAllGridRows()
+    private function getAllTableRows()
     {
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         $this->handleNullAssert($rows, false, 'No nodes found in data tree.');
@@ -857,17 +889,17 @@ class FeatureContext extends RawMinkContext implements Context
     {
         return  $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
     }
-    private function getGridRow($text)
+    private function getTableRow($text)
     {
         usleep(500000);
-        $rows = $this->getAllGridRows();
+        $rows = $this->getAllTableRows();
         foreach ($rows as $row) {
             $treeNode = $row->find('css', '[colid="name"]');
             if ($treeNode->getText() == $text) { return $row; }
         }
     }
     /** 
-     * Either returns all the interaction rows displayed in the grid, or a subset
+     * Either returns all the interaction rows displayed in the table, or a subset
      * under a specified node in the tree.
      */
     private function getInteractionsRows($node = false)
@@ -875,7 +907,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $intRows = [];
         $subSet = $node === false; 
-        $rows = $this->getAllGridRows();
+        $rows = $this->getAllTableRows();
         foreach ($rows as $row) { 
             $nodeText = $row->find('css', '[colid="name"]')->getText(); 
             if ($node && $nodeText === $node) { $subSet = true; continue; }
@@ -923,9 +955,11 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
-    private function changeGridSort($elemId, $newVal, $newElemId)
+    private function changeTableSort($elemId, $newVal, $newElemId)
     {  
-        $this->getUserSession()->executeScript("$('$elemId').val('$newVal').change();");
+        $elem = $this->getUserSession()->evaluateScript("$('$elemId').length;"); 
+        $this->getUserSession()->
+            executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
         $uiUpdated = $this->getUserSession()->evaluateScript("$('#newElemId').length > 0;");
         $this->handleNullAssert($uiUpdated, false, "UI did not update as expected. Did not find [$newElemId].");
     }
@@ -937,7 +971,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function clickRowEditPencil($row)
     {
-        $pencil = $row->find('css', '.grid-edit');
+        $pencil = $row->find('css', '.tbl-edit');
         $this->handleNullAssert($pencil, false, "Couldn't find the edit pencil for row.");
         $pencil->click();
     }
@@ -965,7 +999,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     /** -------- Asserts ----------- */
     private function handleContainsAssert($ndl, $hystk, $isIn, $msg)
-    {                                                                           //print('fieldVal = '.$hystk.', needle = '.$ndl);
+    {                                                                           //print('Haystack = '.$hystk.', needle = '.$ndl);
         if ($isIn && strpos($hystk, $ndl) === false || !$isIn && strpos($hystk, $ndl) != false) { 
             $this->iPutABreakpoint($msg);
         }
@@ -1047,8 +1081,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Fabaceae'];
         $this->fillTaxaFields($taxaData);
-        $miscData = [ 'Interaction Type' => 'Consumption', 
-            'Interaction Tags' => 'Flower', 'Note' => 'Interaction '.$count];
+        $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
         usleep(500000);
@@ -1073,16 +1106,16 @@ class FeatureContext extends RawMinkContext implements Context
     private function fillMiscIntFields($data)
     {   fwrite(STDOUT, "\nFilling remaining fields.\n");
         $fields = array_keys($data);  //print_r($fields);
-        $this->iSelectFromTheDropdownField($data[$fields[0]], $fields[0]);
-        $this->iSelectFromTheDropdownField($data[$fields[1]], $fields[1]);
-        $this->iTypeInTheField($data[$fields[2]], $fields[2], 'textarea');
+        $this->iSelectFromTheDropdownField($data[0], 'Interaction Type');
+        $this->iSelectFromTheDropdownField($data[1], 'Interaction Tags');
+        $this->iTypeInTheField($data[2], 'Note', 'textarea');
     }
 
-    private function editorGridLoads($editor)
+    private function editorTableLoads($editor)
     {
         $editor->wait( 5000, "$('.ag-row').length" );
-        $gridRows = $editor->evaluateScript("$('.ag-row').length > 0");
-        assertTrue($gridRows);
+        $tableRows = $editor->evaluateScript("$('.ag-row').length > 0");
+        assertTrue($tableRows);
     }
 
     private function editorSeesExpectedInteractions($editor)

@@ -301,7 +301,6 @@ function addMarkersForLocAndChildren(topLoc) {
     }
     function logNoGeoJsonError(loc) {
         if (!loc.interactions.length) { return null; }
-        intCnt += loc.interactions.length;  
         if (locIsHabitatOfTopLoc(loc)) { return; }
         ++subCnt;
         // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)

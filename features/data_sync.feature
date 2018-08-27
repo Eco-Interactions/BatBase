@@ -11,4 +11,4 @@ Feature: Local Data Storage updates with changes made by other editors
     #     And each edits some sub-entity data
     #     And each reloads the search page
     #     Then the new data should sync between the editors
-    #     And they should see the expected changes in the data grid
+    #     And they should see the expected changes in the data table

@@ -34,7 +34,7 @@ function buildSearchPgFormUi() {
 /*-------------- Form HTML Methods -------------------------------------------*/
 /** Builds and shows the popup form's structural elements. */
 function showFormPopup(actionHdr, entity, id) {
-    var title = actionHdr + " " + entity;
+    const title = actionHdr + ' ' + entity;
     $('#b-overlay-popup').addClass('form-popup');
     $('#b-overlay').addClass('form-ovrly');
     $('#b-overlay-popup').append(getFormWindowElems(entity, id, title));
@@ -66,9 +66,6 @@ function setFormSize(entity) {
     var confg = sizeConfgs[wKey][entity];                                       //console.log("setFormSize [%s] confg = %O", entity, confg);
     $('.form-popup').css({'width': confg.popup});
     $('#form-main').css({'flex': '0 0 '+ confg.form});
-}
-function hideSearchFormPopup() {
-    $('#b-overlay-popup, #b-overlay').css({display: 'none'});
 }
 /**
  * Returns the form window elements - the form and the detail panel.
@@ -110,13 +107,16 @@ function exitFormPopup(e, skipReset) {
     $("#b-overlay-popup").empty();
     fParams = {};
 }
+function hideSearchFormPopup() {
+    $('#b-overlay-popup, #b-overlay').css({display: 'none'});
+}
 /**
  * If the form was not submitted the table does not reload. Otherwise, if exiting 
  * the edit-forms, the table will reload with the current focus; or, after creating 
  * an interaction, the table will refocus into source-view. Exiting the interaction
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
-function refocusTableIfFormWasSubmitted() {                                      console.log('submitFocus = [%s]', fParams.submitFocus);
+function refocusTableIfFormWasSubmitted() {                                     console.log('submitFocus = [%s]', fParams.submitFocus);
     if (!fParams.submitFocus) { return; }
     if (fParams.submitFocus == 'int') { return refocusAndShowUpdates(); }   
     db_page.initDataTable(fParams.submitFocus);
@@ -1152,7 +1152,7 @@ function updateSrcDetailPanel(entity) {
  * any type-specific labels for fields.  
  * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
  */
-function loadSrcTypeFields(type, typeId, elem) {                            //console.log('loadSrcTypeFields. [%s] elem = %O', type, elem);
+function loadSrcTypeFields(type, typeId, elem) {                                //console.log('loadSrcTypeFields. [%s] elem = %O', type, elem);
     const fLvl = getSubFormLvl('sub');
     resetOnFormTypeChange(type, typeId, fLvl);
     $('#'+type+'_Rows').append(getSrcTypeRows(type, typeId, fLvl));
@@ -1182,19 +1182,19 @@ function getSrcTypeRows(entity, typeId, fLvl, type) {
 function setSourceTypeConfg(entity, id, fLvl, tName) {
     const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
     const type = tName || $(typeElemId)[0].selectize.getItem(id)[0].innerText;
-    fParams.forms[fLvl].typeConfg = getFormConfg(entity).types[type];       //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms[fLvl].typeConfg);             
+    fParams.forms[fLvl].typeConfg = getFormConfg(entity).types[type];           //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms[fLvl].typeConfg);             
 }
 /**
  * Changes form-field labels to more specific and user-friendly labels for 
  * the selected type. 
  */
-function updateFieldLabelsForType(entity, fLvl) {                           //console.log('--updating field labels.');
+function updateFieldLabelsForType(entity, fLvl) {                               //console.log('--updating field labels.');
     const typeElemId = '#'+_util.ucfirst(entity)+'Type-sel'; 
     const type = $(typeElemId)[0].innerText;
     const trans = getLabelTrans();  
     const fId = '#'+fLvl+'-form';
 
-    for (let field in trans) {                                              //console.log('updating field [%s] to [%s]', field, trans[field]);
+    for (let field in trans) {                                                  //console.log('updating field [%s] to [%s]', field, trans[field]);
         const $lbl = $(fId+' label:contains('+field+')'); 
         $lbl.text(trans[field]);
         if ($(fId+' [id^='+field+'-sel]').length) { 
@@ -1219,14 +1219,14 @@ function updateFieldLabelsForType(entity, fLvl) {                           //co
             updatePlaceholderText($('#'+fieldTxt+'-sel')[0], newTxt);
 
         function updateAllComboPlaceholders(cntnrElem) {
-            for (let $i = 0; $i < cntnrElem.children.length; $i++) {        //console.log('cntnr child = %O', cntnrElem.children[$i]);
+            for (let $i = 0; $i < cntnrElem.children.length; $i++) {            //console.log('cntnr child = %O', cntnrElem.children[$i]);
                 if (cntnrElem.children[$i].tagName !== 'SELECT') {continue}
                 updatePlaceholderText(cntnrElem.children[$i], newTxt);   
             }
         }    
     } /* End updateComboboxText */
 } /* End updateFieldLabelsForType */
-function updatePlaceholderText(elem, newTxt) {                              //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+function updatePlaceholderText(elem, newTxt) {                                  //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     elem.selectize.settings.placeholder = 'Select ' + newTxt;
     elem.selectize.updatePlaceholder();
 }
@@ -1239,7 +1239,7 @@ function focusFieldInput(type) {
 /*-------------- Country/Region ------------------------------------------*/
 /** Returns a form row with a combobox populated with all countries and regions. */
 function buildCntryRegFieldRow() {  
-    var opts = getCntryRegOpts();                                           //console.log("buildingCountryFieldRow. ");
+    var opts = getCntryRegOpts();                                               //console.log("buildingCountryFieldRow. ");
     var selElem = _util.buildSelectElem(
         opts, {id: 'Country-Region-sel', class: 'lrg-field'});
     return buildFormRow('Country-Region', selElem, 'top', false);
@@ -1254,7 +1254,7 @@ function getCntryRegOpts() {
  * with it's child-locations and, for regions, all habitat types. When cleared, 
  * the combobox is repopulated with all locations. 
  */
-function onCntryRegSelection(val) {                                         //console.log("country/region selected 'val' = ", val);
+function onCntryRegSelection(val) {                                             //console.log("country/region selected 'val' = ", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
     fillLocationSelect(fParams.records.location[val]);
     if (!fParams.editing) { $('#Country-Region_pin').focus(); }
@@ -1264,8 +1264,8 @@ function onCntryRegSelection(val) {                                         //co
  * Returns a form row with a select dropdown populated with all available 
  * locations.
  */
-function buildLocFieldRow() {                                               //console.log("buildingLocationFieldRow. ");
-    var locOpts = getLocationOpts();                                        //console.log("locOpts = %O", locOpts);
+function buildLocFieldRow() {                                                   //console.log("buildingLocationFieldRow. ");
+    var locOpts = getLocationOpts();                                            //console.log("locOpts = %O", locOpts);
     var selElem = _util.buildSelectElem(
         locOpts, {id: "Location-sel", class: "lrg-field"});
     return buildFormRow("Location", selElem, "top", false);
@@ -1286,7 +1286,7 @@ function getLocationOpts() {
  * child-locations and all habitat types. When cleared, the combobox is 
  * repopulated with all locations. 
  */ 
-function fillLocationSelect(loc) {                                          //console.log("fillLocationSelect for parent Loc = %O", loc);
+function fillLocationSelect(loc) {                                              //console.log("fillLocationSelect for parent Loc = %O", loc);
     var opts = loc ? getOptsForLoc(loc) : getLocationOpts();    
     updateComboboxOptions('#Location-sel', opts);
 }          
@@ -3679,7 +3679,7 @@ function storeData(data) {
     db_sync.updateEditedData(data, onDataSynced);
 }
 /** afterStoredDataUpdated callback */
-function onDataSynced(data, msg, errTag) {                                 //console.log('data update complete. args = %O', arguments);
+function onDataSynced(data, msg, errTag) {                                      //console.log('data update complete. args = %O', arguments);
     toggleWaitOverlay(false);
     if (errTag) { return errUpdatingData(msg, errTag); }
     if (data.citationUpdate) { return; }
@@ -3724,7 +3724,7 @@ function resetInteractionForm() {
     initFormParams("create", "interaction");
     resetIntFields(vals);
     $('#top-cancel').val(" Close "); 
-    disableSubmitBttn('#top-submit');
+    // disableSubmitBttn('#top-submit');
 }
 /** Shows a form-submit success message at the top of the interaction form. */
 function showSuccessMsg(msg) {
@@ -3751,8 +3751,9 @@ function getPinnedFieldVals(pins) {
     }
 } /* End getPinnedValsObj */
 /**
- * Resets the top-form in preparation for another entry. All fields without a pinned
- * value will be reset. checkRequiredFields is triggered to update the submit button.
+ * Resets the top-form in preparation for another entry. Pinned field values are 
+ * persisted. All other fields will be reset. checkRequiredFields is triggered 
+ * to update the submit button.
  */
 function resetIntFields(vals) {
     disableSubmitBttn("#top-submit");

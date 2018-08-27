@@ -30,7 +30,7 @@ import * as db_tips from './tips.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'Live for Justice!!!!!!!!!!!! <3<3';
+const dataKey = 'Live for Justice!!!!! <3<3<3';
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -1274,10 +1274,10 @@ function returnRcrdsToTable() {
  * to @initSrcSearchUi to begin the data-table build.  
  */
 function buildSrcTable() {
-    var entities = [ 'source', 'author', 'publication' ];
-    var entityData = _util.getDataFromStorage(entities);
+    const entities = [ 'source', 'author', 'publication' ];
+    const entityData = _util.getDataFromStorage(entities);
     if( entityData ) { initSrcSearchUi(entityData);
-    } else { console.log("Error loading source data from storage."); }
+    } else { console.log('Error loading source data from storage.'); }
 }
 
 /**
@@ -1318,7 +1318,8 @@ function buildSrcRealmHtml() {
 function setSrcRealm() {
     const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
     const srcRealm = storedRealm || 'pubs';  
-    if (!getSelVal('Source Type')) { setSelVal('Source Type', srcRealm); }
+    if (!getSelVal('Source Type')) { setSelVal('Source Type', srcRealm); 
+    } else { onSrcRealmChange(srcRealm); }
 }
 /** Event fired when the source realm select box has been changed. */
 function onSrcRealmChange(val) {                                                //console.log('-------- SrcRealmChange')
@@ -2280,7 +2281,7 @@ function getTableEntityName() {
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-    if ($('#selPubType').val() === "all") { return; }
+    if (getSelVal('Publication Type') === "all") { return; }
     updatePubSearch();
 }
 /*-------------------- Unique Values Column Filter -----------------------*/
@@ -2982,7 +2983,7 @@ function isNextOpenLeafRow(node) {                                              
 /*----------------- Table Manipulation ------------------------------------------*/
 /** Table-rebuild entry point after form-window close. */
 function resetDataSearchTable(focus) {                                          //console.log('resetting search table.')
-    clearCol2();
+    // clearCol2();
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
@@ -2995,7 +2996,7 @@ export function initDataTable(focus) {                                          
 }
 function selectSearchFocus(f) { 
     const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
-    if (!focus) { return; }
+    // if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSrcTable,
         'taxa': buildTaxonTable 
@@ -3006,7 +3007,7 @@ function selectSearchFocus(f) {
 /**
  * Updates the top sort (focus) of the data table, either 'taxa', 'locs' or 'srcs'.
  */
-function updateFocusAndBuildTable(focus, tableBuilder) {                          //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
+function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     _util.populateStorage('curFocus', focus);
@@ -3041,7 +3042,7 @@ function clearPastHtmlOptions(tableBuilder) {
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
 function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
-    if (focus) { $('#search-focus').val(focus); }
+    if (focus) { setSelVal('Focus', focus); }
     selectSearchFocus();
     window.setTimeout(function() {
         $('#shw-chngd')[0].checked = true;
