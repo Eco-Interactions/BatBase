@@ -1,52 +1,27 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 >ASAP<
-- Add db backup cronjob to new host
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
-    - implement
-        -- Find way to show how many interactions have no location to display?
-        -- Create 'custom' icon for single markers
-        -- add editing to countries/regions for supers/admins with modified forms so gps data can be added.
 
-    - TODO:
 
-    - AFTER: 
-        -- show filters on map view
-        -- Update db page tutorial
-
-        - 
-    - Next Round:
-        - Programmatically load sets of data accoding to zoom size and map viewport
-            - Allow for clustering at higher levels with helpful popups
-Data Changes:
+Website Changes:
+    DB ABOUT PAGE:
+        Removed: 
+            - "Under 'Explore', also in the 'Database' menu, there are pages focusing on areas of the data that have yet to be integrated fully into the search page.
+                Citations
+                Interaction Types"
+            - Need to update "New Data Entry" section
     
 BUG:
-    - loc summary popups for markers aren't reverting to originals when 2 are opened
-        and closed at the time.
+
 
 
 Before Release:
-    -- update tests with the new selectized elem apis
-    -- Add loading popup for geodata on map view
-    -- blur button on db load: 'show interactions in grid on map'
-
     
 MEETING NOTES:
-    - Country/region-habitat locations still need to be configured to display on the map
-    - Locations with the exact same gps coordinates will be right on top of eachother 
-        in the map view. This can be fixed with some intelligence that will tell if another 
-        pin exists at that location already and can add them to a cluster.
+    - Oooo, selectize!
     Next/future round:
-        - Programmatically load sets of data accoding to zoom size and map viewport
-            - Allow for clustering at higher levels with helpful popups
-        -- Update db page tutorial
-        -- Create 'custom' icon for single markers
-        -- add editing to countries/regions for supers/admins with modified forms so gps data can be added.
     Feedback:
-        - Changed location tree column to fit additional loc data
-        - Changed 'Interaction Type' to 'Type' in order to give space for additional data. Thoughts?
-        - Would ya like to be able to move the loc summary popups around?
-
 
 >======== Email ============
 TAYLOR:
@@ -81,7 +56,6 @@ TODOs:
     - {low}[easy] If a new authors display name is identical to another's, prompt 
         user to check for existing author and to add initials if not. 
     - {low}[easy] Validate that genus and species have the same genus names.
-    - {low}[easy] Remove PublisherType code
 
 (DATA)
     - {med}[med] write SQL script to get only records with updates/newly created  
@@ -89,25 +63,17 @@ TODOs:
     - {med} [easy] Change 'center point' to 'display point' - GeoJson entity
     - {low}[med] add 'role' to realms to be able to grab all object/subject realms
         without hardcoding them.
-    - {med}[med] Why are some point-type geoJson's center coordinates in quotes and others aren't
 
 (SEARCH PAGE)
+    - {med}[med] Upgrade to the latest AgGrid. Super out of date at this point.
     - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
-    - {high}[med] Upgrade to the latest AgGrid. Super out of date at this point.
-    - {medium}[easy] Check CSV Exports
     - {med}[med, long] Add data-entry tutorial.
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters- updated at for example.
-    - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
-        elem hasn't loaded yet.
-    -- Selectized --
-        - Add 'all' option that will reset locs at that level
 
 (STATIC/MISC SITE)
     - {med}[complicated] Implement Encore for assets
     - {low}[???] Find out how to tell how many users are online
-    - {high}[easy] Biliography (all cites in alphabetical order)
-    - {med}[easy] Add EXIT click event for nav menu
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
         - update profile page (/profile/edit)
@@ -130,16 +96,11 @@ TODOs:
         - {low}[easy] refactor initcomboboxes to need only the form-lvl param
         - {low}[med] Move interaction create form functions into the same func chain building the rest? 
         - {low}[easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        - {med}[easy] Citation text generation code
-
     --General--
         - {med}[easy] use parital, effectively 'group', css selectors
-        - {low}[easy] remove eif declarations in js files.
-        - {ongoing}[easy] update all quotes to singles unless escaping
     --Search Page--
+        - {low}{easy} put combobox code in _utils
         - {med}{easy} update Loc and Taxa views to alternate color rows as Src is now. 
-        - {low}[easy] update all the comments that mention the updates-since filter 
-            to 'ints-updated-at'
         - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
         - {low}[med] Refactor use of 'main' and 'top' entities to 'core' entities.
         - {low}[med] Download records once and store in memory. (miscObj, maybe?)
@@ -155,16 +116,5 @@ TODOs:
         - {high}[med] Fix taxon-lvl combobox fills on taxon selection.
         - {low}[easy] Fix author field after create form exited
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
-
-
->(Testing):
-    ~Static Site~
-        - Bibliography
-    ~Search Page~
-    ~DB Grid~
-        - CSV downloads
-        - Unq Vals col filter
-    ~Forms~
-        - css displays as expected.
-        - all errors are caught and handled as expected
-        -- check that edit forms show all data they should on load (ie, all authors/editors load)
+        - {high}[med] After int form submit with pinned required fields, enable 
+            submit button after location/any field change

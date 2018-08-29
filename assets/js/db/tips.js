@@ -87,7 +87,8 @@ function getSteps(step) {
                 <br>Once Taxon has been selected in the “Group Interactions by” 
                 box, select one of the following: Bat, Plant, or Arthropod.<br><br>
                 We have selected “Plant” for this tutorial.`,
-            position: 'right'
+            position: 'right',
+            setUpFunc: checkForDbLoad
         },
         {
             element: '#search-tbl',
@@ -230,6 +231,23 @@ function getSteps(step) {
         },
     ];
 }
+function setTableState() { 
+    $('#show-tips').off("click");
+    $('#db-view').css("height", "444px");
+    $('#search-focus')[0].selectize.addItem('taxa');
+    if ($('#sel-realm').length) {
+        window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
+    }
+}
+function resetTableState() {
+    focus = focus || "taxa";
+    $('#db-view').css("height", "888px");
+    $('#show-tips').click(showTips);
+    $('#search-focus')[0].selectize.addItem(focus, 'silent');
+    db_page.initDataTable(focus);
+    intro = null;
+}
+/* ---------- Set Up Functions --------------------*/
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);
     const stepConfg = intro._introItems[intro._currentStep];
     if (!stepConfg.setUpFunc) { return; }
@@ -265,21 +283,14 @@ function showTutorial(tutKey) {
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
     if (tutKey === 'map') { intro.goToStep(11); }
 }
-function setTableState() { 
-    $('#show-tips').off("click");
-    $('#db-view').css("height", "444px");
-    $('#search-focus')[0].selectize.addItem('taxa');
-    if ($('#sel-realm').length) {
-        window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
-    }
+function checkForDbLoad() {
+    if ($('#sel-realm').length) { return; }  
+    window.setTimeout(addDbLoadNotice, 400);
 }
-function resetTableState() {
-    focus = focus || "taxa";
-    $('#db-view').css("height", "888px");
-    $('#show-tips').click(showTips);
-    $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    db_page.initDataTable(focus);
-    intro = null;
+function addDbLoadNotice() {
+    $('.introjs-tooltiptext').append(`
+        <br><br><center><b>Please wait for database to finish downloading before 
+        continuing.`);
 }
 /* ------------------ Search Tips ------------------------------------------- */
 function initSearchTips() { 

@@ -131,7 +131,11 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $marker = $this->getUserSession()->getPage()->find('css', '.leaflet-marker-icon');
         $this->handleNullAssert($marker, false, "Couldn't find marker on the map.");
-        $marker->click();    
+        try {
+            $marker->click();    
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Couldn't click elem.");
+        }
     }
 
     /**
@@ -143,6 +147,8 @@ class FeatureContext extends RawMinkContext implements Context
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
             'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
         $selId = '#sel'.str_replace(' ','',$label);
+        $elem = $this->getUserSession()->getPage()->find('css', $selId);
+        $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
         $this->getUserSession()->
             executeScript("$('$selId')[0].selectize.addItem('$vals[$text]');");
     }
@@ -207,6 +213,11 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInteractionsShownOnTheMap($count)
     {
         $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
+        if (!$elem) { 
+            usleep(50000); 
+            $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
+        }
+        $this->handleNullAssert($elem, false, 'No [interaction count legend] shown on map.');
         $this->handleContainsAssert($count, $elem->getHtml(), true, 
              "Should have found [$count] in the interaction count legend.");
     }
@@ -217,6 +228,11 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInPopup($text)
     {
         $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
+        if (!$elem) { 
+            usleep(50000); 
+            $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
+        }
+        $this->handleNullAssert($elem, false, 'No [popup] shown on map.');
         $this->handleContainsAssert($text, $elem->getHtml(), true, 
              "Should have found [$text] in popup.");
     }
@@ -294,7 +310,12 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iExitTheFormWindow()
     {
-        $this->getUserSession()->executeScript("$('#exit-form').click();");
+        try {
+            $this->getUserSession()->executeScript("$('#exit-form').click();");
+        } catch (Exception $e) {
+            $this->iPutABreakpoint('Error while exiting form.');
+            // print($e);
+        }
     }
 
     /**

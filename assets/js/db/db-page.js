@@ -1330,7 +1330,7 @@ function resetSourceRealm(val) {
     clearPreviousTable();
     resetCurTreeState();
     resetToggleTreeBttn(false);
-    buildSrcTree();
+    buildSrcTree(val);
 }
 /** (Re)builds source tree for the selected source realm. */
 function buildSrcTree(val) {
@@ -1348,8 +1348,8 @@ function storeAndReturnCurRealmRcrds(val) {
 }
 /** Returns an array with all records from the stored record object. */
 function getTreeRcrdAry(realm) {
-    var rcrdIdAry = _util.getDataFromStorage(realm);
-    return rcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
+    const srcRcrdIdAry = _util.getDataFromStorage(realm);
+    return srcRcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
 }
 /**
  * Builds the source data tree for the selected source realm (source type) and 
@@ -2983,7 +2983,6 @@ function isNextOpenLeafRow(node) {                                              
 /*----------------- Table Manipulation ------------------------------------------*/
 /** Table-rebuild entry point after form-window close. */
 function resetDataSearchTable(focus) {                                          //console.log('resetting search table.')
-    // clearCol2();
     resetToggleTreeBttn(false);
     resetFilterStatusBar();
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }
@@ -2996,7 +2995,7 @@ export function initDataTable(focus) {                                          
 }
 function selectSearchFocus(f) { 
     const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
-    // if (!focus) { return; }
+    if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSrcTable,
         'taxa': buildTaxonTable 
@@ -3042,12 +3041,13 @@ function clearPastHtmlOptions(tableBuilder) {
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
 function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
-    if (focus) { setSelVal('Focus', focus); }
-    selectSearchFocus();
-    window.setTimeout(function() {
-        $('#shw-chngd')[0].checked = true;
-        toggleTimeUpdatedFilter();
-    }, 200);        
+    if (focus) { setSelVal('Focus', focus); 
+    } else { selectSearchFocus(); }
+    window.setTimeout(showUpdatesAfterTableLoad, 200);
+}
+function showUpdatesAfterTableLoad() {
+    $('#shw-chngd')[0].checked = true;
+    toggleTimeUpdatedFilter();
 }
 export function showUpdates(focus) {
     showTodaysUpdates(focus);

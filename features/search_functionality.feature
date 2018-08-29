@@ -24,7 +24,7 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data tree to a specific publication type.
       Given the database table is in "Source" view
-      When I select "Journal" from the "Publication Type" dropdown
+      When I select "Journal" from the "Pub Type" dropdown
       Then I should see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
       And data in the interaction rows

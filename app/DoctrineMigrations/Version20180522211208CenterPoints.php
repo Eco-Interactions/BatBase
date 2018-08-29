@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Fills in the center_point property of country geoJson objects. 
  */
-class Version20180522211208AddCPoints extends AbstractMigration implements ContainerAwareInterface
+class Version20180522211208CenterPoints extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
@@ -50,7 +50,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
     private function addPointToGeoJson($name, $point)
     {
         $loc = $this->em->getRepository('AppBundle:Location')
-            ->findOneBy(['displayName' => $name]); 
+            ->findOneBy(['displayName' => $name]); print('name = '.$name."\n");
         $geoJson = $loc->getGeoJson();
         if (!$geoJson) { return $this->createGeoJson($loc, $point); }
         $geoJson->setCenterPoint($point);
@@ -85,7 +85,7 @@ class Version20180522211208AddCPoints extends AbstractMigration implements Conta
             "Central America" => [ 12.7690, -85.6024 ],
             "French Guiana" => [ 5.9332383, -58.0875742 ],
             "Oceania" => [ 140.0188, -22.7359 ],
-            "Caribbean Islands" => [ -68.6569, 20.4691 ],
+            "Caribbean Islands" => [ 20.4691, -68.6569 ],
             "China" => [ 34.672410587, 104.187417847 ],
             "French Antilles" =>[16.4167, -62.1441],
             "Borneo" =>[0.9619, 114.5548],
