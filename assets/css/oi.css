@@ -11,11 +11,10 @@ greens-pallete:
 /*--- Base Styles ---*/
 a:link {
     color: #1b3b1b;
-    text-decoration: none;
+    text-decoration: underline;
 }
 a:visited {
     color: #1b3b1b;
-    text-decoration: none;
 }
 a:hover {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
@@ -276,7 +275,7 @@ span.lbl {
     background: rgba(0,0,0,.8);
     width: 100vw;
     height: 100vh;
-    z-index: 500;
+    z-index: 1500;
     justify-content: center;
 }
 .overlay {

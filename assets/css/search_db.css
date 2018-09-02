@@ -233,7 +233,7 @@ button[name="show-hide-col"] {
 }
 button[name="futureDevBttn"] {
     align-self: flex-end;
-    opacity: .8;
+    opacity: .7;
 }
 #xpand-tree button {
     margin: 0em;
@@ -275,7 +275,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     left: 0;
     background-color: grey;
     width: 100%;
-    height: 85%;
+    height: 91%;
     opacity: .2;
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
@@ -289,15 +289,24 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
 }
 .form-ovrly {
     align-items: center;
+    height: 91vh;
 }
 #top-hdr {
     font-size: 1.3em;
     margin-bottom: 1em;
 }
 #success {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-weight: bold;
-    text-align: center;
+    border: 2px solid green;
+    padding: 10px; 
+    display: none;
+}
+#success>div {
+    justify-content: space-between;
+}
+#success>div>p {
+    padding-top: 6px;
 }
 .form-popup [id$="-hdr"] {
     margin-bottom: 10px;
@@ -414,6 +423,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 .sub2-row {
     width: 372px;
+}
+[id$="-sel-cntnr"]>div {
+    margin-top: .5em
 }
 /** --- Error Styles --- */
 [id$="_errs"] {

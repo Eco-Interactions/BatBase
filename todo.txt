@@ -77,6 +77,7 @@ TODOs:
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
         - update profile page (/profile/edit)
+        - Reorder fields for profile edit form
     - {low}[med] Update read me for site.
     - {low}[easy] Resize slider-header when screen size changes 
 
