@@ -41,7 +41,6 @@ function fixLeafletBug() {
  */
 function initDb() {
     _util.initGeoJsonData();
-    showPopUpMsg();
 }
 function geoJsonDataAvailable() {
     return _util.isGeoJsonDataAvailable();
@@ -132,17 +131,19 @@ function addViewTips(map) {
         - Click on a marker to keep popup open.`;
     return div;
 }
-export function initMap() {                                                     console.log('attempting to initMap')
+export function initMap(rcrds) {                                                console.log('attempting to initMap')
+    locRcrds = rcrds;
     waitForStorageAndLoadMap(addAllIntMrkrsToMap);                                                 
 }
-function waitForStorageAndLoadMap(onLoad) {
+function waitForStorageAndLoadMap(onLoad) {                                     console.log('waiting for geojson');
     return geoJsonDataAvailable() ? 
         buildAndShowMap(onLoad) : 
         window.setTimeout(waitForStorageAndLoadMap.bind(null, onLoad), 500);
 }
 /** ================= Show Interaction Sets on Map ========================== */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, tableData) {                                    //console.log('----------- showInts. tableData = %O', tableData);
+export function showInts(focus, tableData, rcrds) {                             //console.log('----------- showInts. tableData = %O', tableData);
+    locRcrds = rcrds;
     waitForStorageAndLoadMap(showIntsOnMap.bind(null, focus, tableData));
 } 
 function showIntsOnMap(focus, data) {                                           console.log('showIntsOnMap! data = %O', data);
@@ -211,7 +212,8 @@ function zoomIfAllInSameRegion(data) {
 }
 /** ======================= Show Location on Map ============================ */
 /** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom) {                                             
+export function showLoc(id, zoom, rcrds) {                 
+    locRcrds = rcrds;        
     waitForStorageAndLoadMap(showLocInMap.bind(null, id, zoom));
     addAllIntMrkrsToMap();
 }
@@ -350,21 +352,21 @@ function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             
     map.addLayer(MapMarker.layer);
 } /* End addMarkerForEachInteraction */
 /* --- Table Popup --- */
-function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
-    const popUpMsg = msg || 'Loading...';
-    $('#db-popup').text(popUpMsg);
-    $('#db-popup').addClass('loading'); //used in testing
-    $('#db-popup, #db-overlay').show();
-    fadeTable();
-}
+// function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
+//     const popUpMsg = msg || 'Loading...';
+//     $('#db-popup').text(popUpMsg);
+//     $('#db-popup').addClass('loading'); //used in testing
+//     $('#db-popup, #db-overlay').show();
+//     fadeTable();
+// }
 function hidePopUpMsg() {
     $('#db-popup, #db-overlay').hide();
     $('#db-popup').removeClass('loading'); //used in testing
     showTable();
 }
-function fadeTable() {
-    $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, .3);
-}
+// function fadeTable() {
+//     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, .3);
+// }
 function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }

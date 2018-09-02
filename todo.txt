@@ -7,11 +7,6 @@
 Website Changes:
     DB ABOUT PAGE:
         Removed: 
-            - "Under 'Explore', also in the 'Database' menu, there are pages focusing on areas of the data that have yet to be integrated fully into the search page.
-                Citations
-                Interaction Types"
-            - Need to update "New Data Entry" section
-    
 BUG:
 
 
@@ -19,8 +14,8 @@ BUG:
 Before Release:
     
 MEETING NOTES:
-    - Oooo, selectize!
     Next/future round:
+        - Fix wysiwyg icons not showing on prod
     Feedback:
 
 >======== Email ============

@@ -80,23 +80,23 @@ function getExitButtonRow() {
     return row;        
 }
 function getExitButton() {
-    var bttn = _util.buildElem('input', {
-       'id':'exit-form', 'class':'tbl-bttn exit-bttn', 'type':'button', 'value':'X' });
+    const bttn = _util.buildElem('input', { 'id': 'exit-form', 
+        'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
     $(bttn).click(exitFormPopup);
     return bttn;
 }
 function getFormHtml(entity, id, title) {
-    var cntnr = _util.buildElem('div', { class: 'flex-row' });
+    const cntnr = _util.buildElem('div', { class: 'flex-row' });
     $(cntnr).append([getMainFormHtml(title), getDetailPanelElems(entity, id)]);
     return cntnr;
 }
 function getMainFormHtml(title) {
-    var formWin = _util.buildElem("div", { "id": "form-main" });
+     const formWin = _util.buildElem('div', { 'id': 'form-main' });
     $(formWin).append(getHeaderHtml(title));
     return formWin;
 }
 function getHeaderHtml(title) {
-    return _util.buildElem("h1", { "id": "top-hdr", "text": title });
+    return _util.buildElem('h1', { 'id': 'top-hdr', 'text': title });
 }
 /** Returns popup and overlay to their original/default state. */
 function exitFormPopup(e, skipReset) { 
@@ -255,8 +255,8 @@ function initFormParams(action, entity, id) {
  * > vals - Stores all values entered in the form's fields.
  * --- Misc entity specific properties
  * > Citation forms: pub - { src: pubSrc, pub: pub } (parent publication)
- * > Taxon forms: taxonPs - added to fParams.forms (see props @initTaxonParams)
  * > Location forms: geoJson - geoJson entity for this location, if it exists.
+ * > Taxon forms: taxonPs - added to fParams.forms (see props @initTaxonParams)
  */
 function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       //console.log("initLvlParams. fP = %O, arguments = %O", fParams, arguments)
     fParams.forms[entity] = level;
@@ -1571,8 +1571,8 @@ function customizeElemsForTaxonSelectForm(role) {
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
 }
 function getTaxonExitButton(role) {
-    var bttn = getExitButton();
-    bttn.id = "exit-sub-form";
+    const bttn = getExitButton();
+    bttn.id = 'exit-sub-form';
     $(bttn).unbind("click").click(exitTaxonSelectForm.bind(null, role));
     return bttn;
 }
@@ -3054,7 +3054,8 @@ function handleRequiredField(label, input, fLvl) {
 }
 /**
  * On a required field's change event, the submit button for the element's form 
- * is enabled if all of it's required fields have values and it has no open child forms. 
+ * is enabled if all of it's required fields have values and it has no open child 
+ * forms. 
  */
 function checkRequiredFields(e) {                                               //console.log('checkRequiredFields e = %O', e)
     const input = e.currentTarget;
@@ -3062,12 +3063,18 @@ function checkRequiredFields(e) {                                               
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
     if (fParams.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }  
 }
+/**
+ * Note: The 'unchanged' property exists only after the create interaction form 
+ * is submitted before any changes have been made. After any change, the form is 
+ * finished resetting for the next interaction entry.
+ */
 function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = ', input, fLvl);
     const subBttnId = '#'+fLvl+'-submit';
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
         disableSubmitBttn(subBttnId); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         enableSubmitBttn(subBttnId);
+        if (fParams.forms.top.unchanged) { resetForNewForm(); }
     }
 }
 /**
@@ -3690,7 +3697,7 @@ function onDataSynced(data, msg, errTag) {                                      
     handleFormComplete(data);
 
     function isEditForm() {
-        return fParams.forms[fParams.ajaxFormLvl].action === 'edit'
+        return fParams.forms[fParams.ajaxFormLvl].action === 'edit';
     }
 } /* End afterStoredDataUpdated */
 /** Updates the core records in the global form params object. */
@@ -3717,25 +3724,42 @@ function hasChngs(data) {
     return chngs;
 }
 /** ---------------- After Interaction Created -------------------------- */
-/** Resets the interactions form leaving only the pinned values. */
+/** 
+ * Resets the interactions form leaving only the pinned values. Displays a 
+ * success message. Disables submit button until any field is changed. 
+ */
 function resetInteractionForm() {
-    var vals = getPinnedFieldVals();                                            //console.log("vals = %O", vals);
-    showSuccessMsg("New Interaction successfully created.");
-    initFormParams("create", "interaction");
-    resetIntFields(vals);
-    $('#top-cancel').val(" Close "); 
-    // disableSubmitBttn('#top-submit');
+    const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
+    showSuccessMsg('New Interaction successfully created.');
+    initFormParams('create', 'interaction');
+    resetIntFields(vals); 
+    $('#top-cancel').val(' Close ');  
+    disableSubmitBttnUntilAnyFieldChanged();
 }
 /** Shows a form-submit success message at the top of the interaction form. */
 function showSuccessMsg(msg) {
-    var p = _util.buildElem('p', { id: 'success', text: msg });
-    $('#top-hdr').after(p);
-    window.setTimeout(function() { $('#success').remove(); }, 3500);
+    const cntnr = _util.buildElem('div', { id: 'success' });
+    const div = _util.buildElem('div', { class: 'flex-row' });
+    const p = _util.buildElem('p', { text: msg });
+    const bttn = getSuccessMsgExitBttn();
+    div.append(p, bttn);
+    cntnr.append(div)
+    $('#top-hdr').after(cntnr); 
+    $(cntnr).fadeTo('400', .8);
+}
+function getSuccessMsgExitBttn() {
+    const bttn = _util.buildElem('input', { 'id': 'sucess-exit', 
+        'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
+    $(bttn).click(exitSuccessMsg);
+    return bttn;
+}
+function exitSuccessMsg() {
+    $('#success').fadeTo('400', 0, () => $('#success').remove());
 }
 /** Returns an obj with the form fields and either their pinned values or false. */
-function getPinnedFieldVals(pins) {
-    var pins = $('form[name="top"] [id$="_pin"]').toArray();                    //console.log("pins = %O", pins);
-    var vals = {};
+function getPinnedFieldVals() {
+    const pins = $('form[name="top"] [id$="_pin"]').toArray();                  //console.log("pins = %O", pins);
+    const vals = {};
     pins.forEach(function(pin) {  
         if (pin.checked) { getFieldVal(pin.id.split("_pin")[0]); 
         } else { addFalseValue(pin.id.split("_pin")[0]); }
@@ -3743,7 +3767,7 @@ function getPinnedFieldVals(pins) {
     return vals;
 
     function getFieldVal(fieldName) {                                           //console.log("fieldName = %s", fieldName)
-        var suffx = fieldName === 'Note' ? '-txt' : '-sel';
+        const suffx = fieldName === 'Note' ? '-txt' : '-sel';
         vals[fieldName] = $('#'+fieldName+suffx).val();
     }
     function addFalseValue(fieldName) {
@@ -3780,13 +3804,40 @@ function clearDetailPanel(field) {
     }
 }
 function fillPubDetailsIfPinned(pub) {
-    if (pub) { updateSrcDetailPanel('pub'); }
+    if (pub) { updateSrcDetailPanel('pub'); 
+    } else { enableCombobox('#CitationTitle-sel', false); }
 }
 /** Inits the necessary interaction form params after form reset. */
 function initInteractionParams() {
     initFormLevelParamsObj(
         "interaction", "top", null, getFormConfg("interaction"), "create");
     addReqElemsToConfg();
+}
+function disableSubmitBttnUntilAnyFieldChanged() {
+    fParams.forms.top.unchanged = true;
+    disableSubmitBttn('#top-submit');
+    addChangeListenerToNonReqFields();
+}
+function addChangeListenerToNonReqFields() {
+    $('#Location-sel')[0].selectize.on('change', enableSubmitAndRmvListener);
+    $('#InteractionTags-sel')[0].selectize.on('change', enableSubmitAndRmvListener);
+    $('#Note-txt').change(enableSubmitAndRmvListener);
+}
+function enableSubmitAndRmvListener() {
+    enableSubmitBttn('#top-submit');
+    resetForNewForm();
+}
+/**
+ * After an interaction is created, the form can not be submitted until changes
+ * are made. This removes the change listeners from non-required elems and the 
+ * flag tracking the state of the new interaction form.  
+ */
+function resetForNewForm() {
+    $('#Location-sel')[0].selectize.off('change', enableSubmitAndRmvListener);
+    $('#InteractionTags-sel')[0].selectize.off('change', enableSubmitAndRmvListener);
+    $('#Note-txt').off('change');
+    exitSuccessMsg();
+    delete fParams.forms.top.unchanged;
 }
 /** ---------------- After Source Data Edited --------------------------- */
 /**

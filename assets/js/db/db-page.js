@@ -30,7 +30,7 @@ import * as db_tips from './tips.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'Live for Justice!!!!! <3<3<3';
+const dataKey = 'Live for Justice!!!!!!!!<3!! <3<3<3';
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -91,8 +91,8 @@ export function initSearchPage() {
 }
 /** Shows a loading popup message for the inital data-download wait. */
 function showLoadingDataPopUp() {
-    showPopUpMsg("Downloading and caching all interaction records. Please " +
-        "allow for a ~30 second download.");   
+    showPopUpMsg(`Downloading and caching all interaction records. Please allow 
+        for a ~45 second download.`);   
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
@@ -725,7 +725,7 @@ function buildLocationTable(view) {
     } else { console.log('Error loading location data from storage.'); }
 }
 function getLocData() {
-    var locDataStorageProps = [
+    const locDataStorageProps = [
         'location', 'locationType', 'topRegionNames', 'countryNames', 'regionNames'
     ];
     return _util.getDataFromStorage(locDataStorageProps);
@@ -1066,26 +1066,19 @@ export function showLocInDataTable(loc) {                                       
     updateUiForTableView();
     rebuildLocTree([loc.id]);
     setSelVal('Loc View', 'tree', 'silent');
+    updateBttnToReturnRcrdsToTable();
 }
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
     updateUiForMapView();       
-    addNoteAboutHowToFilterInteractionsDisplayed();
-    db_map.initMap();           
-}
-function addNoteAboutHowToFilterInteractionsDisplayed() {
-    $('#opts-col2').html(`
-        <div style="margin: 1em; font-size: 18px;">To filter the interactions 
-        diplayed, return to viewing "Table Data" and filter using the options 
-        available. Then click "Show Interactions on Map" to see them displayed 
-        here. </div>`);
+    db_map.initMap(tParams.rcrdsById);           
 }
 /** Switches to map view and centeres map on selected location. */
 function showLocOnMap(geoJsonId, zoom) {
     updateUiForMapView();
     clearCol2();
     setSelVal('Loc View', 'map', 'silent');
-    db_map.showLoc(geoJsonId, zoom);
+    db_map.showLoc(geoJsonId, zoom, tParams.rcrdsById);
 }
 /**
  * Build an object with all relevant data to display the interactions in the 
@@ -1095,7 +1088,7 @@ function showTableRecordsOnMap() {                                              
     $('#search-tbl').fadeTo('100', 0.3, () => {
         updateUiForMappingInts();
         storeIntAndLocRcrds();
-        db_map.showInts(tParams.curFocus, buildTableLocDataObj());
+        db_map.showInts(tParams.curFocus, buildTableLocDataObj(), tParams.rcrdsById);
     });
 }
 function storeIntAndLocRcrds() {
@@ -1229,12 +1222,12 @@ function getParentName(rcrd) {
 }
 /* --- End showTableRecordsOnMap --- */
 function updateUiForMapView(showingInts) {
+    updateBttnToReturnRcrdsToTable();
     disableTableButtons();
+    showPopUpMsg();
     $('#tool-bar').fadeTo(100, 1);
     $('#search-tbl').hide();
     $('#map').show();
-    if (showingInts) { return; }
-    $('#shw-map').attr('disabled', 'disabled').css({'opacity': .3, 'cursor': 'default'});
 }
 function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
@@ -1245,20 +1238,19 @@ function updateUiForTableView() {
 }
 function updateUiForMappingInts() {
     updateUiForMapView('showingInts');
-    updateBttnToReturnRcrdsToTable();
-    addMsgAboutTableViewFiltering();
     enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));
+}
+function updateBttnToReturnRcrdsToTable() {
+    addMsgAboutTableViewFiltering();
+    $('#shw-map').text('Return to Table View');
+    $('#shw-map').off('click').on('click', returnRcrdsToTable);
+    $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
 function addMsgAboutTableViewFiltering() {
     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
     const div = _util.buildElem('div', {id:'filter-in-tbl-msg'});
     div.innerHTML = `Return to filter data shown.`;
     $('#content-detail').prepend(div);
-}
-function updateBttnToReturnRcrdsToTable() {
-    $('#shw-map').text('Return to Table View');
-    $('#shw-map').off('click').on('click', returnRcrdsToTable);
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
@@ -1267,6 +1259,7 @@ function updateBttnToShowRcrdsOnMap() {
 function returnRcrdsToTable() {
     updateUiForTableView();
     updateBttnToShowRcrdsOnMap();
+    if (getSelVal('Loc View') === 'map') { setSelVal('Loc View', 'tree'); }
 }
 /*------------------Source Search Methods ------------------------------------*/
 /**
@@ -1687,7 +1680,7 @@ function updatePubSearchByType(val) {                                           
  * When the publication type dropdown is changed or the table is filtered by 
  * publication text, the table is rebuilt with the filtered data.
  */
-function updatePubSearch(typeVal, text) {                                       //console.log('updatePubSearch. typeVal = ', typeVal)
+function updatePubSearch(typeVal, text) {                                       console.log('updatePubSearch. typeVal = ', typeVal)
     const typeId = typeVal || getSelVal('Publication Type');
     const txt = text || getFilterTreeTextVal('Publication');
     const newRows = getFilteredPubRows();
@@ -1712,7 +1705,7 @@ function updatePubSearch(typeVal, text) {                                       
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
     function getPubFilters() {
-        return typeId === 'all' && text === '' ? [] :
+        return typeId === 'all' && !text ? [] :
             (typeId === 'all' ? ['"' + text + '"'] : 
             [$("#selPubType option[value='"+typeId+"']").text()+'s']);
     }
@@ -2720,7 +2713,8 @@ function enableTableButtons() {
     $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, 1);
+    $('.tbl-tools').fadeTo(100, 1);
+    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
     authDependentInit(); 
 }
 function disableTableButtons() {

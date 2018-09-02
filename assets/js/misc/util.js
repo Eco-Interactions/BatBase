@@ -18,7 +18,7 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
  *   ucfirst 
 */
 let dataStorage, geoJson;
-const geoJsonDataKey = 'Live for justice!!!!!!!! <3<3';
+const geoJsonDataKey = 'Live for justice!!!!!!<3!! <3<3';
 
 extendPrototypes();
 
@@ -228,11 +228,16 @@ function clearIdbCheck(storedKey) {                                             
 function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
     idb.get('geoJson').then(storeGeoJson);
 }
-function storeGeoJson(geoData) {                                                //console.log('storeGeoJson. geoData ? ', geoData !== undefined);
+function storeGeoJson(geoData) {                                                console.log('stor(ing)GeoJson. geoData ? ', geoData !== undefined);
     if (geoData === undefined) { return downloadGeoJson(); }
     geoJson = geoData; 
 }
 function downloadGeoJson(cb) {                                                  //console.log('downloading all geoJson data!');
+    return  dataStorage.getItem('interaction') ?
+        downloadGeoJsonAfterLocalDbInit(cb) :
+        window.setTimeout(downloadGeoJson, 400);   
+}
+function downloadGeoJsonAfterLocalDbInit(cb) {
     sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
     
     function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
@@ -254,7 +259,7 @@ function parseData(data) {
 export function isGeoJsonDataAvailable() {
     return geoJson;
 }
-export function updateGeoJsonData(cb) {
+export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
     geoJson = false;
     downloadGeoJson(cb);
 }

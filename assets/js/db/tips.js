@@ -167,7 +167,8 @@ function getSteps(step) {
                 map.</h3><br>After filtering the interactions, click here to 
                 display them geographically.<br><br><center>You can try it now.
                 </center>`,
-            position: 'left'
+            position: 'left',
+            setUpFunc: checkForDbLoad
         },
         {
             element: '#db-view',
