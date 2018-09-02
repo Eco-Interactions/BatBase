@@ -503,7 +503,7 @@ span.lbl {
     margin-left: 1em;
 }
 #about-db .first-col {
-    width: 52%;
+    width: 63%;
 }
 #about-db .second-col {
     width: 48%;
@@ -514,6 +514,9 @@ span.lbl {
 #about-db-maps, #db-new-data {
     height: 550px;
     width: 734px;
+}
+#about-db-how-to-use ul {
+    margin-left: 1em;
 }
 /*------------- Definitions -----------------*/
 #def-frame h3 {
