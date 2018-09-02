@@ -314,7 +314,7 @@ span.lbl {
     justify-content: flex-start;
     background: White;
 }
-.top-sticky { z-index: 5000; position: fixed; top: 0; background-color: White;}
+.top-sticky { z-index: 1001; position: fixed; top: 0; background-color: White;}
 #locs_list_filter, #locs_list_length, 
 #interaction_list_filter, #interaction_list_length, 
 #loc_det_list_filter, #loc_det_list_length {

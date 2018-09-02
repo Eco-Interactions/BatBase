@@ -1265,8 +1265,8 @@ function onCntryRegSelection(val) {                                             
  * locations.
  */
 function buildLocFieldRow() {                                                   //console.log("buildingLocationFieldRow. ");
-    var locOpts = getLocationOpts();                                            //console.log("locOpts = %O", locOpts);
-    var selElem = _util.buildSelectElem(
+    const locOpts = getLocationOpts();                                          //console.log("locOpts = %O", locOpts);
+    const selElem = _util.buildSelectElem(
         locOpts, {id: "Location-sel", class: "lrg-field"});
     return buildFormRow("Location", selElem, "top", false);
 }
@@ -1312,6 +1312,7 @@ function onLocSelection(val) {                                                  
     $('#Country-Region-sel')[0].selectize.addItem(prntVal, true);
     fillEditLocDetails(val);
     if (!fParams.editing) { $('#Location_pin').focus(); }
+    checkIntFieldsAndEnableSubmit();
 }
 /** Displays the selected location's data in the side detail panel. */
 function fillEditLocDetails(id) {  
@@ -3065,26 +3066,27 @@ function checkRequiredFields(e) {                                               
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
- * is submitted before any changes have been made. After any change, the form is 
- * finished resetting for the next interaction entry.
+ * is submitted before any changes have been made.
  */
-function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = ', input, fLvl);
+function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fParams.forms.top.unchanged);
     const subBttnId = '#'+fLvl+'-submit';
+    if (fParams.forms.top.unchanged) { resetForNewForm(); }
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
         disableSubmitBttn(subBttnId); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
         enableSubmitBttn(subBttnId);
-        if (fParams.forms.top.unchanged) { resetForNewForm(); }
     }
 }
 /**
  * After the interaction form is submitted, the submit button is disabled to 
  * eliminate accidently creating duplicate interactions. This change event is
  * added to the non-required fields of the form to enable to submit as soon as 
- * any change happens in the form, and the required fields are filled.
+ * any change happens in the form, if the required fields are filled. Also 
+ * removes the success message from the form.
  */
 function checkIntFieldsAndEnableSubmit() {
     if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
+    if (fParams.forms.top.unchanged) { resetForNewForm(); }
 }
 /** Returns true if all the required elements for the current form have a value. */
 function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("->-> ifAllRequiredFieldsFilled... fLvl = %s. fPs = %O", fLvl, fParams)
@@ -3690,9 +3692,9 @@ function onDataSynced(data, msg, errTag) {                                      
     toggleWaitOverlay(false);
     if (errTag) { return errUpdatingData(msg, errTag); }
     if (data.citationUpdate) { return; }
-    if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
     if (isEditForm() && !hasChngs(data)) { 
-        return showSuccessMsg("No changes detected."); }  
+        return showSuccessMsg('No changes detected.', 'red'); }  
+    if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
     updateStoredFormParamsData(data);
     handleFormComplete(data);
 
@@ -3730,20 +3732,22 @@ function hasChngs(data) {
  */
 function resetInteractionForm() {
     const vals = getPinnedFieldVals();                                          //console.log("vals = %O", vals);
-    showSuccessMsg('New Interaction successfully created.');
+    showSuccessMsg('New Interaction successfully created.', 'green');
     initFormParams('create', 'interaction');
     resetIntFields(vals); 
     $('#top-cancel').val(' Close ');  
-    disableSubmitBttnUntilAnyFieldChanged();
+    disableSubmitBttn("#top-submit");
+    fParams.forms.top.unchanged = true;
 }
 /** Shows a form-submit success message at the top of the interaction form. */
-function showSuccessMsg(msg) {
+function showSuccessMsg(msg, color) {
     const cntnr = _util.buildElem('div', { id: 'success' });
     const div = _util.buildElem('div', { class: 'flex-row' });
     const p = _util.buildElem('p', { text: msg });
     const bttn = getSuccessMsgExitBttn();
     div.append(p, bttn);
-    cntnr.append(div)
+    cntnr.append(div);
+    $(cntnr).css('border-color', color);
     $('#top-hdr').after(cntnr); 
     $(cntnr).fadeTo('400', .8);
 }
@@ -3776,15 +3780,13 @@ function getPinnedFieldVals() {
 } /* End getPinnedValsObj */
 /**
  * Resets the top-form in preparation for another entry. Pinned field values are 
- * persisted. All other fields will be reset. checkRequiredFields is triggered 
- * to update the submit button.
+ * persisted. All other fields will be reset. 
  */
 function resetIntFields(vals) {
     disableSubmitBttn("#top-submit");
     initInteractionParams();
     resetUnpinnedFields(vals);
     fillPubDetailsIfPinned(vals.Publication);
-    $(fParams.forms.top.reqElems[0]).change();
 }
 function resetUnpinnedFields(vals) {
     for (var field in vals) {                                                   //console.log("field %s val %s", field, vals[field]);
@@ -3813,29 +3815,12 @@ function initInteractionParams() {
         "interaction", "top", null, getFormConfg("interaction"), "create");
     addReqElemsToConfg();
 }
-function disableSubmitBttnUntilAnyFieldChanged() {
-    fParams.forms.top.unchanged = true;
-    disableSubmitBttn('#top-submit');
-    addChangeListenerToNonReqFields();
-}
-function addChangeListenerToNonReqFields() {
-    $('#Location-sel')[0].selectize.on('change', enableSubmitAndRmvListener);
-    $('#InteractionTags-sel')[0].selectize.on('change', enableSubmitAndRmvListener);
-    $('#Note-txt').change(enableSubmitAndRmvListener);
-}
-function enableSubmitAndRmvListener() {
-    enableSubmitBttn('#top-submit');
-    resetForNewForm();
-}
 /**
  * After an interaction is created, the form can not be submitted until changes
  * are made. This removes the change listeners from non-required elems and the 
  * flag tracking the state of the new interaction form.  
  */
-function resetForNewForm() {
-    $('#Location-sel')[0].selectize.off('change', enableSubmitAndRmvListener);
-    $('#InteractionTags-sel')[0].selectize.off('change', enableSubmitAndRmvListener);
-    $('#Note-txt').off('change');
+function resetForNewForm() {  
     exitSuccessMsg();
     delete fParams.forms.top.unchanged;
 }
@@ -3877,7 +3862,7 @@ function updatedCitationData(citSrc, text) {
     const data = { srcId: citSrc.id, text: text };
     _util.sendAjaxQuery(data, 'crud/citation/edit', formSubmitSucess, formSubmitError);
 }
-    /**
+/**
  * Generates and displays the full citation text after all required fields 
  * are filled.
  */
