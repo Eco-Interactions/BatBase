@@ -67,6 +67,7 @@ TODOs:
         to that level and retain other filters- updated at for example.
 
 (STATIC/MISC SITE)
+    - {med}[med] Create site maintenance page
     - {med}[complicated] Implement Encore for assets
     - {low}[???] Find out how to tell how many users are online
     - {med}[easy] Add headers and css styles to FOS pages 
