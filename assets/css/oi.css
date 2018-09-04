@@ -1,0 +1,731 @@
+/*
+greens-pallete:
+    darkest:    #1b3b1b
+    darker:     #245A37
+    dark:       #2D7853
+    med:        #36976F
+    light:      #3fb58b
+    lighter:    #77cab8
+    lightest:   #a2dadd
+*/
+/*--- Base Styles ---*/
+a:link {
+    color: #1b3b1b;
+    text-decoration: underline;
+}
+a:visited {
+    color: #1b3b1b;
+}
+a:hover {
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+a:active {
+}
+button {
+    border: 1px solid;
+    border-radius: 2px;
+}
+form input, form select, form textarea {
+    font-size: 1em;
+    padding: .2em;
+    margin: .5em .5em .5em 0;
+}
+form textarea {
+    vertical-align: top;
+}
+form label {
+    vertical-align: text-top;
+    margin-right: .5em;
+}
+form button {
+    border: 1px solid;
+    border-radius: 10px;
+    margin: 23px 0 23px 0;
+    padding: .25em .5em .25em .5em;
+    font-size: 1.5em;
+}
+.two-col-outer, .three-col-outer, .four-col-outer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col  {
+    border-right: 1px solid #cccccc;
+    margin-right: 2em;
+    padding: 0 1.25em 0 0;
+}
+span.lbl {
+    font-weight: bold;
+}
+.inln-flds {
+    padding: 15px 0 10px 0;
+}
+.inln-flds span {
+    padding: 0 5px 0 55px;
+}
+.main-col {
+    flex-grow: 8;
+    font-size: 1.1em;
+    padding-right: 2em;
+}
+/*--------------- Util Styles ----------------------------------*/
+.top-em-mrg {
+    margin-top: 1em;
+}
+.bot-em-mrg {
+    margin-bottom: 1em;
+}
+.em-mrg {
+    margin: 1em;
+}
+.sevn-wide {
+    width: 700px;
+}
+.five-wide {
+    width: 500px;
+}
+.hiddenElem {
+    display: none;
+}
+.invis {
+    visibility: hidden;
+}
+.waiting {
+    cursor: wait;
+}
+/*-------- Flex ----------*/
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-grow {
+    flex-grow: 1;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+.flex-col {
+    display: flex;
+    flex-direction: column; 
+}
+/*-------------------------- Main Layout -------------------------------------*/
+#pg-container {
+    max-width: 1500px;
+    position: relative;
+    margin: 0 auto;
+}
+#masthead {
+    position: relative;
+}
+#content-detail {
+    position: absolute;
+    width: 100%;
+    top: 510px;
+}
+#detail-block {
+    margin: 1em .5em 2em 1em;
+}
+#detail-block h4 {
+    margin-top: 15px;
+}
+#detail-block h5 {
+    margin-bottom: 5px;
+}
+.top-pgs h3 {
+    font-size: 1.2em;
+    margin: .75em 0 .5em 0;
+}
+.top-pgs p, #terms-div p {      
+    margin: .2em 0 0 1em;
+    padding: .3em 0 .3em 0;
+    font-size: 1.05em;
+}
+.top-pgs ul li, .top-pgs ol li {
+    margin: .2em 0 0 1.8em;
+    padding: .3em 0 .3em 0;
+    font-size: 1.05em;
+}
+.top-pgs .second-col {
+    margin: 0 20px 0 5px;
+}
+/*.top-pgs .first-col {
+    width: 1800px;
+}*/
+#footer {
+    font-size: 1em;
+    width:100%;
+    padding: 1em 0 3em 0;
+    border-top:1px solid #000;
+    justify-content: space-between;
+}
+/*----------- wysiwyg editor ------------------*/
+.wysiwyg {
+    position: relative;
+}
+.wsywigEdit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 1.5em;
+    z-index: 10;
+    cursor: pointer;
+}
+#hdrtext>button {
+    width: 148px;
+}
+.adminbttn {
+    background: #3399ff;
+    color: white;
+    border-radius: 5px;
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+}
+.adminbttn:hover {
+    background: #1A80E6;
+    box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
+}
+/*------------- Icons ----------------*/
+.icomag {
+    width: 1.5em;
+    height: auto;
+    z-index: 0;
+    position: relative;
+    top: .13em;
+}
+.icopen {
+    width: 1.5em;
+    height: auto;
+    z-index: 0;
+    position: relative;
+    top: .1em;
+}
+/*-------------- Header -------------*/
+#slider-overlay {
+    position: absolute;
+    top: 80px;
+    left: 60px;
+    z-index: 500;
+}
+#side-logo {
+    position: relative;
+    left: 65px;
+    padding-bottom: 20px;
+}
+#chrome-opt-msg {
+    position: relative;
+    color: silver;
+    width: 633px;
+    top: -66px;
+    left: -44px;
+}
+/*------------------- Slider Header ----------------------*/
+#pause-btn-frame, #prev-btn-frame, #next-btn-frame, #pause-btn, #prev-btn, #next-btn {
+    z-index: 500;
+    height: 60px;
+    width: 60px;
+}
+#pause-btn-frame, #prev-btn-frame, #next-btn-frame {
+    position: absolute;
+    z-index: 500;
+    height: 60px;
+    width: 60px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .5s ease-in-out;
+}
+#pause-btn-frame {
+    bottom: 10px;
+    left: 720px;
+}
+#prev-btn-frame, #next-btn-frame {
+    top: 181px;
+}
+#prev-btn-frame {
+    left: 10px;
+}
+#next-btn-frame {
+    right: 10px;
+}
+
+#masthead:hover > #pause-btn-frame, #masthead:hover > #prev-btn-frame, #masthead:hover > #next-btn-frame {
+    opacity: 1;
+}
+
+.message-container, .msg-ghost {
+    color: #a2dadd;
+    font-size: 60px;
+
+    padding: 0px;
+    text-shadow: 0px 0px 8px rgba(0,0,0,1),
+                0px 0px 8px rgba(0,0,0,1),
+                0px 0px 8px rgba(0,0,0,1),
+                0px 0px 8px rgba(0,0,0,1),
+                0px 0px 8px rgba(0,0,0,1);
+}
+.msg-ghost {
+    position: absolute;
+    z-index: 1000;
+}
+/*------------------- Pop Up and Overlay Styles --------------------*/
+#b-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background: rgba(0,0,0,.8);
+    width: 100vw;
+    height: 100vh;
+    z-index: 1500;
+    justify-content: center;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+}
+#b-overlay-popup {
+    position: relative;
+    background: WhiteSmoke;
+    box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
+    z-index: 750;
+    border-radius: 5px;
+}
+.tos-popup {
+    height: 88vh;
+    width: 44vw;
+    top: 2vh;
+    margin: auto;
+    overflow-y: scroll;
+    padding: 2em;
+}
+/**--------------- Menu Styles -------------------*/
+#sticky-hdr {
+    max-width: 100%;
+}
+#tbl-ctrl-div {
+    position: absolute;
+    top: -1000px;
+    right: -1000px;
+}
+#tbl-ctrls-reloc {
+    display: flex;
+    justify-content: flex-start;
+    background: White;
+}
+.top-sticky { z-index: 1001; position: fixed; top: 0; background-color: White;}
+#locs_list_filter, #locs_list_length, 
+#interaction_list_filter, #interaction_list_length, 
+#loc_det_list_filter, #loc_det_list_length {
+    display: inline-block;
+    font-size: .9em;
+    text-align: right;
+    margin: 0;
+    padding: 0;
+    background: White;
+}
+#locs_list_filter, #interaction_list_filter, #loc_det_list_filter input {
+    margin-left: 5px;
+    padding: 0;
+}
+#locs_list_length, #interaction_list_length, #loc_det_list_length select {
+    margin: 0;
+    padding: 0;
+}
+#btn-div {
+    display: inline-block;
+    margin: 0;
+    padding: 0px 10px 0px 18px;
+    float: none;
+}
+#btn-div a {
+    margin-right: 7px;
+    padding: 0px 7px 0px 7px;
+}
+#sticky-col-hdrs {
+    background: White;
+}
+#menu-bar-title {
+    text-align: right;
+    font-size: 23px;
+    padding: 10px 10px 0 0;
+    color: DimGray;
+    height: 43px;
+    width: 400px;
+}
+#hdrmenu {
+    display: flex;
+    justify-content: space-between;
+    height: 43px;
+    width: 1500px;
+    padding: 0px;
+    margin: 0;
+    border-bottom: 1px solid Gray;
+    background-color: White;
+}
+#hdrtext {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+    text-align: right;
+    font-size: 21px;
+    height: 43px;
+    border-bottom: 1px solid Gray;
+    padding: 9px 8px 0 12px;
+}
+#hdricopen {
+    width: 1em;
+    height: auto;
+    z-index: 0;
+    margin: 0 1em 0 .5em;
+    position: relative;
+    top: .1em;
+}
+#hdrmenu ul li {
+    position:relative;
+    display:inline-block;
+    margin:0;
+    padding: 0;
+}
+#hdrmenu > ul > li {
+    margin: 0 20px 0 0;
+}
+#hdrmenu ul li.current-menu-item {
+    background:#ddd;
+}
+#oimenu a {
+    color: Black;
+    display:inline-block;
+    text-decoration:none;
+    font-weight:700;
+    font-size: 23px;
+    line-height:32px;
+    padding: .2em 1em .2em .5em;
+    font-family:"HelveticaNeue","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+.arrow > a:after {
+  content: " \25BC";
+  font-size: .5em;
+  display: block;
+  position: absolute;
+  top: .5em;
+  right: .7em;
+}
+#oimenu {
+    width: 1000px;
+    padding: 0;
+    margin: 0;
+}
+#oimenu li:hover {
+    background: LightGrey;
+}
+#oimenu ul {
+    display:none;
+    z-index: 1000;
+    position:absolute;
+    top:100%;
+    left:0;
+    background: WhiteSmoke;
+    padding: 0;
+    box-shadow: 10px 10px 23px #888888;
+}
+#oimenu ul li {
+    width:230px;
+}
+#oimenu ul a {
+    line-height:120%;
+    padding:10px 15px;
+}
+#oimenu ul ul {
+    top:0;
+    left:100%;
+}
+#oimenu .smtrigger > ul {
+    display:none;
+}
+#oimenu .smtrigger:hover > ul {
+    display:block;
+}
+/*--- List Styles ---*/
+#ul-big {                               /*Clean up old id references*/
+    margin-left: 2em;
+    font-size: 1.3em;
+}
+#ul-big li {
+    margin: 1em 0 1em 0;
+}
+.ul-big {
+    margin-left: 2em;
+    font-size: 1.3em;
+}
+.ul-big li {
+    margin: 1em 0 1em 0;
+}
+.ul-reg li {
+    margin: 0 0 .5em .5em;
+}
+.disc-list>li {
+    list-style: disc;
+    display: list-item;
+    padding-left: 2em;
+}
+.circle-list>li {
+    list-style: circle;
+    display: list-item;
+}
+/*-------------------------------- Pages -------------------------------------*/
+/*-------- Search Database Page styles in search_db.css -------*/
+/*------------------- Home ---------------*/
+#home-pg p {
+    font-size: 1.15em;
+}
+#home-pg h3 {
+    font-size: 1.3em;
+}
+#home-pg h2 {
+    font-size: 1.35em;
+}
+#home-pg .second-col {
+    flex-shrink: 1;
+    min-width: 300px;
+    padding-right: 1em;
+}
+#home-pg .first-col { 
+    flex-grow: 1; 
+    border-right: none;
+    min-width: 715px;
+    padding: 25px 55px 15px 15px; 
+    margin-right: 0;
+}
+/*-- About DB --*/
+#about-db .first-col>ul {
+    margin-left: 1em;
+}
+#about-db .first-col {
+    width: 63%;
+}
+#about-db .second-col {
+    width: 48%;
+}
+.about-db-maps {
+    display: inline-block;
+}
+#about-db-maps, #db-new-data {
+    height: 550px;
+    width: 734px;
+}
+#about-db-how-to-use ul {
+    margin-left: 1em;
+}
+/*------------- Definitions -----------------*/
+#def-frame h3 {
+    font-size: 1.4em;
+    margin: 15px 0px 10px 0;
+}
+#def-frame .first-col {
+    width: 150%;
+}
+#def-frame>div>div {
+    padding: 0 1em 1em 0;
+}
+#def-frame p {
+    font-size: 1em;
+    padding: .3em;
+    margin: 0 1em 0 1em;
+}
+#def-frame li, #future-dev-ul li {
+    margin: 0 1.5em 0 1.2em;
+    font-size: 1em;
+    padding: .5em .5em .5em 0;
+}
+.def-ol>li {
+    list-style: decimal;
+    display: list-item;
+    margin-left: .5em;
+    margin-right: 2em;
+}
+#def-frame .disc-list {
+    margin: 0 0 0 1.5em;
+}
+#def-frame .circle-list {
+    margin: 0 0 0 2.5em;
+}
+#caveats>li.cav, #db-field-list>li.cav, #future-dev-ul>li {
+    list-style: disc;
+    display: list-item;
+    margin-left: 3em;
+    margin-right: 2em;
+}
+#db-field-list a {
+    margin-left: 0;
+}
+/*--------------- About Project ---------------------*/
+#about-pg .second-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#about-pg .first-col {
+    width: 143%;
+}
+/*--- Team ---*/
+#team-hdr {
+    text-align: center;
+    margin: 2em auto 2em auto;
+    font-size: 1.2em;
+}
+.bio-img {
+    height: 200px;
+    width: 160px;
+    float: left;
+    margin: 0 1em 1.5em 0;
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
+}
+#team-sect .second-col {
+    width: 272em;
+}
+#team-sect .four-col-outer>div.fourth-col {
+    width: 220px;
+    flex-shrink: 0;
+}
+
+/*-------------------- Future Dev -----------------*/
+#future-dev-pg .first-col {
+    width: 64%;
+}
+#future-dev-pg ul {
+    margin-left: 1em;
+}
+#articles-add{
+    height: 100vh;
+    width: 100vw;
+}
+/*----------- FOS / Registration Page -------------*/
+.fos_user_user_show {
+    margin-top: 1em;
+}
+#register-pg .second-col {
+    min-width: 550px;
+}
+form.fos_user_registration_register {
+    display: table;
+    text-align: right;
+}
+#reg-form-container>div {
+    display: inline-block;
+    vertical-align: top;
+}
+#reg-form-container {
+    margin-top: 3em; 
+}
+#fos_user_registration_form_first_name {
+    margin-top: 0;
+}
+#fos_user_registration_form_username {
+    margin-bottom: 1em;
+}
+label[for=fos_user_registration_form_about_me] {
+    position: relative;
+    top: .5em;
+}
+#reg-check-email {
+    margin: 1em;
+}
+#reg-form-container p {
+    margin-top: 1em;
+    padding-right: 1.5em;
+}
+#reg-form-container h3 {
+    text-align: right;
+}
+#reg-form-container div.top-em-mrg {
+    margin-top: 3em;
+}
+#reg-form-container input[type=text], 
+#reg-form-container input[type=email],
+#reg-form-container textarea {
+    width: 444px;
+}
+#reg-form-cntnr button:hover, .bttn-cntnr button:hover {
+    border: 1.5px solid;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+#terms-div {
+    padding: 1em;
+    text-align: left;
+    box-shadow: inset 0 0 7px 4px rgba(255,255,255,.5);
+}
+#terms-div h3 {
+    text-align: center;
+}
+#terms-div p {
+    margin: .3em .3em .3em 1.3em; 
+}
+#accept-tos-cntnr {
+    justify-content: space-between;
+    text-align: right;
+}
+#close-tos-bttn {
+    margin-top: 2em;
+}
+#reg-tos {
+    margin-top: 1em;
+}
+#reg-submit, #reg-tos {
+    cursor: pointer;
+}
+/*--------------- Feedback --------------------------*/
+#feedback-popup {
+    background-color: #a2dadd;
+    box-shadow: 5px 5px 7px rgba(0,0,0,0.6);
+    padding: 2em;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 5001;
+}
+#feedback-popup>p {
+    width: 23em;
+    margin-bottom: .7em;
+}
+#feedback-popup>label {
+    width: 4em;
+}
+#feedback-popup input {
+    width: 23em;
+    margin-bottom: .5em;
+}
+#feedback-popup>textarea {
+    display: block;
+    width: 26.7em;
+    height: 8em;
+    margin: .7em 0 .5em 0;
+}
+#feedback-popup>button {
+    border: 1px solid #1b3b1b;
+    background: #245A37;
+    color: #a2dadd;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
+    padding: .5em;
+    margin: .5em 1em 0 0;
+}
+#feedback-popup>button:hover {
+    background: #2D7853;
+    box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
+}
+@media screen and (max-width: 1500px) {
+    #pg-container {
+        max-width: 1313px;
+    }
+    /*--- About DB Pg ---*/
+    #about-db-maps, #db-new-data {
+        height: 529px;
+        width: 639px;
+    }
+    #sticky-hdr, #hdrmenu {
+        width: 1313px;
+    }
+}

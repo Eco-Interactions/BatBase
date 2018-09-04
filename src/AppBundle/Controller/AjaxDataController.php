@@ -142,6 +142,27 @@ class AjaxDataController extends Controller
         return $response;
     }
     /**
+     * Returns an object keyed with location ids with their geoJson as values. 
+     *
+     * @Route("/geo-json", name="app_serialize_geojson")
+     */
+    public function serializeGeoJsonDataAction(Request $request) 
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }  
+
+        $em = $this->getDoctrine()->getManager();
+        $serializer = $this->container->get('jms_serializer');
+        $geoJson = $this->serializeEntity('GeoJson', $serializer, $em);
+
+        $response = new JsonResponse();
+        $response->setData(array( 
+            'geoJson' => $geoJson
+        )); 
+        return $response;
+    }
+    /**
      * Returns serialized data objects for all entities related to Source. 
      *
      * @Route("/source", name="app_serialize_source")

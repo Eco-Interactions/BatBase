@@ -46,7 +46,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
     {
         foreach ($interactions as $intData) { 
             $int = $this->getNewEntity('interaction'); 
-            $this->setEntityData($int, 'interaction', $intData);
+            $this->setAllEntityData($int, 'interaction', $intData);
             $int->setSource($this->getSource($int, $intData['source']));
             $this->addInteractionTag($int, $intData);
             $this->em->flush();
@@ -57,7 +57,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
 
     /** ---------------- Set Entity Data ------------------------------------ */
     /** Sets all new data for the passed entity. */
-    private function setEntityData(&$entity, $entType, $entData)
+    private function setAllEntityData(&$entity, $entType, $entData)
     {   //print("\nSetting entity data = ".$entType." \n");print_r($entData);
         $relFields = $this->getEntityRelFields($entType);
         $skipFields = ['id', 'slug', 'created', 'updated', 'deletedAt', 'parentSource', 'source'];
@@ -84,7 +84,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         if ($parent === null) { 
             $parent = $this->getNewEntity($entType);
             $entityData = $this->getEntityData($entType, $id, false);  
-            $parent = $this->setEntityData($parent, $entType, $entityData);
+            $parent = $this->setAllEntityData($parent, $entType, $entityData);
         }
         return $parent;
     }
@@ -131,7 +131,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         $entityData = $this->getEntityData($entType, $id, false); 
         return $entType === "source" ?
             $this->createSource($entity, $entType, $entityData) : 
-        $this->setEntityData($entity, $entType, $entityData);
+        $this->setAllEntityData($entity, $entType, $entityData);
     }
 
     /** ---------------- Set Source Data ------------------------------------ */ 
@@ -151,7 +151,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         $this->setParentSrcEntity($srcEntity, $entData['parentSource']);
         $this->setSrcTypeEntity($srcEntity, $entData);
 
-        return $this->setEntityData($srcEntity, $entityType, $entData);
+        return $this->setAllEntityData($srcEntity, $entityType, $entData);
     }
     /** Finds or creates the parent source and sets the parent source. */
     private function setParentSrcEntity(&$srcEntity, $parentId)
@@ -174,7 +174,7 @@ class Version001dbMerge extends AbstractMigration implements ContainerAwareInter
         $typeEntity = $this->getNewEntity($srcType);
         $entityData = $this->getEntityData($srcType, false, $entData["displayName"]); 
 
-        $this->setEntityData($typeEntity, $srcType, $entityData);
+        $this->setAllEntityData($typeEntity, $srcType, $entityData);
 
         $typeEntity->setSource($srcEntity);
         $this->em->persist($typeEntity);

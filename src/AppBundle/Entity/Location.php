@@ -44,6 +44,14 @@ class Location
     private $description;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="iso_code", type="string", length=255, nullable=true)
+     * @JMS\Expose
+     */
+    private $isoCode;
+
+    /**
      * @var int
      *
      * @ORM\Column(name="elevation", type="integer", nullable=true)
@@ -126,6 +134,13 @@ class Location
      * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      */
     private $locationType;
+
+    /**
+     * @var \AppBundle\Entity\GeoJson
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location")
+     */
+    private $geoJson;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -249,6 +264,31 @@ class Location
     {
         return $this->description;
     }
+
+    /**
+     * Set isoCode.
+     *
+     * @param string $isoCode
+     *
+     * @return Location
+     */
+    public function setIsoCode($isoCode)
+    {
+        $this->isoCode = $isoCode;
+
+        return $this;
+    }
+
+    /**
+     * Get isoCode.
+     *
+     * @return string
+     */
+    public function getIsoCode()
+    {
+        return $this->isoCode;
+    }
+
 
     /**
      * Set elevation.
@@ -526,7 +566,7 @@ class Location
     {
         return $this->locationType;
     }
-
+    /** -------- Serialize Location Type Data ------------------------ */
     /**
      * Get locationType id and displayName.
      * @JMS\VirtualProperty
@@ -585,6 +625,50 @@ class Location
     private function getLocObj($loc)
     {
         return [ "id" => $loc->getId(), "displayName" => $loc->getDisplayName() ]; 
+    }
+    /** ---- End Location Type Data ---- */
+    /**
+     * Set geoJson.
+     *
+     * @param \AppBundle\Entity\GeoJson $geoJson
+     *
+     * @return Source
+     */
+    public function setGeoJson(\AppBundle\Entity\GeoJson $geoJson)
+    {
+        $this->geoJson = $geoJson;
+
+        return $this;
+    }
+
+    /**
+     * Get geoJson Entity.
+     *
+     * @return \AppBundle\Entity\GeoJson
+     */
+    public function getGeoJson()
+    {
+        return $this->geoJson;
+    }
+
+    /**
+     * Get geoJson ID.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("geoJsonId")
+     *
+     * @return integer
+     */
+    public function getGeoJsonId()
+    {
+        $geoJson = $this->geoJson ? $this->geoJson->getId() : null;
+        if (!$geoJson && $this->isHabitat()) {
+            $geoJson = $this->parentLoc->getGeoJsonId();
+        }
+        return $geoJson;
+    }
+    private function isHabitat()
+    {
+        return $this->locationType->getDisplayName() === 'Habitat';
     }
 
     /**

@@ -144,7 +144,7 @@ class CrudController extends Controller
     /** If the core-entity is 'Source', process any detail-entity data. */
     private function handleDetailEntity($cFormData, $dFormData, &$returnData, $em)
     {
-        if (!property_exists($cFormData->rel, "sourceType")) { return false; }
+        if (property_exists($cFormData, "false")) { return false; }
         return $this->setDetailEntityData($cFormData, $dFormData, $returnData, $em);  
     }
     /**
@@ -153,9 +153,10 @@ class CrudController extends Controller
      */
     private function setDetailEntityData($cFormData, $dFormData, &$returnData, &$em)
     {
-        $dName = $cFormData->rel->sourceType;
+        $dName = property_exists($cFormData->rel, "sourceType") ? 
+            $cFormData->rel->sourceType : 'geoJson';                            //print('detail name = '.$dName);
         $returnData->detail = $dName;
-        if (!$cFormData->hasDetail) { return false; }
+        if (!property_exists($cFormData, "hasDetail")) { return false; }
         $dData = $dFormData->$dName;
         
         return $this->setDetailData( $dData, $dName, $returnData, $em );
@@ -163,16 +164,21 @@ class CrudController extends Controller
     private function setDetailData($dData, $dName, &$returnData, &$em)
     {
         $dEntity = $this->getDetailEntity($dName, $returnData->detailEdits, $em);
-        $dEntity->setSource($returnData->coreEntity);
+        $this->setCoreEntity($returnData->core, $returnData->coreEntity, $dEntity);
         $this->addDetailToCoreEntity($returnData->coreEntity, $dEntity, $dName, $em);
         $this->setEntityData($dData, $dEntity, $returnData->detailEdits, $em);  
 
         return $dEntity;
     }
+    private function setCoreEntity($coreName, &$coreEntity, &$dEntity)
+    {
+        $setCore = 'set'.ucfirst($coreName);
+        $dEntity->$setCore($coreEntity);
+    }
     /** Returns either a newly created entity or an existing entity to edit. */
     private function getDetailEntity($dName, $edits, $em)
     {
-        if ($edits->editing !== false) {
+        if ($edits->editing !== false && $edits->editing !== null) {
             return $this->getEntity(ucfirst($dName), $edits->editing, $em);
         }
         $dClass = 'AppBundle\\Entity\\'. ucfirst($dName);
@@ -379,12 +385,12 @@ class CrudController extends Controller
      * entity is updated with the new value and the field is added to the edits obj.   
      */
     private function setFlatDataAndTrackEdits(&$entity, $field, $newVal, &$edits) 
-    {
+    {  
         $setField = 'set'. ucfirst($field);                                     
         $getField = 'get'. ucfirst($field);                                     
         
         $curVal = $entity->$getField();
-        if ($curVal == $newVal) { return; }
+        if ($curVal === $newVal) { return; }
 
         if ($edits->editing) { $edits->$field = [ "old" => $curVal, "new" => $newVal]; }
         $entity->$setField($newVal);
@@ -457,27 +463,18 @@ class CrudController extends Controller
      */
     private function setUpdatedAtTimes($entityData, &$em)
     {
-        $this->updateUpdatedAt($entityData->core, $em);
+        $this->setUpdatedAt($entityData->core, $em);
         if ($entityData->detailEntity) {
-            $this->updateUpdatedAt($entityData->detail, $em);
+            $this->setUpdatedAt($entityData->detail, $em);
         }
-        $this->setUpdatedAt(1, $em); //System updateAt
+        $this->setUpdatedAt('System', $em); 
         $em->flush();
     }
-    private function updateUpdatedAt($className, &$em)
-    {
-        $dateEntities = ["System", "Author", "Authority", "Citation", "CitationType", 
-            "ContentBlock", "Contribution", "Realm", "Feedback", "HabitatType", 
-            "ImageUpload", "Interaction", "InteractionType", "Level", "Location", 
-            "LocationType", "Naming", "NamingType", "Publication", "PublicationType", 
-            "Source", "SourceType", "Tag", "Taxon", "Taxonym"];
-        $entityDateId = array_search(ucfirst($className), $dateEntities) + 1;
-        $this->setUpdatedAt($entityDateId, $em);                                
-    }
-    private function setUpdatedAt($id, &$em)
+    private function setUpdatedAt($name, &$em)
     {
         $entity = $em->getRepository('AppBundle:SystemDate')
-            ->findOneBy(['id' => $id]);
+            ->findOneBy(['description' => $name]);
+        if (!$entity) { return; }
         $entity->setDateVal(new \DateTime());
         $em->persist($entity);
     }

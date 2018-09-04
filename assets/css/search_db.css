@@ -1,0 +1,592 @@
+/*--- Database Search Page Styles ---*/
+#search-opts {  /* .flex-row also on elem */
+    margin: 1em auto 0 auto;
+    height: 130px;
+    width: 100%;
+    font-size: 1.1em;
+}
+#search-opts span {
+    padding-top: 6px;
+}
+.opts-col {
+    padding: .3em;
+    height: 100%;
+    justify-content: space-around;
+}
+.opts-box {
+    margin: 0 .7em 0 .5em;
+}
+.selectize-input {
+    padding: 4px;
+}
+.selectize-input, .selectize-control.single .selectize-input.input-active {
+    display: inline-flex;
+}
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 0;
+}
+#opts-col1 {
+    border-right: black 1px solid;
+    flex: 0 0 326px;
+    align-items: flex-end;
+}
+#opts-col1 .opts-box {
+    width: 116px;
+}
+#opts-col2, #opts-col3 {
+    font-size: .9em;
+    padding: 5px;
+    border-right: black 1px solid;
+    justify-content: flex-start;
+}
+#opts-col2 {
+    flex: 0 0 460px;      
+}
+#opts-col3 {
+    flex: 1 0 484px;     /*Don't grow or shrink, width.*/ 
+    justify-content: space-between;
+}
+#opts-col3 .bttm-row {
+    justify-content: space-between;
+}
+#shw-map {
+    width: 193px;
+}
+#time-fltr, .flatpickr-input {
+    margin-top: .2em;
+}
+#futrDevMsg {
+    margin: 0 5px 0 5px;
+}
+#show-tips, #strt-tut {
+    width: 95px;
+    margin: 5px 5px 5px 15px;
+}
+.lbl-sel-opts {          /* .flex-row also on elems */
+    margin: .3em;
+    flex: 0 0 auto;
+    width: 222px;    
+    justify-content: space-between;
+}
+#tool-bar {
+    margin: .7em auto .2em auto;
+    padding: .1em;
+    width: 100%;
+    height: 28px;
+    font-size: 1.1em;
+}
+#tbl-status {
+    margin: 0 0 0 .2em;
+    flex-grow: 1;
+    padding: .2em;  
+}
+#xtrnl-filter-status {
+    flex-shrink: 1;
+    margin-right: .3em;
+}
+#tbl-filter-status {
+    flex-grow: 1;
+}
+/*--------- Search Tips Popup -----------------*/
+#tips-close-bttn {
+    position: relative;
+    margin-top: .5em;
+    left: 91%;
+    bottom: -2vh;
+}
+.tips-popup {
+    top: 4vh;
+    /*position: relative;*/
+    font-size: 1.1em;
+    height: 88vh;
+    width: 44vw;
+    padding: 2.2em;
+    text-align: left;
+    margin: auto;
+    overflow-y: scroll;
+}
+.tips-popup li {
+    display: block;
+    padding-left: 1em;
+}
+.tips-popup ul {
+    width: 755px;
+    margin: auto;
+}
+/**-------------- Data Table Styes -------------------------- */
+#db-view {
+    height: 86vh;
+    border: black 1px solid;
+}
+#search-tbl {
+    height: 100%;
+}
+.tbl-edit { 
+    height: 22px;
+    width: 20px;
+    position: relative;
+    left: 9px;
+}
+.ag-menu{
+    z-index: 100;
+}
+.row-purple {
+    background-color: rgba(128,0,128,.13) !important; /* purple */
+}
+.row-green {
+    background-color: rgba(0,128,0,.15) !important; /* green */
+}
+.row-blue {
+    background-color: rgba(0,0,255,.15) !important; /* blue */
+}
+.row-orange {
+    background-color: rgba(255,128,0,.17) !important; /* orange */
+}
+.row-turquoise {
+    background-color: rgba(0,245,255,.11) !important; /* turquoise */
+}
+.row-yellow {
+    background-color: rgba(255,255,0,.2) !important; /* yellow */
+}
+.row-red {
+    background-color: rgba(255,0,0,.15) !important; /* red */
+}
+/**-------------- Data Map Styes -------------------------- */
+#map {
+    height: 100%;
+}
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    color: #555;
+    background: white;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.info h4 {
+    margin: 0 0 5px 5px !important;
+    color: #777;
+}
+.legend {
+    line-height: 18px;
+}
+#int-legend span {
+    padding-left: 16px;
+}
+.legend i {
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin: 2px 8px 2px 8px;
+    padding-right: 3px;
+    opacity: 0.8;
+}
+.single-marker {
+    width: 33px !important;
+    height: 33px !important;
+    margin-left: -12px;
+    margin-top: -15px;
+    border-radius: 25px;
+    border: 4px solid rgba(181, 226, 140, 0.7);
+    text-align: center;
+    color: #222;
+    padding-top: 4px;
+    background-color: rgba(110, 204, 57, 0.9);
+    font-size: 11px;
+}
+#filter-in-tbl-msg {
+    position: absolute;    
+    top: 101px;
+    left: 810px;
+}
+/*------- Buttons ---------------*/
+#filter-bttns {
+    display: inline-flex;
+    justify-content: space-between;
+    height: 44px;
+}
+.tbl-bttn, .tos-bttn {
+    margin: 0 .3em 0 .2em;
+    background: linear-gradient(#fff, #d3d3d3);
+    border-radius: 4px;
+}
+.intro-bttn {
+    width: 144px;
+    height: 22px;
+}
+button[name="csv"], #close-tos-bttn {
+    align-self: flex-end;
+}
+button[name="xpand-all"] {
+    width: 105px;
+}
+button[name="createbttn"] {
+    width: 75px;
+    align-self: flex-end;
+    margin-right: 7px;
+}
+button[name="show-hide-col"] {
+    opacity: .8;
+    cursor: not-allowed;
+}
+button[name="futureDevBttn"] {
+    align-self: flex-end;
+    opacity: .7;
+}
+#xpand-tree button {
+    margin: 0em;
+}
+#xpand-tree {
+    margin-right: .3em;
+}
+/*----- Walkthrough ------*/
+.intro-tips {
+    width: 420px;
+    text-align: justify;
+}
+a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
+    cursor: pointer;
+}
+/*------------ Search Table Popup -----------------*/
+#db-popup {
+    background: #FFF;
+    display: none;
+    position: relative;
+    z-index: 2000;
+    text-align: center;
+    font-size: 20px;
+    box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75);
+    bottom: 75%;
+    left: 45%;
+    width: 500px;
+    height: 100px;
+    padding: 22px;
+    margin-left: -150px;
+    margin-top: -50px;
+    border-radius: 5px;
+}
+#db-overlay {
+    display: none;
+    position: absolute;
+    z-index: 1000;               
+    top: 0;
+    left: 0;
+    background-color: grey;
+    width: 100%;
+    height: 91%;
+    opacity: .2;
+}
+/*-------------------------- Database CRUD Popup -----------------------------*/
+.form-popup {
+    height: 88vh;
+    flex-grow: 0;
+    padding: 15px;
+    text-align: left;
+    justify-content: space-between;
+    flex-direction: column;
+}
+.form-ovrly {
+    align-items: center;
+    height: 91vh;
+}
+#top-hdr {
+    font-size: 1.3em;
+    margin-bottom: 1em;
+}
+#success {
+    margin-bottom: 15px;
+    font-weight: bold;
+    border: 2px solid;
+    padding: 10px; 
+    display: none;
+}
+#success>div {
+    justify-content: space-between;
+}
+#success>div>p {
+    padding-top: 6px;
+}
+.form-popup [id$="-hdr"] {
+    margin-bottom: 10px;
+    text-align: center;
+    padding-top: 4px;
+}
+#form-main {
+    padding: 5px 0 0 5px;
+    height: 81vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+#form-details {
+    flex: 1 1 333px;
+    margin: .5em .2em 0 .2em;
+    padding: 0 .5em .5em .5em;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+#form-details h3 {
+    text-align: center;
+    font-size: 1.15em;
+    margin-bottom: .5em;
+}
+#form-details p {
+    color: darkgrey;   
+    text-align: right
+}
+.det-div {
+    min-height: 50px;
+    margin: .5em 0 1em 0;
+}
+.det-div div {
+    padding: .5em 0 0 .5em;
+}
+.cnt-div {
+    margin: .5em;
+}
+.cnt-div div, .cnt-div span {
+    padding: .25em;
+    width: 44px;
+    text-align: right
+}
+/*------------ Form Styles ---------------*/
+#top-form {
+    font-size: 1em;
+    flex-wrap: wrap;
+}
+.exit-row {
+    width: 100%;
+    justify-content: flex-end;
+    display: flex;
+}
+.exit-bttn {
+    width: 2em;
+    height: 2em;
+    font-weight: bold;
+}
+#exit-sub-form {
+    position: relative;
+    left: 24%;
+    font-size: .75em !important;
+}
+.med-form {
+    border: 1px solid grey;
+    border-radius: 5px;
+    width: 808px;
+    padding: 3px;
+    margin: 11px 0 10px 100px;
+}
+.sml-form {
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 385px;
+    margin-top: .5em;
+}
+div[id$="_Rows"] {
+    min-width: 100%;
+}
+.sml-left {
+    position: relative;
+    left: 10px;
+}
+.sml-right {
+    position: relative;
+    right: 25px;
+}
+#sub-hdr, #sub2-hdr {
+    font-size: 1.1em;
+}
+form[name="top"] p, form[name="top"] .bttn-cntnr {
+    width: 100%;
+}
+.all-fields-cntnr {
+    padding-top: 1em; 
+}
+.field-row {
+    justify-content: space-between;
+    margin-top: .3em;
+}
+[id$="_row"] {
+    padding: .2em .75em .3em  .75em;    
+}
+.top-row {
+    width: 470px;
+    margin-right: 1em;
+}
+.full-row {
+    width: 97.4%;
+}
+.sub-row {
+    width: 390px;
+}
+.sub2-row {
+    width: 372px;
+}
+[id$="-sel-cntnr"]>div {
+    margin-top: .5em
+}
+/** --- Error Styles --- */
+[id$="_errs"] {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    color: red;
+}
+[id$="_errs"] span {
+    margin-top: .3em;
+    justify-content: center;
+}
+[class$="active-errs"] {
+    padding: .3em;
+    margin-bottom: .3em;
+}
+.err-exit {
+    color: darkred;
+    height: 1.65em;
+    width: 1.7em;
+    margin-left: 1em !important;
+}
+/** --- Field Styles --- */
+.field-row .required:after {
+  content: "*";
+}
+.top-pin {
+    margin: .6em 0 0 .6em !important;
+}
+#top-form input, #top-form select, #top-form textarea {
+    padding: .2em;
+    margin: 0;
+    font-size: .95em;
+}
+.xlrg-field {
+    width: 643px;
+}
+.top.xlrg-field {
+    width: 816px;
+}
+.lrg-field {
+    width: 302px;
+}
+.med-field {
+    width: 235px;
+}
+.sml-field {
+    width: 200px;
+}
+#top-form textarea {
+    height: 63px;
+}
+#Note-txt {
+    border-color: #b8b8b8;
+}
+.selectize-input {
+    padding-right: 33px !important;
+}
+#top-form label {
+    font-size: 1em;
+    padding: 9px 0 2px 0;
+    width: 125px;
+}
+.bttn-cntnr {
+    align-self: flex-end;
+    padding: 10px;
+}
+.bttn-cntnr input {
+    padding: 3px !important;
+    margin: 3px !important;
+}
+/**--- Edit-form Styles ---*/
+.pTaxon#sub-form {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    border: 1px solid grey;
+    border-radius: 5px;
+    margin: .5em;
+    padding: .5em;
+}
+.pTaxon #sub2-form {
+    left: -.5em;
+    position: relative;
+}
+.realm-row {
+    justify-content: flex-start !important; 
+}
+select[id$="txn-lvl"] + div {
+    width: 150px;
+}
+/*--------------------------------------------------------------------------*/
+/*------------------ Screen Width < 1500px -----------------------------------*/
+@media screen and (max-width: 1500px) { 
+    /*--------------- Search Page ---------------------*/
+    #detail-block #show-tips, 
+    #detail-block #strt-tut {
+        margin: 10px 5px 0 5px;
+    }
+    #detail-block #opts-col3 {
+        border-right: none;
+    }
+    .tips-popup {
+        width: 77%;
+    }
+    /*--------------- Database CRUD Popup -------------*/
+    #b-overlay .form-popup {
+        padding: 15px;
+    }
+    #b-overlay #form-main {
+        padding: 5px 0 0 20px;
+    }
+    #b-overlay #sub2-form.sml-form {  
+        min-width: 366px;
+    }
+    #b-overlay .top-row {
+        padding: .2em .75em .3em  0;
+        width: 423px;
+        margin-right: 1em;
+    }
+    #b-overlay .sub-row {
+        width: 375px;
+    }
+    #b-overlay .long-sub-row {
+        width: 750px;
+    }
+    #b-overlay .sub2-row {
+        width: 363px;
+    }
+    #b-overlay .med-form {
+        width: 777px;
+        margin: 11px 0 10px 60px;
+    }
+    #b-overlay .full-row {
+        padding: .2em 0 .3em  0;
+        width: 96%;
+    }
+    #b-overlay #Note_row div.field-row {        
+        width: 852px;
+    }
+    #b-overlay #top-form label {
+        font-size: 1em;
+        padding: 9px 0 2px 0;
+        width: 120px;
+    }  
+    #b-overlay .top.xlrg-field {
+        width: 700px;
+    }
+    #b-overlay .xlrg-field {
+        width: 610px;
+    }
+    #b-overlay .lrg-field {
+        width: 262px;
+    } 
+    #b-overlay .med-field {
+        width: 232px;
+    }
+    #b-overlay .sml-field {
+        width: 175px;
+    }
+} 
+@media only screen and (min-width: 1501px) {   /*and (max-width: 1920px)*/ 
+    
+} 

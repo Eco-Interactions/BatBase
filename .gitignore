@@ -28,6 +28,13 @@
 !/web/bundles/app
 /web/uploads/taxon/*
 
+# Node modules
+/node_modules/
+/yarn-error.log
+
+# Generated assets
+/web/build/*
+
 # PHPUnit
 /app/phpunit.xml
 /phpunit.xml
@@ -39,3 +46,6 @@
 /composer.phar
 /composer-setup.php
 composer.lock
+
+# Local Backups
+/assets/hide/*

@@ -1,21 +1,29 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
+>ASAP<
+
 >{{{{{{{{{{{{{ CURRENT PRJOECT [LOCATION UPGRADE] TODO }}}}}}}}}}}}}
-    - Move site to new host
-    - add https cert
-    - research google map api and 'places' service
-    - begin to implement
+
+
+Website Changes:
+    DB ABOUT PAGE:
+        Removed: 
+BUG:
+
+
+
+Before Release:
+    
+MEETING NOTES:
+    Next/future round:
+        - Fix wysiwyg icons not showing on prod
+    Feedback:
 
 >======== Email ============
 TAYLOR:
-    -
         
 Tullenda:
-    -
 
 >==== Change Log ====
-    - Added Bibliography
-    - 
-    - 
 
 >---- Add to Client Task List ---
     - 
@@ -23,10 +31,15 @@ Tullenda:
 >================ DEV Internal Task List ===================
 ##(Category){priority}[difficulty]##
 TODOs:
+(PWA)
+    - {low}[easy] Configure webpack's manifest plugin
+    - {med}[med] Set up html-webpack-plugin to cache html assets https://www.npmjs.com/package/html-webpack-plugin
+
 (CRUD FORMS/BACKEND)
     - {high}[easy] Ensure editor can't togle shown fields when sub-form open.
     - {high}[easy] add error to interaction form for when an 'invisible' error 
         occurs on entity selection
+    - {high}[med] Switch from localStorage to idb everywhere.
     - {med}[med] add err in CRUD controllers eliminating the possibility of creating orphans
     - {med}[easy] When nothing is selected but a country, a habitat type, and the 
         displayname, suggest to user they use the country-habitat combo.
@@ -40,34 +53,36 @@ TODOs:
     - {low}[easy] Validate that genus and species have the same genus names.
 
 (DATA)
-    - {high}[med] write SQL script to get only records with updates/newly created  
+    - {med}[med] write SQL script to get only records with updates/newly created  
     - {med}[easy] Remove publisher-type code
+    - {med} [easy] Change 'center point' to 'display point' - GeoJson entity
     - {low}[med] add 'role' to realms to be able to grab all object/subject realms
         without hardcoding them.
 
-
 (SEARCH PAGE)
-    - {medium}[easy] Check CSV Exports
+    - {med}[med] Upgrade to the latest AgGrid. Super out of date at this point.
+    - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
     - {med}[med, long] Add data-entry tutorial.
-    - {low}[med] Implement selectize library
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters- updated at for example.
-    - {low}[easy] add note to the walkthrough to wait for load if the taxon-domain 
-        elem hasn't loaded yet.
-
 
 (STATIC/MISC SITE)
+    - {med}[med] Create site maintenance page
+    - {med}[complicated] Implement Encore for assets
     - {low}[???] Find out how to tell how many users are online
-    - {high}[easy] Biliography (all cites in alphabetical order)
-    - {med}[easy] Add EXIT click event for nav menu
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
         - update profile page (/profile/edit)
+        - Reorder fields for profile edit form
     - {low}[med] Update read me for site.
     - {low}[easy] Resize slider-header when screen size changes 
 
 (SYNC-DATA)
     - {high}[med] Add error handling for pending updates that can't be resolved 
+
+(TESTS)
+    - {high}[med] Update data_sync tests to test multi-editor syncing.
+    - {med}[med] Refactor fixtures so that entity changes are easier to handle
 
 (REFACTORING):
     --CRUD--
@@ -78,18 +93,14 @@ TODOs:
         - {low}[easy] refactor initcomboboxes to need only the form-lvl param
         - {low}[med] Move interaction create form functions into the same func chain building the rest? 
         - {low}[easy] Change to singular tense in ref panel where appropriate. (taxon view complete)
-        - {med}[easy] Citation text generation code
-
     --General--
         - {med}[easy] use parital, effectively 'group', css selectors
-        - {low}[easy] remove eif declarations in js files.
-        - {ongoing}[easy] update all quotes to singles unless escaping
     --Search Page--
+        - {low}{easy} put combobox code in _utils
         - {med}{easy} update Loc and Taxa views to alternate color rows as Src is now. 
-        - {low}[easy] update all the comments that mention the updates-since filter 
-            to 'ints-updated-at'
         - {low}[med] fillHiddenTaxaColumns... The comments and code are confusing
         - {low}[med] Refactor use of 'main' and 'top' entities to 'core' entities.
+        - {low}[med] Download records once and store in memory. (miscObj, maybe?)
     --Testing--
         - Refactor tests away from sleeping after js changes to attempting to run 
             js or find elems on page multiple times before failing, 'spinning'.
@@ -102,16 +113,5 @@ TODOs:
         - {high}[med] Fix taxon-lvl combobox fills on taxon selection.
         - {low}[easy] Fix author field after create form exited
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
-
-
->(Testing):
-    ~Static Site~
-        - Bibliography
-    ~Search Page~
-    ~DB Grid~
-        - CSV downloads
-        - Unq Vals col filter
-    ~Forms~
-        - css displays as expected.
-        - all errors are caught and handled as expected
-        -- check that edit forms show all data they should on load (ie, all authors/editors load)
+        - {high}[med] After int form submit with pinned required fields, enable 
+            submit button after location/any field change
