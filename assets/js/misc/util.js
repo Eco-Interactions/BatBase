@@ -264,8 +264,8 @@ export function updateGeoJsonData(cb) {                                         
     downloadGeoJson(cb);
 }
 export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
-    if (!isGeoJsonDataAvailable) { updateGeoJsonData(getGeoJsonEntity.bind(null, id))}
-    return JSON.parse(geoJson[id]);                                             
+    return isGeoJsonDataAvailable() ?  JSON.parse(geoJson[id]) :
+        updateGeoJsonData(getGeoJsonEntity.bind(null, id));
 }
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)

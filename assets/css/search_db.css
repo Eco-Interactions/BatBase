@@ -443,9 +443,16 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: .3em;
     margin-bottom: .3em;
 }
+[id$="_errs"]>p {
+    padding-top: .4em;
+    width: initial !important;
+}
+#data_errs .exit-bttn {
+    width: 3em;
+}
 .err-exit {
     color: darkred;
-    height: 1.65em;
+    height: 1.75em;
     width: 1.7em;
     margin-left: 1em !important;
 }

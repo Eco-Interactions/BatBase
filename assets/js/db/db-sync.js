@@ -365,7 +365,8 @@ function getRmvDataPropHndlrs(entity) {
         'location': { 'parentLoc': rmvFromParent, 'locationType': rmvFromTypeProp },
         'source': { 'contributor': rmvContrib, 'parentSource': rmvFromParent, 
             'tag': rmvFromTagProp },
-        'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp }
+        'taxon': { 'parentTaxon': rmvFromParent, 'level': rmvFromNameProp,
+            'displayName': rmvFromNameProp }
     }
     return hndlrs[entity];
 }
@@ -435,7 +436,7 @@ function rmvContrib(prop, rcrd, entity, edits) {                                
 function rmvFromNameProp(prop, rcrd, entity, edits) { 
     var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
     var realm = rcrd.realm.displayName;
-    var level = lvls[edits.level.old-1];
+    var level = edits.level ? lvls[edits.level.old-1] : rcrd.level.displayName;
     var taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
     var nameObj =  allRcrds[realm+level+'Names'] || getDataFromLocalStorage(realm+level+'Names');                //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",realm+level+'Names', nameObj, rcrd, edits)
     delete nameObj[taxonName];

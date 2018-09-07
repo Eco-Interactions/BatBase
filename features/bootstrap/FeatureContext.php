@@ -82,6 +82,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
         $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
         usleep(500000);
+        $this->getUserSession()->wait( 10000, "!$('#db-overlay').length" );
     }
     /**
      * @Given the database table is in :entity view
@@ -755,61 +756,6 @@ class FeatureContext extends RawMinkContext implements Context
         $row = $this->getTableRow($text);
         $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
     }
-    /** ------------------ Data Sync Feature -----------------------------------*/
-    /**
-     * @Given two editors are logged into the website
-     */
-    public function twoEditorsAreLoggedIntoTheWebsite()
-    {
-        $this->editor1 = $this->getEditorSession();
-        $this->editorLogIn($this->editor1, 'testeditor');
-
-        $this->editor2 = $this->getEditorSession();
-        $this->editorLogIn($this->editor2, 'testAdmin');
-    }
-
-    /**
-     * @When each user creates two interactions
-     */
-    public function eachUserCreatesTwoInteractions()
-    {
-        $this->userCreatesInteractions($this->editor1, [1, 2]);
-        $this->userCreatesInteractions($this->editor2, [3, 4]);
-    }
-
-    /**
-     * @When each edits some sub-entity data
-     */
-    public function eachEditsSomeSubEntityData()
-    {   // move interaction from one taxa, location, and source to another
-    }
-
-    /**
-     * @When each reloads the search page
-     */
-    public function eachReloadsTheSearchPage()
-    {
-        $this->editorVisitsSearchPage($this->editor1);
-        $this->editorVisitsSearchPage($this->editor2);
-    }
-
-    /**
-     * @Then the new data should sync between the editors
-     */
-    public function theNewDataShouldSyncBetweenTheEditors()
-    {
-        $this->editorTableLoads($this->editor1);
-        $this->editorTableLoads($this->editor2);
-    }
-
-    /**
-     * @Then they should see the expected changes in the data table
-     */
-    public function theyShouldSeeTheExpectedChangesInTheDataTable()
-    {
-        $this->editorSeesExpectedInteractions($this->editor1);
-        $this->editorSeesExpectedInteractions($this->editor2);
-    }
     /** ------------------ Helper Steps --------------------------------------*/
     /**
      * @When I check the :text box
@@ -1057,6 +1003,73 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->assertFieldValueIs($text, $selId);
     }
+    /** ------------------ Data Sync Feature -----------------------------------*/
+    /**
+     * @Given two editors are logged into the website
+     */
+    public function twoEditorsAreLoggedIntoTheWebsite()
+    {
+        $this->editor1 = $this->getEditorSession();
+        $this->editorLogIn($this->editor1, 'testeditor');
+
+        $this->editor2 = $this->getEditorSession();
+        $this->editorLogIn($this->editor2, 'testAdmin');
+    }
+
+    /**
+     * @When each user creates two interactions
+     */
+    public function eachUserCreatesTwoInteractions()
+    {
+        $this->userCreatesInteractions($this->editor1, [1, 2]);
+        $this->userCreatesInteractions($this->editor2, [3, 4]);
+    }
+
+    /**
+     * @When each edits some sub-entity data
+     */
+    public function eachEditsSomeSubEntityData()
+    {   
+        $this->curUser = $this->editor1; 
+        $this->editorChangesLocationData();
+        $this->curUser = $this->editor2; 
+        $this->editorChangesTaxonData();
+    }
+
+    /**
+     * @When each reloads the search page
+     */
+    public function eachReloadsTheSearchPage()
+    {
+        $this->curUser = $this->editor1;
+        $this->editorVisitsSearchPage($this->curUser);
+        $this->curUser = $this->editor2;
+        $this->editorVisitsSearchPage($this->curUser);
+    }
+
+    /**
+     * @Then the new data should sync between the editors
+     */
+    public function theNewDataShouldSyncBetweenTheEditors()
+    {
+        $this->editorTableLoads($this->editor1);
+        $this->editorTableLoads($this->editor2);
+    }
+
+    /**
+     * @Then they should see the expected changes in the data table
+     */
+    public function theyShouldSeeTheExpectedChangesInTheDataTable()
+    {
+        $this->curUser = $this->editor1;
+        // $this->editorSeesExpectedInteractions();
+        $this->checkSourceData();
+        $this->checkTaxonData();
+        $this->curUser = $this->editor2;
+        $this->checkSourceData();
+        $this->checkLocationData();
+        // $this->editorSeesExpectedInteractions();
+    }
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
     {
@@ -1078,7 +1091,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->curUser = $editor;
         $this->editorVisitsSearchPage($this->curUser);
-        $this->iExitTheTutorial();
         $this->curUser->getPage()->pressButton('New');
         foreach ($cntAry as $cnt) {
             $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
@@ -1090,6 +1102,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $editor->visit('http://localhost/batplant/web/app_test.php/search');
         usleep(500000);
+        $this->iExitTheTutorial();
     }
     /**
      * @Given I create an interaction 
@@ -1100,7 +1113,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Citation Title' => 'Two cases of bat pollination in Central America', 
             'Country-Region' => 'Central America', 'Location' => 'Panama'];
         $this->fillSrcAndLocFields($srcLocData);
-        $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Fabaceae'];
+        $taxaData = ['Genus' => 'Artibeus', 'Family' => 'Sphingidae'];
         $this->fillTaxaFields($taxaData);
         $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
@@ -1108,7 +1121,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
     }
     private function fillSrcAndLocFields($data)
-    {   fwrite(STDOUT, "\nFilling Source and Location fields.\n");
+    {   fwrite(STDOUT, "\n---- Filling Source and Location fields.\n");
         foreach ($data as $field => $value) { //print_r('$field = '.$field.' $val = '.$value);
             $this->iSelectFromTheDropdownField($value, $field); 
         }
@@ -1126,7 +1139,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function fillMiscIntFields($data)
     {   fwrite(STDOUT, "\nFilling remaining fields.\n");
-        $fields = array_keys($data);  //print_r($fields);
+        $fields = array_keys($data); 
         $this->iSelectFromTheDropdownField($data[0], 'Interaction Type');
         $this->iSelectFromTheDropdownField($data[1], 'Interaction Tags');
         $this->iTypeInTheField($data[2], 'Note', 'textarea');
@@ -1138,14 +1151,99 @@ class FeatureContext extends RawMinkContext implements Context
         $tableRows = $editor->evaluateScript("$('.ag-row').length > 0");
         assertTrue($tableRows);
     }
-
+    private function editorChangesLocationData()
+    {   fwrite(STDOUT, "\n--- Editor changing Location data.\n");
+        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->editLocationData();
+        $this->moveLocationInteraction();
+    }
+    private function editLocationData()
+    {
+        $this->iExpandInTheDataTree('Central America');
+        $this->iExpandInTheDataTree('Costa Rica');
+        $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
+        $this->iChangeTheFieldTo('Display Name', 'input', 'Santa Ana-Desert');
+        $this->iChangeTheDropdownFieldTo('Habitat Type', 'Desert');
+        $this->curUser->getPage()->pressButton('Update Location');
+        usleep(500000);
+    }
+    private function moveLocationInteraction()
+    {   fwrite(STDOUT, "\nEditor changing Location interaction data.\n");
+        $this->iExpandInTheDataTree('Central America');
+        $this->iExpandInTheDataTree('Costa Rica');
+        $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
+        $this->iChangeTheDropdownFieldTo('Location', 'Costa Rica');
+        $this->curUser->getPage()->pressButton('Update Interaction');
+        usleep(500000);
+        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->iUncheckTheTimeUpdatedFilter();
+        $this->iExpandInTheDataTree('Central America');
+        $this->iExpandInTheDataTree('Costa Rica');
+        $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
+    }
+    private function editorChangesTaxonData()
+    {   fwrite(STDOUT, "\n--- Editor changing Taxon data.\n");
+        $this->theDatabaseTableIsInSelectedView('Taxon'); 
+        $this->iGroupInteractionsBy('Arthropoda');
+        $this->editTaxonData();
+        $this->moveTaxonInteraction();
+    }
+    private function editTaxonData()
+    {
+        $this->iExpandInTheDataTree('Order Lepidoptera');
+        $this->iClickOnTheEditPencilForTheRow('Family Sphingidae');
+        $this->iChangeTheFieldTo('taxon name', 'input', 'Sphingidaey');
+        $this->curUser->getPage()->pressButton('Update Taxon');
+        usleep(500000);
+    }
+    private function moveTaxonInteraction()
+    {   fwrite(STDOUT, "\n--- Editor changing Taxon interaction data.\n");
+        $this->iExpandInTheDataTree('Order Lepidoptera');
+        $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
+        $this->iFocusOnTheTaxonField('Object');
+        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
+        $this->iSelectFromTheDropdownField('Sphingidaey', 'Family');
+        $this->curUser->getPage()->pressButton('Confirm');
+        $this->curUser->getPage()->pressButton('Update Interaction');
+        usleep(500000);
+        $this->iUncheckTheTimeUpdatedFilter();
+        $this->theDatabaseTableIsInSelectedView('Taxon');
+        $this->iGroupInteractionsBy('Arthropoda');
+        $this->iExpandInTheDataTree('Order Lepidoptera');
+        $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
+        $this->iExpandInTheDataTree('Family Sphingidaey');
+        $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
+    }
     private function editorSeesExpectedInteractions($editor)
     {
-        $this->curUser = $editor;
+        $this->checkSourceData();
+        $this->checkLocationData();
+        $this->checkTaxonData();
+    }    
+    private function checkSourceData()
+    {
+        $this->theDatabaseTableIsInSelectedView('Source'); 
         $this->iExpandInTheDataTree('Revista de Biologia Tropical');
         $this->iExpandInTheDataTree('Two cases of bat pollination in Central America');
         $this->iShouldSeeInteractionsAttributed(6);
-    }    
+    }
+    private function checkLocationData()
+    {
+        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->iExpandInTheDataTree('Central America');
+        $this->iExpandInTheDataTree('Costa Rica');
+        $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
+        $this->iShouldSeeInteractionsUnder('1', 'Santa Ana-Desert');
+    }
+    private function checkTaxonData()
+    {
+        $this->theDatabaseTableIsInSelectedView('Taxon');
+        $this->iGroupInteractionsBy('Arthropoda');
+        $this->iExpandInTheDataTree('Order Lepidoptera');
+        $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
+        $this->iShouldSeeInTheTree('Family Sphingidaey');
+        $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
+    }
     /** ---------- Misc ----------- */
     private function getUserSession()
     {

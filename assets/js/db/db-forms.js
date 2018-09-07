@@ -51,7 +51,7 @@ function setFormSize(entity) {
             'Citation': { popup: '72%', form: '999px' },
             'Author': { popup: '48%', form: '55%' },
             'Location': { popup: '72%', form: '999px' },
-            'Taxon': { popup: '808px', form: '60%' },
+            'Taxon': { popup: '808px', form: '63%' },
         },
         '1366': {
             'Interaction': { popup: '97%', form: '924px' },
@@ -1465,7 +1465,7 @@ function getSelectedObjectRealm(id) {
 }
 /** Note: Taxon fields often fire their focus event twice. */
 function errIfAnotherSubFormOpen(role, fLvl) {
-    if (fParams.forms[fLvl].entity === _util.lcfirst(role)) {return;}
+    if (fParams.forms[fLvl].entity === _util.lcfirst(role)) { return; }
     openSubFormErr(role, null, fLvl);
 }
 /**
@@ -2657,8 +2657,9 @@ function getCoreFieldDefs(entity) {
  * default (required and suggested) fields.
  */
 function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
+    if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
     fParams.forms.expanded[entity] = this.checked;         
-    const fVals = getCurrentFormFieldVals(fLvl); console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
+    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
     const fConfg = fParams.forms[fLvl].confg;                                   //console.log('toggling optional fields. Show? [%s]', fParams.forms.expanded[entity]);
     $('#'+entity+'_Rows').empty();
     $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
@@ -2676,6 +2677,17 @@ function toggleShowAllFields(entity, fLvl) {                                    
         updateFieldLabelsForType(entity, fLvl);
     }
 } /* End toggleShowAllFields */
+function ifOpenSubForm(fLvl) {
+    const subLvl = getNextFormLevel('child', fLvl);
+    return $('#'+subLvl+'-form').length !== 0;
+}
+function showOpenSubFormErr(fLvl) {
+    const subLvl = getNextFormLevel('child', fLvl);
+    let entity = _util.ucfirst(fParams.forms[subLvl].entity);
+    if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
+    openSubFormErr(entity, null, subLvl, true);   
+    $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
+}
 /**
  * Returns rows for the entity form fields. If the form is a source-type, 
  * the type-entity form config is used. 
@@ -4067,18 +4079,20 @@ function getFormErrMsg(errTag) {
 }
 /**------------- Data Storage Errors --------------*/
 function errUpdatingData(errMsg, errTag) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-    var cntnr = _util.buildElem('div', { class: 'flex-col', id:'data_errs' });
-    var msg = "<span>" + errMsg + "<br> Please report this error to the developer: <b>" 
-        + errTag + "</b><br>This form will close and all stored data will be " +
-        "redownloaded.</span>";
-    var confirm = _util.buildElem('span', { class: 'flex-row', 
-            'text': "Please click \"OK\" to continue." });
-    var bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
+    const cntnr = _util.buildElem('div', { class: 'flex-col', id:'data_errs' });
+    const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
+        ${errTag}</b><br><br>This form will close and all stored data will be 
+        redownloaded.</span>`;
+    const confirm = _util.buildElem('span', { class: 'flex-row', 
+            'text': `Please click "OK" to continue.` });
+    const bttn = _util.buildElem('input', { type: 'button', value: 'OK', 
             class: 'tbl-bttn exit-bttn' });
     $(confirm).append(bttn);
     $(cntnr).append([msg, confirm]);
     $('#top-hdr').after(cntnr);
     $(bttn).click(reloadAndRedownloadData);
+    $('#top-submit, #top-cancel, #exit-form').off('click')
+        .css('disabled', 'disabled').fadeTo('400', 0.5);
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fParams.submitFocus);
     exitFormPopup(null, 'skipTableReset');
@@ -4089,17 +4103,18 @@ function reloadAndRedownloadData() {                                            
  * is already an instance using that form, show the user an error message and 
  * reset the select elem. 
  */
-function openSubFormErr(field, id, fLvl) {                                      //console.log("selId = %s, fP = %O ", selId, fParams)
+function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, fP = %O ", selId, fParams)
     var selId = id || '#'+field+'-sel';
-    return formInitErr(field, 'openSubForm', fLvl, selId);
+    return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
 }
 /** 
  * When an error prevents a form init, this method shows an error to the user
  * and resets the combobox that triggered the form. 
  */
-function formInitErr(field, errTag, fLvl, id) {                                 console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
+function formInitErr(field, errTag, fLvl, id, skipClear) {                      //console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
     const selId = id || '#'+field+'-sel';
     reportFormFieldErr(field, errTag, fLvl);
+    if (skipClear) { return; }
     window.setTimeout(function() {clearCombobox(selId)}, 10);
     return { 'value': '', 'text': 'Select ' + field };
 }
