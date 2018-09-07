@@ -4,7 +4,7 @@
  * This filter presents all unique values of column to potentially filter on.
  */
 export function UniqueValues() {}
-UniqueValues.prototype.init = function (params) {                         //console.log("UniqueValues.prototype.init. params = %O", params)
+UniqueValues.prototype.init = function (params) {                               //console.log("UniqueValues.prototype.init. params = %O", params)
     this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
     this.filterModifiedCallback = params.filterModifiedCallback;
     this.valueGetter = params.valueGetter;
@@ -232,11 +232,20 @@ function UnqValsColumnFilterModel(colDef, rowModel, valueGetter, doesRowPassOthe
     this.selectEverything();
 }
 UnqValsColumnFilterModel.prototype.createAllUniqueValues = function () {
-    if (this.usingProvidedSet) { 
-        this.allUniqueValues = toStrings(this.filterParams.values);
+    if (this.usingProvidedSet) {
+        let uniqueValues = toStrings(this.filterParams.values);
+        this.allUniqueValues = getUniqueValuesPresent.bind(this)(uniqueValues);
+    } else { 
+        this.allUniqueValues = toStrings(this.getUniqueValues()); 
+        this.allUniqueValues.sort();
     }
-    else { this.allUniqueValues = toStrings(this.getUniqueValues()); }
-    this.allUniqueValues.sort(); 
+     
+    function getUniqueValuesPresent(allValues) {
+        const tableValues = this.getUniqueValues();  
+        return allValues.filter(v => {  
+            return tableValues.find(tV => tV ? tV.includes(v) : !v ? true : false)
+        });
+    }
 };
 UnqValsColumnFilterModel.prototype.getUniqueValues = function () {
     var _this = this;
@@ -293,8 +302,15 @@ UnqValsColumnFilterModel.prototype.isEverythingSelected = function () {
 UnqValsColumnFilterModel.prototype.isNothingSelected = function () {
     return this.allUniqueValues.length === 0;
 };
-UnqValsColumnFilterModel.prototype.isValueSelected = function (value) {
-    return this.selectedValuesMap[value] !== undefined;
+/* Returns true if a selected value is present in row node. */
+UnqValsColumnFilterModel.prototype.isValueSelected = function (value) {  
+    if (this.selectedValuesMap[value] !== undefined) { return true; }  
+    const selectedValues = Object.keys(this.selectedValuesMap); 
+    for (let i = selectedValues.length - 1; i >= 0; i--) { 
+        if (!value && !selectedValues[i]) { return true; }
+        if (value && value.includes(selectedValues[i])) { return true; }
+    }
+    return false;
 };
 UnqValsColumnFilterModel.prototype.getDisplayedValueCount = function () {
     return this.displayedValues.length;
@@ -304,7 +320,6 @@ UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
 };
 UnqValsColumnFilterModel.prototype.isFilterActive = function () {
     return this.allUniqueValues.length !== this.selectedValuesCount;
-    // return false;
 };
 UnqValsColumnFilterModel.prototype.getModel = function () {
     var model = {};
