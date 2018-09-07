@@ -130,13 +130,14 @@ function addEditPencils() {
         if (userRole === "super") { bttns.splice(6, 0, ['viewHTML', 'removeformat']); }
         
         $('#' + containerElemId).trumbowyg({    
-            btns: bttns,
             autogrow: false,
+            btns: bttns,
             plugins: {  // options object unique to each instance of the wysiwyg.
                 save: {
                     id: containerElemId
                 }
-            }
+            },
+            svgPath: require('../../libs/wysiwyg/ui/icons.svg')
         });
     }
 } /* End addEditPencils */

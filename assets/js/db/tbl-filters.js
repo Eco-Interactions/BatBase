@@ -110,7 +110,7 @@ UniqueValues.prototype.createApi = function () {
 }  
 // optional methods
 UniqueValues.prototype.afterGuiAttached = function(params) {
-    this.drawVirtualRows();
+    this.refreshVirtualRows();
 };
 UniqueValues.prototype.onNewRowsLoaded = function () {}
 UniqueValues.prototype.onAnyFilterChanged = function () {
