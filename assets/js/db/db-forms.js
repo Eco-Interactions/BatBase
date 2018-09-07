@@ -1527,8 +1527,28 @@ function showNewTaxonForm(val, selLvl, fLvl) {                                  
             'taxon', fLvl, 'sml-form', {'DisplayName': val}, '#'+selLvl+'-sel'));
         enableSubmitBttn('#'+fLvl+'-submit');
         $('#'+fLvl+'-hdr')[0].innerText += ' '+ selLvl;
+        $('#DisplayName_row input').focus();
+        if (selLvl == 'Species') { updateSpeciesSubmitBttn(fLvl); }
     }
 }  /* End showTaxonForm */
+function updateSpeciesSubmitBttn(fLvl) {
+    $('#'+fLvl+'-submit').off('click').click(submitSpecies.bind(null, fLvl));
+}
+function submitSpecies(fLvl) {                                                  //console.log('submitSpecies. fLvl = %s', fLvl);
+    const species = $('#DisplayName_row input')[0].value;
+    if (nameNotCorrect()) { return reportFormFieldErr('Species', 'needsGenusName', fLvl); }
+    getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'taxon');
+    
+    function nameNotCorrect() {
+        const genus = getGenusName();                                           //console.log('Genus = %s, Species = %s', genus, species);
+        const speciesParts = species.split(' ');
+        return genus !== speciesParts[0];
+    }
+}
+function getGenusName() {
+    const selId = $('#Genus-sel')[0].selectize.getValue();
+    return $('#Genus-sel')[0].selectize.getItem(selId)[0].innerText;
+}
 function onTaxonCreateFormExit() {
     enableTxnCombos(true);
 }
@@ -4125,6 +4145,7 @@ function formInitErr(field, errTag, fLvl, id, skipClear) {                      
 function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
     const errMsgMap = {
         'isGenusPrnt': handleIsGenusPrnt,
+        'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent, 
         'noGenus': handleNoGenus,
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
@@ -4146,6 +4167,16 @@ function clrIsGenusPrnt(elem, fLvl, e) {
     $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
+function handleNeedsGenusName(elem, errTag, fLvl) {
+    const genus = getGenusName();
+    const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
+    $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrNeedsGenusName(elem, fLvl, e) {
+    $('#DisplayName_row input')[0].value = '';
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
 /** Note: error for the edit-taxon form. */
 function handleNeedsGenusParent(elem, errTag, fLvl) {  
     const msg = '<span>Please select a genus parent for the species taxon.</span>';
@@ -4158,9 +4189,9 @@ function clrNeedsGenusPrntErr(elem, fLvl, e) {
 /** Note: error for the create-taxon form. */
 function handleNoGenus(elem, errTag, fLvl) {  
     const msg = '<span>Please select a genus before creating a species.</span>';
-    setErrElemAndExitBttn(elem, msg, errTag, 'top');
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     $('#Genus-sel').change(function(e){
-        if (e.target.value) { clrNoGenusErr(elem); }
+        if (e.target.value) { clrNoGenusErr(elem, fLvl); }
     });
 }
 function clrNoGenusErr(elem, fLvl, e) {                                            
@@ -4254,12 +4285,12 @@ function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
-        'isGenusPrnt': clrIsGenusPrnt, 'needsGenusPrnt': clrNeedsGenusPrntErr, 
-        'noGenus': clrNoGenusErr, 'needsHigherLvl': clrNeedsHigherLvl, 
-        'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt, 'openSubForm': clrOpenSubForm,
-        'dupAuth': clrFormLvlErr, 'dupEnt': clrFormLvlErr, 
-        'genSubmitErr': clrFormLvlErr, 'fillAuthBlanks': false,
-        'fillEdBlanks': false
+        'isGenusPrnt': clrIsGenusPrnt, 'needsGenusName': clrNeedsGenusName, 
+        'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
+        'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
+        'openSubForm': clrOpenSubForm, 'dupAuth': clrFormLvlErr, 
+        'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
+        'fillAuthBlanks': false, 'fillEdBlanks': false
     };
     if (!exitHdnlrs[errTag]) { return []; }
     const bttn = getExitButton();
@@ -4275,11 +4306,12 @@ function clrFormLvlErr(elem, fLvl) {
     }
 }
 function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+    const subLvl = getNextFormLevel('child', fLvl);
     clearErrElem(elem, fLvl);
-    if (!$('#sub-form').length) { enableSubmitBttn('#top-submit'); }
-    function clearErrElem(elem, fLvl) {
-        if (!elem.innerHTML) { return; }
-        elem.innerHTML = '';
+    if (!$('#'+subLvl+'-form').length) { enableSubmitBttn('#'+fLvl+'-submit'); }
+
+    function clearErrElem(elem, fLvl) {  console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');
+        if (elem.innerHTML) { elem.innerHTML = ''; }
     }
 } /* End clearErrElemAndEnableSubmit */
