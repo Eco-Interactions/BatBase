@@ -43,14 +43,6 @@ class Publisher
     private $displayName;
 
     /**
-     * @var \AppBundle\Entity\PublisherType
-     *
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PublisherType", inversedBy="publishers")
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
-     */
-    private $publisherType;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="city", type="string", length=255, nullable=true)
@@ -177,45 +169,6 @@ class Publisher
     public function getDisplayName()
     {
         return $this->displayName;
-    }
-
-    /**
-     * Set publisherType.
-     *
-     * @param \AppBundle\Entity\PublisherType $publisherType
-     *
-     * @return Publisher
-     */
-    public function setPublisherType(\AppBundle\Entity\PublisherType $publisherType)
-    {
-        $this->publisherType = $publisherType;
-
-        return $this;
-    }
-
-    /**
-     * Get publisherType.
-     *
-     * @return \AppBundle\Entity\PublisherType
-     */
-    public function getPublisherType()
-    {
-        return $this->publisherType;
-    }
-
-    /**
-     * Get the Publisher Type id and displayName.   
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("publisherType")
-     */
-    public function getPublisherTypeData()
-    {
-        if ($this->publisherType) {
-            return [ 
-                "id" => $this->publisherType->getId(),  
-                "displayName" => $this->publisherType->getDisplayName() 
-            ];
-        }
     }
 
     /**
