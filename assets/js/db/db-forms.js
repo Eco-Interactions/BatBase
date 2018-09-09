@@ -1,4 +1,4 @@
-/**
+/*
  * When logged in as an 'admin' or 'super': 
  * >> On the database search page, multiple admin-ui elements are added that open 
  * a popup interface allowing the creating, updating and, soon, deleting of data.   
@@ -494,16 +494,14 @@ function setTextArea(fieldId, prop, rcrd) {
 }
 function setSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
-    $('#'+fieldId+'-sel')[0].selectize.addItem(id);
+    setSelVal('#'+fieldId+'-sel', id);
 }
 function setTagField(fieldId, prop, rcrd) {                                 //console.log("setTagField. rcrd = %O", rcrd)
     var tags = rcrd[prop] || rcrd.tags;
-    tags.forEach(function(tag) {  
-        $('#'+fieldId+'-sel')[0].selectize.addItem(tag.id);
-    });
+    tags.forEach(tag => setSelVal('#'+fieldId+'-sel', tag.id));
 }    
 function setCntry(fieldId, prop, rcrd) {
-    $('#Country-sel')[0].selectize.addItem(rcrd.country.id);
+    setSelVal('#Country-sel', rcrd.country.id);
 }
 function setAdditionalFields(entity, srcRcrd, detail) {
     setTitleField(entity, srcRcrd);
@@ -520,8 +518,8 @@ function setTitleField(entity, srcRcrd) {                                   //co
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
-    if (entity !== 'publication' || !fieldIsDisplayed('Publisher', 'top')) { return; }
-    $('#Publisher-sel')[0].selectize.addItem(srcRcrd.parent);
+    if (entity !== 'publication' || !fieldIsDisplayed('Publisher', 'top')) { return; }    
+    setSelVal('#Publisher-sel', srcRcrd.parent);
 }
 function setCitationEdgeCaseFields(entity, citRcrd) {
     if (entity !== 'citation') { return; }
@@ -538,8 +536,8 @@ function addTaxon(fieldId, prop, rcrd) {                                    //co
 }
 function addSource(fieldId, prop, rcrd) {
     var citSrc = fParams.records.source[rcrd.source];  
-    $('#Publication-sel')[0].selectize.addItem(citSrc.parent);
-    $('#CitationTitle-sel')[0].selectize.addItem(rcrd.source);
+    setSelVal('#Publication-sel', citSrc.parent);
+    setSelVal('#CitationTitle-sel', rcrd.source);
 }
 /*--------------------------- Create Form --------------------------------------------------------*/
 /**
@@ -583,7 +581,7 @@ function finishIntFormBuild() {
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     addReqElemsToConfg();    
     $('.all-fields-cntnr').hide();
-    $('#Publication-sel')[0].selectize.focus();
+    focusCombobox('#Publication-sel', true);
 }
 /** Displays the [Role] Taxon select form when the field gains focus. */ 
 function addTaxonFocusListener(role) {
@@ -686,13 +684,12 @@ function initPubForm(value) {                                               //co
  */
 function loadPubTypeFields(typeId) { 
     loadSrcTypeFields('publication', typeId, this.$input[0]);
-    ifBookAddAuthEdNote(typeId, this.$input[0]);
+    ifBookAddAuthEdNote(typeId, '#'+this.$input[0].id);
 }
 /** Shows the user a note above the author and editor elems. */
-function ifBookAddAuthEdNote(id, typeElem) {                                
-    const $typeElem = typeElem || $('#PublicationType-sel')[0];  
-    const type = $typeElem.selectize.getItem(id).length ? 
-        $typeElem.selectize.getItem(id)[0].innerText : false;
+function ifBookAddAuthEdNote(id, elemId) {                                
+    const typeElemId = elemId || '#PublicationType-sel';  
+    const type = getSelTxt(typeElemId); 
     if (type !== 'Book') { return; }
     const note = _u.buildElem('div', { class: 'skipFormData' });
     $(note).html('<i>Note: there must be at least one author OR editor ' +
@@ -730,7 +727,7 @@ function onCitSelection(val) {
     if (!fParams.editing) { $('#CitationTitle_pin').focus(); }
 }    
 /** Shows the Citation sub-form and disables the publication combobox. */
-function initCitForm(value) {                                               //console.log("Adding new cit! val = %s", val);
+function initCitForm(value) {                                                   //console.log("Adding new cit! val = %s", val);
     const fLvl = getSubFormLvl('sub');
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
@@ -749,7 +746,7 @@ function selectDefaultCitType(fLvl) {
         'Other': 'Other', 'Thesis/Dissertation': 'Ph.D. Dissertation' };
     const citTypes = _u.getDataFromStorage('citTypeNames');
     const dfaultType = dfaults[pubType];  
-    $('#CitationType-sel')[0].selectize.addItem(citTypes[dfaultType]); 
+    setSelVal('#CitationType-sel', citTypes[dfaultType]);
 }
 /** refactor. */
 function finishCitEditFormBuild() {
@@ -791,20 +788,20 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {
     hndlrs[type](type, fLvl);
 
     function updateBookFields() {
-        const params = fParams.forms[fLvl];                                 //console.log('params.pub.src = %O', JSON.parse(JSON.stringify(params.pub.src)));
+        const params = fParams.forms[fLvl];                                     //console.log('params.pub.src = %O', JSON.parse(JSON.stringify(params.pub.src)));
         const pubAuths = params.pub.src.authors;      
         if (!pubAuths) { return showAuthorField(); }
         removeAuthorField();
         if (type === 'Book'){ disableTitleField()} else { enableTitleField()}
 
-        function showAuthorField() {                                        //console.log('showing author field');
+        function showAuthorField() {                                            //console.log('showing author field');
             if (!params.misc.authRow) { return; }
             $('#citation_Rows').append(params.misc.authRow);
             fParams.forms[fLvl].reqElems.push(params.misc.authElem);
             delete fParams.forms[fLvl].misc.authRow;
             delete fParams.forms[fLvl].misc.authElem;
         }
-        function removeAuthorField() {                                      //console.log('removing author field');
+        function removeAuthorField() {                                          //console.log('removing author field');
             let reqElems = params.reqElems;
             fParams.forms[fLvl].misc.authRow = $('#Authors_row').detach();
             fParams.forms[fLvl].reqElems = reqElems.filter(removeAuthElem);  
@@ -900,7 +897,7 @@ function handleCitText(formLvl) {                                               
  * are filled.
  */
 function buildCitationText(fLvl) {
-    const type = $('#CitationType-sel option:selected').text();             //console.log("type = ", type);
+    const type = $('#CitationType-sel option:selected').text();                 //console.log("type = ", type);
     const formVals = getFormValueData('citation', null, null);
     const getFullText = { 'Article': articleCit, 'Book': bookCit, 
         'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
@@ -1172,7 +1169,7 @@ function resetOnFormTypeChange(type, typeId, fLvl) {
  * Builds and return the form-field rows for the selected source type.
  * @return {ary} Form-field rows ordered according to the form config.
  */
-function getSrcTypeRows(entity, typeId, fLvl, type) {
+function getSrcTypeRows(entity, typeId, fLvl, type) {                           //console.log('getSrcTypeRows. type = ', type);
     const fVals = getCurrentFormFieldVals(fLvl);
     setSourceTypeConfg(entity, typeId, fLvl, type); 
     $('#'+entity+'_Rows').empty();     
@@ -1181,7 +1178,7 @@ function getSrcTypeRows(entity, typeId, fLvl, type) {
 /** Sets the type confg for the selected source type in form params. */
 function setSourceTypeConfg(entity, id, fLvl, tName) {
     const typeElemId = '#'+_u.ucfirst(entity)+'Type-sel'; 
-    const type = tName || $(typeElemId)[0].selectize.getItem(id)[0].innerText;
+    const type = tName || getSelTxt(typeElemId);
     fParams.forms[fLvl].typeConfg = getFormConfg(entity).types[type];           //console.log('srcTypeConfg for [%s] = [%O]', type, fParams.forms[fLvl].typeConfg);             
 }
 /**
@@ -1233,7 +1230,7 @@ function updatePlaceholderText(elem, newTxt) {                                  
 function focusFieldInput(type) {
     if (!$('#Title_row input').val()) { $('#Title_row input').focus() 
     } else {
-        $('#'+_u.ucfirst(type)+'Type-sel')[0].selectize.focus();
+        focusCombobox('#'+_u.ucfirst(type)+'Type-sel', true);
     }
 }
 /*-------------- Country/Region ------------------------------------------*/
@@ -1309,7 +1306,7 @@ function onLocSelection(val) {                                                  
     if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
     var locRcrd = fParams.records.location[val];                                //console.log("location = %O", locRcrd);
     var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
-    $('#Country-Region-sel')[0].selectize.addItem(prntVal, true);
+    setSelVal('#Country-Region-sel', prntVal, 'silent');
     fillEditLocDetails(val);
     if (!fParams.editing) { $('#Location_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
@@ -1455,7 +1452,7 @@ function initObjectSelect() {                                                   
     $('#Object_row').append(initSubForm(
         'object', fLvl, 'sml-right sml-form', {}, '#Object-sel'));
     initComboboxes('object', fLvl);             
-    $('#Realm-sel')[0].selectize.addItem(fParams.forms.taxonPs.realmTaxon.realm.id);
+    setSelVal('#Realm-sel', fParams.forms.taxonPs.realmTaxon.realm.id);
     enableCombobox('#Subject-sel', false);
 } 
 /** Returns the realm taxon's lower-case name for a selected object taxon. */
@@ -1540,22 +1537,16 @@ function submitSpecies(fLvl) {                                                  
     getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'taxon');
     
     function nameNotCorrect() {
-        const genus = getGenusName();                                           //console.log('Genus = %s, Species = %s', genus, species);
+        const genus = getSelTxt('#Genus-sel');                                           //console.log('Genus = %s, Species = %s', genus, species);
         const speciesParts = species.split(' ');
         return genus !== speciesParts[0];
     }
-}
-function getGenusName() {
-    const selId = $('#Genus-sel')[0].selectize.getValue();
-    return $('#Genus-sel')[0].selectize.getItem(selId)[0].innerText;
 }
 function onTaxonCreateFormExit() {
     enableTxnCombos(true);
 }
 function enableTxnCombos(enable) {  
-    $.each($('#sub-form select'), function(i, sel){
-        return enable ? $(sel)[0].selectize.enable() : $(sel)[0].selectize.disable();
-    });
+    $.each($('#sub-form select'), (i, sel) => enableCombobox('#'+sel.id, enable));
 }
 /**
  * Removes any previous realm comboboxes. Shows a combobox for each level present 
@@ -1604,7 +1595,7 @@ function exitTaxonSelectForm(role) {
     if (prevTaxon) {
         updateComboboxOptions('#'+role+'-sel', { 
             value: prevTaxon.val, text: prevTaxon.text });
-        $('#'+role+'-sel')[0].selectize.addItem(prevTaxon.val);
+        setSelVal('#'+role+'-sel', prevTaxon.val);
     }
 }
 /** Removes and replaces the taxon form. */
@@ -1626,11 +1617,10 @@ function resetPrevTaxonSelection(id) {
 }
 function ifObjectSelectRealm(realm) {  
     if ('Bat' === realm.displayName) { return; }  
-    $('#Realm-sel')[0].selectize.addItem(realm.id);
+    setSelVal('#Realm-sel', realm.id);
 }
 function addPrevSelection(selId, taxon) {
-    const lvl = taxon.level.displayName;  
-    $('#'+lvl+'-sel')[0].selectize.addItem(selId);
+    setSelVal('#'+taxon.level.displayName+'-sel', selId);
     fParams.forms.taxonPs.prevSel = {val: taxon.id, text:taxon.displayName};    //console.log('taxon = %O. prevSel = %O', taxon, fParams.forms.taxonPs.prevSel);
 }
 function preventComboboxFocus(realm) {
@@ -1641,17 +1631,16 @@ function preventComboboxFocus(realm) {
 }
 /** Adds the selected taxon to the interaction-form's [role]-taxon combobox. */
 function selectTaxon() {
-    var role = fParams.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
-    var selApi = $('#'+role+'-sel')[0].selectize;
-    var opt = getSelectedTaxonOption();
+    const role = fParams.forms.taxonPs.realm === 'Bat' ? 'Subject' : 'Object';
+    const opt = getSelectedTaxonOption();
     $('#sub-form').remove();
     updateComboboxOptions('#'+role+'-sel', opt);
-    selApi.addItem(opt.value);
-    selApi.enable();
+    setSelVal('#'+role+'-sel', opt.value);
+    enableCombobox('#'+role+'-sel', true);
 }
 /** Returns an option object for the most specific taxon selected. */
 function getSelectedTaxonOption() {
-    var taxon = getSelectedTaxon();                                             //console.log("selected Taxon = %O", taxon);
+    const taxon = getSelectedTaxon();                                           //console.log("selected Taxon = %O", taxon);
     return { value: taxon.id, text: getTaxonDisplayName(taxon) };
 }
 function getTaxonDisplayName(taxon) { 
@@ -1781,9 +1770,8 @@ function repopulateLevelCombos(optsObj, selected) {
  * its direct ancestors.
  */
 function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName)
-    var selApi = $('#'+lvlName+'-sel')[0].selectize;
     updateComboboxOptions('#'+lvlName+'-sel', opts);
-    if (lvl in selected) { selApi.addItem(selected[lvl], true); }
+    if (lvl in selected) { setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); }
 }
 /*-------- Edit Taxon Methods ----------*/
 /**
@@ -1919,7 +1907,7 @@ function selectParentTaxon(prntId, realmLvl) {                                  
     var parentLvl = fParams.records.taxon[prntId].level.displayName;  
     if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
     clearAllOtherLvls();
-    $('#'+parentLvl+'-sel')[0].selectize.addItem(prntId);
+    setSelVal('#'+parentLvl+'-sel', prntId);
 }
 function clearAllOtherLvls() {
     $.each($('#sub-form select[id$="-sel"]'), function(i, elem){ 
@@ -2020,7 +2008,7 @@ function initTaxonEditCombo(selId, chngFunc, createFunc) {                      
     var create = createFunc || false;
     var options = { create: create, onChange: chng, placeholder: null }; 
     $('#'+selId).selectize(options);
-    $('#'+selId)[0].selectize.addItem($('#'+selId).data('toSel'), true);
+    setSelVal('#'+selId, $('#'+selId).data('toSel'), 'silent');
 }
 /**
  * Each element is built, nested, and returned as a completed row. 
@@ -2099,8 +2087,7 @@ function selectExistingAuthors(field, authObj, fLvl) {                          
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {
-    const selId = '#'+field+'-sel'+ cnt;                                        //console.log('selId = ', selId)
-    $(selId)[0].selectize.addItem(authId, true);
+    setSelVal('#'+field+'-sel'+ cnt, authId, 'silent');
     buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
 /**
@@ -2311,6 +2298,9 @@ function enableCombobox(selId, enable) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }
+function enableComboboxes($pElems, enable) {
+    $pElems.each((i, elem) => { enableCombobox('#'+elem.id, enable)});
+}
 function focusCombobox(selId, focus) { 
     if (!focus) { return $(selId)[0].selectize.blur(); }
     $(selId)[0].selectize.focus();
@@ -2320,11 +2310,24 @@ function focusFirstCombobox(cntnrId, focus) {
     focusCombobox('#'+ selElems[0].id, focus);
 }
 function clearCombobox(selId) {                                                 //console.log("clearCombobox [%s]", selId);
-    var selApi = $(selId)[0].selectize;
+    const selApi = $(selId)[0].selectize;
     selApi.clear(true);
     selApi.updatePlaceholder();
     selApi.removeOption("");
 }    
+/**
+ * Clears and enables the parent combobox for the exited form. Removes any 
+ * placeholder options and, optionally, brings it into focus.
+ */
+function resetFormCombobox(fLvl, focus) {        
+    if (!fParams.forms[fLvl].pSelId) { return; }
+    const combobox = $(fParams.forms[fLvl].pSelId)[0].selectize;   
+    combobox.clear();
+    combobox.enable();
+    combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
+    if (focus) { combobox.focus(); 
+    } else if (focus === false) { combobox.blur(); }
+}
 /** Clears previous options and adds the new ones. Optionally focuses the combobox. */
 function updateComboboxOptions(selId, opts, focus) {
     var selApi = $(selId)[0].selectize;
@@ -2333,13 +2336,23 @@ function updateComboboxOptions(selId, opts, focus) {
     selApi.refreshOptions(false);
     if (focus === true) { selApi.focus(); }
 }
+function getSelVal(id) {                                                        //console.log('getSelVal [%s]', id);
+    return $(id)[0].selectize.getValue();  
+}
+function getSelTxt(id) {                                                        //console.log('getSelTxt. id = ', id);
+    return $(id)[0].innerText;
+}
+function setSelVal(id, val, silent) {                                           //console.log('setSelVal [%s] = [%s]', id, val);
+    const $selApi = $(id)[0].selectize; 
+    $selApi.addItem(val, silent); 
+}
 /*------------------- Form Builders --------------------------------------*/    
 /**
  * Builds and returns the subForm according to the passed params. Disables the 
  * select elem 'parent' of the sub-form. 
  * (container)DIV>[(header)P, (fields)DIV, (buttons)DIV]
  */
-function initSubForm(formEntity, fLvl, formClasses, fVals, selId) {                 //console.log('initSubForm called. args = %O', arguments)
+function initSubForm(formEntity, fLvl, formClasses, fVals, selId) {             //console.log('initSubForm called. args = %O', arguments)
     const subFormContainer = _u.buildElem('div', {
         id: fLvl+'-form', class: formClasses + ' flex-wrap'}); 
     const hdr = _u.buildElem(
@@ -3216,19 +3229,6 @@ function exitForm(formId, fLvl, focus, data) {                                  
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
     fParams.forms[fLvl].exitHandler(data);
 }
-/**
- * Clears and enables the parent combobox for the exited form. Removes any 
- * placeholder options and, optionally, brings it into focus.
- */
-function resetFormCombobox(fLvl, focus) {        
-    if (!fParams.forms[fLvl].pSelId) { return; }
-    const combobox = $(fParams.forms[fLvl].pSelId)[0].selectize;   
-    combobox.clear();
-    combobox.enable();
-    combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.
-    if (focus) { combobox.focus(); 
-    } else if (focus === false) { combobox.blur(); }
-}
 /** Returns the 'next' form level- either the parent or child. */
 function getNextFormLevel(next, curLvl) {
     const fLvls = fParams.formLevels;
@@ -3344,8 +3344,7 @@ function getFormValueData(entity, fLvl, submitting) {
     }
     /** Adds an array of tag values. */
     function getTagVals(input, fieldName) {                                 
-        const selId = '#'+_u.ucfirst(fieldName)+'-sel';
-        return $(selId)[0].selectize.getValue();       
+        return getSelVal('#'+_u.ucfirst(fieldName)+'-sel');
     }
     function handleAdditionalEntityData(entity) {
         if (!submitting) { return; }
@@ -4163,12 +4162,12 @@ function handleIsGenusPrnt(elem, errTag, fLvl) {
     const msg = "<span>Genus' with species children must remain at genus.</span>";
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
-function clrIsGenusPrnt(elem, fLvl, e) {                                       
-    $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
+function clrIsGenusPrnt(elem, fLvl, e) { 
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 function handleNeedsGenusName(elem, errTag, fLvl) {
-    const genus = getGenusName();
+    const genus = getSelTxt('#Genus-sel');
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -4182,8 +4181,8 @@ function handleNeedsGenusParent(elem, errTag, fLvl) {
     const msg = '<span>Please select a genus parent for the species taxon.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
-function clrNeedsGenusPrntErr(elem, fLvl, e) {                                       
-    $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
+function clrNeedsGenusPrntErr(elem, fLvl, e) {            
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error for the create-taxon form. */
@@ -4204,8 +4203,8 @@ function handleNeedsHigherLvlPrnt(elem, errTag, fLvl) {
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
 /** Clears the cause, either the parent-selection process or the taxon's level. */
-function clrNeedsHigherLvlPrnt(elem, fLvl, e) {                                    
-    $('#txn-lvl')[0].selectize.addItem($('#txn-lvl').data('lvl'));
+function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, fLvl);
     if ($('#sub-form').length) { return selectParentTaxon(
         $('#txn-prnt').data('txn'), fParams.forms.taxonPs.curRealmLvls[0]); 
@@ -4223,7 +4222,7 @@ function handleNeedsHigherLvl(elem, errTag, fLvl) {
 }
 function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-    $('#txn-lvl')[0].selectize.addItem(txnLvl, 'silent');
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
     $('#txn-lvl').data('lvl', txnLvl);
     clearLvlErrs('#Taxon_errs', fLvl);
     enableChngPrntBtttn();

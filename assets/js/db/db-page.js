@@ -1234,12 +1234,12 @@ function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    enableComboboxes(true, $('#opts-col1 select, #opts-col2 select'));
+    enableComboboxes($('#opts-col1 select, #opts-col2 select'));
     $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
 }
 function updateUiForMappingInts() {
     updateUiForMapView('showingInts');
-    enableComboboxes(false, $('#opts-col1 select, #opts-col2 select'));
+    enableComboboxes($('#opts-col1 select, #opts-col2 select', false));
 }
 function updateBttnToReturnRcrdsToTable() {
     addMsgAboutTableViewFiltering();
@@ -2522,11 +2522,11 @@ function getSelVal(field) {                                                     
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     return $(confg.id)[0].selectize.getValue();  
 }
-function getSelTxt(field) {
-    const confg = getSelConfgObj(field);
-    const $selApi = $(confg.id)[0].selectize; 
-    return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
-}
+// function getSelTxt(field) {
+//     const confg = getSelConfgObj(field);
+//     const $selApi = $(confg.id)[0].selectize; 
+//     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
+// }
 function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
     const confg = getSelConfgObj(field);
     const $selApi = $(confg.id)[0].selectize; 
@@ -2552,16 +2552,12 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
-function enableComboboxes(enable, $pElems) {
-    $pElems.each((i, elem) => {  
-        if (enable) { enableCombobox(elem); } else { disableCombobox(elem); }
-    });
+function enableComboboxes($pElems, enable) {
+    $pElems.each((i, elem) => { console.log('elem = %O', elem);enableCombobox(enable, '#'+elem.id) });
 }
-function enableCombobox(elem) {
-    elem.selectize.enable();
-}
-function disableCombobox(elem) {
-    elem.selectize.disable();
+function enableCombobox(enable, selId) {
+    if (enable === false) { return $(selId)[0].selectize.disable(); }
+    $(selId)[0].selectize.enable();
 }
 // function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
