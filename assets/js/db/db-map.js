@@ -8,7 +8,7 @@
  *   showLoc
  *   showInts
  */
-import * as _util from '../misc/util.js';
+import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as MM from './map-markers.js'; 
 
@@ -40,15 +40,15 @@ function fixLeafletBug() {
  * If not, the db is cleared and geoJson is redownloaded. 
  */
 function initDb() {
-    _util.initGeoJsonData();
+    _u.initGeoJsonData();
 }
 function geoJsonDataAvailable() {
-    return _util.isGeoJsonDataAvailable();
+    return _u.isGeoJsonDataAvailable();
 }
 /** ======================= Init Map ======================================== */
 /** Initializes the search database map using leaflet and mapbox. */
 function buildAndShowMap(loadFunc) {                                            console.log('buildAndShowMap. loadFunc = %O', loadFunc);
-    locRcrds = locRcrds || _util.getDataFromStorage('location');
+    locRcrds = locRcrds || _u.getDataFromStorage('location');
     map = getMapInstance();
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
@@ -88,7 +88,7 @@ function addMarkerLegend() {
     legend.addTo(map);
 }
 function addMarkerLegendHtml(map) {
-    const div = _util.buildElem('div', { class: 'info legend flex-col'});
+    const div = _u.buildElem('div', { class: 'info legend flex-col'});
     div.innerHTML += `<h4> Interaction Density </h4>`;
     addDensityHtml()
     return div;
@@ -110,7 +110,7 @@ function addIntCountLegend() {
     legend.addTo(map);
 }
 function addIntCntLegendHtml(map) {
-    const div = _util.buildElem('div', { id: 'int-legend', class: 'info legend flex-col'});
+    const div = _u.buildElem('div', { id: 'int-legend', class: 'info legend flex-col'});
     return div;
 }
 function fillIntCntLegend(shown, notShown) {
@@ -125,7 +125,7 @@ function addTipsLegend() {
     legend.addTo(map);
 }
 function addViewTips(map) {
-    const div = _util.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
+    const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
     $(div).css({'text-align': 'center'});
     div.innerHTML = `<b>- Map Tips -</b>
         - Click on a marker to keep popup open.`;
@@ -180,7 +180,7 @@ function buildIntMarker(focus, intCnt, coords, data) {
         new MM.IntCluster(map, intCnt, focus, coords, data);
 }
 function getCoords(geoId) {
-    const geoJson = _util.getGeoJsonEntity(geoId);                         
+    const geoJson = _u.getGeoJsonEntity(geoId);                         
     return getLatLngObj(geoJson.centerPoint);
 }
 function zoomIfAllInSameRegion(data) {  
@@ -189,7 +189,7 @@ function zoomIfAllInSameRegion(data) {
     zoomIfSharedRegion();
 
     function getRegionData() {
-        locRcrds = _util.getDataFromStorage('location');
+        locRcrds = _u.getDataFromStorage('location');
         for (let geoId in data) {
             if (geoId === 'none') { continue; }
             if (region === false) { return; }
@@ -268,7 +268,7 @@ function addAllIntMrkrsToMap() {
     }
 } 
 function getRegionLocs() {
-    const regionIds = _util.getDataFromStorage('topRegionNames');
+    const regionIds = _u.getDataFromStorage('topRegionNames');
     return Object.values(regionIds).map(id => locRcrds[id]);
 }
 function addMarkersForRegion(region) {
@@ -316,7 +316,7 @@ function addMarkersForLocAndChildren(topLoc) {
 /* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
-    const locGeoJson = _util.getGeoJsonEntity(geoJsonId);
+    const locGeoJson = _u.getGeoJsonEntity(geoJsonId);
     return locGeoJson.centerPoint ? 
         getLatLngObj(locGeoJson.centerPoint) 
         : getLocCenterPoint(loc, locGeoJson);

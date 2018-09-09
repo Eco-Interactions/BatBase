@@ -114,6 +114,8 @@ export function buildSimpleOpts(optAry, placeholder) {                          
     }
     return opts;
 }   
+/*--------------------- Selectize Combobox Methods -----------------------*/
+
 /*--------------------- Extend Prototypes/Libraries ----------------------*/
 function extendPrototypes() {
     extendDate();

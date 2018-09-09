@@ -11,7 +11,7 @@
  *     showUpdates
  *          
  */
-import * as _util from '../misc/util.js';
+import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
 import * as db_forms from './db-forms.js';
 import * as db_map from './db-map.js';
@@ -31,7 +31,7 @@ import * as filters from './tbl-filters.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'Live for Justice!!!!!!!!<3!! <3<3<3';
+const dataKey = 'Live for Justice!!!!!!!!!! <3<3<3';
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -47,7 +47,7 @@ function requireCss() {
     require('../../css/search_db.css');
 }
 function initDbPage () {    
-    dataStorage = _util.getDataStorage();  
+    dataStorage = _u.getDataStorage();  
     db_sync.init();
     clearDataStorageCheck();
     showPopUpMsg('Loading...');
@@ -65,7 +65,7 @@ function clearDataStorageCheck() {
 }
 function clearDataStorage(dataKey) {  
     dataStorage.clear();
-    _util.populateStorage(dataKey, true);
+    _u.populateStorage(dataKey, true);
 }
 /** 
  * When the stored data is reset from another file, the loading data popup 
@@ -77,8 +77,8 @@ export function handleReset(prevFocus) {
 }
 function onDataReset(prevFocus) {
     showLoadingDataPopUp();
-    _util.populateStorage(dataKey, true);
-    _util.populateStorage('curFocus', prevFocus);
+    _u.populateStorage(dataKey, true);
+    _u.populateStorage('curFocus', prevFocus);
 }
 /** ------------- Page Init --------------------------------------------- */
 /**
@@ -117,7 +117,7 @@ function authDependentInit() {
 function adaptUiToScreenSize() {
     if ($(window).width() > 1500) { return; }
     var elemCntnr = $('#opts-col4').detach();  
-    var cntnr = _util.buildElem('div', { class: 'flex-row' });
+    var cntnr = _u.buildElem('div', { class: 'flex-row' });
     $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     $(elemCntnr)[0].className = 'flex-row';
     $(cntnr).append(elemCntnr);
@@ -161,7 +161,7 @@ function selectInitialSearchFocus() {                                           
     selectSearchFocus();
 }
 function setUpFutureDevInfoBttn() {
-    const bttn = _util.buildElem('button', { name: 'futureDevBttn', 
+    const bttn = _u.buildElem('button', { name: 'futureDevBttn', 
             title: getFutureDevMsg(),
             text: 'Hover here for future search options.'});  
     $(bttn).appendTo('#opts-col3 .bttm-row');        
@@ -182,7 +182,7 @@ function getFutureDevMsg() {                                                    
  * sent to @fillTreeWithInteractions.    
  */
 function getInteractionsAndFillTable() {                                         //console.log("getInteractionsAndFillTable called. Tree = %O", tParams.curTree);
-    var entityData = _util.getDataFromStorage('interaction');
+    var entityData = _u.getDataFromStorage('interaction');
     fadeTable();
     if (entityData) { fillTreeWithInteractions(entityData); 
     } else { console.log("Error loading interaction data from storage."); }
@@ -202,7 +202,7 @@ function fillTreeWithInteractions(intRcrds) {                                   
 /** Replaces all interaction ids with records for every node in the tree.  */
 function fillTree(focus, curTree, intRcrds) {  
     const intEntities = ['taxon', 'location', 'source'];
-    const entityData = _util.getDataFromStorage(intEntities);
+    const entityData = _u.getDataFromStorage(intEntities);
     const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     fillMethods[focus](curTree, intRcrds);
 
@@ -263,7 +263,7 @@ function fillTree(focus, curTree, intRcrds) {
     /** Replace the interaction ids with their interaction records. */
     function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
         return interactionsAry.map(function(intId){
-            if (typeof intId === "number") {                                    //console.log("new record = %O",  _util.snapshot(intRcrds[intId]));
+            if (typeof intId === "number") {                                    //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
                 return fillIntRcrd(getDetachedRcrd(intId, intRcrds)); 
             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
         });
@@ -354,7 +354,7 @@ function getTaxonName(taxon) {
  * to @initTaxonSearchUi to begin the data-table build.  
  */
 function buildTaxonTable() {                                                     //console.log("Building Taxon Table.");
-    var data = _util.getDataFromStorage(['realm', 'taxon', 'level']); 
+    var data = _u.getDataFromStorage(['realm', 'taxon', 'level']); 
     if( data ) { initTaxonSearchUi(data);
     } else { console.log("Error loading taxon data from storage."); }
 }
@@ -413,7 +413,7 @@ function seperateTaxonTreeByLvl(topTaxon) {
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        var levels = Object.keys(_util.getDataFromStorage('levelNames'));       //console.log("levels = %O", levels)
+        var levels = Object.keys(_u.getDataFromStorage('levelNames'));       //console.log("levels = %O", levels)
         var obj = {};
         levels.forEach(function(lvl){
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
@@ -440,7 +440,7 @@ function storeAndReturnRealm(val) {
     const realmId = val || getSelValOrDefault(getSelVal('Taxon Realm'));        //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = getDetachedRcrd(realmId);                            console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
-    _util.populateStorage('curRealm', realmId);
+    _u.populateStorage('curRealm', realmId);
     tParams.curRealm = realmId;
     tParams.realmLvl = realmLvl;
     return realmTaxonRcrd;
@@ -512,7 +512,7 @@ function buildTaxonSearchUiAndTable(taxonTree) {                                
  * nodes displayed in the table.
  */
 function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
-    const browseElems = _util.buildElem('span', { id:'sort-taxa-by', 
+    const browseElems = _u.buildElem('span', { id:'sort-taxa-by', 
         class: 'flex-row', text: 'Group Taxa by: ' });
     const opts = getRealmOpts(data);                                            //console.log("realmOpts = %O", realmOpts);
     $(browseElems).append(newSelEl(opts, 'opts-box', 'sel-realm', 'Taxon Realm'));
@@ -586,8 +586,8 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-            const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row' });
-            const span = _util.buildElem('span', { text: level + ': ' });
+            const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+            const span = _u.buildElem('span', { text: level + ': ' });
             const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
             $(sel).css('width', '142px');
             $(lbl).css('margin', '.3em 0em 0em.3em').append([span, sel]);
@@ -729,7 +729,7 @@ function getLocData() {
     const locDataStorageProps = [
         'location', 'locationType', 'topRegionNames', 'countryNames', 'regionNames'
     ];
-    return _util.getDataFromStorage(locDataStorageProps);
+    return _u.getDataFromStorage(locDataStorageProps);
 }
 /**
  * Builds location view html and initializes table load. Either builds the table 
@@ -752,7 +752,7 @@ function addLocDataToTableParams(data) {
     tParams.data = data;
 }
 function buildLocViewHtml() {                   
-    const span = _util.buildElem('span', { id:'grid-view', class: 'flex-row',
+    const span = _u.buildElem('span', { id:'grid-view', class: 'flex-row',
         text: 'View all as: ' });
     const sel = newSelEl(getViewOpts(), 'opts-box', 'sel-realm', 'Loc View');
     $('#sort-opts').append([span, sel]);
@@ -789,7 +789,7 @@ function resetLocUi(view) {
  */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     const regions = getTopRegionIds();
-    _util.populateStorage('curRealm', view);                      
+    _u.populateStorage('curRealm', view);                      
     return view === 'tree' ? buildLocTableTree(regions) : buildLocMap();
 }
 function getTopRegionIds() {
@@ -886,7 +886,7 @@ function buildLocSelectOpts() {
     function buildLocOpt(rowData, name, type) {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        var id = tParams.data[_util.lcfirst(type) + "Names"][name];             
+        var id = tParams.data[_u.lcfirst(type) + "Names"][name];             
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
@@ -895,7 +895,7 @@ function buildLocSelectOpts() {
         return tParams.openRows.indexOf(id) !== -1
     }
     /** Handles all modification of the location options. */
-    function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _util.snapshot(opts));
+    function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _u.snapshot(opts));
         if (opts.Region.length === 2) { rmvTopRegion(); }        
         addMissingOpts();
         sortLocOpts();
@@ -923,7 +923,7 @@ function buildLocSelectOpts() {
         const val = loc && loc[type] ?  loc[type].id : false;
         const txt = loc && loc[type] ?  loc[type].displayName : false;
         if (!val) { return }
-        addToSelectedObj(val, _util.ucfirst(type));  
+        addToSelectedObj(val, _u.ucfirst(type));  
         tParams.openRows.push(val);
         opts[optProp].push({ value: val, text: txt });
     }         
@@ -946,14 +946,14 @@ function createSelectedOptsObj() {
 function buildLocSelects(locOptsObj) {  
     const selElems = [];
     for (let locSelName in locOptsObj) {
-        let elem = buildLocSel(_util.ucfirst(locSelName), locOptsObj[locSelName]); 
+        let elem = buildLocSel(_u.ucfirst(locSelName), locOptsObj[locSelName]); 
         selElems.push(elem);
     }
     return selElems;
     
     function buildLocSel(selName, opts) {
-        const lbl = _util.buildElem('label', { class: "lbl-sel-opts flex-row" });
-        const span = _util.buildElem('span', { text: selName + ': ', class: "opts-span" });
+        const lbl = _u.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
         $(sel).css('width', '202px');
         $(lbl).css('width', '282px').append([span, sel]);
@@ -1093,7 +1093,7 @@ function showTableRecordsOnMap() {                                              
     });
 }
 function storeIntAndLocRcrds() {
-    const rcrds = _util.getDataFromStorage(['interaction', 'location']);
+    const rcrds = _u.getDataFromStorage(['interaction', 'location']);
     tParams.interaction = rcrds.interaction;
     tParams.location = rcrds.location;
 }
@@ -1249,7 +1249,7 @@ function updateBttnToReturnRcrdsToTable() {
 }
 function addMsgAboutTableViewFiltering() {
     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
-    const div = _util.buildElem('div', {id:'filter-in-tbl-msg'});
+    const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
     div.innerHTML = `Return to filter data shown.`;
     $('#content-detail').prepend(div);
 }
@@ -1269,7 +1269,7 @@ function returnRcrdsToTable() {
  */
 function buildSrcTable() {
     const entities = [ 'source', 'author', 'publication' ];
-    const entityData = _util.getDataFromStorage(entities);
+    const entityData = _u.getDataFromStorage(entities);
     if( entityData ) { initSrcSearchUi(entityData);
     } else { console.log('Error loading source data from storage.'); }
 }
@@ -1297,7 +1297,7 @@ function buildSrcRealmHtml() {
 
     function buildSrcTypeElems() {
         const types = getRealmOpts();                                       
-        const span = _util.buildElem('span', { id:'sort-srcs-by', class: 'flex-row', 
+        const span = _u.buildElem('span', { id:'sort-srcs-by', class: 'flex-row', 
             text: 'Source Type: ' });
         const sel = newSelEl(types, 'opts-box', 'sel-realm', 'Source Type');
         return [span, sel];
@@ -1337,12 +1337,12 @@ function storeAndReturnCurRealmRcrds(val) {
     const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
     const realmVal = val || getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
     tParams.curRealm = realmVal;    
-    _util.populateStorage('curRealm', realmVal);
+    _u.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
 }
 /** Returns an array with all records from the stored record object. */
 function getTreeRcrdAry(realm) {
-    const srcRcrdIdAry = _util.getDataFromStorage(realm);
+    const srcRcrdIdAry = _u.getDataFromStorage(realm);
     return srcRcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
 }
 /**
@@ -1486,7 +1486,7 @@ function loadPubSearchHtml(srcTree) {
         return buildPubSelects(pubTypeOpts);
     }
     function buildPubSelectOpts() {
-        const pubTypes = _util.getDataFromStorage('publicationType');           
+        const pubTypes = _u.getDataFromStorage('publicationType');           
         const opts = [{value: 'all', text: '- All -'}];
         for (let t in pubTypes) {
             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
@@ -1495,8 +1495,8 @@ function loadPubSearchHtml(srcTree) {
     }
     /** Builds the publication type dropdown */
     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        const lbl = _util.buildElem('label', {class: "lbl-sel-opts flex-row"});
-        const span = _util.buildElem('span', { text: 'Type:' });
+        const lbl = _u.buildElem('label', {class: "lbl-sel-opts flex-row"});
+        const span = _u.buildElem('span', { text: 'Type:' });
         const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
         $(sel).css('width', '177px');
         $(lbl).css('width', '222px').append([span, sel]);
@@ -1565,10 +1565,10 @@ function getSrcRowData(src, treeLvl, idx) {                                     
 /** Returns a text input with submit button that will filter tree by text string. */
 function buildTreeSearchHtml(entity, hndlr) {
     const func = hndlr || searchTreeText.bind(null, entity);
-    const lbl = _util.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
-    const input = _util.buildElem('input', { 
+    const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
+    const input = _u.buildElem('input', { 
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
-    const bttn = _util.buildElem('button', { text: 'Search', 
+    const bttn = _u.buildElem('button', { text: 'Search', 
         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
     $(bttn).css('margin-left', '5px');
     $(lbl).css('width', '222px');
@@ -1645,7 +1645,7 @@ function updateLocSearch(val) {
     const selVal = parseInt(val);  
     const locType = getLocType(this.$input[0].id);
     tParams.selectedOpts = getSelectedVals(selVal, locType);
-    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _util.snapshot(tParams.selectedOpts));
+    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tParams.selectedOpts));
     updateFilter();
 
     function getLocType(selId) {
@@ -1693,7 +1693,7 @@ function updatePubSearch(typeVal, text) {                                       
     function getFilteredPubRows() {                             
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
         if (txt === '') { return getPubTypeRows(typeId); }
-        const pubTypes = _util.getDataFromStorage('publicationType'); 
+        const pubTypes = _u.getDataFromStorage('publicationType'); 
         const pubIds = pubTypes[typeId].publications;         
         return getAllCurRows().filter(row => 
             pubIds.indexOf(row.pubId) !== -1 && 
@@ -1701,7 +1701,7 @@ function updatePubSearch(typeVal, text) {                                       
     }
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows() { 
-        const pubTypes = _util.getDataFromStorage('publicationType'); 
+        const pubTypes = _u.getDataFromStorage('publicationType'); 
         const pubIds = pubTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
@@ -1717,7 +1717,7 @@ function updatePubSearch(typeVal, text) {                                       
  */
 function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
     var curTaxonHeirarchy = {};
-    var lvls = Object.keys(_util.getDataFromStorage('levelNames'));             //console.log('lvls = %O', lvls);
+    var lvls = Object.keys(_u.getDataFromStorage('levelNames'));             //console.log('lvls = %O', lvls);
     getTaxonDataAtTreeLvl(curTaxonTree);
 
     function getTaxonDataAtTreeLvl(treeLvl) {
@@ -1767,7 +1767,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
     }
     function getSpeciesName(speciesName) {
-        return speciesName === null ? null : _util.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
+        return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
 function getDefaultTblOpts() {
@@ -1959,7 +1959,7 @@ function getPencilHtml(id, entity, editFunc) {
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
     $('#search-tbl').on(
-        'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _util.lcfirst(entity)));
+        'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _u.lcfirst(entity)));
     return editPencil;
 }
 /** -------- Map Column ---------- */
@@ -2216,7 +2216,7 @@ function showInteractionsUpdatedToday() {
  * since the datetime specified by the user.
  */
 function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
-    var rowData = _util.snapshot(tParams.rowData);
+    var rowData = _u.snapshot(tParams.rowData);
     var fltrSince = dateStr || tParams.timeFltr;
     var sinceTime = new Date(fltrSince).getTime();                          
     var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
@@ -2345,7 +2345,7 @@ function clearCol2() {
 function getDetachedRcrd(rcrdKey, rcrds) {                                  
     const orgnlRcrds = rcrds || tParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
     try {
-       return _util.snapshot(orgnlRcrds[rcrdKey]);
+       return _u.snapshot(orgnlRcrds[rcrdKey]);
     }
     catch (e) { 
        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
@@ -2548,7 +2548,7 @@ function saveOrRestoreSelection() {                                             
     return curVal ? saveSelVal($elem, curVal) : setSelVal(field, prevVal, 'silent');
 } /* End saveOrRestoreSelection */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
-    const elem = _util.buildSelectElem(opts, { class: c, id: i });
+    const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
     return elem;
 }
@@ -2672,7 +2672,7 @@ function selectSearchFocus(f) {
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
-    _util.populateStorage('curFocus', focus);
+    _u.populateStorage('curFocus', focus);
     clearOnFocusChange(tableBuilder);
 } 
 function focusNotChanged(focus) {

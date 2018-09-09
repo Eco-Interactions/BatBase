@@ -7,7 +7,7 @@
  * The search tips available by clicking on "Show Tips".
  */
 import * as db_page from './db-page.js';
-import * as _util from '../misc/util.js';
+import * as _u from './util.js';
 
 let intro, focus;
 

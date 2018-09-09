@@ -6,7 +6,7 @@
  *     sync
  *     updateEditedData
  */
-import * as _util from '../misc/util.js';
+import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
@@ -18,7 +18,7 @@ export function init() {
 }
 /** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
 function getServerDataLastUpdatedTimes() {
-    _util.sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes);
+    _u.sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes);
 }
 /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
 function storeDataUpdatedTimes(ajaxData) {
@@ -42,7 +42,7 @@ export function sync(dataUpdatedAt) {
  * search page ui is initialized @initStoredData.
  */
 function addNewDataToStorage(dataUpdatedAt) {  
-    var pgUpdatedAt = _util.getDataFromStorage('pgDataUpdatedAt');              console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
+    var pgUpdatedAt = _u.getDataFromStorage('pgDataUpdatedAt');              console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
     if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) {            console.log("Data up to date.");return; }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
@@ -83,7 +83,7 @@ function ajaxNewData(entities, lastUpdated) {
     function getNewData(entity, func) {                                         //console.log('getting new data for ', entity); 
         let data = { entity: entity, updatedAt: lastUpdated }; 
         const hndlr = func || null;
-        return _util.sendAjaxQuery(data, "ajax/sync-data", hndlr); 
+        return _u.sendAjaxQuery(data, "ajax/sync-data", hndlr); 
     } 
     function updateInteractions() {                                         
         return ints ? getNewData('Interaction', processUpdatedEntityData) : null;
@@ -100,7 +100,7 @@ function processUpdatedData() {
 function processUpdatedEntityData() { 
     const results = arguments[0]; 
     const entity = Object.keys(results)[0];                                     //console.log("[%s] data returned from server = %O", entity, results); 
-    const data = parseData(results[entity]); 
+    const data = parse(results[entity]); 
     storeUpdatedData(data, entity); 
 }
 /** Sends the each updated record to the update handler for the entity. */ 
@@ -109,7 +109,7 @@ function storeUpdatedData(rcrds, entity) {
     const entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
         addCoreEntityData : addDetailEntityData; 
     for (let id in rcrds) { 
-        entityHndlr(_util.lcfirst(entity), rcrds[id]); 
+        entityHndlr(_u.lcfirst(entity), rcrds[id]); 
     } 
 } 
 /** Stores interaction data and inits the search-page table.*/ 
@@ -203,8 +203,8 @@ function getEntityType(entity, rcrd) {
 }
 /** Returns the records source-type. */
 function getSourceType(entity, rcrd) {
-    var type = _util.lcfirst(entity)+"Type";
-    return _util.lcfirst(rcrd[type].displayName);
+    var type = _u.lcfirst(entity)+"Type";
+    return _u.lcfirst(rcrd[type].displayName);
 }
 /** Sends entity-record data to each storage property-type handler. */
 function updateDataProps(propHndlrs, entity, rcrd) {                            //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
@@ -657,7 +657,7 @@ function getTagData(tags, entity) {
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */
 function storeData(key, data) {
-    _util.populateStorage(key, JSON.stringify(data));
+    _u.populateStorage(key, JSON.stringify(data));
 }
 /**
  * Attempts to update the data and catches any errors.
@@ -674,7 +674,7 @@ function updateData(updateFunc, prop, params, edits) {                          
     }
 }
 function getDataFromLocalStorage(prop) {
-    const data = _util.getDataFromStorage(prop);
+    const data = _u.getDataFromStorage(prop);
     allRcrds[prop] = data;
     return data;
 }

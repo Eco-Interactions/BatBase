@@ -1,4 +1,4 @@
-import * as _util from '../misc/util.js';
+import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import 'leaflet.markercluster';
 
@@ -290,7 +290,7 @@ function buildSrcIntSummary(name, ints, focus) {                                
 }
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getTop3CitedBats(ints) {    
-    const taxa = _util.getDataFromStorage('taxon');
+    const taxa = _u.getDataFromStorage('taxon');
     const allBats = {};
     getAllBatsCited();
     const bats = getTopThreeReportStr(allBats, buildBatSummaryStr);
@@ -355,7 +355,7 @@ function getName(name, focus) {
  * "Location Summary" button to the popup connected to @showLocDetailsPopup.
  */
 function getLocNamePopupHtml(loc, summaryFunc) {                                //console.log('getLocNamePopupHtml. loc = %O', loc)
-        const div = _util.buildElem('div');
+        const div = _u.buildElem('div');
         const text = getLocNameHtml(loc);
         const bttn = buildLocSummaryBttn(summaryFunc);
         $(div).append(text).append(bttn);
@@ -374,7 +374,7 @@ function clearMarkerTimeout(timeout) {
 }
 /** ------- Location Summary Popup ------------- */
 function buildLocSummaryBttn(showSummaryFunc) {
-    const bttn = _util.buildElem('input', {type: 'button',
+    const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn', value: 'Location Summary'});
     $(bttn).click(showSummaryFunc);
     $(bttn).css({'margin': '.5em 0 0 0'});
@@ -386,7 +386,7 @@ export function getLocationSummaryHtml(loc, subCnt, rcrds) {                 //c
     return getLocSummaryPopup(loc, subCnt);
 }
 function getLocSummaryPopup(loc, subCnt) {
-    const div = _util.buildElem('div');
+    const div = _u.buildElem('div');
     const html = buildLocDetailsHtml(loc, subCnt);
     const bttn = buildToTableButton(loc);
     $(div).append(html).append(bttn);
@@ -416,7 +416,7 @@ function getSubLocsWithoutGpsData(cnt) {
     return `Sub-Locations without GPS data: ${cnt}`; 
 }
 function getCoordsHtml(loc) {
-    const geoData = _util.getGeoJsonEntity(loc.geoJsonId);                       //console.log('geoJson = %O', geoData); 
+    const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                       //console.log('geoJson = %O', geoData); 
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.coordinates)
     coords = coords.map(c => Number(c).toFixed(6)); 
@@ -453,7 +453,7 @@ function getAllHabitatsWithin(loc) {                                            
 /** --- Cited Bats --- */
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getBatsCitedHtml(loc) {    
-    const rcrds = _util.getDataFromStorage(['interaction', 'taxon']);
+    const rcrds = _u.getDataFromStorage(['interaction', 'taxon']);
     const allBats = {};
     getAllBatsWithin(loc.id);
     const bats = getTopThreeReportStr(allBats, buildLocSummaryStr);
@@ -536,7 +536,7 @@ function finishLocTop3ReportString(str, ttl, tabs) {
 } /* ---- End Location Summary string build ---- */
 /** --- Button to show interactions in the data-table --- */
 function buildToTableButton(loc) {
-    const bttn = _util.buildElem('input', {type: 'button',
+    const bttn = _u.buildElem('input', {type: 'button',
         class:'ag-fresh tbl-bttn', value: 'Show Interactions In Data-Table'});
     $(bttn).click(showLocTableView.bind(null, loc));
     $(bttn).css({'margin': '.5em 0 0 -.4em'});

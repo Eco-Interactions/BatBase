@@ -3,8 +3,6 @@ const exports = module.exports = {};
 require('../../libs/wysiwyg/trumbowyg.min.js');
 require('../../libs/wysiwyg/ui/trumbowyg.min.css');
 
-const _util = require('../misc/util.js');                                             //console.log('util = %O', _util);    
-
 let userRole;                                        
 /**
  *  Adds edit content button to the top of any page with editable content blocks.
@@ -63,18 +61,17 @@ function addButtons() {
                     init: function(trumbowyg) { 
                         const btnDef = {
                             hasIcon: false,
-                            fn: function() {                            console.log("saving. trumbowyg = %O, util = %O", trumbowyg, _util );
+                            fn: function() {                                    console.log("saving. trumbowyg = %O", trumbowyg);
                                 var blkId = trumbowyg.o.plugins.save.id;
                                 var data = { content: $('#' + blkId ).trumbowyg('html')};            //console.log("blkId = ", blkId)
                                 var url = "admin/contentblock/" + blkId + "/update";
-                                _util.sendAjaxQuery(data, url, wysiwygSubmitSuccess);
-                                // $.ajax({
-                                //     method: "POST",
-                                //     url: "admin/contentblock/" + blkId + "/update",
-                                //     success: wysiwygSubmitSuccess,
-                                //     error: ajaxError,
-                                //     data: JSON.stringify()
-                                // });
+                                $.ajax({
+                                    method: "POST",
+                                    url: url,
+                                    success: wysiwygSubmitSuccess,
+                                    error: ajaxError,
+                                    data: JSON.stringify(data)
+                                });
                             }
                         };
                         trumbowyg.addBtnDef('save', btnDef);
@@ -85,8 +82,11 @@ function addButtons() {
     })(jQuery);
 } /* End addButtons */
 /** Reloads the page on content block update success */
-function wysiwygSubmitSuccess(data, textStatus, jqXHR) {                    console.log("Success is yours!! = %O", data);
+function wysiwygSubmitSuccess(data, textStatus, jqXHR) {                        console.log("Success is yours!! = %O", data);
     location.reload(true);
+}
+function ajaxError(jqXHR, textStatus, errorThrown) {
+    console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
 }
 /** Returns the block container id by removing '-edit' from the passed editId */
 function getBlockContainerId(editId) {

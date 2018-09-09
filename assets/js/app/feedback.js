@@ -28,13 +28,24 @@ function hasValidData() {
         $('#feedback-popup>textarea').val().length >= minContentChars;
 }
 function postFeedback() {
-    const _util = require('../misc/util.js');                                   console.log('util = %O', _util);
     var data = {
             routeStr: thisUrl, 
             topicStr: $('#feedback-popup input').val(), 
             contentStr: $('#feedback-popup>textarea').val() 
         };
-    closePopup() && _util.sendAjaxQuery(data, feedbackUrl, feedbackSubmitted);
+    closePopup() && sendAjaxQuery(data, feedbackUrl, feedbackSubmitted);
+}
+function sendAjaxQuery(dataPkg, url, successCb, errCb) {                        console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+    return $.ajax({
+        method: "POST",
+        url: url,
+        success: successCb || dataSubmitSucess,
+        error: errCb || ajaxError,
+        data: JSON.stringify(dataPkg)
+    });
+    function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    }
 }
 function closePopup() {
     console.log('closePopup called');
