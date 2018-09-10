@@ -3318,6 +3318,7 @@ function appendWaitingOverlay() {
 }
 function getFormValuesAndSubmit(id, fLvl, entity) {                             //console.log("getFormValuesAndSubmit. id = %s, fLvl = %s, entity = %s", id, fLvl, entity);
     const formVals = getFormValueData(entity, fLvl, true);
+    if (formVals.err) { return; }
     buildFormDataAndSubmit(fLvl, formVals);  
 }
 /**
@@ -3330,6 +3331,7 @@ function getFormValueData(entity, fLvl, submitting) {
     const formVals = {};
     for (let i = 0; i < elems.length; i++) { getInputData(elems[i]); }  
     handleAdditionalEntityData(entity);
+    checkForErrors(entity, formVals, fLvl);
     return formVals;
     /** Get's the value from the form elem and set it into formVals. */
     function getInputData(elem) {                                           
@@ -3365,7 +3367,7 @@ function getFormValueData(entity, fLvl, submitting) {
             'taxon': [ getTaxonData ],
         };
         if (!dataHndlrs[entity]) { return; }
-        dataHndlrs[entity].forEach(function(func) { func(); });
+        dataHndlrs[entity].forEach(func => func());
     }
     /** ---- Additional Author data ------ */
     /** Concatonates all Author name fields and adds it as 'fullName' in formVals. */ 
@@ -3493,6 +3495,32 @@ function getFormValueData(entity, fLvl, submitting) {
         return fParams.forms.taxonPs.realmTaxon.id;
     }
 } /* End getFormValueData */
+function checkForErrors(entity, formVals, fLvl) {
+    const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
+    if (!errs[entity]) { return; }
+    errs[entity](entity, formVals, fLvl);
+}
+/**
+ * Checks to ensure the new author's name doesn't already exist in the database. 
+ * If it does, a prompt is given to the user to check to ensure they are not 
+ * creating a duplicate, and to add initials if they are sure this is a new author. 
+ */
+function checkDisplayNameForDups(entity, vals, fLvl) {                                //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
+    const cntnr = $('#'+_u.ucfirst(entity)+'s-sel1')[0];
+    const opts = cntnr.selectize.options;  
+    const dup = checkForDuplicate(opts, vals.displayName);  
+    if (!dup) { return; }
+    reportFormFieldErr('FirstName', 'dupAuth', fLvl);
+    vals.err = true;
+}
+function checkForDuplicate(opts, name) {  
+    const newName = name.replace(/\./g,'').toLowerCase(); 
+    const optKeys = Object.keys(opts);
+    return optKeys.find(k => {
+        let optName = opts[k].text.replace(/\./g,'').toLowerCase(); 
+        return optName == newName
+    });
+}
 /** -------------- Form Data Helpers ------------ */
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
 function getSelectedVals(cntnr, fieldName) {
@@ -4086,7 +4114,7 @@ function formSubmitError(jqXHR, textStatus, errorThrown) {                      
  */
 function getFormErrTag(errTxt) {                                                //console.log("errTxt = %O", errTxt) 
     return isDuplicateAuthorErr(errTxt) ?
-        'dupAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
+        'dupSelAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
         'dupEnt'  : 'genSubmitErr';
 }
 function isDuplicateAuthorErr(errTxt) {
@@ -4095,7 +4123,7 @@ function isDuplicateAuthorErr(errTxt) {
 }
 function getFormErrMsg(errTag) {
     var msg = {
-        'dupAuth': 'An author is selected multiple times.',
+        'dupSelAuth': 'An author is selected multiple times.',
         'dupEnt' : 'A record with this display name already exists.',
         'genSubmitErr': 'There was an error during form submission. Please note the ' + 
             'record ID and the changes attempted and send to the developer.'
@@ -4149,20 +4177,30 @@ function formInitErr(field, errTag, fLvl, id, skipClear) {                      
  */
 function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
     const errMsgMap = {
+        'dupAuth': handleDupAuth,
+        'fillAuthBlanks': handleAuthBlanks,
+        'fillEdBlanks': handleEdBlanks,
         'isGenusPrnt': handleIsGenusPrnt,
         'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent, 
-        'noGenus': handleNoGenus,
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
         'needsHigherLvl': handleNeedsHigherLvl,
+        'noGenus': handleNoGenus,
         'openSubForm': handleOpenSubForm,
-        'fillAuthBlanks': handleAuthBlanks,
-        'fillEdBlanks': handleEdBlanks
     };
     const errElem = getFieldErrElem(fieldName, fLvl);
     errMsgMap[errTag](errElem, errTag, fLvl);
 }
 /* ----------- Field-Error Handlers --------------------------------------*/
+function handleDupAuth(elem, errTag, fLvl) {  
+    const msg = `<span>An author with this name already exists in the database.\n
+        If you are sure this is a new author, add initials or modify their name 
+        and submit again. </span>`;
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrDupAuth(elem, fLvl, e) { 
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
 /** Note: error for the edit-taxon form. */
 function handleIsGenusPrnt(elem, errTag, fLvl) {  
     const msg = "<span>Genus' with species children must remain at genus.</span>";
@@ -4293,7 +4331,7 @@ function getErrExitBttn(errTag, elem, fLvl) {
         'isGenusPrnt': clrIsGenusPrnt, 'needsGenusName': clrNeedsGenusName, 
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-        'openSubForm': clrOpenSubForm, 'dupAuth': clrFormLvlErr, 
+        'openSubForm': clrOpenSubForm, 'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
