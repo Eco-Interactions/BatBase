@@ -814,7 +814,13 @@ function handleSpecialCaseTypeUpdates(elem, fLvl) {
         } /* End removeAuthorField */
     } /* End updateBookFields */
     function disableFilledFields() {
-        //TODO. Also maybe add a seperate 'subTitle' field for this type.
+        $('#Title_row input').prop('disabled', true);
+        $('#Year_row input').prop('disabled', true);
+        disableAuthorField();
+    }
+    function disableAuthorField() {
+        $('#Authors-sel-cntnr')[0].lastChild.remove();
+        enableComboboxes($('#Authors-sel-cntnr select'), false);
     }
     function disableTitleField() { 
         $('#Title_row input').prop('disabled', true);
@@ -2188,7 +2194,7 @@ function getAuthName(id) {
  * with '&'. If the names are of editors, they are returned [Initials. Last].
  * If >= 4 authors, returns first author [Last, Initials.] + ', et al';  
  */
-function getFormattedAuthorNames(auths, eds) {                              //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
+function getFormattedAuthorNames(auths, eds) {                                  //console.log('getFormattedAuthorNames. auths = %O, eds = %s', JSON.parse(JSON.stringify(auths)), eds);
     if (Object.keys(auths).length > 3) { return getFirstEtAl(auths[1]); }
     let athrs = '';
     for (let ord in auths) {  
