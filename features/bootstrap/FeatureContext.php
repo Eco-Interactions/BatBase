@@ -19,7 +19,6 @@ class FeatureContext extends RawMinkContext implements Context
     private $editor1; 
     private $editor2;
 
-
     /**
      * Initializes context.
      *

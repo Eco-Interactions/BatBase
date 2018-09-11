@@ -25,6 +25,9 @@ class Version20180911160126Misc extends AbstractMigration
         $this->addSql('DROP INDEX IDX_9CE8D546C54C8C93 ON publisher');
         $this->addSql('ALTER TABLE publisher DROP type_id');
         $this->addSql('ALTER TABLE geo_json CHANGE center_point display_point VARCHAR(255) DEFAULT NULL');
+
+        $this->addSql('ALTER TABLE user ADD last_activity_at DATETIME DEFAULT NULL');
+        $this->addSql('ALTER TABLE user MODIFY last_activity_at DATETIME DEFAULT NULL AFTER email_canonical');
     }
 
     /**

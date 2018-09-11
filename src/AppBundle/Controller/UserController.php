@@ -17,6 +17,22 @@ use Symfony\Component\HttpFoundation\Request;
 class UserController extends Controller
 {
     /**
+     * Lists all users active online in the last 10 minutes.
+     *
+     * @Route("/online", name="admin_user_online")
+     */
+    public function onlineAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entities = $em->getRepository('AppBundle:User')->findOnlineNow();
+
+        return $this->render('User/online.html.twig', array(
+            'entities' => $entities,
+        ));
+    }
+
+    /**
      * Lists all User entities.
      *
      * @Route("/", name="admin_user")

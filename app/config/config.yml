@@ -89,3 +89,9 @@ services:
         class: AppBundle\Form\ProfileFormType
         tags:
             - { name: form.type, alias: appbundle_profile }
+    app_user.activity_listener:
+        class: AppBundle\EventListener\ActivityListener
+        arguments: ['@security.token_storage', '@doctrine']
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onCoreController }
+          

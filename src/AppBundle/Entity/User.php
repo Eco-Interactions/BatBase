@@ -52,6 +52,14 @@ class User extends BaseUser
     protected $lastName;
 
     /**
+     * Date/Time of the last activity
+     *
+     * @var \DateTime
+     * @ORM\Column(name="last_activity_at", type="datetime", nullable=true)
+     */
+    protected $lastActivityAt;
+
+    /**
      * @var \DateTime
      *
      * @Gedmo\Timestampable(on="create")
@@ -148,6 +156,31 @@ class User extends BaseUser
     public function getLastName()
     {
         return $this->lastName;
+    }
+
+    /**
+     * @param \DateTime $lastActivityAt
+     */
+    public function setLastActivityAt($lastActivityAt)
+    {
+        $this->lastActivityAt = $lastActivityAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getLastActivityAt()
+    {
+        return $this->lastActivityAt;
+    }
+
+    /**
+     * @return Bool Whether the user is active or not
+     */
+    public function isActiveNow()
+    {   // Delay during wich the user will be considered as still active
+        $delay = new \DateTime('10 minutes ago');
+        return ( $this->getLastActivityAt() > $delay );
     }
 
     /**

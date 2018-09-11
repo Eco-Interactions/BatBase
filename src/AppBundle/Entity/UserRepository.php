@@ -23,4 +23,18 @@ class UserRepository extends EntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * @return array
+     */
+    public function findOnlineNow()
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->where('u.lastActivityAt > :dt')
+            ->orderBy('u.username', 'ASC')
+            ->setParameter('dt', new \DateTime('10 minutes ago'));
+
+        return $qb->getQuery()->getResult();
+    }
+
 }

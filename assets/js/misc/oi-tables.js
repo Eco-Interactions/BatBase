@@ -23,6 +23,7 @@ function requireCss() {
 function initTable(tableName) {
     var tables = {  /*      sortCol  pgLngth    Col  hideSlider scroll  */
                 feedback_tbl: [   0,  'onehund',  5,    true,   false],
+                online_users_tbl: [   0,  'onehund',  4,    false,   false],
                 biblio_tbl:   [   0,  'fivehund', 0,    false,  false],
     };
     var tblParams = tables[tableName];
@@ -35,7 +36,7 @@ function initTable(tableName) {
         var $tableElem = $(selector);
         var editCol = $tableElem.data('editcol');
         var sortCol = $tableElem.data('sortcol') || dfltSrtCol;
-        if (hideSlider === true) { ECO_INT_FMWK.stickyOffset = 1; }
+        if (hideSlider === true) { exports.stickyOffset = 1; }
         $tableElem.DataTable(getTblCfg(sortCol, editCol, pgLgthList, xportCols, scroll));
         new $.fn.dataTable.FixedHeader( $tableElem, { header: true, headerOffset: 86 } );
         return $tableElem;
