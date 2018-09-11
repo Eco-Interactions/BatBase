@@ -181,7 +181,7 @@ function buildIntMarker(focus, intCnt, coords, data) {
 }
 function getCoords(geoId) {
     const geoJson = _u.getGeoJsonEntity(geoId);                         
-    return getLatLngObj(geoJson.centerPoint);
+    return getLatLngObj(geoJson.displayPoint);
 }
 function zoomIfAllInSameRegion(data) {  
     let region, latLng;
@@ -317,8 +317,8 @@ function addMarkersForLocAndChildren(topLoc) {
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
     const locGeoJson = _u.getGeoJsonEntity(geoJsonId);
-    return locGeoJson.centerPoint ? 
-        getLatLngObj(locGeoJson.centerPoint) 
+    return locGeoJson.displayPoint ? 
+        getLatLngObj(locGeoJson.displayPoint) 
         : getLocCenterPoint(loc, locGeoJson);
 } 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */

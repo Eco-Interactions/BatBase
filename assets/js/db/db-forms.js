@@ -3618,7 +3618,7 @@ function buildFormData(entity, formVals) {
             displayPoint : fParams.forms[fLvl].geoJson.coordinates;
         data.geoJson = {
             flat: { 
-                'centerPoint': displayPoint, 
+                'displayPoint': displayPoint, 
                 'coordinates': coords, 
                 'type': 'point' },
             rel: {}
