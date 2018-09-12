@@ -123,6 +123,17 @@ span.lbl {
     width: 100%;
     top: 510px;
 }
+#error_content {
+    text-align: center;
+}
+#error_content h1 {
+    margin-top: .5em;
+    font-size: 66px;
+}
+#error_content p {
+    font-size: 33px;
+    margin: 2em 0 5em 0;
+}
 #detail-block {
     margin: 1em .5em 2em 1em;
 }
@@ -210,6 +221,10 @@ span.lbl {
     position: relative;
     left: 65px;
     padding-bottom: 20px;
+}
+#error_logo {
+    width: 50%;
+    margin: 2% auto 0 auto;
 }
 #chrome-opt-msg {
     position: relative;

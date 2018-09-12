@@ -1,0 +1,22 @@
+{% extends '::base.html.twig' %}
+
+{% block masthead %}
+    <div class="hiddenElem" id="masthead"  data-hide-slider="true"></div>
+{% endblock %}
+
+{% block pageid %}error_content{% endblock pageid %}
+
+{% block detail %}
+    <img src="{{ asset('bundles/app/images/BatLogo_Horizontal_Color.svg') }}" 
+    	id="error_logo" alt="batplant.org">
+    <h1>Something went wrong...</h1>
+
+    <p>Try refreshing the page or <a href="{{ path('app_home') }}">return to 
+    	the homepage</a><br><br>
+		{% if is_granted("ROLE_USER") %}
+		    If you think you have stumbled on a technical bug, <br><a 
+		    href="{{ path('app_feedback') }}">leave us feedback</a> so we can 
+		    track it down.
+		{% endif %}
+	</p>
+{% endblock %}
