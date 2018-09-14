@@ -316,13 +316,12 @@ function addMarkersForLocAndChildren(topLoc) {
 /* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
-    const locGeoJson = _u.getGeoJsonEntity(geoJsonId);
-    return locGeoJson.displayPoint ? 
-        getLatLngObj(locGeoJson.displayPoint) 
-        : getLocCenterPoint(loc, locGeoJson);
+    const locGeoJson = _u.getGeoJsonEntity(geoJsonId);  
+    return getLatLngObj(locGeoJson.displayPoint); 
 } 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
-function getLatLngObj(point) {                                                  //console.log('point = ', point)
+function getLatLngObj(point) {  
+    if (!point) { return getLocCenterPoint(loc, locGeoJson); }                  //console.log('point = ', point)
     let array = JSON.parse(point); 
     return L.latLng(array[1], array[0]);
 }

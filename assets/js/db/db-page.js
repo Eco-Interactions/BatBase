@@ -31,7 +31,7 @@ import * as filters from './tbl-filters.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'Live for Justice!!!!!!!!!! <3<3<3';
+const dataKey = 'A life with no cause is a life without effect.';               console.log(dataKey);
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -1222,7 +1222,7 @@ function getParentName(rcrd) {
     return rcrd.displayName.split('(citation)')[0];
 }
 /* --- End showTableRecordsOnMap --- */
-function updateUiForMapView(showingInts) {
+function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
     disableTableButtons();
     showPopUpMsg();
@@ -1238,8 +1238,8 @@ function updateUiForTableView() {
     $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
 }
 function updateUiForMappingInts() {
-    updateUiForMapView('showingInts');
-    enableComboboxes($('#opts-col1 select, #opts-col2 select', false));
+    updateUiForMapView();
+    enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
 }
 function updateBttnToReturnRcrdsToTable() {
     addMsgAboutTableViewFiltering();
@@ -2667,6 +2667,7 @@ function selectSearchFocus(f) {
  */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
+    if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     _u.populateStorage('curFocus', focus);
     clearOnFocusChange(tableBuilder);
@@ -2692,7 +2693,6 @@ function clearPastHtmlOptions(tableBuilder) {
         $('#opts-col1, #opts-col2').fadeTo(0, 1);
         updateUiForTableView();
         tableBuilder();
-        if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     }
 } /* End clearPastHtmlOptions */
 /**

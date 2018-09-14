@@ -313,33 +313,33 @@ Feature: Add new data to the database
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
         And I select "Subject Family" from the "Family" dropdown field
-        When I enter "Subject Genus" in the "Genus" dropdown field
+        When I enter "SGenus" in the "Genus" dropdown field
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
         Then I should see "Subject Family" in the "Family" dropdown field
-        And I should see "Subject Genus" in the "Genus" dropdown field
+        And I should see "SGenus" in the "Genus" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Species within the subject taxon sub-form
         Given I open the New Interaction form
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
-        And I select "Subject Genus" from the "Genus" dropdown field
-        When I enter "Subject Species" in the "Species" dropdown field
+        And I select "SGenus" from the "Genus" dropdown field
+        When I enter "SGenus Species" in the "Species" dropdown field
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
-        Then I should see "Subject Species" in the "Species" dropdown field
+        Then I should see "SGenus Species" in the "Species" dropdown field
         And I should see "Subject Family" in the "Family" dropdown field
-        And I should see "Subject Genus" in the "Genus" dropdown field
+        And I should see "SGenus" in the "Genus" dropdown field
 
     @javascript
     Scenario:  I should be able to select a taxon with the subject taxon select form
         Given I open the New Interaction form
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
-        And I select "Subject Species" from the "Species" dropdown field
+        And I select "SGenus Species" from the "Species" dropdown field
         When I press "Confirm"
-        Then I should see "Subject Species" in the "Subject" dropdown field
+        Then I should see "SGenus Species" in the "Subject" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Class within the object taxon sub-form
@@ -386,13 +386,13 @@ Feature: Add new data to the database
         And I see "Select Object Taxon"
         When I select "Arthropod" from the "Realm" dropdown field
         And I select "Object Family" from the "Family" dropdown field
-        When I enter "Object Genus" in the "Genus" dropdown field
+        When I enter "OGenus" in the "Genus" dropdown field
         And I see "New Taxon Genus"
         And I press the "Create Taxon" button
-        Then I should see "Object Genus" in the "Genus" dropdown field     
+        Then I should see "OGenus" in the "Genus" dropdown field     
+        And I should see "Object Family" in the "Family" dropdown field
         And I should see "Object Order" in the "Order" dropdown field
         And I should see "Object Class" in the "Class" dropdown field
-        And I should see "Object Order" in the "Order" dropdown field
 
     @javascript
     Scenario:  I should be able to create a taxon Species within the object taxon sub-form
@@ -400,12 +400,12 @@ Feature: Add new data to the database
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
         When I select "Arthropod" from the "Realm" dropdown field
-        And I select "Object Genus" from the "Genus" dropdown field
-        When I enter "Object Species" in the "Species" dropdown field
+        And I select "OGenus" from the "Genus" dropdown field
+        When I enter "OGenus Species" in the "Species" dropdown field
         And I see "New Taxon Species"
         And I press the "Create Taxon" button
-        Then I should see "Object Species" in the "Species" dropdown field
-        And I should see "Object Genus" in the "Genus" dropdown field     
+        Then I should see "OGenus Species" in the "Species" dropdown field
+        And I should see "OGenus" in the "Genus" dropdown field     
         And I should see "Object Family" in the "Family" dropdown field
         And I should see "Object Order" in the "Order" dropdown field
         And I should see "Object Class" in the "Class" dropdown field
@@ -417,9 +417,9 @@ Feature: Add new data to the database
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
         When I select "Arthropod" from the "Realm" dropdown field
-        And I select "Object Species" from the "Species" dropdown field
+        And I select "OGenus Species" from the "Species" dropdown field
         When I press "Confirm"
-        Then I should see "Object Species" in the "Object" dropdown field
+        Then I should see "OGenus Species" in the "Object" dropdown field
     ## -------------------------- Interaction ----------------------------------##
     @javascript
     Scenario:  I should be able to create a new interaction with all fields filled
@@ -442,7 +442,7 @@ Feature: Add new data to the database
         And I should see "Test Title for Chapter" in the "Citation Title" dropdown field
         And I should see "Costa Rica" in the "Country-Region" dropdown field
         And I should see "Test Location" in the "Location" dropdown field
-        And I should see "Genus Subject Genus" in the "Subject" dropdown field
+        And I should see "Genus SGenus" in the "Subject" dropdown field
         And I should see "Consumption" in the "Interaction Type" dropdown field
         And the "Object" select field should be empty
         And the "Interaction Tags" select field should be empty
@@ -509,8 +509,8 @@ Feature: Add new data to the database
         And I group interactions by "Bats"
         And I filter the table to interactions created since "today"
         When I expand "Family Subject Family" in the data tree
-        And I expand "Genus Subject Genus" in the data tree
-        Then I should see "3" interactions under "Unspecified Subject Genus Interactions"
+        And I expand "Genus SGenus" in the data tree
+        Then I should see "3" interactions under "Unspecified SGenus Interactions"
         And the expected data in the interaction row
 
     @javascript
@@ -521,6 +521,6 @@ Feature: Add new data to the database
         When I expand "Class Object Class" in the data tree
         When I expand "Order Object Order" in the data tree
         When I expand "Family Object Family" in the data tree
-        And I expand "Genus Object Genus" in the data tree
-        Then I should see "3" interactions under "Object Species"
+        And I expand "Genus OGenus" in the data tree
+        Then I should see "3" interactions under "OGenus Species"
         And the expected data in the interaction row

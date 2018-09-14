@@ -1953,7 +1953,7 @@ function checkForTaxonLvlErrs(txnLvl) {
     for (var tag in errObj) {  
         if (errObj[tag]) { return sendTxnErrRprt(tag, 'Taxon'); }
     }
-    clrNeedsHigherLvl(null, null, null, txnLvl);
+    if ($('.top-active-errs').length) { clrNeedsHigherLvl(null, null, null, txnLvl); }
     checkForParentLvlErrs(prntLvl);
 }
 /** Returns true if the taxon's original level is Genus and it has children. */
@@ -1991,7 +1991,9 @@ function checkForParentLvlErrs(prnt) {
         { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
         { 'needsGenusPrnt': txnLvl == 7 && prntLvl != 6 }];
     var hasErrs = !errs.every(checkForErr);                                     //console.log('hasErrs? ', hasErrs)
-    if (!hasErrs) { clearLvlErrs('#Parent_errs', 'sub'); }
+    if (!hasErrs && $('.top-active-errs').length) {
+        clearLvlErrs('#Parent_errs', 'sub'); 
+    }
     return hasErrs;
 
     function checkForErr(errObj) {                                         
@@ -2011,8 +2013,8 @@ function clearLvlErrs(elemId, fLvl) {                                           
 /** Inits a taxon select-elem with the selectize library. */
 function initTaxonEditCombo(selId, chngFunc, createFunc) {                      //console.log("initTaxonEditCombo. selId = ", selId);
     var chng = chngFunc || Function.prototype;
-    var create = createFunc || false;
-    var options = { create: create, onChange: chng, placeholder: null }; 
+    // var create = createFunc || false;
+    var options = { create: false, onChange: chng, placeholder: null }; 
     $('#'+selId).selectize(options);
     setSelVal('#'+selId, $('#'+selId).data('toSel'), 'silent');
 }
@@ -3506,6 +3508,7 @@ function checkForErrors(entity, formVals, fLvl) {
  * creating a duplicate, and to add initials if they are sure this is a new author. 
  */
 function checkDisplayNameForDups(entity, vals, fLvl) {                                //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
+    if (fParams.action === 'edit') { return; }
     const cntnr = $('#'+_u.ucfirst(entity)+'s-sel1')[0];
     const opts = cntnr.selectize.options;  
     const dup = checkForDuplicate(opts, vals.displayName);  
@@ -4353,7 +4356,7 @@ function clearErrElemAndEnableSubmit(elem, fLvl) {                              
     clearErrElem(elem, fLvl);
     if (!$('#'+subLvl+'-form').length) { enableSubmitBttn('#'+fLvl+'-submit'); }
 
-    function clearErrElem(elem, fLvl) {  console.log('fLvl = ', fLvl);
+    function clearErrElem(elem, fLvl) {                                         //console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');
         if (elem.innerHTML) { elem.innerHTML = ''; }
     }

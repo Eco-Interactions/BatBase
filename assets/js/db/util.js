@@ -18,7 +18,7 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
  *   ucfirst 
 */
 let dataStorage, geoJson;
-const geoJsonDataKey = 'Live for justice!!!!!!<3!! <3<3';
+const geoJsonDataKey = 'A life with no cause is a life without effect.';
 
 extendPrototypes();
 

@@ -207,17 +207,17 @@ class GeoJson
         return $this->displayPoint;
     }
 
-    // *
-    //  * Get center point.
-    //  * @JMS\VirtualProperty
-    //  * @JMS\SerializedName("displayPoint")
-    //  *
-    //  * @return int
-     
-    // public function serializeDisplayPoint()
-    // {
-    //     return $this->displayPoint;
-    // }
+    /**
+     * Get center point.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("displayPoint")
+     *
+     * @return int
+     */
+    public function serializeDisplayPoint()
+    {
+        return $this->displayPoint;
+    }
 
     /**
      * Set location.

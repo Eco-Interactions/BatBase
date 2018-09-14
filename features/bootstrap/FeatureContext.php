@@ -289,7 +289,7 @@ class FeatureContext extends RawMinkContext implements Context
             'Citation Title' => 'Test Title for Chapter', 
             'Country-Region' => 'Costa Rica', 'Location' => 'Test Location'];
         $this->fillSrcAndLocFields($srcLocData);
-        $taxaData = ['Genus' => 'Subject Genus', 'Species' => 'Object Species'];
+        $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
         $miscData = [ 'Consumption', 'Arthropod', 'Detailed interaction notes.'];
         $this->fillMiscIntFields($miscData);
