@@ -387,6 +387,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
 div[id$="_Rows"] {
     min-width: 100%;
 }
+[id$="_row"] {
+    padding: .2em .75em .3em  .75em;    
+}
 .sml-left {
     position: relative;
     left: 10px;
@@ -408,9 +411,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     justify-content: space-between;
     margin-top: .3em;
 }
-[id$="_row"] {
-    padding: .2em .75em .3em  .75em;    
-}
 .top-row {
     width: 470px;
     margin-right: 1em;
@@ -426,6 +426,14 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
+}
+#loc-note {
+    margin: .5em auto 0 auto;
+}
+#loc-note .map-link {
+    text-decoration: underline;
+    color: #1b3b1b;
+    cursor: pointer;
 }
 /** --- Error Styles --- */
 [id$="_errs"] {

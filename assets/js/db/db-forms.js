@@ -579,6 +579,7 @@ function finishIntFormBuild() {
     $('#top-cancel').unbind('click').click(exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
+    addLocationSelectionMethodsNote();
     addReqElemsToConfg();    
     $('.all-fields-cntnr').hide();
     focusCombobox('#Publication-sel', true);
@@ -1263,6 +1264,7 @@ function onCntryRegSelection(val) {                                             
     if (!fParams.editing) { $('#Country-Region_pin').focus(); }
 }
 /*-------------- Location ------------------------------------------------*/
+/*--------------- Form methods ---------------------------*/
 /**
  * Returns a form row with a select dropdown populated with all available 
  * locations.
@@ -1365,6 +1367,22 @@ function initLocForm(val) {                                                     
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 function enableCountryRegionField() {  
     enableCombobox('#Country-Region-sel');
+}
+/*--------------- Map methods ---------------------------*/
+/** Adds a message above the location fields in interaction forms. */
+function addLocationSelectionMethodsNote() {
+    const cntnr = _u.buildElem('div', {id: 'loc-note'});
+    const mapText = _u.buildElem('span', {class:'map-link', 
+        text: 'click here to use the map interface.'});
+    $(mapText).click(showInteractionFormMap);
+    const note = [`<span>Select or create a location using the fields below or </span>`,
+        mapText];
+    $(cntnr).append(note);
+    $('#Country-Region_row').before(cntnr);
+}
+/** Open popup with the map interface for location selection. */
+function showInteractionFormMap() {                                             console.log('showInteractionFormMap')
+    // body...
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */

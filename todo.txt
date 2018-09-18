@@ -20,9 +20,10 @@
                     - Click on map will move point
                 - Show all locations within the parent
                 - Select location by clickin button in marker summary popup
-    
 
 Before Release:
+    - {high}[easy] When nothing is selected but a country, a habitat type, and the 
+        displayname, suggest to user they use the country-habitat combo. 
     
 MEETING NOTES:
     Next/future round:
@@ -42,8 +43,6 @@ Tullenda:
 ##(Category){priority}[difficulty]##
 TODOs:
 (CRUD FORMS/BACKEND)
-    - {high}[easy] When nothing is selected but a country, a habitat type, and the 
-        displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
     - {med}[med] Switch from localStorage to idb everywhere.
