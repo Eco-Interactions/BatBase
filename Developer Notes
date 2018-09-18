@@ -1,12 +1,17 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
->Deployment Steps
-## 
-Cache busting:
-    - {config.yml} Update assets version
-    - {search-page.js} Change dataKey    
 
->Install Steps 
-## 
+##------------------------- Serve Side ---------------------------------------##
+>.htaccess rewrite for batplant.org 
+    RewriteEngine on
+    RewriteCond %{HTTP_HOST} ^batplant.org$ [NC,OR]
+    RewriteCond %{HTTP_HOST} ^www.batplant.org$
+    RewriteCond %{REQUEST_URI} !prod/web/
+    RewriteRule (.*) /prod/web/$1 [L]
+
+>Deployment Steps
+    (Need to update)
+
+>Install Steps ## 
 - composer update
 - Set file permissions:
     * debian

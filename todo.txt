@@ -2,10 +2,26 @@
 >ASAP<
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
-    - Fix taxon row coloring when showing updates
+>Add map to Location FORMS
+    - Add message to top form above the location fields to give map seleciton option
+        - If clicked, open map for location selection
+            -- Location selection --
+                - Show map with ui that will filter and zoom the map by region/country
+                - show all locations within the parent
+                - Location selected by clicking on button in marker summary popup
+        -- Creating a new Location --
+            - Add message about map selection option
+                - Allow search by name, address, (landmark?, ) and coordinates
+            - If user enters coordinates into form
+                - Show map and disable submit button
+                - Search by coodinates and show all locations within the parent
+            - Finish and select location
+                - Show marker of different color at resulting point
+                    - Click on map will move point
+                - Show all locations within the parent
+                - Select location by clickin button in marker summary popup
+    
 
-    - Ensure UI updates as it should when toggling to map
-        - search options dimmed and unavailable
 Before Release:
     
 MEETING NOTES:
@@ -44,6 +60,7 @@ TODOs:
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters - (updated at for example).
     - {med}[???] Figure out what the "scroll-linked positioning effect." is on the page
+    - {med}[easy] Change taxon row coloring when showing updated records
 
 (STATIC/MISC SITE)
     - {med}[complicated] Implement Encore for assets
@@ -61,6 +78,8 @@ TODOs:
 
 (TESTS)
     - {med}[med] Refactor fixtures so that entity changes are easier to handle
+    - {high}{med} Ensure UI updates as it should when toggling to map
+        - search options dimmed and unavailable
 
 (PWA)
     - {low}[easy] Configure webpack's manifest plugin
