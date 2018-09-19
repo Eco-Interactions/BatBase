@@ -45,25 +45,26 @@ function initDb() {
 function geoJsonDataAvailable() {
     return _u.isGeoJsonDataAvailable();
 }
-/** ======================= Init Map ======================================== */
-/** Initializes the search database map using leaflet and mapbox. */
-function buildAndShowMap(loadFunc) {                                            console.log('buildAndShowMap. loadFunc = %O', loadFunc);
-    locRcrds = locRcrds || _u.getDataFromStorage('location');
-    map = getMapInstance();
+/*=========================== Shared Methods =================================*/
+// Test for when geoJsonData is erroring and then redownload the data
+function waitForDataThenContinue(cb) {                                          console.log('waiting for geojson');
+    return geoJsonDataAvailable() ? cb() : 
+        window.setTimeout(waitForDataThenContinue.bind(null, cb), 500);
+}
+/** Initializes the map using leaflet and mapbox. */
+function buildAndShowMap(loadFunc, mapId) {                                     console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
+    map = getMapInstance(mapId);
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles();
-    addMarkerLegend();
-    addIntCountLegend();
-    addTipsLegend();
-    map.setView([22,22], 2); console.log('map built.')
-    hidePopUpMsg();
+    if (mapId === 'map') { buildSrchPgMap(); }
+    map.setView([22,22], 2);                                                    console.log('map built.')
 }
-function getMapInstance() {
+function getMapInstance(mapId) {
     if (map) { map.remove(); }
     popups = {};
-    return L.map('map'); 
+    return L.map(mapId); 
 }
 function logLatLng(e) {
     console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
@@ -81,6 +82,14 @@ function addMapTiles() {
         id: 'mapbox.run-bike-hike',
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(map);
+}
+/*============== Search Database Page Methods ================================*/
+/** Initializes the legends used for the search page map. */
+function buildSrchPgMap() {
+    addMarkerLegend();
+    addIntCountLegend();
+    addTipsLegend();
+    hidePopUpMsg();
 }
 function addMarkerLegend() {
     const legend = L.control({position: 'bottomright'});
@@ -131,113 +140,42 @@ function addViewTips(map) {
         - Click on a marker to keep popup open.`;
     return div;
 }
+/** ---------------- Init Map ----------------------------------------------- */
 export function initMap(rcrds) {                                                console.log('attempting to initMap')
     locRcrds = rcrds;
-    waitForStorageAndLoadMap(addAllIntMrkrsToMap);                                                 
+    waitForDataThenContinue(buildAndShowMap.bind(null, addAllIntMrkrsToMap, 'map'));                                                 
 }
-function waitForStorageAndLoadMap(onLoad) {                                     console.log('waiting for geojson');
-    return geoJsonDataAvailable() ? 
-        buildAndShowMap(onLoad) : 
-        window.setTimeout(waitForStorageAndLoadMap.bind(null, onLoad), 500);
-}
-/** ================= Show Interaction Sets on Map ========================== */
-/** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, tableData, rcrds) {                             //console.log('----------- showInts. tableData = %O', tableData);
-    locRcrds = rcrds;
-    waitForStorageAndLoadMap(showIntsOnMap.bind(null, focus, tableData));
-} 
-function showIntsOnMap(focus, data) {                                           console.log('showIntsOnMap! data = %O', data);
-    const keys = Object.keys(data);                                     
-    addIntCntsToLegend(data);
-    addIntMarkersToMap(focus, data);
-    zoomIfAllInSameRegion(data);
-}
-function addIntCntsToLegend(data) {
-    let shwn = 0, notShwn = 0;
-    Object.keys(data).forEach(trackIntCnts);
-    fillIntCntLegend(shwn, notShwn);
-
-    function trackIntCnts(geoId) {  
-        if (geoId === 'none') { notShwn += data[geoId].ttl; 
-        } else { shwn += data[geoId].ttl; }
-    }
-}
-function addIntMarkersToMap(focus, data) {                                      //console.log('addMarkersToMap. data = %O', data);
-    for (let geoId in data) {
-        if (geoId === 'none') { continue; }
-        buildAndAddIntMarker(focus, geoId, data[geoId]);
-    }
-}
-function buildAndAddIntMarker(focus, geoId, data) {  
-    const coords = getCoords(geoId);
-    const intCnt = data.ttl;
-    const MapMarker = buildIntMarker(focus, intCnt, coords, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
-    map.addLayer(MapMarker.layer);
-}
-function buildIntMarker(focus, intCnt, coords, data) {  
-     return intCnt === 1 ? 
-        new MM.IntMarker(focus, coords, data) : 
-        new MM.IntCluster(map, intCnt, focus, coords, data);
-}
-function getCoords(geoId) {
-    const geoJson = _u.getGeoJsonEntity(geoId);                         
-    return getLatLngObj(geoJson.displayPoint);
-}
-function zoomIfAllInSameRegion(data) {  
-    let region, latLng;
-    getRegionData();
-    zoomIfSharedRegion();
-
-    function getRegionData() {
-        locRcrds = _u.getDataFromStorage('location');
-        for (let geoId in data) {
-            if (geoId === 'none') { continue; }
-            if (region === false) { return; }
-            getRegion(data[geoId], geoId);
-        }
-    }
-    function getRegion(geoData, geoId) {
-        geoData.locs.forEach(loc => {  
-            if (!latLng) { latLng = getCenterCoordsOfLoc(loc, geoId); }
-            const regionName = getRegionName(loc);
-            region = regionName == region || !region ? regionName : false;  
-        });
-    }
-    function getRegionName(loc) {
-        return loc.region ? loc.region.displayName : loc.displayName;  
-    }
-    function zoomIfSharedRegion() {  
-        if (region) { map.setView(latLng, 3, {animate: true}); }
-    }
-}
-/** ======================= Show Location on Map ============================ */
+/** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom, rcrds) {                 
     locRcrds = rcrds;        
-    waitForStorageAndLoadMap(showLocInMap.bind(null, id, zoom));
-    addAllIntMrkrsToMap();
+    waitForDataThenContinue(buildAndShowMap.bind(null, showLocInMap, 'map'));
+    
+    function showLocInMap() {
+        const loc = locRcrds[id];                                               console.log('show loc = %O, zoom = %s', loc, zoom)
+        const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId); 
+        if (!latLng) { return noGeoDataErr(); }
+        zoomToLocAndShowPopup(loc, latLng, zoom);
+        addAllIntMrkrsToMap();
+
+        function noGeoDataErr() {
+            console.log('###### No geoJson found for geoJson [%s] ###########', id);
+        }
+    }
 }
-function showLocInMap(id, zoom) {
-    const loc = locRcrds[id];                                                   console.log('show loc = %O, zoom = %s', loc, zoom)
-    const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                    //console.log('point = %s', point);
-    if (!latLng) { return noGeoDataErr(); }
+function zoomToLocAndShowPopup(loc, latLng, zoom) {
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
     popup.setContent(MM.getLocationSummaryHtml(loc, null, locRcrds));  
     popup.options.autoClose = false;
     map.openPopup(popup); 
     map.setView(latLng, zoom, {animate: true});  
-
-    function noGeoDataErr() {
-        // const geoData = JSON.parse(geoJson[id]);                             console.log('geoData = %O', geoData);
-        console.log('###### No geoJson found for geoJson [%s] ###########', id);
-    }
 }
 function buildLocPopup(loc, latLng) {  
     const popup = L.popup().setLatLng(latLng).setContent('');
     popups[loc.displayName] = popup;  
     return popup;
 }
-/** ================= Show All Interaction Markers ========================== */
+/* --- Show All Interaction Markers --- */
 /**
  * Default Location "Map View":
  * Adds a marker to the map for each interaction with any location data. Each 
@@ -313,6 +251,77 @@ function addMarkersForLocAndChildren(topLoc) {
         return topName.indexOf(subName) !== -1;
     }
 } /* End addMarkersForLocAndChildren */
+/**----------------- Show Interaction Sets on Map --------------------------- */
+/** Shows the interactions displayed in the data-table on the map. */
+export function showInts(focus, tableData, rcrds) {                             //console.log('----------- showInts. tableData = %O', tableData);
+    locRcrds = rcrds;
+    waitForDataThenContinue(buildAndShowMap.bind(null, showIntsOnMap, 'map'));                                                 
+    
+    function showIntsOnMap() {                                                  console.log('showIntsOnMap! data = %O', tableData);
+        const keys = Object.keys(tableData);                                     
+        addIntCntsToLegend(tableData);
+        addIntMarkersToMap(focus, tableData);
+        zoomIfAllInSameRegion(tableData);
+    }
+} 
+function addIntCntsToLegend(data) {
+    let shwn = 0, notShwn = 0;
+    Object.keys(data).forEach(trackIntCnts);
+    fillIntCntLegend(shwn, notShwn);
+
+    function trackIntCnts(geoId) {  
+        if (geoId === 'none') { notShwn += data[geoId].ttl; 
+        } else { shwn += data[geoId].ttl; }
+    }
+}
+function addIntMarkersToMap(focus, data) {                                      //console.log('addMarkersToMap. data = %O', data);
+    for (let geoId in data) {
+        if (geoId === 'none') { continue; }
+        buildAndAddIntMarker(focus, geoId, data[geoId]);
+    }
+}
+function buildAndAddIntMarker(focus, geoId, data) {  
+    const coords = getCoords(geoId);
+    const intCnt = data.ttl;
+    const MapMarker = buildIntMarker(focus, intCnt, coords, data);              //console.log('buildAndAddIntMarkers. intCnt = [%s] data = %O', intCnt, data);
+    map.addLayer(MapMarker.layer);
+}
+function buildIntMarker(focus, intCnt, coords, data) {  
+     return intCnt === 1 ? 
+        new MM.IntMarker(focus, coords, data) : 
+        new MM.IntCluster(map, intCnt, focus, coords, data);
+}
+function getCoords(geoId) {
+    const geoJson = _u.getGeoJsonEntity(geoId);                         
+    return getLatLngObj(geoJson.displayPoint);
+}
+function zoomIfAllInSameRegion(data) {  
+    let region, latLng;
+    getRegionData();
+    zoomIfSharedRegion();
+
+    function getRegionData() {
+        locRcrds = _u.getDataFromStorage('location');
+        for (let geoId in data) {
+            if (geoId === 'none') { continue; }
+            if (region === false) { return; }
+            getRegion(data[geoId], geoId);
+        }
+    }
+    function getRegion(geoData, geoId) {
+        geoData.locs.forEach(loc => {  
+            if (!latLng) { latLng = getCenterCoordsOfLoc(loc, geoId); }
+            const regionName = getRegionName(loc);
+            region = regionName == region || !region ? regionName : false;  
+        });
+    }
+    function getRegionName(loc) {
+        return loc.region ? loc.region.displayName : loc.displayName;  
+    }
+    function zoomIfSharedRegion() {  
+        if (region) { map.setView(latLng, 3, {animate: true}); }
+    }
+}
 /* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoJsonId) { 
     if (!geoJsonId) { return false; }                                           //console.log('geoJson obj = %O', geoJson[geoJsonId]);
@@ -369,3 +378,12 @@ function hidePopUpMsg() {
 function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
+/*===================== Location Form Methods ================================*/
+export function initFormMap(locRcrds) {
+    // body...  
+}
+
+export function showAllLocsInCntry(cntry, rcrds) {
+    locRcrds = rcrds;  
+    //show all locs in country      
+} 

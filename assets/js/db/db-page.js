@@ -773,7 +773,7 @@ function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || getSelVal('Loc View');                                     console.log('updateLocView. view = [%s]', val);
+    const val = v || getSelVal('Loc View');                                     //console.log('updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     resetToggleTreeBttn(false);
@@ -2553,7 +2553,7 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 function enableComboboxes($pElems, enable) {
-    $pElems.each((i, elem) => { console.log('elem = %O', elem);enableCombobox(enable, '#'+elem.id) });
+    $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
 }
 function enableCombobox(enable, selId) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }

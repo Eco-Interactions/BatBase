@@ -442,12 +442,12 @@ function fillEditSrcDetails(entity, srcRcrd) {                                  
         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
     }
 } /* End fillEditSrcDetails */
-function getSrcIntCnt(entity, rcrd) {                                       //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
     return entity === 'citation' ? 
         rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
 }
 /** ----------- Shared ---------------------------- */
-function getTtlIntCnt(entity, rcrd, intProp) {                              //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
+function getTtlIntCnt(entity, rcrd, intProp) {                                  //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
     var ints = rcrd[intProp].length;
     if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
     if (rcrd.contributions) { ints += getChildIntCnt(entity, rcrd.contributions, intProp);}        
@@ -461,42 +461,42 @@ function getChildIntCnt(entity, children, intProp) {
     });
     return ints;
 }
-function fillFields(rcrd, fields, shwAll) {                                 //console.log('rcrd = %O, fields = %O', rcrd, fields);
+function fillFields(rcrd, fields, shwAll) {                                     //console.log('rcrd = %O, fields = %O', rcrd, fields);
     const fieldHndlrs = {
         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
         'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
         'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
         'taxon': addTaxon
     };
-    for (let field in fields) {                                             //console.log('------- Setting field [%s]', field);
-        if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }       //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+    for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
+        if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
     }  
 }
-function addDataToField(field, fieldHndlr, rcrd) {                          //console.log("addDataToField [%s] [%0] rcrd = %O", field, fieldHndlr, rcrd);
+function addDataToField(field, fieldHndlr, rcrd) {                              //console.log("addDataToField [%s] [%0] rcrd = %O", field, fieldHndlr, rcrd);
     var elemId = field.split(' ').join('');
     var prop = _u.lcfirst(elemId);
     fieldHndlr(elemId, prop, rcrd);
 }
 /** Adds multiSelect values to the form's val object. */
-function addToFormVals(fieldId, prop, rcrd) {                               //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function addToFormVals(fieldId, prop, rcrd) {                                   //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     const vals = fParams.forms.top.fieldConfg.vals;
     vals[fieldId] = {type: 'multiSelect'};
     vals[fieldId].val = rcrd[prop]; 
     if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
     selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
 }
-function setText(fieldId, prop, rcrd) {                                     //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
 }
 function setTextArea(fieldId, prop, rcrd) {
     $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();   
 }
-function setSelect(fieldId, prop, rcrd) {                                   //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+function setSelect(fieldId, prop, rcrd) {                                       //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
     var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
     setSelVal('#'+fieldId+'-sel', id);
 }
-function setTagField(fieldId, prop, rcrd) {                                 //console.log("setTagField. rcrd = %O", rcrd)
+function setTagField(fieldId, prop, rcrd) {                                     //console.log("setTagField. rcrd = %O", rcrd)
     var tags = rcrd[prop] || rcrd.tags;
     tags.forEach(tag => setSelVal('#'+fieldId+'-sel', tag.id));
 }    
@@ -508,7 +508,7 @@ function setAdditionalFields(entity, srcRcrd, detail) {
     setPublisherField(entity, srcRcrd);
     setCitationEdgeCaseFields(entity, detail);
 }
-function setTitleField(entity, srcRcrd) {                                   //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
+function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
     if (["publication", "citation"].indexOf(entity) === -1) { return; }
     const name = entity === 'publication' ? 
         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
@@ -528,7 +528,7 @@ function setCitationEdgeCaseFields(entity, citRcrd) {
     $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
     $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
 }
-function addTaxon(fieldId, prop, rcrd) {                                    //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
+function addTaxon(fieldId, prop, rcrd) {                                        //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
     var selApi = $('#'+ fieldId + '-sel')[0].selectize;
     var taxon = fParams.records.taxon[rcrd[prop]];                          
     selApi.addOption({ value: taxon.id, text: getTaxonDisplayName(taxon) });
@@ -2249,7 +2249,7 @@ function getFormattedAuthorNames(auths, eds) {                                  
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
 function getEntityRecord(entity, id) {
-    const rcrds = _u.getDataFromStorage(entity);                             //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
+    const rcrds = _u.getDataFromStorage(entity);                                //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
     return rcrds[id];
 }
 /*------------------- Combobox (selectized) Methods ----------------------*/
@@ -2371,6 +2371,43 @@ function getSelTxt(id) {                                                        
 function setSelVal(id, val, silent) {                                           //console.log('setSelVal [%s] = [%s]', id, val);
     const $selApi = $(id)[0].selectize; 
     $selApi.addItem(val, silent); 
+}
+/*--------------- Shared Form Methods -------------------------------*/
+/**
+ * Toggles between displaying all fields for the entity and only showing the 
+ * default (required and suggested) fields.
+ */
+function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
+    if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
+    fParams.forms.expanded[entity] = this.checked;         
+    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
+    const fConfg = fParams.forms[fLvl].confg;                                   //console.log('toggling optional fields. Show? [%s]', fParams.forms.expanded[entity]);
+    $('#'+entity+'_Rows').empty();
+    $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
+    initComboboxes(entity, fLvl);
+    fillComplexFormFields(fLvl);
+    finishSrcForms();
+
+    function finishSrcForms() {
+        if (['citation', 'publication'].indexOf(entity) === -1) { return; }
+        if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
+        if (entity === 'citation') { 
+            handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
+            handleCitText(fLvl);
+        }
+        updateFieldLabelsForType(entity, fLvl);
+    }
+} /* End toggleShowAllFields */
+function ifOpenSubForm(fLvl) {
+    const subLvl = getNextFormLevel('child', fLvl);
+    return $('#'+subLvl+'-form').length !== 0;
+}
+function showOpenSubFormErr(fLvl) {
+    const subLvl = getNextFormLevel('child', fLvl);
+    let entity = _u.ucfirst(fParams.forms[subLvl].entity);
+    if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
+    openSubFormErr(entity, null, subLvl, true);   
+    $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
 }
 /*------------------- Form Builders --------------------------------------*/    
 /**
@@ -2538,7 +2575,7 @@ function getFormConfg(entity) {
             },
             'exitHandler': { create: enablePubField }
         },    
-        "editor": { 
+        'editor': { 
             "add": { "FirstName": "text", "MiddleName": "text", 
                 "LastName": "text", "Suffix": "text"}, 
             "required": ["LastName"], 
@@ -2549,7 +2586,7 @@ function getFormConfg(entity) {
                 "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
                     "LinkUrl", "LinkDisplay"]},
         },                                  
-        "interaction": {
+        'interaction': {
             "add": {},  
             "required": ["InteractionType"],
             "suggested": ["InteractionTags", "Note"],
@@ -2559,19 +2596,19 @@ function getFormConfg(entity) {
                 "opt": false },
             "exitHandler": { create: resetInteractionForm }
         },
-        "location": {
-            "add": {},  
-            "required": ["DisplayName", "Country"],
-            "suggested": ["Description", "HabitatType", "Latitude", "Longitude",
-                "Elevation", "ElevationMax"],
-            "optional": [],
-            "order": {
-                "sug": ["DisplayName", "Description", "Country", "HabitatType", 
-                    "Elevation", "ElevationMax", "Latitude", "Longitude"],
-                "opt": false },
-            "exitHandler": { create: enableCountryRegionField }
+        'location': {
+            'add': {},  
+            'required': ['DisplayName', 'Country'],
+            'suggested': ['Description', 'HabitatType', 'Latitude', 'Longitude',
+                'Elevation', 'ElevationMax'],
+            'optional': [],
+            'order': {
+                'sug': ['DisplayName', 'Description', 'Country', 'HabitatType', 
+                    'Elevation', 'ElevationMax', 'Latitude', 'Longitude'],
+                'opt': false },
+            'exitHandler': { create: enableCountryRegionField }
         },
-        "object": {
+        'object': {
             "add": {"Realm": "select"},  
             "required": [],
             "suggested": ["Realm"],
@@ -2580,7 +2617,7 @@ function getFormConfg(entity) {
                 "sug": ["Realm"],
                 "opt": false }, 
         },
-        "plant": {
+        'plant': {
             "add": {},  
             "required": [],
             "suggested": ["Family", "Genus", "Species"],
@@ -2590,7 +2627,7 @@ function getFormConfg(entity) {
                 "opt": false},
             "exitHandler": { create: enableTaxonCombos }
         },
-        "publication": {
+        'publication': {
             "add": { "Title" : "text", "PublicationType": "select", 
                 "Publisher": "select"},  
             "required": ["PublicationType", "Title"],
@@ -2643,7 +2680,7 @@ function getFormConfg(entity) {
                 },
             }
         },
-        "publisher": { 
+        'publisher': { 
             "add": { "City": "text", "Country": "text"}, 
             "required": ["DisplayName", "City", "Country"],
             "suggested": [],
@@ -2653,7 +2690,7 @@ function getFormConfg(entity) {
                 "opt": ["DisplayName", "City", "Country", "Description", 
                     "LinkUrl", "LinkDisplay"]},
         },
-        "subject": {
+        'subject': {
             "add": {},  
             "required": [],
             "suggested": ["Family", "Genus", "Species"],
@@ -2663,7 +2700,7 @@ function getFormConfg(entity) {
                 "opt": false },
             "exitHandler": { create: enableTaxonCombos }
         },
-        "taxon": {
+        'taxon': {
             "add": {},  
             "required": ["DisplayName"],
             "suggested": [],
@@ -2711,42 +2748,6 @@ function getCoreFieldDefs(entity) {
     return fields[coreEntityMap[entity]];
 }    
 /** -------------------- Form Row Builders ------------------------------ */
-/**
- * Toggles between displaying all fields for the entity and only showing the 
- * default (required and suggested) fields.
- */
-function toggleShowAllFields(entity, fLvl) {                                    //console.log('--- Showing all Fields [%s] -------', this.checked);
-    if (ifOpenSubForm(fLvl)) { return showOpenSubFormErr(fLvl); }
-    fParams.forms.expanded[entity] = this.checked;         
-    const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
-    const fConfg = fParams.forms[fLvl].confg;                                   //console.log('toggling optional fields. Show? [%s]', fParams.forms.expanded[entity]);
-    $('#'+entity+'_Rows').empty();
-    $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
-    initComboboxes(entity, fLvl);
-    fillComplexFormFields(fLvl);
-    finishSrcForms();
-
-    function finishSrcForms() {
-        if (['citation', 'publication'].indexOf(entity) === -1) { return; }
-        if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
-        if (entity === 'citation') { 
-            handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
-            handleCitText(fLvl);
-        }
-        updateFieldLabelsForType(entity, fLvl);
-    }
-} /* End toggleShowAllFields */
-function ifOpenSubForm(fLvl) {
-    const subLvl = getNextFormLevel('child', fLvl);
-    return $('#'+subLvl+'-form').length !== 0;
-}
-function showOpenSubFormErr(fLvl) {
-    const subLvl = getNextFormLevel('child', fLvl);
-    let entity = _u.ucfirst(fParams.forms[subLvl].entity);
-    if (entity === 'Author' || entity === 'Editor') { entity += 's'; }
-    openSubFormErr(entity, null, subLvl, true);   
-    $('#sub-all-fields')[0].checked = !$('#sub-all-fields')[0].checked;
-}
 /**
  * Returns rows for the entity form fields. If the form is a source-type, 
  * the type-entity form config is used. 
@@ -2831,9 +2832,9 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
     }
 } /* End buildRow */ 
 function buildFieldInput(fieldType, entity, field, fLvl) {                      //console.log('buildFieldInput. type [%s], entity [%s], field [%s], lvl [%s]', fieldType, entity, field, fLvl);
-    const buildFieldType = { "text": buildTextInput, "tags": buildTagsElem, 
-        "select": buildSelectCombo, "multiSelect": buildMultiSelectCntnr,  
-        "textArea": buildTextArea, "fullTextArea": buildLongTextArea };
+    const buildFieldType = { 'text': buildTextInput, 'tags': buildTagsElem, 
+        'select': buildSelectCombo, 'multiSelect': buildMultiSelectCntnr,  
+        'textArea': buildTextArea, 'fullTextArea': buildLongTextArea };
     return buildFieldType[fieldType](entity, field, fLvl);  
 }
 function getFieldClass(fLvl, fieldType) {  
