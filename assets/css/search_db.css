@@ -22,6 +22,9 @@
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
 }
+.selectize-dropdown {
+    z-index: 500;
+}
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
 }
@@ -427,6 +430,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
 }
+/*--- Loc Map Styles ---*/
 #loc-note {
     margin: .5em auto 0 auto;
 }
@@ -434,6 +438,12 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     text-decoration: underline;
     color: #1b3b1b;
     cursor: pointer;
+}
+#loc-map {
+    border: 1px grey solid;
+    height: 303px;
+    width: 97%;
+    margin: 1em auto 0 auto;
 }
 /** --- Error Styles --- */
 [id$="_errs"] {
@@ -500,6 +510,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .selectize-input {
     padding-right: 33px !important;
 }
+
 #top-form label {
     font-size: 1em;
     padding: 9px 0 2px 0;

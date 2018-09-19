@@ -11,6 +11,7 @@
 import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
 import * as db_page from './db-page.js';
+import * as db_map from './db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let fParams = {};
@@ -1353,20 +1354,24 @@ function initLocForm(val) {                                                     
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Location', null, fLvl); }
     const vals = {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
-        'Country': $('#Country-Region-sel').val()
-    }; 
+        'Country': $('#Country-Region-sel').val() }; 
     $('#Location_row').after(initSubForm(
         'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
     initComboboxes('location', 'sub');
-    $('#Country-sel').change();
     enableCombobox('#Country-Region-sel', false);
     $('#DisplayName_row input').focus();
-    clearCombobox('#Location-sel'); 
+    $('#loc-note').fadeTo(400, .3);
+    addMapToLocForm();
+    scrollToLocFormWindow();
     return { 'value': '', 'text': 'Creating Location...' };
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 function enableCountryRegionField() {  
     enableCombobox('#Country-Region-sel');
+    $('#loc-note').fadeTo(400, 1);
+}
+function scrollToLocFormWindow() {
+    $('#form-main')[0].scrollTo(0, 140); 
 }
 /*--------------- Map methods ---------------------------*/
 /** Adds a message above the location fields in interaction forms. */
@@ -1383,6 +1388,11 @@ function addLocationSelectionMethodsNote() {
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                             console.log('showInteractionFormMap')
     // body...
+}
+function addMapToLocForm() {
+    const map = _u.buildElem('div', { id: 'loc-map' }); 
+    $('#location_Rows').after(map);
+    db_map.initFormMap(fParams.records.location);
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */

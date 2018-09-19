@@ -24,6 +24,8 @@
 Before Release:
     - {high}[easy] When nothing is selected but a country, a habitat type, and the 
         displayname, suggest to user they use the country-habitat combo. 
+    - {med}[med] Adjust form styles to shrink label width and increase field rows
+        to fill form better. (match width of map in location form)
     
 MEETING NOTES:
     Next/future round:

@@ -57,8 +57,8 @@ function buildAndShowMap(loadFunc, mapId) {                                     
     map.setMaxBounds(getMapBounds());
     map.on('click', logLatLng);
     map.on('load', loadFunc);
-    addMapTiles();
-    if (mapId === 'map') { buildSrchPgMap(); }
+    addMapTiles(mapId);
+    if (mapId !== 'loc-map') { buildSrchPgMap(); }
     map.setView([22,22], 2);                                                    console.log('map built.')
 }
 function getMapInstance(mapId) {
@@ -74,10 +74,10 @@ function getMapBounds() {
     const northEast = L.latLng(100, -200);
     return L.latLngBounds(southWest, northEast);
 }
-function addMapTiles() {
+function addMapTiles(mapId) {
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        minZoom: 3, //Don't zoom out passed 
+        minZoom: mapId === 'loc-map' ? 1 : 3, //Don't zoom out passed 
         maxZoom: 16,
         id: 'mapbox.run-bike-hike',
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
@@ -379,10 +379,13 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
-export function initFormMap(locRcrds) {
-    // body...  
+export function initFormMap(rcrds) {                                              console.log('attempting to initMap')
+    locRcrds = rcrds;
+    waitForDataThenContinue(buildAndShowMap.bind(null, finishFormMap, 'loc-map'));  
 }
-
+function finishFormMap() {
+    // body...
+}
 export function showAllLocsInCntry(cntry, rcrds) {
     locRcrds = rcrds;  
     //show all locs in country      
