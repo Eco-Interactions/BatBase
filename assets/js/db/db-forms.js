@@ -349,25 +349,25 @@ function fillExistingData(entity, id) {
 }
 function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
-    var prnt = getParentEntity(ent);
-    var entity = prnt || ent;
-    var rcrd = getEntityRecord(entity, id);                                     console.log('[%s] rcrd = %O', entity, rcrd);
+    const prnt = getParentEntity(ent);
+    const entity = prnt || ent;
+    const rcrd = getEntityRecord(entity, id);                                   console.log('[%s] rcrd = %O', entity, rcrd);
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
 function fillEntityData(ent, id) {
-    const hndlrs = { "author": fillSrcData, "citation": fillSrcData,
-        "location": fillLocData, "publication": fillSrcData, 
-        "publisher": fillSrcData, "taxon": fillTaxonData, 
-        "interaction": fillIntData };
+    const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
+        'location': fillLocData, 'publication': fillSrcData, 
+        'publisher': fillSrcData, 'taxon': fillTaxonData, 
+        'interaction': fillIntData };
     const rcrd = getEntityRecord(ent, id);                                      //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     hndlrs[ent](ent, id, rcrd);
 }
 function fillIntData(entity, id, rcrd) {  
-    var fields = {
-        "InteractionType": "select", "Location": "select", "Note": "textArea", 
-        "Object": "taxon", "Source": "source", "Subject": "taxon", 
-        "InteractionTags": "tags" };
+    const fields = {
+        'InteractionType': 'select', 'Location': 'select', 'Note': 'textArea', 
+        'Object': 'taxon', 'Source': 'source', 'Subject': 'taxon', 
+        'InteractionTags': 'tags' };
     fillFields(rcrd, fields, true);
 }
 function fillLocData(entity, id, rcrd) {
@@ -1391,8 +1391,13 @@ function showInteractionFormMap() {                                             
 }
 function addMapToLocForm() {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
+    const cntryId = $('#Country-Region-sel').val();
     $('#location_Rows').after(map);
-    db_map.initFormMap(fParams.records.location);
+    db_map.initFormMap(fParams.records.location, cntryId);
+}
+function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
+    if (!val) { return; }
+    db_map.showAllLocsInCntry(val, fParams.records.location);
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */
@@ -2307,7 +2312,7 @@ function initComboboxes(entity, formLvl) {                                      
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
-            'Country': { name: 'Country', change: false, add: false },
+            'Country': { name: 'Country', change: zoomMapToCountry, add: false },
             'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
                 add: initEdForm.bind(null, 1) },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },

@@ -26,6 +26,7 @@ Before Release:
         displayname, suggest to user they use the country-habitat combo. 
     - {med}[med] Adjust form styles to shrink label width and increase field rows
         to fill form better. (match width of map in location form)
+    - {low}{med} Add search by name to the location table view
     
 MEETING NOTES:
     Next/future round:
@@ -35,9 +36,11 @@ MEETING NOTES:
 TAYLOR:
         
 Tullenda:
+    - Berenty Reserve's description has typos and seems to be incomplete
 
 >==== Change Log ====
-
+    > Updated tips legend to toggle.
+    > Added description to location popups
 >---- Add to Client Task List ---
     - 
 

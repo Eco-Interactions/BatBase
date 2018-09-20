@@ -84,6 +84,36 @@ function addMapTiles(mapId) {
         accessToken: 'pk.eyJ1IjoiYmF0cGxhbnQiLCJhIjoiY2poNmw5ZGVsMDAxZzJ4cnpxY3V0bGprYSJ9.pbszY5VsvzGjHeNMx0Jokw'
     }).addTo(map);
 }
+/** A Map Tips legend in the bottom left of the map. Tips toggle open on click. */
+function addTipsLegend() {
+    const legend = L.control({position: 'bottomleft'});
+    legend.onAdd = addViewTips;
+    legend.addTo(map);
+}
+function addViewTips(map) {
+    const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
+    div.innerHTML = getDefaultTipTxt();
+    $(div).click(toggleTips)
+    return div;
+}
+function getDefaultTipTxt() {
+    return `<b>- (Click to Expand Map Tips) -</b>`;
+}
+function setExpandedTipText() {
+    $('#tips-legend').html(`
+        <b><center>- (Click to Collapse Map Tips) -</center>
+        - Click on a marker to keep its popup open.<br>
+        - Hover over truncated(...) text to show full text.`);
+    $('#tips-legend').data('expanded', true);
+}
+function setDefaultTipText() {
+    $('#tips-legend').html(getDefaultTipTxt());
+    $('#tips-legend').data('expanded', false);
+}
+function toggleTips() {
+    return $('#tips-legend').data('expanded') ? 
+        setDefaultTipText() : setExpandedTipText();
+}
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
 function buildSrchPgMap() {
@@ -127,36 +157,6 @@ function fillIntCntLegend(shown, notShown) {
     legend.innerHTML = `<h4>${shown + notShown} Interactions Total </h4>`;
     legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
         ${notShown} without GPS data</span>`;
-}
-/** A Map Tips legend in the bottom left of the map. Tips toggle open on click. */
-function addTipsLegend() {
-    const legend = L.control({position: 'bottomleft'});
-    legend.onAdd = addViewTips;
-    legend.addTo(map);
-}
-function addViewTips(map) {
-    const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
-    div.innerHTML = getDefaultTipTxt();
-    $(div).click(toggleTips)
-    return div;
-}
-function getDefaultTipTxt() {
-    return `<b>- (Click to Expand Map Tips) -</b>`;
-}
-function setExpandedTipText() {
-    $('#tips-legend').html(`
-        <b><center>- (Click to Collapse Map Tips) -</center>
-        - Click on a marker to keep its popup open.<br>
-        - Hover over truncated(...) text to show full text.`);
-    $('#tips-legend').data('expanded', true);
-}
-function setDefaultTipText() {
-    $('#tips-legend').html(getDefaultTipTxt());
-    $('#tips-legend').data('expanded', false);
-}
-function toggleTips() {
-    return $('#tips-legend').data('expanded') ? 
-        setDefaultTipText() : setExpandedTipText();
 }
 /** ---------------- Init Map ----------------------------------------------- */
 export function initMap(rcrds) {                                                console.log('attempting to initMap')
@@ -397,14 +397,46 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
-export function initFormMap(rcrds) {                                              console.log('attempting to initMap')
+export function initFormMap(rcrds, cntryId) {                                   console.log('attempting to initMap')
     locRcrds = rcrds;
     waitForDataThenContinue(buildAndShowMap.bind(null, finishFormMap, 'loc-map'));  
-}
-function finishFormMap() {
-    // body...
+    
+    function finishFormMap() {
+        if (cntryId) { showCntryLocs(cntryId); }
+    }
 }
 export function showAllLocsInCntry(cntry, rcrds) {
-    locRcrds = rcrds;  
-    //show all locs in country      
+    locRcrds = locRcrds || rcrds;  
+    waitForDataThenContinue(
+        buildAndShowMap.bind(null, showCntryLocs.bind(null, cntry), 'loc-map'));  
 } 
+function showCntryLocs(id) {
+    const cntry = locRcrds[id];
+    const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
+    addChildLocsToMap(cntry, cntryLatLng);
+    map.setView(cntryLatLng, 4, {animate: true});  
+}
+function addChildLocsToMap(cntry, cntryLatLng) {
+    let noGpsDataLocCnt = 0;
+    const locs = getChildLocData(cntry);   
+    addLocsWithGpsDataToMap(noGpsDataLocCnt);
+    if (noGpsDataLocCnt) { addLocsWithoutGpsDataToMap(); }
+
+    function addLocsWithGpsDataToMap() {
+        locs.forEach(loc => {
+            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
+            if (!latLng) { return ++noGpsDataLocCnt; }
+            const Marker = new MM.LocMarker(null, latLng, loc, locRcrds, true);
+            map.addLayer(Marker.layer);
+        });
+    }
+    function addLocsWithoutGpsDataToMap(cnt) {
+        const Marker = cnt === 1 ? 
+            new MM.LocMarker(null, cntryLatLng, cntry, locRcrds, true) : 
+            new MM.LocCluster(map, cnt, null, cntryLatLng, locRcrds, true);
+        map.addLayer(Marker.layer);
+    }
+}
+function getChildLocData(cntry) {                                               
+    return cntry.children.map(id => locRcrds[id]).filter(loc => loc.totalInts > 0);
+}
