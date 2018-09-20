@@ -58,6 +58,7 @@ function buildAndShowMap(loadFunc, mapId) {                                     
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles(mapId);
+    addTipsLegend();
     if (mapId !== 'loc-map') { buildSrchPgMap(); }
     map.setView([22,22], 2);                                                    console.log('map built.')
 }
@@ -88,7 +89,6 @@ function addMapTiles(mapId) {
 function buildSrchPgMap() {
     addMarkerLegend();
     addIntCountLegend();
-    addTipsLegend();
     hidePopUpMsg();
 }
 function addMarkerLegend() {
@@ -128,6 +128,7 @@ function fillIntCntLegend(shown, notShown) {
     legend.innerHTML += `<span><b>${shown} shown on map</b></span><span>
         ${notShown} without GPS data</span>`;
 }
+/** A Map Tips legend in the bottom left of the map. Tips toggle open on click. */
 function addTipsLegend() {
     const legend = L.control({position: 'bottomleft'});
     legend.onAdd = addViewTips;
@@ -135,10 +136,27 @@ function addTipsLegend() {
 }
 function addViewTips(map) {
     const div = _u.buildElem('div', { id: 'tips-legend', class: 'info legend flex-col'});
-    $(div).css({'text-align': 'center'});
-    div.innerHTML = `<b>- Map Tips -</b>
-        - Click on a marker to keep popup open.`;
+    div.innerHTML = getDefaultTipTxt();
+    $(div).click(toggleTips)
     return div;
+}
+function getDefaultTipTxt() {
+    return `<b>- (Click to Expand Map Tips) -</b>`;
+}
+function setExpandedTipText() {
+    $('#tips-legend').html(`
+        <b><center>- (Click to Collapse Map Tips) -</center>
+        - Click on a marker to keep its popup open.<br>
+        - Hover over truncated(...) text to show full text.`);
+    $('#tips-legend').data('expanded', true);
+}
+function setDefaultTipText() {
+    $('#tips-legend').html(getDefaultTipTxt());
+    $('#tips-legend').data('expanded', false);
+}
+function toggleTips() {
+    return $('#tips-legend').data('expanded') ? 
+        setDefaultTipText() : setExpandedTipText();
 }
 /** ---------------- Init Map ----------------------------------------------- */
 export function initMap(rcrds) {                                                console.log('attempting to initMap')
