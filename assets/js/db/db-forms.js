@@ -1393,11 +1393,11 @@ function addMapToLocForm() {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
     const cntryId = $('#Country-Region-sel').val();
     $('#location_Rows').after(map);
-    db_map.initFormMap(fParams.records.location, cntryId);
+    db_map.initFormMap(cntryId, fParams.records.location);
 }
 function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
     if (!val) { return; }
-    db_map.showAllLocsInCntry(val, fParams.records.location);
+    db_map.initFormMap(val, fParams.records.location);
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */

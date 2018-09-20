@@ -27,6 +27,8 @@ Before Release:
     - {med}[med] Adjust form styles to shrink label width and increase field rows
         to fill form better. (match width of map in location form)
     - {low}{med} Add search by name to the location table view
+    - Handle multiple habitats of parent country displaying at same point - combine
+    - Cluster counts of all locs within country markers when showing locations in a region
     
 MEETING NOTES:
     Next/future round:

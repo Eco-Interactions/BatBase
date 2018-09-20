@@ -183,7 +183,7 @@ export function showLoc(id, zoom, rcrds) {
 }
 function zoomToLocAndShowPopup(loc, latLng, zoom) {
     const popup = popups[loc.displayName] || buildLocPopup(loc, latLng);
-    popup.setContent(MM.getLocationSummaryHtml(loc, null, locRcrds));  
+    popup.setContent(MM.getLocationSummaryHtml(loc, locRcrds));  
     popup.options.autoClose = false;
     map.openPopup(popup); 
     map.setView(latLng, zoom, {animate: true});  
@@ -234,9 +234,8 @@ function addMarkersForRegion(region) {
 function addMarkersForLocAndChildren(topLoc) {                                 
     if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', topLoc.displayName, topLoc);
     let intCnt = topLoc.totalInts; 
-    let subCnt = 0;
     buildMarkersForLocChildren(topLoc.children);                               
-    if (intCnt || subCnt) { buildLocationMarkers(intCnt, subCnt, topLoc); }
+    if (intCnt) { buildLocationMarkers(intCnt, topLoc); }
 
     function buildMarkersForLocChildren(locs) {
         locs.forEach(id => {
@@ -250,17 +249,16 @@ function addMarkersForLocAndChildren(topLoc) {
     function buildLocationIntMarkers(loc, locIntCnt) {                          //console.log('buildLocationIntMarkers for [%s]', loc.displayName, loc);
         if (loc.children.length) { return addMarkersForLocAndChildren(loc); }
         if (!locIntCnt) { return; }
-        buildLocationMarkers(locIntCnt, null, loc);
+        buildLocationMarkers(locIntCnt, loc);
     }
-    function buildLocationMarkers(intCnt, subCnt, loc) {                        //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
+    function buildLocationMarkers(intCnt, loc) {                                //console.log('   buildLocationMarkers for [%s] = %O', loc.displayName, loc);
         const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);                //console.log('        latLng = ', latLng)
         if (!latLng) { return logNoGeoJsonError(loc); }
-        addMarkerForEachInteraction(intCnt, subCnt, latLng, loc);
+        addMarkerForEachInteraction(intCnt, latLng, loc);
     }
     function logNoGeoJsonError(loc) {
         if (!loc.interactions.length) { return null; }
         if (locIsHabitatOfTopLoc(loc)) { return; }
-        ++subCnt;
         // console.log('###### No geoJson for [%s] %O', loc.displayName, loc)
     }
     function locIsHabitatOfTopLoc(loc) {
@@ -370,10 +368,10 @@ function buildFeature(loc, geoData) {                                           
             }
         };   
 }
-function addMarkerForEachInteraction(intCnt, subCnt, latLng, loc) {             //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
+function addMarkerForEachInteraction(intCnt, latLng, loc) {                     //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
     const MapMarker = intCnt === 1 ? 
-        new MM.LocMarker(subCnt, latLng, loc, locRcrds) :
-        new MM.LocCluster(map, intCnt, subCnt, latLng, loc, locRcrds);
+        new MM.LocMarker(latLng, loc, locRcrds) :
+        new MM.LocCluster(map, intCnt, latLng, loc, locRcrds);
     popups[loc.displayName] = MapMarker.popup;  
     map.addLayer(MapMarker.layer);
 } /* End addMarkerForEachInteraction */
@@ -397,46 +395,62 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
-export function initFormMap(rcrds, cntryId) {                                   console.log('attempting to initMap')
-    locRcrds = rcrds;
-    waitForDataThenContinue(buildAndShowMap.bind(null, finishFormMap, 'loc-map'));  
-    
-    function finishFormMap() {
-        if (cntryId) { showCntryLocs(cntryId); }
-    }
-}
-export function showAllLocsInCntry(cntry, rcrds) {
+export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
     waitForDataThenContinue(
-        buildAndShowMap.bind(null, showCntryLocs.bind(null, cntry), 'loc-map'));  
+        buildAndShowMap.bind(null, finishFormMap.bind(null, cntry), 'loc-map'));  
 } 
+function finishFormMap(cntryId) {
+    addLocCountLegend();
+    if (cntryId) { showCntryLocs(cntryId); }
+}
+
 function showCntryLocs(id) {
     const cntry = locRcrds[id];
     const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
     addChildLocsToMap(cntry, cntryLatLng);
     map.setView(cntryLatLng, 4, {animate: true});  
 }
-function addChildLocsToMap(cntry, cntryLatLng) {
-    let noGpsDataLocCnt = 0;
+function addChildLocsToMap(cntry, coords) {
+    const noGpsLocs = [];
     const locs = getChildLocData(cntry);   
-    addLocsWithGpsDataToMap(noGpsDataLocCnt);
-    if (noGpsDataLocCnt) { addLocsWithoutGpsDataToMap(); }
+    addLocsWithGpsDataToMap();
+    addCountToLegend(locs.length, noGpsLocs.length, cntry);
+    if (noGpsLocs.length) { addLocsWithoutGpsDataToMap(noGpsLocs.length); }
 
     function addLocsWithGpsDataToMap() {
         locs.forEach(loc => {
             const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
-            if (!latLng) { return ++noGpsDataLocCnt; }
-            const Marker = new MM.LocMarker(null, latLng, loc, locRcrds, true);
+            if (!latLng) { return noGpsLocs.push(loc); }
+            const Marker = new MM.LocMarker(latLng, loc, locRcrds, 'form');
             map.addLayer(Marker.layer);
         });
     }
-    function addLocsWithoutGpsDataToMap(cnt) {
+    function addLocsWithoutGpsDataToMap(cnt) {  
         const Marker = cnt === 1 ? 
-            new MM.LocMarker(null, cntryLatLng, cntry, locRcrds, true) : 
-            new MM.LocCluster(map, cnt, null, cntryLatLng, locRcrds, true);
+            new MM.LocMarker(coords, cntry, locRcrds, 'form-noGps') : 
+            new MM.LocCluster(map, cnt, coords, noGpsLocs, locRcrds, 'form-noGps');
         map.addLayer(Marker.layer);
     }
 }
 function getChildLocData(cntry) {                                               
     return cntry.children.map(id => locRcrds[id]).filter(loc => loc.totalInts > 0);
+}
+/*--- Location Count Legend ---*/
+function addLocCountLegend() {
+    const legend = L.control({position: 'topright'});
+    legend.onAdd = addLocCountHtml;
+    legend.addTo(map);
+}
+function addLocCountHtml() {
+    return _u.buildElem('div', { id: 'cnt-legend', class: 'info legend flex-col'});
+}
+function addCountToLegend(ttlLocs, noGpsDataCnt, cntry) {
+    let name = cntry.displayName.split('[')[0];                                 //console.log('addCountToLegend. name = ', name)
+    name = name.length < 22 ? cntry.displayName :
+        name.substring(0, 19)+'...';
+    $('#cnt-legend').html(`
+        <h3 title='${cntry.displayName}'>${ttlLocs} locations in ${name}</h3>
+        <span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>
+    `);
 }

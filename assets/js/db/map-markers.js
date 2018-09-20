@@ -25,13 +25,12 @@ class Marker {
     }
 } /* End Marker Super Class */
 export class LocMarker extends Marker {
-    constructor (subLocCnt, latLng, loc, rcrds, formMarker) {
+    constructor (latLng, loc, rcrds, formMarker) { 
         super(latLng);
         bindClassContextToMethods(this); 
         this.loc = loc;
         locRcrds = rcrds;
         this.formMarker = formMarker;
-        this.subCnt = subLocCnt; //not doing anything with this currently
         this.self = L.marker(latLng, getCustomIcon(formMarker))
             .bindPopup(this.popup, {closeOnClick: false})
             .on('mouseover', this.openPopup)
@@ -55,7 +54,7 @@ export class LocMarker extends Marker {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) {
             const content = this.formMarker ? getLocDetailsHtml(this.loc) : 
-                getLocationSummaryHtml(this.loc, this.subCnt);
+                getLocationSummaryHtml(this.loc);
             this.popup.setContent(content);
         }
         this.self.openPopup();
@@ -125,7 +124,7 @@ export class IntMarker extends Marker {
     }
 } /* End IntMarker Class */
 export class LocCluster extends Marker {
-    constructor (map, intCnt, subCnt, latLng, loc, rcrds, formMarker) {  
+    constructor (map, intCnt, latLng, loc, rcrds, formMarker) {  
         super(latLng);   
         bindClassContextToMethods(this); 
         this.map = map;
@@ -133,7 +132,10 @@ export class LocCluster extends Marker {
         this.formMarker = formMarker;
         locRcrds = rcrds;
         this.popup.options.closeOnClick = false;
-        this.self = L.markerClusterGroup();
+        const markerOptions = !formMarker ? {} : {
+            iconCreateFunction: () => L.divIcon({ html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32) })
+        }; 
+        this.self = L.markerClusterGroup(markerOptions);
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
         this.map.on('popupclose', this.closeLayerPopup);
@@ -152,14 +154,15 @@ export class LocCluster extends Marker {
             this.self.addLayer(L.marker(this.latLng)); 
         }
     }
+    setDefaultPopupHtml() {
+        const content = this.formMarker ? getNoGpsLocDetailsHtml(this.loc) : 
+            getLocationSummaryHtml(this.loc);
+        this.popup.setContent(content);
+    }
     /** --- Event Handlers --- */
     openClusterPopup(c) {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) {
-            const content = this.formMarker ? getLocDetailsHtml(this.loc) : 
-                getLocationSummaryHtml(this.loc, this.subCnt);
-            this.popup.setContent(content);
-        }
+        if (!this.popup.getContent()) { this.setDefaultPopupHtml(); }
         this.map.openPopup(this.popup);
     }
     closeLayerPopup(e) {  
@@ -249,12 +252,13 @@ function bindClassContextToMethods(self) {
     }
 }
 /** ------- Shared Helpers --------- */
-function getCustomIcon(defaultIcon) {
-    if (defaultIcon) { return null; }
+function getCustomIcon(iconType) {
+    if (iconType === 'form') { return null; }
+    const classes = iconType || 'single-marker info';
     return {
         icon: L.divIcon({
-            className: 'single-marker info',
-            html: "1",
+            className: classes,
+            html: '1',
         })
     }
 }
@@ -388,7 +392,7 @@ function getCoordsHtml(loc) {
 }
 /* -------- Location Details Popup ------------- */
 function getLocDetailsHtml(loc) {
-    const div = _u.buildElem('div');
+    const div = document.createElement('div');
     const html = buildDetailsHtml(loc);
     $(div).append(html);
     return div;
@@ -409,29 +413,54 @@ function getElevHtml(loc) {
         `&nbsp; Elevation Max: <b>${loc.elevationMax}</b>` : null;
     return [elev, elevMax].filter(e => e);
 }
+/* --- No Gps Loc Details ---*/
+/** Locations without GPS data are clustered together on the location form map. */
+function getNoGpsLocDetailsHtml(locs) {                                         //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
+    const div = document.createElement('div');
+    const hdr = getNoGpsHdr(locs.length);
+    const locHtml = buildLocDetailHtml(locs);
+    $(div).append([hdr, ...locHtml]);
+    return div;
+}
+function getNoGpsHdr(cnt) {
+    return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
+        </div><span>Hover over a location name to see the location data.</span><br>`;
+}
+function buildLocDetailHtml(locs) {
+    return locs.map(loc => {
+        return `<div class="info-tooltip" style="font-size:1.2em;">
+            <div class="tip">${buildLocDetails(loc)}</div>- ${loc.displayName}</div>`;
+    });
+}
+function buildLocDetails(loc) {
+    const name = `<span style="font-size:1.1em; margin-bottom: .5em;"><b>
+        ${loc.displayName}</b></span>`;
+    const habType = getHabTypeHtml(loc);
+    const elev = getElevHtml(loc);
+    const desc = getDescHtml(loc, 136);
+    return [name, habType, elev, desc].filter(e => e).join('<br>'); 
+}
 /** ------- Location Summary Popup ------------- */
 /** Returns additional details (html) for interactions at the location. */
-export function getLocationSummaryHtml(loc, subCnt, rcrds) {                    //console.log('loc = %O', loc);
+export function getLocationSummaryHtml(loc, rcrds) {                            //console.log('loc = %O rcrds = %O', loc, rcrds);
     locRcrds = locRcrds || rcrds;
-    return getLocSummaryPopup(loc, subCnt);
+    return getLocSummaryPopup(loc);
 }
-function getLocSummaryPopup(loc, subCnt) {
-    const div = _u.buildElem('div');
-    const html = buildSummaryHtml(loc, subCnt);
+function getLocSummaryPopup(loc) {
+    const div = document.createElement('div');
+    const html = buildSummaryHtml(loc);
     const bttn = buildToTableButton(loc);
     $(div).append(html).append(bttn);
     return div;
 }
-function buildSummaryHtml(loc, subCnt) {
+function buildSummaryHtml(loc) {
     const name = getLocNameHtml(loc);
-    const cnt = ifCountryGetIntCnt(loc);
-    const subs = null; //getSubLocsWithoutGpsData(subCnt);
-    const pLocData = (cnt||subs) ? [cnt, subs].filter(el=>el).join('<br>') : false;
+    const cnt = ifCountryGetIntCnt(loc) || false;
     const desc = getDescHtml(loc, 99);
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
     const bats = getBatsCitedHtml(loc);  
-    return name + [pLocData, desc, coords, habType, bats].filter(el => el).join('<br>');  
+    return name + [cnt, desc, coords, habType, bats].filter(el => el).join('<br>');  
 }
 function isRegionOrCountry(loc) {
     const locType = loc.locationType.displayName;  
@@ -442,13 +471,8 @@ function ifCountryGetIntCnt(loc) {
     return ['Region', 'Country'].indexOf(locType) === -1 ? false : 
         `Interactions in ${locType}: <b> ${loc.totalInts}</b>`;
 }
-function getSubLocsWithoutGpsData(cnt) {
-    if (!cnt) { return false; }
-    return `Sub-Locations without GPS data: ${cnt}`; 
-}
 /** --- Habitat Types --- */
 /** Build string of 3 most reported habitats and the count of remaining reported. */
-
 function getAllHabitatsWithin(loc) {                                            //console.log('getting habitats for = %O', loc);
     const habitats = {};
     addHabitatsForLocAndChildren(loc.id);
