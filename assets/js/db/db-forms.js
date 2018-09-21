@@ -1393,7 +1393,18 @@ function addMapToLocForm() {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
     const cntryId = $('#Country-Region-sel').val();
     $('#location_Rows').after(map);
+    $('#location_Rows').before(getHowToCreateLocWithoutGpsDataNote());
+    $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
     db_map.initFormMap(cntryId, fParams.records.location);
+}
+function getHowToCreateLocWithoutGpsDataNote() {
+    return `<p style="width:initial; margin:auto;">To create a location without 
+        GPS data, fill in available data and click "Create Location without GPS 
+        data".</p>`;
+}
+function getHowToCreateLocWithGpsDataNote(argument) {
+    return `<p style="width:initial; margin:auto;">Enter GPS coordinates and   
+        then select "Create Location" from the added green pin's popup.</p>`;
 }
 function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
     if (!val) { return; }
@@ -3153,7 +3164,7 @@ function checkRequiredFields(e) {                                               
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
- * is submitted before any changes have been made.
+ * has been submitted and before any changes have been made.
  */
 function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       //console.log('### checkingReqFields = %O, fLvl = %s, unchanged? ', input, fLvl, fParams.forms.top.unchanged);
     const subBttnId = '#'+fLvl+'-submit';
