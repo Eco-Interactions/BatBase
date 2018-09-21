@@ -587,6 +587,5 @@ function buildToTableButton(loc) {
     return bttn;
 }
 function showLocTableView(loc) {
-    console.log('Switch to table view and show location.');
     db_page.showLocInDataTable(loc);
 }

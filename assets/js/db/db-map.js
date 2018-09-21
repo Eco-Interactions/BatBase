@@ -446,11 +446,15 @@ function addLocCountHtml() {
     return _u.buildElem('div', { id: 'cnt-legend', class: 'info legend flex-col'});
 }
 function addCountToLegend(ttlLocs, noGpsDataCnt, cntry) {
-    let name = cntry.displayName.split('[')[0];                                 //console.log('addCountToLegend. name = ', name)
-    name = name.length < 22 ? cntry.displayName :
-        name.substring(0, 19)+'...';
+    const noGpsDataHtml = noGpsDataCnt === 0 ? null : 
+        `<span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>`;
+    const plural = ttlLocs === 1 ? '' : 's';    
+    let name = getLocName(cntry.displayName);
     $('#cnt-legend').html(`
-        <h3 title='${cntry.displayName}'>${ttlLocs} locations in ${name}</h3>
-        <span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>
-    `);
+        <h3 title='${cntry.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
+        ${noGpsDataHtml ? noGpsDataHtml : ''}`);
+}
+function getLocName(name) {
+    name = name.split('[')[0];                                
+    return name.length < 22 ? name : name.substring(0, 19)+'...';
 }
