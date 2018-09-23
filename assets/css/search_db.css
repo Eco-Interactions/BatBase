@@ -158,6 +158,7 @@ input[type="radio"], input[type="checkbox"] {
 #map {
     height: 100%;
 }
+/* --- Legend Styles --- */
 .info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
@@ -186,6 +187,35 @@ input[type="radio"], input[type="checkbox"] {
     padding-right: 3px;
     opacity: 0.8;
 }
+#filter-in-tbl-msg {
+    position: absolute;    
+    top: 101px;
+    left: 810px;
+}
+/* -- Hover Tooltip -- */
+.info-tooltip div.tip {
+    display:none;
+    background: white;
+    color: #333;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+    text-align: left;
+    border-radius: 12px;
+    padding: 13px 19px;
+    line-height: 1.4;
+    z-index: 50;
+}
+.info-tooltip:hover {
+    position:relative;
+    cursor:pointer; 
+}
+.info-tooltip:hover div.tip {
+    position:absolute; 
+    top: 18px; 
+    left: 22px; 
+    display:block; 
+    width: 333px; 
+}
+/* --- Map Markers --- */
 .single-marker {
     width: 33px !important;
     height: 33px !important;
@@ -212,32 +242,24 @@ input[type="radio"], input[type="checkbox"] {
     background-color: rgba(240, 194, 12, 0.9);
     font-size: 11px;
 }
-#filter-in-tbl-msg {
-    position: absolute;    
-    top: 101px;
-    left: 810px;
+.new-loc {
+    width: 27px !important;
+    height: 27px !important;
+    left: -8px;
+    margin-left: 115px;
+    border-radius: 50%;
+    border: 8px solid green;
+    background-color: white;
 }
-.info-tooltip div.tip {
-    display:none;
-    background: white;
-    color: #333;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.4);
-    text-align: left;
-    border-radius: 12px;
-    padding: 13px 19px;
-    line-height: 1.4;
-    z-index: 50;
-}
-.info-tooltip:hover {
-    position:relative;
-    cursor:pointer; 
-}
-.info-tooltip:hover div.tip {
-    position:absolute; 
-    top: 18px; 
-    left: 22px; 
-    display:block; 
-    width: 333px; 
+.new-loc:after {
+    position: absolute;
+    content: '';
+    width: 0px;
+    height: 0px;
+    bottom: -32px;
+    left: -4px;
+    border: 10px solid transparent;
+    border-top: 19px solid green;
 }
 /*------- Buttons ---------------*/
 #filter-bttns {

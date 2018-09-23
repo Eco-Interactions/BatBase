@@ -12,7 +12,7 @@ import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as MM from './map-markers.js'; 
 
-let locRcrds, map, popups = {};
+let locRcrds, map, volatilePin, popups = {};
 
 initDb();
 requireCss();
@@ -395,6 +395,27 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
+export function addVolatileMapPin(val) {  
+    if (!val || !gpsFieldsFilled()) { return removeMapPin(); }
+    const latLng = L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
+    replaceMapPin(latLng);
+    map.setView(latLng, 5, {animate: true});
+}
+function gpsFieldsFilled() {
+    return ['Latitude', 'Longitude'].every(field => {
+        return $(`#${field}_row input`).val();
+    });
+}
+function replaceMapPin(latLng) {
+    const marker = new MM.LocMarker(latLng, null, null, 'new-loc');
+    removeMapPin();
+    volatilePin = marker.layer; 
+    map.addLayer(marker.layer);  
+}
+function removeMapPin() {
+    if (!volatilePin) { return; }
+    map.removeLayer(volatilePin);
+}
 export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
     waitForDataThenContinue(

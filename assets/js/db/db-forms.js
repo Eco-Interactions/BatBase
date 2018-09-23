@@ -7,6 +7,7 @@
  * allow editing and saving of the content within using the trumbowyg library.
  * Exports: 
  *     editEntity
+ *     addNewLocation
  */
 import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
@@ -1362,7 +1363,9 @@ function initLocForm(val) {                                                     
     $('#DisplayName_row input').focus();
     $('#loc-note').fadeTo(400, .3);
     addMapToLocForm();
+    addNotesToForm();
     scrollToLocFormWindow();
+    addListenerToGpsFields();
     return { 'value': '', 'text': 'Creating Location...' };
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
@@ -1372,6 +1375,38 @@ function enableCountryRegionField() {
 }
 function scrollToLocFormWindow() {
     $('#form-main')[0].scrollTo(0, 140); 
+}
+function addNotesToForm() {
+    $('#location_Rows').before(getHowToCreateLocWithoutGpsDataNote());
+    $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
+}
+function getHowToCreateLocWithoutGpsDataNote() {
+    return `<p style="width:initial; margin:auto;">To create a location without 
+        GPS data, fill in available data and click "Create Location without GPS 
+        data".</p>`;
+}
+function getHowToCreateLocWithGpsDataNote(argument) {
+    return `<p style="width:initial; margin:auto;">Enter GPS coordinates and   
+        then select "Create Location" from the added green pin's popup.</p>`;
+}
+/** Prevents the location form's submit button from enabling when GPS data entered.*/
+function locHasGpsData(fLvl) {
+    if (fParams.forms[fLvl].entity !== 'location') { return false; }
+    return ['Latitude', 'Longitude'].some(field => {
+        return $(`#${field}_row input`).val();
+    });
+}
+function addListenerToGpsFields(fLvl) {
+    $('#Latitude_row input, #Longitude_row input').change(
+        db_map.addVolatileMapPin);
+}
+/**
+ * New locations with GPS data are created by clicking a "Create Location" button
+ * in a the new location's green map pin's popup on the map in the form.
+ */
+export function addNewLocation() {
+    const fLvl = fParams.forms['location'];
+    getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'location');
 }
 /*--------------- Map methods ---------------------------*/
 /** Adds a message above the location fields in interaction forms. */
@@ -1393,18 +1428,7 @@ function addMapToLocForm() {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
     const cntryId = $('#Country-Region-sel').val();
     $('#location_Rows').after(map);
-    $('#location_Rows').before(getHowToCreateLocWithoutGpsDataNote());
-    $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
     db_map.initFormMap(cntryId, fParams.records.location);
-}
-function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p style="width:initial; margin:auto;">To create a location without 
-        GPS data, fill in available data and click "Create Location without GPS 
-        data".</p>`;
-}
-function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p style="width:initial; margin:auto;">Enter GPS coordinates and   
-        then select "Create Location" from the added green pin's popup.</p>`;
 }
 function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
     if (!val) { return; }
@@ -3172,6 +3196,7 @@ function checkReqFieldsAndToggleSubmitBttn(input, fLvl) {                       
     if (!isRequiredFieldFilled(fLvl, input) || hasOpenSubForm(fLvl)) {          //console.log('     disabling submit');
         disableSubmitBttn(subBttnId); 
     } else if (ifAllRequiredFieldsFilled(fLvl)) {                               //console.log('     enabling submit');
+        if (locHasGpsData(fLvl)) { return; }
         enableSubmitBttn(subBttnId);
     }
 }

@@ -1,5 +1,6 @@
 import * as _u from './util.js';
 import * as db_page from './db-page.js';
+import * as db_forms from './db-forms.js';
 import 'leaflet.markercluster';
 
 let locRcrds;
@@ -33,13 +34,11 @@ export class LocMarker extends Marker {
         this.formMarker = formMarker;
         this.self = L.marker(latLng, getCustomIcon(formMarker))
             .bindPopup(this.popup, {closeOnClick: false})
-            .on('mouseover', this.openPopup)
-            .on('mouseenter', this.openPopup)
-            .on('click', this.openAndFreezePopup)
-            .on('mouseout', this.delayPopupClose);
+            .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
+        this.addMarkerEvents();
     }
-    addMarkerEvents() {
+    addMarkerEvents() {  
         this.self
             .on('mouseover', this.openPopup)
             .on('mouseenter', this.openPopup)
@@ -52,8 +51,9 @@ export class LocMarker extends Marker {
     /** --- Event Handlers --- */
     openPopup(e) {                                                              
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) {
-            const content = this.formMarker ? getLocDetailsHtml(this.loc) : 
+        if (!this.popup.getContent()) { console.log('buildingPopup')
+            const content = this.formMarker == 'new-loc' ? getNewLocHtml() : 
+                this.formMarker == 'loc-map' ? getLocDetailsHtml(this.loc) : 
                 getLocationSummaryHtml(this.loc);
             this.popup.setContent(content);
         }
@@ -252,13 +252,13 @@ function bindClassContextToMethods(self) {
     }
 }
 /** ------- Shared Helpers --------- */
-function getCustomIcon(iconType) {
+function getCustomIcon(iconType) { 
     if (iconType === 'form') { return null; }
     const classes = iconType || 'single-marker info';
     return {
         icon: L.divIcon({
             className: classes,
-            html: '1',
+            html: iconType === 'new-loc' ? '' : 1,
         })
     }
 }
@@ -588,4 +588,23 @@ function buildToTableButton(loc) {
 }
 function showLocTableView(loc) {
     db_page.showLocInDataTable(loc);
+}
+/* ---------- New Location Popup ----------------- */
+function getNewLocHtml() {  console.log('buildingNewLocationPopup')
+    const cntnr = document.createElement('div');
+    const text = getNewLocText();
+    const bttn = getCreateLocBttn();
+    $(cntnr).append([text, bttn]);
+    return cntnr;
+}
+function getNewLocText() {
+    return `After confirming that this location is unique and the data entered 
+        is correct, click "Create Location" to submit.`;
+}
+function getCreateLocBttn() {
+    const bttn = _u.buildElem('input', {type: 'button',
+        class:'ag-fresh tbl-bttn', value: 'Create Location'});
+    $(bttn).click(db_forms.addNewLocation);
+    $(bttn).css({'margin': '.5em 0 0 -.4em'});
+    return bttn;
 }
