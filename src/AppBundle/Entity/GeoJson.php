@@ -47,7 +47,6 @@ class GeoJson
      * String array of coordinates - [ long, lat ]
      *
      * @ORM\Column(name="display_point", type="string", length=255, nullable=true)
-     * @JMS\Expose
      */
     private $displayPoint;
 

@@ -53,7 +53,7 @@ export class LocMarker extends Marker {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { console.log('buildingPopup')
             const content = this.formMarker == 'new-loc' ? getNewLocHtml() : 
-                this.formMarker == 'loc-map' ? getLocDetailsHtml(this.loc) : 
+                this.formMarker == 'form' ? getLocDetailsHtml(this.loc) : 
                 getLocationSummaryHtml(this.loc);
             this.popup.setContent(content);
         }
@@ -386,9 +386,9 @@ function getHabTypeHtml(loc) {
 function getCoordsHtml(loc) {
     const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                       //console.log('geoJson = %O', geoData); 
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
-    let coords = JSON.parse(geoData.coordinates)
+    let coords = JSON.parse(geoData.displayPoint)
     coords = coords.map(c => Number(c).toFixed(6)); 
-    return 'Coordinates: <b>' + coords.join(', ') +'</b>';
+    return 'Coordinates: <b>' + [coords[1], coords[0]].join(', ') +'</b>';
 }
 /* -------- Location Details Popup ------------- */
 function getLocDetailsHtml(loc) {
@@ -403,7 +403,7 @@ function buildDetailsHtml(loc) {                                                
     const habType = getHabTypeHtml(loc);
     const elev = getElevHtml(loc);
     const coords = getCoordsHtml(loc);
-    const desc = getDescHtml(loc, 136);
+    const desc = getDescHtml(loc, 88);
     return name + [habType, elev, coords, desc].filter(e => e).join('<br>');   
 }
 function getElevHtml(loc) {
@@ -437,7 +437,7 @@ function buildLocDetails(loc) {
         ${loc.displayName}</b></span>`;
     const habType = getHabTypeHtml(loc);
     const elev = getElevHtml(loc);
-    const desc = getDescHtml(loc, 136);
+    const desc = getDescHtml(loc, 88);
     return [name, habType, elev, desc].filter(e => e).join('<br>'); 
 }
 /** ------- Location Summary Popup ------------- */

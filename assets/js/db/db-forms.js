@@ -1361,7 +1361,8 @@ function initLocForm(val) {                                                     
     initComboboxes('location', 'sub');
     enableCombobox('#Country-Region-sel', false);
     $('#DisplayName_row input').focus();
-    $('#loc-note').fadeTo(400, .3);
+    disableTopFormLocNote();
+    $('#sub-submit').val('Create Location without GPS data');
     addMapToLocForm();
     addNotesToForm();
     scrollToLocFormWindow();
@@ -1373,6 +1374,9 @@ function enableCountryRegionField() {
     enableCombobox('#Country-Region-sel');
     $('#loc-note').fadeTo(400, 1);
 }
+function disableTopFormLocNote() {
+    $('#loc-note').fadeTo(400, .3);
+}
 function scrollToLocFormWindow() {
     $('#form-main')[0].scrollTo(0, 140); 
 }
@@ -1381,13 +1385,13 @@ function addNotesToForm() {
     $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
 }
 function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p style="width:initial; margin:auto;">To create a location without 
-        GPS data, fill in available data and click "Create Location without GPS 
-        data".</p>`;
+    return `<p class="loc-gps-note">To create a location without GPS data, fill 
+        in available data and click <br>"Create Location without GPS data" at the 
+        bottom of the form.</p>`;
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p style="width:initial; margin:auto;">Enter GPS coordinates and   
-        then select "Create Location" from the added green pin's popup.</p>`;
+    return `<p class="loc-gps-note">If GPS data is available, enter the coordinates 
+        and then select <br>"Create Location" from the added green pin's popup.</p>`;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {

@@ -23,7 +23,7 @@
     display: inline-flex;
 }
 .selectize-dropdown {
-    z-index: 500;
+    z-index: 1111;
 }
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
@@ -248,7 +248,7 @@ input[type="radio"], input[type="checkbox"] {
     left: -8px;
     margin-left: 115px;
     border-radius: 50%;
-    border: 8px solid green;
+    border: 9px solid green;
     background-color: white;
 }
 .new-loc:after {
@@ -257,7 +257,7 @@ input[type="radio"], input[type="checkbox"] {
     width: 0px;
     height: 0px;
     bottom: -32px;
-    left: -4px;
+    left: -5px;
     border: 10px solid transparent;
     border-top: 19px solid green;
 }
@@ -502,6 +502,11 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 97%;
     margin: 1em auto 0 auto;
 }
+.loc-gps-note {
+    width:initial; 
+    margin:auto; 
+    text-align: center;
+}
 /** --- Error Styles --- */
 [id$="_errs"] {
     display: flex;
@@ -602,6 +607,7 @@ select[id$="txn-lvl"] + div {
 }
 /*--------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
+/* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) { 
     /*--------------- Search Page ---------------------*/
     #detail-block #show-tips, 
