@@ -390,21 +390,31 @@ function getCoordsHtml(loc) {
     coords = coords.map(c => Number(c).toFixed(6)); 
     return 'Coordinates: <b>' + [coords[1], coords[0]].join(', ') +'</b>';
 }
+function getSelectLocationBttn(loc) {
+    const bttn = _u.buildElem('input', {type: 'button',
+        class:'ag-fresh tbl-bttn popup-bttn', value: 'Select Existing Location'});
+    $(bttn).click(db_forms.selectLoc.bind(null, loc.id));
+    $(bttn).css({'margin-top': '.5em'});
+    return bttn;
+}
 /* -------- Location Details Popup ------------- */
 function getLocDetailsHtml(loc) {
-    const div = document.createElement('div');
+    const div = _u.buildElem('div', { class: 'flex-col' });
     const html = buildDetailsHtml(loc);
-    $(div).append(html);
+    const bttn = getSelectLocationBttn(loc);
+    $(div).append([html, bttn]);
     return div;
 }
 function buildDetailsHtml(loc) {                                                //console.log('buildDetailsHtml loc = %O', loc);
     const name = `<div style="font-size:1.2em; margin-bottom: .5em;"><b>
         ${loc.displayName}</b></div>`;
+    const cntnr = document.createElement('div');
     const habType = getHabTypeHtml(loc);
     const elev = getElevHtml(loc);
     const coords = getCoordsHtml(loc);
     const desc = getDescHtml(loc, 88);
-    return name + [habType, elev, coords, desc].filter(e => e).join('<br>');   
+    $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);   
+    return cntnr;
 }
 function getElevHtml(loc) {
     if (!loc.elevation) { return; }
@@ -418,7 +428,7 @@ function getElevHtml(loc) {
 function getNoGpsLocDetailsHtml(locs) {                                         //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
     const div = document.createElement('div');
     const hdr = getNoGpsHdr(locs.length);
-    const locHtml = buildLocDetailHtml(locs);
+    const locHtml = locs.map(loc => buildLocDetailHtml(loc));
     $(div).append([hdr, ...locHtml]);
     return div;
 }
@@ -426,11 +436,13 @@ function getNoGpsHdr(cnt) {
     return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
         </div><span>Hover over a location name to see the location data.</span><br>`;
 }
-function buildLocDetailHtml(locs) {
-    return locs.map(loc => {
-        return `<div class="info-tooltip" style="font-size:1.2em;">
-            <div class="tip">${buildLocDetails(loc)}</div>- ${loc.displayName}</div>`;
-    });
+function buildLocDetailHtml(loc) {
+    const cntnr = _u.buildElem('div', {class: 'info-tooltip'});
+    const locDetails = _u.buildElem('div', {class: 'tip'});
+    const bttn = getSelectLocationBttn(loc);
+    $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
+    $(cntnr).append([loc.displayName, locDetails]);
+    return cntnr;
 }
 function buildLocDetails(loc) {
     const name = `<span style="font-size:1.1em; margin-bottom: .5em;"><b>

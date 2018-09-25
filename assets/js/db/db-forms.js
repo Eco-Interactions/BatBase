@@ -8,6 +8,7 @@
  * Exports: 
  *     editEntity
  *     addNewLocation
+ *     selectLoc
  */
 import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
@@ -1385,13 +1386,14 @@ function addNotesToForm() {
     $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
 }
 function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note">To create a location without GPS data, fill 
-        in available data and click <br>"Create Location without GPS data" at the 
+    return `<p class="loc-gps-note">No GPS data? Fill 
+        in available data and click "Create Location without GPS data" at the 
         bottom of the form.</p>`;
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note">If GPS data is available, enter the coordinates 
-        and then select <br>"Create Location" from the added green pin's popup.</p>`;
+    return `<p class="loc-gps-note" style="margin-top: 5px;">With GPS data, enter 
+        the coordinates and then select "Create Location" from the added green 
+        pin's popup.</p>`;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
@@ -1403,6 +1405,9 @@ function locHasGpsData(fLvl) {
 function addListenerToGpsFields(fLvl) {
     $('#Latitude_row input, #Longitude_row input').change(
         db_map.addVolatileMapPin);
+}
+export function selectLoc(id) {
+    // body...
 }
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
@@ -1430,9 +1435,14 @@ function showInteractionFormMap() {                                             
 }
 function addMapToLocForm() {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
-    const cntryId = $('#Country-Region-sel').val();
+    const cntryId = getSelectedCountry($('#Country-Region-sel').val());
     $('#location_Rows').after(map);
     db_map.initFormMap(cntryId, fParams.records.location);
+}
+function getSelectedCountry(selId) {
+    if (!selId) { return null; }
+    const selected = fParams.records.location[selId];
+    return selected.locationType.displayName === 'Region' ? null : selId;
 }
 function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
     if (!val) { return; }

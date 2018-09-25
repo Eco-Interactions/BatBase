@@ -29,9 +29,22 @@ Before Release:
     - {low}{med} Add search by name to the location table view
     - Handle multiple habitats of parent country displaying at same point - combine
     - Cluster counts of all locs within country markers when showing locations in a region
+
+
+    - add button to "select existing location"
+        - close form and select location 
+
     
 MEETING NOTES:
     Next/future round:
+        - Draw areas and select as parent location
+        - add "outline" option
+        - Is location name being optional still a priority?
+        - add "click to create point" button? (only if fields blank)
+            - add button to "drag" pin
+                - ultimately help adjust display point for country
+
+
     Feedback:
 
 >======== Email ============
