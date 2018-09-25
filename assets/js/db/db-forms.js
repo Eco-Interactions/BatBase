@@ -1407,7 +1407,10 @@ function addListenerToGpsFields(fLvl) {
         db_map.addVolatileMapPin);
 }
 export function selectLoc(id) {
-    // body...
+    $('#sub-form').remove();
+    setSelVal('#Location-sel', id);
+    enableCountryRegionField();
+    enableCombobox('#Location-sel');
 }
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
