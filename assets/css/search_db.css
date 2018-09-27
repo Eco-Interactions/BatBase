@@ -482,10 +482,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-right: 1em;
 }
 .full-row {
-    width: 97.4%;
+    width: 99.3%;
 }
 .sub-row {
-    width: 390px;
+    width: 398px; /*390*/
 }
 .sub2-row {
     width: 372px;
@@ -512,6 +512,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width:initial; 
     margin:auto; 
     text-align: center;
+}
+/*--- Form specific styles ---*/
+#Authors-lbl, #Editors-lbl {
+    padding-top: .7em;
 }
 /** --- Error Styles --- */
 [id$="_errs"] {
@@ -564,7 +568,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 302px;
 }
 .med-field {
-    width: 235px;
+    width: 240px; /*235*/
 }
 .sml-field {
     width: 200px;
@@ -642,7 +646,7 @@ select[id$="txn-lvl"] + div {
         margin-right: 1em;
     }
     #b-overlay .sub-row {
-        width: 375px;
+        width: 384px; /*375*/
     }
     #b-overlay .long-sub-row {
         width: 750px;
@@ -656,21 +660,21 @@ select[id$="txn-lvl"] + div {
     }
     #b-overlay .full-row {
         padding: .2em 0 .3em  0;
-        width: 96%;
+        width: 98%;
     }
     #b-overlay #Note_row div.field-row {        
         width: 852px;
     }
     #b-overlay #top-form label {
         font-size: 1em;
-        padding: 9px 0 2px 0;
+        padding: 5px 0 2px 0;
         width: 120px;
     }  
     #b-overlay .top.xlrg-field {
         width: 700px;
     }
     #b-overlay .xlrg-field {
-        width: 610px;
+        width: 614px;
     }
     #b-overlay .lrg-field {
         width: 262px;

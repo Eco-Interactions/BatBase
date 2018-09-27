@@ -1133,11 +1133,15 @@ function updateSrcDetailPanel(entity) {
             const rcrdWithAuths = pubSrc.authors ? pubSrc : 
                 citSrc && citSrc.authors ? citSrc : false; 
             if (!rcrdWithAuths) { return; }
-            data.Authors = getAuthorNames(rcrdWithAuths);
+            const cnt = Object.keys(rcrdWithAuths.authors).length; 
+            const prop = 'Author' + (cnt === 1 ? '' : 's'); 
+            data[prop] = getAuthorNames(rcrdWithAuths);
         }
         function addEds() {  
             if (!pubSrc.editors) { return; }
-            data.Editors =  getAuthorNames(pubSrc, true);
+            const cnt = Object.keys(pubSrc.editors).length;
+            const prop = 'Editor' + (cnt === 1 ? '' : 's'); 
+            data[prop] =  getAuthorNames(pubSrc, true);
         }
         function addYear() {
             const yr = pubSrc.year ? pubSrc.year : citSrc ? citSrc.year : false;
@@ -2997,7 +3001,7 @@ function buildMultiSelectElems(entity, field, fLvl, cnt) {
     const wrapper = _u.buildElem('div', {class: 'flex-row'});
     const selElem = buildSelectCombo(entity, field, fLvl, cnt);
     const lbl = _u.buildElem('span', {text: getCntLabel(), class:'multi-span'});
-    $(lbl).css({padding: '.75em .5em 0 0', width: '2.2em'});
+    $(lbl).css({padding: '.2em .5em 0 0', width: '2.2em'});
     $(selElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
     $(wrapper).append([lbl, selElem]);
     return wrapper;
@@ -3139,7 +3143,7 @@ function buildFormRow(field, input, fLvl, isReq, rowClss) {                     
         id: field + '_row'});
     const errorDiv = _u.buildElem('div', { id: field+'_errs'}); 
     const fieldCntnr = _u.buildElem('div', { class: 'field-row flex-row'});
-    const label = _u.buildElem('label', {text: _u.ucfirst(fieldName)});
+    const label = _u.buildElem('label', {text: _u.ucfirst(fieldName), id:field+'-lbl'});
     const pin = fLvl === 'top' ? getPinElem(field) : null;     
     if (isReq) { handleRequiredField(label, input, fLvl); } 
     $(fieldCntnr).append([label, input, pin]);
