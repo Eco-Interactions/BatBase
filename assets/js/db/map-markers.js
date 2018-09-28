@@ -376,7 +376,8 @@ function getDescHtml(loc, strLngth) {
     if (!loc.description) { return; }
     const desc = loc.description.length < strLngth ? loc.description : 
         loc.description.substring(0, strLngth) + '...';
-    return `<span title='${loc.description}'>Description: <b>${desc}</b></span>`
+    return `<span title="${loc.description.replace(/"/g, '&quot;')}">Description: 
+        <b>${desc}</b></span>`;
 }
 function getHabTypeHtml(loc) {
     if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
@@ -602,16 +603,16 @@ function showLocTableView(loc) {
     db_page.showLocInDataTable(loc);
 }
 /* ---------- New Location Popup ----------------- */
-function getNewLocHtml() {  console.log('buildingNewLocationPopup')
-    const cntnr = document.createElement('div');
+function getNewLocHtml() {                                                      console.log('buildingNewLocationPopup')
+    const cntnr = _u.buildElem('div', {class: 'flex-col new-loc-popup'});
     const text = getNewLocText();
     const bttn = getCreateLocBttn();
     $(cntnr).append([text, bttn]);
     return cntnr;
 }
 function getNewLocText() {
-    return `After confirming that this location is unique and the data entered 
-        is correct, click "Create Location" to submit.`;
+    return `After confirming that this location is unique, click "Create Location" 
+        to submit.`;
 }
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',

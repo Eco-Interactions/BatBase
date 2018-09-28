@@ -31,8 +31,11 @@ Before Release:
     - Cluster counts of all locs within country markers when showing locations in a region
 
 
-    - add button to "select existing location"
-        - close form and select location 
+    Testing:
+        - Enter map from top form and create form
+        - Country locations show on map
+        - New map pin drops
+        - Select existing location and form closes
 
     
 MEETING NOTES:
@@ -43,6 +46,9 @@ MEETING NOTES:
         - add "click to create point" button? (only if fields blank)
             - add button to "drag" pin
                 - ultimately help adjust display point for country
+
+        - Errs that catch invalid coordinates
+            - Ensure all required fields are filled in
 
 
     Feedback:

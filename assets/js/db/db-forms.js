@@ -9,6 +9,7 @@
  *     editEntity
  *     addNewLocation
  *     selectLoc
+ *     locCoordErr
  */
 import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
@@ -1383,7 +1384,7 @@ function disableTopFormLocNote() {
     $('#loc-note').fadeTo(400, .3);
 }
 function scrollToLocFormWindow() {
-    $('#form-main')[0].scrollTo(0, 140); 
+    $('#form-main')[0].scrollTo(0, 150); 
 }
 function addNotesToForm() {
     $('#location_Rows').before(getHowToCreateLocWithoutGpsDataNote());
@@ -1422,7 +1423,16 @@ export function selectLoc(id) {
  */
 export function addNewLocation() {
     const fLvl = fParams.forms['location'];
-    getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'location');
+    if (ifAllRequiredFieldsFilled(fLvl)) {
+        getFormValuesAndSubmit('#'+fLvl+'-form',  fLvl, 'location');
+    } else { showFillAllLocFieldsError(fLvl); }
+}
+function showFillAllLocFieldsError(fLvl) {
+    reportFormFieldErr('Display Name', 'needsLocData', fLvl);
+}
+export function locCoordErr(field) {
+    const fLvl = fParams.forms['location'];
+    reportFormFieldErr(field, 'invalidCoords', fLvl);
 }
 /*--------------- Map methods ---------------------------*/
 /** Adds a message above the location fields in interaction forms. */
@@ -4275,18 +4285,20 @@ function reportFormFieldErr(fieldName, errTag, fLvl) {                          
         'fillAuthBlanks': handleAuthBlanks,
         'fillEdBlanks': handleEdBlanks,
         'isGenusPrnt': handleIsGenusPrnt,
+        'invalidCoords': handleInvalidCoords,
         'needsGenusName': handleNeedsGenusName,
         'needsGenusPrnt': handleNeedsGenusParent, 
         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
         'needsHigherLvl': handleNeedsHigherLvl,
+        'needsLocData': handleNeedsLocData,
         'noGenus': handleNoGenus,
         'openSubForm': handleOpenSubForm,
     };
     const errElem = getFieldErrElem(fieldName, fLvl);
-    errMsgMap[errTag](errElem, errTag, fLvl);
+    errMsgMap[errTag](errElem, errTag, fLvl, fieldName);
 }
 /* ----------- Field-Error Handlers --------------------------------------*/
-function handleDupAuth(elem, errTag, fLvl) {  
+function handleDupAuth(elem, errTag, fLvl, fieldName) {  
     const msg = `<span>An author with this name already exists in the database.\n
         If you are sure this is a new author, add initials or modify their name 
         and submit again. </span>`;
@@ -4296,7 +4308,7 @@ function clrDupAuth(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Note: error for the edit-taxon form. */
-function handleIsGenusPrnt(elem, errTag, fLvl) {  
+function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {  
     const msg = "<span>Genus' with species children must remain at genus.</span>";
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
@@ -4304,7 +4316,19 @@ function clrIsGenusPrnt(elem, fLvl, e) {
     setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
     clearErrElemAndEnableSubmit(elem, 'top');
 }
-function handleNeedsGenusName(elem, errTag, fLvl) {
+/** Note: error used for the location form. */
+function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
+    const msg = `<span>Invalid coordinate format.</span>`;
+    $(`#${fieldName}_row input[type="text"]`).on('input', 
+        clrInvalidCoords.bind(null, elem, fLvl, null, fieldName)); 
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    $('.err-exit').hide();
+}
+function clrInvalidCoords(elem, fLvl, e, fieldName) {
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
+}
+function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
     const genus = getSelTxt('#Genus-sel');
     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
@@ -4315,7 +4339,7 @@ function clrNeedsGenusName(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Note: error for the edit-taxon form. */
-function handleNeedsGenusParent(elem, errTag, fLvl) {  
+function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {  
     const msg = '<span>Please select a genus parent for the species taxon.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, 'top');
 }
@@ -4324,7 +4348,7 @@ function clrNeedsGenusPrntErr(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, 'top');
 }
 /** Note: error for the create-taxon form. */
-function handleNoGenus(elem, errTag, fLvl) {  
+function handleNoGenus(elem, errTag, fLvl, fieldName) {  
     const msg = '<span>Please select a genus before creating a species.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     $('#Genus-sel').change(function(e){
@@ -4336,7 +4360,7 @@ function clrNoGenusErr(elem, fLvl, e) {
     clearErrElemAndEnableSubmit(elem, fLvl);
 }
 /** Note: error for the edit-taxon form. */
-function handleNeedsHigherLvlPrnt(elem, errTag, fLvl) { 
+function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) { 
     const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
@@ -4350,7 +4374,7 @@ function clrNeedsHigherLvlPrnt(elem, fLvl, e) {
     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
 }
 /** Note: error for the edit-taxon form. */
-function handleNeedsHigherLvl(elem, errTag, fLvl) {  
+function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
     var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
     var lvlName = fParams.forms.taxonPs.lvls[childLvl-1];
     var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
@@ -4370,22 +4394,32 @@ function enableChngPrntBtttn() {
     if ($('#sub-form').length ) { return; }
     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
 }
+/** Note: error used for the location form when selecting new location from map. */
+function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
+    const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    $('div.new-loc-popup').prepend(msg);
+}
+function clrNeedsLocData(elem, fLvl, e) {
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    $('.new-loc-popup #err').remove();
+}
 /** Note: error used for the publication form. */
-function handleOpenSubForm(elem, errTag, fLvl) {  
+function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
     var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
     var msg = '<p>Please finish the open '+ _u.ucfirst(subEntity) + ' form.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication/citation form. */
-function handleAuthBlanks(elem, errTag, fLvl) {  
+function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
     var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of authors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
 /** Note: error used for the publication form. */
-function handleEdBlanks(elem, errTag, fLvl) {  
+function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
     var subEntity = fParams.forms[fLvl] ? fParams.forms[fLvl].entity : '';
     var msg = '<p>Please fill the blank in the order of editors.</p>';
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
@@ -4422,10 +4456,12 @@ function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
-        'isGenusPrnt': clrIsGenusPrnt, 'needsGenusName': clrNeedsGenusName, 
+        'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
+        'needsGenusName': clrNeedsGenusName, 
         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-        'openSubForm': clrOpenSubForm, 'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
+        'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm, 
+        'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
         'fillAuthBlanks': false, 'fillEdBlanks': false
     };
@@ -4444,11 +4480,12 @@ function clrFormLvlErr(elem, fLvl) {
 }
 function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = getNextFormLevel('child', fLvl);
-    clearErrElem(elem, fLvl);
+        $(elem).fadeTo(400, 0, clearErrElem);
     if (!$('#'+subLvl+'-form').length) { enableSubmitBttn('#'+fLvl+'-submit'); }
 
-    function clearErrElem(elem, fLvl) {                                         //console.log('fLvl = ', fLvl);
+    function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');
         if (elem.innerHTML) { elem.innerHTML = ''; }
+        $(elem).fadeTo(0, 1);
     }
 } /* End clearErrElemAndEnableSubmit */

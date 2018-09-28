@@ -221,52 +221,6 @@ input[type="radio"], input[type="checkbox"] {
 .popup-bttn {
     font-size: 14px !important;
 }
-/* --- Map Markers --- */
-.single-marker {
-    width: 33px !important;
-    height: 33px !important;
-    margin-left: -12px;
-    margin-top: -15px;
-    border-radius: 25px;
-    border: 4px solid rgba(181, 226, 140, 0.7);
-    text-align: center;
-    color: #222;
-    padding-top: 4px;
-    background-color: rgba(110, 204, 57, 0.9);
-    font-size: 11px;
-}
-.form-noGps { 
-    width: 33px !important;
-    height: 33px !important;
-    margin-left: -12px;
-    margin-top: -15px;
-    border-radius: 25px;
-    border: 4px solid rgba(241, 211, 87, 0.7); /*yellow*/
-    text-align: center;
-    color: #222;
-    padding-top: 4px;
-    background-color: rgba(240, 194, 12, 0.9);
-    font-size: 11px;
-}
-.new-loc {
-    width: 27px !important;
-    height: 27px !important;
-    left: -8px;
-    margin-left: 115px;
-    border-radius: 50%;
-    border: 9px solid green;
-    background-color: white;
-}
-.new-loc:after {
-    position: absolute;
-    content: '';
-    width: 23px;
-    height: 0px;
-    bottom: -32px;
-    left: -7px;
-    border: 10px solid transparent;
-    border-top: 19px solid green;
-}
 /*------- Buttons ---------------*/
 #filter-bttns {
     display: inline-flex;
@@ -493,30 +447,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
 }
-/*--- Loc Map Styles ---*/
-#loc-note {
-    margin: .5em auto 0 auto;
-}
-#loc-note .map-link {
-    text-decoration: underline;
-    color: #1b3b1b;
-    cursor: pointer;
-}
-#loc-map {
-    border: 1px grey solid;
-    height: 420px;
-    width: 97%;
-    margin: 1em auto 0 auto;
-}
-.loc-gps-note {
-    width:initial; 
-    margin:auto; 
-    text-align: center;
-}
-/*--- Form specific styles ---*/
-#Authors-lbl, #Editors-lbl {
-    padding-top: .7em;
-}
 /** --- Error Styles --- */
 [id$="_errs"] {
     display: flex;
@@ -596,7 +526,11 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: 3px !important;
     margin: 3px !important;
 }
-/**--- Edit-form Styles ---*/
+/*--- Form specific styles ---*/
+#Authors-lbl, #Editors-lbl {
+    padding-top: .7em;
+}
+/**--- Taxon Edit-Form ---*/
 .pTaxon#sub-form {
     flex-wrap: wrap;
     justify-content: space-around;
@@ -614,6 +548,82 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 }
 select[id$="txn-lvl"] + div {
     width: 150px;
+}
+/*--- Loc Map Styles ---*/
+#loc-note {
+    margin: .5em auto 0 auto;
+}
+#loc-note .map-link {
+    text-decoration: underline;
+    color: #1b3b1b;
+    cursor: pointer;
+}
+#loc-map {
+    border: 1px grey solid;
+    height: 420px;
+    width: 97%;
+    margin: 1em auto 0 auto;
+}
+.loc-gps-note {
+    width:initial; 
+    margin:auto; 
+    text-align: center;
+}
+.new-loc-popup {
+    font-size: 1.1em;
+    font-weight: 600;
+    justify-content: center;
+}
+.new-loc-popup #err {
+    color: red;
+    padding: 5px 5px 5px 10px;
+}
+
+/* --- Map Markers --- */
+.single-marker {
+    width: 33px !important;
+    height: 33px !important;
+    margin-left: -12px;
+    margin-top: -15px;
+    border-radius: 25px;
+    border: 4px solid rgba(181, 226, 140, 0.7);
+    text-align: center;
+    color: #222;
+    padding-top: 4px;
+    background-color: rgba(110, 204, 57, 0.9);
+    font-size: 11px;
+}
+.form-noGps { 
+    width: 33px !important;
+    height: 33px !important;
+    margin-left: -12px;
+    margin-top: -15px;
+    border-radius: 25px;
+    border: 4px solid rgba(241, 211, 87, 0.7); /*yellow*/
+    text-align: center;
+    color: #222;
+    padding-top: 4px;
+    background-color: rgba(240, 194, 12, 0.9);
+    font-size: 11px;
+}
+.new-loc {
+    width: 27px !important;
+    height: 27px !important;
+    left: -8px;
+    margin-left: 115px;
+    border-radius: 50%;
+    border: 9px solid green;
+    background-color: white;
+}
+.new-loc:after {
+    position: absolute;
+    content: '';
+    width: 23px;
+    height: 0px;
+    bottom: -32px;
+    left: -7px;
+    border: 10px solid transparent;
+    border-top: 19px solid green;
 }
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/

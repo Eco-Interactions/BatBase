@@ -10,6 +10,7 @@
  */
 import * as _u from './util.js';
 import * as db_page from './db-page.js';
+import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
 
 let locRcrds, map, volatilePin, popups = {};
@@ -397,7 +398,8 @@ function showTable() {
 /*===================== Location Form Methods ================================*/
 export function addVolatileMapPin(val) {  
     if (!val || !gpsFieldsFilled()) { return removeMapPin(); }
-    const latLng = L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
+    const latLng = getMapPinCoords();
+    if (!latLng) { return; }
     replaceMapPin(latLng);
     map.setView(latLng, 5, {animate: true});
 }
@@ -405,6 +407,22 @@ function gpsFieldsFilled() {
     return ['Latitude', 'Longitude'].every(field => {
         return $(`#${field}_row input`).val();
     });
+}
+function getMapPinCoords() {
+    if (ifCoordFieldHasErr()) { return false; }
+    return L.latLng($('#Latitude_row input').val(), $('#Longitude_row input').val());
+}
+function ifCoordFieldHasErr() {  
+    const errField = coordHasErr('Latitude') ? 'Latitude' : 
+        coordHasErr('Longitude') ? 'Longitude' : false;
+    if (!errField) { return false; }
+    db_forms.locCoordErr(errField);
+    return true;
+}
+function coordHasErr(field) {
+    const coord = $(`#${field}_row input`).val();
+    const max = field === 'Latitude' ? 90 : 180;
+    return isNaN(coord) ? true : coord > max ? true : false;    
 }
 function replaceMapPin(latLng) {
     const marker = new MM.LocMarker(latLng, null, null, 'new-loc');
