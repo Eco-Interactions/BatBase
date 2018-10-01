@@ -1463,7 +1463,23 @@ function getSelectedCountry(selId) {
 }
 function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
     if (!val) { return; }
+    const fLvl = fParams.forms['location'];
+    // if (ifCoordFieldsFilled(fLvl)) {
+    //     if (ifCoordsNotWithinCountry(fParams.records.location[val])) {
+    //         return reportFormFieldErr('Country', 'coordsOutside', fLvl);
+    //     }
+    // }
     db_map.initFormMap(val, fParams.records.location);
+    db_map.addVolatileMapPin('redrop');
+}
+function ifCoordFieldsFilled(fLvl) {
+    return ['Latitude', 'Longitude'].every(field => {
+        return $(`#${field}_row input`).val();
+    });
+}
+function ifCoordsNotWithinCountry(cntry) {
+    if (!hasPolygonData(cntry)) { return false; } //TODO: Figure a way to ensure the two points share a country after implementing geocoding
+    //TODO
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */
