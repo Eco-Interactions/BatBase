@@ -625,6 +625,15 @@ select[id$="txn-lvl"] + div {
     border: 10px solid transparent;
     border-top: 19px solid green;
 }
+/* --- Geocoder Search Elem --- */
+.leaflet-control-geocoder {
+    font-size: 16px;
+}
+.leaflet-control-geocoder-icon {
+    margin: initial;
+    padding: initial;
+    font-size: initial;
+}
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */

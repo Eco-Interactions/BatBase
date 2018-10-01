@@ -1369,7 +1369,7 @@ function initLocForm(val) {                                                     
     $('#DisplayName_row input').focus();
     disableTopFormLocNote();
     $('#sub-submit').val('Create Location without GPS data');
-    addMapToLocForm();
+    addMapToLocForm('#location_Rows');
     addNotesToForm();
     scrollToLocFormWindow();
     addListenerToGpsFields();
@@ -1448,12 +1448,12 @@ function addLocationSelectionMethodsNote() {
 }
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                             console.log('showInteractionFormMap')
-    // body...
+    addMapToLocForm('#Location_row');
 }
-function addMapToLocForm() {
+function addMapToLocForm(elemId) {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
     const cntryId = getSelectedCountry($('#Country-Region-sel').val());
-    $('#location_Rows').after(map);
+    $(elemId).after(map);
     db_map.initFormMap(cntryId, fParams.records.location);
 }
 function getSelectedCountry(selId) {

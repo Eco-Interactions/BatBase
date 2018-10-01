@@ -23,7 +23,8 @@ fixLeafletBug();
 function requireCss() {
     require('../../../node_modules/leaflet/dist/leaflet.css');
     require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
-    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
+    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
+    require('../../../node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css');
 }
 /** For more information on this fix: github.com/PaulLeCam/react-leaflet/issues/255 */
 function fixLeafletBug() {
@@ -59,6 +60,7 @@ function buildAndShowMap(loadFunc, mapId) {                                     
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles(mapId);
+    addGeocoderToMap();
     addTipsLegend();
     if (mapId !== 'loc-map') { buildSrchPgMap(); }
     map.setView([22,22], 2);                                                    console.log('map built.')
@@ -114,6 +116,26 @@ function setDefaultTipText() {
 function toggleTips() {
     return $('#tips-legend').data('expanded') ? 
         setDefaultTipText() : setExpandedTipText();
+}
+function addGeocoderToMap() {
+    const opts = getGeocoderOptions()
+    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);
+}
+function getGeocoderOptions() {
+    return {
+        defaultMarkGeocode: false,
+        position: 'topleft'
+    };
+}
+function drawPolygon(e) {
+    const bbox = e.geocode.bbox;
+    const poly = L.polygon([
+         bbox.getSouthEast(),
+         bbox.getNorthEast(),
+         bbox.getNorthWest(),
+         bbox.getSouthWest()
+    ]).addTo(map);
+    map.fitBounds(poly.getBounds());
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */

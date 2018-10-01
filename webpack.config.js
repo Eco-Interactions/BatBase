@@ -25,13 +25,7 @@ Encore
     // such as '_' for the 'underscore' library
     .autoProvideVariables({
         L: 'leaflet',
-    })
-    // .addPlugin(
-    //     new CircularDependencyPlugin({
-    //         exclude: /a\.js|node_modules/,  // exclude detection of files based on a RegExp
-    //         failOnError: false,  // add errors to webpack instead of warnings
-    //         cwd: process.cwd(),  // set the current working directory for displaying module paths
-    // }))     
+    })  
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
     //         // these options encourage the ServiceWorkers to get in there fast 
@@ -46,7 +40,7 @@ Encore
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
         './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet' ])
+        'leaflet', 'leaflet-control-geocoder' ])
 ; 
 const local = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
