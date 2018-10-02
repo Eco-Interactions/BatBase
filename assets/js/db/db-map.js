@@ -13,7 +13,7 @@ import * as db_page from './db-page.js';
 import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
 
-let locRcrds, map, volatilePin, popups = {};
+let locRcrds, map, geoCoder, poly, volatilePin, popups = {};
 
 initDb();
 requireCss();
@@ -117,23 +117,26 @@ function toggleTips() {
     return $('#tips-legend').data('expanded') ? 
         setDefaultTipText() : setExpandedTipText();
 }
-function addGeocoderToMap() {
-    const opts = getGeocoderOptions()
-    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);
+function addGeoCoderToMap() {
+    const opts = getGeocoderOptions();
+    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);         console.log('geoCoder = %O', geoCoder.reverse);
 }
 function getGeocoderOptions() {
+    geoCoder = L.Control.Geocoder.bing('AocU2CuvrrlUIkS8xwGLy1AZVDmWacJ8PHODmFLyOiRYhkU55fUhB1CpEhOz1B2L');
     return {
         defaultMarkGeocode: false,
-        position: 'topleft'
+        position: 'topleft',
+        geocoder: geoCoder
     };
 }
-function drawPolygon(e) {
+function drawPolygon(e) {                                                       console.log("geocoding results = %O", e);
     const bbox = e.geocode.bbox;
-    const poly = L.polygon([
-         bbox.getSouthEast(),
-         bbox.getNorthEast(),
-         bbox.getNorthWest(),
-         bbox.getSouthWest()
+    if (poly) { map.removeLayer(poly); }
+    poly = L.polygon([
+        bbox.getSouthEast(),
+        bbox.getNorthEast(),
+        bbox.getNorthWest(),
+        bbox.getSouthWest()
     ]).addTo(map);
     map.fitBounds(poly.getBounds());
 }
@@ -418,6 +421,14 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
+export function isCoordInsideCntry(coords, cntry) { //30.6, 5.3 - Algeria
+    const latLng = L.latLng(coords);
+    // geoCoder.reverse(latLng, null, ifInsideCountry, null);
+
+    function ifInsideCountry(result) { console.log('geocoder result = %O', result);
+        
+    }
+}
 export function addVolatileMapPin(val) {  
     if (!val || !gpsFieldsFilled()) { return removeMapPin(); }
     const latLng = getMapPinCoords();
@@ -464,8 +475,8 @@ export function initFormMap(cntry, rcrds) {                                     
 function finishFormMap(cntryId) {
     addLocCountLegend();
     if (cntryId) { showCntryLocs(cntryId); }
+    isCoordInsideCntry('30.6, 5.3', 'Algeria');
 }
-
 function showCntryLocs(id) {
     const cntry = locRcrds[id];
     const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);

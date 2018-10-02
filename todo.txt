@@ -28,7 +28,17 @@ Before Release:
         to fill form better. (match width of map in location form)
     - {low}{med} Add search by name to the location table view
     - Handle multiple habitats of parent country displaying at same point - combine
-    - Cluster counts of all locs within country markers when showing locations in a region
+    - Use enclosures to keep "volatilePin" & "poly" out of the global space
+
+Notes from geocoders:
+    - Photon, mapbox, here: 
+        poor search results
+    - Bing (125K yearly, ~10.5K searches montlhy):
+        good search results
+    - Google (40k searches montlhy):
+        against terms of service to use with leaflet
+    - Mapquest (15K monthly):
+        poor search results 
 
 
     Testing:
