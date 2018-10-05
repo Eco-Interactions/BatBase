@@ -29,6 +29,7 @@ Before Release:
     - {low}{med} Add search by name to the location table view
     - Handle multiple habitats of parent country displaying at same point - combine
     - Use enclosures to keep "volatilePin" & "poly" out of the global space
+    - Ensure that the country selected contains the point entered
 
 Notes from geocoders:
     - Photon, mapbox, here: 
@@ -49,6 +50,8 @@ Notes from geocoders:
 
     
 MEETING NOTES:
+    Point out:
+        - Entering coordinates first fills country and suggests a display name
     Next/future round:
         - Draw areas and select as parent location
         - add "outline" option
@@ -59,6 +62,7 @@ MEETING NOTES:
 
         - Errs that catch invalid coordinates
             - Ensure all required fields are filled in
+        - Improve search results
 
 
     Feedback:

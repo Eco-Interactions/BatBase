@@ -52,7 +52,7 @@ export class LocMarker extends Marker {
     openPopup(e) {                                                              
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { console.log('buildingPopup')
-            const content = this.formMarker == 'new-loc' ? getNewLocHtml() : 
+            const content = this.formMarker == 'new-loc' ? getNewLocHtml(this.loc) : 
                 this.formMarker == 'form' ? getLocDetailsHtml(this.loc) : 
                 getLocationSummaryHtml(this.loc);
             this.popup.setContent(content);
@@ -603,16 +603,19 @@ function showLocTableView(loc) {
     db_page.showLocInDataTable(loc);
 }
 /* ---------- New Location Popup ----------------- */
-function getNewLocHtml() {                                                      console.log('buildingNewLocationPopup')
+function getNewLocHtml(loc) {                                                   console.log('buildingNewLocationPopup')
     const cntnr = _u.buildElem('div', {class: 'flex-col new-loc-popup'});
-    const text = getNewLocText();
+    const text = getNewLocText(loc);
     const bttn = getCreateLocBttn();
     $(cntnr).append([text, bttn]);
     return cntnr;
 }
-function getNewLocText() {
-    return `After confirming that this location is unique, click "Create Location" 
-        to submit.`;
+function getNewLocText(loc) {
+    const name = !loc ? 'This location appears to be over water. Please double-check coordinates.'
+        : 'Near: <b>'+ loc.name;
+    const html = `<div style="font-size:1.2em;">${name}</b></div>`;
+    return `${html}After confirming that this location is unique and the display
+        name is accurate, please fill in all available data, click "Create Location" to submit.`;
 }
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',

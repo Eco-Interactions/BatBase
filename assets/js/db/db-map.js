@@ -14,7 +14,7 @@ import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
 import { jsonp } from '../../../node_modules/leaflet-control-geocoder/src/util.js';
 
-let locRcrds, map, geoCoder, poly, volatilePin, popups = {};
+let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
 initDb();
 requireCss();
@@ -120,11 +120,10 @@ function toggleTips() {
 }
 function addGeoCoderToMap() {
     const opts = getGeocoderOptions();
-    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);         console.log('geoCoder = %O', geoCoder.reverse);
+    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);         
 }
 function getGeocoderOptions() {
-    geoCoder = L.Control.Geocoder.bing('AocU2CuvrrlUIkS8xwGLy1AZVDmWacJ8PHODmFLyOiRYhkU55fUhB1CpEhOz1B2L');
-    geoCoder.geocode = customGeocode;
+    geoCoder = L.Control.Geocoder.nominatim(); 
     return {
         defaultMarkGeocode: false,
         position: 'topleft',
@@ -133,8 +132,8 @@ function getGeocoderOptions() {
 }
 function drawPolygon(e) {                                                       console.log("geocoding results = %O", e);
     const bbox = e.geocode.bbox;
-    if (poly) { map.removeLayer(poly); }
-    poly = L.polygon([
+    if (volatile.poly) { map.removeLayer(volatile.poly); }
+    volatile.poly = L.polygon([
         bbox.getSouthEast(),
         bbox.getNorthEast(),
         bbox.getNorthWest(),
@@ -142,31 +141,31 @@ function drawPolygon(e) {                                                       
     ]).addTo(map);
     map.fitBounds(poly.getBounds());
 }
-/** Added 'Address' to the geocoding results returned. */
-function customGeocode(query, cb, context) {
-    jsonp(
-        'https://dev.virtualearth.net/REST/v1/Locations',
-        { query: query, key: this.key },
-        buildResultData,
+/** Bing geocoder used for reverse geocoding. */
+function reverseGeocode(loc, cb, context) {
+      jsonp( //uses bing for reverse
+        '//dev.virtualearth.net/REST/v1/Locations/' + loc.lat + ',' + loc.lng,
+        { key:'AocU2CuvrrlUIkS8xwGLy1AZVDmWacJ8PHODmFLyOiRYhkU55fUhB1CpEhOz1B2L'},
+        buildResultData.bind(null, cb, context),
         this,
         'jsonp'
-    );
-    function buildResultData(data) {                                            //console.log('data returned = %O', data);
-        var results = [];
-        if (data.resourceSets.length > 0) {
-            for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
-                var resource = data.resourceSets[0].resources[i],
-                bbox = resource.bbox;
-                results[i] = {
-                    name: resource.name,
-                    address: resource.address,
-                    bbox: L.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
-                    center: L.latLng(resource.point.coordinates)
-                };
-            }
+      );
+}
+function buildResultData(cb, context, data) {                                   console.log('data returned = %O', data);
+    var results = [];
+    if (data.resourceSets.length > 0) {
+        for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
+            var resource = data.resourceSets[0].resources[i],
+            bbox = resource.bbox;
+            results[i] = {
+                name: resource.name,
+                address: resource.address,
+                bbox: L.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
+                center: L.latLng(resource.point.coordinates)
+            };
         }
-        cb.call(context, results);
     }
+    cb.call(context, results);
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
@@ -458,11 +457,10 @@ export function isCoordInsideCntry(coords, cntry) { //30.6, 5.3 - Algeria
     }
 }
 export function addVolatileMapPin(val) {  
-    if (!val || !gpsFieldsFilled()) { return removeMapPin(); }
+    if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();
     if (!latLng) { return; }
-    replaceMapPin(latLng);
-    map.setView(latLng, 5, {animate: true});
+    reverseGeocode(latLng, updateMapPin.bind(null, latLng), null);
 }
 function gpsFieldsFilled() {
     return ['Latitude', 'Longitude'].every(field => {
@@ -485,15 +483,81 @@ function coordHasErr(field) {
     const max = field === 'Latitude' ? 90 : 180;
     return isNaN(coord) ? true : coord > max ? true : false;    
 }
-function replaceMapPin(latLng) {
-    const marker = new MM.LocMarker(latLng, null, null, 'new-loc');
-    removeMapPin();
-    volatilePin = marker.layer; 
-    map.addLayer(marker.layer);  
+function updateMapPin(latLng, results) {                                        console.log('updateMapPin. point = %O results = %O', latLng, results);
+    const loc = results.length ? buildLocData(results[0]) : null;
+    replaceMapPin(latLng, loc);  
 }
-function removeMapPin() {
-    if (!volatilePin) { return; }
-    map.removeLayer(volatilePin);
+function buildLocData(data) {
+    const name = !data.address.adminDistrict2 ? data.address.formattedAddress :
+        data.address.formattedAddress.includes(data.address.adminDistrict2) ?
+        data.address.formattedAddress : 
+        data.address.adminDistrict2 + ', ' + data.address.formattedAddress;
+    return {
+        cntry: data.address.countryRegion,
+        cntryId: null,
+        name: name
+    };
+}
+function replaceMapPin(latLng, loc) {
+    const marker = new MM.LocMarker(latLng, loc, null, 'new-loc');
+    removePreviousMapPin(loc);
+    addPinToMap(latLng, marker.layer);
+    fillCountryInForm(loc);
+}
+function removePreviousMapPin(loc) { 
+    if (!volatile.pin) { return volatile.loc = loc; }  
+    map.removeLayer(volatile.pin);
+    resetPinLoc(loc);
+}
+function resetPinLoc(loc) {
+    volatile.prevLoc = volatile.loc; 
+    volatile.loc = loc;
+}
+function addPinToMap(latLng, pin) {
+    volatile.pin = pin;
+    map.addLayer(pin);
+    map.setView(latLng, 5, {animate: true});
+}
+function fillCountryInForm(loc) {
+    if (!loc) { return clearPreviousData(volatile.prevLoc); }
+    selectCountryInForm(loc.cntry);
+}
+/*---- Clear previously auto-filled data ----*/
+function clearPreviousData(prevLoc) {
+    if (!prevLoc) { return; }
+    clearPrevCntry(prevLoc.cntryId);
+}
+function clearPrevCntry(id) {
+    if (!$('#Country-sel')[0].selectize.getValue === id) { return; }
+    $('#Country-sel')[0].selectize.clear();
+}
+/*---- Auto-fill location data ----*/
+function selectCountryInForm(cntry) {                                           //console.log('cntry = ', cntry);
+    let found;
+    const opts = $('#Country-sel')[0].selectize.options;                        //console.log('opts = %O', opts)
+    const cntries = [];
+    filterCountriesAndSelectExactMatch();
+    if (!found) { selectSimilarCountry(); }
+
+    function filterCountriesAndSelectExactMatch() {
+        Object.keys(opts).some(k => {                            
+            if (opts[k].text === cntry) { 
+                found = true;
+                volatile.loc.cntryId = opts[k].value;
+                selectCountry(opts[k]);  
+                return true; 
+            }
+            if (opts[k].text.includes(cntry)) { cntries.push(opts[k]); }
+        });  
+    }
+    function selectSimilarCountry() {
+        if (cntries.length === 1) { return selectCountry(cntries[0]); }
+        console.log('########### MORE/LESS THAN ONE CNTRY FOUND. HANDLE! cntries = %O', cntries);
+    }
+}
+function selectCountry(opt) {
+    if ($('#Country-sel')[0].selectize.getValue === opt.value) { return; }
+    return $('#Country-sel')[0].selectize.addItem(opt.value);
 }
 export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  

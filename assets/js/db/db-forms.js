@@ -1359,6 +1359,16 @@ function getAllLocData(locRcrd) {
 function initLocForm(val) {                                                     //console.log("Adding new loc! val = %s", val);
     const fLvl = getSubFormLvl("sub");
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Location', null, fLvl); }
+    if ($('#loc-map').length !== 0) { $('#loc-map').remove(); }
+    buildLocForm(val, fLvl);
+    disableTopFormLocNote();
+    addMapToLocForm('#location_Rows');
+    addNotesToForm();
+    addListenerToGpsFields();
+    scrollToLocFormWindow();
+    return { 'value': '', 'text': 'Creating Location...' };
+}
+function buildLocForm(val, fLvl) {    
     const vals = {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val() }; 
@@ -1367,13 +1377,7 @@ function initLocForm(val) {                                                     
     initComboboxes('location', 'sub');
     enableCombobox('#Country-Region-sel', false);
     $('#DisplayName_row input').focus();
-    disableTopFormLocNote();
     $('#sub-submit').val('Create Location without GPS data');
-    addMapToLocForm('#location_Rows');
-    addNotesToForm();
-    scrollToLocFormWindow();
-    addListenerToGpsFields();
-    return { 'value': '', 'text': 'Creating Location...' };
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 function enableCountryRegionField() {  

@@ -571,8 +571,8 @@ select[id$="txn-lvl"] + div {
 }
 .new-loc-popup {
     font-size: 1.1em;
-    font-weight: 600;
-    justify-content: center;
+    /*font-weight: 600;*/
+    /*justify-content: center;*/
 }
 .new-loc-popup #err {
     color: red;
