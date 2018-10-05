@@ -12,6 +12,7 @@ import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
+import { jsonp } from '../../../node_modules/leaflet-control-geocoder/src/util.js';
 
 let locRcrds, map, geoCoder, poly, volatilePin, popups = {};
 
@@ -60,7 +61,7 @@ function buildAndShowMap(loadFunc, mapId) {                                     
     map.on('click', logLatLng);
     map.on('load', loadFunc);
     addMapTiles(mapId);
-    addGeocoderToMap();
+    addGeoCoderToMap();
     addTipsLegend();
     if (mapId !== 'loc-map') { buildSrchPgMap(); }
     map.setView([22,22], 2);                                                    console.log('map built.')
@@ -123,6 +124,7 @@ function addGeoCoderToMap() {
 }
 function getGeocoderOptions() {
     geoCoder = L.Control.Geocoder.bing('AocU2CuvrrlUIkS8xwGLy1AZVDmWacJ8PHODmFLyOiRYhkU55fUhB1CpEhOz1B2L');
+    geoCoder.geocode = customGeocode;
     return {
         defaultMarkGeocode: false,
         position: 'topleft',
@@ -139,6 +141,32 @@ function drawPolygon(e) {                                                       
         bbox.getSouthWest()
     ]).addTo(map);
     map.fitBounds(poly.getBounds());
+}
+/** Added 'Address' to the geocoding results returned. */
+function customGeocode(query, cb, context) {
+    jsonp(
+        'https://dev.virtualearth.net/REST/v1/Locations',
+        { query: query, key: this.key },
+        buildResultData,
+        this,
+        'jsonp'
+    );
+    function buildResultData(data) {                                            //console.log('data returned = %O', data);
+        var results = [];
+        if (data.resourceSets.length > 0) {
+            for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
+                var resource = data.resourceSets[0].resources[i],
+                bbox = resource.bbox;
+                results[i] = {
+                    name: resource.name,
+                    address: resource.address,
+                    bbox: L.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
+                    center: L.latLng(resource.point.coordinates)
+                };
+            }
+        }
+        cb.call(context, results);
+    }
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */

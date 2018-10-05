@@ -49,3 +49,6 @@ composer.lock
 
 # Local Backups
 /assets/hide/*
+*.sublime-project
+
+*.sublime-workspace
