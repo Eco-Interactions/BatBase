@@ -571,8 +571,6 @@ select[id$="txn-lvl"] + div {
 }
 .new-loc-popup {
     font-size: 1.1em;
-    /*font-weight: 600;*/
-    /*justify-content: center;*/
 }
 .new-loc-popup #err {
     color: red;
@@ -629,10 +627,23 @@ select[id$="txn-lvl"] + div {
 .leaflet-control-geocoder {
     font-size: 16px;
 }
-.leaflet-control-geocoder-icon {
+.leaflet-control-geocoder-icon, .leaflet-control-drag-icon {
     margin: initial;
     padding: initial;
     font-size: initial;
+}
+/* --- Marker Drag Elem --- */
+.leaflet-control-drag-icon {
+    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    border: 2px solid rgba(0,0,0,0.3);
+    background-color: white;
+    background-image: url('./images/move22x22.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    opacity: .666;
 }
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/

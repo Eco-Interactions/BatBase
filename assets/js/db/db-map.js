@@ -452,7 +452,7 @@ export function isCoordInsideCntry(coords, cntry) { //30.6, 5.3 - Algeria
     const latLng = L.latLng(coords);
     // geoCoder.reverse(latLng, null, ifInsideCountry, null);
 
-    function ifInsideCountry(result) { console.log('geocoder result = %O', result);
+    function ifInsideCountry(result) {                                          console.log('geocoder result = %O', result);
         
     }
 }
@@ -565,9 +565,10 @@ export function initFormMap(cntry, rcrds) {                                     
         buildAndShowMap.bind(null, finishFormMap.bind(null, cntry), 'loc-map'));  
 } 
 function finishFormMap(cntryId) {
+    addMarkerDragLegend();
     addLocCountLegend();
     if (cntryId) { showCntryLocs(cntryId); }
-    isCoordInsideCntry('30.6, 5.3', 'Algeria');
+    // isCoordInsideCntry('30.6, 5.3', 'Algeria');
 }
 function showCntryLocs(id) {
     const cntry = locRcrds[id];
@@ -621,4 +622,32 @@ function addCountToLegend(ttlLocs, noGpsDataCnt, cntry) {
 function getLocName(name) {
     name = name.split('[')[0];                                
     return name.length < 22 ? name : name.substring(0, 19)+'...';
+}
+/*--- Drag Marker Legend ---*/
+function addMarkerDragLegend() {
+    addDragControl();
+    L.control.drag({ position: 'topleft' }).addTo(map);
+}
+function addDragControl() {
+    L.Control.Drag = L.Control.extend({
+        onAdd: function(map) {
+            const bttn = createDragBttn();
+            L.DomEvent.on(bttn, 'click', enableDrag.bind(null, bttn));
+            return bttn;
+        },
+        onRemove: function(map) {}
+    });
+    L.control.drag = function(opts) {return new L.Control.Drag(opts);}
+}
+function createDragBttn() {
+    const className = 'leaflet-control-drag',
+        container = L.DomUtil.create('div', className),
+        button = L.DomUtil.create('button', className + '-icon', container);
+    
+    $(button).attr('disabled', 'disabled');
+    $(container).attr('title', "Drag a new location's map pin.").append(button);
+    return container;
+}
+function enableDrag(bttn) {                                                     console.log('drag enabled!')
+    // click event reloads page for some reason...    
 }
