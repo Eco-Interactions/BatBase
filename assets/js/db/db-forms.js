@@ -1376,8 +1376,8 @@ function buildLocForm(val, fLvl) {
         'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
     initComboboxes('location', 'sub');
     enableCombobox('#Country-Region-sel', false);
-    $('#DisplayName_row input').focus();
-    $('#sub-submit').val('Create Location without GPS data');
+    $('#Latitude_row input').focus();
+    $('#sub-submit').val('Create without GPS data');
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 function enableCountryRegionField() {  
@@ -1391,18 +1391,18 @@ function scrollToLocFormWindow() {
     $('#form-main')[0].scrollTo(0, 150); 
 }
 function addNotesToForm() {
-    $('#location_Rows').before(getHowToCreateLocWithoutGpsDataNote());
     $('#Latitude_row').before(getHowToCreateLocWithGpsDataNote());
+    $('#DisplayName_row').before(getHowToCreateLocWithoutGpsDataNote());
+}
+function getHowToCreateLocWithGpsDataNote(argument) {
+    return `<p class="loc-gps-note" style="margin-top: 5px;">If GPS data available, 
+        enter all data and see the added green pin's popup for <br>the"Create Location"
+        button, and for name suggestions.</p>`;
 }
 function getHowToCreateLocWithoutGpsDataNote() {
     return `<p class="loc-gps-note">No GPS data? Fill 
-        in available data and click "Create Location without GPS data" at the 
-        bottom of the form.</p>`;
-}
-function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note" style="margin-top: 5px;">With GPS data, enter 
-        the coordinates and then select "Create Location" from the added green 
-        pin's popup.</p>`;
+        in available data and click "Create without GPS data" at the bottom of 
+        the form.</p>`;
 }
 /** Prevents the location form's submit button from enabling when GPS data entered.*/
 function locHasGpsData(fLvl) {
@@ -2704,8 +2704,8 @@ function getFormConfg(entity) {
                 'Elevation', 'ElevationMax'],
             'optional': [],
             'order': {
-                'sug': ['DisplayName', 'Description', 'Country', 'HabitatType', 
-                    'Elevation', 'ElevationMax', 'Latitude', 'Longitude'],
+                'sug': ['Latitude', 'Longitude', 'DisplayName', 'Description', 
+                    'Country', 'HabitatType', 'Elevation', 'ElevationMax' ],
                 'opt': false },
             'exitHandler': { create: enableCountryRegionField }
         },
