@@ -30,6 +30,7 @@ Before Release:
     - Handle multiple habitats of parent country displaying at same point - combine
     - Use enclosures to keep "volatilePin" & "poly" out of the global space
     - Ensure that the country selected contains the point entered
+    - add click to drop pin button
 
 Notes from geocoders:
     - Photon, mapbox, here: 
@@ -52,6 +53,7 @@ Notes from geocoders:
 MEETING NOTES:
     Point out:
         - Entering coordinates first fills country and suggests a display name
+        - Updated countries ith 2-letter iso codes, which revealed a couple duplicate countries. Cleaned up this data.
     Next/future round:
         - Draw areas and select as parent location
         - add "outline" option
@@ -74,8 +76,6 @@ Tullenda:
     - Berenty Reserve's description has typos and seems to be incomplete
 
 >==== Change Log ====
-    > Updated tips legend to toggle.
-    > Added description to location popups
 >---- Add to Client Task List ---
     - 
 

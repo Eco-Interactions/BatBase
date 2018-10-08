@@ -121,7 +121,7 @@ function toggleTips() {
 }
 function addGeoCoderToMap() {
     const opts = getGeocoderOptions();
-    L.Control.geocoder(opts).on('markgeocode', drawPolygon).addTo(map);         
+    L.Control.geocoder(opts).on('markgeocode', drawPolygonAndUpdateUi).addTo(map);         
 }
 function getGeocoderOptions() {
     geoCoder = L.Control.Geocoder.nominatim(); 
@@ -131,8 +131,11 @@ function getGeocoderOptions() {
         geocoder: geoCoder
     };
 }
-function drawPolygon(e) {                                                       console.log("geocoding results = %O", e);
-    const bbox = e.geocode.bbox;
+function drawPolygonAndUpdateUi(e) {                                            console.log("geocoding results = %O", e);
+    drawPolygon(e.geocode.bbox);
+    showNearbyLocationsAndUpdateForm(e.geocode.properties);
+}
+function drawPolygon(bbox) {
     if (volatile.poly) { map.removeLayer(volatile.poly); }
     volatile.poly = L.polygon([
         bbox.getSouthEast(),
@@ -140,33 +143,7 @@ function drawPolygon(e) {                                                       
         bbox.getNorthWest(),
         bbox.getSouthWest()
     ]).addTo(map);
-    map.fitBounds(poly.getBounds());
-}
-/** Bing geocoder used for reverse geocoding. */
-function reverseGeocode(loc, cb, context) {
-      jsonp( //uses bing for reverse
-        '//dev.virtualearth.net/REST/v1/Locations/' + loc.lat + ',' + loc.lng,
-        { key:'AocU2CuvrrlUIkS8xwGLy1AZVDmWacJ8PHODmFLyOiRYhkU55fUhB1CpEhOz1B2L'},
-        buildResultData.bind(null, cb, context),
-        this,
-        'jsonp'
-      );
-}
-function buildResultData(cb, context, data) {                                   console.log('data returned = %O', data);
-    var results = [];
-    if (data.resourceSets.length > 0) {
-        for (var i = data.resourceSets[0].resources.length - 1; i >= 0; i--) {
-            var resource = data.resourceSets[0].resources[i],
-            bbox = resource.bbox;
-            results[i] = {
-                name: resource.name,
-                address: resource.address,
-                bbox: L.latLngBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]]),
-                center: L.latLng(resource.point.coordinates)
-            };
-        }
-    }
-    cb.call(context, results);
+    map.fitBounds(volatile.poly.getBounds());
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
@@ -449,20 +426,23 @@ function showTable() {
     $('#borderLayout_eRootPanel, #tbl-tools, #tbl-opts').fadeTo(100, 1);
 }
 /*===================== Location Form Methods ================================*/
-export function isCoordInsideCntry(coords, cntry) { //30.6, 5.3 - Algeria
-    const latLng = L.latLng(coords);
-    // geoCoder.reverse(latLng, null, ifInsideCountry, null);
-
-    function ifInsideCountry(result) {                                          console.log('geocoder result = %O', result);
-        
-    }
+/** Shows all location in containing country and selects the country in the form. */
+function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
+    if (map._container.id !== 'loc-map' || !results) { return; }
+    const cntryId = _u.getDataFromStorage('countryCodes')[results.address.country_code.toUpperCase()];   //console.log('cntryId = ', cntryId);
+    if (!cntryId) { console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
+    showCntryLocs(cntryId, 'noZoom');
+    $('#Country-Region-sel')[0].selectize.addItem(cntryId);
 }
 export function addVolatileMapPin(val) {  
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();
     if (!latLng) { return; }
-    reverseGeocode(latLng, updateMapPin.bind(null, latLng), null);
+    geoCoder.reverse(
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng), null);
+    clearLocCountLegend();
 }
+/* ---- Get GPS Field Values or Report Field Err ---- */
 function gpsFieldsFilled() {
     return ['Latitude', 'Longitude'].every(field => {
         return $(`#${field}_row input`).val();
@@ -484,26 +464,38 @@ function coordHasErr(field) {
     const max = field === 'Latitude' ? 90 : 180;
     return isNaN(coord) ? true : coord > max ? true : false;    
 }
-function updateMapPin(latLng, results) {                                        console.log('updateMapPin. point = %O results = %O', latLng, results);
-    const loc = results.length ? buildLocData(results[0]) : null;
+/* ---- Update Form UI After Reverse Geocode Success ---- */
+/** 
+ * Draws containing polygon on map, shows all locations in containing country,
+ * and adds a map pin for the entered coodinates. 
+ */
+function updateUiAfterFormGeocode(latLng, results) {                            //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
+    if (!results.length) { return updateMapPin(latLng, null); }
+    drawResultingPolygon(results[0].properties.boundingbox);
+    updateMapPin(latLng, results[0]);
+}
+function drawResultingPolygon(bbox) {
+    for (var j = 0; j < 4; j++) bbox[j] = parseFloat(bbox[j]);
+    drawPolygon(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
+}
+function updateMapPin(latLng, results) {                                        //console.log('updateMapPin. point = %O name = %O', latLng, name);
+    const loc = results ? buildLocData(results.properties, results.name) : null;
     replaceMapPin(latLng, loc);  
 }
-function buildLocData(data) {
-    const name = !data.address.adminDistrict2 ? data.address.formattedAddress :
-        data.address.formattedAddress.includes(data.address.adminDistrict2) ?
-        data.address.formattedAddress : 
-        data.address.adminDistrict2 + ', ' + data.address.formattedAddress;
+function buildLocData(data, name) {                                             //console.log('buildLocData. data = %O', data);
     return {
-        cntry: data.address.countryRegion,
-        cntryId: null,
+        cntryId: _u.getDataFromStorage('countryCodes')[data.address.country_code.toUpperCase()],
         name: name
     };
 }
 function replaceMapPin(latLng, loc) {
     const marker = new MM.LocMarker(latLng, loc, null, 'new-loc');
     removePreviousMapPin(loc);
-    addPinToMap(latLng, marker.layer);
-    fillCountryInForm(loc);
+    if (loc) { 
+        $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
+        showCntryLocs(loc.cntryId, 'noZoom');
+    }
+    addPinToMap(latLng, marker.layer);   
 }
 function removePreviousMapPin(loc) { 
     if (!volatile.pin) { return volatile.loc = loc; }  
@@ -517,48 +509,6 @@ function resetPinLoc(loc) {
 function addPinToMap(latLng, pin) {
     volatile.pin = pin;
     map.addLayer(pin);
-    map.setView(latLng, 5, {animate: true});
-}
-function fillCountryInForm(loc) {
-    if (!loc) { return clearPreviousData(volatile.prevLoc); }
-    selectCountryInForm(loc.cntry);
-}
-/*---- Clear previously auto-filled data ----*/
-function clearPreviousData(prevLoc) {
-    if (!prevLoc) { return; }
-    clearPrevCntry(prevLoc.cntryId);
-}
-function clearPrevCntry(id) {
-    if (!$('#Country-sel')[0].selectize.getValue === id) { return; }
-    $('#Country-sel')[0].selectize.clear();
-}
-/*---- Auto-fill location data ----*/
-function selectCountryInForm(cntry) {                                           //console.log('cntry = ', cntry);
-    let found;
-    const opts = $('#Country-sel')[0].selectize.options;                        //console.log('opts = %O', opts)
-    const cntries = [];
-    filterCountriesAndSelectExactMatch();
-    if (!found) { selectSimilarCountry(); }
-
-    function filterCountriesAndSelectExactMatch() {
-        Object.keys(opts).some(k => {                            
-            if (opts[k].text === cntry) { 
-                found = true;
-                volatile.loc.cntryId = opts[k].value;
-                selectCountry(opts[k]);  
-                return true; 
-            }
-            if (opts[k].text.includes(cntry)) { cntries.push(opts[k]); }
-        });  
-    }
-    function selectSimilarCountry() {
-        if (cntries.length === 1) { return selectCountry(cntries[0]); }
-        console.log('########### MORE/LESS THAN ONE CNTRY FOUND. HANDLE! cntries = %O', cntries);
-    }
-}
-function selectCountry(opt) {
-    if ($('#Country-sel')[0].selectize.getValue === opt.value) { return; }
-    return $('#Country-sel')[0].selectize.addItem(opt.value);
 }
 export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
@@ -569,12 +519,12 @@ function finishFormMap(cntryId) {
     addMarkerDragLegend();
     addLocCountLegend();
     if (cntryId) { showCntryLocs(cntryId); }
-    // isCoordInsideCntry('30.6, 5.3', 'Algeria');
 }
-function showCntryLocs(id) {
+function showCntryLocs(id, noZoom) {
     const cntry = locRcrds[id];
     const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
     addChildLocsToMap(cntry, cntryLatLng);
+    if (noZoom) { return; }
     map.setView(cntryLatLng, 4, {animate: true});  
 }
 function addChildLocsToMap(cntry, coords) {
@@ -619,6 +569,9 @@ function addCountToLegend(ttlLocs, noGpsDataCnt, cntry) {
     $('#cnt-legend').html(`
         <h3 title='${cntry.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
         ${noGpsDataHtml ? noGpsDataHtml : ''}`);
+}
+function clearLocCountLegend() {
+    $('#cnt-legend').html('');
 }
 function getLocName(name) {
     name = name.split('[')[0];                                
