@@ -563,13 +563,20 @@ function separateTaxaByLevelAndRealm(taxa) {
  */
 function deriveAndStoreLocationData(data) {                                     //console.log('loc data to store = %O', data);
     const regns = getTypeObj(data.locationType, 'region', 'locations');
-    const cntrys = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntrys);
-    storeData('countryNames', getNameDataObj(cntrys, data.location));
+    const cntries = getTypeObj(data.locationType, 'country', 'locations');       //console.log('reg = %O, cntry = %O', regns, cntries);
+    storeData('countryNames', getNameDataObj(cntries, data.location));
+    storeData('countryCodes', getCodeNameDataObj(cntries, data.location));
     storeData('regionNames', getNameDataObj(regns, data.location));
     storeData('topRegionNames', getTopRegionNameData(data, regns));
     storeData('habTypeNames', getTypeNameData(data.habitatType));
     storeData('locTypeNames', getTypeNameData(data.locationType));
     storeData('location', addInteractionTotalsToLocs(data.location));
+}
+/** Return an obj with the 2-letter ISO-country-code (k) and the country id (v).*/
+function getCodeNameDataObj(ids, rcrds) { 
+    const data = {};
+    ids.forEach(id => data[rcrds[id].isoCode] = id);                            //console.log("codeNameDataObj = %O", data);
+    return data;
 }
 function getTopRegionNameData(locData, regns) {  
     const data = {};

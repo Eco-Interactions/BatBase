@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Fills in the display_point property of country geoJson objects. 
  */
-class Version20180927162956 extends AbstractMigration implements ContainerAwareInterface
+class Version20180927162956DisplayPoint extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;

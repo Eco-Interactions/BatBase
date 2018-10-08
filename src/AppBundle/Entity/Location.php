@@ -45,9 +45,9 @@ class Location
 
     /**
      * @var string
+     * 2 letter country code.
      *
      * @ORM\Column(name="iso_code", type="string", length=255, nullable=true)
-     * @JMS\Expose
      */
     private $isoCode;
 
@@ -138,7 +138,7 @@ class Location
     /**
      * @var \AppBundle\Entity\GeoJson
      *
-     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location")
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\GeoJson", mappedBy="location", cascade={"persist"})
      */
     private $geoJson;
 
@@ -281,6 +281,8 @@ class Location
 
     /**
      * Get isoCode.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("isoCode")
      *
      * @return string
      */
@@ -288,7 +290,6 @@ class Location
     {
         return $this->isoCode;
     }
-
 
     /**
      * Set elevation.
@@ -637,6 +638,13 @@ class Location
     public function setGeoJson(\AppBundle\Entity\GeoJson $geoJson)
     {
         $this->geoJson = $geoJson;
+
+        return $this;
+    }
+
+    public function removeGeoJson()
+    {
+        $this->geoJson = null;
 
         return $this;
     }

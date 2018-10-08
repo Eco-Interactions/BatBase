@@ -232,6 +232,13 @@ class GeoJson
         return $this;
     }
 
+    public function removeLocation()
+    {
+        $this->location = null;
+
+        return $this;
+    }
+
     /**
      * Get location.
      *
