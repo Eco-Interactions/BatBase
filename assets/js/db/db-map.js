@@ -63,6 +63,7 @@ function buildAndShowMap(loadFunc, mapId) {                                     
     addMapTiles(mapId);
     addGeoCoderToMap();
     addTipsLegend();
+    L.control.scale({position: 'bottomright'}).addTo(map);
     if (mapId !== 'loc-map') { buildSrchPgMap(); }
     map.setView([22,22], 2);                                                    console.log('map built.')
 }
