@@ -36,6 +36,7 @@ class GeoJson
 
     /**
      * @var string
+     * String array of coordinates - [ long, lat ] (GeoJson format)
      *
      * @ORM\Column(name="coordinates", type="text", nullable=false)
      * @JMS\Expose
@@ -44,11 +45,18 @@ class GeoJson
 
     /**
      * @var string 
-     * String array of coordinates - [ long, lat ]
+     * String array of coordinates - [ long, lat ] (GeoJson format)
      *
-     * @ORM\Column(name="display_point", type="string", length=255, nullable=true)
+     * @ORM\Column(name="display_point", type="string", length=255, nullable=false)
      */
     private $displayPoint;
+
+    /**
+     * @var string 
+     *
+     * @ORM\Column(name="loc_name", type="string", length=255, nullable=false)
+     */
+    private $locationName;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -198,6 +206,8 @@ class GeoJson
 
     /**
      * Get displayPoint.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("displayPoint")
      *
      * @return text
      */
@@ -207,16 +217,31 @@ class GeoJson
     }
 
     /**
-     * Get center point.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("displayPoint")
+     * Set locationName.
      *
-     * @return int
+     * @param text $locationName
+     *
+     * @return GeoJson
      */
-    public function serializeDisplayPoint()
+    public function setLocationName($locationName)
     {
-        return $this->displayPoint;
+        $this->locationName = $locationName;
+
+        return $this;
     }
+
+    /**
+     * Get locationName.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("displayName")
+     *
+     * @return text
+     */
+    public function getLocationName()
+    {
+        return $this->locationName;
+    }
+
 
     /**
      * Set location.
@@ -260,19 +285,7 @@ class GeoJson
     {
         return $this->location->getId();
     }
-
-    /**
-     * Get location Id.
-     * @JMS\VirtualProperty
-     * @JMS\SerializedName("displayName")
-     *
-     * @return string
-     */
-    public function getLocationName()
-    {
-        return $this->location->getDisplayName();
-    }
-
+    
     /**
      * Set createdBy user.
      *
