@@ -676,7 +676,10 @@ class Location
     }
     private function isHabitat()
     {
-        return $this->locationType->getDisplayName() === 'Habitat';
+        if ($this->locationType->getDisplayName() !== 'Habitat') { return false;}
+        $pName = $this->parentLoc->getDisplayName();
+        $habitat = $this->getHabitatType()->getDisplayName();
+        return $this->getDisplayName() == $pName.'-'.$habitat;
     }
 
     /**

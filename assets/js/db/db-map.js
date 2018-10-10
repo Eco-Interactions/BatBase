@@ -12,7 +12,6 @@ import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
-import { jsonp } from '../../../node_modules/leaflet-control-geocoder/src/util.js';
 
 let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
@@ -555,6 +554,7 @@ function addChildLocsToMap(cntry, coords) {
 
     function addLocsWithGpsDataToMap() {
         locs.forEach(loc => {
+            if (cntry.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
             const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
             if (!latLng) { return noGpsLocs.push(loc); }
             const Marker = new MM.LocMarker(latLng, loc, locRcrds, 'form');
@@ -563,7 +563,7 @@ function addChildLocsToMap(cntry, coords) {
     }
     function addLocsWithoutGpsDataToMap(cnt) {  
         const Marker = cnt === 1 ? 
-            new MM.LocMarker(coords, cntry, locRcrds, 'form-noGps') : 
+            new MM.LocMarker(coords, noGpsLocs, locRcrds, 'form-noGps') : 
             new MM.LocCluster(map, cnt, coords, noGpsLocs, locRcrds, 'form-noGps');
         map.addLayer(Marker.layer);
     }

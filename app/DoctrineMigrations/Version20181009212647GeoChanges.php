@@ -63,13 +63,16 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
             'Cocos (Keeling) Islands' => [96.871, -12.1642],
             'Tokelau' => [-171.8484, -9.2002],
             'Jersey' => [-2.1312, 49.2144],    
-            'Oceania' => [140.0188, -22.7359]        
+            'Oceania' => [140.0188, -22.7359],
+            'Yasuni National Park' => [-75.8069082,-1.1006555]        
         ];
 
         foreach ($points as $name => $coordinates) {
             $geoJson = $this->em->getRepository('AppBundle:GeoJson')
                 ->findOneBy(['locationName' => $name]);
             $geoJson->setDisplayPoint(json_encode($coordinates));
+
+            if ($name === 'Yasuni National Park') { $geoJson->setType('Point'); }
 
             if ($geoJson->getType() == 'Point') {
                 $geoJson->setCoordinates(json_encode($coordinates));

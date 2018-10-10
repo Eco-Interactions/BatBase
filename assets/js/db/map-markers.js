@@ -49,12 +49,15 @@ export class LocMarker extends Marker {
         this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
-    openPopup(e) {                                                              
+    openPopup(e) {                         
+        const map = {
+            'form': getLocDetailsHtml, 'form-noGps': getNoGpsLocDetailsHtml, 
+            'new-loc': getNewLocHtml 
+        };                 
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) { console.log('buildingPopup')
-            const content = this.formMarker == 'new-loc' ? getNewLocHtml(this.loc) : 
-                this.formMarker == 'form' ? getLocDetailsHtml(this.loc) : 
-                getLocationSummaryHtml(this.loc);
+        if (!this.popup.getContent()) { 
+            const content = this.formMarker ? 
+                map[this.formMarker](this.loc) : getLocationSummaryHtml(this.loc);                
             this.popup.setContent(content);
         }
         this.self.openPopup();
@@ -379,9 +382,9 @@ function getDescHtml(loc, strLngth) {
     return `<span title="${loc.description.replace(/"/g, '&quot;')}">Description: 
         <b>${desc}</b></span>`;
 }
-function getHabTypeHtml(loc) {
+function getHabTypeHtml(loc, leaveBlank) {
     if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
-    if (!loc.habitatType) { return 'Habitat Type:'; }
+    if (!loc.habitatType) { return leaveBlank ? '' : 'Habitat Type:'; }
     return `Habitat: <b>${loc.habitatType.displayName}</b>`;
 }
 function getCoordsHtml(loc) {
@@ -398,63 +401,11 @@ function getSelectLocationBttn(loc) {
     $(bttn).css({'margin-top': '.5em'});
     return bttn;
 }
-/* -------- Location Details Popup ------------- */
-function getLocDetailsHtml(loc) {
-    const div = _u.buildElem('div', { class: 'flex-col' });
-    const html = buildDetailsHtml(loc);
-    const bttn = getSelectLocationBttn(loc);
-    $(div).append([html, bttn]);
-    return div;
-}
-function buildDetailsHtml(loc) {                                                //console.log('buildDetailsHtml loc = %O', loc);
-    const name = `<div style="font-size:1.2em; margin-bottom: .5em;"><b>
-        ${loc.displayName}</b></div>`;
-    const cntnr = document.createElement('div');
-    const habType = getHabTypeHtml(loc);
-    const elev = getElevHtml(loc);
-    const coords = getCoordsHtml(loc);
-    const desc = getDescHtml(loc, 88);
-    $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);   
-    return cntnr;
-}
-function getElevHtml(loc) {
-    if (!loc.elevation) { return; }
-    const elev = `Elevation: <b>${loc.elevation}</b>`;
-    const elevMax = loc.elevationMax ? 
-        `&nbsp; Elevation Max: <b>${loc.elevationMax}</b>` : null;
-    return [elev, elevMax].filter(e => e);
-}
-/* --- No Gps Loc Details ---*/
-/** Locations without GPS data are clustered together on the location form map. */
-function getNoGpsLocDetailsHtml(locs) {                                         //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
-    const div = document.createElement('div');
-    const hdr = getNoGpsHdr(locs.length);
-    const locHtml = locs.map(loc => buildLocDetailHtml(loc));
-    $(div).append([hdr, ...locHtml]);
-    return div;
-}
-function getNoGpsHdr(cnt) {
-    return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
-        </div><span>Hover over a location name to see the location data.</span><br>`;
-}
-function buildLocDetailHtml(loc) {
-    const cntnr = _u.buildElem('div', {class: 'info-tooltip'});
-    const locDetails = _u.buildElem('div', {class: 'tip'});
-    const bttn = getSelectLocationBttn(loc);
-    $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
-    $(cntnr).append([loc.displayName, locDetails]);
-    return cntnr;
-}
-function buildLocDetails(loc) {
-    const name = `<span style="font-size:1.1em; margin-bottom: .5em;"><b>
-        ${loc.displayName}</b></span>`;
-    const habType = getHabTypeHtml(loc);
-    const elev = getElevHtml(loc);
-    const desc = getDescHtml(loc, 88);
-    return [name, habType, elev, desc].filter(e => e).join('<br>'); 
-}
-/** ------- Location Summary Popup ------------- */
-/** Returns additional details (html) for interactions at the location. */
+/** ========== Location Summary Popup ============== */
+/** 
+ * Returns additional details (html) for interactions at the location. 
+ * Used when displaying interactions by location on the search page.
+*/
 export function getLocationSummaryHtml(loc, rcrds) {                            //console.log('loc = %O rcrds = %O', loc, rcrds);
     locRcrds = locRcrds || rcrds;
     return getLocSummaryPopup(loc);
@@ -602,7 +553,64 @@ function buildToTableButton(loc) {
 function showLocTableView(loc) {
     db_page.showLocInDataTable(loc);
 }
-/* ---------- New Location Popup ----------------- */
+/* ============ Location Details Popup ================== */
+/* Used for locations displayed in forms. */
+function getLocDetailsHtml(loc) {
+    const div = _u.buildElem('div', { class: 'flex-col' });
+    const html = buildDetailsHtml(loc);
+    const bttn = getSelectLocationBttn(loc);
+    $(div).append([html, bttn]);
+    return div;
+}
+function buildDetailsHtml(loc) {                                                //console.log('buildDetailsHtml loc = %O', loc);
+    const name = `<div style="font-size:1.2em; margin-bottom: .5em;"><b>
+        ${loc.displayName}</b></div>`;
+    const cntnr = document.createElement('div');
+    const habType = getHabTypeHtml(loc);
+    const elev = getElevHtml(loc);
+    const coords = getCoordsHtml(loc);
+    const desc = getDescHtml(loc, 88);
+    $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);   
+    return cntnr;
+}
+function getElevHtml(loc) {
+    if (!loc.elevation) { return; }
+    const elev = `Elevation: <b>${loc.elevation}</b>`;
+    const elevMax = loc.elevationMax ? 
+        `&nbsp; Elevation Max: <b>${loc.elevationMax}</b>` : null;
+    return [elev, elevMax].filter(e => e);
+}
+/* --- No Gps Loc Details ---*/
+/** Locations without GPS data are clustered together on the location form map. */
+function getNoGpsLocDetailsHtml(locs) {                                         //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
+    const div = document.createElement('div');
+    const hdr = getNoGpsHdr(locs.length);
+    const locHtml = locs.map(loc => buildLocDetailHtml(loc));
+    $(div).append([hdr, ...locHtml]);
+    return div;
+}
+function getNoGpsHdr(cnt) {
+    return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
+        </div><span>Hover over a location name to see the location data.</span><br>`;
+}
+function buildLocDetailHtml(loc) {  
+    const cntnr = _u.buildElem('div', {class: 'info-tooltip'});
+    const locDetails = _u.buildElem('div', {class: 'tip'});
+    const bttn = getSelectLocationBttn(loc);
+    $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
+    $(cntnr).append([loc.displayName, locDetails]);
+    return cntnr;
+}
+function buildLocDetails(loc) {
+    const name = `<span style="font-size:1.1em; margin-bottom: .5em;"><b>
+        ${loc.displayName}</b></span>`;
+    const habType = getHabTypeHtml(loc, 'leaveBlank');
+    const elev = getElevHtml(loc);
+    const desc = getDescHtml(loc, 88);
+    return [name, habType, elev, desc].filter(e => e).join('<br>'); 
+}
+/* ============ New Location Popup ============== */
+/** Used when displaying a potential new location on the form. */
 function getNewLocHtml(loc) {                                                   console.log('buildingNewLocationPopup')
     const cntnr = _u.buildElem('div', {class: 'flex-col new-loc-popup'});
     const text = getNewLocText(loc);
