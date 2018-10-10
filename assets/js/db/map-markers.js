@@ -135,10 +135,11 @@ export class LocCluster extends Marker {
         this.formMarker = formMarker;
         locRcrds = rcrds;
         this.popup.options.closeOnClick = false;
-        const markerOptions = !formMarker ? {} : {
-            iconCreateFunction: () => L.divIcon({ html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32) })
+        const opts = !formMarker ? false : {
+            iconCreateFunction: () => L.divIcon({ 
+                html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
         }; 
-        this.self = L.markerClusterGroup(markerOptions);
+        this.self = opts ? L.markerClusterGroup(opts) : L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
         this.map.on('popupclose', this.closeLayerPopup);

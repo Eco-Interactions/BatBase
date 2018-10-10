@@ -22,7 +22,7 @@ fixLeafletBug();
 /** =================== Init Methods ======================================== */
 function requireCss() {
     require('../../../node_modules/leaflet/dist/leaflet.css');
-    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
+    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
     require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
     require('../../../node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css');
 }
