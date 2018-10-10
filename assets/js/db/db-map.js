@@ -131,11 +131,12 @@ function getGeocoderOptions() {
     };
 }
 function drawPolygonAndUpdateUi(e) {                                            console.log("geocoding results = %O", e);
-    drawPolygon(e.geocode.bbox);
+    drawPolygon(e.geocode.bbox, e.geocode.properties.address);
     showNearbyLocationsAndUpdateForm(e.geocode.properties);
 }
-function drawPolygon(bbox) {
+function drawPolygon(bbox, address) {
     if (volatile.poly) { map.removeLayer(volatile.poly); }
+    if (ifCntryResult(address) && polyDataDrawn(address.country_code)) { return; }
     volatile.poly = L.polygon([
         bbox.getSouthEast(),
         bbox.getNorthEast(),
@@ -143,6 +144,21 @@ function drawPolygon(bbox) {
         bbox.getSouthWest()
     ]).addTo(map);
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
+}
+/** Returns true if the only data returned is Country data. */
+function ifCntryResult(address) {  
+    return Object.keys(address).every(k => {  
+        return ['country', 'country_code'].indexOf(k) !== -1
+    });
+}
+/** Draws Country polygon if available. */
+function polyDataDrawn(code) { 
+    const id = _u.getDataFromStorage('countryCodes')[code.toUpperCase()];
+    const cntry = locRcrds[id];
+    const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
+    if (!geoJson || geoJson.type === 'Point') { return false; }  
+    drawCntryPolygon(cntry, geoJson); 
+    return true;
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
@@ -541,9 +557,15 @@ function drawCntryPolygon(cntry, geoJson) {                                     
 function showCntryLocs(id, noZoom) {  
     const cntry = locRcrds[id];
     const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
+    clearPreviousMarkers();
     addChildLocsToMap(cntry, cntryLatLng);
     if (noZoom) { return; }
     map.setView(cntryLatLng, 8, {animate: true});  
+}
+function clearPreviousMarkers() {
+    if (!volatile.markers) { return volatile.markers = []; } 
+    volatile.markers.forEach(m => map.removeLayer(m)); 
+    volatile.markers = [];
 }
 function addChildLocsToMap(cntry, coords) {
     const noGpsLocs = [];
@@ -559,6 +581,7 @@ function addChildLocsToMap(cntry, coords) {
             if (!latLng) { return noGpsLocs.push(loc); }
             const Marker = new MM.LocMarker(latLng, loc, locRcrds, 'form');
             map.addLayer(Marker.layer);
+            volatile.markers.push(Marker.layer);
         });
     }
     function addLocsWithoutGpsDataToMap(cnt) {  
@@ -566,6 +589,7 @@ function addChildLocsToMap(cntry, coords) {
             new MM.LocMarker(coords, noGpsLocs, locRcrds, 'form-noGps') : 
             new MM.LocCluster(map, cnt, coords, noGpsLocs, locRcrds, 'form-noGps');
         map.addLayer(Marker.layer);
+        volatile.markers.push(Marker.layer);
     }
 }
 function getChildLocData(cntry) {                                               
