@@ -120,7 +120,8 @@ function toggleTips() {
 }
 function addGeoCoderToMap() {
     const opts = getGeocoderOptions();
-    L.Control.geocoder(opts).on('markgeocode', drawPolygonAndUpdateUi).addTo(map);         
+    L.Control.geocoder(opts).on('markgeocode', drawPolygonAndUpdateUi).addTo(map);  
+    $('.leaflet-control-geocoder').attr('title', `Search by name or coordinates`);
 }
 function getGeocoderOptions() {
     geoCoder = L.Control.Geocoder.nominatim(); 
@@ -157,7 +158,7 @@ function polyDataDrawn(code) {
     const cntry = locRcrds[id];
     const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
     if (!geoJson || geoJson.type === 'Point') { return false; }  
-    drawCntryPolygon(cntry, geoJson); 
+    drawLocPolygon(cntry, geoJson); 
     return true;
 }
 /*============== Search Database Page Methods ================================*/
@@ -448,8 +449,8 @@ function showNearbyLocationsAndUpdateForm(results) {                            
         results.address.country_code.toUpperCase() : null;
     if (!cntryCode) { return; console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
     const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
-    showCntryLocs(cntryId, 'noZoom');
-    volatile.cntry = cntryId; 
+    showChildLocs(cntryId, null);
+    volatile.prnt = cntryId; 
     $('#Country-Region-sel')[0].selectize.addItem(cntryId);
 }
 export function addVolatileMapPin(val) {  
@@ -510,7 +511,7 @@ function replaceMapPin(latLng, loc) {
     removePreviousMapPin(loc);
     if (loc) { 
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
-        showCntryLocs(loc.cntryId, 'noZoom');
+        showChildLocs(loc.cntryId, null);
     }
     addPinToMap(latLng, marker.layer);   
 }
@@ -528,58 +529,60 @@ function addPinToMap(latLng, pin) {
     map.addLayer(pin);
     map.setView(latLng, 8, {animate:true});
 }
-export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
+export function initFormMap(parent, rcrds) {                                    console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
-    if (volatile.cntry && cntry == volatile.cntry) { return; }
+    if (volatile.prnt && parent == volatile.prnt) { return; }
     waitForDataThenContinue(
-        buildAndShowMap.bind(null, finishFormMap.bind(null, cntry), 'loc-map'));  
+        buildAndShowMap.bind(null, finishFormMap.bind(null, parent), 'loc-map'));  
 } 
-function finishFormMap(cntryId) {
+function finishFormMap(parentId) {
     addMarkerDragLegend();
     addLocCountLegend();
-    if (!cntryId) { return; }
-    addCntryDataToMap(cntryId);
+    if (!parentId) { return; }
+    addParentLocDataToMap(parentId);
 }
-function addCntryDataToMap(id) {  
-    const cntry = locRcrds[id];
-    const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
+function addParentLocDataToMap(id) {  
+    const loc = locRcrds[id];
+    const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. 
     const hasPolyData = geoJson.type !== 'Point';
-    if (hasPolyData) { drawCntryPolygon(cntry, geoJson); }
-    showCntryLocs(id, hasPolyData);
+    if (hasPolyData) { drawLocPolygon(loc, geoJson); }
+    const zoomLvl = loc.locationType.displayName === 'Region' ? 3 : 8;
+    showChildLocs(id, zoomLvl);
 }
-function drawCntryPolygon(cntry, geoJson) {                                     //console.log('drawing country on map');
-    let feature = buildFeature(cntry, geoJson);
+function drawLocPolygon(loc, geoJson) {                                         //console.log('drawing country on map');
+    let feature = buildFeature(loc, geoJson);
     volatile.poly = L.geoJSON(feature);                                         
     volatile.poly.addTo(map);
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
-function showCntryLocs(id, noZoom) {  
-    const cntry = locRcrds[id];
-    const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
+function showChildLocs(id, zoomLvl) {  
+    const prnt = locRcrds[id];
+    const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
     clearPreviousMarkers();
-    addChildLocsToMap(cntry, cntryLatLng);
-    if (noZoom) { return; }
-    map.setView(cntryLatLng, 8, {animate: true});  
+    addChildLocsToMap(prnt, prntLatLng);
+    if (!zoomLvl) { return; }
+    map.setView(prntLatLng, zoomLvl, {animate: true});  
 }
 function clearPreviousMarkers() {
     if (!volatile.markers) { return volatile.markers = []; } 
     volatile.markers.forEach(m => map.removeLayer(m)); 
     volatile.markers = [];
 }
-function addChildLocsToMap(cntry, coords) {
+function addChildLocsToMap(prnt, coords) {
     const noGpsLocs = [];
-    const locs = getChildLocData(cntry);   
+    const locs = getChildLocData(prnt);   
     addLocsWithGpsDataToMap();
-    addCountToLegend(locs.length, noGpsLocs.length, cntry);
+    addCountToLegend(locs.length, noGpsLocs.length, prnt);
     if (noGpsLocs.length) { addLocsWithoutGpsDataToMap(noGpsLocs.length); }
 
     function addLocsWithGpsDataToMap() {
         locs.forEach(loc => {
-            if (cntry.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
+            if (prnt.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
             const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
             if (!latLng) { return noGpsLocs.push(loc); }
-            const Marker = new MM.LocMarker(latLng, loc, locRcrds, 'form');
+            const tag = 'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
+            const Marker = new MM.LocMarker(latLng, loc, locRcrds, tag);
             map.addLayer(Marker.layer);
             volatile.markers.push(Marker.layer);
         });
@@ -592,8 +595,8 @@ function addChildLocsToMap(cntry, coords) {
         volatile.markers.push(Marker.layer);
     }
 }
-function getChildLocData(cntry) {                                               
-    return cntry.children.map(id => locRcrds[id]).filter(loc => loc.totalInts > 0);
+function getChildLocData(prnt) {                                               
+    return prnt.children.map(id => locRcrds[id]).filter(loc => loc.totalInts > 0);
 }
 /*--- Location Count Legend ---*/
 function addLocCountLegend() {
@@ -604,13 +607,13 @@ function addLocCountLegend() {
 function addLocCountHtml() {
     return _u.buildElem('div', { id: 'cnt-legend', class: 'info legend flex-col'});
 }
-function addCountToLegend(ttlLocs, noGpsDataCnt, cntry) {
+function addCountToLegend(ttlLocs, noGpsDataCnt, prnt) {
     const noGpsDataHtml = noGpsDataCnt === 0 ? null : 
         `<span style="align-self: flex-end;">${noGpsDataCnt} without GPS data</span>`;
     const plural = ttlLocs === 1 ? '' : 's';    
-    let name = getLocName(cntry.displayName);
+    let name = getLocName(prnt.displayName);
     $('#cnt-legend').html(`
-        <h3 title='${cntry.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
+        <h3 title='${prnt.displayName}'>${ttlLocs} location${plural} in ${name}</h3>
         ${noGpsDataHtml ? noGpsDataHtml : ''}`);
 }
 function clearLocCountLegend() {
@@ -637,12 +640,12 @@ function addDragControl() {
     L.control.drag = function(opts) {return new L.Control.Drag(opts);}
 }
 function createDragBttn() {
-    const className = 'leaflet-control-drag',
+    const className = 'custom-icon leaflet-control-drag',
         container = L.DomUtil.create('div', className),
         button = L.DomUtil.create('button', className + '-icon', container);
     
     $(button).attr('disabled', 'disabled');
-    $(container).attr('title', "Drag a new location's map pin.").append(button);
+    $(container).attr('title', "Drag a new location's map pin").append(button);
     return container;
 }
 function enableDrag(bttn) {                                                     console.log('drag enabled!')

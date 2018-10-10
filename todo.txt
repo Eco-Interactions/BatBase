@@ -63,7 +63,13 @@ MEETING NOTES:
         Next:
             - Add button to map that will allow click-to-create on the map (kind of like the drag button)
             - Make marker location more exact (place at a lower lattitude than it should be)
+            - Err handling
+                - ensure that entered coordinates are within selected country
+                    on country change
+                    on form submit
         Future:
+        - Get geojson shape data for all remaining top country/regions. 
+            Lmk if there is one that is needed sooner
         - Draw areas and select as parent location
         - add "outline" option
         - Is location name being optional still a priority?

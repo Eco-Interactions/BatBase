@@ -569,7 +569,7 @@ function initCreateForm() {
     finishCreateFormBuild();
 }      
 function finishCreateFormBuild() {
-    focusCombobox('#Publication-sel');
+    focusCombobox('#Publication-sel', false);
     enableCombobox('#CitationTitle-sel', false);
 }
 /*------------------- Interaction Form Methods (Shared) ----------------------*/ 
@@ -1266,14 +1266,14 @@ function getCntryRegOpts() {
  * with it's child-locations and, for regions, all habitat types. When cleared, 
  * the combobox is repopulated with all locations. 
  * If the map is open, the country is outlined and all existing locations within
- * are displayed @zoomMapToCountryAndShowChildLocs
+ * are displayed @focusParentAndShowChildLocs
  */
 function onCntryRegSelection(val) {                                             //console.log("country/region selected 'val' = ", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
     const loc = fParams.records.location[val];
     fillLocationSelect(loc);
     if (!fParams.editing) { $('#Country-Region_pin').focus(); }
-    if ($('#loc-map').length) { zoomMapToCountryAndShowChildLocs(val); }    
+    if ($('#loc-map').length) { focusParentAndShowChildLocs(val); }    
 }
 /*-------------- Location ------------------------------------------------*/
 /*--------------- Form methods ---------------------------*/
@@ -1401,7 +1401,7 @@ function addNotesToForm() {
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
     return `<p class="loc-gps-note" style="margin-top: 5px;">If GPS data available, 
-        enter all data and see the added green pin's popup for <br>the"Create Location"
+        enter all data and see the added green pin's popup for the<br>"Create Location"
         button, and for name suggestions.</p>`;
 }
 function getHowToCreateLocWithoutGpsDataNote() {
@@ -1458,20 +1458,16 @@ function addLocationSelectionMethodsNote() {
 }
 /** Open popup with the map interface for location selection. */
 function showInteractionFormMap() {                                             console.log('showInteractionFormMap')
+    if ($('#loc-map').length) { return; }
     addMapToLocForm('#Location_row');
+    focusCombobox('#Country-Region-sel', true);
 }
 function addMapToLocForm(elemId) {
     const map = _u.buildElem('div', { id: 'loc-map' }); 
-    const cntryId = getSelectedCountry($('#Country-Region-sel').val());
     $(elemId).after(map);
-    db_map.initFormMap(cntryId, fParams.records.location);
+    db_map.initFormMap($('#Country-Region-sel').val(), fParams.records.location);
 }
-function getSelectedCountry(selId) {
-    if (!selId) { return null; }
-    const selected = fParams.records.location[selId];
-    return selected.locationType.displayName === 'Region' ? null : selId;
-}
-function zoomMapToCountryAndShowChildLocs(val) {                                console.log('zoomMapToCountryAndShowChildLocs - [%s]', val);
+function focusParentAndShowChildLocs(val) {                                     console.log('focusParentAndShowChildLocs - [%s]', val);
     if (!val) { return; }
     db_map.initFormMap(val, fParams.records.location);
 }
@@ -2391,7 +2387,7 @@ function initComboboxes(entity, formLvl) {                                      
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
-            'Country': { name: 'Country', change: zoomMapToCountryAndShowChildLocs, add: false },
+            'Country': { name: 'Country', change: focusParentAndShowChildLocs, add: false },
             'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
                 add: initEdForm.bind(null, 1) },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },

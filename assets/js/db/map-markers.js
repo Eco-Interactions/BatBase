@@ -51,8 +51,8 @@ export class LocMarker extends Marker {
     /** --- Event Handlers --- */
     openPopup(e) {                         
         const map = {
-            'form': getLocDetailsHtml, 'form-noGps': getNoGpsLocDetailsHtml, 
-            'new-loc': getNewLocHtml 
+            'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
+            'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getNewLocHtml 
         };                 
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { 
@@ -257,7 +257,7 @@ function bindClassContextToMethods(self) {
 }
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) { 
-    if (iconType === 'form') { return null; }
+    if (iconType.includes('form')) { return null; }
     const classes = iconType || 'single-marker info';
     return {
         icon: L.divIcon({
@@ -555,10 +555,18 @@ function showLocTableView(loc) {
     db_page.showLocInDataTable(loc);
 }
 /* ============ Location Details Popup ================== */
+/* Used for Countries displayed in forms. */
+function getCountryDetailsHtml(loc) {
+    return getLocDetailsHtml(loc, buldCntryDetailsHtml);
+}
+function buldCntryDetailsHtml(loc) {
+    return `<div style="font-size:1.2em; margin-bottom: .5em;"><b>
+        ${loc.displayName}</b></div>`;
+}
 /* Used for locations displayed in forms. */
-function getLocDetailsHtml(loc) {
+function getLocDetailsHtml(loc, htmlFunc) {
     const div = _u.buildElem('div', { class: 'flex-col' });
-    const html = buildDetailsHtml(loc);
+    const html = htmlFunc ? htmlFunc(loc) : buildDetailsHtml(loc);
     const bttn = getSelectLocationBttn(loc);
     $(div).append([html, bttn]);
     return div;
