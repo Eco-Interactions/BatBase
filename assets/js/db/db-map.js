@@ -143,7 +143,7 @@ function drawPolygon(bbox) {
         bbox.getNorthWest(),
         bbox.getSouthWest()
     ]).addTo(map);
-    map.fitBounds(volatile.poly.getBounds());
+    map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
@@ -429,9 +429,12 @@ function showTable() {
 /** Shows all location in containing country and selects the country in the form. */
 function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
     if (map._container.id !== 'loc-map' || !results) { return; }
-    const cntryId = _u.getDataFromStorage('countryCodes')[results.address.country_code.toUpperCase()];   //console.log('cntryId = ', cntryId);
-    if (!cntryId) { console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
+    const cntryCode = results.address.country_code ? 
+        results.address.country_code.toUpperCase() : null;
+    if (!cntryCode) { return; console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
+    const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
     showCntryLocs(cntryId, 'noZoom');
+    volatile.cntry = cntryId; 
     $('#Country-Region-sel')[0].selectize.addItem(cntryId);
 }
 export function addVolatileMapPin(val) {  
@@ -471,7 +474,6 @@ function coordHasErr(field) {
  */
 function updateUiAfterFormGeocode(latLng, results) {                            //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
     if (!results.length) { return updateMapPin(latLng, null); }
-    drawResultingPolygon(results[0].properties.boundingbox);
     updateMapPin(latLng, results[0]);
 }
 function drawResultingPolygon(bbox) {
@@ -509,23 +511,40 @@ function resetPinLoc(loc) {
 function addPinToMap(latLng, pin) {
     volatile.pin = pin;
     map.addLayer(pin);
+    map.setView(latLng, 8, {animate:true});
 }
 export function initFormMap(cntry, rcrds) {                                     console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
+    if (volatile.cntry && cntry == volatile.cntry) { return; }
     waitForDataThenContinue(
         buildAndShowMap.bind(null, finishFormMap.bind(null, cntry), 'loc-map'));  
 } 
 function finishFormMap(cntryId) {
     addMarkerDragLegend();
     addLocCountLegend();
-    if (cntryId) { showCntryLocs(cntryId); }
+    if (!cntryId) { return; }
+    addCntryDataToMap(cntryId);
 }
-function showCntryLocs(id, noZoom) {
+function addCntryDataToMap(id) {  
+    const cntry = locRcrds[id];
+    const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
+    if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. 
+    const hasPolyData = geoJson.type !== 'Point';
+    if (hasPolyData) { drawCntryPolygon(cntry, geoJson); }
+    showCntryLocs(id, hasPolyData);
+}
+function drawCntryPolygon(cntry, geoJson) {                                     //console.log('drawing country on map');
+    let feature = buildFeature(cntry, geoJson);
+    volatile.poly = L.geoJSON(feature);                                         
+    volatile.poly.addTo(map);
+    map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
+}
+function showCntryLocs(id, noZoom) {  
     const cntry = locRcrds[id];
     const cntryLatLng = getCenterCoordsOfLoc(cntry, cntry.geoJsonId);
     addChildLocsToMap(cntry, cntryLatLng);
     if (noZoom) { return; }
-    map.setView(cntryLatLng, 4, {animate: true});  
+    map.setView(cntryLatLng, 8, {animate: true});  
 }
 function addChildLocsToMap(cntry, coords) {
     const noGpsLocs = [];

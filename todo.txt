@@ -31,6 +31,8 @@ Before Release:
     - Use enclosures to keep "volatilePin" & "poly" out of the global space
     - Ensure that the country selected contains the point entered
     - add click to drop pin button
+    - add error handling for when a loc with no geojson data is selected
+        eg, "Unspecified" region our of the country/region combobox
 
 Notes from geocoders:
     - Photon, mapbox, here: 
@@ -53,8 +55,15 @@ Notes from geocoders:
 MEETING NOTES:
     Point out:
         - Entering coordinates first fills country and suggests a display name
-        - Updated countries ith 2-letter iso codes, which revealed a couple duplicate countries. Cleaned up this data.
+        - Updated countries ith 2-letter iso codes, which revealed a couple 
+            duplicate countries. Cleaned up this data.
+        - Errs that catch invalid coordinates
+            - Ensure all required fields are filled in
     Next/future round:
+        Next:
+            - Add button to map that will allow click-to-create on the map (kind of like the drag button)
+            - Make marker location more exact (place at a lower lattitude than it should be)
+        Future:
         - Draw areas and select as parent location
         - add "outline" option
         - Is location name being optional still a priority?
@@ -62,8 +71,6 @@ MEETING NOTES:
             - add button to "drag" pin
                 - ultimately help adjust display point for country
 
-        - Errs that catch invalid coordinates
-            - Ensure all required fields are filled in
         - Improve search results
 
 

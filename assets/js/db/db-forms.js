@@ -1265,11 +1265,15 @@ function getCntryRegOpts() {
  * When a country or region is selected, the location dropdown is repopulated 
  * with it's child-locations and, for regions, all habitat types. When cleared, 
  * the combobox is repopulated with all locations. 
+ * If the map is open, the country is outlined and all existing locations within
+ * are displayed @zoomMapToCountryAndShowChildLocs
  */
 function onCntryRegSelection(val) {                                             //console.log("country/region selected 'val' = ", val);
     if (val === "" || isNaN(parseInt(val))) { return fillLocationSelect(null); }          
-    fillLocationSelect(fParams.records.location[val]);
+    const loc = fParams.records.location[val];
+    fillLocationSelect(loc);
     if (!fParams.editing) { $('#Country-Region_pin').focus(); }
+    if ($('#loc-map').length) { zoomMapToCountryAndShowChildLocs(val); }    
 }
 /*-------------- Location ------------------------------------------------*/
 /*--------------- Form methods ---------------------------*/
@@ -1319,7 +1323,8 @@ function getOptsForLoc(loc) {
  */     
 function onLocSelection(val) {                                                  //console.log("location selected 'val' = '"+ val+"'");
     if (val === 'create') { return openCreateForm('Location'); }
-    if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }          
+    if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }   
+    if ($('#loc-map').length) { removeLocMap(); }
     var locRcrd = fParams.records.location[val];                                //console.log("location = %O", locRcrd);
     var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     setSelVal('#Country-Region-sel', prntVal, 'silent');
@@ -1420,6 +1425,7 @@ export function selectLoc(id) {
     setSelVal('#Location-sel', id);
     enableCountryRegionField();
     enableCombobox('#Location-sel');
+    removeLocMap();
 }
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
@@ -1465,25 +1471,12 @@ function getSelectedCountry(selId) {
     const selected = fParams.records.location[selId];
     return selected.locationType.displayName === 'Region' ? null : selId;
 }
-function zoomMapToCountry(val) {                                                console.log('zoomMapToCountry - [%s]', val);
+function zoomMapToCountryAndShowChildLocs(val) {                                console.log('zoomMapToCountryAndShowChildLocs - [%s]', val);
     if (!val) { return; }
-    const fLvl = fParams.forms['location'];
-    // if (ifCoordFieldsFilled(fLvl)) {
-    //     if (ifCoordsNotWithinCountry(fParams.records.location[val])) {
-    //         return reportFormFieldErr('Country', 'coordsOutside', fLvl);
-    //     }
-    // }
     db_map.initFormMap(val, fParams.records.location);
-    db_map.addVolatileMapPin('redrop');
 }
-function ifCoordFieldsFilled(fLvl) {
-    return ['Latitude', 'Longitude'].every(field => {
-        return $(`#${field}_row input`).val();
-    });
-}
-function ifCoordsNotWithinCountry(cntry) {
-    if (!hasPolygonData(cntry)) { return false; } //TODO: Figure a way to ensure the two points share a country after implementing geocoding
-    //TODO
+function removeLocMap() {
+    $('#loc-map').fadeTo(400, 0, () => $('#loc-map').remove());
 }
 /*------------------------------ Taxon ---------------------------------------*/
 /** ----------------------- Params ------------------------------------- */
@@ -2398,7 +2391,7 @@ function initComboboxes(entity, formLvl) {                                      
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
-            'Country': { name: 'Country', change: zoomMapToCountry, add: false },
+            'Country': { name: 'Country', change: zoomMapToCountryAndShowChildLocs, add: false },
             'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
                 add: initEdForm.bind(null, 1) },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },
