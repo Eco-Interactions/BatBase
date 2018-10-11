@@ -650,7 +650,7 @@ button.custom-icon {
     background-repeat: no-repeat;
     background-position: center;
     border: none;
-    background-size: 20px 20px;
+    background-size: 17px 17px;
     margin: initial;
     padding: initial;
     font-size: initial;
@@ -662,6 +662,10 @@ button.custom-icon {
 /* --- Create New Loc Elem --- */
 .leaflet-control-create-icon {
     background-image: url('./images/plus.svg');
+}
+/* --- Click To Create New Loc Elem --- */
+.leaflet-control-click-create-icon {
+    background-image: url('./images/mouse-pointer.svg');
 }
 /* --- Draw New Loc Boundary Elem --- */
 .leaflet-control-draw-icon {
