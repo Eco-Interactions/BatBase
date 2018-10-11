@@ -536,15 +536,17 @@ export function initFormMap(parent, rcrds) {                                    
         buildAndShowMap.bind(null, finishFormMap.bind(null, parent), 'loc-map'));  
 } 
 function finishFormMap(parentId) {
-    addMarkerDragLegend();
     addLocCountLegend();
+    addNewLocLegend();
+    addDrawNewLocBoundaryLegend();
+    addMarkerDragLegend();
     if (!parentId) { return; }
     addParentLocDataToMap(parentId);
 }
 function addParentLocDataToMap(id) {  
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
-    if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. 
+    if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. eg, "Unspecified region"
     const hasPolyData = geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson); }
     const zoomLvl = loc.locationType.displayName === 'Region' ? 3 : 8;
@@ -622,6 +624,63 @@ function clearLocCountLegend() {
 function getLocName(name) {
     name = name.split('[')[0];                                
     return name.length < 22 ? name : name.substring(0, 19)+'...';
+}
+/*--- Create New Location Legend ---*/
+function addNewLocLegend() {
+    addNewLocControl();
+    L.control.create({ position: 'topleft' }).addTo(map);
+}
+function addNewLocControl() {
+    L.Control.Create = L.Control.extend({
+        onAdd: function(map) {
+            const bttn = createNewLocBttn();
+            L.DomEvent.on(bttn, 'click', createNewLoc.bind(null, bttn));
+            return bttn;
+        },
+        onRemove: function(map) {}
+    });
+    L.control.create = function(opts) {return new L.Control.Create(opts);}
+}
+function createNewLocBttn() {
+    const className = 'custom-icon leaflet-control-create',
+        container = L.DomUtil.create('div', className),
+        button = L.DomUtil.create('button', className + '-icon', container);
+    
+    $(button).attr('disabled', 'disabled');
+    $(container).attr('title', "Click on map to create new location").append(button);
+    return container;
+}
+function createNewLoc(bttn) {                                                   console.log('Create new location with click!')
+    // click event reloads page for some reason...    
+}
+
+/*--- Draw Location Boundary Legend ---*/
+function addDrawNewLocBoundaryLegend() {
+    addDrawLocBoundsCountrol();
+    L.control.draw({ position: 'topleft' }).addTo(map);
+}
+function addDrawLocBoundsCountrol() {
+    L.Control.Draw = L.Control.extend({
+        onAdd: function(map) {
+            const bttn = createDrawLocBttn();
+            L.DomEvent.on(bttn, 'click', drawNewLocBounds.bind(null, bttn));
+            return bttn;
+        },
+        onRemove: function(map) {}
+    });
+    L.control.draw = function(opts) {return new L.Control.Draw(opts);}
+}
+function createDrawLocBttn() {
+    const className = 'custom-icon leaflet-control-draw',
+        container = L.DomUtil.create('div', className),
+        button = L.DomUtil.create('button', className + '-icon', container);
+    
+    $(button).attr('disabled', 'disabled');
+    $(container).attr('title', "Draw new location boundary on map").append(button);
+    return container;
+}
+function drawNewLocBounds(bttn) {                                               console.log('Draw new location boundary!')
+    // click event reloads page for some reason...    
 }
 /*--- Drag Marker Legend ---*/
 function addMarkerDragLegend() {

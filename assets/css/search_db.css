@@ -627,7 +627,7 @@ select[id$="txn-lvl"] + div {
 .leaflet-control-geocoder {
     font-size: 16px;
 }
-.leaflet-control-geocoder-icon, .leaflet-control-drag-icon {
+.leaflet-control-geocoder-icon {
     margin: initial;
     padding: initial;
     font-size: initial;
@@ -651,10 +651,21 @@ button.custom-icon {
     background-position: center;
     border: none;
     background-size: 20px 20px;
+    margin: initial;
+    padding: initial;
+    font-size: initial;
 }
 /* --- Marker Drag Elem --- */
 .leaflet-control-drag-icon {
     background-image: url('./images/arrows-alt.svg');
+}
+/* --- Create New Loc Elem --- */
+.leaflet-control-create-icon {
+    background-image: url('./images/plus.svg');
+}
+/* --- Draw New Loc Boundary Elem --- */
+.leaflet-control-draw-icon {
+    background-image: url('./images/pencil-alt.svg');
 }
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
