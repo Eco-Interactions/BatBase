@@ -257,7 +257,7 @@ function bindClassContextToMethods(self) {
 }
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) { 
-    if (iconType.includes('form')) { return null; }
+    if (iconType && iconType.includes('form')) { return null; }
     const classes = iconType || 'single-marker info';
     return {
         icon: L.divIcon({
@@ -628,8 +628,8 @@ function getNewLocHtml(loc) {                                                   
     return cntnr;
 }
 function getNewLocText(loc) {
-    const name = !loc ? 'This location appears to be over water. Please double-check coordinates.'
-        : 'Near: <b>'+ loc.name;
+    const name = !loc ? 'No geo-data found. Please double-check coordinates.' : 
+        'Near: <b>'+ loc.name;
     const html = `<div style="font-size:1.2em;">${name}</b></div>`;
     return `${html}After confirming that this location is unique and the display
         name is accurate, please fill in all available data, click "Create Location" to submit.`;

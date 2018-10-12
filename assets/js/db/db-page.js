@@ -31,7 +31,7 @@ import * as filters from './tbl-filters.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'A life with no cause is a life without effect.';               console.log(dataKey);
+const dataKey = 'A life without cause is a life without effect!!';               console.log(dataKey);
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
