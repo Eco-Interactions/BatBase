@@ -57,7 +57,7 @@ function waitForDataThenContinue(cb) {                                          
 function buildAndShowMap(loadFunc, mapId) {                                     console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
     map.setMaxBounds(getMapBounds());
-    map.on('click', logLatLng);
+    map.on('click', showLatLngPopup);
     map.on('load', loadFunc);
     addMapTiles(mapId);
     addGeoCoderToMap();
@@ -71,8 +71,10 @@ function getMapInstance(mapId) {
     popups = {};
     return L.map(mapId); 
 }
-function logLatLng(e) {
-    console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+function showLatLngPopup(e) {
+    const latLng = `Lat, Lon: ${e.latlng.lat}, ${e.latlng.lng}`;
+    new L.Popup().setLatLng(e.latlng).setContent(latLng)
+        .openOn(map);
 }
 function getMapBounds() {
     const southWest = L.latLng(-100, 200);
