@@ -57,7 +57,7 @@ function waitForDataThenContinue(cb) {                                          
 function buildAndShowMap(loadFunc, mapId) {                                     console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
     map.setMaxBounds(getMapBounds());
-    map.on('click', showLatLngPopup);
+    map.on('click', showLatLngPopup.bind(null, mapId));
     map.on('load', loadFunc);
     addMapTiles(mapId);
     addGeoCoderToMap();
@@ -71,10 +71,10 @@ function getMapInstance(mapId) {
     popups = {};
     return L.map(mapId); 
 }
-function showLatLngPopup(e) {
-    const latLng = `Lat, Lon: ${e.latlng.lat}, ${e.latlng.lng}`;
-    new L.Popup().setLatLng(e.latlng).setContent(latLng)
-        .openOn(map);
+function showLatLngPopup(mapId, e) {
+    const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+    if (mapId !== 'loc-map') { return console.log(latLng); }
+    new L.Popup().setLatLng(e.latlng).setContent(latLng).openOn(map);
 }
 function getMapBounds() {
     const southWest = L.latLng(-100, 200);
@@ -638,7 +638,7 @@ function addNewLocControl() {
     L.Control.Create = L.Control.extend({
         onAdd: function(map) {
             const bttn = createNewLocBttn();
-            L.DomEvent.on(bttn, 'click', createNewLoc.bind(null, bttn));
+            L.DomEvent.on(bttn, 'click', createNewLoc);
             return bttn;
         },
         onRemove: function(map) {}
@@ -648,14 +648,13 @@ function addNewLocControl() {
 function createNewLocBttn() {
     const className = 'custom-icon leaflet-control-create',
         container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('button', className + '-icon', container);
-    
-    $(button).attr('disabled', 'disabled');
+        button = L.DomUtil.create('input', className + '-icon', container);
+    button.type = 'button';
     $(container).attr('title', "Create New Location").append(button);
     return container;
 }
-function createNewLoc(bttn) {                                                   console.log('Create new location!')
-    // click event reloads page for some reason...    
+function createNewLoc() {                                                       console.log('Create new location!')
+    db_forms.initLocForm('create');
 }
 /*--- Click To Create New Location Button ---*/
 function addClickToCreateLocBttn() {
@@ -666,7 +665,7 @@ function addNewLocHereControl() {
     L.Control.CreateHere = L.Control.extend({
         onAdd: function(map) {
             const bttn = createNewLocHereBttn();
-            L.DomEvent.on(bttn, 'click', createNewLocHere.bind(null, bttn));
+            L.DomEvent.on(bttn, 'click', createNewLocHere);
             return bttn;
         },
         onRemove: function(map) {}
@@ -676,14 +675,15 @@ function addNewLocHereControl() {
 function createNewLocHereBttn() {
     const className = 'custom-icon leaflet-control-click-create',
         container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('button', className + '-icon', container);
+        button = L.DomUtil.create('input', className + '-icon', container);
+    button.type = 'button';
     
-    $(button).attr('disabled', 'disabled');
-    $(container).attr('title', "Click on map to create new location").append(button);
+    $(button).attr('disabled', 'disabled').css('opacity', '.666');
+    $(container).attr('title', "Click on map to select location position").append(button);
     return container;
 }
-function createNewLocHere(bttn) {                                               console.log('Create new location with click!')
-    // click event reloads page for some reason...    
+function createNewLocHere() {                                                   console.log('Create new location with click!')
+
 }
 /*--- Draw Location Boundary Bttn ---*/
 function addDrawNewLocBoundaryBttn() {
@@ -694,7 +694,7 @@ function addDrawLocBoundsCountrol() {
     L.Control.Draw = L.Control.extend({
         onAdd: function(map) {
             const bttn = createDrawLocBttn();
-            L.DomEvent.on(bttn, 'click', drawNewLocBounds.bind(null, bttn));
+            L.DomEvent.on(bttn, 'click', drawNewLocBounds);
             return bttn;
         },
         onRemove: function(map) {}
@@ -704,14 +704,15 @@ function addDrawLocBoundsCountrol() {
 function createDrawLocBttn() {
     const className = 'custom-icon leaflet-control-draw',
         container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('button', className + '-icon', container);
+        button = L.DomUtil.create('input', className + '-icon', container);
+    button.type = 'button';
     
-    $(button).attr('disabled', 'disabled');
+    $(button).attr('disabled', 'disabled').css('opacity', '.666');
     $(container).attr('title', "Draw new location boundary on map").append(button);
     return container;
 }
-function drawNewLocBounds(bttn) {                                               console.log('Draw new location boundary!')
-    // click event reloads page for some reason...    
+function drawNewLocBounds() {                                                   console.log('Draw new location boundary!')
+
 }
 /*--- Drag Marker Bttn ---*/
 function addMarkerDragBttn() {
@@ -722,7 +723,7 @@ function addDragControl() {
     L.Control.Drag = L.Control.extend({
         onAdd: function(map) {
             const bttn = createDragBttn();
-            L.DomEvent.on(bttn, 'click', enableDrag.bind(null, bttn));
+            L.DomEvent.on(bttn, 'click', enableDrag);
             return bttn;
         },
         onRemove: function(map) {}
@@ -732,12 +733,13 @@ function addDragControl() {
 function createDragBttn() {
     const className = 'custom-icon leaflet-control-drag',
         container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('button', className + '-icon', container);
+        button = L.DomUtil.create('input', className + '-icon', container);
+    button.type = 'button';
     
-    $(button).attr('disabled', 'disabled');
+    $(button).attr('disabled', 'disabled').css('opacity', '.666');
     $(container).attr('title', "Drag a new location's map pin").append(button);
     return container;
 }
-function enableDrag(bttn) {                                                     console.log('drag enabled!')
-    // click event reloads page for some reason...    
+function enableDrag() {                                                         console.log('drag enabled!')
+
 }

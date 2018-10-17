@@ -1400,12 +1400,12 @@ function addNotesToForm() {
     $('#DisplayName_row').before(getHowToCreateLocWithoutGpsDataNote());
 }
 function getHowToCreateLocWithGpsDataNote(argument) {
-    return `<p class="loc-gps-note" style="margin-top: 5px;">If GPS data available, 
-        enter all data and see the added green pin's popup for the<br>"Create Location"
-        button, and for name suggestions.</p>`;
+    return `<p class="loc-gps-note skipFormData" style="margin-top: 5px;">GPS 
+        data? Enter all data and see the added green pin's popup for name 
+        suggestions and the "Create" button.</p>`;
 }
 function getHowToCreateLocWithoutGpsDataNote() {
-    return `<p class="loc-gps-note">No GPS data? Fill 
+    return `<p class="loc-gps-note skipFormData">No GPS data? Fill 
         in available data and click "Create without GPS data" at the bottom of 
         the form.</p>`;
 }
@@ -1447,7 +1447,7 @@ export function locCoordErr(field) {
 /*--------------- Map methods ---------------------------*/
 /** Adds a message above the location fields in interaction forms. */
 function addLocationSelectionMethodsNote() {
-    const cntnr = _u.buildElem('div', {id: 'loc-note'});
+    const cntnr = _u.buildElem('div', {id: 'loc-note', class: 'skipFormData'});
     const mapText = _u.buildElem('span', {class:'map-link', 
         text: 'click here to use the map interface.'});
     $(mapText).click(showInteractionFormMap);
@@ -1463,7 +1463,7 @@ function showInteractionFormMap() {                                             
     focusCombobox('#Country-Region-sel', true);
 }
 function addMapToLocForm(elemId) {
-    const map = _u.buildElem('div', { id: 'loc-map' }); 
+    const map = _u.buildElem('div', { id: 'loc-map', class: 'skipFormData' }); 
     $(elemId).after(map);
     db_map.initFormMap($('#Country-Region-sel').val(), fParams.records.location);
 }
@@ -3447,7 +3447,7 @@ function getFormValueData(entity, fLvl, submitting) {
     return formVals;
     /** Get's the value from the form elem and set it into formVals. */
     function getInputData(elem) {                                           
-        if (elem.className === 'skipFormData') { return; }                      //console.log("elem = %O", elem)
+        if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         const fieldName = _u.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
         const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
         
@@ -3733,7 +3733,8 @@ function buildFormData(entity, formVals) {
             flat: { 
                 'displayPoint': displayPoint, 
                 'coordinates': coords, 
-                'type': 'point' },
+                'locationName': formVals.displayName,
+                'type': 'Point' },
             rel: {}
         };
         data.location.hasDetail = true;

@@ -230,12 +230,12 @@ function clearIdbCheck(storedKey) {                                             
 function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
     idb.get('geoJson').then(storeGeoJson);
 }
-function storeGeoJson(geoData) {                                                console.log('stor(ing)GeoJson. geoData ? ', geoData !== undefined);
-    if (geoData === undefined) { return downloadGeoJson(); }
+function storeGeoJson(geoData) {                                                console.log('stor(ing)GeoJson. geoData ? ', !geoData);
+    if (!geoData) { return downloadGeoJson(); }
     geoJson = geoData; 
 }
-function downloadGeoJson(cb) {                                                  //console.log('downloading all geoJson data!');
-    return  dataStorage.getItem('interaction') ?
+function downloadGeoJson(cb) {                                                  console.log('downloading all geoJson data!');
+    return dataStorage.getItem('interaction') ?
         downloadGeoJsonAfterLocalDbInit(cb) :
         window.setTimeout(downloadGeoJson, 400);   
 }

@@ -24,10 +24,12 @@
 Before Release:
     - Handle multiple habitats of parent country displaying at same point - combine
     - Ensure that the country selected contains the point entered
-    - add lat, long popup for clicks on map.
     - add error handling for when a loc with no geojson data is selected
         eg, "Unspecified" region our of the country/region combobox
     - add loading message to map when updating 
+    - Reload search page map after interaction/location form close when in loc-map view
+    - When location is edited:
+        - update geojson location name
 
 
 Notes from geocoders:
@@ -58,12 +60,16 @@ MEETING NOTES:
     Next/future round:
         Next:
             - Add button to map that will allow click-to-create on the map (kind of like the drag button)
+            - Edit form: 
+                - allow selection of another location and merging of all data and 
+                    deletion of location being edited
             - Err handling
                 - ensure that entered coordinates are within selected country
                     on country change
                     on form submit
             - {high}[easy] When nothing is selected but a country, a habitat type, 
                 and the displayname, suggest to user they use the country-habitat combo. 
+            - testing!
 
         Future:
         - {low}{med} Add search by name to the location table view

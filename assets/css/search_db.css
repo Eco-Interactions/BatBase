@@ -552,10 +552,10 @@ select[id$="txn-lvl"] + div {
 /*--- Loc Map Styles ---*/
 #loc-note {
     margin: .5em auto 0 auto;
+    color: slategrey;
 }
 #loc-note .map-link {
     text-decoration: underline;
-    color: #1b3b1b;
     cursor: pointer;
 }
 #loc-map {
@@ -568,6 +568,8 @@ select[id$="txn-lvl"] + div {
     width:initial; 
     margin:auto; 
     text-align: center;
+    color: slategrey;
+    margin-top: 3px;
 }
 .new-loc-popup {
     font-size: 1.1em;
@@ -633,27 +635,19 @@ select[id$="txn-lvl"] + div {
     font-size: initial;
 }
 /* --- Custom Map Icons --- */
-div.custom-icon {
-    border-radius: 4px;
-    width: 34px;
+input.custom-icon {
     height: 34px;
-    border: 2px solid rgba(0,0,0,0.3);
+    width: 34px;
+    border: 2px solid rgba(0,0,0,0.39);
+    border-radius: 4px;
     background-color: white;
     background-repeat: no-repeat;
     background-position: center;
-    cursor: pointer;
-    opacity: .666;
-}
-button.custom-icon {
-    height: 30px;
-    width: 30px;
-    background-repeat: no-repeat;
-    background-position: center;
-    border: none;
     background-size: 17px 17px;
     margin: initial;
     padding: initial;
     font-size: initial;
+    cursor: pointer;
 }
 /* --- Marker Drag Elem --- */
 .leaflet-control-drag-icon {
@@ -661,11 +655,11 @@ button.custom-icon {
 }
 /* --- Create New Loc Elem --- */
 .leaflet-control-create-icon {
-    background-image: url('./images/plus.svg');
+    background-image: url('./images/map-marker-alt.svg');
 }
 /* --- Click To Create New Loc Elem --- */
 .leaflet-control-click-create-icon {
-    background-image: url('./images/mouse-pointer.svg');
+    background-image: url('./images/map-marked-alt.svg');
 }
 /* --- Draw New Loc Boundary Elem --- */
 .leaflet-control-draw-icon {
