@@ -8,6 +8,7 @@
  * Exports: 
  *     editEntity
  *     addNewLocation
+ *     initLocForm
  *     selectLoc
  *     locCoordErr
  */
@@ -1273,7 +1274,7 @@ function onCntryRegSelection(val) {                                             
     const loc = fParams.records.location[val];
     fillLocationSelect(loc);
     if (!fParams.editing) { $('#Country-Region_pin').focus(); }
-    if ($('#loc-map').length) { focusParentAndShowChildLocs(val); }    
+    if ($('#loc-map').length) { focusParentAndShowChildLocs('int', val); }    
 }
 /*-------------- Location ------------------------------------------------*/
 /*--------------- Form methods ---------------------------*/
@@ -1361,13 +1362,13 @@ function getAllLocData(locRcrd) {
     };
 }
 /** Inits the location form and disables the country/region combobox. */
-function initLocForm(val) {                                                     //console.log("Adding new loc! val = %s", val);
+export function initLocForm(val) {                                              //console.log("Adding new loc! val = %s", val);
     const fLvl = getSubFormLvl("sub");
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Location', null, fLvl); }
     if ($('#loc-map').length !== 0) { $('#loc-map').remove(); }
     buildLocForm(val, fLvl);
     disableTopFormLocNote();
-    addMapToLocForm('#location_Rows');
+    addMapToLocForm('#location_Rows', 'create');
     addNotesToForm();
     addListenerToGpsFields();
     scrollToLocFormWindow();
@@ -1457,19 +1458,21 @@ function addLocationSelectionMethodsNote() {
     $('#Country-Region_row').before(cntnr);
 }
 /** Open popup with the map interface for location selection. */
-function showInteractionFormMap() {                                             console.log('showInteractionFormMap')
+function showInteractionFormMap() {                                             //console.log('showInteractionFormMap')
     if ($('#loc-map').length) { return; }
-    addMapToLocForm('#Location_row');
-    focusCombobox('#Country-Region-sel', true);
+    addMapToLocForm('#Location_row', 'int');
+    if (!getSelVal('#Country-Region-sel')) {
+        focusCombobox('#Country-Region-sel', true);
+    }
 }
-function addMapToLocForm(elemId) {
+function addMapToLocForm(elemId, type) {
     const map = _u.buildElem('div', { id: 'loc-map', class: 'skipFormData' }); 
     $(elemId).after(map);
-    db_map.initFormMap($('#Country-Region-sel').val(), fParams.records.location);
+    db_map.initFormMap($('#Country-Region-sel').val(), fParams.records.location, type);
 }
-function focusParentAndShowChildLocs(val) {                                     console.log('focusParentAndShowChildLocs - [%s]', val);
+function focusParentAndShowChildLocs(type, val) {                               //console.log('focusParentAndShowChildLocs - [%s]', val);
     if (!val) { return; }
-    db_map.initFormMap(val, fParams.records.location);
+    db_map.initFormMap(val, fParams.records.location, type);
 }
 function removeLocMap() {
     $('#loc-map').fadeTo(400, 0, () => $('#loc-map').remove());
@@ -2387,7 +2390,7 @@ function initComboboxes(entity, formLvl) {                                      
             'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
             'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
             'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
-            'Country': { name: 'Country', change: focusParentAndShowChildLocs, add: false },
+            'Country': { name: 'Country', change: focusParentAndShowChildLocs.bind(null, 'create'), add: false },
             'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
                 add: initEdForm.bind(null, 1) },
             'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },

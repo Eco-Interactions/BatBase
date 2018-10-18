@@ -54,16 +54,16 @@ function waitForDataThenContinue(cb) {                                          
         window.setTimeout(waitForDataThenContinue.bind(null, cb), 500);
 }
 /** Initializes the map using leaflet and mapbox. */
-function buildAndShowMap(loadFunc, mapId) {                                     console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
+function buildAndShowMap(loadFunc, mapId, type) {                               console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
     map.setMaxBounds(getMapBounds());
-    map.on('click', showLatLngPopup.bind(null, mapId));
+    map.on('click', showLatLngPopup.bind(null, type));
     map.on('load', loadFunc);
     addMapTiles(mapId);
     addGeoCoderToMap();
     addTipsLegend();
-    L.control.scale({position: 'bottomright'}).addTo(map);
     if (mapId !== 'loc-map') { buildSrchPgMap(); }
+    L.control.scale({position: 'bottomright'}).addTo(map);
     map.setView([22,22], 2);                                                    console.log('map built.')
 }
 function getMapInstance(mapId) {
@@ -71,9 +71,9 @@ function getMapInstance(mapId) {
     popups = {};
     return L.map(mapId); 
 }
-function showLatLngPopup(mapId, e) {
+function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-    if (mapId !== 'loc-map') { return console.log(latLng); }
+    if (type !== 'create') { return console.log(latLng); }
     new L.Popup().setLatLng(e.latlng).setContent(latLng).openOn(map);
 }
 function getMapBounds() {
@@ -155,12 +155,12 @@ function ifCntryResult(address) {
     });
 }
 /** Draws Country polygon if available. */
-function polyDataDrawn(code) { 
+function polyDataDrawn(code, skipZoom) { 
     const id = _u.getDataFromStorage('countryCodes')[code.toUpperCase()];
     const cntry = locRcrds[id];
     const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
     if (!geoJson || geoJson.type === 'Point') { return false; }  
-    drawLocPolygon(cntry, geoJson); 
+    drawLocPolygon(cntry, geoJson, skipZoom); 
     return true;
 }
 /*============== Search Database Page Methods ================================*/
@@ -451,9 +451,9 @@ function showNearbyLocationsAndUpdateForm(results) {                            
         results.address.country_code.toUpperCase() : null;
     if (!cntryCode) { return; console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
     const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
-    showChildLocs(cntryId, null);
     volatile.prnt = cntryId; 
-    $('#Country-Region-sel')[0].selectize.addItem(cntryId);
+    $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
+    addParentLocDataToMap(cntryId, 'skipZoom');
 }
 export function addVolatileMapPin(val) {  
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
@@ -531,35 +531,39 @@ function addPinToMap(latLng, pin) {
     map.addLayer(pin);
     map.setView(latLng, 8, {animate:true});
 }
-export function initFormMap(parent, rcrds) {                                    console.log('attempting to initMap')
+export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap')
     locRcrds = locRcrds || rcrds;  
-    if (volatile.prnt && parent == volatile.prnt) { return; }
+    if (!type && volatile.prnt && parent == volatile.prnt) { return; }
     waitForDataThenContinue(
-        buildAndShowMap.bind(null, finishFormMap.bind(null, parent), 'loc-map'));  
+        buildAndShowMap.bind(null, finishFormMap.bind(null, parent, type), 'loc-map', type));  
 } 
-function finishFormMap(parentId) {
+function finishFormMap(parentId, type) {
     addLocCountLegend();
-    addNewLocBttn();
-    addClickToCreateLocBttn();
-    addDrawNewLocBoundaryBttn();
-    addMarkerDragBttn();
+    if (type !== 'create') {
+        addNewLocBttn();
+    } else {
+        addClickToCreateLocBttn();
+        addDrawNewLocBoundaryBttn();
+        addMarkerDragBttn();
+    }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId);
 }
-function addParentLocDataToMap(id) {  
+function addParentLocDataToMap(id, skipZoom) {  
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. eg, "Unspecified region"
     const hasPolyData = geoJson.type !== 'Point';
-    if (hasPolyData) { drawLocPolygon(loc, geoJson); }
-    const zoomLvl = hasPolyData ? false : 
+    if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
+    const zoomLvl = hasPolyData || skipZoom ? false : 
         loc.locationType.displayName === 'Region' ? 3 : 8;
     showChildLocs(id, zoomLvl);
 }
-function drawLocPolygon(loc, geoJson) {                                         //console.log('drawing country on map');
+function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
     let feature = buildFeature(loc, geoJson);
     volatile.poly = L.geoJSON(feature);                                         
     volatile.poly.addTo(map);
+    if (skipZoom) { return; }
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
 function showChildLocs(id, zoomLvl) {  
