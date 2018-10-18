@@ -94,15 +94,38 @@ function getSteps(step) {
             element: '#search-tbl',
             intro: `<b><center>All interactions that involve plants are displayed 
                 and are available for further sorting and filtering.</center></b>
-                <br>"Cnt" (count) shows the number of interactions attributed to 
-                each Taxon, Location, or Source.<br><br>"Subject Taxon" shows the 
-                bat taxon that each interaction is attributed to.<br><br>"Object 
-                Taxon" shows the plant or arthropod interacted with.<br><br>
-                Columns can be resized by dragging the column header dividers and 
-                rearranged by dragging the header iteself.<br><br>Note on Taxon 
-                names: Aside from genus species binomials, names at all other 
-                taxonomic levels begin with the level (e.g., Family Acanthaceae 
-                for the plant family Acanthaceae).`,
+                <br>Columns can be resized by dragging the column header dividers 
+                and rearranged by dragging the header iteself.<br><br>Hovering 
+                over a column header reveals the filter menu for that column.<br><br>
+                Some columns can be filtered by text, others by selecting or 
+                deselecting values in that column.<br><br><center><b>Try 
+                exploring the filter menus a bit now.</b></center>`,
+            position: 'top'
+        },
+        {
+            element: '.ag-header-viewport',
+            intro: `<b><center>Column definitions</b></center><br>
+                <b>"Subject Taxon"</b> shows the bat taxon that each interaction is 
+                attributed to.<br><br>
+                <b>"Object Taxon"</b>, shows the plant or arthropod interacted with.
+                <br><br>Note on Taxon names: Aside from genus species binomials, 
+                names at all other taxonomic levels begin with the level (e.g., 
+                Family Acanthaceae for the plant family Acanthaceae).`,
+            position: 'top'
+        },
+        {
+            element: '.ag-header-viewport',
+            intro: `<b><center>Column definitions</b></center><br>
+                <b>"Cnt"</b> (count) shows the number of interactions attributed 
+                to each Taxon, Location, or Source.<br><br>
+                <b>“Type”</b> refers to the type of interaction, including visitation, 
+                consumption, pollination, seed dispersal, and transport. For a 
+                list of definitions, see the <a href="definitions">Definitions</a> 
+                page.<br><br>
+                <b>“Tags”</b> refer to the part of the Object Taxon being 
+                interacted with, including flower, fruit, seed, leaf, and arthropod. 
+                The “Secondary” tag refers to an interaction that the author did 
+                not witness directly, but instead is citing from another publication.`,
             position: 'top'
         },
         {
@@ -110,15 +133,6 @@ function getSteps(step) {
             intro: `<center>The table can be expanded or collapsed by a single 
                 level or all at once.<br><br>You can try it now.</center>`,
             position: 'right'
-        },
-        {
-            element: '#search-tbl',
-            intro: `<h3><center>Column filters.</center></h3><br>Hovering over a 
-                column header reveals the filter menu for that column.<br><br>
-                Some columns can be filtered by text, others by selecting or 
-                deselecting values in that column.<br><br><center><b>Try 
-                exploring the filter menus a bit now.</b></center>`,
-            position: 'top'
         },
         {
             element: 'button[name="reset-tbl"]',
