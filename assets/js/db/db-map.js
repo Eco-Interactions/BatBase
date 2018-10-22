@@ -605,8 +605,11 @@ function addChildLocsToMap(prnt, coords) {
         volatile.markers.push(Marker.layer);
     }
 }
+/** Return all sub-locs, except country-habitat locations with no interactions.*/
 function getChildLocData(prnt) {                                               
-    return prnt.children.map(id => locRcrds[id]).filter(loc => loc.totalInts > 0);
+    return prnt.children.map(id => locRcrds[id]).filter(loc => {
+        return loc.locationType.displayName !== 'Habitat' || loc.totalInts > 0;        
+    });
 }
 /*--- Location Count Legend ---*/
 function addLocCountLegend() {
