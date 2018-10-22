@@ -64,6 +64,9 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
             'Tokelau' => [-171.8484, -9.2002],
             'Jersey' => [-2.1312, 49.2144],    
             'Oceania' => [140.0188, -22.7359],
+            'Martinique' => [14.6415, -61.0242],
+            'Curacao' => [12.1696, -68.9900],
+            'French Guiana' => [3.9339, -53.1258],
             'Yasuni National Park' => [-75.8069082,-1.1006555]        
         ];
 
