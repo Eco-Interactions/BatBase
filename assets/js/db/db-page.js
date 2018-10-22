@@ -31,7 +31,7 @@ import * as filters from './tbl-filters.js';
  *      data should be cleared and redownloaded.
  */
 let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'A life without cause is a life without effect!!';               console.log(dataKey);
+const dataKey = 'A life without cause is a life without effect!!';              console.log(dataKey);
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -848,9 +848,20 @@ function getLocChildData(childId) {
  * data into table rows and load the table @transformLocDataAndLoadTable.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-function buildLocSearchUiAndTable(locTree) {                                     //console.log("buildLocSearchUiAndTable called. locTree = %O", locTree)
+function buildLocSearchUiAndTable(locTree) {                                    //console.log("buildLocSearchUiAndTable called. locTree = %O", locTree)
     transformLocDataAndLoadTable(locTree);
+    loadLocSearchHtml();
+}
+function loadLocSearchHtml() {
+    clearCol2();        
+    loadSearchByNameElem();
     loadLocComboboxes();
+}
+function loadSearchByNameElem() {  
+    const searchTreeElem = buildTreeSearchHtml('Location');
+    $(searchTreeElem).css({ 'width': '273px' });
+    $('#opts-col2').append(searchTreeElem);
+    $('input[name="selLocation"]').css({ 'width': '205px' });
 }
 /**
  * Create and append the location search comboboxes, Region and Country, and
@@ -859,7 +870,6 @@ function buildLocSearchUiAndTable(locTree) {                                    
 function loadLocComboboxes() {  
     const opts = buildLocSelectOpts();
     var selElems = buildLocSelects(opts);
-    clearCol2();        
     $('#opts-col2').append(selElems);
     initComboboxes(['Region', 'Country']);
     setSelectedLocVals();
