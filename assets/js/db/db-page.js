@@ -1594,19 +1594,30 @@ function buildTreeSearchHtml(entity, hndlr) {
  * contain the case insensitive substring.
  */
 function searchTreeText(entity) {                                               //console.log("----- Search Tree Text");
-    const text = getFilterTreeTextVal(entity);
+    const text = getTreeFilterTextVal(entity);
     const allRows = getAllCurRows(); 
-    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
+    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
     tblOpts.api.setRowData(newRows);
     tParams.focusFltrs = text === "" ? [] : ['"' + text + '"'];
     updateTableFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
-function getFilterTreeTextVal(entity) {                                         //console.log('getFilterTreeTextVal entity = ', entity);
+function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
-function getTreeRowsWithText(rows, text) {
-    return rows.filter(row => row.name.toLowerCase().indexOf(text) !== -1);
+function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText. rows = %O', rows)
+    return rows.filter(row => {  
+        const isRow = row.name.toLowerCase().indexOf(text) !== -1; 
+        return isRow || (hasSubLocs(row) ? childRowsPassFilter(row, text) : false); 
+    });
+}
+function hasSubLocs(row) {
+    return row.children ? !row.children[0].hasOwnProperty('interactionType') : false;
+}
+function childRowsPassFilter(row, text) {
+    const rows = getTreeRowsWithText(row.children, text); 
+    row.children = rows;
+    return rows.length > 0;
 }
 /*------------------ Taxon Filter Updates ---------------------------------*/
 /**
@@ -1680,7 +1691,7 @@ function updateLocSearch(val) {
 } /* End updateLocSearch */
 /*------------------ Source Filter Updates -------------------------------*/
 function updatePubSearchByTxt() {
-    const text = getFilterTreeTextVal('Publication');
+    const text = getTreeFilterTextVal('Publication');
     updatePubSearch(null, text);
 }
 function updatePubSearchByType(val) {                                           //console.log('updatePubSearchByType. val = ', val)
@@ -1693,7 +1704,7 @@ function updatePubSearchByType(val) {                                           
  */
 function updatePubSearch(typeVal, text) {                                       console.log('updatePubSearch. typeVal = ', typeVal)
     const typeId = typeVal || getSelVal('Publication Type');
-    const txt = text || getFilterTreeTextVal('Publication');
+    const txt = text || getTreeFilterTextVal('Publication');
     const newRows = getFilteredPubRows();
     tParams.focusFltrs = getPubFilters();
     tblOpts.api.setRowData(newRows);
@@ -2276,7 +2287,7 @@ function applySrcFltrs() {
 }
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                         //console.log("reapplying [%s] text filter", entity);
-    if (getFilterTreeTextVal(entity) === "") { return; }
+    if (getTreeFilterTextVal(entity) === "") { return; }
     searchTreeText();
 }
 function getTableEntityName() {
