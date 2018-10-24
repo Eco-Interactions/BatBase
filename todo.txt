@@ -39,8 +39,8 @@ Notes from geocoders:
 
 Before Release:
     - Handle multiple habitats of parent country displaying at same point - combine
-    - Fix Martinique coordinates
     - Show all locations, even those without interactions (except habitats) in form
+        - Test fix
     - add error handling for when a loc with no geojson data is selected
         eg, "Unspecified" region our of the country/region combobox
     - add loading message to map when updating 
@@ -50,15 +50,6 @@ Before Release:
     
 MEETING NOTES:
     Point out:
-        - Entering coordinates first fills country and suggests a display name in popup
-        - Updated countries ith 2-letter iso codes, which revealed a couple 
-            duplicate countries. Cleaned up this data.
-        - Errs that catch invalid coordinates
-            - Ensure all required fields are filled in
-        - Search functionality added to all maps
-        - Scale on bottom right
-        - Map tips toggle
-        - Mexico - location with no Gps data
     Next/future rounds:
         Next:
             - Buttons:
@@ -86,9 +77,6 @@ MEETING NOTES:
                 - Improve search results
                 - Future Tool Tips for fields that require more explanations
     Feedback:
-        - Slate grey info text? Clear or not?
-        - How has it been going? Pause on data entry?
-
 
 >======== Email ============
 TAYLOR:

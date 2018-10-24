@@ -438,6 +438,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .full-row {
     width: 99.3%;
 }
+#Note_row {
+    width: 97.7%;
+}
 .sub-row {
     width: 398px; /*390*/
 }

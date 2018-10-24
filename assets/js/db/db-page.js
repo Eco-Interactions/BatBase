@@ -677,12 +677,12 @@ function getTaxonChildRowData(curTaxon, curTreeLvl) {
      * by default
      */
     function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
-        var realmIds = ["2", "3", "4"];  
+        const realmIds = ['2', '3', '4'];  
         if (getIntCount(curTaxon) !== null) { 
             childRows.push({
                 id: curTaxon.id,
-                entity: "Taxon",
-                name: 'Unspecified ' + taxonName + ' Interactions',
+                entity: 'Taxon',
+                name: `Unspecified ${taxonName} Interactions`,
                 isParent: true,
                 open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
                     tParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
@@ -1597,8 +1597,8 @@ function searchTreeText(entity) {                                               
     const text = getTreeFilterTextVal(entity);
     const allRows = getAllCurRows(); 
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
-    tblOpts.api.setRowData(newRows);
-    tParams.focusFltrs = text === "" ? [] : ['"' + text + '"'];
+    tblOpts.api.setRowData(newRows); 
+    tParams.focusFltrs = text === "" ? [] : [...tParams.focusFltrs, `"${text}"`];
     updateTableFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
@@ -1612,7 +1612,8 @@ function getTreeRowsWithText(rows, text) {                                      
     });
 }
 function hasSubLocs(row) {
-    return row.children ? !row.children[0].hasOwnProperty('interactionType') : false;
+    return row.children && row.children.length > 0 ? 
+        !row.children[0].hasOwnProperty('interactionType') : false;
 }
 function childRowsPassFilter(row, text) {
     const rows = getTreeRowsWithText(row.children, text); 
@@ -1726,10 +1727,11 @@ function updatePubSearch(typeVal, text) {                                       
         const pubIds = pubTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
-    function getPubFilters() {
-        return typeId === 'all' && !text ? [] :
-            (typeId === 'all' ? ['"' + text + '"'] : 
-            [$("#selPubType option[value='"+typeId+"']").text()+'s']);
+    function getPubFilters() { 
+        const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
+        return typeId === 'all' && !txt ? [] :
+            (typeId === 'all' ? [`"${txt}"`] : 
+            (!txt ? [`${typeVal}s`] : [`"${txt}"`, `${typeVal}s`]));
     }
 } /* End updatePubSearch */
 /*================ Table Build Methods ==============================================*/
@@ -2115,7 +2117,7 @@ function addActiveExternalFilters(filters) {
     
     function addFocusFilters() {
         if (tParams.focusFltrs && tParams.focusFltrs.length > 0) { 
-            filters.push(tParams.focusFltrs.map(filter => filter));
+            filters.push(...tParams.focusFltrs);  
         } 
     }
     function addUpdatedSinceFilter() {
