@@ -553,6 +553,13 @@ function createEntity(id, entity) {                                             
     initFormParams('create', entity);
     showFormPopup('New', _u.ucfirst(entity), null);
     initCreateForm();
+    resetSearchPageIfInMapView();
+}
+/** This prevents the potential of two map instances clashing. */
+function resetSearchPageIfInMapView() {
+    if (getSelVal('#search-focus') !== 'locs') { return; }
+    if (getSelVal('#sel-realm') !== 'map') { return; }
+    setSelVal('#sel-realm', 'tree');
 }
 /**
  * Inits the interaction form with all fields displayed and the first field, 

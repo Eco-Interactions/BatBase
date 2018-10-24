@@ -67,7 +67,8 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
             'Martinique' => [14.6415, -61.0242],
             'Curacao' => [12.1696, -68.9900],
             'French Guiana' => [3.9339, -53.1258],
-            'Yasuni National Park' => [-75.8069082,-1.1006555]        
+            'Yasuni National Park' => [-75.8069082, -1.1006555],
+            'Russian Federation' => [94.44249, 62.25642]        
         ];
 
         foreach ($points as $name => $coordinates) {

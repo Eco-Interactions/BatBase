@@ -544,19 +544,18 @@ function finishFormMap(parentId, type) {
     if (!parentId) { return; }
     addParentLocDataToMap(parentId);
 }
-function addParentLocDataToMap(id, skipZoom) {  
 /** Draws containing country polygon on map and displays all locations within. */
+function addParentLocDataToMap(id, skipZoom) {  
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
-    if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. eg, "Unspecified region"
-    const hasPolyData = geoJson.type !== 'Point';
+    const hasPolyData = geoJson && geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
     const zoomLvl = hasPolyData || skipZoom ? false : 
         loc.locationType.displayName === 'Region' ? 3 : 8;
     showChildLocs(id, zoomLvl);
 }
-function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */
+function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
     let feature = buildFeature(loc, geoJson);
     volatile.poly = L.geoJSON(feature);                                         
     volatile.poly.addTo(map);
@@ -569,7 +568,7 @@ function showChildLocs(id, zoomLvl) {
     const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
     clearPreviousMarkers();
     addChildLocsToMap(prnt, prntLatLng);
-    if (!zoomLvl) { return; }
+    if (!zoomLvl || !prntLatLng) { return; }
     map.setView(prntLatLng, zoomLvl, {animate: true});  
 }
 function clearPreviousMarkers() {
@@ -596,6 +595,7 @@ function addChildLocsToMap(prnt, coords) {
         });
     }
     function addLocsWithoutGpsDataToMap(cnt) {  
+        if (!coords) { return; }
         const Marker = cnt === 1 ? 
             new MM.LocMarker(coords, noGpsLocs, locRcrds, 'form-noGps') : 
             new MM.LocCluster(map, cnt, coords, noGpsLocs, locRcrds, 'form-noGps');
