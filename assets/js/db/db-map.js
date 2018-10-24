@@ -138,8 +138,8 @@ function drawPolygonAndUpdateUi(e) {                                            
     showNearbyLocationsAndUpdateForm(e.geocode.properties);
 }
 function drawPolygon(bbox, address) {
-    if (volatile.poly) { map.removeLayer(volatile.poly); }
-    if (ifCntryResult(address) && polyDataDrawn(address.country_code)) { return; }
+    if (volatile.poly) { removePreviousPoly(); }
+    if (ifCntryResult(address)) { return; } 
     volatile.poly = L.polygon([
         bbox.getSouthEast(),
         bbox.getNorthEast(),
@@ -148,20 +148,15 @@ function drawPolygon(bbox, address) {
     ]).addTo(map);
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
+function removePreviousPoly() {
+    map.removeLayer(volatile.poly); 
+    volatile.poly = null;
+}
 /** Returns true if the only data returned is Country data. */
 function ifCntryResult(address) {  
     return Object.keys(address).every(k => {  
         return ['country', 'country_code'].indexOf(k) !== -1
     });
-}
-/** Draws Country polygon if available. */
-function polyDataDrawn(code, skipZoom) { 
-    const id = _u.getDataFromStorage('countryCodes')[code.toUpperCase()];
-    const cntry = locRcrds[id];
-    const geoJson = cntry.geoJsonId ? _u.getGeoJsonEntity(cntry.geoJsonId) : false;
-    if (!geoJson || geoJson.type === 'Point') { return false; }  
-    drawLocPolygon(cntry, geoJson, skipZoom); 
-    return true;
 }
 /*============== Search Database Page Methods ================================*/
 /** Initializes the legends used for the search page map. */
@@ -453,7 +448,7 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
     volatile.prnt = cntryId; 
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
-    addParentLocDataToMap(cntryId, 'skipZoom');
+    addParentLocDataToMap(cntryId, volatile.poly);
 }
 export function addVolatileMapPin(val) {  
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
@@ -550,6 +545,7 @@ function finishFormMap(parentId, type) {
     addParentLocDataToMap(parentId);
 }
 function addParentLocDataToMap(id, skipZoom) {  
+/** Draws containing country polygon on map and displays all locations within. */
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     if (!geoJson) { return; }//TODO: show "No Location Data" error over the map. eg, "Unspecified region"
@@ -560,12 +556,14 @@ function addParentLocDataToMap(id, skipZoom) {
     showChildLocs(id, zoomLvl);
 }
 function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
+/** Draws polygon on map and zooms unless skipZoom is a truthy value. */
     let feature = buildFeature(loc, geoJson);
     volatile.poly = L.geoJSON(feature);                                         
     volatile.poly.addTo(map);
     if (skipZoom) { return; }
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
+/** Adds all child locations to map and zooms according to passed zoomLvl. */
 function showChildLocs(id, zoomLvl) {  
     const prnt = locRcrds[id];
     const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
