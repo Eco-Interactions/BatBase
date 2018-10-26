@@ -54,6 +54,7 @@ export class LocMarker extends Marker {
             'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
             'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getNewLocHtml 
         };                 
+        if (!map[this.formMarker]) { return; }
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { 
             const content = this.formMarker ? 

@@ -4,9 +4,11 @@
  */
 /**
  * Exports:
+ *   addVolatileMapPin
+ *   initFormMap
  *   initMap
- *   showLoc
  *   showInts
+ *   showLoc
  */
 import * as _u from './util.js';
 import * as db_page from './db-page.js';
@@ -450,13 +452,21 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, volatile.poly);
 }
-export function addVolatileMapPin(val) {  
+export function addVolatileMapPin(val, type) {                                  //console.log('addVolatileMapPin')
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();
-    if (!latLng) { return; }
-    geoCoder.reverse(
-        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng), null);
+    if (!latLng) { return; }                                                    
+    if (type === 'edit') { addEditFormMapPin(latLng); 
+    } else {
+        geoCoder.reverse(
+            latLng, 1, updateUiAfterFormGeocode.bind(null, latLng), null);
+    }
     clearLocCountLegend();
+}
+function addEditFormMapPin(latLng) {                                            //console.log('addEditFormMapPin. pin = %O', volatile.pin)
+    if (volatile.pin) { map.removeLayer(volatile.pin.layer); }
+    volatile.pin = new MM.LocMarker(latLng, null, null, 'edit-form');
+    map.addLayer(volatile.pin.layer);
 }
 /* ---- Get GPS Field Values or Report Field Err ---- */
 function gpsFieldsFilled() {
@@ -526,7 +536,7 @@ function addPinToMap(latLng, pin) {
     map.addLayer(pin);
     map.setView(latLng, 8, {animate:true});
 }
-export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap')
+export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap. type = ', type);
     locRcrds = locRcrds || rcrds;  
     if (!type && volatile.prnt && parent == volatile.prnt) { return; }
     waitForDataThenContinue(
@@ -542,16 +552,17 @@ function finishFormMap(parentId, type) {
         addMarkerDragBttn();
     }
     if (!parentId) { return; }
-    addParentLocDataToMap(parentId);
+    addParentLocDataToMap(parentId, null, type);
 }
 /** Draws containing country polygon on map and displays all locations within. */
-function addParentLocDataToMap(id, skipZoom) {  
+function addParentLocDataToMap(id, skipZoom, type) {  
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     const hasPolyData = geoJson && geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
     const zoomLvl = hasPolyData || skipZoom ? false : 
         loc.locationType.displayName === 'Region' ? 3 : 8;
+    if (type === 'edit') { return; }
     showChildLocs(id, zoomLvl);
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */

@@ -297,6 +297,7 @@ export function editEntity(id, entity) {                                        
     initFormParams("edit", entity, id);
     showFormPopup('Editing', _u.ucfirst(entity), id);
     initEditForm(id, entity);    
+    onFormFillComplete(id, entity);
 }
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
@@ -309,8 +310,8 @@ function initEditForm(id, entity) {
 }   
 function finishEditFormBuild(entity) {
     const hndlrs = {
-        'interaction': finishIntFormBuild, 'taxon': finishTaxonEditFormBuild,
-        'citation': finishCitEditFormBuild
+        'citation': finishCitEditFormBuild, 'interaction': finishIntFormBuild, 
+        'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
     };
     if (entity in hndlrs) { hndlrs[entity]()  
     } else {
@@ -543,6 +544,15 @@ function addSource(fieldId, prop, rcrd) {
     var citSrc = fParams.records.source[rcrd.source];  
     setSelVal('#Publication-sel', citSrc.parent);
     setSelVal('#CitationTitle-sel', rcrd.source);
+}
+/* ---- On Form Fill Complete --- */
+function onFormFillComplete(id, entity) {                                       //console.log('onFormFillComplete. entity = ', entity);
+    const map = { 'location': finishLocEditForm };
+    if (!map[entity]) { return; }
+    map[entity](id);
+}
+function finishLocEditForm(id) {
+    db_map.addVolatileMapPin(id, 'edit');
 }
 /*--------------------------- Create Form --------------------------------------------------------*/
 /**
@@ -1392,6 +1402,20 @@ function buildLocForm(val, fLvl) {
     $('#Latitude_row input').focus();
     $('#sub-submit').val('Create without GPS data');
 }
+function finishLocEditFormBuild() {  
+    addMapToLocForm('#location_Rows', 'edit');
+    initComboboxes('Location', 'top'); 
+    updateCountryChangeMethod();
+    addListenerToGpsFields(
+        db_map.addVolatileMapPin.bind(null, fParams.editing.core, 'edit'));
+    $('#top-cancel').unbind('click').click(exitFormPopup);
+    $('.all-fields-cntnr').hide();
+}
+function updateCountryChangeMethod() {
+    $('#Country-sel')[0].selectize.off('change');
+    $('#Country-sel')[0].selectize.on('change', 
+        focusParentAndShowChildLocs.bind(null, 'edit'));
+}
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 function enableCountryRegionField() {  
     enableCombobox('#Country-Region-sel');
@@ -1424,9 +1448,9 @@ function locHasGpsData(fLvl) {
         return $(`#${field}_row input`).val();
     });
 }
-function addListenerToGpsFields(fLvl) {
-    $('#Latitude_row input, #Longitude_row input').change(
-        db_map.addVolatileMapPin);
+function addListenerToGpsFields(func) {
+    const method = func || db_map.addVolatileMapPin;
+    $('#Latitude_row input, #Longitude_row input').change(method);
 }
 export function selectLoc(id) {
     $('#sub-form').remove();
