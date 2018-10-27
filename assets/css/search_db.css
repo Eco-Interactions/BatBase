@@ -563,7 +563,7 @@ select[id$="txn-lvl"] + div {
 }
 #loc-map {
     border: 1px grey solid;
-    height: 420px;
+    height: 366px;
     width: 97%;
     margin: 1em auto 0 auto;
 }

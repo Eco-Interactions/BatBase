@@ -75,7 +75,7 @@ function getMapInstance(mapId) {
 }
 function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-    if (type !== 'create') { return console.log(latLng); }
+    if (['create', 'edit'].indexOf(type) === -1) { return console.log(latLng); }
     new L.Popup().setLatLng(e.latlng).setContent(latLng).openOn(map);
 }
 function getMapBounds() {

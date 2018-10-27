@@ -380,10 +380,10 @@ function fillLocData(entity, id, rcrd) {
     fillFields(rcrd, fields);
     addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
     fP.editing.detail = rcrd.geoJsonId || null;
-    if (rcrd.geoJsonId) { idb.get('geoJson').then(storeLocGeoJson); }
+    if (rcrd.geoJsonId) { storeLocGeoJson(rcrd.geoJsonId); }
     
-    function storeLocGeoJson(geoJson) {
-        fP.forms.top.geoJson = JSON.parse(geoJson[rcrd.geoJsonId]);
+    function storeLocGeoJson(id) {                                              
+        fP.forms.top.geoJson = _u.getGeoJsonEntity(id);
     }
 } /* End fillLocData */
 function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
@@ -3484,10 +3484,18 @@ function getFormValueData(entity, fLvl, submitting) {
         if (elem.className.includes('skipFormData')) { return; }                //console.log("elem = %O", elem)
         const fieldName = _u.lcfirst(elem.children[1].children[0].innerText.trim().split(" ").join("")); 
         const input = elem.children[1].children[1];                             //console.log("---------[%s] = %O", fieldName, input);
+        formVals[fieldName] = parseFieldData();                                 //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
         
-        formVals[fieldName] = $(input).data('inputType') ? 
-            getInputVals(fieldName, input, $(input).data('inputType')) : 
-            input.value.trim() || null;                                         //console.log('[%s] = [%s]', fieldName, formVals[fieldName]);
+        /** 
+         * Returns the input value from specialized parsing methods or trims the 
+         * field value and returns the value as either an integer or a string. 
+         */
+        function parseFieldData() {
+            const val = $(input).data('inputType') ? 
+                getInputVals(fieldName, input, $(input).data('inputType')) : 
+                input.value.trim() || null;
+            return isNaN(val) ? val : parseInt(val);                                         
+        }
     }
     /** Edge case input type values are processed via their type handlers. */
     function getInputVals(fieldName, input, type) {
@@ -3685,14 +3693,14 @@ function getSelectedVals(cntnr, fieldName) {
 function buildFormDataAndSubmit(fLvl, formVals) {                        
     let entity = fP.forms[fLvl].entity;                                         //console.log("Submitting [ %s ] [ %s ]-form with vals = %O", entity, fLvl, formVals);  
     if (entity === 'editor') { entity = 'author'; }
-    const formData = buildFormData(entity, formVals);                           //console.log("formData = %O", formData);
+    const formData = buildFormData(entity, formVals, fLvl);                     //console.log("formData = %O", formData);
     submitFormData(formData, fLvl, entity);
 }                
 /**
  * Returns an object with the entity names' as keys for their field-val objects, 
  * which are grouped into flat data and related-entity data objects. 
  */
-function buildFormData(entity, formVals) { 
+function buildFormData(entity, formVals, fLvl) { 
     var pEntity = getParentEntity(entity);                                  
     var parentFields = !pEntity || getParentFields(entity);                     //console.log("buildFormDataObj. pEntity = %s, formVals = %O, parentFields = %O", pEntity, formVals, parentFields);
     var fieldTrans = getFieldTranslations(entity); 
@@ -3753,15 +3761,14 @@ function buildFormData(entity, formVals) {
     /**
      * If the location has GPS data, a geoJson detail entity is added to the 
      * form data. If the location already has geoJson, coordinates are only 
-     * overwritten if the type is 'point'. Otherwise, (multi)polygon coords
+     * overwritten if the type is 'Point'. Otherwise, (multi)polygon coords
      * would be overwritten. Once map editing is complete, this will be revised.
      */
     function handleGeoJson() {
-        if (!formVals.latitude || !formVals.longitude) { return; }
-        delete data.false;
+        if (!fP.editing && (!formVals.latitude || !formVals.longitude)) { return; }
         const displayPoint = JSON.stringify([ formVals.longitude, formVals.latitude ]);
-        const geoJson = fP.forms.top.geoJson
-        const coords = !geoJson || geoJson.type === 'point' ? 
+        const geoJson = fP.forms.top.geoJson; 
+        const coords = !geoJson || geoJson.type === 'Point' ? 
             displayPoint : fP.forms[fLvl].geoJson.coordinates;
         data.geoJson = {
             flat: { 
