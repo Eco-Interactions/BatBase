@@ -443,12 +443,13 @@ function showTable() {
 /*===================== Location Form Methods ================================*/
 /** Shows all location in containing country and selects the country in the form. */
 function showNearbyLocationsAndUpdateForm(results) {                            //console.log('showNearbyLocationsAndUpdateForm = %O', results);
-    if (map._container.id !== 'loc-map' || !results) { return; }
+    if (!results) { return; }
     const cntryCode = results.address.country_code ? 
         results.address.country_code.toUpperCase() : null;
     if (!cntryCode) { return; console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
     const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
     volatile.prnt = cntryId; 
+    if (map._container.id === 'map') { return addParentLocDataToMap(cntryId, null, 'map'); }
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, volatile.poly);
 }
@@ -560,9 +561,9 @@ function addParentLocDataToMap(id, skipZoom, type) {
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     const hasPolyData = geoJson && geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
+    if (type === 'edit' || type === 'map') { return; }
     const zoomLvl = hasPolyData || skipZoom ? false : 
         loc.locationType.displayName === 'Region' ? 3 : 8;
-    if (type === 'edit') { return; }
     showChildLocs(id, zoomLvl);
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */

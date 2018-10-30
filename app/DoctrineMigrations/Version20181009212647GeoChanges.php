@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Template for doctrine migrations where the entity manager is necessary.
+ * Adds location name to each geojson entity. Fixes various display points for countries.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
 class Version20181009212647GeoChanges extends AbstractMigration implements ContainerAwareInterface
@@ -45,6 +45,7 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
             $loc = $entity->getLocation();
             $entity->setLocationName($loc->getDisplayName());
             $this->em->persist($entity);
+            $this->em->flush();
         }
     }
 
@@ -63,20 +64,13 @@ class Version20181009212647GeoChanges extends AbstractMigration implements Conta
             'Cocos (Keeling) Islands' => [96.871, -12.1642],
             'Tokelau' => [-171.8484, -9.2002],
             'Jersey' => [-2.1312, 49.2144],    
-            'Oceania' => [140.0188, -22.7359],
-            'Martinique' => [14.6415, -61.0242],
-            'Curacao' => [12.1696, -68.9900],
-            'French Guiana' => [3.9339, -53.1258],
-            'Yasuni National Park' => [-75.8069082, -1.1006555],
-            'Russian Federation' => [94.44249, 62.25642]        
+            'Oceania' => [140.0188, -22.7359]        
         ];
 
-        foreach ($points as $name => $coordinates) {
+        foreach ($points as $name => $coordinates) {  
             $geoJson = $this->em->getRepository('AppBundle:GeoJson')
                 ->findOneBy(['locationName' => $name]);
             $geoJson->setDisplayPoint(json_encode($coordinates));
-
-            if ($name === 'Yasuni National Park') { $geoJson->setType('Point'); }
 
             if ($geoJson->getType() == 'Point') {
                 $geoJson->setCoordinates(json_encode($coordinates));

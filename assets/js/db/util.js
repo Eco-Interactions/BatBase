@@ -18,7 +18,7 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
  *   ucfirst 
 */
 let dataStorage, geoJson;
-const geoJsonDataKey = 'A life without cause is a life without effect!!';
+const geoJsonDataKey = 'A life without cause is a life without effect!.';
 
 extendPrototypes();
 
@@ -234,12 +234,12 @@ function storeGeoJson(geoData) {                                                
     if (!geoData) { return downloadGeoJson(); }
     geoJson = geoData; 
 }
-function downloadGeoJson(cb) {                                                  console.log('downloading all geoJson data!');
+function downloadGeoJson(cb) {                                                  
     return dataStorage.getItem('interaction') ?
         downloadGeoJsonAfterLocalDbInit(cb) :
-        window.setTimeout(downloadGeoJson, 400);   
+        window.setTimeout(downloadGeoJson, 800);   
 }
-function downloadGeoJsonAfterLocalDbInit(cb) {
+function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
     sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
     
     function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
