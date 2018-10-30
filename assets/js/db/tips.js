@@ -226,6 +226,16 @@ function getSteps(step) {
         },
         {
             element: '#db-view',
+            intro: `<h3><center>Searching the map.</center></h3><br><b>Search by 
+                clicking on the magnifying glass on the left side of the map and 
+                typing your search criteria.</b><br><br>The map will refocus and 
+                show interactions nearby.<br><br><center>You can try this after 
+                exiting the tutorial.`,
+            position: 'top',
+            setUpFunc: loadLocView.bind(null, 'map')
+        },
+        {
+            element: '#db-view',
             intro: `<center><h3>Location mode also has an additional "map" column.
                 </h3></center><br>All locations with GPS data have a map pin in 
                 this column. Click one to load the Map View centered on that 
@@ -296,7 +306,7 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(11); }
+    if (tutKey === 'map') { intro.goToStep(12); }
 }
 function checkForDbLoad() {
     if ($('#sel-realm').length) { return; }  
@@ -351,9 +361,9 @@ function getSearchTipsHtml() {
     return `
         <h3>Tips for searching</h3>
         <ul> 
-            <br><li><strong>To search by specific interaction or habitat types</strong> hover on 
-            "Type” header on the table, click on the revealed filter menu, and select which type 
-            to include in your search. (<a href="definitions">Click here to see definitions</a> 
+            <br><li><strong>To search by specific interaction or habitat types</strong>, click on the 
+            filter menu of the Type or Habitat columns and select which ones to include in your search.  
+            (<a href="definitions">Click here to see definitions</a> 
             for each interaction and habitat type.)</li>
             <br><li><strong>Interested in knowing all the fruit species known from a bat species’ 
             diet?</strong> Search for the bat species by selecting "Taxon" in the "Group Interactions by"
@@ -369,7 +379,10 @@ function getSearchTipsHtml() {
             and then "Plant" for “Group Taxa by” in the field below. You can narrow the search by selecting
             family, genus, or species in the menu to the right. Next, select only “Flower” in the filter menu for the 
             Tags column on the table. This will provide information on the bats that visited 
-            the flower as well as those that have been confirmed pollinating it.</li>
+            the flower as well as those that have been confirmed pollinating it.</li><br>
+            <li><strong>Want to see all interactions for a particular bat species/genus/family on a map?</strong> 
+            Search for the bat as described above, filtering as desired, and then click “Show Interactions on Map”. 
+            All interactions with GPS data will be displayed on the map.</li>
             <br><li><b>Follow along with the tutorial for a guided tour 
             of the search functionality.</b></li><br>
         </ul>
