@@ -32,7 +32,7 @@
 	<hr>
 	<div id="team-sect" class="top-em-mrg">
 		<div id="team-hdr"><h3>The Bat Eco-Interactions Team</h3></div>
-		{% embed 'four_cols_sect.html.twig' %}
+		{% embed 'three_cols_sect.html.twig' %}
 			{% block firstcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
 				<div id="team-cullen" class="wysiwyg">
@@ -46,12 +46,20 @@
 				</div>
 			{% endblock %}
 			{% block thirdcol %}
+				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-chanda.jpg') }}" alt="Chanda Image"></div>
+				<div id="team-chanda" class="wysiwyg">
+					{{ blocks["team-chanda"]|raw }}
+				</div>
+			{% endblock %}
+		{% endembed %}
+		{% embed 'two_cols_sect.html.twig' %}
+			{% block firstcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
 				<div id="team-taylor" class="wysiwyg">
 					{{ blocks["team-taylor"]|raw }}
 				</div>
 			{% endblock %}
-			{% block fourthcol %}
+			{% block secondcol %}
 				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
 				<div id="team-sarah" class="wysiwyg">
 					{{ blocks["team-sarah"]|raw }}

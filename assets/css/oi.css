@@ -597,14 +597,28 @@ span.lbl {
     margin: 0 1em 1.5em 0;
     box-shadow: 2px 2px 3px rgba(0,0,0,0.6);
 }
-#team-sect .second-col {
-    width: 272em;
+#team-sect .three-col-outer .first-col {
+    width: 550px;
 }
-#team-sect .four-col-outer>div.fourth-col {
-    width: 220px;
-    flex-shrink: 0;
+#team-sect .three-col-outer .second-col {
+    width: 550px;
 }
-
+#team-sect .three-col-outer .third-col {
+    width: 500px;
+}
+#team-sect .two-col-outer .first-col {
+    margin-top: 10px;
+    width: 800px;
+}
+#team-sect .two-col-outer {
+    margin-top: 20px;
+}
+#team-sect .two-col-outer .first-col {
+    width: 750px;
+}
+#team-sect .two-col-outer .second-col {
+    width: 750px;
+}
 /*-------------------- Future Dev -----------------*/
 #future-dev-pg .first-col {
     width: 64%;
