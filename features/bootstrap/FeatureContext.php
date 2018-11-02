@@ -422,6 +422,16 @@ class FeatureContext extends RawMinkContext implements Context
         $selector = $curForm.' '.$field;      
         $this->assertFieldValueIs($text, $selector);        
     }
+    
+    /**
+     * @When I see the location's pin on the map
+     */
+    public function iSeeTheLocationsPinOnTheMap()
+    {
+        $marker = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0");
+        $this->handleNullAssert($marker, false, 'Marker not found on map');
+    }
+
 
     /**
      * @Then I should see the :text interaction tag
@@ -785,6 +795,9 @@ class FeatureContext extends RawMinkContext implements Context
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
         usleep(500000);
+        if ($bttnText === 'Update Interaction') { 
+            $this->ensureThatFormClosed(); 
+        }
     }
     /**
      * @Given I see :text
@@ -820,6 +833,16 @@ class FeatureContext extends RawMinkContext implements Context
         $should_nt = $isIn ? 'Should' : "Shouldn't";
         $this->handleEqualAssert($text, $fieldVal, $isIn,  
             "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
+    }
+    /** Check after submitting the Interaction Edit form. */
+    private function ensureThatFormClosed()
+    {
+        try {
+            $this->assertSession()->pageTextNotContains('Editing Interaction');
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Form did not submit/close as expected.");
+        }
+        
     }
     /** ------------------ Get From Page -------------------------------------*/
     private function getAllTableRows()

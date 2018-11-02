@@ -75,7 +75,6 @@ Feature: Edit data in the database
         Then I should see "2" interactions under "Philodendron sphalerum"
         And I should see "1" interactions under "Unspecified Araceae Interactions"
         
-    # pressing update twice because the first time isn't working and I don't know why #timecrunched *
     @javascript
     Scenario:  I should be able to change an interaction's type, tags, and notes
         Given the database table is in "Taxon" view
@@ -88,7 +87,6 @@ Feature: Edit data in the database
         And I remove the "Flower" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
         And I press the "Update Interaction" button
-        # And I press the "Update Interaction" button
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
@@ -123,19 +121,20 @@ Feature: Edit data in the database
         And I click on the edit pencil for the "Santa Ana-Forest" row
         And I see "Editing Location"
         When I change the "Display Name" field "input" to "Santa Ana-Captivity"
-        When I change the "Description" field "textarea" to "Description..."
-        When I change the "Habitat Type" dropdown field to "Captivity"
-        When I change the "Elevation" field "input" to "1000"
-        When I change the "Elevation Max" field "input" to "2000"
-        When I change the "Latitude" field "input" to "9.7489"
-        When I change the "Longitude" field "input" to "83.7534"
+        And I change the "Description" field "textarea" to "Description..."
+        And I change the "Habitat Type" dropdown field to "Captivity"
+        And I change the "Elevation" field "input" to "1000"
+        And I change the "Elevation Max" field "input" to "2000"
+        And I change the "Latitude" field "input" to "9.7489"
+        And I change the "Longitude" field "input" to "83.7534"
+        And I see the location's pin on the map
         And I press the "Update Location" button
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Captivity" row
         And I see "Editing Location"
         Then I should see "Santa Ana-Captivity" in the "Display Name" field "input"
-        Then I should see "Description..." in the "Description" field "textarea"
+        And I should see "Description..." in the "Description" field "textarea"
         Then I should see "Captivity" in the "Habitat Type" dropdown field
         Then I should see "1000" in the "Elevation" field "input"
         Then I should see "2000" in the "Elevation Max" field "input"
@@ -223,7 +222,7 @@ Feature: Edit data in the database
         Then I should see "www.link.com" in the "Link Url" field "input"
         Then I should see "Publisher Website" in the "Link Display" field "input"
 
-#todo - test proper removal of citation from authors in tree
+    #todo - test proper removal of citation from authors in tree
     @javascript
     Scenario:  I should be able to edit the data of an existing citation [CHAPTER->BOOK]
         Given the database table is in "Source" view

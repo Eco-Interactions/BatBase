@@ -3488,13 +3488,13 @@ function getFormValueData(entity, fLvl, submitting) {
         
         /** 
          * Returns the input value from specialized parsing methods or trims the 
-         * field value and returns the value as either an integer or a string. 
+         * field value and returns the value, with numbers parsed as integers. 
          */
         function parseFieldData() {
             const val = $(input).data('inputType') ? 
                 getInputVals(fieldName, input, $(input).data('inputType')) : 
-                input.value.trim() || null;
-            return isNaN(val) ? val : parseInt(val);                                         
+                input.value.trim() || null; 
+            return Number.isInteger(val) ? parseInt(val) : val;                                         
         }
     }
     /** Edge case input type values are processed via their type handlers. */

@@ -850,10 +850,10 @@ function getLocChildData(childId) {
  */
 function buildLocSearchUiAndTable(locTree) {                                    //console.log("buildLocSearchUiAndTable called. locTree = %O", locTree)
     transformLocDataAndLoadTable(locTree);
-    loadLocSearchHtml();
+    loadSearchLocHtml();
 }
-function loadLocSearchHtml() {
-    clearCol2();        
+function loadSearchLocHtml() {
+    clearCol2();       
     loadSearchByNameElem();
     loadLocComboboxes();
 }
@@ -868,7 +868,7 @@ function loadSearchByNameElem() {
  * set any previously 'selected' values.
  */
 function loadLocComboboxes() {  
-    const opts = buildLocSelectOpts();
+    const opts = buildLocSelectOpts(); 
     var selElems = buildLocSelects(opts);
     $('#opts-col2').append(selElems);
     initComboboxes(['Region', 'Country']);
@@ -2269,7 +2269,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  */
 function syncFiltersAndUi(sinceTime) {
     if (tParams.curFocus === "srcs") { applySrcFltrs(); }
-    if (tParams.curFocus === "locs") { loadLocComboboxes(); }    
+    if (tParams.curFocus === "locs") { loadSearchLocHtml(); }    
     updateTableFilterStatusMsg();  
     syncTimeUpdatedRadios(sinceTime);
 }
