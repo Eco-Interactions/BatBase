@@ -277,25 +277,63 @@ Feature: Add new data to the database
 
     ## -------------------------- Location -------------------------------------##
     @javascript
-    Scenario:  I should be able to create a location with its sub-form
+    Scenario:  I should be able to create a location with GPS data using the sub-form
         Given I open the New Interaction form
-        And I enter "Test Location" in the "Location" dropdown field
-        Then I should see "New Location"
+        And I click on "use the map interface" link
+        And I press the "New Location" button in the map
+        And I should see "New Location"
+        When I type "9.79026" in the "Latitude" field "input"
+        And I type "-83.91546" in the "Longitude" field "input"
+        And I see the "new" location's pin on the map
+        And I type "Test Location With GPS" in the "Display Name" field "input"
+        And I type "Test Description" in the "Description" field "textarea"
+        And I select "Savanna" from the "Habitat Type" dropdown field
+        And I type "1500" in the "Elevation" field "input"
+        And I type "2500" in the "Elevation Max" field "input"
+        # And I see the country's polygon drawn on the map
+        And I press "Create Location" in the added green pin's popup
+        Then I should see "Test Location With GPS" in the "Location" dropdown field
+        And I should see "Test Description" in the "Location" detail panel
+        And I should see "Savanna" in the "Location" detail panel
+        And I should see "1500" in the "Location" detail panel
+        And I should see "2500" in the "Location" detail panel
+        And I should see "9.79026" in the "Location" detail panel
+        And I should see "-83.91546" in the "Location" detail panel
+
+    @javascript
+    Scenario:  I should be able to create a location without GPS data
+        Given I open the New Interaction form
+        And I enter "Test Location Without GPS" in the "Location" dropdown field
+        And I should see "New Location"
         When I type "Test Description" in the "Description" field "textarea"
         And I select "Costa Rica" from the "Country" dropdown field
         And I select "Savanna" from the "Habitat Type" dropdown field
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
-        And I type "-58.864905" in the "Latitude" field "input"
-        And I type "3.339844" in the "Longitude" field "input"
-        And I press the "Create Location" button
-        Then I should see "Test Location" in the "Location" dropdown field
+        And I press the "Create without GPS data" button
+        Then I should see "Test Location Without GPS" in the "Location" dropdown field
         And I should see "Test Description" in the "Location" detail panel
         And I should see "Savanna" in the "Location" detail panel
         And I should see "1500" in the "Location" detail panel
         And I should see "2500" in the "Location" detail panel
-        And I should see "-58.864905" in the "Location" detail panel
-        And I should see "3.339844" in the "Location" detail panel
+
+    @javascript
+    Scenario:  I should be able to select a location using the form map
+        Given I open the New Interaction form
+        When I click on "use the map interface" link
+        Then I should see the map loaded
+        And I select "Costa Rica" from the "Country-Region" dropdown field
+        And I see the country's polygon drawn on the map
+        And I should see "2" location markers
+        And I click on an existing location marker
+        And I press the "Select Existing Location" button
+        And the map should close
+        And I should see "Description" in the "Location" detail panel
+        And I should see "Name" in the "Location" detail panel
+        And I should see "Habitat Type" in the "Location" detail panel
+        And I should see "Latitude" in the "Location" detail panel
+        And I should see "Longitude" in the "Location" detail panel
+        And I should see "Elevation" in the "Location" detail panel
     ## -------------------------- Taxon ----------------------------------------##
     @javascript
     Scenario:  I should be able to create a taxon Family within the subject taxon sub-form
@@ -441,7 +479,7 @@ Feature: Add new data to the database
         And I should see "Test Book with Editors" in the "Publication" dropdown field
         And I should see "Test Title for Chapter" in the "Citation Title" dropdown field
         And I should see "Costa Rica" in the "Country-Region" dropdown field
-        And I should see "Test Location" in the "Location" dropdown field
+        And I should see "Test Location With GPS" in the "Location" dropdown field
         And I should see "Genus SGenus" in the "Subject" dropdown field
         And I should see "Consumption" in the "Interaction Type" dropdown field
         And the "Object" select field should be empty
@@ -500,7 +538,7 @@ Feature: Add new data to the database
         And I filter the table to interactions created since "today"
         When I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
-        Then I should see "3" interactions under "Test Location"
+        Then I should see "3" interactions under "Test Location With GPS"
         And the expected data in the location interaction row
 
     @javascript

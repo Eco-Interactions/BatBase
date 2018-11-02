@@ -4,6 +4,7 @@ Feature: Wysiwyg site text editing
 	I should be able to use the wysiwyg editor to modify the text
 
     #Needs to be updated
+    
 	# Background:
 	# 	Given I am on "/login"
 	# 	And I fill in "Username" with "TestAdmin"

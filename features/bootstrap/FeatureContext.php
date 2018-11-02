@@ -287,7 +287,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $srcLocData = [ 'Publication' => 'Test Book with Editors', 
             'Citation Title' => 'Test Title for Chapter', 
-            'Country-Region' => 'Costa Rica', 'Location' => 'Test Location'];
+            'Country-Region' => 'Costa Rica', 'Location' => 'Test Location With GPS'];
         $this->fillSrcAndLocFields($srcLocData);
         $taxaData = ['Genus' => 'SGenus', 'Species' => 'OGenus Species'];
         $this->fillTaxaFields($taxaData);
@@ -425,11 +425,18 @@ class FeatureContext extends RawMinkContext implements Context
     
     /**
      * @When I see the location's pin on the map
+     * @When I see the :type location's pin on the map
      */
-    public function iSeeTheLocationsPinOnTheMap()
+    public function iSeeTheLocationsPinOnTheMap($type = null)
     {
-        $marker = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0");
-        $this->handleNullAssert($marker, false, 'Marker not found on map');
+        $class = '.leaflet-marker-icon';
+        $msg = 'Marker not found on map';
+        if ($type === 'new') { 
+            $class += '.new-loc';
+            $msg = 'New Location marker not found on map';
+        }
+        $marker = $this->getUserSession()->evaluateScript("$('$class').length > 0");
+        $this->handleNullAssert($marker, false, $msg);
     }
 
 
@@ -765,7 +772,102 @@ class FeatureContext extends RawMinkContext implements Context
         $row = $this->getTableRow($text);
         $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
     }
+    /** ------------------ Map Methods ---------------------------------------*/
+    /**
+     * @Given I press the :type button in the map
+     */
+    public function iPressTheButtonInTheMap($type)
+    {
+        $map = ['New Location' => '.leaflet-control-create-icon'];
+        $bttn = $this->getUserSession()->getPage()->find('css', $map[$type]);
+        $this->handleNullAssert($bttn, false, 'No [$type] button found.');
+        $bttn->click();
+    }
+
+    /**
+     * @When I see the country's polygon drawn on the map
+     */
+    public function iSeeTheCountrysPolygonDrawnOnTheMap()
+    {
+        // usleep(5000000);
+        // $poly = $this->getUserSession()->getPage()->find('css', 'path.leaflet-interactive');
+        // $this->handleNullAssert($poly, false, 'No polygon found on map');
+    }
+
+    /**
+     * @When I press :bttnText in the added green pin's popup
+     */
+    public function iPressInTheAddedGreenPinsPopup($bttnText)
+    {
+        $marker = $this->getUserSession()->getPage()->find('css', '.new-loc');
+        $this->handleNullAssert($marker, false, 'No new location marker found on map.');        
+        $marker->click();
+        
+        $bttn = $this->getUserSession()->getPage()->find('css', "input[value='$bttnText']");
+        $this->handleNullAssert($bttn, false, 'No [$bttnText] button found.');
+        $bttn->click();
+        usleep(50000);
+    }
+
+    /**
+     * @Then I should see the map loaded
+     */
+    public function iShouldSeeTheMapLoaded()
+    {
+        $mapTile = $this->getUserSession()->getPage()->find('css', '.leaflet-tile-pane');
+        $this->handleNullAssert($mapTile, false, 'No map tiles found.');
+    }
+
+    /**
+     * @Then I should see :count location markers
+     */
+    public function iShouldSeeLocationMarkers($count)
+    {
+        $markers = $this->getUserSession()->getPage()->findAll('css', '.leaflet-marker-icon');
+        $this->handleEqualAssert(count($markers), $count, true, 'Found ['.count($markers)."] markers. Expected [$count].");
+    }
+
+    /**
+     * @Then I click on an existing location marker
+     */
+    public function iClickOnAnExistingLocationMarker()
+    {
+        $markers = $this->getUserSession()->getPage()->findAll('css', '.leaflet-marker-icon');
+        $this->handleNullAssert($markers, false, 'No markers found on map.');
+        $markers[0]->click();
+    }
+
+    /**
+     * @Then the map should close
+     */
+    public function theMapShouldClose()
+    {
+        $map = $this->getUserSession()->getPage()->find('css', '#loc-map');
+        $this->handleNullAssert($map, true, 'Map should not be displayed, and yet...');
+    }
+
+
     /** ------------------ Helper Steps --------------------------------------*/
+    /**
+     * @Given I see :text
+     */
+    public function iSee($text)
+    {
+        try {
+            $this->assertSession()->pageTextContains($text);
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Did not find [$text] anywhere on page.");
+        }
+    }
+    /**
+     * @Given I click on :text link
+     */
+    public function iClickOnLink($text)
+    {
+        $map = ['use the map interface' => '.map-link'];
+        $link = $this->getUserSession()->getPage()->find('css', $map[$text]);
+        $link->click();
+    }
     /**
      * @When I check the :text box
      */
@@ -797,17 +899,6 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         if ($bttnText === 'Update Interaction') { 
             $this->ensureThatFormClosed(); 
-        }
-    }
-    /**
-     * @Given I see :text
-     */
-    public function iSee($text)
-    {
-        try {
-            $this->assertSession()->pageTextContains($text);
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Did not find [$text] anywhere on page.");
         }
     }
     /** -------------------- Asserts ---------------------------------------- */

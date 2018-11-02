@@ -500,10 +500,6 @@ function updateUiAfterFormGeocode(latLng, results) {                            
     if (!results.length) { return updateMapPin(latLng, null); }
     updateMapPin(latLng, results[0]);
 }
-function drawResultingPolygon(bbox) {
-    for (var j = 0; j < 4; j++) bbox[j] = parseFloat(bbox[j]);
-    drawPolygon(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
-}
 function updateMapPin(latLng, results) {                                        //console.log('updateMapPin. point = %O name = %O', latLng, name);
     const loc = results ? buildLocData(results.properties, results.name) : null;
     replaceMapPin(latLng, loc);  
@@ -519,7 +515,7 @@ function replaceMapPin(latLng, loc) {
     removePreviousMapPin(loc);
     if (loc) { 
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
-        showChildLocs(loc.cntryId, null);
+        addParentLocDataToMap(loc.cntryId, true);
     }
     addPinToMap(latLng, marker.layer);   
 }
