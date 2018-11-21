@@ -30,8 +30,9 @@ import * as filters from './tbl-filters.js';
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded.
  */
-let userRole, dataStorage, misc = {}, columnDefs = [], tParams = {}; 
-const dataKey = 'A life without cause is a life without effect.';               console.log(dataKey);
+let userRole, dataStorage, tParams = {};
+const misc = {}; 
+const dataKey = 'A life without cause is a life without effect!';               console.log(dataKey);
 const tblOpts = getDefaultTblOpts();
 
 requireCss();
@@ -1599,7 +1600,7 @@ function searchTreeText(entity) {                                               
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
     tblOpts.api.setRowData(newRows); 
     tParams.focusFltrs = text === "" ? [] : [...tParams.focusFltrs, `"${text}"`];
-    updateTableFilterStatusMsg();
+    updateFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
@@ -1643,7 +1644,7 @@ function updateTaxonSearch(val) {                                               
             if (tParams.focusFltrs) { 
                 tParams.focusFltrs.push(curLevel + " " + taxonName); 
             } else { tParams.focusFltrs = [curLevel + " " + taxonName] }
-            updateTableFilterStatusMsg();
+            updateFilterStatusMsg();
         }
     }
 } /* End updateTaxonSearch */
@@ -1687,7 +1688,7 @@ function updateLocSearch(val) {
     } /* End getSelectedVals */
     function updateFilter() {
         tParams.focusFltrs = [locType];
-        updateTableFilterStatusMsg();
+        updateFilterStatusMsg();
     }
 } /* End updateLocSearch */
 /*------------------ Source Filter Updates -------------------------------*/
@@ -1709,7 +1710,7 @@ function updatePubSearch(typeVal, text) {                                       
     const newRows = getFilteredPubRows();
     tParams.focusFltrs = getPubFilters();
     tblOpts.api.setRowData(newRows);
-    updateTableFilterStatusMsg();
+    updateFilterStatusMsg();
     resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {                             
@@ -1729,9 +1730,10 @@ function updatePubSearch(typeVal, text) {                                       
     }
     function getPubFilters() { 
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
+        const truncTxt = txt ? txt.substring(0, 50)+'...' : null; 
         return typeId === 'all' && !txt ? [] :
-            (typeId === 'all' ? [`"${txt}"`] : 
-            (!txt ? [`${typeVal}s`] : [`"${txt}"`, `${typeVal}s`]));
+            (typeId === 'all' ? [`"${truncTxt}"`] : 
+            (!txt ? [`${typeVal}s`] : [`"${truncTxt}"`, `${typeVal}s`]));
     }
 } /* End updatePubSearch */
 /*================ Table Build Methods ==============================================*/
@@ -1875,7 +1877,7 @@ function getColumnDefs(mainCol) {
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                filter: filters.UniqueValues, filterParams: {values: ['Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
+                filter: filters.UniqueValues, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
@@ -2066,7 +2068,7 @@ function onFilterChange() {
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    updateTableFilterStatusMsg();    
+    updateFilterStatusMsg();    
 } 
 /** Returns an obj with all filter models. */
 function getAllFilterModels() {  
@@ -2094,7 +2096,7 @@ function getAllFilterModels() {
  * , or applies the previous filter 
  * message persisted through table update into map view.
  */
-function updateTableFilterStatusMsg() {                                          //console.log("updateTableFilterStatusMsg called.")
+function updateFilterStatusMsg() {                                              //console.log("updateFilterStatusMsg called.")
     if (tblOpts.api === undefined) { return; }
     // if (tParams.persistFilters) { return setTableFilterStatus(tParams.persistFilters); }
     getFiltersAndUpdateStatus();
@@ -2170,7 +2172,7 @@ function resetFilterStatusBar() {
  * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
  * Note: 'Today' is the default selection. 
  */
-function toggleTimeUpdatedFilter(state) { 
+function toggleTimeUpdatedFilter(state) {                                       console.log('toggleTimeUpdatedFilter. state = ', state);
     var filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
     var opac = filtering ? 1 : .3;
     $('#time-fltr, .flatpickr-input, #fltr-tdy, #fltr-cstm')
@@ -2270,7 +2272,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
 function syncFiltersAndUi(sinceTime) {
     if (tParams.curFocus === "srcs") { applySrcFltrs(); }
     if (tParams.curFocus === "locs") { loadSearchLocHtml(); }    
-    updateTableFilterStatusMsg();  
+    updateFilterStatusMsg();  
     syncTimeUpdatedRadios(sinceTime);
 }
 function syncTimeUpdatedRadios(sinceTime) {
@@ -2740,8 +2742,8 @@ function clearPreviousTable() {                                                 
     $('#search-tbl').show();
 }
 /**
- * Resets table state to top focus options: Taxon and source are reset at current
- * realm; locations are reset to the top regions.
+ * ResetData button: Resets table state to top focus options: Taxon and source 
+ * are reset at current realm; locations are reset to the top regions.
  */
 function resetDataTable() {                                                     //console.log("---reseting table---")
     const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTree, srcs: resetSourceRealm };
@@ -2752,8 +2754,8 @@ function resetDataTable() {                                                     
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { $('#shw-chngd')[0].checked = false; }     //resets updatedAt table filter
-    updateTableFilterStatusMsg();
+    if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
+    updateFilterStatusMsg();
 }
 /** Deltes the props uesd for only the displayed table in the global tParams. */
 function resetCurTreeStorageProps() {

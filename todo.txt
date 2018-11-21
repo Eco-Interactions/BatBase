@@ -36,7 +36,6 @@ MEETING NOTES:
             - Buttons:
                 - click-to-create pin on the map (kind of like the drag button)
                 - Drag 
-            - Edit form: - update geojson location name
             - Err handling:
                 - ensure that entered coordinates are within selected country
                     on country change, on form submit

@@ -89,6 +89,7 @@ input[type="radio"], input[type="checkbox"] {
 }
 #tbl-filter-status {
     flex-grow: 1;
+    max-width: 825px;
 }
 /*--------- Search Tips Popup -----------------*/
 #tips-close-bttn {
