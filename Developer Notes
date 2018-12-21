@@ -12,9 +12,16 @@
     (Need to update)
 
 >Install Steps ## 
-- composer update
+- Install & Update COMPOSER:
+    - Composer https://getcomposer.org/download/
+    - Extend php.ini memory-limit
+    - php composer.phar update
+        - Memory limit issues:
+            - $ php -d memory_limit=-1 composer.phar install
 - Set file permissions:
-    * debian
+    - Mac (10.14)
+        - https://symfony.com/doc/3.4/setup/file_permissions.html
+    - Linux (debian)
         $ sudo chgrp www-data /var/www/* -R //Make sure the group is www-data on '/var/www'
         $ sudo chmod 775 /var/www/* -R  //Make '/var/www' writable for the group
         $ sudo chmod g+s /var/www/* -R  //Set the GID for www-data for all sub-folders
@@ -23,22 +30,23 @@
         $ HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx' | grep -v root | head -1 | cut -d\  -f1)
         $ sudo setfacl -dR -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
         $ sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:[whoami?]:rwX var
-- Extend php.ini memory-limit
 
 ## Yarn, NPM, & Encore ##
-> Steps taken to build npm and encore
+- Steps taken to build npm and encore:
     - Follow directions to install npm and yarn - https://symfony.com/doc/3.4/frontend.html
-    - Install jquery - $ npm install --save jquery
-    - Install ag-grid - $ npm install --save ag-grid
-    - Install webpack - $ npm install webpack@^3.0.0 --save-dev
-    - Install webpack-workbox - $ npm install workbox-webpack-plugin --save-dev
-    - Install idb-keyval - $ npm install --save idb-keyval
-> After installing new plugin/package
+    # - Install jquery - $ npm install --save jquery
+    # - Install ag-grid - $ npm install --save ag-grid
+    # - Install webpack - $ npm install webpack@^3.0.0 --save-dev
+    # - Install webpack-workbox - $ npm install workbox-webpack-plugin --save-dev
+    # - Install idb-keyval - $ npm install --save idb-keyval
+- After installing new plugin/package:
     - run $ sudo yarn install
+
+## Generate Assets ##
 > Asset generation commands: 
-        - $ yarn run encore dev
-        - $ yarn run encore dev --watch (run while working on asset code)
-        - $ yarn run encore production
+        - $ yarn run encore dev --config-name local
+        - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
+        - $ yarn run encore production --config-name server
 
 
 ##------------------- TESTING ------------------------------------------------##

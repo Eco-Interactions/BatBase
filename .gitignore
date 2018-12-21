@@ -47,8 +47,7 @@
 /composer-setup.php
 composer.lock
 
-# Local Backups
+# Local Files
 /assets/hide/*
 *.sublime-project
-
 *.sublime-workspace
