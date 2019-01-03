@@ -111,6 +111,7 @@ function exitFormPopup(e, skipReset) {
     $("#b-overlay-popup").removeClass("form-popup");
     $("#b-overlay-popup").empty();
     fP = {};
+    db_map.clearMemory();
 }
 function hideSearchFormPopup() {
     $('#b-overlay-popup, #b-overlay').css({display: 'none'});

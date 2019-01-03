@@ -632,8 +632,8 @@ function getNewLocText(loc) {
     const name = !loc ? 'No geo-data found. Please double-check coordinates.' : 
         'Near: <b>'+ loc.name;
     const html = `<div style="font-size:1.2em;">${name}</b></div>`;
-    return `${html}After confirming that this location is unique and the display
-        name is accurate, please fill in all available data, click "Create Location" to submit.`;
+    return `${html}After confirming that this location is unique, please fill in 
+        all available data and click "Create Location" to submit.`;
 }
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',

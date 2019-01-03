@@ -5,6 +5,7 @@
 /**
  * Exports:
  *   addVolatileMapPin
+ *   clearMemory
  *   initFormMap
  *   initMap
  *   showInts
@@ -17,7 +18,7 @@ import * as MM from './map-markers.js';
 
 let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
-const app = {
+let app = {
     flags: {/*
         onClickDropPin
     */}
@@ -27,6 +28,12 @@ initDb();
 requireCss();
 fixLeafletBug();
 
+export function clearMemory() { console.log('clearing memory')
+    app = {flags:{}};
+    map = null;
+    volatile = {};
+    popups = {};
+}
 /** =================== Init Methods ======================================== */
 function requireCss() {
     require('../../../node_modules/leaflet/dist/leaflet.css');
@@ -517,12 +524,12 @@ function coordHasErr(field) {
  */
 function updateUiAfterFormGeocode(latLng, noZoom, results) {                    //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
     if (!results.length) { return updateMapPin(latLng, null, noZoom); }
-    updateMapPin(latLng, results[0], noZoom);  console.log('map = %O', map)
-    $('#'+map._container.id).css('cursor', 'default');
+    updateMapPin(latLng, results[0], noZoom); 
 }
 function updateMapPin(latLng, results, noZoom) {                                //console.log('updateMapPin. point = %O name = %O', latLng, name);
     const loc = results ? buildLocData(results.properties, results.name) : null;
     replaceMapPin(latLng, loc, noZoom);  
+    $('#'+map._container.id).css('cursor', 'default');
 }
 function buildLocData(data, name) {                                             //console.log('buildLocData. data = %O', data);
     return {
