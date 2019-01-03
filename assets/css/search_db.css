@@ -653,6 +653,10 @@ input.custom-icon {
     font-size: initial;
     cursor: pointer;
 }
+input.active-icon {
+    background-color: rgba(40, 143, 235, .4);
+    border-color: #288feb;
+}
 /* --- Marker Drag Elem --- */
 .leaflet-control-drag-icon {
     background-image: url('./images/arrows-alt.svg');

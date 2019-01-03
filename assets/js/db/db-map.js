@@ -17,6 +17,12 @@ import * as MM from './map-markers.js';
 
 let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
+const app = {
+    flags: {/*
+        onClickDropPin
+    */}
+};
+
 initDb();
 requireCss();
 fixLeafletBug();
@@ -59,7 +65,7 @@ function waitForDataThenContinue(cb) {                                          
 function buildAndShowMap(loadFunc, mapId, type) {                               console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
     map.setMaxBounds(getMapBounds());
-    map.on('click', showLatLngPopup.bind(null, type));
+    map.on('click', onMapClick.bind(null, type));
     map.on('load', loadFunc);
     addMapTiles(mapId);
     addGeoCoderToMap();
@@ -72,6 +78,19 @@ function getMapInstance(mapId) {
     if (map) { map.remove(); }
     popups = {};
     return L.map(mapId); 
+}
+/**
+ * Either displays coordinates at click location; or drops a new map pin and updates
+ * the form.
+ */
+function onMapClick(type, e) { 
+    if (isButtonClick(e)) { return; }
+    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(e);
+    } else { showLatLngPopup(type, e) }
+}
+function isButtonClick(e) {
+    const elemClass = e.originalEvent.target.className;
+    return typeof elemClass === 'string' && elemClass.includes('leaflet-control');
 }
 function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
@@ -460,7 +479,7 @@ export function addVolatileMapPin(val, type) {                                  
     if (type === 'edit') { addEditFormMapPin(latLng); 
     } else {
         geoCoder.reverse(
-            latLng, 1, updateUiAfterFormGeocode.bind(null, latLng), null);
+            latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false), null);
     }
     clearLocCountLegend();
 }
@@ -496,13 +515,14 @@ function coordHasErr(field) {
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, results) {                            //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
-    if (!results.length) { return updateMapPin(latLng, null); }
-    updateMapPin(latLng, results[0]);
+function updateUiAfterFormGeocode(latLng, noZoom, results) {                    //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
+    if (!results.length) { return updateMapPin(latLng, null, noZoom); }
+    updateMapPin(latLng, results[0], noZoom);  console.log('map = %O', map)
+    $('#'+map._container.id).css('cursor', 'default');
 }
-function updateMapPin(latLng, results) {                                        //console.log('updateMapPin. point = %O name = %O', latLng, name);
+function updateMapPin(latLng, results, noZoom) {                                //console.log('updateMapPin. point = %O name = %O', latLng, name);
     const loc = results ? buildLocData(results.properties, results.name) : null;
-    replaceMapPin(latLng, loc);  
+    replaceMapPin(latLng, loc, noZoom);  
 }
 function buildLocData(data, name) {                                             //console.log('buildLocData. data = %O', data);
     return {
@@ -510,14 +530,14 @@ function buildLocData(data, name) {                                             
         name: name
     };
 }
-function replaceMapPin(latLng, loc) {
+function replaceMapPin(latLng, loc, noZoom) {
     const marker = new MM.LocMarker(latLng, loc, null, 'new-loc');
     removePreviousMapPin(loc);
     if (loc) { 
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
         addParentLocDataToMap(loc.cntryId, true);
     }
-    addPinToMap(latLng, marker.layer);   
+    addPinToMap(latLng, marker.layer, noZoom);   
 }
 function removePreviousMapPin(loc) { 
     if (!volatile.pin) { return volatile.loc = loc; }  
@@ -528,10 +548,11 @@ function resetPinLoc(loc) {
     volatile.prevLoc = volatile.loc; 
     volatile.loc = loc;
 }
-function addPinToMap(latLng, pin) {
+function addPinToMap(latLng, pin, noZoom) {
+    const zoom = noZoom ? map.getZoom() : 8;
     volatile.pin = pin;
     map.addLayer(pin);
-    map.setView(latLng, 8, {animate:true});
+    map.setView(latLng, zoom, {animate:true});
 }
 export function initFormMap(parent, rcrds, type) {                              console.log('attempting to initMap. type = ', type);
     locRcrds = locRcrds || rcrds;  
@@ -564,6 +585,7 @@ function addParentLocDataToMap(id, skipZoom, type) {
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */
 function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
+    if (volatile.poly) { map.removeLayer(volatile.poly); }
     let feature = buildFeature(loc, geoJson);
     volatile.poly = L.geoJSON(feature);                                         
     volatile.poly.addTo(map);
@@ -691,12 +713,31 @@ function createNewLocHereBttn() {
         button = L.DomUtil.create('input', className + '-icon', container);
     button.type = 'button';
     
-    $(button).attr('disabled', 'disabled').css('opacity', '.666');
     $(container).attr('title', "Click on map to select location position").append(button);
     return container;
 }
-function createNewLocHere() {                                                   console.log('Create new location with click!')
-
+/**
+ * Sets a flag that will trigger reverse geocode of the coordinates of subsequent 
+ * map clicks.
+ */
+function createNewLocHere(e) {                                                  //console.log('Create new location with click! %O', e)
+    const buttonActive = app.flags.onClickDropPin ? !app.flags.onClickDropPin : true;
+    const $bttn = $('input.leaflet-control-click-create-icon');
+    app.flags.onClickDropPin = buttonActive;
+    buttonActive ? $bttn.addClass('active-icon') : $bttn.removeClass('active-icon');
+}
+/**
+ * Drops a new map pin, draws the containing country and displays pins for all  
+ * existing sub locations within the country.
+ */ 
+function dropNewMapPinAndUpdateForm(e) {
+    geoCoder.reverse(
+        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, 'noZoom'), null); 
+    $('#loc-map').css('cursor', 'progress');
+    updateCoordFields(e.latlng);
+}
+function updateCoordFields(latLng) {                                            console.log('updateCoordFields')
+    // body...
 }
 /*--- Draw Location Boundary Bttn ---*/
 function addDrawNewLocBoundaryBttn() {

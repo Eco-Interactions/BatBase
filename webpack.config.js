@@ -18,7 +18,9 @@ Encore
     // empty the outputPath dir before each build
     .cleanupOutputBeforeBuild()
     // show OS notifications when builds finish/fail /** Stopped working and I don't know why. */
-    .enableBuildNotifications()
+    .enableBuildNotifications(true, (options) => {
+        options.alwaysNotify = true;
+    })
     // filenames include a hash that changes whenever the file contents change
     .enableVersioning()
     // you can use this method to provide other common global variables,

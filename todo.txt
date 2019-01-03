@@ -10,6 +10,10 @@
         - add button to switch to location merge mode
             - eventually add this functionality
 
+    CURRENT    
+     - click-to-create pin on the map (kind of like the drag button)
+     - FIGURE OUT WHERE I'M ADDING THE CUSTOM MARKER AND TRY TO USE LEAFLETS. MINE LOOKS OFF FROM WHERE THE ACTUAL POINT IS
+
 
 Notes from geocoders:
     - Photon, mapbox, here: 
@@ -34,7 +38,6 @@ MEETING NOTES:
     Next/future rounds:
         Next:
             - Buttons:
-                - click-to-create pin on the map (kind of like the drag button)
                 - Drag 
             - Err handling:
                 - ensure that entered coordinates are within selected country
@@ -93,6 +96,7 @@ TODOs:
 
 (STATIC/MISC SITE)
     - {med}[complicated] Implement Encore for assets
+    - {med}[complicated] Switch from pixels to percent with styles to better adapt to smaller screen resolutions
     - {lox}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
