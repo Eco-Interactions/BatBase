@@ -528,8 +528,8 @@ function updateUiAfterFormGeocode(latLng, noZoom, results) {                    
 }
 function updateMapPin(latLng, results, noZoom) {                                //console.log('updateMapPin. point = %O name = %O', latLng, name);
     const loc = results ? buildLocData(results.properties, results.name) : null;
-    replaceMapPin(latLng, loc, noZoom);  
     $('#'+map._container.id).css('cursor', 'default');
+    replaceMapPin(latLng, loc, noZoom);  
 }
 function buildLocData(data, name) {                                             //console.log('buildLocData. data = %O', data);
     return {

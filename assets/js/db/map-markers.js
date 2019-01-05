@@ -258,14 +258,24 @@ function bindClassContextToMethods(self) {
 }
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) { 
-    if (iconType && iconType.includes('form')) { return null; }
-    const classes = iconType || 'single-marker info';
-    return {
-        icon: L.divIcon({
-            className: classes,
-            html: iconType === 'new-loc' ? '' : 1,
-        })
-    }
+    if (iconType && iconType.includes('form')) { return null; }                 console.log('returning custom icon');
+    return {icon:  L.icon({
+        iconUrl: require('./../../css/images/teal-marker-icon.png'),
+        iconSize: [29, 43],
+        iconAnchor: [16, 42],
+        popupAnchor: [0, -39],
+        shadowUrl: require('./../../css/images/marker-shadow.png'),
+        shadowSize: [33, 45],
+        shadowAnchor: [10, 44]
+    })};
+
+    // const classes = iconType || 'single-marker info';
+    // return {
+    //     icon: L.divIcon({
+    //         className: classes,
+    //         html: iconType === 'new-loc' ? '' : 1,
+    //     })
+    // }
 }
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
