@@ -28,7 +28,7 @@ initDb();
 requireCss();
 fixLeafletBug();
 
-export function clearMemory() { console.log('clearing memory')
+export function clearMemory() {                                                 console.log('clearing memory')
     app = {flags:{}};
     map = null;
     volatile = {};
@@ -479,21 +479,33 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     $('#Country-Region-sel')[0].selectize.addItem(cntryId, 'silent');
     addParentLocDataToMap(cntryId, volatile.poly);
 }
-export function addVolatileMapPin(val, type) {                                  //console.log('addVolatileMapPin')
+export function addVolatileMapPin(val, type, cntryId) {                         //console.log('addVolatileMapPin')
     if (!val || !gpsFieldsFilled()) { return removePreviousMapPin(); }
     const latLng = getMapPinCoords();
     if (!latLng) { return; }                                                    
-    if (type === 'edit') { addEditFormMapPin(latLng); 
-    } else {
-        geoCoder.reverse(
-            latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false), null);
-    }
+    if (type === 'edit') { addEditFormMapData(latLng, val, cntryId); 
+    } else { addNewLocPinAndFillCoordFields(latLng); }
     clearLocCountLegend();
 }
-function addEditFormMapPin(latLng) {                                            //console.log('addEditFormMapPin. pin = %O', volatile.pin)
+function addEditFormMapData(latLng, locId, cntryId) {
+    addEditFormMapPin(latLng);
+    if (!cntryId) { return; }
+    addParentLocDataToMap(cntryId, 'skipZoom', 'edit', locId);
+    map.setView(latLng, 10, {animate: true});  
+}
+function addEditFormMapPin(latLng) {                                            //console.log('addEditFormMapPin. pin = %O, latLng = %O', volatile.pin, latLng);
     if (volatile.pin) { map.removeLayer(volatile.pin.layer); }
-    volatile.pin = new MM.LocMarker(latLng, null, null, 'edit-form');
+    volatile.pin = new MM.LocMarker(latLng, null, null, 'edit-loc');
     map.addLayer(volatile.pin.layer);
+}
+function addNewLocPinAndFillCoordFields(latLng) {
+    geoCoder.reverse(
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false), null);
+    fillCoordFields(latLng);
+}
+function fillCoordFields(latLng) {                                              //console.log('latLng = %O', latLng);
+    $('#Latitude_row input').val();
+    $('#Longitude_row input').val();
 }
 /* ---- Get GPS Field Values or Report Field Err ---- */
 function gpsFieldsFilled() {
@@ -569,8 +581,10 @@ export function initFormMap(parent, rcrds, type) {                              
 } 
 function finishFormMap(parentId, type) {
     addLocCountLegend();
-    if (type !== 'create') {
+    if (type === 'loc-map') {
         addNewLocBttn();
+    } else if (type === 'edit') {
+        addClickToCreateLocBttn();
     } else {
         addClickToCreateLocBttn();
         addDrawNewLocBoundaryBttn();
@@ -579,16 +593,19 @@ function finishFormMap(parentId, type) {
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
 }
-/** Draws containing country polygon on map and displays all locations within. */
-function addParentLocDataToMap(id, skipZoom, type) {  
+/** 
+ * Draws containing country polygon on map and displays all locations within. 
+ * If editing location, locId will be passed to skip the child loc's marker.
+ */
+function addParentLocDataToMap(id, skipZoom, type, locId) {  
     const loc = locRcrds[id];
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     const hasPolyData = geoJson && geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }
-    if (type === 'edit' || type === 'map') { return; }
+    if (type === 'map') { return; }
     const zoomLvl = hasPolyData || skipZoom ? false : 
         loc.locationType.displayName === 'Region' ? 3 : 8;
-    showChildLocs(id, zoomLvl);
+    showChildLocs(id, zoomLvl, type, locId);
 }
 /** Draws polygon on map and zooms unless skipZoom is a truthy value. */
 function drawLocPolygon(loc, geoJson, skipZoom) {                               //console.log('drawing country on map');
@@ -599,12 +616,15 @@ function drawLocPolygon(loc, geoJson, skipZoom) {                               
     if (skipZoom) { return; }
     map.fitBounds(volatile.poly.getBounds(), { padding: [10, 10] });
 }
-/** Adds all child locations to map and zooms according to passed zoomLvl. */
-function showChildLocs(id, zoomLvl) {  
-    const prnt = locRcrds[id];
+/** 
+ * Adds all child locations to map and zooms according to passed zoomLvl. 
+ * If editing location, locId will be passed to skip the child loc's marker.
+ */
+function showChildLocs(pId, zoomLvl, type, locId) {  
+    const prnt = locRcrds[pId];
     const prntLatLng = getCenterCoordsOfLoc(prnt, prnt.geoJsonId);
     clearPreviousMarkers();
-    addChildLocsToMap(prnt, prntLatLng);
+    addChildLocsToMap(prnt, prntLatLng, type, locId);
     if (!zoomLvl || !prntLatLng) { return; }
     map.setView(prntLatLng, zoomLvl, {animate: true});  
 }
@@ -613,7 +633,8 @@ function clearPreviousMarkers() {
     volatile.markers.forEach(m => map.removeLayer(m)); 
     volatile.markers = [];
 }
-function addChildLocsToMap(prnt, coords) {
+/** If editing location, locId will be passed to skip it's marker. */
+function addChildLocsToMap(prnt, coords, type, locId) {     
     const noGpsLocs = [];
     const locs = getChildLocData(prnt);   
     addLocsWithGpsDataToMap();
@@ -622,6 +643,7 @@ function addChildLocsToMap(prnt, coords) {
 
     function addLocsWithGpsDataToMap() {
         locs.forEach(loc => {
+            if (loc.id === locId) { return; }
             if (prnt.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
             const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
             if (!latLng) { return noGpsLocs.push(loc); }

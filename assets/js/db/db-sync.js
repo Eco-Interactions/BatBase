@@ -100,7 +100,7 @@ function processUpdatedData() {
 function processUpdatedEntityData() { 
     const results = arguments[0]; 
     const entity = Object.keys(results)[0];                                     //console.log("[%s] data returned from server = %O", entity, results); 
-    const data = parse(results[entity]); 
+    const data = parseData(results[entity]); 
     storeUpdatedData(data, entity); 
 }
 /** Sends the each updated record to the update handler for the entity. */ 

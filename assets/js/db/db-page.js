@@ -4,6 +4,7 @@
  * by realm: bat, plant, arthropod), locations, or sources (grouped by either 
  * authors, publications, or publishers). The data map displays interactions
  * geographically. Filtered interactions can be viewed in either form. 
+ * 
  * Exports:
  *     handleReset
  *     initSearchPage
@@ -1149,7 +1150,7 @@ function buildTableLocDataObj() {
                 locs[newLoc.id] = { loc: newLoc, ints: [] }; 
             }
         }
-    }    
+    } /* End buildInteractionMapData */
     function addToMapDataObj(entData, locs, noLocCnt) { 
         mapData.none.ttl += noLocCnt;
         for (let id in locs) {
@@ -1192,7 +1193,7 @@ function buildTableLocDataObj() {
             mapData[geoId].ints[auths] = mapData[geoId].ints[keyName];
             delete mapData[geoId].ints[keyName];  
         }
-    }
+    } /* End addIntData */
     function initIntDataObj(entData, geoId) {
         mapData[geoId].ints[entData.name] = [];
     }
@@ -1246,7 +1247,8 @@ function updateUiForTableView() {
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
     enableComboboxes($('#opts-col1 select, #opts-col2 select'));
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});    
+    $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
+    updateBttnToShowRcrdsOnMap();
 }
 function updateUiForMappingInts() {
     updateUiForMapView();
@@ -1270,7 +1272,6 @@ function updateBttnToShowRcrdsOnMap() {
 }
 function returnRcrdsToTable() {
     updateUiForTableView();
-    updateBttnToShowRcrdsOnMap();
     if (getSelVal('Loc View') === 'map') { setSelVal('Loc View', 'tree'); }
 }
 /*------------------Source Search Methods ------------------------------------*/

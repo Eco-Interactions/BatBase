@@ -325,9 +325,9 @@ function finishEditFormBuild(entity) {
 function getEditFormFields(id, entity) {
     const rowCntnr = _u.buildElem('div', {
         id: entity+'_Rows', class: 'flex-row flex-wrap'});
-    const edges = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
+    const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
         'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
-    const fieldBldr = entity in edges ? edges[entity] : buildEditFormFields;  
+    const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
     fP.forms.expanded[entity] = true;
     $(rowCntnr).append(fieldBldr(entity, id));                              
     return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
@@ -377,12 +377,21 @@ function fillIntData(entity, id, rcrd) {
     fillFields(rcrd, fields, true);
 }
 function fillLocData(entity, id, rcrd) {
-    var fields = getCoreFieldDefs(entity);
+    const fields = getCoreFieldDefs(entity);  
+    handleLatLongFields();
     fillFields(rcrd, fields);
     addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
     fP.editing.detail = rcrd.geoJsonId || null;
     if (rcrd.geoJsonId) { storeLocGeoJson(rcrd.geoJsonId); }
-    
+    /* Sets values without triggering each field's change method. */
+    function handleLatLongFields() {
+        delete fields.Latitude;
+        delete fields.Longitude;
+        delete fields.Country;
+        $('#Latitude_row input').val(rcrd.latitude);
+        $('#Longitude_row input').val(rcrd.longitude);
+        setSelVal('#Country-sel', rcrd.country.id, 'silent');
+    }
     function storeLocGeoJson(id) {                                              
         fP.forms.top.geoJson = _u.getGeoJsonEntity(id);
     }
@@ -553,7 +562,7 @@ function onFormFillComplete(id, entity) {                                       
     map[entity](id);
 }
 function finishLocEditForm(id) {
-    db_map.addVolatileMapPin(id, 'edit');
+    db_map.addVolatileMapPin(id, 'edit', getSelVal('#Country-sel'));
 }
 /*--------------------------- Create Form --------------------------------------------------------*/
 /**
@@ -1404,11 +1413,11 @@ function buildLocForm(val, fLvl) {
     $('#sub-submit').val('Create without GPS data');
 }
 function finishLocEditFormBuild() {  
-    addMapToLocForm('#location_Rows', 'edit');
+    addMapToLocForm('#location_Rows', 'edit', fP.editing.core);
     initComboboxes('Location', 'top'); 
     updateCountryChangeMethod();
     addListenerToGpsFields(
-        db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit'));
+        db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
     $('#top-cancel').unbind('click').click(exitFormPopup);
     $('.all-fields-cntnr').hide();
 }

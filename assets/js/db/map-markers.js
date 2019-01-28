@@ -258,7 +258,7 @@ function bindClassContextToMethods(self) {
 }
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) { 
-    if (iconType && iconType.includes('form')) { return null; }                 console.log('returning custom icon');
+    if (!iconType || iconType && iconType.includes('form')) { return null; }    //console.log('returning custom icon');
     return {icon:  L.icon({
         iconUrl: require('./../../css/images/teal-marker-icon.png'),
         iconSize: [29, 43],
