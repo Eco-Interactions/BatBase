@@ -610,25 +610,6 @@ select[id$="txn-lvl"] + div {
     background-color: rgba(240, 194, 12, 0.9);
     font-size: 11px;
 }
-.new-loc {
-    width: 27px !important;
-    height: 27px !important;
-    left: -8px;
-    margin-left: 115px;
-    border-radius: 50%;
-    border: 9px solid green;
-    background-color: white;
-}
-.new-loc:after {
-    position: absolute;
-    content: '';
-    width: 23px;
-    height: 0px;
-    bottom: -32px;
-    left: -7px;
-    border: 10px solid transparent;
-    border-top: 19px solid green;
-}
 /* --- Geocoder Search Elem --- */
 .leaflet-control-geocoder {
     font-size: 16px;
