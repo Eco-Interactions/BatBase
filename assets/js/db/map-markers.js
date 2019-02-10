@@ -258,29 +258,32 @@ function bindClassContextToMethods(self) {
 }
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) {                                              //console.log('iconType = ', iconType)
-    if (!iconType || iconType && iconType.includes('form')) { return null; }    //console.log('returning custom icon');
+    if (!iconType) { return getGreenCircleMarker(); }
+    if (iconType && iconType.includes('form')) { return null; }  //!iconType ||   //console.log('returning custom icon');
     return iconType === 'edit-loc' ? getTealPinMarker() : getGreenCircleMarker();
-}
-function getTealPinMarker() {
-    return { 
-        icon:  L.icon({
-            iconUrl: require('./../../css/images/teal-marker-icon.png'),
-            iconSize: [29, 43],
-            iconAnchor: [16, 42],
-            popupAnchor: [0, -39],
-            shadowUrl: require('./../../css/images/marker-shadow.png'),
-            shadowSize: [33, 45],
-            shadowAnchor: [10, 44]
-        })
-    };
-}
-function getGreenCircleMarker() {  
-    const classes = iconType || 'single-marker info';
-    return {
-        icon: L.divIcon({
-            className: 'single-marker info',
-            html: iconType === 'new-loc' ? '' : 1,
-        })
+    /** Used for the edit-location forms to display the location being edited. */
+    function getTealPinMarker() {
+        return { 
+            icon:  L.icon({
+                iconUrl: require('./../../css/images/teal-marker-icon.png'),
+                iconSize: [29, 43],
+                iconAnchor: [16, 42],
+                popupAnchor: [0, -39],
+                shadowUrl: require('./../../css/images/marker-shadow.png'),
+                shadowSize: [33, 45],
+                shadowAnchor: [10, 44]
+            })
+        };
+    }
+    /** Displays single interactions on map as a green circle to match marker-clusters. */
+    function getGreenCircleMarker() {  
+        const classes = iconType || 'single-marker info';
+        return {
+            icon: L.divIcon({
+                className: 'single-marker info',
+                html: iconType === 'new-loc' ? '' : 1,
+            })
+        }
     }
 }
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
