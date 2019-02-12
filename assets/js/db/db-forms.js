@@ -9,6 +9,7 @@
  *     editEntity
  *     addNewLocation
  *     initLocForm
+ *     mergeLocs
  *     selectLoc
  *     locCoordErr
  */
@@ -182,15 +183,15 @@ function addDataToCntDetailPanel(refObj) {
 }
 /**
  * When the Publication, Citation, or Location fields are selected, their data 
- * is added to the side detail panel of the form. For other entity edit-forms: 
+ * is added se the side detail panel of the form. For other entity edit-forms: 
  * the total number of referencing records is added. 
  */
 function addDataToIntDetailPanel(ent, propObj) {
     var html = getDataHtmlString(propObj);
-    emptySidePanel(ent);
+    clearDetailPanel(ent);
     $('#'+ent+'-det div').append(html);
 }
-function emptySidePanel(ent, reset) {
+function clearDetailPanel(ent, reset) {                                         //console.log('clearDetailPanel for [%s]', ent)
     if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
     if (ent === 'pub') { ent = 'src'; }
     $('#'+ent+'-det div').empty();
@@ -434,7 +435,7 @@ function fillSrcData(entity, id, rcrd) {
 
     function setSrcData() {
         fillFields(src, fields.core);
-        fillEditSrcDetails(entity, src);            
+        fillSrcDataInDetailPanel(entity, src);            
     }
     function setDetailData() {
         var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
@@ -447,7 +448,7 @@ function getSourceFields(entity) {
     return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity).add };
 }
 /** Adds a count of all refences to the entity to the form's detail-panel. */
-function fillEditSrcDetails(entity, srcRcrd) {                                  //console.log('fillEditSrcDetails. [%s]. srcRcrd = %O', entity, srcRcrd);
+function fillSrcDataInDetailPanel(entity, srcRcrd) {                            //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
     var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
     addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
     addDataToCntDetailPanel(refObj);
@@ -457,7 +458,7 @@ function fillEditSrcDetails(entity, srcRcrd) {                                  
         const ref = entity === 'publisher' ? 'pub' : 'cit';
         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
     }
-} /* End fillEditSrcDetails */
+} /* End fillSrcDataInDetailPanel */
 function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
     return entity === 'citation' ? 
         rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
@@ -674,7 +675,7 @@ function onPubSelection(val) {
 function onPubClear() {
     clearCombobox('#CitationTitle-sel');
     enableCombobox('#CitationTitle-sel', false);
-    emptySidePanel('pub', true);
+    clearDetailPanel('pub', true);
 }
 /** Displays the selected publication's data in the side detail panel. */
 function fillPubDetailPanel(id) {  
@@ -755,7 +756,7 @@ function getPubCitationOpts(pubId) {
  */    
 function onCitSelection(val) {  
     if (val === 'create') { return openCreateForm('CitationTitle'); }
-    if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
+    if (val === '' || isNaN(parseInt(val))) { return clearDetailPanel('cit', true); }                     //console.log("cit selection = ", parseInt(val));                          
     updateSrcDetailPanel('cit');
     if (!fP.editing) { $('#CitationTitle_pin').focus(); }
 }    
@@ -1351,17 +1352,17 @@ function getOptsForLoc(loc) {
  */     
 function onLocSelection(val) {                                                  //console.log("location selected 'val' = '"+ val+"'");
     if (val === 'create') { return openCreateForm('Location'); }
-    if (val === '' || isNaN(parseInt(val))) { return emptySidePanel('loc', true); }   
+    if (val === '' || isNaN(parseInt(val))) { return clearDetailPanel('loc', true); }   
     if ($('#loc-map').length) { removeLocMap(); }
     var locRcrd = fP.records.location[val];                                     //console.log("location = %O", locRcrd);
     var prntVal = locRcrd.parent ? locRcrd.parent : locRcrd.id;
     setSelVal('#Country-Region-sel', prntVal, 'silent');
-    fillEditLocDetails(val);
+    fillLocDataInDetailPanel(val);
     if (!fP.editing) { $('#Location_pin').focus(); }
     checkIntFieldsAndEnableSubmit();
 }
 /** Displays the selected location's data in the side detail panel. */
-function fillEditLocDetails(id) {  
+function fillLocDataInDetailPanel(id) {  
     var locRcrd = fP.records.location[id];  
     var propObj = getLocDetailDataObj(locRcrd);
     addDataToIntDetailPanel('loc', propObj);
@@ -1413,7 +1414,7 @@ function buildLocForm(val, fLvl) {
     $('#sub-submit').val('Create without GPS data');
 }
 function finishLocEditFormBuild() {  
-    addMapToLocForm('#location_Rows', 'edit', fP.editing.core);
+    addMapToLocForm('#location_Rows', 'edit');
     initComboboxes('Location', 'top'); 
     updateCountryChangeMethod();
     addListenerToGpsFields(
@@ -1468,6 +1469,10 @@ export function selectLoc(id) {
     enableCountryRegionField();
     enableCombobox('#Location-sel');
     removeLocMap();
+}
+/** Location edit form: merges location being edited with another displayed on the map. */
+export function mergeLocs(id) {                                                 console.log('Merge location being edited into this one = ', id);
+    // body...
 }
 /**
  * New locations with GPS data are created by clicking a "Create Location" button
@@ -4025,14 +4030,14 @@ function resetUnpinnedFields(vals) {
 }
 function clearField(fieldName) {
     if (fieldName === 'Note') { return $('#Note-txt').val(""); }
-    clearDetailPanel(fieldName);
+    clearFieldDetailPanel(fieldName);
     clearCombobox('#'+fieldName+'-sel');
 }
-function clearDetailPanel(field) {
+function clearFieldDetailPanel(field) {
     let detailFields = {
         'Location': 'loc', 'CitationTitle': 'src', 'Publication': 'src' };
     if (Object.keys(detailFields).indexOf(field) !== -1) {  
-        emptySidePanel(detailFields[field], true);
+        clearDetailPanel(detailFields[field], true);
     }
 }
 function fillPubDetailsIfPinned(pub) {

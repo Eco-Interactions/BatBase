@@ -49,18 +49,9 @@ export class LocMarker extends Marker {
         this.self.off('mouseover').off('click').off('mouseout');
     }
     /** --- Event Handlers --- */
-    openPopup(e) {                         
-        const map = {
-            'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
-            'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getNewLocHtml 
-        };                 
-        if (!map[this.formMarker]) { return; }
+    openPopup(e) {            
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        if (!this.popup.getContent()) { 
-            const content = this.formMarker ? 
-                map[this.formMarker](this.loc) : getLocationSummaryHtml(this.loc);                
-            this.popup.setContent(content);
-        }
+        ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.formMarker);
         this.self.openPopup();
     }
     /** 
@@ -128,7 +119,7 @@ export class IntMarker extends Marker {
     }
 } /* End IntMarker Class */
 export class LocCluster extends Marker {
-    constructor (map, intCnt, latLng, loc, rcrds, formMarker) {  
+    constructor (map, intCnt, latLng, loc, rcrds, formMarker) { 
         super(latLng);   
         bindClassContextToMethods(this); 
         this.map = map;
@@ -259,8 +250,18 @@ function bindClassContextToMethods(self) {
 /** ------- Shared Helpers --------- */
 function getCustomIcon(iconType) {                                              //console.log('iconType = ', iconType)
     if (!iconType) { return getGreenCircleMarker(); }
-    if (iconType && iconType.includes('form')) { return null; }  //!iconType ||   //console.log('returning custom icon');
-    return iconType === 'edit-loc' ? getTealPinMarker() : getGreenCircleMarker();
+    if (iconType && iconType.includes('form')) { return null; } //console.log('returning custom icon');
+    return getTealPinMarker();
+    /** Displays single interactions on map as a green circle to match marker-clusters. */
+    function getGreenCircleMarker() {  
+        const classes = iconType || 'single-marker info';
+        return {
+            icon: L.divIcon({
+                className: 'single-marker info',
+                html: iconType === 'new-loc' ? '' : 1,
+            })
+        }
+    }
     /** Used for the edit-location forms to display the location being edited. */
     function getTealPinMarker() {
         return { 
@@ -275,17 +276,7 @@ function getCustomIcon(iconType) {                                              
             })
         };
     }
-    /** Displays single interactions on map as a green circle to match marker-clusters. */
-    function getGreenCircleMarker() {  
-        const classes = iconType || 'single-marker info';
-        return {
-            icon: L.divIcon({
-                className: 'single-marker info',
-                html: iconType === 'new-loc' ? '' : 1,
-            })
-        }
-    }
-}
+} /* End getCustomIcon */
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
     const locHtml = getLocNameHtml(intData.locs[0]);
@@ -389,6 +380,27 @@ function clearMarkerTimeout(timeout) {
     clearTimeout(timeout); 
     timeout = null;                                                             //console.log('timout cleared')       
 }
+/** Handles intialization of location maker popups. (this === LocMarker) */
+function ifLocPopupEmpty(content, type) { 
+    if (!content) {
+        content = buildLocMarkerContent(type, this.loc);          
+        this.popup.setContent(content);
+    }
+}
+function buildLocMarkerContent(type, loc) {    
+    const map = {
+        'e-loc': getEditLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
+        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getNewLocHtml 
+    };         
+    const editing = type ? ifEditingReturnTrueAndUpdateType() : false;  
+    return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc, locRcrds);
+
+    function ifEditingReturnTrueAndUpdateType() {
+        const isEditing = type.includes('edit');
+        type = isEditing ? type.split('edit')[1] : type;   
+        return isEditing;
+    }
+} /* End buildLocMarkerContent */
 function getLocNameHtml(loc) {  
     let parent = loc.locationType.displayName === 'Country' ? '' :
         loc.country ? loc.country.displayName : 'Region';
@@ -409,17 +421,20 @@ function getHabTypeHtml(loc, leaveBlank) {
     return `Habitat: <b>${loc.habitatType.displayName}</b>`;
 }
 function getCoordsHtml(loc) {
-    const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                       //console.log('geoJson = %O', geoData); 
+    const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                         //console.log('geoJson = %O', geoData); 
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.displayPoint)
     coords = coords.map(c => Number(c).toFixed(6)); 
     return 'Coordinates: <b>' + [coords[1], coords[0]].join(', ') +'</b>';
 }
-function getSelectLocationBttn(loc) {
+function getSelectLocationBttn(loc, editing) {
+    const text = (editing ? 'Merge Into ' : 'Select ') + 'Existing Location'; 
+    const clickFunc = editing ? db_forms.mergeLocs : db_forms.selectLoc; 
     const bttn = _u.buildElem('input', {type: 'button',
-        class:'ag-fresh tbl-bttn popup-bttn', value: 'Select Existing Location'});
-    $(bttn).click(db_forms.selectLoc.bind(null, loc.id));
+        class:'ag-fresh tbl-bttn popup-bttn', value: text});
+    $(bttn).click(clickFunc.bind(null, loc.id));
     $(bttn).css({'margin-top': '.5em'});
+    if (editing) { $(bttn).attr('disabled', 'disabled').css('opacity', '.666'); }
     return bttn;
 }
 /** ========== Location Summary Popup ============== */
@@ -576,18 +591,25 @@ function showLocTableView(loc) {
 }
 /* ============ Location Details Popup ================== */
 /* Used for Countries displayed in forms. */
-function getCountryDetailsHtml(loc) {
-    return getLocDetailsHtml(loc, buldCntryDetailsHtml);
+function getCountryDetailsHtml(loc, editing) {
+    return getLocDetailsHtml(loc, editing, buldCntryDetailsHtml);
 }
 function buldCntryDetailsHtml(loc) {
     return `<div style="font-size:1.2em; margin-bottom: .5em;"><b>
         ${loc.displayName}</b></div>`;
 }
+function getEditLocHtml(loc, editing) {
+    const div = _u.buildElem('div', { class: 'flex-col' });    
+    const name = `<div style="font-size:1.1em; margin-bottom: .5em;"><b>
+        The location being edited.</b></div>`;  
+    $(div).append(name);
+    return div;
+}
 /* Used for locations displayed in forms. */
-function getLocDetailsHtml(loc, htmlFunc) {
+function getLocDetailsHtml(loc, editing, htmlFunc) {
     const div = _u.buildElem('div', { class: 'flex-col' });
     const html = htmlFunc ? htmlFunc(loc) : buildDetailsHtml(loc);
-    const bttn = getSelectLocationBttn(loc);
+    const bttn = getSelectLocationBttn(loc, editing);
     $(div).append([html, bttn]);
     return div;
 }
@@ -611,7 +633,7 @@ function getElevHtml(loc) {
 }
 /* --- No Gps Loc Details ---*/
 /** Locations without GPS data are clustered together on the location form map. */
-function getNoGpsLocDetailsHtml(locs) {                                         //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
+function getNoGpsLocDetailsHtml(locs, editing) {                                //console.log('getNoGpsLocDetailsHtml. locs = %O', locs);
     const div = document.createElement('div');
     const hdr = getNoGpsHdr(locs.length);
     const locHtml = locs.map(loc => buildLocDetailHtml(loc));
@@ -622,10 +644,10 @@ function getNoGpsHdr(cnt) {
     return `<div style="font-size:1.2em;"><b>${cnt} location with no GPS data.</b>
         </div><span>Hover over a location name to see the location data.</span><br>`;
 }
-function buildLocDetailHtml(loc) {  
+function buildLocDetailHtml(loc, editing) {  
     const cntnr = _u.buildElem('div', {class: 'info-tooltip'});
     const locDetails = _u.buildElem('div', {class: 'tip'});
-    const bttn = getSelectLocationBttn(loc);
+    const bttn = getSelectLocationBttn(loc, editing);
     $(locDetails).append([buildLocDetails(loc), '<br>', bttn]);
     $(cntnr).append([loc.displayName, locDetails]);
     return cntnr;
@@ -639,8 +661,11 @@ function buildLocDetails(loc) {
     return [name, habType, elev, desc].filter(e => e).join('<br>'); 
 }
 /* ============ New Location Popup ============== */
-/** Used when displaying a potential new location on the form. */
-function getNewLocHtml(loc) {                                                   console.log('buildingNewLocationPopup')
+/** 
+ * Used when displaying a potential new location on the form. A flag is passed to
+ * indicate to sister methods whether they are in editing mode. Useless here.
+ */
+function getNewLocHtml(loc, editing) {                                          //console.log('buildingNewLocationPopup')
     const cntnr = _u.buildElem('div', {class: 'flex-col new-loc-popup'});
     const text = getNewLocText(loc);
     const bttn = getCreateLocBttn();

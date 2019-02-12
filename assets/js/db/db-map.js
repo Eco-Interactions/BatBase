@@ -95,6 +95,7 @@ function onMapClick(type, e) {
     if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(e);
     } else { showLatLngPopup(type, e) }
 }
+/** Catches clicks on map buttons. */
 function isButtonClick(e) {
     const elemClass = e.originalEvent.target.className;
     return typeof elemClass === 'string' && elemClass.includes('leaflet-control');
@@ -495,7 +496,7 @@ function addEditFormMapData(latLng, locId, cntryId) {
 }
 function addEditFormMapPin(latLng) {                                            //console.log('addEditFormMapPin. pin = %O, latLng = %O', volatile.pin, latLng);
     if (volatile.pin) { map.removeLayer(volatile.pin.layer); }
-    volatile.pin = new MM.LocMarker(latLng, null, null, 'edit-loc');
+    volatile.pin = new MM.LocMarker(latLng, null, null, 'e-loc');
     map.addLayer(volatile.pin.layer);
 }
 function addNewLocPinAndFillCoordFields(latLng) {
@@ -647,7 +648,8 @@ function addChildLocsToMap(prnt, coords, type, locId) {
             if (prnt.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
             const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
             if (!latLng) { return noGpsLocs.push(loc); }
-            const tag = 'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
+            const tag = (type === 'edit' ? 'edit' : '') +
+                'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
             const Marker = new MM.LocMarker(latLng, loc, locRcrds, tag);
             map.addLayer(Marker.layer);
             volatile.markers.push(Marker.layer);
