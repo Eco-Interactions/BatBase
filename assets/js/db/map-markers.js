@@ -272,7 +272,8 @@ function getCustomIcon(iconType) {                                              
                 popupAnchor: [0, -39],
                 shadowUrl: require('./../../css/images/marker-shadow.png'),
                 shadowSize: [33, 45],
-                shadowAnchor: [10, 44]
+                shadowAnchor: [10, 44],
+                className: 'new-loc'
             })
         };
     }

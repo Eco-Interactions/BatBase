@@ -432,7 +432,7 @@ class FeatureContext extends RawMinkContext implements Context
         $class = '.leaflet-marker-icon';
         $msg = 'Marker not found on map';
         if ($type === 'new') { 
-            $class += '.new-loc';
+            $class = $class.'.new-loc';
             $msg = 'New Location marker not found on map';
         }
         $marker = $this->getUserSession()->evaluateScript("$('$class').length > 0");
@@ -774,13 +774,24 @@ class FeatureContext extends RawMinkContext implements Context
     }
     /** ------------------ Map Methods ---------------------------------------*/
     /**
+     * @When I click on the map
+     */
+    public function iClickOnTheMap()
+    {
+        $this->getUserSession()->executeScript("$('#loc-map').click();");
+        usleep(500000);    
+    }
+    /**
      * @Given I press the :type button in the map
      */
     public function iPressTheButtonInTheMap($type)
     {
-        $map = ['New Location' => '.leaflet-control-create-icon'];
+        $map = [
+            'New Location' => '.leaflet-control-create-icon',
+            'Click to select position' => '.leaflet-control-click-create-icon'
+        ];
         $bttn = $this->getUserSession()->getPage()->find('css', $map[$type]);
-        $this->handleNullAssert($bttn, false, 'No [$type] button found.');
+        $this->handleNullAssert($bttn, false, "No [$type] button found.");
         $bttn->click();
     }
 
@@ -799,9 +810,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPressInTheAddedGreenPinsPopup($bttnText)
     {
-        $marker = $this->getUserSession()->getPage()->find('css', '.new-loc');
+        $marker = $this->getUserSession()->getPage()->find('css', 
+            '.leaflet-marker-icon.new-loc');
         $this->handleNullAssert($marker, false, 'No new location marker found on map.');        
-        $marker->click();
+        $marker->click(); 
         
         $bttn = $this->getUserSession()->getPage()->find('css', "input[value='$bttnText']");
         $this->handleNullAssert($bttn, false, 'No [$bttnText] button found.');
@@ -819,12 +831,21 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :count location markers
+     * @Then I should see :mCount location markers
+     * @Then I should see :mCount location markers and :cCount location clusters
+     * Note: Clusters are returning 2 instead of 1 as elem count, not sure why. 
      */
-    public function iShouldSeeLocationMarkers($count)
+    public function iShouldSeeLocationMarkers($mCount, $cCount)
     {
         $markers = $this->getUserSession()->getPage()->findAll('css', '.leaflet-marker-icon');
-        $this->handleEqualAssert(count($markers), $count, true, 'Found ['.count($markers)."] markers. Expected [$count].");
+        if ($cCount) {
+            $clusters = $this->getUserSession()->getPage()->findAll('css', 
+                '.leaflet-marker-icon.form-noGps');  
+            ++$clusters;
+            $markers = count($markers) - count($clusters) + 1;
+            $this->handleEqualAssert(count($clusters), $cCount, true, 'Found ['.count($clusters)."] clusters. Expected [$cCount].");
+        }
+        $this->handleEqualAssert($markers, $mCount, true, 'Found ['.$markers."] markers. Expected [$mCount].");
     }
 
     /**
@@ -845,6 +866,24 @@ class FeatureContext extends RawMinkContext implements Context
         $map = $this->getUserSession()->getPage()->find('css', '#loc-map');
         $this->handleNullAssert($map, true, 'Map should not be displayed, and yet...');
     }
+
+    /**
+     * @Then the coordinate fields should be filled
+     */
+    public function theCoordinateFieldsShouldBeFilled()
+    {
+        $this->iPutABreakpoint("theCoordinateFieldsShouldBeFilled");
+    }
+
+    /**
+     * @Then the marker's popup should have a description of the position 
+     * Note: The description is derived from the reverse geocode results.
+     */
+    public function theMarkersPopupShouldHaveADescriptionOfThePosition()
+    {
+        $this->iPutABreakpoint("theMarkersPopupShouldHaveADescriptionOfThePosition");
+    }
+
 
 
     /** ------------------ Helper Steps --------------------------------------*/

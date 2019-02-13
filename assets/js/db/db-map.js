@@ -91,14 +91,13 @@ function getMapInstance(mapId) {
  * the form.
  */
 function onMapClick(type, e) { 
-    if (isButtonClick(e)) { return; }
+    if (ifClickOnMapTool(e)) { return; }
     if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(e);
     } else { showLatLngPopup(type, e) }
 }
-/** Catches clicks on map buttons. */
-function isButtonClick(e) {
-    const elemClass = e.originalEvent.target.className;
-    return typeof elemClass === 'string' && elemClass.includes('leaflet-control');
+/** Catches clicks on map buttons or tools. */
+function ifClickOnMapTool(e) {      
+    return e.originalEvent.target.id !== 'loc-map';
 }
 function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
@@ -535,7 +534,7 @@ function coordHasErr(field) {
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, noZoom, results) {                    //console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
+function updateUiAfterFormGeocode(latLng, noZoom, results) {                    console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
     if (!results.length) { return updateMapPin(latLng, null, noZoom); }
     updateMapPin(latLng, results[0], noZoom); 
 }
@@ -553,7 +552,7 @@ function buildLocData(data, name) {                                             
 function replaceMapPin(latLng, loc, noZoom) {
     const marker = new MM.LocMarker(latLng, loc, null, 'new-loc');
     removePreviousMapPin(loc);
-    if (loc) { 
+    if (loc) {                                                                  console.log('Adding parent data for loc = %O', loc)
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
         addParentLocDataToMap(loc.cntryId, true);
     }
@@ -580,13 +579,13 @@ export function initFormMap(parent, rcrds, type) {                              
     waitForDataThenContinue(
         buildAndShowMap.bind(null, finishFormMap.bind(null, parent, type), 'loc-map', type));  
 } 
-function finishFormMap(parentId, type) {
+function finishFormMap(parentId, type) {                                        console.log('finishFormMap. pId [%s], type [%s]', parentId, type);
     addLocCountLegend();
-    if (type === 'loc-map') {
+    if (type === 'int') {
         addNewLocBttn();
     } else if (type === 'edit') {
         addClickToCreateLocBttn();
-    } else {
+    } else { //'create'
         addClickToCreateLocBttn();
         addDrawNewLocBoundaryBttn();
         addMarkerDragBttn();
@@ -600,6 +599,7 @@ function finishFormMap(parentId, type) {
  */
 function addParentLocDataToMap(id, skipZoom, type, locId) {  
     const loc = locRcrds[id];
+    if (!loc) { return console.log('No country data matched in geocode results'); }
     const geoJson = loc.geoJsonId ? _u.getGeoJsonEntity(loc.geoJsonId) : false;
     const hasPolyData = geoJson && geoJson.type !== 'Point';
     if (hasPolyData) { drawLocPolygon(loc, geoJson, skipZoom); }

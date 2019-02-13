@@ -21,6 +21,7 @@
 - Set file permissions:
     - Mac (10.14)
         - https://symfony.com/doc/3.4/setup/file_permissions.html
+        (If they haven't fixed the lack of recursion in the command, add it. Otherwise behat will not have the permissions it needs to run)
     - Linux (debian)
         $ sudo chgrp www-data /var/www/* -R //Make sure the group is www-data on '/var/www'
         $ sudo chmod 775 /var/www/* -R  //Make '/var/www' writable for the group
@@ -44,23 +45,27 @@
 
 ## Generate Assets ##
 > Asset generation commands: 
-        - $ yarn run encore dev --config-name local
-        - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
-        - $ yarn run encore production --config-name server
+    - $ yarn run encore dev --config-name local
+    - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
+    - $ yarn run encore production --config-name server
 
 
 ##------------------- TESTING ------------------------------------------------##
 >Testing software setup
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
     - Java 8+ (debian: https://tecadmin.net/install-java-8-on-debian/)
-- Install Chrome Driver (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
+- Install Chrome Driver 
+    - Linux: (https://christopher.su/2015/selenium-chromedriver-ubuntu/)
+    - Mac: 
+        $ brew tap homebrew/cask
+        $ brew cask install chromedriver
 >Resources used during tests set-up 
 # https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
 # https://knpuniversity.com/screencast/behat
 
 >HOW TO RUN TESTS: 
 Start Selenium: 
-    $ java -jar [selenium-server-standalone-3.5.3.jar]
+    $ java -jar [selenium-server-standalone-3.141.59.jar]
 
 Run Tests:
     - Unit Tests:

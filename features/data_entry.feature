@@ -276,13 +276,16 @@ Feature: Add new data to the database
         And I should see "Publication Description" in the "Src" detail panel
 
     ## -------------------------- Location -------------------------------------##
+    Testing within: The "create new location" button.
     @javascript
     Scenario:  I should be able to create a location with GPS data using the sub-form
         Given I open the New Interaction form
         And I click on "use the map interface" link
-        And I press the "New Location" button in the map
+        And I press the "New Location" button in the map  
         And I should see "New Location"
-        When I type "9.79026" in the "Latitude" field "input"
+        When I press the "Click on map to select lcoation position" button in the map
+        And I click 
+        And I type "9.79026" in the "Latitude" field "input"
         And I type "-83.91546" in the "Longitude" field "input"
         And I see the "new" location's pin on the map
         And I type "Test Location With GPS" in the "Display Name" field "input"
@@ -290,10 +293,11 @@ Feature: Add new data to the database
         And I select "Savanna" from the "Habitat Type" dropdown field
         And I type "1500" in the "Elevation" field "input"
         And I type "2500" in the "Elevation Max" field "input"
-        # And I see the country's polygon drawn on the map
+        # And I see the country's polygon drawn on the map  #(Couldn't identify elem)
         And I press "Create Location" in the added green pin's popup
         Then I should see "Test Location With GPS" in the "Location" dropdown field
         And I should see "Test Description" in the "Location" detail panel
+        And I should see "Costa Rica" in the "Country-Region" dropdown field
         And I should see "Savanna" in the "Location" detail panel
         And I should see "1500" in the "Location" detail panel
         And I should see "2500" in the "Location" detail panel
@@ -324,8 +328,8 @@ Feature: Add new data to the database
         Then I should see the map loaded
         And I select "Costa Rica" from the "Country-Region" dropdown field
         And I see the country's polygon drawn on the map
-        And I should see "2" location markers
-        And I click on an existing location marker
+        And I should see "1" location markers and "1" location clusters
+        And I click on an existing location marker   
         And I press the "Select Existing Location" button
         And the map should close
         And I should see "Description" in the "Location" detail panel
@@ -334,6 +338,21 @@ Feature: Add new data to the database
         And I should see "Latitude" in the "Location" detail panel
         And I should see "Longitude" in the "Location" detail panel
         And I should see "Elevation" in the "Location" detail panel
+
+    # Unable to get the click event to happen in the correct area of the map pane
+    # @javascript
+    # Scenario:  I should be able to click on map to select location position
+    #     Given I open the New Interaction form
+    #     And I click on "use the map interface" link
+    #     And I press the "New Location" button in the map  
+    #     And I should see "New Location"
+    #     When I press the "Click to select position" button in the map
+    #     And I click on the map
+    #     And I break "See the pin anywhere?"
+    #     Then I see the "new" location's pin on the map
+    #     And the coordinate fields should be filled
+    #     And the marker's popup should have a description of the position 
+
     ## -------------------------- Taxon ----------------------------------------##
     @javascript
     Scenario:  I should be able to create a taxon Family within the subject taxon sub-form
