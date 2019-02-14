@@ -6,13 +6,14 @@ use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use AppBundle\Entity\GeoJson;
+use AppBundle\Entity\InteractionType;
+
 
 /**
- * Template for doctrine migrations where the entity manager is necessary.
+ * Adds the "roost" and "host" interaction types.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class Version20170725183034MoveInts extends AbstractMigration implements ContainerAwareInterface
+class Version20190214182051IntTypes extends AbstractMigration implements ContainerAwareInterface
 {
 
     private $container;
@@ -31,7 +32,23 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $this->addInteractionTypes();
+        $this->em->flush();
+    }
 
+    private function addInteractionTypes()
+    {
+        $types = ['roost' => 'leaf', 'host' => 'arthropod'
+    ];
+        foreach ($types as $type => $tagName) {
+            $IntType = new InteractionType();
+            $IntType->setDisplayName($type);
+
+            $Tag = $this->em->getRepository('AppBundle:Tag')->findOneBy(['displayName' => $tagName]);
+            $IntType->addValidTag($Tag);
+
+            $this->em->persist($IntType);
+        }
     }
 
     /**
