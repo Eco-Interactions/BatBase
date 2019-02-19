@@ -390,8 +390,8 @@ function ifLocPopupEmpty(content, type) {
 }
 function buildLocMarkerContent(type, loc) {    
     const map = {
-        'e-loc': getEditLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
-        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getNewLocHtml 
+        'e-loc': getGeocodedLocHtml, 'form': getLocDetailsHtml, 'form-c': getCountryDetailsHtml, 
+        'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getGeocodedLocHtml 
     };         
     const editing = type ? ifEditingReturnTrueAndUpdateType() : false;  
     return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc, locRcrds);
@@ -662,23 +662,20 @@ function buildLocDetails(loc) {
     return [name, habType, elev, desc].filter(e => e).join('<br>'); 
 }
 /* ============ New Location Popup ============== */
-/** 
- * Used when displaying a potential new location on the form. A flag is passed to
- * indicate to sister methods whether they are in editing mode. Useless here.
- */
-function getNewLocHtml(loc, editing) {                                          //console.log('buildingNewLocationPopup')
+/** Used when displaying a geocoded (new or edit) location on the form.  */
+function getGeocodedLocHtml(loc, editing) {                                     //console.log('buildingGeocodedLocationPopup. editing? ', editing);
     const cntnr = _u.buildElem('div', {class: 'flex-col new-loc-popup'});
-    const text = getNewLocText(loc);
-    const bttn = getCreateLocBttn();
+    const text = getNewLocText(loc, editing);
+    const bttn = editing ? '' : getCreateLocBttn();
     $(cntnr).append([text, bttn]);
     return cntnr;
 }
-function getNewLocText(loc) {
+function getNewLocText(loc, editing) {
     const name = !loc ? 'No geo-data found. Please double-check coordinates.' : 
         'Near: <b>'+ loc.name;
-    const html = `<div style="font-size:1.2em;">${name}</b></div>`;
-    return `${html}After confirming that this location is unique, please fill in 
-        all available data and click "Create Location" to submit.`;
+    const html = `<div style="font-size:1.1em;">${name}</b></div>`;
+    return editing ? html : `${html}After confirming that this location is unique, 
+        please fill in all available data and click "Create Location" to submit.`;
 }
 function getCreateLocBttn() {
     const bttn = _u.buildElem('input', {type: 'button',

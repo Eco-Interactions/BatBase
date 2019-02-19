@@ -92,12 +92,14 @@ function getMapInstance(mapId) {
  */
 function onMapClick(type, e) { 
     if (ifClickOnMapTool(e)) { return; }
-    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(e);
+    if (app.flags.onClickDropPin) { dropNewMapPinAndUpdateForm(type, e);  
     } else { showLatLngPopup(type, e) }
 }
 /** Catches clicks on map buttons or tools. */
-function ifClickOnMapTool(e) {      
-    return e.originalEvent.target.id !== 'loc-map';
+function ifClickOnMapTool(e) {                                                  //console.log('e = %O', e)  
+    let elemClass = e.originalEvent.target.className;
+    elemClass = elemClass || e.originalEvent.target._container.className;
+    return typeof elemClass === 'string' && elemClass.includes('leaflet-control');
 }
 function showLatLngPopup(type, e) {
     const latLng = `Lat, Lon: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
@@ -488,24 +490,20 @@ export function addVolatileMapPin(val, type, cntryId) {                         
     clearLocCountLegend();
 }
 function addEditFormMapData(latLng, locId, cntryId) {
-    addEditFormMapPin(latLng);
+    geoCoder.reverse(
+        latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, 'edit'), null);
     if (!cntryId) { return; }
     addParentLocDataToMap(cntryId, 'skipZoom', 'edit', locId);
     map.setView(latLng, 10, {animate: true});  
-}
-function addEditFormMapPin(latLng) {                                            //console.log('addEditFormMapPin. pin = %O, latLng = %O', volatile.pin, latLng);
-    if (volatile.pin) { map.removeLayer(volatile.pin.layer); }
-    volatile.pin = new MM.LocMarker(latLng, null, null, 'e-loc');
-    map.addLayer(volatile.pin.layer);
 }
 function addNewLocPinAndFillCoordFields(latLng) {
     geoCoder.reverse(
         latLng, 1, updateUiAfterFormGeocode.bind(null, latLng, false), null);
     fillCoordFields(latLng);
 }
-function fillCoordFields(latLng) {                                              //console.log('latLng = %O', latLng);
-    $('#Latitude_row input').val();
-    $('#Longitude_row input').val();
+function fillCoordFields(latLng) {                                              //console.log('fillCoordFields latLng = %O', latLng);
+    $('#Latitude_row input').val(latLng.lat.toFixed(5));
+    $('#Longitude_row input').val(latLng.lng.toFixed(5));
 }
 /* ---- Get GPS Field Values or Report Field Err ---- */
 function gpsFieldsFilled() {
@@ -534,14 +532,14 @@ function coordHasErr(field) {
  * Draws containing polygon on map, shows all locations in containing country,
  * and adds a map pin for the entered coodinates. 
  */
-function updateUiAfterFormGeocode(latLng, noZoom, results) {                    console.log('updateUiAfterFormGeocode. point = %O results = %O', latLng, results);
-    if (!results.length) { return updateMapPin(latLng, null, noZoom); }
-    updateMapPin(latLng, results[0], noZoom); 
+function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  console.log('updateUiAfterFormGeocode. zoomFlag? [%s] point = %O results = %O', zoomFlag, latLng, results);
+    if (!results.length) { return updateMapPin(latLng, null, zoomFlag); }
+    updateMapPin(latLng, results[0], zoomFlag); 
 }
-function updateMapPin(latLng, results, noZoom) {                                //console.log('updateMapPin. point = %O name = %O', latLng, name);
+function updateMapPin(latLng, results, zoomFlag) {                                //console.log('updateMapPin. point = %O name = %O', latLng, name);
     const loc = results ? buildLocData(results.properties, results.name) : null;
     $('#'+map._container.id).css('cursor', 'default');
-    replaceMapPin(latLng, loc, noZoom);  
+    replaceMapPin(latLng, loc, zoomFlag);  
 }
 function buildLocData(data, name) {                                             //console.log('buildLocData. data = %O', data);
     return {
@@ -549,14 +547,16 @@ function buildLocData(data, name) {                                             
         name: name
     };
 }
-function replaceMapPin(latLng, loc, noZoom) {
-    const marker = new MM.LocMarker(latLng, loc, null, 'new-loc');
+/** Note: MarkerType triggers the marker's popup build method.  */
+function replaceMapPin(latLng, loc, zoomFlag) {
+    const markerType = zoomFlag === 'edit' ? 'edite-loc' : 'new-loc';
+    const marker = new MM.LocMarker(latLng, loc, null, markerType);
     removePreviousMapPin(loc);
-    if (loc) {                                                                  console.log('Adding parent data for loc = %O', loc)
+    if (loc && zoomFlag !== 'edit') {                                           console.log('Adding parent data for loc = %O', loc)
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
         addParentLocDataToMap(loc.cntryId, true);
     }
-    addPinToMap(latLng, marker.layer, noZoom);   
+    addPinToMap(latLng, marker.layer, zoomFlag);   
 }
 function removePreviousMapPin(loc) { 
     if (!volatile.pin) { return volatile.loc = loc; }  
@@ -567,8 +567,8 @@ function resetPinLoc(loc) {
     volatile.prevLoc = volatile.loc; 
     volatile.loc = loc;
 }
-function addPinToMap(latLng, pin, noZoom) {
-    const zoom = noZoom ? map.getZoom() : 8;
+function addPinToMap(latLng, pin, zoomFlag) {
+    const zoom = zoomFlag ? map.getZoom() : 8;
     volatile.pin = pin;
     map.addLayer(pin);
     map.setView(latLng, zoom, {animate:true});
@@ -761,14 +761,11 @@ function createNewLocHere(e) {                                                  
  * Drops a new map pin, draws the containing country and displays pins for all  
  * existing sub locations within the country.
  */ 
-function dropNewMapPinAndUpdateForm(e) {
-    geoCoder.reverse(
-        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, 'noZoom'), null); 
+function dropNewMapPinAndUpdateForm(type, e) {
     $('#loc-map').css('cursor', 'progress');
-    updateCoordFields(e.latlng);
-}
-function updateCoordFields(latLng) {                                            console.log('updateCoordFields')
-    // body...
+    geoCoder.reverse(
+        e.latlng, 1, updateUiAfterFormGeocode.bind(null, e.latlng, type), null); 
+    fillCoordFields(e.latlng);
 }
 /*--- Draw Location Boundary Bttn ---*/
 function addDrawNewLocBoundaryBttn() {

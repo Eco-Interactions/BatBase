@@ -2,34 +2,9 @@
 >ASAP<
 
 >{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
->Add map to Location FORMS
-    - Editing Location - 
-        - insert map
-        - show location pin on map
-        - show green pin when coordinates change
-        - add button to switch to location merge mode
-            - eventually add this functionality
-
-    CURRENT    
-     - click-to-create pin on the map (kind of like the drag button)
-     - FIGURE OUT WHERE I'M ADDING THE CUSTOM MARKER AND TRY TO USE LEAFLETS. MINE LOOKS OFF FROM WHERE THE ACTUAL POINT IS
+> Create Interaction Lists and UI
 
 
-Notes from geocoders:
-    - Photon, mapbox, here: 
-        poor search results
-    - Bing (125K yearly, ~10.5K searches montlhy):
-        good(ish) search results, uses HERE backend
-    - Google (40k searches montlhy):
-        against terms of service to use with leaflet
-    - Mapquest (15K monthly):
-        poor search results 
-
-    Testing:
-        - Enter map from top form and create form
-        - Country locations show on map
-        - New map pin drops
-        - Select existing location and form closes
 
 Before Release:
 
@@ -37,8 +12,8 @@ MEETING NOTES:
     Point out:
     Next/future rounds:
         Next:
-            - Buttons:
-                - Drag 
+            - UI:
+                - Create saved lists of interactions 
             - Err handling:
                 - ensure that entered coordinates are within selected country
                     on country change, on form submit
@@ -47,6 +22,8 @@ MEETING NOTES:
             - testing:
 
         Future:
+            - Data:
+                - Add more realms
             - Edit form:
                 - allow selection of another location and merging of all data and 
                     deletion of location being edited
@@ -54,11 +31,7 @@ MEETING NOTES:
                 - Draw areas and select as parent location
                 - Get shape data for mising countries and regions
                     - Eg, Central America. Priority?
-                - Optional Location name. Priority?
                 - Adjust display point for country
-                - {low}{med} Add search by name to the location table view
-                - Improve search results
-                - Future Tool Tips for fields that require more explanations
     Feedback:
 
 >======== Email ============
@@ -70,7 +43,8 @@ Tullenda:
 
 >==== Change Log ====
 >---- Add to Client Task List ---
-    - 
+    - Create Interaction Lists
+    - Add more realms
 
 >================ DEV Internal Task List ===================
 ##(Category){priority}[difficulty]##
