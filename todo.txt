@@ -7,6 +7,12 @@
 
 
 Before Release:
+    - Feedback isn't working
+
+Planning Meeting Notes:
+
+
+
 
 MEETING NOTES:
     Point out:

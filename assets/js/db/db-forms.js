@@ -57,7 +57,7 @@ function setFormSize(entity) {
             'Citation': { popup: '1313px', form: '999px' },
             'Author': { popup: '777px', form: '484px' },
             'Location': { popup: '1313px', form: '999px' },
-            'Taxon': { popup: '752px', form: '389px' },
+            'Taxon': { popup: '752px', form: '454px' },
         },
         '1366': {
             'Interaction': { popup: '97%', form: '924px' },
