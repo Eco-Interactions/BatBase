@@ -52,20 +52,20 @@ function setFormSize(entity) {
     var sizeConfgs = { 
         '1500': {
             'Interaction': { popup: '1510px', form: '999px' },
-            'Publication': { popup: '72%', form: '999px' },
-            'Publisher': { popup: '48%', form: '55%' },
-            'Citation': { popup: '72%', form: '999px' },
-            'Author': { popup: '48%', form: '55%' },
-            'Location': { popup: '72%', form: '999px' },
-            'Taxon': { popup: '808px', form: '63%' },
+            'Publication': { popup: '1313px', form: '999px' },
+            'Publisher': { popup: '784px', form: '484px' },
+            'Citation': { popup: '1313px', form: '999px' },
+            'Author': { popup: '777px', form: '484px' },
+            'Location': { popup: '1313px', form: '999px' },
+            'Taxon': { popup: '752px', form: '389px' },
         },
         '1366': {
             'Interaction': { popup: '97%', form: '924px' },
-            'Publication': { popup: '92%', form: '920px' },
-            'Publisher': { popup: '58%', form: '460px' },
-            'Citation': { popup: '92%', form: '920px' },
-            'Author': { popup: '58%', form: '460px' },
-            'Location': { popup: '92%', form: '920px' },
+            'Publication': { popup: '1212px', form: '920px' },
+            'Publisher': { popup: '750px', form: '460px' },
+            'Citation': { popup: '1212px', form: '920px' },
+            'Author': { popup: '750px', form: '460px' },
+            'Location': { popup: '1212px', form: '920px' },
             'Taxon': { popup: '808px', form: '450px' },
     }};
     var wKey = $(window).width() > 1499 ? '1500' : '1366';
