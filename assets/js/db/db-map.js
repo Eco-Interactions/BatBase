@@ -588,7 +588,6 @@ function finishFormMap(parentId, type) {                                        
     } else { //'create'
         addClickToCreateLocBttn();
         addDrawNewLocBoundaryBttn();
-        addMarkerDragBttn();
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
@@ -794,34 +793,5 @@ function createDrawLocBttn() {
     return container;
 }
 function drawNewLocBounds() {                                                   console.log('Draw new location boundary!')
-
-}
-/*--- Drag Marker Bttn ---*/
-function addMarkerDragBttn() {
-    addDragControl();
-    L.control.drag({ position: 'topleft' }).addTo(map);
-}
-function addDragControl() {
-    L.Control.Drag = L.Control.extend({
-        onAdd: function(map) {
-            const bttn = createDragBttn();
-            L.DomEvent.on(bttn, 'click', enableDrag);
-            return bttn;
-        },
-        onRemove: function(map) {}
-    });
-    L.control.drag = function(opts) {return new L.Control.Drag(opts);}
-}
-function createDragBttn() {
-    const className = 'custom-icon leaflet-control-drag',
-        container = L.DomUtil.create('div', className),
-        button = L.DomUtil.create('input', className + '-icon', container);
-    button.type = 'button';
-    
-    $(button).attr('disabled', 'disabled').css('opacity', '.666');
-    $(container).attr('title', "Drag a new location's map pin").append(button);
-    return container;
-}
-function enableDrag() {                                                         console.log('drag enabled!')
 
 }

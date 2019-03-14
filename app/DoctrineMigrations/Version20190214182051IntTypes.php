@@ -42,7 +42,7 @@ class Version20190214182051IntTypes extends AbstractMigration implements Contain
     ];
         foreach ($types as $type => $tagName) {
             $IntType = new InteractionType();
-            $IntType->setDisplayName($type);
+            $IntType->setDisplayName(ucfirst($type)); 
 
             $Tag = $this->em->getRepository('AppBundle:Tag')->findOneBy(['displayName' => $tagName]);
             $IntType->addValidTag($Tag);
