@@ -1933,16 +1933,20 @@ function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   
     if (tParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
-/** Sorts each row by taxonomic rank and then alphabetizes by name. */
+/** 
+ * Sorts each row by taxonomic rank and then alphabetizes by name.
+ * "Unspecified" interaction groupings are kept at top so they remain under their 
+ * source taxon. 
+ */
 function sortTaxonRows(a, b) {
     var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
     var aParts = a.split(" ");
-    var aLvl = aParts[0];
+    var aLvl = aParts[0];   
     var aName = aParts[1];
     var bParts = b.split(" ");
     var bLvl = bParts[0];
     var bName = bParts[1];
-    return  aLvl === "Unspecified" ? -1 : compareRankThenName();  
+    return  bLvl === "Unspecified" ? 1 : compareRankThenName();  
 
     function compareRankThenName() {
         return sortByRank() || sortByName();
