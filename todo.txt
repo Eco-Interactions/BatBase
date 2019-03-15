@@ -4,6 +4,31 @@
 >{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
 > Create Interaction Lists and UI
 
+>REFACTORING
+
+Current:
+    load-table-data
+
+Next:
+    tbl-bttns.js
+
+Future:
+    - Break util into 
+        - data storage
+        - combobox/selectize?
+        - extend
+        - html
+
+
+
+
+
+
+
+
+
+
+
 
 
 Before Release:
