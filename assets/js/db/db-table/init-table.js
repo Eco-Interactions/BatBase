@@ -7,10 +7,12 @@
  */
 import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
-import * as filters from './tbl-filters.js';
+import unqVals from './ag-grid-unique-filter.js';
 import * as db_csv from './csv-data.js';
+import * as db_filters from './db-filters.js';
 /** Refactor away **/
-import {showLocOnMap} from '../db-page.js';
+import { accessTableState as tState, showLocOnMap } from '../db-page.js';
+
 
 
 let tParams = {/* rowData, curFocus, opts, curRealm, userRole, viewTitle */};
@@ -29,16 +31,10 @@ export function init(iParams) {                                                 
     tblOpts.rowData = tParams.rowData;
     tblOpts.columnDefs = getColumnDefs(tParams.viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
-    sortTreeColumnIfTaxonFocused();
-    return tblOpts;
+    sortTreeColumnIfTaxonFocused(); // REFACT:: MIGHT NOT BE NEEDED?
+    tState().set(null, 'api', tblOpts.api);
 }
-/** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
-function sortTreeColumnIfTaxonFocused() {
-    if (tParams.curFocus === 'taxa') {
-        tParams.opts.api.setSortModel([{colId: "name", sort: "asc"}]);
-    }
-}
-
+/** Base table options object. */
 function getDefaultTblOpts() {
     tParams.opts = {
         columnDefs: getColumnDefs(),
@@ -62,10 +58,8 @@ function getDefaultTblOpts() {
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    updateFilterStatusMsg();    
+    db_filters.updateFilterStatusMsg();    
 } 
-
-
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's
  * @param  {obj} params  {column, colDef, context, api}
@@ -109,18 +103,18 @@ function getColumnDefs(mainCol) {
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
+            {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                filter: filters.UniqueValues, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
+                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
-            {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
+            {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
             {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
             {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
-            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
+            {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: unqVals },
+            {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
 }
 /** Adds tooltip to Interaction row cells */
@@ -166,6 +160,13 @@ function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   
     if (tParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
+
+/** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
+function sortTreeColumnIfTaxonFocused() {
+    if (tParams.curFocus === 'taxa') {
+        tParams.opts.api.setSortModel([{colId: "name", sort: "asc"}]);
+    }
+}
 /** 
  * Sorts each row by taxonomic rank and then alphabetizes by name.
  * "Unspecified" interaction groupings are kept at top so they remain under their 
