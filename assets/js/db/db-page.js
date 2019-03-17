@@ -10,7 +10,6 @@
  *     handleReset
  *     initSearchPage
  *     initDataTable
- *     setTableState
  *     showLocOnMap
  *     showUpdates
  *
@@ -21,25 +20,20 @@ import * as _u from './util.js';
 import * as db_sync from './db-sync.js';
 import * as db_forms from './db-forms.js';
 import * as db_map from './db-map.js';
-// import * as agGrid from '../../grid/ag-grid.js';
 import * as db_tips from './tips.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as load_tbl from './db-table/init-table.js'
 import * as db_csv from './db-table/csv-data.js'
 
 /**
- * userRole = Stores the role of the user.
  * dataStorage = window.localStorage (sessionStorage for tests)
  * tParams = obj container for misc params used for the search table.
- * tState = Stores table state params needed across multiple modules.
- * tOpts = REFACT. MERGE INTO TSTATE
+ * tblState = Stores table state params needed across multiple modules.
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded. REFACT:: DB_SYNC
  */
-let userRole, dataStorage, tblOpts = {}, tParams = {}, tState = {};
-// const misc = {}; 
+let dataStorage, tParams = {}, tblState = {};
 const dataKey = 'A life without cause is a life without effect!';               console.log(dataKey);
-// const tblOpts = getDefaultTblOpts();
 
 requireCss();
 initDbPage();
@@ -58,9 +52,10 @@ function initDbPage () {
     db_sync.init();
     clearDataStorageCheck();
     showPopUpMsg('Loading...');
+    storeUserRole();
     addDomEventListeners();
     adaptUiToScreenSize();
-    authDependentInit();
+    _u.authDependentInit();
     initSearchState();
 }
 /** --------------- local storage methods ------------------------------- */
@@ -95,12 +90,15 @@ function onDataReset(prevFocus) {
  */
 export function initSearchPage() {
     showLoadingDataPopUp();
-    db_tips.startWalkthrough(tParams.curFocus);
+    db_tips.startWalkthrough(tblState.curFocus);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 function showLoadingDataPopUp() {
     showPopUpMsg(`Downloading and caching all interaction records. Please allow 
         for a ~45 second download.`);   
+}
+function storeUserRole() {
+    tblState.userRole = $('body').data("user-role");                              //console.log("----userRole === visitor ", userRole === "visitor")
 }
 function addDomEventListeners() {
     db_filters.addDomEventListeners();
@@ -113,17 +111,16 @@ function addDomEventListeners() {
     // $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
     // $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function authDependentInit() {
-    userRole = $('body').data("user-role");                                     //console.log("----userRole === visitor ", userRole === "visitor")
-    if (userRole === "visitor") {
-        $('button[name="csv"]').prop('disabled', true);
-        $('button[name="csv"]').prop('title', "Register to download.");
-        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
-}
+// /**
+//  * REFACT:: UI-UTIL OR SOMETHING
+//  */
+// function authDependentInit() {
+//     if (userRole === "visitor") {
+//         $('button[name="csv"]').prop('disabled', true);
+//         $('button[name="csv"]').prop('title', "Register to download.");
+//         $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
+//     } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
+// }
 /** Moves the buttons from the end of the search options panel to just beneath. */
 function adaptUiToScreenSize() {
     if ($(window).width() > 1500) { return; }
@@ -145,8 +142,8 @@ export function accessTableState() {
 /**
  * Returns table state to requesting module.
  */
-export function getTableState(k) {  console.log('getTableState. params? ', arguments);
-    return k ? tState[k] : tState;
+function getTableState(k) {                                              //console.log('getTableState. params? ', arguments);
+    return k ? tblState[k] : tblState;
 }
 
 /**
@@ -155,14 +152,16 @@ export function getTableState(k) {  console.log('getTableState. params? ', argum
  * {str} curFocus       Focus of the data in table: tax, srcs, locs
  * {str} curRealm       Sub-sort of table data. Eg: bats, auths, etc 
  * {ary} rowData        Row data in table
+ * {obj} rcrdsById      Focus records keyed by ID
  * {obj} selectedOpts   K: Combobox key V: value selected  //REFACT:: MERGE??
  * {ary} selectedVals   K: Combobox key V: value selected  //REFACT:: MERGE??
+ * {str} userRole       Stores the role of the user.
  */
-export function setTableState(multi, key, value) {  console.log('setTableState. params? ', arguments);
+function setTableState(multi, key, value) {                              //console.log('setTableState. params? ', arguments);
     if (multi) { Object.keys(multi).forEach(k => {
-        tState[k] = multi[k];
+        tblState[k] = multi[k];
     })} else {
-        tState[key] = value;
+        tblState[key] = value;
     }
 }
 /*-------------------- Top "State" Managment Methods -------------------------*/
@@ -183,11 +182,14 @@ function initSearchState() {
  * curTree - data 'tree' object to be displayed in table.
  * rowData - array of rows displayed in the table.
  * selectedOpts - search combobox values 'selected' for the current tree.
+ *
+ * REFACT:: DESCRIBE THE DIFFERENCE AND SEPARATE
  */
 function resetTableParams() {  
     tParams = {}; 
-    tParams.curFocus = getResetFocus();  
     tParams.openRows = [];                                                      //console.log("tParams = %O", tParams);
+    tblState = {}
+    tblState.curFocus = getResetFocus();  
 }
 function getResetFocus() {
     const foci = ['locs', 'srcs', 'taxa'];
@@ -197,8 +199,8 @@ function getResetFocus() {
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     $('#filter-opts').show(400);  
-    initCombobox('Focus');
-    setSelVal('Focus', tParams.curFocus, 'silent');
+    _u.initCombobox('Focus');
+    _u.setSelVal('Focus', tblState.curFocus, 'silent');
     $('#sort-opts').show(400);
     selectSearchFocus();
 }
@@ -235,7 +237,7 @@ function getInteractionsAndFillTable() {                                        
  * calls @load_tbl.onTableInitComplete for the final stage of the build. 
  */
 function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
-    const focus = tParams.curFocus; 
+    const focus = tblState.curFocus; 
     const curTree = tParams.curTree; 
     fillTree(focus, curTree, intRcrds);
     buildTable(focus, curTree);
@@ -306,7 +308,7 @@ function fillTree(focus, curTree, intRcrds) {
     function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
         return interactionsAry.map(function(intId){
             if (typeof intId === "number") {                                    //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
-                return fillIntRcrd(getDetachedRcrd(intId, intRcrds)); 
+                return fillIntRcrd(_u.getDetachedRcrd(intId, intRcrds)); 
             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
         });
     }
@@ -408,7 +410,7 @@ function buildTaxonTable() {                                                    
  */
 function initTaxonSearchUi(data) {                                              console.log("initTaxonSearchUi. data = %O", data);
     var realmTaxonRcrd;
-    tParams.rcrdsById = data.taxon;
+    tblState.rcrdsById = data.taxon;
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
     setTaxonRealm();  
     
@@ -421,9 +423,9 @@ function initTaxonSearchUi(data) {                                              
 function setTaxonRealm() {
     var realmVal;
     var storedRealm = dataStorage.getItem('curRealm');                          console.log("storedRealm = ", storedRealm)
-    if (!getSelVal('Taxon Realm')) { 
+    if (!_u.getSelVal('Taxon Realm')) { 
         realmVal = storedRealm !== null ? storedRealm : "3";  
-        setSelVal('Taxon Realm', realmVal, 'silent');
+        _u.setSelVal('Taxon Realm', realmVal, 'silent');
     }
 }
 /**
@@ -464,7 +466,7 @@ function seperateTaxonTreeByLvl(topTaxon) {
     }
 } /* End seperateTaxonTreeByLvl */
 /** Event fired when the taxon realm select box has been changed. */
-function onTaxonRealmChange(val) {  
+export function onTaxonRealmChange(val) {  
     if (!val) { return; }
     resetTaxonRealm(val);
 }
@@ -479,11 +481,11 @@ function resetTaxonRealm(val) {  console.log('resetTaxonRealm')
  * the taxon's record.
  */
 function storeAndReturnRealm(val) {
-    const realmId = val || getSelValOrDefault(getSelVal('Taxon Realm'));        //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = getDetachedRcrd(realmId);                            console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmId = val || getSelValOrDefault(_u.getSelVal('Taxon Realm'));        //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
+    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);                            console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _u.populateStorage('curRealm', realmId);
-    tParams.curRealm = realmId;
+    tblState.curRealm = realmId;
     tParams.realmLvl = realmLvl;
     return realmTaxonRcrd;
 }
@@ -496,7 +498,7 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.. 
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-function rebuildTaxonTree(topTaxon, realmInit) {                                //console.log("realmTaxon=%O", realmTaxon)
+export function rebuildTaxonTree(topTaxon, realmInit) {                                //console.log("realmTaxon=%O", realmTaxon)
     clearPreviousTable();
     initTaxonTree(topTaxon);
     if (realmInit) { storeLevelData(topTaxon); 
@@ -531,7 +533,7 @@ function buildTaxonTree(topTaxon) {                                             
         return children.map(function(child){
             if (typeof child === "object") { return child; }
 
-            var childRcrd = getDetachedRcrd(child);                             //console.log("child = %O", child);
+            var childRcrd = _u.getDetachedRcrd(child, tblState.rcrdsById);                             //console.log("child = %O", child);
             if (childRcrd.children.length >= 1) { 
                 childRcrd.children = getChildTaxa(childRcrd.children);
             } else { childRcrd.children = null; }
@@ -559,7 +561,7 @@ function buildTaxonRealmHtml(data) {                                            
     const opts = getRealmOpts(data);                                            //console.log("realmOpts = %O", realmOpts);
     $(browseElems).append(newSelEl(opts, 'opts-box', 'sel-realm', 'Taxon Realm'));
     $('#sort-opts').append(browseElems);
-    initCombobox('Taxon Realm');
+    _u.initCombobox('Taxon Realm');
     $('#sort-opts').fadeTo(0, 1);
 
     function getRealmOpts(data) {  
@@ -605,7 +607,7 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                     
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in tParams.selectedVals) {
-            const taxon = getDetachedRcrd(tParams.selectedVals[lvl]);
+            const taxon = _u.getDetachedRcrd(tParams.selectedVals[lvl], tblState.rcrdsById);
             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
         } else { optsObj[lvl] = []; }
     }
@@ -622,7 +624,7 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     const elems = buildTaxonSelects(levelOptsObj, levels);
     clearCol2();        
     $('#opts-col2').append(elems);
-    initComboboxes(tParams.allRealmLvls.slice(1));
+    _u.initComboboxes(tParams.allRealmLvls.slice(1));
     setSelectedTaxonVals(tParams.selectedVals);
     
     function buildTaxonSelects(opts, levels) {  
@@ -642,7 +644,7 @@ function setSelectedTaxonVals(selected) {                                       
     if (selected === undefined) {return;}
     tParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
         if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
-        setSelVal(lvl, selected[lvl], 'silent');
+        _u.setSelVal(lvl, selected[lvl], 'silent');
     });
 }
 /*-------- Taxon Data Formatting ------------------------------------------*/
@@ -655,8 +657,8 @@ function transformTaxonDataAndLoadTable(taxonTree) {                            
     for (var topTaxon in taxonTree) {
         finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
     }
-    tParams.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
-    loadTable("Taxon Tree");
+    tblState.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
+    load_tbl.init("Taxon Tree");
 }
 /**
  * Recurses through each taxon's 'children' property and returns a row data obj 
@@ -787,10 +789,10 @@ function initLocSearchUi(locData, view) {
 function setLocView(view) {
     const storedRealm = view || dataStorage.getItem('curRealm');                //console.log("setLocView. storedRealm = ", storedRealm)
     const locRealm = storedRealm || 'tree';
-    setSelVal('Loc View', locRealm, 'silent');
+    _u.setSelVal('Loc View', locRealm, 'silent');
 }
 function addLocDataToTableParams(data) {
-    tParams.rcrdsById = data.location;                                    
+    tblState.rcrdsById = data.location;                                    
     tParams.data = data;
 }
 function buildLocViewHtml() {                   
@@ -798,7 +800,7 @@ function buildLocViewHtml() {
         text: 'View all as: ' });
     const sel = newSelEl(getViewOpts(), 'opts-box', 'sel-realm', 'Loc View');
     $('#sort-opts').append([span, sel]);
-    initCombobox('Loc View');
+    _u.initCombobox('Loc View');
     $('#sort-opts').fadeTo(0, 1);
 
     function getViewOpts() {
@@ -806,7 +808,7 @@ function buildLocViewHtml() {
                 { value: 'tree', text: 'Table Data' }];   
     } 
 } /* End buildLocViewHtml */
-function onLocViewChange(val) {
+export function onLocViewChange(val) {
     if (!val) { return; }
     updateLocView(val);
 }
@@ -815,7 +817,7 @@ function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || getSelVal('Loc View');                                     //console.log('updateLocView. view = [%s]', val);
+    const val = v || _u.getSelVal('Loc View');                                     //console.log('updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     resetToggleTreeBttn(false);
@@ -855,7 +857,7 @@ function buildLocTableTree(topLocs) {                                           
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  */
-function rebuildLocTree(topLoc) {                                               //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+export function rebuildLocTree(topLoc) {                                        console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
     var topLocs = topLoc || getTopRegionIds();
     tParams.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousTable();
@@ -870,7 +872,7 @@ function buildLocTree(topLocs) {                                                
     var topLoc;
     var tree = {};                                                              //console.log("tree = %O", tree);
     topLocs.forEach(function(id){  
-        topLoc = getDetachedRcrd(id);  
+        topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
     tParams.curTree = sortDataTree(tree);
@@ -883,7 +885,7 @@ function getLocChildren(rcrd) {
     return rcrd;
 }
 function getLocChildData(childId) {  
-    return getLocChildren(getDetachedRcrd(childId));
+    return getLocChildren(_u.getDetachedRcrd(childId, tblState.rcrdsById));
 }
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
@@ -913,13 +915,13 @@ function loadLocComboboxes() {
     const opts = buildLocSelectOpts(); 
     var selElems = buildLocSelects(opts);
     $('#opts-col2').append(selElems);
-    initComboboxes(['Region', 'Country']);
+    _u.initComboboxes(['Region', 'Country']);
     setSelectedLocVals();
 }/** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts() {  console.log('tState = %O', tState);
+function buildLocSelectOpts() {  console.log('tblState = %O', tblState);
     var processedOpts = { Region: [], Country: [] };
     var opts = { Region: [], Country: [] };  
-    tState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
+    tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
     modifyOpts();
     return opts; 
     /**
@@ -956,17 +958,17 @@ function buildLocSelectOpts() {  console.log('tState = %O', tState);
      * If both top & sub regions are in the table, only the sub-region opt is 
      * included, unless the top region is the location being filtered on. 
      */
-    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tParams.selectedOpts)
-        const selLoc = tParams.rcrdsById[tParams.openRows[0]];                  
+    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tblState.selectedOpts)
+        const selLoc = tblState.rcrdsById[tParams.openRows[0]];                  
         if (!selLoc || !selLoc.parent) { return; }
         opts.Region = opts.Region.filter(function(region) {
-            return region.value == tParams.selectedOpts.region;
+            return region.value == tblState.selectedOpts.region;
         });             
     }
     /** If the Region or Country aren't in the table, they are added as options here. */
     function addMissingOpts() {                                                 
-        if (!tParams.openRows.length && !tParams.selectedOpts) { return; }
-        const selLoc = tParams.rcrdsById[tParams.openRows[0]];                  
+        if (!tParams.openRows.length && !tblState.selectedOpts) { return; }
+        const selLoc = tblState.rcrdsById[tParams.openRows[0]];                  
         if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
     }
@@ -980,7 +982,7 @@ function buildLocSelectOpts() {  console.log('tState = %O', tState);
         opts[optProp].push({ value: val, text: txt });
     }         
     function addToSelectedObj(id, type) {
-        const sel = tParams.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
+        const sel = tblState.selectedOpts || createSelectedOptsObj();            //console.log('building opt for [%s] = %O', type, loc);
         sel[type] = id;
     }
     /** Alphabetizes the options. */
@@ -991,8 +993,8 @@ function buildLocSelectOpts() {  console.log('tState = %O', tState);
     }
 } /* End buildLocSelectOpts */
 function createSelectedOptsObj() {
-    tParams.selectedOpts = {};
-    return tParams.selectedOpts;
+    tblState.selectedOpts = {};
+    return tblState.selectedOpts;
 }
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
@@ -1013,9 +1015,9 @@ function buildLocSelects(locOptsObj) {
     }
 }
 function setSelectedLocVals() {                                                 
-    const selected = tParams.selectedOpts;                                      //console.log("selected in setSelectedLocVals = %O", selected);
+    const selected = tblState.selectedOpts;                                      //console.log("selected in setSelectedLocVals = %O", selected);
     Object.keys(selected).forEach(locType => {
-        setSelVal(locType, selected[locType], 'silent');
+        _u.setSelVal(locType, selected[locType], 'silent');
     });
 }
 /*--------- Location Data Formatting -----------------------------------------*/
@@ -1028,8 +1030,8 @@ function transformLocDataAndLoadTable(locTree) {
     for (var topNode in locTree) {                                              //console.log("topNode = ", topNode)
         finalRowData.push( getLocRowData(locTree[topNode], 0)); 
     }
-    tParams.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", tParams.rowData);
-    loadTable("Location Tree");
+    tblState.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", tblState.rowData);
+    load_tbl.init("Location Tree");
 }
 /** Returns a row data object for the passed location and it's children.  */
 function getLocRowData(locRcrd, treeLvl) {                                      //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
@@ -1118,20 +1120,20 @@ function hasChildInteractions(row) {
 export function showLocInDataTable(loc) {                                        //console.log('showing Loc = %O', loc);
     updateUiForTableView();
     rebuildLocTree([loc.id]);
-    setSelVal('Loc View', 'tree', 'silent');
+    _u.setSelVal('Loc View', 'tree', 'silent');
     updateBttnToReturnRcrdsToTable();
 }
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
     updateUiForMapView();       
-    db_map.initMap(tParams.rcrdsById);           
+    db_map.initMap(tblState.rcrdsById);           
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(geoJsonId, zoom) {
     updateUiForMapView();
     clearCol2();
-    setSelVal('Loc View', 'map', 'silent');
-    db_map.showLoc(geoJsonId, zoom, tParams.rcrdsById);
+    _u.setSelVal('Loc View', 'map', 'silent');
+    db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
 }
 /**
  * Build an object with all relevant data to display the interactions in the 
@@ -1141,7 +1143,7 @@ function showTableRecordsOnMap() {                                              
     $('#search-tbl').fadeTo('100', 0.3, () => {
         updateUiForMappingInts();
         storeIntAndLocRcrds();
-        db_map.showInts(tParams.curFocus, buildTableLocDataObj(), tParams.rcrdsById);
+        db_map.showInts(tblState.curFocus, buildTableLocDataObj(), tblState.rcrdsById);
     });
 }
 function storeIntAndLocRcrds() {
@@ -1156,13 +1158,13 @@ function storeIntAndLocRcrds() {
 function buildTableLocDataObj() {  
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
     let curBaseNodeName; //used for Source rows
-    tblOpts.api.forEachNodeAfterFilter(getIntMapData);
+    tblState.api.forEachNodeAfterFilter(getIntMapData);
     return mapData;  
     
     function getIntMapData(row) {                         
         if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }                         
         if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
-        buildInteractionMapData(row.data, getDetachedRcrd(row.data.id));
+        buildInteractionMapData(row.data, _u.getDetachedRcrd(row.data.id, tblState.rcrdsById));
     }
     function buildInteractionMapData(rowData, rcrd) {
         const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
@@ -1177,8 +1179,8 @@ function buildTableLocDataObj() {
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
         function addRowData(intRowData) {  
             if (!intRowData.location) { return ++noLocCnt; }
-            const intRcrd = getDetachedRcrd(intRowData.id, tParams.interaction);
-            const loc = getDetachedRcrd(intRcrd.location, tParams.location);
+            const intRcrd = _u.getDetachedRcrd(intRowData.id, tParams.interaction);
+            const loc = _u.getDetachedRcrd(intRcrd.location, tParams.location);
             addLocAndIntData(loc, intRcrd);
             ++data.intCnt;
         }
@@ -1208,7 +1210,7 @@ function buildTableLocDataObj() {
     function addIntData(locObj, entData, geoId) {
         const mapDataProp = mapData[geoId].ints[entData.name]
         if (!mapData[geoId].ints[entData.name]) { initIntDataObj(entData, geoId); }
-        if (tParams.curRealm == 'auths') { return sanitizeAndAddInt(); }
+        if (tblState.curRealm == 'auths') { return sanitizeAndAddInt(); }
         addToIntObj(entData.name)
 
         function addToIntObj(key) {
@@ -1252,7 +1254,7 @@ function hasUnspecifiedRow(rowData) {
     return rowData.children[0].name.indexOf('Unspecified') !== -1;
 }
 function getRowRcrdName(rowData, rcrd, baseNode) {
-    if (tParams.curFocus === 'srcs') { return getSrcRowName(rowData, rcrd, baseNode)}
+    if (tblState.curFocus === 'srcs') { return getSrcRowName(rowData, rcrd, baseNode)}
     return rowData.name.indexOf('Unspecified') !== -1 ?
         getUnspecifiedRowEntityName(rowData, rcrd) : 
         getRcrdDisplayName(rowData.name, rcrd);
@@ -1264,7 +1266,7 @@ function getSrcRowName(rowData, rcrd, baseNode) {
     return `${baseNode} - (${work})`;
 }
 function getUnspecifiedRowEntityName(row, rcrd) {
-    return tParams.curFocus === 'taxa' ? 
+    return tblState.curFocus === 'taxa' ? 
         getTaxonName(rcrd) : getRcrdDisplayName(rcrd.displayName, rcrd);
 }
 function getRcrdDisplayName(name, rcrd) {
@@ -1276,7 +1278,7 @@ function getParentName(rcrd) {
 /* --- End showTableRecordsOnMap --- */
 function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
-    disableTableButtons();
+    _u.disableTableButtons();
     showPopUpMsg();
     $('#tool-bar').fadeTo(100, 1);
     $('#search-tbl').hide();
@@ -1285,7 +1287,7 @@ function updateUiForMapView() {
 function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
-    enableTableButtons();
+    _u.enableTableButtons();
     enableComboboxes($('#opts-col1 select, #opts-col2 select'));
     $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
@@ -1312,7 +1314,7 @@ function updateBttnToShowRcrdsOnMap() {
 }
 function returnRcrdsToTable() {
     updateUiForTableView();
-    if (getSelVal('Loc View') === 'map') { setSelVal('Loc View', 'tree'); }
+    if (_u.getSelVal('Loc View') === 'map') { _u.setSelVal('Loc View', 'tree'); }
 }
 /*------------------Source Search Methods ------------------------------------*/
 /**
@@ -1337,14 +1339,14 @@ function initSrcSearchUi(srcData) {                                             
 }
 /** Add source data to tParams to be available while in a source focus. */
 function addSrcDataToTableParams(srcData) {
-    tParams.rcrdsById = srcData.source;
+    tblState.rcrdsById = srcData.source;
     tParams.author = srcData.author;
     tParams.publication = srcData.publication;
 }
 /** Builds the combobox for the source realm types. */
 function buildSrcRealmHtml() {                                             
     $('#sort-opts').append(buildSrcTypeElems());
-    initCombobox('Source Type');
+    _u.initCombobox('Source Type');
     $('#sort-opts').fadeTo(0, 1);
 
     function buildSrcTypeElems() {
@@ -1364,11 +1366,11 @@ function buildSrcRealmHtml() {
 function setSrcRealm() {
     const storedRealm = dataStorage.getItem('curRealm');                        //console.log("storedRealm = ", storedRealm)
     const srcRealm = storedRealm || 'pubs';  
-    if (!getSelVal('Source Type')) { setSelVal('Source Type', srcRealm); 
+    if (!_u.getSelVal('Source Type')) { _u.setSelVal('Source Type', srcRealm); 
     } else { onSrcRealmChange(srcRealm); }
 }
 /** Event fired when the source realm select box has been changed. */
-function onSrcRealmChange(val) {                                                //console.log('-------- SrcRealmChange')
+export function onSrcRealmChange(val) {                                                //console.log('-------- SrcRealmChange')
     if (!val) { return; }
     resetSourceRealm(val);
 }
@@ -1381,21 +1383,21 @@ function resetSourceRealm(val) {
 /** (Re)builds source tree for the selected source realm. */
 function buildSrcTree(val) {
     const realmRcrds = storeAndReturnCurRealmRcrds(val);                        //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
-    initSrcTree(tParams.curRealm, realmRcrds);
+    initSrcTree(tblState.curRealm, realmRcrds);
     getInteractionsAndFillTable();
 }
 /** Returns the records for the source realm currently selected. */
 function storeAndReturnCurRealmRcrds(val) {
     const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
-    const realmVal = val || getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
-    tParams.curRealm = realmVal;    
+    const realmVal = val || _u.getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
+    tblState.curRealm = realmVal;    
     _u.populateStorage('curRealm', realmVal);
     return getTreeRcrdAry(valMap[realmVal]);
 }
 /** Returns an array with all records from the stored record object. */
 function getTreeRcrdAry(realm) {
     const srcRcrdIdAry = _u.getDataFromStorage(realm);
-    return srcRcrdIdAry.map(function(id) { return getDetachedRcrd(id); });
+    return srcRcrdIdAry.map(function(id) { return _u.getDetachedRcrd(id, tblState.rcrdsById); });
 }
 /**
  * Builds the source data tree for the selected source realm (source type) and 
@@ -1430,13 +1432,13 @@ function buildPubTree(pubSrcRcrds) {                                            
 function getPubData(rcrd) {                                                     //console.log("getPubData. rcrd = %O", rcrd);
     rcrd.children = getPubChildren(rcrd);
     if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
-        rcrd.publication = getDetachedRcrd(rcrd.publication, tParams.publication);
+        rcrd.publication = _u.getDetachedRcrd(rcrd.publication, tParams.publication);
     }
     return rcrd;
 }
 function getPubChildren(rcrd) {                                                 //console.log("getPubChildren rcrd = %O", rcrd)
     if (rcrd.children.length === 0) { return []; }
-    return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
+    return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
 }
 /*-------------- Publisher Source Tree ---------------------------------------*/
 /**
@@ -1457,7 +1459,7 @@ function buildPublTree(pubRcrds) {                                              
 
     function addPubl(pub) {
         if (!pub.parent) { noPubl.push(pub); return; }
-        const publ = getDetachedRcrd(pub.parent, tParams.rcrdsById);
+        const publ = _u.getDetachedRcrd(pub.parent, tblState.rcrdsById);
         tree[publ.displayName] = getPublData(publ); 
     }
 } /* End buildPublTree */
@@ -1467,7 +1469,7 @@ function getPublData(rcrd) {
 }
 function getPublChildren(rcrd) {                                                //console.log("getPubChildren rcrd = %O", rcrd)
     if (rcrd.children.length === 0) { return []; }
-    return rcrd.children.map(id => getPubData(getDetachedRcrd(id)));
+    return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
 }
 function getPubsWithoutPubls(pubs) {
     let publ = { id: 0, displayName: "Unspecified", parent: null, sourceType: { displayName: 'Publisher' } };
@@ -1487,13 +1489,13 @@ function getPubsWithoutPubls(pubs) {
 function buildAuthTree(authSrcRcrds) {                                          //console.log("----buildAuthSrcTree");
     var tree = {};
     for (var id in authSrcRcrds) { 
-        getAuthData(getDetachedRcrd(id, authSrcRcrds)); 
+        getAuthData(_u.getDetachedRcrd(id, authSrcRcrds)); 
     }  
     return tree;  
 
     function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
         if (authSrc.contributions.length > 0) {
-            authSrc.author = getDetachedRcrd(authSrc.author, tParams.author);
+            authSrc.author = _u.getDetachedRcrd(authSrc.author, tParams.author);
             authSrc.children = getAuthChildren(authSrc.contributions); 
             tree[authSrc.displayName] = authSrc;
         }
@@ -1503,7 +1505,7 @@ function buildAuthTree(authSrcRcrds) {                                          
  * @getPubData and return's the source record.
  */
 function getAuthChildren(contribs) {                                            //console.log("getAuthChildren contribs = %O", contribs);
-    return contribs.map(wrkSrcid => getPubData(getDetachedRcrd(wrkSrcid)));
+    return contribs.map(wrkSrcid => getPubData(_u.getDetachedRcrd(wrkSrcid, tblState.rcrdsById)));
 }
 /**
  * Will build the select elems for the source search options. Clears previous 
@@ -1516,7 +1518,7 @@ function buildSrcSearchUiAndTable(srcTree) {                                    
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
     clearPreviousTable();
-    buildUi[tParams.curRealm](srcTree); 
+    buildUi[tblState.curRealm](srcTree); 
     transformSrcDataAndLoadTable(srcTree);
 } 
 /** Builds a text input for searching author names. */
@@ -1532,11 +1534,11 @@ function loadAuthSearchHtml(srcTree) {
  */
 function loadPubSearchHtml(srcTree) {
     const pubTypeElem = buildPubTypeSelect();
-    const searchTreeElem = db_filters.buildTreeSearchHtml('Publication', db_filters.updatePubSearchByTxt);
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
     clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
-    initCombobox('Publication Type');
-    setSelVal('Publication Type', 'all', 'silent');
+    _u.initCombobox('Publication Type');
+    _u.setSelVal('Publication Type', 'all', 'silent');
     
     function buildPubTypeSelect() {
         const pubTypeOpts = buildPubSelectOpts();
@@ -1572,7 +1574,7 @@ function loadPublSearchHtml(srcTree) {
  */
 function transformSrcDataAndLoadTable(srcTree) {                                 //console.log("transformSrcDataAndLoadTable called.")
     var prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
-    var treeName = prefix[tParams.curRealm] + ' Tree';
+    var treeName = prefix[tblState.curRealm] + ' Tree';
     let rowColorIdx = 0;
     var finalRowData = [];
 
@@ -1580,8 +1582,8 @@ function transformSrcDataAndLoadTable(srcTree) {                                
         rowColorIdx = rowColorIdx < 6 ? ++rowColorIdx : 0; 
         finalRowData.push( getSrcRowData(srcTree[topNode], 0, rowColorIdx) );
     }
-    tParams.rowData = finalRowData;                                             //console.log("rowData = %O", tParams.rowData);
-    loadTable(treeName);
+    tblState.rowData = finalRowData;                                             //console.log("rowData = %O", tblState.rowData);
+    load_tbl.init(treeName);
 }
 function getSrcRowData(src, treeLvl, idx) {                                     //console.log("getSrcRowData. source = %O", src);
     var entity = src.sourceType.displayName;
@@ -1810,7 +1812,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         var lvl = taxon.level.displayName;
         var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
         if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
-        } else { clearLowerLvls(tParams.rcrdsById[prntId].level.displayName); }
+        } else { clearLowerLvls(tblState.rcrdsById[prntId].level.displayName); }
         curTaxonHeirarchy[lvl] = taxon.displayName;
     }
     /**
@@ -1863,20 +1865,12 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
 //     };
 // }
 /* ============================ LOAD DATA TABLE ============================== */
-/**
- * Passes off to init-table.js to load formatted data and handle post-init ui updates.
- */
-function loadTable(treeColTitle, tOpts) {
-    const initParams = {
-        rowData: tParams.rowData,
-        curFocus: tParams.curFocus,
-        opts: false,
-        curRealm: tParams.curRealm,
-        userRole: userRole,
-        viewTitle: treeColTitle
-    };
-    tblOpts = load_tbl.init(initParams);
-}
+// *
+//  * Passes off to init-table.js to load formatted data and handle post-init ui updates.
+ 
+// function loadTable(treeColTitle, tOpts) {
+//     load_tbl.init(treeColTitle, tOpts);
+// }
 // /**
 //  * Builds the table options object and passes everyting into agGrid, which 
 //  * creates and shows the table.
@@ -2429,23 +2423,19 @@ function getCurTaxonLvlCols() {                                                 
 function clearCol2() {
     $('#opts-col2').empty();
 }
-/** 
- * Returns a record detached from the original. If no records are passed, the 
- * focus' records are used.
- */
-function getDetachedRcrd(rcrdKey, rcrds) {                                  
-    const orgnlRcrds = rcrds || tParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
-    try {
-       return _u.snapshot(orgnlRcrds[rcrdKey]);
-    }
-    catch (e) { 
-       console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
-    }
-}
-/** If table is filtered by an external filter, the rows are stored in fltrdRows. */
-function getAllCurRows() {
-    return tParams.fltrdRows || tParams.rowData;
-}
+// /** 
+//  * Returns a record detached from the original. If no records are passed, the 
+//  * focus' records are used.
+//  */
+// function getDetachedRcrd(rcrdKey, rcrds) {                                  
+//     const orgnlRcrds = rcrds || tParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+//     try {
+//        return _u.snapshot(orgnlRcrds[rcrdKey]);
+//     }
+//     catch (e) { 
+//        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
+//     }
+// }
 function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#db-popup').text(popUpMsg);
@@ -2469,25 +2459,25 @@ function fadeTable() {
 //     enableTableButtons();
 //     hideUnusedColFilterMenus();
 // } 
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
-        .attr('disabled', false).css('cursor', 'pointer');
-    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools').fadeTo(100, 1);
-    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    authDependentInit(); 
-}
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
-        .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
-}
+// /**
+//  * REFACT:: UI-UTIL OR SOMETHING
+//  */
+// function enableTableButtons() {  
+//     $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
+//         .attr('disabled', false).css('cursor', 'pointer');
+//     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+//     $('.tbl-tools').fadeTo(100, 1);
+//     $('button[name="futureDevBttn"]').fadeTo(100, .7);    
+//     authDependentInit(); 
+// }
+// /**
+//  * REFACT:: UI-UTIL OR SOMETHING
+//  */
+// function disableTableButtons() {
+//     $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
+//         .attr('disabled', 'disabled').css('cursor', 'default');
+//     $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
+// }
 // /**
 //  * Hides the "tree" column's filter button. (Filtering on the group 
 //  * column only filters the leaf nodes, by design. It is not useful here.)
@@ -2569,89 +2559,87 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
     }
     return [];
 }
-/* ------------- Selectize Library -------------------------------------- */
-/**
- * Inits 'selectize' for each select elem in the form's 'selElems' array
- * according to the 'selMap' config. Empties array after intializing.
- *
- * REFACT NOTE:: data-filters.js || util-combobox
- */
-function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
-    const confg = getSelConfgObj(field); 
-    initSelectCombobox(confg);  
-} /* End initComboboxes */
-function initComboboxes(fieldAry) {
-    fieldAry.forEach(field => initCombobox(field));
-}
-function getSelConfgObj(field) {
-    const updateTaxonSearch = db_filters.updateTaxonSearch;
-    const updateLocSearch = db_filters.updateLocSearch;
-    const updatePubSearch = db_filters.updatePubSearchByType;
-    const confgs = { 
-        'Focus' : { name: field, id: '#search-focus', change: selectSearchFocus },
-        'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
-        'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearch },
-        'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
-        'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
-        'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
-        'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
-    };
-    return confgs[field];
-}
-/**
- * Inits the combobox, using 'selectize', according to the passed config.
- * Note: The 'selectize' library turns select dropdowns into input comboboxes
- * that allow users to search by typing.
- */
-function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
-    const options = {
-        create: false,
-        onChange: confg.change,
-        onBlur: saveOrRestoreSelection,
-        placeholder: getPlaceholer(confg.id)
-    };
-    const sel = $(confg.id).selectize(options); 
+// /* ------------- Selectize Library -------------------------------------- */
+// /**
+//  * Inits 'selectize' for each select elem in the form's 'selElems' array
+//  * according to the 'selMap' config. Empties array after intializing.
+//  *
+//  * REFACT NOTE:: data-filters.js || util-combobox
+//  */
+// function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
+//     const confg = getSelConfgObj(field); 
+//     initSelectCombobox(confg);  
+// } /* End initComboboxes */
+// function initComboboxes(fieldAry) {
+//     fieldAry.forEach(field => initCombobox(field));
+// }
+// function getSelConfgObj(field) {
+//     const updateTaxonSearch = db_filters.updateTaxonSearch;
+//     const updateLocSearch = db_filters.updateLocSearch;
+//     const updatePubSearch = db_filters.updatePubSearch;
+//     const confgs = { 
+//         'Focus' : { name: field, id: '#search-focus', change: selectSearchFocus },
+//         'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+//         'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
+//         'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+//         'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+//         'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+//         'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearch },
+//         'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
+//         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
+//         'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+//         'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
+//         'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
+//     };
+//     return confgs[field];
+// }
+// /**
+//  * Inits the combobox, using 'selectize', according to the passed config.
+//  * Note: The 'selectize' library turns select dropdowns into input comboboxes
+//  * that allow users to search by typing.
+//  */
+// function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+//     const options = {
+//         create: false,
+//         onChange: confg.change,
+//         onBlur: saveOrRestoreSelection,
+//         placeholder: getPlaceholer(confg.id)
+//     };
+//     const sel = $(confg.id).selectize(options); 
 
-    function getPlaceholer(id) {
-        const optCnt = $(id + ' > option').length;  
-        const placeholder = 'Select ' + confg.name
-        return optCnt ? 'Select ' + confg.name : '- None -';
-    }
-} /* End initSelectCombobox */
-function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
-    const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
-    return $(confg.id)[0].selectize.getValue();  
-}
-// function getSelTxt(field) {
+//     function getPlaceholer(id) {
+//         const optCnt = $(id + ' > option').length;  
+//         const placeholder = 'Select ' + confg.name
+//         return optCnt ? 'Select ' + confg.name : '- None -';
+//     }
+// } /* End initSelectCombobox */
+// function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
+//     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+//     return $(confg.id)[0].selectize.getValue();  
+// }
+// // function getSelTxt(field) {
+// //     const confg = getSelConfgObj(field);
+// //     const $selApi = $(confg.id)[0].selectize; 
+// //     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
+// // }
+// function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
 //     const confg = getSelConfgObj(field);
 //     const $selApi = $(confg.id)[0].selectize; 
-//     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
+//     $selApi.addItem(val, silent); 
+//     saveSelVal($(confg.id), val);
 // }
-function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
-    const confg = getSelConfgObj(field);
-    const $selApi = $(confg.id)[0].selectize; 
-    $selApi.addItem(val, silent); 
-    saveSelVal($(confg.id), val);
-}
-function saveSelVal($elem, val) {
-    $elem.data('val', val);
-}
-/**
- * onBlur: the elem is checked for a value. If one is selected, it is saved. 
- * If none, the previous is restored. 
- */
-function saveOrRestoreSelection() {                                             //console.log('----------- saveOrRestoreSelection')
-    const $elem = this.$input;  
-    const field = $elem.data('field'); 
-    const prevVal = $elem.data('val');          
-    const curVal = getSelVal(field);                                 
-    return curVal ? saveSelVal($elem, curVal) : setSelVal(field, prevVal, 'silent');
-} /* End saveOrRestoreSelection */
+
+// /**
+//  * onBlur: the elem is checked for a value. If one is selected, it is saved. 
+//  * If none, the previous is restored. 
+//  */
+// function saveOrRestoreSelection() {                                             //console.log('----------- saveOrRestoreSelection')
+//     const $elem = this.$input;  
+//     const field = $elem.data('field'); 
+//     const prevVal = $elem.data('val');          
+//     const curVal = _u.getSelVal(field);                                 
+//     return curVal ? saveSelVal($elem, curVal) : _u.setSelVal(field, prevVal, 'silent');
+// } /* End saveOrRestoreSelection */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
     const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
@@ -2664,10 +2652,6 @@ function enableCombobox(enable, selId) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }
-// function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
-//     elem.selectize.settings.placeholder = 'Select ' + newTxt;
-//     elem.selectize.updatePlaceholder();
-// }
 /*--------------------- Table Button Methods ------------------------------*/
 /**
  *  * REFACT NOTE:: table-bttns.js
@@ -2678,11 +2662,11 @@ function toggleExpandTree() {                                                   
     return expanded ? collapseTree() : expandTree();
 }
 function expandTree() {
-    tblOpts.api.expandAll();    
+    tblState.api.expandAll();    
     $('#xpand-all').html("Collapse All");
 }
 function collapseTree() {
-    tblOpts.api.collapseAll();
+    tblState.api.collapseAll();
     $('#xpand-all').html("Expand All");
 }
 /**
@@ -2706,7 +2690,7 @@ function collapseTreeByOne() {
  * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
  */
 function toggleTreeByOneLvl(opening) {
-    var tblModel = tblOpts.api.getModel();                                      //console.log("tblModel = %O", tblModel);
+    var tblModel = tblState.api.getModel();                                      //console.log("tblModel = %O", tblModel);
     var bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
@@ -2715,7 +2699,7 @@ function toggleTreeByOneLvl(opening) {
         row.expanded = opening;
         row.data.open = opening;
     });
-    tblOpts.api.onGroupExpandedOrCollapsed();
+    tblState.api.onGroupExpandedOrCollapsed();
     updateToggleTreeButton();
     /**
      * Checks displayed rows against total rows after filters to determine
@@ -2733,7 +2717,7 @@ function toggleTreeByOneLvl(opening) {
 } /* End toggleTreeByOneLvl */
 function getCurTreeRowCount() {
     var cnt = 0;
-    tblOpts.api.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
+    tblState.api.forEachNodeAfterFilter(function(node){ cnt += 1; }); 
     return cnt;
 }
 /**
@@ -2764,8 +2748,8 @@ export function initDataTable(focus) {                                          
     resetDataSearchTable(focus);
     updateUiForTableView();
 }
-function selectSearchFocus(f) { 
-    const focus = f || getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
+export function selectSearchFocus(f) { 
+    const focus = f || _u.getSelVal('Focus');                                      console.log("---select(ing)SearchFocus = ", focus); 
     if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSrcTable,
@@ -2787,7 +2771,7 @@ function updateFocusAndBuildTable(focus, tableBuilder) {                        
     clearOnFocusChange(tableBuilder);
 } 
 function focusNotChanged(focus) {
-    return focus === tParams.curFocus;
+    return focus === tblState.curFocus;
 }
 function clearOnFocusChange(tableBuilder) {
     dataStorage.removeItem('curRealm');
@@ -2816,7 +2800,7 @@ function clearPastHtmlOptions(tableBuilder) {
  * REFACT NOTE:: FORM EXIT METHOD
  */
 function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
-    if (focus) { setSelVal('Focus', focus); 
+    if (focus) { _u.setSelVal('Focus', focus); 
     } else { selectSearchFocus(); }
     window.setTimeout(showUpdatesAfterTableLoad, 200);
 }
@@ -2828,7 +2812,7 @@ export function showUpdates(focus) {
     showTodaysUpdates(focus);
 }
 function clearPreviousTable() {                                                 //console.log("clearing table");
-    if (tblOpts.api) { tblOpts.api.destroy(); }  
+    if (tblState.api) { tblState.api.destroy(); }  
     $('#map').hide(); //Clears location map view
     $('#search-tbl').show();
 }
@@ -2841,7 +2825,7 @@ function clearPreviousTable() {                                                 
 function resetDataTable() {                                                     //console.log("---reseting table---")
     const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTree, srcs: resetSourceRealm };
     resetCurTreeState();
-    resetMap[tParams.curFocus](); 
+    resetMap[tblState.curFocus](); 
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
@@ -2850,11 +2834,15 @@ function resetCurTreeState() {                                                  
     if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
 }
-/** Deltes the props uesd for only the displayed table in the global tParams. */
+/** 
+ * Deltes the props uesd for only the displayed table in the global tParams.
+ * REFACT (FLTRDROWS AND FOCUSFLTRS IN DB-FILTERS)
+ */
 function resetCurTreeStorageProps() {
     var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltrs'];
     props.forEach(function(prop){ delete tParams[prop]; });
-    tParams.selectedOpts = {};
+    tblState.selectedOpts = {};
+    db_filters.resetTableStateParams();
 }
 // /**
 //  * When the table rowModel is updated, the total interaction count for each 

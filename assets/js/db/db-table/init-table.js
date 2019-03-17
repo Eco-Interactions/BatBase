@@ -8,35 +8,30 @@
 import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
 import unqVals from './ag-grid-unique-filter.js';
-import * as db_csv from './csv-data.js';
 import * as db_filters from './db-filters.js';
 /** Refactor away **/
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
-
-
-let tParams = {/* rowData, curFocus, opts, curRealm, userRole, viewTitle */};
-
+let tblState;
 
 /**
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
- *
- * iParams: { rowData, curFocus, opts, curRealm, userRole, viewTitle }
  */
-export function init(iParams) {                                                 //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
-    tParams = iParams;
+export function init(viewTitle) {                                                 //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
+    tblState = tState().get();
     const tblDiv = document.querySelector('#search-tbl');
-    const tblOpts = tParams.opts || getDefaultTblOpts();
-    tblOpts.rowData = tParams.rowData;
-    tblOpts.columnDefs = getColumnDefs(tParams.viewTitle);
+    const tblOpts = getDefaultTblOpts();
+    tblOpts.rowData = tblState.rowData;
+    tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     sortTreeColumnIfTaxonFocused(); // REFACT:: MIGHT NOT BE NEEDED?
     tState().set(null, 'api', tblOpts.api);
+    onModelUpdated();
 }
 /** Base table options object. */
 function getDefaultTblOpts() {
-    tParams.opts = {
+    return {
         columnDefs: getColumnDefs(),
         rowSelection: 'multiple',   //Used for csv export
         getHeaderCellTemplate: getHeaderCellTemplate, 
@@ -53,7 +48,6 @@ function getDefaultTblOpts() {
         enableFilter: true,
         rowHeight: 26
     };
-    return tParams.opts;
 }
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
@@ -78,14 +72,14 @@ function getHeaderCellTemplate(params) {
         '  </div>' +
         '</div>'; 
 }
-function softRefresh() { tParams.opts.api.refreshView(); }
+function softRefresh() { tblState.api.refreshView(); }
 /**
  * Tree columns are hidden until taxon export and are used for the flattened 
  * taxon-tree data. The role is set to subject for 'bats' exports, object for 
  * plants and arthropods.
  */
 function getColumnDefs(mainCol) { 
-    var realm = tParams.curRealm || false;  
+    var realm = tblState.curRealm || false;  
     var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
 
     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
@@ -130,15 +124,15 @@ function addToolTipToTree(params) {
 }
 /** Returns the initial width of the tree column according to role and screen size. */
 function getTreeWidth() { 
-    var offset = ['admin', 'super', 'editor'].indexOf(tParams.userRole) === -1 ? 0 : 50;
-    if (tParams.curFocus === 'locs') { offset = offset + 60; }
+    var offset = ['admin', 'super', 'editor'].indexOf(tblState.userRole) === -1 ? 0 : 50;
+    if (tblState.curFocus === 'locs') { offset = offset + 60; }
     return ($(window).width() > 1500 ? 340 : 273) - offset;
 }
 /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
 function onBeforeSortChanged() {                                            
-    if (tParams.curFocus !== "taxa") { return; }                       
-    var sortModel = tParams.opts.api.getSortModel();                             //console.log("model obj = %O", sortModel)
-    if (!sortModel.length) { return tParams.opts.api.setSortModel([{colId: "name", sort: "asc"}]); }
+    if (tblState.curFocus !== "taxa") { return; }                       
+    var sortModel = tblState.api.getSortModel();                             //console.log("model obj = %O", sortModel)
+    if (!sortModel.length) { return tblState.api.setSortModel([{colId: "name", sort: "asc"}]); }
     ifNameUnsorted(sortModel);        
 }
 /** Sorts the tree column if it is not sorted. */
@@ -148,7 +142,7 @@ function ifNameUnsorted(model) {
     });
     if (!nameSorted) { 
         model.push({colId: "name", sort: "asc"}); 
-        tParams.opts.api.setSortModel(model);
+        tblState.api.setSortModel(model);
     }
 }
 /**
@@ -157,14 +151,14 @@ function ifNameUnsorted(model) {
  */
 function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
     if (!a) { return 0; } //Interaction rows are returned unsorted
-    if (tParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
+    if (tblState.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
 
 /** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
 function sortTreeColumnIfTaxonFocused() {
-    if (tParams.curFocus === 'taxa') {
-        tParams.opts.api.setSortModel([{colId: "name", sort: "asc"}]);
+    if (tblState.curFocus === 'taxa') {
+        tblState.api.setSortModel([{colId: "name", sort: "asc"}]);
     }
 }
 /** 
@@ -201,20 +195,20 @@ function sortTaxonRows(a, b) {
 }  /* End sortTaxonRows */
 /** ------ Edit Column ---------- */
 function isNotEditor() {  
-    return ['admin', 'editor', 'super'].indexOf(tParams.userRole) === -1;
+    return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
 }
 /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
 function addEditPencil(params) {   
     if (uneditableEntityRow(params)) { return "<span>"; }                     
     return getPencilHtml(params.data.id, params.data.entity, db_forms.editEntity);
 }
-function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tParams.curFocus, params);
+function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tblState.curFocus, params);
     const uneditables = [
-        tParams.curFocus === 'locs' && 
+        tblState.curFocus === 'locs' && 
             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
-        tParams.curFocus === 'taxa' && //Realm Taxa 
+        tblState.curFocus === 'taxa' && //Realm Taxa 
             (!params.data.parentTaxon && !params.data.interactionType),
-        tParams.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
+        tblState.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
     return uneditables.some(test => test);
 }
 function getPencilHtml(id, entity, editFunc) {
@@ -228,7 +222,7 @@ function getPencilHtml(id, entity, editFunc) {
 }
 /** -------- Map Column ---------- */
 function ifLocView() {                                           
-    return tParams.curFocus === 'locs';
+    return tblState.curFocus === 'locs';
 }
 function addMapIcon(params) {                                                   //console.log('row params = %O', params);
     if (!params.data.onMap) { return '<span>'; }
@@ -251,7 +245,7 @@ function getZoomLvl(loc) {
  */
 function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
     if (params.data.name !== "") { return; } 
-    return tParams.curFocus === "srcs" ? 
+    return tblState.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
 }
 /**
@@ -263,7 +257,7 @@ function getRowStyleClass(params) {                                             
 function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
     if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
         isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
-        return tParams.curFocus === "srcs" ? 
+        return tblState.curFocus === "srcs" ? 
         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
     } 
 }
@@ -305,7 +299,7 @@ function getNodeChildDetails(rcrd) {                                            
  */
  export function onTableInitComplete() {
     hidePopUpMsg();
-    enableTableButtons();
+    _u.enableTableButtons();
     hideUnusedColFilterMenus();
 } 
 function hidePopUpMsg() {
@@ -315,35 +309,6 @@ function hidePopUpMsg() {
 }
 function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
-}
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
-        .attr('disabled', false).css('cursor', 'pointer');
-    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools').fadeTo(100, 1);
-    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    authDependentInit(); 
-}
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function authDependentInit() {
-    if (tParams.userRole === "visitor") {
-        $('button[name="csv"]').prop('disabled', true);
-        $('button[name="csv"]').prop('title', "Register to download.");
-        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
-}
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
-        .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 
@@ -378,11 +343,12 @@ function hideUnusedColFilterMenus() {
 
 /**
  * When the table rowModel is updated, the total interaction count for each 
- * tree node, displayed
- * interactions. Any rows filtered out will not be included in the totals.
+ * tree node is updated. Interactions filtered out will not be included in the totals.
  */
-function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tParams.opts.api.getModel().rowsToDisplay);
-    updateTotalRowIntCount( tParams.opts.api.getModel().rootNode );
+function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblState.api.getModel().rowsToDisplay);
+    tblState = tState().get();  
+    if (!tblState.api) { return; }
+    updateTotalRowIntCount(tblState.api.getModel().rootNode);
 }
 /**
  * Sets new interaction totals for each tree node @getChildrenCnt and then 
@@ -391,7 +357,7 @@ function onModelUpdated() {                                                     
  */
 function updateTotalRowIntCount(rootNode) {
     getChildrenCnt(rootNode.childrenAfterFilter);  
-    tParams.opts.api.softRefreshView();
+    tblState.api.softRefreshView();
 }
 function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
     var nodeCnt, ttl = 0;

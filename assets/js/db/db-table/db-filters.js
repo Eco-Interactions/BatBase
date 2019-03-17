@@ -14,27 +14,27 @@
  */
 import * as _u from '../util.js';
 //Rfactor away from calling 'get' each time api is neededx
-import { accessTableState as tState, resetToggleTreeBttn } from '../db-page.js';
+import { accessTableState as tState, resetToggleTreeBttn, rebuildLocTree, rebuildTaxonTree } from '../db-page.js';
 
 
 
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
- *     focusFltrs - Stores focus specific filter strings (ie, name search, taxonomic level, country, etc)
+ *     fltrdRows - rowdata after filters
+ *     focusFltrs - Stores focus specific filter strings (eg: name search, taxonomic level, country, etc)
  *     tblApi - API for ag-grid table
  *     timeFltr - Stores the specified datetime for the time-updated filter.
- *
- *      fltrdRows - USED IN DB-PAGE TOO
- *      rowData - USED IN DB-PAGE TOO
- *      curFocus - USED ALL OVER
- *      curRealm - USED ALL OVER
- *      selectedVals - - USED IN DB-PAGE TOO
- *      selectedOpts- USED IN DB-PAGE TOO
- *      
  */
-let fPs = {};
+let fPs = {
+    focusFltrs: []
+};
 let tblState; //Updated with each new entry into this module
+
+/** Updates table state whenever method-chain in module is activated. */
+function refreshTableState() {
+    tblState = tState().get();
+}
 
 export function addDomEventListeners() {
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
@@ -42,7 +42,12 @@ export function addDomEventListeners() {
     $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
 
-
+export function resetTableStateParams() {
+    const props = ['fltrdRows'];
+    props.forEach(function(prop){ delete fPs[prop]; });
+    fPs.focusFltrs = [];
+}
+/* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
  * Either displays all filters currently applied, or applies the previous filter 
  * message persisted through table update into map view.
@@ -51,35 +56,6 @@ export function updateFilterStatusMsg() {                                       
     if (tState().get('api') === undefined) { return; }
     getFiltersAndUpdateStatus();
 }
-
-
-/*================== Table Filter Functions ===============================*/
-// function onFilterChange() {
-//     fPs.tblApi.onFilterChanged();
-// }
-
-/** Returns an obj with all filter models. */
-function getAllFilterModels() {  
-    const filters = Object.keys(tState.get('api').filterManager.allFilters);
-    return {
-        'Subject Taxon': getColumnFilterApi('subject'),
-        'Object Taxon': getColumnFilterApi('object'),
-        'Interaction Type': getColumnFilterApi('interactionType'),
-        'Tags': getColumnFilterApi('tags'),
-        'Habitat': getColumnFilterApi('habitat'),
-        'Country': getColumnFilterApi('country'),
-        'Region': getColumnFilterApi('region'),
-        'Location Desc.': getColumnFilterApi('location'),
-        'Citation': getColumnFilterApi('citation'),
-        'Note': getColumnFilterApi('note') 
-    };  
-    
-    function getColumnFilterApi(colName) {
-        return filters.indexOf(colName) === -1 ? null : 
-            fPs.tblApi.getFilterApi(colName).getModel()
-    }
-}
-
 /**
  * Adds all active filters to the table's status message. First adding any 
  * focus-level filters, such as author name or taxon, then any active filters
@@ -131,6 +107,27 @@ function getFilterStatus(filters) {
         return filters.join(', ') + '.'; 
     }
 }
+/** Returns an obj with the ag-grid filter models. */
+function getAllFilterModels() {  
+    const filters = Object.keys(tState().get('api').filterManager.allFilters);
+    return {
+        'Subject Taxon': getColumnFilterApi('subject'),
+        'Object Taxon': getColumnFilterApi('object'),
+        'Interaction Type': getColumnFilterApi('interactionType'),
+        'Tags': getColumnFilterApi('tags'),
+        'Habitat': getColumnFilterApi('habitat'),
+        'Country': getColumnFilterApi('country'),
+        'Region': getColumnFilterApi('region'),
+        'Location Desc.': getColumnFilterApi('location'),
+        'Citation': getColumnFilterApi('citation'),
+        'Note': getColumnFilterApi('note') 
+    };  
+    
+    function getColumnFilterApi(colName) {
+        return filters.indexOf(colName) === -1 ? null : 
+            tblState.api.getFilterApi(colName).getModel()
+    }
+}
 function setTableFilterStatus(status) {                                          //console.log("setTableFilterStatus. status = ", status)
     $('#tbl-filter-status').text(status);
 }
@@ -145,37 +142,37 @@ export function resetFilterStatusBar() {
     $('#tbl-filter-status').text('No Active Filters.');
     fPs.focusFltrs = [];
 }
-/*-------------------- Filter By Time Updated ----------------------------*/
+/* ====================== TIME-UPDATED FILTER ======================================================================= */
 /**
  * The time-updated filter is enabled when the filter option in opts-col3 is 
  * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
  * Note: 'Today' is the default selection. 
  */
-export function toggleTimeUpdatedFilter(state) {                                       console.log('toggleTimeUpdatedFilter. state = ', state);
-    var filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
-    var opac = filtering ? 1 : .3;
+export function toggleTimeUpdatedFilter(state) {                                console.log('toggleTimeUpdatedFilter. state = ', state);
+    const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
+    refreshTableState();
+    updateRelatedUi(filtering);
+    if (filtering) { showInteractionsUpdatedToday();
+    } else { resetTimeUpdatedFilter(); }
+    resetToggleTreeBttn(false);
+}
+function updateRelatedUi(filtering) {
+    const opac = filtering ? 1 : .3;
     $('#time-fltr, .flatpickr-input, #fltr-tdy, #fltr-cstm')
         .attr({'disabled': !filtering});  
     $('#fltr-tdy')[0].checked = true;
     $('#shw-chngd')[0].checked = filtering;
     $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
         .css({'opacity': opac});
-    if (filtering) { showInteractionsUpdatedToday();
-    } else { resetTimeUpdatedFilter(); }
-    resetToggleTreeBttn(false);
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  * REFACT
  */
-function resetTimeUpdatedFilter() {  //console.log('tState = %O', tState);
-    const curTableState = tState().get();
-    tState().set({
-        fltrdRows: null,
-        fltrSince: null
-    });
-    if (curTableState.api && curTableState.rowData) { 
-        curTableState.api.setRowData(curTableState.rowData);
+function resetTimeUpdatedFilter() {                                             //console.log('tState = %O', tState);
+    fPs.fltrdRows = null;
+    if (tblState.api && tblState.rowData) { 
+        tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
     }
 }
@@ -230,7 +227,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
     var sinceTime = new Date(fltrSince).getTime();                          
     var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
     fPs.timeFltr = fltrSince;
-    fPs.tblApi.setRowData(updatedRows);
+    tblState.api.setRowData(updatedRows);
     fPs.fltrdRows = updatedRows;
     resetToggleTreeBttn(false);
     syncFiltersAndUi(sinceTime);
@@ -254,7 +251,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  * The table filter's status message is updated. The time-updated radios are synced.
  */
 function syncFiltersAndUi(sinceTime) {
-    tblState = tState().get(); //REFACT:: MOVE UP IN METHOD CHAIN TO FIRST ENTRY POINT
+    // tblState = tState().get(); //REFACT:: MOVE UP IN METHOD CHAIN TO FIRST ENTRY POINT
     if (tblState.curFocus === "srcs") { applySrcFltrs(); }
     if (tblState.curFocus === "locs") { loadSearchLocHtml(); }    
     updateFilterStatusMsg();  
@@ -271,7 +268,6 @@ function syncTimeUpdatedRadios(sinceTime) {
 function applySrcFltrs(focus, realm) {
     var resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
-    // var realm = tParams.curRealm;  
     resets[realm]();
 }
 function reapplyTreeTextFltr() {                                            
@@ -286,13 +282,13 @@ function getTableEntityName() {
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-    if (getSelVal('Publication Type') === "all") { return; }
+    if (_u.getSelVal('Publication Type') === "all") { return; }
     updatePubSearch();
 }
-/*================== Search Panel Filter Functions ===========================*/
+/*================== Search Panel Filter Functions ===================================================================*/
 /** Returns a text input with submit button that will filter tree by text string. */
-export function buildTreeSearchHtml(entity, hndlr) {
-    const func = hndlr || searchTreeText.bind(null, entity);
+export function buildTreeSearchHtml(entity) {
+    const func = getTreeSearchHandler(entity);
     const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
     const input = _u.buildElem('input', { 
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
@@ -306,17 +302,23 @@ export function buildTreeSearchHtml(entity, hndlr) {
     $(lbl).append([input, bttn]);
     return lbl;
 }
+function getTreeSearchHandler(entity) { 
+    return entity === 'Publication' ? 
+        updatePubSearch : searchTreeText.bind(null, entity);
+}
 /**
  * When the search-tree text-input is submitted, by either pressing 'enter' or
  * by clicking on the 'search' button, the tree is rebuilt with only rows that  
  * contain the case insensitive substring.
  */
 function searchTreeText(entity) {                                               //console.log("----- Search Tree Text");
+    refreshTableState();
     const text = getTreeFilterTextVal(entity);
     const allRows = getAllCurRows(); 
-    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
-    fPs.tblApi.setRowData(newRows); 
-    tParams.focusFltrs = text === "" ? [] : [...tParams.focusFltrs, `"${text}"`];
+    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  console.log('newRows = %O', newRows)
+    tblState.api.setRowData(newRows); 
+    fPs.focusFltrs = text === "" ? [] : fPs.focusFltrs.length ? 
+        [...fPs.focusFltrs, `"${text}"`] : [`"${text}"`];  
     updateFilterStatusMsg();
     resetToggleTreeBttn(false);
 } 
@@ -329,7 +331,8 @@ function getTreeRowsWithText(rows, text) {                                      
         return isRow || (hasSubLocs(row) ? childRowsPassFilter(row, text) : false); 
     });
 }
-function hasSubLocs(row) {
+function hasSubLocs(row) {  
+    if (tblState.curFocus !== 'locs') { return; }
     return row.children && row.children.length > 0 ? 
         !row.children[0].hasOwnProperty('interactionType') : false;
 }
@@ -344,9 +347,10 @@ function childRowsPassFilter(row, text) {
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-export function updateTaxonSearch(val) {                                               //console.log("updateTaxonSearch val = ", val)
+export function updateTaxonSearch(val) {                                        //console.log("updateTaxonSearch val = ", val)
     if (!val) { return; }
-    const rcrd = getDetachedRcrd(val);  
+    refreshTableState();
+    const rcrd = _u.getDetachedRcrd(val, tblState.rcrdsById);  
     tParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
     rebuildTaxonTree(rcrd);
@@ -358,9 +362,9 @@ export function updateTaxonSearch(val) {                                        
         updateFilters();
 
         function updateFilters() {
-            if (tParams.focusFltrs) { 
-                tParams.focusFltrs.push(curLevel + " " + taxonName); 
-            } else { tParams.focusFltrs = [curLevel + " " + taxonName] }
+            if (fPs.focusFltrs) { 
+                fPs.focusFltrs.push(curLevel + " " + taxonName); 
+            } else { fPs.focusFltrs = [curLevel + " " + taxonName] }
             updateFilterStatusMsg();
         }
     }
@@ -375,7 +379,7 @@ function getRelatedTaxaToSelect(selTaxonObj) {                                  
     function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
         if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
             selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
-            selectAncestorTaxa(getDetachedRcrd(taxon.parent))
+            selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, tblState.rcrdsById))
         }
     }
 } /* End getRelatedTaxaToSelect */
@@ -384,8 +388,8 @@ export function updateLocSearch(val) {
     if (!val) { return; }
     const selVal = parseInt(val);  
     const locType = getLocType(this.$input[0].id);
-    tParams.selectedOpts = getSelectedVals(selVal, locType);
-    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tParams.selectedOpts));
+    tState().set(null, 'selectedOpts', getSelectedVals(selVal, locType));
+    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
     updateFilter();
 
     function getLocType(selId) {
@@ -399,34 +403,27 @@ export function updateLocSearch(val) {
         return selected;  
 
         function selectRegion(val) {
-            var loc = getDetachedRcrd(val);
+            var loc = _u.getDetachedRcrd(val, tblState.rcrdsById);
             selected['Region'] = loc.region.id;
         }
     } /* End getSelectedVals */
     function updateFilter() {
-        tParams.focusFltrs = [locType];
+        fPs.focusFltrs = [locType];
         updateFilterStatusMsg();
     }
 } /* End updateLocSearch */
 /*------------------ Source Filter Updates -------------------------------*/
-export function updatePubSearchByTxt() {
-    const text = getTreeFilterTextVal('Publication');
-    updatePubSearch(null, text);
-}
-export function updatePubSearchByType() {                                           //console.log('updatePubSearchByType. val = ', val)
-    if (!val) { return; }
-    updatePubSearch(val, null);
-}
 /**
  * When the publication type dropdown is changed or the table is filtered by 
  * publication text, the table is rebuilt with the filtered data.
  */
-function updatePubSearch(typeVal, text) {                                       console.log('updatePubSearch. typeVal = ', typeVal)
-    const typeId = typeVal || getSelVal('Publication Type');
-    const txt = text || getTreeFilterTextVal('Publication');
+export function updatePubSearch() {                                             //console.log('updatePubSearch.')
+    refreshTableState();
+    const typeId = _u.getSelVal('Publication Type'); 
+    const txt = getTreeFilterTextVal('Publication');
     const newRows = getFilteredPubRows();
-    tParams.focusFltrs = getPubFilters();
-    fPs.tblApi.setRowData(newRows);
+    fPs.focusFltrs = getPubFilters();
+    tblState.api.setRowData(newRows);
     updateFilterStatusMsg();
     resetToggleTreeBttn(false);
 
@@ -434,10 +431,10 @@ function updatePubSearch(typeVal, text) {                                       
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
         if (txt === '') { return getPubTypeRows(typeId); }
         const pubTypes = _u.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[typeId].publications;         
+        const pubIds = pubTypes[typeId].publications;        
         return getAllCurRows().filter(row => 
             pubIds.indexOf(row.pubId) !== -1 && 
-            row.name.toLowerCase().indexOf(text) !== -1);
+            row.name.toLowerCase().indexOf(txt) !== -1);
     }
     /** Returns the rows for publications with their id in the selected type's array */
     function getPubTypeRows() { 
@@ -453,3 +450,8 @@ function updatePubSearch(typeVal, text) {                                       
             (!txt ? [`${typeVal}s`] : [`"${truncTxt}"`, `${typeVal}s`]));
     }
 } /* End updatePubSearch */
+/* ========================== FILTER UTILITY METHODS ================================================================ */
+/** If table is filtered by an external filter, the rows are stored in fltrdRows. */
+function getAllCurRows() {
+    return fPs.fltrdRows || tblState.rowData;
+} 

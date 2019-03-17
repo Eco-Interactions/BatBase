@@ -1,4 +1,9 @@
+
 import * as idb from 'idb-keyval'; //set, get, del, clear
+import * as db_csv from './db-table/csv-data.js';
+import * as db_filters from './db-table/db-filters.js';
+import * as db_page from './db-page.js';
+
 /* 
  * Exports:
  *   addEnterKeypressClick
@@ -8,6 +13,7 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
  *   getDataFromStorage
  *   lcfirst 
  *   getDataStorage
+ *   getDetachedRcrd
  *   getGeoJsonEntity
  *   initGeoJsonData
  *   populateStorage
@@ -331,3 +337,144 @@ export function snapshot(obj) {
 //     }
 //     else { element.className = className; }
 // };
+
+
+/*-------------------------------------- TO SORT ------------------------------------------------*/
+/**
+ * REFACT:: UI-UTIL OR SOMETHING
+ */
+export function authDependentInit(userRole) {
+    if (userRole === "visitor") {
+        $('button[name="csv"]').prop('disabled', true);
+        $('button[name="csv"]').prop('title', "Register to download.");
+        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
+    } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
+}
+/**  Returns a copy of the record detached from the original. */
+export function getDetachedRcrd(rcrdKey, rcrds) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+    try {
+       return snapshot(rcrds[rcrdKey]);
+    }
+    catch (e) { 
+       console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    }
+}
+/**
+ * REFACT:: UI-UTIL OR SOMETHING
+ */
+export function enableTableButtons() {  
+    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
+        .attr('disabled', false).css('cursor', 'pointer');
+    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+    $('.tbl-tools').fadeTo(100, 1);
+    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
+    authDependentInit(); 
+}
+/**
+ * REFACT:: UI-UTIL OR SOMETHING
+ */
+export function disableTableButtons() {
+    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
+        .attr('disabled', 'disabled').css('cursor', 'default');
+    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
+}
+/* ------------- Selectize Library -------------------------------------- */
+/**
+ * Inits 'selectize' for each select elem in the form's 'selElems' array
+ * according to the 'selMap' config. Empties array after intializing.
+ *
+ * REFACT NOTE:: data-filters.js || util-combobox
+ */
+export function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
+    const confg = getSelConfgObj(field); 
+    initSelectCombobox(confg);  
+} /* End initComboboxes */
+export function initComboboxes(fieldAry) {
+    fieldAry.forEach(field => initCombobox(field));
+}
+function getSelConfgObj(field) {
+    const updateTaxonSearch = db_filters.updateTaxonSearch;
+    const updateLocSearch = db_filters.updateLocSearch;
+    const updatePubSearch = db_filters.updatePubSearch;
+    const confgs = { 
+        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus },
+        'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
+        'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearch },
+        'Loc View' : {name: field, id: '#sel-realm', change: db_page.onLocViewChange },
+        'Source Type': { name: field, id: '#sel-realm', change: db_page.onSrcRealmChange },
+        'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
+        'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: db_page.onTaxonRealmChange },
+        'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
+    };
+    return confgs[field];
+}
+/**
+ * Inits the combobox, using 'selectize', according to the passed config.
+ * Note: The 'selectize' library turns select dropdowns into input comboboxes
+ * that allow users to search by typing.
+ */
+function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+    const options = {
+        create: false,
+        onChange: confg.change,
+        onBlur: saveOrRestoreSelection,
+        placeholder: getPlaceholer(confg.id)
+    };
+    const sel = $(confg.id).selectize(options); 
+
+    function getPlaceholer(id) {
+        const optCnt = $(id + ' > option').length;  
+        const placeholder = 'Select ' + confg.name
+        return optCnt ? 'Select ' + confg.name : '- None -';
+    }
+} /* End initSelectCombobox */
+export function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
+    const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
+    return $(confg.id)[0].selectize.getValue();  
+}
+// function getSelTxt(field) {
+//     const confg = getSelConfgObj(field);
+//     const $selApi = $(confg.id)[0].selectize; 
+//     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
+// }
+export function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
+    const confg = getSelConfgObj(field);
+    const $selApi = $(confg.id)[0].selectize; 
+    $selApi.addItem(val, silent); 
+    saveSelVal($(confg.id), val);
+}
+/**
+ * onBlur: the elem is checked for a value. If one is selected, it is saved. 
+ * If none, the previous is restored. 
+ */
+function saveOrRestoreSelection() {                                             //console.log('----------- saveOrRestoreSelection')
+    const $elem = this.$input;  
+    const field = $elem.data('field'); 
+    const prevVal = $elem.data('val');          
+    const curVal = getSelVal(field);                                 
+    return curVal ? saveSelVal($elem, curVal) : setSelVal(field, prevVal, 'silent');
+} 
+
+function saveSelVal($elem, val) {
+    $elem.data('val', val);
+}
+// function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+//     elem.selectize.settings.placeholder = 'Select ' + newTxt;
+//     elem.selectize.updatePlaceholder();
+// }
+
+
+
+
+
+
+
+
+
+
+
+
