@@ -25,8 +25,9 @@ export function init(viewTitle) {                                               
     tblOpts.rowData = tblState.rowData;
     tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
-    sortTreeColumnIfTaxonFocused(); // REFACT:: MIGHT NOT BE NEEDED?
+    tblState.api = tblOpts.api;
     tState().set(null, 'api', tblOpts.api);
+    sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
 }
 /** Base table options object. */
@@ -346,7 +347,7 @@ function hideUnusedColFilterMenus() {
  * tree node is updated. Interactions filtered out will not be included in the totals.
  */
 function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblState.api.getModel().rowsToDisplay);
-    tblState = tState().get();  
+    // tblState = tState().get();  
     if (!tblState.api) { return; }
     updateTotalRowIntCount(tblState.api.getModel().rootNode);
 }

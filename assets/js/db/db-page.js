@@ -153,8 +153,7 @@ function getTableState(k) {                                              //conso
  * {str} curRealm       Sub-sort of table data. Eg: bats, auths, etc 
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
- * {obj} selectedOpts   K: Combobox key V: value selected  //REFACT:: MERGE??
- * {ary} selectedVals   K: Combobox key V: value selected  //REFACT:: MERGE??
+ * {obj} selectedOpts   K: Combobox key V: value selected 
  * {str} userRole       Stores the role of the user.
  */
 function setTableState(multi, key, value) {                              //console.log('setTableState. params? ', arguments);
@@ -606,8 +605,8 @@ function buildTaxonSelectOpts(rcrdsByLvl) {                                     
         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-        if (lvl in tParams.selectedVals) {
-            const taxon = _u.getDetachedRcrd(tParams.selectedVals[lvl], tblState.rcrdsById);
+        if (lvl in tblState.selectedOpts) {
+            const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
         } else { optsObj[lvl] = []; }
     }
@@ -625,7 +624,7 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     clearCol2();        
     $('#opts-col2').append(elems);
     _u.initComboboxes(tParams.allRealmLvls.slice(1));
-    setSelectedTaxonVals(tParams.selectedVals);
+    setSelectedTaxonVals(tblState.selectedOpts);
     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
@@ -641,7 +640,7 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     }
 }
 function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
-    if (selected === undefined) {return;}
+    if (!selected || !Object.keys(selected).length) {return;}
     tParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
         if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
         _u.setSelVal(lvl, selected[lvl], 'silent');
@@ -2806,7 +2805,7 @@ function showTodaysUpdates(focus) {                                             
 }
 function showUpdatesAfterTableLoad() {
     $('#shw-chngd')[0].checked = true;
-    toggleTimeUpdatedFilter();
+    db_filters.toggleTimeUpdatedFilter();
 }
 export function showUpdates(focus) {
     showTodaysUpdates(focus);
@@ -2831,16 +2830,14 @@ function resetDataTable() {                                                     
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
 }
 /** 
  * Deltes the props uesd for only the displayed table in the global tParams.
- * REFACT (FLTRDROWS AND FOCUSFLTRS IN DB-FILTERS)
  */
 function resetCurTreeStorageProps() {
-    var props = ['curTree', 'selectedVals', 'fltrdRows', 'focusFltrs'];
-    props.forEach(function(prop){ delete tParams[prop]; });
+    delete tParams.curTree;
     tblState.selectedOpts = {};
     db_filters.resetTableStateParams();
 }

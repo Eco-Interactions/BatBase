@@ -7,7 +7,7 @@
 >REFACTORING
 
 Current:
-    load-table-data
+    - Filter tree by text (only filter top level, unless in publication view)
 
 Next:
     tbl-bttns.js
@@ -33,6 +33,7 @@ Future:
 
 Before Release:
     - Feedback isn't working
+    - Fix tree rows being colored when their interactions have been filtered out
 
 Planning Meeting Notes:
 

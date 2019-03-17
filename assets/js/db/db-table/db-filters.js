@@ -13,7 +13,6 @@
  *              
  */
 import * as _u from '../util.js';
-//Rfactor away from calling 'get' each time api is neededx
 import { accessTableState as tState, resetToggleTreeBttn, rebuildLocTree, rebuildTaxonTree } from '../db-page.js';
 
 
@@ -35,7 +34,6 @@ let tblState; //Updated with each new entry into this module
 function refreshTableState() {
     tblState = tState().get();
 }
-
 export function addDomEventListeners() {
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
     $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
@@ -52,7 +50,7 @@ export function resetTableStateParams() {
  * Either displays all filters currently applied, or applies the previous filter 
  * message persisted through table update into map view.
  */
-export function updateFilterStatusMsg() {                                              //console.log("updateFilterStatusMsg called.")
+export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
     if (tState().get('api') === undefined) { return; }
     getFiltersAndUpdateStatus();
 }
@@ -128,7 +126,7 @@ function getAllFilterModels() {
             tblState.api.getFilterApi(colName).getModel()
     }
 }
-function setTableFilterStatus(status) {                                          //console.log("setTableFilterStatus. status = ", status)
+function setTableFilterStatus(status) {                                         //console.log("setTableFilterStatus. status = ", status)
     $('#tbl-filter-status').text(status);
 }
 function setExternalFilterStatus(status) {
@@ -148,7 +146,7 @@ export function resetFilterStatusBar() {
  * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
  * Note: 'Today' is the default selection. 
  */
-export function toggleTimeUpdatedFilter(state) {                                console.log('toggleTimeUpdatedFilter. state = ', state);
+export function toggleTimeUpdatedFilter(state) {                                //console.log('toggleTimeUpdatedFilter. state = ', state);
     const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
     refreshTableState();
     updateRelatedUi(filtering);
@@ -181,7 +179,7 @@ function resetTimeUpdatedFilter() {                                             
  * selected time - either 'Today' or a 'Custom' datetime selected using the 
  * flatpickr calendar.
  */
-function filterInteractionsByTimeUpdated(e) {                               
+function filterInteractionsByTimeUpdated(e) {         console.log('e = %O', e)                     
     var elem = e.currentTarget;  
     if (elem.id === 'fltr-cstm') { showFlatpickrCal(elem); 
     } else { showInteractionsUpdatedToday(); }
@@ -190,16 +188,20 @@ function filterInteractionsByTimeUpdated(e) {
  * Instantiates the flatpickr calendar and opens the calendar. If a custom time
  * was previously selected and stored, it is reapplied.
  */
-function showFlatpickrCal(elem) {  
+function showFlatpickrCal(elem) {  console.log('showFlatpickrCal. fPs = %O', fPs);
     fPs.cal = fPs.cal || initCal(elem); 
-    if (fPs.timeFltr) {
-        fPs.cal.setDate(fPs.timeFltr);
-        filterInteractionsUpdatedSince([], fPs.timeFltr, null);
+    if (fPs.customTimeFltr) { 
+        reapplyPreviousTimeFilter(fPs.customTimeFltr)
     } else {
         fPs.cal.open();                                                             
         $('.today').focus();                                                   
     }
 }    
+function reapplyPreviousTimeFilter(filterTime) {
+    fPs.cal.setDate(filterTime);
+    filterInteractionsUpdatedSince([], filterTime, null);
+    $('#fltr-cstm')[0].checked = true;      
+}
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal(elem) {
     const confirmDatePlugin = require('../../libs/confirmDate.js'); 
@@ -222,16 +224,25 @@ function showInteractionsUpdatedToday() {
  * since the datetime specified by the user.
  */
 function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
-    var rowData = _u.snapshot(fPs.rowData);
-    var fltrSince = dateStr || fPs.timeFltr;
-    var sinceTime = new Date(fltrSince).getTime();                          
-    var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
-    fPs.timeFltr = fltrSince;
-    tblState.api.setRowData(updatedRows);
-    fPs.fltrdRows = updatedRows;
-    resetToggleTreeBttn(false);
-    syncFiltersAndUi(sinceTime);
+    const filterTime = getFilterTime();                         
+    refreshTableState();             
+    filterInteractionsAndUpdateState();        
+    syncFiltersAndUi(filterTime);
 
+    function getFilterTime() {
+        const fltrSince = dateStr || fPs.timeFltr;
+        fPs.timeFltr = fltrSince;
+        return new Date(fltrSince).getTime(); 
+    }
+    function filterInteractionsAndUpdateState() {
+        const updatedRows = filterRowsByTimeUpdated();                          //console.log("updatedRows = %O", updatedRows);
+        tblState.api.setRowData(updatedRows);
+        fPs.fltrdRows = updatedRows;
+    }
+    function filterRowsByTimeUpdated() {
+        const rowData = _u.snapshot(tblState.rowData);
+        return rowData.filter(addAllRowsWithUpdates);        
+    }
     function addAllRowsWithUpdates(rowObj) { 
         if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
         rowObj.children = rowObj.children ? 
@@ -239,8 +250,8 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
         return rowObj.children.length > 0;
 
         function checkIntRowForUpdates(row) { 
-            var rowUpdatedAt = new Date(row.updatedAt).getTime();               //console.log("row [%O}.data.updatedAt = [%s], sinceTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
-            return rowUpdatedAt > sinceTime;
+            const rowUpdatedAt = new Date(row.updatedAt).getTime();             //console.log("row [%O}.data.updatedAt = [%s], filterTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, filterTime, rowUpdatedAt > filterTime);
+            return rowUpdatedAt > filterTime;
         }
     } /* End addAllRowsWithUpdates */
 } /* End filterInteractionsUpdatedSince */ 
@@ -250,28 +261,32 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(sinceTime) {
-    // tblState = tState().get(); //REFACT:: MOVE UP IN METHOD CHAIN TO FIRST ENTRY POINT
-    if (tblState.curFocus === "srcs") { applySrcFltrs(); }
-    if (tblState.curFocus === "locs") { loadSearchLocHtml(); }    
+function syncFiltersAndUi(filterTime) {
+    resetToggleTreeBttn(false);
+    syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
-    syncTimeUpdatedRadios(sinceTime);
+    syncTimeUpdatedRadios(filterTime);
+
+    function syncViewFiltersAndUi(focus) {
+        if (focus === "srcs") { applySrcFltrs(); }
+        if (focus === "locs") { loadSearchLocHtml(); }    
+    }
 }
-function syncTimeUpdatedRadios(sinceTime) {
-    if (new Date(new Date().today()).getTime() > sinceTime) { 
+function syncTimeUpdatedRadios(filterTime) {
+    if (new Date(new Date().today()).getTime() > filterTime) { 
         $('#fltr-cstm')[0].checked = true;  
-        misc.cstmTimeFltr = sinceTime;
+        fPs.customTimeFltr = filterTime;
     } else {
         $('#fltr-tdy')[0].checked = true; }
 }
 /** Reapplys active external filters, author name or publication type. */
-function applySrcFltrs(focus, realm) {
-    var resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
+function applySrcFltrs() {
+    const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
-    resets[realm]();
+    resets[tblState.curRealm]();
 }
 function reapplyTreeTextFltr() {                                            
-    const entity = getTableEntityName();                                         //console.log("reapplying [%s] text filter", entity);
+    const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
     if (getTreeFilterTextVal(entity) === "") { return; }
     searchTreeText();
 }
@@ -315,7 +330,7 @@ function searchTreeText(entity) {                                               
     refreshTableState();
     const text = getTreeFilterTextVal(entity);
     const allRows = getAllCurRows(); 
-    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  console.log('newRows = %O', newRows)
+    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
     tblState.api.setRowData(newRows); 
     fPs.focusFltrs = text === "" ? [] : fPs.focusFltrs.length ? 
         [...fPs.focusFltrs, `"${text}"`] : [`"${text}"`];  
@@ -351,7 +366,7 @@ export function updateTaxonSearch(val) {                                        
     if (!val) { return; }
     refreshTableState();
     const rcrd = _u.getDetachedRcrd(val, tblState.rcrdsById);  
-    tParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", tParams.selectedVals);
+    tState().set(null, 'selectedOpts', getRelatedTaxaToSelect(rcrd));           //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
     rebuildTaxonTree(rcrd);
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
@@ -444,7 +459,8 @@ export function updatePubSearch() {                                             
     }
     function getPubFilters() { 
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
-        const truncTxt = txt ? txt.substring(0, 50)+'...' : null; 
+        const truncTxt = txt ? 
+            (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null; 
         return typeId === 'all' && !txt ? [] :
             (typeId === 'all' ? [`"${truncTxt}"`] : 
             (!txt ? [`${typeVal}s`] : [`"${truncTxt}"`, `${typeVal}s`]));
