@@ -5,10 +5,11 @@
  *     addDomEventListeners
  *     buildTreeSearchHtml
  *     resetFilterStatusBar
+ *     resetTableStateParams
  *     toggleTimeUpdatedFilter
  *     updateFilterStatusMsg
  *     updateLocSearch
- *     updatePubSearchByType
+ *     updatePubSearch
  *     updateTaxonSearch
  *              
  */

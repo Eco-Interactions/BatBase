@@ -1,10 +1,12 @@
-/*=================CSV Methods================================================*/
 /**
  * Exports a csv of the interaction records displayed in the table, removing 
  * tree rows and flattening tree data where possible: currently only taxon.
  * For taxon csv export: The relevant tree columns are shown and also exported. 
+ *
+ * Export default:
+ *     exportCsvData
  */
-export function exportCsvData() {
+export default function exportCsvData() {
     var views = { 'locs': 'Location', 'srcs': 'Source', 'taxa': 'Taxon' };
     var fileName = 'Bat Eco-Interaction Records by '+ views[tParams.curFocus] +'.csv';
     var params = {

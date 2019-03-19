@@ -1,6 +1,6 @@
 
 import * as idb from 'idb-keyval'; //set, get, del, clear
-import * as db_csv from './db-table/csv-data.js';
+import exportCsvData from './db-table/csv-data.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
 
@@ -348,7 +348,7 @@ export function authDependentInit(userRole) {
         $('button[name="csv"]').prop('disabled', true);
         $('button[name="csv"]').prop('title', "Register to download.");
         $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
+    } else { $('button[name="csv"]').click(exportCsvData); }
 }
 /**  Returns a copy of the record detached from the original. */
 export function getDetachedRcrd(rcrdKey, rcrds) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);

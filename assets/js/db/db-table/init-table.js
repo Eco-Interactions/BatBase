@@ -7,9 +7,8 @@
  */
 import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
-import unqVals from './ag-grid-unique-filter.js';
 import * as db_filters from './db-filters.js';
-/** Refactor away **/
+import unqVals from './ag-grid-unique-filter.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;
@@ -18,15 +17,15 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(viewTitle) {                                                 //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
+export function init(viewTitle, rowData) {                                      //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
     tblState = tState().get();
     const tblDiv = document.querySelector('#search-tbl');
     const tblOpts = getDefaultTblOpts();
-    tblOpts.rowData = tblState.rowData;
+    tblOpts.rowData = rowData;
     tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     tblState.api = tblOpts.api;
-    tState().set(null, 'api', tblOpts.api);
+    tState().set({'api': tblOpts.api, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
 }
