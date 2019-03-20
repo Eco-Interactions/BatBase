@@ -385,7 +385,7 @@ export function disableTableButtons() {
  *
  * REFACT NOTE:: data-filters.js || util-combobox
  */
-export function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
+export function initCombobox(field) {                                           //console.log("initCombobox [%s]", field);
     const confg = getSelConfgObj(field); 
     initSelectCombobox(confg);  
 } /* End initComboboxes */
@@ -432,7 +432,7 @@ function initSelectCombobox(confg) {                                            
         return optCnt ? 'Select ' + confg.name : '- None -';
     }
 } /* End initSelectCombobox */
-export function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
+export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     return $(confg.id)[0].selectize.getValue();  
 }
@@ -468,7 +468,10 @@ function saveSelVal($elem, val) {
 // }
 
 
-
+/* -------------------------------------------------------------------------- */
+export function fadeTable() {  
+    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
+}
 
 
 

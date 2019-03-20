@@ -23,17 +23,17 @@ import * as db_map from './db-map.js';
 import * as db_tips from './tips.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as build_tbl_data from './db-table/build-table-data.js'; //REFACT: BETTER NAME
+import * as data_tree from './db-table/build-data-tree.js';
 import * as init_tbl from './db-table/init-table.js';
 import * as db_csv from './db-table/csv-data.js';
 
 /**
  * dataStorage = window.localStorage (sessionStorage for tests)
- * tParams = obj container for misc params used for the search table.
  * tblState = Stores table state params needed across multiple modules.
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded. REFACT:: DB_SYNC
  */
-let dataStorage, tParams = {}, tblState = {};
+let dataStorage, tblState = {};
 const dataKey = 'A life without cause is a life without effect!';               console.log(dataKey);
 
 requireCss();
@@ -108,20 +108,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('button[name="reset-tbl"]').click(resetDataTable);
     $('#shw-map').click(showTableRecordsOnMap);
-    // $('#shw-chngd').change(toggleTimeUpdatedFilter);
-    // $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
-    // $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
-// /**
-//  * REFACT:: UI-UTIL OR SOMETHING
-//  */
-// function authDependentInit() {
-//     if (userRole === "visitor") {
-//         $('button[name="csv"]').prop('disabled', true);
-//         $('button[name="csv"]').prop('title', "Register to download.");
-//         $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-//     } else { $('button[name="csv"]').click(db_csv.exportCsvData); }
-// }
 /** Moves the buttons from the end of the search options panel to just beneath. */
 function adaptUiToScreenSize() {
     if ($(window).width() > 1500) { return; }
@@ -143,7 +130,7 @@ export function accessTableState() {
 /**
  * Returns table state to requesting module.
  */
-function getTableState(k) {                                              //console.log('getTableState. params? ', arguments);
+function getTableState(k) {                                                     //console.log('getTableState. params? ', arguments);
     return k ? tblState[k] : tblState;
 }
 
@@ -188,9 +175,8 @@ function initSearchState() {
  * REFACT:: DESCRIBE THE DIFFERENCE AND SEPARATE
  */
 function resetTableParams() {  
-    tParams = {}; 
-    tblState = {}
-    tblState.openRows = [];                                                      //console.log("tParams = %O", tParams);
+    tblState = {};
+    tblState.openRows = [];                                                      //console.log("tblState = %O", tblState);
     tblState.curFocus = getResetFocus();  
 }
 function getResetFocus() {
@@ -220,180 +206,131 @@ function getFutureDevMsg() {                                                    
         "the data shown in the table and/or csv export.";
 }
 
-/*------------------ Interaction Search Methods--------------------------------------*/
-/**
- * If interaction data is already in data storage, the data is sent to 
- * @fillTreeWithInteractions to begin rebuilding the data table. Otherwise, 
- * an ajax call gets the data which is stored @storeInteractions before being
- * sent to @fillTreeWithInteractions.    
- */
-function getInteractionsAndFillTable() {                                         //console.log("getInteractionsAndFillTable called. Tree = %O", tParams.curTree);
-    var entityData = _u.getDataFromStorage('interaction');
-    fadeTable();
-    if (entityData) { fillTreeWithInteractions(entityData); 
-    } else { console.log("Error loading interaction data from storage."); }
-}
-/**
- * Fills the current tree data with interaction records @fillTree and starts 
- * the table-building method chain for the current focus @buildTable. Finally, 
- * calls @init_tbl.onTableInitComplete for the final stage of the build. 
- */
-function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
-    const focus = tblState.curFocus; 
-    const curTree = tParams.curTree; 
-    fillTree(focus, curTree, intRcrds);
-    buildTable(focus, curTree);
-    init_tbl.onTableInitComplete();
-} 
-/** Replaces all interaction ids with records for every node in the tree.  */
-function fillTree(focus, curTree, intRcrds) {  
-    const intEntities = ['taxon', 'location', 'source'];
-    const entityData = _u.getDataFromStorage(intEntities);
-    const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
-    fillMethods[focus](curTree, intRcrds);
+// /*------------------ Interaction Search Methods--------------------------------------*/
+// /**
+//  * If interaction data is already in data storage, the data is sent to 
+//  * @fillTreeWithInteractions to begin rebuilding the data table. Otherwise, 
+//  * an ajax call gets the data which is stored @storeInteractions before being
+//  * sent to @fillTreeWithInteractions.    
+//  */
+// function getInteractionsAndFillTable() {                                         //console.log("getInteractionsAndFillTable called. Tree = %O", tblState.curTree);
+//     var entityData = _u.getDataFromStorage('interaction');
+//     fadeTable();
+//     if (entityData) { fillTreeWithInteractions(entityData); 
+//     } else { console.log("Error loading interaction data from storage."); }
+// }
+// /**
+//  * Fills the current tree data with interaction records @fillTree and starts 
+//  * the table-building method chain for the current focus @buildTable. Finally, 
+//  * calls @init_tbl.onTableInitComplete for the final stage of the build. 
+//  */
+// function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
+//     const focus = tblState.curFocus; 
+//     const curTree = tblState.curTree; 
+//     fillTree(focus, curTree, intRcrds);
+//     buildTable(focus, curTree);
+//     init_tbl.onTableInitComplete();
+// } 
+// /** Replaces all interaction ids with records for every node in the tree.  */
+// function fillTree(focus, curTree, intRcrds) {  
+//     const intEntities = ['taxon', 'location', 'source'];
+//     const entityData = _u.getDataFromStorage(intEntities);
+//     const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
+//     fillMethods[focus](curTree, intRcrds);
 
-    function fillTaxonTree(curTree) {                                           //console.log("fillingTaxonTree. curTree = %O", curTree);
-        fillTaxaInteractions(curTree);  
-        fillHiddenTaxonColumns(curTree, intRcrds);
+//     function fillTaxonTree(curTree) {                                           //console.log("fillingTaxonTree. curTree = %O", curTree);
+//         fillTaxaInteractions(curTree);  
+//         fillHiddenTaxonColumns(curTree, intRcrds);
 
-        function fillTaxaInteractions(treeLvl) {                                //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
-            for (let taxon in treeLvl) {   
-                fillTaxonInteractions(treeLvl[taxon]);
-                if (treeLvl[taxon].children !== null) { 
-                    fillTaxaInteractions(treeLvl[taxon].children); }
-            }
-        }
-        function fillTaxonInteractions(taxon) {                                 //console.log("fillTaxonInteractions. taxon = %O", taxon);
-            const roles = ['subjectRoles', 'objectRoles'];
-            for (let r in roles) {
-                taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
-            }
-        }
-    } /* End fillTaxonTree */
-    /**
-     * Recurses through each location's 'children' property and replaces all 
-     * interaction ids with the interaction records.
-     */
-    function fillLocTree(treeBranch) {                                          //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
-        for (let curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
-            if (treeBranch[curNode].interactions.length > 0) { 
-                treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
-            if (treeBranch[curNode].children) { 
-                fillLocTree(treeBranch[curNode].children); }
-        }
-    }
-    /**
-     * Recurses through each source's 'children' property until finding the
-     * direct source, then replacing its interaction id's with their records.
-     */
-    function fillSrcTree(curTree) { 
-        for (let srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
-            fillSrcInteractions(curTree[srcName]);
-        }
-        /**
-         * Recurses through each source's 'children' property until all sources 
-         * have any interaction ids replaced with the interaction records. 
-         */
-        function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
-            const srcChildren = [];
-            if (curSrc.isDirect) { replaceSrcInts(curSrc); }
-            curSrc.children.forEach(function(childSrc){
-                fillSrcInteractions(childSrc); 
-            });
-        }
-        function replaceSrcInts(curSrc) {
-            curSrc.interactions = replaceInteractions(curSrc.interactions); 
-        }
-
-    } /* End fillSrcTree */
-    /** Replace the interaction ids with their interaction records. */
-    function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-        return interactionsAry.map(function(intId){
-            if (typeof intId === "number") {                                    //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
-                return fillIntRcrd(_u.getDetachedRcrd(intId, intRcrds)); 
-            }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
-        });
-    }
-    /** Returns a filled record with all references replaced with entity records. */
-    function fillIntRcrd(intRcrd) {
-        for (let prop in intRcrd) { 
-            if (prop in entityData) { 
-                intRcrd[prop] = entityData[prop][intRcrd[prop]];
-            } else if (prop === "subject" || prop === "object") {
-                intRcrd[prop] = entityData.taxon[intRcrd[prop]];
-            } else if (prop === "tags") {
-                intRcrd[prop] = intRcrd[prop].length > 0 ? 
-                    getIntTags(intRcrd[prop]) : null;
-            }
-        }
-        return intRcrd;
-    }
-    function getIntTags(tagAry) { 
-        const tags = tagAry.map(function(tag){ return tag.displayName; });
-        return tags.join(", ");
-    }
-} /* End fillTree */
-/** Calls the start of the table-building method chain for the current focus. */
-function buildTable(focus, curTree) {
-    const tblBuilderMap = { 
-        locs: buildLocSearchUiAndTable,  srcs: buildSrcSearchUiAndTable,
-        taxa: buildTaxonSearchUiAndTable 
-    };    
-    tblBuilderMap[focus](curTree);
-}
-// /** Returns an interaction rowData object with flat data in table-ready format. */
-// function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log("intRcrd = %O", intRcrd);
-//     var rowData = {
-//         isParent: false,
-//         name: "",
-//         treeLvl: treeLvl,
-//         type: "intRcrd", 
-//         id: intRcrd.id,
-//         entity: "Interaction",
-//         interactionType: intRcrd.interactionType.displayName,
-//         citation: intRcrd.source.description,
-//         subject: getTaxonName(intRcrd.subject),
-//         object: getTaxonName(intRcrd.object),
-//         tags: intRcrd.tags,
-//         note: intRcrd.note, 
-//         rowColorIdx: idx,
-//         updatedAt: intRcrd.updatedAt
-//     };
-//     if (intRcrd.location) { getLocationData(intRcrd.location); }
-//     return rowData;
-//     /** Adds to 'rowData' any location properties present in the intRcrd. */
-//     function getLocationData(locObj) {
-//         getSimpleLocData();
-//         getOtherLocData();
-//         /** Add any present scalar location data. */
-//         function getSimpleLocData() {
-//             var props = {
-//                 location: 'displayName',    gps: 'gpsData',
-//                 elev: 'elevation',          elevMax: 'elevationMax',
-//                 lat: 'latitude',            lng: 'longitude',
-//             };
-//             for (var p in props) {
-//                if (locObj[props[p]]) { rowData[p] = locObj[props[p]]; } 
+//         function fillTaxaInteractions(treeLvl) {                                //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
+//             for (let taxon in treeLvl) {   
+//                 fillTaxonInteractions(treeLvl[taxon]);
+//                 if (treeLvl[taxon].children !== null) { 
+//                     fillTaxaInteractions(treeLvl[taxon].children); }
 //             }
 //         }
-//         /** Adds relational location data. Skips 'unspecified' regions. */
-//         function getOtherLocData() {
-//             var props = {
-//                 country: "country",         region: "region",
-//                 habitat: "habitatType"          
-//             };
-//             for (var p in props) {
-//                 if (locObj[props[p]]) { 
-//                     if (p === "region" && locObj[props[p]].displayName === "Unspecified") { continue; }
-//                     rowData[p] = locObj[props[p]].displayName; } 
-//             }                
+//         function fillTaxonInteractions(taxon) {                                 //console.log("fillTaxonInteractions. taxon = %O", taxon);
+//             const roles = ['subjectRoles', 'objectRoles'];
+//             for (let r in roles) {
+//                 taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
+//             }
 //         }
-//     } /* End getLocationData */
-// } /* End buildIntRowData */
-function getTaxonName(taxon) {                                           
-    var lvl = taxon.level.displayName;  
-    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
-}   
+//     } /* End fillTaxonTree */
+//     /**
+//      * Recurses through each location's 'children' property and replaces all 
+//      * interaction ids with the interaction records.
+//      */
+//     function fillLocTree(treeBranch) {                                          //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
+//         for (let curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
+//             if (treeBranch[curNode].interactions.length > 0) { 
+//                 treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
+//             if (treeBranch[curNode].children) { 
+//                 fillLocTree(treeBranch[curNode].children); }
+//         }
+//     }
+//     /**
+//      * Recurses through each source's 'children' property until finding the
+//      * direct source, then replacing its interaction id's with their records.
+//      */
+//     function fillSrcTree(curTree) { 
+//         for (let srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
+//             fillSrcInteractions(curTree[srcName]);
+//         }
+//         /**
+//          * Recurses through each source's 'children' property until all sources 
+//          * have any interaction ids replaced with the interaction records. 
+//          */
+//         function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+//             const srcChildren = [];
+//             if (curSrc.isDirect) { replaceSrcInts(curSrc); }
+//             curSrc.children.forEach(function(childSrc){
+//                 fillSrcInteractions(childSrc); 
+//             });
+//         }
+//         function replaceSrcInts(curSrc) {
+//             curSrc.interactions = replaceInteractions(curSrc.interactions); 
+//         }
+
+//     } /* End fillSrcTree */
+//     /** Replace the interaction ids with their interaction records. */
+//     function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
+//         return interactionsAry.map(function(intId){
+//             if (typeof intId === "number") {                                    //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
+//                 return fillIntRcrd(_u.getDetachedRcrd(intId, intRcrds)); 
+//             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
+//         });
+//     }
+//     /** Returns a filled record with all references replaced with entity records. */
+//     function fillIntRcrd(intRcrd) {
+//         for (let prop in intRcrd) { 
+//             if (prop in entityData) { 
+//                 intRcrd[prop] = entityData[prop][intRcrd[prop]];
+//             } else if (prop === "subject" || prop === "object") {
+//                 intRcrd[prop] = entityData.taxon[intRcrd[prop]];
+//             } else if (prop === "tags") {
+//                 intRcrd[prop] = intRcrd[prop].length > 0 ? 
+//                     getIntTags(intRcrd[prop]) : null;
+//             }
+//         }
+//         return intRcrd;
+//     }
+//     function getIntTags(tagAry) { 
+//         const tags = tagAry.map(function(tag){ return tag.displayName; });
+//         return tags.join(", ");
+//     }
+// } /* End fillTree */
+// /** Calls the start of the table-building method chain for the current focus. */
+// function buildTable(focus, curTree) {
+//     const tblBuilderMap = { 
+//         locs: buildLocSearchUiAndTable,  srcs: buildSrcSearchUiAndTable,
+//         taxa: buildTaxonSearchUiAndTable 
+//     };    
+//     tblBuilderMap[focus](curTree);
+// }
+// function getTaxonName(taxon) {                                           
+//     var lvl = taxon.level.displayName;  
+//     return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
+// }   
 /*------------------ Taxon Search Methods ------------------------------------*/
 /**
  * Get all data needed for the Taxon-focused table from data storage and send 
@@ -434,12 +371,12 @@ function setTaxonRealm() {
  * Stores in the global tState obj:
  * > taxonByLvl - object with taxon records in the current tree organized by 
  *   level and keyed under their display name.
- *   ## tParams
+ *   ## tblState
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
 function storeLevelData(topTaxon) {
     tblState["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                   //console.log("taxaByLvl = %O", tblState.taxaByLvl)
-    tParams["allRealmLvls"] = Object.keys(tblState.taxaByLvl);
+    tblState["allRealmLvls"] = Object.keys(tblState.taxaByLvl);
 }
 function updateTaxaByLvl(topTaxon) {
     tblState["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                   //console.log("taxaByLvl = %O", tblState.taxaByLvl)
@@ -489,7 +426,7 @@ function storeAndReturnRealm(val) {
     const realmLvl = realmTaxonRcrd.level;
     _u.populateStorage('curRealm', realmId);
     tblState.curRealm = realmId;
-    tParams.realmLvl = realmLvl;
+    tblState.realmLvl = realmLvl;
     return realmTaxonRcrd;
 }
 /** This catches errors in realm value caused by exiting mid-tutorial.  */
@@ -520,13 +457,13 @@ function initTaxonTree(topTaxon) {
 /**
  * Returns a heirarchical tree of taxon record data from the top, parent, 
  * realm taxon through all children. The tree is stored as 'curTree' in the 
- * global tParams obj. 
+ * global tblState obj. 
  */
 function buildTaxonTree(topTaxon) {                                             //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
     var tree = {};                                                              //console.log("tree = %O", tree);
     tree[topTaxon.displayName] = topTaxon;  
     topTaxon.children = getChildTaxa(topTaxon.children);    
-    tParams.curTree = tree;  
+    tblState.curTree = tree;  
     /**
      * Recurses through each taxon's 'children' property and returns a record 
      * for each child ID found. 
@@ -585,7 +522,7 @@ function loadTaxonComboboxes() {
     const curTaxaByLvl = tblState.taxaByLvl;                                    //console.log("curTaxaByLvl = %O", curTaxaByLvl);
     const lvlOptsObj = buildTaxonSelectOpts(curTaxaByLvl);
     const levels = Object.keys(lvlOptsObj);
-    if (levels.indexOf(tParams.realmLvl) !== -1) { levels.shift(); } //Removes realm level
+    if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     loadLevelSelects(lvlOptsObj, levels);
 }
 /**
@@ -595,7 +532,7 @@ function loadTaxonComboboxes() {
  */
 function buildTaxonSelectOpts(rcrdsByLvl) {                                     //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     const optsObj = {};
-    const curRealmLvls = tParams.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+    const curRealmLvls = tblState.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
     curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
@@ -627,7 +564,7 @@ function loadLevelSelects(levelOptsObj, levels) {                               
     const elems = buildTaxonSelects(levelOptsObj, levels);
     clearCol2();        
     $('#opts-col2').append(elems);
-    _u.initComboboxes(tParams.allRealmLvls.slice(1));
+    _u.initComboboxes(tblState.allRealmLvls.slice(1));
     setSelectedTaxonVals(tblState.selectedOpts);
     
     function buildTaxonSelects(opts, levels) {  
@@ -645,124 +582,11 @@ function loadLevelSelects(levelOptsObj, levels) {                               
 }
 function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tParams.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
+    tblState.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
         if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
         _u.setSelVal(lvl, selected[lvl], 'silent');
     });
 }
-// /*-------- Taxon Data Formatting ------------------------------------------*/
-// /**
-//  * Transforms the tree's taxon record data into the table format and sets the 
-//  * row data in the global tParams object as 'rowData'. Calls @loadTable.
-//  */
-// function transformTaxonDataAndLoadTable(taxonTree) {                             //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
-//     var finalRowData = [];
-//     for (var topTaxon in taxonTree) {
-//         finalRowData.push( getTaxonRowData(taxonTree[topTaxon], 0) );
-//     }
-//     tblState.rowData = finalRowData;                                             //console.log("rowData = %O", finalRowData);
-//     init_tbl.init("Taxon Tree");
-// }
-// /**
-//  * Recurses through each taxon's 'children' property and returns a row data obj 
-//  * for each taxon in the tree.
-//  */
-// function getTaxonRowData(taxon, treeLvl) {                                      //console.log("taxonRowData. taxon = %O", taxon);
-//     var lvl = taxon.level.displayName;
-//     var name = lvl === "Species" ? taxon.displayName : lvl+" "+taxon.displayName;
-//     var intCount = getIntCount(taxon); 
-//     return {
-//         id: taxon.id,
-//         entity: "Taxon",
-//         name: name,
-//         isParent: true,                     
-//         parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
-//         open: tParams.openRows.indexOf(taxon.id.toString()) !== -1, 
-//         children: getTaxonChildRowData(taxon, treeLvl),
-//         treeLvl: treeLvl,
-//         interactions: intCount !== null,          
-//         intCnt: intCount,   
-//     }; 
-// } /* End getTaxonRowData */
-// /**
-//  * Checks whether this taxon has interactions in either the subject or object
-//  * roles. Returns the interaction count if any records are found, null otherwise. 
-//  */
-// function getIntCount(taxon) {
-//     var roles = ["subjectRoles", "objectRoles"];
-//     var intCnt = 0;
-//     roles.forEach(function(role) { intCnt += taxon[role].length; });
-//     return intCnt > 0 ? intCnt : null;
-// } 
-// /**
-//  * Returns both interactions for the curTaxon and rowData for any children.
-//  * The interactions for non-species Taxa are grouped as the first child row 
-//  * under "Unspecified [taxonName] Interactions", for species the interactions 
-//  * are added as rows directly beneath the taxon.
-//  */
-// function getTaxonChildRowData(curTaxon, curTreeLvl) {
-//     var childRows = [];
-
-//     if (curTaxon.level.id !== 7){ //Species
-//         getUnspecifiedInts(curTreeLvl);
-//         if (curTaxon.children && curTaxon.children.length) { 
-//             getTaxonChildRows(curTaxon.children); 
-//         }
-//     } else { childRows = getTaxonIntRows(curTaxon, curTreeLvl); }
-//     return childRows;
-
-//     function getUnspecifiedInts(curTreeLvl) {
-//         var realmMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
-//         var name = curTaxon.id in realmMap ?  
-//             realmMap[curTaxon.id] : curTaxon.displayName;
-//         getUnspecifiedTaxonInts(name, curTreeLvl);
-//     }
-//     /**
-//      * Groups interactions attributed directly to a taxon with child-taxa
-//      * and adds them as it's first child row. 
-//      * Note: Realm interactions are built closed, otherwise they would be expanded
-//      * by default
-//      */
-//     function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
-//         const realmIds = ['2', '3', '4'];  
-//         if (getIntCount(curTaxon) !== null) { 
-//             childRows.push({
-//                 id: curTaxon.id,
-//                 entity: 'Taxon',
-//                 name: `Unspecified ${taxonName} Interactions`,
-//                 isParent: true,
-//                 open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
-//                     tParams.openRows.indexOf(curTaxon.id.toString()) !== -1,
-//                 children: getTaxonIntRows(curTaxon, treeLvl),
-//                 treeLvl: treeLvl,
-//                 interactions: true,
-//                 groupedInts: true
-//             });
-//         }
-//     }
-//     function getTaxonChildRows(children) {
-//         children.forEach(function(childTaxon){
-//             childRows.push( getTaxonRowData(childTaxon, curTreeLvl + 1));
-//         });
-//     }
-// } /* End getTaxonChildRowData */
-// function getTaxonIntRows(taxon, treeLvl) {                                      //console.log("getTaxonInteractions for = %O", taxon);
-//     var ints = [];
-//     ['subjectRoles', 'objectRoles'].forEach(function(role) {
-//         taxon[role].forEach(function(intRcrd){
-//             ints.push( buildTaxonIntRowData(intRcrd, treeLvl) );
-//         });
-//     });
-//     return ints;
-// }
-// /** Adds the taxon heirarchical data to the interactions row data. */ 
-// function buildTaxonIntRowData(intRcrd, treeLvl) {
-//     var rowData = buildIntRowData(intRcrd, treeLvl);
-//     getCurTaxonLvlCols().forEach(function(colName){
-//         rowData[colName] = intRcrd[colName];
-//     });
-//     return rowData;                
-// }
 /*------------------Location Search Methods-----------------------------------*/
 /** 
  * Get location data from data storage and sends it to @initLocSearchUi
@@ -796,7 +620,7 @@ function setLocView(view) {
 }
 function addLocDataToTableParams(data) {
     tblState.rcrdsById = data.location;                                    
-    tParams.data = data;
+    tblState.data = data;
 }
 function buildLocViewHtml() {                   
     const span = _u.buildElem('span', { id:'grid-view', class: 'flex-row',
@@ -841,7 +665,7 @@ function showLocInteractionData(view) {                                         
 }
 function getTopRegionIds() {
     const ids = [];
-    const regions = tParams.data.topRegionNames;
+    const regions = tblState.data.topRegionNames;
     for (let name in regions) { ids.push(regions[name]); } 
     return ids;
 }
@@ -869,7 +693,7 @@ export function rebuildLocTree(topLoc) {                                        
 /**
  * Builds a tree of location data with passed locations at the top level, and 
  * sub-locations as nested children. Adds the alphabetized tree to the global 
- * tParams obj as 'curTree'. 
+ * tblState obj as 'curTree'. 
  */ 
 function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
     var topLoc;
@@ -878,7 +702,7 @@ function buildLocTree(topLocs) {                                                
         topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
-    tParams.curTree = sortDataTree(tree);
+    tblState.curTree = sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
 function getLocChildren(rcrd) {   
@@ -943,7 +767,7 @@ function buildLocSelectOpts() {  console.log('tblState = %O', tblState);
     function buildLocOpt(rowData, name, type) {
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        var id = tParams.data[_u.lcfirst(type) + "Names"][name];             
+        var id = tblState.data[_u.lcfirst(type) + "Names"][name];             
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
@@ -1023,101 +847,6 @@ function setSelectedLocVals() {
         _u.setSelVal(locType, selected[locType], 'silent');
     });
 }
-// /*--------- Location Data Formatting -----------------------------------------*/
-// /**
-//  * Transforms the tree's location data into the table format and sets the row 
-//  * data in the global tParams object as 'rowData'. Calls @loadTable.
-//  */
-// function transformLocDataAndLoadTable(locTree) {
-//     var finalRowData = [];                                                      //console.log("locTree = %O", locTree);
-//     for (var topNode in locTree) {                                              //console.log("topNode = ", topNode)
-//         finalRowData.push( getLocRowData(locTree[topNode], 0)); 
-//     }
-//     tblState.rowData = removeLocsWithoutInteractions(finalRowData);              //console.log("rowData = %O", tblState.rowData);
-//     init_tbl.init("Location Tree");
-// }
-// /** Returns a row data object for the passed location and it's children.  */
-// function getLocRowData(locRcrd, treeLvl) {                                      //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
-//     return {
-//         id: locRcrd.id,
-//         entity: "Location",
-//         name: getLocDisplayName(),  /* Interaction rows have no name to display. */
-//         onMap: isMappable(locRcrd),
-//         isParent: locRcrd.interactionType === undefined,  /* Only interaction records return false. */
-//         open: tParams.openRows.indexOf(locRcrd.id) !== -1, 
-//         children: getLocRowDataForRowChildren(locRcrd, treeLvl),
-//         treeLvl: treeLvl,
-//         interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
-//         locGroupedInts: hasGroupedInteractionsRow(locRcrd),
-//         type: locRcrd.locationType.displayName
-//     }; 
-//     function getLocDisplayName() {
-//         var trans = { 'Unspecified': 'Unspecified / Habitat Only' };
-//         return trans[locRcrd.displayName] || locRcrd.displayName;
-//     }     
-//     function isMappable(loc) {                                                  
-//         return loc.geoJsonId ? loc.id : false;
-//     }
-//     *
-//      * Returns rowData for interactions at this location and for any children.
-//      * If there are both interactions and children, the interactions rows are 
-//      * grouped under the first child row as "Unspecified [locName] Interactions", 
-//      * otherwise interaction rows are added directly beneath the taxon.
-     
-//     function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {                   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
-//         var childRows = [];
-//         var locType = locRcrd.locationType.displayName; 
-//         if (locType === "Region" || locType === "Country") {
-//             getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl, locType);
-//             locRcrd.children.forEach(getChildLocData);
-//         } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
-//         return childRows;
-//         /**
-//          * Groups interactions attributed directly to a location with child-locations
-//          * and adds them as it's first child row. 
-//          */
-//         function getUnspecifiedLocInts(intsAry, treeLvl, locType) {   
-//             var locName = locRcrd.displayName === "Unspecified" ? 
-//                 "Location" : locRcrd.displayName;
-//             if (intsAry.length > 0) { 
-//                 childRows.push({
-//                     id: locRcrd.id,
-//                     entity: "Location",
-//                     name: 'Unspecified ' + locName + ' Interactions',
-//                     isParent: true,
-//                     open: false,
-//                     children: getIntRowData(intsAry, treeLvl),
-//                     interactions: intsAry.length > 0,
-//                     treeLvl: treeLvl,
-//                     groupedInts: true,
-//                     type: locType
-//                 });
-//             }
-//         }
-//         function getChildLocData(childLoc) {
-//             childRows.push(getLocRowData(childLoc, pTreeLvl + 1));
-//         }
-//     } /* End getLocRowDataForChildren */
-
-// } /* End getLocRowData */
-// function hasGroupedInteractionsRow(locRcrd) {
-//     return locRcrd.children.length > 0 && locRcrd.interactions.length > 0;
-// }
-// /** Filters out all locations with no interactions below them in the tree. */
-// function removeLocsWithoutInteractions(rows) {  
-//     return rows.filter(function(row){
-//         if (row.children) { 
-//             row.children = removeLocsWithoutInteractions(row.children);
-//         }
-//         return row.interactions || hasChildInteractions(row);
-//     });
-// }
-// function hasChildInteractions(row) {
-//     if (!row.children) { return true; }
-//     return row.children.some(function(childRow) {
-//         return childRow.interactions || hasChildInteractions(childRow);  
-//     });
-// }
 /** ------------ Location Map Methods --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
 export function showLocInDataTable(loc) {                                        //console.log('showing Loc = %O', loc);
@@ -1151,8 +880,8 @@ function showTableRecordsOnMap() {                                              
 }
 function storeIntAndLocRcrds() {
     const rcrds = _u.getDataFromStorage(['interaction', 'location']);
-    tParams.interaction = rcrds.interaction;
-    tParams.location = rcrds.location;
+    tblState.interaction = rcrds.interaction;
+    tblState.location = rcrds.location;
 }
 /**
  * Builds an object sorted by geoJsonId with all interaction data at that location.
@@ -1182,8 +911,8 @@ function buildTableLocDataObj() {
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
         function addRowData(intRowData) {  
             if (!intRowData.location) { return ++noLocCnt; }
-            const intRcrd = _u.getDetachedRcrd(intRowData.id, tParams.interaction);
-            const loc = _u.getDetachedRcrd(intRcrd.location, tParams.location);
+            const intRcrd = _u.getDetachedRcrd(intRowData.id, tblState.interaction);
+            const loc = _u.getDetachedRcrd(intRcrd.location, tblState.location);
             addLocAndIntData(loc, intRcrd);
             ++data.intCnt;
         }
@@ -1340,11 +1069,11 @@ function initSrcSearchUi(srcData) {                                             
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
 }
-/** Add source data to tParams to be available while in a source focus. */
+/** Add source data to tblState to be available while in a source focus. */
 function addSrcDataToTableParams(srcData) {
     tblState.rcrdsById = srcData.source;
-    tParams.author = srcData.author;
-    tParams.publication = srcData.publication;
+    tblState.author = srcData.author;
+    tblState.publication = srcData.publication;
 }
 /** Builds the combobox for the source realm types. */
 function buildSrcRealmHtml() {                                             
@@ -1373,7 +1102,7 @@ function setSrcRealm() {
     } else { onSrcRealmChange(srcRealm); }
 }
 /** Event fired when the source realm select box has been changed. */
-export function onSrcRealmChange(val) {                                                //console.log('-------- SrcRealmChange')
+export function onSrcRealmChange(val) {                                         console.log('-------- SrcRealmChange')
     if (!val) { return; }
     resetSourceRealm(val);
 }
@@ -1381,135 +1110,145 @@ function resetSourceRealm(val) {
     clearPreviousTable();
     resetCurTreeState();
     resetToggleTreeBttn(false);
-    buildSrcTree(val);
+    startSrcTableBuildChain(val);
 }
-/** (Re)builds source tree for the selected source realm. */
-function buildSrcTree(val) {
-    const realmRcrds = storeAndReturnCurRealmRcrds(val);                        //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
-    initSrcTree(tblState.curRealm, realmRcrds);
-    getInteractionsAndFillTable();
+function startSrcTableBuildChain(val) {
+    storeSrcRealm(val);
+    buildSrcSearchUiAndTable();
+    build_tbl_data.transformSrcDataAndLoadTable(data_tree.buildSrcTree(), tblState);
 }
-/** Returns the records for the source realm currently selected. */
-function storeAndReturnCurRealmRcrds(val) {
-    const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
+function storeSrcRealm(val) {  
     const realmVal = val || _u.getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
-    tblState.curRealm = realmVal;    
     _u.populateStorage('curRealm', realmVal);
-    return getTreeRcrdAry(valMap[realmVal]);
+    tblState.curRealm = realmVal;    
 }
-/** Returns an array with all records from the stored record object. */
-function getTreeRcrdAry(realm) {
-    const srcRcrdIdAry = _u.getDataFromStorage(realm);
-    return srcRcrdIdAry.map(function(id) { return _u.getDetachedRcrd(id, tblState.rcrdsById); });
-}
-/**
- * Builds the source data tree for the selected source realm (source type) and 
- * adds it to the global tParams obj as 'curTree', 
- * NOTE: Sources have three realms and tree-data structures:
- * Authors->Citations/Publications->Interactions
- * Publications->Citations->Interactions. 
- * Publishers->Publications->Citations->Interactions. 
- */
-function initSrcTree(focus, rcrds) {                                            //console.log("initSrcTree realmRcrds = %O", realmRcrds);
-    const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
-    let tree = treeMap[focus](rcrds);
-    tParams.curTree = sortDataTree(tree);
-}  
-/*-------------- Publication Source Tree -------------------------------------------*/
-/**
- * Returns a tree object with Publications as the base nodes of the data tree. 
- * Each interaction is attributed directly to a citation source, which currently 
- * always has a 'parent' publication source.
- * Data structure:
- * ->Publication Title
- * ->->Citation Title
- * ->->->Interactions Records
- */
-function buildPubTree(pubSrcRcrds) {                                            //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
-    var tree = {};
-    pubSrcRcrds.forEach(function(pub) { 
-        tree[pub.displayName] = getPubData(pub); 
-    });
-    return tree;
-}
-function getPubData(rcrd) {                                                     //console.log("getPubData. rcrd = %O", rcrd);
-    rcrd.children = getPubChildren(rcrd);
-    if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
-        rcrd.publication = _u.getDetachedRcrd(rcrd.publication, tParams.publication);
-    }
-    return rcrd;
-}
-function getPubChildren(rcrd) {                                                 //console.log("getPubChildren rcrd = %O", rcrd)
-    if (rcrd.children.length === 0) { return []; }
-    return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
-}
-/*-------------- Publisher Source Tree ---------------------------------------*/
-/**
- * Returns a tree object with Publishers as the base nodes of the data tree. 
- * Publications with no publisher are added underneath the "Unspecified" base node.
- * Data structure:
- * ->Publisher Name
- * ->->Publication Title
- * ->->->Citation Title
- * ->->->->Interactions Records
- */
-function buildPublTree(pubRcrds) {                                              //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
-    let tree = {};
-    let noPubl = [];
-    pubRcrds.forEach(function(pub) { addPubl(pub); });
-    tree["Unspecified"] = getPubsWithoutPubls(noPubl);
-    return tree;
+// /** (Re)builds source tree for the selected source realm. */
+// function buildSrcTree(val) {
+//     const realmRcrds = storeAndReturnCurRealmRcrds(val);                        //console.log("---Build Source Tree. realmRcrds = %O", realmRcrds);
+//     initSrcTree(tblState.curRealm, realmRcrds);
+//     getInteractionsAndFillTable();
+// }
+// /** Returns the records for the source realm currently selected. */
+// function storeAndReturnCurRealmRcrds(val) {
+//     const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
+//     const realmVal = val || _u.getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
+//     tblState.curRealm = realmVal;    
+//     _u.populateStorage('curRealm', realmVal);
+//     return getTreeRcrdAry(valMap[realmVal]);
+// }
+// /** Returns an array with all records from the stored record object. */
+// function getTreeRcrdAry(realm) {
+//     const srcRcrdIdAry = _u.getDataFromStorage(realm);
+//     return srcRcrdIdAry.map(function(id) { return _u.getDetachedRcrd(id, tblState.rcrdsById); });
+// }
+// /**
+//  * Builds the source data tree for the selected source realm (source type) and 
+//  * adds it to the global tblState obj as 'curTree', 
+//  * NOTE: Sources have three realms and tree-data structures:
+//  * Authors->Citations/Publications->Interactions
+//  * Publications->Citations->Interactions. 
+//  * Publishers->Publications->Citations->Interactions. 
+//  */
+// function initSrcTree(focus, rcrds) {                                            //console.log("initSrcTree realmRcrds = %O", realmRcrds);
+//     const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
+//     let tree = treeMap[focus](rcrds);
+//     tblState.curTree = sortDataTree(tree);
+// }  
+// /*-------------- Publication Source Tree -------------------------------------------*/
+// /**
+//  * Returns a tree object with Publications as the base nodes of the data tree. 
+//  * Each interaction is attributed directly to a citation source, which currently 
+//  * always has a 'parent' publication source.
+//  * Data structure:
+//  * ->Publication Title
+//  * ->->Citation Title
+//  * ->->->Interactions Records
+//  */
+// function buildPubTree(pubSrcRcrds) {                                            //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+//     var tree = {};
+//     pubSrcRcrds.forEach(function(pub) { 
+//         tree[pub.displayName] = getPubData(pub); 
+//     });
+//     return tree;
+// }
+// function getPubData(rcrd) {                                                     //console.log("getPubData. rcrd = %O", rcrd);
+//     rcrd.children = getPubChildren(rcrd);
+//     if (rcrd.publication) {                                                     //console.log("rcrd with pub = %O", rcrd)
+//         rcrd.publication = _u.getDetachedRcrd(rcrd.publication, tblState.publication);
+//     }
+//     return rcrd;
+// }
+// function getPubChildren(rcrd) {                                                 //console.log("getPubChildren rcrd = %O", rcrd)
+//     if (rcrd.children.length === 0) { return []; }
+//     return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
+// }
+// /*-------------- Publisher Source Tree ---------------------------------------*/
+// /**
+//  * Returns a tree object with Publishers as the base nodes of the data tree. 
+//  * Publications with no publisher are added underneath the "Unspecified" base node.
+//  * Data structure:
+//  * ->Publisher Name
+//  * ->->Publication Title
+//  * ->->->Citation Title
+//  * ->->->->Interactions Records
+//  */
+// function buildPublTree(pubRcrds) {                                              //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+//     let tree = {};
+//     let noPubl = [];
+//     pubRcrds.forEach(function(pub) { addPubl(pub); });
+//     tree["Unspecified"] = getPubsWithoutPubls(noPubl);
+//     return tree;
 
-    function addPubl(pub) {
-        if (!pub.parent) { noPubl.push(pub); return; }
-        const publ = _u.getDetachedRcrd(pub.parent, tblState.rcrdsById);
-        tree[publ.displayName] = getPublData(publ); 
-    }
-} /* End buildPublTree */
-function getPublData(rcrd) {
-    rcrd.children = getPublChildren(rcrd);
-    return rcrd;
-}
-function getPublChildren(rcrd) {                                                //console.log("getPubChildren rcrd = %O", rcrd)
-    if (rcrd.children.length === 0) { return []; }
-    return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
-}
-function getPubsWithoutPubls(pubs) {
-    let publ = { id: 0, displayName: "Unspecified", parent: null, sourceType: { displayName: 'Publisher' } };
-    publ.children = pubs.map(pub => getPubData(pub));
-    return publ;
-}
-/*-------------- Author Source Tree ------------------------------------------*/
-/**
- * Returns a tree object with Authors as the base nodes of the data tree, 
- * with their contributibuted works and the interactions they contain nested 
- * within. Authors with no contributions are not added to the tree.
- * Data structure:
- * ->Author Display Name [Last, First M Suff]
- * ->->Citation Title (Publication Title)
- * ->->->Interactions Records
- */
-function buildAuthTree(authSrcRcrds) {                                          //console.log("----buildAuthSrcTree");
-    var tree = {};
-    for (var id in authSrcRcrds) { 
-        getAuthData(_u.getDetachedRcrd(id, authSrcRcrds)); 
-    }  
-    return tree;  
+//     function addPubl(pub) {
+//         if (!pub.parent) { noPubl.push(pub); return; }
+//         const publ = _u.getDetachedRcrd(pub.parent, tblState.rcrdsById);
+//         tree[publ.displayName] = getPublData(publ); 
+//     }
+// } /* End buildPublTree */
+// function getPublData(rcrd) {
+//     rcrd.children = getPublChildren(rcrd);
+//     return rcrd;
+// }
+// function getPublChildren(rcrd) {                                                //console.log("getPubChildren rcrd = %O", rcrd)
+//     if (rcrd.children.length === 0) { return []; }
+//     return rcrd.children.map(id => getPubData(_u.getDetachedRcrd(id, tblState.rcrdsById)));
+// }
+// function getPubsWithoutPubls(pubs) {
+//     let publ = { id: 0, displayName: "Unspecified", parent: null, sourceType: { displayName: 'Publisher' } };
+//     publ.children = pubs.map(pub => getPubData(pub));
+//     return publ;
+// }
+// /*-------------- Author Source Tree ------------------------------------------*/
+// /**
+//  * Returns a tree object with Authors as the base nodes of the data tree, 
+//  * with their contributibuted works and the interactions they contain nested 
+//  * within. Authors with no contributions are not added to the tree.
+//  * Data structure:
+//  * ->Author Display Name [Last, First M Suff]
+//  * ->->Citation Title (Publication Title)
+//  * ->->->Interactions Records
+//  */
+// function buildAuthTree(authSrcRcrds) {                                          //console.log("----buildAuthSrcTree");
+//     var tree = {};
+//     for (var id in authSrcRcrds) { 
+//         getAuthData(_u.getDetachedRcrd(id, authSrcRcrds)); 
+//     }  
+//     return tree;  
 
-    function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
-        if (authSrc.contributions.length > 0) {
-            authSrc.author = _u.getDetachedRcrd(authSrc.author, tParams.author);
-            authSrc.children = getAuthChildren(authSrc.contributions); 
-            tree[authSrc.displayName] = authSrc;
-        }
-    }
-} /* End buildAuthTree */
-/** For each source work contribution, gets any additional publication children
- * @getPubData and return's the source record.
- */
-function getAuthChildren(contribs) {                                            //console.log("getAuthChildren contribs = %O", contribs);
-    return contribs.map(wrkSrcid => getPubData(_u.getDetachedRcrd(wrkSrcid, tblState.rcrdsById)));
-}
+//     function getAuthData(authSrc) {                                             //console.log("rcrd = %O", authSrc);
+//         if (authSrc.contributions.length > 0) {
+//             authSrc.author = _u.getDetachedRcrd(authSrc.author, tblState.author);
+//             authSrc.children = getAuthChildren(authSrc.contributions); 
+//             tree[authSrc.displayName] = authSrc;
+//         }
+//     }
+// } /* End buildAuthTree */
+// /** For each source work contribution, gets any additional publication children
+//  * @getPubData and return's the source record.
+//  */
+// function getAuthChildren(contribs) {                                            //console.log("getAuthChildren contribs = %O", contribs);
+//     return contribs.map(wrkSrcid => getPubData(_u.getDetachedRcrd(wrkSrcid, tblState.rcrdsById)));
+// }
 /**
  * Will build the select elems for the source search options. Clears previous 
  * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
@@ -1517,15 +1256,15 @@ function getAuthChildren(contribs) {                                            
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-function buildSrcSearchUiAndTable(srcTree) {                                     //console.log("buildSrcSearchUiAndTable called. tree = %O", srcTree);
+function buildSrcSearchUiAndTable() {                                     //console.log("buildSrcSearchUiAndTable called. tree = %O", srcTree);
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
     clearPreviousTable();
-    buildUi[tblState.curRealm](srcTree); 
-    build_tbl_data.transformSrcDataAndLoadTable(srcTree, tblState);
+    buildUi[tblState.curRealm](); 
+    // build_tbl_data.transformSrcDataAndLoadTable(srcTree, tblState);
 } 
 /** Builds a text input for searching author names. */
-function loadAuthSearchHtml(srcTree) {
+function loadAuthSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
     clearCol2();        
     $('#opts-col2').append(searchTreeElem);
@@ -1535,7 +1274,7 @@ function loadAuthSearchHtml(srcTree) {
  * @param  {[type]} srcTree [description]
  * @return {[type]}         [description]
  */
-function loadPubSearchHtml(srcTree) {
+function loadPubSearchHtml() {
     const pubTypeElem = buildPubTypeSelect();
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
     clearCol2();        
@@ -1565,233 +1304,15 @@ function loadPubSearchHtml(srcTree) {
         return lbl;
     }
 } /* End loadPubSearchHtml */
-function loadPublSearchHtml(srcTree) {
+function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
     clearCol2();        
     $('#opts-col2').append(searchTreeElem);
 }
-// /*--------- Source Data Formatting ---------------------------------------*/
-// /**
-//  * Transforms the tree's source record data into table row format and set as 
-//  * 'rowData' in the global tParams object as 'rowData'. Calls @loadTable.
-//  */
-// function transformSrcDataAndLoadTable(srcTree) {                                 //console.log("transformSrcDataAndLoadTable called.")
-//     var prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
-//     var treeName = prefix[tblState.curRealm] + ' Tree';
-//     let rowColorIdx = 0;
-//     var finalRowData = [];
-
-//     for (var topNode in srcTree) {
-//         rowColorIdx = rowColorIdx < 6 ? ++rowColorIdx : 0; 
-//         finalRowData.push( getSrcRowData(srcTree[topNode], 0, rowColorIdx) );
-//     }
-//     tblState.rowData = finalRowData;                                             //console.log("rowData = %O", tblState.rowData);
-//     init_tbl.init(treeName);
-// }
-// function getSrcRowData(src, treeLvl, idx) {                                     //console.log("getSrcRowData. source = %O", src);
-//     var entity = src.sourceType.displayName;
-//     var detailId = entity === "Publication" ? src.publication.id : null;  
-//     const displayName = src.displayName.includes('(citation)') ? 
-//         'Whole work cited.' : src.displayName;
-//     return {
-//         id: src.id,
-//         entity: entity,
-//         pubId: detailId,
-//         name: displayName,
-//         isParent: true,      
-//         parentSource: src.parent,
-//         open: tParams.openRows.indexOf(src.id.toString()) !== -1, 
-//         children: getChildSrcRowData(src, treeLvl, idx),
-//         treeLvl: treeLvl,
-//         interactions: src.isDirect,   //Only rows with interaction are colored
-//         rowColorIdx: idx
-//     }; 
-//     /**
-//      * Recurses through each source's 'children' property and returns a row data obj 
-//      * for each source node in the tree. 
-//      * Note: var idx is used for row coloring.
-//      */
-//     function getChildSrcRowData(curSrc, treeLvl, idx) {
-//         if (curSrc.isDirect) { return getIntRowData(curSrc.interactions, treeLvl, idx); }
-//         return curSrc.children === null ? [] : getChildSrcData(curSrc, treeLvl, idx);
-       
-//         function getChildSrcData(src, treeLvl, idx) {
-//             return src.children.map(function(childSrc) {                        //console.log("childSrc = %O", childSrc);
-//                 idx = idx < 6 ? ++idx : 0; 
-//                 return getSrcRowData(childSrc, treeLvl +1, idx);
-//             });
-//         }
-//     }
-// } /* End getSrcRowData */
-// /*================== Search Panel Filter Functions ===========================*/
-// /** Returns a text input with submit button that will filter tree by text string. */
-// function buildTreeSearchHtml(entity, hndlr) {
-//     const func = hndlr || searchTreeText.bind(null, entity);
-//     const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
-//     const input = _u.buildElem('input', { 
-//         name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
-//     const bttn = _u.buildElem('button', { text: 'Search', 
-//         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
-//     $(bttn).css('margin-left', '5px');
-//     $(lbl).css('width', '222px');
-//     $(input).css('width', '160px');
-//     $(input).onEnter(func);
-//     $(bttn).click(func);
-//     $(lbl).append([input, bttn]);
-//     return lbl;
-// }
-// /**
-//  * When the search-tree text-input is submitted, by either pressing 'enter' or
-//  * by clicking on the 'search' button, the tree is rebuilt with only rows that  
-//  * contain the case insensitive substring.
-//  */
-// function searchTreeText(entity) {                                               //console.log("----- Search Tree Text");
-//     const text = getTreeFilterTextVal(entity);
-//     const allRows = getAllCurRows(); 
-//     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
-//     tblOpts.api.setRowData(newRows); 
-//     tParams.focusFltrs = text === "" ? [] : [...tParams.focusFltrs, `"${text}"`];
-//     updateFilterStatusMsg();
-//     resetToggleTreeBttn(false);
-// } 
-// function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
-//     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
-// }
-// function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText. rows = %O', rows)
-//     return rows.filter(row => {  
-//         const isRow = row.name.toLowerCase().indexOf(text) !== -1; 
-//         return isRow || (hasSubLocs(row) ? childRowsPassFilter(row, text) : false); 
-//     });
-// }
-// function hasSubLocs(row) {
-//     return row.children && row.children.length > 0 ? 
-//         !row.children[0].hasOwnProperty('interactionType') : false;
-// }
-// function childRowsPassFilter(row, text) {
-//     const rows = getTreeRowsWithText(row.children, text); 
-//     row.children = rows;
-//     return rows.length > 0;
-// }
-// /*------------------ Taxon Filter Updates ---------------------------------*/
-// /**
-//  * When a taxon is selected from one of the taxon-level comboboxes, the table 
-//  * is updated with the taxon as the top of the new tree. The remaining level 
-//  * comboboxes are populated with realted taxa, with ancestors selected.
-//  */
-// function updateTaxonSearch(val) {                                               //console.log("updateTaxonSearch val = ", val)
-//     if (!val) { return; }
-//     const rcrd = getDetachedRcrd(val);  
-//     tParams.selectedVals = getRelatedTaxaToSelect(rcrd);                        //console.log("selectedVals = %O", tParams.selectedVals);
-//     updateFilterStatus();
-//     rebuildTaxonTree(rcrd);
-//     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
-
-//     function updateFilterStatus() {
-//         const curLevel = rcrd.level.displayName;
-//         const taxonName = rcrd.displayName;
-//         updateFilters();
-
-//         function updateFilters() {
-//             if (tParams.focusFltrs) { 
-//                 tParams.focusFltrs.push(curLevel + " " + taxonName); 
-//             } else { tParams.focusFltrs = [curLevel + " " + taxonName] }
-//             updateFilterStatusMsg();
-//         }
-//     }
-// } /* End updateTaxonSearch */
-// /** The selected taxon's ancestors will be selected in their levels combobox. */
-// function getRelatedTaxaToSelect(selTaxonObj) {                                  //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
-//     var topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
-//     var selected = {};                                                          //console.log("selected = %O", selected)
-//     selectAncestorTaxa(selTaxonObj);
-//     return selected;
-//     /** Adds parent taxa to selected object, until the realm parent. */
-//     function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
-//         if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-//             selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
-//             selectAncestorTaxa(getDetachedRcrd(taxon.parent))
-//         }
-//     }
-// } /* End getRelatedTaxaToSelect */
-// /*------------------ Location Filter Updates -----------------------------*/
-// function updateLocSearch(val) { 
-//     if (!val) { return; }
-//     const selVal = parseInt(val);  
-//     const locType = getLocType(this.$input[0].id);
-//     tParams.selectedOpts = getSelectedVals(selVal, locType);
-//     rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tParams.selectedOpts));
-//     updateFilter();
-
-//     function getLocType(selId) {
-//         const selTypes = { selCountry: 'Country', selRegion: 'Region' };
-//         return selTypes[selId];
-//     }
-//     function getSelectedVals(val, type) {                                       //console.log("getSelectedVals. val = %s, selType = ", val, type)
-//         const selected = {};
-//         if (type === 'Country') { selectRegion(val); }
-//         if (val !== 'none' && val !== 'all') { selected[type] = val; }
-//         return selected;  
-
-//         function selectRegion(val) {
-//             var loc = getDetachedRcrd(val);
-//             selected['Region'] = loc.region.id;
-//         }
-//     } /* End getSelectedVals */
-//     function updateFilter() {
-//         tParams.focusFltrs = [locType];
-//         updateFilterStatusMsg();
-//     }
-// } /* End updateLocSearch */
-// /*------------------ Source Filter Updates -------------------------------*/
-// function updatePubSearchByTxt() {
-//     const text = getTreeFilterTextVal('Publication');
-//     updatePubSearch(null, text);
-// }
-// function updatePubSearchByType(val) {                                           //console.log('updatePubSearchByType. val = ', val)
-//     if (!val) { return; }
-//     updatePubSearch(val, null);
-// }
-// /**
-//  * When the publication type dropdown is changed or the table is filtered by 
-//  * publication text, the table is rebuilt with the filtered data.
-//  */
-// function updatePubSearch(typeVal, text) {                                       console.log('updatePubSearch. typeVal = ', typeVal)
-//     const typeId = typeVal || getSelVal('Publication Type');
-//     const txt = text || getTreeFilterTextVal('Publication');
-//     const newRows = getFilteredPubRows();
-//     tParams.focusFltrs = getPubFilters();
-//     tblOpts.api.setRowData(newRows);
-//     updateFilterStatusMsg();
-//     resetToggleTreeBttn(false);
-
-//     function getFilteredPubRows() {                             
-//         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
-//         if (txt === '') { return getPubTypeRows(typeId); }
-//         const pubTypes = _u.getDataFromStorage('publicationType'); 
-//         const pubIds = pubTypes[typeId].publications;         
-//         return getAllCurRows().filter(row => 
-//             pubIds.indexOf(row.pubId) !== -1 && 
-//             row.name.toLowerCase().indexOf(text) !== -1);
-//     }
-//     /** Returns the rows for publications with their id in the selected type's array */
-//     function getPubTypeRows() { 
-//         const pubTypes = _u.getDataFromStorage('publicationType'); 
-//         const pubIds = pubTypes[typeId].publications;      
-//         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
-//     }
-//     function getPubFilters() { 
-//         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
-//         const truncTxt = txt ? txt.substring(0, 50)+'...' : null; 
-//         return typeId === 'all' && !txt ? [] :
-//             (typeId === 'all' ? [`"${truncTxt}"`] : 
-//             (!txt ? [`${typeVal}s`] : [`"${truncTxt}"`, `${typeVal}s`]));
-//     }
-// } /* End updatePubSearch */
 /*================ Table Build Methods ==============================================*/
 // /**
 //  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
 //  *
-//  * NOTE REFACT:: CSV DOWNLOAD
 //  */
 function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
     var curTaxonHeirarchy = {};
@@ -1848,690 +1369,49 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
-// function getDefaultTblOpts() {
-//     return {
-//         columnDefs: getColumnDefs(),
-//         rowSelection: 'multiple',   //Used for csv export
-//         getHeaderCellTemplate: getHeaderCellTemplate, 
-//         getNodeChildDetails: getNodeChildDetails,
-//         getRowClass: getRowStyleClass,
-//         onRowGroupOpened: softRefresh,
-//         onBeforeFilterChanged: beforeFilterChange, 
-//         onAfterFilterChanged: afterFilterChanged,
-//         onModelUpdated: onModelUpdated,
-//         onBeforeSortChanged: onBeforeSortChanged,
-//         enableColResize: true,
-//         enableSorting: true,
-//         unSortIcon: true,
-//         enableFilter: true,
-//         rowHeight: 26
-//     };
-// }
-/* ============================ LOAD DATA TABLE ============================== */
-// *
-//  * Passes off to init-table.js to load formatted data and handle post-init ui updates.
- 
-// function loadTable(treeColTitle, tOpts) {
-//     init_tbl.init(treeColTitle, tOpts);
-// }
-// /**
-//  * Builds the table options object and passes everyting into agGrid, which 
-//  * creates and shows the table.
-//  */
-// function loadTable(treeColTitle, tOpts) {                                       //console.log("loading table. rowdata = %s", JSON.stringify(rowData, null, 2));
-//     const tblDiv = document.querySelector('#search-tbl');
-//     const tblOptsObj = tOpts || tblOpts;
-//     tblOptsObj.rowData = tParams.rowData;
-//     tblOptsObj.columnDefs = getColumnDefs(treeColTitle);
-//     new agGrid.Grid(tblDiv, tblOptsObj);
-//     sortTreeColumnIfTaxonFocused();
-// }
-// /** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
-// function sortTreeColumnIfTaxonFocused() {
-//     if (tParams.curFocus === 'taxa') {
-//         tblOpts.api.setSortModel([{colId: "name", sort: "asc"}]);
-//     }
-// }
-// /**
-//  * Copied from agGrid's default template, with columnId added to create unique ID's
-//  * @param  {obj} params  {column, colDef, context, api}
-//  */
-// function getHeaderCellTemplate(params) {  
-//     var filterId = params.column.colId + 'ColFilterIcon';  
-//     return '<div class="ag-header-cell">' +
-//         '  <div id="agResizeBar" class="ag-header-cell-resize"></div>' +
-//         '  <span id="agMenu" class="' + params.column.colId + ' ag-header-icon ag-header-cell-menu-button"></span>' + //added class here so I can hide the filter on the group column, 
-//         '  <div id="agHeaderCellLabel" class="ag-header-cell-label">' +                                 //which breaks the table. The provided 'supressFilter' option doesn't work.
-//         '    <span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
-//         '    <span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
-//         '    <span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
-//         '    <a name="' + filterId + '" id="agFilter" class="anything ag-header-icon ag-filter-icon"></a>' +
-//         '    <span id="agText" class="ag-header-cell-text"></span>' +
-//         '  </div>' +
-//         '</div>'; 
-// }
-// function softRefresh() { tblOpts.api.refreshView(); }
-
-
-
-// /**
-//  * Tree columns are hidden until taxon export and are used for the flattened 
-//  * taxon-tree data. The role is set to subject for 'bats' exports, object for 
-//  * plants and arthropods.
-//  */
-// function getColumnDefs(mainCol) { 
-//     var realm = tParams.curRealm || false;  
-//     var taxonLvlPrefix = realm ? (realm == 2 ? "Subject" : "Object") : "Tree"; 
-
-//     return [{headerName: mainCol, field: "name", width: getTreeWidth(), cellRenderer: 'group', suppressFilter: true,
-//                 cellRendererParams: { innerRenderer: addToolTipToTree, padding: 20 }, 
-//                 cellClass: getCellStyleClass, comparator: sortByRankThenName },     //cellClassRules: getCellStyleClass
-//             {headerName: taxonLvlPrefix + " Kingdom", field: "treeKingdom", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Phylum", field: "treePhylum", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Class", field: "treeClass", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Order", field: "treeOrder", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Family", field: "treeFamily", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
-//             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
-//             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-//             {headerName: "Cnt", field: "intCnt", width: 47, volatile: true, headerTooltip: "Interaction Count" },
-//             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
-//             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-//             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
-//             {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
-//             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-//                 filter: filters.UniqueValues, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
-//             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
-//             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
-//             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
-//             {headerName: "Elev", field: "elev", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-//             // {headerName: "Elev Max", field: "elevMax", width: 150, hide: true },
-//             {headerName: "Lat", field: "lat", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-//             {headerName: "Long", field: "lng", width: 60, hide: !ifLocView(), cellRenderer: addToolTipToCells },
-//             {headerName: "Country", field: "country", width: 102, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
-//             {headerName: "Region", field: "region", width: 100, cellRenderer: addToolTipToCells, filter: filters.UniqueValues },
-//             {headerName: "Note", field: "note", width: 100, cellRenderer: addToolTipToCells} ];
-// }
-// /** Adds tooltip to Interaction row cells */
-// function addToolTipToCells(params) {
-//     var value = params.value || null;
-//     return value === null ? null : '<span title="'+value+'">'+value+'</span>';
-// }
-// /** --------- Tree Column ---------------------- */
-// /** Adds tooltip to Tree cells */
-// function addToolTipToTree(params) {      
-//     var name = params.data.name || null;                                        //console.log("params in cell renderer = %O", params)         
-//     return name === null ? null : '<span title="'+name+'">'+name+'</span>';
-// }
-// /** Returns the initial width of the tree column according to role and screen size. */
-// function getTreeWidth() { 
-//     var offset = ['admin', 'super', 'editor'].indexOf(userRole) === -1 ? 0 : 50;
-//     if (tParams.curFocus === 'locs') { offset = offset + 60; }
-//     return ($(window).width() > 1500 ? 340 : 273) - offset;
-// }
-// /** This method ensures that the Taxon tree column stays sorted by Rank and Name. */
-// function onBeforeSortChanged() {                                            
-//     if (tParams.curFocus !== "taxa") { return; }                       
-//     var sortModel = tblOpts.api.getSortModel();                             //console.log("model obj = %O", sortModel)
-//     if (!sortModel.length) { return tblOpts.api.setSortModel([{colId: "name", sort: "asc"}]); }
-//     ifNameUnsorted(sortModel);        
-// }
-// /** Sorts the tree column if it is not sorted. */
-// function ifNameUnsorted(model) {
-//     var nameSorted = model.some(function(colModel){
-//         return colModel.colId === "name";
-//     });
-//     if (!nameSorted) { 
-//         model.push({colId: "name", sort: "asc"}); 
-//         tblOpts.api.setSortModel(model);
-//     }
-// }
-// /**
-//  * Sorts the tree column alphabetically for all views. If in Taxon view, the 
-//  * rows are sorted first by rank and then alphabetized by name @sortTaxonRows. 
-//  */
-// function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   //console.log("sortByRankThenName a-[%s] = %O b-[%s] = %O (inverted? %s)", a, nodeA, b, nodeB, isInverted);
-//     if (!a) { return 0; } //Interaction rows are returned unsorted
-//     if (tParams.curFocus !== "taxa") { return alphaSortVals(a, b); }
-//     return sortTaxonRows(a, b);
-// } 
-// /** 
-//  * Sorts each row by taxonomic rank and then alphabetizes by name.
-//  * "Unspecified" interaction groupings are kept at top so they remain under their 
-//  * source taxon. 
-//  */
-// function sortTaxonRows(a, b) {
-//     var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-//     var aParts = a.split(" ");
-//     var aLvl = aParts[0];   
-//     var aName = aParts[1];
-//     var bParts = b.split(" ");
-//     var bLvl = bParts[0];
-//     var bName = bParts[1];
-//     return  bLvl === "Unspecified" ? 1 : compareRankThenName();  
-
-//     function compareRankThenName() {
-//         return sortByRank() || sortByName();
-//     }
-//     function sortByRank() {
-//         if (lvls.indexOf(aLvl) === -1 || lvls.indexOf(bLvl) === -1) { return alphaSpecies(); }
-//         return lvls.indexOf(aLvl) === lvls.indexOf(bLvl) ? false :
-//             lvls.indexOf(aLvl) > lvls.indexOf(bLvl) ? 1 : -1; 
-//     }
-//     function sortByName() {
-//         return aName.toLowerCase() > bName.toLowerCase() ? 1 : -1;
-//     }
-//     function alphaSpecies() {                                             
-//         return lvls.indexOf(aLvl) !== -1 ? 1 :
-//             lvls.indexOf(bLvl) !== -1 ? -1 :
-//             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
-//     }
-// }  /* End sortTaxonRows */
-// /** ------ Edit Column ---------- */
-// function isNotEditor() {  
-//     return ['admin', 'editor', 'super'].indexOf(userRole) === -1;
-// }
-// /** Adds an edit pencil for all tree nodes bound to the entity edit method. */
-// function addEditPencil(params) {   
-//     if (uneditableEntityRow(params)) { return "<span>"; }                     
-//     return getPencilHtml(params.data.id, params.data.entity, db_forms.editEntity);
-// }
-// function uneditableEntityRow(params) {                                          //console.log('focus = [%s] params = %O', tParams.curFocus, params);
-//     const uneditables = [
-//         tParams.curFocus === 'locs' && 
-//             (['Region','Country','Habitat'].indexOf(params.data.type) !== -1),
-//         tParams.curFocus === 'taxa' && //Realm Taxa 
-//             (!params.data.parentTaxon && !params.data.interactionType),
-//         tParams.curFocus === 'srcs' && params.data.id === 0]; //Unspecifed publisher
-//     return uneditables.some(test => test);
-// }
-// function getPencilHtml(id, entity, editFunc) {
-//     const path = require('../../css/images/eif.pencil.svg');
-//     var editPencil = `<img src=${path} id="edit${entity}${id}"
-//         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
-//     $('#search-tbl').off('click', '#edit'+entity+id);
-//     $('#search-tbl').on(
-//         'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _u.lcfirst(entity)));
-//     return editPencil;
-// }
-// /** -------- Map Column ---------- */
-// function ifLocView() {                                           
-//     return tParams.curFocus === 'locs';
-// }
-// function addMapIcon(params) {                                                   //console.log('row params = %O', params);
-//     if (!params.data.onMap) { return '<span>'; }
-//     const id = params.data.id;
-//     const zoomLvl = getZoomLvl(params.data);  
-//     const path = require('../../css/images/marker-icon.png');
-//     const icon = `<img src='${path}' id='map${id}' alt='Map Icon' 
-//         title='Show on Map' style='height: 22px; margin-left: 9px; cursor:pointer;'>`;
-//     $('#search-tbl').off('click', '#map'+id);
-//     $('#search-tbl').on('click', '#map'+id, showLocOnMap.bind(null, params.data.onMap, zoomLvl));
-//     return icon;
-// }
-// function getZoomLvl(loc) {  
-//     return loc.type === 'Region' ? 4 : loc.type === 'Country' ? 5 : 7;   
-// }
-// /*================== Row Styling =========================================*/
-// /**
-//  * Adds a css background-color class to interaction record rows. Source-focused 
-//  * interaction rows are not colored, their name rows are colored instead. 
-//  */
-// function getRowStyleClass(params) {                                             //console.log("getRowStyleClass params = %O... lvl = ", params, params.data.treeLvl);
-//     if (params.data.name !== "") { return; } 
-//     return tParams.curFocus === "srcs" ? 
-//         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
-// }
-// /**
-//  * Adds a background-color to cells with open child interaction rows, or cells 
-//  * with their grouped interactions row displayed - eg, Expanding the tree cell 
-//  * for Africa will be highlighted, as well as the 'Unspecified Africa Interactions'
-//  * cell Africa's interaction record rows are still grouped within. 
-//  */
-// function getCellStyleClass(params) {                                            //console.log("getCellStyleClass for row [%s] = %O", params.data.name, params);
-//     if ((params.node.expanded === true && isOpenRowWithChildInts(params)) || 
-//         isNameRowforClosedGroupedInts(params)) {                                //console.log("setting style class")
-//         return tParams.curFocus === "srcs" ? 
-//         getSrcRowColorClass(params.data) : getRowColorClass(params.data.treeLvl);
-//     } 
-// }
-// function isOpenRowWithChildInts(params) {
-//     if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
-//     return params.data.interactions === true && params.data.name !== "";
-// }
-// /**
-//  * Returns true if the location row's child interactions are present in 
-//  * data tree after filtering.
-//  */
-// function hasIntsAfterFilters(params) {  
-//     return params.node.childrenAfterFilter.some(function(childRow) {
-//         return childRow.data.name.split(" ")[0] === "Unspecified";
-//     });
-// }
-// function isNameRowforClosedGroupedInts(params) {  
-//     return params.data.groupedInts === true;
-// }
-// /** Returns a color based on the tree level of the row. */
-// function getRowColorClass(treeLvl) {
-//     var rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
-//     var styleClass = 'row-' + rowColorArray[treeLvl];                           //console.log("styleClass = ", styleClass);
-//     return styleClass;
-// }
-// /** Returns a color based on the tree level of the row. */
-// function getSrcRowColorClass(params) {
-//     const rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
-//     const styleClass = 'row-' + rowColorArray[params.rowColorIdx];              //console.log("styleClass = ", styleClass);
-//     return styleClass;
-// }
-// function getNodeChildDetails(rcrd) {                                            //console.log("rcrd = %O", rcrd)  
-//     if (rcrd.isParent) {
-//         return { group: true, expanded: rcrd.open, children: rcrd.children };
-//     } else { return null; }
-// }
-// /*================== Table Filter Functions ===============================*/
-// // function onFilterChange() {
-// //     tblOpts.api.onFilterChanged();
-// // }
-
-// /** Returns an obj with all filter models. */
-// function getAllFilterModels() {  
-//     const filters = Object.keys(tblOpts.api.filterManager.allFilters);
-//     return {
-//         'Subject Taxon': getColumnFilterApi('subject'),
-//         'Object Taxon': getColumnFilterApi('object'),
-//         'Interaction Type': getColumnFilterApi('interactionType'),
-//         'Tags': getColumnFilterApi('tags'),
-//         'Habitat': getColumnFilterApi('habitat'),
-//         'Country': getColumnFilterApi('country'),
-//         'Region': getColumnFilterApi('region'),
-//         'Location Desc.': getColumnFilterApi('location'),
-//         'Citation': getColumnFilterApi('citation'),
-//         'Note': getColumnFilterApi('note') 
-//     };  
-    
-//     function getColumnFilterApi(colName) {
-//         return filters.indexOf(colName) === -1 ? null : 
-//             tblOpts.api.getFilterApi(colName).getModel()
-//     }
-// }
-// /**
-//  * Either displays all filters currently applied, or applies the previous filter 
-//  * message persisted through table update into map view.
-//  */
-// function updateFilterStatusMsg() {                                              //console.log("updateFilterStatusMsg called.")
-//     if (tblOpts.api === undefined) { return; }
-//     // if (tParams.persistFilters) { return setTableFilterStatus(tParams.persistFilters); }
-//     getFiltersAndUpdateStatus();
-// }
-// /**
-//  * Adds all active filters to the table's status message. First adding any 
-//  * focus-level filters, such as author name or taxon, then any active filters
-//  * for table columns, and then checks/adds the 'interactions updated since' filter. 
-//  * Sets table-status with the resulting active-filters messasge.
-//  */
-// function getFiltersAndUpdateStatus() {
-//     const activeFilters = [];
-//     addActiveExternalFilters(activeFilters);
-//     addActiveTableFilters(activeFilters);
-//     setFilterStatus(activeFilters);
-// }
-// function addActiveExternalFilters(filters) {
-//     addFocusFilters();
-//     addUpdatedSinceFilter();
-    
-//     function addFocusFilters() {
-//         if (tParams.focusFltrs && tParams.focusFltrs.length > 0) { 
-//             filters.push(...tParams.focusFltrs);  
-//         } 
-//     }
-//     function addUpdatedSinceFilter() {
-//         if ($('#shw-chngd')[0].checked) { 
-//             filters.push("Time Updated");
-//         } 
-//     }
-// } /* End addActiveExternalFilters */
-// function addActiveTableFilters(filters) {
-//     const filterModels = getAllFilterModels();        
-//     const columns = Object.keys(filterModels);        
-//     for (let i=0; i < columns.length; i++) {
-//         if (filterModels[columns[i]] !== null) { 
-//             filters.push(columns[i]); }
-//     }
-// }
-// function setFilterStatus(filters) {
-//     if (filters.length > 0) { setTableFilterStatus(getFilterStatus(filters)); 
-//     } else { resetFilterStatusBar() }
-// }
-// function getFilterStatus(filters) {
-//     var tempStatusTxt;
-//     if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
-//         return filters.join(', ') + '.';
-//     } else {
-//         tempStatusTxt = $('#xtrnl-filter-status').text();
-//         if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-//             setExternalFilterStatus(tempStatusTxt + ', ');
-//         }
-//         return filters.join(', ') + '.'; 
-//     }
-// }
-// function setTableFilterStatus(status) {                                          //console.log("setTableFilterStatus. status = ", status)
-//     $('#tbl-filter-status').text(status);
-// }
-// function setExternalFilterStatus(status) {
-//     $('#xtrnl-filter-status').text(status);
-// }
-// function clearTableStatus() {
-//     $('#tbl-filter-status, #xtrnl-filter-status').empty();
-// }
-// function resetFilterStatusBar() {  
-//     $('#xtrnl-filter-status').text('Filtering on: ');
-//     $('#tbl-filter-status').text('No Active Filters.');
-//     tParams.focusFltrs = [];
-// }
-// /*-------------------- Filter By Time Updated ----------------------------*/
-// /**
-//  * The time-updated filter is enabled when the filter option in opts-col3 is 
-//  * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
-//  * Note: 'Today' is the default selection. 
-//  */
-// function toggleTimeUpdatedFilter(state) {                                       console.log('toggleTimeUpdatedFilter. state = ', state);
-//     var filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
-//     var opac = filtering ? 1 : .3;
-//     $('#time-fltr, .flatpickr-input, #fltr-tdy, #fltr-cstm')
-//         .attr({'disabled': !filtering});  
-//     $('#fltr-tdy')[0].checked = true;
-//     $('#shw-chngd')[0].checked = filtering;
-//     $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
-//         .css({'opacity': opac});
-//     if (filtering) { showInteractionsUpdatedToday();
-//     } else { resetTimeUpdatedFilter(); }
-//     resetToggleTreeBttn(false);
-// }
-// /** Disables the calendar, if shown, and resets table with active filters reapplied. */
-// function resetTimeUpdatedFilter() {
-//     // $('.flatpickr-input').attr({'disabled': true});
-//     tParams.fltrdRows = null;
-//     tParams.fltrSince = null;
-//     if (tblOpts.api && tParams.rowData) { 
-//         tblOpts.api.setRowData(tParams.rowData);
-//         syncFiltersAndUi();
-//     }
-// }
-// /** 
-//  * Filters the interactions in the table to show only those modified since the 
-//  * selected time - either 'Today' or a 'Custom' datetime selected using the 
-//  * flatpickr calendar.
-//  */
-// function filterInteractionsByTimeUpdated(e) {                               
-//     var elem = e.currentTarget;  
-//     if (elem.id === 'fltr-cstm') { showFlatpickrCal(elem); 
-//     } else { showInteractionsUpdatedToday(); }
-// }
-// /** 
-//  * Instantiates the flatpickr calendar and opens the calendar. If a custom time
-//  * was previously selected and stored, it is reapplied.
-//  */
-// function showFlatpickrCal(elem) {  
-//     misc.cal = misc.cal || initCal(elem); 
-//     if (misc.cstmTimeFltr) {
-//         misc.cal.setDate(misc.cstmTimeFltr);
-//         filterInteractionsUpdatedSince([], misc.cstmTimeFltr, null);
-//     } else {
-//         misc.cal.open();                                                             
-//         $('.today').focus();                                                   
-//     }
-// }    
-// /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
-// function initCal(elem) {
-//     const confirmDatePlugin = require('../libs/confirmDate.js'); 
-//     var calOpts = {
-//         altInput: true,     maxDate: "today",
-//         enableTime: true,   plugins: [confirmDatePlugin({})],
-//         onReady: function() { this.amPM.textContent = "AM"; },
-//         onClose: filterInteractionsUpdatedSince
-//     }; 
-//     return $('#time-fltr').flatpickr(calOpts);
-// }
-// /** Filters table to show interactions with updates since midnight 'today'. */
-// function showInteractionsUpdatedToday() {
-//     misc.cal = misc.cal || initCal();
-//     misc.cal.setDate(new Date().today());
-//     filterInteractionsUpdatedSince([], new Date().today(), null);
-// }
-// /**
-//  * Filters all interactions in the table leaving only the records with updates
-//  * since the datetime specified by the user.
-//  */
-// function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
-//     var rowData = _u.snapshot(tParams.rowData);
-//     var fltrSince = dateStr || tParams.timeFltr;
-//     var sinceTime = new Date(fltrSince).getTime();                          
-//     var updatedRows = rowData.filter(addAllRowsWithUpdates);                    //console.log("updatedRows = %O", updatedRows);
-//     tParams.timeFltr = fltrSince;
-//     tblOpts.api.setRowData(updatedRows);
-//     tParams.fltrdRows = updatedRows;
-//     resetToggleTreeBttn(false);
-//     syncFiltersAndUi(sinceTime);
-
-//     function addAllRowsWithUpdates(rowObj) { 
-//         if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
-//         rowObj.children = rowObj.children ? 
-//             rowObj.children.filter(addAllRowsWithUpdates) : [];
-//         return rowObj.children.length > 0;
-
-//         function checkIntRowForUpdates(row) { 
-//             var rowUpdatedAt = new Date(row.updatedAt).getTime();               //console.log("row [%O}.data.updatedAt = [%s], sinceTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, sinceTime, rowUpdatedAt > sinceTime);
-//             return rowUpdatedAt > sinceTime;
-//         }
-//     } /* End addAllRowsWithUpdates */
-// } /* End filterInteractionsUpdatedSince */ 
-// /**
-//  * When filtering by time updated, some filters will need to be reapplied.
-//  * (Taxa and loation filter rowdata directly, and so do not need to be reapplied.
-//  * Source, both auth and pub views, must be reapplied.)
-//  * The table filter's status message is updated. The time-updated radios are synced.
-//  */
-// function syncFiltersAndUi(sinceTime) {
-//     if (tParams.curFocus === "srcs") { applySrcFltrs(); }
-//     if (tParams.curFocus === "locs") { loadSearchLocHtml(); }    
-//     updateFilterStatusMsg();  
-//     syncTimeUpdatedRadios(sinceTime);
-// }
-// function syncTimeUpdatedRadios(sinceTime) {
-//     if (new Date(new Date().today()).getTime() > sinceTime) { 
-//         $('#fltr-cstm')[0].checked = true;  
-//         misc.cstmTimeFltr = sinceTime;
-//     } else {
-//         $('#fltr-tdy')[0].checked = true; }
-// }
-// /** Reapplys active external filters, author name or publication type. */
-// function applySrcFltrs() {
-//     var resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
-//         'publ': reapplyTreeTextFltr };
-//     var realm = tParams.curRealm;  
-//     resets[realm]();
-// }
-// function reapplyTreeTextFltr() {                                            
-//     const entity = getTableEntityName();                                         //console.log("reapplying [%s] text filter", entity);
-//     if (getTreeFilterTextVal(entity) === "") { return; }
-//     searchTreeText();
-// }
-// function getTableEntityName() {
-//     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
-//         'publ': 'Publisher', 'pubs': 'Publication' };
-//     const ent = tParams.curFocus === "srcs" ? tParams.curRealm : tParams.curFocus;
-//     return names[ent];
-// }
-// function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
-//     if (getSelVal('Publication Type') === "all") { return; }
-//     updatePubSearch();
-// }
-// /*=================CSV Methods================================================*/
-// /**
-//  * Exports a csv of the interaction records displayed in the table, removing 
-//  * tree rows and flattening tree data where possible: currently only taxon.
-//  * For taxon csv export: The relevant tree columns are shown and also exported. 
-//  */
-// function exportCsvData() {
-//     var views = { 'locs': 'Location', 'srcs': 'Source', 'taxa': 'Taxon' };
-//     var fileName = 'Bat Eco-Interaction Records by '+ views[tParams.curFocus] +'.csv';
-//     var params = {
-//         onlySelected: true,
-//         fileName: fileName,
-//         // customHeader: "This is a custom header.\n\n",
-//         // customFooter: "This is a custom footer."
-//     };
-//     if (tParams.curFocus === 'taxa') { showTaxonCols(); }
-//     tblOpts.columnApi.setColumnsVisible(['name', 'intCnt', 'edit', 'map'], false);
-//     selectRowsForExport();
-//     tblOpts.api.exportDataAsCsv(params);
-//     returnTableState();
-// }
-// function returnTableState() {
-//     collapseTree();
-//     tblOpts.columnApi.setColumnsVisible(['name', 'intCnt', 'edit'], true);
-//     if (tParams.curFocus === 'locs') { tblOpts.columnApi.setColumnsVisible(['map'], true); }
-//     if (tParams.curFocus === 'taxa') { revertTaxonTable(); }
-// }
-// function showTaxonCols() {
-//     tblOpts.columnApi.setColumnsVisible(getCurTaxonLvlCols(), true)
-// }
-/** DRY: csv-data */
-
-// function revertTaxonTable() {
-//     tblOpts.columnApi.setColumnsVisible(getCurTaxonLvlCols(), false)
-//     expandTreeByOne(); 
-// }
-// /**
-//  * Selects every interaction row in the currently displayed table by expanding all
-//  * rows in order to get all the rows via the 'rowsToDisplay' property on the rowModel.
-//  */
-// function selectRowsForExport() {
-//     tblOpts.api.expandAll();
-//     tblOpts.api.getModel().rowsToDisplay.forEach(selectInteractions);           //console.log("selected rows = %O", tblOpts.api.getSelectedNodes())   
-// }
-// /**
-//  * A row is identified as an interaction row by the 'interactionType' property
-//  * present in the interaction row data.
-//  */
-// function selectInteractions(rowNode) { 
-//     if (rowNode.data.interactionType !== undefined) {                       
-//         rowNode.setSelected(true);
-//     }
-// }
 /*================= Utility ==================================================*/
 function clearCol2() {
     $('#opts-col2').empty();
 }
-// /** 
-//  * Returns a record detached from the original. If no records are passed, the 
-//  * focus' records are used.
-//  */
-// function getDetachedRcrd(rcrdKey, rcrds) {                                  
-//     const orgnlRcrds = rcrds || tParams.rcrdsById;                              //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
-//     try {
-//        return _u.snapshot(orgnlRcrds[rcrdKey]);
-//     }
-//     catch (e) { 
-//        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, orgnlRcrds);
-//     }
-// }
 function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
     const popUpMsg = msg || 'Loading...';
     $('#db-popup').text(popUpMsg);
     $('#db-popup').addClass('loading'); //used in testing
     $('#db-popup, #db-overlay').show();
-    fadeTable();
+    _u.fadeTable();
 }
 // function hidePopUpMsg() {
 //     $('#db-popup, #db-overlay').hide();
 //     $('#db-popup').removeClass('loading'); //used in testing
 //     showTable();
 // }
-function fadeTable() {  
-    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
-}
 // function showTable() {
 //     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
 // }
-// function finishTableAndUiLoad() {
-//     hidePopUpMsg();
-//     enableTableButtons();
-//     hideUnusedColFilterMenus();
-// } 
-// /**
-//  * REFACT:: UI-UTIL OR SOMETHING
-//  */
-// function enableTableButtons() {  
-//     $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
-//         .attr('disabled', false).css('cursor', 'pointer');
-//     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-//     $('.tbl-tools').fadeTo(100, 1);
-//     $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-//     authDependentInit(); 
-// }
-// /**
-//  * REFACT:: UI-UTIL OR SOMETHING
-//  */
-// function disableTableButtons() {
-//     $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
-//         .attr('disabled', 'disabled').css('cursor', 'default');
-//     $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
-// }
-// /**
-//  * Hides the "tree" column's filter button. (Filtering on the group 
-//  * column only filters the leaf nodes, by design. It is not useful here.)
-//  * Hides the sort icons for the 'edit' and 'map' columns.
-//  * Hides the filter button on the 'edit' and 'count' columns.
-//  *    Also hides for the map, elevation, latitude, longitude location columns.
-//  */
-// function hideUnusedColFilterMenus() {
-//     $('.ag-header-cell-menu-button.name').hide();
-//     $('.ag-header-cell-menu-button.edit').hide();
-//     $('.ag-header-cell-menu-button.intCnt').hide();
-//     $('.ag-header-cell-menu-button.map').hide();
-//     /** Hides sort icons for the map & edit columns. */
-//     $('div[colId="map"] .ag-sort-none-icon').hide();
-//     $('div[colId="map"] .ag-sort-ascending-icon').hide();
-//     $('div[colId="map"] .ag-sort-descending-icon').hide();
-//     $('div[colId="edit"] .ag-sort-none-icon').hide();
-//     $('div[colId="edit"] .ag-sort-ascending-icon').hide();
-//     $('div[colId="edit"] .ag-sort-descending-icon').hide();
-//     /* Hides filters for these loc data columns */
-//     $('.ag-header-cell-menu-button.elev').hide();
-//     $('.ag-header-cell-menu-button.lat').hide();
-//     $('.ag-header-cell-menu-button.lng').hide();
-//     $('div[colId="lat"] .ag-sort-none-icon').hide();
-//     $('div[colId="lat"] .ag-sort-ascending-icon').hide();
-//     $('div[colId="lat"] .ag-sort-descending-icon').hide();
-//     $('div[colId="lng"] .ag-sort-none-icon').hide();
-//     $('div[colId="lng"] .ag-sort-ascending-icon').hide();
-//     $('div[colId="lng"] .ag-sort-descending-icon').hide();
-// }
-/** Sorts the all levels of the data tree alphabetically. */
-function sortDataTree(tree) {
-    var sortedTree = {};
-    var keys = Object.keys(tree).sort();    
+// /** Sorts the all levels of the data tree alphabetically. */
+// function sortDataTree(tree) {
+//     var sortedTree = {};
+//     var keys = Object.keys(tree).sort();    
 
-    for (var i=0; i<keys.length; i++){ 
-        sortedTree[keys[i]] = sortNodeChildren(tree[keys[i]]);
-    }
-    return sortedTree;
+//     for (var i=0; i<keys.length; i++){ 
+//         sortedTree[keys[i]] = sortNodeChildren(tree[keys[i]]);
+//     }
+//     return sortedTree;
 
-    function sortNodeChildren(node) { 
-        if (node.children) {  
-            node.children = node.children.sort(alphaEntityNames);
-            node.children.forEach(sortNodeChildren);
-        }
-        return node;
-    } 
-} /* End sortDataTree */
-/** Alphabetizes array via sort method. */
-function alphaEntityNames(a, b) {                                               //console.log("alphaSrcNames a = %O b = %O", a, b);
-    var x = a.displayName.toLowerCase();
-    var y = b.displayName.toLowerCase();
-    return x<y ? -1 : x>y ? 1 : 0;
-}
+//     function sortNodeChildren(node) { 
+//         if (node.children) {  
+//             node.children = node.children.sort(alphaEntityNames);
+//             node.children.forEach(sortNodeChildren);
+//         }
+//         return node;
+//     } 
+// } /* End sortDataTree */
+// /** Alphabetizes array via sort method. */
+// function alphaEntityNames(a, b) {                                               //console.log("alphaSrcNames a = %O b = %O", a, b);
+//     var x = a.displayName.toLowerCase();
+//     var y = b.displayName.toLowerCase();
+//     return x<y ? -1 : x>y ? 1 : 0;
+// }
 /** 
  * Sorts an array of options via sort method.
  * REFACT NOTE:: UTIL.js
@@ -2547,87 +1427,6 @@ function alphaSortVals(a, b) {
     var y = b.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
 }
-// /* ------------- Selectize Library -------------------------------------- */
-// /**
-//  * Inits 'selectize' for each select elem in the form's 'selElems' array
-//  * according to the 'selMap' config. Empties array after intializing.
-//  *
-//  * REFACT NOTE:: data-filters.js || util-combobox
-//  */
-// function initCombobox(field) {                                                  //console.log("initCombobox [%s]", field);
-//     const confg = getSelConfgObj(field); 
-//     initSelectCombobox(confg);  
-// } /* End initComboboxes */
-// function initComboboxes(fieldAry) {
-//     fieldAry.forEach(field => initCombobox(field));
-// }
-// function getSelConfgObj(field) {
-//     const updateTaxonSearch = db_filters.updateTaxonSearch;
-//     const updateLocSearch = db_filters.updateLocSearch;
-//     const updatePubSearch = db_filters.updatePubSearch;
-//     const confgs = { 
-//         'Focus' : { name: field, id: '#search-focus', change: selectSearchFocus },
-//         'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-//         'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
-//         'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-//         'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-//         'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-//         'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearch },
-//         'Loc View' : {name: field, id: '#sel-realm', change: onLocViewChange },
-//         'Source Type': { name: field, id: '#sel-realm', change: onSrcRealmChange },
-//         'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-//         'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: onTaxonRealmChange },
-//         'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
-//     };
-//     return confgs[field];
-// }
-// /**
-//  * Inits the combobox, using 'selectize', according to the passed config.
-//  * Note: The 'selectize' library turns select dropdowns into input comboboxes
-//  * that allow users to search by typing.
-//  */
-// function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
-//     const options = {
-//         create: false,
-//         onChange: confg.change,
-//         onBlur: saveOrRestoreSelection,
-//         placeholder: getPlaceholer(confg.id)
-//     };
-//     const sel = $(confg.id).selectize(options); 
-
-//     function getPlaceholer(id) {
-//         const optCnt = $(id + ' > option').length;  
-//         const placeholder = 'Select ' + confg.name
-//         return optCnt ? 'Select ' + confg.name : '- None -';
-//     }
-// } /* End initSelectCombobox */
-// function getSelVal(field) {                                                     //console.log('getSelVal [%s]', field);
-//     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
-//     return $(confg.id)[0].selectize.getValue();  
-// }
-// // function getSelTxt(field) {
-// //     const confg = getSelConfgObj(field);
-// //     const $selApi = $(confg.id)[0].selectize; 
-// //     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
-// // }
-// function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
-//     const confg = getSelConfgObj(field);
-//     const $selApi = $(confg.id)[0].selectize; 
-//     $selApi.addItem(val, silent); 
-//     saveSelVal($(confg.id), val);
-// }
-
-// /**
-//  * onBlur: the elem is checked for a value. If one is selected, it is saved. 
-//  * If none, the previous is restored. 
-//  */
-// function saveOrRestoreSelection() {                                             //console.log('----------- saveOrRestoreSelection')
-//     const $elem = this.$input;  
-//     const field = $elem.data('field'); 
-//     const prevVal = $elem.data('val');          
-//     const curVal = _u.getSelVal(field);                                 
-//     return curVal ? saveSelVal($elem, curVal) : _u.setSelVal(field, prevVal, 'silent');
-// } /* End saveOrRestoreSelection */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
     const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
@@ -2823,59 +1622,10 @@ function resetCurTreeState() {                                                  
     db_filters.updateFilterStatusMsg();
 }
 /** 
- * Deltes the props uesd for only the displayed table in the global tParams.
+ * Deltes the props uesd for only the displayed table in the global tblState.
  */
 function resetCurTreeStorageProps() {
-    delete tParams.curTree;
+    delete tblState.curTree;
     tblState.selectedOpts = {};
     db_filters.resetTableStateParams();
 }
-// /**
-//  * When the table rowModel is updated, the total interaction count for each 
-//  * tree node, displayed in the "count" column, is updated to count only displayed
-//  * interactions. Any rows filtered out will not be included in the totals.
-//  */
-// function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblOpts.api.getModel().rowsToDisplay);
-//     updateTotalRowIntCount( tblOpts.api.getModel().rootNode );
-// }
-// /**
-//  * Sets new interaction totals for each tree node @getChildrenCnt and then 
-//  * calls the table's softRefresh method, which refreshes any rows with "volatile"
-//  * set "true" in the columnDefs - currently only "Count".
-//  */
-// function updateTotalRowIntCount(rootNode) {
-//     getChildrenCnt(rootNode.childrenAfterFilter);  
-//     tblOpts.api.softRefreshView();
-// }
-// function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
-//     var nodeCnt, ttl = 0;
-//     nodeChildren.forEach(function(child) {
-//         nodeCnt = 0;
-//         nodeCnt += addSubNodeInteractions(child);
-//         ttl += nodeCnt;
-//         if (nodeCnt !== 0 && child.data.intCnt !== null) { child.data.intCnt = nodeCnt; }
-//     });
-//     return ttl;
-// }
-// /**
-//  * Interaction records are identified by their lack of any children, specifically 
-//  * their lack of a "childrenAfterFilter" property.
-//  */
-// function addSubNodeInteractions(child) {  
-//     var cnt = 0;
-//     if (child.childrenAfterFilter) {
-//         cnt += getChildrenCnt(child.childrenAfterFilter);
-//         if (cnt !== 0) { child.data.intCnt = cnt; }
-//     } else { /* Interaction record row */
-//         ++cnt;
-//         child.data.intCnt = null; 
-//     }
-//     return cnt;
-// }
-
-
-
-
-
-
-

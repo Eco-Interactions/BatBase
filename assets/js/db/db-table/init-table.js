@@ -3,7 +3,6 @@
  * 
  * Exports:
  *     init
- *     onTableInitComplete         
  */
 import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
@@ -28,6 +27,7 @@ export function init(viewTitle, rowData) {                                      
     tState().set({'api': tblOpts.api, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
+    onTableInitComplete();
 }
 /** Base table options object. */
 function getDefaultTblOpts() {
@@ -294,10 +294,7 @@ function getNodeChildDetails(rcrd) {                                            
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
 }
-/**
- * ENTRY POINT AFTER INTERACTION FILL
- */
- export function onTableInitComplete() {
+function onTableInitComplete() {
     hidePopUpMsg();
     _u.enableTableButtons();
     hideUnusedColFilterMenus();
