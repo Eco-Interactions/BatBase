@@ -8,15 +8,39 @@
 import { accessTableState as tState } from '../db-page.js';
 import * as _u from '../util.js';
 
-/**
- * curTree - only used here?
- */
 let tblState; //Refreshed with each new entry into the module.
 
 function refreshTableState() {
     tblState = tState().get();
 }
-
+/* ========================= LOCATION TREE ========================================================================== */
+/**
+ * Builds a tree of location data with passed locations at the top level, and 
+ * sub-locations as nested children. 
+ */ 
+export function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
+    refreshTableState();
+    return fillTreeWithInteractions(buildLocDataTree(topLocs));
+}
+function buildLocDataTree(topLocs) {
+    let topLoc;
+    const tree = {};                                                              //console.log("tree = %O", tree);
+    topLocs.forEach(function(id){  
+        topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
+        tree[topLoc.displayName] = getLocChildren(topLoc);
+    });  
+    return sortDataTree(tree);
+}
+/** Returns the location record with all child ids replaced with their records. */
+function getLocChildren(rcrd) {   
+    if (rcrd.children.length > 0) { 
+        rcrd.children = rcrd.children.map(getLocChildData);
+    }
+    return rcrd;
+}
+function getLocChildData(childId) {  
+    return getLocChildren(_u.getDetachedRcrd(childId, tblState.rcrdsById));
+}
 /* ========================= SOURCE TREE ============================================================================ */
 /** (Re)builds source tree for the selected source realm. */
 export function buildSrcTree() {
@@ -141,7 +165,7 @@ function buildAuthTree(authSrcRcrds) {                                          
 function getAuthChildren(contribs) {                                            //console.log("getAuthChildren contribs = %O", contribs);
     return contribs.map(wrkSrcid => getPubData(_u.getDetachedRcrd(wrkSrcid, tblState.rcrdsById)));
 }
-/* ====================== Interaction Fill Methods ========================== */
+/* ====================== Interaction Fill Methods ================================================================== */
 /**
  * Replaces interaction IDs in the data tree with the interaction records.    
  */
@@ -253,7 +277,7 @@ function getTaxonName(taxon) {
     var lvl = taxon.level.displayName;  
     return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
 }  
-/* ================================ UTILITY ================================= */
+/* ================================ UTILITY ========================================================================= */
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
     var sortedTree = {};

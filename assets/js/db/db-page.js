@@ -659,9 +659,9 @@ function resetLocUi(view) {
  * Starts the Table build depending on the view selected.
  */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
-    const regions = getTopRegionIds();
+    // const regions = getTopRegionIds();
     _u.populateStorage('curRealm', view);                      
-    return view === 'tree' ? buildLocTableTree(regions) : buildLocMap();
+    return view === 'tree' ? rebuildLocTree() : buildLocMap();
 }
 function getTopRegionIds() {
     const ids = [];
@@ -675,54 +675,55 @@ function getTopRegionIds() {
  * countries, areas, and points as nested children @buildLocTree. Fills tree
  * with interactions and continues building the table @getInteractionsAndFillTable.
  */
-function buildLocTableTree(topLocs) {                                            //console.log('buildLocTableTree')
-    buildLocTree(topLocs);
-    getInteractionsAndFillTable();
-}
+// function buildLocTableTree(topLocs) {                                            //console.log('buildLocTableTree')
+//     buildLocTree(topLocs);
+//     getInteractionsAndFillTable();
+// }
 /**
  * Rebuilds loc tree with passed location, or the default top regions, as the
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
+ * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTree(topLoc) {                                        console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
-    var topLocs = topLoc || getTopRegionIds();
+export function rebuildLocTree(topLoc) {                                        //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+    const topLocs = topLoc || getTopRegionIds();
     tblState.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousTable();
-    buildLocTableTree(topLocs);
+    startLocTableBuildChain(topLocs);
 }
-/**
- * Builds a tree of location data with passed locations at the top level, and 
- * sub-locations as nested children. Adds the alphabetized tree to the global 
- * tblState obj as 'curTree'. 
- */ 
-function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
-    var topLoc;
-    var tree = {};                                                              //console.log("tree = %O", tree);
-    topLocs.forEach(function(id){  
-        topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
-        tree[topLoc.displayName] = getLocChildren(topLoc);
-    });  
-    tblState.curTree = sortDataTree(tree);
+function startLocTableBuildChain(topLocs) {
+    build_tbl_data.transformLocDataAndLoadTable(
+        data_tree.buildLocTree(topLocs), tblState);
+    loadSearchLocHtml();
 }
-/** Returns the location record with all child ids replaced with their records. */
-function getLocChildren(rcrd) {   
-    if (rcrd.children.length > 0) { 
-        rcrd.children = rcrd.children.map(getLocChildData);
-    }
-    return rcrd;
-}
-function getLocChildData(childId) {  
-    return getLocChildren(_u.getDetachedRcrd(childId, tblState.rcrdsById));
-}
+// /**
+//  * Builds a tree of location data with passed locations at the top level, and 
+//  * sub-locations as nested children. Adds the alphabetized tree to the global 
+//  * tblState obj as 'curTree'. 
+//  */ 
+// function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
+//     var topLoc;
+//     var tree = {};                                                              //console.log("tree = %O", tree);
+//     topLocs.forEach(function(id){  
+//         topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
+//         tree[topLoc.displayName] = getLocChildren(topLoc);
+//     });  
+//     tblState.curTree = sortDataTree(tree);
+// }
+// /** Returns the location record with all child ids replaced with their records. */
+// function getLocChildren(rcrd) {   
+//     if (rcrd.children.length > 0) { 
+//         rcrd.children = rcrd.children.map(getLocChildData);
+//     }
+//     return rcrd;
+// }
+// function getLocChildData(childId) {  
+//     return getLocChildren(_u.getDetachedRcrd(childId, tblState.rcrdsById));
+// }
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
- * Note: This is also the entry point for filter-related table rebuilds.
  */
-function buildLocSearchUiAndTable(locTree) {                                    //console.log("buildLocSearchUiAndTable called. locTree = %O", locTree)
-    build_tbl_data.transformLocDataAndLoadTable(locTree, tblState);
-    loadSearchLocHtml();
-}
 function loadSearchLocHtml() {
     clearCol2();       
     loadSearchByNameElem();
@@ -745,7 +746,7 @@ function loadLocComboboxes() {
     _u.initComboboxes(['Region', 'Country']);
     setSelectedLocVals();
 }/** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts() {  console.log('tblState = %O', tblState);
+function buildLocSelectOpts() {  
     var processedOpts = { Region: [], Country: [] };
     var opts = { Region: [], Country: [] };  
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
@@ -1259,7 +1260,7 @@ function storeSrcRealm(val) {
 function buildSrcSearchUiAndTable() {                                     //console.log("buildSrcSearchUiAndTable called. tree = %O", srcTree);
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
-    clearPreviousTable();
+    // clearPreviousTable();
     buildUi[tblState.curRealm](); 
     // build_tbl_data.transformSrcDataAndLoadTable(srcTree, tblState);
 } 

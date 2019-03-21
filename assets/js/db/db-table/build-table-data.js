@@ -24,7 +24,7 @@ function transformLocData(tree, tblState) {
     return removeLocsWithoutInteractions(finalRowData);
 }
 /** Returns a row data object for the passed location and it's children.  */
-function getLocRowData(locRcrd, treeLvl, tblState) {                                      //console.log("--getLocRowData called for %s = %O", locRcrd.displayName, locRcrd);
+function getLocRowData(locRcrd, treeLvl, tblState) {                            //console.log("--getLocRowData called for %s = %O, tblState = %O", locRcrd.displayName, locRcrd, tblState);
     return {
         id: locRcrd.id,
         entity: "Location",
