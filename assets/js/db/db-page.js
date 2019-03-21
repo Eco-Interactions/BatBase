@@ -33,7 +33,20 @@ import * as db_csv from './db-table/csv-data.js';
  * dataKey = String checked in data storage to indicate whether the stored 
  *      data should be cleared and redownloaded. REFACT:: DB_SYNC
  */
-let dataStorage, tblState = {};
+let dataStorage; //REFACT: MOVE INTO UTIL OR DBSYNC
+/**
+ * Stores table state params needed across multiple modules. 
+ * {obj} api            Ag-grid API (available after table-init complete)
+ * {str} curFocus       Focus of the data in table: taxa, srcs, locs
+ * {str} curRealm       Sub-sort of table data. Eg: bats, auths, etc 
+ * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
+ * {ary} rowData        Row data in table
+ * {obj} rcrdsById      Focus records keyed by ID
+ * {obj} selectedOpts   K: Combobox key V: value selected 
+ * {obj} taxaByLvl      Taxon records in curTree organized by level and keyed under their display name.
+ * {str} userRole       Stores the role of the user.
+ */
+let tblState = {};
 const dataKey = 'A life without cause is a life without effect!';               console.log(dataKey);
 
 requireCss();
@@ -161,23 +174,13 @@ function initSearchState() {
     setUpFutureDevInfoBttn();
     selectInitialSearchFocus();
 } 
-/**
- * Container for param data needed for a selected focus. Resets on focus change.
- * - curFocus: Top table sort - Taxon (taxa), Location (locs), or Source (srcs).
- * - openRows: Array of entity ids whose table rows will be expanded on load.
- * Notable properties stored later: 
- * rcrdsById - all records for the current focus.
- * curRealm - focus' realm-level sort (eg, Taxon realms: Bat, Plant, Arthropod).
- * curTree - data 'tree' object to be displayed in table.
- * rowData - array of rows displayed in the table.
- * selectedOpts - search combobox values 'selected' for the current tree.
- *
- * REFACT:: DESCRIBE THE DIFFERENCE AND SEPARATE
- */
+/** Resets on focus change. */
 function resetTableParams() {  
-    tblState = {};
-    tblState.openRows = [];                                                      //console.log("tblState = %O", tblState);
-    tblState.curFocus = getResetFocus();  
+    tblState = {
+        curFocus: getResetFocus(),
+        openRows: [],
+        selectedOpts: {}
+    };
 }
 function getResetFocus() {
     const foci = ['locs', 'srcs', 'taxa'];
@@ -205,215 +208,45 @@ function getFutureDevMsg() {                                                    
         "Below is a 'Show/Hide Columns' button that will allow users to specify " +
         "the data shown in the table and/or csv export.";
 }
-
-// /*------------------ Interaction Search Methods--------------------------------------*/
-// /**
-//  * If interaction data is already in data storage, the data is sent to 
-//  * @fillTreeWithInteractions to begin rebuilding the data table. Otherwise, 
-//  * an ajax call gets the data which is stored @storeInteractions before being
-//  * sent to @fillTreeWithInteractions.    
-//  */
-// function getInteractionsAndFillTable() {                                         //console.log("getInteractionsAndFillTable called. Tree = %O", tblState.curTree);
-//     var entityData = _u.getDataFromStorage('interaction');
-//     fadeTable();
-//     if (entityData) { fillTreeWithInteractions(entityData); 
-//     } else { console.log("Error loading interaction data from storage."); }
-// }
-// /**
-//  * Fills the current tree data with interaction records @fillTree and starts 
-//  * the table-building method chain for the current focus @buildTable. Finally, 
-//  * calls @init_tbl.onTableInitComplete for the final stage of the build. 
-//  */
-// function fillTreeWithInteractions(intRcrds) {                                   //console.log("fillTreeWithInteractionscalled.");
-//     const focus = tblState.curFocus; 
-//     const curTree = tblState.curTree; 
-//     fillTree(focus, curTree, intRcrds);
-//     buildTable(focus, curTree);
-//     init_tbl.onTableInitComplete();
-// } 
-// /** Replaces all interaction ids with records for every node in the tree.  */
-// function fillTree(focus, curTree, intRcrds) {  
-//     const intEntities = ['taxon', 'location', 'source'];
-//     const entityData = _u.getDataFromStorage(intEntities);
-//     const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
-//     fillMethods[focus](curTree, intRcrds);
-
-//     function fillTaxonTree(curTree) {                                           //console.log("fillingTaxonTree. curTree = %O", curTree);
-//         fillTaxaInteractions(curTree);  
-//         fillHiddenTaxonColumns(curTree, intRcrds);
-
-//         function fillTaxaInteractions(treeLvl) {                                //console.log("fillTaxonInteractions called. taxonTree = %O", curTree) 
-//             for (let taxon in treeLvl) {   
-//                 fillTaxonInteractions(treeLvl[taxon]);
-//                 if (treeLvl[taxon].children !== null) { 
-//                     fillTaxaInteractions(treeLvl[taxon].children); }
-//             }
-//         }
-//         function fillTaxonInteractions(taxon) {                                 //console.log("fillTaxonInteractions. taxon = %O", taxon);
-//             const roles = ['subjectRoles', 'objectRoles'];
-//             for (let r in roles) {
-//                 taxon[roles[r]] = replaceInteractions(taxon[roles[r]]); 
-//             }
-//         }
-//     } /* End fillTaxonTree */
-//     /**
-//      * Recurses through each location's 'children' property and replaces all 
-//      * interaction ids with the interaction records.
-//      */
-//     function fillLocTree(treeBranch) {                                          //console.log("fillLocTree called. taxonTree = %O", treeBranch) 
-//         for (let curNode in treeBranch) {                                       //console.log("curNode = %O", treeBranch[curNode]);
-//             if (treeBranch[curNode].interactions.length > 0) { 
-//                 treeBranch[curNode].interactions = replaceInteractions(treeBranch[curNode].interactions); }
-//             if (treeBranch[curNode].children) { 
-//                 fillLocTree(treeBranch[curNode].children); }
-//         }
-//     }
-//     /**
-//      * Recurses through each source's 'children' property until finding the
-//      * direct source, then replacing its interaction id's with their records.
-//      */
-//     function fillSrcTree(curTree) { 
-//         for (let srcName in curTree) {                                          //console.log("-----processing src %s = %O. children = %O", srcName, curTree[srcName], curTree[srcName].children);
-//             fillSrcInteractions(curTree[srcName]);
-//         }
-//         /**
-//          * Recurses through each source's 'children' property until all sources 
-//          * have any interaction ids replaced with the interaction records. 
-//          */
-//         function fillSrcInteractions(curSrc) {                                  //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
-//             const srcChildren = [];
-//             if (curSrc.isDirect) { replaceSrcInts(curSrc); }
-//             curSrc.children.forEach(function(childSrc){
-//                 fillSrcInteractions(childSrc); 
-//             });
-//         }
-//         function replaceSrcInts(curSrc) {
-//             curSrc.interactions = replaceInteractions(curSrc.interactions); 
-//         }
-
-//     } /* End fillSrcTree */
-//     /** Replace the interaction ids with their interaction records. */
-//     function replaceInteractions(interactionsAry) {                             //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-//         return interactionsAry.map(function(intId){
-//             if (typeof intId === "number") {                                    //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
-//                 return fillIntRcrd(_u.getDetachedRcrd(intId, intRcrds)); 
-//             }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
-//         });
-//     }
-//     /** Returns a filled record with all references replaced with entity records. */
-//     function fillIntRcrd(intRcrd) {
-//         for (let prop in intRcrd) { 
-//             if (prop in entityData) { 
-//                 intRcrd[prop] = entityData[prop][intRcrd[prop]];
-//             } else if (prop === "subject" || prop === "object") {
-//                 intRcrd[prop] = entityData.taxon[intRcrd[prop]];
-//             } else if (prop === "tags") {
-//                 intRcrd[prop] = intRcrd[prop].length > 0 ? 
-//                     getIntTags(intRcrd[prop]) : null;
-//             }
-//         }
-//         return intRcrd;
-//     }
-//     function getIntTags(tagAry) { 
-//         const tags = tagAry.map(function(tag){ return tag.displayName; });
-//         return tags.join(", ");
-//     }
-// } /* End fillTree */
-// /** Calls the start of the table-building method chain for the current focus. */
-// function buildTable(focus, curTree) {
-//     const tblBuilderMap = { 
-//         locs: buildLocSearchUiAndTable,  srcs: buildSrcSearchUiAndTable,
-//         taxa: buildTaxonSearchUiAndTable 
-//     };    
-//     tblBuilderMap[focus](curTree);
-// }
-// function getTaxonName(taxon) {                                           
-//     var lvl = taxon.level.displayName;  
-//     return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
-// }   
 /*------------------ Taxon Search Methods ------------------------------------*/
 /**
  * Get all data needed for the Taxon-focused table from data storage and send 
  * to @initTaxonSearchUi to begin the data-table build.  
  */
-function buildTaxonTable() {                                                     //console.log("Building Taxon Table.");
-    var data = _u.getDataFromStorage(['realm', 'taxon', 'level']); 
-    if( data ) { initTaxonSearchUi(data);
+function buildTaxonTable() {                                                    //console.log("Building Taxon Table.");
+    const data = _u.getDataFromStorage(['realm', 'taxon']); 
+    if (data) { initTaxonSearchUi(data);
     } else { console.log("Error loading taxon data from storage."); }
 }
 /**
  * If the taxon search comboboxes aren't displayed, build them @buildTaxonRealmHtml.
  * If no realm is selected, the default realm value is set. The realm-tree 
- * is built @initTaxonTree and all present taxon-levels are stored @storeLevelData. 
+ * is built @startTxnTableBuildChain and all present taxon-levels are stored @storeLevelData. 
  * Continues table build @getInteractionsAndFillTable.  
  */
 function initTaxonSearchUi(data) {                                              console.log("initTaxonSearchUi. data = %O", data);
-    var realmTaxonRcrd;
     tblState.rcrdsById = data.taxon;
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
     setTaxonRealm();  
-    
-    realmTaxonRcrd = storeAndReturnRealm();
-    initTaxonTree(realmTaxonRcrd);
-    storeLevelData(realmTaxonRcrd);
-    getInteractionsAndFillTable();
+    startTxnTableBuildChain(storeAndReturnRealm());
 }
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonRealm() {
-    var realmVal;
-    var storedRealm = dataStorage.getItem('curRealm');                          console.log("storedRealm = ", storedRealm)
+    const storedRealm = dataStorage.getItem('curRealm');                        console.log("storedRealm = ", storedRealm)
     if (!_u.getSelVal('Taxon Realm')) { 
-        realmVal = storedRealm !== null ? storedRealm : "3";  
+        const realmVal = storedRealm !== null ? storedRealm : "3";  
         _u.setSelVal('Taxon Realm', realmVal, 'silent');
     }
 }
-/**
- * Stores in the global tState obj:
- * > taxonByLvl - object with taxon records in the current tree organized by 
- *   level and keyed under their display name.
- *   ## tblState
- * > allRealmLvls - array of all levels present in the current realm tree.
- */
-function storeLevelData(topTaxon) {
-    tblState["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                   //console.log("taxaByLvl = %O", tblState.taxaByLvl)
-    tblState["allRealmLvls"] = Object.keys(tblState.taxaByLvl);
-}
-function updateTaxaByLvl(topTaxon) {
-    tblState["taxaByLvl"] = seperateTaxonTreeByLvl(topTaxon);                   //console.log("taxaByLvl = %O", tblState.taxaByLvl)
-}
-/** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(topTaxon) {
-    var separated = {};
-    separate(topTaxon);
-    return sortObjByLevelRank(separated);
-
-    function separate(taxon) {
-        var lvl = taxon.level.displayName;
-        if (separated[lvl] === undefined) { separated[lvl] = {}; }
-        separated[lvl][taxon.displayName] = taxon;
-        
-        if (taxon.children) { 
-            taxon.children.forEach(function(child){ separate(child); }); 
-        }
-    }
-    function sortObjByLevelRank(taxonObj) {
-        var levels = Object.keys(_u.getDataFromStorage('levelNames'));       //console.log("levels = %O", levels)
-        var obj = {};
-        levels.forEach(function(lvl){
-            if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
-        });
-        return obj;
-    }
-} /* End seperateTaxonTreeByLvl */
 /** Event fired when the taxon realm select box has been changed. */
 export function onTaxonRealmChange(val) {  
     if (!val) { return; }
     resetTaxonRealm(val);
 }
-function resetTaxonRealm(val) {  console.log('resetTaxonRealm')
+function resetTaxonRealm(val) {                                                 //console.log('resetTaxonRealm')
     const realmTaxon = storeAndReturnRealm(val);
     resetCurTreeState();
-    rebuildTaxonTree(realmTaxon, true);
+    rebuildTaxonTree(realmTaxon);
 }
 /**
  * Gets the currently selected taxon realm's id, gets the record for the taxon, 
@@ -421,8 +254,8 @@ function resetTaxonRealm(val) {  console.log('resetTaxonRealm')
  * the taxon's record.
  */
 function storeAndReturnRealm(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('Taxon Realm'));        //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);                            console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmId = val || getSelValOrDefault(_u.getSelVal('Taxon Realm'));     //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
+    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _u.populateStorage('curRealm', realmId);
     tblState.curRealm = realmId;
@@ -435,79 +268,43 @@ function getSelValOrDefault(val) {
 }
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
- * the tree are stored or updated before continuing @getInteractionsAndFillTable.. 
+ * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTaxonTree(topTaxon, realmInit) {                                //console.log("realmTaxon=%O", realmTaxon)
+export function rebuildTaxonTree(topTaxon, filtering) {                         //console.log("realmTaxon=%O", realmTaxon)
     clearPreviousTable();
-    initTaxonTree(topTaxon);
-    if (realmInit) { storeLevelData(topTaxon); 
-    } else { updateTaxaByLvl(topTaxon); }
-    getInteractionsAndFillTable();
+    startTxnTableBuildChain(topTaxon, filtering)
 }
 /**
- * Builds a family tree of taxon data with passed taxon as the top of the tree. 
+ * Builds a family tree of taxon data with passed taxon as the top of the tree, 
+ * transforms that data into the format used for ag-grid and loads the grid, aka table. 
  * The top taxon's id is added to the global focus storage obj's 'openRows' 
  * and will be expanded on table load. 
  */
-function initTaxonTree(topTaxon) {
-    buildTaxonTree(topTaxon);                                 
+function startTxnTableBuildChain(topTaxon, filtering) {
     tblState.openRows = [topTaxon.id.toString()];                                //console.log("openRows=", openRows)
-}
-/**
- * Returns a heirarchical tree of taxon record data from the top, parent, 
- * realm taxon through all children. The tree is stored as 'curTree' in the 
- * global tblState obj. 
- */
-function buildTaxonTree(topTaxon) {                                             //console.log("buildTaxonTree called for topTaxon = %O", topTaxon);
-    var tree = {};                                                              //console.log("tree = %O", tree);
-    tree[topTaxon.displayName] = topTaxon;  
-    topTaxon.children = getChildTaxa(topTaxon.children);    
-    tblState.curTree = tree;  
-    /**
-     * Recurses through each taxon's 'children' property and returns a record 
-     * for each child ID found. 
-     */
-    function getChildTaxa(children) {                                           //console.log("getChildTaxa called. children = %O", children);
-        if (children === null) { return null; }
-        return children.map(function(child){
-            if (typeof child === "object") { return child; }
-
-            var childRcrd = _u.getDetachedRcrd(child, tblState.rcrdsById);                             //console.log("child = %O", child);
-            if (childRcrd.children.length >= 1) { 
-                childRcrd.children = getChildTaxa(childRcrd.children);
-            } else { childRcrd.children = null; }
-
-            return childRcrd;
-        });
-    }
-} /* End buildTaxonTree */
-/**
- * Initialize a search-combobox for each level in the tree @loadTaxonComboboxes.
- * Transform tree data into table rows and load table @transformTaxonDataAndLoadTable.
- */
-function buildTaxonSearchUiAndTable(taxonTree) {                                   //console.log("taxaByLvl = %O", tblState.taxaByLvl);
+    build_tbl_data.transformTaxonDataAndLoadTable(
+        data_tree.buildTxnTree(topTaxon, filtering), tblState);
     loadTaxonComboboxes();
-    build_tbl_data.transformTaxonDataAndLoadTable(taxonTree, tblState);
-} 
+}
 /*------------------ Build Taxon Search Ui --------------------------------*/
 /**
  * Builds the select box for the taxon realms that will become the data tree 
  * nodes displayed in the table.
  */
-function buildTaxonRealmHtml(data) {                                            //console.log("buildTaxonRealmHtml called. ");
+function buildTaxonRealmHtml(realms) {                                          //console.log("buildTaxonRealmHtml called. ");
     const browseElems = _u.buildElem('span', { id:'sort-taxa-by', 
         class: 'flex-row', text: 'Group Taxa by: ' });
-    const opts = getRealmOpts(data);                                            //console.log("realmOpts = %O", realmOpts);
+    const opts = getRealmOpts(realms);                                          //console.log("realmOpts = %O", realmOpts);
     $(browseElems).append(newSelEl(opts, 'opts-box', 'sel-realm', 'Taxon Realm'));
     $('#sort-opts').append(browseElems);
     _u.initCombobox('Taxon Realm');
     $('#sort-opts').fadeTo(0, 1);
 
-    function getRealmOpts(data) {  
-        var optsAry = [];
-        for (var id in data) {                                                  //console.log("taxon = %O", data[taxonId]);
-            optsAry.push({ value: data[id].taxon, text: data[id].displayName });
+    function getRealmOpts(realms) {  
+        const optsAry = [];
+        for (let id in realms) {                                                //console.log("taxon = %O", data[taxonId]);
+            optsAry.push({ value: realms[id].taxon, text: realms[id].displayName });
         }
         return optsAry;
     }
@@ -532,7 +329,7 @@ function loadTaxonComboboxes() {
  */
 function buildTaxonSelectOpts(rcrdsByLvl) {                                     //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     const optsObj = {};
-    const curRealmLvls = tblState.allRealmLvls.slice(1);                           //console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
+    const curRealmLvls = tblState.allRealmLvls.slice(1);                        console.log("curRealmLvls = %O", curRealmLvls) //Skips realm lvl 
     curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
@@ -580,20 +377,18 @@ function loadLevelSelects(levelOptsObj, levels) {                               
         return elems;
     }
 }
-function setSelectedTaxonVals(selected) {                                       //console.log("selected in setSelectedTaxonVals = %O", selected);
+function setSelectedTaxonVals(selected) {                                       console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
-    tblState.allRealmLvls.forEach(function(lvl) {                                //console.log("lvl ", lvl)
-        if (!selected[lvl]) { return; }                                                   //console.log("selecting = ", lvl, selected[lvl])
+    tblState.allRealmLvls.forEach(function(lvl) {                               
+        if (!selected[lvl]) { return; }                                         console.log("selecting [%s] = ", lvl, selected[lvl])
         _u.setSelVal(lvl, selected[lvl], 'silent');
     });
 }
 /*------------------Location Search Methods-----------------------------------*/
-/** 
- * Get location data from data storage and sends it to @initLocSearchUi
- */
+/** Get location data from data storage and sends it to @initLocSearchUi */
 function buildLocationTable(view) {
     const data = getLocData();
-    if( data ) { initLocSearchUi(data, view);
+    if (data) { initLocSearchUi(data, view);
     } else { console.log('Error loading location data from storage.'); }
 }
 function getLocData() {
@@ -659,26 +454,10 @@ function resetLocUi(view) {
  * Starts the Table build depending on the view selected.
  */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
-    // const regions = getTopRegionIds();
     _u.populateStorage('curRealm', view);                      
     return view === 'tree' ? rebuildLocTree() : buildLocMap();
 }
-function getTopRegionIds() {
-    const ids = [];
-    const regions = tblState.data.topRegionNames;
-    for (let name in regions) { ids.push(regions[name]); } 
-    return ids;
-}
 /** ------------ Location Table Methods ------------------------------------- */
-/** 
- * Builds a tree of location data with regions at the top level, and sub-regions, 
- * countries, areas, and points as nested children @buildLocTree. Fills tree
- * with interactions and continues building the table @getInteractionsAndFillTable.
- */
-// function buildLocTableTree(topLocs) {                                            //console.log('buildLocTableTree')
-//     buildLocTree(topLocs);
-//     getInteractionsAndFillTable();
-// }
 /**
  * Rebuilds loc tree with passed location, or the default top regions, as the
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
@@ -691,35 +470,17 @@ export function rebuildLocTree(topLoc) {                                        
     clearPreviousTable();
     startLocTableBuildChain(topLocs);
 }
+function getTopRegionIds() {
+    const ids = [];
+    const regions = tblState.data.topRegionNames;
+    for (let name in regions) { ids.push(regions[name]); } 
+    return ids;
+}
 function startLocTableBuildChain(topLocs) {
     build_tbl_data.transformLocDataAndLoadTable(
         data_tree.buildLocTree(topLocs), tblState);
     loadSearchLocHtml();
 }
-// /**
-//  * Builds a tree of location data with passed locations at the top level, and 
-//  * sub-locations as nested children. Adds the alphabetized tree to the global 
-//  * tblState obj as 'curTree'. 
-//  */ 
-// function buildLocTree(topLocs) {                                                //console.log("passed 'top' locIds = %O", topLocs)
-//     var topLoc;
-//     var tree = {};                                                              //console.log("tree = %O", tree);
-//     topLocs.forEach(function(id){  
-//         topLoc = _u.getDetachedRcrd(id, tblState.rcrdsById);  
-//         tree[topLoc.displayName] = getLocChildren(topLoc);
-//     });  
-//     tblState.curTree = sortDataTree(tree);
-// }
-// /** Returns the location record with all child ids replaced with their records. */
-// function getLocChildren(rcrd) {   
-//     if (rcrd.children.length > 0) { 
-//         rcrd.children = rcrd.children.map(getLocChildData);
-//     }
-//     return rcrd;
-// }
-// function getLocChildData(childId) {  
-//     return getLocChildren(_u.getDetachedRcrd(childId, tblState.rcrdsById));
-// }
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
@@ -1055,9 +816,8 @@ function returnRcrdsToTable() {
  * to @initSrcSearchUi to begin the data-table build.  
  */
 function buildSrcTable() {
-    const entities = [ 'source', 'author', 'publication' ];
-    const entityData = _u.getDataFromStorage(entities);
-    if( entityData ) { initSrcSearchUi(entityData);
+    const data = _u.getDataFromStorage('source');
+    if (data) { initSrcSearchUi(data);
     } else { console.log('Error loading source data from storage.'); }
 }
 
@@ -1066,15 +826,9 @@ function buildSrcTable() {
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 function initSrcSearchUi(srcData) {                                             //console.log("=========init source search ui");
-    addSrcDataToTableParams(srcData);
+    tblState.rcrdsById = srcData;
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
-}
-/** Add source data to tblState to be available while in a source focus. */
-function addSrcDataToTableParams(srcData) {
-    tblState.rcrdsById = srcData.source;
-    tblState.author = srcData.author;
-    tblState.publication = srcData.publication;
 }
 /** Builds the combobox for the source realm types. */
 function buildSrcRealmHtml() {                                             
@@ -1116,7 +870,8 @@ function resetSourceRealm(val) {
 function startSrcTableBuildChain(val) {
     storeSrcRealm(val);
     buildSrcSearchUiAndTable();
-    build_tbl_data.transformSrcDataAndLoadTable(data_tree.buildSrcTree(), tblState);
+    build_tbl_data.transformSrcDataAndLoadTable(
+        data_tree.buildSrcTree(tblState.curRealm), tblState);
 }
 function storeSrcRealm(val) {  
     const realmVal = val || _u.getSelVal('Source Type');                           //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
@@ -1315,61 +1070,61 @@ function loadPublSearchHtml() {
 //  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
 //  *
 //  */
-function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
-    var curTaxonHeirarchy = {};
-    var lvls = Object.keys(_u.getDataFromStorage('levelNames'));                //console.log('lvls = %O', lvls);
-    getTaxonDataAtTreeLvl(curTaxonTree);
+// function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
+//     var curTaxonHeirarchy = {};
+//     var lvls = Object.keys(_u.getDataFromStorage('levelNames'));                //console.log('lvls = %O', lvls);
+//     getTaxonDataAtTreeLvl(curTaxonTree);
 
-    function getTaxonDataAtTreeLvl(treeLvl) {
-        for (var topTaxon in treeLvl) {                                         //console.log('curTaxon = %O', treeLvl[topTaxon])
-            syncTaxonHeir( treeLvl[topTaxon] ); 
-            fillInteractionRcrdsWithTaxonTreeData( treeLvl[topTaxon] );
-            if (treeLvl[topTaxon].children) { 
-                getTaxonDataAtTreeLvl( treeLvl[topTaxon].children ); }             
-        }
-    }
-    /**
-     * This method keeps the curTaxonChain obj in sync with the taxon being processed.  
-     * For each taxon, all level more specific that the parent lvl are cleared.
-     * Note: The top taxon for the realm inits the taxon chain obj. 
-     */
-    function syncTaxonHeir(taxon) {                        
-        var lvl = taxon.level.displayName;
-        var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
-        if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
-        } else { clearLowerLvls(tblState.rcrdsById[prntId].level.displayName); }
-        curTaxonHeirarchy[lvl] = taxon.displayName;
-    }
-    /**
-     * Inits the taxonomic-rank object that will be used to track the parent
-     * chain of each taxon being processed. 
-     */
-    function fillInAvailableLevels(topLvl) { 
-        var topIdx = lvls.indexOf(topLvl);
-        for (var i = topIdx; i < lvls.length; i++) { 
-            curTaxonHeirarchy[lvls[i]] = null;
-        }  
-    }
-    function clearLowerLvls(parentLvl) {
-        var topIdx = lvls.indexOf(parentLvl);
-        for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
-    }
-    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
-        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             //console.log('role = ', role)
-            if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
-        });
-    } 
-    function addTaxonTreeFields(intRcrdObj) {                               
-        for (var lvl in curTaxonHeirarchy) {
-            var colName = 'tree' + lvl; 
-            intRcrdObj[colName] = lvl === 'Species' ? 
-                getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
-        }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
-    }
-    function getSpeciesName(speciesName) {
-        return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
-    }
-} /* End fillHiddenColumns */
+//     function getTaxonDataAtTreeLvl(treeLvl) {
+//         for (var topTaxon in treeLvl) {                                         //console.log('curTaxon = %O', treeLvl[topTaxon])
+//             syncTaxonHeir( treeLvl[topTaxon] ); 
+//             fillInteractionRcrdsWithTaxonTreeData( treeLvl[topTaxon] );
+//             if (treeLvl[topTaxon].children) { 
+//                 getTaxonDataAtTreeLvl( treeLvl[topTaxon].children ); }             
+//         }
+//     }
+//     /**
+//      * This method keeps the curTaxonChain obj in sync with the taxon being processed.  
+//      * For each taxon, all level more specific that the parent lvl are cleared.
+//      * Note: The top taxon for the realm inits the taxon chain obj. 
+//      */
+//     function syncTaxonHeir(taxon) {                        
+//         var lvl = taxon.level.displayName;
+//         var prntId = taxon.parent;                                              //console.log("syncTaxonHeir TAXON = [%s], LVL = [%s] prntId = ",taxonName, lvl, prntId);
+//         if (!prntId || prntId === 1) { fillInAvailableLevels(lvl);
+//         } else { clearLowerLvls(tblState.rcrdsById[prntId].level.displayName); }
+//         curTaxonHeirarchy[lvl] = taxon.displayName;
+//     }
+//     /**
+//      * Inits the taxonomic-rank object that will be used to track the parent
+//      * chain of each taxon being processed. 
+//      */
+//     function fillInAvailableLevels(topLvl) { 
+//         var topIdx = lvls.indexOf(topLvl);
+//         for (var i = topIdx; i < lvls.length; i++) { 
+//             curTaxonHeirarchy[lvls[i]] = null;
+//         }  
+//     }
+//     function clearLowerLvls(parentLvl) {
+//         var topIdx = lvls.indexOf(parentLvl);
+//         for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
+//     }
+//     function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
+//         $(['subjectRoles', 'objectRoles']).each(function(i, role) {             //console.log('role = ', role)
+//             if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
+//         });
+//     } 
+//     function addTaxonTreeFields(intRcrdObj) {                               
+//         for (var lvl in curTaxonHeirarchy) {
+//             var colName = 'tree' + lvl; 
+//             intRcrdObj[colName] = lvl === 'Species' ? 
+//                 getSpeciesName(curTaxonHeirarchy[lvl]) : curTaxonHeirarchy[lvl];
+//         }                                                                       //console.log('intRcrd after taxon fill = %O', intRcrdObj);
+//     }
+//     function getSpeciesName(speciesName) {
+//         return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
+//     }
+// } /* End fillHiddenColumns */
 /*================= Utility ==================================================*/
 function clearCol2() {
     $('#opts-col2').empty();
@@ -1520,11 +1275,7 @@ function isNextOpenLeafRow(node) {                                              
     return true;
 }     
 /*----------------- Table Manipulation ------------------------------------------*/
-/** 
- * Table-rebuild entry point after form-window close. 
- *
- 
- */
+/**  Table-rebuild entry point after form-window close.  */
 function resetDataSearchTable(focus) {                                          //console.log('resetting search table.')
     resetToggleTreeBttn(false);
     db_filters.resetFilterStatusBar();

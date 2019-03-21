@@ -369,7 +369,7 @@ export function updateTaxonSearch(val) {                                        
     const rcrd = _u.getDetachedRcrd(val, tblState.rcrdsById);  
     tState().set(null, 'selectedOpts', getRelatedTaxaToSelect(rcrd));           //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
-    rebuildTaxonTree(rcrd);
+    rebuildTaxonTree(rcrd, 'filtering');
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function updateFilterStatus() {
