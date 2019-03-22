@@ -393,10 +393,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
-function getTaxonName(taxon) {                                           
-    var lvl = taxon.level.displayName;  
-    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
-}  
+
 /* ================================ UTILITY ========================================================================= */
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {

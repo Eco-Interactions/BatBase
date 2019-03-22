@@ -15,6 +15,8 @@ import * as _u from './util.js';
 import * as db_page from './db-page.js';
 import * as db_forms from './db-forms.js';
 import * as MM from './map-markers.js'; 
+import { accessTableState as tState } from './db-page.js';
+
 
 let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
@@ -24,7 +26,6 @@ let app = {
     */}
 };
 
-initDb();
 requireCss();
 fixLeafletBug();
 
@@ -52,22 +53,15 @@ function fixLeafletBug() {
 }
 /** ------------------ Stored Data Methods ---------------------------------- */
 /**
- * Checks whether the dataKey exists in indexDB cache. 
- * If it is, the stored geoJson is fetched and stored in the global variable. 
- * If not, the db is cleared and geoJson is redownloaded. 
+ * Checks if geojson data is already available, downloads if not.
+ * TODO:: Test for when geoJsonData is erroring and then redownload the data
  */
-function initDb() {
-    _u.initGeoJsonData();
-}
-function geoJsonDataAvailable() {
-    return _u.isGeoJsonDataAvailable();
-}
-/*=========================== Shared Methods =================================*/
-// Test for when geoJsonData is erroring and then redownload the data
 function waitForDataThenContinue(cb) {                                          console.log('waiting for geojson');
-    return geoJsonDataAvailable() ? cb() : 
+    return _u.isGeoJsonDataAvailable() ? cb() : 
         window.setTimeout(waitForDataThenContinue.bind(null, cb), 500);
 }
+/*=========================== Shared Methods =================================*/
+
 /** Initializes the map using leaflet and mapbox. */
 function buildAndShowMap(loadFunc, mapId, type) {                               console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
@@ -343,17 +337,144 @@ function addMarkersForLocAndChildren(topLoc) {
 } /* End addMarkersForLocAndChildren */
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, tableData, rcrds) {                             //console.log('----------- showInts. tableData = %O', tableData);
-    locRcrds = rcrds;
+export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. tableData = %O', tableData);
+    locRcrds = locRcrds;
     waitForDataThenContinue(buildAndShowMap.bind(null, showIntsOnMap, 'map'));                                                 
     
-    function showIntsOnMap() {                                                  console.log('showIntsOnMap! data = %O', tableData);
+    function showIntsOnMap() {                                                  
+        const tableData = buildLocDataObj(viewRcrds, locRcrds);                 //console.log('showIntsOnMap! data = %O', tableData);
         const keys = Object.keys(tableData);                                     
         addIntCntsToLegend(tableData);
         addIntMarkersToMap(focus, tableData);
         zoomIfAllInSameRegion(tableData);
     }
 } 
+/**
+ * Builds an object sorted by geoJsonId with all interaction data at that location.
+ * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
+ */
+function buildLocDataObj(viewRcrds, locRcrds) {  
+    const tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+    const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
+    let curBaseNodeName; //used for Source rows
+    tblState.api.forEachNodeAfterFilter(getIntMapData);
+    return mapData;  
+    
+    function getIntMapData(row) {                         
+        if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }                         
+        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
+        buildInteractionMapData(row.data, _u.getDetachedRcrd(row.data.id, viewRcrds));
+    }
+    function buildInteractionMapData(rowData, rcrd) {
+        const intRcrds = _u.getDataFromStorage('interaction');
+        const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
+        let noLocCnt = 0;
+        const data = { 
+            intCnt: 0, 
+            name: getRowRcrdName(rowData, rcrd, curBaseNodeName),
+            rcrd: rcrd
+        };
+        rowData.children.forEach(addRowData); //interactions
+        addToMapDataObj(data, locs, noLocCnt);
+        /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
+        function addRowData(intRowData) {  
+            if (!intRowData.location) { return ++noLocCnt; }  
+            const intRcrd = _u.getDetachedRcrd(intRowData.id, intRcrds);        //console.log('intRcd = %O, locRcrds = %O', intRcrd, locRcrds);
+            const loc = _u.getDetachedRcrd(intRcrd.location, locRcrds);
+            addLocAndIntData(loc, intRcrd);
+            ++data.intCnt;
+        }
+        function addLocAndIntData(newLoc, intRcrd) {
+            if (!locs[newLoc.id]) { initLocObj() }
+            locs[newLoc.id].ints.push(intRcrd);
+
+            function initLocObj() {
+                locs[newLoc.id] = { loc: newLoc, ints: [] }; 
+            }
+        }
+    } /* End buildInteractionMapData */
+    function addToMapDataObj(entData, locs, noLocCnt) { 
+        mapData.none.ttl += noLocCnt;
+        for (let id in locs) {
+            addData(locs[id], entData);
+        }
+    }
+    function addData(locObj, entData) {
+        const geoId = locObj.loc.geoJsonId;
+        if (!geoId) { return mapData.none.ttl += locObj.ints.length; }
+        if (!mapData[geoId]) { initDataObj(geoId, locObj.loc); }
+        mapData[geoId].ttl += locObj.ints.length;
+        addIfNewLoc(locObj.loc, geoId);
+        addIntData(locObj, entData, geoId);
+    }
+    function addIntData(locObj, entData, geoId) {
+        const mapDataProp = mapData[geoId].ints[entData.name]
+        if (!mapData[geoId].ints[entData.name]) { initIntDataObj(entData, geoId); }
+        if (tblState.curRealm == 'auths') { return sanitizeAndAddInt(); }
+        addToIntObj(entData.name)
+
+        function addToIntObj(key) {
+            mapData[geoId].ints[key] = mapData[geoId].ints[key].concat(locObj.ints);
+        }
+        /**
+         * When author interactions are displayed, they often duplicate if two 
+         * authors attrbuted to the same work are shown. This combines the author
+         * names in that case, thus showing the interaction once.
+         */
+        function sanitizeAndAddInt() { 
+            const keyStr = entData.name.split(' - (')[1];
+            const curAuth = entData.name.split(' - (')[0];
+            const toCombine = Object.keys(mapData[geoId].ints).find(
+                key => key.includes(keyStr) && !key.includes(curAuth)); 
+            if (!toCombine) { addToIntObj(entData.name); 
+            } else { modifyAndCombineInt(toCombine, keyStr, curAuth); }
+        }
+        function modifyAndCombineInt(keyName, work, curAuth) {  
+            let auths = keyName.split(' - (')[0]; 
+            auths += `, ${curAuth} - (${work}`; 
+            mapData[geoId].ints[auths] = mapData[geoId].ints[keyName];
+            delete mapData[geoId].ints[keyName];  
+        }
+    } /* End addIntData */
+    function initIntDataObj(entData, geoId) {
+        mapData[geoId].ints[entData.name] = [];
+    }
+    /** Some locations share geoJson with their parent, eg habitats. */
+    function addIfNewLoc(newLoc, geoId) {
+        const alreadyAdded = mapData[geoId].locs.find(
+            loc => loc.displayName === newLoc.displayName); 
+        if (alreadyAdded) { return; }  
+        mapData[geoId].locs.push(newLoc);
+    }
+    function initDataObj(geoId, loc) {
+        mapData[geoId] = { ints: {/* name: [rcrds] */}, locs: [loc], ttl: 0 };
+    }
+    function hasUnspecifiedRow(rowData) {
+        return rowData.children[0].name.indexOf('Unspecified') !== -1;
+    }
+    function getRowRcrdName(rowData, rcrd, baseNode) {
+        if (tblState.curFocus === 'srcs') { return getSrcRowName(rowData, rcrd, baseNode)}
+        return rowData.name.indexOf('Unspecified') !== -1 ?
+            getUnspecifiedRowEntityName(rowData, rcrd) : 
+            getRcrdDisplayName(rowData.name, rcrd);
+    }
+    /** Adds the base entity name before the name of the work, eg Author (work) */
+    function getSrcRowName(rowData, rcrd, baseNode) {  
+        const work = getRcrdDisplayName(rowData.name, rcrd);
+        if (work == baseNode) { return baseNode; }
+        return `${baseNode} - (${work})`;
+    }
+    function getUnspecifiedRowEntityName(row, rcrd) { 
+        return tblState.curFocus === 'taxa' ? 
+            _u.getTaxonName(rcrd) : getRcrdDisplayName(rcrd.displayName, rcrd);
+    }
+    function getRcrdDisplayName(name, rcrd) {
+        return name === 'Whole work cited.' ? getParentName(rcrd) : name;
+    }
+    function getParentName(rcrd) {  
+        return rcrd.displayName.split('(citation)')[0];
+    }
+} /* End buildTableLocDataObj */
 function addIntCntsToLegend(data) {
     let shwn = 0, notShwn = 0;
     Object.keys(data).forEach(trackIntCnts);

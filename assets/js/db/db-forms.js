@@ -130,7 +130,7 @@ function refocusTableIfFormWasSubmitted() {                                     
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
     var focus  = fP.action === 'create' ? 'srcs' : null;
-    db_page.showUpdates(focus);   
+    db_filters.showTodaysUpdates(focus);   
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?

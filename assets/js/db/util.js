@@ -24,9 +24,10 @@ import * as db_page from './db-page.js';
  *   ucfirst 
 */
 let dataStorage, geoJson;
-const geoJsonDataKey = 'A life without cause is a life without effect!';
+const geoJsonKey = 'A life without cause is a life without effect!!';  
 
 extendPrototypes();
+initGeoJsonData();
 
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
@@ -225,8 +226,13 @@ export function removeFromStorage(key) {
     dataStorage.removeItem(key);
 }
 /** --------- IDB Storage --------------- */
-export function initGeoJsonData() {
-    idb.get(geoJsonDataKey).then(clearIdbCheck);
+/** 
+ * Checks whether the dataKey exists in indexDB cache. 
+ * If it is, the stored geoJson is fetched and stored in the global variable. 
+ * If not, the db is cleared and geoJson is redownloaded. 
+ */
+export function initGeoJsonData() {  
+    idb.get(geoJsonKey).then(clearIdbCheck);
 }
 function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
     if (storedKey) { return getGeoJsonData(); } 
@@ -236,7 +242,7 @@ function clearIdbCheck(storedKey) {                                             
 function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
     idb.get('geoJson').then(storeGeoJson);
 }
-function storeGeoJson(geoData) {                                                console.log('stor(ing)GeoJson. geoData ? ', !geoData);
+function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
     if (!geoData) { return downloadGeoJson(); }
     geoJson = geoData; 
 }
@@ -251,7 +257,7 @@ function downloadGeoJsonAfterLocalDbInit(cb) {                                  
     function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
         idb.set('geoJson', data.geoJson);
         storeGeoJson(data.geoJson);
-        idb.set(geoJsonDataKey, true);
+        idb.set(geoJsonKey, true);
         if (cb) { cb(); }
     }
 }
@@ -467,6 +473,13 @@ function saveSelVal($elem, val) {
 //     elem.selectize.updatePlaceholder();
 // }
 
+export function enableComboboxes($pElems, enable) {
+    $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
+}
+function enableCombobox(enable, selId) {
+    if (enable === false) { return $(selId)[0].selectize.disable(); }
+    $(selId)[0].selectize.enable();
+}
 
 /* -------------------------------------------------------------------------- */
 export function fadeTable() {  
@@ -474,8 +487,18 @@ export function fadeTable() {
 }
 
 
-
-
+export function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
+    const popUpMsg = msg || 'Loading...';
+    $('#db-popup').text(popUpMsg);
+    $('#db-popup').addClass('loading'); //used in testing
+    $('#db-popup, #db-overlay').show();
+    fadeTable();
+}
+/** May only be needed in db0map */
+export function getTaxonName(taxon) {                                           
+    const lvl = taxon.level.displayName;  
+    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
+}  
 
 
 
