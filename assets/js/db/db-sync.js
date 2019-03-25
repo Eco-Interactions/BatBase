@@ -451,7 +451,7 @@ function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
     window.localStorage.clear();
     ajaxAndStoreAllEntityData();
-    db_page.handleReset(prevFocus);
+    db_page.onDataReset(prevFocus);
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded

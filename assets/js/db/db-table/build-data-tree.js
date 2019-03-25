@@ -217,7 +217,7 @@ function storeLevelData(topTaxon) {                                             
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
 function updateTaxaByLvl(topTaxon) {
-    tState().set(null, 'taxaByLvl', seperateTaxonTreeByLvl(topTaxon));          //console.log("taxaByLvl = %O", taxaByLvl)
+    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(topTaxon)});              //console.log("taxaByLvl = %O", taxaByLvl)
 }
 /** Returns an object with taxon records by level and keyed with display names. */
 function seperateTaxonTreeByLvl(topTaxon) {

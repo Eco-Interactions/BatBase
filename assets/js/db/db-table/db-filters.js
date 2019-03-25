@@ -16,7 +16,7 @@
  */
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTree, rebuildTaxonTree } from '../db-page.js';
-import { resetToggleTreeBttn } from './tbl-ui.js';
+import { resetToggleTreeBttn } from './db-ui.js';
 
 
 
@@ -389,7 +389,7 @@ export function updateTaxonSearch(val) {                                        
     if (!val) { return; }
     const taxonRcrds = tState().get('rcrdsById');
     const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
-    tState().set(null, 'selectedOpts', getRelatedTaxaToSelect(rcrd, taxonRcrds));//console.log("selectedVals = %O", tParams.selectedVals);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});//console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
     rebuildTaxonTree(rcrd, 'filtering');
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
@@ -432,7 +432,7 @@ function getLocType(selId) {
 }
 function getComboboxValuesAndRebuildLocTree(val, locType) {
     const selVal = parseInt(val);  
-    tState().set(null, 'selectedOpts', getSelectedVals(selVal, locType));
+    tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
     rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
     updateFilter(locType);
 }

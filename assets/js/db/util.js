@@ -500,7 +500,13 @@ export function getTaxonName(taxon) {
     return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
 }  
 
+export function clearCol2() {
+    $('#opts-col2').empty();
+}
 
-
-
+export function alphaOptionObjs(a, b) {
+    var x = a.text.toLowerCase();
+    var y = b.text.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}
 

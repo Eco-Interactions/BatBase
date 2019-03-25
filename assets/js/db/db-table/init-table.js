@@ -7,6 +7,7 @@
 import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
 import * as db_filters from './db-filters.js';
+import * as db_forms from '../db-forms.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
