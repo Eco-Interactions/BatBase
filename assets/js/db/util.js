@@ -346,33 +346,30 @@ export function getTaxonName(taxon) {
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
- *
- * REFACT NOTE:: data-filters.js || util-combobox
  */
-export function initCombobox(field) {                                           //console.log("initCombobox [%s]", field);
+export function initCombobox(field) {                                           console.log("initCombobox [%s]", field);
     const confg = getSelConfgObj(field); 
     initSelectCombobox(confg);  
 } /* End initComboboxes */
 export function initComboboxes(fieldAry) {
     fieldAry.forEach(field => initCombobox(field));
 }
-function getSelConfgObj(field) {
-    const updateTaxonSearch = db_filters.updateTaxonSearch;
-    const updateLocSearch = db_filters.updateLocSearch;
-    const updatePubSearch = db_filters.updatePubSearch;
+/** REFACTOR AWAY FROM USING FIELD IN ID'S. CUZ WHY AM I ALREADY? */
+function getSelConfgObj(field) {  
     const confgs = { 
         'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus },
-        'Class' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Country' : { name: field, id: '#sel'+field, change: updateLocSearch },
-        'Family' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Genus' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Order' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Publication Type' : {name: field, id: '#selPubType', change: updatePubSearch },
-        'Loc View' : {name: field, id: '#sel-realm', change: db_page.onLocViewChange },
-        'Source Type': { name: field, id: '#sel-realm', change: db_page.onSrcRealmChange },
-        'Species' : { name: field, id: '#sel'+field, change: updateTaxonSearch },
-        'Taxon Realm' : { name: 'Realm', id: '#sel-realm', change: db_page.onTaxonRealmChange },
-        'Region' : { name: field, id: '#sel'+field, change: updateLocSearch },
+        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
+        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
+        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
+        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
+        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
+        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch },
+        // 'Loc View' : {name: field, id: '#sel-realm', change: db_page.onLocViewChange },
+        // 'Source Type': { name: field, id: '#sel-realm', change: db_page.onSrcRealmChange },
+        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
+        // 'Taxon View' : { name: 'Realm', id: '#sel-realm', change: db_page.onTaxonRealmChange },
+        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
+        'View': { name: 'View', id: '#sel-view', change: false }
     };
     return confgs[field];
 }
@@ -388,7 +385,7 @@ function initSelectCombobox(confg) {                                            
         onBlur: saveOrRestoreSelection,
         placeholder: getPlaceholer(confg.id)
     };
-    const sel = $(confg.id).selectize(options); 
+    const sel = $(confg.id).selectize(options);  
 
     function getPlaceholer(id) {
         const optCnt = $(id + ' > option').length;  
@@ -396,7 +393,7 @@ function initSelectCombobox(confg) {                                            
         return optCnt ? 'Select ' + confg.name : '- None -';
     }
 } /* End initSelectCombobox */
-export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
+export function getSelVal(field) {                                              console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     return $(confg.id)[0].selectize.getValue();  
 }
@@ -405,7 +402,7 @@ export function getSelVal(field) {                                              
 //     const $selApi = $(confg.id)[0].selectize; 
 //     return $selApi.getItem(id).length ? $selApi.getItem(id)[0].innerText : false;
 // }
-export function setSelVal(field, val, silent) {                                        //console.log('setSelVal [%s] = [%s]', field, val);
+export function setSelVal(field, val, silent) {                                 console.log('setSelVal [%s] = [%s]', field, val);
     const confg = getSelConfgObj(field);
     const $selApi = $(confg.id)[0].selectize; 
     $selApi.addItem(val, silent); 
@@ -436,6 +433,17 @@ export function enableComboboxes($pElems, enable) {
 function enableCombobox(enable, selId) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
+}
+export function replaceSelOpts(selId, opts, changeHndlr) {                      console.log('replaceSelOpts. args = %O', arguments)
+    const $selApi = $(selId)[0].selectize;
+    if (!opts) { return clearCombobox($selApi); }
+    $selApi.addOption(opts); 
+    $selApi.on('change', changeHndlr)  
+    $selApi.refreshOptions(false);
+}
+function clearCombobox($selApi) {
+    $selApi.clearOptions();
+    $selApi.off('change');
 }
 /* ------------- Unused ----------------------------------------------------- */
 

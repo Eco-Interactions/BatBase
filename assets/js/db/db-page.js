@@ -5,15 +5,15 @@
  * authors, publications, or publishers). The data map displays interactions
  * geographically. Filtered interactions can be viewed in either form. 
  * 
- * Exports:
- *     accessTableState
+ * Exports:                 Imported by:
+ *     accessTableState         Almost everything else
  *     initSearchPage
  *     initDataTable
- *     onLocViewChange
+ *     onLocViewChange          db_ui
  *     onDataReset
- *     onSrcRealmChange
- *     onTaxonRealmChange
- *     rebuildLocTree
+ *     onSrcViewChange          db_ui
+ *     onTxnViewChange          db_ui
+ *     rebuildLocTable
  *     rebuildTaxonTable
  *     selectSearchFocus
  *     showLocInDataTable
@@ -85,9 +85,9 @@ function initSearchState() {
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     $('#filter-opts').show(400);  
-    _u.initCombobox('Focus');
+    _u.initComboboxes(['Focus', 'View']);
     _u.setSelVal('Focus', tblState.curFocus, 'silent');
-    $('#sort-opts').show(400);
+    // $('#sort-opts').show(400);
     selectSearchFocus();
 }
 /* ================== Table "State" Methods ========================================================================= */
@@ -124,12 +124,9 @@ function getResetFocus() {
     const storedFocus = _u.getDataFromStorage('curFocus');
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
-/**
- * ResetData button: Resets table state to top focus options: Taxon and source 
- * are reset at current realm; locations are reset to the top regions.
- */
+/** Resets table state to top focus options for the selected view. */
 function resetDataTable() {                                                     //console.log("---reseting table---")
-    const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTree, srcs: resetSourceRealm };
+    const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTable, srcs: resetSourceRealm };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 
 } 
@@ -137,7 +134,7 @@ function resetDataTable() {                                                     
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     db_ui.resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
+    // if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
 }
 /** 
@@ -152,7 +149,7 @@ function resetCurTreeStorageProps() {
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetFilterStatusBar();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
+    // if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();
 }
@@ -166,12 +163,10 @@ export function selectSearchFocus(f) {
     if (!_u.getDataFromStorage('pgDataUpdatedAt')) { return; } 
     updateFocusAndBuildTable(focus, builderMap[focus]); 
 }
-/**
- * Updates the top sort (focus) of the data table, either 'taxa', 'locs' or 'srcs'.
- */
+/** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
-    if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
+    // if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     storeStateValue('curFocus', focus);
     clearOnFocusChange(focus, tableBuilder);
@@ -189,7 +184,9 @@ function clearOnFocusChange(focus, tableBuilder) {
     db_filters.resetFilterStatusBar();
     resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
-    db_ui.clearPastHtmlOptions(tableBuilder); 
+    _u.replaceSelOpts('#sel-view', false);
+    tableBuilder();
+    // db_ui.clearPastHtmlOptions(tableBuilder); 
 }
 function storeStateValue(key, value) {
     _u.addToStorage(key, JSON.stringify(value));
@@ -207,8 +204,8 @@ function buildTaxonTable() {                                                    
         startTxnTableBuildChain(storeAndReturnRealm());
     } else { console.log("Error loading taxon data from storage."); }
 }
-/** Event fired when the taxon realm select box has been changed. */
-export function onTaxonRealmChange(val) {  
+/** Event fired when the taxon view select box has been changed. */
+export function onTxnViewChange(val) { console.log('onTxnViewChange. val = [%s]', val) 
     if (!val) { return; }
     resetTaxonRealm(val);
 }
@@ -218,12 +215,12 @@ function resetTaxonRealm(val) {                                                 
     rebuildTaxonTable(realmTaxon);
 }
 /**
- * Gets the currently selected taxon realm's id, gets the record for the taxon, 
+ * Gets the currently selected taxon realm/view's id, gets the record for the taxon, 
  * stores both it's id and level in the global focusStorag, and returns 
  * the taxon's record.
  */
 function storeAndReturnRealm(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('Taxon Realm'));     //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));     //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     storeStateValue('curRealm', realmId);
@@ -254,14 +251,14 @@ function startTxnTableBuildChain(topTaxon, filtering) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
     frmt_data.transformTaxonDataAndLoadTable(
         data_tree.buildTxnTree(topTaxon, filtering), tblState);
-    db_ui.loadTaxonComboboxes(tblState);
+    // db_ui.loadTaxonComboboxes(tblState);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(view) {
     const data = getLocData();
     if (data) { 
         addLocDataToTableParams(data);
-        db_ui.initLocSearchUi(data, view);
+        db_ui.initLocSearchUi(view);
         updateLocView(view);
     } else { console.log('Error loading location data from storage.'); }
 }
@@ -282,7 +279,7 @@ export function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || _u.getSelVal('Loc View');                                  //console.log('updateLocView. view = [%s]', val);
+    const val = v || _u.getSelVal('View');                                  //console.log('updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
@@ -293,12 +290,9 @@ function resetLocUi(view) {
     clearPreviousTable();
     if (view === 'tree') { db_ui.updateUiForTableView(); }
 }
-/** 
- * Starts the Table build depending on the view selected.
- */
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
     storeStateValue('curRealm', view);                      
-    return view === 'tree' ? rebuildLocTree() : buildLocMap();
+    return view === 'tree' ? rebuildLocTable() : buildLocMap();
 }
 /** ------------ Location Table Methods ------------------------------------- */
 /**
@@ -307,7 +301,7 @@ function showLocInteractionData(view) {                                         
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTree(topLoc) {   //REFACT:: CHANGE NAME TO REBUILDLOCTABLE                                     //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+export function rebuildLocTable(topLoc) {                                       //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();
     tblState.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousTable();
@@ -322,14 +316,14 @@ function getTopRegionIds() {
 function startLocTableBuildChain(topLocs) {
     frmt_data.transformLocDataAndLoadTable(
         data_tree.buildLocTree(topLocs), tblState);
-    db_ui.loadSearchLocHtml(tblState);
+    // db_ui.loadSearchLocHtml(tblState);
 }
 /** ------------ Location Map Methods --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
 export function showLocInDataTable(loc) {                                       //console.log('showing Loc = %O', loc);
     db_ui.updateUiForTableView();
-    rebuildLocTree([loc.id]);
-    _u.setSelVal('Loc View', 'tree', 'silent');
+    rebuildLocTable([loc.id]);
+    _u.setSelVal('View', 'tree', 'silent');
 }
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
@@ -340,7 +334,7 @@ function buildLocMap() {
 export function showLocOnMap(geoJsonId, zoom) {
     db_ui.updateUiForMapView();
     db_ui.clearCol2();
-    _u.setSelVal('Loc View', 'map', 'silent');
+    _u.setSelVal('View', 'map', 'silent');
     db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
@@ -353,11 +347,11 @@ function buildSourceTable() {
     if (data) { 
         tblState.rcrdsById = data;
         db_ui.initSrcSearchUi(data);
-        onSrcRealmChange(tblState.curRealm);
+        onSrcViewChange(tblState.curRealm);
     } else { console.log('Error loading source data from storage.'); }
 }
 /** Event fired when the source realm select box has been changed. */
-export function onSrcRealmChange(val) {                                         //console.log('-------- SrcRealmChange. [%s]', val)
+export function onSrcViewChange(val) {                                         //console.log('-------- SrcRealmChange. [%s]', val)
     if (!val) { return; }
     resetSourceRealm(val);
 }
@@ -369,7 +363,7 @@ function resetSourceRealm(val) {
 }
 function startSrcTableBuildChain(val) {
     storeSrcRealm(val);
-    db_ui.buildSrcSearchUiAndTable(tblState.curRealm);
+    // db_ui.loadSrcSearchUi(tblState.curRealm);
     frmt_data.transformSrcDataAndLoadTable(
         data_tree.buildSrcTree(tblState.curRealm), tblState);
 }

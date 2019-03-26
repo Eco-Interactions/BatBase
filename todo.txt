@@ -7,7 +7,7 @@
 >REFACTORING
 
 Current:
-    - Filter tree by text (only filter top level, unless in publication view)
+    - replace realm with view in db code
 
 Next:
     tbl-bttns.js

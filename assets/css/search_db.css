@@ -30,7 +30,7 @@ input[type="radio"], input[type="checkbox"] {
 }
 #opts-col1 {
     border-right: black 1px solid;
-    flex: 0 0 326px;
+    flex: 0 0 495px;
     align-items: flex-end;
 }
 #opts-col1 .opts-box {

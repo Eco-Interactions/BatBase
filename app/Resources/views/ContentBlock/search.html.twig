@@ -15,7 +15,7 @@
 
 {% block detail %}
     <div id="search-opts" class="flex-row">
-        <div id="opts-col1" class="opts-col flex-col">
+        <div id="opts-col1" class="flex-row">
             <div id="filter-opts" class="flex-row" style="display: none;">
                 <span>Group Interactions by: </span>
                 <select id="search-focus" class="opts-box" data-field="Focus">
@@ -23,10 +23,11 @@
                     <option value="srcs">Source</option>
                     <option value="taxa">Taxon</option>
                 </select>
+                <span>View: </span>
+                <select id="sel-view" class="opts-box" data-field="View"></select>
             </div>
-            <div id="sort-opts" class="flex-row" style="display: none;"></div>
         </div>
-        <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
+        {#<div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
         <div id="opts-col3" class="opts-col flex-col flex-wrap">
             <div id="shw-chngd-ints" class='tbl-tools'>
                 <input type="checkbox" id="shw-chngd">
@@ -41,8 +42,8 @@
                 <button id="shw-map" class="ag-fresh tbl-bttn">
                     Show Interactions on Map</button>
             </div>
-        </div>
-        <div id="opts-col4" class="flex-col">
+        </div>#}
+        <div id="opts-col4" class="flex-row">
             <button id="strt-tut" class="ag-fresh tbl-bttn">Tutorial</button>
             <button id="show-tips" class="ag-fresh tbl-bttn">Search Tips</button>
         </div> 

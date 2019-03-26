@@ -1,7 +1,7 @@
 /**
  * Handles custom filtering of the data displayed in the table and reltaed UI.
  * 
- * Exports:
+ * Exports:                     Imported by:
  *     addDomEventListeners
  *     buildTreeSearchHtml
  *     resetFilterStatusBar
@@ -9,17 +9,13 @@
  *     showTodaysUpdates
  *     toggleTimeUpdatedFilter
  *     updateFilterStatusMsg
- *     updateLocSearch
- *     updatePubSearch
- *     updateTaxonSearch
- *              
+ *     updateLocSearch                  util
+ *     updatePubSearch                  util
+ *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTree, rebuildTaxonTable } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTaxonTable } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
-
-
-
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -58,9 +54,9 @@ export function resetTableStateParams() {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
-    tblState = {api: tState().get('api')};
-    if (!tblState.api) { return; }
-    getFiltersAndUpdateStatus();
+    // tblState = {api: tState().get('api')};
+    // if (!tblState.api) { return; }
+    // getFiltersAndUpdateStatus();
 }
 /**
  * Adds all active filters to the table's status message. First adding any 
@@ -151,8 +147,6 @@ export function resetFilterStatusBar() {
 /**
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
- *
- * REFACT NOTE:: FORM EXIT METHOD
  */
 export function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
     if (focus) { _u.setSelVal('Focus', focus); 
@@ -169,12 +163,12 @@ function showUpdatesAfterTableLoad() {
  * Note: 'Today' is the default selection. 
  */
 export function toggleTimeUpdatedFilter(state) {                                //console.log('toggleTimeUpdatedFilter. state = ', state);
-    const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
-    tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
-    updateRelatedUi(filtering);
-    if (filtering) { showInteractionsUpdatedToday();
-    } else { resetTimeUpdatedFilter(); }
-    resetToggleTreeBttn(false);
+    // const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
+    // tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+    // updateRelatedUi(filtering);
+    // if (filtering) { showInteractionsUpdatedToday();
+    // } else { resetTimeUpdatedFilter(); }
+    // resetToggleTreeBttn(false);
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .3;
@@ -433,7 +427,7 @@ function getLocType(selId) {
 function getComboboxValuesAndRebuildLocTree(val, locType) {
     const selVal = parseInt(val);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
-    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
+    rebuildLocTable([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
     updateFilter(locType);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
