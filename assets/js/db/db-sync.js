@@ -1,39 +1,23 @@
 /**
- * Handles adding and removing data from local storage after edits via crud forms.
+ * Handles adding, updating, and removing data from local storage.
  * Exports:
- *     init
- *     reset
- *     sync
+ *     addNewDataToStorage
+ *     initStoredData
+ *     resetStoredData
  *     updateEditedData
  */
 import * as _u from './util.js';
-import * as db_page from './db-page.js';
+import { initDataTable, initSearchPage } from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let failed = { errors: [], updates: {}};
 let allRcrds = {};
 
-export function init() {
-    getServerDataLastUpdatedTimes();
-}
-/** Gets an object with the lastUpdated datetimes for the system and each entity class.*/
-function getServerDataLastUpdatedTimes() {
-    _u.sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes);
-}
-/** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
-function storeDataUpdatedTimes(ajaxData) {
-    storeData('dataUpdatedAt', ajaxData.dataState);                             console.log("dataState = %O", ajaxData.dataState);
-    addNewDataToStorage(ajaxData.dataState);
-}
 /** Returns the current date time in the format: Y-m-d H:i:s */
 function getCurrentDate() {
     return new Date().today() + " " + new Date().timeNow();
 }
-/*-------------- Stored Data Methods -----------------------------------------*/
 /*------------------ Page Load Data Sync ---------------------------------*/
-export function sync(dataUpdatedAt) {
-    addNewDataToStorage(dataUpdatedAt);
-}
 /**
  * On search page load, the system updatedAt flag is compared against the page's. 
  * If there they system data has updates more recent than the last sync, the 
@@ -41,8 +25,8 @@ export function sync(dataUpdatedAt) {
  * On a browser's first visit to the page, all data is downloaded and the 
  * search page ui is initialized @initStoredData.
  */
-function addNewDataToStorage(dataUpdatedAt) {  
-    var pgUpdatedAt = _u.getDataFromStorage('pgDataUpdatedAt');              console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
+export function addNewDataToStorage(dataUpdatedAt, reset) {  
+    var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt');                 console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
     if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) {            console.log("Data up to date.");return; }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
@@ -119,15 +103,15 @@ function storeDataAndRetryFailedUpdates(results) {
 } 
 function retryFailedUpdatesAndLoadTable() {                                     //console.log('retryFailedUpdatesAndLoadTable')
     retryFailedUpdates();
-    initDataTable(); //TODO: send errors during init update to search page and show error message to user.
+    loadDataTable(); //TODO: send errors during init update to search page and show error message to user.
 }
 /**
  * Updates the stored data's updatedAt flag, and initializes the search-page 
- * table with the updated data @db_page.initDataTable. 
+ * table with the updated data @initDataTable. 
  */
-function initDataTable() {                                                      //console.log('Finished updating! Loading search table.')
+function loadDataTable() {                                                      //console.log('Finished updating! Loading search table.')
     storeData('pgDataUpdatedAt', getCurrentDate()); 
-    db_page.initDataTable(); 
+    initDataTable(); 
 }
 /*------------------ Update Submitted Form Data --------------------------*/
 export function updateEditedData(data, cb) {
@@ -443,15 +427,13 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     storeData(realm+level+'Names', nameObj);
 }
 /*------------------ Init Stored Data Methods --------------------------------*/
-export function reset() {
-    resetStoredData();
-}
 /** When there is an error while storing data, all data is redownloaded. */
-function resetStoredData() {
+export function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
-    window.localStorage.clear();
+    db_ui.showLoadingDataPopUp();
+    _u.clearDataStorage();
+    _u.addToStorage('curFocus', prevFocus);
     ajaxAndStoreAllEntityData();
-    db_page.onDataReset(prevFocus);
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
@@ -459,15 +441,15 @@ function resetStoredData() {
  * data's lastUpdated flag, 'pgDataUpdatedAt', is created. A data-loading 
  * popup message and intro-walkthrough are shown on the Search page @initSearchPage.
  */
-function initStoredData() {
+export function initStoredData() {
     ajaxAndStoreAllEntityData();
-    db_page.initSearchPage();
+    initSearchPage();
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @storeEntityData. The stored data's 
  * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Database search page 
- * table build begins @db_page.initDataTable.
+ * table build begins @initDataTable.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
@@ -483,7 +465,7 @@ function ajaxAndStoreAllEntityData() {                                          
         $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
         storeData('pgDataUpdatedAt', getCurrentDate());
-        db_page.initDataTable();
+        initDataTable();
     });
 }
 /**
@@ -664,7 +646,7 @@ function getTagData(tags, entity) {
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */
 function storeData(key, data) {
-    _u.populateStorage(key, JSON.stringify(data));
+    _u.addToStorage(key, JSON.stringify(data));
 }
 /**
  * Attempts to update the data and catches any errors.

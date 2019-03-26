@@ -1,6 +1,6 @@
-import * as _u from './util.js';
-import * as db_page from './db-page.js';
-import * as db_forms from './db-forms.js';
+import * as _u from '../util.js';
+import { showLocInDataTable } from '../db-page.js';
+import * as db_forms from '../db-forms/db-forms.js';
 import 'leaflet.markercluster';
 
 let locRcrds;
@@ -266,11 +266,11 @@ function getCustomIcon(iconType) {                                              
     function getTealPinMarker() {
         return { 
             icon:  L.icon({
-                iconUrl: require('./../../css/images/teal-marker-icon.png'),
+                iconUrl: require('./../../../css/images/teal-marker-icon.png'),
                 iconSize: [29, 43],
                 iconAnchor: [16, 42],
                 popupAnchor: [0, -39],
-                shadowUrl: require('./../../css/images/marker-shadow.png'),
+                shadowUrl: require('./../../../css/images/marker-shadow.png'),
                 shadowSize: [33, 45],
                 shadowAnchor: [10, 44],
                 className: 'new-loc'
@@ -588,7 +588,7 @@ function buildToTableButton(loc) {
     return bttn;
 }
 function showLocTableView(loc) {
-    db_page.showLocInDataTable(loc);
+    showLocInDataTable(loc);
 }
 /* ============ Location Details Popup ================== */
 /* Used for Countries displayed in forms. */

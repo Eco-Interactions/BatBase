@@ -4,11 +4,12 @@
  * Exports:
  *     init
  */
-import * as _u from '../util.js';
 import * as agGrid from '../../../grid/ag-grid.js';
 import * as db_filters from './db-filters.js';
-import * as db_forms from '../db-forms.js';
+import * as db_forms from '../db-forms/db-forms.js';
 import unqVals from './ag-grid-unique-filter.js';
+import { lcfirst } from '../util.js';
+import { enableTableButtons } from './db-ui.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;
@@ -218,7 +219,7 @@ function getPencilHtml(id, entity, editFunc) {
         class="tbl-edit" title="Edit ${entity} ${id}" alt="Edit ${entity}">`;
     $('#search-tbl').off('click', '#edit'+entity+id);
     $('#search-tbl').on(
-        'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, _u.lcfirst(entity)));
+        'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, lcfirst(entity)));
     return editPencil;
 }
 /** -------- Map Column ---------- */
@@ -297,7 +298,7 @@ function getNodeChildDetails(rcrd) {                                            
 }
 function onTableInitComplete() {
     hidePopUpMsg();
-    _u.enableTableButtons();
+    enableTableButtons();
     hideUnusedColFilterMenus();
 } 
 function hidePopUpMsg() {

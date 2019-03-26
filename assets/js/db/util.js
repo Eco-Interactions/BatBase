@@ -1,30 +1,43 @@
 
 import * as idb from 'idb-keyval'; //set, get, del, clear
-import exportCsvData from './db-table/csv-data.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
+import { addNewDataToStorage, initStoredData } from './db-sync.js';
+import { showPopUpMsg } from './db-table/db-ui.js';
 
 /* 
  * Exports:
  *   addEnterKeypressClick
+ *   addToStorage
+ *   alphaOptionObjs
  *   buildElem
  *   buildSelectElem
  *   buildSimpleOpts
+ *   clearDataStorage
+ *   enableComboboxes
  *   getDataFromStorage
  *   lcfirst 
- *   getDataStorage
  *   getDetachedRcrd
  *   getGeoJsonEntity
+ *   getSelVal
+ *   initCombobox
+ *   initComboboxes
+ *   init_db
  *   initGeoJsonData
- *   populateStorage
+ *   isGeoJsonDataAvailable
+ *   addToStorage
  *   removeFromStorage
  *   sendAjaxQuery
+ *   setSelVal
  *   stripString
  *   snapshot
  *   ucfirst 
 */
-let dataStorage, geoJson;
-const geoJsonKey = 'A life without cause is a life without effect!!';  
+let geoJson;
+/* dataStorage = window.localStorage (sessionStorage for tests) */
+const dataStorage = getDataStorage();
+const geoJsonKey = 'A life without cause is a life without effect.';  
+const localStorageKey = 'A life without cause is a life without effect!!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -47,6 +60,10 @@ export function lcfirst(str) {
 export function stripString(text) {
     let str = text.trim();
     return str.charAt(str.length-1) === '.' ? str.slice(0, -1) : str;
+}
+/*---------- Object Helpers ----------------------------------------------*/
+export function snapshot(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }
 /*-------- - HTML Helpers ------------------------------------------------*/
 export function buildElem(tag, attrs) {                                         //console.log("buildElem called. tag = %s. attrs = %O", tag, attrs);// attr = { id, class, name, type, value, text }
@@ -120,9 +137,12 @@ export function buildSimpleOpts(optAry, placeholder) {                          
         opts.unshift({ value: "placeholder", text: placeholder });
     }
     return opts;
-}   
-/*--------------------- Selectize Combobox Methods -----------------------*/
-
+} 
+export function alphaOptionObjs(a, b) {
+    var x = a.text.toLowerCase();
+    var y = b.text.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}  
 /*--------------------- Extend Prototypes/Libraries ----------------------*/
 function extendPrototypes() {
     extendDate();
@@ -164,7 +184,27 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
         }
       }
 }
-/*--------------------------Storage Methods-------------------------------*/
+/*--------------------------Storage Methods---------------------------------------------------------------------------*/
+/** 
+ * On page load, clears local storage data if triggered by datakey change and 
+ * downloads any new or changed data.
+ */
+export function init_db() {
+    showPopUpMsg('Loading...');
+    if (!dataStorage.getItem(localStorageKey)) {
+        clearDataStorage();
+        initStoredData();
+    } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
+}
+export function clearDataStorage() {  
+    dataStorage.clear();
+    dataStorage.setItem(localStorageKey, true);
+}
+/** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
+function storeDataUpdatedTimes(ajaxData) {
+    dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
+    addNewDataToStorage(ajaxData.dataState);
+}
 /** --------- Local Storage --------------- */
 /**
  * Gets data from data storage for each storage property passed. If an array
@@ -193,15 +233,14 @@ export function getDataFromStorage(props) {
         }
     } /* End getDataObj */
 } /* End getDataFromStorage */
-export function getDataStorage() {
+function getDataStorage() {
     const env = $('body').data('env');
     const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
     if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
         return false; 
     } 
-    dataStorage = window[storageType]; 
-    if (env === 'test') { dataStorage.clear(); }
-    return dataStorage;  
+    if (env === 'test') { window[storageType].clear(); }
+    return window[storageType];  
     
     function storageAvailable(type) {
         try {
@@ -217,7 +256,7 @@ export function getDataStorage() {
         }
     }
 } /* End getDataStorage */
-export function populateStorage(key, val) {
+export function addToStorage(key, val) {                                        //console.log('addToStorage. k = [%s] v = [%s] valType = ', key, val, typeof(val));
     if (dataStorage) {                                                          //console.log("dataStorage active.");
         dataStorage.setItem(key, val);
     } else { console.log("####__ No Local Storage Available__####"); }
@@ -289,75 +328,9 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
-
-/*---------- Object Helpers ----------------------------------------------*/
-export function snapshot(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-// function alphaProperties(obj) {
-//     var sortable=[];
-//     var returnObj = {};
-
-//     for(var key in obj) {                   // convert object into array
-//         if(obj.hasOwnProperty(key))
-//             sortable.push([key, obj[key]]); // each item is an array in format [key, value]
-//     }
-    
-//     sortable.sort(function(a, b) {          // sort items by value
-//         var x=a[1].toLowerCase(),
-//             y=b[1].toLowerCase();
-//         return x<y ? -1 : x>y ? 1 : 0;
-//     });
-//     sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
-
-//     return returnObj;
-
-//     function rebuildObj(keyValAry) {
-//         var key = keyValAry[0];
-//         var val = keyValAry[1];
-//         returnObj[key] = val;
-//     }
-// }
-/*-------- - CSS Helpers ------------------------------------------------*/
-// function addOrRemoveCssClass(element, className, add) {
-//     if (add) { addCssClass(element, className);
-//     } else { removeCssClass(element, className); }
-// }
-// function removeCssClass(element, className) {
-//     if (element.className && element.className.length > 0) {
-//         var cssClasses = element.className.split(' ');
-//         var index = cssClasses.indexOf(className);
-//         if (index >= 0) {
-//             cssClasses.splice(index, 1);
-//             element.className = cssClasses.join(' ');
-//         }
-//     }
-// };
-// function addCssClass(element, className) {
-//     if (element.className && element.className.length > 0) {
-//         var cssClasses = element.className.split(' ');
-//         if (cssClasses.indexOf(className) < 0) {
-//             cssClasses.push(className);
-//             element.className = cssClasses.join(' ');
-//         }
-//     }
-//     else { element.className = className; }
-// };
-
-
-/*-------------------------------------- TO SORT ------------------------------------------------*/
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-export function authDependentInit(userRole) {
-    if (userRole === "visitor") {
-        $('button[name="csv"]').prop('disabled', true);
-        $('button[name="csv"]').prop('title', "Register to download.");
-        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(exportCsvData); }
-}
+/* ------------- Data Util -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
-export function getDetachedRcrd(rcrdKey, rcrds) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, orgnlRcrds);
+export function getDetachedRcrd(rcrdKey, rcrds) {                               //console.log("getDetachedRcrd. key = %s, rcrds = %O", rcrdKey, rcrds);
     try {
        return snapshot(rcrds[rcrdKey]);
     }
@@ -365,26 +338,11 @@ export function getDetachedRcrd(rcrdKey, rcrds) {                               
        console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
     }
 }
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-export function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
-        .attr('disabled', false).css('cursor', 'pointer');
-    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools').fadeTo(100, 1);
-    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    authDependentInit(); 
-}
-/**
- * REFACT:: UI-UTIL OR SOMETHING
- */
-export function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
-        .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
-}
-/* ------------- Selectize Library -------------------------------------- */
+export function getTaxonName(taxon) {                                           
+    const lvl = taxon.level.displayName;  
+    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
+}  
+/* ------------- Selectize Library Helpers ---------------------------------- */
 /**
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
@@ -472,7 +430,6 @@ function saveSelVal($elem, val) {
 //     elem.selectize.settings.placeholder = 'Select ' + newTxt;
 //     elem.selectize.updatePlaceholder();
 // }
-
 export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
 }
@@ -480,33 +437,54 @@ function enableCombobox(enable, selId) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }
+/* ------------- Unused ----------------------------------------------------- */
 
-/* -------------------------------------------------------------------------- */
-export function fadeTable() {  
-    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
-}
+// function alphaProperties(obj) {
+//     var sortable=[];
+//     var returnObj = {};
 
+//     for(var key in obj) {                   // convert object into array
+//         if(obj.hasOwnProperty(key))
+//             sortable.push([key, obj[key]]); // each item is an array in format [key, value]
+//     }
+    
+//     sortable.sort(function(a, b) {          // sort items by value
+//         var x=a[1].toLowerCase(),
+//             y=b[1].toLowerCase();
+//         return x<y ? -1 : x>y ? 1 : 0;
+//     });
+//     sortable.forEach(rebuildObj); // array in format [ [ key1, val1 ], [ key2, val2 ], ... ]
 
-export function showPopUpMsg(msg) {                                                    //console.log("showPopUpMsg. msg = ", msg)
-    const popUpMsg = msg || 'Loading...';
-    $('#db-popup').text(popUpMsg);
-    $('#db-popup').addClass('loading'); //used in testing
-    $('#db-popup, #db-overlay').show();
-    fadeTable();
-}
-/** May only be needed in db0map */
-export function getTaxonName(taxon) {                                           
-    const lvl = taxon.level.displayName;  
-    return lvl === "Species" ? taxon.displayName : lvl+' '+taxon.displayName;
-}  
+//     return returnObj;
 
-export function clearCol2() {
-    $('#opts-col2').empty();
-}
-
-export function alphaOptionObjs(a, b) {
-    var x = a.text.toLowerCase();
-    var y = b.text.toLowerCase();
-    return x<y ? -1 : x>y ? 1 : 0;
-}
-
+//     function rebuildObj(keyValAry) {
+//         var key = keyValAry[0];
+//         var val = keyValAry[1];
+//         returnObj[key] = val;
+//     }
+// }
+/*-------- - CSS Helpers ------------------------------------------------*/
+// function addOrRemoveCssClass(element, className, add) {
+//     if (add) { addCssClass(element, className);
+//     } else { removeCssClass(element, className); }
+// }
+// function removeCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         var index = cssClasses.indexOf(className);
+//         if (index >= 0) {
+//             cssClasses.splice(index, 1);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+// };
+// function addCssClass(element, className) {
+//     if (element.className && element.className.length > 0) {
+//         var cssClasses = element.className.split(' ');
+//         if (cssClasses.indexOf(className) < 0) {
+//             cssClasses.push(className);
+//             element.className = cssClasses.join(' ');
+//         }
+//     }
+//     else { element.className = className; }
+// };

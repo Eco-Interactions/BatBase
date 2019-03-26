@@ -9,9 +9,10 @@
  *     updateUiForMapView
  */
 import * as _u from '../util.js';
+import exportCsvData from './csv-data.js';
 import { accessTableState as tState } from '../db-page.js';
-import { showInts } from '../db-map.js';
 import { buildTreeSearchHtml } from './db-filters.js';
+import { showInts } from '../db-map/db-map.js';
 
 
 adaptUiToScreenSize();
@@ -48,7 +49,7 @@ function getFutureDevMsg() {                                                    
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {
-    _u.showPopUpMsg(`Downloading and caching all interaction records. Please allow 
+    showPopUpMsg(`Downloading and caching all interaction records. Please allow 
         for a ~45 second download.`);   
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
@@ -88,7 +89,7 @@ function collapseTreeByOne() {
  */
 function toggleTreeByOneLvl(opening) {
     const tblApi = tState().get('api');
-    const tblModel = tblApi.getModel();                                            //console.log("tblModel = %O", tblModel);
+    const tblModel = tblApi.getModel();                                         //console.log("tblModel = %O", tblModel);
     const bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
 
@@ -137,15 +138,15 @@ function isNextOpenLeafRow(node) {                                              
  * is built @startTxnTableBuildChain and all present taxon-levels are stored @storeLevelData. 
  * Continues table build @getInteractionsAndFillTable.  
  */
-export function initTaxonSearchUi(data) {                                       console.log("initTaxonSearchUi. data = %O", data);
+export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
     if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
     setTaxonRealm();  
 }
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonRealm() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      console.log("storedRealm = ", storedRealm)
+    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = [%s] taxonRealm = [%s]", storedRealm, _u.getSelVal('Taxon Realm'))
     if (!_u.getSelVal('Taxon Realm')) { 
-        const realmVal = storedRealm !== null ? storedRealm : "3";  
+        const realmVal = storedRealm ? storedRealm : "3";  
         _u.setSelVal('Taxon Realm', realmVal, 'silent');
     }
 }
@@ -220,7 +221,7 @@ function buildTaxonOptions(taxonNames, taxonData) {
 }
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
-    _u.clearCol2();        
+    clearCol2();        
     $('#opts-col2').append(elems);
     _u.initComboboxes(tblState.allRealmLvls.slice(1));
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
@@ -278,7 +279,7 @@ function buildLocViewHtml() {
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
 export function loadSearchLocHtml(tblState) {
-    _u.clearCol2();       
+    clearCol2();       
     loadSearchByNameElem();
     loadLocComboboxes(tblState);
 }
@@ -364,7 +365,7 @@ function buildLocSelectOpts(tblState) {
         opts[optProp].push({ value: val, text: txt });
     }         
     function addToSelectedObj(id, type) {
-        const sel = tblState.selectedOpts;            //console.log('building opt for [%s] = %O', type, loc);
+        const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s] = %O', type, loc);
         sel[type] = id;
     }
     /** Alphabetizes the options. */
@@ -402,7 +403,7 @@ function setSelectedLocVals(selected) {                                         
  * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
-export function initSrcSearchUi(srcData) {                                             //console.log("=========init source search ui");
+export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
     if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
     setSrcRealm();  
 }
@@ -427,7 +428,7 @@ function buildSrcRealmHtml() {
 } /* End buildSrcRealmHtml */
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcRealm() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      console.log("storedRealm = ", storedRealm)
+    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = ", storedRealm)
     const srcRealm = storedRealm || 'pubs';  
     tState().set({'curRealm': srcRealm});
     if (!_u.getSelVal('Source Type')) { _u.setSelVal('Source Type', srcRealm, 'silent'); } 
@@ -439,7 +440,7 @@ function setSrcRealm() {
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-export function buildSrcSearchUiAndTable(realm) {                                           //console.log("buildSrcSearchUiAndTable called. tree = %O", srcTree);
+export function buildSrcSearchUiAndTable(realm) {                               //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml };
     buildUi[realm](); 
@@ -447,13 +448,13 @@ export function buildSrcSearchUiAndTable(realm) {                               
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
     const searchTreeElem = buildTreeSearchHtml('Author');
-    _u.clearCol2();        
+    clearCol2();        
     $('#opts-col2').append(searchTreeElem);
 }
 function loadPubSearchHtml() {
     const pubTypeElem = buildPubTypeSelect();
     const searchTreeElem = buildTreeSearchHtml('Publication');
-    _u.clearCol2();        
+    clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
@@ -482,14 +483,14 @@ function loadPubSearchHtml() {
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml() {
     const searchTreeElem = buildTreeSearchHtml('Publisher');
-    _u.clearCol2();        
+    clearCol2();        
     $('#opts-col2').append(searchTreeElem);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
-    _u.disableTableButtons();
-    _u.showPopUpMsg();
+    disableTableButtons();
+    showPopUpMsg();
     $('#tool-bar').fadeTo(100, 1);
     $('#search-tbl').hide();
     $('#map').show(); 
@@ -497,7 +498,7 @@ export function updateUiForMapView() {
 export function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
-    _u.enableTableButtons();
+    enableTableButtons();
     _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
     $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
@@ -511,8 +512,8 @@ function showTableRecordsOnMap() {                                              
     const locRcrds = tblState.curFocus !== 'locs' ? 
         _u.getDataFromStorage('location') : tblState.rcrdsById;  
     $('#search-tbl').fadeTo('100', 0.3, () => {
-        db_ui.updateUiForMappingInts();
-        db_map.showInts(tblState.curFocus, tblState.rcrdsById, locRcrds);
+        updateUiForMappingInts();
+        showInts(tblState.curFocus, tblState.rcrdsById, locRcrds);
     });
 }
 function updateBttnToReturnRcrdsToTable() {
@@ -540,4 +541,50 @@ function newSelEl(opts, c, i, field) {                                          
     const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
     return elem;
+}
+export function authDependentInit(userRole) {
+    if (userRole === "visitor") {
+        $('button[name="csv"]').prop('disabled', true);
+        $('button[name="csv"]').prop('title', "Register to download.");
+        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
+    } else { $('button[name="csv"]').click(exportCsvData); }
+}
+export function enableTableButtons() {  
+    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
+        .attr('disabled', false).css('cursor', 'pointer');
+    $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
+    $('.tbl-tools').fadeTo(100, 1);
+    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
+    authDependentInit(); 
+}
+export function disableTableButtons() {
+    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
+        .attr('disabled', 'disabled').css('cursor', 'default');
+    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
+}
+export function fadeTable() {  
+    $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);
+}
+export function showPopUpMsg(msg) {                                             //console.log("showPopUpMsg. msg = ", msg)
+    const popUpMsg = msg || 'Loading...';
+    $('#db-popup').text(popUpMsg);
+    $('#db-popup').addClass('loading'); //used in testing
+    $('#db-popup, #db-overlay').show();
+    fadeTable();
+}
+/** Called seperately so @emptySearchOpts is called once. */
+export function clearPastHtmlOptions(tableBuilder) {    
+    $('#opts-col2').fadeTo(100, 0);
+    $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
+    
+    function emptySearchOpts() {                                                //console.log("emptying search options");
+        $('#opts-col2').empty();
+        $('#sort-opts').empty();
+        $('#opts-col1, #opts-col2').fadeTo(0, 1);
+        updateUiForTableView();
+        tableBuilder();
+    }
+} /* End clearPastHtmlOptions */
+export function clearCol2() {
+    $('#opts-col2').empty();
 }

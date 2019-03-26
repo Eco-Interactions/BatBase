@@ -13,10 +13,10 @@
  *     selectLoc
  *     locCoordErr
  */
-import * as _u from './util.js';
-import * as db_sync from './db-sync.js';
-import * as db_page from './db-page.js';
-import * as db_map from './db-map.js';
+import * as _u from '../util.js';
+import * as db_sync from '../db-sync.js';
+import * as db_page from '../db-page.js';
+import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let fP = {};
@@ -4319,7 +4319,7 @@ function errUpdatingData(errMsg, errTag) {                                      
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
     exitFormPopup(null, 'skipTableReset');
-    db_sync.reset();
+    db_sync.resetStoredData();
 }
 /**
  * When the user attempts to create an entity that uses the sub-form and there 

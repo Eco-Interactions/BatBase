@@ -15,7 +15,7 @@
  *              
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTree, rebuildTaxonTree } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, rebuildLocTree, rebuildTaxonTable } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 
 
@@ -389,9 +389,9 @@ export function updateTaxonSearch(val) {                                        
     if (!val) { return; }
     const taxonRcrds = tState().get('rcrdsById');
     const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
-    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});//console.log("selectedVals = %O", tParams.selectedVals);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
-    rebuildTaxonTree(rcrd, 'filtering');
+    rebuildTaxonTable(rcrd, 'filtering');
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function updateFilterStatus() {
@@ -459,7 +459,7 @@ function updateFilter(locType) {
  * NOTE: All Source realms include text search.
  */
 export function updatePubSearch() {                                             //console.log('updatePubSearch.')
-    tblState = tState().get(null, ['api', 'rowData']);  console.log('tblState = %O', tblState);
+    tblState = tState().get(null, ['api', 'rowData']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
     const newRows = getFilteredPubRows();
@@ -494,6 +494,6 @@ export function updatePubSearch() {                                             
 } /* End updatePubSearch */
 /* ========================== FILTER UTILITY METHODS ================================================================ */
 /** If table is filtered by an external filter, the rows are stored in fltrdRows. */
-function getAllCurRows() {  console.log('tblState = %O', tblState)
+function getAllCurRows() { 
     return fPs.fltrdRows || tblState.rowData;
 } 
