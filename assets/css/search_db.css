@@ -43,6 +43,9 @@ div[id^="opts-"] {
 #opts-col2, #opts-col3, #opts-col4 {
     border-right: black 1px solid;
 }
+#opts-col5 {
+    padding: 5px 0 5px 5px;
+}
 #tool-bar {
     margin: .7em auto .2em auto;
     padding: .1em;
@@ -86,14 +89,38 @@ button[name="futureDevBttn"] {
     opacity: .7;
 }
 /*------------ Buttons ----------------------*/
-#filter {
+.ico-bttn {
     padding-top: 3px;
+}
+.ico-bttn:before {
+    float: left;
+    margin: 2px 5px 0 0;
 }
 #filter:before {
     content: url(./images/filter.svg);
     width: 15px;
-    float: left;
-    margin: 2px 3px 0 0;
+}
+button[name="reset-tbl"]:before {
+    content: url(./images/undo-alt.svg);
+    width: 15px;
+
+}
+button[name="csv"]:before {
+    content: url(./images/file-download.svg);
+    width: 12px;
+}
+#new-data:before {
+    content: url(./images/plus.svg);
+    width: 14px;
+}
+#shw-map:before {
+    content: url(./images/globe-africa.svg);
+    width: 17px;
+}
+button[name="int-set"]:before {
+    content: url(./images/tasks.svg);
+    width: 16px;
+
 }
 .tbl-bttn, .tos-bttn {
     margin: 0 .3em 0 .2em;
