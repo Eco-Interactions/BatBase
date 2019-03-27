@@ -315,6 +315,9 @@ span.lbl {
     overflow-y: scroll;
     padding: 2em;
 }
+#close-tos-bttn {
+    align-self: flex-end;
+}
 /**--------------- Menu Styles -------------------*/
 #sticky-hdr {
     max-width: 100%;

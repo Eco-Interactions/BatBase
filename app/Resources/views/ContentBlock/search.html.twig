@@ -18,52 +18,64 @@
         <div id="opts-col1" class="flex-row">
             <div id="filter-opts" class="flex-row" style="display: none;">
                 <span>Group Interactions by: </span>
-                <select id="search-focus" class="opts-box" data-field="Focus">
+                <select id="search-focus" class="col1-sel" data-field="Focus">
                     <option value="locs">Location</option>
                     <option value="srcs">Source</option>
                     <option value="taxa">Taxon</option>
                 </select>
                 <span>View: </span>
-                <select id="sel-view" class="opts-box" data-field="View"></select>
+                <select id="sel-view" class="col1-sel" data-field="View"></select>
             </div>
         </div>
-        {#<div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
-        <div id="opts-col3" class="opts-col flex-col flex-wrap">
-            <div id="shw-chngd-ints" class='tbl-tools'>
-                <input type="checkbox" id="shw-chngd">
-                <label for="shw-chngd">Show records updated since:</label>
-                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
-                <label for="fltr-tdy">Today</label>
-                <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
-                <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
-                <input type="text" id="time-fltr" disabled="disabled">
-            </div>
-            <div class="bttm-row flex-row">
-                <button id="shw-map" class="ag-fresh tbl-bttn">
-                    Show Interactions on Map</button>
-            </div>
-        </div>#}
-        <div id="opts-col4" class="flex-row">
-            <button id="strt-tut" class="ag-fresh tbl-bttn">Tutorial</button>
-            <button id="show-tips" class="ag-fresh tbl-bttn">Search Tips</button>
-        </div> 
+        <div id="opts-col2" class="flex-row">
+            <button id="filter" class="ag-fresh tbl-bttn">
+                Filter Data
+            </button>     
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="reset-tbl">
+                Clear Filters
+            </button>
+        </div>
+        <div id="opts-col3" class="flex-row">
+            <button id="shw-map" class="ag-fresh tbl-bttn">
+                Show Interactions on Map
+            </button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="csv">
+                Download CSV
+            </button>
+        </div>
+        <div id="opts-col4" class="flex-row">  
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="reset-tbl" disabled>
+                Load Saved Interactions
+            </button>   
+            <button id="new-data" class="ag-fresh tbl-bttn" disabled>
+                Add Data
+            </button>
+        </div>
+        <div id="opts-col5" class="flex-row">
+            <button id="strt-tut" class="ag-fresh tbl-bttn">
+                Tutorial
+            </button>
+            <button id="show-tips" class="ag-fresh tbl-bttn">
+                Search Tips
+            </button>
+        </div>
     </div>
     <div id="tool-bar" class="flex-row">
-        <div class='flex-row tbl-tools'>
-            <div id='xpand-tree'>
-                <button id="xpand-all" class="ag-fresh ag-header-cell tbl-bttn" name="xpand-all">Expand All</button>
-                <button class="ag-fresh ag-header-cell tbl-bttn" name="xpand-1">+</button>
-                <button class="ag-fresh ag-header-cell tbl-bttn" name="collapse-1">-</button>
-            </div>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="reset-tbl">Reset Data</button>
+        <div id='xpand-tree' class=' tbl-tools'>
+            <button id="xpand-all" class="ag-fresh ag-header-cell tbl-bttn" name="xpand-all">
+                Expand All
+            </button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="xpand-1">+</button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="collapse-1">-</button>
         </div>
         <div id="tbl-status" class="flex-row">
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="tbl-filter-status"></div>
         </div>
         <div class='tbl-tools' style='align-self: flex-end;'>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="csv">Download CSV</button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" disabled>
+                Show/Hide Columns
+            </button>
         </div>
     </div>
     
@@ -80,3 +92,18 @@
     {{parent()}}    
     <script src="{{ asset('build/db.js') }}"></script>
 {% endblock %}
+
+{#<div id="shw-chngd-ints" class='tbl-tools'>
+                <input type="checkbox" id="shw-chngd">
+                <label for="shw-chngd">Show records updated since:</label>
+                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
+                <label for="fltr-tdy">Today</label>
+                <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
+                <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
+                <input type="text" id="time-fltr" disabled="disabled">
+            </div>
+            <div class="bttm-row flex-row">
+                <button id="shw-map" class="ag-fresh tbl-bttn">
+                    Show Interactions on Map</button>
+            </div>
+        </div>#}

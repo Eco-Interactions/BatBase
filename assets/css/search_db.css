@@ -1,23 +1,10 @@
 /*--- Database Search Page Styles ---*/
-#search-opts {  /* .flex-row also on elem */
-    margin: 1em auto 0 auto;
-    height: 130px;
-    width: 100%;
-    font-size: 1.1em;
-}
-#search-opts span {
-    padding-top: 6px;
-}
-.opts-col {
-    padding: .3em;
-    height: 100%;
-    justify-content: space-around;
-}
-.opts-box {
-    margin: 0 .7em 0 .5em;
-}
+/* ---- Selectize ----------------------------------------------------------- */
+/*.selectize-input {
+    padding-right: 33px !important;
+}*/
 .selectize-input {
-    padding: 4px;
+    padding: 4px 33px 4px 4px !important;
 }
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
@@ -25,51 +12,36 @@
 .selectize-dropdown {
     z-index: 1111;
 }
+/* -------------- Search Options -------------------------------------------- */
+#search-opts {  /* .flex-row also on elem */
+    margin: 1em auto 0 auto;
+    width: 100%;
+    font-size: 1.1em;
+}
+#search-opts button {
+    height: 29px;
+}
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
+}
+div[id^="opts-"] {
+    padding: 5px;
 }
 #opts-col1 {
     border-right: black 1px solid;
     flex: 0 0 495px;
-    align-items: flex-end;
+    padding: 0;
+    align-items: center;
 }
-#opts-col1 .opts-box {
+#opts-col1 span {
+    padding-top: 6px;
+}
+.col1-sel {
     width: 116px;
+    margin: 0 .7em 0 .5em;
 }
-#opts-col2, #opts-col3 {
-    font-size: .9em;
-    padding: 5px;
+#opts-col2, #opts-col3, #opts-col4 {
     border-right: black 1px solid;
-    justify-content: flex-start;
-}
-#opts-col2 {
-    flex: 0 0 460px;      
-}
-#opts-col3 {
-    flex: 1 0 484px;     /*Don't grow or shrink, width.*/ 
-    justify-content: space-between;
-}
-#opts-col3 .bttm-row {
-    justify-content: space-between;
-}
-#shw-map {
-    width: 193px;
-}
-#time-fltr, .flatpickr-input {
-    margin-top: .2em;
-}
-#futrDevMsg {
-    margin: 0 5px 0 5px;
-}
-#show-tips, #strt-tut {
-    width: 95px;
-    margin: 5px 5px 5px 15px;
-}
-.lbl-sel-opts {          /* .flex-row also on elems */
-    margin: .3em;
-    flex: 0 0 auto;
-    width: 222px;    
-    justify-content: space-between;
 }
 #tool-bar {
     margin: .7em auto .2em auto;
@@ -91,7 +63,57 @@ input[type="radio"], input[type="checkbox"] {
     flex-grow: 1;
     max-width: 825px;
 }
-/*--------- Search Tips Popup -----------------*/
+/*------- Filter Option Styles ---------------*/
+#time-fltr, .flatpickr-input {
+    margin-top: .2em;
+}
+#futrDevMsg {
+    margin: 0 5px 0 5px;
+}
+.lbl-sel-opts {          /* .flex-row also on elems */
+    margin: .3em;
+    flex: 0 0 auto;
+    width: 222px;    
+    justify-content: space-between;
+}
+/*#filter-bttns {
+    display: inline-flex;
+    justify-content: space-between;
+    height: 44px;
+}*/
+button[name="futureDevBttn"] {
+    align-self: flex-end;
+    opacity: .7;
+}
+/*------------ Buttons ----------------------*/
+#filter {
+    padding-top: 3px;
+}
+#filter:before {
+    content: url(./images/filter.svg);
+    width: 15px;
+    float: left;
+    margin: 2px 3px 0 0;
+}
+.tbl-bttn, .tos-bttn {
+    margin: 0 .3em 0 .2em;
+    background: linear-gradient(#fff, #d3d3d3);
+    border-radius: 4px;
+}
+button[name="xpand-all"] {
+    width: 105px;
+}
+button[name="show-hide-col"] {
+    opacity: .8;
+    cursor: not-allowed;
+}
+#xpand-tree button {
+    margin: 0em;
+}
+#xpand-tree {
+    margin-right: .3em;
+}
+/*------------------------------- Search Tips Popup --------------------------*/
 #tips-close-bttn {
     position: relative;
     margin-top: .5em;
@@ -117,7 +139,7 @@ input[type="radio"], input[type="checkbox"] {
     width: 755px;
     margin: auto;
 }
-/**-------------- Data Table Styes -------------------------- */
+/**------------------------------ Data Table Styes -------------------------- */
 #db-view {
     height: 86vh;
     border: black 1px solid;
@@ -155,11 +177,11 @@ input[type="radio"], input[type="checkbox"] {
 .row-red {
     background-color: rgba(255,0,0,.15) !important; /* red */
 }
-/**-------------- Data Map Styes -------------------------- */
+/**-------------------------------- Data Map Styes -------------------------- */
 #map {
     height: 100%;
 }
-/* --- Legend Styles --- */
+/* -------- Legend Styles -------- */
 .info {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
@@ -193,7 +215,7 @@ input[type="radio"], input[type="checkbox"] {
     top: 101px;
     left: 810px;
 }
-/* -- Hover Tooltip -- */
+/* ------ Hover Tooltip ----------- */
 .info-tooltip {
     font-size:1.2em;
 }
@@ -222,47 +244,7 @@ input[type="radio"], input[type="checkbox"] {
 .popup-bttn {
     font-size: 14px !important;
 }
-/*------- Buttons ---------------*/
-#filter-bttns {
-    display: inline-flex;
-    justify-content: space-between;
-    height: 44px;
-}
-.tbl-bttn, .tos-bttn {
-    margin: 0 .3em 0 .2em;
-    background: linear-gradient(#fff, #d3d3d3);
-    border-radius: 4px;
-}
-.intro-bttn {
-    width: 144px;
-    height: 22px;
-}
-button[name="csv"], #close-tos-bttn {
-    align-self: flex-end;
-}
-button[name="xpand-all"] {
-    width: 105px;
-}
-button[name="createbttn"] {
-    width: 75px;
-    align-self: flex-end;
-    margin-right: 7px;
-}
-button[name="show-hide-col"] {
-    opacity: .8;
-    cursor: not-allowed;
-}
-button[name="futureDevBttn"] {
-    align-self: flex-end;
-    opacity: .7;
-}
-#xpand-tree button {
-    margin: 0em;
-}
-#xpand-tree {
-    margin-right: .3em;
-}
-/*----- Walkthrough ------*/
+/*----------------------------- Walkthrough ----------------------------------*/
 .intro-tips {
     width: 420px;
     text-align: justify;
@@ -270,7 +252,11 @@ button[name="futureDevBttn"] {
 a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     cursor: pointer;
 }
-/*------------ Search Table Popup -----------------*/
+.intro-bttn {
+    width: 144px;
+    height: 22px;
+}
+/*----------------------- Search Table Popup ---------------------------------*/
 #db-popup {
     background: #FFF;
     display: none;
@@ -371,7 +357,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     width: 44px;
     text-align: right
 }
-/*------------ Form Styles ---------------*/
+/*------------------------------- Form Styles --------------------------------*/
 #top-form {
     font-size: 1em;
     flex-wrap: wrap;
@@ -451,7 +437,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
 }
-/** --- Error Styles --- */
+/** ------------ Error Styles -------------- */
 [id$="_errs"] {
     display: flex;
     justify-content: center;
@@ -480,7 +466,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 1.7em;
     margin-left: 1em !important;
 }
-/** --- Field Styles --- */
+/** ------------- Field Styles ------------- */
 .field-row .required:after {
   content: "*";
 }
@@ -513,10 +499,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 #Note-txt {
     border-color: #b8b8b8;
 }
-.selectize-input {
-    padding-right: 33px !important;
-}
-
 #top-form label {
     font-size: 1em;
     padding: 9px 0 2px 0;
@@ -530,7 +512,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: 3px !important;
     margin: 3px !important;
 }
-/*--- Form specific styles ---*/
+/*----------------- Form specific styles -----------------------*/
 #Authors-lbl, #Editors-lbl {
     padding-top: .7em;
 }
@@ -553,7 +535,7 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 select[id$="txn-lvl"] + div {
     width: 150px;
 }
-/*--- Loc Map Styles ---*/
+/*------------- Loc Map Styles ----------------*/
 #loc-note {
     margin: .5em auto 0 auto;
     color: slategrey;
@@ -582,8 +564,7 @@ select[id$="txn-lvl"] + div {
     color: red;
     padding: 5px 5px 5px 10px;
 }
-
-/* --- Map Markers --- */
+/* ------------- Map Markers ------------- */
 .single-marker {
     width: 33px !important;
     height: 33px !important;

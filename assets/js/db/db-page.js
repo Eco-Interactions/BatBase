@@ -205,7 +205,7 @@ function buildTaxonTable() {                                                    
     } else { console.log("Error loading taxon data from storage."); }
 }
 /** Event fired when the taxon view select box has been changed. */
-export function onTxnViewChange(val) { console.log('onTxnViewChange. val = [%s]', val) 
+export function onTxnViewChange(val) {                                          console.log('onTxnViewChange. val = [%s]', val) 
     if (!val) { return; }
     resetTaxonRealm(val);
 }
@@ -220,7 +220,7 @@ function resetTaxonRealm(val) {                                                 
  * the taxon's record.
  */
 function storeAndReturnRealm(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));     //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     storeStateValue('curRealm', realmId);
