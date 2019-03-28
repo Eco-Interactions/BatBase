@@ -3,6 +3,7 @@
  *
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
+ *     collapseTree                     csv-data
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
@@ -56,14 +57,14 @@ function disableUserFeatures() {
         {'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true).prop(
         'title', "Please register to use these features.");
 }
-function enableEditorFeatures() {
-    $('button[name="csv"]').click(exportCsvData); 
+function enableEditorFeatures() {  console.log('enableEditorFeatures')
+    $('button[name="csv"]').off('click').click(exportCsvData);  //Fixes strange bug where click event called twice. 
     // $('button[name="int-set"]').click(); 
     $('#new-data').addClass('adminbttn').click(
         createEntity.bind(null, 'create', 'interaction'));
 }
-function enableUserFeatures() {
-    $('button[name="csv"]').click(exportCsvData); 
+function enableUserFeatures() {  console.log('enableUserFeatures')
+    $('button[name="csv"]').off('click').click(exportCsvData); //Fixes strange bug where click event called twice. 
     // $('button[name="int-set"]').click(); 
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' }).prop(
         'title', 'This feature is only available to editors.');
@@ -88,7 +89,7 @@ function expandTree(tblApi) {
     tblApi.expandAll();    
     $('#xpand-all').html("Collapse All");
 }
-function collapseTree(tblApi) {
+export function collapseTree(tblApi) {
     tblApi.collapseAll();
     $('#xpand-all').html("Expand All");
 }
@@ -225,7 +226,7 @@ function buildTaxonOptions(taxonNames, taxonData) {
 }
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
-    clearCol2();        
+    // clearCol2();        
     $('#opts-col2').append(elems);
     _u.initComboboxes(tblState.allRealmLvls.slice(1));
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
@@ -278,7 +279,7 @@ function setLocView(view) {
  * MOVING TO NEW FILTER DROPDOWN PANEL. 
  */
 export function loadSearchLocHtml(tblState) {
-    clearCol2();       
+    // clearCol2();       
     loadSearchByNameElem();
     loadLocComboboxes(tblState);
 }
@@ -437,13 +438,13 @@ export function loadSrcSearchUi(realm) {                                        
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
     const searchTreeElem = buildTreeSearchHtml('Author');
-    clearCol2();        
+    // clearCol2();        
     $('#opts-col2').append(searchTreeElem);
 }
 function loadPubSearchHtml() {
     const pubTypeElem = buildPubTypeSelect();
     const searchTreeElem = buildTreeSearchHtml('Publication');
-    clearCol2();        
+    // clearCol2();        
     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
@@ -472,7 +473,7 @@ function loadPubSearchHtml() {
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml() {
     const searchTreeElem = buildTreeSearchHtml('Publisher');
-    clearCol2();        
+    // clearCol2();        
     $('#opts-col2').append(searchTreeElem);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
@@ -567,6 +568,6 @@ export function showPopUpMsg(msg) {                                             
 //         tableBuilder();
 //     }
 // } /* End clearPastHtmlOptions */
-export function clearCol2() {
-    $('#opts-col2').empty();
-}
+// export function clearCol2() {
+    // $('#opts-col2').empty();
+// }

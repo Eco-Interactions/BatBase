@@ -113,6 +113,9 @@ button[name="csv"]:before {
     content: url(./images/plus.svg);
     width: 14px;
 }
+#shw-map {
+    width: 204px;
+}
 #shw-map:before {
     content: url(./images/globe-africa.svg);
     width: 17px;

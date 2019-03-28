@@ -26,7 +26,8 @@ export function init(viewTitle, rowData) {                                      
     tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     tblState.api = tblOpts.api;
-    tState().set({'api': tblOpts.api, 'rowData': rowData});
+    tState().set(
+        {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
     onTableInitComplete();

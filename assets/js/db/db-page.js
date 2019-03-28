@@ -21,7 +21,6 @@
  */
 import * as _u from './util.js';
 import * as data_tree from './db-table/build-data-tree.js';
-import * as db_csv from './db-table/csv-data.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_map from './db-map/db-map.js';
 import * as db_sync from './db-sync.js';
@@ -33,8 +32,9 @@ import * as init_tbl from './db-table/init-table.js';
 /**
  * Stores table state params needed across multiple modules. 
  * {obj} api            Ag-grid API (available after table-init complete)
+ * {obj} columnApi      Ag-grid Column API (available after table-init complete)
  * {str} curFocus       Focus of the data in table: taxa, srcs, locs
- * {str} curView       Sub-sort of table data. Eg: bats, auths, etc 
+ * {str} curView        Sub-sort of table data. Eg: bats, auths, etc 
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
@@ -277,14 +277,13 @@ export function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || _u.getSelVal('View');                                  //console.log('updateLocView. view = [%s]', val);
+    const val = v || _u.getSelVal('View');                                      //console.log('updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
     showLocInteractionData(val);
 }
 function resetLocUi(view) { 
-    db_ui.clearCol2();
     clearPreviousTable();
     if (view === 'tree') { db_ui.updateUiForTableView(); }
 }
@@ -331,7 +330,6 @@ function buildLocMap() {
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(geoJsonId, zoom) {
     db_ui.updateUiForMapView();
-    db_ui.clearCol2();
     _u.setSelVal('View', 'map', 'silent');
     db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
 }
