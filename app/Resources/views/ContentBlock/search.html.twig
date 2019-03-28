@@ -14,9 +14,9 @@
 {% endblock headline %}
 
 {% block detail %}
-    <div id="search-opts" class="flex-row">
-        <div id="opts-col1" class="flex-row">
-            <div id="filter-opts" class="flex-row" style="display: none;">
+    <div id="db-opts" class="flex-row">
+        <div id="db-opts-col1" class="flex-row">
+            <div class="flex-row">
                 <span>Group Interactions by: </span>
                 <select id="search-focus" class="col1-sel" data-field="Focus">
                     <option value="locs">Location</option>
@@ -27,7 +27,7 @@
                 <select id="sel-view" class="col1-sel" data-field="View"></select>
             </div>
         </div>
-        <div id="opts-col2" class="flex-row">
+        <div id="db-opts-col2" class="flex-row">
             <button id="filter" class="ag-fresh tbl-bttn ico-bttn">
                 Filter Data
             </button>     
@@ -35,12 +35,12 @@
                 Clear Filters
             </button>
         </div>
-        <div id="opts-col3" class="flex-row">
+        <div id="db-opts-col3" class="flex-row">
             <button id="shw-map" class="ag-fresh tbl-bttn ico-bttn">
                 Show Interactions on Map
             </button>
         </div>
-        <div id="opts-col4" class="flex-row">  
+        <div id="db-opts-col4" class="flex-row">  
             <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="csv">
                 CSV
             </button>
@@ -51,12 +51,31 @@
                 Add Data
             </button>
         </div>
-        <div id="opts-col5" class="flex-row">
+        <div id="db-opts-col5" class="flex-row">
             <button id="strt-tut" class="ag-fresh tbl-bttn">
                 Tutorial
             </button>
             <button id="show-tips" class="ag-fresh tbl-bttn">
                 Search Tips
+            </button>
+        </div>
+    </div>
+    <div id='filter-opts' class="flex-row closed">
+        <div id="focus-filters" class="flex-row"></div>
+        <div id="shw-chngd-ints" class='tbl-tools'>
+            <input type="checkbox" id="shw-chngd">
+            <label for="shw-chngd">Show records updated since:</label>
+            <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
+            <label for="fltr-tdy">Today</label>
+            <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
+            <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
+            <input type="text" id="time-fltr" disabled="disabled">
+        </div>
+        <div id="stored-filters" class="flex-row">
+            <span>Load saved filter set: </span>
+            <select id="saved-filters" class="saved-filters-sel" data-field=""></select>
+            <button id="save-filter" class="ag-fresh tbl-bttn">
+                Save Current Filter State
             </button>
         </div>
     </div>
@@ -72,7 +91,7 @@
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="tbl-filter-status"></div>
         </div>
-        <div class='tbl-tools' style='align-self: flex-end;'>
+        <div class='tbl-tools'>
             <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" 
                 title="Future feature: customize the data shown in the table and/or csv export."
                 disabled> Show/Hide Columns
@@ -93,18 +112,3 @@
     {{parent()}}    
     <script src="{{ asset('build/db.js') }}"></script>
 {% endblock %}
-
-{#<div id="shw-chngd-ints" class='tbl-tools'>
-                <input type="checkbox" id="shw-chngd">
-                <label for="shw-chngd">Show records updated since:</label>
-                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
-                <label for="fltr-tdy">Today</label>
-                <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
-                <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
-                <input type="text" id="time-fltr" disabled="disabled">
-            </div>
-            <div class="bttm-row flex-row">
-                <button id="shw-map" class="ag-fresh tbl-bttn">
-                    Show Interactions on Map</button>
-            </div>
-        </div>#}

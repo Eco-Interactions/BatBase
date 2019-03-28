@@ -344,8 +344,8 @@ export function showInts(focus, viewRcrds, locRcrds) {                          
     function showIntsOnMap() {                                                  
         const tableData = buildMapDataObj(viewRcrds, locRcrds);                 //console.log('showIntsOnMap! data = %O', tableData);
         const keys = Object.keys(tableData);                                     
-        addIntCntsToLegend(tableData); console.log('addIntMarkersToMap begins at = ', Date.now());
-        addIntMarkersToMap(focus, tableData); console.log('addIntMarkersToMap ends at = ', Date.now());
+        addIntCntsToLegend(tableData); 
+        addIntMarkersToMap(focus, tableData);
         zoomIfAllInSameRegion(tableData);
     }
 } 

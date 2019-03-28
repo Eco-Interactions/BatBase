@@ -7,6 +7,7 @@
  *     resetFilterStatusBar
  *     resetTableStateParams
  *     showTodaysUpdates
+ *     toggleFilterPanel                db_ui
  *     toggleTimeUpdatedFilter
  *     updateFilterStatusMsg
  *     updateLocSearch                  util
@@ -33,20 +34,35 @@ let fPs = {
  */
 let tblState;
 
-/** Updates table state whenever method-chain in module is activated. */
-function refreshTableState() {
-    tblState = tState().get();
+export function addDomEventListeners() {  
+    $('#filter').click(toggleFilterPanel);                                      
+    // $('#shw-chngd').change(toggleTimeUpdatedFilter);
+    // $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
+    // $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
-export function addDomEventListeners() {
-    $('#shw-chngd').change(toggleTimeUpdatedFilter);
-    $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
-    $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
-}
-
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
     fPs.focusFltrs = [];
+}
+/* ====================== FILTER PANEL ============================================================================== */
+export function toggleFilterPanel() {  
+    tblState = tState().get(['curFocus', 'curView']);
+    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(tblState); 
+    } else { hideFilterPanel(); }
+}
+function buildAndShowFilterPanel(tblState) {                                    console.log('buildAndShowFilterPanel')
+    $('#filter-opts').removeClass('closed');  
+    $('#db-opts-col2').addClass('shw-col-borders hide-bttm-border');
+    _u.initCombobox('Saved Filters');
+    buildFocusFilters(tblState);
+}
+function hideFilterPanel() {                                                    console.log('hideFilterPanel')
+    $('#db-opts-col2').removeClass('shw-col-borders hide-bttm-border');
+    $('#filter-opts').addClass('closed');
+}
+function buildFocusFilters(tblState) {
+    // body...
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**

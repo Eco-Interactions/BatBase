@@ -5,7 +5,8 @@
  * >> All Content Blocks will have an edit icon attached to the top left of their 
  * container. When clicked, a wysiwyg interface will encapsulate that block and 
  * allow editing and saving of the content within using the trumbowyg library.
- * Exports: 
+ * 
+ * Exports:             Imported by:
  *     addNewLocation
  *     editEntity
  *     createEntity

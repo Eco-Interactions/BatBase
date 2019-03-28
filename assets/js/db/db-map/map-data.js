@@ -2,7 +2,7 @@
  * Builds an object sorted by geoJsonId with all interaction data at that location.
  * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
  *
- * Export defaut:
+ * Export defaut:        Imported by:
  *     buildMapDataObj      db_map
  */
 import { accessTableState as tState } from '../db-page.js';

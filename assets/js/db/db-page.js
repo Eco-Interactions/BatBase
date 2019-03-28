@@ -58,7 +58,7 @@ function requireCss() {
 }
 function initDbPage () {    
     _u.init_db();
-    addDomEventListeners();
+    db_ui.init();
     initSearchState();
 }
 /**
@@ -69,11 +69,6 @@ export function initSearchPage() {
     db_ui.showLoadingDataPopUp();
     db_tips.startWalkthrough(tblState.curFocus);
 }
-function addDomEventListeners() {
-    db_filters.addDomEventListeners();
-    db_ui.addDomEventListeners();
-    $('button[name="reset-tbl"]').click(resetDataTable);
-}
 function initSearchState() {
     resetTableParams();
     db_filters.toggleTimeUpdatedFilter('disable');
@@ -82,10 +77,8 @@ function initSearchState() {
 } 
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
-    $('#filter-opts').show(400);  
     _u.initComboboxes(['Focus', 'View']);
     _u.setSelVal('Focus', tblState.curFocus, 'silent');
-    // $('#sort-opts').show(400);
     selectSearchFocus();
 }
 /* ================== Table "State" Methods ========================================================================= */
@@ -123,7 +116,7 @@ function getResetFocus() {
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
 /** Resets table state to top focus options for the selected view. */
-function resetDataTable() {                                                     //console.log("---reseting table---")
+export function resetDataTable() {                                              //console.log("---reseting table---")
     const resetMap = { taxa: resetTaxonView, locs: rebuildLocTable, srcs: resetSourceView };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 

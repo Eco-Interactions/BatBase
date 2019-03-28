@@ -365,10 +365,8 @@ function getSelConfgObj(field) {
         'Int-set': { name: 'Interaction Set', id: '#int-set', change: false },
         'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
         'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch },
-        // 'Loc View' : {name: field, id: '#sel-realm', change: db_page.onLocViewChange },
-        // 'Source Type': { name: field, id: '#sel-realm', change: db_page.onSrcRealmChange },
+        'Saved Filters': {name: field, id: '#saved-filters', change: false },
         'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        // 'Taxon View' : { name: 'Realm', id: '#sel-realm', change: db_page.onTaxonRealmChange },
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
         'View': { name: 'View', id: '#sel-view', change: false }
     };
