@@ -181,84 +181,96 @@ function setTaxonView() {
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
-// /* ---------------------------- TAXON FILTER UI ----------------------------- */
-// /**
-//  * Builds and initializes a search-combobox for each level present in the 
-//  * the unfiltered realm tree. Each level's box is populated with the names 
-//  * of every taxon at that level in the displayed, filtered, table-tree. After 
-//  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
-//  *
-//  * MOVING TO NEW FILTER DROPDOWN PANEL. 
-//  */
-// export function loadTaxonComboboxes(tblState) {
-//     const lvlOptsObj = buildTaxonSelectOpts(tblState);
-//     const levels = Object.keys(lvlOptsObj);
-//     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-//     loadLevelSelects(lvlOptsObj, levels, tblState);
-// }
-// /**
-//  * Builds select options for each level with taxon data in the current realm.
-//  * If there is no data after filtering at a level, a 'none' option obj is built
-//  * and will be selected.
-//  */
-// function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
-//     const optsObj = {};
-//     const rcrdsByLvl = tblState.taxaByLvl;       
-//     const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
-//     curRealmLvls.forEach(buildLvlOptions);
-//     return optsObj;
+/* ---------------------------- TAXON FILTER UI ----------------------------- */
+/**
+ * Builds and initializes a search-combobox for each level present in the 
+ * the unfiltered realm tree. Each level's box is populated with the names 
+ * of every taxon at that level in the displayed, filtered, table-tree. After 
+ * appending, the selects are initialized with the 'selectize' library @initComboboxes.
+ *
+ * MOVING TO NEW FILTER DROPDOWN PANEL. 
+ */
+export function loadTaxonComboboxes(tblState) {
+    const lvlOptsObj = buildTaxonSelectOpts(tblState);
+    const levels = Object.keys(lvlOptsObj);
+    const loadFunc = $('#focus-filters div').length ? updateTaxonSelOptions : loadLevelSelects;
+    if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
+    loadFunc(lvlOptsObj, levels, tblState);
+}
+/**
+ * Builds select options for each level with taxon data in the current realm.
+ * If there is no data after filtering at a level, a 'none' option obj is built
+ * and will be selected.
+ */
+function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
+    const optsObj = {};
+    const rcrdsByLvl = tblState.taxaByLvl;       
+    const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
+    curRealmLvls.forEach(buildLvlOptions);
+    return optsObj;
 
-//     function buildLvlOptions(lvl) {
-//         return lvl in rcrdsByLvl ? 
-//             getTaxaOptsAtLvl(rcrdsByLvl[lvl], lvl) : fillInLvlOpts(lvl)
-//     }
-//     /** Child levels can have multiple taxa.  */
-//     function getTaxaOptsAtLvl(rcrds, lvl) {
-//         const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                 //console.log("taxonNames = %O", taxonNames);
-//         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
-//     }
-//     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
-//         if (lvl in tblState.selectedOpts) {
-//             const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
-//             optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
-//         } else { optsObj[lvl] = []; }
-//     }
-// } /* End buildTaxonSelectOpts */
-// function buildTaxonOptions(taxonNames, taxonData) {
-//     return taxonNames.map(function(taxonKey){
-//         return {
-//             value: taxonData[taxonKey].id,
-//             text: taxonKey
-//         };
-//     });
-// }
-// function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
-//     const elems = buildTaxonSelects(levelOptsObj, levels);
-//     // clearCol2();        
-//     $('#opts-col2').append(elems);
-//     _u.initComboboxes(tblState.allRealmLvls.slice(1));
-//     setSelectedTaxonVals(tblState.selectedOpts, tblState);
+    function buildLvlOptions(lvl) {
+        return lvl in rcrdsByLvl ? 
+            getTaxaOptsAtLvl(rcrdsByLvl[lvl], lvl) : fillInLvlOpts(lvl)
+    }
+    /** Child levels can have multiple taxa.  */
+    function getTaxaOptsAtLvl(rcrds, lvl) {
+        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                 //console.log("taxonNames = %O", taxonNames);
+        optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
+    }
+    function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
+        if (lvl in tblState.selectedOpts) {
+            const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
+            optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
+        } else { optsObj[lvl] = []; }
+    }
+} /* End buildTaxonSelectOpts */
+function buildTaxonOptions(taxonNames, taxonData) {
+    return taxonNames.map(function(taxonKey){
+        return {
+            value: taxonData[taxonKey].id,
+            text: taxonKey
+        };
+    });
+}
+function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
+    const elems = buildTaxonSelects(levelOptsObj, levels);
+    $('#focus-filters').append(elems);
+    _u.initComboboxes(tblState.allRealmLvls.slice(1));
+    setSelectedTaxonVals(tblState.selectedOpts, tblState);
     
-//     function buildTaxonSelects(opts, levels) {  
-//         const elems = [];
-//         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-//             const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row' });
-//             const span = _u.buildElem('span', { text: level + ': ' });
-//             const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
-//             $(sel).css('width', '142px');
-//             $(lbl).css('margin', '.3em 0em 0em.3em').append([span, sel]);
-//             elems.push(lbl);
-//         });
-//         return elems;
-//     }
-// }
-// function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
-//     if (!selected || !Object.keys(selected).length) {return;}
-//     tblState.allRealmLvls.forEach(function(lvl) {                               
-//         if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
-//         _u.setSelVal(lvl, selected[lvl], 'silent');
-//     });
-// }
+    function buildTaxonSelects(opts, levels) {  
+        const elems = [];
+        levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
+            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
+            const span = _u.buildElem('span', { text: level + ': ' });
+            const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
+            setTaxonElemStyles(lbl, sel, level);
+            $(lbl).append([span, sel])
+            elems.push(lbl);
+        });
+        return elems;
+    }
+}
+function setTaxonElemStyles(lbl, sel, level) {
+    const lblWidth = level === 'Species' ? '313px' : '222px';
+    const selWidth = level === 'Species' ? '233px' : '142px';
+    $(lbl).css({'margin': '.3em 0 0 1em', 'width': lblWidth});
+    $(sel).css('width', selWidth);
+}
+function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
+    levels.forEach(function(level) {                                            
+        _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
+    });
+    setSelectedTaxonVals(tblState.selectedOpts, tblState);
+}
+function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
+    if (!selected || !Object.keys(selected).length) {return;}
+    tblState.allRealmLvls.forEach(function(lvl) {                               
+        if (!selected[lvl]) { return; }                                         //console.log("selecting [%s] = ", lvl, selected[lvl])
+        _u.setSelVal(lvl, selected[lvl], 'silent');
+    });
+}
 /* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table 

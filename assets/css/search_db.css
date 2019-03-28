@@ -11,6 +11,7 @@
 }
 .selectize-dropdown {
     z-index: 1111;
+    position: absolute;
 }
 /* -------------- Search Options -------------------------------------------- */
 #db-opts {  /* .flex-row also on elem */
@@ -43,27 +44,16 @@ div[id^="db-opts-"] {
     border-right: black 1px solid;
     border-left: black 1px solid;
 }
-.hide-border-section:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 234px;
-    left: 512px;
-    top: 56px;
-    /*background: white;*/
-    z-index: 10;
-    /*border: red 1px solid;*/
-}
 #db-opts-col3, #db-opts-col4 {
     border-right: black 1px solid;
 }
 #db-opts-col5 {
     padding: 5px 0 5px 5px;
 }
-
+/* --------- Filter Options Panel --------- */
 #filter-opts {
     width: 100%;
-    max-height: 100px;
+    max-height: 122px;
     background: rgba(220, 220, 220, .5);
     border-radius: 10px;
     padding: 10px;
@@ -77,6 +67,10 @@ div[id^="db-opts-"] {
     padding: 0;
     border: 0;
     transition: all .5s ease-in-out;
+    overflow-y: hidden;
+}
+#filter-opts span {
+    padding-top: 3px;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-bttm-border:before {
@@ -97,10 +91,10 @@ div[id^="db-opts-"] {
     transition: all .5s ease-in-out;
 }
 #focus-filters {
-    flex-grow: 1;
+    flex-grow: 0;
 }
 #shw-chngd-ints {
-    flex: 0 0 515PX;
+    flex: 0 0 380px;
     align-self: flex-start;
     border-right: black 1px solid;
     border-left: black 1px solid;
@@ -112,15 +106,30 @@ div[id^="db-opts-"] {
     align-self: flex-start;
     padding-left: 5px;
 }
-#stored-filters>span {
+/*#stored-filters>span {
     padding-top: 3px;
-}
-#saved-filters {
-}
+}*/
 .saved-filters-sel {
     margin: 0 10px 2px 5px;
     width: 146px;
 }
+#time-fltr, .flatpickr-input {
+    margin-top: .2em;
+}
+#futrDevMsg {
+    margin: 0 5px 0 5px;
+}
+.sel-cntnr {          /* .flex-row also on elems */
+    margin: .3em;
+    flex: 0 0 auto;
+    width: 222px;    
+    justify-content: space-between;
+}
+button[name="futureDevBttn"] {
+    align-self: flex-end;
+    opacity: .7;
+}
+/* --------- Table Tool Bar --------- */
 #tool-bar {
     margin: .7em auto .2em auto;
     padding: .1em;
@@ -140,28 +149,6 @@ div[id^="db-opts-"] {
 #tbl-filter-status {
     flex-grow: 1;
     max-width: 825px;
-}
-/*------- Filter Option Styles ---------------*/
-#time-fltr, .flatpickr-input {
-    margin-top: .2em;
-}
-#futrDevMsg {
-    margin: 0 5px 0 5px;
-}
-.lbl-sel-opts {          /* .flex-row also on elems */
-    margin: .3em;
-    flex: 0 0 auto;
-    width: 222px;    
-    justify-content: space-between;
-}
-/*#filter-bttns {
-    display: inline-flex;
-    justify-content: space-between;
-    height: 44px;
-}*/
-button[name="futureDevBttn"] {
-    align-self: flex-end;
-    opacity: .7;
 }
 /*------------ Buttons ----------------------*/
 .ico-bttn {

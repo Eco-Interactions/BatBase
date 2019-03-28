@@ -177,6 +177,7 @@ function clearOnFocusChange(focus, tableBuilder) {
     db_ui.resetToggleTreeBttn(false); 
     _u.replaceSelOpts('#sel-view', false);
     tableBuilder();
+    $('#focus-filters').empty();
     // db_ui.clearPastHtmlOptions(tableBuilder); 
 }
 function storeStateValue(key, value) {
@@ -242,7 +243,7 @@ function startTxnTableBuildChain(topTaxon, filtering) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
     frmt_data.transformTaxonDataAndLoadTable(
         data_tree.buildTxnTree(topTaxon, filtering), tblState);
-    // db_ui.loadTaxonComboboxes(tblState);
+    db_ui.loadTaxonComboboxes(tblState);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(view) {

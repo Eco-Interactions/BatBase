@@ -16,7 +16,7 @@
  */
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTaxonTable } from '../db-page.js';
-import { resetToggleTreeBttn } from './db-ui.js';
+import * as db_ui from './db-ui.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -47,22 +47,19 @@ export function resetTableStateParams() {
 }
 /* ====================== FILTER PANEL ============================================================================== */
 export function toggleFilterPanel() {  
-    tblState = tState().get(['curFocus', 'curView']);
-    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(tblState); 
+    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
     } else { hideFilterPanel(); }
 }
-function buildAndShowFilterPanel(tblState) {                                    console.log('buildAndShowFilterPanel')
+function buildAndShowFilterPanel() {                                            console.log('buildAndShowFilterPanel')
     $('#filter-opts').removeClass('closed');  
     $('#db-opts-col2').addClass('shw-col-borders hide-bttm-border');
     _u.initCombobox('Saved Filters');
-    buildFocusFilters(tblState);
+    window.setTimeout(function() { $('#filter-opts').css('overflow-y', 'visible')}, 500);
 }
 function hideFilterPanel() {                                                    console.log('hideFilterPanel')
+    $('#filter-opts').css('overflow-y', 'hidden');
     $('#db-opts-col2').removeClass('shw-col-borders hide-bttm-border');
     $('#filter-opts').addClass('closed');
-}
-function buildFocusFilters(tblState) {
-    // body...
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
@@ -184,7 +181,7 @@ export function toggleTimeUpdatedFilter(state) {                                
     // updateRelatedUi(filtering);
     // if (filtering) { showInteractionsUpdatedToday();
     // } else { resetTimeUpdatedFilter(); }
-    // resetToggleTreeBttn(false);
+    // db_ui.resetToggleTreeBttn(false);
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .3;
@@ -295,7 +292,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  * The table filter's status message is updated. The time-updated radios are synced.
  */
 function syncFiltersAndUi(filterTime) {
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
     syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
     syncTimeUpdatedRadios(filterTime);
@@ -368,7 +365,7 @@ function searchTreeText(entity) {                                               
     fPs.focusFltrs = text === "" ? [] : fPs.focusFltrs.length ? 
         [...fPs.focusFltrs, `"${text}"`] : [`"${text}"`];  
     updateFilterStatusMsg();
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
 } 
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
@@ -418,7 +415,7 @@ export function updateTaxonSearch(val) {                                        
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
-function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
+function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
     const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
     const selected = {};                                                        //console.log("selected = %O", selected)
     selectAncestorTaxa(selTaxonObj);
@@ -476,7 +473,7 @@ export function updatePubSearch() {                                             
     fPs.focusFltrs = getPubFilters();
     tblState.api.setRowData(newRows);
     updateFilterStatusMsg();
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {                             
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }

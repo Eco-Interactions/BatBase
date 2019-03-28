@@ -382,16 +382,16 @@ function initSelectCombobox(confg) {                                            
         create: false,
         onChange: confg.change,
         onBlur: saveOrRestoreSelection,
-        placeholder: getPlaceholer(confg.id)
+        placeholder: getPlaceholer(confg.id, confg.name)
     };
     const sel = $(confg.id).selectize(options);  
 
-    function getPlaceholer(id) {
-        const optCnt = $(id + ' > option').length;  
-        const placeholder = 'Select ' + confg.name
-        return optCnt ? 'Select ' + confg.name : '- None -';
-    }
 } /* End initSelectCombobox */
+function getPlaceholer(id, name, empty) {
+    const optCnt = empty ? 0 : $(id + ' > option').length;  console.log('[%s] options length = ', id, optCnt);
+    const placeholder = 'Select ' + name
+    return optCnt ? 'Select ' + name : '- None -';
+}
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
     return $(confg.id)[0].selectize.getValue();  
@@ -422,10 +422,11 @@ function saveOrRestoreSelection() {                                             
 function saveSelVal($elem, val) {
     $elem.data('val', val);
 }
-// function updatePlaceholderText(elem, newTxt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
-//     elem.selectize.settings.placeholder = 'Select ' + newTxt;
-//     elem.selectize.updatePlaceholder();
-// }
+function updatePlaceholderText(id, newTxt, optCnt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+    const emptySel = optCnt === 0;
+    $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, emptySel);
+    $(id)[0].selectize.updatePlaceholder();
+}
 export function enableComboboxes($pElems, enable) {
     $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
 }
@@ -433,12 +434,14 @@ function enableCombobox(enable, selId) {
     if (enable === false) { return $(selId)[0].selectize.disable(); }
     $(selId)[0].selectize.enable();
 }
-export function replaceSelOpts(selId, opts, changeHndlr) {                      //console.log('replaceSelOpts. args = %O', arguments)
+export function replaceSelOpts(selId, opts, changeHndlr, name) {                //console.log('replaceSelOpts. args = %O', arguments)
     const $selApi = $(selId)[0].selectize;
     if (!opts) { return clearCombobox($selApi); }
-    $selApi.addOption(opts); 
-    $selApi.on('change', changeHndlr)  
+    $selApi.clearOptions(); 
+    $selApi.addOption(opts);
     $selApi.refreshOptions(false);
+    updatePlaceholderText(selId, name, opts.length);
+    if (changeHndlr) { $selApi.on('change', changeHndlr); }  
 }
 function clearCombobox($selApi) {
     $selApi.clearOptions();
