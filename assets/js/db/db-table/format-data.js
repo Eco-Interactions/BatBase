@@ -112,7 +112,7 @@ function hasChildInteractions(row) {
  */
 export function transformSrcDataAndLoadTable(srcTree, tblState) {               //console.log("transformSrcDataAndLoadTable called.")
     const rowData = transformSrcData(srcTree, tblState);                  
-    init_tbl.init(getSrcTreeName(tblState.curRealm), rowData);
+    init_tbl.init(getSrcTreeName(tblState.curView), rowData);
 }
 function transformSrcData(tree, tblState) {
     let rowColorIdx = 0;
@@ -159,9 +159,9 @@ function getSrcRowData(src, treeLvl, idx, tblState) {                           
         }
     }
 } /* End getSrcRowData */
-function getSrcTreeName(realm) {
+function getSrcTreeName(view) {
     const prefix = { "pubs": "Publication", "auths": "Author", "publ": "Publisher"};
-    return prefix[realm] + ' Tree';
+    return prefix[view] + ' Tree';
 }
 /*-------- Taxon Data Formatting ------------------------------------------*/
 /**

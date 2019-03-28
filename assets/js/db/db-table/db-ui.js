@@ -154,10 +154,10 @@ export function initTaxonSearchUi(data) {                                       
     setTaxonView();  
 }
 function loadTaxonViewOpts(realms) {
-    const opts = getRealmOpts(realms);
+    const opts = getViewOpts(realms);
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
 }
-function getRealmOpts(realms) {  
+function getViewOpts(realms) {  
     const optsAry = [];
     for (let id in realms) {                                                
         optsAry.push({ value: realms[id].taxon, text: realms[id].displayName });
@@ -166,9 +166,9 @@ function getRealmOpts(realms) {
 }
 /** Restores stored realm from previous session or sets the default 'Plants'. */
 function setTaxonView() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = [%s] taxonRealm = [%s]", storedRealm, _u.getSelVal('View'))
+    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
     if (!_u.getSelVal('View')) { 
-        const realmVal = storedRealm ? storedRealm : "3";  
+        const realmVal = storedView ? storedView : "3";  
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
@@ -205,7 +205,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     }
     /** Child levels can have multiple taxa.  */
     function getTaxaOptsAtLvl(rcrds, lvl) {
-        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                   //console.log("taxonNames = %O", taxonNames);
+        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                 //console.log("taxonNames = %O", taxonNames);
         optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
@@ -266,9 +266,9 @@ function loadLocationViewOpts(argument) {
     _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
 }
 function setLocView(view) {
-    const storedRealm = view || _u.getDataFromStorage('curRealm');              //console.log("setLocView. storedRealm = ", storedRealm)
-    const locRealm = storedRealm || 'tree';
-    _u.setSelVal('View', locRealm, 'silent');
+    const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
+    const locView = storedView || 'tree';
+    _u.setSelVal('View', locView, 'silent');
 }
 /* ------------------------- LOCATION FILTER UI ----------------------------- */
 /**
@@ -399,12 +399,12 @@ function setSelectedLocVals(selected) {                                         
 }
 /* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
- * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
+ * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
     loadSourceViewOpts();
-    setSrcRealm();  
+    setSrcView();  
 }
 function loadSourceViewOpts() {
     const opts = [{ value: "auths", text: "Authors" },
@@ -413,11 +413,11 @@ function loadSourceViewOpts() {
     _u.replaceSelOpts('#sel-view', opts, db_page.onSrcViewChange);
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
-function setSrcRealm() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = ", storedRealm)
-    const srcRealm = storedRealm || 'pubs';  
-    db_page.accessTableState().set({'curRealm': srcRealm});
-    if (!_u.getSelVal('View')) { _u.setSelVal('View', srcRealm, 'silent'); } 
+function setSrcView() {
+    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = ", storedView)
+    const srcView = storedView || 'pubs';  
+    db_page.accessTableState().set({'curView': srcView});
+    if (!_u.getSelVal('View')) { _u.setSelVal('View', srcView, 'silent'); } 
 }
 /* ------------------------- SOURCE FILTER UI ------------------------------- */
 /**
@@ -559,7 +559,7 @@ export function showPopUpMsg(msg) {                                             
 //     $('#opts-col2').fadeTo(100, 0);
 //     $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
     
-//     function emptySearchOpts() {                                                //console.log("emptying search options");
+//     function emptySearchOpts() {                                             //console.log("emptying search options");
 //         $('#opts-col2').empty();
 //         // $('#sort-opts').empty();
 //         $('#opts-col1, #opts-col2').fadeTo(0, 1);

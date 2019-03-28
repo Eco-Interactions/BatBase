@@ -260,8 +260,8 @@ function setTableState() {
     $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
     $('#search-focus')[0].selectize.addItem('taxa');
-    if ($('#sel-realm').length) {
-        window.setTimeout(() => {$('#sel-realm')[0].selectize.addItem('3')}, 100);
+    if ($('#sel-view').length) {
+        window.setTimeout(() => {$('#sel-view')[0].selectize.addItem('3')}, 100);
     }
 }
 function resetTableState() {
@@ -285,11 +285,11 @@ function loadLocView(view) {
     if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
         $('#search-focus')[0].selectize.addItem('locs');
     }
-    window.setTimeout(loadLocRealm(view), 400);  
+    window.setTimeout(loadLocView(view), 400);  
 }
-function loadLocRealm(view) {
-    if ($('#sel-realm')[0].selectize.getValue() !== view) {
-        $('#sel-realm')[0].selectize.addItem(view);
+function loadLocView(view) {
+    if ($('#sel-view')[0].selectize.getValue() !== view) {
+        $('#sel-view')[0].selectize.addItem(view);
     }
 }
 function addBttnEvents() {  
@@ -309,7 +309,7 @@ function showTutorial(tutKey) {
     if (tutKey === 'map') { intro.goToStep(12); }
 }
 function checkForDbLoad() {
-    if ($('#sel-realm').length) { return; }  
+    if ($('#sel-view').length) { return; }  
     window.setTimeout(addDbLoadNotice, 400);
 }
 function addDbLoadNotice() {

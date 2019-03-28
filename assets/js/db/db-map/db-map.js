@@ -353,7 +353,7 @@ export function showInts(focus, viewRcrds, locRcrds) {                          
  * -> geoJsonId: {locs: [{loc}], ints: [{name: [intRcrds]}], ttl: ## } 
  */
 function buildLocDataObj(viewRcrds, locRcrds) {  
-    const tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+    const tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
     let curBaseNodeName; //used for Source rows
     tblState.api.forEachNodeAfterFilter(getIntMapData);
@@ -409,7 +409,7 @@ function buildLocDataObj(viewRcrds, locRcrds) {
     function addIntData(locObj, entData, geoId) {
         const mapDataProp = mapData[geoId].ints[entData.name]
         if (!mapData[geoId].ints[entData.name]) { initIntDataObj(entData, geoId); }
-        if (tblState.curRealm == 'auths') { return sanitizeAndAddInt(); }
+        if (tblState.curView == 'auths') { return sanitizeAndAddInt(); }
         addToIntObj(entData.name)
 
         function addToIntObj(key) {

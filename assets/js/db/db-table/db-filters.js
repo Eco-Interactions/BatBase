@@ -164,7 +164,7 @@ function showUpdatesAfterTableLoad() {
  */
 export function toggleTimeUpdatedFilter(state) {                                //console.log('toggleTimeUpdatedFilter. state = ', state);
     // const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
-    // tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+    // tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
     // updateRelatedUi(filtering);
     // if (filtering) { showInteractionsUpdatedToday();
     // } else { resetTimeUpdatedFilter(); }
@@ -240,8 +240,8 @@ function showInteractionsUpdatedToday() {
  */
 function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
     const filterTime = getFilterTime();  
-    if (!tblState.curRealm) { //If module entered through updateTaxonSearch
-        tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+    if (!tblState.curView) { //If module entered through updateTaxonSearch
+        tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
     }                       
     filterInteractionsAndUpdateState();        
     syncFiltersAndUi(filterTime);
@@ -300,7 +300,7 @@ function syncTimeUpdatedRadios(filterTime) {
 function applySrcFltrs() {
     const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
-    resets[tblState.curRealm]();
+    resets[tblState.curView]();
 }
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
@@ -310,7 +310,7 @@ function reapplyTreeTextFltr() {
 function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
         'publ': 'Publisher', 'pubs': 'Publication' };
-    const ent = tblState.curFocus === "srcs" ? tblState.curRealm : tblState.curFocus;
+    const ent = tblState.curFocus === "srcs" ? tblState.curView : tblState.curFocus;
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");

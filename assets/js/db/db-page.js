@@ -1,7 +1,7 @@
 /**
  * The Database Search page entry point. The data table is built to display the 
  * eco-interaction records organized by a selected "focus": taxa (grouped further 
- * by realm: bat, plant, arthropod), locations, or sources (grouped by either 
+ * by view: bat, plant, arthropod), locations, or sources (grouped by either 
  * authors, publications, or publishers). The data map displays interactions
  * geographically. Filtered interactions can be viewed in either form. 
  * 
@@ -34,7 +34,7 @@ import * as init_tbl from './db-table/init-table.js';
  * Stores table state params needed across multiple modules. 
  * {obj} api            Ag-grid API (available after table-init complete)
  * {str} curFocus       Focus of the data in table: taxa, srcs, locs
- * {str} curRealm       Sub-sort of table data. Eg: bats, auths, etc 
+ * {str} curView       Sub-sort of table data. Eg: bats, auths, etc 
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
@@ -124,7 +124,7 @@ function getResetFocus() {
 }
 /** Resets table state to top focus options for the selected view. */
 function resetDataTable() {                                                     //console.log("---reseting table---")
-    const resetMap = { taxa: resetTaxonRealm, locs: rebuildLocTable, srcs: resetSourceRealm };
+    const resetMap = { taxa: resetTaxonView, locs: rebuildLocTable, srcs: resetSourceView };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 
 } 
@@ -178,7 +178,7 @@ function focusNotChanged(focus) {
     return focus === tblState.curFocus;
 }
 function clearOnFocusChange(focus, tableBuilder) {
-    storeStateValue('curRealm', false);
+    storeStateValue('curView', false);
     db_filters.resetFilterStatusBar();
     resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
@@ -199,16 +199,16 @@ function buildTaxonTable() {                                                    
     if (data) { 
         tblState.rcrdsById = data.taxon;
         db_ui.initTaxonSearchUi(data);
-        startTxnTableBuildChain(storeAndReturnRealm());
+        startTxnTableBuildChain(storeAndReturnView());
     } else { console.log("Error loading taxon data from storage."); }
 }
 /** Event fired when the taxon view select box has been changed. */
 export function onTxnViewChange(val) {                                          console.log('onTxnViewChange. val = [%s]', val) 
     if (!val) { return; }
-    resetTaxonRealm(val);
+    resetTaxonView(val);
 }
-function resetTaxonRealm(val) {                                                 //console.log('resetTaxonRealm')
-    const realmTaxon = storeAndReturnRealm(val);
+function resetTaxonView(val) {                                                 //console.log('resetTaxonView')
+    const realmTaxon = storeAndReturnView(val);
     resetCurTreeState();
     rebuildTaxonTable(realmTaxon);
 }
@@ -217,12 +217,12 @@ function resetTaxonRealm(val) {                                                 
  * stores both it's id and level in the global focusStorag, and returns 
  * the taxon's record.
  */
-function storeAndReturnRealm(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnRealm. val [%s], realmId [%s]', val, realmId)
+function storeAndReturnView(val) {
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
-    storeStateValue('curRealm', realmId);
-    tblState.curRealm = realmId;
+    storeStateValue('curView', realmId);
+    tblState.curView = realmId;
     tblState.realmLvl = realmLvl;
     return realmTaxonRcrd;
 }
@@ -273,7 +273,7 @@ export function onLocViewChange(val) {
     updateLocView(val);
 }
 /** 
- * Event fired when the source realm select box has been changed.
+ * Event fired when the source view select box has been changed.
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
@@ -289,7 +289,7 @@ function resetLocUi(view) {
     if (view === 'tree') { db_ui.updateUiForTableView(); }
 }
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
-    storeStateValue('curRealm', view);                      
+    storeStateValue('curView', view);                      
     return view === 'tree' ? rebuildLocTable() : buildLocMap();
 }
 /** ------------ Location Table Methods ------------------------------------- */
@@ -345,28 +345,28 @@ function buildSourceTable() {
     if (data) { 
         tblState.rcrdsById = data;
         db_ui.initSrcSearchUi(data);
-        onSrcViewChange(tblState.curRealm);
+        onSrcViewChange(tblState.curView);
     } else { console.log('Error loading source data from storage.'); }
 }
-/** Event fired when the source realm select box has been changed. */
-export function onSrcViewChange(val) {                                         //console.log('-------- SrcRealmChange. [%s]', val)
+/** Event fired when the source view select box has been changed. */
+export function onSrcViewChange(val) {                                         //console.log('-------- SrcViewChange. [%s]', val)
     if (!val) { return; }
-    resetSourceRealm(val);
+    resetSourceView(val);
 }
-function resetSourceRealm(val) {
+function resetSourceView(val) {
     clearPreviousTable();
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
     startSrcTableBuildChain(val);
 }
 function startSrcTableBuildChain(val) {
-    storeSrcRealm(val);
-    // db_ui.loadSrcSearchUi(tblState.curRealm);
+    storeSrcView(val);
+    // db_ui.loadSrcSearchUi(tblState.curView);
     frmt_data.transformSrcDataAndLoadTable(
-        data_tree.buildSrcTree(tblState.curRealm), tblState);
+        data_tree.buildSrcTree(tblState.curView), tblState);
 }
-function storeSrcRealm(val) {  
-    const realmVal = val || _u.getSelVal('Source Type');                        //console.log("storeAndReturnCurRealmRcrds. realmVal = ", realmVal)
-    storeStateValue('curRealm', realmVal);
-    tblState.curRealm = realmVal;    
+function storeSrcView(val) {  
+    const viewVal = val || _u.getSelVal('Source Type');                        //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
+    storeStateValue('curView', viewVal);
+    tblState.curView = viewVal;    
 }
