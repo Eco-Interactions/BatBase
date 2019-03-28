@@ -130,8 +130,11 @@ button[name="int-set"]:before {
 button[name="xpand-all"] {
     width: 105px;
 }
+button[name="xpand-1"], button[name="collapse-1"] {
+    font-weight: 600;
+}
 button[name="show-hide-col"] {
-    opacity: .8;
+    opacity: .5;
     cursor: not-allowed;
 }
 #xpand-tree button {

@@ -9,17 +9,20 @@
  *     loadSearchLocHtml                
  *     loadTaxonComboboxes              
  *     resetToggleTreeBttn
- *     setUpFutureDevInfoBttn
  *     updateUiForTableView
  *     updateUiForMapView
  */
 import * as _u from '../util.js';
 import exportCsvData from './csv-data.js';
+import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import { buildTreeSearchHtml } from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
 
+const userRole = $('body').data("user-role");
+
 adaptUiToScreenSize();
+authDependentInit();
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 /** Moves the buttons from the end of the search options panel to just beneath. */
@@ -38,30 +41,32 @@ export function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
 }
-export function setUpFutureDevInfoBttn() {
-    const bttn = _u.buildElem('button', { name: 'futureDevBttn', 
-            title: getFutureDevMsg(),
-            text: 'Hover here for future search options.'});  
-    $(bttn).appendTo('#opts-col3 .bttm-row');        
-}
-function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
-    return "Future options include year and elevation range, habitat and interaction " +
-        "type (currently available by filtering the table columns), " +
-        "as well as other criteria that would be helpful to focus the data. \n" +
-        "Below is a 'Show/Hide Columns' button that will allow users to specify " +
-        "the data shown in the table and/or csv export.";
-}
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {
     showPopUpMsg(`Downloading and caching all interaction records. Please allow 
         for a ~45 second download.`);   
 }
-export function authDependentInit(userRole) {
-    if (userRole === "visitor") {
-        $('button[name="csv"]').prop('disabled', true);
-        $('button[name="csv"]').prop('title', "Register to download.");
-        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(exportCsvData); }
+function authDependentInit() {
+    if (userRole === "visitor") { disableUserFeatures();
+    } else if (userRole === "user"){ enableUserFeatures(); 
+    } else { enableEditorFeatures(); }
+}
+function disableUserFeatures() {
+    $('button[name="int-set"], button[name="csv"], #new-data').css(
+        {'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true).prop(
+        'title', "Please register to use these features.");
+}
+function enableEditorFeatures() {
+    $('button[name="csv"]').click(exportCsvData); 
+    // $('button[name="int-set"]').click(); 
+    $('#new-data').addClass('adminbttn').click(
+        createEntity.bind(null, 'create', 'interaction'));
+}
+function enableUserFeatures() {
+    $('button[name="csv"]').click(exportCsvData); 
+    // $('button[name="int-set"]').click(); 
+    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' }).prop(
+        'title', 'This feature is only available to editors.');
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**

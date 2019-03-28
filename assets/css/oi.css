@@ -186,9 +186,9 @@ span.lbl {
     width: 148px;
 }
 .adminbttn {
-    background: #3399ff;
-    color: white;
-    border-radius: 5px;
+    background: #3399ff !important;
+    color: white !important;
+    border-radius: 5px !important;
     box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
 }
 .adminbttn:hover {

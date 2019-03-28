@@ -58,7 +58,6 @@ function requireCss() {
 }
 function initDbPage () {    
     _u.init_db();
-    db_ui.authDependentInit();
     addDomEventListeners();
     initSearchState();
 }
@@ -79,7 +78,6 @@ function initSearchState() {
     resetTableParams();
     db_filters.toggleTimeUpdatedFilter('disable');
     db_filters.resetFilterStatusBar();      
-    db_ui.setUpFutureDevInfoBttn();
     selectInitialSearchFocus();
 } 
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */

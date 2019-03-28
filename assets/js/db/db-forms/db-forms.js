@@ -6,8 +6,9 @@
  * container. When clicked, a wysiwyg interface will encapsulate that block and 
  * allow editing and saving of the content within using the trumbowyg library.
  * Exports: 
- *     editEntity
  *     addNewLocation
+ *     editEntity
+ *     createEntity
  *     initLocForm
  *     mergeLocs
  *     selectLoc
@@ -20,23 +21,6 @@ import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let fP = {};
-
-authDependentInit();    
-
-function authDependentInit() {   
-    const userRole = $('body').data("user-role");                               //console.log("crud.js role = ", userRole);
-    if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {                //console.log("admin CRUD ACTIVATE!! ");
-        if ($('body').data("this-url") === "/search") { buildSearchPgFormUi(); }
-    }
-}
-/*--------------------- SEARCH PAGE CRUD-FORM ----------------------------------------------------*/
-/** Adds a "New" button under the top table focus options. */
-function buildSearchPgFormUi() {
-    var bttn = _u.buildElem('button', { 
-            text: 'New', name: 'createbttn', class: 'adminbttn' });
-    $(bttn).click(createEntity.bind(null, 'create', 'interaction'));
-    $('#opts-col1').append(bttn);
-}
 /*-------------- Form HTML Methods -------------------------------------------*/
 /** Builds and shows the popup form's structural elements. */
 function showFormPopup(actionHdr, entity, id) {
@@ -570,7 +554,7 @@ function finishLocEditForm(id) {
  * Fills the global fP obj with the basic form params @initFormParams. 
  * Init the create interaction form and append into the popup window @initCreateForm. 
  */
-function createEntity(id, entity) {                                             //console.log('Creating [%s] [%s]', entity, id);  
+export function createEntity(id, entity) {                                             //console.log('Creating [%s] [%s]', entity, id);  
     initFormParams('create', entity);
     showFormPopup('New', _u.ucfirst(entity), null);
     initCreateForm();
