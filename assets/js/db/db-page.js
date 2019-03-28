@@ -78,8 +78,16 @@ function initSearchState() {
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     _u.initComboboxes(['Focus', 'View']);
+    _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', tblState.curFocus, 'silent');
     selectSearchFocus();
+}
+function getFocusOpts() {
+    return [
+        { value: 'locs', text: 'Location' },
+        { value: 'srcs', text: 'Source' },
+        { value: 'taxa', text: 'Taxon' },
+    ];
 }
 /* ================== Table "State" Methods ========================================================================= */
 export function accessTableState() {
@@ -307,7 +315,7 @@ function getTopRegionIds() {
 function startLocTableBuildChain(topLocs) {
     frmt_data.transformLocDataAndLoadTable(
         data_tree.buildLocTree(topLocs), tblState);
-    // db_ui.loadSearchLocHtml(tblState);
+    db_ui.loadSearchLocHtml(tblState);
 }
 /** ------------ Location Map Methods --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */

@@ -440,7 +440,7 @@ export function replaceSelOpts(selId, opts, changeHndlr, name) {                
     $selApi.clearOptions(); 
     $selApi.addOption(opts);
     $selApi.refreshOptions(false);
-    updatePlaceholderText(selId, name, opts.length);
+    if (name) { updatePlaceholderText(selId, name, opts.length); }    
     if (changeHndlr) { $selApi.on('change', changeHndlr); }  
 }
 function clearCombobox($selApi) {

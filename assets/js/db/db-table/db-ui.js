@@ -187,8 +187,6 @@ function setTaxonView() {
  * the unfiltered realm tree. Each level's box is populated with the names 
  * of every taxon at that level in the displayed, filtered, table-tree. After 
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
- *
- * MOVING TO NEW FILTER DROPDOWN PANEL. 
  */
 export function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
@@ -258,7 +256,7 @@ function setTaxonElemStyles(lbl, sel, level) {
     $(lbl).css({'margin': '.3em 0 0 1em', 'width': lblWidth});
     $(sel).css('width', selWidth);
 }
-function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
+function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
     levels.forEach(function(level) {                                            
         _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
     });
@@ -291,133 +289,138 @@ function setLocView(view) {
     const locView = storedView || 'tree';
     _u.setSelVal('View', locView, 'silent');
 }
-// /* ------------------------- LOCATION FILTER UI ----------------------------- */
-// /**
-//  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
-//  * data into table rows and load the table @transformLocDataAndLoadTable.
-//  *
-//  * MOVING TO NEW FILTER DROPDOWN PANEL. 
-//  */
-// export function loadSearchLocHtml(tblState) {
-//     // clearCol2();       
-//     loadSearchByNameElem();
-//     loadLocComboboxes(tblState);
-// }
-// function loadSearchByNameElem() {  
-//     const searchTreeElem = db-opts('Location');
-//     $(searchTreeElem).css({ 'width': '273px' });
-//     $('#opts-col2').append(searchTreeElem);
-//     $('input[name="selLocation"]').css({ 'width': '205px' });
-// }
-// /**
-//  * Create and append the location search comboboxes, Region and Country, and
-//  * set any previously 'selected' values.
-//  */
-// function loadLocComboboxes(tblState) {  
-//     const opts = buildLocSelectOpts(tblState); 
-//     const selElems = buildLocSelects(opts);
-//     $('#opts-col2').append(selElems);
-//     _u.initComboboxes(['Region', 'Country']);
-//     setSelectedLocVals(tblState.selectedOpts);
-// }/** Builds arrays of options objects for the location comboboxes. */
-// function buildLocSelectOpts(tblState) {  
-//     const data = _u.getDataFromStorage(['countryNames', 'regionNames']);
-//     const processedOpts = { Region: [], Country: [] };
-//     const opts = { Region: [], Country: [] };  
-//     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
-//     modifyOpts();
-//     return opts; 
-//     /**
-//      * Recurses through the tree and builds a option object for each unique 
-//      * country and region in the current table with interactions.
-//      */
-//     function buildLocOptsForNode(row) {                                 
-//         const rowData = row.data;  
-//         if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
-//         if (rowData.type === 'Region' || rowData.type === 'Country') {
-//             buildLocOpt(rowData, rowData.name, rowData.type); 
-//         }
-//         if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
-//     }
-//     /** If the location has interactions an option object is built for it. */
-//     function buildLocOpt(rowData, name, type) {
-//         if (name.includes('Unspecified')) { return; }
-//         if (processedOpts[type].indexOf(name) !== -1) { return; }
-//         const id = data[_u.lcfirst(type) + "Names"][name];             
-//         if (isOpenRow(id)) { addToSelectedObj(id, type); }
-//         opts[type].push({ value: id, text: name.split('[')[0] }); 
-//         processedOpts[type].push(name);
-//     }
-//     function isOpenRow(id) {  
-//         return tblState.openRows.indexOf(id) !== -1
-//     }
-//     /** Handles all modification of the location options. */
-//     function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _u.snapshot(opts));
-//         if (opts.Region.length === 2) { rmvTopRegion(); }        
-//         addMissingOpts();
-//         sortLocOpts();
-//     }
-//     /** 
-//      * If both top & sub regions are in the table, only the sub-region opt is 
-//      * included, unless the top region is the location being filtered on. 
-//      */
-//     function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tblState.selectedOpts)
-//         const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
-//         if (!selLoc || !selLoc.parent) { return; }
-//         opts.Region = opts.Region.filter(function(region) {
-//             return region.value == tblState.selectedOpts.region;
-//         });             
-//     }
-//     /** If the Region or Country aren't in the table, they are added as options here. */
-//     function addMissingOpts() {                                                 
-//         if (!tblState.openRows.length && !tblState.selectedOpts) { return; }
-//         const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
-//         if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
-//         if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
-//     }
-//     /** build the new opts and adds their loc ids to the selected-options obj. */
-//     function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
-//         const val = loc && loc[type] ?  loc[type].id : false;
-//         const txt = loc && loc[type] ?  loc[type].displayName : false;
-//         if (!val) { return }
-//         addToSelectedObj(val, _u.ucfirst(type));  
-//         tblState.openRows.push(val);
-//         opts[optProp].push({ value: val, text: txt });
-//     }         
-//     function addToSelectedObj(id, type) {
-//         const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s] = %O', type, loc);
-//         sel[type] = id;
-//     }
-//     /** Alphabetizes the options. */
-//     function sortLocOpts() {
-//         for (let type in opts) {
-//             opts[type] = opts[type].sort(_u.alphaOptionObjs); 
-//         }
-//     }
-// } /* End buildLocSelectOpts */
-// /** Builds the location select elements */
-// function buildLocSelects(locOptsObj) {  
-//     const selElems = [];
-//     for (let locSelName in locOptsObj) {
-//         let elem = buildLocSel(_u.ucfirst(locSelName), locOptsObj[locSelName]); 
-//         selElems.push(elem);
-//     }
-//     return selElems;
+/* ------------------------- LOCATION FILTER UI ----------------------------- */
+/**
+ * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
+ * data into table rows and load the table @transformLocDataAndLoadTable.
+ */
+export function loadSearchLocHtml(tblState) {   
+    if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
+    loadLocComboboxes(tblState);
+    loadSearchByNameElem();
+}
+function updateLocSelOptions(tblState) {
+    const opts = buildLocSelectOpts(tblState); 
+    Object.keys(opts).forEach(locType => {                                            
+        _u.replaceSelOpts('#sel'+locType, opts[locType], null, locType);
+    });
+    setSelectedLocVals(tblState.selectedOpts);
+}
+function loadSearchByNameElem() {  
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
+    // $(searchTreeElem).css({ 'width': '273px' });
+    $('#focus-filters').append(searchTreeElem);
+    // $('input[name="selLocation"]').css({ 'width': '205px' });
+}
+/**
+ * Create and append the location search comboboxes, Region and Country, and
+ * set any previously 'selected' values.
+ */
+function loadLocComboboxes(tblState) {  
+    const opts = buildLocSelectOpts(tblState); 
+    const selElems = buildLocSelects(opts);
+    $('#focus-filters').append(selElems);
+    _u.initComboboxes(['Region', 'Country']);
+    setSelectedLocVals(tblState.selectedOpts);
+}/** Builds arrays of options objects for the location comboboxes. */
+function buildLocSelectOpts(tblState) {  
+    const data = _u.getDataFromStorage(['countryNames', 'regionNames']);
+    const processedOpts = { Region: [], Country: [] };
+    const opts = { Region: [], Country: [] };  
+    tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
+    modifyOpts();
+    return opts; 
+    /**
+     * Recurses through the tree and builds a option object for each unique 
+     * country and region in the current table with interactions.
+     */
+    function buildLocOptsForNode(row) {                                 
+        const rowData = row.data;  
+        if (rowData.interactionType) {return;}                                  //console.log("buildLocOptsForNode %s = %O", rowData.name, rowData)
+        if (rowData.type === 'Region' || rowData.type === 'Country') {
+            buildLocOpt(rowData, rowData.name, rowData.type); 
+        }
+        if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
+    }
+    /** If the location has interactions an option object is built for it. */
+    function buildLocOpt(rowData, name, type) {
+        if (name.includes('Unspecified')) { return; }
+        if (processedOpts[type].indexOf(name) !== -1) { return; }
+        const id = data[_u.lcfirst(type) + "Names"][name];             
+        if (isOpenRow(id)) { addToSelectedObj(id, type); }
+        opts[type].push({ value: id, text: name.split('[')[0] }); 
+        processedOpts[type].push(name);
+    }
+    function isOpenRow(id) {  
+        return tblState.openRows.indexOf(id) !== -1
+    }
+    /** Handles all modification of the location options. */
+    function modifyOpts() {                                                     //console.log('modifyOpts. opts = %O', _u.snapshot(opts));
+        if (opts.Region.length === 2) { rmvTopRegion(); }        
+        addMissingOpts();
+        sortLocOpts();
+    }
+    /** 
+     * If both top & sub regions are in the table, only the sub-region opt is 
+     * included, unless the top region is the location being filtered on. 
+     */
+    function rmvTopRegion() {                                                   //console.log('rmving top region. opts = %O, regionToKeep = %O', opts, tblState.selectedOpts)
+        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
+        if (!selLoc || !selLoc.parent) { return; }
+        opts.Region = opts.Region.filter(function(region) {
+            return region.value == tblState.selectedOpts.region;
+        });             
+    }
+    /** If the Region or Country aren't in the table, they are added as options here. */
+    function addMissingOpts() {                                                 
+        if (!tblState.openRows.length && !tblState.selectedOpts) { return; }
+        const selLoc = tblState.rcrdsById[tblState.openRows[0]];                  
+        if (!opts.Country.length) { buildOpt(selLoc, 'country', 'Country'); }
+        if (!opts.Region.length) { buildOpt(selLoc, 'region', 'Region'); }
+    }
+    /** build the new opts and adds their loc ids to the selected-options obj. */
+    function buildOpt(loc, type, optProp) {                                     //console.log('building opt for [%s]. loc = %O', type, loc);
+        const val = loc && loc[type] ?  loc[type].id : false;
+        const txt = loc && loc[type] ?  loc[type].displayName : false;
+        if (!val) { return }
+        addToSelectedObj(val, _u.ucfirst(type));  
+        tblState.openRows.push(val);
+        opts[optProp].push({ value: val, text: txt });
+    }         
+    function addToSelectedObj(id, type) {
+        const sel = tblState.selectedOpts;                                      //console.log('building opt for [%s] = %O', type, loc);
+        sel[type] = id;
+    }
+    /** Alphabetizes the options. */
+    function sortLocOpts() {
+        for (let type in opts) {
+            opts[type] = opts[type].sort(_u.alphaOptionObjs); 
+        }
+    }
+} /* End buildLocSelectOpts */
+/** Builds the location select elements */
+function buildLocSelects(locOptsObj) {  
+    const selElems = [];
+    for (let locSelName in locOptsObj) {
+        let elem = buildLocSel(_u.ucfirst(locSelName), locOptsObj[locSelName]); 
+        selElems.push(elem);
+    }
+    return selElems;
     
-//     function buildLocSel(selName, opts) {
-//         const lbl = _u.buildElem('label', { class: "lbl-sel-opts flex-row" });
-//         const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
-//         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
-//         $(sel).css('width', '202px');
-//         $(lbl).css('width', '282px').append([span, sel]);
-//         return lbl;
-//     }
-// }
-// function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
-//     Object.keys(selected).forEach(locType => {
-//         _u.setSelVal(locType, selected[locType], 'silent');
-//     });
-// }
+    function buildLocSel(selName, opts) {
+        const lbl = _u.buildElem('label', { class: "sel-cntnr flex-row" });
+        const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
+        const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
+        $(sel).css('width', '202px');
+        $(lbl).css('width', '282px').append([span, sel]);
+        return lbl;
+    }
+}
+function setSelectedLocVals(selected) {                                         //console.log("selected in setSelectedLocVals = %O", selected);
+    Object.keys(selected).forEach(locType => {
+        _u.setSelVal(locType, selected[locType], 'silent');
+    });
+}
 /* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
  * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
@@ -483,7 +486,7 @@ function setSrcView() {
 //     }
 //     /** Builds the publication type dropdown */
 //     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-//         const lbl = _u.buildElem('label', {class: "lbl-sel-opts flex-row"});
+//         const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
 //         const span = _u.buildElem('span', { text: 'Type:' });
 //         const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
 //         $(sel).css('width', '177px');
