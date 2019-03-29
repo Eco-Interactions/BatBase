@@ -67,9 +67,9 @@ function hideFilterPanel() {                                                    
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
-    // tblState = {api: tState().get('api')};
-    // if (!tblState.api) { return; }
-    // getFiltersAndUpdateStatus();
+    tblState = {api: tState().get('api')};
+    if (!tblState.api) { return; }
+    getFiltersAndUpdateStatus();
 }
 /**
  * Adds all active filters to the table's status message. First adding any 
@@ -408,14 +408,8 @@ export function updateTaxonSearch(val) {                                        
     function updateFilterStatus() {
         const curLevel = rcrd.level.displayName;
         const taxonName = rcrd.displayName;
-        updateFilters();
-
-        function updateFilters() {
-            if (fPs.focusFltrs) { 
-                fPs.focusFltrs.push(curLevel + " " + taxonName); 
-            } else { fPs.focusFltrs = [curLevel + " " + taxonName] }
-            updateFilterStatusMsg();
-        }
+        fPs.focusFltrs = [curLevel + " " + taxonName];
+        updateFilterStatusMsg();
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
