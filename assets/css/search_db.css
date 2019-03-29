@@ -70,7 +70,7 @@ div[id^="db-opts-"] {
     overflow-y: hidden;
 }
 #filter-opts span {
-    padding-top: 3px;
+    padding-top: 5px;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-bttm-border:before {
@@ -91,7 +91,7 @@ div[id^="db-opts-"] {
     transition: all .5s ease-in-out;
 }
 #focus-filters {
-    flex-grow: 0;
+    flex-grow: 1;
 }
 #shw-chngd-ints {
     flex: 0 0 380px;

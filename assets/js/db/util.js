@@ -14,7 +14,6 @@ import { showPopUpMsg } from './db-table/db-ui.js';
  *   buildSelectElem
  *   buildSimpleOpts
  *   clearDataStorage
- *   enableComboboxes
  *   getDataFromStorage
  *   lcfirst 
  *   getDetachedRcrd
@@ -388,7 +387,7 @@ function initSelectCombobox(confg) {                                            
 
 } /* End initSelectCombobox */
 function getPlaceholer(id, name, empty) {
-    const optCnt = empty ? 0 : $(id + ' > option').length;  console.log('[%s] options length = ', id, optCnt);
+    const optCnt = empty ? 0 : $(id + ' > option').length;  
     const placeholder = 'Select ' + name
     return optCnt ? 'Select ' + name : '- None -';
 }
@@ -422,18 +421,18 @@ function saveOrRestoreSelection() {                                             
 function saveSelVal($elem, val) {
     $elem.data('val', val);
 }
-function updatePlaceholderText(id, newTxt, optCnt) {                               //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+function updatePlaceholderText(id, newTxt, optCnt) {                            //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     const emptySel = optCnt === 0;
     $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, emptySel);
     $(id)[0].selectize.updatePlaceholder();
 }
-export function enableComboboxes($pElems, enable) {
-    $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
-}
-function enableCombobox(enable, selId) {
-    if (enable === false) { return $(selId)[0].selectize.disable(); }
-    $(selId)[0].selectize.enable();
-}
+// export function enableComboboxes($pElems, enable) {   console.log('############ enableComboboxes used')
+//     $pElems.each((i, elem) => { enableCombobox(enable, '#'+elem.id) });
+// }
+// function enableCombobox(enable, selId) {
+//     if (enable === false) { return $(selId)[0].selectize.disable(); }
+//     $(selId)[0].selectize.enable();
+// }
 export function replaceSelOpts(selId, opts, changeHndlr, name) {                //console.log('replaceSelOpts. args = %O', arguments)
     const $selApi = $(selId)[0].selectize;
     if (!opts) { return clearCombobox($selApi); }

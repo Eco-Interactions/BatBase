@@ -334,7 +334,7 @@ function reapplyPubFltr() {                                                     
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {
     const func = getTreeSearchHandler(entity);
-    const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row tbl-tools' });
+    const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
     const span = _u.buildElem('span', { text: 'Name:' });
     const input = _u.buildElem('input', { 
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
@@ -342,10 +342,14 @@ export function buildTreeSearchHtml(entity) {
         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
     $(span).css('margin', '0 20px 0 0');
     $(lbl).css('width', '284px');
-    $(input).css('width', '204px');
+    $(input).css('width', getTreeSearchInputWidth(entity));
     $(input).onEnter(func);
     $(lbl).append([span, input]);
     return lbl;
+}
+function getTreeSearchInputWidth(entity) {
+    const w = { 'Location': '204px' };
+    return w[entity] ? w[entity] : '228px';
 }
 function getTreeSearchHandler(entity) { 
     return entity === 'Publication' ? 

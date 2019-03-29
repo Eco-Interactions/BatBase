@@ -443,62 +443,60 @@ function setSrcView() {
     db_page.accessTableState().set({'curView': srcView});
     if (!_u.getSelVal('View')) { _u.setSelVal('View', srcView, 'silent'); } 
 }
-// /* ------------------------- SOURCE FILTER UI ------------------------------- */
-// /**
-//  * Will build the select elems for the source search options. Clears previous 
-//  * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
-//  * format and load the data table.
-//  * NOTE: This is the entry point for source table rebuilds as filters alter data
-//  * contained in the data tree.
-//  *
-//  * MOVING TO NEW FILTER DROPDOWN PANEL. 
-//  */
-// export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
-//     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
-//         'publ':loadPublSearchHtml };
-//     buildUi[realm](); 
-// } 
-// /** Builds a text input for searching author names. */
-// function loadAuthSearchHtml() {
-//     const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
-//     // clearCol2();        
-//     $('#opts-col2').append(searchTreeElem);
-// }
-// function loadPubSearchHtml() {
-//     const pubTypeElem = buildPubTypeSelect();
-//     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
-//     // clearCol2();        
-//     $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
-//     _u.initCombobox('Publication Type');
-//     _u.setSelVal('Publication Type', 'all', 'silent');
+/* ------------------------- SOURCE FILTER UI ------------------------------- */
+/**
+ * Will build the select elems for the source search options. Clears previous 
+ * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
+ * format and load the data table.
+ * NOTE: This is the entry point for source table rebuilds as filters alter data
+ * contained in the data tree.
+ */
+export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
+    if ($('#focus-filters div').length) { return; }
+    const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
+        'publ':loadPublSearchHtml }; 
+    buildUi[realm](); 
+} 
+/** Builds a text input for searching author names. */
+function loadAuthSearchHtml() {
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
+    $('#focus-filters').append(searchTreeElem);
+}
+function loadPubSearchHtml() {
+    const pubTypeElem = buildPubTypeSelect();
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
+    // $(searchTreeElem).css('width', '228px');
+    $('#focus-filters').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
+    _u.initCombobox('Publication Type');
+    _u.setSelVal('Publication Type', 'all', 'silent');
     
-//     function buildPubTypeSelect() {
-//         const pubTypeOpts = buildPubSelectOpts();
-//         return buildPubSelects(pubTypeOpts);
-//     }
-//     function buildPubSelectOpts() {
-//         const pubTypes = _u.getDataFromStorage('publicationType');           
-//         const opts = [{value: 'all', text: '- All -'}];
-//         for (let t in pubTypes) {
-//             opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
-//         }
-//         return opts.sort(_u.alphaOptionObjs);  
-//     }
-//     /** Builds the publication type dropdown */
-//     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-//         const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
-//         const span = _u.buildElem('span', { text: 'Type:' });
-//         const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
-//         $(sel).css('width', '177px');
-//         $(lbl).css('width', '222px').append([span, sel]);
-//         return lbl;
-//     }
-// } /* End loadPubSearchHtml */
-// function loadPublSearchHtml() {
-//     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
-//     // clearCol2();        
-//     $('#opts-col2').append(searchTreeElem);
-// }
+    function buildPubTypeSelect() {
+        const pubTypeOpts = buildPubSelectOpts();
+        return buildPubSelects(pubTypeOpts);
+    }
+    function buildPubSelectOpts() {
+        const pubTypes = _u.getDataFromStorage('publicationType');           
+        const opts = [{value: 'all', text: '- All -'}];
+        for (let t in pubTypes) {
+            opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
+        }
+        return opts.sort(_u.alphaOptionObjs);  
+    }
+    /** Builds the publication type dropdown */
+    function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+        const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
+        const span = _u.buildElem('span', { text: 'Type:' });
+        const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+        $(sel).css('width', '177px');
+        $(lbl).css('width', '222px').append([span, sel]);
+        return lbl;
+    }
+} /* End loadPubSearchHtml */
+function loadPublSearchHtml() {
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
+    // clearCol2();        
+    $('#focus-filters').append(searchTreeElem);
+}
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
@@ -512,13 +510,13 @@ export function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
+    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
+    // $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
 }
 export function updateUiForMappingInts() {
     updateUiForMapView();
-    _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
+    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
@@ -530,17 +528,17 @@ function showTableRecordsOnMap() {                                              
     });
 }
 function updateBttnToReturnRcrdsToTable() {
-    addMsgAboutTableViewFiltering();
+    // addMsgAboutTableViewFiltering();
     $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
+    // $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
-function addMsgAboutTableViewFiltering() {
-    if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
-    const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
-    div.innerHTML = `Return to filter data shown.`;
-    $('#content-detail').prepend(div);
-}
+// function addMsgAboutTableViewFiltering() {
+//     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
+//     const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
+//     div.innerHTML = `Return to filter data shown.`;
+//     $('#content-detail').prepend(div);
+// }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);

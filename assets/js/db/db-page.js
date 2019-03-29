@@ -184,8 +184,8 @@ function clearOnFocusChange(focus, tableBuilder) {
     resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
     _u.replaceSelOpts('#sel-view', false);
+    $('#focus-filters').empty();  
     tableBuilder();
-    $('#focus-filters').empty();
     // db_ui.clearPastHtmlOptions(tableBuilder); 
 }
 function storeStateValue(key, value) {
@@ -205,13 +205,14 @@ function buildTaxonTable() {                                                    
     } else { console.log("Error loading taxon data from storage."); }
 }
 /** Event fired when the taxon view select box has been changed. */
-export function onTxnViewChange(val) {                                          console.log('onTxnViewChange. val = [%s]', val) 
+export function onTxnViewChange(val) {                                          //console.log('onTxnViewChange. val = [%s]', val) 
     if (!val) { return; }
     resetTaxonView(val);
 }
-function resetTaxonView(val) {                                                 //console.log('resetTaxonView')
+function resetTaxonView(val) {                                                  //console.log('resetTaxonView')
     const realmTaxon = storeAndReturnView(val);
     resetCurTreeState();
+    $('#focus-filters').empty();  
     rebuildTaxonTable(realmTaxon);
 }
 /**
@@ -357,16 +358,17 @@ function resetSourceView(val) {
     clearPreviousTable();
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
+    $('#focus-filters').empty();
     startSrcTableBuildChain(val);
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    // db_ui.loadSrcSearchUi(tblState.curView);
+    db_ui.loadSrcSearchUi(tblState.curView);
     frmt_data.transformSrcDataAndLoadTable(
         data_tree.buildSrcTree(tblState.curView), tblState);
 }
 function storeSrcView(val) {  
-    const viewVal = val || _u.getSelVal('Source Type');                        //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
+    const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
     storeStateValue('curView', viewVal);
     tblState.curView = viewVal;    
 }
