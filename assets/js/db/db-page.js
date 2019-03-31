@@ -133,7 +133,7 @@ export function resetDataTable() {                                              
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     db_ui.resetToggleTreeBttn(false);
-    // if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
 }
 /** 
@@ -148,7 +148,7 @@ function resetCurTreeStorageProps() {
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetFilterStatusBar();
-    // if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();
 }
@@ -165,7 +165,7 @@ export function selectSearchFocus(f) {
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
-    // if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     storeStateValue('curFocus', focus);
     clearOnFocusChange(focus, tableBuilder);
@@ -186,7 +186,6 @@ function clearOnFocusChange(focus, tableBuilder) {
     _u.replaceSelOpts('#sel-view', false);
     $('#focus-filters').empty();  
     tableBuilder();
-    // db_ui.clearPastHtmlOptions(tableBuilder); 
 }
 function storeStateValue(key, value) {
     _u.addToStorage(key, JSON.stringify(value));
