@@ -264,18 +264,22 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(filterTime) {  console.log('tblState = %O', tblState);
+function syncFiltersAndUi(filterTime) {                                         console.log('tblState = %O', tblState);
     db_ui.resetToggleTreeBttn(false);
     syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
 
     function syncViewFiltersAndUi(focus) {
-        if (focus === "srcs") { applySrcFltrs(); }
-        if (focus === "locs") { db_ui.loadSearchLocHtml(tblState); }    
+        const map = {
+            locs: db_ui.loadSearchLocHtml,
+            srcs: applySrcFltrs,
+            taxa: updateTaxonComboboxes
+        }; 
+        map[focus](tblState);
     }
 }
 /** Reapplys active external filters, author name or publication type. */
-function applySrcFltrs() {
+function applySrcFltrs(tblState) {
     const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
     resets[tblState.curView]();
@@ -295,6 +299,38 @@ function reapplyPubFltr() {                                                     
     if (_u.getSelVal('Publication Type') === "all") { return; }
     updatePubSearch();
 }
+/**
+ * When the time-updated filter is updated, the taxa-by-level property has to be
+ * updated based on the rows displayed in the grid so that the combobox options
+ * show only taxa in the filtered tree.
+ */
+function updateTaxonComboboxes(tblState) {
+    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(_u.getTblRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
+    db_ui.loadTaxonComboboxes(tblState);
+}
+/** Returns an object with taxon records by level and keyed with display names. */
+function seperateTaxonTreeByLvl(rowData) {                                      //console.log('rowData = %O', rowData);
+    const separated = {};
+    rowData.forEach(data => separate(data));
+    return sortObjByLevelRank(separated);
+
+    function separate(row) {                                                    //console.log('taxon = %O', taxon)
+        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
+        separated[row.taxonLvl][row.displayName] = row.id;
+        
+        if (row.children) { 
+            row.children.forEach(child => separate(child)); 
+        }
+    }
+    function sortObjByLevelRank(taxonObj) {
+        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
+        const obj = {};
+        levels.forEach(lvl => { 
+            if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
+        });
+        return obj;
+    }
+} /* End seperateTaxonTreeByLvl */
 /*================== Search Panel Filter Functions ===================================================================*/
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {

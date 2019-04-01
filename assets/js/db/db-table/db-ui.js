@@ -202,19 +202,19 @@ export function loadTaxonComboboxes(tblState) {
  */
 function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     const optsObj = {};
-    const rcrdsByLvl = tblState.taxaByLvl;       
+    const taxaByLvl = tblState.taxaByLvl;       
     const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
     curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {
-        return lvl in rcrdsByLvl ? 
-            getTaxaOptsAtLvl(rcrdsByLvl[lvl], lvl) : fillInLvlOpts(lvl)
+        return lvl in taxaByLvl ? 
+            getTaxaOptsAtLvl(taxaByLvl[lvl], lvl) : fillInLvlOpts(lvl)
     }
     /** Child levels can have multiple taxa.  */
     function getTaxaOptsAtLvl(rcrds, lvl) {
-        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                 //console.log("taxonNames = %O", taxonNames);
-        optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
+        const taxonNames = Object.keys(taxaByLvl[lvl]).sort();                  //console.log("taxonNames = %O", taxonNames);
+        optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in tblState.selectedOpts) {
@@ -226,7 +226,7 @@ function buildTaxonSelectOpts(tblState) {                                       
 function buildTaxonOptions(taxonNames, taxonData) {
     return taxonNames.map(function(taxonKey){
         return {
-            value: taxonData[taxonKey].id,
+            value: taxonData[taxonKey],
             text: taxonKey
         };
     });

@@ -188,15 +188,17 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                            
     const intCount = getIntCount(taxon); 
     return {
         id: taxon.id,
-        entity: "Taxon",
-        name: name,
-        isParent: true,                     
-        parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
-        open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
         children: getTaxonChildRowData(taxon, treeLvl, tblState),
-        treeLvl: treeLvl,
+        displayName: taxon.displayName,
+        entity: "Taxon",
         interactions: intCount !== null,          
         intCnt: intCount,   
+        isParent: true,                     
+        name: name,
+        open: tblState.openRows.indexOf(taxon.id.toString()) !== -1, 
+        parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
+        taxonLvl: lvl,
+        treeLvl: treeLvl,
     }; 
 } /* End getTaxonRowData */
 /**
@@ -242,15 +244,17 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
         if (getIntCount(curTaxon) !== null) { 
             childRows.push({
                 id: curTaxon.id,
+                children: getTaxonIntRows(curTaxon, treeLvl, tblState),
+                displayName: taxonName,
                 entity: 'Taxon',
-                name: `Unspecified ${taxonName} Interactions`,
+                groupedInts: true,
+                interactions: true,
                 isParent: true,
+                name: `Unspecified ${taxonName} Interactions`,
                 open: realmIds.indexOf(curTaxon.id) === -1 ? false : 
                     tblState.openRows.indexOf(curTaxon.id.toString()) !== -1,
-                children: getTaxonIntRows(curTaxon, treeLvl, tblState),
+                taxonLvl: curTaxon.level.displayName,
                 treeLvl: treeLvl,
-                interactions: true,
-                groupedInts: true
             });
         }
     }

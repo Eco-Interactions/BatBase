@@ -228,16 +228,16 @@ function seperateTaxonTreeByLvl(topTaxon) {
     function separate(taxon) {                                                  //console.log('taxon = %O', taxon)
         const lvl = taxon.level.displayName;
         if (!separated[lvl]) { separated[lvl] = {}; }
-        separated[lvl][taxon.displayName] = taxon;
+        separated[lvl][taxon.displayName] = taxon.id;
         
         if (taxon.children) { 
-            taxon.children.forEach(function(child){ separate(child); }); 
+            taxon.children.forEach(child => separate(child)); 
         }
     }
     function sortObjByLevelRank(taxonObj) {
         const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
         const obj = {};
-        levels.forEach(function(lvl){
+        levels.forEach(lvl => {
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
