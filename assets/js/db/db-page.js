@@ -102,7 +102,7 @@ function getTableState(k, keys) {                                               
 }
 function getStateObj(keys) {
     const obj = {};
-    keys.forEach(k => obj[k] = tblState[k]);                                    //console.log('stateObj = %O', obj)
+    keys.forEach(k => obj[k] = tblState[k] || null);                            //console.log('stateObj = %O', obj)
     return obj;
 }
 function setTableState(stateObj) {                                              //console.log('setTableState. stateObj = %O', stateObj);

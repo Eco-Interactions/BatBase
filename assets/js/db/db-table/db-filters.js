@@ -22,7 +22,6 @@ import * as db_ui from './db-ui.js';
  *     cal - Stores the flatpickr calendar instance. 
  *     fltrdRows - rowdata after filters
  *     focusFltrs - Stores focus specific filter strings (eg: name search, taxonomic level, country, etc)
- *     tblApi - API for ag-grid table
  *     timeFltr - Stores the specified datetime for the time-updated filter.
  */
 let fPs = {
@@ -48,13 +47,13 @@ export function toggleFilterPanel() {
     if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
     } else { hideFilterPanel(); }
 }
-function buildAndShowFilterPanel() {                                            console.log('buildAndShowFilterPanel')
+function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     $('#filter-opts').removeClass('closed');  
     $('#db-opts-col2').addClass('shw-col-borders hide-bttm-border');
     _u.initCombobox('Saved Filters');
     window.setTimeout(function() { $('#filter-opts').css('overflow-y', 'visible')}, 500);
 }
-function hideFilterPanel() {                                                    console.log('hideFilterPanel')
+function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
     $('#filter-opts').css('overflow-y', 'hidden');
     $('#db-opts-col2').removeClass('shw-col-borders hide-bttm-border');
     $('#filter-opts').addClass('closed');
@@ -225,7 +224,7 @@ function reapplyPreviousTimeFilter(filterTime, skipSync) {
  * since the datetime specified by the user.
  * Note: Params 1-3 sent by calendar
  */
-function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {                    console.log("filterInteractionsUpdatedSince called. arguments? ", arguments);
+function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   //console.log("filterInteractionsUpdatedSince called. arguments? ", arguments);
     const filterTime = getFilterTime();  
     tblState = tState().get();
     filterInteractionsAndUpdateState();   
@@ -264,7 +263,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(filterTime) {                                         console.log('tblState = %O', tblState);
+function syncFiltersAndUi(filterTime) {                                         //console.log('tblState = %O', tblState);
     db_ui.resetToggleTreeBttn(false);
     syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
@@ -287,7 +286,7 @@ function applySrcFltrs(tblState) {
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
     if (getTreeFilterTextVal(entity) === "") { return; }
-    searchTreeText();
+    searchTreeText(entity);
 }
 function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
@@ -305,7 +304,7 @@ function reapplyPubFltr() {                                                     
  * show only taxa in the filtered tree.
  */
 function updateTaxonComboboxes(tblState) {
-    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(_u.getTblRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
+    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(getAllCurRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
     db_ui.loadTaxonComboboxes(tblState);
 }
 /** Returns an object with taxon records by level and keyed with display names. */
@@ -372,7 +371,7 @@ function searchTreeText(entity) {                                               
     updateFilterStatusMsg();
     db_ui.resetToggleTreeBttn(false);
 } 
-function getTreeFilterTextVal(entity) {                                         console.log('getTreeFilterTextVal entity = ', entity);
+function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
 function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText. rows = %O', rows)
@@ -414,7 +413,7 @@ export function updateTaxonSearch(val) {                                        
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
-function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
+function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
     const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
     const selected = {};                                                        //console.log("selected = %O", selected)
     selectAncestorTaxa(selTaxonObj);
@@ -440,7 +439,7 @@ function getLocType(selId) {
 function getComboboxValuesAndRebuildLocTree(val, locType) {
     const selVal = parseInt(val);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
-    rebuildLocTable([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
+    rebuildLocTable([selVal]);                                                  //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
     updateFilter(locType);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)

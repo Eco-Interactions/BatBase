@@ -11,7 +11,6 @@
 }
 .selectize-dropdown {
     z-index: 1111;
-    position: absolute;
 }
 /* -------------- Search Options -------------------------------------------- */
 #db-opts {  /* .flex-row also on elem */
@@ -56,7 +55,7 @@ div[id^="db-opts-"] {
     max-height: 122px;
     background: rgba(220, 220, 220, .5);
     border-radius: 10px;
-    padding: 8px;
+    padding: 8px 4px 8px 4px;
     border: black 1px solid;
     transition: all .5s ease-in-out;
     overflow-y: hidden;
@@ -94,7 +93,7 @@ div[id^="db-opts-"] {
     flex-grow: 1;
 }
 #shw-chngd-ints {
-    flex: 0 0 400px;
+    flex: 0 0 408px;
     border-right: black 1px solid;
     border-left: black 1px solid;
     padding-left: 5px;
@@ -113,7 +112,7 @@ div[id^="db-opts-"] {
 }
 #time-fltr, .flatpickr-input {
     margin-top: .2em;
-    width: 160px;
+    width: 170px;
 }
 #futrDevMsg {
     margin: 0 5px 0 5px;
