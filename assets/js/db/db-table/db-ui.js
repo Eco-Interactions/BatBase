@@ -29,6 +29,7 @@ export function init() {
     addDomEventListeners();
     adaptUiToScreenSize(); //TODO: Update!!
     authDependentInit();
+    disableSaveFilterUI();
 }
 /** Moves the buttons from the end of the search options panel to just beneath. */
 function adaptUiToScreenSize() {
@@ -59,23 +60,28 @@ function authDependentInit() {
     } else { enableEditorFeatures(); }
 }
 function disableUserFeatures() {
-    $('button[name="int-set"], button[name="csv"], #new-data').css(
-        {'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true).prop(
-        'title', "Please register to use these features.");
+    $('button[name="int-set"], button[name="csv"], #new-data')
+        .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
+        .prop('title', "Please register to use these features.");
 }
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This is an upcoming feature!'); 
-    $('#new-data').addClass('adminbttn').click(
-        createEntity.bind(null, 'create', 'interaction'));
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
     $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This is an upcoming feature!'); 
-    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' }).prop(
-        'title', 'This feature is only available to editors.');
+    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to editors.');
+}
+function disableSaveFilterUI() {
+    $('.saved-filters-sel, #save-filter, #stored-filters span')
+        .css('cursor', 'not-allowed !important')
+        .prop('title', 'This is an upcoming feature!').attr('disabled', true);
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -251,8 +257,8 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     }
 }
 function setTaxonElemStyles(lbl, sel, level) {
-    const lblWidth = level === 'Species' ? '313px' : '222px';
-    const selWidth = level === 'Species' ? '233px' : '142px';
+    const lblWidth = level === 'Species' ? '305px' : '273px';
+    const selWidth = level === 'Species' ? '233px' : '202px';
     $(lbl).css({'margin': '.3em 0 0 1em', 'width': lblWidth});
     $(sel).css('width', selWidth);
 }
