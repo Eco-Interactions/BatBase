@@ -49,7 +49,7 @@ function getIntroOptions() {
 function getSteps(step) {
     return [ 
         {
-            element: '#opts-col4', 
+            element: '#db-opts-col5', 
             intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database 
                 Search Page!</center></b><br><b>This tutorial demonstrates the 
                 various database features and search tools available.</b> There 
@@ -68,7 +68,7 @@ function getSteps(step) {
             setUpFunc: addBttnEvents
         },
         {
-            element: '#filter-opts',
+            element: '#db-opts',
             intro: `<h3><center>The interaction records are displayed by either 
                 <br>Location, Source, or Taxon.<center></h3><br><b>Location</b> 
                 - Where the interaction(s) were observed. Can be displayed in a 
@@ -78,15 +78,16 @@ function getSteps(step) {
                 obtained. You can select Publications, which will list journals,
                 books, etc or Authors, which will provide a list of authors.
                 <br><br><b>Taxon</b> - The Bat/Plant/Arthropod in the interaction. 
-                Taxon is the default mode and where we will begin.`,
-            position: 'right'
+                <br><br>Taxon is the default mode and where we will begin.`,
+            position: 'top',
+            setUpFunc: checkForDbLoad
         },
         {
-            element:'#sort-opts',
-            intro: `<h3><center>Select the Taxon Tree grouping.<center></h3>
+            element:'#db-opts-col1',
+            intro: `<h3><center>Select the Taxon Tree view.<center></h3>
                 <br>Once Taxon has been selected in the “Group Interactions by” 
                 box, select one of the following: Bat, Plant, or Arthropod.<br><br>
-                We have selected “Plant” for this tutorial.`,
+                We have selected the “Plant” view for this tutorial.`,
             position: 'right',
             setUpFunc: checkForDbLoad
         },
@@ -99,7 +100,7 @@ function getSteps(step) {
                 over a column header reveals the filter menu for that column.<br><br>
                 Some columns can be filtered by text, others by selecting or 
                 deselecting values in that column.<br><br><center><b>Try 
-                exploring the filter menus a bit now.</b></center>`,
+                exploring the column filter menus a bit now.</b></center>`,
             position: 'top'
         },
         {
@@ -119,7 +120,7 @@ function getSteps(step) {
                 <b>"Cnt"</b> (count) shows the number of interactions attributed 
                 to each Taxon, Location, or Source.<br><br>
                 <b>“Type”</b> refers to the type of interaction, including visitation, 
-                consumption, pollination, seed dispersal, and transport. For a 
+                consumption, pollination, seed dispersal, host, roost, and transport. For a 
                 list of definitions, see the <a href="definitions">Definitions</a> 
                 page.<br><br>
                 <b>“Tags”</b> refer to the part of the Object Taxon being 
@@ -135,16 +136,16 @@ function getSteps(step) {
             position: 'right'
         },
         {
-            element: 'button[name="reset-tbl"]',
-            intro: `<b>Click here at any point to clear all filters and reset 
-                the results.</b>`,
-            position: 'right'
+            element: '#filter',
+            intro: `<h3><center>Click here to toggle the filter options panel open 
+                or closed.</center></h3>`, 
+            position: 'bottom',
+            setUpFunc: toggleFilterPanel
         },
         {
-            element: '#opts-col2',
-            intro: `<h3><center>Dynamic filtering options are in this panel.
-                </center></h3><br><b>In Taxon mode, these dropdowns show all 
-                taxon levels that are used in the Taxon Tree.</b> When first 
+            element: '#focus-filters',
+            intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
+                show all taxon levels that present in the Taxon Tree.</b> When first 
                 displayed, all taxa for each level will be available in the 
                 dropdown selection lists.<br><br><b>You can focus on any part of 
                 the taxon tree by selecting a specific taxon from a dropdown.</b> 
@@ -155,16 +156,32 @@ function getSteps(step) {
                 ones associated with the selected taxon will be shown.<br>- Any 
                 levels that are not recorded in the Taxon's ancestry chain will 
                 have 'None' selected.`, 
-            position: 'right'
+            position: 'bottom',
+        },
+        {
+            element: '#focus-filters',
+            intro: `<h3><center>Other view-specific filters</center></h3><br>
+                Locations can be filtered by region, country, and display name.<br><br>
+                Sources can be filtered by name, or by type (depending on the type
+                of source displayed in the table.)`, 
+            position: 'bottom',
         },
         {
             element: '#shw-chngd-ints',
             intro: `<h3><center>Check this box to filter interaction records by 
                 time updated/created.</center></h3><br><b></b>The time defaults 
-                to the current date. Clicking on 'Custom' allows the selection 
-                of any date/time.<br><br>Only interactions created/updated after 
+                to the current date. Use the calendar to select any date. That date 
+                will be saved and reapplied if the filter is turned reset when switching
+                between data views.<br><br>Only interactions created/updated after 
                 the selected time will be displayed.`,
             position: 'left'
+        },
+        {
+            element: 'button[name="reset-tbl"]',
+            intro: `<b>Click here at any point to clear all filters and reset 
+                the results.</b>`,
+            position: 'right',
+            setUpFunc: clearFilters
         },
         {
             element: 'button[name="csv"]',
@@ -189,11 +206,12 @@ function getSteps(step) {
             intro: `<h3><center>On the map, a marker identifies each location 
                 with interactions from the filtered data.</h3></center><br>
                 <b>Mouse over or click on a marker to see a popup summary of the 
-                interactions.</b><br><br>The summary shows details from 4 
+                interactions.</b><br><br>The summary shows details from up to 4 
                 interaction sets at the location. Details include the name of the 
                 Taxon/Location/Source filtered to, the count of their interactions, 
                 and the top 3 most reported bats in the set of interactions.<br>
-                <br><b>Click on a marker to keep its popup open.<b><br><br>`,
+                <br><center><b>Click on a marker to keep its popup open.</b><br><br>
+                Hover over truncated(...) text to show full text.`,
             position: 'top',
             setUpFunc: loadIntsOnMap
         },
@@ -204,13 +222,13 @@ function getSteps(step) {
             position: 'top'
         },
         {
-            element: '#opts-col1',
+            element: '#db-opts-col1',
             intro: `<h3><center>The map is also available in Location mode.
                 </center></h3><br>Group interactions by "Location" and then select 
-                "Map Data" from the "View all as:" box.<br><br><b>Every 
-                interaction with GPS data is loaded in the map.</b>`,
+                "Map Data" from the "View" box.<br><br><b>Every interaction with 
+                GPS data is loaded in the map.</b>`,
             position: 'right',
-            setUpFunc: loadLocView.bind(null, 'map')
+            setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
             element: '#db-view',
@@ -228,15 +246,15 @@ function getSteps(step) {
             element: '#db-view',
             intro: `<h3><center>Searching the map.</center></h3><br><b>Search by 
                 clicking on the magnifying glass on the left side of the map and 
-                typing your search criteria.</b><br><br>The map will refocus and 
-                show interactions nearby.<br><br><center>You can try this after 
+                typing your search criteria.</b><br><br><center>The map will 
+                refocus and show interactions nearby.<br><br>You can try this after 
                 exiting the tutorial.`,
             position: 'top',
             setUpFunc: loadLocView.bind(null, 'map')
         },
         {
             element: '#db-view',
-            intro: `<center><h3>Location mode also has an additional "map" column.
+            intro: `<center><h3>The Location table also has an additional "map" column.
                 </h3></center><br>All locations with GPS data have a map pin in 
                 this column. Click one to load the Map View centered on that 
                 location with its popup opened.<br><br><center>You can try it 
@@ -245,7 +263,7 @@ function getSteps(step) {
             setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
-            element: '#opts-col4',
+            element: '#db-opts-col5',
             intro: `<b><center>Thank you for taking the time to learn about the 
                 <br>Bat Eco-Interactions Database Search Page!</b></center><br>
                 You can start this tutorial again at anytime. There are also 
@@ -259,10 +277,14 @@ function getSteps(step) {
 function setTableState() { 
     $('#show-tips').off("click");
     $('#db-view').css("height", "444px");
-    $('#search-focus')[0].selectize.addItem('taxa');
-    if ($('#sel-view').length) {
-        window.setTimeout(() => {$('#sel-view')[0].selectize.addItem('3')}, 100);
+    setDbLoadDependentState();
+}
+function setDbLoadDependentState() {
+    if (!$('#search-focus').val()) {
+        return window.setTimeout(setDbLoadDependentState, 200);
     }
+    $('#search-focus')[0].selectize.addItem('taxa');
+    $('#sel-view')[0].selectize.addItem('3');
 }
 function resetTableState() {
     focus = focus || "taxa";
@@ -281,13 +303,13 @@ function onAfterStepChange(stepElem) {                                          
 function loadIntsOnMap() {                                                      //console.log('loadMapView. display = ', $('#map')[0].style.display)
     if ($('#map')[0].style.display === 'none') { $('#shw-map').click(); }
 }
-function loadLocView(view) {
+function loadLocView(view) {   
     if ($('#search-focus')[0].selectize.getValue() !== 'locs') {
         $('#search-focus')[0].selectize.addItem('locs');
     }
-    window.setTimeout(loadLocView(view), 400);  
+    window.setTimeout(setLocView(view), 400);  
 }
-function loadLocView(view) {
+function setLocView(view) {
     if ($('#sel-view')[0].selectize.getValue() !== view) {
         $('#sel-view')[0].selectize.addItem(view);
     }
@@ -306,16 +328,25 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(12); }
+    if (tutKey === 'map') { intro.goToStep(14); }
 }
 function checkForDbLoad() {
-    if ($('#sel-view').length) { return; }  
+    if ($('#sel-view').val()) { return; }  
     window.setTimeout(addDbLoadNotice, 400);
 }
 function addDbLoadNotice() {
     $('.introjs-tooltiptext').append(`
         <br><br><center><b>Please wait for database to finish downloading before 
         continuing.`);
+}
+function toggleFilterPanel(close) {
+    const closed = $('#filter-opts').hasClass('closed');
+    if ((close && closed) || !close && !closed) { return; }
+    $('#filter').click();
+}
+function clearFilters() {
+    $('button[name="reset-tbl"]').click();
+    toggleFilterPanel(true);
 }
 /* ------------------ Search Tips ------------------------------------------- */
 function initSearchTips() { 

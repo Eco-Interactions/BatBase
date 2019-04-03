@@ -7,10 +7,8 @@
 >REFACTORING
 
 Current:
-    - replace realm with view in db code
 
 Next:
-    tbl-bttns.js
 
 Future:
     - Break util into 
@@ -24,10 +22,7 @@ Future:
 Before Release:
     - Feedback isn't working
     - Fix tree rows being colored when their interactions have been filtered out
-    - Update Tutorial
-    - Fix "tips" display
     - update adaptUIToScreenSize in db-ui
-    - Load loc comboboxes after time-updated filter reapplied
 
 Planning Meeting Notes:
 

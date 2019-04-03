@@ -36,7 +36,7 @@ let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
 const geoJsonKey = 'A life without cause is a life without effect.';  
-const localStorageKey = 'A life without cause is a life without effect!!!'; 
+const localStorageKey = 'A life without cause is a life without effect!!!!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -203,6 +203,7 @@ export function clearDataStorage() {
 function storeDataUpdatedTimes(ajaxData) {
     dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
     addNewDataToStorage(ajaxData.dataState);
+    db_page.initSearchState();
 }
 /** --------- Local Storage --------------- */
 /**

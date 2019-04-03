@@ -257,7 +257,7 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     }
 }
 function setTaxonElemStyles(lbl, sel, level) {
-    const lblWidth = level === 'Species' ? '305px' : '273px';
+    const lblWidth = level === 'Species' ? '304px' : '273px';
     const selWidth = level === 'Species' ? '233px' : '202px';
     $(lbl).css({'margin': '.3em 0 0 1em', 'width': lblWidth});
     $(sel).css('width', selWidth);

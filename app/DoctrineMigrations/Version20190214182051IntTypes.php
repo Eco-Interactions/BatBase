@@ -11,7 +11,7 @@ use AppBundle\Entity\InteractionType;
 
 /**
  * Adds the "roost" and "host" interaction types.
- * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
+ * Note: The 'createdBy' admin is hardcoded to 6, Sarah.
  */
 class Version20190214182051IntTypes extends AbstractMigration implements ContainerAwareInterface
 {
@@ -43,6 +43,7 @@ class Version20190214182051IntTypes extends AbstractMigration implements Contain
         foreach ($types as $type => $tagName) {
             $IntType = new InteractionType();
             $IntType->setDisplayName(ucfirst($type)); 
+            $IntType->setCreatedBy($this->admin);
 
             $Tag = $this->em->getRepository('AppBundle:Tag')->findOneBy(['displayName' => $tagName]);
             $IntType->addValidTag($Tag);

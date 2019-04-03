@@ -8,6 +8,7 @@
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
  *     initSearchPage
+ *     initSearchState          util
  *     initDataTable
  *     onLocViewChange          db_ui
  *     onDataReset
@@ -56,10 +57,13 @@ function requireCss() {
     require('../../css/lib/selectize.default.css');
     require('../../css/search_db.css');
 }
+/**
+ * Initializes the database and UI. The util init method will call @initSearchState
+ * after handling the initializing of the local data storage.
+ */
 function initDbPage () {    
     _u.init_db();
     db_ui.init();
-    initSearchState();
 }
 /**
  * The first time a browser visits the search page, all data is downloaded
@@ -69,7 +73,7 @@ export function initSearchPage() {
     db_ui.showLoadingDataPopUp();
     db_tips.startWalkthrough(tblState.curFocus);
 }
-function initSearchState() {
+export function initSearchState() {
     resetTableParams();
     db_filters.toggleTimeUpdatedFilter('disable');
     db_filters.resetFilterStatusBar();      
@@ -153,7 +157,7 @@ export function initDataTable(focus) {                                          
     db_ui.updateUiForTableView();
 }
 export function selectSearchFocus(f) { 
-    const focus = f || _u.getSelVal('Focus');                                   //console.log("---select(ing)SearchFocus = ", focus); 
+    const focus = f ? f : _u.getSelVal('Focus');                                console.log("---select(ing)SearchFocus = ", focus); 
     if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
