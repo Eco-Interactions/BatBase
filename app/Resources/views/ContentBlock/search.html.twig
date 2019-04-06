@@ -63,10 +63,10 @@
             <label for="shw-chngd">Show records updated since:</label>
             <input type="text" id="time-fltr" disabled="disabled">
         </div>
-        <div id="stored-filters" class="flex-row"> <!-- tbl-tools -->
+        <div id="stored-filters" class="flex-row"> 
             <span>Load saved filters: </span>
             <select id="saved-filters" class="saved-filters-sel" data-field="" disabled="true"></select>
-            <button id="save-filter" class="ag-fresh" disabled="true">  <!-- tbl-bttn -->
+            <button id="save-filter" class="ag-fresh" disabled="true"> 
                 Save Current Filter State
             </button>
         </div>
@@ -90,14 +90,12 @@
             </button>
         </div>
     </div>
-    
     <div id="db-view">
         <div id="search-tbl" class="ag-fresh"></div>
         <div id="map" style="display: none;"></div>
         <div id="db-overlay"></div>
         <div id="db-popup"></div>
     </div>
-
 {% endblock detail %}
 
 {% block javascripts %} 

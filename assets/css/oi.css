@@ -751,7 +751,10 @@ label[for=fos_user_registration_form_about_me] {
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) {
     #pg-container {
-        max-width: 1313px;
+        max-width: 1330px;
+    }
+    #detail-block {
+        margin: 0 .5em 2em .5em;
     }
     /*--- About DB Pg ---*/
     #about-db-maps, #db-new-data {

@@ -128,6 +128,36 @@ button[name="futureDevBttn"] {
     align-self: flex-end;
     opacity: .7;
 }
+.txtLbl {
+    width: 284px;
+}
+.txtLbl input {
+    height: 27px;
+    width: 228px;
+}
+.taxonLbl {
+    margin: .3em 0 0 1em;
+    width: 273px;
+}
+.speciesLbl {
+    margin: .3em 0 0 1em;
+    width: 304px;
+}
+.taxonSel {  /*selectize combobox*/
+    width: 202px;
+}
+.speciesSel { /*selectize combobox*/
+    width: 233px;
+}
+.locLbl {
+    width: 282px;
+}
+.locSel {
+    width: 202px;
+}
+.locTxtInput {
+    width: 204px;
+}
 /* --------- Table Tool Bar --------- */
 #tool-bar {
     margin: .7em auto .2em auto;
@@ -734,15 +764,52 @@ input.active-icon {
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) { 
     /*--------------- Search Page ---------------------*/
-    #detail-block #show-tips, 
-    #detail-block #strt-tut {
-        margin: 10px 5px 0 5px;
+    #tbl-ctrls-reloc #db-opts-col5 {
+        padding: 0 0 9px 0;
     }
-    #detail-block #opts-col3 {
+    #detail-block #db-opts-col4 {
         border-right: none;
+    }
+    #db-opts {
+        margin: 1em auto 0 .5em;
     }
     .tips-popup {
         width: 77%;
+    }
+    #filter-opts {
+        font-size: .9em;
+    }
+    #filter-opts #shw-chngd-ints {
+        flex: 0 0 390px;
+    }
+    #filter-opts #stored-filters {
+        flex: 0 0 459px;
+    }
+    #focus-filters .taxonLbl {
+        margin: .3em 0 0 .5em;
+        width: 217px;
+    }
+    #focus-filters .speciesLbl {
+        margin: .3em 0 0 .5em;
+        width: 284px;
+    }
+    #focus-filters .taxonSel {
+        width: 158px;
+    }
+    #focus-filters .speciesSel {
+        width: 225px;
+    }
+    #focus-filters .locLbl {
+        width: 218px;
+    }
+    #focus-filters .locSel {
+        width: 160px;
+    }
+    #focus-filters .txtLbl {
+        width: 280px;
+    }
+    #focus-filters .locTxtInput {
+        width: 224px;
     }
     /*--------------- Database CRUD Popup -------------*/
     #b-overlay .form-popup {

@@ -66,7 +66,7 @@ function buildSliderConfig() {
     };
 
     function getWidth() { 
-        return $(window).width() > 1500 ? 1500 : 1313;
+        return $(window).width() > 1500 ? 1500 : 1330;
     }
     function getMsgPos() {
         var frstFm = allFrames[0];

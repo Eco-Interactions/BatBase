@@ -23,23 +23,22 @@ import { showInts } from '../db-map/db-map.js';
 
 const userRole = $('body').data("user-role");
 
-
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
     addDomEventListeners();
-    adaptUiToScreenSize(); //TODO: Update!!
+    adaptUiToScreenSize();
     authDependentInit();
     disableSaveFilterUI();
 }
-/** Moves the buttons from the end of the search options panel to just beneath. */
+/** Moves the buttons from the end of the search options panel to just the header row. */
 function adaptUiToScreenSize() {
     if ($(window).width() > 1500) { return; }
-    const elemCntnr = $('#opts-col4').detach();  
+    const elemCntnr = $('#db-opts-col5').detach();  
     const cntnr = _u.buildElem('div', { class: 'flex-row' });
     $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     $(elemCntnr)[0].className = 'flex-row';
     $(cntnr).append(elemCntnr);
-    $('#db-opts').after(cntnr);
+    $('#tbl-ctrls-reloc').append(cntnr);
 }
 function addDomEventListeners() {
     db_filters.addDomEventListeners();
@@ -257,10 +256,9 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     }
 }
 function setTaxonElemStyles(lbl, sel, level) {
-    const lblWidth = level === 'Species' ? '304px' : '273px';
-    const selWidth = level === 'Species' ? '233px' : '202px';
-    $(lbl).css({'margin': '.3em 0 0 1em', 'width': lblWidth});
-    $(sel).css('width', selWidth);
+    const className = level === 'Species' ? 'species' : 'taxon';
+    $(lbl).addClass(className+'Lbl');
+    $(sel).addClass(className+'Sel');
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
     levels.forEach(function(level) {                                            
@@ -314,9 +312,7 @@ function updateLocSelOptions(tblState) {
 }
 function loadSearchByNameElem() {  
     const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
-    // $(searchTreeElem).css({ 'width': '273px' });
     $('#focus-filters').append(searchTreeElem);
-    // $('input[name="selLocation"]').css({ 'width': '205px' });
 }
 /**
  * Create and append the location search comboboxes, Region and Country, and
@@ -417,8 +413,9 @@ function buildLocSelects(locOptsObj) {
         const lbl = _u.buildElem('label', { class: "sel-cntnr flex-row" });
         const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
-        $(sel).css('width', '202px');
-        $(lbl).css('width', '282px').append([span, sel]);
+        $(lbl).addClass('locLbl').append([span, sel]);
+        $(sel).addClass('locSel');
+        // $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
     }
 }
@@ -493,8 +490,9 @@ function loadPubSearchHtml() {
         const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
         const span = _u.buildElem('span', { text: 'Type:' });
         const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+        const lblW = $(window).width() > 1500 ? '222px' : '230px';
         $(sel).css('width', '177px');
-        $(lbl).css('width', '222px').append([span, sel]);
+        $(lbl).css('width', lblW).append([span, sel]);
         return lbl;
     }
 } /* End loadPubSearchHtml */

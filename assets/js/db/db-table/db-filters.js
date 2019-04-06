@@ -340,16 +340,11 @@ export function buildTreeSearchHtml(entity) {
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
     const bttn = _u.buildElem('button', { text: 'Search', 
         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
-    $(span).css('margin', '0 20px 0 0');
-    $(lbl).css('width', '284px');
-    $(input).css({'width': getTreeSearchInputWidth(entity), 'height': '27px'});
+    if (entity == 'Location') { $(input).addClass('locTxtInput');}
+    $(lbl).addClass('txtLbl');
     $(input).onEnter(func);
     $(lbl).append([span, input]);
     return lbl;
-}
-function getTreeSearchInputWidth(entity) {
-    const w = { 'Location': '204px' };
-    return w[entity] ? w[entity] : '228px';
 }
 function getTreeSearchHandler(entity) { 
     return entity === 'Publication' ? 
