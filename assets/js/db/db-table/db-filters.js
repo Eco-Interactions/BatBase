@@ -200,16 +200,19 @@ function showCal() {                                                            
     if (fPs.timeFltr) { 
         reapplyPreviousTimeFilter(fPs.timeFltr)
     } else {
-        fPs.cal.open();                                                             
-        $('.today').focus();                                                   
+        fPs.cal.open();            
+        fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
     }
 }    
-/** Instantiates the flatpickr calendar and returns the flatpickr instance. */
+/** 
+ * Instantiates the flatpickr calendar and returns the flatpickr instance.
+ * Add time updated filter
+ */
 function initCal() {
     const confirmDatePlugin = require('../../libs/confirmDate.js'); 
     const calOpts = {
-        altInput: true,     maxDate: "today",
-        enableTime: true,   plugins: [confirmDatePlugin({})],
+        altInput: true, maxDate: "today", enableTime: true,   
+        plugins: [confirmDatePlugin({showAlways: true})],
         onReady: function() { this.amPM.textContent = "AM"; },
         onClose: filterInteractionsUpdatedSince
     }; 
@@ -228,6 +231,7 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
     const filterTime = getFilterTime();  
     tblState = tState().get();
     filterInteractionsAndUpdateState();   
+    $('.flatpickr-input').val(dateStr);
     if (skipSync) { console.log('skipping sync');return; }
     syncFiltersAndUi(filterTime);
 

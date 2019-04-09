@@ -153,10 +153,10 @@ button[name="futureDevBttn"] {
     width: 282px;
 }
 .locSel {
-    width: 202px;
+    width: 217px;
 }
 .locTxtInput {
-    width: 204px;
+    width: 220px !important;
 }
 /* --------- Table Tool Bar --------- */
 #tool-bar {
