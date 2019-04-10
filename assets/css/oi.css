@@ -234,52 +234,8 @@ span.lbl {
     left: -44px;
 }
 /*------------------- Slider Header ----------------------*/
-#pause-btn-frame, #prev-btn-frame, #next-btn-frame, #pause-btn, #prev-btn, #next-btn {
-    z-index: 500;
-    height: 60px;
-    width: 60px;
-}
 #pause-btn-frame, #prev-btn-frame, #next-btn-frame {
-    position: absolute;
-    z-index: 500;
-    height: 60px;
-    width: 60px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity .5s ease-in-out;
-}
-#pause-btn-frame {
-    bottom: 10px;
-    left: 720px;
-}
-#prev-btn-frame, #next-btn-frame {
-    top: 181px;
-}
-#prev-btn-frame {
-    left: 10px;
-}
-#next-btn-frame {
-    right: 10px;
-}
-
-#masthead:hover > #pause-btn-frame, #masthead:hover > #prev-btn-frame, #masthead:hover > #next-btn-frame {
-    opacity: 1;
-}
-
-.message-container, .msg-ghost {
-    color: #a2dadd;
-    font-size: 60px;
-
-    padding: 0px;
-    text-shadow: 0px 0px 8px rgba(0,0,0,1),
-                0px 0px 8px rgba(0,0,0,1),
-                0px 0px 8px rgba(0,0,0,1),
-                0px 0px 8px rgba(0,0,0,1),
-                0px 0px 8px rgba(0,0,0,1);
-}
-.msg-ghost {
-    position: absolute;
-    z-index: 1000;
+    display: none;
 }
 /*------------------- Pop Up and Overlay Styles --------------------*/
 #b-overlay {
