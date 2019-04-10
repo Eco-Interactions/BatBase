@@ -216,11 +216,6 @@ button[name="int-set"]:before {
     width: 16px;
 
 }
-.tbl-bttn, .tos-bttn {
-    margin: 0 .3em 0 .2em;
-    background: linear-gradient(#fff, #d3d3d3);
-    border-radius: 4px;
-}
 button[name="xpand-all"] {
     width: 105px;
 }

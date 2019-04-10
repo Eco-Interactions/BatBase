@@ -9,6 +9,18 @@
 Current:
 
 Next:
+    - Build backend for saving lists
+        - Store Interaction lists
+        - Store Filter Sets
+
+
+
+Before Release:
+    - Feedback isn't working
+    - Figure out why Chanda's bio isn't loading
+
+Planning Meeting Notes:
+
 
 Future:
     - Break util into 
@@ -16,17 +28,7 @@ Future:
         - combobox/selectize?
         - extend
         - html
-
-
-
-Before Release:
-    - Feedback isn't working
-    - Fix tree rows being colored when their interactions have been filtered out
-    - update adaptUIToScreenSize in db-ui
-
-Planning Meeting Notes:
-
-
+    - Refactor form code
 
 
 MEETING NOTES:

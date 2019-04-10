@@ -44,30 +44,10 @@ form button {
     padding: .25em .5em .25em .5em;
     font-size: 1.5em;
 }
-.two-col-outer, .three-col-outer, .four-col-outer {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-}
-.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col  {
-    border-right: 1px solid #cccccc;
-    margin-right: 2em;
-    padding: 0 1.25em 0 0;
-}
-span.lbl {
-    font-weight: bold;
-}
-.inln-flds {
-    padding: 15px 0 10px 0;
-}
-.inln-flds span {
-    padding: 0 5px 0 55px;
-}
-.main-col {
-    flex-grow: 8;
-    font-size: 1.1em;
-    padding-right: 2em;
+.tbl-bttn, .tos-bttn, .bei-bttn {
+    margin: 0 .3em 0 .2em;
+    background: linear-gradient(#fff, #d3d3d3);
+    border-radius: 4px;
 }
 /*--------------- Util Styles ----------------------------------*/
 .top-em-mrg {
@@ -123,7 +103,32 @@ span.lbl {
     width: 100%;
     top: 510px;
 }
-#error_content {
+/* ========== PAGE CONTENT STYLES ============= */
+.two-col-outer, .three-col-outer, .four-col-outer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col  {
+    border-right: 1px solid #cccccc;
+    margin-right: 2em;
+    padding: 0 1.25em 0 0;
+}
+span.lbl {
+    font-weight: bold;
+}
+.inln-flds {
+    padding: 15px 0 10px 0;
+}
+.inln-flds span {
+    padding: 0 5px 0 55px;
+}
+.main-col {
+    flex-grow: 8;
+    font-size: 1.1em;
+    padding-right: 2em;
+}#error_content {
     text-align: center;
 }
 #error_content h1 {
@@ -160,9 +165,6 @@ span.lbl {
 .top-pgs .second-col {
     margin: 0 20px 0 5px;
 }
-/*.top-pgs .first-col {
-    width: 1800px;
-}*/
 #footer {
     font-size: 1em;
     width:100%;
@@ -274,7 +276,7 @@ span.lbl {
 #close-tos-bttn {
     align-self: flex-end;
 }
-/**--------------- Menu Styles -------------------*/
+/**--------------- Header Menu Styles -------------------*/
 #sticky-hdr {
     max-width: 100%;
 }
@@ -289,24 +291,7 @@ span.lbl {
     background: White;
 }
 .top-sticky { z-index: 1001; position: fixed; top: 0; background-color: White;}
-#locs_list_filter, #locs_list_length, 
-#interaction_list_filter, #interaction_list_length, 
-#loc_det_list_filter, #loc_det_list_length {
-    display: inline-block;
-    font-size: .9em;
-    text-align: right;
-    margin: 0;
-    padding: 0;
-    background: White;
-}
-#locs_list_filter, #interaction_list_filter, #loc_det_list_filter input {
-    margin-left: 5px;
-    padding: 0;
-}
-#locs_list_length, #interaction_list_length, #loc_det_list_length select {
-    margin: 0;
-    padding: 0;
-}
+
 #btn-div {
     display: inline-block;
     margin: 0;
@@ -656,9 +641,6 @@ label[for=fos_user_registration_form_about_me] {
 }
 #close-tos-bttn {
     margin-top: 2em;
-}
-#reg-tos {
-    margin-top: 1em;
 }
 #reg-submit, #reg-tos {
     cursor: pointer;
