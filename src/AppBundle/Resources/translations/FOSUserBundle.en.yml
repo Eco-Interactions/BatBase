@@ -40,20 +40,20 @@ change_password:
 # Registration
 registration:
     check_email: An email has been sent to %email%. It contains an activation link you must click to activate your account.
-    confirmed: Congrats %username%, your account is now activated.
+    confirmed: Welcome %username%, your account is now activated. We look forward to your feedback and participation!
     back: Back to the originating page.
     submit: Register
     flash:
         user_created: The user has been created successfully
     email:
-        subject: Welcome %username%!
+        subject: Welcome to Batplant.org %username%!
         message: |
             Hello %username%!
 
-            Welcome to batplant.org. To finish activating your account - please visit %confirmationUrl%
+            Welcome! To finish activating your account - please visit %confirmationUrl%
 
             Regards,
-            The Team.
+            The Batplant.org Team.
 
 # Password resetting
 resetting:
