@@ -16,8 +16,8 @@ Next:
 
 
 Before Release:
-    - Feedback isn't working
-    - Figure out why Chanda's bio isn't loading
+    - Add to Testing
+        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
 Planning Meeting Notes:
 
@@ -29,6 +29,7 @@ Future:
         - extend
         - html
     - Refactor form code
+    - Figure out whether the explicit form services are necessary
 
 
 MEETING NOTES:
