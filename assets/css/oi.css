@@ -103,6 +103,41 @@ form button {
     width: 100%;
     top: 510px;
 }
+/*-------------- Image Slider -------------*/
+#slider-overlay {
+    position: absolute;
+    top: 80px;
+    left: 60px;
+    z-index: 500;
+}
+#side-logo {
+    position: relative;
+    left: 65px;
+    padding-bottom: 20px;
+}
+#error_logo {
+    width: 50%;
+    margin: 2% auto 0 auto;
+}
+#chrome-opt-msg {
+    position: relative;
+    color: silver;
+    width: 633px;
+    top: -66px;
+    left: -44px;
+}
+#img-slider {
+  width: 100%;
+  height: 432px;
+}
+.slide {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 423px;
+  transition: all 3s ease-in-out;
+  opacity: 0;
+}
 /* ========== PAGE CONTENT STYLES ============= */
 .two-col-outer, .three-col-outer, .four-col-outer {
     margin-top: 10px;
@@ -211,33 +246,6 @@ span.lbl {
     z-index: 0;
     position: relative;
     top: .1em;
-}
-/*-------------- Header -------------*/
-#slider-overlay {
-    position: absolute;
-    top: 80px;
-    left: 60px;
-    z-index: 500;
-}
-#side-logo {
-    position: relative;
-    left: 65px;
-    padding-bottom: 20px;
-}
-#error_logo {
-    width: 50%;
-    margin: 2% auto 0 auto;
-}
-#chrome-opt-msg {
-    position: relative;
-    color: silver;
-    width: 633px;
-    top: -66px;
-    left: -44px;
-}
-/*------------------- Slider Header ----------------------*/
-#pause-btn-frame, #prev-btn-frame, #next-btn-frame {
-    display: none;
 }
 /*------------------- Pop Up and Overlay Styles --------------------*/
 #b-overlay {

@@ -40,9 +40,8 @@ Encore
     .addEntry('app', './assets/js/app/oi.js' )
     .addEntry('db', './assets/js/db/db-page.js')
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
-    .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet', 'leaflet-control-geocoder' ])
+    .createSharedEntry('libs', ['jquery', 'leaflet', 'leaflet-control-geocoder',
+        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js'])
 ; 
 const local = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
