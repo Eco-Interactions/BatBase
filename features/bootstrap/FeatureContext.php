@@ -100,7 +100,7 @@ class FeatureContext extends RawMinkContext implements Context
     {        
         $vals = ['Map' => 'map', 'Table' => 'tbl'];
         $newElems = ['Map' => '#map', 'Table' => '#search-tbl'];
-        $this->changeTableSort('#sel-realm', $vals[$loc], $newElems[$loc]);
+        $this->changeTableSort('#sel-view', $vals[$loc], $newElems[$loc]);
         usleep(500000);
     }
 
@@ -114,7 +114,7 @@ class FeatureContext extends RawMinkContext implements Context
         $newElems = ['Authors' => '[name="srchTree"]', 'Publications' => '#selPubTypes', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
             'Publishers' => '[name="srchTree"]'];
-        $this->changeTableSort('#sel-realm', $vals[$type], $newElems[$type]);
+        $this->changeTableSort('#sel-view', $vals[$type], $newElems[$type]);
     }
 
     /**
@@ -122,7 +122,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iSelectTheLocationView($view)
     {
-        $this->changeTableSort('#sel-realm', 'map', '#map');
+        $this->changeTableSort('#sel-view', 'map', '#map');
     }
     /**
      * @When I click on a map marker

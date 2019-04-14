@@ -15,7 +15,6 @@ import { showPopUpMsg } from './db-table/db-ui.js';
  *   buildSimpleOpts
  *   clearDataStorage
  *   getDataFromStorage
- *   lcfirst 
  *   getDetachedRcrd
  *   getGeoJsonEntity
  *   getSelVal
@@ -24,7 +23,7 @@ import { showPopUpMsg } from './db-table/db-ui.js';
  *   init_db
  *   initGeoJsonData
  *   isGeoJsonDataAvailable
- *   addToStorage
+ *   lcfirst 
  *   removeFromStorage
  *   sendAjaxQuery
  *   setSelVal
@@ -216,7 +215,7 @@ export function getDataFromStorage(props) {
     return getStoredDataObj();
 
     function getStoredData() {
-        var data = dataStorage.getItem(props);  if (!data) { console.log("no stored data for [%s]", props); console.trace(); }
+        var data = dataStorage.getItem(props);  if (!data) { console.log("  ### no stored data for [%s]", props); /* console.trace(); */ }
         return data ? JSON.parse(data) : false;
     }
     function getStoredDataObj() {

@@ -7,7 +7,7 @@
  *     updateEditedData
  */
 import * as _u from './util.js';
-import { initDataTable, initSearchPage } from './db-page.js';
+import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let failed = { errors: [], updates: {}};
@@ -439,17 +439,17 @@ export function resetStoredData() {
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @ajaxAndStoreAllEntityData. The stored 
  * data's lastUpdated flag, 'pgDataUpdatedAt', is created. A data-loading 
- * popup message and intro-walkthrough are shown on the Search page @initSearchPage.
+ * popup message and intro-walkthrough are shown on the Search page.
  */
 export function initStoredData() {
     ajaxAndStoreAllEntityData();
-    initSearchPage();
+    showIntroAndLoadingMsg();
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
  * from the server and stored locally @storeEntityData. The stored data's 
  * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Database search page 
- * table build begins @initDataTable.
+ * table build begins @initSearchState.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
  *   /location - HabitatType, Location, LocationType, 'noLocIntIds' 
@@ -464,8 +464,8 @@ function ajaxAndStoreAllEntityData() {                                          
     ).then(function(a1, a2, a3, a4) {                                           console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
         $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
-        storeData('pgDataUpdatedAt', getCurrentDate());
-        initDataTable();
+        storeData('pgDataUpdatedAt', getCurrentDate());  
+        initSearchState('taxa');
     });
 }
 /**

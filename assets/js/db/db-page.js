@@ -7,9 +7,9 @@
  * 
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
- *     initSearchPage
- *     initSearchState          util
- *     initDataTable
+ *     showIntroAndLoadingMsg   db_sync
+ *     initSearchState          db_sync, util
+ *     initDataTable            db_sync
  *     onLocViewChange          db_ui
  *     onDataReset
  *     onSrcViewChange          db_ui
@@ -69,10 +69,11 @@ function initDbPage () {
  * The first time a browser visits the search page, all data is downloaded
  * from the server and stored in dataStorage. The intro-walkthrough is shown.
  */
-export function initSearchPage() {
+export function showIntroAndLoadingMsg() {
     db_ui.showLoadingDataPopUp();
-    db_tips.startWalkthrough(tblState.curFocus);
+    db_tips.startWalkthrough('taxa');
 }
+/** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchState() {
     resetTableParams();
     db_filters.toggleTimeUpdatedFilter('disable');
@@ -81,9 +82,10 @@ export function initSearchState() {
 } 
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
+    const focus = tblState.curFocus || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
-    _u.setSelVal('Focus', tblState.curFocus, 'silent');
+    _u.setSelVal('Focus', focus, 'silent');
     selectSearchFocus();
 }
 function getFocusOpts() {
