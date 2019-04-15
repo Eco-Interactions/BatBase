@@ -63,9 +63,9 @@
 # https://www.gembani.com/en/blog/symfony3-end-to-end-testing-with-mink-and-selenium.html
 # https://knpuniversity.com/screencast/behat
 
->HOW TO RUN TESTS: 
+>TESTING:
 Start Selenium: 
-    $ java -jar [selenium-server-standalone-3.141.59.jar]
+    $ java -jar selenium-server-standalone-3.141.59.jar
 
 Run Tests:
     - Unit Tests:

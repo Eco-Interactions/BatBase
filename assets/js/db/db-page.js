@@ -7,7 +7,6 @@
  * 
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
- *     showIntroAndLoadingMsg   db_sync
  *     initSearchState          db_sync, util
  *     initDataTable            db_sync
  *     onLocViewChange          db_ui
@@ -17,6 +16,7 @@
  *     rebuildLocTable
  *     rebuildTaxonTable
  *     selectSearchFocus
+ *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap
  */

@@ -6,9 +6,9 @@
  *     buildTreeSearchHtml
  *     resetFilterStatusBar
  *     resetTableStateParams
- *     showTodaysUpdates
+ *     showTodaysUpdates                db_forms
  *     toggleFilterPanel                db_ui
- *     toggleTimeUpdatedFilter
+ *     toggleTimeUpdatedFilter          db_page
  *     updateFilterStatusMsg
  *     updateLocSearch                  util
  *     updatePubSearch                  util
@@ -160,18 +160,19 @@ export function resetFilterStatusBar() {
  */
 export function showTodaysUpdates(focus) {                                      //console.log("showingUpdated from today")
     if (focus) { _u.setSelVal('Focus', focus); 
-    } else { db_page.selectSearchFocus(); }
+    } else { selectSearchFocus(); }
     window.setTimeout(showUpdatesAfterTableLoad, 200);
 }
 function showUpdatesAfterTableLoad() {
-    toggleTimeUpdatedFilter(true);
+    toggleTimeUpdatedFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeUpdatedFilter(state) {                                //console.log('toggleTimeUpdatedFilter. state = ', state);
-    const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
+export function toggleTimeUpdatedFilter(state, time) {                          //console.log('toggleTimeUpdatedFilter. state = %s, time? ', state, time);
+    const filtering = state === 'disable' ? false : 
+        state === true ? true : $('#shw-chngd')[0].checked;
     tblState = tState().get();
     updateRelatedUi(filtering);
-    if (filtering) { showCal();
+    if (filtering) { showCal(time);
     } else { resetTimeUpdatedFilter(); }
     db_ui.resetToggleTreeBttn(false);
 }
@@ -195,9 +196,10 @@ function resetTimeUpdatedFilter() {                                             
  * Instantiates the flatpickr calendar and opens the calendar. If a custom time
  * was previously selected and stored, it is reapplied.
  */
-function showCal() {                                                            //console.log('showFlatpickrCal. fPs = %O', fPs);
+function showCal(time) {                                                        //console.log('showFlatpickrCal. fPs = %O', fPs);
     fPs.cal = fPs.cal || initCal(); 
-    if (fPs.timeFltr) { 
+    if (time == 'today') { filterToChangesToday(); 
+    } else if (fPs.timeFltr) { 
         reapplyPreviousTimeFilter(fPs.timeFltr)
     } else {
         fPs.cal.open();            
@@ -221,6 +223,10 @@ function initCal() {
 function reapplyPreviousTimeFilter(filterTime, skipSync) {
     fPs.cal.setDate(filterTime);  
     filterInteractionsUpdatedSince(null, filterTime, null, skipSync);
+}
+function filterToChangesToday() {  
+    fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
+    filterInteractionsUpdatedSince(null, new Date().today(), null)
 }
 /**
  * Filters all interactions in the table leaving only the records with updates

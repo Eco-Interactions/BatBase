@@ -5,15 +5,13 @@
 }*/
 .selectize-input {
     padding: 4px 33px 4px 4px !important;
+    border-color: #666 !important;
 }
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
 }
 .selectize-dropdown {
     z-index: 1111;
-}
-.selectize-control.single .selectize-input, .selectize-dropdown.single {
-    border-color: #666;
 }
 /* -------------- Search Options -------------------------------------------- */
 #db-opts {  /* .flex-row also on elem */
@@ -542,13 +540,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-right: 1em;
 }
 .full-row {
-    width: 99.3%;
-}
-#Note_row {
-    width: 97.7%;
+    width: 955px;
 }
 .sub-row {
-    width: 398px; /*390*/
+    width: 398px; 
 }
 .sub2-row {
     width: 372px;
@@ -596,17 +591,19 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: .2em;
     margin: 0;
     font-size: .95em;
+    border: gray 1px solid;
+    border-radius: 4px;
 }
 .xlrg-field {
     width: 643px;
 }
 .top.xlrg-field {
-    width: 816px;
+    width: 792px;
 }
 .lrg-field {
     width: 302px;
 }
-.med-field {
+.med-field { 
     width: 240px; /*235*/
 }
 .sml-field {
@@ -634,6 +631,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 /*----------------- Form specific styles -----------------------*/
 #Authors-lbl, #Editors-lbl {
     padding-top: .7em;
+}
+#Authors-sel-cntnr, #Editors-sel-cntnr {
+    width: 329px;
 }
 /**--- Taxon Edit-Form ---*/
 .pTaxon#sub-form {
@@ -836,7 +836,7 @@ input.active-icon {
     }
     #b-overlay .full-row {
         padding: .2em 0 .3em  0;
-        width: 98%;
+        width: 850px;
     }
     #b-overlay #Note_row div.field-row {        
         width: 852px;

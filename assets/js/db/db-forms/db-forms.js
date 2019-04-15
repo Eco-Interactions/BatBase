@@ -18,6 +18,7 @@
 import * as _u from '../util.js';
 import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
+import { showTodaysUpdates } from '../db-table/db-filters.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
@@ -115,7 +116,7 @@ function refocusTableIfFormWasSubmitted() {                                     
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
     var focus  = fP.action === 'create' ? 'srcs' : null;
-    db_filters.showTodaysUpdates(focus);   
+    showTodaysUpdates(focus);   
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?

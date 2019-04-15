@@ -16,6 +16,12 @@ Next:
 
 
 Before Release:
+    - Turn all form styles from percentages to pixels
+
+
+
+
+
     - Add to Testing
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
@@ -29,7 +35,10 @@ Future:
         - extend
         - html
     - Refactor form code
+        - break out css
     - Figure out whether the explicit form services are necessary
+    - Refactor TESTS
+        - replace all usleeps with "spinner" wait methods
 
 
 MEETING NOTES:

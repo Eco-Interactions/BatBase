@@ -375,9 +375,12 @@ class FeatureContext extends RawMinkContext implements Context
     public function iUncheckTheTimeUpdatedFilter()
     {
         usleep(1000000); //refactor to  [wait(test)]
+        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
+        $filterPanelToggle->click();
+        usleep(300000);
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
-        usleep(500000);
+        usleep(300000);
     }
 
     /**
@@ -638,7 +641,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $row = $this->getTreeNode($text);  
-        $row->doubleClick();
+        $this->expandRow($row);
     }
 
     /**
@@ -935,7 +938,7 @@ class FeatureContext extends RawMinkContext implements Context
         if (stripos($bttnText, "Update") !== false || 
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
-        usleep(500000);
+        usleep(1000000);
         if ($bttnText === 'Update Interaction') { 
             $this->ensureThatFormClosed(); 
         }
@@ -1061,6 +1064,23 @@ class FeatureContext extends RawMinkContext implements Context
         }
         $this->handleNullAssert($row, false, "Didn't find the [$text] tree node.");
         return $row;
+    }
+    private function expandRow($row)
+    {
+        $row->doubleClick();
+        $clicked = $this->isRowExpanded($row);  //print('clicked ? '. $clicked);
+        if ($clicked) { return; }
+        if (!$clicked) {
+            $row->doubleClick();
+        }
+        if (!$this->isRowExpanded($row)) {
+            $this->iPutABreakpoint("row still not expanded");
+        }
+    }
+    private function isRowExpanded($row)
+    {
+        return $row->find('css', 'span.ag-group-expanded');
+
     }
     private function getValueToSelect($selId, $text)
     {
