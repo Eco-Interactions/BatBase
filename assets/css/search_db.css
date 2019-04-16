@@ -536,11 +536,11 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .3em;
 }
 .top-row {
-    width: 470px;
+    width: 481px;
     margin-right: 1em;
 }
 .full-row {
-    width: 955px;
+    width: 979px;
 }
 .sub-row {
     width: 398px; 
@@ -598,13 +598,13 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     width: 643px;
 }
 .top.xlrg-field {
-    width: 792px;
+    width: 800px;
 }
 .lrg-field {
     width: 302px;
 }
 .med-field { 
-    width: 240px; /*235*/
+    width: 240px; 
 }
 .sml-field {
     width: 200px;
@@ -817,8 +817,8 @@ input.active-icon {
         min-width: 366px;
     }
     #b-overlay .top-row {
-        padding: .2em .75em .3em  0;
-        width: 423px;
+        padding: .2em 0 .3em  0;
+        width: 436px;
         margin-right: 1em;
     }
     #b-overlay .sub-row {
@@ -838,22 +838,26 @@ input.active-icon {
         padding: .2em 0 .3em  0;
         width: 850px;
     }
+    #b-overlay #citation_Rows .full-row {
+        padding: .2em .75em .3em  .75em;
+        width: 766px;
+    }
     #b-overlay #Note_row div.field-row {        
-        width: 852px;
+        width: 888px;
     }
     #b-overlay #top-form label {
         font-size: 1em;
         padding: 5px 0 2px 0;
-        width: 120px;
+        width: 121px;
     }  
     #b-overlay .top.xlrg-field {
-        width: 700px;
+        width: 751px;
     }
     #b-overlay .xlrg-field {
         width: 614px;
     }
     #b-overlay .lrg-field {
-        width: 262px;
+        width: 289px;
     } 
     #b-overlay .med-field {
         width: 232px;

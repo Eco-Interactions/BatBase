@@ -1398,6 +1398,7 @@ function buildLocForm(val, fLvl) {
     enableCombobox('#Country-Region-sel', false);
     $('#Latitude_row input').focus();
     $('#sub-submit').val('Create without GPS data');
+    if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
 }
 function finishLocEditFormBuild() {  
     addMapToLocForm('#location_Rows', 'edit');
@@ -1447,7 +1448,15 @@ function locHasGpsData(fLvl) {
 }
 function addListenerToGpsFields(func) {
     const method = func || db_map.addVolatileMapPin;
-    $('#Latitude_row input, #Longitude_row input').change(method);
+    $('#Latitude_row input, #Longitude_row input').change(
+        toggleNoGpsSubmitBttn.bind(null, method));
+}
+function toggleNoGpsSubmitBttn(addMapPinFunc) {
+    const lat = $('#Latitude_row input').val();  
+    const lng = $('#Longitude_row input').val();  
+    const toggleMethod = lat || lng ? disableSubmitBttn : enableSubmitBttn;
+    toggleMethod('#sub-submit');
+    addMapPinFunc(true);
 }
 export function selectLoc(id) {
     $('#sub-form').remove();

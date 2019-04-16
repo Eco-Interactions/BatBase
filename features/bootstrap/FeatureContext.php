@@ -261,6 +261,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @Given I focus on the :role taxon field
+     * @Given I focus on the :role combobox
      */
     public function iFocusOnTheTaxonField($role)
     {
@@ -559,26 +560,32 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then the table should be filtered to interactions created since :time
+     * @Then the table should be filtered to interactions created today
      */
-    public function theTableShouldBeFilteredToInteractionsCreatedSince($time)
+    public function theTableShouldBeFilteredToInteractionsCreatedSince()
     {
         usleep(500000);
         $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
         $this->handleEqualAssert($checked, true, true, "Updates-since filter is not checked.");
-        $filter = $this->getUserSession()->evaluateScript("$('input[name=shw-chngd]:checked').val();");
-        $this->handleEqualAssert(lcfirst($time), $filter, true, 
-            "Showing updates-since [$filter]. Expected since [$time]");
+    }
+
+    /**
+     * @Then I add the data from all from previous scenarios in this feature
+     */
+    public function iAddTheDataFromAllFromPreviousScenariosInThisFeature()
+    {
+        throw new PendingException();
     }
 
     /**------------------ Table Interaction Steps -----------------------------*/
     /**
-     * @Given I filter the table to interactions created since :time
+     * @Given I filter the table to interactions created today
      */
-    public function iFilterTheTableToInteractionsCreatedSince($time)
+    public function iFilterTheTableToInteractionsCreatedSince()
     {
         $this->getUserSession()->executeScript("$('#shw-chngd').click().change();");
-        $this->theTableShouldBeFilteredToInteractionsCreatedSince($time);
+        $this->getUserSession()->executeScript("$('.flatpickr-confirm').click();");
+        $this->theTableShouldBeFilteredToInteractionsCreatedSince();
         usleep(500000);
     }
 
@@ -641,9 +648,18 @@ class FeatureContext extends RawMinkContext implements Context
     {
         usleep(500000);
         $row = $this->getTreeNode($text);  
-        $this->expandRow($row);
+        $this->toggleRow($text, $row);
     }
 
+    /**
+     * @When I collapse :text in the data tree
+     */
+    public function iCollapseInTheDataTree($text)
+    {
+        usleep(500000);
+        $row = $this->getTreeNode($text);  
+        $this->toggleRow($text, $row, 'close');
+    }
     /**
      * @When I expand :txt in level :num of the data tree
      */
@@ -836,19 +852,17 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * @Then I should see :mCount location markers
      * @Then I should see :mCount location markers and :cCount location clusters
-     * Note: Clusters are returning 2 instead of 1 as elem count, not sure why. 
+     * Note: Cluster count returns one extra for some reason I have yet to identify
      */
     public function iShouldSeeLocationMarkers($mCount, $cCount)
     {
-        $markers = $this->getUserSession()->getPage()->findAll('css', '.leaflet-marker-icon');
+        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
         if ($cCount) {
             $clusters = $this->getUserSession()->getPage()->findAll('css', 
-                '.leaflet-marker-icon.form-noGps');  
-            ++$clusters;
-            $markers = count($markers) - count($clusters) + 1;
-            $this->handleEqualAssert(count($clusters), $cCount, true, 'Found ['.count($clusters)."] clusters. Expected [$cCount].");
+                'div.leaflet-marker-icon');  
+            $this->handleEqualAssert(count($clusters), $cCount+1, true, 'Found ['.count($clusters)."] clusters. Expected [$cCount].");
         }
-        $this->handleEqualAssert($markers, $mCount, true, 'Found ['.$markers."] markers. Expected [$mCount].");
+        $this->handleEqualAssert(count($markers), $mCount, true, 'Found ['.count($markers)."] markers. Expected [$mCount].");
     }
 
     /**
@@ -856,7 +870,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iClickOnAnExistingLocationMarker()
     {
-        $markers = $this->getUserSession()->getPage()->findAll('css', '.leaflet-marker-icon');
+        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
         $this->handleNullAssert($markers, false, 'No markers found on map.');
         $markers[0]->click();
     }
@@ -1065,16 +1079,17 @@ class FeatureContext extends RawMinkContext implements Context
         $this->handleNullAssert($row, false, "Didn't find the [$text] tree node.");
         return $row;
     }
-    private function expandRow($row)
+    private function toggleRow($text, $row, $close = false)
     {
         $row->doubleClick();
-        $clicked = $this->isRowExpanded($row);  //print('clicked ? '. $clicked);
-        if ($clicked) { return; }
-        if (!$clicked) {
+        $clicked = $this->isRowExpanded($row);  
+        if ($clicked && !$close || !$clicked && $close) { return; }
+        if (!$clicked && !$close || !$clicked && $close) {
             $row->doubleClick();
         }
         if (!$this->isRowExpanded($row)) {
-            $this->iPutABreakpoint("row still not expanded");
+            $msg = $text . " row still not " . (!$close ? "expanded" : "collapsed"); 
+            $this->iPutABreakpoint($msg);
         }
     }
     private function isRowExpanded($row)
