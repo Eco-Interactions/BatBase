@@ -132,7 +132,7 @@ class FeatureContext extends RawMinkContext implements Context
         $marker = $this->getUserSession()->getPage()->find('css', '.leaflet-marker-icon');
         $this->handleNullAssert($marker, false, "Couldn't find marker on the map.");
         try {
-            $marker->click();    
+            $marker->doubleClick();    
         } catch (Exception $e) {
             $this->iPutABreakpoint("Couldn't click elem.");
         }
@@ -955,6 +955,9 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(1000000);
         if ($bttnText === 'Update Interaction') { 
             $this->ensureThatFormClosed(); 
+        }
+        if ($bttnText === 'Map View') {
+            $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
     /** -------------------- Asserts ---------------------------------------- */
