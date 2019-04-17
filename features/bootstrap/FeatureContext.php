@@ -83,6 +83,16 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->getUserSession()->wait( 10000, "!$('#db-overlay').length" );
     }
+
+    /**
+     * @Given I toggle :state the filter panel
+     */
+    public function iToggleTheFilterPanel($state)
+    {
+        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
+        $filterPanelToggle->click();
+        usleep(300000);
+    }
     /**
      * @Given the database table is in :entity view
      */
@@ -158,10 +168,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iTypeInTheTextBoxAndPressEnter($text, $type)
     {
-        $input = 'sel'.$type;
-        $bttn = $input.'_submit';
-        $this->getUserSession()->executeScript("$('[name=\"$input\"]')[0].value = '$text';");
-        $this->getUserSession()->getPage()->pressButton($bttn);
+        $input = $this->getUserSession()->getPage()->find('css', 'input[name="sel'.$type.'"]');
+        $input->setValue($text);
+        $input->keypress('13');
+        usleep(500000);
     }
 
     /**
@@ -376,9 +386,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iUncheckTheTimeUpdatedFilter()
     {
         usleep(1000000); //refactor to  [wait(test)]
-        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
-        $filterPanelToggle->click();
-        usleep(300000);
+        $this->iToggleOpenTheFilterPanel();
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
         usleep(300000);
