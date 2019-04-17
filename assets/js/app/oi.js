@@ -12,7 +12,6 @@ function requireCss() {
     require('../../css/oi.css');    
 }
 function requireGlobalJquery() { 
-    const $ = require('jquery');
     global.$ = $;
     global.jQuery = $;
 }

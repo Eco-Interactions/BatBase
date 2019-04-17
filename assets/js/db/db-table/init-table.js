@@ -4,7 +4,7 @@
  * Exports:
  *     init
  */
-import * as agGrid from '../../../grid/ag-grid.js';
+import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_filters from './db-filters.js';
 import * as db_forms from '../db-forms/db-forms.js';
 import unqVals from './ag-grid-unique-filter.js';

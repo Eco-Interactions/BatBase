@@ -29,6 +29,7 @@ Planning Meeting Notes:
 
 
 Future:
+    - Upgrade to encore 0.21 & webpack 4
     - Break util into 
         - data storage
         - combobox/selectize?
