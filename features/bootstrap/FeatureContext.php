@@ -76,11 +76,11 @@ class FeatureContext extends RawMinkContext implements Context
      * @Given I exit the tutorial
      */
     public function iExitTheTutorial()
-    {
+    {                                                                           //fwrite(STDOUT, "\n        Exiting the tutorial.\n");
         $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
         $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
         $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
-        usleep(500000);
+        usleep(100000);
         $this->getUserSession()->wait( 10000, "!$('#db-overlay').length" );
     }
 
@@ -89,6 +89,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iToggleTheFilterPanel($state)
     {
+        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts').hasClass('closed');");
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
         $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
         $filterPanelToggle->click();
         usleep(300000);
@@ -153,7 +155,7 @@ class FeatureContext extends RawMinkContext implements Context
      * Search page elems.
      */
     public function iSelectFromTheDropdown($text, $label)
-    {
+    {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
             'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
         $selId = '#sel'.str_replace(' ','',$label);
@@ -386,7 +388,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iUncheckTheTimeUpdatedFilter()
     {
         usleep(1000000); //refactor to  [wait(test)]
-        $this->iToggleOpenTheFilterPanel();
+        $this->iToggleTheFilterPanel('open');
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
         usleep(300000);
@@ -406,7 +408,7 @@ class FeatureContext extends RawMinkContext implements Context
      * @When I add the :text interaction tag
      */
     public function iAddTheInteractionTag($text)
-    {
+    {                                                                           //fwrite(STDOUT, "\niAddTheInteractionTag\n");
         $val = $this->getValueToSelect('#InteractionTags-sel', $text);
         $this->getUserSession()->executeScript("$('#InteractionTags-sel')[0].selectize.addItem('$val');");
         usleep(500000);
@@ -1093,8 +1095,8 @@ class FeatureContext extends RawMinkContext implements Context
     private function toggleRow($text, $row, $close = false)
     {
         $row->doubleClick();
-        $clicked = $this->isRowExpanded($row);  
-        if ($clicked && !$close || !$clicked && $close) { return; }
+        $clicked = $this->isRowExpanded($row);                                  
+        if ($clicked && !$close || !$clicked && $close) { fwrite(STDOUT, "\n       [$text] row opened.\n");return; }
         if (!$clicked && !$close || !$clicked && $close) {
             $row->doubleClick();
         }
@@ -1105,7 +1107,8 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function isRowExpanded($row)
     {
-        return $row->find('css', 'span.ag-group-expanded');
+        $checkbox = $row->find('css', 'span.ag-group-expanded');
+        return $checkbox->isVisible();
 
     }
     private function getValueToSelect($selId, $text)
@@ -1121,7 +1124,7 @@ class FeatureContext extends RawMinkContext implements Context
      * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
     private function changeTableSort($elemId, $newVal, $newElemId)
-    {  
+    {                                                                           //fwrite(STDOUT, "\nchangeTableSort\n");
         $elem = $this->getUserSession()->evaluateScript("$('$elemId').length;"); 
         $this->getUserSession()->
             executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
@@ -1194,7 +1197,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     /** Couldn't find a way to check whether elem exists before set value attempt. */
     private function selectValueInCombobox($selId, $text)
-    {                                                                           //print('selId = '.$selId);
+    {                                                                           //fwrite(STDOUT, "\n            selectValueInCombobox - [$text] in [$selId]\n");           
         $msg = 'Error while selecting ['.$text.'] in ['.$selId.'].';
         $val = $this->getValueToSelect($selId, $text); 
         $this->getUserSession()->executeScript("$('$selId').length ? $('$selId')[0].selectize.addItem('$val') : null;");
@@ -1203,35 +1206,49 @@ class FeatureContext extends RawMinkContext implements Context
     }
     /** ------------------ Data Sync Feature -----------------------------------*/
     /**
-     * @Given two editors are logged into the website
+     * @Given an editor logs into the website
      */
-    public function twoEditorsAreLoggedIntoTheWebsite()
-    {
+    public function anEditorLogsIntoTheWebsite()
+    {                                                                           fwrite(STDOUT, "\n---- Editor 1 logging in.\n");
         $this->editor1 = $this->getEditorSession();
         $this->editorLogIn($this->editor1, 'testeditor');
+    }
 
+    /**
+     * @Given a second editor logs into the website
+     */
+    public function aSecondEditorLogsIntoTheWebsite()
+    {                                                                           fwrite(STDOUT, "\n---- Editor 2 logging in.\n");
         $this->editor2 = $this->getEditorSession();
         $this->editorLogIn($this->editor2, 'testAdmin');
     }
 
     /**
-     * @When each user creates two interactions
+     * @Given editor :cnt creates two interactions
      */
-    public function eachUserCreatesTwoInteractions()
+    public function editorCreatesTwoInteractions($cnt)
     {
-        $this->userCreatesInteractions($this->editor1, [1, 2]);
-        $this->userCreatesInteractions($this->editor2, [3, 4]);
+        $map = [[1,2], [3,4]];
+        $editor = 'editor' . $cnt;
+        $this->curUser = $this->$editor;
+        $this->editorVisitsSearchPage($this->curUser);                          fwrite(STDOUT, "\n        Visits search page.\n");   
+        $this->userCreatesInteractions($this->curUser, $map[$cnt - 1]);
     }
 
     /**
-     * @When each edits some sub-entity data
+     * @Given editor :cnt edits some sub-entity data
      */
-    public function eachEditsSomeSubEntityData()
+    public function editorEditsSomeSubEntityData($cnt)
     {   
-        $this->curUser = $this->editor1; 
-        $this->editorChangesLocationData();
-        $this->curUser = $this->editor2; 
-        $this->editorChangesTaxonData();
+        $editor = 'editor' . $cnt;
+        $this->curUser = $this->$editor; 
+        $this->iUncheckTheTimeUpdatedFilter();
+        $this->iToggleTheFilterPanel('close');
+        if ($cnt == 1) {
+            $this->editorChangesLocationData();
+        } else {
+            $this->editorChangesTaxonData();
+        }
     }
 
     /**
@@ -1286,27 +1303,25 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     private function userCreatesInteractions($editor, $cntAry)
-    {
-        $this->curUser = $editor;
-        $this->editorVisitsSearchPage($this->curUser);
-        $this->curUser->getPage()->pressButton('New');
-        foreach ($cntAry as $cnt) {
+    {                                                                           fwrite(STDOUT, "\---- userCreatesInteractions.\n");
+        $this->curUser->getPage()->pressButton('Add Data');
+        foreach ($cntAry as $cnt) {                                             fwrite(STDOUT, "\n    Creating interaction $cnt\n");
             $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
-        }
+        }                                                                       fwrite(STDOUT, "\n    Interactions added. Exiting form\n");
         $this->iExitTheFormWindow();
     }
 
     private function editorVisitsSearchPage($editor)
-    {
+    {   
         $editor->visit('http://localhost/batplant/web/app_test.php/search');
-        usleep(500000);
+        usleep(400000);
         $this->iExitTheTutorial();
     }
     /**
      * @Given I create an interaction 
      */
     public function iSubmitTheNewInteractionFormWithTheFixtureEntities($count = 1)
-    {
+    {                                                                           fwrite(STDOUT, "\n        Filling form with fixture data\n");
         $srcLocData = [ 'Publication' => 'Revista de Biologia Tropical', 
             'Citation Title' => 'Two cases of bat pollination in Central America', 
             'Country-Region' => 'Central America', 'Location' => 'Panama'];
@@ -1316,18 +1331,18 @@ class FeatureContext extends RawMinkContext implements Context
         $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
-        usleep(500000);
+        usleep(1000000);                                                        fwrite(STDOUT, "\n  Interaction ".$count." complete\n");
     }
     private function fillSrcAndLocFields($data)
-    {   fwrite(STDOUT, "\n---- Filling Source and Location fields.\n");
-        foreach ($data as $field => $value) { //print_r('$field = '.$field.' $val = '.$value);
+    {                                                                           fwrite(STDOUT, "\n        Filling Source and Location fields.\n");
+        foreach ($data as $field => $value) { 
             $this->iSelectFromTheDropdownField($value, $field); 
         }
     }
     private function fillTaxaFields($data) 
-    {   fwrite(STDOUT, "\nFilling Taxa fields.\n");  
+    {                                                                           fwrite(STDOUT, "\n        Filling Taxa fields.\n");  
         $lvls = array_keys($data);
-        $this->iFocusOnTheTaxonField('Subject');
+        $this->iFocusOnTheTaxonField('Subject');   
         $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
         $this->getUserSession()->getPage()->pressButton('Confirm');
         $this->iFocusOnTheTaxonField('Object');
@@ -1336,7 +1351,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->getUserSession()->getPage()->pressButton('Confirm');
     }
     private function fillMiscIntFields($data)
-    {   fwrite(STDOUT, "\nFilling remaining fields.\n");
+    {                                                                           fwrite(STDOUT, "\n        Filling remaining fields.\n");
         $fields = array_keys($data); 
         $this->iSelectFromTheDropdownField($data[0], 'Interaction Type');
         $this->iSelectFromTheDropdownField($data[1], 'Interaction Tags');
@@ -1350,13 +1365,13 @@ class FeatureContext extends RawMinkContext implements Context
         assertTrue($tableRows);
     }
     private function editorChangesLocationData()
-    {   fwrite(STDOUT, "\n--- Editor changing Location data.\n");
+    {                                                                           fwrite(STDOUT, "\n---- Editor changing Location data.\n");
         $this->theDatabaseTableIsInSelectedView('Location'); 
         $this->editLocationData();
         $this->moveLocationInteraction();
     }
     private function editLocationData()
-    {
+    {                                                                           fwrite(STDOUT, "\n        Editing Location data.\n");
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
@@ -1366,7 +1381,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
     }
     private function moveLocationInteraction()
-    {   fwrite(STDOUT, "\nEditor changing Location interaction data.\n");
+    {                                                                           fwrite(STDOUT, "\n        Editing interaction location data.\n");
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
@@ -1380,7 +1395,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
     }
     private function editorChangesTaxonData()
-    {   fwrite(STDOUT, "\n--- Editor changing Taxon data.\n");
+    {                                                                           fwrite(STDOUT, "\n        Editor changing Taxon data.\n");
         $this->theDatabaseTableIsInSelectedView('Taxon'); 
         $this->iGroupInteractionsBy('Arthropoda');
         $this->editTaxonData();
@@ -1395,7 +1410,7 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
     }
     private function moveTaxonInteraction()
-    {   fwrite(STDOUT, "\n--- Editor changing Taxon interaction data.\n");
+    {                                                                           fwrite(STDOUT, "\n--- Editor changing Taxon interaction data.\n");
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
@@ -1413,7 +1428,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
     }
     private function editorSeesExpectedInteractions($editor)
-    {
+    {                                                                           fwrite(STDOUT, "\n        Editor sees expected data.\n");
         $this->checkSourceData();
         $this->checkLocationData();
         $this->checkTaxonData();
@@ -1439,10 +1454,10 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
-        $this->iShouldSeeInTheTree('Family Sphingidaey');
+        $this->iExpandInTheDataTree('Family Sphingidaey');
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
     }
-    /** ---------- Misc ----------- */
+    /** ---------- Misc Util ----------- */
     private function getUserSession()
     {
         return isset($this->curUser) ? $this->curUser : $this->getSession();

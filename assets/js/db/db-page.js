@@ -71,6 +71,7 @@ function initDbPage () {
  */
 export function showIntroAndLoadingMsg() {
     db_ui.showLoadingDataPopUp();
+    _u.initComboboxes(['Focus', 'View']);
     db_tips.startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
@@ -159,8 +160,10 @@ export function initDataTable(focus) {                                          
     db_ui.updateUiForTableView();
 }
 export function selectSearchFocus(f) { 
+    // const data = _u.getDataFromStorage('pgDataUpdatedAt'); console.log('data ? ', data)
+    // if (!data) { return; } 
     const focus = f ? f : _u.getSelVal('Focus');                                console.log("---select(ing)SearchFocus = ", focus); 
-    if (!focus) { return; }
+    // if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 

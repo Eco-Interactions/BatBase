@@ -26,7 +26,7 @@ function getCurrentDate() {
  * search page ui is initialized @initStoredData.
  */
 export function addNewDataToStorage(dataUpdatedAt, reset) {  
-    var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt');                 console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
+    var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
     if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) {            console.log("Data up to date.");return; }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
