@@ -1,9 +1,5 @@
-/*-------------------- Unique Values Column Filter -----------------------*/
-/**
- * Class function: 
- * This filter presents all unique values of column to potentially filter on.
- */
-export function UniqueValues() {}
+/** This filter presents all unique values of column to potentially filter on. */
+export default function UniqueValues() {}
 UniqueValues.prototype.init = function (params) {                               //console.log("UniqueValues.prototype.init. params = %O", params)
     this.model = new UnqValsColumnFilterModel(params.colDef, params.rowModel, params.valueGetter, params.doesRowPassOtherFilter);
     this.filterModifiedCallback = params.filterModifiedCallback;

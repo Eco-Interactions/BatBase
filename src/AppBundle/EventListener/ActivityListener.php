@@ -38,7 +38,7 @@ class ActivityListener
             $user = $this->tokenContext->getToken()->getUser();
 
             if ( ($user instanceof User) && !($user->isActiveNow()) ) {
-                $user->setLastActivityAt(new \DateTime());
+                $user->setLastActivityAt(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
                 $this->doctrine->getManager()->flush($user);
             }
         }

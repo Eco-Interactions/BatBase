@@ -11,10 +11,12 @@
  *   showInts
  *   showLoc
  */
-import * as _u from './util.js';
-import * as db_page from './db-page.js';
-import * as db_forms from './db-forms.js';
+import * as _u from '../util.js';
+import * as db_forms from '../db-forms/db-forms.js';
 import * as MM from './map-markers.js'; 
+import buildMapDataObj from './map-data.js';
+import { accessTableState as tState } from '../db-page.js';
+
 
 let locRcrds, map, geoCoder, volatile = {}, popups = {};
 
@@ -24,7 +26,6 @@ let app = {
     */}
 };
 
-initDb();
 requireCss();
 fixLeafletBug();
 
@@ -36,10 +37,10 @@ export function clearMemory() {                                                 
 }
 /** =================== Init Methods ======================================== */
 function requireCss() {
-    require('../../../node_modules/leaflet/dist/leaflet.css');
-    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
-    require('../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
-    require('../../../node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css');
+    require('../../../../node_modules/leaflet/dist/leaflet.css');
+    require('../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css');
+    require('../../../../node_modules/leaflet.markercluster/dist/MarkerCluster.css');
+    require('../../../../node_modules/leaflet-control-geocoder/dist/Control.Geocoder.css');
 }
 /** For more information on this fix: github.com/PaulLeCam/react-leaflet/issues/255 */
 function fixLeafletBug() {
@@ -52,22 +53,15 @@ function fixLeafletBug() {
 }
 /** ------------------ Stored Data Methods ---------------------------------- */
 /**
- * Checks whether the dataKey exists in indexDB cache. 
- * If it is, the stored geoJson is fetched and stored in the global variable. 
- * If not, the db is cleared and geoJson is redownloaded. 
+ * Checks if geojson data is already available, downloads if not.
+ * TODO:: Test for when geoJsonData is erroring and then redownload the data
  */
-function initDb() {
-    _u.initGeoJsonData();
-}
-function geoJsonDataAvailable() {
-    return _u.isGeoJsonDataAvailable();
-}
-/*=========================== Shared Methods =================================*/
-// Test for when geoJsonData is erroring and then redownload the data
 function waitForDataThenContinue(cb) {                                          console.log('waiting for geojson');
-    return geoJsonDataAvailable() ? cb() : 
+    return _u.isGeoJsonDataAvailable() ? cb() : 
         window.setTimeout(waitForDataThenContinue.bind(null, cb), 500);
 }
+/*=========================== Shared Methods =================================*/
+
 /** Initializes the map using leaflet and mapbox. */
 function buildAndShowMap(loadFunc, mapId, type) {                               console.log('buildAndShowMap. loadFunc = %O mapId = %s', loadFunc, mapId);
     map = getMapInstance(mapId);
@@ -343,13 +337,14 @@ function addMarkersForLocAndChildren(topLoc) {
 } /* End addMarkersForLocAndChildren */
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, tableData, rcrds) {                             //console.log('----------- showInts. tableData = %O', tableData);
-    locRcrds = rcrds;
+export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. tableData = %O', tableData);
+    locRcrds = locRcrds;
     waitForDataThenContinue(buildAndShowMap.bind(null, showIntsOnMap, 'map'));                                                 
     
-    function showIntsOnMap() {                                                  console.log('showIntsOnMap! data = %O', tableData);
+    function showIntsOnMap() {                                                  
+        const tableData = buildMapDataObj(viewRcrds, locRcrds);                 //console.log('showIntsOnMap! data = %O', tableData);
         const keys = Object.keys(tableData);                                     
-        addIntCntsToLegend(tableData);
+        addIntCntsToLegend(tableData); 
         addIntMarkersToMap(focus, tableData);
         zoomIfAllInSameRegion(tableData);
     }

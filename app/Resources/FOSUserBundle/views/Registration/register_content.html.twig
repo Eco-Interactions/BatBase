@@ -10,7 +10,7 @@
     {{ form_row(form.plainPassword.first) }}
     {{ form_row(form.plainPassword.second) }}
 
-    <input id="reg-tos" class="top-em-mrg" type="button" value="Agree to our Terms of Use" />
-    <input id="reg-submit" type="submit" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
+    <input id="reg-tos" class="top-em-mrg bei-bttn" type="button" value="Agree to our Terms of Use" />
+    <input id="reg-submit" type="submit" class="bei-bttn" value="{{ 'registration.submit'|trans({}, 'FOSUserBundle') }}" />
     {{ form_end(form) }}
 </form>

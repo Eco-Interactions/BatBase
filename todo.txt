@@ -4,14 +4,42 @@
 >{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
 > Create Interaction Lists and UI
 
+>REFACTORING
+
+Current:
+
+Next:
+    - Build backend for saving lists
+        - Store Interaction lists
+        - Store Filter Sets
+
 
 
 Before Release:
-    - Feedback isn't working
+    - Turn all form styles from percentages to pixels
+
+
+
+
+
+    - Add to Testing
+        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
 Planning Meeting Notes:
 
 
+Future:
+    - Upgrade to encore 0.21 & webpack 4
+    - Break util into 
+        - data storage
+        - combobox/selectize?
+        - extend
+        - html
+    - Refactor form code
+        - break out css
+    - Figure out whether the explicit form services are necessary
+    - Refactor TESTS
+        - replace all usleeps with "spinner" wait methods
 
 
 MEETING NOTES:

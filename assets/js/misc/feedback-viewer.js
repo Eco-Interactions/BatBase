@@ -36,15 +36,14 @@ function createPopUp(feedback) {
 	$statusElem = createStatusSelect(feedback.status);
 	$adminNotesElem = $('<textarea id="admn-notes" placeholder="Add notes about this feedback here..."></textarea>').text(feedback.notes);
 
-
 	$viewerPopup.append($('<p></p>').text(fromTxt).prepend($('<span class="lbl">Feedback from: </span>')));
 	$viewerPopup.append($('<p class="top-mrg"></p>').text(feedback.topic).prepend($('<span class="lbl">Topic: </span>')));
-	$viewerPopup.append($('<p class="top-mrg btm-mrg"></p>').text(feedback.content));
+	$viewerPopup.append($('<p class="top-mrg btm-mrg"></p>').text(feedback.content).prepend($('<span class="lbl">Description: </span>')));
+	$viewerPopup.append($('<hr>'));
 	$viewerPopup.append($asgnUsrElem);
 	$viewerPopup.append($statusElem);
 	$viewerPopup.append($('<p class="top-mrg"><span class="lbl">Admin Notes:</span></p>'));
 	$viewerPopup.append($adminNotesElem);
-	$viewerPopup.append($('<p id="note-chars"></p>').text('No notes entered').css({ 'font-size': '.8em' }));
 	$viewerPopup.append($('<button name="post-feedback">Update Feedback Entry</button>'));
 	$viewerPopup.append($('<button name="cancel-feedback">Cancel</button>'));
 	$viewerPopup.hide();
@@ -80,7 +79,6 @@ function hasChangedData() {
 }
 
 function onNoteChange() {
-	setNotesChars($(this).val().length);
 	noteHasChanges = $adminNotesElem.val() === orgnlFeedback.notes ? false : true;
 	console.log("noteChanges called and ==", noteHasChanges);
 	onDataChange();
@@ -116,8 +114,7 @@ function updateFeedback() {
 			asgnUserId: userId === 0 ? null : userId,
     		adminNotes: $adminNotesElem.val(),
     		status: $('select[name=status] option:selected').val()
-    	};																								console.log('data obj= ', data);
-    	console.log('$adminNotesElem = ', $adminNotesElem);
+    	};																		console.log('$adminNotesElem = ', $adminNotesElem);
     sendAjaxRequest(updateFeedbackAjaxData(data));
     // closePopup() && sendAjaxRequest(data);
 }
@@ -160,16 +157,6 @@ function addPopupEvents() {
 function closePopup() {
 	$viewerPopup.fadeOut("slow", function () { document.location.reload(true); });
 	return true;
-}
-
-function setNotesChars(charCnt) {
-	$('#note-chars').text(getCharStr(charCnt));
-}
-
-function getCharStr(curCnt, max) {
-	if (curCnt !== 0) {
-		return curCnt + ' characters.';
-	}
 }
 
 function sbarOffest(pxValStr) {

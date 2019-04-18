@@ -4,11 +4,12 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Feedback;
 use AppBundle\Form\FeedbackType;
+
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Feedback controller.
@@ -17,6 +18,13 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FeedbackController extends Controller
 {
+    protected $requestStack;
+
+    public function __construct(RequestStack $requestStack)
+    {
+        $this->requestStack = $requestStack;
+    }
+
     /**
      * Lists all Feedback entities.
      *
@@ -40,8 +48,9 @@ class FeedbackController extends Controller
      * @Route("/post", name="app_feedback_post")
      * @Method("POST")
      */
-    public function postAction(Request $request)
+    public function postAction()
     {
+        $request = $this->requestStack->getCurrentRequest();
         $requestContent = $request->getContent();
         $postedData = json_decode($requestContent);
         $routeStr = $postedData->routeStr;
@@ -74,7 +83,7 @@ class FeedbackController extends Controller
      */
     public function updateAction($id)
     {
-        $request = $this->container->get('request');
+        $request = $this->requestStack->getCurrentRequest();
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('AppBundle:Feedback')->find($id);
 
@@ -168,32 +177,32 @@ class FeedbackController extends Controller
      * @Route("/{id}", name="old_feedback_update")
      * @Method("PUT")
      */
-    public function oldUpdateAction(Request $request, $id)
-    {
-        $em = $this->getDoctrine()->getManager();
+    // public function oldUpdateAction(Request $request, $id)
+    // {
+    //     $em = $this->getDoctrine()->getManager();
 
-        $entity = $em->getRepository('AppBundle:Feedback')->find($id);
+    //     $entity = $em->getRepository('AppBundle:Feedback')->find($id);
 
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find Feedback entity.');
-        }
+    //     if (!$entity) {
+    //         throw $this->createNotFoundException('Unable to find Feedback entity.');
+    //     }
 
-        $deleteForm = $this->createDeleteForm($id);
-        $editForm = $this->createEditForm($entity);
-        $editForm->handleRequest($request);
+    //     $deleteForm = $this->createDeleteForm($id);
+    //     $editForm = $this->createEditForm($entity);
+    //     $editForm->handleRequest($request);
 
-        if ($editForm->isSubmitted()) {
-            $em->flush();
+    //     if ($editForm->isSubmitted()) {
+    //         $em->flush();
 
-            return $this->redirect($this->generateUrl('feedback_edit', array('id' => $id)));
-        }
+    //         return $this->redirect($this->generateUrl('feedback_edit', array('id' => $id)));
+    //     }
 
-        return $this->render('Feedback/edit.html.twig', array(
-            'entity' => $entity,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
+    //     return $this->render('Feedback/edit.html.twig', array(
+    //         'entity' => $entity,
+    //         'edit_form' => $editForm->createView(),
+    //         'delete_form' => $deleteForm->createView(),
+    //     ));
+    // }
 
     /**
      * Creates a new Feedback entity.
@@ -201,8 +210,9 @@ class FeedbackController extends Controller
      * @Route("/create", name="feedback_create")
      * @Method("POST")
      */
-    public function createAction(Request $request)
+    public function createAction()
     {
+        $request = $this->requestStack->getCurrentRequest();
         $entity = new Feedback();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -332,8 +342,9 @@ class FeedbackController extends Controller
      * @Route("/{id}", name="feedback_delete")
      * @Method("DELETE")
      */
-    public function deleteAction(Request $request, $id)
+    public function deleteAction($id)
     {
+        $request = $this->requestStack->getCurrentRequest();
         $form = $this->createDeleteForm($id);
         $form->handleRequest($request);
 

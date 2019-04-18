@@ -51,18 +51,18 @@
     {% block body %}
         <div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
             {% block masthead %}
-            <div id="masthead"  data-img-path="{{ asset('bundles/app/images/') }}">
-                <div id="slider-overlay">
-                    <img src="{{ asset('bundles/app/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org" width="375">
+             <div id="slider-overlay">
+                <img src="{{ asset('bundles/app/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org" width="375">
+            </div>
+            <div id="img-slider">
+                <div class="slide" style="opacity: 1;">
+                    <img src="{{ asset('bundles/app/images/cactusbat.jpg') }}">
                 </div>
-                <div id="prev-btn-frame" title="Previous">
-                    <img id="prev-btn" class="step-btn" src="{{ asset('bundles/app/images/prev.png') }}" alt="<|">
+                <div class="slide">
+                    <img src="{{ asset('bundles/app/images/twobats.jpg') }}">
                 </div>
-                <div id="pause-btn-frame" title="Pause">
-                    <img id="pause-btn" src="{{ asset('bundles/app/images/pause.png') }}" alt="||">
-                </div>
-                <div id="next-btn-frame" title="Next">
-                    <img id="next-btn" class="step-btn" src="{{ asset('bundles/app/images/next.png') }}" alt="|>">
+                <div class="slide">
+                    <img src="{{ asset('bundles/app/images/inflower.jpg') }}">
                 </div>
             </div>
             {% endblock %}
@@ -104,7 +104,6 @@
         <script src="{{ asset('build/manifest.js') }}"></script>            
         <script src="{{ asset('build/libs.js') }}"></script>
         <script src="{{ asset('build/app.js') }}"></script>
-        <!-- <script src="{{ asset('build/static.js') }}"></script> -->
     {% endblock javascripts %}
     </body>
 </html>
