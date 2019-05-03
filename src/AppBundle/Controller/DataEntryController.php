@@ -17,11 +17,11 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 
 /**
- * Crud-form controller.
+ * Date-entry/edit form controller.
  *
  * @Route("/crud", name="app_")
  */
-class CrudController extends Controller
+class DataEntryController extends Controller
 {
 /*------------------------------ CREATE --------------------------------------*/
     /**
