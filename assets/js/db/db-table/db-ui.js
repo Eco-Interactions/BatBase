@@ -4,7 +4,7 @@
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
- *     init                             db_page
+ *     pg_init                             db_page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
@@ -20,11 +20,12 @@ import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
+import { toggleSaveIntsPanel } from './save-ints.js';
 
 const userRole = $('body').data("user-role");
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
-export function init() {
+export function pg_init() {
     addDomEventListeners();
     adaptUiToScreenSize();
     authDependentInit();
@@ -65,15 +66,13 @@ function disableUserFeatures() {
 }
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This is an upcoming feature!'); 
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn')
         .click(createEntity.bind(null, 'create', 'interaction'));
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
-    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This is an upcoming feature!'); 
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
 }

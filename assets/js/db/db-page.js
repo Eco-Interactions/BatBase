@@ -63,7 +63,7 @@ function requireCss() {
  */
 function initDbPage () {    
     _u.init_db();
-    db_ui.init();
+    db_ui.pg_init();
 }
 /**
  * The first time a browser visits the search page, all data is downloaded
