@@ -16,6 +16,7 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data tree to a specific country.
         Given the database table is in "Location" view
+        And I toggle "open" the filter panel
         When I select "Costa Rica" from the "Country" dropdown
         Then I should see "Central America" in the "Region" dropdown
         And I should see "3" rows in the table data tree
@@ -24,6 +25,7 @@ Feature: Filtering the data displayed in the database table
     @javascript
     Scenario:  I should be able to filter the data tree to a specific publication type.
       Given the database table is in "Source" view
+      And I toggle "open" the filter panel
       When I select "Journal" from the "Pub Type" dropdown
       Then I should see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
@@ -33,6 +35,7 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data tree to a specific author.
       Given the database table is in "Source" view
       And I group interactions by "Authors"
+      And I toggle "open" the filter panel
       When I type "Cockle" in the "Author" text box and press enter
       And I should see "1" rows in the table data tree
       And data in the interaction rows
@@ -41,6 +44,7 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data tree to a specific publisher.
       Given the database table is in "Source" view
       And I group interactions by "Publishers"
+      And I toggle "open" the filter panel
       When I type "University of Paris VI" in the "Publisher" text box and press enter
       And I should see "1" rows in the table data tree
       And data in the interaction rows
@@ -50,6 +54,7 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data tree to a specific taxon.
       Given the database table is in "Taxon" view
       And I group interactions by "Bats"
+      And I toggle "open" the filter panel
       When I select "Artibeus lituratus" from the "Species" dropdown
       Then I should see "Artibeus" in the "Genus" dropdown
       And I should see "Phyllostomidae" in the "Family" dropdown

@@ -14,65 +14,88 @@
 {% endblock headline %}
 
 {% block detail %}
-    <div id="search-opts" class="flex-row">
-        <div id="opts-col1" class="opts-col flex-col">
-            <div id="filter-opts" class="flex-row" style="display: none;">
+    <div id="db-opts" class="flex-row">
+        <div id="db-opts-col1" class="flex-row">
+            <div class="flex-row">
                 <span>Group Interactions by: </span>
-                <select id="search-focus" class="opts-box" data-field="Focus">
-                    <option value="locs">Location</option>
-                    <option value="srcs">Source</option>
-                    <option value="taxa">Taxon</option>
-                </select>
-            </div>
-            <div id="sort-opts" class="flex-row" style="display: none;"></div>
-        </div>
-        <div id="opts-col2" class="opts-col flex-col flex-wrap"></div>
-        <div id="opts-col3" class="opts-col flex-col flex-wrap">
-            <div id="shw-chngd-ints" class='tbl-tools'>
-                <input type="checkbox" id="shw-chngd">
-                <label for="shw-chngd">Show records updated since:</label>
-                <input type="radio" id="fltr-tdy" name="shw-chngd" checked="checked" value="today">
-                <label for="fltr-tdy">Today</label>
-                <input type="radio" id="fltr-cstm" name="shw-chngd" value="custom">
-                <label for="fltr-cstm" style="margin-right: .1em">Custom</label>
-                <input type="text" id="time-fltr" disabled="disabled">
-            </div>
-            <div class="bttm-row flex-row">
-                <button id="shw-map" class="ag-fresh tbl-bttn">
-                    Show Interactions on Map</button>
+                <select id="search-focus" class="col1-sel" data-field="Focus"></select>
+                <span>View: </span>
+                <select id="sel-view" class="col1-sel" data-field="View"></select>
             </div>
         </div>
-        <div id="opts-col4" class="flex-col">
-            <button id="strt-tut" class="ag-fresh tbl-bttn">Tutorial</button>
-            <button id="show-tips" class="ag-fresh tbl-bttn">Search Tips</button>
-        </div> 
+        <div id="db-opts-col2" class="flex-row tbl-tools">
+            <button id="filter" class="ag-fresh tbl-bttn ico-bttn">
+                Filter Data
+            </button>     
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="reset-tbl">
+                Clear Filters
+            </button>
+        </div>
+        <div id="db-opts-col3" class="flex-row">
+            <button id="shw-map" class="ag-fresh tbl-bttn ico-bttn">
+                Show Interactions on Map
+            </button>
+        </div>
+        <div id="db-opts-col4" class="flex-row">  
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="csv">
+                CSV
+            </button>
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="int-set">
+                Load Interaction Set
+            </button>   
+            <button id="new-data" class="ag-fresh tbl-bttn ico-bttn">
+                Add Data
+            </button>
+        </div>
+        <div id="db-opts-col5" class="flex-row">
+            <button id="strt-tut" class="ag-fresh tbl-bttn">
+                Tutorial
+            </button>
+            <button id="show-tips" class="ag-fresh tbl-bttn">
+                Search Tips
+            </button>
+        </div>
+    </div>
+    <div id='filter-opts' class="flex-row closed">
+        <div id="focus-filters" class="flex-row flex-wrap tbl-tools"></div>
+        <div id="shw-chngd-ints" class='tbl-tools'>
+            <input type="checkbox" id="shw-chngd">
+            <label for="shw-chngd">Show records updated since:</label>
+            <input type="text" id="time-fltr" disabled="disabled">
+        </div>
+        <div id="stored-filters" class="flex-row"> 
+            <span>Load saved filters: </span>
+            <select id="saved-filters" class="saved-filters-sel" data-field="" disabled="true"></select>
+            <button id="save-filter" class="ag-fresh" disabled="true"> 
+                Save Current Filter State
+            </button>
+        </div>
     </div>
     <div id="tool-bar" class="flex-row">
-        <div class='flex-row tbl-tools'>
-            <div id='xpand-tree'>
-                <button id="xpand-all" class="ag-fresh ag-header-cell tbl-bttn" name="xpand-all">Expand All</button>
-                <button class="ag-fresh ag-header-cell tbl-bttn" name="xpand-1">+</button>
-                <button class="ag-fresh ag-header-cell tbl-bttn" name="collapse-1">-</button>
-            </div>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="reset-tbl">Reset Data</button>
+        <div id='xpand-tree' class=' tbl-tools'>
+            <button id="xpand-all" class="ag-fresh ag-header-cell tbl-bttn" name="xpand-all">
+                Expand All
+            </button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="xpand-1">+</button>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="collapse-1">-</button>
         </div>
         <div id="tbl-status" class="flex-row">
             <div id="xtrnl-filter-status">Filtering on:</div>
             <div id="tbl-filter-status"></div>
         </div>
-        <div class='tbl-tools' style='align-self: flex-end;'>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" disabled>Show/Hide Columns</button>
-            <button class="ag-fresh ag-header-cell tbl-bttn" name="csv">Download CSV</button>
+        <div class='tbl-tools'>
+            <button class="ag-fresh ag-header-cell tbl-bttn" name="show-hide-col" 
+                title="Future feature: customize the data shown in the table and/or csv export."
+                disabled> Show/Hide Columns
+            </button>
         </div>
     </div>
-    
     <div id="db-view">
         <div id="search-tbl" class="ag-fresh"></div>
         <div id="map" style="display: none;"></div>
         <div id="db-overlay"></div>
         <div id="db-popup"></div>
     </div>
-
 {% endblock detail %}
 
 {% block javascripts %} 

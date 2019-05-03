@@ -1,6 +1,15 @@
 const Encore = require('@symfony/webpack-encore');
-const CircularDependencyPlugin = require('circular-dependency-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const webpack = require('webpack');
+// const CircularDependencyPlugin = require('circular-dependency-plugin')
 // const WorkboxPlugin = require('workbox-webpack-plugin');
+
+const autoProvidedVars = { L: 'leaflet' };
+const appFiles = './assets/js/app/oi.js';
+const dbFiles = './assets/js/db/db-page.js';
+const fdbkFiles = './assets/js/misc/feedback-viewer.js';
+const libFiles = ['jquery', 'leaflet', 'leaflet-control-geocoder',
+        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js'];
  
 /** ================= Create local development config ======================= */
 Encore
@@ -25,9 +34,7 @@ Encore
     .enableVersioning()
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
-    .autoProvideVariables({
-        L: 'leaflet',
-    })  
+    .autoProvideVariables(autoProvidedVars)  
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
     //         // these options encourage the ServiceWorkers to get in there fast 
@@ -37,14 +44,13 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    .addEntry('app', './assets/js/app/oi.js' )
-    .addEntry('db', './assets/js/db/db-page.js')
-    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
-    .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet', 'leaflet-control-geocoder' ])
+    .addEntry('app', appFiles)
+    .addEntry('db', dbFiles)
+    .addEntry('feedback', fdbkFiles)
+    .createSharedEntry('libs', libFiles)
 ; 
 const local = Encore.getWebpackConfig();
+
 // Set a unique name for the config (needed to generate assets via cli!)
 local.name = 'local';
 // reset Encore to build the second config
@@ -70,9 +76,7 @@ Encore
     // filenames include a hash that changes whenever the file contents change
     .enableVersioning()
     // use this method to provide common global variables
-    .autoProvideVariables({
-        L: 'leaflet'
-    })
+    .autoProvideVariables(autoProvidedVars)
     // .addPlugin(
     //     new WorkboxPlugin.GenerateSW({
     //         // these options encourage the ServiceWorkers to get in there fast 
@@ -82,16 +86,20 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    .addEntry('app', './assets/js/app/oi.js' )
-    .addEntry('db', './assets/js/db/db-page.js')
-    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
-    .createSharedEntry('libs', ['jquery', './assets/js/libs/beaverslider.js', 
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js',
-        'leaflet', 'leaflet-control-geocoder'  ])
+    .addEntry('app', appFiles)
+    .addEntry('db', dbFiles)
+    .addEntry('feedback', fdbkFiles)
+    .createSharedEntry('libs', libFiles)
 ; 
 const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
 server.name = 'server';
+// Remove the old version of uglify (doesn't parce es6)
+server.plugins = server.plugins.filter(
+    plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
+);
+// Add the new one
+server.plugins.push(new UglifyJsPlugin());
 
 // export the final configuration
 module.exports = [server, local];

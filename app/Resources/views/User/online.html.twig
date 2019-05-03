@@ -1,6 +1,6 @@
 {% extends "layout.html.twig" %}
 
-{% block headline %}Users Active In The Last 10 Minutes (Current time: {{ "now"|date("H:i:s") }}){% endblock %}
+{% block headline %}Users Active In The Last 2 Hours (Current time: {{ "now"|date("H:i:s", 'America/Los_Angeles') }}){% endblock %}
 	
 {% block datatable %}online_users_tbl{% endblock datatable %}
 
@@ -20,7 +20,7 @@
 	                <td>{{ user.username }}</td>
 	                <td>{{ user.firstname }}</td>
 	                <td>{{ user.email }}</td>
-	                <td>{{ user.lastActivityAt|date("H:i:s") }}</td>
+	                <td>{{ user.lastActivityAt|date("H:i:s", 'America/Los_Angeles') }}</td>
             	</tr>
             {% endfor %}
         </tbody>

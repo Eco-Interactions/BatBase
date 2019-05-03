@@ -1,56 +1,86 @@
 /**
  * Handles UI related to the database search page.
  *
- * Exports:
- *     addDomEventListeners
+ * Exports:                         Imported by:
+ *     addDomEventListeners             db_page
+ *     collapseTree                     csv-data
+ *     init                             db_page
+ *     initLocSearchUi                  db_page
+ *     initSrcSearchUi                  db_page
+ *     initTaxonSearchUi                db_page
+ *     loadSearchLocHtml                
+ *     loadTaxonComboboxes              
  *     resetToggleTreeBttn
- *     setUpFutureDevInfoBttn
  *     updateUiForTableView
  *     updateUiForMapView
  */
 import * as _u from '../util.js';
 import exportCsvData from './csv-data.js';
-import { accessTableState as tState } from '../db-page.js';
-import { buildTreeSearchHtml } from './db-filters.js';
+import { createEntity } from '../db-forms/db-forms.js';
+import * as db_page from '../db-page.js';
+import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
 
-
-adaptUiToScreenSize();
+const userRole = $('body').data("user-role");
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
-/** Moves the buttons from the end of the search options panel to just beneath. */
+export function init() {
+    addDomEventListeners();
+    adaptUiToScreenSize();
+    authDependentInit();
+    disableSaveFilterUI();
+}
+/** Moves the buttons from the end of the search options panel to just the header row. */
 function adaptUiToScreenSize() {
     if ($(window).width() > 1500) { return; }
-    var elemCntnr = $('#opts-col4').detach();  
-    var cntnr = _u.buildElem('div', { class: 'flex-row' });
+    const elemCntnr = $('#db-opts-col5').detach();  
+    const cntnr = _u.buildElem('div', { class: 'flex-row' });
     $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     $(elemCntnr)[0].className = 'flex-row';
     $(cntnr).append(elemCntnr);
-    $('#search-opts').after(cntnr);
+    $('#tbl-ctrls-reloc').append(cntnr);
 }
-export function addDomEventListeners() {
+function addDomEventListeners() {
+    db_filters.addDomEventListeners();
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-}
-export function setUpFutureDevInfoBttn() {
-    const bttn = _u.buildElem('button', { name: 'futureDevBttn', 
-            title: getFutureDevMsg(),
-            text: 'Hover here for future search options.'});  
-    $(bttn).appendTo('#opts-col3 .bttm-row');        
-}
-function getFutureDevMsg() {                                                    //console.log("addFutureDevMsg")
-    return "Future options include year and elevation range, habitat and interaction " +
-        "type (currently available by filtering the table columns), " +
-        "as well as other criteria that would be helpful to focus the data. \n" +
-        "Below is a 'Show/Hide Columns' button that will allow users to specify " +
-        "the data shown in the table and/or csv export.";
+    $('button[name="reset-tbl"]').click(db_page.resetDataTable);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {
     showPopUpMsg(`Downloading and caching all interaction records. Please allow 
         for a ~45 second download.`);   
+}
+function authDependentInit() {
+    if (userRole === "visitor") { disableUserFeatures();
+    } else if (userRole === "user"){ enableUserFeatures(); 
+    } else { enableEditorFeatures(); }
+}
+function disableUserFeatures() {
+    $('button[name="int-set"], button[name="csv"], #new-data')
+        .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
+        .prop('title', "Please register to use these features.");
+}
+function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
+    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This is an upcoming feature!'); 
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
+}
+function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
+    $('button[name="csv"]').click(exportCsvData); 
+    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This is an upcoming feature!'); 
+    $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to editors.');
+}
+function disableSaveFilterUI() {
+    $('.saved-filters-sel, #save-filter, #stored-filters span')
+        .css('cursor', 'not-allowed !important')
+        .prop('title', 'This is an upcoming feature!').attr('disabled', true);
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -63,7 +93,7 @@ export function resetToggleTreeBttn(xpanded) {
     $('#xpand-all').data("xpanded", xpanded);
 }
 function toggleExpandTree() {                                                   //console.log("toggleExpandTree")
-    const tblApi = tState().get('api');
+    const tblApi = db_page.accessTableState().get('api');
     const expanded = $('#xpand-all').data('xpanded');
     $('#xpand-all').data("xpanded", !expanded);
     return expanded ? collapseTree(tblApi) : expandTree(tblApi);
@@ -72,7 +102,7 @@ function expandTree(tblApi) {
     tblApi.expandAll();    
     $('#xpand-all').html("Collapse All");
 }
-function collapseTree(tblApi) {
+export function collapseTree(tblApi) {
     tblApi.collapseAll();
     $('#xpand-all').html("Expand All");
 }
@@ -88,7 +118,7 @@ function collapseTreeByOne() {
  * rows left after updating, the toggle tree button is updated to 'Collapse All'. 
  */
 function toggleTreeByOneLvl(opening) {
-    const tblApi = tState().get('api');
+    const tblApi = db_page.accessTableState().get('api');
     const tblModel = tblApi.getModel();                                         //console.log("tblModel = %O", tblModel);
     const bttXpandedAll = $("#xpand-all").data('xpanded');
     if (opening && bttXpandedAll === true) {return;}
@@ -131,57 +161,44 @@ function isNextOpenLeafRow(node) {                                              
     return true;
 }     
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
-/* ---------------------------- TAXON VIEW ---------------------------------- */
-/**
- * If the taxon search comboboxes aren't displayed, build them @buildTaxonRealmHtml.
- * If no realm is selected, the default realm value is set. The realm-tree 
- * is built @startTxnTableBuildChain and all present taxon-levels are stored @storeLevelData. 
- * Continues table build @getInteractionsAndFillTable.  
- */
+/* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
+/** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    if (!$("#sel-realm").length) { buildTaxonRealmHtml(data.realm); }  
-    setTaxonRealm();  
+    loadTaxonViewOpts(data.realm);
+    setTaxonView();  
+}
+function loadTaxonViewOpts(realms) {
+    const opts = getViewOpts(realms);
+    _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
+}
+function getViewOpts(realms) {  
+    const optsAry = [];
+    for (let id in realms) {                                                
+        optsAry.push({ value: realms[id].taxon, text: realms[id].displayName });
+    }
+    return optsAry;
 }
 /** Restores stored realm from previous session or sets the default 'Plants'. */
-function setTaxonRealm() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = [%s] taxonRealm = [%s]", storedRealm, _u.getSelVal('Taxon Realm'))
-    if (!_u.getSelVal('Taxon Realm')) { 
-        const realmVal = storedRealm ? storedRealm : "3";  
-        _u.setSelVal('Taxon Realm', realmVal, 'silent');
+function setTaxonView() {
+    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
+    if (!_u.getSelVal('View')) { 
+        const realmVal = storedView ? storedView : "3";  
+        _u.setSelVal('View', realmVal, 'silent');
     }
 }
-/**
- * Builds the select box for the taxon realms that will become the data tree 
- * nodes displayed in the table.
- */
-function buildTaxonRealmHtml(realms) {                                          //console.log("buildTaxonRealmHtml called. ");
-    const browseElems = _u.buildElem('span', { id:'sort-taxa-by', 
-        class: 'flex-row', text: 'Group Taxa by: ' });
-    const opts = getRealmOpts(realms);                                          //console.log("realmOpts = %O", realmOpts);
-    $(browseElems).append(newSelEl(opts, 'opts-box', 'sel-realm', 'Taxon Realm'));
-    $('#sort-opts').append(browseElems);
-    _u.initCombobox('Taxon Realm');
-    $('#sort-opts').fadeTo(0, 1);
-
-    function getRealmOpts(realms) {  
-        const optsAry = [];
-        for (let id in realms) {                                                //console.log("taxon = %O", data[taxonId]);
-            optsAry.push({ value: realms[id].taxon, text: realms[id].displayName });
-        }
-        return optsAry;
-    }
-} /* End buildTaxonRealmHtml */
+/* ---------------------------- TAXON FILTER UI ----------------------------- */
 /**
  * Builds and initializes a search-combobox for each level present in the 
  * the unfiltered realm tree. Each level's box is populated with the names 
  * of every taxon at that level in the displayed, filtered, table-tree. After 
- * appending, the selects are initialized with the 'selectize' library @initComboboxes. 
+ * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
 export function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
+    const loadFunc = $('#focus-filters div').length ? updateTaxonSelOptions : loadLevelSelects;
     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
-    loadLevelSelects(lvlOptsObj, levels, tblState);
+    loadFunc(lvlOptsObj, levels, tblState);
 }
 /**
  * Builds select options for each level with taxon data in the current realm.
@@ -190,19 +207,19 @@ export function loadTaxonComboboxes(tblState) {
  */
 function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
     const optsObj = {};
-    const rcrdsByLvl = tblState.taxaByLvl;       
+    const taxaByLvl = tblState.taxaByLvl;       
     const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
     curRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {
-        return lvl in rcrdsByLvl ? 
-            getTaxaOptsAtLvl(rcrdsByLvl[lvl], lvl) : fillInLvlOpts(lvl)
+        return lvl in taxaByLvl ? 
+            getTaxaOptsAtLvl(taxaByLvl[lvl], lvl) : fillInLvlOpts(lvl)
     }
     /** Child levels can have multiple taxa.  */
     function getTaxaOptsAtLvl(rcrds, lvl) {
-        const taxonNames = Object.keys(rcrdsByLvl[lvl]).sort();                   //console.log("taxonNames = %O", taxonNames);
-        optsObj[lvl] = buildTaxonOptions(taxonNames, rcrdsByLvl[lvl]);
+        const taxonNames = Object.keys(taxaByLvl[lvl]).sort();                  //console.log("taxonNames = %O", taxonNames);
+        optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
     }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in tblState.selectedOpts) {
@@ -214,30 +231,40 @@ function buildTaxonSelectOpts(tblState) {                                       
 function buildTaxonOptions(taxonNames, taxonData) {
     return taxonNames.map(function(taxonKey){
         return {
-            value: taxonData[taxonKey].id,
+            value: taxonData[taxonKey],
             text: taxonKey
         };
     });
 }
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
-    clearCol2();        
-    $('#opts-col2').append(elems);
+    $('#focus-filters').append(elems);
     _u.initComboboxes(tblState.allRealmLvls.slice(1));
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-            const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row' });
+            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
             const span = _u.buildElem('span', { text: level + ': ' });
             const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
-            $(sel).css('width', '142px');
-            $(lbl).css('margin', '.3em 0em 0em.3em').append([span, sel]);
+            setTaxonElemStyles(lbl, sel, level);
+            $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
+}
+function setTaxonElemStyles(lbl, sel, level) {
+    const className = level === 'Species' ? 'species' : 'taxon';
+    $(lbl).addClass(className+'Lbl');
+    $(sel).addClass(className+'Sel');
+}
+function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
+    levels.forEach(function(level) {                                            
+        _u.replaceSelOpts('#sel'+level, lvlOptsObj[level], null, level);
+    });
+    setSelectedTaxonVals(tblState.selectedOpts, tblState);
 }
 function setSelectedTaxonVals(selected, tblState) {                             //console.log("selected in setSelectedTaxonVals = %O", selected);
     if (!selected || !Object.keys(selected).length) {return;}
@@ -246,48 +273,46 @@ function setSelectedTaxonVals(selected, tblState) {                             
         _u.setSelVal(lvl, selected[lvl], 'silent');
     });
 }
-/* ---------------------------- LOCATION VIEW ------------------------------- */
+/* ---------------------------- LOCATION VIEW ----------------------------------------------------------------------- */
 /**
  * Builds location view html and initializes table load. Either builds the table 
  * data-tree view, by default, or loads the data-map view, if previously 
  * selected. 
  */ 
-export function initLocSearchUi(locData, view) {
-    if (!$("#grid-view").length) { buildLocViewHtml(); }  
+export function initLocSearchUi(view) {
+    loadLocationViewOpts()
     setLocView(view);  
 } 
-function setLocView(view) {
-    const storedRealm = view || _u.getDataFromStorage('curRealm');              //console.log("setLocView. storedRealm = ", storedRealm)
-    const locRealm = storedRealm || 'tree';
-    _u.setSelVal('Loc View', locRealm, 'silent');
+function loadLocationViewOpts(argument) {
+    const opts = [{ value: 'map', text: 'Map Data' },
+                { value: 'tree', text: 'Table Data' }];
+    _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
 }
-function buildLocViewHtml() {                   
-    const span = _u.buildElem('span', { id:'grid-view', class: 'flex-row',
-        text: 'View all as: ' });
-    const sel = newSelEl(getViewOpts(), 'opts-box', 'sel-realm', 'Loc View');
-    $('#sort-opts').append([span, sel]);
-    _u.initCombobox('Loc View');
-    $('#sort-opts').fadeTo(0, 1);
-
-    function getViewOpts() {
-        return [{ value: 'map', text: 'Map Data' },
-                { value: 'tree', text: 'Table Data' }];   
-    } 
-} /* End buildLocViewHtml */
+function setLocView(view) {
+    const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
+    const locView = storedView || 'tree';
+    _u.setSelVal('View', locView, 'silent');
+}
+/* ------------------------- LOCATION FILTER UI ----------------------------- */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
-export function loadSearchLocHtml(tblState) {
-    clearCol2();       
-    loadSearchByNameElem();
+export function loadSearchLocHtml(tblState) {   
+    if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
+    loadSearchByNameElem();
+}
+function updateLocSelOptions(tblState) {
+    const opts = buildLocSelectOpts(tblState); 
+    Object.keys(opts).forEach(locType => {                                            
+        _u.replaceSelOpts('#sel'+locType, opts[locType], null, locType);
+    });
+    setSelectedLocVals(tblState.selectedOpts);
 }
 function loadSearchByNameElem() {  
-    const searchTreeElem = buildTreeSearchHtml('Location');
-    $(searchTreeElem).css({ 'width': '273px' });
-    $('#opts-col2').append(searchTreeElem);
-    $('input[name="selLocation"]').css({ 'width': '205px' });
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
+    $('#focus-filters').append(searchTreeElem);
 }
 /**
  * Create and append the location search comboboxes, Region and Country, and
@@ -296,7 +321,7 @@ function loadSearchByNameElem() {
 function loadLocComboboxes(tblState) {  
     const opts = buildLocSelectOpts(tblState); 
     const selElems = buildLocSelects(opts);
-    $('#opts-col2').append(selElems);
+    $('#focus-filters').append(selElems);
     _u.initComboboxes(['Region', 'Country']);
     setSelectedLocVals(tblState.selectedOpts);
 }/** Builds arrays of options objects for the location comboboxes. */
@@ -385,11 +410,12 @@ function buildLocSelects(locOptsObj) {
     return selElems;
     
     function buildLocSel(selName, opts) {
-        const lbl = _u.buildElem('label', { class: "lbl-sel-opts flex-row" });
+        const lbl = _u.buildElem('label', { class: "sel-cntnr flex-row" });
         const span = _u.buildElem('span', { text: selName + ': ', class: "opts-span" });
         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
-        $(sel).css('width', '202px');
-        $(lbl).css('width', '282px').append([span, sel]);
+        $(lbl).addClass('locLbl').append([span, sel]);
+        $(sel).addClass('locSel');
+        // $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
     }
 }
@@ -398,41 +424,29 @@ function setSelectedLocVals(selected) {                                         
         _u.setSelVal(locType, selected[locType], 'silent');
     });
 }
-/* ---------------------------- SOURCE VIEW --------------------------------- */
+/* ---------------------------- SOURCE VIEW ------------------------------------------------------------------------- */
 /**
- * If the source-realm combobox isn't displayed, build it @buildSrcRealmHtml.
+ * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
-    if (!$("#sel-realm").length) { buildSrcRealmHtml(); }  
-    setSrcRealm();  
+    loadSourceViewOpts();
+    setSrcView();  
 }
-/** Builds the combobox for the source realm types. */
-function buildSrcRealmHtml() {                                             
-    $('#sort-opts').append(buildSrcTypeElems());
-    _u.initCombobox('Source Type');
-    $('#sort-opts').fadeTo(0, 1);
-
-    function buildSrcTypeElems() {
-        const types = getRealmOpts();                                       
-        const span = _u.buildElem('span', { id:'sort-srcs-by', class: 'flex-row', 
-            text: 'Source Type: ' });
-        const sel = newSelEl(types, 'opts-box', 'sel-realm', 'Source Type');
-        return [span, sel];
-    }
-    function getRealmOpts() {
-        return [{ value: "auths", text: "Authors" },
-                { value: "pubs", text: "Publications" },
-                { value: "publ", text: "Publishers" }];
-    }
-} /* End buildSrcRealmHtml */
+function loadSourceViewOpts() {
+    const opts = [{ value: "auths", text: "Authors" },
+                  { value: "pubs", text: "Publications" },
+                  { value: "publ", text: "Publishers" }];
+    _u.replaceSelOpts('#sel-view', opts, db_page.onSrcViewChange);
+} 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
-function setSrcRealm() {
-    const storedRealm = _u.getDataFromStorage('curRealm');                      //console.log("storedRealm = ", storedRealm)
-    const srcRealm = storedRealm || 'pubs';  
-    tState().set({'curRealm': srcRealm});
-    if (!_u.getSelVal('Source Type')) { _u.setSelVal('Source Type', srcRealm, 'silent'); } 
+function setSrcView() {
+    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = ", storedView)
+    const srcView = storedView || 'pubs';  
+    db_page.accessTableState().set({'curView': srcView});
+    if (!_u.getSelVal('View')) { _u.setSelVal('View', srcView, 'silent'); } 
 }
+/* ------------------------- SOURCE FILTER UI ------------------------------- */
 /**
  * Will build the select elems for the source search options. Clears previous 
  * table. Calls @transformSrcDataAndLoadTable to transform tree data into table 
@@ -440,22 +454,22 @@ function setSrcRealm() {
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-export function buildSrcSearchUiAndTable(realm) {                               //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
+export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
+    if ($('#focus-filters div').length) { return; }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
-        'publ':loadPublSearchHtml };
+        'publ':loadPublSearchHtml }; 
     buildUi[realm](); 
 } 
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
-    const searchTreeElem = buildTreeSearchHtml('Author');
-    clearCol2();        
-    $('#opts-col2').append(searchTreeElem);
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
+    $('#focus-filters').append(searchTreeElem);
 }
 function loadPubSearchHtml() {
     const pubTypeElem = buildPubTypeSelect();
-    const searchTreeElem = buildTreeSearchHtml('Publication');
-    clearCol2();        
-    $('#opts-col2').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
+    // $(searchTreeElem).css('width', '228px');
+    $('#focus-filters').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
     
@@ -473,18 +487,19 @@ function loadPubSearchHtml() {
     }
     /** Builds the publication type dropdown */
     function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        const lbl = _u.buildElem('label', {class: "lbl-sel-opts flex-row"});
+        const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
         const span = _u.buildElem('span', { text: 'Type:' });
         const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+        const lblW = $(window).width() > 1500 ? '222px' : '230px';
         $(sel).css('width', '177px');
-        $(lbl).css('width', '222px').append([span, sel]);
+        $(lbl).css('width', lblW).append([span, sel]);
         return lbl;
     }
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml() {
-    const searchTreeElem = buildTreeSearchHtml('Publisher');
-    clearCol2();        
-    $('#opts-col2').append(searchTreeElem);
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
+    // clearCol2();        
+    $('#focus-filters').append(searchTreeElem);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {
@@ -499,16 +514,16 @@ export function updateUiForTableView() {
     $('#search-tbl').fadeTo('100', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
+    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
+    // $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
 }
 export function updateUiForMappingInts() {
     updateUiForMapView();
-    _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
+    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
-    const tblState = tState().get(null, ['curFocus', 'rcrdsById']);
+    const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
     const locRcrds = tblState.curFocus !== 'locs' ? 
         _u.getDataFromStorage('location') : tblState.rcrdsById;  
     $('#search-tbl').fadeTo('100', 0.3, () => {
@@ -517,24 +532,24 @@ function showTableRecordsOnMap() {                                              
     });
 }
 function updateBttnToReturnRcrdsToTable() {
-    addMsgAboutTableViewFiltering();
+    // addMsgAboutTableViewFiltering();
     $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
-    $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
+    // $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
-function addMsgAboutTableViewFiltering() {
-    if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
-    const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
-    div.innerHTML = `Return to filter data shown.`;
-    $('#content-detail').prepend(div);
-}
+// function addMsgAboutTableViewFiltering() {
+//     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
+//     const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
+//     div.innerHTML = `Return to filter data shown.`;
+//     $('#content-detail').prepend(div);
+// }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
 }
 function returnRcrdsToTable() {
     updateUiForTableView();
-    if (_u.getSelVal('Loc View') === 'map') { _u.setSelVal('Loc View', 'tree'); }
+    if (_u.getSelVal('View') === 'map') { _u.setSelVal('View', 'tree'); }
 }
 /* ========================== UTILITY =============================================================================== */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
@@ -542,23 +557,16 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
-export function authDependentInit(userRole) {
-    if (userRole === "visitor") {
-        $('button[name="csv"]').prop('disabled', true);
-        $('button[name="csv"]').prop('title', "Register to download.");
-        $('button[name="csv"]').css({'opacity': '.8', 'cursor': 'not-allowed' });
-    } else { $('button[name="csv"]').click(exportCsvData); }
-}
 export function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]')
+    $('.tbl-tools button, .tbl-tools input')
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
     $('.tbl-tools').fadeTo(100, 1);
     $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    authDependentInit(); 
+    // authDependentInit(); 
 }
 export function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input, button[name="futureDevBttn"]`)
+    $(`.tbl-tools button, .tbl-tools input`)
         .attr('disabled', 'disabled').css('cursor', 'default');
     $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
 }
@@ -573,18 +581,18 @@ export function showPopUpMsg(msg) {                                             
     fadeTable();
 }
 /** Called seperately so @emptySearchOpts is called once. */
-export function clearPastHtmlOptions(tableBuilder) {    
-    $('#opts-col2').fadeTo(100, 0);
-    $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
+// export function clearPastHtmlOptions(tableBuilder) {    
+//     $('#opts-col2').fadeTo(100, 0);
+//     $('#opts-col1').fadeTo(100, 0, emptySearchOpts);
     
-    function emptySearchOpts() {                                                //console.log("emptying search options");
-        $('#opts-col2').empty();
-        $('#sort-opts').empty();
-        $('#opts-col1, #opts-col2').fadeTo(0, 1);
-        updateUiForTableView();
-        tableBuilder();
-    }
-} /* End clearPastHtmlOptions */
-export function clearCol2() {
-    $('#opts-col2').empty();
-}
+//     function emptySearchOpts() {                                             //console.log("emptying search options");
+//         $('#opts-col2').empty();
+//         // $('#sort-opts').empty();
+//         $('#opts-col1, #opts-col2').fadeTo(0, 1);
+//         updateUiForTableView();
+//         tableBuilder();
+//     }
+// } /* End clearPastHtmlOptions */
+// export function clearCol2() {
+    // $('#opts-col2').empty();
+// }

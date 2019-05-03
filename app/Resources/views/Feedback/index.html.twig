@@ -13,10 +13,6 @@
 
 {% block datatable %}feedback_tbl{% endblock datatable %}
 
-{% block masthead %}
-    <div class="hiddenElem" id="masthead"  data-hide-slider="true"></div>
-{% endblock %}
-
 {% block headline %}
     Beta Tester Feedback
 {% endblock headline %}
@@ -27,8 +23,8 @@
             <tr>
                 <th>Date</th>
                 <th>Created By</th>
-                <th>Topic</th>
                 <th>Page</th>
+                <th>Topic</th>
                 <th>Content</th>
                 <th>Admin Notes</th>
                 <th>Assigned User</th>
@@ -36,7 +32,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for feedback in entities %}
+            {% for feedback in entities if feedback.status > 0 %}
                 {% set user = feedback.createdBy %}
                 {% set route = 'Home' %}
                 {% if feedback.route != '/' %}
@@ -49,7 +45,6 @@
                 <tr>
                     <td>{{ feedback.created|date("F jS \\a\\t g:ia") }}</td>
                     <td><a href="mailto:{{ user.email }}?subject=website%20feedback">{{ user }}</a></td>
-                    <td>{{ feedback.topic }}</td>
                     <td>
                         <a  href="{{app.request.getSchemeAndHttpHost() ~ app.request.baseUrl ~ feedback.route}}"
                             class="feedback-link"
@@ -58,6 +53,7 @@
                             {{ route }}
                         </a>
                     </td>
+                    <td>{{ feedback.topic }}</td>
                     <td>{{ feedback.content }}</td>
                     <td>{{ feedback.adminNotes }}</td>
                     <td>{{ feedback.assignedUser }}</td>

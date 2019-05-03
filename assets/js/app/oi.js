@@ -12,7 +12,6 @@ function requireCss() {
     require('../../css/oi.css');    
 }
 function requireGlobalJquery() { 
-    const $ = require('jquery');
     global.$ = $;
     global.jQuery = $;
 }
@@ -25,8 +24,18 @@ function initUi() {
 function initTos() {
     require('./tos.js').init();
 }
-function initImageSlider() {                                                
-    require('./oislider.js').init();
+function initImageSlider() {    
+    let curSlide = 1,
+        nxtSlide = 2;         
+  
+    window.setInterval(() => { 
+    $('#img-slider div:nth-child('+nxtSlide+')').css({opacity: 1}); 
+        window.setTimeout(() => {   
+            $('#img-slider div:nth-child('+curSlide+')').css({opacity: 0}); 
+            curSlide = nxtSlide;
+            nxtSlide = curSlide === 3 ? 1 : curSlide + 1;
+        }, 1000)
+    }, 10000);
 }
 /**
  * Initiates tables and rearranges realted UI. Used on the feedback and bilio pages.

@@ -4,7 +4,7 @@
  * Exports:
  *     init
  */
-import * as agGrid from '../../../grid/ag-grid.js';
+import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_filters from './db-filters.js';
 import * as db_forms from '../db-forms/db-forms.js';
 import unqVals from './ag-grid-unique-filter.js';
@@ -26,7 +26,8 @@ export function init(viewTitle, rowData) {                                      
     tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     tblState.api = tblOpts.api;
-    tState().set({'api': tblOpts.api, 'rowData': rowData});
+    tState().set(
+        {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
     onTableInitComplete();
@@ -264,14 +265,22 @@ function getCellStyleClass(params) {                                            
     } 
 }
 function isOpenRowWithChildInts(params) {
-    if (params.data.locGroupedInts) { return hasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
-    return params.data.interactions === true && params.data.name !== "";
+    if (params.data.locGroupedInts) { return locHasIntsAfterFilters(params); }     //console.log('params.data.interactions === true && params.data.name !== ""', params.data.interactions === true && params.data.name !== "")
+    if (params.data.interactions === true && params.data.name !== "") {
+        return tblState.curFocus === "taxa" ? txnHasIntsAfterFilters(params) : true;
+    };
+}
+function txnHasIntsAfterFilters(params) {
+    if (params.data.taxonLvl === 'Species') { return true; }
+    return params.node.childrenAfterFilter.some(function(childRow) {
+        return childRow.data.name.split(" ")[0] === "Unspecified";
+    });
 }
 /**
  * Returns true if the location row's child interactions are present in 
  * data tree after filtering.
  */
-function hasIntsAfterFilters(params) {  
+function locHasIntsAfterFilters(params) {  
     return params.node.childrenAfterFilter.some(function(childRow) {
         return childRow.data.name.split(" ")[0] === "Unspecified";
     });
@@ -285,7 +294,7 @@ function getRowColorClass(treeLvl) {
     var styleClass = 'row-' + rowColorArray[treeLvl];                           //console.log("styleClass = ", styleClass);
     return styleClass;
 }
-/** Returns a color based on the tree level of the row. */
+/** Alternates the row coloring. rowColorIdx added when row data built. */
 function getSrcRowColorClass(params) {
     const rowColorArray = ['purple', 'green', 'orange', 'blue', 'red', 'turquoise', 'yellow'];
     const styleClass = 'row-' + rowColorArray[params.rowColorIdx];              //console.log("styleClass = ", styleClass);

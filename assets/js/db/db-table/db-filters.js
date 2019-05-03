@@ -1,31 +1,27 @@
 /**
  * Handles custom filtering of the data displayed in the table and reltaed UI.
  * 
- * Exports:
+ * Exports:                     Imported by:
  *     addDomEventListeners
  *     buildTreeSearchHtml
  *     resetFilterStatusBar
  *     resetTableStateParams
- *     showTodaysUpdates
- *     toggleTimeUpdatedFilter
+ *     showTodaysUpdates                db_forms
+ *     toggleFilterPanel                db_ui
+ *     toggleTimeUpdatedFilter          db_page
  *     updateFilterStatusMsg
- *     updateLocSearch
- *     updatePubSearch
- *     updateTaxonSearch
- *              
+ *     updateLocSearch                  util
+ *     updatePubSearch                  util
+ *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTree, rebuildTaxonTable } from '../db-page.js';
-import { resetToggleTreeBttn } from './db-ui.js';
-
-
-
+import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTaxonTable } from '../db-page.js';
+import * as db_ui from './db-ui.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
  *     fltrdRows - rowdata after filters
  *     focusFltrs - Stores focus specific filter strings (eg: name search, taxonomic level, country, etc)
- *     tblApi - API for ag-grid table
  *     timeFltr - Stores the specified datetime for the time-updated filter.
  */
 let fPs = {
@@ -37,20 +33,30 @@ let fPs = {
  */
 let tblState;
 
-/** Updates table state whenever method-chain in module is activated. */
-function refreshTableState() {
-    tblState = tState().get();
-}
-export function addDomEventListeners() {
+export function addDomEventListeners() {  
+    $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
-    $('#fltr-tdy').change(filterInteractionsByTimeUpdated);
-    $('#fltr-cstm').change(filterInteractionsByTimeUpdated);
 }
-
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
     fPs.focusFltrs = [];
+}
+/* ====================== FILTER PANEL ============================================================================== */
+export function toggleFilterPanel() {  
+    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
+    } else { hideFilterPanel(); }
+}
+function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
+    $('#filter-opts').removeClass('closed');  
+    $('#db-opts-col2').addClass('shw-col-borders hide-bttm-border');
+    _u.initCombobox('Saved Filters');
+    window.setTimeout(function() { $('#filter-opts').css('overflow-y', 'visible')}, 500);
+}
+function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
+    $('#filter-opts').css('overflow-y', 'hidden');
+    $('#db-opts-col2').removeClass('shw-col-borders hide-bttm-border');
+    $('#filter-opts').addClass('closed');
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
@@ -151,39 +157,30 @@ export function resetFilterStatusBar() {
 /**
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
- *
- * REFACT NOTE:: FORM EXIT METHOD
  */
-export function showTodaysUpdates(focus) {                                             //console.log("showingUpdated from today")
+export function showTodaysUpdates(focus) {                                      //console.log("showingUpdated from today")
     if (focus) { _u.setSelVal('Focus', focus); 
-    } else { db_page.selectSearchFocus(); }
+    } else { selectSearchFocus(); }
     window.setTimeout(showUpdatesAfterTableLoad, 200);
 }
 function showUpdatesAfterTableLoad() {
-    $('#shw-chngd')[0].checked = true;
-    toggleTimeUpdatedFilter();
+    toggleTimeUpdatedFilter(true, 'today');
 }
-/**
- * The time-updated filter is enabled when the filter option in opts-col3 is 
- * checked. When active, the radio options, 'Today' and 'Custom', are enabled. 
- * Note: 'Today' is the default selection. 
- */
-export function toggleTimeUpdatedFilter(state) {                                //console.log('toggleTimeUpdatedFilter. state = ', state);
-    const filtering = state === 'disable' ? false : $('#shw-chngd')[0].checked;
-    tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
+/** The time-updated filter is enabled when the filter option is checked. */
+export function toggleTimeUpdatedFilter(state, time) {                          //console.log('toggleTimeUpdatedFilter. state = %s, time? ', state, time);
+    const filtering = state === 'disable' ? false : 
+        state === true ? true : $('#shw-chngd')[0].checked;
+    tblState = tState().get();
     updateRelatedUi(filtering);
-    if (filtering) { showInteractionsUpdatedToday();
+    if (filtering) { showCal(time);
     } else { resetTimeUpdatedFilter(); }
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .3;
-    $('#time-fltr, .flatpickr-input, #fltr-tdy, #fltr-cstm')
-        .attr({'disabled': !filtering});  
-    $('#fltr-tdy')[0].checked = true;
+    $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
     $('#shw-chngd')[0].checked = filtering;
-    $('label[for=fltr-tdy], label[for=fltr-cstm], #time-fltr, .flatpickr-input')
-        .css({'opacity': opac});
+    $('#time-fltr, .flatpickr-input').css({'opacity': opac});
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
@@ -196,60 +193,52 @@ function resetTimeUpdatedFilter() {                                             
     }
 }
 /** 
- * Filters the interactions in the table to show only those modified since the 
- * selected time - either 'Today' or a 'Custom' datetime selected using the 
- * flatpickr calendar.
- */
-function filterInteractionsByTimeUpdated(e) {                                   //console.log('e = %O', e)                     
-    const elem = e.currentTarget;  
-    if (elem.id === 'fltr-cstm') { showFlatpickrCal(elem); 
-    } else { showInteractionsUpdatedToday(); }
-}
-/** 
  * Instantiates the flatpickr calendar and opens the calendar. If a custom time
  * was previously selected and stored, it is reapplied.
  */
-function showFlatpickrCal(elem) {                                               //console.log('showFlatpickrCal. fPs = %O', fPs);
-    fPs.cal = fPs.cal || initCal(elem); 
-    if (fPs.customTimeFltr) { 
-        reapplyPreviousTimeFilter(fPs.customTimeFltr)
+function showCal(time) {                                                        //console.log('showFlatpickrCal. fPs = %O', fPs);
+    fPs.cal = fPs.cal || initCal(); 
+    if (time == 'today') { filterToChangesToday(); 
+    } else if (fPs.timeFltr) { 
+        reapplyPreviousTimeFilter(fPs.timeFltr)
     } else {
-        fPs.cal.open();                                                             
-        $('.today').focus();                                                   
+        fPs.cal.open();            
+        fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
     }
 }    
-function reapplyPreviousTimeFilter(filterTime) {
-    fPs.cal.setDate(filterTime);
-    filterInteractionsUpdatedSince([], filterTime, null);
-    $('#fltr-cstm')[0].checked = true;      
-}
-/** Instantiates the flatpickr calendar and returns the flatpickr instance. */
-function initCal(elem) {
+/** 
+ * Instantiates the flatpickr calendar and returns the flatpickr instance.
+ * Add time updated filter
+ */
+function initCal() {
     const confirmDatePlugin = require('../../libs/confirmDate.js'); 
     const calOpts = {
-        altInput: true,     maxDate: "today",
-        enableTime: true,   plugins: [confirmDatePlugin({})],
+        altInput: true, maxDate: "today", enableTime: true,   
+        plugins: [confirmDatePlugin({showAlways: true})],
         onReady: function() { this.amPM.textContent = "AM"; },
         onClose: filterInteractionsUpdatedSince
     }; 
     return $('#time-fltr').flatpickr(calOpts);
 }
-/** Filters table to show interactions with updates since midnight 'today'. */
-function showInteractionsUpdatedToday() {
-    fPs.cal = fPs.cal || initCal();
-    fPs.cal.setDate(new Date().today());
-    filterInteractionsUpdatedSince([], new Date().today(), null);
+function reapplyPreviousTimeFilter(filterTime, skipSync) {
+    fPs.cal.setDate(filterTime);  
+    filterInteractionsUpdatedSince(null, filterTime, null, skipSync);
+}
+function filterToChangesToday() {  
+    fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
+    filterInteractionsUpdatedSince(null, new Date().today(), null)
 }
 /**
  * Filters all interactions in the table leaving only the records with updates
  * since the datetime specified by the user.
+ * Note: Params 1-3 sent by calendar
  */
-function filterInteractionsUpdatedSince(dates, dateStr, instance) {             //console.log("\nfilterInteractionsUpdatedSince called.");
+function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   //console.log("filterInteractionsUpdatedSince called. arguments? ", arguments);
     const filterTime = getFilterTime();  
-    if (!tblState.curRealm) { //If module entered through updateTaxonSearch
-        tblState = tState().get(null, ['api', 'curFocus', 'curRealm', 'rowData']);
-    }                       
-    filterInteractionsAndUpdateState();        
+    tblState = tState().get();
+    filterInteractionsAndUpdateState();   
+    $('.flatpickr-input').val(dateStr);
+    if (skipSync) { console.log('skipping sync');return; }
     syncFiltersAndUi(filterTime);
 
     function getFilterTime() {
@@ -284,60 +273,87 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance) {             
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(filterTime) {
-    resetToggleTreeBttn(false);
+function syncFiltersAndUi(filterTime) {                                         //console.log('tblState = %O', tblState);
+    db_ui.resetToggleTreeBttn(false);
     syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
-    syncTimeUpdatedRadios(filterTime);
 
     function syncViewFiltersAndUi(focus) {
-        if (focus === "srcs") { applySrcFltrs(); }
-        if (focus === "locs") { loadSearchLocHtml(); }    
+        const map = {
+            locs: db_ui.loadSearchLocHtml,
+            srcs: applySrcFltrs,
+            taxa: updateTaxonComboboxes
+        }; 
+        map[focus](tblState);
     }
 }
-function syncTimeUpdatedRadios(filterTime) {
-    if (new Date(new Date().today()).getTime() > filterTime) { 
-        $('#fltr-cstm')[0].checked = true;  
-        fPs.customTimeFltr = filterTime;
-    } else {
-        $('#fltr-tdy')[0].checked = true; }
-}
 /** Reapplys active external filters, author name or publication type. */
-function applySrcFltrs() {
+function applySrcFltrs(tblState) {
     const resets = { 'auths': reapplyTreeTextFltr, 'pubs': reapplyPubFltr, 
         'publ': reapplyTreeTextFltr };
-    resets[tblState.curRealm]();
+    resets[tblState.curView]();
 }
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
     if (getTreeFilterTextVal(entity) === "") { return; }
-    searchTreeText();
+    searchTreeText(entity);
 }
 function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
         'publ': 'Publisher', 'pubs': 'Publication' };
-    const ent = tblState.curFocus === "srcs" ? tblState.curRealm : tblState.curFocus;
+    const ent = tblState.curFocus === "srcs" ? tblState.curView : tblState.curFocus;
     return names[ent];
 }
 function reapplyPubFltr() {                                                     //console.log("reapplying pub filter");
     if (_u.getSelVal('Publication Type') === "all") { return; }
     updatePubSearch();
 }
+/**
+ * When the time-updated filter is updated, the taxa-by-level property has to be
+ * updated based on the rows displayed in the grid so that the combobox options
+ * show only taxa in the filtered tree.
+ */
+function updateTaxonComboboxes(tblState) {
+    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(getAllCurRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
+    db_ui.loadTaxonComboboxes(tblState);
+}
+/** Returns an object with taxon records by level and keyed with display names. */
+function seperateTaxonTreeByLvl(rowData) {                                      //console.log('rowData = %O', rowData);
+    const separated = {};
+    rowData.forEach(data => separate(data));
+    return sortObjByLevelRank(separated);
+
+    function separate(row) {                                                    //console.log('taxon = %O', taxon)
+        if (!separated[row.taxonLvl]) { separated[row.taxonLvl] = {}; }
+        separated[row.taxonLvl][row.displayName] = row.id;
+        
+        if (row.children) { 
+            row.children.forEach(child => separate(child)); 
+        }
+    }
+    function sortObjByLevelRank(taxonObj) {
+        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
+        const obj = {};
+        levels.forEach(lvl => { 
+            if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
+        });
+        return obj;
+    }
+} /* End seperateTaxonTreeByLvl */
 /*================== Search Panel Filter Functions ===================================================================*/
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {
     const func = getTreeSearchHandler(entity);
-    const lbl = _u.buildElem('label', { class: 'lbl-sel-opts flex-row tbl-tools' });
+    const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
+    const span = _u.buildElem('span', { text: 'Name:' });
     const input = _u.buildElem('input', { 
-        name: 'sel'+entity, type: 'text', placeholder: entity+' Name'  });
+        name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
     const bttn = _u.buildElem('button', { text: 'Search', 
         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
-    $(bttn).css('margin-left', '5px');
-    $(lbl).css('width', '222px');
-    $(input).css('width', '160px');
+    if (entity == 'Location') { $(input).addClass('locTxtInput');}
+    $(lbl).addClass('txtLbl');
     $(input).onEnter(func);
-    $(bttn).click(func);
-    $(lbl).append([input, bttn]);
+    $(lbl).append([span, input]);
     return lbl;
 }
 function getTreeSearchHandler(entity) { 
@@ -358,7 +374,7 @@ function searchTreeText(entity) {                                               
     fPs.focusFltrs = text === "" ? [] : fPs.focusFltrs.length ? 
         [...fPs.focusFltrs, `"${text}"`] : [`"${text}"`];  
     updateFilterStatusMsg();
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
 } 
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
@@ -397,14 +413,8 @@ export function updateTaxonSearch(val) {                                        
     function updateFilterStatus() {
         const curLevel = rcrd.level.displayName;
         const taxonName = rcrd.displayName;
-        updateFilters();
-
-        function updateFilters() {
-            if (fPs.focusFltrs) { 
-                fPs.focusFltrs.push(curLevel + " " + taxonName); 
-            } else { fPs.focusFltrs = [curLevel + " " + taxonName] }
-            updateFilterStatusMsg();
-        }
+        fPs.focusFltrs = [curLevel + " " + taxonName];
+        updateFilterStatusMsg();
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
@@ -425,6 +435,7 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
 export function updateLocSearch(val) { 
     if (!val) { return; }
     getComboboxValuesAndRebuildLocTree(val, getLocType(this.$input[0].id));
+    if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.timeFltr, 'skip'); }
 } 
 function getLocType(selId) {
     const selTypes = { selCountry: 'Country', selRegion: 'Region' };
@@ -433,7 +444,7 @@ function getLocType(selId) {
 function getComboboxValuesAndRebuildLocTree(val, locType) {
     const selVal = parseInt(val);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
-    rebuildLocTree([selVal]);                                                   //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
+    rebuildLocTable([selVal]);                                                  //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
     updateFilter(locType);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
@@ -466,7 +477,7 @@ export function updatePubSearch() {                                             
     fPs.focusFltrs = getPubFilters();
     tblState.api.setRowData(newRows);
     updateFilterStatusMsg();
-    resetToggleTreeBttn(false);
+    db_ui.resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {                             
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }

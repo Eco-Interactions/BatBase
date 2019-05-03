@@ -5,9 +5,11 @@
  * >> All Content Blocks will have an edit icon attached to the top left of their 
  * container. When clicked, a wysiwyg interface will encapsulate that block and 
  * allow editing and saving of the content within using the trumbowyg library.
- * Exports: 
- *     editEntity
+ * 
+ * Exports:             Imported by:
  *     addNewLocation
+ *     editEntity
+ *     createEntity
  *     initLocForm
  *     mergeLocs
  *     selectLoc
@@ -16,27 +18,11 @@
 import * as _u from '../util.js';
 import * as db_sync from '../db-sync.js';
 import * as db_page from '../db-page.js';
+import { showTodaysUpdates } from '../db-table/db-filters.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let fP = {};
-
-authDependentInit();    
-
-function authDependentInit() {   
-    const userRole = $('body').data("user-role");                               //console.log("crud.js role = ", userRole);
-    if (['editor', 'admin', 'super'].indexOf(userRole) !== -1) {                //console.log("admin CRUD ACTIVATE!! ");
-        if ($('body').data("this-url") === "/search") { buildSearchPgFormUi(); }
-    }
-}
-/*--------------------- SEARCH PAGE CRUD-FORM ----------------------------------------------------*/
-/** Adds a "New" button under the top table focus options. */
-function buildSearchPgFormUi() {
-    var bttn = _u.buildElem('button', { 
-            text: 'New', name: 'createbttn', class: 'adminbttn' });
-    $(bttn).click(createEntity.bind(null, 'create', 'interaction'));
-    $('#opts-col1').append(bttn);
-}
 /*-------------- Form HTML Methods -------------------------------------------*/
 /** Builds and shows the popup form's structural elements. */
 function showFormPopup(actionHdr, entity, id) {
@@ -130,7 +116,7 @@ function refocusTableIfFormWasSubmitted() {                                     
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
     var focus  = fP.action === 'create' ? 'srcs' : null;
-    db_filters.showTodaysUpdates(focus);   
+    showTodaysUpdates(focus);   
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
@@ -570,7 +556,7 @@ function finishLocEditForm(id) {
  * Fills the global fP obj with the basic form params @initFormParams. 
  * Init the create interaction form and append into the popup window @initCreateForm. 
  */
-function createEntity(id, entity) {                                             //console.log('Creating [%s] [%s]', entity, id);  
+export function createEntity(id, entity) {                                             //console.log('Creating [%s] [%s]', entity, id);  
     initFormParams('create', entity);
     showFormPopup('New', _u.ucfirst(entity), null);
     initCreateForm();
@@ -1412,6 +1398,7 @@ function buildLocForm(val, fLvl) {
     enableCombobox('#Country-Region-sel', false);
     $('#Latitude_row input').focus();
     $('#sub-submit').val('Create without GPS data');
+    if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
 }
 function finishLocEditFormBuild() {  
     addMapToLocForm('#location_Rows', 'edit');
@@ -1461,7 +1448,15 @@ function locHasGpsData(fLvl) {
 }
 function addListenerToGpsFields(func) {
     const method = func || db_map.addVolatileMapPin;
-    $('#Latitude_row input, #Longitude_row input').change(method);
+    $('#Latitude_row input, #Longitude_row input').change(
+        toggleNoGpsSubmitBttn.bind(null, method));
+}
+function toggleNoGpsSubmitBttn(addMapPinFunc) {
+    const lat = $('#Latitude_row input').val();  
+    const lng = $('#Longitude_row input').val();  
+    const toggleMethod = lat || lng ? disableSubmitBttn : enableSubmitBttn;
+    toggleMethod('#sub-submit');
+    addMapPinFunc(true);
 }
 export function selectLoc(id) {
     $('#sub-form').remove();
