@@ -28,7 +28,7 @@
                 Filter Data
             </button>     
             <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="reset-tbl">
-                Reset 
+                Reset
             </button>
         </div>
         <div id="db-opts-col3" class="flex-row">
@@ -41,15 +41,16 @@
         </div>
         <div id="db-opts-col4" class="flex-row">  
             <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="int-set">
-                Save(d) Interactions
+                Data Lists
             </button>   
-        </div>
-        <div id="db-opts-col5" class="flex-row">
             <button id="new-data" class="ag-fresh tbl-bttn ico-bttn">
                 Add Data
             </button>
+            <button id="rvw-data" class="ag-fresh tbl-bttn ico-bttn">
+                Review Data
+            </button>
         </div>
-        <div id="db-opts-col6" class="flex-row">
+        <div id="db-opts-col5" class="flex-row">
             <button id="strt-tut" class="ag-fresh tbl-bttn">
                 Tutorial
             </button>
@@ -67,13 +68,51 @@
         </div>
         <div id="stored-filters" class="flex-row"> 
             <span>Load saved filters: </span>
-            <select id="saved-filters" class="saved-filters-sel" data-field="" disabled="true"></select>
+            <select id="saved-filters" class="saved-filters-sel" data-field="" disabled="true">
+                <option value="create">New Saved Filters Set</option>
+            </select>
             <button id="save-filter" class="ag-fresh" disabled="true"> 
                 Save Current Filter State
             </button>
         </div>
     </div>
-    <div id='int-opts' class="flex-row closed">
+    <div id='int-opts' class="flex-row closed"> 
+        <div id="int-lists" class="flex-col flex-wrap tbl-tools">           <!-- Select list -->
+            <span><b>Select List of Interaction Data</b></span>
+            <select id="saved-ints" class="int-list-sel" data-field="">
+                <option value="create">Add New Interaction List</option>
+            </select>
+            <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
+                View Interaction List in Table
+            </button>        
+        </div>
+        <div id="list-details" class='tbl-tools flex-col'>                  <!-- List details -->
+            <span><b>List Details</b></span>
+            <div class="flex-row">
+                <span>Display Name: </span>
+                <input type="text" placeholder="Display Name" style="height: 27px;"> 
+            </div>
+            <div class="flex-row">
+                <span>Description: </span>
+                <textarea placeholder="Description" style="height: 50px;"></textarea>  
+            </div> 
+        </div>
+        <div class="flex-col">                                              <!-- Add to / remove from list -->
+            <span><b>Modify List Data</b></span>
+            <div class="flex-row">
+                <input type="checkbox" id="add-to-list">
+                <label for="add-to-list">Add Interactions In Table To List</label>
+            </div>
+            <div class="flex-row">
+                <input type="radio" id="add-all-list" disabled="disabled">
+                <label for="add-all-list">Add All Displayed</label>
+                <input type="radio" id="add-one-list" disabled="disabled">
+                <label for="add-one-list">Select Rows To Add</label>
+            </div>
+            <button id="update-list" class="ag-fresh" disabled="true"> 
+                Save List
+            </button>       
+        </div>
     </div>
     <div id="tool-bar" class="flex-row">
         <div id='xpand-tree' class=' tbl-tools'>

@@ -55,26 +55,41 @@ export function showLoadingDataPopUp() {
         for a ~45 second download.`);   
 }
 function authDependentInit() {
-    if (userRole === "visitor") { disableUserFeatures();
-    } else if (userRole === "user"){ enableUserFeatures(); 
-    } else { enableEditorFeatures(); }
+    const initMap = {
+        visitor: disableUserFeatures, user: enableUserFeatures,
+        editor: enableEditorFeatures, admin: enableAdminFeatures,
+        super: enableAdminFeatures
+    };
+    initMap[userRole]();
 }
 function disableUserFeatures() {
-    $('button[name="int-set"], button[name="csv"], #new-data')
+    $('button[name="int-set"], button[name="csv"], #new-data, #rvw-data')
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
         .prop('title', "Please register to use these features.");
-}
-function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
-    $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
+    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to admins.');
+}
+function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
+    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to admins.');
+}
+function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
+    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#rvw-data').addClass('adminbttn').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This is an upcoming feature!');
 }
 function disableSaveFilterUI() {
     $('.saved-filters-sel, #save-filter, #stored-filters span')

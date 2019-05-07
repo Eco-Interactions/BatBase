@@ -4,6 +4,7 @@ import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
 import { addNewDataToStorage, initStoredData } from './db-sync.js';
 import { showPopUpMsg } from './db-table/db-ui.js';
+import { newIntList, selIntList } from './db-table/save-ints.js';
 
 /* 
  * Exports:
@@ -353,21 +354,22 @@ export function initCombobox(field) {                                           
 export function initComboboxes(fieldAry) {
     fieldAry.forEach(field => initCombobox(field));
 }
-/** REFACTOR AWAY FROM USING FIELD IN ID'S. CUZ WHY AM I ALREADY? */
 function getSelConfgObj(field) {  
     const confgs = { 
-        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus },
-        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
-        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Int-set': { name: 'Interaction Set', id: '#int-set', change: false },
-        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch },
+        // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
+        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus, blur: true },
+        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
+        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
+        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
+        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
+        // Search Page Comboboxes with Create Options and Sub-panels
+        'Int-lists': { name: 'Interaction List', id: '#saved-ints', add: newIntList, change: selIntList },
         'Saved Filters': {name: field, id: '#saved-filters', change: false },
-        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
-        'View': { name: 'View', id: '#sel-view', change: false }
     };
     return confgs[field];
 }
@@ -378,18 +380,18 @@ function getSelConfgObj(field) {
  */
 function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
     const options = {
-        create: false,
+        create: confg.add || false,
         onChange: confg.change,
-        onBlur: saveOrRestoreSelection,
-        placeholder: getPlaceholer(confg.id, confg.name)
+        onBlur: confg.blur ? saveOrRestoreSelection : null,
+        placeholder: getPlaceholer(confg.id, confg.name, confg.add)
     };
-    const sel = $(confg.id).selectize(options);  
+    $(confg.id).selectize(options); 
 
 } /* End initSelectCombobox */
-function getPlaceholer(id, name, empty) {
+function getPlaceholer(id, name, add, empty) {
     const optCnt = empty ? 0 : $(id + ' > option').length;  
     const placeholder = 'Select ' + name
-    return optCnt ? 'Select ' + name : '- None -';
+    return optCnt || add ? 'Select ' + name : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
@@ -407,6 +409,7 @@ export function setSelVal(field, val, silent) {                                 
     saveSelVal($(confg.id), val);
 }
 /**
+ * For comboboxes on the database page that must remain filled for the UI to stay synced.
  * onBlur: the elem is checked for a value. If one is selected, it is saved. 
  * If none, the previous is restored. 
  */
@@ -423,7 +426,7 @@ function saveSelVal($elem, val) {
 }
 function updatePlaceholderText(id, newTxt, optCnt) {                            //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     const emptySel = optCnt === 0;
-    $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, emptySel);
+    $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, false, emptySel);
     $(id)[0].selectize.updatePlaceholder();
 }
 // export function enableComboboxes($pElems, enable) {   console.log('############ enableComboboxes used')
