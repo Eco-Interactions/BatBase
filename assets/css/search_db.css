@@ -50,24 +50,37 @@ div[id^="db-opts-col"] {
 #db-opts-col5 {
     padding: 5px 0 5px 5px;
 }
-/* --------- Filter Options Panel --------- */
-#filter-opts {
+/* --------- Pop-out Options Panel --------- */
+.pop-out-panel {
     width: 100%;
-    max-height: 122px;
-    background: rgba(220, 220, 220, .5);
+    background: #f2f9f8;
     border-radius: 10px;
     padding: 8px 4px 8px 4px;
     border: black 1px solid;
     transition: all .5s ease-in-out;
     overflow-y: hidden;
 }
-#filter-opts.closed {
-    max-height: 0;
+.pop-out-panel.closed {
     border-radius: 0;
     padding: 0;
     border: 0;
     transition: all .5s ease-in-out;
-    overflow-y: hidden;
+    overflow-y: hidden;    
+}
+.shw-col-borders {
+    background: rgba(121, 201, 183, .1);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-top: black 1px solid;
+    transition: all .5s ease-in-out;
+    border-right: black 1px solid !important;
+}
+/** ---- Filter Options ---- */
+#filter-opts {
+    max-height: 122px;
+}
+#filter-opts.closed {
+    max-height: 0;
 }
 #filter-opts span {
     padding-top: 5px;
@@ -80,16 +93,8 @@ div[id^="db-opts-col"] {
     width: 196px;
     left: 500px;
     top: 56px;
-    background: #f0f0f0;
+    background: #f2f9f8;
     z-index: 10;
-}
-.shw-col-borders {
-    background: rgba(220, 220, 220, .5);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-top: black 1px solid;
-    transition: all .5s ease-in-out;
-    border-right: black 1px solid !important;
 }
 #focus-filters {
     flex-grow: 1;
@@ -159,23 +164,11 @@ button[name="futureDevBttn"] {
 }
 /* ----- Data Lists' Panel ------ */
 #int-opts {
-    width: 100%;
     max-height: 222px;
-    background: rgba(220, 220, 220, .5);
-    border-radius: 10px;
-    padding: 8px 4px 8px 4px;
-    border: black 1px solid;
-    transition: all .5s ease-in-out;
-    overflow-y: hidden;
     align-items: stretch;
 }
 #int-opts.closed {
     max-height: 0;
-    border-radius: 0;
-    padding: 0;
-    border: 0;
-    transition: all .5s ease-in-out;
-    overflow-y: hidden;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-int-bttm-border:before {
@@ -185,7 +178,7 @@ button[name="futureDevBttn"] {
     width: 319px;
     right: 194px;
     top: 56px;
-    background: #f0f0f0;
+    background: #f2f9f8;
     z-index: 10;
 }
 #int-opts>div {

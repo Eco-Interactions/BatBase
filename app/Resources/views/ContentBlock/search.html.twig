@@ -59,7 +59,7 @@
             </button>
         </div>
     </div>
-    <div id='filter-opts' class="flex-row closed">
+    <div id='filter-opts' class="flex-row pop-out-panel closed">
         <div id="focus-filters" class="flex-row flex-wrap tbl-tools"></div>
         <div id="shw-chngd-ints" class='tbl-tools'>
             <input type="checkbox" id="shw-chngd">
@@ -76,17 +76,18 @@
             </button>
         </div>
     </div>
-    <div id='int-opts' class="flex-row closed"> 
-        <div id="int-lists" class="flex-col flex-wrap tbl-tools">           <!-- Select list -->
+    <div id='int-opts' class="flex-row pop-out-panel closed"> 
+        <div id="int-lists" class="flex-col flex-wrap tbl-tools">               <!-- Select list -->
             <span><b>Select List of Interaction Data</b></span>
             <select id="saved-ints" class="int-list-sel" data-field="">
                 <option value="create">Add New Interaction List</option>
+                <option value="test">Testing</option>
             </select>
             <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
                 View Interaction List in Table
             </button>        
         </div>
-        <div id="list-details" class='tbl-tools flex-col'>                  <!-- List details -->
+        <div id="list-details" class='tbl-tools flex-col'>                      <!-- List details -->
             <span><b>List Details</b></span>
             <div class="flex-row">
                 <span>Display Name: </span>
@@ -97,7 +98,7 @@
                 <textarea placeholder="Description" style="height: 50px;"></textarea>  
             </div> 
         </div>
-        <div id="mod-list-pnl" class="flex-col">                                              <!-- Add to / remove from list -->
+        <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
             <span><b>Modify List Data</b></span>
             <div class="flex-row" id="mod-list-cntnr">
                 <input type="checkbox" id="mod-list">
@@ -106,7 +107,7 @@
             <div class="flex-row" style="margin-left: 1em;">
                 <input type="radio" id="add-all-list">
                 <label for="add-all-list">Add All Displayed</label>
-                <input type="radio" id="add-one-list" disabled="disabled">
+                <input type="radio" id="add-one-list">
                 <label for="add-one-list">Select Rows To Add</label>
             </div>
             <button id="update-list" class="ag-fresh tbl-bttn"> 
