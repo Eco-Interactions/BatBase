@@ -49,13 +49,13 @@ export function toggleFilterPanel() {
 }
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     $('#filter-opts').removeClass('closed');  
-    $('#db-opts-col2').addClass('shw-col-borders hide-bttm-border');
+    $('#db-opts-col2').addClass('shw-col-borders hide-fltr-bttm-border');
     _u.initCombobox('Saved Filters');
     window.setTimeout(function() { $('#filter-opts').css('overflow-y', 'visible')}, 500);
 }
 function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
     $('#filter-opts').css('overflow-y', 'hidden');
-    $('#db-opts-col2').removeClass('shw-col-borders hide-bttm-border');
+    $('#db-opts-col2').removeClass('shw-col-borders hide-fltr-bttm-border');
     $('#filter-opts').addClass('closed');
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */

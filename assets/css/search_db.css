@@ -73,7 +73,7 @@ div[id^="db-opts-col"] {
     padding-top: 5px;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
-.hide-bttm-border:before {
+.hide-fltr-bttm-border:before {
     content: '';
     position: absolute;
     height: 3px;
@@ -89,6 +89,7 @@ div[id^="db-opts-col"] {
     border-top-right-radius: 10px;
     border-top: black 1px solid;
     transition: all .5s ease-in-out;
+    border-right: black 1px solid !important;
 }
 #focus-filters {
     flex-grow: 1;
@@ -188,11 +189,16 @@ button[name="futureDevBttn"] {
     z-index: 10;
 }
 #int-opts>div {
-    padding: 10px; 
+    padding: 5px; 
 }
 #int-opts span {
     align-self: center;
     margin: 2px 0 10px 0;
+}
+#int-opts button {
+    margin-right: 0;
+    width: 200px;
+    align-self: flex-end;
 }
 #int-lists {
     flex: 0 0 333px;
@@ -208,21 +214,37 @@ button[name="futureDevBttn"] {
     height: 25px;
 }
 #list-details {
-    flex: 0 0 555px;
+    flex: 1 0 555px;
     border-left: black 1px solid;
     border-right: black 1px solid;
-    margin: 0 1em 0 1em;
+    margin-left: .5em;
 }
 #list-details div {
     margin: .2em;
 }
-#list-details span {
+#list-details div>span {
     width: 111px;
     padding-top: 3px;
 }
 #list-details input, #list-details textarea {
-    width: 415px;
+    min-width: 415px;
     border: grey 1px solid;
+}
+#list-details textarea {
+    width: 580px;
+}
+#mod-list-pnl {
+    flex: 0 0 412px;
+    padding-left: 0px;
+}
+#mod-list-cntnr {
+    margin: .5em 0;
+}
+#mod-list-pnl div input[type="radio"], #mod-list-pnl div input[type="checkbox"] {
+    margin: 0 .5em 0 1em;
+}
+#update-list {
+    margin-top: auto;
 }
 /* --------- Table Tool Bar --------- */
 #tool-bar {
@@ -827,10 +849,10 @@ input.active-icon {
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) { 
     /*--------------- Search Page ---------------------*/
-    #tbl-ctrls-reloc #db-opts-col6 {
+    #tbl-ctrls-reloc #db-opts-col5 {
         padding: 0 0 9px 0;
     }
-    #detail-block #db-opts-col5 {
+    #detail-block #db-opts-col4 {
         border-right: none;
     }
     #db-opts {
@@ -841,6 +863,9 @@ input.active-icon {
     }
     #filter-opts {
         font-size: .9em;
+    }
+    .hide-fltr-bttm-border:before {
+        left: 501px;
     }
     #filter-opts #shw-chngd-ints {
         flex: 0 0 390px;
@@ -873,6 +898,13 @@ input.active-icon {
     }
     #focus-filters .locTxtInput {
         width: 224px;
+    }
+    .hide-int-bttm-border:before {
+        right: 24px;
+        width: 318px;
+    }
+    #int-opts #list-details textarea {
+        width: 415px;
     }
     /*--------------- Database CRUD Popup -------------*/
     #b-overlay .form-popup {
