@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * User Named lists.
@@ -12,6 +13,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @JMS\ExclusionPolicy("all")
+ * 
  */
 class UserNamed
 {
@@ -29,6 +32,7 @@ class UserNamed
      * @var string
      *
      * @ORM\Column(name="type", type="string", length=255, nullable=false)
+     * @JMS\Expose
      */
     private $type;
 
@@ -36,13 +40,16 @@ class UserNamed
      * @var string
      *
      * @ORM\Column(name="display_name", type="string", length=255)
+     * @JMS\Expose
+     * @JMS\SerializedName("displayName")
      */
     private $displayName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="desc", type="text", nullable=false)
+     * @ORM\Column(name="description", type="text", nullable=false)
+     * @JMS\Expose
      */
     private $description;
 
@@ -50,13 +57,16 @@ class UserNamed
      * @var string
      *
      * @ORM\Column(name="details", type="text", nullable=false)
+     * @JMS\Expose
      */
     private $details;
 
     /**
      * @var \DateTime
      * 
-     * @ORM\Column(name="loaded", type="datetime", nullable=false)
+     * @ORM\Column(name="loaded", type="datetime", nullable=true)
+     * @JMS\Expose
+     * @JMS\SerializedName("lastLoaded")
      */
     protected $lastLoaded;
 
@@ -108,6 +118,8 @@ class UserNamed
 
     /**
      * Get id.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("id")
      *
      * @return int
      */
@@ -258,6 +270,18 @@ class UserNamed
     public function getCreatedBy()
     {
         return $this->createdBy;
+    }
+
+    /**
+     * Get Created by User Id
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("user")
+     * 
+     * @param int
+     */
+    public function getCreatedById()
+    {
+        return $this->createdBy->getId();
     }
 
     /**

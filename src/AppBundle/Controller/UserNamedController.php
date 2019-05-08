@@ -2,7 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\User;
 use AppBundle\Entity\UserNamed;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
@@ -25,14 +24,11 @@ class UserNamedController extends Controller
      * Saves a new set of user-named data.
      *
      * list = {
-     *     data: {
-         *     displayName:
-         *     type:
-         *     description:
-         *     details:
-         *     //loadedAt: (not for create, only read)
-     *     },
-     *     user:
+     *     displayName:
+     *     type:
+     *     description:
+     *     details:
+     *     //loadedAt: (not for create, only read)
      * }
      *
      * @Route("/create", name="list_create")
@@ -41,60 +37,24 @@ class UserNamedController extends Controller
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       //print("\nCreating New List.\n");
+        }                               
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $data = json_decode($requestContent);                               
         
         $list = new UserNamed();
+        $list->setCreatedBy($this->getUser());
+        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles') ));
+        $this->setListData($data, $list, $em);
+        $em->persist($list);
 
         $returnData = new \stdClass; 
-        $returnData->name = $data->data->displayName;;
+        $returnData->name = $data->displayName;
         $returnData->list = $list;
 
-        $this->setListData($data->data, $list, false, $em);
-
-        $returnData->list->setCreatedBy($em->getRepository('AppBundle:User')
-            ->findBy(['id' => $data->user]));
-        
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
-/*------------------------------ Edit ----------------------------------------*/
-    // /**
-    //  * Updates an Entity, and any detail-entities, with the submitted form data. 
-    //  *
-    //  * @Route("/entity/edit", name="entity_edit")
-    //  */
-    // public function entityEditAction(Request $request)
-    // {
-    //     if (!$request->isXmlHttpRequest()) {
-    //         return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-    //     }                                                                       //print("\nCreating Source.\n");
-    //     $em = $this->getDoctrine()->getManager();
-    //     $requestContent = $request->getContent();
-    //     $formData = json_decode($requestContent);                               //print("\nForm data =");print_r($formData);
-        
-    //     $coreName = $formData->coreEntity;                                      //print("coreName = ". $coreName);
-    //     $coreFormData = $formData->$coreName;
-    //     $coreEntity = $em->getRepository('AppBundle:'.ucfirst($coreName))
-    //         ->findOneBy(['id' => $formData->ids->core ]);
-        
-    //     $returnData = new \stdClass; 
-    //     $returnData->core = $coreName;
-    //     $returnData->coreEntity = $coreEntity;
-    //     $returnData->coreEdits = $this->getEditsObj($formData->ids->core); 
-    //     $returnData->detailEdits = $this->getEditsObj($formData->ids->detail);
-
-    //     $this->setEntityData($coreFormData, $coreEntity, $returnData->coreEdits, $em);
-
-    //     $returnData->detailEntity = $this->handleDetailEntity(
-    //         $coreFormData, $formData, $returnData, $em
-    //     );
-    //     $this->removeEditingFlag($returnData->coreEdits, $returnData->detailEdits);
-    //     return $this->attemptFlushAndSendResponse($returnData, $em);
-    // }
     /*---------- Set List Data ---------------------------------------------*/
-    /** Sets all scalar data. */ 
     private function setListData($data, &$entity, &$em)
     {
         foreach ($data as $field => $val) {
@@ -146,6 +106,9 @@ class UserNamedController extends Controller
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($data)
     {
+        $data->list = $this->container->get('jms_serializer')
+            ->serialize($data->list, 'json');
+
         $response = new JsonResponse();
         $response->setData(array(
             'results' => $data
