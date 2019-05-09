@@ -20,7 +20,7 @@ import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
-import { addDataListClickEvents, toggleSaveIntsPanel } from './save-ints.js';
+import { toggleSaveIntsPanel } from './save-ints.js';
 
 const userRole = $('body').data("user-role");
 
@@ -48,7 +48,6 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.resetDataTable);
-    addDataListClickEvents();
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {

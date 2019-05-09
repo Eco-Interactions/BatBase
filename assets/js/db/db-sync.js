@@ -5,6 +5,7 @@
  *     initStoredData
  *     resetStoredData
  *     updateEditedData
+ *     updateUserNamedList
  */
 import * as _u from './util.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
@@ -112,6 +113,24 @@ function retryFailedUpdatesAndLoadTable() {                                     
 function loadDataTable() {                                                      //console.log('Finished updating! Loading search table.')
     storeData('pgDataUpdatedAt', getCurrentDate()); 
     initDataTable(); 
+}
+/*---------------- Update User Named Lists -----------------------------------*/
+export function updateUserNamedList(data) {                                     //console.log('updating stored list data. %O', data);
+    const list = JSON.parse(data.entity);  
+
+    const type = list.type;
+    const rcrdKey = type == 'filter' ? 'savedFilters' : 'dataLists';
+    const nameKey = type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
+    let rcrds = _u.getDataFromStorage(rcrdKey);
+    let names = _u.getDataFromStorage(nameKey);
+
+    rcrds[list.id] = list;
+    names[list.displayName] = list.id;
+
+    if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
+
+    storeData(rcrdKey, rcrds);
+    storeData(nameKey, names);
 }
 /*------------------ Update Submitted Form Data --------------------------*/
 export function updateEditedData(data, cb) {
@@ -460,10 +479,11 @@ export function initStoredData() {
 function ajaxAndStoreAllEntityData() {                                          console.log("ajaxAndStoreAllEntityData");
     $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
-        $.ajax("ajax/source"), $.ajax("ajax/interaction")
-    ).then(function(a1, a2, a3, a4) {                                           console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
-        $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
-        deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
+        $.ajax("ajax/source"), $.ajax("ajax/interaction"),
+        $.ajax("ajax/lists"),
+    ).then(function(a1, a2, a3, a4, a5) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
+        $.each([a1, a2, a3, a4, a5], function(idx, a) { storeServerData(a[0]); });
+        deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('pgDataUpdatedAt', getCurrentDate());  
         initSearchState('taxa');
     });
@@ -492,6 +512,7 @@ function deriveAndStoreData(data) {
     deriveAndStoreLocationData(data[1]);
     deriveAndStoreSourceData(data[2]);
     deriveInteractionData(data[3]);
+    deriveUserNamedListData(data[4]);
 }
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveAndStoreTaxonData(data) {                                        //console.log("deriveAndStoreTaxonData called. data = %O", data);
@@ -620,7 +641,7 @@ function getEntityRcrds(ids, rcrds) {
     return data;
 }
 /** Returns an object with each entity record's displayName (key) and id. */
-function getNameDataObj(ids, rcrds) {
+function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
     var data = {};
     ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
     return data;
@@ -642,6 +663,28 @@ function getTagData(tags, entity) {
         }
     }  
     return data;
+}
+/** 
+ * [type] - array of user created interaction and filter sets.
+ * [type]Names - an object with each set item's displayName(k) and id.
+ */
+function deriveUserNamedListData(data) {                                        //console.log('list data = %O', data)
+    const filters = {};
+    const filterIds = [];
+    const int_sets = {};
+    const int_setIds = [];
+
+    data.lists.forEach(l => { 
+        let entities = l.type == 'filter' ? filters : int_sets;
+        let idAry = l.type == 'filter' ? filterIds : int_setIds;
+        entities[l.id] = l;
+        idAry.push(l.id);
+    });
+
+    storeData('savedFilters', filters);
+    storeData('savedFilterNames', getNameDataObj(filterIds, filters));
+    storeData('dataLists', int_sets);
+    storeData('dataListNames', getNameDataObj(int_setIds, int_sets));
 }
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */

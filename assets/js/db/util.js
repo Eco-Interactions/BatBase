@@ -14,10 +14,12 @@ import { newIntList, selIntList } from './db-table/save-ints.js';
  *   buildElem
  *   buildSelectElem
  *   buildSimpleOpts
+ *   buildOptsObj
  *   clearDataStorage
  *   getDataFromStorage
  *   getDetachedRcrd
  *   getGeoJsonEntity
+ *   getOptsFromStoredData
  *   getSelVal
  *   initCombobox
  *   initComboboxes
@@ -36,7 +38,7 @@ let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
 const geoJsonKey = 'A life without cause is a life without effect.';  
-const localStorageKey = 'A life without cause is a life without effect!!!!!'; 
+const localStorageKey = 'A life without cause is a life without effect!!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -121,6 +123,7 @@ export function buildSelectElem(options, attrs, changeFunc, selected) {
         }
     }
 }
+/** ------- Options Methods --------- */
 /**
  * Creates an opts obj for each 'item' in array with the index as the value and 
  * the 'item' as the text.
@@ -142,6 +145,18 @@ export function alphaOptionObjs(a, b) {
     var y = b.text.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
 }  
+/** Builds options out of a stored entity-name object. */
+export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
+    var dataObj = getDataFromStorage(prop);  
+    var sortedNameKeys = Object.keys(dataObj).sort();
+    return buildOptsObj(dataObj, sortedNameKeys);
+}
+/** Builds options out of the entity-name  object, with id as 'value'. */
+export function buildOptsObj(entityObj, sortedKeys) {
+    return sortedKeys.map(function(name) {
+        return { value: entityObj[name], text: ucfirst(name) }
+    });    
+}
 /*--------------------- Extend Prototypes/Libraries ----------------------*/
 function extendPrototypes() {
     extendDate();

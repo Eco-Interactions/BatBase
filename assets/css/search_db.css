@@ -192,6 +192,7 @@ button[name="futureDevBttn"] {
     margin-right: 0;
     width: 200px;
     align-self: flex-end;
+    margin-top: auto;
 }
 #int-lists {
     flex: 0 0 333px;

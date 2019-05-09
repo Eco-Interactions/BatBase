@@ -217,6 +217,33 @@ class AjaxDataController extends Controller
         ));
         return $response;
     }
+    /**
+     * Gets all UserNamed entities created by the current user.
+     * @Route("/lists", name="app_serialize_user_named")
+     */
+    public function getUserLists(Request $request)
+    {    
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }           
+        $em = $this->getDoctrine()->getManager();
+
+        $lists = $em->getRepository('AppBundle:UserNamed')
+            ->findBy(['createdBy' => $this->getUser()]);
+
+        $returnData = [];
+
+        foreach ($lists as $list) {
+            array_push($returnData, $this->container->get('jms_serializer')
+                ->serialize($list, 'json'));
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'lists' => $returnData
+        ));
+        return $response;
+    }
     /** Returns serialized Entity data. */
     private function serializeEntity($entity, $serializer, $em)
     {

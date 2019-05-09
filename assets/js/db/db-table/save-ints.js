@@ -3,22 +3,18 @@
  *
  *
  * Exports:                 Imported By:
- *     addDataListClickEvents       db-ui
  *     newIntList                   util
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
  */
 import * as _u from '../util.js';
-
-export function addDataListClickEvents() {
-    $('#update-list').click(submitDataList);
-}
+import { updateUserNamedList } from '../db-sync.js';
 
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
     } else { hideIntPanel(); }
 }
-function buildAndShowIntPanel() {                                               console.log('buildAndShowIntPanel')
+function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')
     showPanel();
     disableInputs();
     initListCombobox();
@@ -33,47 +29,84 @@ function showPanel() {
 }
 function initListCombobox() {
     _u.initCombobox('Int-lists');   
-    _u.replaceSelOpts('#saved-ints', [{value: 'create', text: 'Add New Interaction List'}]);
+    updateDataListSel();
 }
-function hideIntPanel() {                                                       console.log('hideIntPanel')
+function hideIntPanel() {                                                       //console.log('hideIntPanel')
     $('#int-opts').css('overflow-y', 'hidden');
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');
 }
+/* --------------- Create New List ------------------- */
 /** Creates a new list of saved interactions. */
-export function newIntList(val) {                                               console.log('creating interaction list. val = ', val);
+export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
     enableInputs('create');
     $('#list-details input').val(val).focus();
-
+    $('#list-details textarea').val('val');
+    $('#submit-list').off('click').click(createDataList);
     return { value: "new", text: val ? val : "Adding New Interaction List" };
 }
+function createDataList() {
+    const data = buildListData();
+    submitDataList(data, 'create');
+}
+/* --------------- Edit List ----------------------- */
 /** Opens a saved list of interactions. */
-export function selIntList(val) {                                               console.log('selecting interaction list. val = ', val);
-    if (val === 'create' || !val) { return newIntList(''); }
-    if (val === 'new') { return; }
-    // fillListData();
+export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
+    if (val === 'create') { return newIntList(''); }
+    if (!val) { return clearAndDisableInputs(); }
+    if (val === 'new') { return; } // New list typed into combobox
+    $('#submit-list').off('click').click(editDataList);
+    fillListData(val);
     enableInputs();
 }
-function submitDataList() {
-    const envUrl = $('body').data("ajax-target-url");
-    const data = {
-        displayName: $('#list-details input').val(),
-        type: 'interaction',
-        description: $('#list-details textarea').val(),
-        details: "[]"
-    };
-    _u.sendAjaxQuery(data, envUrl + 'lists/create', listSubmitComplete);
+function editDataList() {
+    const data = buildListData();
+    data.id = _u.getSelVal('Int-lists');
+    submitDataList(data, 'edit');
 }
-function listSubmitComplete() {  console.log('listSubmitComplete arguments = %O', arguments);
-        
+function fillListData(id) {
+    const lists = _u.getDataFromStorage('dataLists');                           
+    const list = lists[id];                                                     
+
+    $('#list-details input').val(list.displayName);
+    $('#list-details textarea').val(list.description);
 }
-/** ------------------ Util ------------------------------------------------- */
+/** ------------------ Shared Util ------------------------------------------ */
+function clearAndDisableInputs() {
+    $('#int-opts input, #list-details textarea').val('');
+    disableInputs();
+}
 function disableInputs() {
     $('#int-opts input, #list-details textarea, #mod-list-pnl label, #int-opts button')
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableInputs(state) {
-    const enableBttns = state === 'create' ? "#update-list" : '#int-opts button';  console.log('enableBttns = ', enableBttns)
+    const enableBttns = state === 'create' ? "#submit-list" : '#int-opts button';  
     $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label, '+enableBttns)
         .attr({'disabled': false}).css({'opacity': '1'});
+}
+function updateDataListSel() {
+    const opts = _u.getOptsFromStoredData('dataListNames');                     
+    opts.unshift({value: 'create', text: '...Add New Interaction List'});
+    _u.replaceSelOpts('#saved-ints', opts);
+}
+/* -------------- List create/edit helpers -------------- */
+function buildListData() {
+    return {
+        displayName: $('#list-details input').val(),
+        type: 'interaction',
+        description: $('#list-details textarea').val(),
+        details: "[]"
+    };
+}
+function submitDataList(data, action) {
+    const envUrl = $('body').data("ajax-target-url");
+    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete);
+    
+    function listSubmitComplete(results) {                                      
+        const list = JSON.parse(results.list.entity);                           console.log('listSubmitComplete list = %O, id = %s', list, list.id)
+        updateUserNamedList(results.list, action);
+        updateDataListSel();
+        $('#saved-ints')[0].selectize.addItem(list.id);
+    }
 }

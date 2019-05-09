@@ -1273,8 +1273,8 @@ function buildCntryRegFieldRow() {
 }
 /** Returns options for each country and region. */ 
 function getCntryRegOpts() {
-    var opts = getOptsFromStoredData('countryNames');                       
-    return opts.concat(getOptsFromStoredData('regionNames'));
+    var opts = _u.getOptsFromStoredData('countryNames');                       
+    return opts.concat(_u.getOptsFromStoredData('regionNames'));
 }
 /** 
  * When a country or region is selected, the location dropdown is repopulated 
@@ -1999,7 +1999,7 @@ function getTaxonLvlOpts(taxon) {
     for (var name in lvls) {
         if (realmLvls.indexOf(name) === -1) { delete lvls[name]; }
     }
-    return buildOptsObj(lvls, Object.keys(lvls));
+    return _u.buildOptsObj(lvls, Object.keys(lvls));
 }
 /**
  * Returns a level select with all levels in the taxon-parent's realm and a 
@@ -2192,7 +2192,7 @@ function submitTaxonEdit() {
 }
 /*-------------- Interaction Detail Fields -------------------------------*/
 function buildIntTypeField() {
-    var opts = getOptsFromStoredData('intTypeNames');
+    var opts = _u.getOptsFromStoredData('intTypeNames');
     var selElem = _u.buildSelectElem(
         opts, {id: 'InteractionType-sel', class: 'lrg-field'});
     return buildFormRow('InteractionType', selElem, 'top', true);
@@ -3092,15 +3092,15 @@ function getSelectOpts(field) {                                                 
         "Authors": [ getSrcOpts, 'authSrcs'],
         "CitationType": [ getCitTypeOpts, 'citTypeNames'],
         "Class": [ getTaxonOpts, 'Class' ],
-        "Country": [ getOptsFromStoredData, 'countryNames' ],
+        "Country": [ _u.getOptsFromStoredData, 'countryNames' ],
         "Editors": [ getSrcOpts, 'authSrcs'],
         "Family": [ getTaxonOpts, 'Family' ],
         "Genus": [ getTaxonOpts, 'Genus' ],
-        "HabitatType": [ getOptsFromStoredData, 'habTypeNames'],
+        "HabitatType": [ _u.getOptsFromStoredData, 'habTypeNames'],
         "InteractionTags": [ getTagOpts, 'interaction' ],
-        "InteractionType": [ getOptsFromStoredData, 'intTypeNames' ],
+        "InteractionType": [ _u.getOptsFromStoredData, 'intTypeNames' ],
         "Order": [ getTaxonOpts, 'Order' ],
-        "PublicationType": [ getOptsFromStoredData, 'pubTypeNames'],
+        "PublicationType": [ _u.getOptsFromStoredData, 'pubTypeNames'],
         "Publisher": [ getSrcOpts, 'publSrcs'],
         "Realm": [ getRealmOpts, null ],
         "Species": [ getTaxonOpts, 'Species' ],
@@ -3130,21 +3130,9 @@ function getOptsFromStoredRcrds(prop) {
     var opts = getRcrdOpts(null, rcrds);
     return opts.sort(alphaOptionObjs);
 }
-/** Builds options out of a stored entity-name object. */
-function getOptsFromStoredData(prop) {                                          //console.log("prop = ", prop)
-    var dataObj = _u.getDataFromStorage(prop);
-    var sortedNameKeys = Object.keys(dataObj).sort();
-    return buildOptsObj(dataObj, sortedNameKeys);
-}
-/** Builds options out of the entity-name  object, with id as 'value'. */
-function buildOptsObj(entityObj, sortedKeys) {
-    return sortedKeys.map(function(name) {
-        return { value: entityObj[name], text: _u.ucfirst(name) }
-    });    
-}
 /** Returns an array of options objects for tags of the passed entity. */
 function getTagOpts(entity) {
-    return getOptsFromStoredData(entity+"Tags");
+    return _u.getOptsFromStoredData(entity+"Tags");
 }
 /** Returns an array of source-type (prop) options objects. */
 function getSrcOpts(prop, field) {
@@ -3163,7 +3151,7 @@ function getCitTypeOpts(prop) {
     const fLvl = getSubFormLvl('sub');
     const citTypesObj = _u.getDataFromStorage(prop);
     const curTypeNames = getCitTypeNames();                                     //console.log('curTypeNames = %O', curTypeNames);
-    return buildOptsObj(citTypesObj, curTypeNames.sort());
+    return initSelectCombobox(citTypesObj, curTypeNames.sort());
 
     function getCitTypeNames() {
         const opts = {
@@ -3188,12 +3176,12 @@ function getCitTypeOpts(prop) {
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
 function getTaxonOpts(level) {
-    let opts = getOptsFromStoredData(fP.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fP.forms.taxonPs.realm+level+"Names", opts)        
+    let opts = _u.getOptsFromStoredData(fP.forms.taxonPs.realm+level+'Names');//console.log("taxon opts for [%s] = %O", fP.forms.taxonPs.realm+level+"Names", opts)        
     opts.unshift({ value: 'create', text: 'Add a new '+level+'...'});
     return opts;
 }
 function getRealmOpts() {
-    return getOptsFromStoredData('objectRealmNames');  
+    return _u.getOptsFromStoredData('objectRealmNames');  
 }
 /* -----------------------------------------------------------------------*/
 /**

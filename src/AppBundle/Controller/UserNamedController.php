@@ -21,16 +21,7 @@ class UserNamedController extends Controller
 {
 /*------------------------------ CREATE --------------------------------------*/
     /**
-     * Saves a new set of user-named data.
-     *
-     * list = {
-     *     displayName:
-     *     type:
-     *     description:
-     *     details:
-     *     //loadedAt: (not for create, only read)
-     * }
-     *
+     * Saves a new set of user-named data
      * @Route("/create", name="list_create")
      */
     public function listCreateAction(Request $request)
@@ -41,32 +32,63 @@ class UserNamedController extends Controller
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
         $data = json_decode($requestContent);                               
-        
         $list = new UserNamed();
-        $list->setCreatedBy($this->getUser());
-        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles') ));
-        $this->setListData($data, $list, $em);
-        $em->persist($list);
-
+        
         $returnData = new \stdClass; 
         $returnData->name = $data->displayName;
-        $returnData->list = $list;
+        $returnData->entity = $list;
+        $returnData->edits = new \stdClass;
+
+        $list->setCreatedBy($this->getUser());
+        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles') ));
+        $this->setListData($data, $list, $em, $returnData->edits);
+
+        $em->persist($list);
+        $returnData->edits = false;
+
+        return $this->attemptFlushAndSendResponse($returnData, $em);
+    }
+/*------------------------------ EDIT ----------------------------------------*/
+    /**
+     * Updates the user-named filter set or interaction list.
+     *
+     * @Route("/edit", name="list_edit")
+     */
+    public function entityEditAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       //print("\nCreating Source.\n");
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $data = json_decode($requestContent);                                   //print("\nForm data =");print_r($formData);
+        $list = $em->getRepository('AppBundle:UserNamed')->findOneBy(['id' => $data->id]);
+        
+        $returnData = new \stdClass; 
+        $returnData->name = $data->displayName;
+        $returnData->entity = $list;
+        $returnData->edits = new \stdClass;
+
+        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
+        $this->setListData($data, $list, $em, $returnData->edits);
+        $em->persist($list);
 
         return $this->attemptFlushAndSendResponse($returnData, $em);
     }
     /*---------- Set List Data ---------------------------------------------*/
-    private function setListData($data, &$entity, &$em)
+    private function setListData($data, &$entity, &$em, &$editing)
     {
         foreach ($data as $field => $val) {
-            $this->setDataAndTrackEdits($entity, $field, $val);  
+            $this->setDataAndTrackEdits($entity, $field, $val, $editing);  
         }
     }
     /**
      * Checks whether current value is equal to the passed value. If not, the 
      * entity is updated with the new value and the field is added to the edits obj.   
      */
-    private function setDataAndTrackEdits(&$entity, $field, $newVal) 
+    private function setDataAndTrackEdits(&$entity, $field, $newVal, &$editing) 
     {  
+        if ($field == 'id') { return; }
         $setField = 'set'. ucfirst($field);                                     
         $getField = 'get'. ucfirst($field);                                     
         
@@ -74,6 +96,7 @@ class UserNamedController extends Controller
         if ($curVal === $newVal) { return; }
 
         $entity->$setField($newVal);
+        $editing->$field['old'] = $curVal;
     }
     /*---------- Flush and Return Data ---------------------------------------*/
     /**
@@ -106,12 +129,12 @@ class UserNamedController extends Controller
     /** Sends an object with the entities' serialized data back to the crud form. */
     private function sendDataAndResponse($data)
     {
-        $data->list = $this->container->get('jms_serializer')
-            ->serialize($data->list, 'json');
+        $data->entity = $this->container->get('jms_serializer')
+            ->serialize($data->entity, 'json');
 
         $response = new JsonResponse();
         $response->setData(array(
-            'results' => $data
+            'list' => $data
         ));
         return $response;
     }
