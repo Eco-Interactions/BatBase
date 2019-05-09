@@ -192,7 +192,6 @@ button[name="futureDevBttn"] {
     margin-right: 0;
     width: 200px;
     align-self: flex-end;
-    margin-top: auto;
 }
 #int-lists {
     flex: 0 0 333px;
@@ -237,8 +236,12 @@ button[name="futureDevBttn"] {
 #mod-list-pnl div input[type="radio"], #mod-list-pnl div input[type="checkbox"] {
     margin: 0 .5em 0 1em;
 }
-#update-list {
-    margin-top: auto;
+#list-submit-msg {
+    opacity: 0;
+    color: darkslategrey;
+    margin: 1em .5em 0 0 !important;
+    border: 1px green solid;
+    padding: 5px;
 }
 /* --------- Table Tool Bar --------- */
 #tool-bar {

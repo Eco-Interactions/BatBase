@@ -56,6 +56,7 @@ export function selIntList(val) {                                               
     if (!val) { return clearAndDisableInputs(); }
     if (val === 'new') { return; } // New list typed into combobox
     $('#submit-list').off('click').click(editDataList);
+    $('#list-details input, #list-details textarea').change(enableSubmitBttn);
     fillListData(val);
     enableInputs();
 }
@@ -73,7 +74,7 @@ function fillListData(id) {
 }
 /** ------------------ Shared Util ------------------------------------------ */
 function clearAndDisableInputs() {
-    $('#int-opts input, #list-details textarea').val('');
+    $('#list-details input, #list-details textarea').val('');
     disableInputs();
 }
 function disableInputs() {
@@ -81,9 +82,13 @@ function disableInputs() {
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableInputs(state) {
-    const enableBttns = state === 'create' ? "#submit-list" : '#int-opts button';  
+    const enableBttns = state === 'create' ? "#submit-list" : '#load-list';  
     $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label, '+enableBttns)
         .attr({'disabled': false}).css({'opacity': '1'});
+}
+function enableSubmitBttn() {
+    $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
+    hideSavedMsg();
 }
 function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
@@ -108,5 +113,12 @@ function submitDataList(data, action) {
         updateUserNamedList(results.list, action);
         updateDataListSel();
         $('#saved-ints')[0].selectize.addItem(list.id);
+        showSavedMsg();
     }
+}
+function showSavedMsg() {
+    $('#list-submit-msg').fadeTo('slow', 1);
+}
+function hideSavedMsg() {
+    $('#list-submit-msg').fadeTo('slow', 0);
 }
