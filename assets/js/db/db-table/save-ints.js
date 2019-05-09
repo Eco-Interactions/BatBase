@@ -10,6 +10,8 @@
 import * as _u from '../util.js';
 import { updateUserNamedList } from '../db-sync.js';
 
+let activeList;
+
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
     } else { hideIntPanel(); }
@@ -40,8 +42,10 @@ function hideIntPanel() {                                                       
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
     enableInputs('create');
+    $('#list-details input, #list-details textarea').change(enableSubmitBttn);
     $('#list-details input').val(val).focus();
-    $('#list-details textarea').val('val');
+    $('#list-details textarea').val('');
+    $('#int-list-cnt')[0].innerHTML = 0;
     $('#submit-list').off('click').click(createDataList);
     return { value: "new", text: val ? val : "Adding New Interaction List" };
 }
@@ -67,10 +71,12 @@ function editDataList() {
 }
 function fillListData(id) {
     const lists = _u.getDataFromStorage('dataLists');                           
-    const list = lists[id];                                                     
+    const list = lists[id];                                                     console.log('activeList = %O', list);                                                 
+    activeList = list;
 
     $('#list-details input').val(list.displayName);
     $('#list-details textarea').val(list.description);
+    $('#int-list-cnt')[0].innerHTML = JSON.parse(list.details).length;
 }
 /** ------------------ Shared Util ------------------------------------------ */
 function clearAndDisableInputs() {
@@ -82,8 +88,8 @@ function disableInputs() {
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableInputs(state) {
-    const enableBttns = state === 'create' ? "#submit-list" : '#load-list';  
-    $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label, '+enableBttns)
+    const enableBttns = state === 'create' ? '' : ', #load-list';  
+    $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label' + enableBttns)
         .attr({'disabled': false}).css({'opacity': '1'});
 }
 function enableSubmitBttn() {
