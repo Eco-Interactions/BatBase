@@ -29,6 +29,7 @@ Planning Meeting Notes:
 
 
 Future:
+    - Add text search to taxon view
     - Upgrade to encore 0.21 & webpack 4
     - Break util into 
         - data storage

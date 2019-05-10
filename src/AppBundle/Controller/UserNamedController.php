@@ -54,7 +54,7 @@ class UserNamedController extends Controller
      *
      * @Route("/edit", name="list_edit")
      */
-    public function entityEditAction(Request $request)
+    public function listEditAction(Request $request)
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
