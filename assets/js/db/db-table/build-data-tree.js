@@ -14,18 +14,21 @@ let focusRcrds; //Refreshed with each new entry into the module.
 /**
  * Builds a tree of location data with passed locations at the top level, and 
  * sub-locations as nested children. 
+ * Note: If loading a user-named data set (intSet), only the entities within 
+ * those interactions are added to the data tree.
  */ 
-export function buildLocTree(topLocs) {                                         //console.log("passed 'top' locIds = %O", topLocs)
+export function buildLocTree(topLocs, intSet) {                                 //console.log("passed 'top' locIds = %O", topLocs)
     focusRcrds = tState().get('rcrdsById');
-    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs));
+    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, intSet));
 }
-function buildLocDataTree(topLocs) {
+function buildLocDataTree(topLocs, intSet) {
     let topLoc;
-    const tree = {};                                                            //console.log("tree = %O", tree);
+    let tree = {};                                                            //console.log("tree = %O", tree);
     topLocs.forEach(function(id){  
         topLoc = _u.getDetachedRcrd(id, focusRcrds);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
+    if (intSet) { tree = filterTreeToInteractionSet(tree, intSet); }
     return sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
@@ -393,6 +396,12 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
+/* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
+function filterTreeToInteractionSet(dataTree, intSet) {
+    
+}
+
+
 
 /* ================================ UTILITY ========================================================================= */
 /** Sorts the all levels of the data tree alphabetically. */

@@ -15,9 +15,11 @@ import { accessTableState as tState } from '../db-page.js';
  * list - List open in panel
  * modMode - "add" || "rmv" interaction rows selected in table
  * tblApi - AgGrid table api
+ * interactions - records loaded in the grid
+ * intRcrds - all interaction rcrds
  */
 let app = {};
-/* ----------------------- Init Methods ------------------------------------- */
+/* ----------------------- Init Methods And Event Handlers ------------------ */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
     } else { hideIntPanel(); }
@@ -26,7 +28,7 @@ function buildAndShowIntPanel() {                                               
     showPanel();
     disableInputs();
     initListCombobox();
-    addInputEvents();
+    addEvents();
 }
 function showPanel() {
     $('#int-opts').removeClass('closed');  
@@ -40,11 +42,12 @@ function initListCombobox() {
     _u.initCombobox('Int-lists');   
     updateDataListSel();
 }
-function addInputEvents() {
+function addEvents() {
     $('#add-mode').click(preventUnclick).change(updateModMode.bind(null, 'add'));
     $('#rmv-mode').click(preventUnclick).change(updateModMode.bind(null, 'rmv'));
     $('input[name="mod-list"]').on('change', toggleAddInstructions);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
+    $('#load-list').click(loadInteractionsInTable);
 }
 function hideIntPanel() {                                                       //console.log('hideIntPanel')
     $('#int-opts').css('overflow-y', 'hidden');
@@ -60,6 +63,18 @@ function preventUnclick(e) {
 }
 function updateModMode(mode) {
     app.modMode = mode;
+}
+function toggleAddInstructions() {                                              //console.log('toggleAddInstructions');
+    $('#mod-info').fadeTo('fast', 0); 
+    addInfoMsgAndUpdateTableSelection();
+    $('#mod-info').fadeTo('slow', 1); 
+}
+function addInfoMsgAndUpdateTableSelection() {
+    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save Interaction List" to add/remove selection. *Interaction rows are the base level rows with data.';
+    const all = 'Click "Save Interaction List" to add/remove all *interactions displayed in the table. *Interaction rows are the base level rows with data.';
+
+    if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
+    } else { $('#mod-info')[0].innerHTML = all; }
 }
 /* ----------------------- Create New List ---------------------------------- */
 /** Creates a new list of saved interactions. */
@@ -120,18 +135,6 @@ function resetModUi() {                                                         
     $('#mod-info').fadeTo('fast', 0, () => {
         $('#mod-info')[0].innerHTML = ''; 
     });
-}
-function toggleAddInstructions() {                                              console.log('toggleAddInstructions');
-    $('#mod-info').fadeTo('fast', 0); 
-    addInfoMsgAndUpdateTableSelection();
-    $('#mod-info').fadeTo('slow', 1); 
-}
-function addInfoMsgAndUpdateTableSelection() {
-    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save Interaction List" to add/remove selection. *Interaction rows are the base level rows with data.';
-    const all = 'Click "Save Interaction List" to add/remove all *interactions displayed in the table. *Interaction rows are the base level rows with data.';
-
-    if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
-    } else { $('#mod-info')[0].innerHTML = all; }
 }
 function enableSubmitBttn() {
     $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
@@ -210,3 +213,27 @@ function hideSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 0);
     $('#list-submit-msg')[0].innerHTML = '';
 }
+/* ====================== LOAD INTERACTIONS IN TABLE ======================== */
+/**
+ * 
+ */
+function loadInteractionsInTable() {
+    const ids = app.list.details;
+    const 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
