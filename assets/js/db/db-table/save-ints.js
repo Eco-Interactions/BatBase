@@ -41,12 +41,9 @@ function hideIntPanel() {                                                       
 /* --------------- Create New List ------------------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
-    enableInputs('create');
-    $('#list-details input, #list-details textarea').change(enableSubmitBttn);
-    $('#list-details input').val(val).focus();
-    $('#list-details textarea').val('');
-    $('#int-list-cnt')[0].innerHTML = 0;
-    $('#submit-list').off('click').click(createDataList);
+    enableInputs();
+    addInputEvents(createDataList);
+    fillListDataFields(val, '', 0);
     return { value: "new", text: val ? val : "Adding New Interaction List" };
 }
 function createDataList() {
@@ -59,8 +56,7 @@ export function selIntList(val) {                                               
     if (val === 'create') { return newIntList(''); }
     if (!val) { return clearAndDisableInputs(); }
     if (val === 'new') { return; } // New list typed into combobox
-    $('#submit-list').off('click').click(editDataList);
-    $('#list-details input, #list-details textarea').change(enableSubmitBttn);
+    addInputEvents(editDataList);
     fillListData(val);
     enableInputs();
 }
@@ -71,12 +67,9 @@ function editDataList() {
 }
 function fillListData(id) {
     const lists = _u.getDataFromStorage('dataLists');                           
-    const list = lists[id];                                                     console.log('activeList = %O', list);                                                 
-    activeList = list;
-
-    $('#list-details input').val(list.displayName);
-    $('#list-details textarea').val(list.description);
-    $('#int-list-cnt')[0].innerHTML = JSON.parse(list.details).length;
+    const list = getActiveList(lists[id]);                                      console.log('activeList = %O', list);                                                 
+    fillListDataFields(
+        list.displayName, list.description, list.details.length);
 }
 /** ------------------ Shared Util ------------------------------------------ */
 function clearAndDisableInputs() {
@@ -87,10 +80,19 @@ function disableInputs() {
     $('#int-opts input, #list-details textarea, #mod-list-pnl label, #int-opts button')
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
-function enableInputs(state) {
-    const enableBttns = state === 'create' ? '' : ', #load-list';  
-    $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label' + enableBttns)
+function enableInputs() {
+    $('#list-details textarea, #list-details input, #mod-list-cntnr input, #mod-list-cntnr label')
         .attr({'disabled': false}).css({'opacity': '1'});
+}
+function addInputEvents(submitEvent) {
+    $('#list-details input, #list-details textarea').change(enableSubmitBttn);
+    $('#submit-list').off('click').click(submitEvent);
+}
+function fillListDataFields(nameVal, descVal, intCnt) {
+    $('#list-details input').val(nameVal).focus();
+    $('#list-details textarea').val(descVal);
+    $('#int-list-cnt')[0].innerHTML = intCnt;  
+    if (intCnt > 0) { $('#load-list').attr({disabled: false}).css({opacity: 1}); }
 }
 function enableSubmitBttn() {
     $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
@@ -100,6 +102,11 @@ function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
+}
+function getActiveList(list) {
+    activeList = list;
+    list.details = JSON.parse(list.details);
+    return list;
 }
 /* -------------- List create/edit helpers -------------- */
 function buildListData() {
