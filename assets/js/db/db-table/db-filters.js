@@ -4,6 +4,7 @@
  * Exports:                     Imported by:
  *     addDomEventListeners
  *     buildTreeSearchHtml
+ *     hideFilterPanel                  db_ui
  *     newFilterSet                     util
  *     resetFilterStatusBar
  *     resetTableStateParams
@@ -82,25 +83,28 @@ function updateFilterSelOpts() {
 }
 function disableFilterSetInputs() {
     $('.filter-set-details input, .filter-set-details textarea').val('');
-    $('.filter-set-details input, .filter-set-details span, .filter-submit button, .filter-set-details textarea')
+    $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
+        .filter-set-details textarea, #stored-filters button`)
         .attr('disabled', true).css('opacity', '.5');
 }
 function enableFilterSetInputs() {
-    $('.filter-set-details input, .filter-set-details span, .filter-submit button, .filter-set-details textarea')
+    $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
+        .filter-set-details textarea, #stored-filters button`)
         .attr('disabled', false).css('opacity', '1');
 }
-function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
+export function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
     $('#filter-opts').css('overflow-y', 'hidden');
     $('#db-opts-col2').removeClass('shw-col-borders hide-fltr-bttm-border');
     $('#filter-opts').addClass('closed');
 }
 export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
     enableFilterSetInputs();
+    $('.filter-set-details input').focus();
     return { value: "new", text: val ? val : "Creating New Filter Set" };
 }
 
 export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
-    if (val === 'create') { return newFilterSet(); }
+    if (val === 'create') { return newFilterSet(null); }
     if (!val) { return disableFilterSetInputs(); }
     if (val === 'new') { return; } // New list typed into combobox
     enableFilterSetInputs();

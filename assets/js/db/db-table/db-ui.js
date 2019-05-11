@@ -20,7 +20,7 @@ import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
-import { addDomEvents, toggleSaveIntsPanel } from './save-ints.js';
+import { addDomEvents, hideIntPanel, toggleSaveIntsPanel } from './save-ints.js';
 
 const userRole = $('body').data("user-role");
 
@@ -507,7 +507,6 @@ function loadPubSearchHtml() {
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
-    // clearCol2();        
     $('#focus-filters').append(searchTreeElem);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
@@ -515,43 +514,37 @@ export function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
     disableTableButtons();
     showPopUpMsg();
-    $('#tool-bar').fadeTo(100, 1);
-    $('#search-tbl').hide();
+    closeOpenPanels();
+    $('#tool-bar').fadeTo('fast', 1);
+    $('#search-tbl').hide();  
     $('#map').show(); 
 }
+function closeOpenPanels() {
+    if (!$('#filter-opts').hasClass('closed')) { db_filters.hideFilterPanel(); }
+    if (!$('#int-opts').hasClass('closed')) { hideIntPanel(); }
+}
 export function updateUiForTableView() {
-    $('#search-tbl').fadeTo('100', 1);
+    $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
-    // $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
-}
-export function updateUiForMappingInts() {
-    updateUiForMapView();
-    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
-    const locRcrds = tblState.curFocus !== 'locs' ? 
-        _u.getDataFromStorage('location') : tblState.rcrdsById;  
-    $('#search-tbl').fadeTo('100', 0.3, () => {
-        updateUiForMappingInts();
-        showInts(tblState.curFocus, tblState.rcrdsById, locRcrds);
+    $('#search-tbl').fadeTo('fast', 0.3, () => {
+        updateUiForMapView();
+        showInts(tblState.curFocus, tblState.rcrdsById, getLocRcrds());
     });
+
+    function getLocRcrds() {
+        return tblState.curFocus !== 'locs' ? 
+            _u.getDataFromStorage('location') : tblState.rcrdsById;  
+    }
 }
 function updateBttnToReturnRcrdsToTable() {
-    // addMsgAboutTableViewFiltering();
     $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
-    // $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
-// function addMsgAboutTableViewFiltering() {
-//     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
-//     const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
-//     div.innerHTML = `Return to filter data shown.`;
-//     $('#content-detail').prepend(div);
-// }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
@@ -567,17 +560,15 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 export function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input')
+    $('.tbl-tools button, .tbl-tools input, .map-dsbl')
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools').fadeTo(100, 1);
-    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    // authDependentInit(); 
+    $('.tbl-tools, .map-dsbl').fadeTo('slow', 1);
 }
 export function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input`)
+    $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
+    $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
         .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
 }
 export function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);

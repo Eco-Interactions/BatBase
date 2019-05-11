@@ -3,6 +3,7 @@
  *
  * Exports:                 Imported By:
  *     addDomEvents                 db-ui
+ *     hideIntPanel                 db-ui
  *     newIntList                   util
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
@@ -53,7 +54,7 @@ function addEvents() {
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
 }
-function hideIntPanel() {                                                       //console.log('hideIntPanel')
+export function hideIntPanel() {                                                       //console.log('hideIntPanel')
     $('#int-opts').css('overflow-y', 'hidden');
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');

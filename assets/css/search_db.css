@@ -1,4 +1,8 @@
 /*--- Database Search Page Styles ---*/
+#detail-block input, #detail-block textarea, #detail-block select {
+    border: #666 1px solid;
+    border-radius: 3px;
+}
 /* ---- Selectize ----------------------------------------------------------- */
 /*.selectize-input {
     padding-right: 33px !important;
@@ -81,12 +85,6 @@ div[id^="db-opts-col"] {
 #filter-opts.closed {
     max-height: 0;
 }
-#db-opts-col2.shw-col-borders {
-    background: rgba(121, 201, 183, .1);
-}
-#filter-opts span {
-    padding-top: 5px;
-}
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-fltr-bttm-border:before {
     content: '';
@@ -98,39 +96,53 @@ div[id^="db-opts-col"] {
     background: #f2f9f8;
     z-index: 10;
 }
+#db-opts-col2.shw-col-borders {
+    background: rgba(121, 201, 183, .1);
+}
+#filter-opts span {
+    padding-top: 5px;
+}
+#filter-col1 {
+    flex: 0 0 618px;
+    border-right: black 1px solid;
+}
 #focus-filters {
-    flex: 0 1 588px;
-    max-height: 122px;
+    margin-bottom: .75em;
 }
 #shw-chngd-ints {
-    flex: 0 0 242px;
-    border-right: black 1px solid;
-    border-left: black 1px solid;
-    padding-left: 5px;
+    width: 100%;
+    margin-top: auto;
 }
 #stored-filters {
     flex: 1 0 472px;
     padding-left: 10px;
 }
-#stored-filters input, #stored-filters textarea {
-    min-width: 351px;
-    border: grey 1px solid;
+#stored-filters input {
+    min-width: 222px;
 }
 #stored-filters textarea {
-    width: 505px;
+    width: 509px;
 }
 #stored-filters div>span {
-    width: 111px;
-    padding-top: 9px;
+    width: 95px;
+    padding-top: 4px;
+}
+#stored-filters button {
+    margin-left: auto;
+    height: 27px;
+    width: 88px;
 }
 .saved-filters-sel {
-    /*margin: 0 0 0 -3px !important;*/
-    width: 351px;
-    /*height: 27px;*/
+    width: 222px;
+}
+#filter-set-name {
+    width: 46px !important;
+    margin: 0 .3em 0 .6em;
 }
 #time-fltr, .flatpickr-input {
-    margin: .2em 0 0 26px;
     width: 170px;
+    font-size: .85em;
+    padding: 4px;
 }
 #futrDevMsg {
     margin: 0 5px 0 5px;
@@ -146,11 +158,11 @@ button[name="futureDevBttn"] {
     opacity: .7;
 }
 .txtLbl {
-    width: 284px;
+    width: 303px;
 }
 .txtLbl input {
     height: 27px;
-    width: 228px;
+    width: 250px;
 }
 .taxonLbl {
     margin: .3em 0 0 1em;
@@ -173,7 +185,7 @@ button[name="futureDevBttn"] {
     width: 217px;
 }
 .locTxtInput {
-    width: 220px !important;
+    width: 238px !important;
 }
 /* ----- Data Lists' Panel ------ */
 #int-opts {
@@ -192,8 +204,8 @@ button[name="futureDevBttn"] {
     content: '';
     position: absolute;
     height: 3px;
-        width: 83px;
-    right: 259px;
+    width: 82px;
+    right: 490px;
     top: 56px;
     background: #e2f2f3;
     z-index: 10;
@@ -236,9 +248,8 @@ button[name="futureDevBttn"] {
     width: 111px;
     padding-top: 3px;
 }
-#list-details input, #list-details textarea {
+#list-details input {
     min-width: 415px;
-    border: grey 1px solid;
 }
 #list-details textarea {
     width: 488px;
@@ -280,7 +291,7 @@ button[name="futureDevBttn"] {
 }
 .submit-cntnr :last-child {
     margin-left: auto;
-}\
+}
 /* --------- Table Tool Bar --------- */
 #tool-bar {
     margin: .7em auto .2em auto;
@@ -720,8 +731,8 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: .2em;
     margin: 0;
     font-size: .95em;
-    border: gray 1px solid;
-    border-radius: 4px;
+    /*border: gray 1px solid;*/
+    /*border-radius: 4px;*/
 }
 .xlrg-field {
     width: 643px;
@@ -894,11 +905,23 @@ input.active-icon {
     .tips-popup {
         width: 77%;
     }
-    #filter-opts #stored-filters textarea {
-        width: 315px;
+    #filter-opts #filter-col1 {
+        flex: 0 0 555px;
     }
     .hide-fltr-bttm-border:before {
         left: 468px;
+    }
+    #focus-filters .taxonLbl {
+        width: 257px;
+    }
+    #focus-filters .taxonSel {
+        width: 186px;
+    }
+    #focus-filters .locLbl {
+        width: 267px;
+    }
+    #focus-filters .locSel {
+        width: 201px;
     }
     .hide-int-bttm-border:before {
         right: 319px;
