@@ -48,8 +48,8 @@ function initListCombobox() {
     updateDataListSel();
 }
 function addEvents() {
-    $('#add-mode').click(preventUnclick).change(updateModMode.bind(null, 'add'));
-    $('#rmv-mode').click(preventUnclick).change(updateModMode.bind(null, 'rmv'));
+    $('#add-mode').change(() => app.modMode = 'add');
+    $('#rmv-mode').change(() => app.modMode = 'rmv');
     $('input[name="mod-list"]').on('change', toggleAddInstructions);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
@@ -59,24 +59,14 @@ export function hideIntPanel() {                                                
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');
 }
-function preventUnclick(e) {
-    const checkbox = $(this);
-    if (!checkbox.is(':checked')) {
-        e.preventDefault;
-        return false
-    }
-}
-function updateModMode(mode) {
-    app.modMode = mode;
-}
 function toggleAddInstructions() {                                              //console.log('toggleAddInstructions');
     $('#mod-info').fadeTo('fast', 0); 
     addInfoMsgAndUpdateTableSelection();
     $('#mod-info').fadeTo('slow', 1); 
 }
 function addInfoMsgAndUpdateTableSelection() {
-    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save Interaction List" to add/remove selection. *Interaction rows are the colored base-level rows.';
-    const all = 'Click "Save Interaction List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
+    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.';
+    const all = 'Click "Save List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
 
     if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
     } else { $('#mod-info')[0].innerHTML = all; }
@@ -104,7 +94,7 @@ export function selIntList(val) {                                               
     addSubmitEvent(editDataList);
     fillListData(val);
     enableInputs();
-    $('#add-mode').prop('checked', true);
+    enableModUi('add');
     expandAllTableRows();
 }
 function editDataList() {
@@ -123,7 +113,7 @@ function fillListData(id) {
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea, #int-list-cnt').val('');
     disableInputs();
-    resetModUi();
+    // resetModUi();
 }
 function disableInputs() {
     $('#list-details input, #mod-radios input, #list-details textarea, #mod-list-pnl label, #int-opts button')
@@ -137,12 +127,18 @@ function enableInputs() {
 function addSubmitEvent(submitEvent) {
     $('#submit-list').off('click').click(submitEvent);
 }
-function resetModUi() {                                                         console.log('resetModUi')
-    $('input[type="radio"]').prop('checked', false);
-    $('#mod-info').fadeTo('fast', 0, () => {
-        $('#mod-info')[0].innerHTML = ''; 
-    });
+function enableModUi(mode) { 
+    const inactiveMode = mode === 'add' ? 'rmv' : 'add';
+    $(`#${inactiveMode}-mode`).prop('checked', false);
+    $(`#${mode}-mode`).prop('checked', true);
+    $(`#mod-all-list`).prop('checked', true).change();
 }
+// function resetModUi() {                                                         console.log('resetModUi')
+//     $('input[type="radio"]').prop('checked', false);
+//     $('#mod-info').fadeTo('fast', 0, () => {
+//         $('#mod-info')[0].innerHTML = ''; 
+//     });
+// }
 function enableSubmitBttn() {
     $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
     hideSavedMsg();
@@ -176,17 +172,15 @@ function buildListData() {
         displayName: $('#list-details input').val(),
         type: 'interaction',
         description: $('#list-details textarea').val(),
-        details: getInteractions(),
+        details: JSON.stringify(getInteractions()),
     };
-    app.edits = app.list.details.length !== data.details.length;
-    data.details = JSON.stringify(data.details);      
     return data;
 }
 /* ----------- Add Interaction Rows ----------------- */
 function getInteractions() {
     app.tblApi = tState().get('api');
-    return $('#mod-one-list').prop('checked') ? 
-        getUpdatedInteractionSet() : addAllInteractionsInTable();
+    return $('#mod-one-list').prop('checked') ? getUpdatedInteractionSet() : 
+        $('#mod-all-list').prop('checked') ? addAllInteractionsInTable() : [];
 }
 function addAllInteractionsInTable() {
     app.tblApi = tState().get('api');
@@ -212,23 +206,20 @@ function listSubmitComplete(action, results) {
     updateUserNamedList(results.list, action);
     updateDataListSel();
     $('#saved-ints')[0].selectize.addItem(list.id);
-    showSavedMsg(results.list.edits);
+    showSavedMsg();
 }
-function showSavedMsg(edits) {
-    const msg = app.edits || Object.keys(edits).length ? "Changes saved." : "No changes detected";
-    $('#int-list-msg')[0].innerHTML = msg;
+function showSavedMsg() {
     $('#int-list-msg').fadeTo('slow', 1);
-    delete app.edits;
 }
 function hideSavedMsg() {
     $('#int-list-msg').fadeTo('slow', 0);
-    $('#int-list-msg')[0].innerHTML = '';
 }
 /* ====================== LOAD INTERACTIONS IN TABLE ======================== */
 /**
  * 
  */
 function loadInteractionsInTable() {
+    enableModUi('rmv');
     const ids = app.list.details;
     // const 
 }

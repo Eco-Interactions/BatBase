@@ -7,12 +7,14 @@
 >REFACTORING
 
 Current:
-
+    - Think of "title" for the "add mode" of data lists
 Next:
     - Build backend for saving lists
         - Store Interaction lists
         - Store Filter Sets
     - Change cursor to finger over interaction rows
+
+    - Replace agGrid with MIT alternative 
 
 * Identical table
     - Pending Edits

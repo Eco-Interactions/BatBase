@@ -4,9 +4,6 @@
     border-radius: 3px;
 }
 /* ---- Selectize ----------------------------------------------------------- */
-/*.selectize-input {
-    padding-right: 33px !important;
-}*/
 .selectize-input {
     padding: 4px 33px 4px 4px !important;
     border-color: #666 !important;
@@ -276,7 +273,7 @@ button[name="futureDevBttn"] {
 .list-submit-msg {
     opacity: 0;
     color: green;
-    margin: auto .5em !important;
+    margin: .5em !important;
     border: 1px green solid;
     border-radius: 5px;
     padding: 5px;
@@ -288,6 +285,7 @@ button[name="futureDevBttn"] {
 }
 .submit-cntnr + div {
     margin-right: auto;
+    flex-grow: 1;
 }
 .submit-cntnr :last-child {
     margin-left: auto;

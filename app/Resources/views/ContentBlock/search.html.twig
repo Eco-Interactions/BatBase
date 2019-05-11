@@ -118,10 +118,10 @@
         <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
             <span><b>Modify List Data</b></span>
             <div class="flex-row" id="mod-list-cntnr">
-                <input type="checkbox" id="add-mode" name="mod-mode">
+                <input type="checkbox" id="add-mode" name="mod-mode" disabled="disabled">
                 <label for="mod-mode">Add Interactions</label>
-                <input type="checkbox" id="rmv-mode" name="mod-mode">
-                <label for="mod-mode">Remove Interactions</label>
+                <input type="checkbox" id="rmv-mode" name="mod-mode" disabled="disabled" title="Click 'View Interactions In Table' to remove from list">
+                <label for="mod-mode" title="Click 'View Interactions In Table' to remove from list">Remove Interactions</label>
             </div>
             <div id="mod-radios" class="flex-row" style="margin-left: 1em;">
                 <input name="mod-list" type="radio" id="mod-all-list">
@@ -133,11 +133,13 @@
             <div class="flex-row submit-cntnr">
                 <button id="delete-list" class="ag-fresh tbl-bttn"> 
                     Delete List
-                </button>                       
-                <span id="int-list-msg" class="list-submit-msg"></span>
-                <button id="submit-list" class="ag-fresh tbl-bttn"> 
-                    Save List
-                </button>       
+                </button>      
+                <div class="flex-row">
+                    <span id="int-list-msg" class="list-submit-msg">&#10004;</span>
+                    <button id="submit-list" class="ag-fresh tbl-bttn"> 
+                        Save List
+                    </button>       
+                </div>
             </div>
         </div>
     </div>
