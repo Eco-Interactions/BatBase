@@ -20,7 +20,7 @@ import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
-import { toggleSaveIntsPanel } from './save-ints.js';
+import { addDomEvents, toggleSaveIntsPanel } from './save-ints.js';
 
 const userRole = $('body').data("user-role");
 
@@ -29,17 +29,16 @@ export function pg_init() {
     addDomEventListeners();
     adaptUiToScreenSize();
     authDependentInit();
-    disableSaveFilterUI();
 }
 /** Moves the buttons from the end of the search options panel to just the header row. */
 function adaptUiToScreenSize() {
-    if ($(window).width() > 1500) { return; }
-    const elemCntnr = $('#db-opts-col5').detach();  
-    const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
-    $(elemCntnr)[0].className = 'flex-row';
-    $(cntnr).append(elemCntnr);
-    $('#tbl-ctrls-reloc').append(cntnr);
+    // if ($(window).width() > 1500) { return; }
+    // const elemCntnr = $('#db-opts-col5').detach();  
+    // const cntnr = _u.buildElem('div', { class: 'flex-row' });
+    // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
+    // $(elemCntnr)[0].className = 'flex-row';
+    // $(cntnr).append(elemCntnr);
+    // $('#tbl-ctrls-reloc').append(cntnr);
 }
 function addDomEventListeners() {
     db_filters.addDomEventListeners();
@@ -48,6 +47,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.resetDataTable);
+    addDomEvents();
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {
@@ -90,11 +90,6 @@ function enableAdminFeatures() {                                                
         .click(createEntity.bind(null, 'create', 'interaction'));
     $('#rvw-data').addClass('adminbttn').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This is an upcoming feature!');
-}
-function disableSaveFilterUI() {
-    $('.saved-filters-sel, #save-filter, #stored-filters span')
-        .css('cursor', 'not-allowed !important')
-        .prop('title', 'This is an upcoming feature!').attr('disabled', true);
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**

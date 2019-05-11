@@ -2,6 +2,7 @@
  * Handles the saving, editing, and display of saved lists of interactions.
  *
  * Exports:                 Imported By:
+ *     addDomEvents                 db-ui
  *     newIntList                   util
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
@@ -19,6 +20,10 @@ import { accessTableState as tState } from '../db-page.js';
  * intRcrds - all interaction rcrds
  */
 let app = {};
+
+export function addDomEvents() {
+    addEvents();
+}
 /* ----------------------- Init Methods And Event Handlers ------------------ */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
@@ -28,7 +33,6 @@ function buildAndShowIntPanel() {                                               
     showPanel();
     disableInputs();
     initListCombobox();
-    addEvents();
 }
 function showPanel() {
     $('#int-opts').removeClass('closed');  
@@ -70,8 +74,8 @@ function toggleAddInstructions() {                                              
     $('#mod-info').fadeTo('slow', 1); 
 }
 function addInfoMsgAndUpdateTableSelection() {
-    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save Interaction List" to add/remove selection. *Interaction rows are the base level rows with data.';
-    const all = 'Click "Save Interaction List" to add/remove all *interactions displayed in the table. *Interaction rows are the base level rows with data.';
+    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save Interaction List" to add/remove selection. *Interaction rows are the colored base-level rows.';
+    const all = 'Click "Save Interaction List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
 
     if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
     } else { $('#mod-info')[0].innerHTML = all; }
@@ -83,7 +87,8 @@ export function newIntList(val) {                                               
     addSubmitEvent(createDataList);
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
-    return { value: "new", text: val ? val : "Adding New Interaction List" };
+    expandAllTableRows();
+    return { value: "new", text: val ? val : "Creating New Interaction List" };
 }
 function createDataList() {
     const data = buildListData();
@@ -99,6 +104,7 @@ export function selIntList(val) {                                               
     fillListData(val);
     enableInputs();
     $('#add-mode').prop('checked', true);
+    expandAllTableRows();
 }
 function editDataList() {
     const data = buildListData();
@@ -150,6 +156,10 @@ function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
+}
+function expandAllTableRows() {
+    app.tblApi = tState().get('api');
+    app.tblApi.expandAll();
 }
 /* --------------------- List Manipulation ---------------------------------- */
 function addActiveListToMemory(list) {
@@ -205,13 +215,13 @@ function listSubmitComplete(action, results) {
 }
 function showSavedMsg(edits) {
     const msg = app.edits || Object.keys(edits).length ? "Changes saved." : "No changes detected";
-    $('#list-submit-msg')[0].innerHTML = msg;
-    $('#list-submit-msg').fadeTo('slow', 1);
+    $('#int-list-msg')[0].innerHTML = msg;
+    $('#int-list-msg').fadeTo('slow', 1);
     delete app.edits;
 }
 function hideSavedMsg() {
-    $('#list-submit-msg').fadeTo('slow', 0);
-    $('#list-submit-msg')[0].innerHTML = '';
+    $('#int-list-msg').fadeTo('slow', 0);
+    $('#int-list-msg')[0].innerHTML = '';
 }
 /* ====================== LOAD INTERACTIONS IN TABLE ======================== */
 /**
@@ -219,7 +229,7 @@ function hideSavedMsg() {
  */
 function loadInteractionsInTable() {
     const ids = app.list.details;
-    const 
+    // const 
 }
 
 

@@ -5,6 +5,7 @@ import * as db_page from './db-page.js';
 import { addNewDataToStorage, initStoredData } from './db-sync.js';
 import { showPopUpMsg } from './db-table/db-ui.js';
 import { newIntList, selIntList } from './db-table/save-ints.js';
+import { newFilterSet, selFilterSet } from './db-table/db-filters.js';
 
 /* 
  * Exports:
@@ -384,7 +385,7 @@ function getSelConfgObj(field) {
         'View': { name: 'View', id: '#sel-view', change: false, blur: true },
         // Search Page Comboboxes with Create Options and Sub-panels
         'Int-lists': { name: 'Interaction List', id: '#saved-ints', add: newIntList, change: selIntList },
-        'Saved Filters': {name: field, id: '#saved-filters', change: false },
+        'Saved Filter Set': {name: field, id: '#saved-filters', add: newFilterSet, change: selFilterSet },
     };
     return confgs[field];
 }

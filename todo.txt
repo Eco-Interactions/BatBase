@@ -12,7 +12,17 @@ Next:
     - Build backend for saving lists
         - Store Interaction lists
         - Store Filter Sets
+    - Change cursor to finger over interaction rows
 
+* Identical table
+    - Pending Edits
+        - entity, id, edits (json), timestamp
+        - removed once approved 
+    - Edit History
+        - all fields pending has, plus approvedBy
+
+
+- look at graphs about user traffic on siteground
 
 
 Before Release:

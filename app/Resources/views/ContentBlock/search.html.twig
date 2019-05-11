@@ -18,14 +18,14 @@
         <div id="db-opts-col1" class="flex-row">
             <div class="flex-row">
                 <span>Group Interactions by: </span>
-                <select id="search-focus" class="col1-sel" data-field="Focus"></select>
+                <select id="search-focus" class="col1-sel focus-sel" data-field="Focus"></select>
                 <span>View: </span>
                 <select id="sel-view" class="col1-sel" data-field="View"></select>
             </div>
         </div>
         <div id="db-opts-col2" class="flex-row tbl-tools">
             <button id="filter" class="ag-fresh tbl-bttn ico-bttn">
-                Filter Data
+                Filters
             </button>     
             <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="reset-tbl">
                 Reset
@@ -35,27 +35,29 @@
             <button id="shw-map" class="ag-fresh tbl-bttn ico-bttn">
                 Show Interactions on Map
             </button>
-            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="csv">
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="csv">  <!-- DOwnload csv data -->
                 CSV
             </button>
         </div>
         <div id="db-opts-col4" class="flex-row">  
-            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="int-set">
-                Data Lists
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="int-set">  <!-- Saved lists of interactions -->
+                Lists
             </button>   
-            <button id="new-data" class="ag-fresh tbl-bttn ico-bttn">
-                Add Data
-            </button>
-            <button id="rvw-data" class="ag-fresh tbl-bttn ico-bttn">
-                Review Data
-            </button>
         </div>
         <div id="db-opts-col5" class="flex-row">
+            <button id="new-data" class="ag-fresh tbl-bttn ico-bttn">  <!-- Add tooltip "new interaction" -->
+                New
+            </button>
+            <button id="rvw-data" class="ag-fresh tbl-bttn ico-bttn">
+                Review
+            </button>
+        </div>
+        <div id="db-opts-col6" class="flex-row">
             <button id="strt-tut" class="ag-fresh tbl-bttn">
                 Tutorial
             </button>
             <button id="show-tips" class="ag-fresh tbl-bttn">
-                Search Tips
+                Tips
             </button>
         </div>
     </div>
@@ -66,14 +68,29 @@
             <label for="shw-chngd">Show records updated since:</label>
             <input type="text" id="time-fltr" disabled="disabled">
         </div>
-        <div id="stored-filters" class="flex-row"> 
-            <span>Load saved filters: </span>
-            <select id="saved-filters" class="saved-filters-sel" data-field="" disabled="true">
-                <option value="create">New Saved Filters Set</option>
-            </select>
-            <button id="save-filter" class="ag-fresh" disabled="true"> 
-                Save Current Filter State
-            </button>
+        <div id="stored-filters" class="flex-col"> 
+            <div class="flex-row spaced">
+                <span>Select Filter: </span>
+                <select id="saved-filters" class="saved-filters-sel"></select>
+            </div>
+            <div class="flex-row spaced filter-set-details">
+                <span>Display Name: </span>
+                <input type="text" placeholder="Display Name" style="height: 27px;"> 
+            </div>
+            <div class="flex-row spaced filter-set-details" style="width: 100%;">
+                <span>Description: </span>
+                <textarea placeholder="Description" style="height: 50px;"></textarea>  
+            </div> 
+            <div class="flex-row submit-cntnr spaced filter-submit">
+                <button id="delete-filter" class="ag-fresh tbl-bttn"> 
+                    Delete Filter Set
+                </button>
+                <span id="filter-list-msg" class="list-submit-msg"></span>
+                <button id="save-filter" class="ag-fresh tbl-bttn"> 
+                    Save Filters
+                </button>                
+            </div>
+
         </div>
     </div>
     <div id='int-opts' class="flex-row pop-out-panel closed"> 
@@ -114,10 +131,11 @@
                 <label for="mod-one-list">Select Rows</label>
             </div>
             <span id="mod-info"></span>
-            <div id="submit-cntnr" class="flex-row">
+            <div class="flex-row submit-cntnr">
                 <button id="delete-list" class="ag-fresh tbl-bttn"> 
                     Delete List
-                </button>                       <span id="list-submit-msg"></span>
+                </button>                       
+                <span id="int-list-msg" class="list-submit-msg"></span>
                 <button id="submit-list" class="ag-fresh tbl-bttn"> 
                     Save List
                 </button>       
