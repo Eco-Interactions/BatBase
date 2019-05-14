@@ -1,10 +1,10 @@
 /**
  * Builds a data tree out of the records for the selected data view. 
  * 
- * Exports:
- *     buildLocTree
- *     buildSrcTree
- *     buildTxnTree        
+ * Exports:         Imported by:
+ *     buildLocTree     db-page, save-ints
+ *     buildSrcTree     db-page, save-ints
+ *     buildTxnTree     db-page, save-ints
  */
 import { accessTableState as tState } from '../db-page.js';
 import * as _u from '../util.js';
@@ -422,15 +422,20 @@ function filterTreeToInteractionSet(dataTree, focus) {                          
     }
 } /* End filterTreeToInteractionSet */
 function filterEntityAndSubs(ent, focus, set) {                                 //console.log('filterEntityAndSubs. Entity = %O', ent);
+    if (ent.children) { filterEntsInSubs(); }
     const inSet = hasInteractionsInSet();                                       //if (inSet) { console.log('inSet! entity = %O', ent) }
-    return ent.children.length ? 
-        findMatchingEntsInSubs() : inSet;
+    return inSet || ent.children.length;
 
-    function hasInteractionsInSet() {
-        if (focus === 'taxa') { return filterTaxonInteractions();  } 
-        return filterEntityInteractions('interactions');
+    function filterEntsInSubs() {
+        ent.children = ent.children.filter(c => filterEntityAndSubs(c, focus, set)); 
     }
-    function filterEntityInteractions(prop) {                                   //console.log('filterEntityInteractions. [%s] ent = %O, set = %O', prop, ent, set);
+    function hasInteractionsInSet() {
+        return focus === 'taxa' ? filterTaxonInteractions() :
+            focus === 'locs' ? filterLocInterations() : 
+            filterEntityInteractions();
+    }
+    function filterEntityInteractions(p) {                                   
+        const prop = p ? p : 'interactions';                                    //console.log('filterEntityInteractions. [%s] ent = %O, set = %O', prop, ent, set);
         ent[prop] = ent[prop].filter(id => set.indexOf(id) !== -1);
         return ent[prop].length > 0;                                  
     }
@@ -439,9 +444,23 @@ function filterEntityAndSubs(ent, focus, set) {                                 
         const subj = filterEntityInteractions('subjectRoles');
         return obj || subj;
     }
-    function findMatchingEntsInSubs() {
-        ent.children = ent.children.filter(c => filterEntityAndSubs(c, focus, set)); 
-        return inSet || ent.children.length > 0;
+    function filterLocInterations() {
+        const hasInts = filterEntityInteractions();
+        ent.totalInts = updateLocationTotalIntCount(0, ent);
+        return hasInts;
+    }
+    /**
+     * The totalInt count is used when displaying interactions focused on location
+     * in "Map Data" view.
+     */
+    function updateLocationTotalIntCount(total, locEnt) {                       //console.log('updateLocationTotalIntCount. ttl = %s, locEnt = %O', total, JSON.parse(JSON.stringify(locEnt)));
+        let cnt = 0;
+        cnt += locEnt.interactions.length;
+        if (locEnt.children.length > 0) { 
+            cnt += locEnt.children.reduce(updateLocationTotalIntCount, 0); 
+        }
+        locEnt.totalInts = cnt;
+        return total + cnt;
     }
 } /* End filterEntityAndSubs */
 

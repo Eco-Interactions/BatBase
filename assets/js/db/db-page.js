@@ -337,8 +337,13 @@ export function showLocInDataTable(loc) {                                       
 }
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
-    db_ui.updateUiForMapView();       
+    db_ui.updateUiForMapView();      
+    if (tblState.intSet) { return showLocsInSetOnMap(); }
     db_map.initMap(tblState.rcrdsById);           
+}
+function showLocsInSetOnMap() {
+    const locTree = data_tree.buildLocTree(getTopRegionIds());
+    db_map.initMap(tblState.rcrdsById, locTree);
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(geoJsonId, zoom) {

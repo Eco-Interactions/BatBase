@@ -3,13 +3,13 @@
  * Displays the map on the search database page.
  */
 /**
- * Exports:
- *   addVolatileMapPin
- *   clearMemory
- *   initFormMap
- *   initMap
- *   showInts
- *   showLoc
+ * Exports:                 Imported by:
+ *   addVolatileMapPin          db_forms
+ *   clearMemory                db_forms
+ *   initFormMap                db_forms
+ *   initMap                    db_page
+ *   showInts                   db_page, db_ui
+ *   showLoc                    db_page
  */
 import * as _u from '../util.js';
 import * as db_forms from '../db-forms/db-forms.js';
@@ -227,9 +227,10 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(rcrds) {                                                console.log('attempting to initMap')
+export function initMap(rcrds, fltrd) {                                         console.log('attempting to initMap')
     locRcrds = rcrds;
-    waitForDataThenContinue(buildAndShowMap.bind(null, addAllIntMrkrsToMap, 'map'));                                                 
+    const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
+    waitForDataThenContinue(buildAndShowMap.bind(null, dispFunc, 'map'));                                                 
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
@@ -290,7 +291,7 @@ function addAllIntMrkrsToMap() {
         }
         ttlShown += region.totalInts;
     }
-} 
+}
 function getRegionLocs() {
     const regionIds = _u.getDataFromStorage('topRegionNames');
     return Object.values(regionIds).map(id => locRcrds[id]);
@@ -307,7 +308,7 @@ function addMarkersForLocAndChildren(topLoc) {
 
     function buildMarkersForLocChildren(locs) {
         locs.forEach(id => {
-            let loc = locRcrds[id];
+            let loc = typeof id === 'object' ? id : locRcrds[id];
             if (loc.locationType.displayName == 'Country') { 
                 return addMarkersForLocAndChildren(loc, false); 
             }
@@ -335,6 +336,29 @@ function addMarkersForLocAndChildren(topLoc) {
         return topName.indexOf(subName) !== -1;
     }
 } /* End addMarkersForLocAndChildren */
+/**
+ * When the table is filtered to display a set of interactions created by the user, 
+ * that set is displayed when the loc view "Map Data" is selected.
+ */
+function addMrkrsInSet(tree) {                                                  console.log('addMrkrsInSet. tree = %O', tree)
+    let ttlShown = 0, 
+    ttlNotShown = 0;
+    addMarkersInTree();
+    fillIntCntLegend(ttlShown, ttlNotShown);
+
+    function addMarkersInTree() {
+        for (let branch in tree) {
+            trackBranchIntCnt(tree[branch]);
+            addMarkersForLocAndChildren(tree[branch]);
+        }
+    }
+    function trackBranchIntCnt(branch) {
+        if (branch.displayName === "Unspecified") { 
+            return ttlNotShown += branch.totalInts; 
+        }
+        ttlShown += branch.totalInts;
+    }
+}
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
 export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. tableData = %O', tableData);
