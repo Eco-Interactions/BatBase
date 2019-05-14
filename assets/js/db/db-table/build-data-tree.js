@@ -137,7 +137,7 @@ function buildPublTree(pubSrcRcrds, pubRcrds) {                                 
     }
     function getPubsWithoutPubls(pubs) {
         const publ = { id: 0, displayName: "Unspecified", parent: null, 
-            sourceType: { displayName: 'Publisher' } };
+            sourceType: { displayName: 'Publisher' }, interactions: [] };
         publ.children = pubs.map(pub => getPubData(pub, pubRcrds));
         return publ;
     }
@@ -422,7 +422,7 @@ function filterTreeToInteractionSet(dataTree, focus) {                          
     }
 } /* End filterTreeToInteractionSet */
 function filterEntityAndSubs(ent, focus, set) {                                 //console.log('filterEntityAndSubs. Entity = %O', ent);
-    const inSet = hasInteractionsInSet();    //if (inSet) { console.log('inSet! entity = %O', ent) }
+    const inSet = hasInteractionsInSet();                                       //if (inSet) { console.log('inSet! entity = %O', ent) }
     return ent.children.length ? 
         findMatchingEntsInSubs() : inSet;
 
@@ -450,8 +450,8 @@ function filterEntityAndSubs(ent, focus, set) {                                 
 /* ================================ UTILITY ========================================================================= */
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
-    var sortedTree = {};
-    var keys = Object.keys(tree).sort();    
+    const sortedTree = {};
+    const keys = Object.keys(tree).sort(alphaBranchNames);    
 
     for (var i=0; i<keys.length; i++){ 
         sortedTree[keys[i]] = sortNodeChildren(tree[keys[i]]);
@@ -465,6 +465,12 @@ function sortDataTree(tree) {
         }
         return node;
     } 
+    function alphaBranchNames(a, b) {
+        if (a.includes('Unspecified')) { return 1; }
+        var x = a.toLowerCase();
+        var y = b.toLowerCase();
+        return x<y ? -1 : x>y ? 1 : 0;
+    }
 } /* End sortDataTree */
 /** Alphabetizes array via sort method. */
 function alphaEntityNames(a, b) {                                               //console.log("alphaSrcNames a = %O b = %O", a, b);

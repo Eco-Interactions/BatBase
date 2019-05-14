@@ -10,7 +10,7 @@
  *     initTaxonSearchUi                db_page
  *     loadSearchLocHtml                
  *     loadTaxonComboboxes              
- *     resetToggleTreeBttn
+ *     resetToggleTreeBttn              db_page, init-table
  *     updateUiForTableView
  *     updateUiForMapView
  */

@@ -255,22 +255,22 @@ function getRegionIds() {
     return ids;
 }
 /* ---- Srcs ---- */
-function buildSrcTreeInts() {
-    // body...
+function buildSrcTreeInts() {                                                   
+    frmt_data.transformSrcDataAndLoadTable(
+        data_tree.buildSrcTree(app.tblState.curView), app.tblState);
 }
 /* ---- Taxa ---- */
 
-function buildTxnTreeInts() {                                                   console.log('buildTxnTreeInts. tblState = %O', app.tblState)
-    const realmTaxon = _u.getDataFromStorage('taxon')[getRealmTaxonId(app.tblState)];
+function buildTxnTreeInts() {                                                   
+    const realmTaxon = _u.getDataFromStorage('taxon')[getId(app.tblState.taxaByLvl)];
     frmt_data.transformTxnDataAndLoadTable(
         data_tree.buildTxnTree(realmTaxon), app.tblState);
 }
-function getRealmTaxonId(tblState) {
-    const realmLevel = Object.keys(tblState.taxaByLvl).filter(lvl => {
-        return Object.keys(tblState.taxaByLvl[lvl]).length == 1;
+function getId(taxaByLvl) {
+    const realmLvl = Object.keys(taxaByLvl).filter(lvl => {
+        return Object.keys(taxaByLvl[lvl]).length == 1;
     });
-    const id = tblState.taxaByLvl[realmLevel][Object.keys(tblState.taxaByLvl[realmLevel])[0]];  console.log('id = ', id);
-    return id;
+    return taxaByLvl[realmLvl][Object.keys(taxaByLvl[realmLvl])[0]];  
 }
 
 

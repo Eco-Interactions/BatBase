@@ -9,7 +9,7 @@ import * as db_filters from './db-filters.js';
 import * as db_forms from '../db-forms/db-forms.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
-import { enableTableButtons } from './db-ui.js';
+import { enableTableButtons, resetToggleTreeBttn } from './db-ui.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;
@@ -29,7 +29,7 @@ export default function initTbl(viewTitle, rowData, state) {                    
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
-    onTableInitComplete();
+    onTableInitComplete(rowData);
 }
 /** Base table options object. */
 function getDefaultTblOpts(viewTitle) {  
@@ -304,11 +304,17 @@ function getNodeChildDetails(rcrd) {                                            
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
 }
-function onTableInitComplete() {
+function onTableInitComplete(rowData) {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
+    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
 } 
+function updateDisplayForShowingInteractionSet(rowData) {
+    if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
+    tblState.api.expandAll(); 
+    resetToggleTreeBttn(true);
+}
 function hidePopUpMsg() {
     $('#db-popup, #db-overlay').hide();
     $('#db-popup').removeClass('loading'); //used in testing
