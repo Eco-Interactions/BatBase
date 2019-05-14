@@ -28,7 +28,6 @@ import * as db_sync from './db-sync.js';
 import * as db_tips from './tips.js';
 import * as db_ui from './db-table/db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
-import * as init_tbl from './db-table/init-table.js';
 
 /**
  * Stores table state params needed across multiple modules. 
@@ -36,6 +35,7 @@ import * as init_tbl from './db-table/init-table.js';
  * {obj} columnApi      Ag-grid Column API (available after table-init complete)
  * {str} curFocus       Focus of the data in table: taxa, srcs, locs
  * {str} curView        Sub-sort of table data. Eg: bats, auths, etc 
+ * {ary} intSet         An array of interactions saved and loaded in the table by the user
  * {ary} openRows       Array of entity ids whose table rows will be expanded on load.
  * {ary} rowData        Row data in table
  * {obj} rcrdsById      Focus records keyed by ID
@@ -118,8 +118,10 @@ function setTableState(stateObj) {                                              
 /*-------------------- "State" Managment Methods -----------------------------*/
 /** Resets on focus change. */
 function resetTableParams(focus) {  
+    const intSet = tblState.intSet;
     tblState = {
         curFocus: focus || getResetFocus(),
+        intSet: intSet,
         openRows: [],
         selectedOpts: {},
         userRole: $('body').data("user-role")
@@ -258,7 +260,7 @@ export function rebuildTaxonTable(topTaxon, filtering) {                        
  */
 function startTxnTableBuildChain(topTaxon, filtering) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
-    frmt_data.transformTaxonDataAndLoadTable(
+    frmt_data.transformTxnDataAndLoadTable(
         data_tree.buildTxnTree(topTaxon, filtering), tblState);
     db_ui.loadTaxonComboboxes(tblState);
 }

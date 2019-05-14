@@ -1,8 +1,8 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  * 
- * Exports:
- *     init
+ * Exports:        Imported by:
+ *     initTbl          format-data
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_filters from './db-filters.js';
@@ -18,12 +18,11 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(viewTitle, rowData) {                                      //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
-    tblState = tState().get();
+export default function initTbl(viewTitle, rowData, state) {                    console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+    tblState = state;
     const tblDiv = document.querySelector('#search-tbl');
-    const tblOpts = getDefaultTblOpts();
+    const tblOpts = getDefaultTblOpts(viewTitle);
     tblOpts.rowData = rowData;
-    tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     tblState.api = tblOpts.api;
     tState().set(
@@ -33,9 +32,9 @@ export function init(viewTitle, rowData) {                                      
     onTableInitComplete();
 }
 /** Base table options object. */
-function getDefaultTblOpts() {
+function getDefaultTblOpts(viewTitle) {  
     return {
-        columnDefs: getColumnDefs(),
+        columnDefs: getColumnDefs(viewTitle),
         rowSelection: 'multiple',   //Used for csv export
         getHeaderCellTemplate: getHeaderCellTemplate, 
         getNodeChildDetails: getNodeChildDetails,

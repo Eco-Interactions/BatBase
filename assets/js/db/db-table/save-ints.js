@@ -9,14 +9,18 @@
  *     toggleSaveIntsPanel          db-ui
  */
 import * as _u from '../util.js';
+import * as data_tree from './build-data-tree.js';
+import * as frmt_data from './format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState } from '../db-page.js';
+import { resetToggleTreeBttn } from './db-ui.js';
 
 /**
  * edits - tracks changes in interaction list on list submit
  * list - List open in panel
  * modMode - "add" || "rmv" interaction rows selected in table
  * tblApi - AgGrid table api
+ * tblState - state data for table and search page
  * interactions - records loaded in the grid
  * intRcrds - all interaction rcrds
  */
@@ -34,6 +38,7 @@ function buildAndShowIntPanel() {                                               
     showPanel();
     disableInputs();
     initListCombobox();
+    expandAllTableRows();
 }
 function showPanel() {
     $('#int-opts').removeClass('closed');  
@@ -62,7 +67,7 @@ export function hideIntPanel() {                                                
 function toggleAddInstructions() {                                              //console.log('toggleAddInstructions');
     $('#mod-info').fadeTo('fast', 0); 
     addInfoMsgAndUpdateTableSelection();
-    $('#mod-info').fadeTo('slow', 1); 
+    $('#mod-info').fadeTo('slow', 1);
 }
 function addInfoMsgAndUpdateTableSelection() {
     const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.';
@@ -78,7 +83,6 @@ export function newIntList(val) {                                               
     addSubmitEvent(createDataList);
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
-    expandAllTableRows();
     return { value: "new", text: val ? val : "Creating New Interaction List" };
 }
 function createDataList() {
@@ -95,7 +99,6 @@ export function selIntList(val) {                                               
     fillListData(val);
     enableInputs();
     enableModUi('add');
-    expandAllTableRows();
 }
 function editDataList() {
     const data = buildListData();
@@ -130,7 +133,10 @@ function addSubmitEvent(submitEvent) {
 function enableModUi(mode) { 
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
     $(`#${inactiveMode}-mode`).prop('checked', false);
+    $(`label[for="${inactiveMode}-mode"]`).css('opacity', .5);
+
     $(`#${mode}-mode`).prop('checked', true);
+    $(`label[for="${mode}-mode"]`).css('opacity', 1);
     $(`#mod-all-list`).prop('checked', true).change();
 }
 // function resetModUi() {                                                         console.log('resetModUi')
@@ -157,6 +163,7 @@ function updateDataListSel() {
 function expandAllTableRows() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
+    resetToggleTreeBttn(true);
 }
 /* --------------------- List Manipulation ---------------------------------- */
 function addActiveListToMemory(list) {
@@ -185,6 +192,7 @@ function getInteractions() {
 function addAllInteractionsInTable() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
+    resetToggleTreeBttn(true);
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions);           
     return getUpdatedInteractionSet();
 }
@@ -216,14 +224,54 @@ function hideSavedMsg() {
 }
 /* ====================== LOAD INTERACTIONS IN TABLE ======================== */
 /**
- * 
+ * Loads the interaction set in the table, where it can be explored and filtered
+ * with the standard UI options
  */
 function loadInteractionsInTable() {
+    app.tblState = tState().get();
+    app.tblState.intSet = app.list.details;
+    app.tblState.api.destroy();
+    buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     enableModUi('rmv');
-    const ids = app.list.details;
-    // const 
+    app.tblState.api.expandAll();
+    resetToggleTreeBttn(true);
 }
+function buildFocusDataTreeAndLoadGrid(dataFocus) {
+    const bldrs = {
+        'locs': buildLocTreeInts, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
+    }
+    bldrs[dataFocus]();
+}
+/* ---- Locs ---- */
+function buildLocTreeInts() {
+    const regions = getRegionIds();
+    frmt_data.transformLocDataAndLoadTable(
+        data_tree.buildLocTree(regions), app.tblState);
+}
+function getRegionIds() {
+    const ids = [];
+    const regions = _u.getDataFromStorage('topRegionNames');
+    for (let name in regions) { ids.push(regions[name]); } 
+    return ids;
+}
+/* ---- Srcs ---- */
+function buildSrcTreeInts() {
+    // body...
+}
+/* ---- Taxa ---- */
 
+function buildTxnTreeInts() {                                                   console.log('buildTxnTreeInts. tblState = %O', app.tblState)
+    const realmTaxon = _u.getDataFromStorage('taxon')[getRealmTaxonId(app.tblState)];
+    frmt_data.transformTxnDataAndLoadTable(
+        data_tree.buildTxnTree(realmTaxon), app.tblState);
+}
+function getRealmTaxonId(tblState) {
+    const realmLevel = Object.keys(tblState.taxaByLvl).filter(lvl => {
+        return Object.keys(tblState.taxaByLvl[lvl]).length == 1;
+    });
+    const id = tblState.taxaByLvl[realmLevel][Object.keys(tblState.taxaByLvl[realmLevel])[0]];  console.log('id = ', id);
+    return id;
+}
 
 
 

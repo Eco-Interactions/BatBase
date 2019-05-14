@@ -7,30 +7,34 @@
 >REFACTORING
 
 Current:
-    - Think of "title" for the "add mode" of data lists
-Next:
     - Build backend for saving lists
         - Store Interaction lists
+            - clear filters before loading list?
+            - update filters to work with intSets
+            - event hook for when a row is selected bu the user? 
+                - switch to "select rows" mode
         - Store Filter Sets
-    - Change cursor to finger over interaction rows
+    - Think of "title" for the "add mode" of data lists
+    - sync filters and lists
 
+
+
+Next:
+    - Change cursor to finger over interaction rows
+    - look at graphs about user traffic on siteground
     - Replace agGrid with MIT alternative 
 
-* Identical table
-    - Pending Edits
-        - entity, id, edits (json), timestamp
-        - removed once approved 
-    - Edit History
-        - all fields pending has, plus approvedBy
-
-
-- look at graphs about user traffic on siteground
+> "Review Data" backend
+    * Identical tables
+        - Pending Edits
+            - entity, id, edits (json), timestamp
+            - removed once approved 
+        - Edit History
+            - all fields pending has, plus approvedBy
 
 
 Before Release:
     - Turn all form styles from percentages to pixels
-
-
 
 
 
@@ -39,6 +43,11 @@ Before Release:
 
 Planning Meeting Notes:
 
+Before conference:
+
+
+Figure out how to "stress test" the site:
+    - Large number of people using it
 
 Future:
     - Add text search to taxon view
@@ -53,7 +62,8 @@ Future:
     - Figure out whether the explicit form services are necessary
     - Refactor TESTS
         - replace all usleeps with "spinner" wait methods
-
+    - Accessibility REFACTORING 
+        - text to speech, etc
 
 MEETING NOTES:
     Point out:
@@ -106,7 +116,7 @@ TODOs:
 (DATA)
 
 (SEARCH PAGE)
-    - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point.
+    - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
         - Unable to update as rowGrouping is now an enterprise feature (ie min $800 package)
     - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
     - {med}[med, long] Add data-entry tutorial.
@@ -163,3 +173,14 @@ TODOs:
             - https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
         - {low}[easy] Fix author field after create form exited
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
+
+
+
+
+
+    Other cool things, sort later:
+        - microsoft app center 
+            - analytics for apps free
+        - Try out some js debugging tools
+
+

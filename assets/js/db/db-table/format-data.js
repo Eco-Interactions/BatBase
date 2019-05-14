@@ -1,12 +1,12 @@
 /**
  * Formats the tree data into the row-data format used in ag-grid.
  *
- * Exports:
- *     transformLocDataAndLoadTable
- *     transformSrcDataAndLoadTable
- *     transformTaxonDataAndLoadTable
+ * Exports:                         Imported by:
+ *     transformLocDataAndLoadTable         db-page, save-ints
+ *     transformSrcDataAndLoadTable         db-page, save-ints
+ *     transformTxnDataAndLoadTable         db-page, save-ints
  */
-import * as init_tbl from './init-table.js'
+import initTbl from './init-table.js'
 
 /*--------- Location Data Formatting ---------------------------------------------------------------------------------*/
 /**
@@ -14,7 +14,7 @@ import * as init_tbl from './init-table.js'
  * to the init-table module.
  */
 export function transformLocDataAndLoadTable(locTree, tblState) {
-    init_tbl.init("Location Tree", transformLocData(locTree, tblState));
+    initTbl("Location Tree", transformLocData(locTree, tblState), tblState);
 }
 function transformLocData(tree, tblState) {
     const finalRowData = [];                                                    //console.log("locTree = %O", tree);
@@ -112,7 +112,7 @@ function hasChildInteractions(row) {
  */
 export function transformSrcDataAndLoadTable(srcTree, tblState) {               //console.log("transformSrcDataAndLoadTable called.")
     const rowData = transformSrcData(srcTree, tblState);                  
-    init_tbl.init(getSrcTreeName(tblState.curView), rowData);
+    initTbl(getSrcTreeName(tblState.curView), rowData, tblState);
 }
 function transformSrcData(tree, tblState) {
     let rowColorIdx = 0;
@@ -168,8 +168,8 @@ function getSrcTreeName(view) {
  * Transforms the tree's taxon record data into the table format and sends the data 
  * to the init-table module.
  */
-export function transformTaxonDataAndLoadTable(taxonTree, tblState) {           //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
-    init_tbl.init("Taxon Tree", transformTaxonData(taxonTree, tblState));
+export function transformTxnDataAndLoadTable(taxonTree, tblState) {             //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
+    initTbl("Taxon Tree", transformTaxonData(taxonTree, tblState), tblState);
 }
 function transformTaxonData(tree, tblState) {
     const finalRowData = [];

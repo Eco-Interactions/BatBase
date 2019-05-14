@@ -10,6 +10,7 @@ import { accessTableState as tState } from '../db-page.js';
 import * as _u from '../util.js';
 
 let focusRcrds; //Refreshed with each new entry into the module.
+let tblState;
 /* ========================= LOCATION TREE ========================================================================== */
 /**
  * Builds a tree of location data with passed locations at the top level, and 
@@ -17,18 +18,19 @@ let focusRcrds; //Refreshed with each new entry into the module.
  * Note: If loading a user-named data set (intSet), only the entities within 
  * those interactions are added to the data tree.
  */ 
-export function buildLocTree(topLocs, intSet) {                                 //console.log("passed 'top' locIds = %O", topLocs)
-    focusRcrds = tState().get('rcrdsById');
-    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, intSet));
+export function buildLocTree(topLocs) {                                         //console.log("passed 'top' locIds = %O", topLocs)
+    tblState = tState().get(null, ['rcrdsById', 'intSet']);
+    focusRcrds = tblState.rcrdsById;
+    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs));
 }
-function buildLocDataTree(topLocs, intSet) {
+function buildLocDataTree(topLocs) {
     let topLoc;
     let tree = {};                                                            //console.log("tree = %O", tree);
     topLocs.forEach(function(id){  
         topLoc = _u.getDetachedRcrd(id, focusRcrds);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
-    if (intSet) { tree = filterTreeToInteractionSet(tree, intSet); }
+    tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
 }
 /** Returns the location record with all child ids replaced with their records. */
@@ -44,9 +46,10 @@ function getLocChildData(childId) {
 /* ========================= SOURCE TREE ============================================================================ */
 /** (Re)builds source tree for the selected source realm. */
 export function buildSrcTree(realm) {
-    focusRcrds = tState().get('rcrdsById');
-    const dataTree = buildSrcRealmTree(realm, getRealmRcrds(realm));
-    return fillTreeWithInteractions('srcs', dataTree);
+    tblState = tState().get(null, ['rcrdsById', 'intSet']);
+    focusRcrds = tblState.rcrdsById;
+    const tree = buildSrcRealmTree(realm, getRealmRcrds(realm));
+    return fillTreeWithInteractions('srcs', tree);
 }
 /** Returns the records for the source realm currently selected. */
 function getRealmRcrds(realm) {
@@ -65,10 +68,11 @@ function getTreeRcrdAry(realmRcrdKey) {
  * Publications->Citations->Interactions. 
  * Publishers->Publications->Citations->Interactions. 
  */
-function buildSrcRealmTree(realm, rcrds) {                                      //console.log("initSrcTree realmRcrds = %O", realmRcrds);
+function buildSrcRealmTree(realm, rcrds) {                              
     const pubRcrds = _u.getDataFromStorage('publication');
     const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
     let tree = treeMap[realm](rcrds, pubRcrds);
+    tree = filterTreeToInteractionSet(tree, 'srcs');
     return sortDataTree(tree);
 }  
 /*-------------- Publication Source Tree -------------------------------------------*/
@@ -176,29 +180,33 @@ function buildAuthTree(authSrcRcrds, pubRcrds) {                                
  * stored in tblState.
  */
 export function buildTxnTree(topTaxon, filtering) {                             //console.log("buildTaxonTree called for topTaxon = %O. filtering?", topTaxon, filtering);
-    focusRcrds = tState().get('rcrdsById');
-    const tree = buildTxnDataTree(topTaxon);
+    tblState = tState().get(null, ['rcrdsById', 'intSet']);
+    focusRcrds = tblState.rcrdsById;
+
+    let tree = buildTxnDataTree(topTaxon);
+
     storeTaxonLevelData(topTaxon, filtering);
     return fillTreeWithInteractions('taxa', tree);  
 }
 function buildTxnDataTree(topTaxon) {
-    const tree = {};                                                            //console.log("tree = %O", tree);
+    let tree = {};                                                              //console.log("tree = %O", tree);
     tree[topTaxon.displayName] = topTaxon;  
-    topTaxon.children = getChildTaxa(topTaxon.children);    
+    topTaxon.children = getChildTaxa(topTaxon.children);   
+    tree = filterTreeToInteractionSet(tree, 'taxa');
     return tree;
     /**
      * Recurses through each taxon's 'children' property and returns a record 
      * for each child ID found. 
      */
     function getChildTaxa(children) {                                           //console.log("getChildTaxa called. children = %O", children);
-        if (children === null) { return null; }
+        if (children === null) { return []; } //changed from nullifying the children prop to an empty array... consequences?
         return children.map(function(child){
             if (typeof child === "object") { return child; }
 
             const childRcrd = _u.getDetachedRcrd(child, focusRcrds);            //console.log("child = %O", childRcrd);
             if (childRcrd.children.length >= 1) { 
                 childRcrd.children = getChildTaxa(childRcrd.children);
-            } else { childRcrd.children = null; }
+            } else { childRcrd.children = []; } //changed from nullifying the children prop to an empty array... consequences?
 
             return childRcrd;
         });
@@ -248,7 +256,7 @@ function seperateTaxonTreeByLvl(topTaxon) {
 } /* End seperateTaxonTreeByLvl */
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
-function fillTreeWithInteractions(focus, dataTree) {  
+function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const entities = ['interaction', 'taxon', 'location', 'source'];
     const entityData = _u.getDataFromStorage(entities); 
     const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
@@ -397,9 +405,45 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
     }
 } /* End fillHiddenColumns */
 /* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
-function filterTreeToInteractionSet(dataTree, intSet) {
-    
-}
+function filterTreeToInteractionSet(dataTree, focus) {                          console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);
+    const intSet = tblState.intSet;
+    if (!intSet) { return dataTree; }
+
+    const tree = {};
+
+    for (let bName in dataTree) {  
+        addDataInInteractionSetToFilteredTree(dataTree[bName], bName);
+    }                                                                           console.log('tree after int filter = %O', tree)
+    return tree;
+
+    function addDataInInteractionSetToFilteredTree(branch, name) {
+        const hasIntsInSet = filterEntityAndSubs(branch, focus, intSet); 
+        if (hasIntsInSet) { tree[name] = branch; }
+    }
+} /* End filterTreeToInteractionSet */
+function filterEntityAndSubs(ent, focus, set) {                                 //console.log('filterEntityAndSubs. Entity = %O', ent);
+    const inSet = hasInteractionsInSet();    //if (inSet) { console.log('inSet! entity = %O', ent) }
+    return ent.children.length ? 
+        findMatchingEntsInSubs() : inSet;
+
+    function hasInteractionsInSet() {
+        if (focus === 'taxa') { return filterTaxonInteractions();  } 
+        return filterEntityInteractions('interactions');
+    }
+    function filterEntityInteractions(prop) {                                   //console.log('filterEntityInteractions. [%s] ent = %O, set = %O', prop, ent, set);
+        ent[prop] = ent[prop].filter(id => set.indexOf(id) !== -1);
+        return ent[prop].length > 0;                                  
+    }
+    function filterTaxonInteractions() {
+        const obj = filterEntityInteractions('objectRoles');
+        const subj = filterEntityInteractions('subjectRoles');
+        return obj || subj;
+    }
+    function findMatchingEntsInSubs() {
+        ent.children = ent.children.filter(c => filterEntityAndSubs(c, focus, set)); 
+        return inSet || ent.children.length > 0;
+    }
+} /* End filterEntityAndSubs */
 
 
 
