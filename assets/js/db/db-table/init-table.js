@@ -18,7 +18,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export default function initTbl(viewTitle, rowData, state) {                    console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export default function initTbl(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
     const tblDiv = document.querySelector('#search-tbl');
     const tblOpts = getDefaultTblOpts(viewTitle);
@@ -57,6 +57,7 @@ function afterFilterChanged() {}                                                
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
     updateFilterStatusMsg();    
 } 
+/** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
     if ($('#int-opts').hasClass('closed') || $('#mod-one-list').prop('checked')) { return; }  
     $('#mod-one-list').prop({checked: 'checked'}).change();
@@ -100,7 +101,7 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-            {headerName: "Cnt", field: "intCnt", width: 47, volatile: true, headerTooltip: "Interaction Count" },
+            {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },

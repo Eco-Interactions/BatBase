@@ -405,9 +405,9 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
     }
 } /* End fillHiddenColumns */
 /* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
-function filterTreeToInteractionSet(dataTree, focus) {                          console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);
+function filterTreeToInteractionSet(dataTree, focus) {                          //console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);
     const intSet = tblState.intSet;
-    if (!intSet) { return dataTree; }
+    if (!intSet == null || !intSet) { return dataTree; }
 
     const tree = {};
 

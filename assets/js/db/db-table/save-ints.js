@@ -12,19 +12,15 @@ import * as _u from '../util.js';
 import * as data_tree from './build-data-tree.js';
 import * as frmt_data from './format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState } from '../db-page.js';
+import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 import { updateFilterStatusMsg } from './db-filters.js';
 
 /**
- * edits - tracks changes in interaction list on list submit
  * list - List open in panel
- * modMode - "add" || "rmv" interaction rows selected in table
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
- * interactions - records loaded in the grid
- * intRcrds - all interaction rcrds
- */
+] */
 let app = {};
 
 export function addDomEvents() {
@@ -81,6 +77,14 @@ function addInfoMsgAndUpdateTableSelection() {
     if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
     } else { $('#mod-info')[0].innerHTML = all; }
 }
+/** Resets interactions displated to the full feault set of the current focus. */
+function resetTable() {                                                         //console.log('- - - - - -resetingTable');
+    removePreviousTable();
+    tState().set({'intSet': false});                                            //console.log('focus = %s', app.tblState.curFocus);
+    resetSearchState();
+    $('#load-list').html('View Interaction List in Table');
+    $('#load-list').off('click').click(loadInteractionsInTable);
+}
 /* ----------------------- Create New List ---------------------------------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
@@ -96,7 +100,7 @@ function createDataList() {
 }
 /* ----------------------- Edit List ---------------------------------------- */
 /** Opens a saved list of interactions. */
-export function selIntList(val) {                                               console.log('selecting interaction list. val = ', val);
+export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
     if (val === 'create') { return newIntList(''); }
     if (!val) { return clearAndDisableInputs(); }
     if (val === 'new') { return; } // New list typed into combobox
@@ -111,7 +115,7 @@ function editDataList() {
 }
 function fillListData(id) {
     const lists = _u.getDataFromStorage('dataLists');                           
-    const list = addActiveListToMemory(lists[id]);                              console.log('activeList = %O', list);                                                 
+    const list = addActiveListToMemory(lists[id]);                              //console.log('activeList = %O', list);                                                 
     fillListDataFields(
         list.displayName, list.description, list.details.length);
 }
@@ -164,11 +168,6 @@ function updateDataListSel() {
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
 }
-function expandAllTableRows() {
-    app.tblApi = tState().get('api');
-    app.tblApi.expandAll();
-    resetToggleTreeBttn(true);
-}
 /* --------------------- List Manipulation ---------------------------------- */
 function addActiveListToMemory(list) {
     app.list = list ? parseList(list) : { details: [] };
@@ -205,7 +204,7 @@ function selectInteractions(rowNode) {
     if (rowNode.data.interactionType !== undefined) { rowNode.setSelected(true); }
 }
 function getUpdatedInteractionSet() {
-    const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; }); console.log('selected rows = %O', rows);
+    const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; }); //console.log('selected rows = %O', rows);
     return [ ...new Set(rows.concat(app.list.details).filter(id => id))];
 }
 /* ---------------- Submit and Success Methods -------------------------------*/
@@ -231,15 +230,16 @@ function hideSavedMsg() {
  * Loads the interaction set in the table, where it can be explored and filtered
  * with the standard UI options
  */
-function loadInteractionsInTable() {
-    app.tblState = tState().get();
+function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
+    removePreviousTable();
     app.tblState.intSet = app.list.details;
-    app.tblState.api.destroy();
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     enableModUi('rmv');
     app.tblState.api.expandAll();
     resetToggleTreeBttn(true);
     updateFilterStatusMsg();
+    $('#load-list').html('Reset to All Interactions');
+    $('#load-list').off('click').click(resetTable);
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
     const bldrs = {
@@ -265,7 +265,6 @@ function buildSrcTreeInts() {
         data_tree.buildSrcTree(app.tblState.curView), app.tblState);
 }
 /* ---- Taxa ---- */
-
 function buildTxnTreeInts() {                                                   
     const realmTaxon = _u.getDataFromStorage('taxon')[getId(app.tblState.taxaByLvl)];
     frmt_data.transformTxnDataAndLoadTable(
@@ -277,8 +276,16 @@ function getId(taxaByLvl) {
     });
     return taxaByLvl[realmLvl][Object.keys(taxaByLvl[realmLvl])[0]];  
 }
-
-
+/** -------------- Utility ------------------------------------------------=- */
+function removePreviousTable() {
+    app.tblState = tState().get();
+    app.tblState.api.destroy();
+}
+function expandAllTableRows() {
+    app.tblApi = tState().get('api');
+    app.tblApi.expandAll();
+    resetToggleTreeBttn(true);
+}
 
 
 

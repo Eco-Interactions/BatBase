@@ -174,11 +174,11 @@ function isNextOpenLeafRow(node) {                                              
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
     loadTaxonViewOpts(data.realm);
-    setTaxonView();  
+    setTaxonView(); 
 }
 function loadTaxonViewOpts(realms) {
     const opts = getViewOpts(realms);
-    _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
+    _u.replaceSelOpts('#sel-view', opts, db_page.rebuildTxnTable);
 }
 function getViewOpts(realms) {  
     const optsAry = [];

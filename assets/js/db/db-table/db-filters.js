@@ -6,8 +6,8 @@
  *     buildTreeSearchHtml              db-ui
  *     hideFilterPanel                  db_ui
  *     newFilterSet                     util
- *     resetFilterStatusBar             db-page, save-ints
- *     resetTableStateParams            ab-page
+ *     resetTblFilters                  db-page, save-ints
+ *     resetTableStateParams            db-page
  *     selFilterSet                     util
  *     showTodaysUpdates                db_forms
  *     toggleFilterPanel                tips
@@ -18,7 +18,7 @@
  *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTaxonTable } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from './db-ui.js';
 /** 
  * Filter Params
@@ -188,7 +188,7 @@ function addActiveTableFilters(filters) {
 }
 function setFilterStatus(filters) {
     if (filters.length > 0) { setTableFilterStatus(getFilterStatus(filters)); 
-    } else { resetFilterStatusBar() }
+    } else { resetTblFilters() }
 }
 function getFilterStatus(filters) {
     if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
@@ -231,9 +231,10 @@ function setExternalFilterStatus(status) {
 function clearTableStatus() {
     $('#tbl-filter-status, #xtrnl-filter-status').empty();
 }
-export function resetFilterStatusBar() {  
+export function resetTblFilters() {  
     $('#xtrnl-filter-status').text('Filtering on: ');
     $('#tbl-filter-status').text('No Active Filters.');
+    $('#shw-chngd').prop('checked', false); //resets updatedAt table filter
     fPs.focusFltrs = [];
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
@@ -490,7 +491,7 @@ export function updateTaxonSearch(val) {                                        
     const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     updateFilterStatus();
-    rebuildTaxonTable(rcrd, 'filtering');
+    rebuildTxnTable(rcrd, 'filtering');
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function updateFilterStatus() {

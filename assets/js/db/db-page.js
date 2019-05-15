@@ -13,9 +13,11 @@
  *     onDataReset
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
- *     rebuildLocTable
- *     rebuildTaxonTable
- *     selectSearchFocus
+ *     rebuildLocTable          save-ints
+ *     rebuildTxnTable          save-ints, dn-ui
+ *     resetSearchState         save-ints
+ *     resetDataTable           db-ui, save-ints    
+ *     selectSearchFocus        save-ints
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap
@@ -75,12 +77,22 @@ export function showIntroAndLoadingMsg() {
     db_tips.startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchState() {
-    resetTableParams();
-    db_filters.toggleTimeUpdatedFilter('disable');
-    db_filters.resetFilterStatusBar();      
+export function initSearchState() {                                             //console.log('initSearchState');
+    resetState();      
     selectInitialSearchFocus();
 } 
+function resetState() {
+    resetTableParams();
+    db_filters.toggleTimeUpdatedFilter('disable');
+    db_filters.resetTblFilters();
+}
+export function resetSearchState() {                                            //console.log('resetSearchState');
+    resetTableParams();
+    db_filters.toggleTimeUpdatedFilter('disable');
+    db_filters.resetTblFilters();    
+    selectSearchFocus();
+
+}
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
     const focus = tblState.curFocus || 'taxa';
@@ -118,14 +130,14 @@ function setTableState(stateObj) {                                              
 /*-------------------- "State" Managment Methods -----------------------------*/
 /** Resets on focus change. */
 function resetTableParams(focus) {  
-    const intSet = tblState.intSet;
+    const intSet =  tblState.intSet;
     tblState = {
         curFocus: focus || getResetFocus(),
-        intSet: intSet,
         openRows: [],
         selectedOpts: {},
         userRole: $('body').data("user-role")
     };
+    if (intSet) { tblState.intSet = intSet; }
 }
 function getResetFocus() {
     const foci = ['locs', 'srcs', 'taxa'];
@@ -134,7 +146,7 @@ function getResetFocus() {
 }
 /** Resets table state to top focus options for the selected view. */
 export function resetDataTable() {                                              //console.log("---reseting table---")
-    const resetMap = { taxa: resetTaxonView, locs: rebuildLocTable, srcs: resetSourceView };
+    const resetMap = { taxa:  onTxnViewChange, locs: rebuildLocTable, srcs: rebuildSrcTable };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 
 } 
@@ -156,16 +168,13 @@ function resetCurTreeStorageProps() {
 /**  Table-rebuild entry point after form-window close.  */
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
     db_ui.resetToggleTreeBttn(false);
-    db_filters.resetFilterStatusBar();
+    db_filters.resetTblFilters();
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();
 }
 export function selectSearchFocus(f) { 
-    // const data = _u.getDataFromStorage('pgDataUpdatedAt'); console.log('data ? ', data)
-    // if (!data) { return; } 
     const focus = f ? f : _u.getSelVal('Focus');                                console.log("---select(ing)SearchFocus = ", focus); 
-    // if (!focus) { return; }
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 
@@ -176,7 +185,6 @@ export function selectSearchFocus(f) {
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
-    if ($('#shw-chngd')[0].checked) { $('#shw-chngd').click(); } //resets updatedAt table filter
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     storeStateValue('curFocus', focus);
     clearOnFocusChange(focus, tableBuilder);
@@ -191,7 +199,7 @@ function focusNotChanged(focus) {
 }
 function clearOnFocusChange(focus, tableBuilder) {
     storeStateValue('curView', false);
-    db_filters.resetFilterStatusBar();
+    db_filters.resetTblFilters();
     resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
     _u.replaceSelOpts('#sel-view', false);
@@ -200,69 +208,6 @@ function clearOnFocusChange(focus, tableBuilder) {
 }
 function storeStateValue(key, value) {
     _u.addToStorage(key, JSON.stringify(value));
-}
-/* ==================== TAXON SEARCH  =============================================================================== */
-/**
- * Get all data needed for the Taxon-focused table from data storage and send 
- * to @initTaxonSearchUi to begin the data-table build.  
- */
-function buildTaxonTable() {                                                    //console.log("Building Taxon Table.");
-    const data = _u.getDataFromStorage(['realm', 'taxon']); 
-    if (data) { 
-        tblState.rcrdsById = data.taxon;
-        db_ui.initTaxonSearchUi(data);
-        startTxnTableBuildChain(storeAndReturnView());
-    } else { console.log("Error loading taxon data from storage."); }
-}
-/** Event fired when the taxon view select box has been changed. */
-export function onTxnViewChange(val) {                                          //console.log('onTxnViewChange. val = [%s]', val) 
-    if (!val) { return; }
-    resetTaxonView(val);
-}
-function resetTaxonView(val) {                                                  //console.log('resetTaxonView')
-    const realmTaxon = storeAndReturnView(val);
-    resetCurTreeState();
-    $('#focus-filters').empty();  
-    rebuildTaxonTable(realmTaxon);
-}
-/**
- * Gets the currently selected taxon realm/view's id, gets the record for the taxon, 
- * stores both it's id and level in the global focusStorag, and returns 
- * the taxon's record.
- */
-function storeAndReturnView(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
-    const realmLvl = realmTaxonRcrd.level;
-    storeStateValue('curView', realmId);
-    tblState.curView = realmId;
-    tblState.realmLvl = realmLvl;
-    return realmTaxonRcrd;
-}
-/** This catches errors in realm value caused by exiting mid-tutorial.  */
-function getSelValOrDefault(val) {
-    return !val ? 3 : isNaN(val) ? 3 : val;
-}
-/**
- * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
- * the tree are stored or updated before continuing @getInteractionsAndFillTable.
- * Note: This is the entry point for filter-related taxon-table rebuilds.
- */
-export function rebuildTaxonTable(topTaxon, filtering) {                        //console.log("topTaxon = %O", topTaxon)
-    clearPreviousTable();
-    startTxnTableBuildChain(topTaxon, filtering)
-}
-/**
- * Builds a family tree of taxon data with passed taxon as the top of the tree, 
- * transforms that data into the format used for ag-grid and loads the grid, aka table. 
- * The top taxon's id is added to the global focus storage obj's 'openRows' 
- * and will be expanded on table load. 
- */
-function startTxnTableBuildChain(topTaxon, filtering) {
-    tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
-    frmt_data.transformTxnDataAndLoadTable(
-        data_tree.buildTxnTree(topTaxon, filtering), tblState);
-    db_ui.loadTaxonComboboxes(tblState);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(view) {
@@ -372,9 +317,9 @@ function buildSourceTable() {
 /** Event fired when the source view select box has been changed. */
 export function onSrcViewChange(val) {                                         //console.log('-------- SrcViewChange. [%s]', val)
     if (!val) { return; }
-    resetSourceView(val);
+    rebuildSrcTable(val);
 }
-function resetSourceView(val) {
+function rebuildSrcTable(val) {
     clearPreviousTable();
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
@@ -391,4 +336,67 @@ function storeSrcView(val) {
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
     storeStateValue('curView', viewVal);
     tblState.curView = viewVal;    
+}
+/* ==================== TAXON SEARCH  =============================================================================== */
+/**
+ * Get all data needed for the Taxon-focused table from data storage and send 
+ * to @initTaxonSearchUi to begin the data-table build.  
+ */
+function buildTaxonTable() {                                                    //console.log("Building Taxon Table.");
+    const data = _u.getDataFromStorage(['realm', 'taxon']); 
+    if (data) { 
+        tblState.rcrdsById = data.taxon;
+        db_ui.initTaxonSearchUi(data);
+        startTxnTableBuildChain(storeAndReturnView());
+    } else { console.log("Error loading taxon data from storage."); }
+}
+/** Event fired when the taxon view select box has been changed. */
+export function rebuildTxnTable(val) {                                          //console.log('rebuildTxnTable. val = [%s]', val) 
+    if (!val) { return; }
+    onTxnViewChange(val);
+}
+function onTxnViewChange(val) {                                                 //console.log('onTxnViewChange')
+    const realmTaxon = storeAndReturnView(val);
+    resetCurTreeState();
+    $('#focus-filters').empty();  
+    buildTxnTable(realmTaxon);
+}
+/**
+ * Gets the currently selected taxon realm/view's id, gets the record for the taxon, 
+ * stores both it's id and level in the global focusStorage, and returns 
+ * the taxon's record.
+ */
+function storeAndReturnView(val) {
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
+    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
+    const realmLvl = realmTaxonRcrd.level;
+    storeStateValue('curView', realmId);
+    tblState.curView = realmId;
+    tblState.realmLvl = realmLvl;   
+    return realmTaxonRcrd;
+}
+/** This catches errors in realm value caused by exiting mid-tutorial.  */
+function getSelValOrDefault(val) {
+    return !val ? 3 : isNaN(val) ? 3 : val;
+}
+/**
+ * Builds a taxon data-tree for the passed taxon. The taxon levels present in 
+ * the tree are stored or updated before continuing @getInteractionsAndFillTable.
+ * Note: This is the entry point for filter-related taxon-table rebuilds.
+ */
+function buildTxnTable(topTaxon, filtering) {                                   //console.log("topTaxon = %O", topTaxon)
+    clearPreviousTable();
+    startTxnTableBuildChain(topTaxon, filtering)
+}
+/**
+ * Builds a family tree of taxon data with passed taxon as the top of the tree, 
+ * transforms that data into the format used for ag-grid and loads the grid, aka table. 
+ * The top taxon's id is added to the global focus storage obj's 'openRows' 
+ * and will be expanded on table load. 
+ */
+function startTxnTableBuildChain(topTaxon, filtering) {
+    tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
+    frmt_data.transformTxnDataAndLoadTable(
+        data_tree.buildTxnTree(topTaxon, filtering), tblState);
+    db_ui.loadTaxonComboboxes(tblState);
 }
