@@ -41,6 +41,7 @@ function buildAndShowIntPanel() {                                               
         disableInputs();
         initListCombobox();
         expandAllTableRows();
+        enableModUi('add');
         window.setTimeout(function() { 
             $('#saved-ints')[0].selectize.focus();  
         }, 500);         
@@ -50,8 +51,7 @@ function showPanel() {
     $('#int-opts').removeClass('closed');  
     $('#db-opts-col4').addClass('shw-col-borders hide-int-bttm-border');
     window.setTimeout(function() { 
-        $('#int-opts').css('overflow-y', 'visible');
-    }, 500);  
+        $('#int-opts').css('overflow-y', 'visible')}, 500);  
 }
 function initListCombobox() {
     _u.initCombobox('Int-lists');   
@@ -60,16 +60,16 @@ function initListCombobox() {
 function addEvents() {
     $('#add-mode').change(() => app.modMode = 'add');
     $('#rmv-mode').change(() => app.modMode = 'rmv');
-    $('input[name="mod-list"]').on('change', toggleAddInstructions);
+    $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
 }
-export function hideIntPanel() {                                                       //console.log('hideIntPanel')
+export function hideIntPanel() {                                                //console.log('hideIntPanel')
     $('#int-opts').css('overflow-y', 'hidden');
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');
 }
-function toggleAddInstructions() {                                              //console.log('toggleAddInstructions');
+function toggleInstructions() {                                                 //console.log('toggleInstructions');
     $('#mod-info').fadeTo('fast', 0); 
     addInfoMsgAndUpdateTableSelection();
     $('#mod-info').fadeTo('slow', 1);
@@ -103,7 +103,6 @@ export function selIntList(val) {                                               
     addSubmitEvent(editDataList);
     fillListData(val);
     enableInputs();
-    enableModUi('add');
 }
 function editDataList() {
     const data = buildListData();

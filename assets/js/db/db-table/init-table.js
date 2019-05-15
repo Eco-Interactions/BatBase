@@ -35,20 +35,21 @@ export default function initTbl(viewTitle, rowData, state) {                    
 function getDefaultTblOpts(viewTitle) {  
     return {
         columnDefs: getColumnDefs(viewTitle),
-        rowSelection: 'multiple',   //Used for csv export
+        enableColResize: true,
+        enableFilter: true,
+        enableSorting: true,
         getHeaderCellTemplate: getHeaderCellTemplate, 
         getNodeChildDetails: getNodeChildDetails,
         getRowClass: getRowStyleClass,
-        onRowGroupOpened: softRefresh,
         onBeforeFilterChanged: beforeFilterChange, 
         onAfterFilterChanged: afterFilterChanged,
-        onModelUpdated: onModelUpdated,
         onBeforeSortChanged: onBeforeSortChanged,
-        enableColResize: true,
-        enableSorting: true,
-        unSortIcon: true,
-        enableFilter: true,
-        rowHeight: 26
+        onModelUpdated: onModelUpdated,
+        onRowGroupOpened: softRefresh,
+        onRowSelected: rowSelected,
+        rowHeight: 26,
+        rowSelection: 'multiple',   //Used for csv export
+        unSortIcon: true
     };
 }
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
@@ -56,6 +57,10 @@ function afterFilterChanged() {}                                                
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
     updateFilterStatusMsg();    
 } 
+function rowSelected() {  
+    if ($('#int-opts').hasClass('closed') || $('#mod-one-list').prop('checked')) { return; }  
+    $('#mod-one-list').prop({checked: 'checked'}).change();
+}
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's
  * @param  {obj} params  {column, colDef, context, api}
