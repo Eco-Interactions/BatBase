@@ -341,6 +341,11 @@ function buildLocMap() {
     if (tblState.intSet) { return showLocsInSetOnMap(); }
     db_map.initMap(tblState.rcrdsById);           
 }
+/**
+ * When displaying a user-made set "list" of interactions focused on locations in 
+ * "Map Data" view, the locations displayed on the map are only those in the set
+ * and their popup data reflects the data of the set. 
+ */
 function showLocsInSetOnMap() {
     const locTree = data_tree.buildLocTree(getTopRegionIds());
     db_map.initMap(tblState.rcrdsById, locTree);

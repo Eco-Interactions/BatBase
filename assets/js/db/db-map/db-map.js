@@ -300,17 +300,22 @@ function addMarkersForRegion(region) {
     if (region.displayName === "Unspecified") { return; }
     addMarkersForLocAndChildren(region);
 }
-function addMarkersForLocAndChildren(topLoc) {                                 
+function addMarkersForLocAndChildren(topLoc, fltrdSet) {                                 
     if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', topLoc.displayName, topLoc);
-    let intCnt = topLoc.totalInts; 
+    // let intCnt = fltrdSet ? topLoc.interactions.length : topLoc.totalInts; 
+    let intCnt = topLoc.interactions.length; 
     buildMarkersForLocChildren(topLoc.children);                               
     if (intCnt) { buildLocationMarkers(intCnt, topLoc); }
-
+    /**
+     * When displaying a user-made set "list" of interactions focused on locations in 
+     * "Map Data" view, the locations displayed on the map are only those in the set
+     * and their popup data reflects the data of the set. 
+     */
     function buildMarkersForLocChildren(locs) {
-        locs.forEach(id => {
-            let loc = typeof id === 'object' ? id : locRcrds[id];
+        locs.forEach(l => {
+            let loc = typeof l === 'object' ? l : locRcrds[l];
             if (loc.locationType.displayName == 'Country') { 
-                return addMarkersForLocAndChildren(loc, false); 
+                return addMarkersForLocAndChildren(loc); 
             }
             buildLocationIntMarkers(loc, loc.interactions.length);
         });
@@ -340,7 +345,7 @@ function addMarkersForLocAndChildren(topLoc) {
  * When the table is filtered to display a set of interactions created by the user, 
  * that set is displayed when the loc view "Map Data" is selected.
  */
-function addMrkrsInSet(tree) {                                                  console.log('addMrkrsInSet. tree = %O', tree)
+function addMrkrsInSet(tree) {                                                  //console.log('addMrkrsInSet. tree = %O', tree)
     let ttlShown = 0, 
     ttlNotShown = 0;
     addMarkersInTree();
@@ -461,7 +466,7 @@ function buildFeature(loc, geoData) {                                           
             }
         };   
 }
-function addMarkerForEachInteraction(intCnt, latLng, loc) {                     //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
+function addMarkerForEachInteraction(intCnt, latLng, loc) {           //console.log('adding [%s] markers at [%O]', intCnt, latLng);
     const MapMarker = intCnt === 1 ? 
         new MM.LocMarker(latLng, loc, locRcrds) :
         new MM.LocCluster(map, intCnt, latLng, loc, locRcrds);
