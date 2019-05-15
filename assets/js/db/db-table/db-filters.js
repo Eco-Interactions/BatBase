@@ -1,18 +1,18 @@
 /**
- * Handles custom filtering of the data displayed in the table and reltaed UI.
+ * Handles custom filtering of the data displayed in the table and related UI.
  * 
- * Exports:                     Imported by:
- *     addDomEventListeners
- *     buildTreeSearchHtml
+ * Exports:                     Imported by:                (updated all 05/19)
+ *     addDomEventListeners             db-ui
+ *     buildTreeSearchHtml              db-ui
  *     hideFilterPanel                  db_ui
  *     newFilterSet                     util
- *     resetFilterStatusBar
- *     resetTableStateParams
+ *     resetFilterStatusBar             db-page, save-ints
+ *     resetTableStateParams            ab-page
  *     selFilterSet                     util
  *     showTodaysUpdates                db_forms
- *     toggleFilterPanel                db_ui
+ *     toggleFilterPanel                tips
  *     toggleTimeUpdatedFilter          db_page
- *     updateFilterStatusMsg
+ *     updateFilterStatusMsg            db-page, init-tbl
  *     updateLocSearch                  util
  *     updatePubSearch                  util
  *     updateTaxonSearch                util
@@ -141,7 +141,7 @@ function hideSavedMsg() {
  * message persisted through table update into map view.
  */
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
-    tblState = {api: tState().get('api')};
+    tblState = tState().get(null, ['api', 'intSet']);
     if (!tblState.api) { return; }
     getFiltersAndUpdateStatus();
 }
@@ -160,6 +160,7 @@ function getFiltersAndUpdateStatus() {
 function addActiveExternalFilters(filters) {
     addFocusFilters();
     addUpdatedSinceFilter();
+    addIntListFilter();
     
     function addFocusFilters() {
         if (fPs.focusFltrs && fPs.focusFltrs.length > 0) { 
@@ -170,6 +171,11 @@ function addActiveExternalFilters(filters) {
         if ($('#shw-chngd')[0].checked) { 
             filters.push("Time Updated");
         } 
+    }
+    function addIntListFilter() {
+        if (tblState.intSet) {
+            filters.push("Interaction List");
+        }
     }
 } /* End addActiveExternalFilters */
 function addActiveTableFilters(filters) {

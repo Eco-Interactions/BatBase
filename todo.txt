@@ -13,6 +13,7 @@ Current:
             - update filters to work with intSets
             - event hook for when a row is selected bu the user? 
                 - switch to "select rows" mode
+            - Bold core tree branch names
         - Store Filter Sets
     - Think of "title" for the "add mode" of data lists
     - sync filters and lists

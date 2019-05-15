@@ -5,8 +5,8 @@
  *     initTbl          format-data
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
-import * as db_filters from './db-filters.js';
 import * as db_forms from '../db-forms/db-forms.js';
+import { updateFilterStatusMsg } from './db-filters.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
 import { enableTableButtons, resetToggleTreeBttn } from './db-ui.js';
@@ -54,7 +54,7 @@ function getDefaultTblOpts(viewTitle) {
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    db_filters.updateFilterStatusMsg();    
+    updateFilterStatusMsg();    
 } 
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's
@@ -308,6 +308,7 @@ function onTableInitComplete(rowData) {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
+    updateFilterStatusMsg();
     if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
 } 
 function updateDisplayForShowingInteractionSet(rowData) {

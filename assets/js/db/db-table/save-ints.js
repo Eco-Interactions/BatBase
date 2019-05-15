@@ -14,6 +14,7 @@ import * as frmt_data from './format-data.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
+import { updateFilterStatusMsg } from './db-filters.js';
 
 /**
  * edits - tracks changes in interaction list on list submit
@@ -36,16 +37,20 @@ export function toggleSaveIntsPanel() {                                         
 }
 function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')
     showPanel();
-    disableInputs();
-    initListCombobox();
-    expandAllTableRows();
+    if (!tState().get('intSet')) {
+        disableInputs();
+        initListCombobox();
+        expandAllTableRows();
+        window.setTimeout(function() { 
+            $('#saved-ints')[0].selectize.focus();  
+        }, 500);         
+    }
 }
 function showPanel() {
     $('#int-opts').removeClass('closed');  
     $('#db-opts-col4').addClass('shw-col-borders hide-int-bttm-border');
     window.setTimeout(function() { 
         $('#int-opts').css('overflow-y', 'visible');
-        $('#saved-ints')[0].selectize.focus();  
     }, 500);  
 }
 function initListCombobox() {
@@ -235,6 +240,7 @@ function loadInteractionsInTable() {
     enableModUi('rmv');
     app.tblState.api.expandAll();
     resetToggleTreeBttn(true);
+    updateFilterStatusMsg();
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
     const bldrs = {
