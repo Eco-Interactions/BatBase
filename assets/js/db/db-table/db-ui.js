@@ -173,12 +173,14 @@ function isNextOpenLeafRow(node) {                                              
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    loadTaxonViewOpts(data.realm);
+    if ($('#sel-view').data('focus') === 'taxa') { return; }
+    loadTxnViewOpts(data.realm);
     setTaxonView(); 
 }
-function loadTaxonViewOpts(realms) {
+function loadTxnViewOpts(realms) {
     const opts = getViewOpts(realms);
-    _u.replaceSelOpts('#sel-view', opts, db_page.rebuildTxnTable);
+    _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
+    $('#sel-view').data('focus', 'taxa');
 }
 function getViewOpts(realms) {  
     const optsAry = [];
@@ -289,13 +291,15 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * selected. 
  */ 
 export function initLocSearchUi(view) {
-    loadLocationViewOpts()
+    if ($('#sel-view').data('focus') === 'locs') { return; }
+    loadLocationViewOpts();
     setLocView(view);  
 } 
 function loadLocationViewOpts(argument) {
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
     _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
+    $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
     const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
@@ -439,6 +443,7 @@ function setSelectedLocVals(selected) {                                         
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
+    if ($('#sel-view').data('focus') === 'srcs') { return; }
     loadSourceViewOpts();
     setSrcView();  
 }
@@ -447,6 +452,7 @@ function loadSourceViewOpts() {
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
     _u.replaceSelOpts('#sel-view', opts, db_page.onSrcViewChange);
+    $('#sel-view').data('focus', 'srcs');
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView() {

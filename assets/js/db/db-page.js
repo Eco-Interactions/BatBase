@@ -14,7 +14,7 @@
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
  *     rebuildLocTable          db-filters
- *     rebuildTxnTable          db-filters, db-ui
+ *     rebuildTxnTable          db-filters
  *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-ints    
  *     selectSearchFocus        db-filters
