@@ -14,7 +14,7 @@ import * as frmt_data from './format-data.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
-import { updateFilterStatusMsg } from './db-filters.js';
+import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
 
 /**
  * list - List open in panel
@@ -236,7 +236,11 @@ function loadInteractionsInTable() {                                            
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     enableModUi('rmv');
     app.tblState.api.expandAll();
+    updateUi();
+}
+function updateUi() {
     resetToggleTreeBttn(true);
+    syncViewFiltersAndUi(app.tblState.curFocus);
     updateFilterStatusMsg();
     $('#load-list').html('Reset to All Interactions');
     $('#load-list').off('click').click(resetTable);

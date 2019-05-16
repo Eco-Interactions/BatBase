@@ -29,6 +29,7 @@ import { newFilterSet, selFilterSet } from './db-table/db-filters.js';
  *   isGeoJsonDataAvailable
  *   lcfirst 
  *   removeFromStorage
+ *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
  *   stripString
@@ -459,7 +460,10 @@ export function replaceSelOpts(selId, opts, changeHndlr, name) {                
     $selApi.addOption(opts);
     $selApi.refreshOptions(false);
     if (name) { updatePlaceholderText(selId, name, opts.length); }    
-    if (changeHndlr) { $selApi.on('change', changeHndlr); }  
+    if (changeHndlr) { 
+        $selApi.off('change');
+        $selApi.on('change', changeHndlr); 
+    }  
 }
 function clearCombobox($selApi) {
     $selApi.clearOptions();

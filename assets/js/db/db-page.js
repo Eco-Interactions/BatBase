@@ -13,11 +13,11 @@
  *     onDataReset
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
- *     rebuildLocTable          save-ints
- *     rebuildTxnTable          save-ints, dn-ui
+ *     rebuildLocTable          db-filters
+ *     rebuildTxnTable          db-filters, db-ui
  *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-ints    
- *     selectSearchFocus        save-ints
+ *     selectSearchFocus        db-filters
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap
@@ -146,7 +146,7 @@ function getResetFocus() {
 }
 /** Resets table state to top focus options for the selected view. */
 export function resetDataTable() {                                              //console.log("---reseting table---")
-    const resetMap = { taxa:  onTxnViewChange, locs: rebuildLocTable, srcs: rebuildSrcTable };
+    const resetMap = { taxa:  buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 
 } 
@@ -351,15 +351,15 @@ function buildTaxonTable() {                                                    
     } else { console.log("Error loading taxon data from storage."); }
 }
 /** Event fired when the taxon view select box has been changed. */
-export function rebuildTxnTable(val) {                                          //console.log('rebuildTxnTable. val = [%s]', val) 
+export function onTxnViewChange(val) {                                          //console.log('rebuildTxnTable. val = [%s]', val) 
     if (!val) { return; }
-    onTxnViewChange(val);
+    buildTxnTable(val);
 }
-function onTxnViewChange(val) {                                                 //console.log('onTxnViewChange')
+function buildTxnTable(val) {                                                   //console.log('onTxnViewChange')
     const realmTaxon = storeAndReturnView(val);
     resetCurTreeState();
     $('#focus-filters').empty();  
-    buildTxnTable(realmTaxon);
+    rebuildTxnTable(realmTaxon);
 }
 /**
  * Gets the currently selected taxon realm/view's id, gets the record for the taxon, 
@@ -384,7 +384,7 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-function buildTxnTable(topTaxon, filtering) {                                   //console.log("topTaxon = %O", topTaxon)
+export function rebuildTxnTable(topTaxon, filtering) {                          //console.log("topTaxon = %O", topTaxon)
     clearPreviousTable();
     startTxnTableBuildChain(topTaxon, filtering)
 }

@@ -10,6 +10,7 @@
  *     resetTableStateParams            db-page
  *     selFilterSet                     util
  *     showTodaysUpdates                db_forms
+ *     syncViewFiltersAndUi             save-ints
  *     toggleFilterPanel                tips
  *     toggleTimeUpdatedFilter          db_page
  *     updateFilterStatusMsg            db-page, init-tbl
@@ -357,19 +358,19 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi(filterTime) {                                         //console.log('tblState = %O', tblState);
+function syncFiltersAndUi() {                                                   //console.log('tblState = %O', tblState);
     db_ui.resetToggleTreeBttn(false);
     syncViewFiltersAndUi(tblState.curFocus);
     updateFilterStatusMsg();  
-
-    function syncViewFiltersAndUi(focus) {
-        const map = {
-            locs: db_ui.loadSearchLocHtml,
-            srcs: applySrcFltrs,
-            taxa: updateTaxonComboboxes
-        }; 
-        map[focus](tblState);
-    }
+}
+export function syncViewFiltersAndUi(focus) {
+    tblState = tState().get();
+    const map = {
+        locs: db_ui.loadSearchLocHtml,
+        srcs: applySrcFltrs,
+        taxa: updateTaxonComboboxes
+    }; 
+    map[focus](tblState);
 }
 /** Reapplys active external filters, author name or publication type. */
 function applySrcFltrs(tblState) {
@@ -485,8 +486,8 @@ function childRowsPassFilter(row, text) {
  * is updated with the taxon as the top of the new tree. The remaining level 
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
-export function updateTaxonSearch(val) {                                        //console.log("updateTaxonSearch val = ", val)
-    if (!val) { return; }
+export function updateTaxonSearch(val) {                                        
+    if (!val) { return; }                                                       console.log("updateTaxonSearch val = ", val); 
     const taxonRcrds = tState().get('rcrdsById');
     const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
