@@ -81,6 +81,7 @@ function addInfoMsgAndUpdateTableSelection() {
 function resetTable() {                                                         //console.log('- - - - - -resetingTable');
     removePreviousTable();
     tState().set({'intSet': false});                                            //console.log('focus = %s', app.tblState.curFocus);
+    delete app.listLoaded;
     resetSearchState();
     $('#load-list').html('View Interaction List in Table');
     $('#load-list').off('click').click(loadInteractionsInTable);
@@ -102,8 +103,9 @@ function createDataList() {
 /** Opens a saved list of interactions. */
 export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
     if (val === 'create') { return newIntList(''); }
-    if (!val) { return clearAndDisableInputs(); }
+    if (!val) { return resetListUi(); }
     if (val === 'new') { return; } // New list typed into combobox
+    resetPrevListUiState();
     addSubmitEvent(editDataList);
     fillListData(val);
     enableInputs();
@@ -121,6 +123,10 @@ function fillListData(id) {
 }
 /** ================== Shared Util ========================================== */
 /* ----------------- UI ------------------------------------------------------*/
+function resetListUi() {
+    clearAndDisableInputs();
+    resetPrevListUiState();
+}
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea, #int-list-cnt').val('');
     disableInputs();
@@ -167,6 +173,12 @@ function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
+}
+function resetPrevListUiState() {
+    if (!app.listLoaded) { return; }
+    resetTable();
+    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);
+    delete app.listLoaded;
 }
 /* --------------------- List Manipulation ---------------------------------- */
 function addActiveListToMemory(list) {
@@ -237,13 +249,17 @@ function loadInteractionsInTable() {                                            
     enableModUi('rmv');
     app.tblState.api.expandAll();
     updateUi();
+    app.listLoaded = true;
 }
 function updateUi() {
     resetToggleTreeBttn(true);
     syncViewFiltersAndUi(app.tblState.curFocus);
     updateFilterStatusMsg();
-    $('#load-list').html('Reset to All Interactions');
-    $('#load-list').off('click').click(resetTable);
+    updateListLoadButton('Reset to All Interactions', resetTable);
+}
+function updateListLoadButton(text, clickFunc) {
+    $('#load-list').html(text);
+    $('#load-list').off('click').click(clickFunc);
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
     const bldrs = {

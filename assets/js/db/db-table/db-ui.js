@@ -173,11 +173,11 @@ function isNextOpenLeafRow(node) {                                              
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    if ($('#sel-view').data('focus') === 'taxa') { return; }
     loadTxnViewOpts(data.realm);
     setTaxonView(); 
 }
 function loadTxnViewOpts(realms) {
+    if ($('#sel-view').data('focus') === 'taxa') { return; }
     const opts = getViewOpts(realms);
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
     $('#sel-view').data('focus', 'taxa');
@@ -291,11 +291,11 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * selected. 
  */ 
 export function initLocSearchUi(view) {
-    if ($('#sel-view').data('focus') === 'locs') { return; }
     loadLocationViewOpts();
     setLocView(view);  
 } 
 function loadLocationViewOpts(argument) {
+    if ($('#sel-view').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
     _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
@@ -443,11 +443,11 @@ function setSelectedLocVals(selected) {                                         
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
-    if ($('#sel-view').data('focus') === 'srcs') { return; }
-    loadSourceViewOpts();
+    loadSourceViewOpts();   
     setSrcView();  
 }
 function loadSourceViewOpts() {
+    if ($('#sel-view').data('focus') === 'srcs') { return ; }
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
