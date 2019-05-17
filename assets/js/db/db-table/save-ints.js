@@ -18,6 +18,7 @@ import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
 
 /**
  * list - List open in panel
+ * listLoaded - List loaded in table
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
 ] */
@@ -26,7 +27,14 @@ let app = {};
 export function addDomEvents() {
     addEvents();
 }
-/* ----------------------- Init Methods And Event Handlers ------------------ */
+function addEvents() {
+    $('#add-mode').change(() => app.modMode = 'add');
+    $('#rmv-mode').change(() => app.modMode = 'rmv');
+    $('input[name="mod-list"]').on('change', toggleInstructions);
+    $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
+    $('#load-list').click(loadInteractionsInTable);
+}
+/* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
     } else { hideIntPanel(); }
@@ -49,44 +57,13 @@ function showPanel() {
     window.setTimeout(function() { 
         $('#int-opts').css('overflow-y', 'visible')}, 500);  
 }
-function initListCombobox() {
-    _u.initCombobox('Int-lists');   
-    updateDataListSel();
-}
-function addEvents() {
-    $('#add-mode').change(() => app.modMode = 'add');
-    $('#rmv-mode').change(() => app.modMode = 'rmv');
-    $('input[name="mod-list"]').on('change', toggleInstructions);
-    $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
-    $('#load-list').click(loadInteractionsInTable);
-}
 export function hideIntPanel() {                                                //console.log('hideIntPanel')
     $('#int-opts').css('overflow-y', 'hidden');
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');
 }
-function toggleInstructions() {                                                 //console.log('toggleInstructions');
-    $('#mod-info').fadeTo('fast', 0); 
-    addInfoMsgAndUpdateTableSelection();
-    $('#mod-info').fadeTo('slow', 1);
-}
-function addInfoMsgAndUpdateTableSelection() {
-    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.';
-    const all = 'Click "Save List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
-
-    if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
-    } else { $('#mod-info')[0].innerHTML = all; }
-}
-/** Resets interactions displated to the full feault set of the current focus. */
-function resetTable() {                                                         //console.log('- - - - - -resetingTable');
-    removePreviousTable();
-    tState().set({'intSet': false});                                            //console.log('focus = %s', app.tblState.curFocus);
-    delete app.listLoaded;
-    resetSearchState();
-    $('#load-list').html('View Interaction List in Table');
-    $('#load-list').off('click').click(loadInteractionsInTable);
-}
-/* ----------------------- Create New List ---------------------------------- */
+/* ============== CREATE/OPEN/EDIT INTERACTION LIST ========================= */
+/* ------------------ CREATE LIST -------------------------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
     enableInputs();
@@ -99,7 +76,7 @@ function createDataList() {
     const data = buildListData();
     submitDataList(data, 'create');
 }
-/* ----------------------- Edit List ---------------------------------------- */
+/* ----------------- OPEN LIST ----------------------------- */
 /** Opens a saved list of interactions. */
 export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
     if (val === 'create') { return newIntList(''); }
@@ -121,74 +98,7 @@ function fillListData(id) {
     fillListDataFields(
         list.displayName, list.description, list.details.length);
 }
-/** ================== Shared Util ========================================== */
-/* ----------------- UI ------------------------------------------------------*/
-function resetListUi() {
-    clearAndDisableInputs();
-    resetPrevListUiState();
-}
-function clearAndDisableInputs() {
-    $('#list-details input, #list-details textarea, #int-list-cnt').val('');
-    disableInputs();
-    // resetModUi();
-}
-function disableInputs() {
-    $('#list-details input, #mod-radios input, #list-details textarea, #mod-list-pnl label, #int-opts button')
-        .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
-}
-function enableInputs() {
-    $(`#list-details input, #list-details textarea, #add-mode+label, 
-        #int-opts button, #mod-radios input, #mod-radios label`)
-        .attr({'disabled': false}).css({'opacity': '1'});
-}
-function addSubmitEvent(submitEvent) {
-    $('#submit-list').off('click').click(submitEvent);
-}
-function enableModUi(mode) { 
-    const inactiveMode = mode === 'add' ? 'rmv' : 'add';
-    $(`#${inactiveMode}-mode`).prop('checked', false);
-    $(`label[for="${inactiveMode}-mode"]`).css('opacity', .5);
-
-    $(`#${mode}-mode`).prop('checked', true);
-    $(`label[for="${mode}-mode"]`).css('opacity', 1);
-    $(`#mod-all-list`).prop('checked', true).change();
-}
-// function resetModUi() {                                                         console.log('resetModUi')
-//     $('input[type="radio"]').prop('checked', false);
-//     $('#mod-info').fadeTo('fast', 0, () => {
-//         $('#mod-info')[0].innerHTML = ''; 
-//     });
-// }
-function enableSubmitBttn() {
-    $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
-    hideSavedMsg();
-}
-function fillListDataFields(nameVal, descVal, intCnt) {
-    $('#list-details input').val(nameVal).focus();
-    $('#list-details textarea').val(descVal);
-    $('#int-list-cnt')[0].innerHTML = intCnt;  
-    if (intCnt > 0) { $('#load-list').attr({disabled: false}).css({opacity: 1}); }
-}
-function updateDataListSel() {
-    const opts = _u.getOptsFromStoredData('dataListNames');                     
-    opts.unshift({value: 'create', text: '...Add New Interaction List'});
-    _u.replaceSelOpts('#saved-ints', opts);
-}
-function resetPrevListUiState() {
-    if (!app.listLoaded) { return; }
-    resetTable();
-    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);
-    delete app.listLoaded;
-}
-/* --------------------- List Manipulation ---------------------------------- */
-function addActiveListToMemory(list) {
-    app.list = list ? parseList(list) : { details: [] };
-    return app.list;
-}
-function parseList(list) {
-    list.details = JSON.parse(list.details);
-    return list
-}
+/* ---------------------- EDIT LIST ------------------------ */
 function buildListData() {
     const data = {
         displayName: $('#list-details input').val(),
@@ -198,7 +108,7 @@ function buildListData() {
     };
     return data;
 }
-/* ----------- Add Interaction Rows ----------------- */
+/* ----- ADD ROWS ----- */
 function getInteractions() {
     app.tblApi = tState().get('api');
     return $('#mod-one-list').prop('checked') ? getUpdatedInteractionSet() : 
@@ -219,25 +129,9 @@ function getUpdatedInteractionSet() {
     const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; }); //console.log('selected rows = %O', rows);
     return [ ...new Set(rows.concat(app.list.details).filter(id => id))];
 }
-/* ---------------- Submit and Success Methods -------------------------------*/
-function submitDataList(data, action) {
-    const envUrl = $('body').data("ajax-target-url");
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
-}
-function listSubmitComplete(action, results) {                                      
-    const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action);
-    updateDataListSel();
-    $('#saved-ints')[0].selectize.addItem(list.id);
-    showSavedMsg();
-}
-function showSavedMsg() {
-    $('#int-list-msg').fadeTo('slow', 1);
-}
-function hideSavedMsg() {
-    $('#int-list-msg').fadeTo('slow', 0);
-}
-/* ====================== LOAD INTERACTIONS IN TABLE ======================== */
+/* ----- REMOVE ROWS ----- */
+
+/* ================== LOAD INTERACTION LIST IN TABLE ======================== */
 /**
  * Loads the interaction set in the table, where it can be explored and filtered
  * with the standard UI options
@@ -296,7 +190,110 @@ function getId(taxaByLvl) {
     });
     return taxaByLvl[realmLvl][Object.keys(taxaByLvl[realmLvl])[0]];  
 }
-/** -------------- Utility ------------------------------------------------=- */
+/* ====================== UTILITY =========================================== */
+
+/* ---------------- Submit and Success Methods -------------------------------*/
+function submitDataList(data, action) {
+    const envUrl = $('body').data("ajax-target-url");
+    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
+}
+function listSubmitComplete(action, results) {                                      
+    const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
+    updateUserNamedList(results.list, action);
+    updateDataListSel();
+    $('#saved-ints')[0].selectize.addItem(list.id);
+    showSavedMsg();
+}
+function showSavedMsg() {
+    $('#int-list-msg').fadeTo('slow', 1);
+}
+function hideSavedMsg() {
+    $('#int-list-msg').fadeTo('slow', 0);
+}
+/* ----------------- UI -------------*/
+function initListCombobox() {
+    _u.initCombobox('Int-lists');   
+    updateDataListSel();
+}
+function toggleInstructions() {                                                 //console.log('toggleInstructions');
+    $('#mod-info').fadeTo('fast', 0); 
+    addInfoMsgAndUpdateTableSelection();
+    $('#mod-info').fadeTo('slow', 1);
+}
+function addInfoMsgAndUpdateTableSelection() {
+    const byOne = 'Click on an *interaction row to select. Hold ctrl to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.';
+    const all = 'Click "Save List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
+
+    if ($('#mod-one-list').prop('checked')) { $('#mod-info')[0].innerHTML = byOne;
+    } else { $('#mod-info')[0].innerHTML = all; }
+}
+function resetListUi() {
+    clearAndDisableInputs();
+    resetPrevListUiState();
+}
+function clearAndDisableInputs() {
+    $('#list-details input, #list-details textarea, #int-list-cnt').val('');
+    disableInputs();
+}
+function disableInputs() {
+    $('#list-details input, #mod-radios input, #list-details textarea, #mod-list-pnl label, #int-opts button')
+        .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
+}
+function enableInputs() {
+    $(`#list-details input, #list-details textarea, #add-mode+label, 
+        #int-opts button, #mod-radios input, #mod-radios label`)
+        .attr({'disabled': false}).css({'opacity': '1'});
+}
+function addSubmitEvent(submitEvent) {
+    $('#submit-list').off('click').click(submitEvent);
+}
+function enableModUi(mode) { 
+    const inactiveMode = mode === 'add' ? 'rmv' : 'add';
+    $(`#${inactiveMode}-mode`).prop('checked', false);
+    $(`label[for="${inactiveMode}-mode"]`).css('opacity', .5);
+
+    $(`#${mode}-mode`).prop('checked', true);
+    $(`label[for="${mode}-mode"]`).css('opacity', 1);
+    $(`#mod-all-list`).prop('checked', true).change();
+}
+function enableSubmitBttn() {
+    $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
+    hideSavedMsg();
+}
+function fillListDataFields(nameVal, descVal, intCnt) {
+    $('#list-details input').val(nameVal).focus();
+    $('#list-details textarea').val(descVal);
+    $('#int-list-cnt')[0].innerHTML = intCnt;  
+    if (intCnt > 0) { $('#load-list').attr({disabled: false}).css({opacity: 1}); }
+}
+function updateDataListSel() {
+    const opts = _u.getOptsFromStoredData('dataListNames');                     
+    opts.unshift({value: 'create', text: '...Add New Interaction List'});
+    _u.replaceSelOpts('#saved-ints', opts);
+}
+function resetPrevListUiState() {
+    if (!app.listLoaded) { return; }
+    resetTable();
+    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);
+    delete app.listLoaded;
+}
+function addActiveListToMemory(list) {
+    app.list = list ? parseList(list) : { details: [] };
+    return app.list;
+}
+function parseList(list) {
+    list.details = JSON.parse(list.details);
+    return list
+}
+/** Resets interactions displated to the full feault set of the current focus. */
+function resetTable() {                                                         //console.log('- - - - - -resetingTable');
+    removePreviousTable();
+    tState().set({'intSet': false});                                            //console.log('focus = %s', app.tblState.curFocus);
+    delete app.listLoaded;
+    resetSearchState();
+    $('#load-list').html('View Interaction List in Table');
+    $('#load-list').off('click').click(loadInteractionsInTable);
+}
 function removePreviousTable() {
     app.tblState = tState().get();
     app.tblState.api.destroy();
@@ -306,7 +303,6 @@ function expandAllTableRows() {
     app.tblApi.expandAll();
     resetToggleTreeBttn(true);
 }
-
 
 
 
