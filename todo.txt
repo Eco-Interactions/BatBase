@@ -1,10 +1,9 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 >ASAP<
 
->{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
 > Create Interaction Lists and UI
 
->REFACTORING
+
 
 Current:
     - Build backend for saving lists
@@ -16,14 +15,11 @@ Current:
             - Bold core tree branch names
         - Store Filter Sets
     - Think of "title" for the "add mode" of data lists
-    - sync filters and lists
+    - Add titles to all menu buttons
+    - update tutorial
 
 
 
-Next:
-    - Change cursor to finger over interaction rows
-    - look at graphs about user traffic on siteground
-    - Replace agGrid with MIT alternative 
 
 > "Review Data" backend
     * Identical tables
@@ -45,7 +41,7 @@ Before Release:
 Planning Meeting Notes:
 
 Before conference:
-
+    - Add spanish translations to site
 
 Figure out how to "stress test" the site:
     - Large number of people using it
@@ -60,11 +56,15 @@ Future:
         - html
     - Refactor form code
         - break out css
+    - refactor out all styles for the panel displays
     - Figure out whether the explicit form services are necessary
     - Refactor TESTS
         - replace all usleeps with "spinner" wait methods
     - Accessibility REFACTORING 
         - text to speech, etc
+Next:
+    - look at graphs about user traffic on siteground
+    - Replace agGrid with MIT alternative 
 
 MEETING NOTES:
     Point out:

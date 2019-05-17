@@ -33,6 +33,7 @@ function addEvents() {
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
+    $('#delete-list').click(deleteInteractionList);
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
@@ -62,8 +63,8 @@ export function hideIntPanel() {                                                
     $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
     $('#int-opts').addClass('closed');
 }
-/* ============== CREATE/OPEN/EDIT INTERACTION LIST ========================= */
-/* ------------------ CREATE LIST -------------------------- */
+/* ============== CREATE/OPEN INTERACTION LIST ============================== */
+/* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
     enableInputs();
@@ -76,7 +77,7 @@ function createDataList() {
     const data = buildListData();
     submitDataList(data, 'create');
 }
-/* ----------------- OPEN LIST ----------------------------- */
+/* ------ OPEN LIST ------- */
 /** Opens a saved list of interactions. */
 export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
     if (val === 'create') { return newIntList(''); }
@@ -98,7 +99,7 @@ function fillListData(id) {
     fillListDataFields(
         list.displayName, list.description, list.details.length);
 }
-/* ---------------------- EDIT LIST ------------------------ */
+/* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
     const data = {
         displayName: $('#list-details input').val(),
@@ -131,6 +132,10 @@ function getUpdatedInteractionSet() {
 }
 /* ----- REMOVE ROWS ----- */
 
+/* ====================== DELETE INTERACTION LIST =========================== */
+function deleteInteractionList() {                                              console.log('deleteInteractionList')
+    deleteDataList({id: app.list.id});
+}
 /* ================== LOAD INTERACTION LIST IN TABLE ======================== */
 /**
  * Loads the interaction set in the table, where it can be explored and filtered
@@ -192,7 +197,8 @@ function getId(taxaByLvl) {
 }
 /* ====================== UTILITY =========================================== */
 
-/* ---------------- Submit and Success Methods -------------------------------*/
+/* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
+/** Submit new or edited interaction list. */
 function submitDataList(data, action) {
     const envUrl = $('body').data("ajax-target-url");
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
@@ -204,7 +210,17 @@ function listSubmitComplete(action, results) {
     $('#saved-ints')[0].selectize.addItem(list.id);
     showSavedMsg();
 }
-function showSavedMsg() {
+/** Submit new or edited interaction list. */
+function deleteDataList(data) {
+    const envUrl = $('body').data("ajax-target-url");
+    _u.sendAjaxQuery(data, envUrl + 'lists/delete', listDeleteComplete);
+}
+function listDeleteComplete(results) {                                          console.log('listDeleteComplete results = %O', results)
+    updateUserNamedList(results.list, 'delete');
+    updateDataListSel();
+    $('#saved-ints')[0].selectize.open();
+}
+function showSavedMsg(msgClass) {
     $('#int-list-msg').fadeTo('slow', 1);
 }
 function hideSavedMsg() {
@@ -229,19 +245,22 @@ function addInfoMsgAndUpdateTableSelection() {
 }
 function resetListUi() {
     clearAndDisableInputs();
+    hideSavedMsg();
     resetPrevListUiState();
 }
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea, #int-list-cnt').val('');
+    $('#int-list-cnt').html('');
     disableInputs();
 }
 function disableInputs() {
-    $('#list-details input, #mod-radios input, #list-details textarea, #mod-list-pnl label, #int-opts button')
+    $(`#list-details input, #mod-radios input, #list-details textarea,
+        #mod-list-pnl label, #int-opts button, #mod-info`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableInputs() {
     $(`#list-details input, #list-details textarea, #add-mode+label, 
-        #int-opts button, #mod-radios input, #mod-radios label`)
+        #int-opts button, #mod-radios input, #mod-radios label, #mod-info`)
         .attr({'disabled': false}).css({'opacity': '1'});
 }
 function addSubmitEvent(submitEvent) {

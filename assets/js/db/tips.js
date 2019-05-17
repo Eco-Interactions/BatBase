@@ -49,7 +49,7 @@ function getIntroOptions() {
 function getSteps(step) {
     return [ 
         {
-            element: '#db-opts-col5', 
+            element: '#db-opts-col6', 
             intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database 
                 Search Page!</center></b><br><b>This tutorial demonstrates the 
                 various database features and search tools available.</b> There 
@@ -263,7 +263,7 @@ function getSteps(step) {
             setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
-            element: '#db-opts-col5',
+            element: '#db-opts-col6',
             intro: `<b><center>Thank you for taking the time to learn about the 
                 <br>Bat Eco-Interactions Database Search Page!</b></center><br>
                 You can start this tutorial again at anytime. There are also 

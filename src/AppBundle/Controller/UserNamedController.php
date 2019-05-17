@@ -46,7 +46,32 @@ class UserNamedController extends Controller
         $em->persist($list);
         $returnData->edits = false;
 
-        return $this->attemptFlushAndSendResponse($returnData, $em);
+        return $this->attemptListFlushAndSendResponse($returnData, $em);
+    }
+/*------------------------------ DELETE --------------------------------------*/
+    /**
+     * Deletes the user-named filter set or interaction list.
+     *
+     * @Route("/delete", name="list_delete")
+     */
+    public function listDeleteAction(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }                                                                       
+        $em = $this->getDoctrine()->getManager();
+        $requestContent = $request->getContent();
+        $data = json_decode($requestContent);                                   
+        $list = $em->getRepository('AppBundle:UserNamed')->findOneBy(['id' => $data->id]);
+        
+        $returnData = new \stdClass; 
+        $returnData->id = $data->id;
+        $returnData->displayName = $list->getDisplayName();
+        $returnData->type = $list->getType();
+
+        $em->remove($list);
+
+        return $this->attemptListFlushAndSendResponse($returnData, $em, true);
     }
 /*------------------------------ EDIT ----------------------------------------*/
     /**
@@ -58,10 +83,10 @@ class UserNamedController extends Controller
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
-        }                                                                       //print("\nCreating Source.\n");
+        }                                                                       
         $em = $this->getDoctrine()->getManager();
         $requestContent = $request->getContent();
-        $data = json_decode($requestContent);                                   //print("\nForm data =");print_r($formData);
+        $data = json_decode($requestContent);                                   
         $list = $em->getRepository('AppBundle:UserNamed')->findOneBy(['id' => $data->id]);
         
         $returnData = new \stdClass; 
@@ -73,7 +98,7 @@ class UserNamedController extends Controller
         $this->setListData($data, $list, $em, $returnData->edits);
         $em->persist($list);
 
-        return $this->attemptFlushAndSendResponse($returnData, $em);
+        return $this->attemptListFlushAndSendResponse($returnData, $em);
     }
     /*---------- Set List Data ---------------------------------------------*/
     private function setListData($data, &$entity, &$em, &$editing)
@@ -103,7 +128,7 @@ class UserNamedController extends Controller
      * Attempts to flush all persisted data. If there are no errors, the created/updated 
      * data is sent back to the crud form; otherise, an error message is sent back.
      */                                                                                                                                     
-    private function attemptFlushAndSendResponse($data, &$em)
+    private function attemptListFlushAndSendResponse($data, &$em, $delete = false)
     {        
         try {
             $em->flush();
@@ -113,7 +138,7 @@ class UserNamedController extends Controller
             return $this->sendErrorResponse($e, "\Exception");
         }
         // $this->setUpdatedAtTimes($data, $em);
-        return $this->sendDataAndResponse($data);
+        return $this->sendListDataAndResponse($data, $delete);
     }
     /** Logs the error message and returns an error response message. */
     private function sendErrorResponse($e, $tag)
@@ -127,10 +152,12 @@ class UserNamedController extends Controller
         return $response;
     }
     /** Sends an object with the entities' serialized data back to the crud form. */
-    private function sendDataAndResponse($data)
+    private function sendListDataAndResponse($data, $delete)
     {
-        $data->entity = $this->container->get('jms_serializer')
-            ->serialize($data->entity, 'json');
+        if (!$delete) {
+            $data->entity = $this->container->get('jms_serializer')
+                ->serialize($data->entity, 'json');
+        }
 
         $response = new JsonResponse();
         $response->setData(array(

@@ -115,23 +115,29 @@ function loadDataTable() {                                                      
     initDataTable(); 
 }
 /*---------------- Update User Named Lists -----------------------------------*/
-export function updateUserNamedList(data) {                                     //console.log('updating stored list data. %O', data);
-    const list = JSON.parse(data.entity);  
+export function updateUserNamedList(data, action) {                             //console.log('updating [%s] stored list data. %O', action, data);
+    const list = action == 'delete' ? data : JSON.parse(data.entity);  
+    const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
+    const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
+    const rcrds = _u.getDataFromStorage(rcrdKey);
+    const names = _u.getDataFromStorage(nameKey);
 
-    const type = list.type;
-    const rcrdKey = type == 'filter' ? 'savedFilters' : 'dataLists';
-    const nameKey = type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
-    let rcrds = _u.getDataFromStorage(rcrdKey);
-    let names = _u.getDataFromStorage(nameKey);
-
-    rcrds[list.id] = list;
-    names[list.displayName] = list.id;
-
-    if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
-
+    updateListData();
     storeData(rcrdKey, rcrds);
     storeData(nameKey, names);
-}
+
+    function updateListData() {
+        if (action == 'delete') { return removeListData(); } 
+        rcrds[list.id] = list;
+        names[list.displayName] = list.id;
+
+        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
+    }
+    function removeListData() {  
+        delete rcrds[list.id];  
+        delete names[list.displayName];  
+    }
+} /* End updateUserNamedList */
 /*------------------ Update Submitted Form Data --------------------------*/
 export function updateEditedData(data, cb) {
     updateStoredData(data, cb);
