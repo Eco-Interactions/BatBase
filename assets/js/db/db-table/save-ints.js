@@ -2,8 +2,7 @@
  * Handles the saving, editing, and display of saved lists of interactions.
  *
  * Exports:                 Imported By:
- *     addDomEvents                 db-ui
- *     hideIntPanel                 db-ui
+ *     addListPanelEvents           panel-util
  *     newIntList                   util
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
@@ -11,6 +10,7 @@
 import * as _u from '../util.js';
 import * as data_tree from './build-data-tree.js';
 import * as frmt_data from './format-data.js'; 
+import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
@@ -27,10 +27,7 @@ import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
 ] */
 let app = {};
 
-export function addDomEvents() {
-    addEvents();
-}
-function addEvents() {
+export function addListPanelEvents() {
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
@@ -42,10 +39,10 @@ function addEvents() {
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
-    } else { hideIntPanel(); }
+    } else { _uPnl.cssClosePanel('#int-opts'); }
 }
 function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')
-    showPanel();
+    _uPnl.cssOpenPanel('#int-opts');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
@@ -54,17 +51,6 @@ function buildAndShowIntPanel() {                                               
             disableInputs();
         }, 500);         
     }
-}
-function showPanel() {
-    $('#int-opts').removeClass('closed');  
-    $('#db-opts-col4').addClass('shw-col-borders hide-int-bttm-border');
-    window.setTimeout(function() { 
-        $('#int-opts').css('overflow-y', 'visible')}, 500);  
-}
-export function hideIntPanel() {                                                //console.log('hideIntPanel')
-    $('#int-opts').css('overflow-y', 'hidden');
-    $('#db-opts-col4').removeClass('shw-col-borders hide-int-bttm-border');
-    $('#int-opts').addClass('closed');
 }
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */

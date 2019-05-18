@@ -20,8 +20,8 @@ import { createEntity } from '../db-forms/db-forms.js';
 import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
-import { addDomEvents, hideIntPanel, toggleSaveIntsPanel } from './save-ints.js';
-
+import { toggleSaveIntsPanel } from './save-ints.js';
+import { addPanelEvents, cssClosePanel } from './panel-util.js';
 const userRole = $('body').data("user-role");
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
@@ -47,7 +47,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.resetDataTable);
-    addDomEvents();
+    addPanelEvents();
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp() {
@@ -527,7 +527,7 @@ export function updateUiForMapView() {
 }
 function closeOpenPanels() {
     if (!$('#filter-opts').hasClass('closed')) { db_filters.hideFilterPanel(); }
-    if (!$('#int-opts').hasClass('closed')) { hideIntPanel(); }
+    if (!$('#int-opts').hasClass('closed')) { cssClosePanel('#int-opts'); }
 }
 export function updateUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);
