@@ -2,7 +2,7 @@
  * Handles custom filtering of the data displayed in the table and related UI.
  * 
  * Exports:                     Imported by:                (updated all 05/19)
- *     addDomEventListeners             db-ui
+ *     addFilterPanelEvents             panel-util
  *     buildTreeSearchHtml              db-ui
  *     newFilterSet                     util
  *     resetTblFilters                  db-page, save-ints
@@ -40,10 +40,11 @@ let fPs = {
  */
 let tblState;
 
-export function addDomEventListeners() {  
+export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(toggleTimeUpdatedFilter);
-    addSavedFilterSetEvents();
+    $('#delete-filter').click(confirmThenDeleteFilterSet.bind(null, fPs.modMode));
+    $('#save-filter').click(submitFilterSet.bind(null, fPs.modMode));
 }
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
@@ -51,10 +52,6 @@ export function resetTableStateParams() {
     fPs.focusFltrs = [];
 }
 /* ====================== FILTER PANEL ============================================================================== */
-function addSavedFilterSetEvents() {
-    $('#delete-filter').click(confirmThenDeleteFilterSet.bind(null, fPs.modMode));
-    $('#save-filter').click(submitFilterSet.bind(null, fPs.modMode));
-}
 function confirmThenDeleteFilterSet() {
     // body...
 }

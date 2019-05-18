@@ -41,7 +41,6 @@ function adaptUiToScreenSize() {
     // $('#tbl-ctrls-reloc').append(cntnr);
 }
 function addDomEventListeners() {
-    db_filters.addDomEventListeners();
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
