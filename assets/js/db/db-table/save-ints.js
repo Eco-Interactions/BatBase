@@ -34,6 +34,8 @@ function addEvents() {
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
     $('#delete-list').click(deleteInteractionList);
+    $('#confm-delete').click(confmDelete);
+    $('#cncl-delete').click(cancelDelete);
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
@@ -67,7 +69,7 @@ export function hideIntPanel() {                                                
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
-    enableInputs();
+    enableInputs('create');
     addSubmitEvent(createDataList);
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
@@ -133,8 +135,20 @@ function getUpdatedInteractionSet() {
 /* ----- REMOVE ROWS ----- */
 
 /* ====================== DELETE INTERACTION LIST =========================== */
-function deleteInteractionList() {                                              console.log('deleteInteractionList')
+function deleteInteractionList() {                                              //console.log('deleteInteractionList')
+    $('#delete-list').hide();
+    $('.confm-cntnr').show();    
+}
+function confmDelete() {
+    resetDeleteButton();
     deleteDataList({id: app.list.id});
+}
+function cancelDelete() {
+    resetDeleteButton();
+}
+function resetDeleteButton() {
+    $('.confm-cntnr').hide();    
+    $('#delete-list').show();
 }
 /* ================== LOAD INTERACTION LIST IN TABLE ======================== */
 /**
@@ -258,10 +272,11 @@ function disableInputs() {
         #mod-list-pnl label, #int-opts button, #mod-info`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
-function enableInputs() {
+function enableInputs(creating) {
     $(`#list-details input, #list-details textarea, #add-mode+label, 
         #int-opts button, #mod-radios input, #mod-radios label, #mod-info`)
         .attr({'disabled': false}).css({'opacity': '1'});
+    if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
 }
 function addSubmitEvent(submitEvent) {
     $('#submit-list').off('click').click(submitEvent);

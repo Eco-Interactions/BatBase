@@ -6,7 +6,6 @@ import { addNewDataToStorage, initStoredData } from './db-sync.js';
 import { showPopUpMsg } from './db-table/db-ui.js';
 import { newIntList, selIntList } from './db-table/save-ints.js';
 import { newFilterSet, selFilterSet } from './db-table/db-filters.js';
-
 /* 
  * Exports:
  *   addEnterKeypressClick
@@ -470,7 +469,6 @@ function clearCombobox($selApi) {
     $selApi.off('change');
 }
 /* ------------- Unused ----------------------------------------------------- */
-
 // function alphaProperties(obj) {
 //     var sortable=[];
 //     var returnObj = {};

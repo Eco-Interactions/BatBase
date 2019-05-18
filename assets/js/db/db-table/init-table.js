@@ -59,6 +59,7 @@ function beforeFilterChange() {                                                 
 } 
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
+    $('#int-list-msg').fadeTo('slow', 0);  //Hide previous save-success message
     if ($('#int-opts').hasClass('closed') || $('#mod-one-list').prop('checked')) { return; }  
     $('#mod-one-list').prop({checked: 'checked'}).change();
 }

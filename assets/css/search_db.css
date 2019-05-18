@@ -281,7 +281,7 @@ button[name="futureDevBttn"] {
 .submit-cntnr {
     margin-top: auto;
     width: 100%;
-    height: 27px;
+    height: 24px;
 }
 .submit-cntnr + div {
     margin-right: auto;
@@ -289,6 +289,10 @@ button[name="futureDevBttn"] {
 }
 .submit-cntnr :last-child {
     margin-left: auto;
+}
+.confm-cntnr {
+    display: none;
+    height: 100%
 }
 /* --------- Table Tool Bar --------- */
 #tool-bar {
