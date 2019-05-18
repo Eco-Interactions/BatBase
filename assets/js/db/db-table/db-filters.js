@@ -1,16 +1,12 @@
 /**
  * Handles custom filtering of the data displayed in the table and related UI.
  * 
- * Exports:                     Imported by:                (updated all 05/19)
- *     addFilterPanelEvents             panel-util
+ * Exports:                     Imported by:                (Added all post initial refactor)
  *     buildTreeSearchHtml              db-ui
- *     newFilterSet                     util
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page
- *     selFilterSet                     util
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
- *     toggleFilterPanel                tips
  *     toggleTimeUpdatedFilter          db_page
  *     updateFilterStatusMsg            db-page, init-tbl
  *     updateLocSearch                  util
@@ -20,7 +16,6 @@
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from './db-ui.js';
-import * as _uPnl from './panel-util.js';
 
 /** 
  * Filter Params
@@ -28,11 +23,9 @@ import * as _uPnl from './panel-util.js';
  *     fltrdRows - rowdata after filters
  *     focusFltrs - Stores focus specific filter strings (eg: name search, taxonomic level, country, etc)
  *     timeFltr - Stores the specified datetime for the time-updated filter.
- *     modMode - When saved filter is created or loaded, 'create' or 'edit' 
  */
 let fPs = {
-    focusFltrs: [],
-    modMode: null
+    focusFltrs: []
 };
 /**
  * Updated with each new entry into this module with properties needed for that 
@@ -40,90 +33,10 @@ let fPs = {
  */
 let tblState;
 
-export function addFilterPanelEvents() {  
-    $('#filter').click(toggleFilterPanel);                                      
-    $('#shw-chngd').change(toggleTimeUpdatedFilter);
-    $('#delete-filter').click(confirmThenDeleteFilterSet.bind(null, fPs.modMode));
-    $('#save-filter').click(submitFilterSet.bind(null, fPs.modMode));
-}
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
     fPs.focusFltrs = [];
-}
-/* ====================== FILTER PANEL ============================================================================== */
-function confirmThenDeleteFilterSet() {
-    // body...
-}
-export function toggleFilterPanel() {  
-    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
-    } else { _uPnl.togglePanel('#filter-opts', 'close'); }
-}
-function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
-    _uPnl.togglePanel('#filter-opts', 'open');
-    initSavedFiltersUi();
-}
-function initSavedFiltersUi() {
-    initSavedFiltersCombobox();
-    disableFilterSetInputs();
-}
-function initSavedFiltersCombobox() {
-    _u.initCombobox('Saved Filter Set');
-    updateFilterSelOpts();
-}
-function updateFilterSelOpts() {
-    const opts = _u.getOptsFromStoredData('savedFilterNames');                     
-    opts.unshift({value: 'create', text: '...New Saved Filter Set'});
-    _u.replaceSelOpts('#saved-filters', opts);
-}
-function disableFilterSetInputs() {
-    $('.filter-set-details input, .filter-set-details textarea').val('');
-    $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
-        .filter-set-details textarea, #stored-filters button`)
-        .attr('disabled', true).css('opacity', '.5');
-}
-function enableFilterSetInputs() {
-    $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
-        .filter-set-details textarea, #stored-filters button`)
-        .attr('disabled', false).css('opacity', '1');
-}
-export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
-    enableFilterSetInputs();
-    $('.filter-set-details input').focus();
-    return { value: "new", text: val ? val : "Creating New Filter Set" };
-}
-
-export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
-    if (val === 'create') { return newFilterSet(null); }
-    if (!val) { return disableFilterSetInputs(); }
-    if (val === 'new') { return; } // New list typed into combobox
-    enableFilterSetInputs();
-}
-/* ---------------- Submit and Success Methods -------------------------------*/
-function submitFilterSet(action) {
-    const details = getFilterSetJson();
-    const envUrl = $('body').data("ajax-target-url");
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
-}
-function getFilterSetJson() {
-    // body...
-}
-function listSubmitComplete(action, results) {                                      
-    const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action);
-    updateDataListSel();
-    $('#saved-ints')[0].selectize.addItem(list.id);
-    showSavedMsg(results.list.edits);
-}
-function showSavedMsg(edits) {
-    const msg = app.edits || Object.keys(edits).length ? "Changes saved." : "No changes detected";
-    $('#int-list-msg')[0].innerHTML = msg;
-    $('#int-list-msg').fadeTo('slow', 1);
-    delete app.edits;
-}
-function hideSavedMsg() {
-    $('#int-list-msg').fadeTo('slow', 0);
-    $('#int-list-msg')[0].innerHTML = '';
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**

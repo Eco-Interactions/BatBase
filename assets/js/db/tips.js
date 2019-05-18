@@ -140,7 +140,7 @@ function getSteps(step) {
             intro: `<h3><center>Click here to toggle the filter options panel open 
                 or closed.</center></h3>`, 
             position: 'bottom',
-            setUpFunc: toggleFilterPanel
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#focus-filters',
@@ -339,14 +339,14 @@ function addDbLoadNotice() {
         <br><br><center><b>Please wait for database to finish downloading before 
         continuing.`);
 }
-function toggleFilterPanel(close) {
+function toggleFilterPanelInTutorial(close) {
     const closed = $('#filter-opts').hasClass('closed');
     if ((close && closed) || !close && !closed) { return; }
     $('#filter').click();
 }
 function clearFilters() {
     $('button[name="reset-tbl"]').click();
-    toggleFilterPanel(true);
+    toggleFilterPanelInTutorial(true);
 }
 /* ------------------ Search Tips ------------------------------------------- */
 function initSearchTips() { 

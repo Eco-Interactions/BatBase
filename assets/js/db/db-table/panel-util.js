@@ -9,7 +9,7 @@
  *     togglePanel          db-filters, save-ints
  */
 import * as _u from '../util.js';
-import { addFilterPanelEvents } from './db-filters.js';
+import { addFilterPanelEvents } from './save-fltrs.js';
 import { addListPanelEvents } from './save-ints.js';
 
 
