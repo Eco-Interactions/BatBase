@@ -31,6 +31,7 @@ function addEvents() {
     $('#add-mode').change(() => app.modMode = 'add');
     $('#rmv-mode').change(() => app.modMode = 'rmv');
     $('input[name="mod-list"]').on('change', toggleInstructions);
+    $('#unsel-rows').click(deselectAllRows);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
     $('#delete-list').click(deleteInteractionList);
@@ -121,12 +122,12 @@ function addAllInteractionsInTable() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
     resetToggleTreeBttn(true);
-    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions);           
+    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, true));           
     return getUpdatedInteractionSet();
 }
-/** An interaction row has 'interactionType' data. */
-function selectInteractions(rowNode) { 
-    if (rowNode.data.interactionType !== undefined) { rowNode.setSelected(true); }
+/** An interaction row has 'interactionType' data. Selected or unselects all rows. */
+function selectInteractions(select, rowNode) { 
+    if (rowNode.data.interactionType !== undefined) { rowNode.setSelected(select); }
 }
 function getUpdatedInteractionSet() {
     const rows = app.tblApi.getSelectedNodes().map(r => { return r.data.id; }); //console.log('selected rows = %O', rows);
@@ -156,13 +157,15 @@ function resetDeleteButton() {
  * with the standard UI options
  */
 function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
+    app.tblState = tState().get();
     removePreviousTable();
-    app.tblState.intSet = app.list.details;
+    tState().set('intSet', app.list.details);
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     enableModUi('rmv');
     app.tblState.api.expandAll();
     updateUi();
     app.listLoaded = true;
+    delete app.tblState;
 }
 function updateUi() {
     resetToggleTreeBttn(true);
@@ -226,7 +229,7 @@ function listSubmitComplete(action, results) {
 }
 /** Submit new or edited interaction list. */
 function deleteDataList(data) {
-    const envUrl = $('body').data("ajax-target-url");
+    const envUrl = $('body').data('ajax-target-url');
     _u.sendAjaxQuery(data, envUrl + 'lists/delete', listDeleteComplete);
 }
 function listDeleteComplete(results) {                                          console.log('listDeleteComplete results = %O', results)
@@ -322,14 +325,13 @@ function parseList(list) {
 /** Resets interactions displated to the full feault set of the current focus. */
 function resetTable() {                                                         //console.log('- - - - - -resetingTable');
     removePreviousTable();
-    tState().set({'intSet': false});                                            //console.log('focus = %s', app.tblState.curFocus);
+    tState().set({'intSet': false});                                            
     delete app.listLoaded;
     resetSearchState();
     $('#load-list').html('View Interaction List in Table');
     $('#load-list').off('click').click(loadInteractionsInTable);
 }
 function removePreviousTable() {
-    app.tblState = tState().get();
     app.tblState.api.destroy();
 }
 function expandAllTableRows() {
@@ -337,7 +339,10 @@ function expandAllTableRows() {
     app.tblApi.expandAll();
     resetToggleTreeBttn(true);
 }
-
+function deselectAllRows() {                                                    console.log('unselect all rows');
+    app.tblApi = tState().get('api');
+    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));           
+}
 
 
 

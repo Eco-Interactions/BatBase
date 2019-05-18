@@ -258,8 +258,20 @@ button[name="futureDevBttn"] {
 #mod-list-cntnr {
     margin: .5em 0;
 }
-#mod-list-pnl div input[type="radio"], #mod-list-pnl div input[type="checkbox"] {
+#mod-list-pnl div input[type="radio"] {
+    margin: .3em .5em 0 1em;
+}
+#mod-list-pnl div input[type="checkbox"] {
     margin: 0 .5em 0 1em;
+}
+input[name="mod-list"] {
+    margin-top: 3px;
+}
+#mod-radios label {
+    padding-top: 3px;
+}
+#unsel-rows {
+    margin-left: 10px;
 }
 #mod-info {
     margin: .5em !important;
