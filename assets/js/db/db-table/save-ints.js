@@ -164,25 +164,26 @@ function resetDeleteButton() {
 function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
     app.tblState = tState().get();
     removePreviousTable();
-    tState().set({'intSet': app.list.details});
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
-    enableModUi('rmv');
-    app.tblState.api.expandAll();
     updateUi();
     app.listLoaded = true;
     delete app.tblState;
 }
 function updateUi() {
+    app.tblState.api.expandAll();
     resetToggleTreeBttn(true);
     syncViewFiltersAndUi(app.tblState.curFocus);
     updateFilterStatusMsg();
     updateListLoadButton('Reset to All Interactions', resetTable);
+    hideSavedMsg();
+    enableModUi('rmv');
 }
 function updateListLoadButton(text, clickFunc) {
     $('#load-list').html(text);
     $('#load-list').off('click').click(clickFunc);
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
+    tState().set({'intSet': app.list.details});
     const bldrs = {
         'locs': buildLocTreeInts, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
     }
@@ -322,7 +323,7 @@ function disableInputs() {                                                      
 function addSubmitEvent(submitEvent) {
     $('#submit-list').off('click').click(submitEvent);
 }
-function enableModUi(m) {                                                       console.log('enableModUi')
+function enableModUi(m) {                                                       //console.log('enableModUi')
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
     const label = mode === 'add' ? 

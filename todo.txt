@@ -44,6 +44,7 @@ Before conference:
     - Add spanish translations to site
     - Add int row color code somewhere small (beneath toolbar?)
     - Create static page with tutorial information
+    - DOuble check all center points for multi-polygons
 
 Figure out how to "stress test" the site:
     - Large number of people using it

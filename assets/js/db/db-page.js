@@ -300,6 +300,7 @@ export function showLocOnMap(geoJsonId, zoom) {
     db_ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent');
     db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
+    $('#tbl-filter-status').html('No Active Filters.');
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
 /**
