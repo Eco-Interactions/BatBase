@@ -114,11 +114,17 @@ div[id^="db-opts-col"] {
     flex: 1 0 472px;
     padding-left: 10px;
 }
-#stored-filters input {
+#filter-set-name + input {
     min-width: 222px;
+    font-weight: 600;
+    font-size: .8em;
+    padding-left: 3px;
 }
 #stored-filters textarea {
     width: 509px;
+    font-weight: 600;
+    font-size: .8em;
+    padding-left: 3px;
 }
 #stored-filters div>span {
     width: 95px;
