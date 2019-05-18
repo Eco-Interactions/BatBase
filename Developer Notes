@@ -82,11 +82,6 @@ Run Tests:
 ##  php bin/console doctrine:schema:update --force --env=test
 ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
->BEST PRACTICES
-## Standards decided upon and why
-comments:
-    //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
-
 >::Known BUGS::
 ## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 
 Search Page:
@@ -137,3 +132,12 @@ Errors:
             -- or equal/above the parent.
         -- Species must have genus parent
         -- Can't change genus that has species children
+
+
+>BEST PRACTICES
+## Standards decided upon and why
+alphabetize:
+    Everything than can be should be.
+comments:
+    //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
+

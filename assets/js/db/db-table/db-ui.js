@@ -21,7 +21,7 @@ import * as db_page from '../db-page.js';
 import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
 import { toggleSaveIntsPanel } from './save-ints.js';
-import { addPanelEvents, cssClosePanel } from './panel-util.js';
+import { addPanelEvents, closeOpenPanels } from './panel-util.js';
 const userRole = $('body').data("user-role");
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
@@ -524,10 +524,6 @@ export function updateUiForMapView() {
     $('#tool-bar').fadeTo('fast', 1);
     $('#search-tbl').hide();  
     $('#map').show(); 
-}
-function closeOpenPanels() {
-    if (!$('#filter-opts').hasClass('closed')) { db_filters.hideFilterPanel(); }
-    if (!$('#int-opts').hasClass('closed')) { cssClosePanel('#int-opts'); }
 }
 export function updateUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);

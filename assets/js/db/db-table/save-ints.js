@@ -39,10 +39,10 @@ export function addListPanelEvents() {
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
     if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
-    } else { _uPnl.cssClosePanel('#int-opts'); }
+    } else { _uPnl.togglePanel('#int-opts', 'close'); }
 }
 function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')
-    _uPnl.cssOpenPanel('#int-opts');
+    _uPnl.togglePanel('#int-opts', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();

@@ -4,7 +4,6 @@
  * Exports:                     Imported by:                (updated all 05/19)
  *     addDomEventListeners             db-ui
  *     buildTreeSearchHtml              db-ui
- *     hideFilterPanel                  db_ui
  *     newFilterSet                     util
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page
@@ -21,6 +20,8 @@
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from './db-ui.js';
+import * as _uPnl from './panel-util.js';
+
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -59,15 +60,11 @@ function confirmThenDeleteFilterSet() {
 }
 export function toggleFilterPanel() {  
     if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
-    } else { hideFilterPanel(); }
+    } else { _uPnl.togglePanel('#filter-opts', 'close'); }
 }
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
-    $('#filter-opts').removeClass('closed');  
-    $('#db-opts-col2').addClass('shw-col-borders hide-fltr-bttm-border');
+    _uPnl.togglePanel('#filter-opts', 'open');
     initSavedFiltersUi();
-    window.setTimeout(function() { 
-        $('#filter-opts').css('overflow-y', 'visible');
-    }, 800);
 }
 function initSavedFiltersUi() {
     initSavedFiltersCombobox();
@@ -92,11 +89,6 @@ function enableFilterSetInputs() {
     $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
         .filter-set-details textarea, #stored-filters button`)
         .attr('disabled', false).css('opacity', '1');
-}
-export function hideFilterPanel() {                                                    //console.log('hideFilterPanel')
-    $('#filter-opts').css('overflow-y', 'hidden');
-    $('#db-opts-col2').removeClass('shw-col-borders hide-fltr-bttm-border');
-    $('#filter-opts').addClass('closed');
 }
 export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
     enableFilterSetInputs();
