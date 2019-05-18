@@ -103,31 +103,26 @@
         <div id="list-details" class='flex-col'>                      <!-- List details -->
             <span><b>List Details</b></span>
             <div class="flex-row">
-                <span>Display Name: </span>
+                <span class="details-desc">List Name: </span>
                 <input type="text" placeholder="Display Name" style="height: 27px;"> 
             </div>
             <div class="flex-row" style="width: 100%;">
-                <span>Description: </span>
+                <span class="details-desc">Description: </span>
                 <textarea placeholder="Description" style="height: 50px;"></textarea>  
             </div> 
             <div class="flex-row" style="width: 100%;">
-                <span>Interactions: </span>
+                <span class="details-desc">Interactions: </span>
                 <span id="int-list-cnt"></span> 
             </div> 
         </div>
         <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
             <span><b>Modify List Data</b></span>
-            <div class="flex-row" id="mod-list-cntnr">
-                <input type="checkbox" id="add-mode" name="mod-mode" disabled="disabled">
-                <label for="add-mode">Add Interactions</label>
-                <input type="checkbox" id="rmv-mode" name="mod-mode" disabled="disabled" title="Click 'View Interactions In Table' to remove from list">
-                <label for="rmv-mode" title="Click 'View Interactions In Table' to remove from list">Remove Interactions</label>
-            </div>
+            <div id="mod-mode">Add Interactions to List</div>
             <div id="mod-radios" class="flex-row" style="margin-left: 1em;">
                 <input name="mod-list" type="radio" id="mod-all-list">
-                <label for="mod-all-list">All Rows In Table</label>
-                <input name="mod-list" type="radio" id="mod-one-list">
-                <label for="mod-one-list">Select Rows</label>
+                <label for="mod-all-list">All Rows</label>
+                <input name="mod-list" type="radio" id="mod-some-list">
+                <label for="mod-some-list">Select Rows</label>
                     <button id="unsel-rows" class="ag-fresh tbl-bttn"> 
                         Unselect All Rows
                     </button>   

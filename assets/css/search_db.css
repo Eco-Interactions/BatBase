@@ -241,28 +241,29 @@ button[name="futureDevBttn"] {
 #list-details div, #stored-filters .spaced {
     margin: .2em;
 }
-#list-details div>span {
-    width: 111px;
-    padding-top: 3px;
-}
 #list-details input {
     min-width: 415px;
+    font-weight: 600;
+    font-size: .8em;
 }
 #list-details textarea {
     width: 488px;
+    font-weight: 600;
+    font-size: .8em;
+    padding-left: 5px;
+}
+.details-desc {
+    width: 99px;
 }
 #mod-list-pnl {
     flex: 1 0 412px;
     padding-left: 0px;
 }
-#mod-list-cntnr {
-    margin: .5em 0;
+#mod-mode {
+    margin: .4em 1em;
 }
 #mod-list-pnl div input[type="radio"] {
     margin: .3em .5em 0 1em;
-}
-#mod-list-pnl div input[type="checkbox"] {
-    margin: 0 .5em 0 1em;
 }
 input[name="mod-list"] {
     margin-top: 3px;
@@ -271,7 +272,7 @@ input[name="mod-list"] {
     padding-top: 3px;
 }
 #unsel-rows {
-    margin-left: 10px;
+    margin-left: 20px;
 }
 #mod-info {
     margin: .5em !important;
@@ -281,6 +282,7 @@ input[name="mod-list"] {
     color: darkslategray;
     text-align: center;
     opacity: 0;
+    font-size: .85em;
 }
 .list-submit-msg {
     opacity: 0;
