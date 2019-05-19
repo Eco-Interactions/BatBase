@@ -72,20 +72,23 @@
         </div>
         <div id="stored-filters" class="flex-col"> 
             <div class="flex-row spaced">
-                <span>Select Filter: </span>
+                <span class="fltr-desc">Select Filter: </span>
                 <select id="saved-filters" class="saved-filters-sel"></select>
                 <div class="flex-row spaced filter-set-details">
-                    <span id="filter-set-name">Name: </span>
+                    <span id="filter-set-name" class="fltr-desc">Name: </span>
                     <input type="text" placeholder="Filter Name" style="height: 27px;"> 
                 </div>
-                <div id="filter-list-msg" class="list-submit-msg"></div>
+                <span id="set-submit-msg" class="pnl-submit-msg">&#10004;</span>
                 <button id="save-filter" class="ag-fresh tbl-bttn"> 
                     Save Filter
                 </button>                
             </div>
-            <div class="flex-row spaced filter-set-details">
-                <span>Description: </span>
-                <textarea placeholder="Filter Description"></textarea>  
+            <div class="flex-row spaced">
+                <div class="filter-set-details flex-row">
+                    <span class="fltr-desc">Description: </span>
+                    <textarea placeholder="Filter Description"></textarea>  
+                </div>
+                <span style="width: 34px;"></span>
                 <button id="delete-filter" class="ag-fresh tbl-bttn"> 
                     Delete
                 </button>
@@ -141,7 +144,7 @@
                     </button>  
                 </div>  
                 <div class="flex-row">
-                    <span id="int-list-msg" class="list-submit-msg">&#10004;</span>
+                    <span id="list-submit-msg" class="pnl-submit-msg">&#10004;</span>
                     <button id="submit-list" class="ag-fresh tbl-bttn"> 
                         Save List
                     </button>       

@@ -57,7 +57,7 @@ function buildAndShowIntPanel() {                                               
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
     enableInputs('create');
-    addSubmitEvent(createDataList);
+    _uPnl.updateSubmitEvent('#submit-list', createDataList);
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
     enableModUi('add');
@@ -67,7 +67,7 @@ export function newIntList(val) {                                               
 }
 function createDataList() {
     const data = buildListData();
-    submitDataList(data, 'create');
+    submitDataList(data, 'create', onListSubmitComplete.bind(null, 'create'));
 }
 /* ------ OPEN LIST ------- */
 /** Opens a saved list of interactions. */
@@ -76,7 +76,7 @@ export function selIntList(val) {                                               
     if (!val && !app.submitting) { return resetListUi(); }
     if (val === 'new') { return; } // New list typed into combobox
     resetPrevListUiState();
-    addSubmitEvent(editDataList);
+    _uPnl.updateSubmitEvent('#submit-list', editDataList);
     fillListData(val);
     enableInputs();
     enableModUi('add');
@@ -84,7 +84,7 @@ export function selIntList(val) {                                               
 function editDataList() {
     const data = buildListData();
     data.id = _u.getSelVal('Int-lists');
-    submitDataList(data, 'edit');
+    submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
     const lists = _u.getDataFromStorage('dataLists');                           
@@ -132,7 +132,7 @@ function deleteInteractionList() {                                              
 }
 function confmDelete() {
     resetDeleteButton();
-    deleteDataList({id: app.list.id});
+    _uPnl.submitUpdates({id: app.list.id}, 'delete', onListDeleteComplete);
     delete app.rowSelMode;
 }
 function cancelDelete() {
@@ -206,21 +206,16 @@ function getId(taxaByLvl) {
 }
 /* ====================== UTILITY =========================================== */
 function addActiveListToMemory(list) {
-    app.list = list ? parseList(list) : { details: [] };
+    app.list = _uPnl.parseUserNamed(list); 
     return app.list;
-}
-function parseList(list) {
-    list.details = JSON.parse(list.details);
-    return list
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 /** Submit new or edited interaction list. */
-function submitDataList(data, action) {
-    const envUrl = $('body').data("ajax-target-url");
+function submitDataList(data, action, hndlr) {
     app.submitting = app.modMode; //Flag tells various event handlers how to handle submit
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
+    _uPnl.submitUpdates(data, action, hndlr);
 }
-function listSubmitComplete(action, results) {                                      
+function onListSubmitComplete(action, results) {                                      
     const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
     updateUserNamedList(results.list, action);
     updateDataListSel();
@@ -230,21 +225,16 @@ function listSubmitComplete(action, results) {
     if (app.submitting === 'rmv') { loadInteractionsInTable(); }
     delete app.submitting;
 }
-/** Submit new or edited interaction list. */
-function deleteDataList(data) {
-    const envUrl = $('body').data('ajax-target-url');
-    _u.sendAjaxQuery(data, envUrl + 'lists/delete', listDeleteComplete);
-}
-function listDeleteComplete(results) {                                          console.log('listDeleteComplete results = %O', results)
+function onListDeleteComplete(results) {                                        console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
     updateDataListSel();
     $('#saved-ints')[0].selectize.open();
 }
-function showSavedMsg(msgClass) {
-    $('#int-list-msg').fadeTo('slow', 1);
+function showSavedMsg() {
+    $('#list-submit-msg').fadeTo('slow', 1);
 }
 function hideSavedMsg() {
-    $('#int-list-msg').fadeTo('slow', 0);
+    $('#list-submit-msg').fadeTo('slow', 0);
 }
 /* ------------------------------- UI ----------------------------------------*/
 function initListCombobox() {
@@ -306,9 +296,6 @@ function disableInputs() {                                                      
         #mod-list-pnl label, #int-opts button`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
-function addSubmitEvent(submitEvent) {
-    $('#submit-list').off('click').click(submitEvent);
-}
 function enableModUi(m) {                                                       //console.log('enableModUi')
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
@@ -347,6 +334,7 @@ function resetTable() {                                                         
     enableModUi('add');
     $('#load-list').html('View Interaction List in Table');
     $('#load-list').off('click').click(loadInteractionsInTable);
+    expandAllTableRows();
 }
 function removePreviousTable() {  
     app.tblApi = app.tblState ? app.tblState.api : tState().get('api');  
@@ -361,14 +349,3 @@ function deselectAllRows() {                                                    
     app.tblApi = tState().get('api');
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));           
 }
-
-
-
-
-
-
-
-
-
-
-

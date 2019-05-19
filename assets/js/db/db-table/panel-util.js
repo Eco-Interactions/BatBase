@@ -6,19 +6,25 @@
  * Exports:           Imported by:
  *     addPanelEvents       db-ui
  *     closeOpenPanels      db-ui
- *     togglePanel          db-filters, save-ints
+ *     parseUserNamed       save-fltrs, save-ints
+ *     submitUpdates        save-fltrs, save-ints
+ *     togglePanel          save-fltrs, save-ints
+ *     updateSubmitEvent    save-fltrs, save-ints
  */
 import * as _u from '../util.js';
 import { addFilterPanelEvents } from './save-fltrs.js';
 import { addListPanelEvents } from './save-ints.js';
 
 
+/* ----------------- EVENT RELATED ------------------ */
 export function addPanelEvents() {
     addFilterPanelEvents();
     addListPanelEvents();
 }
-
-/* -------------------  Open/Close Panels --------------------- */
+export function updateSubmitEvent(id, event) {
+    $(id).off('click').click(event);
+}
+/* -------------------  OPEN/CLOSE PANELS --------------------- */
 export function closeOpenPanels() {
     ['#filter-opts', '#int-opts'].forEach(id => {
         if (!$(id).hasClass('closed')) { cssClosePanel(id); }
@@ -53,3 +59,25 @@ function getColumnSpacerId(id) {
         '#int-opts': 'hide-int-bttm-border', 
     }[id];
 }
+/* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
+export function submitUpdates(data, action, successFunc) {
+    const envUrl = $('body').data("ajax-target-url");
+    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, successFunc);
+}
+/* ----------------- MISC ----------------------------------------------------*/
+export function parseUserNamed(entity) {                                        
+    return entity ? parseEntity(entity) : { details: [] };
+}
+function parseEntity(entity) {
+    entity.details = JSON.parse(entity.details);
+    return entity
+}
+
+
+
+
+
+
+
+
+

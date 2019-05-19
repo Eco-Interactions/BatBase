@@ -49,9 +49,9 @@ function initSavedFiltersUi() {
 }
 function initSavedFiltersCombobox() {
     _u.initCombobox('Saved Filter Set');
-    updateFilterSelOpts();
+    updateFilterSel();
 }
-function updateFilterSelOpts() {
+function updateFilterSel() {
     const opts = _u.getOptsFromStoredData('savedFilterNames');                     
     opts.unshift({value: 'create', text: '...New Saved Filter Set'});
     _u.replaceSelOpts('#saved-filters', opts);
@@ -59,8 +59,13 @@ function updateFilterSelOpts() {
 /* ------ CREATE FILTER SET ------- */
 export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
     enableFilterSetInputs();
-    $('.filter-set-details input').focus();
-    return { value: "new", text: val ? val : "Creating New Filter Set" };
+    _uPnl.updateSubmitEvent('#save-filter', createFilterSet);
+    $('#filter-set-name + input').val(val).focus();
+    return { value: 'new', text: val ? val : "Creating New Filter Set" };
+}
+function createFilterSet() {
+    const data = buildFilterData();
+    _uPnl.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
 }
 
 
@@ -71,17 +76,35 @@ export function selFilterSet(val) {                                             
     if (!val) { return disableFilterSetInputs(); }
     if (val === 'new') { return; } // New list typed into combobox
     enableFilterSetInputs();
+    _uPnl.updateSubmitEvent('#save-filter', editFilterSet);
+    fillFilterData(val);
 }
-
+function editFilterSet() {
+    const data = buildFilterData();
+    data.id = _u.getSelVal('Saved Filter Set');
+    _uPnl.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
+}
+function fillFilterData(id) {
+    const filters = _u.getDataFromStorage('savedFilters');                           
+    const filter = addActiveFilterToMemory(filters[id]);                        //console.log('activeFilter = %O', filter);                                                 
+    fillFilterDetailFields(filter.displayName, filter.description);
+}
+function fillFilterDetailFields(name, description) {
+    $('#filter-set-name + input').val(name).focus();
+    $('.filter-set-details textarea').val(description);
+}
 /* ====================== EDIT FILTER SET =================================== */
-function buildListData() {
+function buildFilterData() {
     const data = {
-        displayName: $('#list-details input').val(),
-        type: 'interaction',
-        description: $('#list-details textarea').val(),
-        details: JSON.stringify(getInteractions()),
+        displayName: $('#filter-set-name + input').val(),
+        type: 'filter',
+        description: $('#saved-filters textarea').val(),
+        details: "[]",
     };
     return data;
+}
+function getFilterSetJson() {
+    // body...
 }
 /* ====================== DELETE FILTER SET ================================= */
 function confirmThenDeleteFilterSet() {
@@ -90,32 +113,27 @@ function confirmThenDeleteFilterSet() {
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 
 /* ====================== UTILITY =========================================== */
-
+function addActiveFilterToMemory(set) {
+    app.fltr = _uPnl.parseUserNamed(set);
+    return app.fltr;
+}
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
-function submitFilterSet(action) {
-    const details = getFilterSetJson();
+function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
-    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, listSubmitComplete.bind(null, action));
+    _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
 }
-function getFilterSetJson() {
-    // body...
-}
-function listSubmitComplete(action, results) {                                      
-    const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
+function onFilterSubmitComplete(action, results) {          
+    const filter = JSON.parse(results.list.entity);                             console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
     updateUserNamedList(results.list, action);
-    updateDataListSel();
-    $('#saved-ints')[0].selectize.addItem(list.id);
-    showSavedMsg(results.list.edits);
+    updateFilterSel();
+    $('#saved-filters')[0].selectize.addItem(filter.id);
+    showSavedMsg();
 }
-function showSavedMsg(edits) {
-    const msg = app.edits || Object.keys(edits).length ? "Changes saved." : "No changes detected";
-    $('#int-list-msg')[0].innerHTML = msg;
-    $('#int-list-msg').fadeTo('slow', 1);
-    delete app.edits;
+function showSavedMsg() {
+    $('#set-submit-msg').fadeTo('slow', 1);
 }
 function hideSavedMsg() {
-    $('#int-list-msg').fadeTo('slow', 0);
-    $('#int-list-msg')[0].innerHTML = '';
+    $('#set-submit-msg').fadeTo('slow', 0);
 }
 /* ------------------------------- UI ----------------------------------------*/
 
