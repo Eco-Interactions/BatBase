@@ -69,7 +69,7 @@ function createFilterSet() {
 
 /* ------ OPEN FILTER SET ------- */
 export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
-    if (val === 'create') { return newFilterSet(false); }
+    if (val === 'create') { return newFilterSet(); }
     if (!val) { return resetFilterUi(); }
     if (val === 'new') { return; } // New list typed into combobox
     enableFilterSetInputs();

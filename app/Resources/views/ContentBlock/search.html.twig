@@ -63,6 +63,7 @@
     </div>
     <div id='filter-opts' class="flex-row pop-out-panel closed">
         <div id="filter-col1" class="flex-col">
+            <span><b>Individual Filters (Here and in some Table Column Headers)</b></span>
             <div id="focus-filters" class="flex-row flex-wrap"></div>
             <div id="shw-chngd-ints">
                 <input type="checkbox" id="shw-chngd">
@@ -72,6 +73,14 @@
         </div>
         <div id="stored-filters" class="flex-col"> 
             <div class="flex-row spaced">
+                <span style="flex-grow: 1;"></span>
+                <span><b>Saved Filters</b></span>
+                <span style="flex-grow: 1;"></span>
+                <button id="apply-filter" class="ag-fresh tbl-bttn"> 
+                    Apply Filter
+                </button>                
+            </div>
+            <div class="flex-row spaced" style="height: 27px;">
                 <span class="fltr-desc">Select Filter: </span>
                 <select id="saved-filters" class="saved-filters-sel"></select>
                 <div class="flex-row spaced filter-set-details">

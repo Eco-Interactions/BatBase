@@ -99,6 +99,10 @@ div[id^="db-opts-col"] {
 #filter-opts span {
     padding-top: 5px;
 }
+#filter-col1 > span {
+    align-self: center;
+    padding-bottom: 5px;
+}
 #filter-col1 {
     flex: 0 0 618px;
     border-right: black 1px solid;
@@ -131,9 +135,11 @@ div[id^="db-opts-col"] {
     padding-top: 4px;
 }
 #stored-filters button {
-    margin-right: auto;
     height: 27px;
     width: 111px;
+}
+#apply-filter {
+    margin-right: 7.3em;
 }
 .saved-filters-sel {
     width: 199px;
@@ -943,6 +949,9 @@ input.active-icon {
     }
     #filter-opts #filter-col1 {
         flex: 0 0 555px;
+    }
+    #filter-opts #apply-filter {
+        margin-right: none;
     }
     .hide-fltr-bttm-border:before {
         left: 467px;
