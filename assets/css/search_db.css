@@ -121,7 +121,7 @@ div[id^="db-opts-col"] {
     padding-left: 3px;
 }
 #stored-filters textarea {
-    width: 511px;
+    width: 487px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
@@ -133,10 +133,10 @@ div[id^="db-opts-col"] {
 #stored-filters button {
     margin-right: auto;
     height: 27px;
-    width: 88px;
+    width: 111px;
 }
 .saved-filters-sel {
-    width: 222px;
+    width: 199px;
 }
 #filter-set-name {
     width: 46px !important;
@@ -317,7 +317,14 @@ input[name="mod-list"] {
 .submit-cntnr :last-child {
     margin-left: auto;
 }
-.confm-cntnr {
+#set-confm-cntnr {
+    display: none;
+    width: min-content;
+}
+#confm-set-delete {
+    margin-bottom: .5em;
+}
+#list-confm-cntnr {
     display: none;
     height: 100%
 }

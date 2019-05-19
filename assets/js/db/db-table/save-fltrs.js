@@ -16,11 +16,7 @@ import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 
 /**
- * list - List open in panel
- * listLoaded - List loaded in table
- * modMode - Set modificiation state: 'add' or Remove ('rmv')
- * rowSelMode - Modifying 'all' or 'some' rows
- * submitting - True when updates are in submit process
+ * fltr - List open in panel
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
 ] */
@@ -29,8 +25,9 @@ let app = {};
 export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(db_filters.toggleTimeUpdatedFilter);
-    $('#delete-filter').click(confirmThenDeleteFilterSet.bind(null, app.modMode));
-    $('#save-filter').click(submitFilterSet.bind(null, app.modMode));
+    $('#delete-filter').click(deleteFilterSet);
+    $('#confm-set-delete').click(confmDelete);
+    $('#cncl-set-delete').click(cancelDelete);
 }
 
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
@@ -58,7 +55,7 @@ function updateFilterSel() {
 }
 /* ------ CREATE FILTER SET ------- */
 export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
-    enableFilterSetInputs();
+    enableFilterSetInputs('create');
     _uPnl.updateSubmitEvent('#save-filter', createFilterSet);
     $('#filter-set-name + input').val(val).focus();
     return { value: 'new', text: val ? val : "Creating New Filter Set" };
@@ -72,8 +69,8 @@ function createFilterSet() {
 
 /* ------ OPEN FILTER SET ------- */
 export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
-    if (val === 'create') { return newFilterSet(null); }
-    if (!val) { return disableFilterSetInputs(); }
+    if (val === 'create') { return newFilterSet(false); }
+    if (!val) { return resetFilterUi(); }
     if (val === 'new') { return; } // New list typed into combobox
     enableFilterSetInputs();
     _uPnl.updateSubmitEvent('#save-filter', editFilterSet);
@@ -98,7 +95,7 @@ function buildFilterData() {
     const data = {
         displayName: $('#filter-set-name + input').val(),
         type: 'filter',
-        description: $('#saved-filters textarea').val(),
+        description: $('#stored-filters textarea').val(),
         details: "[]",
     };
     return data;
@@ -107,8 +104,21 @@ function getFilterSetJson() {
     // body...
 }
 /* ====================== DELETE FILTER SET ================================= */
-function confirmThenDeleteFilterSet() {
-    // body...
+function deleteFilterSet() {                                              //console.log('deleteInteractionList')
+    $('#delete-filter').hide();
+    $('#set-confm-cntnr').show();  
+    hideSavedMsg();  
+}
+function confmDelete() {  
+    resetDeleteButton();
+    _uPnl.submitUpdates({id: app.fltr.id}, 'delete', onFilterDeleteComplete);
+}
+function cancelDelete() {
+    resetDeleteButton();
+}
+function resetDeleteButton() {
+    $('#set-confm-cntnr').hide();    
+    $('#delete-filter').show();
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 
@@ -129,6 +139,11 @@ function onFilterSubmitComplete(action, results) {
     $('#saved-filters')[0].selectize.addItem(filter.id);
     showSavedMsg();
 }
+function onFilterDeleteComplete(results) {                                      console.log('listDeleteComplete results = %O', results)
+    updateUserNamedList(results.list, 'delete');
+    updateFilterSel();
+    $('#saved-filters')[0].selectize.open();
+}
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);
 }
@@ -136,17 +151,26 @@ function hideSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 0);
 }
 /* ------------------------------- UI ----------------------------------------*/
-
 /* ---- Reset & Enable/Disable UI --- */
+function resetFilterUi() {
+    hideSavedMsg();
+    clearFilterDetailFields();
+    disableFilterSetInputs();
+}
+function clearFilterDetailFields() {
+    $('#filter-set-name + input').val('');
+    $('.filter-set-details textarea').val('');
+}
 function disableFilterSetInputs() {
     $('.filter-set-details input, .filter-set-details textarea').val('');
     $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
         .filter-set-details textarea, #stored-filters button`)
         .attr('disabled', true).css('opacity', '.5');
 }
-function enableFilterSetInputs() {
+function enableFilterSetInputs(create) {
     $(`.filter-set-details input, .filter-set-details span, .filter-submit button, 
-        .filter-set-details textarea, #stored-filters button`)
+        .filter-set-details textarea, #save-filter`)
         .attr('disabled', false).css('opacity', '1');
+    if (!create) { $('#delete-filter').attr('disabled', false).css('opacity', '1'); }
 }
 /* --- Table Methods --- */

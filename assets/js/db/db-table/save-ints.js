@@ -33,8 +33,8 @@ export function addListPanelEvents() {
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
     $('#load-list').click(loadInteractionsInTable);
     $('#delete-list').click(deleteInteractionList);
-    $('#confm-delete').click(confmDelete);
-    $('#cncl-delete').click(cancelDelete);
+    $('#confm-list-delete').click(confmDelete);
+    $('#cncl-list-delete').click(cancelDelete);
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
@@ -128,7 +128,7 @@ function getUpdatedIntSet(mode) {
 /* ====================== DELETE INTERACTION LIST =========================== */
 function deleteInteractionList() {                                              //console.log('deleteInteractionList')
     $('#delete-list').hide();
-    $('.confm-cntnr').show();    
+    $('#list-confm-cntnr').show();    
 }
 function confmDelete() {
     resetDeleteButton();
@@ -139,7 +139,7 @@ function cancelDelete() {
     resetDeleteButton();
 }
 function resetDeleteButton() {
-    $('.confm-cntnr').hide();    
+    $('#list-confm-cntnr').hide();    
     $('#delete-list').show();
 }
 /* ================== LOAD INTERACTION LIST IN TABLE ======================== */
