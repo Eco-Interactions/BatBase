@@ -6,10 +6,13 @@
 
 
 Current:
+    - filters
+        - saved filters dropdown: sub-categories into focus & view
+
+
     - Build backend for saving lists
         - Store Interaction lists
             - clear filters before loading list?
-            - update filters to work with intSets
             - event hook for when a row is selected bu the user? 
                 - switch to "select rows" mode
             - Bold core tree branch names

@@ -3,6 +3,8 @@
  * 
  * Exports:                     Imported by:                (Added all post initial refactor)
  *     buildTreeSearchHtml              db-ui
+ *     getExternalFilters               save-fltrs
+ *     getTableFilterModels               save-fltrs
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page
  *     showTodaysUpdates                db_forms
@@ -46,7 +48,7 @@ export function resetTableStateParams() {
 export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
     tblState = tState().get(null, ['api', 'intSet']);
     if (!tblState.api) { return; }
-    getFiltersAndUpdateStatus();
+    setFilterStatus(getActiveFilters());
 }
 /**
  * Adds all active filters to the table's status message. First adding any 
@@ -54,16 +56,15 @@ export function updateFilterStatusMsg() {                                       
  * for table columns, and then checks/adds the 'interactions updated since' filter. 
  * Sets table-status with the resulting active-filters messasge.
  */
-function getFiltersAndUpdateStatus() {
-    const activeFilters = [];
-    addActiveExternalFilters(activeFilters);
-    addActiveTableFilters(activeFilters);
-    setFilterStatus(activeFilters);
+function getActiveFilters() {
+    return getTableFilters(getExternalFilters([]));
 }
-function addActiveExternalFilters(filters) {
+export function getExternalFilters() {
+    const filters = [];
     addFocusFilters();
     addUpdatedSinceFilter();
     addIntListFilter();
+    return filters;
     
     function addFocusFilters() {
         if (fPs.focusFltrs && fPs.focusFltrs.length > 0) { 
@@ -80,14 +81,15 @@ function addActiveExternalFilters(filters) {
             filters.push("Interaction List");
         }
     }
-} /* End addActiveExternalFilters */
-function addActiveTableFilters(filters) {
-    const filterModels = getAllFilterModels();        
+} /* End getExternalFilters */
+function getTableFilters(filters) {
+    const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
     const columns = Object.keys(filterModels);        
     for (let i=0; i < columns.length; i++) {
         if (filterModels[columns[i]] !== null) { 
             filters.push(columns[i]); }
     }
+    return filters;
 }
 function setFilterStatus(filters) {
     if (filters.length > 0) { setTableFilterStatus(getFilterStatus(filters)); 
@@ -105,7 +107,7 @@ function getFilterStatus(filters) {
     }
 }
 /** Returns an obj with the ag-grid filter models. */
-function getAllFilterModels() {  
+export function getTableFilterModels() {  
     const filters = Object.keys(tblState.api.filterManager.allFilters);
     return {
         'Subject Taxon': getColumnFilterApi('subject'),
@@ -119,7 +121,6 @@ function getAllFilterModels() {
         'Citation': getColumnFilterApi('citation'),
         'Note': getColumnFilterApi('note') 
     };  
-    
     function getColumnFilterApi(colName) {
         return filters.indexOf(colName) === -1 ? null : 
             tblState.api.getFilterApi(colName).getModel()

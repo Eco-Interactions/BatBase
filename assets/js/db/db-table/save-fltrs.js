@@ -90,18 +90,55 @@ function fillFilterDetailFields(name, description) {
     $('#filter-set-name + input').val(name).focus();
     $('.filter-set-details textarea').val(description);
 }
-/* ====================== EDIT FILTER SET =================================== */
+/* =================== BUILD FILTER DATA JSON =============================== */
 function buildFilterData() {
+    app.tblState = tState().get(null, ['curFocus', 'curView', 'api']);
     const data = {
         displayName: $('#filter-set-name + input').val(),
         type: 'filter',
         description: $('#stored-filters textarea').val(),
-        details: "[]",
+        details: getFilterSetJson(app.tblState),
     };
     return data;
 }
-function getFilterSetJson() {
-    // body...
+/**
+ * filters: {
+ *     focus: '',
+ *     view: '',
+ *     panel: {
+ *         text:
+ *         combobox:
+ *         time:
+ *     },
+ *     table: {
+ *         displayName: { colName: filterModel }},
+ * }
+ */
+function getFilterSetJson(tState) {                                             //console.log('tblState = %O', tState)
+    const filters = {
+        focus: tState.curFocus, panel: getFiltersInPanel(),
+        table: getColumnHeaderFilters(), view: tState.curView
+    };
+    return JSON.stringify(filters);
+}
+function getFiltersInPanel() {
+    const panelFilters = db_filters.getExternalFilters();                       //console.log('panelFilters = %O', panelFilters);
+    return {};
+}
+/** Returns an obj with the ag-grid filter models. */
+function getColumnHeaderFilters() {
+    const models = db_filters.getTableFilterModels();              
+    const colTitles = Object.keys(models);
+    return getActiveTableFilters();
+    
+    function getActiveTableFilters() {
+        const filters = {};
+        colTitles.forEach(col => { 
+            if (!models[col]) { return; }  
+            filters[col] = models[col];
+        });                                                                     //console.log('tableFilters = %O', filters);
+        return filters;
+    }
 }
 /* ====================== DELETE FILTER SET ================================= */
 function deleteFilterSet() {                                              //console.log('deleteInteractionList')
