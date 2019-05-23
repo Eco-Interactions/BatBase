@@ -3,8 +3,7 @@
  * 
  * Exports:                     Imported by:                (Added all post initial refactor)
  *     buildTreeSearchHtml              db-ui
- *     getExternalFilters               save-fltrs
- *     getTableFilterModels               save-fltrs
+ *     getFilterState                   save-fltrs
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page
  *     showTodaysUpdates                db_forms
@@ -23,15 +22,14 @@ import * as db_ui from './db-ui.js';
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
  *     fltrdRows - rowdata after filters
- *     focusFltrs - Object stores focus specific filter strings 
+ *     pnlFltrs - Object stores panel filter values 
  *         combo - obj with combo-label (k): obj with text and value (k) with their respective values
- *         list - Save interaction list ID
  *         name - name filter string
- *         time - date string filtered to
+ *         time - Datetime string
  *     timeFltr - Stores the specified datetime for the time-updated filter.
  */
 let fPs = {
-    focusFltrs: {}
+    pnlFltrs: {}
 };
 /**
  * Updated with each new entry into this module with properties needed for that 
@@ -42,7 +40,13 @@ let tblState;
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
-    fPs.focusFltrs = {};
+    fPs.pnlFltrs = {};
+}
+export function getFilterState() {
+    return {
+        panel: fPs.pnlFltrs,
+        table: getTableFilterModels()
+    };
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
@@ -63,42 +67,36 @@ export function updateFilterStatusMsg() {                                       
 function getActiveFilters() {
     return getTableFilters(getExternalFilters([]));
 }
-export function getExternalFilters() {
-    const filters = [];
-    filters.push(...addFocusFilters());
-    addUpdatedSinceFilter();
-    addIntListFilter();
-    return filters; //filter away null values?
+function getExternalFilters() {
+    return [...addFocusFilters(), addIntListFilter()].filter(f => f);
     
 } /* End getExternalFilters */
 function addFocusFilters() {  
-    const map = { combo: addComboValue, name: addName };
+    const map = { combo: addComboValue, name: addName, time: addTimeFltr };
     return getFocusFilterDisplayVals();
 
     function getFocusFilterDisplayVals() {
         const filters = [];
-        Object.keys(fPs.focusFltrs).forEach(type => {                           //console.log('filter [%s] = %O', type, fPs.focusFltrs[type]);
-            filters.push(map[type](fPs.focusFltrs[type]));
+        Object.keys(fPs.pnlFltrs).forEach(type => {                                 //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
+            filters.push(map[type](fPs.pnlFltrs[type]));
         });  
         return filters; 
     }
-    /** Stores the most recent combobox selection. */
-    function addComboValue(comboObj) {                                          //console.log('comboObj = %O', comboObj);
-        const type = Object.keys(comboObj);
-        return comboObj[type].text;
-    }
-    function addName(name) {
-        return name;
-    }
 }
-function addUpdatedSinceFilter() {
-    if ($('#shw-chngd')[0].checked) { 
-        filters.push("Time Updated");
-    } 
+/** Stores the most recent combobox selection. */
+function addComboValue(comboObj) {                                              //console.log('comboObj = %O', comboObj);
+    const type = Object.keys(comboObj);
+    return comboObj[type].text;
+}
+function addName(name) {
+    return name;
+}
+function addTimeFltr(time) {
+    return "Time Updated";
 }
 function addIntListFilter() {
     if (tblState.intSet) {
-        filters.push("Interaction List");
+        return "Interaction List";
     }
 }
 function getTableFilters(filters) {
@@ -126,7 +124,7 @@ function getFilterStatus(filters) {
     }
 }
 /** Returns an obj with the ag-grid filter models. */
-export function getTableFilterModels() {  
+function getTableFilterModels() {  
     const filters = Object.keys(tblState.api.filterManager.allFilters);
     return {
         'Subject Taxon': getColumnFilterApi('subject'),
@@ -159,7 +157,7 @@ export function resetTblFilters() {
     $('#tbl-filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
     $('#shw-chngd').prop('checked', false); //resets updatedAt table filter
-    fPs.focusFltrs = {};
+    fPs.pnlFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 /**
@@ -204,11 +202,11 @@ function resetTimeUpdatedFilter() {                                             
  * Instantiates the flatpickr calendar and opens the calendar. If a custom time
  * was previously selected and stored, it is reapplied.
  */
-function showCal(time) {                                                        //console.log('showFlatpickrCal. fPs = %O', fPs);
+function showCal(time) {                                                        //console.log('showFlatpickrCal. time? = [%s] fPs = %O', time, fPs);
     fPs.cal = fPs.cal || initCal(); 
     if (time == 'today') { filterToChangesToday(); 
-    } else if (fPs.timeFltr) { 
-        reapplyPreviousTimeFilter(fPs.timeFltr)
+    } else if (fPs.pnlFltrs.time) { 
+        reapplyPreviousTimeFilter(fPs.pnlFltrs.time)
     } else {
         fPs.cal.open();            
         fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
@@ -250,8 +248,8 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
     syncFiltersAndUi(filterTime);
 
     function getFilterTime() {
-        const fltrSince = dateStr || fPs.timeFltr;
-        fPs.timeFltr = fltrSince;
+        const fltrSince = dateStr || fPs.pnlFltrs.time;
+        fPs.pnlFltrs.time = fltrSince;
         return new Date(fltrSince).getTime(); 
     }
     function filterInteractionsAndUpdateState() {
@@ -384,8 +382,8 @@ function searchTreeText(entity) {                                               
     db_ui.resetToggleTreeBttn(false);
 } 
 function setFocusFilterVal(text) { 
-    if (text === "") { return delete fPs.focusFltrs.name; }
-    fPs.focusFltrs.name = '"'+text+'"'; 
+    if (text === "") { return delete fPs.pnlFltrs.name; }
+    fPs.pnlFltrs.name = '"'+text+'"'; 
 }
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
@@ -424,8 +422,8 @@ export function updateTaxonSearch(val) {
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;
         const taxonName = rcrd.displayName;
-        fPs.focusFltrs.combo = {};
-        fPs.focusFltrs.combo[curLevel] = { text: taxonName, value: val };
+        fPs.pnlFltrs.combo = {};
+        fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
@@ -446,7 +444,7 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
 export function updateLocSearch(val) { 
     if (!val) { return; }
     getComboboxValuesAndRebuildLocTree(val, getLocType(this.$input[0].id));
-    if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.timeFltr, 'skip'); }
+    if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
 } 
 function getLocType(selId) {
     const selTypes = { selCountry: 'Country', selRegion: 'Region' };
@@ -471,8 +469,8 @@ function getSelectedVals(val, type) {                                           
     }
 } /* End getSelectedVals */
 function updateLocFilter(locType, locId) {
-    fPs.focusFltrs.combo = {};
-    fPs.focusFltrs.combo[locType] = { text: locType, value: locId };
+    fPs.pnlFltrs.combo = {};
+    fPs.pnlFltrs.combo[locType] = { text: locType, value: locId };
     // updateFilterStatusMsg();
 }
 /*------------------ Source Filter Updates -------------------------------*/
@@ -517,15 +515,15 @@ export function updatePubSearch() {                                             
         updatePubNameFilter();
 
         function updatePubComboboxFilter() { 
-            if (type === '- All -') { delete fPs.focusFltrs.combo; 
+            if (type === '- All -') { delete fPs.pnlFltrs.combo; 
             } else { 
-                fPs.focusFltrs.combo = {}; 
-                fPs.focusFltrs.combo["PubType"] = { text: type, value: typeId }
+                fPs.pnlFltrs.combo = {}; 
+                fPs.pnlFltrs.combo["PubType"] = { text: type, value: typeId }
             };
         }
         function updatePubNameFilter() {  
-            if (text == '' || text == null) { delete fPs.focusFltrs.name;
-            } else { fPs.focusFltrs.name = '"'+text+'"'; }
+            if (text == '' || text == null) { delete fPs.pnlFltrs.name;
+            } else { fPs.pnlFltrs.name = '"'+text+'"'; }
         }
     }
 } /* End updatePubSearch */

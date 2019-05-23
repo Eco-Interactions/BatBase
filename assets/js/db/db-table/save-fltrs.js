@@ -64,9 +64,6 @@ function createFilterSet() {
     const data = buildFilterData();
     _uPnl.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
 }
-
-
-
 /* ------ OPEN FILTER SET ------- */
 export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
     if (val === 'create') { return newFilterSet(); }
@@ -83,7 +80,7 @@ function editFilterSet() {
 }
 function fillFilterData(id) {
     const filters = _u.getDataFromStorage('savedFilters');                           
-    const filter = addActiveFilterToMemory(filters[id]);                        //console.log('activeFilter = %O', filter);                                                 
+    const filter = addActiveFilterToMemory(filters[id]);                        console.log('activeFilter = %O', filter);                                                 
     fillFilterDetailFields(filter.displayName, filter.description);
 }
 function fillFilterDetailFields(name, description) {
@@ -102,32 +99,19 @@ function buildFilterData() {
     return data;
 }
 /**
- * filters: {
- *     focus: '',
- *     view: '',
- *     panel: {
- *         text:
- *         combobox:
- *         time:
- *     },
- *     table: {
- *         displayName: { colName: filterModel }},
- * }
+ * Returns a json object with the current focus, view, and active filters in the
+ * filter panel and the table column headers.
  */
 function getFilterSetJson(tState) {                                             //console.log('tblState = %O', tState)
+    const fState = db_filters.getFilterState();
     const filters = {
-        focus: tState.curFocus, panel: getFiltersInPanel(),
-        table: getColumnHeaderFilters(), view: tState.curView
+        focus: tState.curFocus, panel: fState.panel,
+        table: getColumnHeaderFilters(fState.table), view: tState.curView
     };
     return JSON.stringify(filters);
 }
-function getFiltersInPanel() {
-    const panelFilters = db_filters.getExternalFilters();                       //console.log('panelFilters = %O', panelFilters);
-    return {};
-}
 /** Returns an obj with the ag-grid filter models. */
-function getColumnHeaderFilters() {
-    const models = db_filters.getTableFilterModels();              
+function getColumnHeaderFilters(models) {
     const colTitles = Object.keys(models);
     return getActiveTableFilters();
     
