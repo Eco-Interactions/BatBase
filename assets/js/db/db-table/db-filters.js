@@ -23,11 +23,15 @@ import * as db_ui from './db-ui.js';
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
  *     fltrdRows - rowdata after filters
- *     focusFltrs - Stores focus specific filter strings (eg: name search, taxonomic level, country, etc)
+ *     focusFltrs - Object stores focus specific filter strings 
+ *         combo - obj with combo-label (k): obj with text and value (k) with their respective values
+ *         list - Save interaction list ID
+ *         name - name filter string
+ *         time - date string filtered to
  *     timeFltr - Stores the specified datetime for the time-updated filter.
  */
 let fPs = {
-    focusFltrs: []
+    focusFltrs: {}
 };
 /**
  * Updated with each new entry into this module with properties needed for that 
@@ -38,7 +42,7 @@ let tblState;
 export function resetTableStateParams() {
     const props = ['fltrdRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
-    fPs.focusFltrs = [];
+    fPs.focusFltrs = {};
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
@@ -61,27 +65,42 @@ function getActiveFilters() {
 }
 export function getExternalFilters() {
     const filters = [];
-    addFocusFilters();
+    filters.push(...addFocusFilters());
     addUpdatedSinceFilter();
     addIntListFilter();
-    return filters;
+    return filters; //filter away null values?
     
-    function addFocusFilters() {
-        if (fPs.focusFltrs && fPs.focusFltrs.length > 0) { 
-            filters.push(...fPs.focusFltrs);  
-        } 
-    }
-    function addUpdatedSinceFilter() {
-        if ($('#shw-chngd')[0].checked) { 
-            filters.push("Time Updated");
-        } 
-    }
-    function addIntListFilter() {
-        if (tblState.intSet) {
-            filters.push("Interaction List");
-        }
-    }
 } /* End getExternalFilters */
+function addFocusFilters() {  
+    const map = { combo: addComboValue, name: addName };
+    return getFocusFilterDisplayVals();
+
+    function getFocusFilterDisplayVals() {
+        const filters = [];
+        Object.keys(fPs.focusFltrs).forEach(type => {                           //console.log('filter [%s] = %O', type, fPs.focusFltrs[type]);
+            filters.push(map[type](fPs.focusFltrs[type]));
+        });  
+        return filters; 
+    }
+    /** Stores the most recent combobox selection. */
+    function addComboValue(comboObj) {                                          //console.log('comboObj = %O', comboObj);
+        const type = Object.keys(comboObj);
+        return comboObj[type].text;
+    }
+    function addName(name) {
+        return name;
+    }
+}
+function addUpdatedSinceFilter() {
+    if ($('#shw-chngd')[0].checked) { 
+        filters.push("Time Updated");
+    } 
+}
+function addIntListFilter() {
+    if (tblState.intSet) {
+        filters.push("Interaction List");
+    }
+}
 function getTableFilters(filters) {
     const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
     const columns = Object.keys(filterModels);        
@@ -138,8 +157,9 @@ function clearTableStatus() {
 export function resetTblFilters() {  
     $('#xtrnl-filter-status').text('Filtering on: ');
     $('#tbl-filter-status').text('No Active Filters.');
+    $('#focus-filters input').val('');
     $('#shw-chngd').prop('checked', false); //resets updatedAt table filter
-    fPs.focusFltrs = [];
+    fPs.focusFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 /**
@@ -359,11 +379,14 @@ function searchTreeText(entity) {                                               
     const allRows = getAllCurRows(); 
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
     tblState.api.setRowData(newRows); 
-    fPs.focusFltrs = text === "" ? [] : fPs.focusFltrs.length ? 
-        [...fPs.focusFltrs, `"${text}"`] : [`"${text}"`];  
+    setFocusFilterVal(text);
     updateFilterStatusMsg();
     db_ui.resetToggleTreeBttn(false);
 } 
+function setFocusFilterVal(text) { 
+    if (text === "") { return delete fPs.focusFltrs.name; }
+    fPs.focusFltrs.name = '"'+text+'"'; 
+}
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
@@ -394,15 +417,15 @@ export function updateTaxonSearch(val) {
     const taxonRcrds = tState().get('rcrdsById');
     const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
-    updateFilterStatus();
+    addToFilterMemory();
     rebuildTxnTable(rcrd, 'filtering');
     if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
-    function updateFilterStatus() {
+    function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;
         const taxonName = rcrd.displayName;
-        fPs.focusFltrs = [curLevel + " " + taxonName];
-        updateFilterStatusMsg();
+        fPs.focusFltrs.combo = {};
+        fPs.focusFltrs.combo[curLevel] = { text: taxonName, value: val };
     }
 } /* End updateTaxonSearch */
 /** The selected taxon's ancestors will be selected in their levels combobox. */
@@ -432,8 +455,8 @@ function getLocType(selId) {
 function getComboboxValuesAndRebuildLocTree(val, locType) {
     const selVal = parseInt(val);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
+    updateLocFilter(locType, selVal);
     rebuildLocTable([selVal]);                                                  //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
-    updateFilter(locType);
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};
@@ -447,9 +470,10 @@ function getSelectedVals(val, type) {                                           
         selected['Region'] = loc.region.id;
     }
 } /* End getSelectedVals */
-function updateFilter(locType) {
-    fPs.focusFltrs = [locType];
-    updateFilterStatusMsg();
+function updateLocFilter(locType, locId) {
+    fPs.focusFltrs.combo = {};
+    fPs.focusFltrs.combo[locType] = { text: locType, value: locId };
+    // updateFilterStatusMsg();
 }
 /*------------------ Source Filter Updates -------------------------------*/
 /**
@@ -462,9 +486,8 @@ export function updatePubSearch() {                                             
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
     const newRows = getFilteredPubRows();
-    fPs.focusFltrs = getPubFilters();
+    setPubFilters();
     tblState.api.setRowData(newRows);
-    updateFilterStatusMsg();
     db_ui.resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {                             
@@ -482,13 +505,28 @@ export function updatePubSearch() {                                             
         const pubIds = pubTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
-    function getPubFilters() { 
+    function setPubFilters() { 
         const typeVal = $(`#selPubType option[value="${typeId}"]`).text();
         const truncTxt = txt ? 
             (txt.length > 50 ? txt.substring(0, 50)+'...' : txt) : null; 
-        return typeId === 'all' && !txt ? [] :
-            (typeId === 'all' ? [`"${truncTxt}"`] : 
-            (!txt ? [`${typeVal}s`] : [`"${truncTxt}"`, `${typeVal}s`]));
+        updatePubFocusFilters(typeVal, typeId, truncTxt);
+        updateFilterStatusMsg();
+    }
+    function updatePubFocusFilters(type, typeId, text) {
+        updatePubComboboxFilter();
+        updatePubNameFilter();
+
+        function updatePubComboboxFilter() { 
+            if (type === '- All -') { delete fPs.focusFltrs.combo; 
+            } else { 
+                fPs.focusFltrs.combo = {}; 
+                fPs.focusFltrs.combo["PubType"] = { text: type, value: typeId }
+            };
+        }
+        function updatePubNameFilter() {  
+            if (text == '' || text == null) { delete fPs.focusFltrs.name;
+            } else { fPs.focusFltrs.name = '"'+text+'"'; }
+        }
     }
 } /* End updatePubSearch */
 /* ========================== FILTER UTILITY METHODS ================================================================ */
