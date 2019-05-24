@@ -12,7 +12,7 @@ import * as data_tree from './build-data-tree.js';
 import * as db_filters from './db-filters.js';
 import * as frmt_data from './format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetSearchState } from '../db-page.js';
+import { accessTableState as tState, resetSearchState, selectSearchFocus } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 
 /**
@@ -165,7 +165,22 @@ function resetDeleteButton() {
     $('#delete-filter').show();
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
-
+function applyFilterSet() {
+    const filters = app.fltr.details;                                           console.log('Applying filters = %O', filters);
+    updateTableView(filters.view);
+    reloadTableInFilterFocus(filters.focus);
+    updateUi();
+}
+function updateTableView(view) {
+    view =  view ? view : 'tree'; console.log('view = ', view);//Location filters are only saved in tree view
+    _u.addToStorage('curView', view);
+}
+function reloadTableInFilterFocus(focus) {
+    $('#search-focus')[0].selectize.addItem(focus);
+}
+function updateUi() {
+    $('#apply-filter').html('Reapply Filter');
+}
 /* ====================== UTILITY =========================================== */
 function addActiveFilterToMemory(set) {
     app.fltr = _uPnl.parseUserNamed(set);

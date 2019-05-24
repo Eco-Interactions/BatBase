@@ -17,7 +17,7 @@
  *     rebuildTxnTable          db-filters
  *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-ints    
- *     selectSearchFocus        db-filters
+ *     selectSearchFocus        db-filters, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap

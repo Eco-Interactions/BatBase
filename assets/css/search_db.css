@@ -141,6 +141,9 @@ div[id^="db-opts-col"] {
 #apply-filter {
     margin-right: 7.3em;
 }
+#delete-filter {
+    align-self: flex-end;
+}
 .saved-filters-sel {
     width: 199px;
 }
@@ -951,7 +954,7 @@ input.active-icon {
         flex: 0 0 555px;
     }
     #filter-opts #apply-filter {
-        margin-right: none;
+        margin-right: .3em;
     }
     .hide-fltr-bttm-border:before {
         left: 467px;
