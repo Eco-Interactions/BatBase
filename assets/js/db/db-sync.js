@@ -122,20 +122,21 @@ export function updateUserNamedList(data, action) {                             
     const rcrds = _u.getDataFromStorage(rcrdKey);
     const names = _u.getDataFromStorage(nameKey);
 
-    updateListData();
+    if (action == 'delete') { return removeListData(); 
+    } else { updateListData(); }
+
     storeData(rcrdKey, rcrds);
     storeData(nameKey, names);
 
-    function updateListData() {
-        if (action == 'delete') { return removeListData(); } 
-        rcrds[list.id] = list;
-        names[list.displayName] = list.id;
-
-        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
-    }
     function removeListData() {  
         delete rcrds[list.id];  
         delete names[list.displayName];  
+    }
+    function updateListData() {
+        rcrds[list.id] = list;
+        names[list.displayName] = list.type !== 'filter' ? list.id :
+            {value: list.id, group: getFocusAndViewOptionGroupString(list)};
+        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
     }
 } /* End updateUserNamedList */
 /*------------------ Update Submitted Form Data --------------------------*/
@@ -688,9 +689,26 @@ function deriveUserNamedListData(data) {                                        
     });
 
     storeData('savedFilters', filters);
-    storeData('savedFilterNames', getNameDataObj(filterIds, filters));
+    storeData('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
     storeData('dataLists', int_sets);
     storeData('dataListNames', getNameDataObj(int_setIds, int_sets));
+}
+function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
+    const data = {};
+    ids.forEach(function(id) { 
+        data[filters[id].displayName] = { 
+            value: id, group: getFocusAndViewOptionGroupString(filters[id]) }
+    });                                                                         //console.log("nameDataObj = %O", data);
+    return data;
+}
+function getFocusAndViewOptionGroupString(list) {
+    list.details = JSON.parse(list.details);                                    //console.log('getFocusAndViewOptionGroupString. list = %O', list)
+    const map = {
+        'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',
+        'taxa': 'Taxon', '2': 'Bats', '3': 'Plants', '4': 'Arthropod'
+    };
+    return list.details.focus === 'locs' ? 'Location' : 
+        map[list.details.focus] + ' - ' + map[list.details.view];
 }
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */

@@ -136,8 +136,8 @@ Errors:
 
 >BEST PRACTICES
 ## Standards decided upon and why
-alphabetize:
-    Everything than can be should be.
+alphabetize: 
+    Everything than can be should be.  (Adopted 2019-05-01)
 comments:
     //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
 

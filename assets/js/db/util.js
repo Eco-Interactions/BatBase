@@ -152,10 +152,18 @@ export function getOptsFromStoredData(prop) {                                   
     var sortedNameKeys = Object.keys(dataObj).sort();
     return buildOptsObj(dataObj, sortedNameKeys);
 }
-/** Builds options out of the entity-name  object, with id as 'value'. */
+/** 
+ * Builds options out of the entity-name  object. Name (k) ID (v). If an option 
+ * group is passed, an additional 'group' key is added that will serve as a category 
+ * for the options in the group.
+ */
 export function buildOptsObj(entityObj, sortedKeys) {
     return sortedKeys.map(function(name) {
-        return { value: entityObj[name], text: ucfirst(name) }
+        return typeof entityObj[name] === 'object' ? 
+            { group: entityObj[name].group, 
+              text: ucfirst(name),
+              value: entityObj[name].value } :
+            { value: entityObj[name], text: ucfirst(name) }
     });    
 }
 /*--------------------- Extend Prototypes/Libraries ----------------------*/
@@ -363,9 +371,9 @@ export function getTaxonName(taxon) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initCombobox(field) {                                           //console.log("initCombobox [%s]", field);
+export function initCombobox(field, options) {                                           //console.log("initCombobox [%s]", field);
     const confg = getSelConfgObj(field); 
-    initSelectCombobox(confg);  
+    initSelectCombobox(confg, options);  
 } /* End initComboboxes */
 export function initComboboxes(fieldAry) {
     fieldAry.forEach(field => initCombobox(field));
@@ -394,15 +402,21 @@ function getSelConfgObj(field) {
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
  * that allow users to search by typing.
  */
-function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+function initSelectCombobox(confg, opts) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
     const options = {
         create: confg.add || false,
         onChange: confg.change,
         onBlur: confg.blur ? saveOrRestoreSelection : null,
         placeholder: getPlaceholer(confg.id, confg.name, confg.add)
     };
-    $(confg.id).selectize(options); 
-
+    if (opts) { addAdditionalOptions(); }                                       //console.log('options = %O', options);
+    $(confg.id).selectize(options);  
+    /** All non-standard options are added to this 'options' prop. */ 
+    function addAdditionalOptions() {
+        for (var opt in opts) {  
+            options[opt] = opts[opt];
+        }
+    }
 } /* End initSelectCombobox */
 function getPlaceholer(id, name, add, empty) {
     const optCnt = empty ? 0 : $(id + ' > option').length;  

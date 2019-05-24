@@ -8,6 +8,7 @@
 Current:
     - filters
         - saved filters dropdown: sub-categories into focus & view
+    - intro js tip points
 
 
     - Build backend for saving lists

@@ -68,8 +68,9 @@ export function submitUpdates(data, action, successFunc) {
 export function parseUserNamed(entity) {                                        
     return entity ? parseEntity(entity) : { details: [] };
 }
-function parseEntity(entity) {
-    entity.details = JSON.parse(entity.details);
+function parseEntity(entity) {  
+    entity.details = typeof entity.details == 'string' ? 
+        JSON.parse(entity.details) : entity.details;
     return entity
 }
 
