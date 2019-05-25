@@ -166,17 +166,29 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {
+    app.tblApi = tState().get('api');
     const filters = app.fltr.details;                                           console.log('Applying filters = %O', filters);
     updateTableView(filters.view);
     reloadTableInFilterFocus(filters.focus);
+    applyTableFilters(filters.table);
+    applyPanelFilters(filters.panel);
     updateUi();
 }
 function updateTableView(view) {
-    view =  view ? view : 'tree'; console.log('view = ', view);//Location filters are only saved in tree view
-    _u.addToStorage('curView', view);
+    view =  view ? view : 'tree'; //Location filters are only saved in tree view
+    _u.addToStorage('curView', JSON.stringify(view)); 
 }
-function reloadTableInFilterFocus(focus) {
+function reloadTableInFilterFocus(focus) {                                      
     $('#search-focus')[0].selectize.addItem(focus);
+}
+function applyTableFilters(filters) {                                           console.log('applyTableFilters = %O', filters);
+    for (let name in filters) {  
+        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
+    }
+}
+function applyPanelFilters(filters) {                                           console.log('applyPanelFilters = %O', filters);
+    // body...
 }
 function updateUi() {
     $('#apply-filter').html('Reapply Filter');
