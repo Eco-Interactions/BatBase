@@ -204,11 +204,14 @@ function resetTimeUpdatedFilter() {                                             
  */
 function showCal(time) {                                                        //console.log('showFlatpickrCal. time? = [%s] fPs = %O', time, fPs);
     fPs.cal = fPs.cal || initCal(); 
-    if (time == 'today') { filterToChangesToday(); 
-    } else if (fPs.pnlFltrs.time) { 
-        reapplyPreviousTimeFilter(fPs.pnlFltrs.time)
+    if (time == 'today') { 
+        filterToChangesToday(); 
+    } else if (time) { 
+        filterToSpecifiedTime(time);
+    } else if (fPs.pnlFltrs.time) {
+        reapplyPreviousTimeFilter(fPs.pnlFltrs.time);
     } else {
-        fPs.cal.open();            
+        fPs.cal.open();
         fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
     }
 }    
@@ -226,13 +229,18 @@ function initCal() {
     }; 
     return $('#time-fltr').flatpickr(calOpts);
 }
-function reapplyPreviousTimeFilter(filterTime, skipSync) {
+function reapplyPreviousTimeFilter(filterTime, skipSync) { 
     fPs.cal.setDate(filterTime);  
     filterInteractionsUpdatedSince(null, filterTime, null, skipSync);
 }
 function filterToChangesToday() {  
-    fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
-    filterInteractionsUpdatedSince(null, new Date().today(), null)
+    const today = new Date().today();
+    fPs.cal.setDate(today, false, 'Y-m-d');  
+    filterInteractionsUpdatedSince(null, today, null);
+}
+function filterToSpecifiedTime(time) {
+    fPs.cal.setDate(time, false, 'F d, Y h:i K');  
+    filterInteractionsUpdatedSince(null, time, null);
 }
 /**
  * Filters all interactions in the table leaving only the records with updates
@@ -417,7 +425,7 @@ export function updateTaxonSearch(val) {
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
     rebuildTxnTable(rcrd, 'filtering');
-    if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
+    // if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;

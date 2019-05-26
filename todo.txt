@@ -35,20 +35,20 @@ Current:
 
 
 Before Release:
-    - Turn all form styles from percentages to pixels
-
-
-
     - Add to Testing
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
 Planning Meeting Notes:
 
 Before conference:
+    - Add Data-review UI
     - Add spanish translations to site
+    - Turn all form styles from percentages to pixels
     - Add int row color code somewhere small (beneath toolbar?)
     - Create static page with tutorial information
-    - DOuble check all center points for multi-polygons
+        - Add intro.js hints to complicated UI areas
+    - Double check all center points for multi-polygons
+    - Add "- All -" option to comboboxes in location and taxa view
 
 Figure out how to "stress test" the site:
     - Large number of people using it

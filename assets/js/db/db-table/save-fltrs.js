@@ -170,8 +170,8 @@ function applyFilterSet() {
     const filters = app.fltr.details;                                           console.log('Applying filters = %O', filters);
     updateTableView(filters.view);
     reloadTableInFilterFocus(filters.focus);
-    applyTableFilters(filters.table);
     applyPanelFilters(filters.panel);
+    applyTableFilters(filters.table);
     updateUi();
 }
 function updateTableView(view) {
@@ -181,14 +181,28 @@ function updateTableView(view) {
 function reloadTableInFilterFocus(focus) {                                      
     $('#search-focus')[0].selectize.addItem(focus);
 }
-function applyTableFilters(filters) {                                           console.log('applyTableFilters = %O', filters);
+function applyTableFilters(filters) {                                           //console.log('applyTableFilters = %O', filters);
     for (let name in filters) {  
         const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
 }
-function applyPanelFilters(filters) {                                           console.log('applyPanelFilters = %O', filters);
-    // body...
+function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs);
+    const map = {
+        combo: setComboboxFilter, name: setNameSearchFilter,
+        time: setTimeUpdatedFilter
+    };
+    Object.keys(map).forEach(type => fs[type] ? map[type](fs[type]) : null); //Calls filters in an order that ensures optimized application, eg, less redundant processes
+}
+function setComboboxFilter(fObj) {                                              //console.log('setComboboxFilter. fObj = %O', fObj);
+    const name = Object.keys(fObj)[0];
+    $(`#sel${name}`)[0].selectize.addItem(fObj[name].value);
+}
+function setNameSearchFilter(text) {                                            //console.log('setNameSearchFilter. text = %s', text);
+    $('#focus-filters input').val(text);
+}
+function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
+    db_filters.toggleTimeUpdatedFilter(true, time);
 }
 function updateUi() {
     $('#apply-filter').html('Reapply Filter');
