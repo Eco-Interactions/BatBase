@@ -166,33 +166,26 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {
-    app.tblApi = tState().get('api');
-    const filters = app.fltr.details;                                           console.log('Applying filters = %O', filters);
+    const filters = app.fltr.details;                                           
     updateTableView(filters.view);
     reloadTableInFilterFocus(filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
     updateUi();
 }
-function updateTableView(view) {
+function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
     _u.addToStorage('curView', JSON.stringify(view)); 
 }
 function reloadTableInFilterFocus(focus) {                                      
     $('#search-focus')[0].selectize.addItem(focus);
 }
-function applyTableFilters(filters) {                                           //console.log('applyTableFilters = %O', filters);
-    for (let name in filters) {  
-        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
-        app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
-    }
-}
 function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs);
     const map = {
         combo: setComboboxFilter, name: setNameSearchFilter,
         time: setTimeUpdatedFilter
     };
-    Object.keys(map).forEach(type => fs[type] ? map[type](fs[type]) : null); //Calls filters in an order that ensures optimized application, eg, less redundant processes
+    Object.keys(map).forEach(type => fs[type] ? map[type](fs[type]) : null);    //Calls filters in an order that ensures optimized application, eg, less redundant processes
 }
 function setComboboxFilter(fObj) {                                              //console.log('setComboboxFilter. fObj = %O', fObj);
     const name = Object.keys(fObj)[0];
@@ -203,6 +196,13 @@ function setNameSearchFilter(text) {                                            
 }
 function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     db_filters.toggleTimeUpdatedFilter(true, time);
+}
+function applyTableFilters(filters) {                                           //console.log('applyTableFilters = %O', filters);
+    app.tblApi = tState().get('api');
+    for (let name in filters) {  
+        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
+    }
 }
 function updateUi() {
     $('#apply-filter').html('Reapply Filter');
