@@ -108,7 +108,7 @@ function getColumnDefs(mainCol) {
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
+                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '( Blanks )']}},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
@@ -163,7 +163,11 @@ function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   
     if (tblState.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
-
+function alphaSortVals(a, b) {
+    var x = a.toLowerCase();
+    var y = b.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}  
 /** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
 function sortTreeColumnIfTaxonFocused() {
     if (tblState.curFocus === 'taxa') {
