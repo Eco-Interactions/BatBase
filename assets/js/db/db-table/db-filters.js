@@ -17,6 +17,7 @@
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from './db-ui.js';
+import { savedFilterSetActive } from './save-fltrs.js';
 
 /** 
  * Filter Params
@@ -113,16 +114,20 @@ function setFilterStatus(filters) {
     } else { resetTblFilters() }
 }
 function getFilterStatus(filters) {
-    if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
-        return filters.join(', ') + '.';
-    } else {
-        const tempStatusTxt = $('#xtrnl-filter-status').text();
-        if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-            setExternalFilterStatus(tempStatusTxt + ', ');
-        }
-        return filters.join(', ') + '.'; 
-    }
+    return (savedFilterSetActive() ? '(SET) ' : '') + filters.join(', ') + '.';
 }
+// Removed because setting the "external filter status" doesn't seem to ever be used anymore.
+// function getFilterStatus(filters) {
+//     if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
+//         return filters.join(', ') + '.';
+//     } else {
+//         const tempStatusTxt = $('#xtrnl-filter-status').text();
+//         if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
+//             setExternalFilterStatus(tempStatusTxt + ', ');
+//         }
+//         return filters.join(', ') + '.'; 
+//     }
+// }
 /** Returns an obj with the ag-grid filter models. */
 function getTableFilterModels() {  
     const filters = Object.keys(tblState.api.filterManager.allFilters);
@@ -144,17 +149,10 @@ function getTableFilterModels() {
     }
 }
 function setTableFilterStatus(status) {                                         //console.log("setTableFilterStatus. status = ", status)
-    $('#tbl-filter-status').text(status);
-}
-function setExternalFilterStatus(status) {
-    $('#xtrnl-filter-status').text(status);
-}
-function clearTableStatus() {
-    $('#tbl-filter-status, #xtrnl-filter-status').empty();
+    $('#filter-status').text(status);
 }
 export function resetTblFilters() {  
-    $('#xtrnl-filter-status').text('Filtering on: ');
-    $('#tbl-filter-status').text('No Active Filters.');
+    $('#filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
     $('#shw-chngd').prop('checked', false); //resets updatedAt table filter
     fPs.pnlFltrs = {};

@@ -3,8 +3,9 @@
  *
  * Exports:                 Imported By:                  (Added all post initial refactor)
  *     addFilterPanelEvents         panel-util
- *     newFilterSet                     util
- *     selFilterSet                     util
+ *     newFilterSet                 util
+ *     savedFilterSetActive         db-filters
+ *     selFilterSet                 util
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
@@ -21,6 +22,11 @@ import { resetToggleTreeBttn } from './db-ui.js';
  * tblState - state data for table and search page
 ] */
 let app = {};
+
+export function savedFilterSetActive(deactivate) {  
+    if (deactivate) { app.fltr.active = false; }
+    return app.fltr ? app.fltr.active : false;
+}
 
 export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
@@ -166,12 +172,13 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {
-    const filters = app.fltr.details;                                           
+    const filters = app.fltr.details; 
+    app.fltr.active = true;
     updateTableView(filters.view);
     reloadTableInFilterFocus(filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
-    updateUi();
+    app.fltr.active = true;
 }
 function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
@@ -203,9 +210,6 @@ function applyTableFilters(filters) {                                           
         const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
-}
-function updateUi() {
-    $('#apply-filter').html('Reapply Filter');
 }
 /* ====================== UTILITY =========================================== */
 function addActiveFilterToMemory(set) {
