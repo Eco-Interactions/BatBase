@@ -13,7 +13,7 @@ import * as data_tree from './build-data-tree.js';
 import * as db_filters from './db-filters.js';
 import * as frmt_data from './format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetSearchState, selectSearchFocus } from '../db-page.js';
+import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 
 /**
@@ -23,8 +23,7 @@ import { resetToggleTreeBttn } from './db-ui.js';
 ] */
 let app = {};
 
-export function savedFilterSetActive(deactivate) {  
-    if (deactivate) { app.fltr.active = false; }
+export function savedFilterSetActive() {  
     return app.fltr ? app.fltr.active : false;
 }
 
@@ -171,21 +170,22 @@ function resetDeleteButton() {
     $('#delete-filter').show();
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
-function applyFilterSet() {
+function applyFilterSet() {                                                     console.log('Applying Filter Set')
     const filters = app.fltr.details; 
     app.fltr.active = true;
-    updateTableView(filters.view);
-    reloadTableInFilterFocus(filters.focus);
+    reloadTableInFilterFocus(filters.view, filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
-    app.fltr.active = true;
+    delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
+}
+function reloadTableInFilterFocus(view, focus) {   
+    updateTableView(view);          
+    if (focus == tState().get('curFocus')) { resetDataTable() 
+    } else { $('#search-focus')[0].selectize.addItem(focus); }                        
 }
 function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
     _u.addToStorage('curView', JSON.stringify(view)); 
-}
-function reloadTableInFilterFocus(focus) {                                      
-    $('#search-focus')[0].selectize.addItem(focus);
 }
 function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs);
     const map = {
@@ -204,10 +204,10 @@ function setNameSearchFilter(text) {                                            
 function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     db_filters.toggleTimeUpdatedFilter(true, time);
 }
-function applyTableFilters(filters) {                                           //console.log('applyTableFilters = %O', filters);
-    app.tblApi = tState().get('api');
+function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
+    app.tblApi = tState().get('api'); 
     for (let name in filters) {  
-        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        const colName = Object.keys(filters[name])[0];                          console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
 }
@@ -226,7 +226,19 @@ function onFilterSubmitComplete(action, results) {
     updateUserNamedList(results.list, action);
     updateFilterSel();
     $('#saved-filters')[0].selectize.addItem(filter.id);
+    addSetToFilterStatus();
     showSavedMsg();
+}
+function addSetToFilterStatus() {
+    if (!dataFiltersSaved(app.fltr)) { return; }
+    app.fltr.active = true;
+    db_filters.updateFilterStatusMsg();
+    delete app.fltr.active;
+}
+function dataFiltersSaved(fltr) {
+    const panleFilters = Object.keys(fltr.details.panel).length > 0;
+    const tableFilters = Object.keys(fltr.details.table).length > 0;
+    return panleFilters || tableFilters;
 }
 function onFilterDeleteComplete(results) {                                      console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
@@ -235,6 +247,7 @@ function onFilterDeleteComplete(results) {                                      
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);
+    window.setTimeout(hideSavedMsg, 2500);
 }
 function hideSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 0);
