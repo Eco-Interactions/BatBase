@@ -16,7 +16,7 @@
  *     rebuildLocTable          db-filters
  *     rebuildTxnTable          db-filters
  *     resetSearchState         save-ints
- *     resetDataTable           db-ui, save-ints    
+ *     resetDataTable           db-ui, save-fltrs, save-ints    
  *     selectSearchFocus        db-filters, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
@@ -146,7 +146,7 @@ function getResetFocus() {
 }
 /** Resets table state to top focus options for the selected view. */
 export function resetDataTable() {                                              //console.log("---reseting table---")
-    const resetMap = { taxa:  buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
+    const resetMap = { taxa: buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
     resetCurTreeState();
     resetMap[tblState.curFocus](); 
 } 

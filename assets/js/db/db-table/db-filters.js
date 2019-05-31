@@ -96,9 +96,7 @@ function addTimeFltr(time) {
     return "Time Updated";
 }
 function addIntListFilter() {
-    if (tblState.intSet) {
-        return "Interaction List";
-    }
+    if (tblState.intSet) { return "Interaction List"; }
 }
 function getTableFilters(filters) {
     const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
