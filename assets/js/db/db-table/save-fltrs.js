@@ -243,6 +243,7 @@ function dataFiltersSaved(fltr) {
 function onFilterDeleteComplete(results) {                                      console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
     updateFilterSel();
+    $('#stored-filters input, #stored-filters textarea').val('');
     $('#saved-filters')[0].selectize.open();
 }
 function showSavedMsg() {
