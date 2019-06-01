@@ -30,6 +30,7 @@ import * as db_sync from './db-sync.js';
 import * as db_tips from './tips.js';
 import * as db_ui from './db-table/db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
+import { resetStoredFiltersUi } from './db-table/save-fltrs.js';
 
 /**
  * Stores table state params needed across multiple modules. 
@@ -156,6 +157,7 @@ function resetCurTreeState() {                                                  
     db_ui.resetToggleTreeBttn(false);
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
+    resetStoredFiltersUi();
 }
 /** 
  * Deltes the props uesd for only the displayed table in the global tblState.
@@ -169,6 +171,7 @@ function resetCurTreeStorageProps() {
 export function initDataTable(focus) {                                          //console.log('resetting search table.')
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
+    resetStoredFiltersUi();
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();

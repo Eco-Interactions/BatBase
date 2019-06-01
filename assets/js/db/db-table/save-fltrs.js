@@ -4,8 +4,10 @@
  * Exports:                 Imported By:                  (Added all post initial refactor)
  *     addFilterPanelEvents         panel-util
  *     newFilterSet                 util
+ *     resetStoredFiltersUi         db-page
  *     savedFilterSetActive         db-filters
  *     selFilterSet                 util
+ *     
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
@@ -34,6 +36,11 @@ export function addFilterPanelEvents() {
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
+}
+export function resetStoredFiltersUi() {
+    if (!$('#saved-filters')[0].selectize) { return; }
+    $('#saved-filters')[0].selectize.clear();
+    $('#stored-filters input, #stored-filters textarea').val('');
 }
 
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
@@ -180,7 +187,9 @@ function applyFilterSet() {                                                     
 }
 function reloadTableInFilterFocus(view, focus) {   
     updateTableView(view);          
-    if (focus == tState().get('curFocus')) { resetDataTable() 
+    if (focus == tState().get('curFocus')) { 
+        resetDataTable();
+        _u.setSelVal('Saved Filter Set', app.fltr.id); 
     } else { $('#search-focus')[0].selectize.addItem(focus); }                        
 }
 function updateTableView(view) {                                                //console.log('updateTableView')
@@ -213,7 +222,9 @@ function applyTableFilters(filters) {                                           
 }
 /* ====================== UTILITY =========================================== */
 function addActiveFilterToMemory(set) {
+    const status = app.fltr ? app.fltr.active : false;
     app.fltr = _uPnl.parseUserNamed(set);
+    app.fltr.active = status;
     return app.fltr;
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
