@@ -234,6 +234,12 @@ button[name="futureDevBttn"] {
     width: 200px;
     align-self: flex-end;
 }
+#load-list+div {
+    opacity: .3;
+    align-self: flex-end;
+    font-size: .9em;
+    margin-top: .25em;
+}
 #int-lists {
     flex: 0 0 333px;
 }

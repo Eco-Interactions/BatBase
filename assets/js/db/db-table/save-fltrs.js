@@ -17,9 +17,11 @@ import * as frmt_data from './format-data.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
+import { savedIntListLoaded } from './save-ints.js';
 
 /**
  * fltr - List open in panel
+ *     active - true when loading saved filters
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
 ] */
@@ -91,7 +93,7 @@ function buildOptGroups(opts) {
 /* ------ CREATE FILTER SET ------- */
 export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
     enableFilterSetInputs('create');
-    _uPnl.updateSubmitEvent('#save-filter', createFilterSet);
+    updateSubmitButton(createFilterSet, savedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
     return { value: 'new', text: val ? val : "Creating New Filter Set" };
 }
@@ -100,12 +102,12 @@ function createFilterSet() {
     _uPnl.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
 }
 /* ------ OPEN FILTER SET ------- */
-export function selFilterSet(val) {                                             console.log('loading filter set. val = %s', val);
-    if (val === 'create') { return newFilterSet(); }
-    if (!val) { return resetFilterUi(); }
+export function selFilterSet(val) {                                             
     if (val === 'new') { return; } // New list typed into combobox
+    if (val === 'create') { return newFilterSet(); }                            console.log('loading filter set. val = %s', val);
+    if (!val) { return resetFilterUi(); }
     enableFilterSetInputs();
-    _uPnl.updateSubmitEvent('#save-filter', editFilterSet);
+    updateSubmitButton(editFilterSet, savedIntListLoaded());
     fillFilterData(val);
 }
 function editFilterSet() {
@@ -185,18 +187,23 @@ function applyFilterSet() {                                                     
     applyTableFilters(filters.table);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
+/* --- reloadTableInFilterFocus --- */
 function reloadTableInFilterFocus(view, focus) {   
-    updateTableView(view);          
+    updateTableView(view);    
+    reloadTable(focus, app.fltr.id);
+}
+function reloadTable(focus, fltrId) { 
     if (focus == tState().get('curFocus')) { 
         resetDataTable();
-        _u.setSelVal('Saved Filter Set', app.fltr.id); 
+        _u.setSelVal('Saved Filter Set', fltrId); 
     } else { $('#search-focus')[0].selectize.addItem(focus); }                        
 }
+/* End reloadTableInFilterFocus */
 function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
     _u.addToStorage('curView', JSON.stringify(view)); 
 }
-function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs);
+function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs)
     const map = {
         combo: setComboboxFilter, name: setNameSearchFilter,
         time: setTimeUpdatedFilter
@@ -219,6 +226,7 @@ function applyTableFilters(filters) {                                           
         const colName = Object.keys(filters[name])[0];                          console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
+    delete app.tblApi;
 }
 /* ====================== UTILITY =========================================== */
 function addActiveFilterToMemory(set) {
@@ -293,4 +301,25 @@ function enableFilterSetInputs(create) {
         $('#save-filter').html('Save Filter'); 
     }
 }
-/* --- Table Methods --- */
+function updateSubmitButton(func, listLoaded) {
+    if (listLoaded) {
+    $(`#save-filter`).css('opacity', '.5')
+        .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
+
+    } else {
+        _uPnl.updateSubmitEvent('#save-filter', func);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

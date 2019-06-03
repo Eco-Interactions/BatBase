@@ -4,6 +4,7 @@
  * Exports:                 Imported By:
  *     addListPanelEvents           panel-util
  *     newIntList                   util
+ *     savedIntListLoaded           db-filters, save-fltrs
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
  */
@@ -26,6 +27,10 @@ import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
  * tblState - state data for table and search page
 ] */
 let app = {};
+
+export function savedIntListLoaded() {                                          //console.log('savedIntListLoaded? ', app.listLoaded);
+    return app.listLoaded;
+}
 
 export function addListPanelEvents() {
     $('input[name="mod-list"]').on('change', toggleInstructions);
@@ -75,7 +80,7 @@ export function selIntList(val) {                                               
     if (val === 'create') { return newIntList(''); }
     if (!val && !app.submitting) { return resetListUi(); }
     if (val === 'new') { return; } // New list typed into combobox
-    resetPrevListUiState();
+    // resetPrevListUiState();
     _uPnl.updateSubmitEvent('#submit-list', editDataList);
     fillListData(val);
     enableInputs();
@@ -150,19 +155,25 @@ function resetDeleteButton() {
 function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
     app.tblState = tState().get();
     removePreviousTable();
+    app.listLoaded = true;
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     updateUi();
-    app.listLoaded = true;
     delete app.tblState;
 }
 function updateUi() {
     app.tblState.api.expandAll();
     resetToggleTreeBttn(true);
-    syncViewFiltersAndUi(app.tblState.curFocus);
-    updateFilterStatusMsg();
+    syncFilterUi(app.tblState.curFocus);
     updateListLoadButton('Reset to All Interactions', resetTable);
     hideSavedMsg();
     enableModUi('rmv');
+    updateFilterStatusMsg();
+}
+function syncFilterUi(focus) {
+    syncViewFiltersAndUi(focus);
+    if ($('#saved-filters')[0].selectize) { 
+        $('#saved-filters')[0].selectize.clear() 
+    }
 }
 function updateListLoadButton(text, clickFunc) {
     $('#load-list').html(text);
@@ -245,7 +256,9 @@ function fillListDataFields(nameVal, descVal, intCnt) {
     $('#list-details input').val(nameVal).focus();
     $('#list-details textarea').val(descVal);
     $('#int-list-cnt')[0].innerHTML = '<b>'+intCnt+'</b>';  
-    if (intCnt > 0) { $('#load-list').attr({disabled: false}).css({opacity: 1}); }
+    if (intCnt > 0) { 
+        $('#load-list, #load-list+div').attr({disabled: false}).css({opacity: 1}); 
+    }
 }
 /* --- Select Rows Radio Toggles ---- */
 function toggleInstructions() {                                                 //console.log('toggleInstructions');
@@ -277,7 +290,7 @@ function getRowSelectInfo(selMode) {
 function resetListUi() {
     clearAndDisableInputs();
     hideSavedMsg();
-    resetPrevListUiState();
+    // resetPrevListUiState();
 }
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea').val('');
@@ -293,7 +306,7 @@ function enableInputs(creating) {                                               
 }
 function disableInputs() {                                                      //console.log('disableInputs')
     $(`#list-details input, #mod-radios input, #list-details textarea,
-        #mod-list-pnl label, #int-opts button`)
+        #mod-list-pnl label, #int-opts button, #load-list+div`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableModUi(m) {                                                       //console.log('enableModUi')
@@ -318,12 +331,12 @@ function updateDataListSel() {
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
 }
-function resetPrevListUiState() {
-    if (!app.listLoaded || app.submitting) { return; }
-    resetTable();
-    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);
-    delete app.listLoaded;
-}
+// function resetPrevListUiState() {
+//     if (!app.listLoaded || app.submitting) { return; }
+//     resetTable();
+//     updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);  console.log('#################### listLoaded flag? ', listLoaded);
+//     delete app.listLoaded;
+// }
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
 function resetTable() {                                                         //console.log('- - - - - -resetingTable');

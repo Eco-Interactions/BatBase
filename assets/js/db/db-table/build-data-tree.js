@@ -413,7 +413,7 @@ function filterTreeToInteractionSet(dataTree, focus) {                          
 
     for (let bName in dataTree) {  
         addDataInInteractionSetToFilteredTree(dataTree[bName], bName);
-    }                                                                           console.log('tree after int filter = %O', tree)
+    }                                                                           //console.log('tree after int filter = %O', tree)
     return tree;
 
     function addDataInInteractionSetToFilteredTree(branch, name) {

@@ -18,6 +18,7 @@ import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from './db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from './save-fltrs.js';
+import { savedIntListLoaded } from './save-ints.js';
 
 /** 
  * Filter Params
@@ -66,19 +67,15 @@ export function updateFilterStatusMsg() {                                       
  * Sets table-status with the resulting active-filters messasge.
  */
 function getActiveFilters() {
-    return getTableFilters(getExternalFilters([]));
+    return getTableFilters(addExternalFilters());
 }
-function getExternalFilters() {
-    return [...addFocusFilters(), addIntListFilter()].filter(f => f);
-    
-} /* End getExternalFilters */
-function addFocusFilters() {  
+function addExternalFilters() {  
     const map = { combo: addComboValue, name: addName, time: addTimeFltr };
     return getFocusFilterDisplayVals();
 
     function getFocusFilterDisplayVals() {
         const filters = [];
-        Object.keys(fPs.pnlFltrs).forEach(type => {                                 //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
+        Object.keys(fPs.pnlFltrs).forEach(type => {                             //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
             filters.push(map[type](fPs.pnlFltrs[type]));
         });  
         return filters; 
@@ -95,9 +92,6 @@ function addName(name) {
 function addTimeFltr(time) {
     return "Time Updated";
 }
-function addIntListFilter() {
-    if (tblState.intSet) { return "Interaction List"; }
-}
 function getTableFilters(filters) {
     const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
     const columns = Object.keys(filterModels);        
@@ -108,14 +102,17 @@ function getTableFilters(filters) {
     return filters;
 }
 function setFilterStatus(filters) {
-    if (filters.length > 0) { setTableFilterStatus(getFilterStatus(filters)); 
+    if (filters.length > 0 || savedIntListLoaded()) { setStatus(getStatus(filters)); 
     } else { resetTblFilters() }
 }
-function getFilterStatus(filters) {
-    return (savedFilterSetActive() ? '(SET) ' : '') + filters.join(', ') + '.';
+function getStatus(filters) {                                                   
+    const list = savedIntListLoaded() ? '(LIST)' : ''; 
+    const set = savedFilterSetActive() ? '(SET)' : '';
+    const loaded = [list, set].filter(f=>f).join(' '); 
+    return (loaded ? (loaded + ' ') : '') + filters.join(', ') + '.';
 }
 // Removed because setting the "external filter status" doesn't seem to ever be used anymore.
-// function getFilterStatus(filters) {
+// function getStatus(filters) {
 //     if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
 //         return filters.join(', ') + '.';
 //     } else {
@@ -146,7 +143,7 @@ function getTableFilterModels() {
             tblState.api.getFilterApi(colName).getModel()
     }
 }
-function setTableFilterStatus(status) {                                         //console.log("setTableFilterStatus. status = ", status)
+function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
     $('#filter-status').text(status);
 }
 export function resetTblFilters() {  
