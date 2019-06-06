@@ -38,8 +38,8 @@ import { newFilterSet, selFilterSet } from './db-table/save-fltrs.js';
 let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
-const geoJsonKey = 'A life without cause is a life without effect.';  
-const localStorageKey = 'A life without cause is a life without effect!!!'; 
+const geoJsonKey = 'A life without cause is a life without effect!';  
+const localStorageKey = 'A life without cause is a life without effect!'; 
 
 extendPrototypes();
 initGeoJsonData();

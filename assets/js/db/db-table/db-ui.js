@@ -22,7 +22,11 @@ import * as db_filters from './db-filters.js';
 import { showInts } from '../db-map/db-map.js';
 import { toggleSaveIntsPanel } from './save-ints.js';
 import { addPanelEvents, closeOpenPanels } from './panel-util.js';
-const userRole = $('body').data("user-role");
+
+const app = {
+    userRole: $('body').data("user-role"),
+    enabledSelectors: ''
+};
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function pg_init() {
@@ -59,12 +63,15 @@ function authDependentInit() {
         editor: enableEditorFeatures, admin: enableAdminFeatures,
         super: enableAdminFeatures
     };
-    initMap[userRole]();
+    initMap[app.userRole]();
 }
-function disableUserFeatures() {
-    $('button[name="int-set"], button[name="csv"], #new-data, #rvw-data')
+function disableUserFeatures() {                                                //console.log('disableUserFeatures')
+    $(`button[name="int-set"], button[name="csv"], #new-data, #rvw-data, 
+        #saved-filters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
+        #stored-filters input, #stored-filters textarea`)
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
         .prop('title', "Please register to use these features.");
+    app.enabledSelectors = '#filter, button[name="reset-tbl"]';
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
@@ -73,6 +80,8 @@ function enableUserFeatures() {                                                 
         .prop('title', 'This feature is only available to editors.');
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');
+    app.enabledSelectors = `#filter, button[name="reset-tbl"], 
+        button[name="csv"], button[name="int-set"]`;
 }
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
@@ -81,6 +90,8 @@ function enableEditorFeatures() {                                               
         .click(createEntity.bind(null, 'create', 'interaction'));
     $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to admins.');
+    app.enabledSelectors = `#filter, button[name="reset-tbl"], 
+        button[name="csv"], button[name="int-set"], #new-data`;
 }
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
@@ -89,6 +100,7 @@ function enableAdminFeatures() {                                                
         .click(createEntity.bind(null, 'create', 'interaction'));
     $('#rvw-data').addClass('adminbttn').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This is an upcoming feature!');
+    app.enabledSelectors = '.map-dsbl';
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -560,11 +572,11 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
-export function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input, .map-dsbl')
+export function enableTableButtons() {                                          //console.log('enableTableButtons')
+    $('.tbl-tools button, .tbl-tools input, #db-opts-col1, ' + app.enabledSelectors)
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools, .map-dsbl').fadeTo('slow', 1);
+    $('.tbl-tools, ' + app.enabledSelectors).fadeTo('slow', 1);
 }
 export function disableTableButtons() {
     $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 

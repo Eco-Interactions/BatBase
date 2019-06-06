@@ -1,6 +1,6 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 >ASAP<
-
+    - Refactor getTableState to take one arg and determine if it's singular or an array
 > Create Interaction Lists and UI
 
 
@@ -39,6 +39,7 @@ Before Release:
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
 Planning Meeting Notes:
+    - Add "cited post" to "updated since" filter
 
 Before conference:
     - Add Data-review UI

@@ -1,5 +1,9 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 
+>Test Users
+    - Test_User: testuser123
+    - EditorTestUser: testeditor123
+
 ##------------------------- Serve Side ---------------------------------------##
 >.htaccess rewrite for batplant.org 
     RewriteEngine on
