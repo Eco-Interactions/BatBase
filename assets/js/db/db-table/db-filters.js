@@ -61,13 +61,18 @@ export function updateFilterStatusMsg() {                                       
     setFilterStatus(getActiveFilters());
 }
 /**
- * Adds all active filters to the table's status message. First adding any 
- * focus-level filters, such as author name or taxon, then any active filters
- * for table columns, and then checks/adds the 'interactions updated since' filter. 
- * Sets table-status with the resulting active-filters messasge.
+ * Returns the display names of all active filters in an array. 
+ * If a saved filter set is applied filters are read from the set. Otherwise, the
+ * active filters in the panel and table are checked and returned.
  */
-function getActiveFilters() {
-    return getTableFilters(addExternalFilters());
+function getActiveFilters() { 
+    const set = savedFilterSetActive(); 
+    return set ? getSavedFilterStatus(set) : getTableFilters(addExternalFilters());
+}
+function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
+    const tblFltrs = Object.keys(set.table);
+    const pnlFltrs = Object.keys(set.panel).map(type => Object.keys(set.panel[type])[0]);
+    return pnlFltrs.concat(tblFltrs);
 }
 function addExternalFilters() {  
     const map = { combo: addComboValue, name: addName, time: addTimeFltr };

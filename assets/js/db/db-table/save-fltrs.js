@@ -24,11 +24,11 @@ import { savedIntListLoaded } from './save-ints.js';
  *     active - true when loading saved filters
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
-] */
+ */
 let app = {};
 
 export function savedFilterSetActive() {  
-    return app.fltr ? app.fltr.active : false;
+    return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
 
 export function addFilterPanelEvents() {  
