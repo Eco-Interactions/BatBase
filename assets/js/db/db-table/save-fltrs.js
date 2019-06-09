@@ -267,7 +267,7 @@ function onFilterDeleteComplete(results) {                                      
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);
-    window.setTimeout(hideSavedMsg, 2500);
+    window.setTimeout(hideSavedMsg, 3000);
 }
 function hideSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 0);

@@ -252,6 +252,7 @@ function onListDeleteComplete(results) {                                        
 }
 function showSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 1);
+    window.setTimeout(hideSavedMsg, 3000);
 }
 function hideSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 0);
