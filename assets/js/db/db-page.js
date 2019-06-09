@@ -175,7 +175,8 @@ export function initDataTable(focus) {                                          
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();
 }
-export function selectSearchFocus(f) { 
+export function selectSearchFocus(f) {                                          
+    if (f == '') { return; } //Combobox cleared by user
     const focus = f ? f : _u.getSelVal('Focus');                                console.log("---select(ing)SearchFocus = ", focus); 
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
