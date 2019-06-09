@@ -46,7 +46,7 @@ export function resetTableStateParams() {
 export function getFilterState() {
     return {
         panel: fPs.pnlFltrs,
-        table: getTableFilters([])
+        table: getTableFilterModels()
     };
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
@@ -105,7 +105,7 @@ function getTableFilters(filters) {
     }
     return filters;
 }
-function setFilterStatus(filters) {
+function setFilterStatus(filters) {  
     if (filters.length > 0 || savedIntListLoaded()) { setStatus(getStatus(filters)); 
     } else { resetTblFilters() }
 }
@@ -113,7 +113,9 @@ function getStatus(filters) {
     const list = savedIntListLoaded() ? '(LIST)' : ''; 
     const set = savedFilterSetActive() ? '(SET)' : '';
     const loaded = [list, set].filter(f=>f).join(' '); 
-    return (loaded ? (loaded + ' ') : '') + filters.join(', ') + '.';
+    const fltrs = filters.join(', ');
+    return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :
+        loaded ? loaded : fltrs+'.';
 }
 // Removed because setting the "external filter status" doesn't seem to ever be used anymore.
 // function getStatus(filters) {
