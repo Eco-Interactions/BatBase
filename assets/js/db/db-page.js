@@ -92,7 +92,6 @@ export function resetSearchState() {                                            
     db_filters.toggleTimeUpdatedFilter('disable');
     db_filters.resetTblFilters();    
     selectSearchFocus();
-
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
 function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')

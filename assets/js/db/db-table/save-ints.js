@@ -15,7 +15,7 @@ import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from './db-filters.js';
+import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
 
 /**
  * list - List open in panel
@@ -153,12 +153,22 @@ function resetDeleteButton() {
  * with the standard UI options
  */
 function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
-    app.tblState = tState().get();
-    removePreviousTable();
-    app.listLoaded = true;
+    prepareMemoryForTableLoad();
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     updateUi();
     delete app.tblState;
+}
+/**
+ * Refactor to remove the table rebuild/teardown. It is here because I am crunched 
+ * for time and it was the simplest way to clear the panel filters.
+ */
+function prepareMemoryForTableLoad() {
+    tState().set({'intSet': app.list.details});
+    removePreviousTable();
+    resetSearchState();  //tblRebuild
+    removePreviousTable(); //tblTeardown
+    app.tblState = tState().get();  
+    app.listLoaded = true;
 }
 function updateUi() {
     app.tblState.api.expandAll();
@@ -180,7 +190,6 @@ function updateListLoadButton(text, clickFunc) {
     $('#load-list').off('click').click(clickFunc);
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
-    tState().set({'intSet': app.list.details});
     const bldrs = {
         'locs': buildLocTreeInts, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
     }
@@ -363,3 +372,14 @@ function deselectAllRows() {                                                    
     app.tblApi = tState().get('api');
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));           
 }
+
+
+
+
+
+
+
+
+
+
+

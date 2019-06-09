@@ -5,7 +5,7 @@
  *     buildTreeSearchHtml              db-ui
  *     getFilterState                   save-fltrs
  *     resetTblFilters                  db-page, save-ints
- *     resetTableStateParams            db-page
+ *     resetTableStateParams            db-page, db-ui
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
  *     toggleTimeUpdatedFilter          db_page
@@ -27,8 +27,7 @@ import { savedIntListLoaded } from './save-ints.js';
  *     pnlFltrs - Object stores panel filter values 
  *         combo - obj with combo-label (k): obj with text and value (k) with their respective values
  *         name - name filter string
- *         time - Datetime string
- *     timeFltr - Stores the specified datetime for the time-updated filter.
+ *         time - Stores the specified datetime for the time-updated filter.
  */
 let fPs = {
     pnlFltrs: {}
@@ -47,7 +46,7 @@ export function resetTableStateParams() {
 export function getFilterState() {
     return {
         panel: fPs.pnlFltrs,
-        table: getTableFilterModels()
+        table: getTableFilters([])
     };
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
