@@ -5,7 +5,7 @@
  *     buildTreeSearchHtml              db-ui
  *     getFilterState                   save-fltrs
  *     resetTblFilters                  db-page, save-ints
- *     resetTableStateParams            db-page, db-ui
+ *     resetTableStateParams            db-page, db-ui, save-ints
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
  *     toggleTimeUpdatedFilter          db_page

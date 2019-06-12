@@ -15,7 +15,7 @@ import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
-import { updateFilterStatusMsg, syncViewFiltersAndUi } from './db-filters.js';
+import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from './db-filters.js';
 
 /**
  * list - List open in panel

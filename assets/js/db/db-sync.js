@@ -122,7 +122,7 @@ export function updateUserNamedList(data, action) {                             
     const rcrds = _u.getDataFromStorage(rcrdKey);
     const names = _u.getDataFromStorage(nameKey);
 
-    if (action == 'delete') { return removeListData(); 
+    if (action == 'delete') { removeListData(); 
     } else { updateListData(); }
 
     storeData(rcrdKey, rcrds);
