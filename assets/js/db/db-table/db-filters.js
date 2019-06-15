@@ -70,8 +70,13 @@ function getActiveFilters() {
 }
 function getSavedFilterStatus(set) {                                            //console.log('getSavedFilterStatus. set = %O', set);
     const tblFltrs = Object.keys(set.table);
-    const pnlFltrs = Object.keys(set.panel).map(type => Object.keys(set.panel[type])[0]);
+    const pnlFltrs = getPanelFilters(set.panel);
     return pnlFltrs.concat(tblFltrs);
+}
+function getPanelFilters(filters) {
+    return Object.keys(filters).map(type => {
+        return typeof type == 'string' ? 'Time Updated' : Object.keys(filters[type])[0]
+    });
 }
 function addExternalFilters() {  
     const map = { combo: addComboValue, name: addName, time: addTimeFltr };
