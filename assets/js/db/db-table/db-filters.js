@@ -90,8 +90,8 @@ function getSavedFilterStatus(set) {                                            
     return pnlFltrs.concat(tblFltrs);
 }
 function getPanelFilters(filters) {
-    return Object.keys(filters).map(type => {
-        return typeof type == 'string' ? 'Time Updated' : Object.keys(filters[type])[0]
+    return Object.keys(filters).map(type => {  
+        return typeof filters[type] == 'string' ? 'Time Updated' : Object.keys(filters[type])[0]
     });
 }
 function addExternalFilters() {  
