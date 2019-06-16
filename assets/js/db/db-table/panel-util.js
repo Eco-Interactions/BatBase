@@ -27,7 +27,7 @@ export function updateSubmitEvent(id, event) {
 /* -------------------  OPEN/CLOSE PANELS --------------------- */
 export function closeOpenPanels() {
     ['#filter-opts', '#int-opts'].forEach(id => {
-        if (!$(id).hasClass('closed')) { cssClosePanel(id); }
+        if (!$(id).hasClass('closed')) { togglePanel(id, 'close'); }
     })
 }
 export function togglePanel(id, state) {

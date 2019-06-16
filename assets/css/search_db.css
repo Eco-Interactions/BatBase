@@ -87,7 +87,7 @@ div[id^="db-opts-col"] {
     content: '';
     position: absolute;
     height: 3px;
-    width: 170px;
+    width: 133px;
     left: 467px;
     top: 56px;
     background: #f2f9f8;
@@ -217,8 +217,8 @@ button[name="futureDevBttn"] {
     content: '';
     position: absolute;
     height: 3px;
-    width: 83px;
-    right: 489px;
+    width: 125px;
+    left: 891px;
     top: 56px;
     background: #e2f2f3;
     z-index: 10;

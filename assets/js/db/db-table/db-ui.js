@@ -11,8 +11,8 @@
  *     loadSearchLocHtml                
  *     loadTaxonComboboxes              
  *     resetToggleTreeBttn              db_page, init-table
- *     updateUiForTableView
- *     updateUiForMapView
+ *     updateUiForTableView             db-page
+ *     updateUiForMapView               db-page
  */
 import * as _u from '../util.js';
 import exportCsvData from './csv-data.js';
