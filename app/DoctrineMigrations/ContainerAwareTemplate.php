@@ -13,7 +13,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class Version20170725183034MoveInts extends AbstractMigration implements ContainerAwareInterface
 {
-
     private $container;
     private $em;
     private $admin;
