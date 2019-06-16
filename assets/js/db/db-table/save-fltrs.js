@@ -44,7 +44,14 @@ export function resetStoredFiltersUi() {
     $('#saved-filters')[0].selectize.clear();
     $('#stored-filters input, #stored-filters textarea').val('');
 }
-
+export function updateFilterPanelHeader(focus) {  
+    const map = {
+        locs: 'Location', srcs: 'Source', taxa: 'Taxon'
+    };
+    const hdrPieces = $('#filter-col1>span').text().split(' ');  
+    hdrPieces.splice(0, 1, map[focus]);  
+    $('#filter-col1>span').text(hdrPieces.join(' '));
+}
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  
     if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 

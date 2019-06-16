@@ -102,6 +102,7 @@ div[id^="db-opts-col"] {
 #filter-col1 > span {
     align-self: center;
     padding-bottom: 5px;
+    font-weight: 600;
 }
 #filter-col1 {
     flex: 0 0 618px;
@@ -380,7 +381,6 @@ button[name="reset-tbl"]:before, button[name="clear-list"]:before {
     content: url(./images/undo-alt.svg);
     width: 15px;
     margin: 2px;
-
 }
 button[name="csv"]:before {
     content: url(./images/file-download.svg);

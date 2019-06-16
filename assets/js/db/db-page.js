@@ -30,7 +30,7 @@ import * as db_sync from './db-sync.js';
 import * as db_tips from './tips.js';
 import * as db_ui from './db-table/db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
-import { resetStoredFiltersUi } from './db-table/save-fltrs.js';
+import { resetStoredFiltersUi, updateFilterPanelHeader } from './db-table/save-fltrs.js';
 
 /**
  * Stores table state params needed across multiple modules. 
@@ -100,6 +100,7 @@ function selectInitialSearchFocus() {                                           
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
     selectSearchFocus();
+    updateFilterPanelHeader(focus);
 }
 function getFocusOpts() {
     return [
@@ -191,6 +192,7 @@ function updateFocusAndBuildTable(focus, tableBuilder) {                        
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     storeStateValue('curFocus', focus);
     clearOnFocusChange(focus, tableBuilder);
+    updateFilterPanelHeader(focus);
 } 
 function clearPreviousTable() {                                                 //console.log("clearing table");
     if (tblState.api) { tblState.api.destroy(); }  
