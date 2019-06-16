@@ -92,13 +92,14 @@ function movelistElems(style) {
 }
 /* --- Vertical Stacking --- */
 function stackIntListPanel() {
-    $(`#list-sel-cntnr, #load-list-cntnr`).removeClass('flex-col').addClass('flex-row');
+    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
     $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).addClass('vert');
     movelistElems('vert');
 }
 function stackListElems() {
     $('#top-details').append($('#list-count').detach());
+    $('#mod-opts-cntnr').append($('#mod-radios').detach());
 }
 function spreadIntListPanel() {
     // body...

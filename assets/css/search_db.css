@@ -322,6 +322,7 @@ button[name="futureDevBttn"] {
 }
 #list-details textarea {
     width: 488px;
+    height: 50px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
@@ -348,6 +349,15 @@ button[name="futureDevBttn"] {
 }
 #mod-mode {
     margin: .4em 1em;
+}
+#mod-list-pnl.vert #mod-mode {
+    margin: 8px 0 0 1em;
+}
+#mod-radios {
+    margin-left: 1em;
+}
+#mod-list-pnl.vert #mod-radios {
+    margin: 5px 0 0 0;
 }
 #mod-list-pnl div input[type="radio"] {
     margin: .3em .5em 0 1em;
