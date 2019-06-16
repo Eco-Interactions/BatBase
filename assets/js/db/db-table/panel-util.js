@@ -70,24 +70,35 @@ function openVerticalPanels(id, col, colClass) {
     updateIntListPanelStyles('vert');
     cssOpenPanel(id, col, colClass);
 }
+/* =========== Filter ========= */
 function updateFilterPanelStyles(style) {
     if (style == 'vert') { stackFilterPanel();
     } else { spreadFilterPanel(); }
 }
 function stackFilterPanel() {
-    $('#filter-opts, #filter-col1').addClass('vert');
+    $('#filter-opts, #filter-col1, #stored-filters').addClass('vert');
 }
 function spreadFilterPanel() {
     // body...
 }
+/* =========== List ========= */
 function updateIntListPanelStyles(style) {
     if (style == 'vert') { stackIntListPanel();
     } else { spreadIntListPanel(); }
 }
+function movelistElems(style) {
+    if (style == 'vert') { stackListElems();
+    } else { spreadListElems(); }
+}
+/* --- Vertical Stacking --- */
 function stackIntListPanel() {
     $(`#list-sel-cntnr, #load-list-cntnr`).removeClass('flex-col').addClass('flex-row');
     $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
-        #list-sel-cntnr`).addClass('vert');
+        #list-sel-cntnr, #list-count`).addClass('vert');
+    movelistElems('vert');
+}
+function stackListElems() {
+    $('#top-details').append($('#list-count').detach());
 }
 function spreadIntListPanel() {
     // body...

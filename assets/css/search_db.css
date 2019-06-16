@@ -317,14 +317,27 @@ button[name="futureDevBttn"] {
     font-size: .8em;
     padding-left: 3px;
 }
+#list-details.vert input {
+    min-width: 434px;
+}
 #list-details textarea {
     width: 488px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
 }
+#list-details.vert textarea {
+    width: 566px;
+    height: 33px;
+}
 .details-desc {
     width: 99px;
+}
+#list-count {
+    width: 100%;
+}
+#list-count.vert {
+    width: 40px;
 }
 #mod-list-pnl {
     flex: 1 0 412px;
