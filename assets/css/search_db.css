@@ -51,7 +51,10 @@ div[id^="db-opts-col"] {
 #db-opts-col5 {
     border-right: 1px black solid;
 }
-/* --------- Pop-out Options Panel --------- */
+/* ============= Pop-out Options Panel ================ */
+#fltr-int-panl-cntnr {
+    width: 100%;
+}
 .pop-out-panel {
     width: 100%;
     background: #f2f9f8;
@@ -76,12 +79,6 @@ div[id^="db-opts-col"] {
     /*border-right: black 1px solid !important;*/
 }
 /** ---- Filter Options ---- */
-#filter-opts {
-    max-height: 222px;
-}
-#filter-opts.closed {
-    max-height: 0;
-}
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-fltr-bttm-border:before {
     content: '';
@@ -96,17 +93,31 @@ div[id^="db-opts-col"] {
 #db-opts-col2.shw-col-borders {
     background: rgba(121, 201, 183, .1);
 }
+#filter-opts {
+    max-height: 222px;
+}
+#filter-opts.vert {
+    max-height: 444px;
+}
+#filter-opts.closed {
+    max-height: 0;
+}
 #filter-opts span {
     padding-top: 5px;
+}
+#filter-col1 {
+    flex: 0 0 618px;
+    border-right: black 1px solid;
+}
+#filter-col1.vert {
+    flex: initial;
+    border-bottom: black 1px solid;
+    border-right: none;
 }
 #filter-col1 > span {
     align-self: center;
     padding-bottom: 5px;
     font-weight: 600;
-}
-#filter-col1 {
-    flex: 0 0 618px;
-    border-right: black 1px solid;
 }
 #focus-filters {
     margin-bottom: .75em;
@@ -118,6 +129,9 @@ div[id^="db-opts-col"] {
 #stored-filters {
     flex: 1 0 472px;
     padding-left: 10px;
+}
+#stored-filters.vert {
+    flex: initial;
 }
 #filter-set-name + input {
     min-width: 222px;
@@ -201,14 +215,6 @@ button[name="futureDevBttn"] {
     width: 238px !important;
 }
 /* ----- Data Lists' Panel ------ */
-#int-opts {
-    max-height: 222px;
-    align-items: stretch;
-    background: #e2f2f3;
-}
-#int-opts.closed {
-    max-height: 0;
-}
 #db-opts-col4.shw-col-borders {
     background: #e2f2f3;
 }
@@ -223,12 +229,32 @@ button[name="futureDevBttn"] {
     background: #e2f2f3;
     z-index: 10;
 }
+#int-opts {
+    max-height: 222px;
+    align-items: stretch;
+    background: #e2f2f3;
+}
+#int-opts.vert {
+    max-height: 444px;
+}
+#int-opts.closed {
+    max-height: 0;
+}
 #int-opts>div {
     padding: 5px; 
 }
 #int-opts span {
     align-self: center;
     margin: 2px 0 10px 0;
+}
+#int-lists {
+    flex: 0 0 333px;
+}
+#int-lists.vert {
+    flex: initial;
+}
+#int-lists button {
+    margin-top: auto;
 }
 #load-list {
     margin-right: 0;
@@ -240,12 +266,6 @@ button[name="futureDevBttn"] {
     align-self: flex-end;
     font-size: .9em;
     margin-top: .25em;
-}
-#int-lists {
-    flex: 0 0 333px;
-}
-#int-lists button {
-    margin-top: auto;
 }
 .int-list-sel {
     margin: auto 0 auto 0;
@@ -259,6 +279,13 @@ button[name="futureDevBttn"] {
     border-left: black 1px solid;
     border-right: black 1px solid;
     margin-left: .5em;
+}
+#list-details.vert {
+    flex: initial;
+    border-left: none;
+    border-right: none;
+    border-top: black 1px solid;
+    border-bottom: black 1px solid;
 }
 #list-details div, #stored-filters .spaced {
     margin: .2em;
@@ -281,6 +308,9 @@ button[name="futureDevBttn"] {
 #mod-list-pnl {
     flex: 1 0 412px;
     padding-left: 0px;
+}
+#mod-list-pnl.vert {
+    flex: initial;
 }
 #mod-mode {
     margin: .4em 1em;

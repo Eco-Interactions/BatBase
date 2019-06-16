@@ -62,111 +62,113 @@
             </button>
         </div>
     </div>
-    <div id='filter-opts' class="flex-row pop-out-panel closed">
-        <div id="filter-col1" class="flex-col">
-            <span>Group and Date Filters</span>
-            <div id="focus-filters" class="flex-row flex-wrap"></div>
-            <div id="shw-chngd-ints">
-                <input type="checkbox" id="shw-chngd">
-                <label for="shw-chngd">Show interactions updated since:</label>
-                <input type="text" id="time-fltr" disabled="disabled">
-            </div>
-        </div>
-        <div id="stored-filters" class="flex-col"> 
-            <div class="flex-row spaced">
-                <span style="flex-grow: 1;"></span>
-                <span><b>Saved Filter Sets</b></span>
-                <span style="flex-grow: 1;"></span>
-                <button id="apply-filter" class="ag-fresh tbl-bttn"> 
-                    Apply Filter
-                </button>                
-            </div>
-            <div class="flex-row spaced" style="min-height: 27px;">
-                <span class="fltr-desc">Select Filter: </span>
-                <select id="saved-filters" class="saved-filters-sel"></select>
-                <div class="flex-row spaced filter-set-details">
-                    <span id="filter-set-name" class="fltr-desc">Name: </span>
-                    <input type="text" placeholder="Filter Name" style="height: 27px;"> 
+    <div id='fltr-int-panl-cntnr' class="flex-col">
+        <div id='filter-opts' class="flex-row pop-out-panel closed">
+            <div id="filter-col1" class="flex-col">
+                <span>Group and Date Filters</span>
+                <div id="focus-filters" class="flex-row flex-wrap"></div>
+                <div id="shw-chngd-ints">
+                    <input type="checkbox" id="shw-chngd">
+                    <label for="shw-chngd">Show interactions updated since:</label>
+                    <input type="text" id="time-fltr" disabled="disabled">
                 </div>
-                <span id="set-submit-msg" class="pnl-submit-msg">&#10004;</span>
-                <button id="save-filter" class="ag-fresh tbl-bttn"> 
-                    Save Filter
-                </button>                
             </div>
-            <div class="flex-row spaced">
-                <div class="filter-set-details flex-row">
-                    <span class="fltr-desc">Description: </span>
-                    <textarea placeholder="Filter Description"></textarea>  
+            <div id="stored-filters" class="flex-col"> 
+                <div class="flex-row spaced">
+                    <span style="flex-grow: 1;"></span>
+                    <span><b>Saved Filter Sets</b></span>
+                    <span style="flex-grow: 1;"></span>
+                    <button id="apply-filter" class="ag-fresh tbl-bttn"> 
+                        Apply Filter
+                    </button>                
                 </div>
-                <span style="width: 34px;"></span>
-                <button id="delete-filter" class="ag-fresh tbl-bttn"> 
-                    Delete
-                </button>
-                <div id="set-confm-cntnr" class="flex-col">
-                    <button id="confm-set-delete" class="ag-fresh tbl-bttn"> 
-                        Confirm Delete
-                    </button>   
-                    <button id="cncl-set-delete" class="ag-fresh tbl-bttn"> 
-                        Cancel
-                    </button>  
-                </div>  
-            </div> 
-        </div>
-    </div>
-    <div id='int-opts' class="flex-row pop-out-panel closed"> 
-        <div id="int-lists" class="flex-col flex-wrap">               <!-- Select list -->
-            <span><b>Select List of Interaction Data</b></span>
-            <select id="saved-ints" class="int-list-sel"></select>
-            <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
-                Load Interaction List in Table
-            </button>        
-            <div>Note: Filters will be reset.</div>
-        </div>
-        <div id="list-details" class='flex-col'>                      <!-- List details -->
-            <span><b>List Details</b></span>
-            <div class="flex-row">
-                <span class="details-desc">List Name: </span>
-                <input type="text" placeholder="Display Name" style="height: 27px;"> 
+                <div class="flex-row spaced" style="min-height: 27px;">
+                    <span class="fltr-desc">Select Filter: </span>
+                    <select id="saved-filters" class="saved-filters-sel"></select>
+                    <div class="flex-row spaced filter-set-details">
+                        <span id="filter-set-name" class="fltr-desc">Name: </span>
+                        <input type="text" placeholder="Filter Name" style="height: 27px;"> 
+                    </div>
+                    <span id="set-submit-msg" class="pnl-submit-msg">&#10004;</span>
+                    <button id="save-filter" class="ag-fresh tbl-bttn"> 
+                        Save Filter
+                    </button>                
+                </div>
+                <div class="flex-row spaced">
+                    <div class="filter-set-details flex-row">
+                        <span class="fltr-desc">Description: </span>
+                        <textarea placeholder="Filter Description"></textarea>  
+                    </div>
+                    <span style="width: 34px;"></span>
+                    <button id="delete-filter" class="ag-fresh tbl-bttn"> 
+                        Delete
+                    </button>
+                    <div id="set-confm-cntnr" class="flex-col">
+                        <button id="confm-set-delete" class="ag-fresh tbl-bttn"> 
+                            Confirm Delete
+                        </button>   
+                        <button id="cncl-set-delete" class="ag-fresh tbl-bttn"> 
+                            Cancel
+                        </button>  
+                    </div>  
+                </div> 
             </div>
-            <div class="flex-row" style="width: 100%;">
-                <span class="details-desc">Description: </span>
-                <textarea placeholder="Description" style="height: 50px;"></textarea>  
-            </div> 
-            <div class="flex-row" style="width: 100%;">
-                <span class="details-desc">Interactions: </span>
-                <span id="int-list-cnt"></span> 
-            </div> 
         </div>
-        <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
-            <span><b>Modify List Data</b></span>
-            <div id="mod-mode">Add Interactions to List</div>
-            <div id="mod-radios" class="flex-row" style="margin-left: 1em;">
-                <input name="mod-list" type="radio" id="mod-all-list">
-                <label for="mod-all-list">All Rows</label>
-                <input name="mod-list" type="radio" id="mod-some-list">
-                <label for="mod-some-list">Select Rows</label>
-                    <button id="unsel-rows" class="ag-fresh tbl-bttn"> 
-                        Unselect All Rows
-                    </button>   
+        <div id='int-opts' class="flex-row pop-out-panel closed"> 
+            <div id="int-lists" class="flex-col flex-wrap">               <!-- Select list -->
+                <span><b>Select List of Interaction Data</b></span>
+                <select id="saved-ints" class="int-list-sel"></select>
+                <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
+                    Load Interaction List in Table
+                </button>        
+                <div>Note: Filters will be reset.</div>
             </div>
-            <span id="mod-info"></span>
-            <div class="flex-row submit-cntnr">
-                <button id="delete-list" class="ag-fresh tbl-bttn"> 
-                    Delete Saved List
-                </button>      
-                <div id="list-confm-cntnr">
-                    <button id="confm-list-delete" class="ag-fresh tbl-bttn"> 
-                        Confirm Delete
-                    </button>   
-                    <button id="cncl-list-delete" class="ag-fresh tbl-bttn"> 
-                        Cancel
-                    </button>  
-                </div>  
+            <div id="list-details" class='flex-col'>                      <!-- List details -->
+                <span><b>List Details</b></span>
                 <div class="flex-row">
-                    <span id="list-submit-msg" class="pnl-submit-msg">&#10004;</span>
-                    <button id="submit-list" class="ag-fresh tbl-bttn"> 
-                        Save List
-                    </button>       
+                    <span class="details-desc">List Name: </span>
+                    <input type="text" placeholder="Display Name" style="height: 27px;"> 
+                </div>
+                <div class="flex-row" style="width: 100%;">
+                    <span class="details-desc">Description: </span>
+                    <textarea placeholder="Description" style="height: 50px;"></textarea>  
+                </div> 
+                <div class="flex-row" style="width: 100%;">
+                    <span class="details-desc">Interactions: </span>
+                    <span id="int-list-cnt"></span> 
+                </div> 
+            </div>
+            <div id="mod-list-pnl" class="flex-col">                                <!-- Add to / remove from list -->
+                <span><b>Modify List Data</b></span>
+                <div id="mod-mode">Add Interactions to List</div>
+                <div id="mod-radios" class="flex-row" style="margin-left: 1em;">
+                    <input name="mod-list" type="radio" id="mod-all-list">
+                    <label for="mod-all-list">All Rows</label>
+                    <input name="mod-list" type="radio" id="mod-some-list">
+                    <label for="mod-some-list">Select Rows</label>
+                        <button id="unsel-rows" class="ag-fresh tbl-bttn"> 
+                            Unselect All Rows
+                        </button>   
+                </div>
+                <span id="mod-info"></span>
+                <div class="flex-row submit-cntnr">
+                    <button id="delete-list" class="ag-fresh tbl-bttn"> 
+                        Delete Saved List
+                    </button>      
+                    <div id="list-confm-cntnr">
+                        <button id="confm-list-delete" class="ag-fresh tbl-bttn"> 
+                            Confirm Delete
+                        </button>   
+                        <button id="cncl-list-delete" class="ag-fresh tbl-bttn"> 
+                            Cancel
+                        </button>  
+                    </div>  
+                    <div class="flex-row">
+                        <span id="list-submit-msg" class="pnl-submit-msg">&#10004;</span>
+                        <button id="submit-list" class="ag-fresh tbl-bttn"> 
+                            Save List
+                        </button>       
+                    </div>
                 </div>
             </div>
         </div>
