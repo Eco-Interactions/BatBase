@@ -117,11 +117,15 @@
         <div id='int-opts' class="flex-row pop-out-panel closed"> 
             <div id="int-lists" class="flex-col flex-wrap">               <!-- Select list -->
                 <span><b>Select List of Interaction Data</b></span>
-                <select id="saved-ints" class="int-list-sel"></select>
-                <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
-                    Load Interaction List in Table
-                </button>        
-                <div>Note: Filters will be reset.</div>
+                <div id='list-sel-cntnr' class="flex-col">
+                    <select id="saved-ints" class="int-list-sel"></select>
+                    <div id="load-list-cntnr">
+                        <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
+                            Load Interaction List in Table
+                        </button>        
+                        <div>Note: Filters will be reset.</div>
+                    </div>
+                </div>
             </div>
             <div id="list-details" class='flex-col'>                      <!-- List details -->
                 <span><b>List Details</b></span>

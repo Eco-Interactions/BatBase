@@ -85,7 +85,9 @@ function updateIntListPanelStyles(style) {
     } else { spreadIntListPanel(); }
 }
 function stackIntListPanel() {
-    $('#int-opts, #int-lists, #list-details, #mod-list-pnl').addClass('vert');
+    $(`#list-sel-cntnr, #load-list-cntnr`).removeClass('flex-col').addClass('flex-row');
+    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+        #list-sel-cntnr`).addClass('vert');
 }
 function spreadIntListPanel() {
     // body...

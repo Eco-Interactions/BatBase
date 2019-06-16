@@ -247,19 +247,37 @@ button[name="futureDevBttn"] {
     align-self: center;
     margin: 2px 0 10px 0;
 }
+#int-opts.vert span {
+    align-self: center;
+    margin: inherit;
+}
 #int-lists {
     flex: 0 0 333px;
 }
 #int-lists.vert {
     flex: initial;
 }
-#int-lists button {
-    margin-top: auto;
+#list-sel-cntnr.vert {
+    justify-content: space-around;
+}
+/*#int-lists button {*/
+    /*margin-top: auto;*/
+/*}*/
+#list-sel-cntnr.vert .int-list-sel {
+    width: 300px;
+
+}
+#load-list-cntnr {
+    align-self: flex-end;
+    margin-top: 44px;
+    text-align: right;
+}
+#load-list-cntnr.vert {
+    margin: 0;
 }
 #load-list {
     margin-right: 0;
     width: 200px;
-    align-self: flex-end;
 }
 #load-list+div {
     opacity: .3;
@@ -267,13 +285,16 @@ button[name="futureDevBttn"] {
     font-size: .9em;
     margin-top: .25em;
 }
+#load-list-cntnr.vert #load-list+div {
+    margin: auto 0 auto 5px;
+}
 .int-list-sel {
     margin: auto 0 auto 0;
 }
-#saved-lists {
+/*#saved-lists {
     width: 333px;
     height: 25px;
-}
+}*/
 #list-details {
     flex: 0 1 490px;
     border-left: black 1px solid;
