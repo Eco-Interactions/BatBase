@@ -33,7 +33,7 @@ export class LocMarker extends Marker {
         locRcrds = rcrds;
         this.formMarker = formMarker;
         this.self = L.marker(latLng, getCustomIcon(formMarker))
-            .bindPopup(this.popup, {closeOnClick: false, maxWidth: 'auto'})
+            .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
         this.addMarkerEvents();
@@ -81,7 +81,7 @@ export class IntMarker extends Marker {
         this.data = intData;
         this.focus = focus;
         this.self = L.marker(latLng, getCustomIcon())
-            .bindPopup(this.popup, {closeOnClick: false, maxWidth: 'auto'});
+            .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'});
         this.addMarkerEvents();
         this.self.on('popupclose', this.onPopupClose);
     }
@@ -127,7 +127,8 @@ export class LocCluster extends Marker {
         this.formMarker = formMarker;
         locRcrds = rcrds;
         this.popup.options.closeOnClick = false;
-        this.popup.options.maxWidth = 'auto';
+        this.popup.options.maxWidth = '272';
+        this.popup.options.minWidth = '177';
         const opts = !formMarker ? false : {
             iconCreateFunction: () => L.divIcon({ 
                 html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
@@ -185,10 +186,11 @@ export class IntCluster extends Marker {
         super(latLng);
         bindClassContextToMethods(this); 
         this.map = map;
-        this.focus = focus,
-        this.data = data
+        this.focus = focus;
+        this.data = data;
         this.popup.options.closeOnClick = false;
-        this.popup.options.maxWidth = 'auto';
+        this.popup.options.maxWidth = '272';
+        this.popup.options.minWidth = '177';
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
