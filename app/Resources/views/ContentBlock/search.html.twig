@@ -27,8 +27,7 @@
             <button id="filter" class="ag-fresh tbl-bttn map-dsbl ico-bttn">
                 Filters
             </button>     
-            <button class="ag-fresh ag-header-cell tbl-bttn map-dsbl ico-bttn" name="reset-tbl">
-                Reset
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="reset-tbl" title="Clear All Filters">
             </button>
         </div>
         <div id="db-opts-col3" class="flex-row">
@@ -42,7 +41,9 @@
         <div id="db-opts-col4" class="flex-row">  
             <button class="ag-fresh ag-header-cell tbl-bttn map-dsbl ico-bttn" name="int-set">  <!-- Saved lists of interactions -->
                 Lists
-            </button>   
+            </button>      
+            <button class="ag-fresh ag-header-cell tbl-bttn ico-bttn" name="clear-list" title="Clear Loaded Interaction List" disabled="disabled">
+            </button> 
         </div>
         <div id="db-opts-col5" class="flex-row">
             <button id="new-data" class="ag-fresh tbl-bttn map-dsbl ico-bttn">  <!-- Add tooltip "new interaction" -->
@@ -117,7 +118,7 @@
             <span><b>Select List of Interaction Data</b></span>
             <select id="saved-ints" class="int-list-sel"></select>
             <button id="load-list" class="ag-fresh tbl-bttn" disabled="true"> 
-                View Interaction List in Table
+                Load Interaction List in Table
             </button>        
             <div>Note: Filters will be reset.</div>
         </div>

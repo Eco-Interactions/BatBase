@@ -3,6 +3,7 @@
  * 
  * Exports:                     Imported by:                (Added all post initial refactor)
  *     buildTreeSearchHtml              db-ui
+ *     enableClearFiltersButton         db-ui
  *     getFilterState                   save-fltrs
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page, db-ui, save-ints
@@ -49,6 +50,20 @@ export function getFilterState() {
         table: getTableFilterModels()
     };
 }
+export function enableClearFiltersButton() {
+    if (!filtersActive()) { 
+        $('button[name="reset-tbl"]')
+            .attr('disabled', true).css({'opacity': .5, cursor: 'inherit'}); 
+    } else {  
+        $('button[name="reset-tbl"]')
+            .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
+    }
+}
+function filtersActive() {
+    const tbl = Object.keys(getTableFilters([])).length > 0;
+    const pnl = Object.keys(fPs.pnlFltrs).length > 0;
+    return tbl || pnl;
+}
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /**
  * Either displays all filters currently applied, or applies the previous filter 
@@ -58,6 +73,7 @@ export function updateFilterStatusMsg() {                                       
     tblState = tState().get(null, ['api', 'intSet']);
     if (!tblState.api) { return; }
     setFilterStatus(getActiveFilters());
+    enableClearFiltersButton();
 }
 /**
  * Returns the display names of all active filters in an array. 
@@ -136,6 +152,7 @@ function getStatus(filters) {
 // }
 /** Returns an obj with the ag-grid filter models. */
 function getTableFilterModels() {  
+    if (!tblState.api) { return {}; }
     const filters = Object.keys(tblState.api.filterManager.allFilters);
     return {
         'Subject Taxon': getColumnFilterApi('subject'),

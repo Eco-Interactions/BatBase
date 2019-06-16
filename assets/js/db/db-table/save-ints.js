@@ -7,6 +7,7 @@
  *     savedIntListLoaded           db-filters, save-fltrs
  *     selIntList                   util
  *     toggleSaveIntsPanel          db-ui
+ *     enableListReset              db-ui
  */
 import * as _u from '../util.js';
 import * as data_tree from './build-data-tree.js';
@@ -33,6 +34,7 @@ export function savedIntListLoaded() {                                          
 }
 
 export function addListPanelEvents() {
+    $('button[name="clear-list"]').click(resetTable);
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
@@ -55,6 +57,15 @@ function buildAndShowIntPanel() {                                               
             $('#saved-ints')[0].selectize.focus();  
             disableInputs();
         }, 500);         
+    }
+}
+export function enableListReset() {  
+    if (!app.listLoaded) { 
+        $('button[name="clear-list"]')
+            .attr('disabled', true).css({'opacity': .5, cursor: 'inherit'}); 
+    } else {  
+        $('button[name="clear-list"]')
+            .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
     }
 }
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
@@ -178,6 +189,7 @@ function updateUi() {
     hideSavedMsg();
     enableModUi('rmv');
     updateFilterStatusMsg();
+    enableListReset();
 }
 function syncFilterUi(focus) {
     syncViewFiltersAndUi(focus);
@@ -355,7 +367,7 @@ function resetTable() {                                                         
     delete app.listLoaded;
     resetSearchState();
     enableModUi('add');
-    $('#load-list').html('View Interaction List in Table');
+    $('#load-list').html('Load Interaction List in Table');
     $('#load-list').off('click').click(loadInteractionsInTable);
     expandAllTableRows();
 }

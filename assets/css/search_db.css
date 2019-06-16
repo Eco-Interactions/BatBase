@@ -376,9 +376,10 @@ input[name="mod-list"] {
     content: url(./images/filter.svg);
     width: 15px;
 }
-button[name="reset-tbl"]:before {
+button[name="reset-tbl"]:before, button[name="clear-list"]:before {
     content: url(./images/undo-alt.svg);
     width: 15px;
+    margin: 2px;
 
 }
 button[name="csv"]:before {
@@ -540,7 +541,7 @@ button[name="show-hide-col"] {
 }
 .info-tooltip:hover {
     position:relative;
-    cursor:pointer; 
+    cursor: pointer; 
 }
 .info-tooltip:hover div.tip {
     position:absolute; 
