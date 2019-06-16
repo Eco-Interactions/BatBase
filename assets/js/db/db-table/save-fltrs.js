@@ -295,17 +295,17 @@ function disableFilterSetInputs() {
     $(`.filter-set-details input, .filter-set-details span, #delete-filter, 
         .filter-set-details textarea, #save-filter, #apply-filter`)
         .attr('disabled', true).css('opacity', '.5');
-    $('#save-filter').html('Save Filter'); 
+    $('#save-filter').html('Save'); 
 }
 function enableFilterSetInputs(create) {
     $(`.filter-set-details input, .filter-set-details span, #save-filter, 
         .filter-set-details textarea`).attr('disabled', false).css('opacity', '1');
     if (!create) { 
         $('#delete-filter').attr('disabled', false).css('opacity', '1'); 
-        $('#save-filter').html('Update Filter'); 
+        $('#save-filter').html('Update'); 
         $('#apply-filter').attr('disabled', false).css('opacity', '1'); 
     } else {
-        $('#save-filter').html('Save Filter'); 
+        $('#save-filter').html('Save'); 
     }
 }
 function updateSubmitButton(func, listLoaded) {

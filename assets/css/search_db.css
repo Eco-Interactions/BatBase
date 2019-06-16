@@ -129,7 +129,6 @@ div[id^="db-opts-col"] {
 #filter-col1.vert #shw-chngd-ints {
     width: auto;
     margin-bottom: 5px;
-
 }
 #stored-filters {
     flex: 1 0 472px;
@@ -138,17 +137,22 @@ div[id^="db-opts-col"] {
 #stored-filters.vert {
     flex: initial;
 }
+.filter-set-details {
+    flex-grow: 1;
+}
 #filter-set-name + input {
     min-width: 222px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
+    flex-grow: 1;
 }
 #stored-filters textarea {
     width: 487px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
+    flex-grow: 1
 }
 .fltr-desc {
     width: 95px;
@@ -156,14 +160,14 @@ div[id^="db-opts-col"] {
 }
 #stored-filters button {
     height: 27px;
-    width: 111px;
+    width: 88px;
 }
 #apply-filter {
-    margin-right: 7.3em;
+    margin-top: 5px;
 }
-#delete-filter {
-    align-self: flex-end;
-}
+/*#delete-filter {
+    align-self: flex-start;
+}*/
 .saved-filters-sel {
     width: 199px;
 }
