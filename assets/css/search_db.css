@@ -126,6 +126,11 @@ div[id^="db-opts-col"] {
     width: 100%;
     margin-top: auto;
 }
+#filter-col1.vert #shw-chngd-ints {
+    width: auto;
+    margin-bottom: 5px;
+
+}
 #stored-filters {
     flex: 1 0 472px;
     padding-left: 10px;
