@@ -58,6 +58,8 @@ function bothPanelsOpen(id) {
     return !$(otherPnl).hasClass('closed'); 
 }
 function cssOpenPanel(id, col, colClass) {
+    const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
+    $(bttn).addClass('panel-open-toggle');
     $(id).removeClass('closed');  
     $(col).addClass('shw-col-borders ' + colClass);
     window.setTimeout(function() { 
@@ -76,6 +78,8 @@ function closePanel(id, col, colClass) {
     } else { closeVerticalPanel(id, col, colClass); }
 }
 function cssClosePanel(id, col, colClass) {
+    const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
+    $(bttn).removeClass('panel-open-toggle');
     $(id).css('overflow-y', 'hidden');
     $(col).removeClass('shw-col-borders ' + colClass);
     $(id).addClass('closed');

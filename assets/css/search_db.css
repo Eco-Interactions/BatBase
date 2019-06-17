@@ -78,6 +78,9 @@ div[id^="db-opts-col"] {
     transition: all .5s ease-in-out;
     /*border-right: black 1px solid !important;*/
 }
+.panel-open-toggle {
+    box-shadow: inset 0px 4px 10px #C1C1CA;
+}
 /** ---- Filter Options ---- */
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-fltr-bttm-border:before {
