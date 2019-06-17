@@ -79,41 +79,49 @@ function stackFilterPanel() {
     $('#filter-opts, #filter-col1, #stored-filters').addClass('vert');
 }
 function spreadFilterPanel() {
-    // body...
+    $('#filter-opts, #filter-col1, #stored-filters').removeClass('vert');
 }
 /* =========== List ========= */
 function updateIntListPanelStyles(style) {
     if (style == 'vert') { stackIntListPanel();
     } else { spreadIntListPanel(); }
 }
-function movelistElems(style) {
-    if (style == 'vert') { stackListElems();
-    } else { spreadListElems(); }
-}
 /* --- Vertical Stacking --- */
 function stackIntListPanel() {
     $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
     $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).addClass('vert');
-    movelistElems('vert');
+    stackListElems();
 }
 function stackListElems() {
     $('#top-details').append($('#list-count').detach());
-    $('#mod-opts-cntnr').append($('#mod-radios').detach());
 }
+/* --- Horizontal Spreading --- */
 function spreadIntListPanel() {
-    // body...
+    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
+    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+        #list-sel-cntnr, #list-count`).removeClass('vert');
+    $('#list-details').append($('#list-count').detach());
 }
 /* --- Close Panel(s) --- */
 function closePanel(id, col, colClass) {
-    cssClosePanel(id, col, colClass);
+    if (!bothPanelsOpen(id)) { cssClosePanel(id, col, colClass);
+    } else { closeVerticalPanel(id, col, colClass); }
 }
 function cssClosePanel(id, col, colClass) {
     $(id).css('overflow-y', 'hidden');
     $(col).removeClass('shw-col-borders ' + colClass);
     $(id).addClass('closed');
 }
-
+function closeVerticalPanel(id, col, colClass) {
+    cssClosePanel(id, col, colClass);
+    window.setTimeout(() => {
+        spreadFilterPanel();
+        spreadIntListPanel();
+        $('#fltr-int-panl-cntnr').attr('class', 'flex-col');
+        $('#filter-opts, #int-opts').removeClass('flex-col').addClass('flex-row');
+    }, 500);
+}
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 export function submitUpdates(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
