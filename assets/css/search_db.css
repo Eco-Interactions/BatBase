@@ -320,6 +320,9 @@ button[name="futureDevBttn"] {
     border-top: black 1px solid;
     border-bottom: black 1px solid;
 }
+#list-details>span {
+    font-weight: 600;
+}
 #list-details div, #stored-filters .spaced {
     margin: .2em;
 }

@@ -94,14 +94,18 @@ function spreadIntListPanel() {
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
 export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
-    enableInputs('create');
     _uPnl.updateSubmitEvent('#submit-list', createDataList);
+    updateUiForListCreate();
     fillListDataFields(val, '', 0);
     addActiveListToMemory();
-    enableModUi('add');
-    hideSavedMsg();
     delete app.rowSelMode;
     return { value: "new", text: val ? val : "Creating New Interaction List" };
+}
+function updateUiForListCreate() {
+    enableInputs('create');
+    enableModUi('add');
+    hideSavedMsg();
+    updateDetailHdr('New');
 }
 function createDataList() {
     const data = buildListData();
@@ -118,6 +122,7 @@ export function selIntList(val) {                                               
     fillListData(val);
     enableInputs();
     enableModUi('add');
+    updateDetailHdr('Selected');
 }
 function editDataList() {
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
@@ -213,6 +218,7 @@ function updateUi() {
     enableModUi('rmv');
     updateFilterStatusMsg();
     enableListReset();
+    updateDetailHdr('Loaded');
 }
 function syncFilterUi(focus) {
     syncViewFiltersAndUi(focus);
@@ -341,6 +347,7 @@ function resetListUi() {
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea').val('');
     $('#int-list-cnt').html('');
+    updateDetailHdr('');
     disableModUi();
     disableInputs();
 }
@@ -371,6 +378,9 @@ function disableModUi() {
 function enableSubmitBttn() {
     $('#submit-list').attr({'disabled': false}).css({'opacity': '1'});
     hideSavedMsg();
+}
+function updateDetailHdr(type) {
+    $('#list-details>span').html(type + ' List Details');
 }
 function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
