@@ -8,6 +8,7 @@
  *
  * Exports:             Imported by:
  *     startWalkthrough         db-page
+ *     showSaveModal            save-fltrs
  *     
  */
 import * as db_page from './db-page.js';
@@ -23,6 +24,7 @@ function init() {
     $("#show-tips").click(showTips);
     require('../../css/lib/introjs.min.css');
 }
+/* ======================= TUTORIAL ========================================= */
 export function startWalkthrough(curFocus) {
     focus = curFocus;
     window.setTimeout(startIntroWalkthrough, 250); 
@@ -34,8 +36,7 @@ function startIntroWalkthrough(){
     intro.start();
 } 
 function buildIntro() {                                                         //console.log("buildIntro called")
-    const lib = require('../libs/intro.js');  
-    intro = lib.introJs();
+    const intro = require('../libs/intro.js').introJs();
     intro.onexit(function() { resetTableState(); });
     intro.oncomplete(function() { resetTableState(); });
     intro.onafterchange(onAfterStepChange.bind(null));
@@ -353,3 +354,38 @@ function clearFilters() {
     $('button[name="reset-tbl"]').click();
     toggleFilterPanelInTutorial(true);
 }
+/* ===================== MODALS/TIPS ======================================== */
+export function showSaveModal(text, elem, dir, submitCb, cancelCb) {
+    const intro = require('../libs/intro.js').introJs();   
+    intro.oncomplete(submitCb);
+    intro.onexit(cancelCb);
+    intro.setOptions(getModalOptions(text, elem, dir));
+    intro.start();
+}
+function getModalOptions(text, elem, direction) {                                   
+    return {
+        showStepNumbers: false,
+        showBullets: false,
+        skipLabel: 'Cancel',
+        doneLabel: "Submit",
+        tooltipClass: 'intro-tips',
+        steps: getSlideConfg(text, elem, direction)
+    }; 
+}
+function getSlideConfg(text, elem, dir) {
+    return [{
+        element: elem,
+        intro: text,
+        position: dir
+    }];
+}
+/* ==================== SHARED HELPERS ====================================== */
+
+
+
+
+
+
+
+
+

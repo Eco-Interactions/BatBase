@@ -18,6 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from './db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
+import { showSaveModal } from '../intro.js';
 
 /**
  * fltr - List open in panel
@@ -254,6 +255,15 @@ function addActiveFilterToMemory(set) {
     return app.fltr;
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
+function showSaveFilterModal(success) {
+    const modalHtml = buildModalHtml();
+    showSaveModal(modalHtml, '#save-filter', 'right', success, Function.prototype);
+}
+function buildModalHtml() {
+    const hdr = '<h2> Saving filters: </h2>';
+    const fltrs = $('#filter-status').html()
+    return hdr + '<br>' + fltrs;
+}
 function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
@@ -321,10 +331,10 @@ function enableFilterSetInputs(create) {
 }
 function updateSubmitButton(func, listLoaded) {
     if (listLoaded) {
-    $(`#save-filter`).css('opacity', '.5')
-        .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
+        $(`#save-filter`).css('opacity', '.5')
+            .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
     } else {
-        _uPnl.updateSubmitEvent('#save-filter', func);
+        _uPnl.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
     }
 }
 
