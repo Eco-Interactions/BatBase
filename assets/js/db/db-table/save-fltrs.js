@@ -52,6 +52,17 @@ export function updateFilterPanelHeader(focus) {
     hdrPieces.splice(0, 1, map[focus]);  
     $('#filter-col1>span').text(hdrPieces.join(' '));
 }
+/* --- Toggle Panel Vertically or Horizontally --- */
+export function toggleFilterPanelOrientation(style) {
+    if (style == 'vert') { stackFilterPanel();
+    } else { spreadFilterPanel(); }
+}
+function stackFilterPanel() {
+    $('#filter-opts, #filter-col1, #stored-filters').addClass('vert');
+}
+function spreadFilterPanel() {
+    $('#filter-opts, #filter-col1, #stored-filters').removeClass('vert');
+}
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  
     if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 

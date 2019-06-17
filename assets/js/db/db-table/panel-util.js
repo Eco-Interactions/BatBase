@@ -12,8 +12,8 @@
  *     updateSubmitEvent    save-fltrs, save-ints
  */
 import * as _u from '../util.js';
-import { addFilterPanelEvents } from './save-fltrs.js';
-import { addListPanelEvents } from './save-ints.js';
+import { addFilterPanelEvents, toggleFilterPanelOrientation } from './save-fltrs.js';
+import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
 
 
 /* ----------------- EVENT RELATED ------------------ */
@@ -66,42 +66,9 @@ function cssOpenPanel(id, col, colClass) {
 function openVerticalPanels(id, col, colClass) {
     $('#fltr-int-panl-cntnr').attr('class', 'flex-row');
     $('#filter-opts, #int-opts').removeClass('flex-row').addClass('flex-col');
-    updateFilterPanelStyles('vert');
-    updateIntListPanelStyles('vert');
+    toggleFilterPanelOrientation('vert');
+    toggleListPanelOrientation('vert');
     cssOpenPanel(id, col, colClass);
-}
-/* =========== Filter ========= */
-function updateFilterPanelStyles(style) {
-    if (style == 'vert') { stackFilterPanel();
-    } else { spreadFilterPanel(); }
-}
-function stackFilterPanel() {
-    $('#filter-opts, #filter-col1, #stored-filters').addClass('vert');
-}
-function spreadFilterPanel() {
-    $('#filter-opts, #filter-col1, #stored-filters').removeClass('vert');
-}
-/* =========== List ========= */
-function updateIntListPanelStyles(style) {
-    if (style == 'vert') { stackIntListPanel();
-    } else { spreadIntListPanel(); }
-}
-/* --- Vertical Stacking --- */
-function stackIntListPanel() {
-    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
-    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
-        #list-sel-cntnr, #list-count`).addClass('vert');
-    stackListElems();
-}
-function stackListElems() {
-    $('#top-details').append($('#list-count').detach());
-}
-/* --- Horizontal Spreading --- */
-function spreadIntListPanel() {
-    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
-    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
-        #list-sel-cntnr, #list-count`).removeClass('vert');
-    $('#list-details').append($('#list-count').detach());
 }
 /* --- Close Panel(s) --- */
 function closePanel(id, col, colClass) {
@@ -116,8 +83,8 @@ function cssClosePanel(id, col, colClass) {
 function closeVerticalPanel(id, col, colClass) {
     cssClosePanel(id, col, colClass);
     window.setTimeout(() => {
-        spreadFilterPanel();
-        spreadIntListPanel();
+        toggleFilterPanelOrientation('horz');
+        toggleListPanelOrientation('horz');
         $('#fltr-int-panl-cntnr').attr('class', 'flex-col');
         $('#filter-opts, #int-opts').removeClass('flex-col').addClass('flex-row');
     }, 500);

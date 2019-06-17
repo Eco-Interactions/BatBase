@@ -68,6 +68,28 @@ export function enableListReset() {
             .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
     }
 }
+/* --- Toggle Panel Vertically or Horizontally --- */
+export function toggleListPanelOrientation(style) {
+    if (style == 'vert') { stackIntListPanel();
+    } else { spreadIntListPanel(); }
+}
+/* --- Vertical Stacking --- */
+function stackIntListPanel() {
+    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-col').addClass('flex-row');
+    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+        #list-sel-cntnr, #list-count`).addClass('vert');
+    stackListElems();
+}
+function stackListElems() {
+    $('#top-details').append($('#list-count').detach());
+}
+/* --- Horizontal Spreading --- */
+function spreadIntListPanel() {
+    $(`#list-sel-cntnr, #load-list-cntnr, #mod-opts-cntnr`).removeClass('flex-row').addClass('flex-col');
+    $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
+        #list-sel-cntnr, #list-count`).removeClass('vert');
+    $('#list-details').append($('#list-count').detach());
+}
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
