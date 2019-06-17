@@ -312,7 +312,6 @@ function updateSubmitButton(func, listLoaded) {
     if (listLoaded) {
     $(`#save-filter`).css('opacity', '.5')
         .attr({'disabled': true, 'title': 'Set can not be changed while interaction list loaded.'});
-
     } else {
         _uPnl.updateSubmitEvent('#save-filter', func);
     }

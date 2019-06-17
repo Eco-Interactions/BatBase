@@ -91,13 +91,14 @@ export function selIntList(val) {                                               
     if (val === 'create') { return newIntList(''); }
     if (!val && !app.submitting) { return resetListUi(); }
     if (val === 'new') { return; } // New list typed into combobox
-    // resetPrevListUiState();
+    resetPrevListUiState();
     _uPnl.updateSubmitEvent('#submit-list', editDataList);
     fillListData(val);
     enableInputs();
     enableModUi('add');
 }
 function editDataList() {
+    $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
     data.id = _u.getSelVal('Int-lists');
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
@@ -256,6 +257,7 @@ function onListSubmitComplete(action, results) {
     toggleInstructions();  
     if (app.submitting === 'rmv') { loadInteractionsInTable(); }
     delete app.submitting;
+    $('#submit-list').data('submitting', false);
 }
 function onListDeleteComplete(results) {                                        console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
@@ -289,7 +291,7 @@ function toggleInstructions() {                                                 
     $('#mod-info').fadeTo('fast', 1);
 }
 function addInfoMsgAndUpdateTableSelection() {
-    const selMode = getRowSelectModeAndSyncRadioUi();
+    const selMode = getRowSelectModeAndSyncRadioUi();   
     const info = getRowSelectInfo(selMode);  
     $('#mod-info')[0].innerHTML = info;
     app.rowSelMode = selMode;
@@ -312,7 +314,7 @@ function getRowSelectInfo(selMode) {
 function resetListUi() {
     clearAndDisableInputs();
     hideSavedMsg();
-    // resetPrevListUiState();
+    resetPrevListUiState();
 }
 function clearAndDisableInputs() {
     $('#list-details input, #list-details textarea').val('');
@@ -320,22 +322,22 @@ function clearAndDisableInputs() {
     disableModUi();
     disableInputs();
 }
-function enableInputs(creating) {                                               //console.log('enableInputs')
-    $(`#list-details input, #list-details textarea, #add-mode+label, 
-        #int-opts button, #mod-radios input, #mod-radios label`)
+function enableInputs(creating) {                                               console.log('enableInputs')
+    $(`#list-details input, #list-details textarea, #add-mode+label,  #list-details span,
+        #int-opts button, #mod-radios input, #mod-radios label, #mod-mode`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
 }
-function disableInputs() {                                                      //console.log('disableInputs')
-    $(`#list-details input, #mod-radios input, #list-details textarea,
-        #mod-list-pnl label, #int-opts button, #load-list+div`)
+function disableInputs() {                                                      console.log('disableInputs')
+    $(`#list-details input, #mod-radios input, #list-details textarea, #list-details span,
+        #mod-list-pnl label, #int-opts button, #load-list+div, #mod-mode`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
 }
 function enableModUi(m) {                                                       //console.log('enableModUi')
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
     const label = mode === 'add' ? 
-        'Add Interactions to List' : 'Remove Interactions from List';
+        'Add Interactions to List:' : 'Remove Interactions from List:';
     $('#mod-mode').html(label).css({'font-weight': 600});
     app.modMode = mode;
 }
@@ -353,12 +355,12 @@ function updateDataListSel() {
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
     _u.replaceSelOpts('#saved-ints', opts);
 }
-// function resetPrevListUiState() {
-//     if (!app.listLoaded || app.submitting) { return; }
-//     resetTable();
-//     updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);  console.log('#################### listLoaded flag? ', listLoaded);
-//     delete app.listLoaded;
-// }
+function resetPrevListUiState() {
+    if (!app.listLoaded || app.submitting) { return; }
+    resetTable();
+    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);  
+    delete app.listLoaded;
+}
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
 function resetTable() {                                                         //console.log('- - - - - -resetingTable');
