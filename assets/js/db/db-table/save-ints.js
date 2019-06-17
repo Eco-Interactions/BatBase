@@ -351,13 +351,13 @@ function clearAndDisableInputs() {
     disableModUi();
     disableInputs();
 }
-function enableInputs(creating) {                                               console.log('enableInputs')
+function enableInputs(creating) {                                               //console.log('enableInputs')
     $(`#list-details input, #list-details textarea, #add-mode+label,  #list-details span,
         #int-opts button, #mod-radios input, #mod-radios label, #mod-mode`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
 }
-function disableInputs() {                                                      console.log('disableInputs')
+function disableInputs() {                                                      //console.log('disableInputs')
     $(`#list-details input, #mod-radios input, #list-details textarea, #list-details span,
         #mod-list-pnl label, #int-opts button, #load-list+div, #mod-mode`)
         .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
