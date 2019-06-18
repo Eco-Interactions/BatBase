@@ -82,13 +82,16 @@ div[id^="db-opts-col"] {
     box-shadow: inset 0px 4px 10px #C1C1CA;
 }
 /** ---- Filter Options ---- */
+#db-opts-col2 {
+    width: 135px;
+}
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-fltr-bttm-border:before {
     content: '';
     position: absolute;
     height: 3px;
     width: 133px;
-    left: 467px;
+    left: 468px;
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
@@ -151,7 +154,7 @@ div[id^="db-opts-col"] {
     flex-grow: 1;
 }
 #stored-filters textarea {
-    width: 487px;
+    /*width: 487px;*/
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
@@ -172,7 +175,7 @@ div[id^="db-opts-col"] {
     align-self: flex-start;
 }*/
 .saved-filters-sel {
-    width: 199px;
+    width: 236px;
 }
 #filter-set-name {
     width: 46px !important;
@@ -227,6 +230,9 @@ button[name="futureDevBttn"] {
     width: 238px !important;
 }
 /* ----- Data Lists' Panel ------ */
+#db-opts-col4 {
+    width: 128px;
+}
 #db-opts-col4.shw-col-borders {
     background: #e2f2f3;
 }
@@ -235,8 +241,8 @@ button[name="futureDevBttn"] {
     content: '';
     position: absolute;
     height: 3px;
-    width: 125px;
-    left: 891px;
+    width: 126px;
+    left: 892px;
     top: 56px;
     background: #e2f2f3;
     z-index: 10;
@@ -1049,14 +1055,17 @@ input.active-icon {
     .tips-popup {
         width: 77%;
     }
-    #filter-opts #filter-col1 {
-        flex: 0 0 555px;
+    #fltr-int-panl-cntnr #filter-opts.vert {
+        width: 604px;
     }
-    #filter-opts #apply-filter {
-        margin-right: .3em;
+    #filter-opts #stored-filters button {
+        width: 60px;
     }
-    .hide-fltr-bttm-border:before {
-        left: 467px;
+    #filter-opts #stored-filters .saved-filters-sel {
+        width: 196px;
+    }
+    #set-submit-msg+span {
+        display: none;
     }
     #focus-filters .taxonLbl {
         width: 257px;
@@ -1070,11 +1079,12 @@ input.active-icon {
     #focus-filters .locSel {
         width: 201px;
     }
-    .hide-int-bttm-border:before {
-        right: 319px;
-    }
     #int-opts #list-details textarea {
         width: 415px;
+    }
+    #int-opts.vert #list-details textarea {
+        width: auto;
+        flex-grow: 1;
     }
     /*--------------- Database CRUD Popup -------------*/
     #b-overlay .form-popup {

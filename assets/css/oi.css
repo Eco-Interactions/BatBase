@@ -702,6 +702,12 @@ label[for=fos_user_registration_form_about_me] {
     #detail-block {
         margin: 0 .5em 2em .5em;
     }
+    #content-detail {
+        top: 454px;
+    }
+    #img-slider {
+        height: 374px;
+    }
     /*--- About DB Pg ---*/
     #about-db-maps, #db-new-data {
         height: 529px;
