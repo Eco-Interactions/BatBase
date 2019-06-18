@@ -547,7 +547,8 @@ export function updatePubSearch() {                                             
             if (type === '- All -') { delete fPs.pnlFltrs.combo; 
             } else { 
                 fPs.pnlFltrs.combo = {}; 
-                fPs.pnlFltrs.combo["PubType"] = { text: type, value: typeId }
+                fPs.pnlFltrs.combo["Publication Type"] = 
+                    { text: 'Publication Type', value: typeId }
             };
         }
         function updatePubNameFilter() {  

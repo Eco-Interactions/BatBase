@@ -356,6 +356,7 @@ function clearFilters() {
 }
 /* ===================== MODALS/TIPS ======================================== */
 export function showSaveModal(text, elem, dir, submitCb, cancelCb) {
+    if (intro) { return; }
     const intro = require('../libs/intro.js').introJs();   
     intro.oncomplete(submitCb);
     intro.onexit(cancelCb);
@@ -367,8 +368,8 @@ function getModalOptions(text, elem, direction) {
         showStepNumbers: false,
         showBullets: false,
         skipLabel: 'Cancel',
-        doneLabel: "Submit",
-        tooltipClass: 'intro-tips',
+        doneLabel: 'Submit',
+        tooltipClass: 'modal-msg',
         steps: getSlideConfg(text, elem, direction)
     }; 
 }

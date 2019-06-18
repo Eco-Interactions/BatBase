@@ -230,8 +230,9 @@ function applyPanelFilters(fs) {                                                
     Object.keys(map).forEach(type => fs[type] ? map[type](fs[type]) : null);    //Calls filters in an order that ensures optimized application, eg, less redundant processes
 }
 function setComboboxFilter(fObj) {                                              //console.log('setComboboxFilter. fObj = %O', fObj);
-    const name = Object.keys(fObj)[0];
-    $(`#sel${name}`)[0].selectize.addItem(fObj[name].value);
+    const name = Object.keys(fObj)[0];  
+    const id = name === 'Publication Type' ? 'PubType' : name;
+    $(`#sel${id}`)[0].selectize.addItem(fObj[name].value);
 }
 function setNameSearchFilter(text) {                                            //console.log('setNameSearchFilter. text = %s', text);
     $('#focus-filters input').val(text);
@@ -260,9 +261,14 @@ function showSaveFilterModal(success) {
     showSaveModal(modalHtml, '#save-filter', 'right', success, Function.prototype);
 }
 function buildModalHtml() {
-    const hdr = '<h2> Saving filters: </h2>';
-    const fltrs = $('#filter-status').html()
+    const hdr = '<h2> Saving Filter Set: </h2>';
+    const fltrs = getActiveFilters($('#filter-status').html());
     return hdr + '<br>' + fltrs;
+}
+function getActiveFilters(statusMsg) {
+    const pieces = statusMsg.split(')');
+    if (pieces.length > 1) { pieces.shift(); }
+    return pieces.join('');
 }
 function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");

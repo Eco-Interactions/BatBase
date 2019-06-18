@@ -642,7 +642,7 @@ button[name="show-hide-col"] {
 .popup-bttn {
     font-size: 14px !important;
 }
-/*----------------------------- Walkthrough ----------------------------------*/
+/*----------------------------- Intro.js -------------------------------------*/
 .intro-tips {
     width: 420px;
     text-align: justify;
@@ -653,6 +653,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
 .intro-bttn {
     width: 144px;
     height: 22px;
+}
+.modal-msg {
+    min-width: 333px !important;
 }
 /*----------------------- Search Table Popup ---------------------------------*/
 #db-popup {
