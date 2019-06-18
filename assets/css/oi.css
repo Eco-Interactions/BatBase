@@ -705,7 +705,7 @@ label[for=fos_user_registration_form_about_me] {
     #content-detail {
         top: 454px;
     }
-    #img-slider {
+    #img-slider, .slide {
         height: 374px;
     }
     /*--- About DB Pg ---*/

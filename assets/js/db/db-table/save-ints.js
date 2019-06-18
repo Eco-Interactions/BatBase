@@ -404,6 +404,7 @@ function resetTable() {                                                         
     $('#load-list').html('Load Interaction List in Table');
     $('#load-list').off('click').click(loadInteractionsInTable);
     expandAllTableRows();
+    updateDetailHdr('Selected');
 }
 function removePreviousTable() {  
     resetTableStateParams();

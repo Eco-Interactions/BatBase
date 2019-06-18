@@ -37,7 +37,7 @@ let fPs = {
  * Updated with each new entry into this module with properties needed for that 
  * method chain.
  */
-let tblState;
+let tblState = {};
 
 export function resetTableStateParams() {
     const props = ['fltrdRows'];

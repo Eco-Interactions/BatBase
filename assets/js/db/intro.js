@@ -36,7 +36,7 @@ function startIntroWalkthrough(){
     intro.start();
 } 
 function buildIntro() {                                                         //console.log("buildIntro called")
-    const intro = require('../libs/intro.js').introJs();
+    intro = require('../libs/intro.js').introJs();
     intro.onexit(function() { resetTableState(); });
     intro.oncomplete(function() { resetTableState(); });
     intro.onafterchange(onAfterStepChange.bind(null));
@@ -357,11 +357,15 @@ function clearFilters() {
 /* ===================== MODALS/TIPS ======================================== */
 export function showSaveModal(text, elem, dir, submitCb, cancelCb) {
     if (intro) { return; }
-    const intro = require('../libs/intro.js').introJs();   
+    intro = require('../libs/intro.js').introJs();   
     intro.oncomplete(submitCb);
-    intro.onexit(cancelCb);
+    intro.onexit(exitModal.bind(null, cancelCb));
     intro.setOptions(getModalOptions(text, elem, dir));
     intro.start();
+}
+function exitModal(cancelCb) {
+    intro = null;
+    cancelCb();
 }
 function getModalOptions(text, elem, direction) {                                   
     return {

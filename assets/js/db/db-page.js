@@ -75,7 +75,7 @@ function initDbPage () {
 export function showIntroAndLoadingMsg() {
     db_ui.showLoadingDataPopUp();
     _u.initComboboxes(['Focus', 'View']);
-    db_tips.startWalkthrough('taxa');
+    startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchState() {                                             //console.log('initSearchState');
