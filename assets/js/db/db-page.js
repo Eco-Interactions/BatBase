@@ -27,7 +27,7 @@ import * as data_tree from './db-table/build-data-tree.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_map from './db-map/db-map.js';
 import * as db_sync from './db-sync.js';
-import * as db_ui from './db-table/db-ui.js';
+import * as db_ui from './db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
 import { startWalkthrough } from './intro.js';
 import { resetStoredFiltersUi, updateFilterPanelHeader } from './db-table/save-fltrs.js';

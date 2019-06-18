@@ -9,7 +9,7 @@ import * as db_forms from '../db-forms/db-forms.js';
 import { updateFilterStatusMsg } from './db-filters.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
-import { enableTableButtons, resetToggleTreeBttn } from './db-ui.js';
+import { enableTableButtons, resetToggleTreeBttn } from '../db-ui.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;

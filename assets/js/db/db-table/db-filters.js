@@ -17,7 +17,7 @@
  */
 import * as _u from '../util.js';
 import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
-import * as db_ui from './db-ui.js';
+import * as db_ui from '../db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from './save-fltrs.js';
 import { savedIntListLoaded } from './save-ints.js';
 

@@ -7,7 +7,7 @@
  *     exportCsvData
  */
 import { accessTableState as tState } from '../db-page.js';
-import { collapseTree } from './db-ui.js';
+import { collapseTree } from '../db-ui.js';
 
 export default function exportCsvData() {
     const tblState = tState().get();

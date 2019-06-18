@@ -13,7 +13,7 @@
  */
 import * as db_page from './db-page.js';
 import * as _u from './util.js';
-import { showTips } from './db-table/db-ui.js';
+import { showTips } from './db-ui.js';
 
 let intro, focus;
 
