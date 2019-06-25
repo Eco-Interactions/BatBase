@@ -3147,11 +3147,11 @@ function getSrcOpts(prop, field) {
  * Return the citation type options available for the parent publication type.
  * Also adds the parent publication and source records to the fP obj. 
  */
-function getCitTypeOpts(prop) {
+function getCitTypeOpts(prop) {  
     const fLvl = getSubFormLvl('sub');
-    const citTypesObj = _u.getDataFromStorage(prop);
-    const curTypeNames = getCitTypeNames();                                     //console.log('curTypeNames = %O', curTypeNames);
-    return initSelectCombobox(citTypesObj, curTypeNames.sort());
+    const types = _u.getDataFromStorage(prop);
+    const names = getCitTypeNames();                                            //console.log('types = %O', names);
+    return _u.buildOptsObj(types, names.sort());
 
     function getCitTypeNames() {
         const opts = {

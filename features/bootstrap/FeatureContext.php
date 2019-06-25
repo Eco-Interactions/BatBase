@@ -954,11 +954,25 @@ class FeatureContext extends RawMinkContext implements Context
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
+    // /**
+    //  * @When /^(?:|I )click (?:on |)(?:|the )"([^"]*)"(?:|.*)$/
+    //  * @Then /^(?:|I )click (?:on |)(?:|the )"([^"]*)"(?:|.*)$/
+    //  */
+    // public function iClickOn($arg1)
+    // {
+    //     $findName = $this->getSession()->getPage()->find("css", $arg1);
+    //     if (!$findName) {
+    //         throw new Exception($arg1 . " could not be found");
+    //     } else {
+    //         $findName->click();
+    //     }
+    // }
     /**
      * @When I press the :bttnText button
      */
     public function iPressTheButton($bttnText)
     {
+        if (stripos($bttnText, "Confirm") !== false) { $bttnText = 'sub-submit'; } //Should not be necessary. No changes were made to the button, but suddenly it wasn't finding the confirm button, though the reset button (almost identical) was found fine. #ugh
         if (stripos($bttnText, "Update") !== false || 
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
@@ -1096,7 +1110,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $row->doubleClick();
         $clicked = $this->isRowExpanded($row);                                  
-        if ($clicked && !$close || !$clicked && $close) { fwrite(STDOUT, "\n       [$text] row opened.\n");return; }
+        if ($clicked && !$close || !$clicked && $close) { /*fwrite(STDOUT, "\n       [$text] row opened.\n");return; */ }
         if (!$clicked && !$close || !$clicked && $close) {
             $row->doubleClick();
         }

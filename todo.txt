@@ -1,30 +1,33 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
->ASAP<
-    - Refactor getTableState to take one arg and determine if it's singular or an array
-> Create Interaction Lists and UI
-
-
-
+Thoughts:
+    - Leave redundant or unnecessary code commented out until tests are ran to help 
+        trouble shoot when issues arrise.
 Current:
-    - filters
-        - saved filters dropdown: sub-categories into focus & view
-    - intro js tip points
+    >Testing
+        - bugs
+            - location edit form styling
+        - complete
+            - init
+    > Create Interaction Lists and UI
+        - fade text in int panel until int list is selected
+        - when a list is loaded, and a new list is selected, reset everything
+        - when selecting "add list", focus on display name field
+        - update tutorial
+        - Refactor getTableState to take one arg and determine if it's singular or an array
+        - Add tool tips to all menu items
+            - Add info message that all elems have tooltips
+        - Prevent saving a list without a name entered
+
+>taxon form BUGS
+    - When new taxon is created, the previous display name check isn't prompting the editor to change the name
+        Add more complicated check to make sure no other taxonym in the realm has the same name
+    - 103 duplicates
+    Solution ideas:
+        - Add text search to taxa views to help eliminate creating duplicates
+        - Reverse order of taxon level inputs in select form to encourage searching for the most specific taxon first
 
 
-    - Build backend for saving lists
-        - Store Interaction lists
-            - clear filters before loading list?
-            - event hook for when a row is selected bu the user? 
-                - switch to "select rows" mode
-            - Bold core tree branch names
-        - Store Filter Sets
-    - Think of "title" for the "add mode" of data lists
-    - Add titles to all menu buttons
-    - update tutorial
-
-
-
-
+Next:
 > "Review Data" backend
     * Identical tables
         - Pending Edits
@@ -35,27 +38,23 @@ Current:
 
 
 Before Release:
-    - Add to Testing
-        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
 
 Planning Meeting Notes:
-    - Add "cited post" to "updated since" filter
 
 Before conference:
-    - Add Data-review UI
+    - Add tbl int count to filter msg area
+    - Bold core tree branch names
     - Add spanish translations to site
-    - Turn all form styles from percentages to pixels
-    - Add int row color code somewhere small (beneath toolbar?)
-    - Create static page with tutorial information
-        - Add intro.js hints to complicated UI areas
+    - Add tutorial help points to the filter and int-list panels
     - Double check all center points for multi-polygons
     - Add "- All -" option to comboboxes in location and taxa view
+    - Add text search to taxon view
+    - Create review data interface after
 
-Figure out how to "stress test" the site:
+- Figure out how to "stress test" the site:
     - Large number of people using it
 
-Future:
-    - Add text search to taxon view
+Sort:
     - Upgrade to encore 0.21 & webpack 4
     - Break util into 
         - data storage
@@ -68,19 +67,23 @@ Future:
     - Figure out whether the explicit form services are necessary
     - Refactor TESTS
         - replace all usleeps with "spinner" wait methods
+        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
     - Accessibility REFACTORING 
         - text to speech, etc
-Next:
-    - look at graphs about user traffic on siteground
-    - Replace agGrid with MIT alternative 
 
 MEETING NOTES:
     Point out:
+        - Table int count
     Next/future rounds:
+        Possible:
+            - Add "cited post" to "updated since" filter 
         Next:
             - UI:
-                - Create saved lists of interactions 
+                - Polishing and updating tutorial
+                - add an option to the lists "remove" selection 
+                    - Only keep interactions displayed
             - Err handling:
+                - Fix taxon forms
                 - ensure that entered coordinates are within selected country
                     on country change, on form submit
                 - {high}[easy] When nothing is selected but a country, a habitat type, 
@@ -93,11 +96,14 @@ MEETING NOTES:
             - Edit form:
                 - allow selection of another location and merging of all data and 
                     deletion of location being edited
+                - Turn all form styles from percentages to pixels
             - Features: 
                 - Draw areas and select as parent location
                 - Get shape data for mising countries and regions
                     - Eg, Central America. Priority?
                 - Adjust display point for country
+                - look at graphs about user traffic on siteground
+                - Replace agGrid with MIT alternative 
     Feedback:
 
 >======== Email ============
@@ -131,13 +137,13 @@ TODOs:
     - {med}[med, long] Add data-entry tutorial.
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters - (updated at for example).
-    - {med}[???] Figure out what the "scroll-linked positioning effect." is on the page
     - {med}[easy] Change taxon row coloring when showing updated records
 
 (STATIC/MISC SITE)
+    - {low}[easy] Clean up security access control
     - {med}[complicated] Implement Encore for assets
     - {med}[complicated] Switch from pixels to percent with styles to better adapt to smaller screen resolutions
-    - {lox}[med] Graph active users over time. 
+    - {low}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
