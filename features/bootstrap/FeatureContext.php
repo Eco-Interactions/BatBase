@@ -1109,9 +1109,9 @@ class FeatureContext extends RawMinkContext implements Context
     private function toggleRow($text, $row, $close = false)
     {
         $row->doubleClick();
-        $clicked = $this->isRowExpanded($row);                                  
-        if ($clicked && !$close || !$clicked && $close) { /*fwrite(STDOUT, "\n       [$text] row opened.\n");return; */ }
-        if (!$clicked && !$close || !$clicked && $close) {
+        $xpnded = $this->isRowExpanded($row);                                  
+        if ($xpnded && !$close || !$xpnded && $close) { /*fwrite(STDOUT, "       [$text] row ".(!$close ? "expanded" : "collapsed").".\n"); */ return;  }
+        if (!$xpnded && !$close || !$xpnded && $close) { 
             $row->doubleClick();
         }
         if (!$this->isRowExpanded($row)) {
@@ -1358,11 +1358,11 @@ class FeatureContext extends RawMinkContext implements Context
         $lvls = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');   
         $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
-        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iPressTheButton('Confirm');
         $this->iFocusOnTheTaxonField('Object');
         $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
         $this->iSelectFromTheDropdownField($data[$lvls[1]], $lvls[1]);
-        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iPressTheButton('Confirm');
     }
     private function fillMiscIntFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling remaining fields.\n");
@@ -1430,7 +1430,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iFocusOnTheTaxonField('Object');
         $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
         $this->iSelectFromTheDropdownField('Sphingidaey', 'Family');
-        $this->curUser->getPage()->pressButton('Confirm');
+        $this->iPressTheButton('Confirm');
         $this->curUser->getPage()->pressButton('Update Interaction');
         usleep(500000);
         $this->iUncheckTheTimeUpdatedFilter();
