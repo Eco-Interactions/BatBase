@@ -80,8 +80,9 @@ class FeatureContext extends RawMinkContext implements Context
         $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
         $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
         $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
-        usleep(100000);
-        $this->getUserSession()->wait( 10000, "!$('#db-overlay').length" );
+        $this->spin(function(){
+            return $this->getUserSession()->evaluateScript("!$('.introjs-tooltiptext').length");
+            }, 'Tutorial not closed.');
     }
 
     /**
@@ -93,7 +94,12 @@ class FeatureContext extends RawMinkContext implements Context
         if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
         $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
         $filterPanelToggle->click();
-        usleep(300000);
+        /* -- Spin until finished -- */
+        $stepComplete = function() use ($state){
+            $closed = $this->getUserSession()->evaluateScript("$('#filter-opts').hasClass('closed');"); 
+            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+        };      
+        $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
     }
     /**
      * @Given the database table is in :entity view
@@ -387,7 +393,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iUncheckTheTimeUpdatedFilter()
     {
-        usleep(1000000); //refactor to  [wait(test)]
+        usleep(200000); //refactor to  [wait(test)]
         $this->iToggleTheFilterPanel('open');
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
@@ -976,7 +982,7 @@ class FeatureContext extends RawMinkContext implements Context
         if (stripos($bttnText, "Update") !== false || 
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);
-        usleep(1000000);
+        usleep(500000);
         if ($bttnText === 'Update Interaction') { 
             $this->ensureThatFormClosed(); 
         }
@@ -1472,6 +1478,21 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
     }
     /** ---------- Misc Util ----------- */
+    private function spin ($lambda, $errMsg, $wait = 20)
+    {
+        for ($i = 0; $i < $wait; $i++)
+        {
+            try {
+                if ($lambda()) {
+                    return true;
+                } else { }
+            } catch (Exception $e) {
+                // do nothing
+            }
+            sleep(1);
+        }
+        $this->iPutABreakpoint($errMsg);
+    }
     private function getUserSession()
     {
         return isset($this->curUser) ? $this->curUser : $this->getSession();
