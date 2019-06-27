@@ -447,6 +447,9 @@ input[name="mod-list"] {
     height: 28px;
     font-size: 1.1em;
 }
+#tbl-cnt {
+    padding: 2px;
+}
 #tbl-status {
     margin: 0 0 0 .2em;
     flex-grow: 1;

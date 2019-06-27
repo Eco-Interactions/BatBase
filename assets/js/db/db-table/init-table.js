@@ -370,20 +370,22 @@ function hideUnusedColFilterMenus() {
 /**
  * When the table rowModel is updated, the total interaction count for each 
  * tree node is updated. Interactions filtered out will not be included in the totals.
+ * Updates the total interaction count displayed in the tool bar. 
  */
 function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblState.api.getModel().rowsToDisplay);
-    // tblState = tState().get();  
     if (!tblState.api) { return; }
-    updateTotalRowIntCount(tblState.api.getModel().rootNode);
+    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);
+    updateTotalCountDisplay(ttlInts);
 }
 /**
  * Sets new interaction totals for each tree node @getChildrenCnt and then 
  * calls the table's softRefresh method, which refreshes any rows with "volatile"
  * set "true" in the columnDefs - currently only "Count".
  */
-function updateTotalRowIntCount(rootNode) {
-    getChildrenCnt(rootNode.childrenAfterFilter);  
+function updateTotalRowIntCounts(rootNode) {
+    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);  
     tblState.api.softRefreshView();
+    return ttlInts;
 }
 function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
     var nodeCnt, ttl = 0;
@@ -410,3 +412,10 @@ function addSubNodeInteractions(child) {
     }
     return cnt;
 }
+function updateTotalCountDisplay(cnt) {  
+    $("#tbl-cnt").text(`[ Total: ${cnt} ]`);
+}
+
+
+
+
