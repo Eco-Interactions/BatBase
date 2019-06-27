@@ -2,21 +2,66 @@
 Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
+
+>==== Change Log ====
+
 Current:
-    >Testing
-        - bugs
-            - location edit form styling
-        - complete
-            - init
-    > Create Interaction Lists and UI
-        - fade text in int panel until int list is selected
-        - when a list is loaded, and a new list is selected, reset everything
-        - when selecting "add list", focus on display name field
-        - update tutorial
-        - Refactor getTableState to take one arg and determine if it's singular or an array
-        - Add tool tips to all menu items
-            - Add info message that all elems have tooltips
-        - Prevent saving a list without a name entered
+    - updating tutorial
+        - Add help boxes to panels connected to their sections in the walkthrough
+
+Before conference:
+    - Add tutorial help points to the filter and int-list panels
+    - Double check all center points for multi-polygons
+    - Add "- All -" option to comboboxes in location and taxa view
+    - Add text search to taxon view
+    - Figure out how to "stress test" the site:
+        - Large number of people using it
+    - look at graphs about user traffic on siteground
+
+
+MEETING NOTES:
+    Point out:
+        - Table int count
+        - Panel features and UI
+        - tutorial jump pointsin panels 
+    Next/future rounds:
+        Possible:
+            - Add "cited post" to "updated since" filter 
+        Next:
+            - UI:
+                - Polishing and updating tutorial
+                - add an option to the lists "remove" selection 
+                    - Only keep interactions displayed
+            - Err handling:
+                - Fix taxon forms
+            - testing:
+
+        Future:
+            - Review Data
+                * Identical tables
+                    - Pending Edits
+                        - entity, id, edits (json), timestamp
+                        - removed once approved 
+                    - Edit History
+                        - all fields pending has, plus approvedBy
+            - Data:
+                - Add more realms
+            - Edit form:
+                - Fix taxon forms
+                - allow selection of another location and merging of all data and 
+                    deletion of location being edited
+                - Turn all form styles from percentages to pixels
+            - Features: 
+                - Draw areas and select as parent location
+                - Get shape data for mising countries and regions
+                    - Eg, Central America. Priority?
+                - Adjust display point for country
+                - Replace agGrid with MIT alternative 
+    Feedback:
+
+
+
+>================ DEV Internal Task List ===================
 
 >taxon form BUGS
     - When new taxon is created, the previous display name check isn't prompting the editor to change the name
@@ -26,35 +71,12 @@ Current:
         - Add text search to taxa views to help eliminate creating duplicates
         - Reverse order of taxon level inputs in select form to encourage searching for the most specific taxon first
 
-
-Next:
-> "Review Data" backend
-    * Identical tables
-        - Pending Edits
-            - entity, id, edits (json), timestamp
-            - removed once approved 
-        - Edit History
-            - all fields pending has, plus approvedBy
-
-
-Before Release:
-
-Planning Meeting Notes:
-
-Before conference:
-    - Add tbl int count to filter msg area
-    - Bold core tree branch names
-    - Add spanish translations to site
-    - Add tutorial help points to the filter and int-list panels
-    - Double check all center points for multi-polygons
-    - Add "- All -" option to comboboxes in location and taxa view
-    - Add text search to taxon view
-    - Create review data interface after
-
-- Figure out how to "stress test" the site:
-    - Large number of people using it
-
 Sort:
+    - ensure that entered coordinates are within selected country
+        on country change, on form submit
+    - Create review data interface after
+    - Add spanish translations to site
+    - Refactor getTableState to take one arg and determine if it's singular or an array
     - Upgrade to encore 0.21 & webpack 4
     - Break util into 
         - data storage
@@ -70,58 +92,11 @@ Sort:
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
     - Accessibility REFACTORING 
         - text to speech, etc
-
-MEETING NOTES:
-    Point out:
-        - Table int count
-    Next/future rounds:
-        Possible:
-            - Add "cited post" to "updated since" filter 
-        Next:
-            - UI:
-                - Polishing and updating tutorial
-                - add an option to the lists "remove" selection 
-                    - Only keep interactions displayed
-            - Err handling:
-                - Fix taxon forms
-                - ensure that entered coordinates are within selected country
-                    on country change, on form submit
-                - {high}[easy] When nothing is selected but a country, a habitat type, 
-                and the displayname, suggest to user they use the country-habitat combo. 
-            - testing:
-
-        Future:
-            - Data:
-                - Add more realms
-            - Edit form:
-                - allow selection of another location and merging of all data and 
-                    deletion of location being edited
-                - Turn all form styles from percentages to pixels
-            - Features: 
-                - Draw areas and select as parent location
-                - Get shape data for mising countries and regions
-                    - Eg, Central America. Priority?
-                - Adjust display point for country
-                - look at graphs about user traffic on siteground
-                - Replace agGrid with MIT alternative 
-    Feedback:
-
->======== Email ============
-TAYLOR:
-        
-Tullenda:
-    - Some location descriptions (Berenty Reserve) have typos and seems to be 
-        incomplete
-
->==== Change Log ====
->---- Add to Client Task List ---
-    - Create Interaction Lists
-    - Add more realms
-
->================ DEV Internal Task List ===================
 ##(Category){priority}[difficulty]##
 TODOs:
 (CRUD FORMS/BACKEND)
+    - {high}[easy] When nothing is selected but a country, a habitat type, 
+        and the displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
     - {med}[med] Switch from localStorage to idb everywhere.

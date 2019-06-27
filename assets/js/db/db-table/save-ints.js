@@ -108,6 +108,7 @@ function updateUiForListCreate() {
     updateDetailHdr('New');
 }
 function createDataList() {
+    if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     const data = buildListData();
     submitDataList(data, 'create', onListSubmitComplete.bind(null, 'create'));
 }
@@ -125,6 +126,7 @@ export function selIntList(val) {                                               
     updateDetailHdr('Selected');
 }
 function editDataList() {
+    if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
     $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
     data.id = _u.getSelVal('Int-lists');
