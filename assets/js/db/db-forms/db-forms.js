@@ -83,7 +83,7 @@ function getFormHtml(entity, id, title) {
     return cntnr;
 }
 function getMainFormHtml(title) {
-     const formWin = _u.buildElem('div', { 'id': 'form-main' });
+     const formWin = _u.buildElem('div', { id: 'form-main', class: fP.action });
     $(formWin).append(getHeaderHtml(title));
     return formWin;
 }

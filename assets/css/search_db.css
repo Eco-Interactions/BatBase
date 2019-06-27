@@ -1098,7 +1098,7 @@ input.active-icon {
     }
     #b-overlay .top-row {
         padding: .2em 0 .3em  0;
-        width: 436px;
+        width: 434px;
         margin-right: 1em;
     }
     #b-overlay .sub-row {
@@ -1117,6 +1117,10 @@ input.active-icon {
     #b-overlay .full-row {
         padding: .2em 0 .3em  0;
         width: 850px;
+    }
+    #form-main.edit #citation_Rows .full-row {
+        padding: .2em .75em .3em  0;
+        width: 895px;
     }
     #b-overlay #citation_Rows .full-row {
         padding: .2em .75em .3em  .75em;
