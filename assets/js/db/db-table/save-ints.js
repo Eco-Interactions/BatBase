@@ -141,7 +141,7 @@ function fillListData(id) {
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
     const data = {
-        displayName: $('#list-details input').val(),
+        displayName: _u.ucfirst($('#list-details input').val()),
         type: 'interaction',
         description: $('#list-details textarea').val(),
         details: JSON.stringify(getInteractions()),

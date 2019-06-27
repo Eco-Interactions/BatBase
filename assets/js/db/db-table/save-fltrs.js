@@ -82,8 +82,7 @@ function initSavedFiltersCombobox() {
     updateFilterSel();
 }
 function updateFilterSel() {
-    const opts = _u.getOptsFromStoredData('savedFilterNames');     
-    opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'});              //console.log('groups =%O', groups);
+    const opts = getSavedFilterOpts(_u.getOptsFromStoredData('savedFilterNames'));     
     const optGroups = buildOptGroups(opts);                                      //console.log('optGroups = %O', optGroups);
     if ($('#saved-filters')[0].selectize) {$('#saved-filters')[0].selectize.destroy();}
     _u.initCombobox('Saved Filter Set', getSpecialOpts());
@@ -95,7 +94,18 @@ function updateFilterSel() {
             optgroupField: 'group',
             labelField: 'text',
             searchField: ['text'],
-            sortField: 'group',
+            sortField: [
+                {
+                    field: 'group',
+                    direction: 'asc'
+                },
+                {
+                    field: 'text',
+                    direction: 'asc'
+                },
+                {
+                    field: '$score'
+                }],
             render: {
                 optgroup_header: function(data, escape) {  
                     return '<div class="optgroup-header">' + escape(data.text) + '</div>';
@@ -103,6 +113,11 @@ function updateFilterSel() {
             }
         };
     }         
+}
+function getSavedFilterOpts(opts) {
+    if (opts.length > 1) { opts = opts.sort(_u.alphaOptionObjs); }
+    opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'}); console.log('filter opts =%O', opts);
+    return opts;
 }
 function buildOptGroups(opts) {
     let groups = Array.from(new Set(opts.map(opt => opt.group)));       
@@ -147,7 +162,7 @@ function fillFilterDetailFields(name, description) {
 function buildFilterData() {
     app.tblState = tState().get(null, ['curFocus', 'curView', 'api']);
     const data = {
-        displayName: $('#filter-set-name + input').val(),
+        displayName: _u.ucfirst($('#filter-set-name + input').val()),
         type: 'filter',
         description: $('#stored-filters textarea').val(),
         details: getFilterSetJson(app.tblState),
@@ -257,6 +272,7 @@ function addActiveFilterToMemory(set) {
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 function showSaveFilterModal(success) {
+    if (!$('.filter-set-details input').val()) { return $('.filter-set-details input').focus(); }
     const modalHtml = buildModalHtml();
     showSaveModal(modalHtml, '#save-filter', 'right', success, Function.prototype);
 }
@@ -295,8 +311,8 @@ function dataFiltersSaved(fltr) {
 }
 function onFilterDeleteComplete(results) {                                      console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
+    resetFilterUi();
     updateFilterSel();
-    $('#stored-filters input, #stored-filters textarea').val('');
     $('#saved-filters')[0].selectize.open();
 }
 function showSavedMsg() {

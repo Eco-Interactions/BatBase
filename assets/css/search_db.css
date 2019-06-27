@@ -402,10 +402,7 @@ input[name="mod-list"] {
     opacity: 0;
     font-size: .85em;
 }
-#set-submit-msg { /*Filter set*/
-    opacity: 0;
-}
-#list-submit-msg { /*Int. list*/
+#set-submit-msg, #list-submit-msg { 
     opacity: 0;
 }
 .pnl-submit-msg {
@@ -415,6 +412,7 @@ input[name="mod-list"] {
     border-radius: 5px;
     padding: 5px;
     width: 26px;
+    height: 26px;
 }
 .submit-cntnr {
     margin-top: auto;

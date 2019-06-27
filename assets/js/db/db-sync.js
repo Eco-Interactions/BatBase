@@ -29,7 +29,9 @@ function getCurrentDate() {
 export function addNewDataToStorage(dataUpdatedAt, reset) {  
     var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
-    if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) {            console.log("Data up to date.");return; }
+    if (!ifEntityUpdates(dataUpdatedAt.System, pgUpdatedAt)) { 
+       return getUserSpecificUpdates(); 
+    }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
     syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
 }
@@ -37,15 +39,26 @@ export function addNewDataToStorage(dataUpdatedAt, reset) {
  * Returns true if the first datetime is more recent than the second. 
  * Note: for cross-browser date comparisson, dashes must be replaced with slashes.
  */
-function firstTimeIsMoreRecent(timeOne, timeTwo) {  
+function ifEntityUpdates(timeOne, timeTwo) {  
     var time1 = timeOne.replace(/-/g,'/');  
     var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
 }
+/**
+ * Updates user specific data in local storage. Useful when the user changes on the
+ * same machine, or when the search page is first visited before a user logged in.
+ */
+function getUserSpecificUpdates() {
+    _u.sendAjaxQuery(null, "ajax/lists", storeUserSpecificData);                console.log('Data updated.');
+}
+function storeUserSpecificData(data) {
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+}
 /** Filter updatedAt entities and send those with updates to @ajaxNewData. */
 function syncUpdatedData(updatedAt, pgUpdatedAt) {                              console.log("Synching data updated since - ", pgUpdatedAt);
     var withUpdates = Object.keys(updatedAt).filter(function(entity){
-        return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
+        return ifEntityUpdates(updatedAt[entity], pgUpdatedAt);
     });                                                                         console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
     if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
     ajaxNewData(withUpdates, pgUpdatedAt);
