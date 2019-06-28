@@ -59,19 +59,21 @@ export function toggleFilterPanelOrientation(style) {
     } else { spreadFilterPanel(); }
 }
 function stackFilterPanel() {
-    $('#filter-opts, #filter-col1, #stored-filters').addClass('vert');
+    $('#filter-opts-pnl, #filter-col1, #stored-filters').addClass('vert');
+    $('#filter-opts').removeClass('hide-fltr-bttm-border').addClass('hide-fltr-bttm-border-vert');
 }
 function spreadFilterPanel() {
-    $('#filter-opts, #filter-col1, #stored-filters').removeClass('vert');
+    $('#filter-opts-pnl, #filter-col1, #stored-filters').removeClass('vert');
+    $('#filter-opts').removeClass('hide-fltr-bttm-border-vert').addClass('hide-fltr-bttm-border');
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  
-    if ($('#filter-opts').hasClass('closed')) { buildAndShowFilterPanel(); 
-    } else { _uPnl.togglePanel('#filter-opts', 'close'); }
+    if ($('#filter-opts-pnl').hasClass('closed')) { buildAndShowFilterPanel(); 
+    } else { _uPnl.togglePanel('#filter-opts-pnl', 'close'); }
 }
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
-    _uPnl.togglePanel('#filter-opts', 'open');
+    _uPnl.togglePanel('#filter-opts-pnl', 'open');
     initSavedFiltersUi();
 }
 function initSavedFiltersUi() {

@@ -55,7 +55,7 @@ function getIntroOptions() {
 function getSteps(step) {
     return [ 
         {
-            element: '#db-opts-col6', 
+            element: '#help-opts', 
             intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database 
                 Search Page!</center></b><br><b>This tutorial demonstrates the 
                 various database features and search tools available.</b> There 
@@ -89,7 +89,7 @@ function getSteps(step) {
             setUpFunc: checkForDbLoad
         },
         {
-            element:'#db-opts-col1',
+            element:'#focus-opts',
             intro: `<h3><center>Select the Taxon Tree view.<center></h3>
                 <br>Once Taxon has been selected in the “Group Interactions by” 
                 box, select one of the following: Bat, Plant, or Arthropod.<br><br>
@@ -228,7 +228,7 @@ function getSteps(step) {
             position: 'top'
         },
         {
-            element: '#db-opts-col1',
+            element: '#focus-opts',
             intro: `<h3><center>The map is also available in Location mode.
                 </center></h3><br>Group interactions by "Location" and then select 
                 "Map Data" from the "View" box.<br><br><b>Every interaction with 
@@ -269,7 +269,7 @@ function getSteps(step) {
             setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
-            element: '#db-opts-col6',
+            element: '#help-opts',
             intro: `<b><center>Thank you for taking the time to learn about the 
                 <br>Bat Eco-Interactions Database Search Page!</b></center><br>
                 You can start this tutorial again at anytime. There are also 

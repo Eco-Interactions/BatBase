@@ -26,7 +26,7 @@ export function updateSubmitEvent(id, event) {
 }
 /* -------------------  OPEN/CLOSE PANELS --------------------- */
 export function closeOpenPanels() {
-    ['#filter-opts', '#int-opts'].forEach(id => {
+    ['#filter-opts-pnl', '#int-opts'].forEach(id => {
         if (!$(id).hasClass('closed')) { togglePanel(id, 'close'); }
     })
 }
@@ -38,13 +38,13 @@ export function togglePanel(id, state) {
 }
 function getMenuColumn(id) {
     return { 
-        '#filter-opts': '#db-opts-col2', 
-        '#int-opts': '#db-opts-col4', 
+        '#filter-opts-pnl': '#filter-opts', 
+        '#int-opts': '#list-opts', 
     }[id];
 }
 function getColumnSpacerId(id) {
     return { 
-        '#filter-opts': 'hide-fltr-bttm-border', 
+        '#filter-opts-pnl': 'hide-fltr-bttm-border', 
         '#int-opts': 'hide-int-bttm-border', 
     }[id];
 }
@@ -54,7 +54,7 @@ function openPanel(id, col, colClass) {
     } else { openVerticalPanels(id, col, colClass); }
 }
 function bothPanelsOpen(id) {
-    const otherPnl = id.includes('int') ? '#filter-opts' : '#int-opts';
+    const otherPnl = id.includes('int') ? '#filter-opts-pnl' : '#int-opts';
     return !$(otherPnl).hasClass('closed'); 
 }
 function cssOpenPanel(id, col, colClass) {
@@ -67,7 +67,7 @@ function cssOpenPanel(id, col, colClass) {
 }
 function openVerticalPanels(id, col, colClass) {
     $('#fltr-int-panl-cntnr').attr('class', 'flex-row');
-    $('#filter-opts, #int-opts').removeClass('flex-row').addClass('flex-col');
+    $('#filter-opts-pnl, #int-opts').removeClass('flex-row').addClass('flex-col');
     toggleFilterPanelOrientation('vert');
     toggleListPanelOrientation('vert');
     cssOpenPanel(id, col, colClass);
@@ -90,7 +90,7 @@ function closeVerticalPanel(id, col, colClass) {
         toggleFilterPanelOrientation('horz');
         toggleListPanelOrientation('horz');
         $('#fltr-int-panl-cntnr').attr('class', 'flex-col');
-        $('#filter-opts, #int-opts').removeClass('flex-col').addClass('flex-row');
+        $('#filter-opts-pnl, #int-opts').removeClass('flex-col').addClass('flex-row');
     }, 500);
 }
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/

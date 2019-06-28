@@ -38,7 +38,7 @@ export function pg_init() {
 /** Moves the buttons from the end of the search options panel to just the header row. */
 function adaptUiToScreenSize() {
     // if ($(window).width() > 1500) { return; }
-    // const elemCntnr = $('#db-opts-col5').detach();  
+    // const elemCntnr = $('#data-opts').detach();  
     // const cntnr = _u.buildElem('div', { class: 'flex-row' });
     // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     // $(elemCntnr)[0].className = 'flex-row';
@@ -67,7 +67,7 @@ function authDependentInit() {
     initMap[app.userRole]();
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
-    $(`button[name="csv"], #db-opts-col4 button, #new-data, #rvw-data, 
+    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, 
         #saved-filters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
@@ -647,7 +647,7 @@ function newSelEl(opts, c, i, field) {                                          
     return elem;
 }
 export function enableTableButtons() {                                          //console.log('enableTableButtons')
-    $('.tbl-tools button, .tbl-tools input, #db-opts-col1, ' + app.enabledSelectors)
+    $('.tbl-tools button, .tbl-tools input, #focus-opts, ' + app.enabledSelectors)
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
     $('.tbl-tools, ' + app.enabledSelectors).fadeTo('slow', 1);

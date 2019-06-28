@@ -23,33 +23,33 @@
 #db-opts button {
     height: 29px;
 }
+#misc-opts, #help-opts {
+    padding: 5px;
+    /*align-items: center;    */
+}
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
 }
-div[id^="db-opts-col"] {
+#focus-opts {
+    flex: 0 0 458px;
     padding: 5px;
-}
-#db-opts-col1 {
-    flex: 0 0 450px;
-    padding: 0;
     align-items: center;
 }
-#db-opts-col1 span {
+#focus-opts span {
     padding-top: 6px;
 }
 .focus-sel {
-    width: 88px !important;
-}
-.col1-sel {
-    width: 108px;
+    width: 88px;
     margin: 0 .5em 0 .5em;
 }
-#db-opts-col2, #db-opts-col4 {
-    border-left: 1px black solid;
-    border-right: 1px black solid;
+.view-sel {
+    width: 108px;
+    margin-left: .5em;
 }
-#db-opts-col5 {
-    border-right: 1px black solid;
+#data-opts {
+    padding: 5px;
+    /*border-right: 1px black solid;*/
+    border-left: 1px black solid;
 }
 /* ============= Pop-out Options Panel ================ */
 #fltr-int-panl-cntnr {
@@ -58,7 +58,6 @@ div[id^="db-opts-col"] {
 .pop-out-panel {
     width: 100%;
     background: #f2f9f8;
-    border-radius: 10px;
     padding: 8px 4px 8px 4px;
     border: black 1px solid;
     transition: all .5s ease-in-out;
@@ -82,33 +81,60 @@ div[id^="db-opts-col"] {
     box-shadow: inset 0px 4px 10px #C1C1CA;
 }
 /** ---- Filter Options ---- */
-#db-opts-col2 {
-    width: 135px;
+#filter-opts {
+    padding: 5px 2px 0px 2px;
+    width: 129px;
+    border-left: 1px black solid;
+    border-right: 1px black solid;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
 .hide-fltr-bttm-border:before {
     content: '';
     position: absolute;
     height: 3px;
-    width: 133px;
-    left: 468px;
+    width: 127px;
+    left: 731px;
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
 }
-#db-opts-col2.shw-col-borders {
+.hide-fltr-bttm-border-vert:before {
+    content: '';
+    position: absolute;
+    height: 3px;
+    top: 56px;
+    background: #f2f9f8;
+    z-index: 10;
+    width: 99px;
+    left: 759px;    
+}
+#filter-opts.shw-col-borders {
     background: rgba(121, 201, 183, .1);
 }
-#filter-opts {
+#filter-opts-pnl {
     max-height: 222px;
+    border-radius: 10px;
 }
-#filter-opts.vert {
+/* Hides left corner of panel when both panels are opened. */
+#filter-opts-pnl.vert::before {
+  background-color: #f2f9f8;
+  content: "";
+  display: block;
+  height: 10px;
+  position: absolute;
+  width: 10px;
+}
+#filter-opts-pnl.vert::before {
+  top: 58px;
+  left: 754px;
+}
+#filter-opts-pnl.vert {
     max-height: 444px;
 }
-#filter-opts.closed {
+#filter-opts-pnl.closed {
     max-height: 0;
 }
-#filter-opts span {
+#filter-opts-pnl span {
     padding-top: 5px;
 }
 #filter-col1 {
@@ -230,10 +256,13 @@ button[name="futureDevBttn"] {
     width: 238px !important;
 }
 /* ----- Data Lists' Panel ------ */
-#db-opts-col4 {
+#list-opts {
     width: 128px;
+    border-right: 1px black solid;
+    border-left: 1px black solid;
+    padding: 5px;
 }
-#db-opts-col4.shw-col-borders {
+#list-opts.shw-col-borders {
     background: #e2f2f3;
 }
 /* Hides border just beneath the filter options in db-opts to create full filter area */
@@ -242,7 +271,7 @@ button[name="futureDevBttn"] {
     position: absolute;
     height: 3px;
     width: 126px;
-    left: 892px;
+    left: 145px;
     top: 56px;
     background: #e2f2f3;
     z-index: 10;
@@ -251,6 +280,7 @@ button[name="futureDevBttn"] {
     max-height: 222px;
     align-items: stretch;
     background: #e2f2f3;
+    border-radius: 10px;
 }
 #int-opts.vert {
     max-height: 444px;
@@ -1056,13 +1086,13 @@ input.active-icon {
     .tips-popup {
         width: 77%;
     }
-    #fltr-int-panl-cntnr #filter-opts.vert {
+    #fltr-int-panl-cntnr #filter-opts-pnl.vert {
         width: 604px;
     }
-    #filter-opts #stored-filters button {
+    #filter-opts-pnl #stored-filters button {
         width: 60px;
     }
-    #filter-opts #stored-filters .saved-filters-sel {
+    #filter-opts-pnl #stored-filters .saved-filters-sel {
         width: 196px;
     }
     #set-submit-msg+span {
