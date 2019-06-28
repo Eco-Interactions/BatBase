@@ -6,6 +6,7 @@
  *     newIntList                   util
  *     savedIntListLoaded           db-filters, save-fltrs
  *     selIntList                   util
+ *     toggleListPanelOrientation   panel-util
  *     toggleSaveIntsPanel          db-ui
  *     enableListReset              db-ui
  */

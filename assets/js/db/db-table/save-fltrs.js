@@ -54,17 +54,18 @@ export function updateFilterPanelHeader(focus) {
     $('#filter-col1>span').text(hdrPieces.join(' '));
 }
 /* --- Toggle Panel Vertically or Horizontally --- */
-export function toggleFilterPanelOrientation(style) {
+export function toggleFilterPanelOrientation(style, close) {
     if (style == 'vert') { stackFilterPanel();
-    } else { spreadFilterPanel(); }
+    } else { spreadFilterPanel(close); }
 }
 function stackFilterPanel() {
     $('#filter-opts-pnl, #filter-col1, #stored-filters').addClass('vert');
     $('#filter-opts').removeClass('hide-fltr-bttm-border').addClass('hide-fltr-bttm-border-vert');
 }
-function spreadFilterPanel() {
+function spreadFilterPanel(close) { 
     $('#filter-opts-pnl, #filter-col1, #stored-filters').removeClass('vert');
-    $('#filter-opts').removeClass('hide-fltr-bttm-border-vert').addClass('hide-fltr-bttm-border');
+    $('#filter-opts').removeClass('hide-fltr-bttm-border-vert');
+    if (!close) { $('#filter-opts').addClass('hide-fltr-bttm-border'); }
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  

@@ -87,7 +87,7 @@ function cssClosePanel(id, col, colClass) {
 function closeVerticalPanel(id, col, colClass) {
     cssClosePanel(id, col, colClass);
     window.setTimeout(() => {
-        toggleFilterPanelOrientation('horz');
+        toggleFilterPanelOrientation('horz', id.includes('filter'));
         toggleListPanelOrientation('horz');
         $('#fltr-int-panl-cntnr').attr('class', 'flex-col');
         $('#filter-opts-pnl, #int-opts').removeClass('flex-col').addClass('flex-row');
