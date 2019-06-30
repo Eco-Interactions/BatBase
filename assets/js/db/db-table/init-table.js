@@ -59,10 +59,10 @@ function beforeFilterChange() {                                                 
 } 
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
-    $('#int-list-msg').fadeTo('slow', 0);  //Hide previous save-success message
     if ($('#int-opts').hasClass('closed') || $('#mod-some-list').prop('checked')
             || $('#submit-list').data('submitting')) { return; }  
     $('#mod-some-list').prop({checked: 'checked'}).change();
+    $('#unsel-rows').attr({'disabled': false}).fadeTo('slow', 1);
 }
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's

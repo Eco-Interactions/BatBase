@@ -16,10 +16,10 @@
 {% block detail %}
     <div id="db-opts" class="flex-row">
         <div id="help-opts" class="flex-row">
-            <button id="strt-tut" class="ag-fresh tbl-bttn" title="Start the Walkthrough Tutorial">
+            <button id="strt-tut" class="ag-fresh tbl-bttn map-dsbl" title="Start the Walkthrough Tutorial">
                 Tutorial
             </button>
-            <button id="show-tips" class="ag-fresh tbl-bttn" title="Show Creative Search Tips Ideas">
+            <button id="show-tips" class="ag-fresh tbl-bttn map-dsbl" title="Show Creative Search Tips Ideas">
                 Tips
             </button>
         </div>
@@ -97,12 +97,14 @@
                     <div id="mod-mode">Add Interactions to List:</div>
                     <div id="mod-radios" class="flex-row">
                         <input name="mod-list" type="radio" id="mod-all-list">
-                        <label for="mod-all-list">All Rows</label>
+                        <label for="mod-all-list">All Shown</label>
                         <input name="mod-list" type="radio" id="mod-some-list">
                         <label for="mod-some-list">Select Rows</label>
-                            <button id="unsel-rows" class="ag-fresh tbl-bttn"> 
-                                Unselect All Rows
-                            </button>   
+                        <input name="mod-list" type="radio" id="mod-rmv-list" style="display: none;opacity:0;" disabled="disabled">
+                        <label for="mod-rmv-list" style="display: none;opacity:0;" class="hiddenElem">All Not Shown</label>
+                        <button id="unsel-rows" class="ag-fresh tbl-bttn" disabled="disabled"> 
+                            Unselect All
+                        </button>   
                     </div>
                 </div>
                 <span id="mod-info"></span>

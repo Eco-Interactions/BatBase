@@ -7,9 +7,9 @@
  * The search tips available by clicking on "Show Tips".
  *
  * Exports:             Imported by:
+ *     exitModal                save-fltrs
  *     startWalkthrough         db-page
  *     showSaveModal            save-fltrs
- *     
  */
 import * as db_page from './db-page.js';
 import * as _u from './util.js';
@@ -355,24 +355,26 @@ function clearFilters() {
     toggleFilterPanelInTutorial(true);
 }
 /* ===================== MODALS/TIPS ======================================== */
-export function showSaveModal(text, elem, dir, submitCb, cancelCb) {
+export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
     if (intro) { return; }
+    const bttnText = noSave ? 'Cancel' : 'Submit'; 
+    const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
     intro = require('../libs/intro.js').introJs();   
-    intro.oncomplete(submitCb);
-    intro.onexit(exitModal.bind(null, cancelCb));
-    intro.setOptions(getModalOptions(text, elem, dir));
+    intro.oncomplete(subFunc);
+    // intro.onexit(exitModal.bind(null, cancelCb));
+    intro.setOptions(getModalOptions(text, elem, dir, bttnText));
     intro.start();
 }
-function exitModal(cancelCb) {
+export function exitModal(cancelCb) {
     intro = null;
-    cancelCb();
+    if (cancelCb) { cancelCb(); }
 }
-function getModalOptions(text, elem, direction) {                                   
+function getModalOptions(text, elem, direction, bttnText) {                                   
     return {
         showStepNumbers: false,
         showBullets: false,
         skipLabel: 'Cancel',
-        doneLabel: 'Submit',
+        doneLabel: bttnText,
         tooltipClass: 'modal-msg',
         steps: getSlideConfg(text, elem, direction)
     }; 

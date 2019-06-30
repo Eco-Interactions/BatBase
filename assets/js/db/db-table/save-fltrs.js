@@ -18,7 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
-import { showSaveModal } from '../intro.js';
+import { exitModal, showSaveModal } from '../intro.js';
 
 /**
  * fltr - List open in panel
@@ -134,9 +134,10 @@ export function newFilterSet(val) {                                             
     $('#filter-set-name + input').val(val).focus();
     return { value: 'new', text: val ? val : "Creating New Filter Set" };
 }
-function createFilterSet() {
+function createFilterSet() {  
     const data = buildFilterData();
     _uPnl.submitUpdates(data, 'create', onFilterSubmitComplete.bind(null, 'create'));
+    exitModal();
 }
 /* ------ OPEN FILTER SET ------- */
 export function selFilterSet(val) {                                             
@@ -147,10 +148,11 @@ export function selFilterSet(val) {
     updateSubmitButton(editFilterSet, savedIntListLoaded());
     fillFilterData(val);
 }
-function editFilterSet() {
+function editFilterSet() {  
     const data = buildFilterData();
     data.id = _u.getSelVal('Saved Filter Set');
     _uPnl.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
+    exitModal();
 }
 function fillFilterData(id) {
     const filters = _u.getDataFromStorage('savedFilters');                           
@@ -222,6 +224,7 @@ function applyFilterSet() {                                                     
     reloadTableInFilterFocus(filters.view, filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
+    $('#saved-filters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
 /* --- reloadTableInFilterFocus --- */
@@ -276,13 +279,17 @@ function addActiveFilterToMemory(set) {
 /* ---------------- SUBMIT AND SUCCESS METHODS -------------------------------*/
 function showSaveFilterModal(success) {
     if (!$('.filter-set-details input').val()) { return $('.filter-set-details input').focus(); }
+    let readyToSave = true;  
     const modalHtml = buildModalHtml();
-    showSaveModal(modalHtml, '#save-filter', 'right', success, Function.prototype);
-}
-function buildModalHtml() {
-    const hdr = '<h2> Saving Filter Set: </h2>';
-    const fltrs = getActiveFilters($('#filter-status').html());
-    return hdr + '<br>' + fltrs;
+    const succFunc = readyToSave ? success : false;
+    showSaveModal(modalHtml, '#save-filter', 'right', succFunc, Function.prototype, !readyToSave);
+    
+    function buildModalHtml() {
+        const hdr = '<h2> Saving Filter Set: </h2>';
+        const fltrs = getActiveFilters($('#filter-status').html());
+        if (fltrs.includes('No Active')) { readyToSave = false; }
+        return hdr + '<br>' + fltrs;
+    }
 }
 function getActiveFilters(statusMsg) {
     const pieces = statusMsg.split(')');
@@ -331,6 +338,7 @@ function resetFilterUi() {
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();
+    db_filters.updateFilterStatusMsg();
 }
 function clearFilterDetailFields() {
     $('#filter-set-name + input').val('');

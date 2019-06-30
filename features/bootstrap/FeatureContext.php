@@ -90,13 +90,13 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iToggleTheFilterPanel($state)
     {
-        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts').hasClass('closed');");
+        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');");
         if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
         $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
         $filterPanelToggle->click();
         /* -- Spin until finished -- */
         $stepComplete = function() use ($state){
-            $closed = $this->getUserSession()->evaluateScript("$('#filter-opts').hasClass('closed');"); 
+            $closed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');"); 
             if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
         };      
         $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));

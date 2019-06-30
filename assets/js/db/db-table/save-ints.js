@@ -6,6 +6,7 @@
  *     newIntList                   util
  *     savedIntListLoaded           db-filters, save-fltrs
  *     selIntList                   util
+ *     syncListAfterFilterChange    db-filters     
  *     toggleListPanelOrientation   panel-util
  *     toggleSaveIntsPanel          db-ui
  *     enableListReset              db-ui
@@ -39,7 +40,7 @@ export function addListPanelEvents() {
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
     $('#list-details input, #list-details textarea, input[name="mod-list"]').change(enableSubmitBttn);
-    $('#load-list').click(loadInteractionsInTable);
+    $('#load-list').click(loadListInTable);
     $('#delete-list').click(deleteInteractionList);
     $('#confm-list-delete').click(confmDelete);
     $('#cncl-list-delete').click(cancelDelete);
@@ -90,6 +91,16 @@ function spreadIntListPanel() {
     $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).removeClass('vert');
     $('#list-details').append($('#list-count').detach());
+}
+export function syncListAfterFilterChange() {
+    if (!savedIntListLoaded()) { return; }
+    const filtering = filtersApplied();        
+    const opac = filtering ? 1 : .6;
+    toggleRmvRowsNotShownOptDisplay(opac, app.modMode);
+    $('#mod-rmv-list, label[for="mod-rmv-list"]').attr({disabled: !filtering});
+}
+function filtersApplied() {
+    return $('#filter-status').text() !== '(LIST)';
 }
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
@@ -153,7 +164,8 @@ function buildListData() {
 function getInteractions() {
     app.tblApi = tState().get('api');
     return $('#mod-some-list').prop('checked') ? getUpdatedIntSet(app.modMode) : 
-        $('#mod-all-list').prop('checked') ? getAllIntsInTable(app.modMode) : [];
+        $('#mod-all-list').prop('checked') ? getAllIntsInTable(app.modMode) : 
+        $('#mod-rmv-list').prop('checked') ? getAllIntsInTable(app.modMode) : [];
 }
 function getAllIntsInTable(mode) {
     app.tblApi = tState().get('api');
@@ -194,7 +206,7 @@ function resetDeleteButton() {
  * Loads the interaction set in the table, where it can be explored and filtered
  * with the standard UI options
  */
-function loadInteractionsInTable() {                                            //console.log('loading Interaction List in Table');
+function loadListInTable() {                                                    //console.log('----Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
     buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
     updateUi();
@@ -286,7 +298,7 @@ function onListSubmitComplete(action, results) {
     $('#saved-ints')[0].selectize.addItem(list.id);
     showSavedMsg();
     toggleInstructions();  
-    if (app.submitting === 'rmv') { loadInteractionsInTable(); }
+    if (app.submitting === 'rmv') { loadListInTable(); }
     delete app.submitting;
     $('#submit-list').data('submitting', false);
 }
@@ -329,7 +341,8 @@ function addInfoMsgAndUpdateTableSelection() {
 }
 function getRowSelectModeAndSyncRadioUi() {
     const radioVal = $('#mod-some-list').prop('checked') ? 'some' : 
-        $('#mod-all-list').prop('checked') ? 'all' : false;
+        $('#mod-all-list').prop('checked') ? 'all' :
+        $('#mod-rmv-list').prop('checked') ? 'rmvd' : false;
     if (!radioVal) {
         $(`#mod-${app.rowSelMode}-list`).prop('checked', true);
         return app.rowSelMode;
@@ -337,9 +350,12 @@ function getRowSelectModeAndSyncRadioUi() {
     return radioVal;
 }
 function getRowSelectInfo(selMode) {
-    const byOne = 'Click on an *interaction row to select. Hold ctrl/cmd to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.';
-    const all = 'Click "Save List" to add/remove all *interactions displayed in the table. *Interaction rows are the colored base-level rows.';
-    return selMode === 'all' ? all : byOne;
+    const map = {
+        some: 'Click on an *interaction row to select. Hold ctrl/cmd to select multiple rows. Hold shift and click a 2nd row to select a range. Click "Save List" to add/remove selection. *Interaction rows are the colored base-level rows.',
+        all: 'Click "Save List" to add/remove all *interactions in the table. *Interaction rows are the colored base-level rows.',
+        rmvd: 'Click "Save List" to keep only the interations in the table.'
+    }; 
+    return map[selMode];
 }
 /* ---- Reset & Enable/Disable UI --- */
 function resetListUi() {
@@ -355,23 +371,41 @@ function clearAndDisableInputs() {
     disableInputs();
 }
 function enableInputs(creating) {                                               //console.log('enableInputs')
-    $(`#list-details input, #list-details textarea, #add-mode+label,  #list-details span,
-        #int-opts button, #mod-radios input, #mod-radios label, #mod-mode`)
-        .attr({'disabled': false}).css({'opacity': '1'});
+    $(`#list-details input, #list-details textarea, #list-details span,
+        #int-opts button, #mod-mode, #mod-all-list, label[for="mod-all-list"], 
+        #mod-some-list, label[for="mod-some-list"]`).attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
+    $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
 function disableInputs() {                                                      //console.log('disableInputs')
-    $(`#list-details input, #mod-radios input, #list-details textarea, #list-details span,
-        #mod-list-pnl label, #int-opts button, #load-list+div, #mod-mode`)
-        .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
+    $(`#list-details input, #list-details textarea, #list-details span, #int-opts button, 
+        #load-list+div, #mod-mode, #mod-all-list, label[for="mod-all-list"], #mod-some-list, 
+        label[for="mod-some-list"]`).attr({'disabled': 'disabled'}).css({'opacity': '.5'});
+    $('#mod-rmv-list, label[for="mod-rmv-list"]').css({display: 'none'});
 }
 function enableModUi(m) {                                                       //console.log('enableModUi')
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
     const label = mode === 'add' ? 
         'Add Interactions to List:' : 'Remove Interactions from List:';
-    $('#mod-mode').html(label).css({'font-weight': 600});
+    $('#mod-mode').html(label).css({'font-weight': 600, 'font-size': '.9em'});
+    $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);  console.log('about to toggle')
+    toggleRmvOnlyOption(mode);
     app.modMode = mode;
+}
+function toggleRmvOnlyOption(mode) {
+    const opac = mode == 'add' ? 0 : .6;
+    toggleRmvRowsNotShownOptDisplay(opac, mode);
+}
+/** Shows or Hides the additional option for the remove mode. */
+function toggleRmvRowsNotShownOptDisplay(opac, mode) { 
+    const selectors = '#mod-rmv-list, label[for="mod-rmv-list"]';
+    const show = mode == 'add' ? 'none' : 'block'; 
+    $(selectors).css({display: show});
+    if (opac > 0) { $(selectors).fadeTo('fast', opac); }
+}
+function optShown() {
+    return !$('#mod-rmv-list').hasClass('hiddenElem');
 }
 function disableModUi() {
     $(`#mod-radios input`).prop('checked', false);
@@ -393,7 +427,7 @@ function updateDataListSel() {
 function resetPrevListUiState() {
     if (!app.listLoaded || app.submitting) { return; }
     resetTable();
-    updateListLoadButton('View Interaction List in Table', loadInteractionsInTable);  
+    updateListLoadButton('View Interaction List in Table', loadListInTable);  
     delete app.listLoaded;
 }
 /* --- Table Methods --- */
@@ -405,7 +439,7 @@ function resetTable() {                                                         
     resetSearchState();
     enableModUi('add');
     $('#load-list').html('Load Interaction List in Table');
-    $('#load-list').off('click').click(loadInteractionsInTable);
+    $('#load-list').off('click').click(loadListInTable);
     expandAllTableRows();
     updateDetailHdr('Selected');
 }
@@ -421,7 +455,8 @@ function expandAllTableRows() {
 }
 function deselectAllRows() {                                                    //console.log('unselect all rows');
     app.tblApi = tState().get('api');
-    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));           
+    app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));       
+    $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
 
 

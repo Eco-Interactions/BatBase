@@ -84,8 +84,8 @@ input[type="radio"], input[type="checkbox"] {
 }
 /** ---- Filter Options ---- */
 #filter-opts {
-    padding: 5px 2px 0px 2px;
-    width: 129px;
+    padding: 5px;
+    width: 135px;
     border-left: 1px black solid;
     border-right: 1px black solid;
 }
@@ -94,8 +94,8 @@ input[type="radio"], input[type="checkbox"] {
     content: '';
     position: absolute;
     height: 3px;
-    width: 127px;
-    left: 727px;
+    width: 132px;
+    left: 724px;
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
@@ -107,7 +107,7 @@ input[type="radio"], input[type="checkbox"] {
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
-    width: 99px;
+    width: 105px;
     left: 759px;    
 }
 #filter-opts.shw-col-borders {
@@ -132,6 +132,7 @@ input[type="radio"], input[type="checkbox"] {
 }
 #filter-opts-pnl.vert {
     max-height: 444px;
+    border-left: none;
 }
 #filter-opts-pnl.closed {
     max-height: 0;
@@ -273,7 +274,7 @@ button[name="futureDevBttn"] {
     position: absolute;
     height: 3px;
     width: 126px;
-    left: 141px;
+    left: 140px;
     top: 56px;
     background: #e2f2f3;
     z-index: 10;
@@ -1092,7 +1093,7 @@ input.active-icon {
         width: 604px;
     }
     .hide-fltr-bttm-border-vert:before {
-        width: 127px;
+        width: 132px;
         left: 727px;
     }
     #filter-opts-pnl #stored-filters button {

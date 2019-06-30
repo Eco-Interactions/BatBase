@@ -8,6 +8,7 @@ Thoughts:
 Current:
     - updating tutorial
         - Add help boxes to panels connected to their sections in the walkthrough
+    - Add Lists to System Date
 
 Before conference:
     - Add tutorial help points to the filter and int-list panels
@@ -30,8 +31,6 @@ MEETING NOTES:
         Next:
             - UI:
                 - Polishing and updating tutorial
-                - add an option to the lists "remove" selection 
-                    - Only keep interactions displayed
             - Err handling:
                 - Fix taxon forms
             - testing:
