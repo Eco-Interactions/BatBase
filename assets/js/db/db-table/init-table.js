@@ -59,10 +59,11 @@ function beforeFilterChange() {                                                 
 } 
 /** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
 function rowSelected() {  
-    if ($('#int-opts').hasClass('closed') || $('#mod-some-list').prop('checked')
-            || $('#submit-list').data('submitting')) { return; }  
-    $('#mod-some-list').prop({checked: 'checked'}).change();
+    if ($('#int-opts').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
     $('#unsel-rows').attr({'disabled': false}).fadeTo('slow', 1);
+    if (!$('#mod-some-list').prop('checked')) {
+        $('#mod-some-list').prop({checked: 'checked'}).change();
+    }
 }
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's
