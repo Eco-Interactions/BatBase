@@ -18,6 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from './db-filters.js';
+import { showHelpModal } from '../intro.js';
 
 /**
  * list - List open in panel
@@ -43,6 +44,7 @@ export function addListPanelEvents() {
     $('#delete-list').click(deleteInteractionList);
     $('#confm-list-delete').click(confmDelete);
     $('#cncl-list-delete').click(cancelDelete);
+    $('#svd-list-hlp').click(showHelpModal.bind(null, 'saved-lists'));
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
@@ -360,16 +362,17 @@ function clearAndDisableInputs() {
     disableInputs();
 }
 function enableInputs(creating) {                                               //console.log('enableInputs')
-    $(`#list-details input, #list-details textarea, #list-details span,
-        #int-opts button, #mod-mode,#mod-radios input, #mod-radios label`)
+    $(`#list-details input, #list-details textarea, #list-details span, #mod-list-pnl > span:first-child, 
+        #int-opts button, #mod-mode, #mod-radios input, #mod-radios label`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
 function disableInputs() {                                                      //console.log('disableInputs')
-    $(`#list-details input, #list-details textarea, #list-details span, #int-opts button, 
-        #load-list+div, #mod-mode, #mod-radios input, #mod-radios label`)
-        .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
+    $(`#list-details input, #list-details textarea, #list-details span, #list-sel-cntnr button, 
+        #mod-list-pnl button, #mod-list-pnl > span:first-child, #load-list+div, 
+        #mod-mode, #mod-radios input, #mod-radios label`)
+            .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
     $('#mod-rmv-list, label[for="mod-rmv-list"]').css({display: 'none'});
 }
 function enableModUi(m) {                                                       //console.log('enableModUi')

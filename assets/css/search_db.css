@@ -697,6 +697,11 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
 .modal-msg {
     min-width: 333px !important;
 }
+.hlp-bttn {
+    height: 22px !important;
+    width: 23px !important;
+    font-weight: 600;
+}
 /*----------------------- Search Table Popup ---------------------------------*/
 #db-popup {
     background: #FFF;

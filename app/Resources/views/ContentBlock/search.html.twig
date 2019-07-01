@@ -65,7 +65,12 @@
     <div id='fltr-int-panl-cntnr' class="flex-col">
         <div id='int-opts' class="flex-row pop-out-panel closed"> 
             <div id="int-lists" class="flex-col flex-wrap">               <!-- Select list -->
-                <span><b>Select List of Interaction Data</b></span>
+                <div class="flex-row spaced">
+                    <button id="svd-list-hlp" class="ag-fresh tbl-bttn hlp-bttn">?</button>
+                    <span style="flex-grow: 1;"></span>
+                    <span><b>Select List of Interaction Data</b></span>
+                    <span style="flex-grow: 1.6;"></span>
+                </div>
                 <div id='list-sel-cntnr' class="flex-col">
                     <select id="saved-ints" class="int-list-sel"></select>
                     <div id="load-list-cntnr">
@@ -145,7 +150,7 @@
                     <span style="flex-grow: 1;"></span>
                     <span><b>Saved Filter Sets</b></span>
                     <span style="flex-grow: 1.6;"></span>
-                    <button id="svd-fltr-hlp" class="ag-fresh tbl-bttn" style="width: 27px;font-weight: 600;">?</button>
+                    <button id="svd-fltr-hlp" class="ag-fresh tbl-bttn hlp-bttn">?</button>
                 </div>
                 <div class="flex-row spaced" style="min-height: 27px;">
                     <button id="save-filter" class="ag-fresh tbl-bttn"> 

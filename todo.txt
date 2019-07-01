@@ -16,6 +16,7 @@ Before conference:
     - Add "- All -" option to comboboxes in location and taxa view
     - Add text search to taxon view
     - Add "cited at" to time search filter
+    - pre-load all new user accounts with example filter sets and int lists
     - Figure out how to "stress test" the site:
         - Large number of people using it
 

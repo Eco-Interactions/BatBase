@@ -9,7 +9,7 @@
  * Exports:             Imported by:
  *     exitModal                save-fltrs
  *     startWalkthrough         db-page
- *     showHelpModal            save-fltrs
+ *     showHelpModal            save-fltrs, save-ints
  *     showSaveModal            save-fltrs
  */
 import * as db_page from './db-page.js';
@@ -25,18 +25,23 @@ function init() {
     $("#show-tips").click(showTips);
     require('../../css/lib/introjs.min.css');
 }
-/* ======================= TUTORIAL ========================================= */
+/* ===================== MODALS/TIPS ======================================== */
+/* ------------ HELP MODALS ------------ */
 export function showHelpModal(key) {
-    const step = getSteps().filter(s => s.helpKey == key);
+    const steps= getHelpSteps(key);
     intro = require('../libs/intro.js').introJs();
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
     intro.setOptions({
         showBullets: false, 
         showStepNumbers: false, 
-        steps: removeRegisterMsg(step, key), 
+        steps: steps, 
         tooltipClass: 'intro-tips'});
     intro.start();
+}
+function getHelpSteps(key) {
+    let steps = getSteps().filter(s => s.helpKey == key);
+    return steps.length > 0 ? removeRegisterMsg(steps, key) : getCustomHelpSteps(key);
 }
 function removeRegisterMsg(step, key) {
     if ($('body').data('user-role') === 'visitor') { return step; }
@@ -46,6 +51,85 @@ function removeRegisterMsg(step, key) {
     step[0].intro = step[0].intro.split(map[key])[0];
     return step;
 }
+function getCustomHelpSteps(key) {
+    const getSteps = {
+        'saved-lists': getListSteps
+    };
+    return getSteps[key]();
+}
+function getListSteps() {
+    return [
+        {
+            element: '#int-opts',
+            intro: `<h3><center>Users can create custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, or a perhaps few habitats 
+                in particular?<br><br>Save interactions as a list and use the filters 
+                and features to explore them as a group.<br><br>`,
+            position: 'top'
+        },
+        {
+            element: '#int-lists',
+            intro: `<h3><center>Select a list to manage or enter a new name to create.</center></h3><br>
+                After selecting, show the interactions in the table by clicking 
+                "Load Interaction List in Table".<br><br>Once loaded, sort and view
+                the interactions using the various filters and features of the page.<br><br>`,
+            position: 'right',
+        },
+        {
+            element: '#list-details',
+            intro: `<h3><center>Update the list name and description here.</center></h3><br>`,
+            position: 'top',
+        },
+        {
+            element: '#mod-list-pnl',
+            intro: `<h3><center>Add/remove list interactions.</center></h3><br>
+                <b>Add:</b> Select/create a list. Select interaction rows in the table, 
+                or the "All Shown" option, and click "Save List" to update the list.<br><br>
+                <b>Remove:</b> Select a list and click "Load Interaction List in Table". Select 
+                interaction rows in the table or the "All Shown" option and click
+                "Save List" to remove the selected interactions from the list.`,
+            position: 'left',
+        },
+        {
+            element: 'button[name="clear-list"]',
+            intro: `<h3><center>Click here to reset table to all database interactions.</center></h3>`,
+            position: 'bottom',
+        }
+    ];
+}
+/* ------------ SAVE MODALS ------------ */
+export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
+    if (intro) { return; }
+    const bttnText = noSave ? 'Cancel' : 'Submit'; 
+    const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
+    intro = require('../libs/intro.js').introJs();   
+    intro.oncomplete(subFunc);
+    // intro.onexit(exitModal.bind(null, cancelCb));
+    intro.setOptions(getModalOptions(text, elem, dir, bttnText));
+    intro.start();
+}
+export function exitModal(cancelCb) {
+    intro = null;
+    if (cancelCb) { cancelCb(); }
+}
+function getModalOptions(text, elem, direction, bttnText) {                                   
+    return {
+        showStepNumbers: false,
+        showBullets: false,
+        skipLabel: 'Cancel',
+        doneLabel: bttnText,
+        tooltipClass: 'modal-msg',
+        steps: getSlideConfg(text, elem, direction)
+    }; 
+}
+function getSlideConfg(text, elem, dir) {
+    return [{
+        element: elem,
+        intro: text,
+        position: dir
+    }];
+}
+/* ======================= TUTORIAL ========================================= */
 export function startWalkthrough(curFocus) {
     focus = curFocus;
     window.setTimeout(startIntroWalkthrough, 250); 
@@ -410,38 +494,6 @@ function toggleListPanelInTutorial(close) {
     } else {
         $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
     }
-}
-/* ===================== MODALS/TIPS ======================================== */
-export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
-    if (intro) { return; }
-    const bttnText = noSave ? 'Cancel' : 'Submit'; 
-    const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
-    intro = require('../libs/intro.js').introJs();   
-    intro.oncomplete(subFunc);
-    // intro.onexit(exitModal.bind(null, cancelCb));
-    intro.setOptions(getModalOptions(text, elem, dir, bttnText));
-    intro.start();
-}
-export function exitModal(cancelCb) {
-    intro = null;
-    if (cancelCb) { cancelCb(); }
-}
-function getModalOptions(text, elem, direction, bttnText) {                                   
-    return {
-        showStepNumbers: false,
-        showBullets: false,
-        skipLabel: 'Cancel',
-        doneLabel: bttnText,
-        tooltipClass: 'modal-msg',
-        steps: getSlideConfg(text, elem, direction)
-    }; 
-}
-function getSlideConfg(text, elem, dir) {
-    return [{
-        element: elem,
-        intro: text,
-        position: dir
-    }];
 }
 /* ==================== SHARED HELPERS ====================================== */
 
