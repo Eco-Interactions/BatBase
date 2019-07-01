@@ -15,16 +15,16 @@ Before conference:
     - Double check all center points for multi-polygons
     - Add "- All -" option to comboboxes in location and taxa view
     - Add text search to taxon view
+    - Add "cited at" to time search filter
     - Figure out how to "stress test" the site:
         - Large number of people using it
-    - look at graphs about user traffic on siteground
 
 
 MEETING NOTES:
     Point out:
         - Table int count
         - Panel features and UI
-        - tutorial jump pointsin panels 
+        - tutorial jump points in panels 
     Next/future rounds:
         Possible:
             - Add "cited post" to "updated since" filter 

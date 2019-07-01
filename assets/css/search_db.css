@@ -94,8 +94,8 @@ input[type="radio"], input[type="checkbox"] {
     content: '';
     position: absolute;
     height: 3px;
-    width: 132px;
-    left: 724px;
+    width: 133px;
+    left: 726px;
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
@@ -107,7 +107,7 @@ input[type="radio"], input[type="checkbox"] {
     top: 56px;
     background: #f2f9f8;
     z-index: 10;
-    width: 105px;
+    width: 100px;
     left: 759px;    
 }
 #filter-opts.shw-col-borders {

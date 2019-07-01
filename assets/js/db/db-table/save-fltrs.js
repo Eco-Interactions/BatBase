@@ -18,7 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
-import { exitModal, showSaveModal } from '../intro.js';
+import { exitModal, showHelpModal, showSaveModal } from '../intro.js';
 
 /**
  * fltr - List open in panel
@@ -39,6 +39,7 @@ export function addFilterPanelEvents() {
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
+    $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'saved-filters'));
 }
 export function resetStoredFiltersUi() {
     if (!$('#saved-filters')[0].selectize) { return; }

@@ -9,6 +9,7 @@
  * Exports:             Imported by:
  *     exitModal                save-fltrs
  *     startWalkthrough         db-page
+ *     showHelpModal            save-fltrs
  *     showSaveModal            save-fltrs
  */
 import * as db_page from './db-page.js';
@@ -25,6 +26,26 @@ function init() {
     require('../../css/lib/introjs.min.css');
 }
 /* ======================= TUTORIAL ========================================= */
+export function showHelpModal(key) {
+    const step = getSteps().filter(s => s.helpKey == key);
+    intro = require('../libs/intro.js').introJs();
+    intro.onexit(() => intro = null);
+    intro.oncomplete(() => intro = null);
+    intro.setOptions({
+        showBullets: false, 
+        showStepNumbers: false, 
+        steps: removeRegisterMsg(step, key), 
+        tooltipClass: 'intro-tips'});
+    intro.start();
+}
+function removeRegisterMsg(step, key) {
+    if ($('body').data('user-role') === 'visitor') { return step; }
+    const map = {
+        'saved-filters': '<br><br><center>Register and log in to use these features.</center>'
+    };
+    step[0].intro = step[0].intro.split(map[key])[0];
+    return step;
+}
 export function startWalkthrough(curFocus) {
     focus = curFocus;
     window.setTimeout(startIntroWalkthrough, 250); 
@@ -37,8 +58,8 @@ function startIntroWalkthrough(){
 } 
 function buildIntro() {                                                         //console.log("buildIntro called")
     intro = require('../libs/intro.js').introJs();
-    intro.onexit(function() { resetTableState(); });
-    intro.oncomplete(function() { resetTableState(); });
+    intro.onexit(() => resetTableState());
+    intro.oncomplete(() => resetTableState());
     intro.onafterchange(onAfterStepChange.bind(null));
     intro.setOptions(getIntroOptions());
 } 
@@ -52,7 +73,7 @@ function getIntroOptions() {
         steps: getSteps()
     };
 }
-function getSteps(step) {
+function getSteps() {
     return [ 
         {
             element: '#help-opts', 
@@ -70,11 +91,11 @@ function getSteps(step) {
                 margin: 0 25px 5px 45px">Map View</button><button class="intro-bttn 
                 tbl-bttn" disabled="disabled" title="Coming soon" style="opacity: 
                 0.3; cursor: default;">Data Entry</button>`,
-            position: 'left',
+            position: 'right',
             setUpFunc: addBttnEvents
         },
         {
-            element: '#db-opts',
+            element: '#focus-opts',
             intro: `<h3><center>The interaction records are displayed by either 
                 <br>Location, Source, or Taxon.<center></h3><br><b>Location</b> 
                 - Where the interaction(s) were observed. Can be displayed in a 
@@ -149,7 +170,7 @@ function getSteps(step) {
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#focus-filters',
+            element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
                 show all taxon levels that present in the Taxon Tree.</b> When first 
                 displayed, all taxa for each level will be available in the 
@@ -162,15 +183,17 @@ function getSteps(step) {
                 ones associated with the selected taxon will be shown.<br>- Any 
                 levels that are not recorded in the Taxon's ancestry chain will 
                 have 'None' selected.`, 
-            position: 'bottom',
+            position: 'right',
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#focus-filters',
+            element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 Locations can be filtered by region, country, and display name.<br><br>
                 Sources can be filtered by name, or by type (depending on the type
                 of source displayed in the table.)`, 
-            position: 'bottom',
+            position: 'right',
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#shw-chngd-ints',
@@ -180,12 +203,24 @@ function getSteps(step) {
                 will be saved and reapplied if the filter is turned reset when switching
                 between data views.<br><br>Only interactions created/updated after 
                 the selected time will be displayed.`,
-            position: 'left'
+            position: 'top',
+            setUpFunc: toggleFilterPanelInTutorial
+        },
+        {
+            element: '#stored-filters',
+            intro: `<h3><center>Filters can be saved and applied as a set.</center></h3><br>
+                Saved sets include the grouping and view of the table and all applied filters from
+                the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
+                in a "forest" habitat or all African "consumption" interactions in
+                a "desert" habitat.<br><br><center>Register and log in to use these features.</center>`,
+            position: 'left',
+            setUpFunc: toggleFilterPanelInTutorial,
+            helpKey: 'saved-filters'
         },
         {
             element: 'button[name="reset-tbl"]',
             intro: `<b>Click here at any point to clear all filters and reset 
-                the results.</b>`,
+                the interactions in the table.</b>`,
             position: 'right',
             setUpFunc: clearFilters
         },
@@ -196,7 +231,8 @@ function getSteps(step) {
                 columns are exported in the order they are displayed in the table 
                 below.<br><br>For an explanation of the csv format and how to 
                 use the file, see a note at the bottom of the "Search Tips"`,
-            position: 'left'
+            position: 'left',
+            setUpFunc: toggleFilterPanelInTutorial.bind(null, 'close')
         },
         {
             element: '#shw-map',
@@ -269,6 +305,14 @@ function getSteps(step) {
             setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
+            element: '#list-opts',
+            intro: `<h3><center>Users can create custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, or a perhaps few habitats 
+                in particular?<br><br>Register and log in to save interactions as a list 
+                and use the filters and features to explore them as a group.<br><br>`,
+            position: 'right',
+        },
+        {
             element: '#help-opts',
             intro: `<b><center>Thank you for taking the time to learn about the 
                 <br>Bat Eco-Interactions Database Search Page!</b></center><br>
@@ -276,7 +320,7 @@ function getSteps(step) {
                 "Search tips" to help you refine your search in various ways.<br>
                 <br><b><center>Register and log in to leave us feedback.<br> 
                 We'd love to hear from you!</b></center>` ,
-            position: 'left'
+            position: 'right'
         },
     ];
 }
@@ -345,14 +389,27 @@ function addDbLoadNotice() {
         <br><br><center><b>Please wait for database to finish downloading before 
         continuing.`);
 }
-function toggleFilterPanelInTutorial(close) {
-    const closed = $('#filter-opts').hasClass('closed');
+function toggleFilterPanelInTutorial(close) {  
+    const closed = $('#filter-opts-pnl').hasClass('closed');   
     if ((close && closed) || !close && !closed) { return; }
     $('#filter').click();
 }
 function clearFilters() {
     $('button[name="reset-tbl"]').click();
     toggleFilterPanelInTutorial(true);
+}
+function toggleListPanelInTutorial(close) {
+    const role = $('body').data('user-role');
+    const closed = $('#int-opts').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { 
+        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
+        return;
+    }
+    if (!close) {
+        $('#button[name="int-set"]').attr({disabled: false}).click();
+    } else {
+        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
+    }
 }
 /* ===================== MODALS/TIPS ======================================== */
 export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
