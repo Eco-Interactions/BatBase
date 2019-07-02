@@ -40,6 +40,7 @@ export function addFilterPanelEvents() {
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
     $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'saved-filters'));
+    $('#fltr-pnl-hlp').click(showHelpModal.bind(null, 'filter-panel'));
 }
 export function resetStoredFiltersUi() {
     if (!$('#saved-filters')[0].selectize) { return; }
@@ -50,9 +51,9 @@ export function updateFilterPanelHeader(focus) {
     const map = {
         locs: 'Location', srcs: 'Source', taxa: 'Taxon'
     };
-    const hdrPieces = $('#filter-col1>span').text().split(' ');  
+    const hdrPieces = $('#filter-col1>div>div').text().split(' ');  
     hdrPieces.splice(0, 1, map[focus]);  
-    $('#filter-col1>span').text(hdrPieces.join(' '));
+    $('#filter-col1>div>div').text(hdrPieces.join(' '));
 }
 /* --- Toggle Panel Vertically or Horizontally --- */
 export function toggleFilterPanelOrientation(style, close) {

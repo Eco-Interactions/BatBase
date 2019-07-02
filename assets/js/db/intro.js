@@ -28,36 +28,86 @@ function init() {
 /* ===================== MODALS/TIPS ======================================== */
 /* ------------ HELP MODALS ------------ */
 export function showHelpModal(key) {
-    const steps= getHelpSteps(key);
     intro = require('../libs/intro.js').introJs();
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
     intro.setOptions({
         showBullets: false, 
         showStepNumbers: false, 
-        steps: steps, 
+        steps: getHelpSteps(key), 
         tooltipClass: 'intro-tips'});
     intro.start();
 }
 function getHelpSteps(key) {
-    let steps = getSteps().filter(s => s.helpKey == key);
-    return steps.length > 0 ? removeRegisterMsg(steps, key) : getCustomHelpSteps(key);
-}
-function removeRegisterMsg(step, key) {
-    if ($('body').data('user-role') === 'visitor') { return step; }
-    const map = {
-        'saved-filters': '<br><br><center>Register and log in to use these features.</center>'
-    };
-    step[0].intro = step[0].intro.split(map[key])[0];
-    return step;
-}
-function getCustomHelpSteps(key) {
     const getSteps = {
-        'saved-lists': getListSteps
+        'filter-panel': getFilterPanelSteps,
+        'saved-filters': getSavedFilterSteps,
+        'saved-lists': getSavedListSteps
     };
     return getSteps[key]();
 }
-function getListSteps() {
+function getFilterPanelSteps() {
+    return [{
+        element: '#filter-col1',
+        intro: `<h3><center>Dynamic filters</center></h3><br><b>Location:</b> Region, country,
+            and name filters.<br><br><b>Source:</b> Name and publication type filters.
+            <br><br><b>Taxon:</b> Name and taxonomic rank filters.<br>
+             - There is a dropdown for each taxonomic rank present in the root
+            (bat, plant, or arthropod) Taxon Tree. Initially, all taxa in each rank 
+            will be available.<br> - Select a specific taxon from a dropdown and 
+            the Tree will update to show the selected taxon as the top the of the tree. 
+            The other dropdowns will populate with related taxa.`, 
+        position: 'right',
+    },
+    {
+        element: '#shw-chngd-ints',
+        intro: `<h3><center>Check this box to filter interaction records by 
+            time updated/created.</center></h3><br><b></b>The time defaults 
+            to the current date. Use the calendar to select any date. That date 
+            will be saved and reapplied if the filter is turned reset when switching
+            between data views.<br><br>Only interactions created/updated after 
+            the selected time will be displayed.`,
+        position: 'top',
+        setUpFunc: toggleFilterPanelInTutorial,
+        helpKey: 'filter-panel'
+    },
+    {
+        element: '.ag-header-viewport',
+        intro: `<h3><center>Table column filters</center></h3><br>Hovering 
+            over a column header reveals the filter menu for that column.<br><br>
+            Some columns can be filtered by text, others by selecting or 
+            deselecting values in that column.`,
+        position: 'top'
+    },
+    {
+        element: '#stored-filters',
+        intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
+            Saved sets include the grouping and view of the table and all applied filters from
+            the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
+            in a "forest" habitat or all African "consumption" interactions in
+            a "desert" habitat.`,
+        position: 'left',
+    },
+    {
+        element: 'button[name="reset-tbl"]',
+        intro: `<b>Click here at any point to clear all filters and reset 
+            the interactions in the table.</b>`,
+        position: 'right',
+        setUpFunc: clearFilters
+    }];
+}
+function getSavedFilterSteps() {
+    return [{
+        element: '#stored-filters',
+        intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
+            Saved sets include the grouping and view of the table and all applied filters from
+            the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
+            in a "forest" habitat or all African "consumption" interactions in
+            a "desert" habitat.`,
+        position: 'left'
+    }];
+}
+function getSavedListSteps() {
     return [
         {
             element: '#int-opts',
@@ -256,17 +306,11 @@ function getSteps() {
         {
             element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
-                show all taxon levels that present in the Taxon Tree.</b> When first 
-                displayed, all taxa for each level will be available in the 
-                dropdown selection lists.<br><br><b>You can focus on any part of 
-                the taxon tree by selecting a specific taxon from a dropdown.</b> 
-                The Taxon Tree will change to show the selected taxon as the top 
-                of the tree.<br><br><b>When a dropdown is used to filter the data, 
-                the other dropdowns will also change to reflect the data shown.
-                </b><br><br>- Higher level rankings will be fixed and only lower 
-                ones associated with the selected taxon will be shown.<br>- Any 
-                levels that are not recorded in the Taxon's ancestry chain will 
-                have 'None' selected.`, 
+                show all taxa in each rank present in the root (bat, plant, arthropod) 
+                Taxon Tree.</b><br><br> - Initially, all taxa in each rank will be available. 
+            Select a specific taxon from a dropdown and the Tree will update to show 
+            the selected taxon as the top the of the tree. The other dropdowns will 
+            populate with related taxa.`, 
             position: 'right',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -274,8 +318,7 @@ function getSteps() {
             element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 Locations can be filtered by region, country, and display name.<br><br>
-                Sources can be filtered by name, or by type (depending on the type
-                of source displayed in the table.)`, 
+                Sources can be filtered by name, and/or by type of publication.`, 
             position: 'right',
             setUpFunc: toggleFilterPanelInTutorial
         },
@@ -298,8 +341,7 @@ function getSteps() {
                 in a "forest" habitat or all African "consumption" interactions in
                 a "desert" habitat.<br><br><center>Register and log in to use these features.</center>`,
             position: 'left',
-            setUpFunc: toggleFilterPanelInTutorial,
-            helpKey: 'saved-filters'
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: 'button[name="reset-tbl"]',
