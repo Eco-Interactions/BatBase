@@ -22,6 +22,8 @@ Before conference:
 
 
 MEETING NOTES:
+    Questions:
+        - Do we still need the "Tips"?
     Point out:
         - Table int count
         - Panel features and UI

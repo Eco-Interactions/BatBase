@@ -479,7 +479,8 @@ input[name="mod-list"] {
     font-size: 1.1em;
 }
 #tbl-cnt {
-    padding: 2px;
+    padding-top: 4px;
+    font-size: .9em;
 }
 #tbl-status {
     margin: 0 0 0 .2em;

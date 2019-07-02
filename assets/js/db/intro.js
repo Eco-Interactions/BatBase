@@ -52,12 +52,11 @@ function getFilterPanelSteps() {
         intro: `<h3><center>Dynamic filters</center></h3><br><b>Location:</b> Region, country,
             and name filters.<br><br><b>Source:</b> Name and publication type filters.
             <br><br><b>Taxon:</b> Name and taxonomic rank filters.<br>
-             - There is a dropdown for each taxonomic rank present in the root
-            (bat, plant, or arthropod) Taxon Tree. Initially, all taxa in each rank 
-            will be available.<br> - Select a specific taxon from a dropdown and 
-            the Tree will update to show the selected taxon as the top the of the tree. 
-            The other dropdowns will populate with related taxa.`, 
-        position: 'right',
+             - The dropdowns show all taxa in the Taxon Tree<br>
+             - Select a specific taxon and the Tree will update to show interactions
+             for the taxon and lower related taxa. The other dropdowns 
+            will populate with the related taxa in the Tree.`, 
+        position: 'top',
     },
     {
         element: '#shw-chngd-ints',
@@ -68,8 +67,7 @@ function getFilterPanelSteps() {
             between data views.<br><br>Only interactions created/updated after 
             the selected time will be displayed.`,
         position: 'top',
-        setUpFunc: toggleFilterPanelInTutorial,
-        helpKey: 'filter-panel'
+        setUpFunc: toggleFilterPanelInTutorial
     },
     {
         element: '.ag-header-viewport',
@@ -80,18 +78,8 @@ function getFilterPanelSteps() {
         position: 'top'
     },
     {
-        element: '#stored-filters',
-        intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
-            Saved sets include the grouping and view of the table and all applied filters from
-            the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
-            in a "forest" habitat or all African "consumption" interactions in
-            a "desert" habitat.`,
-        position: 'left',
-    },
-    {
         element: 'button[name="reset-tbl"]',
-        intro: `<b>Click here at any point to clear all filters and reset 
-            the interactions in the table.</b>`,
+        intro: `<b>Click here to clear all filters and reset the interactions in the table.</b>`,
         position: 'right',
         setUpFunc: clearFilters
     }];
@@ -100,10 +88,9 @@ function getSavedFilterSteps() {
     return [{
         element: '#stored-filters',
         intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
-            Saved sets include the grouping and view of the table and all applied filters from
+            Saved sets include the grouping and view of the data and all applied filters from
             the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
-            in a "forest" habitat or all African "consumption" interactions in
-            a "desert" habitat.`,
+            in a "forest" habitat or all African "consumption" interactions in a "desert" habitat.`,
         position: 'left'
     }];
 }
@@ -111,10 +98,10 @@ function getSavedListSteps() {
     return [
         {
             element: '#int-opts',
-            intro: `<h3><center>Users can create custom lists of interactions.</center></h3><br>
-                Studying specific countries in Africa, or a perhaps few habitats 
-                in particular?<br><br>Save interactions as a list and use the filters 
-                and features to explore them as a group.<br><br>`,
+            intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, data from specific publishers or authors, 
+                or a perhaps few habitats in particular? <br><br>Save interactions as a list and 
+                use the filters and features to explore them as a group.<br><br>`,
             position: 'top'
         },
         {
@@ -127,7 +114,7 @@ function getSavedListSteps() {
         },
         {
             element: '#list-details',
-            intro: `<h3><center>Update the list name and description here.</center></h3><br>`,
+            intro: `<h3><center>Update the List Name and Description.</center></h3>`,
             position: 'top',
         },
         {
@@ -138,7 +125,7 @@ function getSavedListSteps() {
                 <b>Remove:</b> Select a list and click "Load Interaction List in Table". Select 
                 interaction rows in the table or the "All Shown" option and click
                 "Save List" to remove the selected interactions from the list.`,
-            position: 'left',
+            position: 'top',
         },
         {
             element: 'button[name="clear-list"]',
@@ -306,20 +293,19 @@ function getSteps() {
         {
             element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
-                show all taxa in each rank present in the root (bat, plant, arthropod) 
-                Taxon Tree.</b><br><br> - Initially, all taxa in each rank will be available. 
-            Select a specific taxon from a dropdown and the Tree will update to show 
-            the selected taxon as the top the of the tree. The other dropdowns will 
-            populate with related taxa.`, 
-            position: 'right',
+                show all taxa in the selected realm, all Plants in this example.</b><br><br>
+                 - Select a specific taxon from a dropdown and the Tree will update to show 
+                the selected taxon as the top the of the data tree. The other dropdowns will 
+                populate with related taxa.`, 
+            position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 Locations can be filtered by region, country, and display name.<br><br>
-                Sources can be filtered by name, and/or by type of publication.`, 
-            position: 'right',
+                Sources can be filtered by name, and by type of publication.`, 
+            position: 'top',
             setUpFunc: toggleFilterPanelInTutorial
         },
         {
@@ -336,7 +322,7 @@ function getSteps() {
         {
             element: '#stored-filters',
             intro: `<h3><center>Filters can be saved and applied as a set.</center></h3><br>
-                Saved sets include the grouping and view of the table and all applied filters from
+                Saved sets include the grouping and view of the data and all applied filters from
                 the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
                 in a "forest" habitat or all African "consumption" interactions in
                 a "desert" habitat.<br><br><center>Register and log in to use these features.</center>`,
@@ -345,8 +331,7 @@ function getSteps() {
         },
         {
             element: 'button[name="reset-tbl"]',
-            intro: `<b>Click here at any point to clear all filters and reset 
-                the interactions in the table.</b>`,
+            intro: `<b>Click here to clear all filters and reset the interactions in the table.</b>`,
             position: 'right',
             setUpFunc: clearFilters
         },
@@ -432,10 +417,10 @@ function getSteps() {
         },
         {
             element: '#list-opts',
-            intro: `<h3><center>Users can create custom lists of interactions.</center></h3><br>
-                Studying specific countries in Africa, or a perhaps few habitats 
-                in particular?<br><br>Register and log in to save interactions as a list 
-                and use the filters and features to explore them as a group.<br><br>`,
+            intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, data from specific publishers or authors, 
+                or a perhaps few habitats in particular? <br><br>Save interactions as a list and 
+                use the filters and features to explore them as a group.<br><br>`,
             position: 'right',
         },
         {

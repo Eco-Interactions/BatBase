@@ -414,7 +414,7 @@ function addSubNodeInteractions(child) {
     return cnt;
 }
 function updateTotalCountDisplay(cnt) {  
-    $("#tbl-cnt").text(`[ Total: ${cnt} ]`);
+    $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
 }
 
 
