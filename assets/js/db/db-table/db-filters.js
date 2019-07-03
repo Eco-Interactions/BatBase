@@ -92,11 +92,12 @@ function getSavedFilterStatus(set) {                                            
 }
 function getPanelFilters(filters) {
     return Object.keys(filters).map(type => {  
-        return typeof filters[type] == 'string' ? 'Time Updated' : Object.keys(filters[type])[0]
+        return type === 'time' ? 
+            getTimeFltrString(filters[type].type) : Object.keys(filters[type])[0]
     });
 }
 function addExternalFilters() {  
-    const map = { combo: addComboValue, name: addName, time: addTimeFltr };
+    const map = { combo: addComboValue, name: addName, time: getTimeFltrString };
     return getFocusFilterDisplayVals();
 
     function getFocusFilterDisplayVals() {
@@ -115,8 +116,9 @@ function addComboValue(comboObj) {                                              
 function addName(name) {
     return name;
 }
-function addTimeFltr(time) {
-    return "Time Updated";
+function getTimeFltrString(time) {
+    const type = time.type === 'cited' ? 'Published' : 'Updated';
+    return 'Time '+ type;
 }
 function getTableFilters(filters) {
     const filterModels = getTableFilterModels();                                //console.log('filterModels = %O', filterModels); 
@@ -260,78 +262,66 @@ function initCal() {
         altInput: true, maxDate: "today", enableTime: true,   
         plugins: [confirmDatePlugin({showAlways: true})],
         onReady: function() { this.amPM.textContent = "AM"; },
-        onClose: filterByType
+        onClose: filterByTime
     }; 
     return $('#time-cal').flatpickr(calOpts);
 }
 function reapplyPreviousTimeFilter(timeObj, skipSync) { 
     fPs.cal.setDate(timeObj.date);  
-    filterByType(null, timeObj.date, null, skipSync);
+    filterByTime(null, timeObj.date, null, skipSync);
 }
 function filterToChangesToday() {  
     const today = new Date().today();
     fPs.cal.setDate(today, false, 'Y-m-d');  
-    filterByType(null, today, null, skipSync);
+    filterByTime(null, today, null, skipSync);
 }
 function filterToSpecifiedTime(time) {
     fPs.cal.setDate(time, false, 'F d, Y h:i K');  
-    filterByType(null, time, null, skipSync);
+    filterByTime(null, time, null, skipSync);
 }
-/**
- * This method can be called on calendar input change, and thus takes the following
- * parameters: dates, dateStr, instance, skipSync.
- */
-function filterByType(dates, dateStr, instance, skipSync) {
-    if (fPs.pnlFltrs.time.type === 'cited') {
-        filterInteractionsPublishedAfter(null, dateStr, null, skipSync);
-    } else {
-        filterInteractionsUpdatedSince(null, dateStr, null, skipSync);
-    }
-}
-/* ------------------ PUBLISHED AFTER [TIME] FILTER ------------------------- */
-function filterInteractionsPublishedAfter(dates, dateStr, instance, skipSync) { console.log("filterInteractionsPublishedAfter called. arguments? ", arguments);
-    
-}
-/* ------------------- UPDATED AFTER [TIME] FILTER -------------------------- */
 /**
  * Filters all interactions in the table leaving only the records with updates
  * since the datetime specified by the user.
  * Note: Params 1-3 sent by calendar
  */
-function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   //console.log("filterInteractionsUpdatedSince called. arguments? ", arguments);
-    const filterTime = getFilterTime();  
+function filterByTime(dates, dateStr, instance, skipSync) {
+    const time = updateMemoryAndReturnTime(dateStr);
+    filterTableByTime(time, fPs.pnlFltrs.time.type);
+    updateUiAfterTimeFilterChange(dateStr, skipSync);
+}
+function updateMemoryAndReturnTime(dateStr) {
     tblState = tState().get();
-    filterInteractionsAndUpdateState();   
-    $('.flatpickr-input').val(dateStr);
-    if (skipSync) { console.log('skipping sync');return; }
-    syncFiltersAndUi(filterTime);
-
-    function getFilterTime() {
-        const fltrSince = dateStr || fPs.pnlFltrs.time.date;
-        fPs.pnlFltrs.time.date =  fltrSince;
-        return new Date(fltrSince).getTime(); 
-    }
-    function filterInteractionsAndUpdateState() {
-        const updatedRows = filterRowsByTimeUpdated();                          //console.log("updatedRows = %O", updatedRows);
-        tblState.api.setRowData(updatedRows);
-        fPs.fltrdRows = updatedRows;
-    }
-    function filterRowsByTimeUpdated() {
-        const rowData = _u.snapshot(tblState.rowData);
-        return rowData.filter(addAllRowsWithUpdates);        
-    }
-    function addAllRowsWithUpdates(rowObj) { 
-        if (rowObj.interactionType) { return checkIntRowForUpdates(rowObj); }
-        rowObj.children = rowObj.children ? 
-            rowObj.children.filter(addAllRowsWithUpdates) : [];
-        return rowObj.children.length > 0;
+    const fltrSince = dateStr || fPs.pnlFltrs.time.date;
+    fPs.pnlFltrs.time.date =  fltrSince;
+    return new Date(fltrSince).getTime(); 
+}
+function filterTableByTime(time, type) {
+    const rows = getRowsAfterTime(time, type);                                  //console.log("rows = %O", rows);
+    tblState.api.setRowData(rows);
+    fPs.fltrdRows = rows;
+}
+function getRowsAfterTime(filterTime, type) {
+    const rowData = _u.snapshot(tblState.rowData);
+    return rowData.filter(getIntsForTimeFilter);        
+    
+    function getIntsForTimeFilter(row) { 
+        if (row.interactionType) { return checkIntRowForUpdates(row); }
+        row.children = row.children ? 
+            row.children.filter(getIntsForTimeFilter) : [];
+        return row.children.length > 0;
 
         function checkIntRowForUpdates(row) { 
-            const rowUpdatedAt = new Date(row.updatedAt).getTime();             //console.log("row [%O}.data.updatedAt = [%s], filterTime = [%s], rowUpdatedAt > since = [%s]", row, rowUpdatedAt, filterTime, rowUpdatedAt > filterTime);
-            return rowUpdatedAt > filterTime;
+            const date = type === 'cited' ? row.year + '-01-01' : row.updatedAt;
+            const rowTime = new Date(date).getTime();                           //console.log("row [%O] rowTime = %O, rowTime > since = [%s]", row, rowTime, rowTime > filterTime);
+            return rowTime > filterTime;
         }
     } /* End addAllRowsWithUpdates */
-} /* End filterInteractionsUpdatedSince */ 
+} /* End getRowsAfterTime */
+function updateUiAfterTimeFilterChange(time, skipSync) {
+    $('.flatpickr-input').val(time);
+    if (skipSync) { console.log('skipping filter sync');return; }
+    syncFiltersAndUi(time);
+}
 /**
  * When filtering by time updated, some filters will need to be reapplied.
  * (Taxa and loation filter rowdata directly, and so do not need to be reapplied.

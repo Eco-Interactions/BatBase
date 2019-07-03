@@ -314,7 +314,8 @@ function buildIntRowData(intRcrd, treeLvl, idx){                                
         tags: intRcrd.tags,
         note: intRcrd.note, 
         rowColorIdx: idx,
-        updatedAt: intRcrd.updatedAt
+        updatedAt: intRcrd.updatedAt,
+        year: intRcrd.source.year
     };
     if (intRcrd.location) { getLocationData(intRcrd.location); }
     return rowData;
