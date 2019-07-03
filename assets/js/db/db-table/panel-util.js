@@ -12,13 +12,13 @@
  *     updateSubmitEvent    save-fltrs, save-ints
  */
 import * as _u from '../util.js';
-import { addFilterPanelEvents, toggleFilterPanelOrientation } from './save-fltrs.js';
+import { initFilterPanel, toggleFilterPanelOrientation } from './save-fltrs.js';
 import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
 
 
 /* ----------------- EVENT RELATED ------------------ */
 export function addPanelEvents() {
-    addFilterPanelEvents();
+    initFilterPanel();
     addListPanelEvents();
 }
 export function updateSubmitEvent(id, event) {

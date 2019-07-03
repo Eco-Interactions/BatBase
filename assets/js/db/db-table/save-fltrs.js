@@ -2,12 +2,11 @@
  * Handles the saving, editing, and display of saved sets of filters.
  *
  * Exports:                 Imported By:                  (Added all post initial refactor)
- *     addFilterPanelEvents         panel-util
+ *     initFilterPanel              panel-util
  *     newFilterSet                 util
  *     resetStoredFiltersUi         db-page
  *     savedFilterSetActive         db-filters
  *     selFilterSet                 util
- *     
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
@@ -31,7 +30,23 @@ let app = {};
 export function savedFilterSetActive() {  
     return app.fltr ? (app.fltr.active ? app.fltr.details : false) : false;
 }
-
+/* ------------ Init ------------------- */
+export function initFilterPanel() {
+    addFilterPanelEvents();
+    initTimeFilterUi();
+    initSavedFiltersUi();
+}
+function initTimeFilterUi() {
+    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
+    $('#time-fltr')[0].selectize.disable();
+}
+function initSavedFiltersUi() {
+    initSavedFiltersCombobox();
+    disableFilterSetInputs();
+}
+function initSavedFiltersCombobox() {
+    updateFilterSel();
+}
 export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(db_filters.toggleTimeFilter);
@@ -77,19 +92,6 @@ export function toggleFilterPanel() {
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
-    initTimeFilterUi();
-    initSavedFiltersUi();
-}
-function initTimeFilterUi() {
-    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
-    $('#time-fltr')[0].selectize.disable();
-}
-function initSavedFiltersUi() {
-    initSavedFiltersCombobox();
-    disableFilterSetInputs();
-}
-function initSavedFiltersCombobox() {
-    updateFilterSel();
 }
 function updateFilterSel() {
     const opts = getSavedFilterOpts(_u.getOptsFromStoredData('savedFilterNames'));     
