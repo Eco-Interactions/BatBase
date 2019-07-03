@@ -250,10 +250,12 @@ class AjaxDataController extends Controller
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
         $data = new \stdClass;   
 
-        foreach ($entities as $entity) {  
-            $id = $entity->getId();
+        for ($i=0; $i < count($entities); $i++) { 
+            $entity = $entities[$i];
+            $id = $entity->getId();                                             //print('id = '.$id."\n"); 
             $data->$id = $serializer->serialize($entity, 'json');
         }
         return $data;
+
     }
 }

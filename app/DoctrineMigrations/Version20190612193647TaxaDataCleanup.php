@@ -59,9 +59,6 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
             $this->updateParent($sty, $rmv);
 
             $this->persistEntity($sty);
-
-//print("\n\n Taxon has [".count($rmv->getChildTaxa())."] children. [".count($rmv->getInteractions())."] interactions. [".$rmv->getParentTaxon()."] parent.\n\n");
-
             $this->removeTaxon($rmv, 'parent changes');
         }
     }
@@ -85,6 +82,7 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
                 $this->moveInteractionsFromSet($sty, $remove);
             } else {
                 $rmv = $this->getEntity('Taxon', $remove);
+                $rmv->setParentTaxon(null);
                 $this->moveChildrenAndInteractions($sty, $rmv);
                 $this->removeTaxon($rmv, 'single simple dup');
             }
@@ -95,8 +93,9 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
     {
         foreach ($remove as $rmvId) {
             $rmv = $this->getEntity('Taxon', $rmvId);      
+            $rmv->setParentTaxon(null);
             $this->moveChildrenAndInteractions($sty, $rmv);
-            $this->removeTaxon($rmv, 'singe from simple set');
+            $this->removeTaxon($rmv, 'single from simple set');
         }
     }
     /** ------------ SHARED ------------------------- */
@@ -108,17 +107,17 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
             'simple' => [ 948 => 1797,  1821 => 1823, 1825 => 1827,  1867 => [1868, 1869, 1870], 
                 905 => 1907, 1930 => 1928, 1946 => 1951, 1986 => 1988, 953 => 2000, 965 => 2001, 
                 919 => 2007, 1694 => [2008, 2662, 2666], 885 => 2017, 961 => 2025, 2024 => 2027, 
-                882 => 2035, 979 => 2056, 1956 => [2058 => 2057], 969 => 2068, 1753 => 2071, 
+                882 => 2035, 979 => 2056, 1956 => [2058, 2057], 969 => 2068, 1753 => 2071, 
                 2093 => 2091, 1965 => 1963, 1741 => 2113, 1735 => [2114, 2315], 2149 => 2146, 
                 2150 => 2147, 972 => [2157, 2055], 2223 => 2221, 2247 => 2245, 476 => 2249, 
-                477 => 2250, 2260 => 2258, 83 => 2265, 2211 => 2285, 2294 => 2292, 978 => 2304, 
+                477 => 2250, 2260 => 2258, 83 => [2265, 1771], 2211 => 2285, 2294 => 2292, 978 => 2304, 
                 945 => 2309, 1685 => 2311, 2337 => [2339, 2338], 1767 => 1765, 314 => 1806,
-                1826 => 1824, 1846 => [1844, 1845], 918 => 1847, 1851 => 1848, 1852 => 1849, 
+                1826 => 1824, 1845 => 1844, 918 => 1847, 1851 => 1848, 1852 => 1849, 
                 175 => [1853, 1854], 1871 => 1877, 1872 => [1879, 1878], 1880 => 1881, 
-                1835 => [1904, 1906], 1987 => 1985, 1992 => 1991, 2047 => 2046, 1956 => 2058, 
+                1835 => [1904, 1906], 1987 => 1985, 1992 => 1991, 2047 => 2046, 
                 1969 => 2066, 1466 => 2099, 98 => 2122, 485 => [2208, 2206], 2225 => 1146, 
                 2298 => 2299, 2252 => 2405, 2227 => 2414, 2446 => 2444, 1580 => [2462, 2466, 2467], 
-                1696 => 2471, 2211 => 2475, 916 => 2478, 2486 => 2484]
+                1696 => 2471, 2211 => 2475, 916 => 2478, 2486 => 2484, 2209 => 2207, 499 => 2172, 82 => 1770, 88 => 1762]
         ];
         return $map[$type];
     }
@@ -165,7 +164,7 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
             $this->persistEntity($move);
         }
         $this->em->flush();
-        // if (count($move->getChildTaxa())) { print("##  taxon still has children\n"); }
+        if (count($move->getChildTaxa())) { print("##  taxon still has children\n"); }
         // } else { print("----------------------------------------------------\n"); }
     }
 
