@@ -266,7 +266,8 @@ function setNameSearchFilter(text) {                                            
     $('#focus-filters input').val(text);
 }
 function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
-    db_filters.toggleTimeFilter(true, time);
+    _u.setSelVal('Time Filter', time.type);
+    db_filters.toggleTimeFilter(true, time.date);
 }
 function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
     app.tblApi = tState().get('api'); 

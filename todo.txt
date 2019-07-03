@@ -4,10 +4,11 @@ Thoughts:
         trouble shoot when issues arrise.
 
 >==== Change Log ====
+    - Added "published" after to time filter
 
 Current:
-    - updating tutorial
-        - Add help boxes to panels connected to their sections in the walkthrough
+    - update tests with new filters
+        - time updated/published
     - Add Lists to System Date
 
 Before conference:

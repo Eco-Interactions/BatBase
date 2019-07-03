@@ -172,7 +172,7 @@ input[type="radio"], input[type="checkbox"] {
 }
 .time-fltr-sel {
     margin: 0 .5em;
-    width: 120px;
+    width: 111px;
 }
 #time-cal, .flatpickr-input {
     width: 202px;

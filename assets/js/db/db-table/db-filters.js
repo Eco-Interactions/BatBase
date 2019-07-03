@@ -93,7 +93,7 @@ function getSavedFilterStatus(set) {                                            
 function getPanelFilters(filters) {
     return Object.keys(filters).map(type => {  
         return type === 'time' ? 
-            getTimeFltrString(filters[type].type) : Object.keys(filters[type])[0]
+            getTimeFltrString(filters[type]) : Object.keys(filters[type])[0]
     });
 }
 function addExternalFilters() {  
@@ -185,8 +185,8 @@ export function resetTblFilters() {
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
+    if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
     fPs.pnlFltrs.time.type = val;
-    showCal();
 }
 /**
  * When the interaction form is exited, the passed focus is selected and the 
@@ -198,6 +198,7 @@ export function showTodaysUpdates(focus) {                                      
     window.setTimeout(showUpdatesAfterTableLoad, 200);
 }
 function showUpdatesAfterTableLoad() {
+    _u.setSelVal('Time Filter', 'updated');
     toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
@@ -273,11 +274,11 @@ function reapplyPreviousTimeFilter(timeObj, skipSync) {
 function filterToChangesToday() {  
     const today = new Date().today();
     fPs.cal.setDate(today, false, 'Y-m-d');  
-    filterByTime(null, today, null, skipSync);
+    filterByTime(null, today);
 }
 function filterToSpecifiedTime(time) {
     fPs.cal.setDate(time, false, 'F d, Y h:i K');  
-    filterByTime(null, time, null, skipSync);
+    filterByTime(null, time);
 }
 /**
  * Filters all interactions in the table leaving only the records with updates
