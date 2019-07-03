@@ -7,9 +7,10 @@
  *     getFilterState                   save-fltrs
  *     resetTblFilters                  db-page, save-ints
  *     resetTableStateParams            db-page, db-ui, save-ints
+ *     selTimeFilter                    save-fltrs
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
- *     toggleTimeUpdatedFilter          db_page
+ *     toggleTimeFilter          db_page
  *     updateFilterStatusMsg            db-page, init-tbl, save-fltrs
  *     updateLocSearch                  util
  *     updatePubSearch                  util
@@ -28,7 +29,7 @@ import { savedIntListLoaded } from './save-ints.js';
  *     pnlFltrs - Object stores panel filter values 
  *         combo - obj with combo-label (k): obj with text and value (k) with their respective values
  *         name - name filter string
- *         time - Stores the specified datetime for the time-updated filter.
+ *         time - Obj with the datetime and filter type, time published or time added/updated 
  */
 let fPs = {
     pnlFltrs: {}
@@ -181,6 +182,10 @@ export function resetTblFilters() {
     fPs.pnlFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
+export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
+    fPs.pnlFltrs.time.type = val;
+    showCal();
+}
 /**
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
@@ -191,28 +196,37 @@ export function showTodaysUpdates(focus) {                                      
     window.setTimeout(showUpdatesAfterTableLoad, 200);
 }
 function showUpdatesAfterTableLoad() {
-    toggleTimeUpdatedFilter(true, 'today');
+    toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeUpdatedFilter(state, time) {                          //console.log('toggleTimeUpdatedFilter. state = %s, time? ', state, time);
-    const filtering = state === 'disable' ? false : 
-        state === true ? true : $('#shw-chngd')[0].checked;
-    tblState = tState().get();
+export function toggleTimeFilter(state, time) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
+    const filtering = ifFilteringOnTime(state);
+    updateMemory(time);
     updateRelatedUi(filtering);
     if (filtering) { showCal(time);
-    } else { resetTimeUpdatedFilter(); }
-    db_ui.resetToggleTreeBttn(false);
+    } else { resetTimeFilter(); }
+}
+function updateMemory(time) {
+    tblState = tState().get();
+    fPs.pnlFltrs.time = {date: time, type: _u.getSelVal('Time Filter')};
+}
+function ifFilteringOnTime(state) {
+    return state === 'disable' ? false : state === true ? true : $('#shw-chngd')[0].checked;
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .3;
-    $('#time-fltr, .flatpickr-input').attr({'disabled': !filtering});  
+    $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
+    $('.time-fltr-sel, #time-cal, .flatpickr-input').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
-    $('#time-fltr, .flatpickr-input').css({'opacity': opac});
+    db_ui.resetToggleTreeBttn(false);
+    if (filtering) {
+        $('#time-fltr')[0].selectize.enable();
+    } else { $('#time-fltr')[0].selectize.disable(); }
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  */
-function resetTimeUpdatedFilter() {                                             //console.log('tState = %O', tState);
+function resetTimeFilter() {                                                    //console.log('tState = %O', tState);
     fPs.fltrdRows = null;
     if (tblState.api && tblState.rowData) { 
         tblState.api.setRowData(tblState.rowData);
@@ -229,7 +243,7 @@ function showCal(time) {                                                        
         filterToChangesToday(); 
     } else if (time) { 
         filterToSpecifiedTime(time);
-    } else if (fPs.pnlFltrs.time) {
+    } else if (fPs.pnlFltrs.time.date) {  
         reapplyPreviousTimeFilter(fPs.pnlFltrs.time);
     } else {
         fPs.cal.open();
@@ -246,23 +260,39 @@ function initCal() {
         altInput: true, maxDate: "today", enableTime: true,   
         plugins: [confirmDatePlugin({showAlways: true})],
         onReady: function() { this.amPM.textContent = "AM"; },
-        onClose: filterInteractionsUpdatedSince
+        onClose: filterByType
     }; 
-    return $('#time-fltr').flatpickr(calOpts);
+    return $('#time-cal').flatpickr(calOpts);
 }
-function reapplyPreviousTimeFilter(filterTime, skipSync) { 
-    fPs.cal.setDate(filterTime);  
-    filterInteractionsUpdatedSince(null, filterTime, null, skipSync);
+function reapplyPreviousTimeFilter(timeObj, skipSync) { 
+    fPs.cal.setDate(timeObj.date);  
+    filterByType(null, timeObj.date, null, skipSync);
 }
 function filterToChangesToday() {  
     const today = new Date().today();
     fPs.cal.setDate(today, false, 'Y-m-d');  
-    filterInteractionsUpdatedSince(null, today, null);
+    filterByType(null, today, null, skipSync);
 }
 function filterToSpecifiedTime(time) {
     fPs.cal.setDate(time, false, 'F d, Y h:i K');  
-    filterInteractionsUpdatedSince(null, time, null);
+    filterByType(null, time, null, skipSync);
 }
+/**
+ * This method can be called on calendar input change, and thus takes the following
+ * parameters: dates, dateStr, instance, skipSync.
+ */
+function filterByType(dates, dateStr, instance, skipSync) {
+    if (fPs.pnlFltrs.time.type === 'cited') {
+        filterInteractionsPublishedAfter(null, dateStr, null, skipSync);
+    } else {
+        filterInteractionsUpdatedSince(null, dateStr, null, skipSync);
+    }
+}
+/* ------------------ PUBLISHED AFTER [TIME] FILTER ------------------------- */
+function filterInteractionsPublishedAfter(dates, dateStr, instance, skipSync) { console.log("filterInteractionsPublishedAfter called. arguments? ", arguments);
+    
+}
+/* ------------------- UPDATED AFTER [TIME] FILTER -------------------------- */
 /**
  * Filters all interactions in the table leaving only the records with updates
  * since the datetime specified by the user.
@@ -277,8 +307,8 @@ function filterInteractionsUpdatedSince(dates, dateStr, instance, skipSync) {   
     syncFiltersAndUi(filterTime);
 
     function getFilterTime() {
-        const fltrSince = dateStr || fPs.pnlFltrs.time;
-        fPs.pnlFltrs.time = fltrSince;
+        const fltrSince = dateStr || fPs.pnlFltrs.time.date;
+        fPs.pnlFltrs.time.date =  fltrSince;
         return new Date(fltrSince).getTime(); 
     }
     function filterInteractionsAndUpdateState() {
@@ -446,7 +476,6 @@ export function updateTaxonSearch(val) {
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
     rebuildTxnTable(rcrd, 'filtering');
-    // if ($('#shw-chngd')[0].checked) { filterInteractionsUpdatedSince(); }
 
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;

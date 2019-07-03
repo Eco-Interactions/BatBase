@@ -34,7 +34,7 @@ export function savedFilterSetActive() {
 
 export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
-    $('#shw-chngd').change(db_filters.toggleTimeUpdatedFilter);
+    $('#shw-chngd').change(db_filters.toggleTimeFilter);
     $('#delete-filter').click(deleteFilterSet);
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
@@ -51,9 +51,9 @@ export function updateFilterPanelHeader(focus) {
     const map = {
         locs: 'Location', srcs: 'Source', taxa: 'Taxon'
     };
-    const hdrPieces = $('#filter-col1>div>div').text().split(' ');  
+    const hdrPieces = $('#focus-filter-hdr').text().split(' ');  
     hdrPieces.splice(0, 1, map[focus]);  
-    $('#filter-col1>div>div').text(hdrPieces.join(' '));
+    $('#focus-filter-hdr').text(hdrPieces.join(' '));
 }
 /* --- Toggle Panel Vertically or Horizontally --- */
 export function toggleFilterPanelOrientation(style, close) {
@@ -77,7 +77,12 @@ export function toggleFilterPanel() {
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
+    initTimeFilterUi();
     initSavedFiltersUi();
+}
+function initTimeFilterUi() {
+    _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
+    $('#time-fltr')[0].selectize.disable();
 }
 function initSavedFiltersUi() {
     initSavedFiltersCombobox();
@@ -261,7 +266,7 @@ function setNameSearchFilter(text) {                                            
     $('#focus-filters input').val(text);
 }
 function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
-    db_filters.toggleTimeUpdatedFilter(true, time);
+    db_filters.toggleTimeFilter(true, time);
 }
 function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
     app.tblApi = tState().get('api'); 

@@ -39,7 +39,7 @@ let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
 const geoJsonKey = 'A life without cause is a life without effect!';  
-const localStorageKey = 'A life without cause is a life without effect!!!!'; 
+const localStorageKey = 'A life without cause is a life without effect!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -371,9 +371,9 @@ export function getTaxonName(taxon) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initCombobox(field, options) {                                           //console.log("initCombobox [%s]", field);
+export function initCombobox(field, options, change) {                          //console.log("initCombobox [%s] args = %O", field, arguments);
     const confg = getSelConfgObj(field); 
-    initSelectCombobox(confg, options);  
+    initSelectCombobox(confg, options, change);  
 } /* End initComboboxes */
 export function initComboboxes(fieldAry) {
     fieldAry.forEach(field => initCombobox(field));
@@ -388,8 +388,9 @@ function getSelConfgObj(field) {
         'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
-        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
+        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Time Filter': { name: 'Filter', id: '#time-fltr' },
         'View': { name: 'View', id: '#sel-view', change: false, blur: true },
         // Search Page Comboboxes with Create Options and Sub-panels
         'Int-lists': { name: 'Interaction List', id: '#saved-ints', add: newIntList, change: selIntList },
@@ -402,10 +403,10 @@ function getSelConfgObj(field) {
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
  * that allow users to search by typing.
  */
-function initSelectCombobox(confg, opts) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+function initSelectCombobox(confg, opts, change) {                              //console.log("initSelectCombobox. CONFG = %O", confg)
     const options = {
         create: confg.add || false,
-        onChange: confg.change,
+        onChange: change || confg.change,
         onBlur: confg.blur ? saveOrRestoreSelection : null,
         placeholder: getPlaceholer(confg.id, confg.name, confg.add)
     };

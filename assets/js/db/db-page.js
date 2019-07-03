@@ -10,7 +10,6 @@
  *     initSearchState          db_sync, util
  *     initDataTable            db_sync
  *     onLocViewChange          db_ui
- *     onDataReset
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
  *     rebuildLocTable          db-filters
@@ -84,12 +83,12 @@ export function initSearchState() {                                             
 } 
 function resetState() {
     resetTableParams();
-    db_filters.toggleTimeUpdatedFilter('disable');
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
     db_filters.resetTblFilters();
 }
 export function resetSearchState() {                                            //console.log('resetSearchState');
     resetTableParams();
-    db_filters.toggleTimeUpdatedFilter('disable');
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
     db_filters.resetTblFilters();    
     selectSearchFocus();
 }
@@ -155,7 +154,7 @@ export function resetDataTable() {                                              
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     db_ui.resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
     resetStoredFiltersUi();
 }
@@ -172,7 +171,7 @@ export function initDataTable(focus) {                                          
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
     resetStoredFiltersUi();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }
     selectSearchFocus(focus);
     db_ui.updateUiForTableView();
 }
@@ -189,7 +188,7 @@ export function selectSearchFocus(f) {
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     clearPreviousTable();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeUpdatedFilter('disable'); }
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     storeStateValue('curFocus', focus);
     clearOnFocusChange(focus, tableBuilder);

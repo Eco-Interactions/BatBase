@@ -149,7 +149,7 @@ input[type="radio"], input[type="checkbox"] {
     border-bottom: black 1px solid;
     border-right: none;
 }
-#filter-col1 > div > div {
+#focus-filter-hdr {
     align-self: center;
     padding-bottom: 5px;
     font-weight: 600;
@@ -157,14 +157,30 @@ input[type="radio"], input[type="checkbox"] {
 #focus-filters {
     margin-bottom: .75em;
 }
+/* --- Time Updated Filter --- */
 #shw-chngd-ints {
     width: 100%;
     margin-top: auto;
+    align-items: center;
 }
 #filter-col1.vert #shw-chngd-ints {
     width: auto;
     margin-bottom: 5px;
 }
+#shw-chngd {
+    margin: 7px;
+}
+.time-fltr-sel {
+    margin: 0 .5em;
+    width: 120px;
+}
+#time-cal, .flatpickr-input {
+    width: 202px;
+    font-size: .85em;
+    padding: 4px;
+    margin-left: 11px;
+}
+/* --- Filter Set Section --- */
 #stored-filters {
     flex: 1 0 472px;
     padding-left: 10px;
@@ -209,11 +225,6 @@ input[type="radio"], input[type="checkbox"] {
 #filter-set-name {
     width: 46px !important;
     margin: 0 .3em 0 .6em;
-}
-#time-fltr, .flatpickr-input {
-    width: 202px;
-    font-size: .85em;
-    padding: 4px;
 }
 #futrDevMsg {
     margin: 0 5px 0 5px;
