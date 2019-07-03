@@ -7,6 +7,9 @@ Thoughts:
     - Added "published" after to time filter
 
 Current:
+    - Add view filter to filter status message
+        - Keep it from saving filter set with only view filter selected
+            - Show 'No Active Filters' if only view is selected
     - update tests with new filters
         - time updated/published
     - Add Lists to System Date

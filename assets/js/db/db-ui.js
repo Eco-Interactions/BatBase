@@ -246,18 +246,24 @@ function buildTaxonSelectOpts(tblState) {                                       
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in tblState.selectedOpts) {
             const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
-            optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
+            optsObj[lvl] = [
+                {value: 'all', text: '- All -'}, 
+                {value: taxon.id, text: taxon.displayName}];  
         } else { optsObj[lvl] = []; }
     }
+    function buildTaxonOptions(taxonNames, data) {
+        const opts = taxonNames.map(name => {
+            return { value: data[name],
+                     text: name}});
+        if (optionIsSelected(opts[0].value)) {
+            opts.unshift({value: 'all', text: '- All -'});
+        }
+        return opts;
+    }
+    function optionIsSelected(id) {  console.log('option [%s] IsSelected? selected = %O', id, tblState.selectedOpts);
+        return Object.keys(tblState.selectedOpts).some(k => id == tblState.selectedOpts[k]);
+    }
 } /* End buildTaxonSelectOpts */
-function buildTaxonOptions(taxonNames, taxonData) {
-    return taxonNames.map(function(taxonKey){
-        return {
-            value: taxonData[taxonKey],
-            text: taxonKey
-        };
-    });
-}
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);

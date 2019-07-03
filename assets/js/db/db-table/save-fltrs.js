@@ -107,17 +107,11 @@ function updateFilterSel() {
             labelField: 'text',
             searchField: ['text'],
             sortField: [
-                {
-                    field: 'group',
-                    direction: 'asc'
-                },
-                {
-                    field: 'text',
-                    direction: 'asc'
-                },
-                {
-                    field: '$score'
-                }],
+                { field: 'group',
+                  direction: 'asc'},
+                { field: 'text',
+                  direction: 'asc'},
+                { field: '$score'}],
             render: {
                 optgroup_header: function(data, escape) {  
                     return '<div class="optgroup-header">' + escape(data.text) + '</div>';
@@ -137,7 +131,7 @@ function buildOptGroups(opts) {
     return groups;
 }
 /* ------ CREATE FILTER SET ------- */
-export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);                                     
+export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet, savedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
@@ -151,8 +145,9 @@ function createFilterSet() {
 /* ------ OPEN FILTER SET ------- */
 export function selFilterSet(val) {                                             
     if (val === 'new') { return; } // New list typed into combobox
-    if (val === 'create') { return newFilterSet(); }                            console.log('loading filter set. val = %s', val);
-    if (!val) { return resetFilterUi(); }
+    resetFilterUi();
+    if (val === 'create') { return newFilterSet(); }                            
+    if (!val) { return;  }                                                      console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet, savedIntListLoaded());
     fillFilterData(val);
@@ -345,6 +340,7 @@ function hideSavedMsg() {
 /* ------------------------------- UI ----------------------------------------*/
 /* ---- Reset & Enable/Disable UI --- */
 function resetFilterUi() {
+    app.fltr = null;
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();

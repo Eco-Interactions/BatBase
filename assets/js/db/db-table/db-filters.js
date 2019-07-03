@@ -180,7 +180,7 @@ function setStatus(status) {                                                    
 export function resetTblFilters() {  
     $('#filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
-    $('#shw-chngd').prop('checked', false); //resets updatedAt table filter
+    $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
     fPs.pnlFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
@@ -217,9 +217,9 @@ function ifFilteringOnTime(state) {
     return state === 'disable' ? false : state === true ? true : $('#shw-chngd')[0].checked;
 }
 function updateRelatedUi(filtering) {
-    const opac = filtering ? 1 : .3;
+    const opac = filtering ? 1 : .6;
     $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
-    $('.time-fltr-sel, #time-cal, .flatpickr-input').css({'opacity': opac});
+    $('.time-fltr-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
     db_ui.resetToggleTreeBttn(false);
     if (filtering) {
@@ -461,9 +461,9 @@ function childRowsPassFilter(row, text) {
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 export function updateTaxonSearch(val) {                                        
-    if (!val) { return; }                                                       console.log("updateTaxonSearch val = ", val); 
+    if (!val) { return; }                                                       //console.log("updateTaxonSearch val = ", val); 
     const taxonRcrds = tState().get('rcrdsById');
-    const rcrd = _u.getDetachedRcrd(val, taxonRcrds);  
+    const rcrd = getRootTaxonRcrd(val, taxonRcrds, this.currentResults.items);
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
     rebuildTxnTable(rcrd, 'filtering');
@@ -475,6 +475,19 @@ export function updateTaxonSearch(val) {
         fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
     }
 } /* End updateTaxonSearch */
+/**
+ * When a taxon is selected from the filter comboboxes, the record is returned.
+ * When 'all' is selected, the selected parent is returned, or the realm record.
+ */
+function getRootTaxonRcrd(val, rcrds, opts) {
+    const id = val == 'all' ? getParentId(opts, rcrds) : val;
+    return _u.getDetachedRcrd(id, rcrds);  
+}
+function getParentId(opts, rcrds) {  
+    const prev = opts.filter(o => o.id !== 'all')[0];  
+    const prevRcrd = _u.getDetachedRcrd(prev.id, rcrds);  
+    return prevRcrd.parent;
+}
 /** The selected taxon's ancestors will be selected in their levels combobox. */
 function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
     const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
