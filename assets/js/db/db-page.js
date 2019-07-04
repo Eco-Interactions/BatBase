@@ -265,6 +265,7 @@ export function rebuildLocTable(topLoc) {                                       
     const topLocs = topLoc || getTopRegionIds();
     tblState.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousTable();
+    db_filters.updateFilterViewMsg();
     startLocTableBuildChain(topLocs);
 }
 function getTopRegionIds() {
@@ -328,6 +329,7 @@ export function onSrcViewChange(val) {                                         /
 function rebuildSrcTable(val) {
     clearPreviousTable();
     resetCurTreeState();
+    db_filters.updateFilterViewMsg();
     db_ui.resetToggleTreeBttn(false);
     $('#focus-filters').empty();
     startSrcTableBuildChain(val);
@@ -377,6 +379,7 @@ function storeAndReturnView(val) {
     const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     storeStateValue('curView', realmId);
+    db_filters.updateFilterViewMsg(realmTaxonRcrd.displayName);
     tblState.curView = realmId;
     tblState.realmLvl = realmLvl;   
     return realmTaxonRcrd;

@@ -66,11 +66,17 @@ function filtersActive() {
     return tbl || pnl;
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
+export function updateFilterViewMsg() {                                                     
+    const view = _u.getDataFromStorage('curView'); 
+    const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
+    const msg = map[view] ? `[${map[view]}]` : '';
+    $('#view-fltr').text(msg);
+}
 /**
  * Either displays all filters currently applied, or applies the previous filter 
  * message persisted through table update into map view.
  */
-export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called.")
+export function updateFilterStatusMsg() {                                       //console.log("updateFilterStatusMsg called."); 
     tblState = tState().get(null, ['api', 'intSet']);
     if (!tblState.api) { return; }
     setFilterStatus(getActiveFilters());
@@ -81,7 +87,7 @@ export function updateFilterStatusMsg() {                                       
  * If a saved filter set is applied filters are read from the set. Otherwise, the
  * active filters in the panel and table are checked and returned.
  */
-function getActiveFilters() { 
+function getActiveFilters() {   
     const set = savedFilterSetActive(); 
     return set ? getSavedFilterStatus(set) : getTableFilters(addExternalFilters());
 }
@@ -105,7 +111,7 @@ function addExternalFilters() {
         Object.keys(fPs.pnlFltrs).forEach(type => {                             //console.log('filter [%s] = %O', type, fPs.pnlFltrs[type]);
             filters.push(map[type](fPs.pnlFltrs[type]));
         });  
-        return filters; 
+        return filters.filter(f => f); 
     }
 }
 /** Stores the most recent combobox selection. */
@@ -117,6 +123,7 @@ function addName(name) {
     return name;
 }
 function getTimeFltrString(time) {
+    if (!time.date) { return null; }
     const type = time.type === 'cited' ? 'Published' : 'Updated';
     return 'Time '+ type;
 }
@@ -180,7 +187,9 @@ function setStatus(status) {                                                    
 export function resetTblFilters() {  
     $('#filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
-    $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
+    if ($('#shw-chngd').prop('checked')) { 
+        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
+    }
     fPs.pnlFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
@@ -471,6 +480,7 @@ export function updateTaxonSearch(val) {
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;
         const taxonName = rcrd.displayName;
+        if (!rcrd.parent || rcrd.parent == 1) { return delete fPs.pnlFltrs.combo; }
         fPs.pnlFltrs.combo = {};
         fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
     }
