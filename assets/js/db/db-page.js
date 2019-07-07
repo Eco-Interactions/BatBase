@@ -277,7 +277,7 @@ function getTopRegionIds() {
 function startLocTableBuildChain(topLocs, textFltr) {
     frmt_data.transformLocDataAndLoadTable(
         data_tree.buildLocTree(topLocs, textFltr), tblState);
-    db_ui.loadSearchLocHtml(tblState);
+    db_ui.loadLocFilterPanelElems(tblState);
 }
 /** ------------ Location Map Methods --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
@@ -407,5 +407,5 @@ function startTxnTableBuildChain(topTaxon, filtering) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
     frmt_data.transformTxnDataAndLoadTable(
         data_tree.buildTxnTree(topTaxon, filtering), tblState);
-    db_ui.loadTaxonComboboxes(tblState);
+    db_ui.loadTxnFilterPanelElems(tblState);
 }

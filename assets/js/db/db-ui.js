@@ -4,12 +4,13 @@
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
- *     pg_init                             db_page
+ *     pg_init                          db_page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
- *     loadSearchLocHtml                
- *     loadTaxonComboboxes              
+ *     loadLocFilterPanelElems          db-page, db-filters
+ *     loadTaxonComboboxes              db-page, db-filters     
+ *     loadTxnFilterPanelElems          db-page, db-filters
  *     resetToggleTreeBttn              db_page, init-table
  *     showTips                         intro
  *     updateUiForTableView             db-page
@@ -35,7 +36,10 @@ export function pg_init() {
     adaptUiToScreenSize();
     authDependentInit();
 }
-/** Moves the buttons from the end of the search options panel to just the header row. */
+/** 
+ * Moves the buttons from the end of the search menu to just the header row.
+ * (Not used currently. Could revive in the future if the search menu grows.)
+ */
 function adaptUiToScreenSize() {
     // if ($(window).width() > 1500) { return; }
     // const elemCntnr = $('#data-opts').detach();  
@@ -200,7 +204,7 @@ function getViewOpts(realms) {
     }
     return optsAry;
 }
-/** Restores stored realm from previous session or sets the default 'Plants'. */
+/** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView() {
     const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
     if (!_u.getSelVal('View')) { 
@@ -209,6 +213,15 @@ function setTaxonView() {
     }
 }
 /* ---------------------------- TAXON FILTER UI ----------------------------- */
+export function loadTxnFilterPanelElems(tblState) {
+    if ($('#focus-filters div').length) { return loadTaxonComboboxes(tblState); }
+    loadTaxonComboboxes(tblState);
+    loadTxnNameSearchElem(tblState);
+}
+function loadTxnNameSearchElem(tblState) {
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Taxon');
+    $('#focus-filters').append(searchTreeElem);
+}
 /**
  * Builds and initializes a search-combobox for each level present in the 
  * the unfiltered realm tree. Each level's box is populated with the names 
@@ -274,20 +287,14 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
+            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row taxonLbl' });
             const span = _u.buildElem('span', { text: level + ': ' });
-            const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
-            setTaxonElemStyles(lbl, sel, level);
+            const sel = newSelEl(opts[level], 'opts-box taxonSel', 'sel' + level, level);            
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
-}
-function setTaxonElemStyles(lbl, sel, level) {
-    const className = level === 'Species' ? 'species' : 'taxon';
-    $(lbl).addClass(className+'Lbl');
-    $(sel).addClass(className+'Sel');
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
     levels.forEach(function(level) {                                            
@@ -329,10 +336,10 @@ function setLocView(view) {
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
-export function loadSearchLocHtml(tblState) {   
+export function loadLocFilterPanelElems(tblState) {   
     if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
-    loadSearchByNameElem();
+    loadLocNameSearchElem();
 }
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState); 
@@ -341,7 +348,7 @@ function updateLocSelOptions(tblState) {
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
-function loadSearchByNameElem() {  
+function loadLocNameSearchElem() {  
     const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
     $('#focus-filters').append(searchTreeElem);
 }

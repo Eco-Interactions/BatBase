@@ -250,15 +250,8 @@ button[name="futureDevBttn"] {
     margin: .3em 0 0 1em;
     width: 273px;
 }
-.speciesLbl {
-    margin: .3em 0 0 1em;
-    width: 304px;
-}
 .taxonSel {  /*selectize combobox*/
     width: 202px;
-}
-.speciesSel { /*selectize combobox*/
-    width: 233px;
 }
 .locLbl {
     width: 282px;

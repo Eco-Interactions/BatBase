@@ -340,7 +340,7 @@ function syncFiltersAndUi() {                                                   
 export function syncViewFiltersAndUi(focus) {
     tblState = tState().get();
     const map = {
-        locs: db_ui.loadSearchLocHtml,
+        locs: db_ui.loadLocFilterPanelElems,
         srcs: applySrcFltrs,
         taxa: updateTaxonComboboxes
     }; 
@@ -409,15 +409,24 @@ export function buildTreeSearchHtml(entity) {
         name: 'sel'+entity, type: 'text', placeholder: entity+' Name (Press Enter to Filter)'  });
     const bttn = _u.buildElem('button', { text: 'Search', 
         name: 'sel'+entity+'_submit', class: 'ag-fresh tbl-bttn' });
-    if (entity == 'Location') { $(input).addClass('locTxtInput');}
-    $(lbl).addClass('txtLbl');
+    addInputClass(entity, input);
+    addLblClass(entity, lbl);
     $(input).onEnter(func);
     $(lbl).append([span, input]);
     return lbl;
 }
+function addInputClass(entity, input) {
+    const map = { 'Location': 'locTxtInput', 'Taxon': 'taxonSel' };
+    if (!map[entity]) { return; }
+    $(input).addClass(map[entity]);
+}
+function addLblClass(entity, lbl) {
+    const className = entity == 'Taxon' ? 'taxonLbl' : 'txtLbl';
+    $(lbl).addClass(className);
+}
 function onTextFilterChange(entity, e) {
     const map = {
-        'Location': filterLocs, 'Publication': updatePubSearch, 'Taxon': updateTaxonSearch };
+        'Location': filterLocs, 'Publication': updatePubSearch, 'Taxon': filterTaxa };
     const txt = getTreeFilterTextVal(entity);  
     const hndlr = map[entity] ? map[entity] : filterTableByText;
     hndlr(txt);
