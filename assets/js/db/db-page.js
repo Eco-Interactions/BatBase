@@ -261,12 +261,12 @@ function showLocInteractionData(view) {                                         
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTable(topLoc) {                                       //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
-    const topLocs = topLoc || getTopRegionIds();
+export function rebuildLocTable(topLoc, textFltr) {                             //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+    const topLocs = topLoc || getTopRegionIds();    
     tblState.openRows = topLocs.length === 1 ? topLocs : [];
     clearPreviousTable();
     db_filters.updateFilterViewMsg();
-    startLocTableBuildChain(topLocs);
+    startLocTableBuildChain(topLocs, textFltr);
 }
 function getTopRegionIds() {
     const ids = [];
@@ -274,9 +274,9 @@ function getTopRegionIds() {
     for (let name in regions) { ids.push(regions[name]); } 
     return ids;
 }
-function startLocTableBuildChain(topLocs) {
+function startLocTableBuildChain(topLocs, textFltr) {
     frmt_data.transformLocDataAndLoadTable(
-        data_tree.buildLocTree(topLocs), tblState);
+        data_tree.buildLocTree(topLocs, textFltr), tblState);
     db_ui.loadSearchLocHtml(tblState);
 }
 /** ------------ Location Map Methods --------------------------------------- */

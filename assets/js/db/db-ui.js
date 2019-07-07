@@ -392,6 +392,7 @@ function buildLocSelectOpts(tblState) {
         if (opts.Region.length === 2) { rmvTopRegion(); }        
         addMissingOpts();
         sortLocOpts();
+        addAllOption();
     }
     /** 
      * If both top & sub regions are in the table, only the sub-region opt is 
@@ -430,6 +431,11 @@ function buildLocSelectOpts(tblState) {
             opts[type] = opts[type].sort(_u.alphaOptionObjs); 
         }
     }
+    function addAllOption() {  
+        Object.keys(tblState.selectedOpts).forEach(type => {
+            opts[type].unshift({value: 'all', text: '- All -'})
+        });
+    }
 } /* End buildLocSelectOpts */
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
@@ -446,7 +452,6 @@ function buildLocSelects(locOptsObj) {
         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
-        // $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
     }
 }

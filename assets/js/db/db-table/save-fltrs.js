@@ -39,6 +39,7 @@ export function initFilterPanel() {
 function initTimeFilterUi() {
     _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
     $('#time-fltr')[0].selectize.disable();
+    db_filters.toggleTimeFilter('disable');
 }
 function initSavedFiltersUi() {
     initSavedFiltersCombobox();
@@ -122,7 +123,7 @@ function updateFilterSel() {
 }
 function getSavedFilterOpts(opts) {
     if (opts.length > 1) { opts = opts.sort(_u.alphaOptionObjs); }
-    opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'}); console.log('filter opts =%O', opts);
+    opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'}); 
     return opts;
 }
 function buildOptGroups(opts) {
@@ -131,7 +132,7 @@ function buildOptGroups(opts) {
     return groups;
 }
 /* ------ CREATE FILTER SET ------- */
-export function newFilterSet(val) {                                             console.log('creating filter set. val = %s', val);
+export function newFilterSet(val) {                                             //console.log('creating filter set. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet, savedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
@@ -147,7 +148,7 @@ export function selFilterSet(val) {
     if (val === 'new') { return; } // New list typed into combobox
     resetFilterUi();
     if (val === 'create') { return newFilterSet(); }                            
-    if (!val) { return;  }                                                      console.log('loading filter set. val = %s', val);
+    if (!val) { return;  }                                                      //console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet, savedIntListLoaded());
     fillFilterData(val);
@@ -205,7 +206,7 @@ function getColumnHeaderFilters(models) {
     }
 }
 /* ====================== DELETE FILTER SET ================================= */
-function deleteFilterSet() {                                              //console.log('deleteInteractionList')
+function deleteFilterSet() {                                                    //console.log('deleteInteractionList')
     $('#delete-filter').hide();
     $('#set-confm-cntnr').show();  
     hideSavedMsg();  
@@ -222,7 +223,7 @@ function resetDeleteButton() {
     $('#delete-filter').show();
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
-function applyFilterSet() {                                                     console.log('Applying Filter Set')
+function applyFilterSet() {                                                     //console.log('Applying Filter Set')
     const filters = app.fltr.details; 
     app.fltr.active = true;
     reloadTableInFilterFocus(filters.view, filters.focus);
@@ -269,7 +270,7 @@ function setTimeUpdatedFilter(time) {                                           
 function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
     app.tblApi = tState().get('api'); 
     for (let name in filters) {  
-        const colName = Object.keys(filters[name])[0];                          console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
     delete app.tblApi;
@@ -306,7 +307,7 @@ function submitFilterSet(data, action, successFunc) {
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
 }
 function onFilterSubmitComplete(action, results) {          
-    const filter = JSON.parse(results.list.entity);                             console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
+    const filter = JSON.parse(results.list.entity);                             //console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
     updateUserNamedList(results.list, action);
     updateFilterSel();
     $('#saved-filters')[0].selectize.addItem(filter.id);
@@ -324,7 +325,7 @@ function dataFiltersSaved(fltr) {
     const tableFilters = Object.keys(fltr.details.table).length > 0;
     return panleFilters || tableFilters;
 }
-function onFilterDeleteComplete(results) {                                      console.log('listDeleteComplete results = %O', results)
+function onFilterDeleteComplete(results) {                                      //console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
     resetFilterUi();
     updateFilterSel();

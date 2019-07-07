@@ -18,18 +18,19 @@ let tblState;
  * Note: If loading a user-named data set (intSet), only the entities within 
  * those interactions are added to the data tree.
  */ 
-export function buildLocTree(topLocs) {                                         //console.log("passed 'top' locIds = %O", topLocs)
+export function buildLocTree(topLocs, textFltr) {                               //console.log("passed 'top' locIds = %O", topLocs)
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
-    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs));
+    return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));
 }
-function buildLocDataTree(topLocs) {
+function buildLocDataTree(topLocs, textFltr) {
     let topLoc;
-    let tree = {};                                                            //console.log("tree = %O", tree);
+    let tree = {};                                                              //console.log("tree = %O", tree);
     topLocs.forEach(function(id){  
         topLoc = _u.getDetachedRcrd(id, focusRcrds);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
+    tree = filterTreeByText(textFltr, tree, 'locs');
     tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
 }
@@ -404,6 +405,24 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         return speciesName === null ? null : _u.ucfirst(curTaxonHeirarchy['Species'].split(' ')[1]);
     }
 } /* End fillHiddenColumns */
+/* =================== LOAD ONLY ROWS THAT PASS TEXT FILTER ================= */
+function filterTreeByText(text, tree, focus) {
+    if (!text) { return tree; }
+    const fltrd = {};
+
+    for (let branch in tree) {
+        const include = getRowsWithText(tree[branch], text);
+        if (include) { fltrd[branch] = tree[branch]; }
+    }
+
+    return fltrd;
+}
+function getRowsWithText(branch, text) {                                        //console.log('getRowsWithText branch = %O', branch);
+    let hasText = branch.displayName.toLowerCase().includes(text.toLowerCase());
+    branch.children = branch.children.filter(c => getRowsWithText(c, text));
+    branch.interactions = hasText ? branch.interactions : [];
+    return hasText || branch.children.length > 0;
+}
 /* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
 function filterTreeToInteractionSet(dataTree, focus) {                          //console.log('filter[%s]TreeToInteractionSet. tree = %O  set = %O', focus, dataTree, tblState.intSet);
     const intSet = tblState.intSet;

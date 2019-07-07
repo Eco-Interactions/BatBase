@@ -13,7 +13,7 @@ import initTbl from './init-table.js'
  * Transforms the tree's location data into the table format and sends the data 
  * to the init-table module.
  */
-export function transformLocDataAndLoadTable(locTree, tblState) {
+export function transformLocDataAndLoadTable(locTree, tblState) {  
     initTbl("Location Tree", transformLocData(locTree, tblState), tblState);
 }
 function transformLocData(tree, tblState) {

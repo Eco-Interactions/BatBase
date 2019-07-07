@@ -373,9 +373,9 @@ function hideUnusedColFilterMenus() {
  * tree node is updated. Interactions filtered out will not be included in the totals.
  * Updates the total interaction count displayed in the tool bar. 
  */
-function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblState.api.getModel().rowsToDisplay);
+function onModelUpdated() {                                                     
     if (!tblState.api) { return; }
-    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);
+    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);  //console.log("-----new total ints = ", ttlInts);
     updateTotalCountDisplay(ttlInts);
 }
 /**
@@ -416,7 +416,4 @@ function addSubNodeInteractions(child) {
 function updateTotalCountDisplay(cnt) {  
     $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
 }
-
-
-
 

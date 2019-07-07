@@ -25,11 +25,15 @@ import { savedIntListLoaded } from './save-ints.js';
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
- *     fltrdRows - rowdata after filters
+ *     rows - rowData at various stages of filtering
+ *         allRows: all rowdata for the selected focus/view, no filters
+ *         comboRows: after combo filters
+ *         textRows: after text filter
+ *         timeRows: after time filter
  *     pnlFltrs - Object stores panel filter values 
- *         combo - obj with combo-label (k): obj with text and value (k) with their respective values
- *         name - name filter string
- *         time - Obj with the datetime and filter type, time published or time added/updated 
+ *         combo: obj with combo-label (k): obj with text and value (k) with their respective values
+ *         name: name filter string
+ *         time: Obj with the datetime and filter type, time published or time added/updated 
  */
 let fPs = {
     pnlFltrs: {}
@@ -41,7 +45,7 @@ let fPs = {
 let tblState = {};
 
 export function resetTableStateParams() {
-    const props = ['fltrdRows'];
+    const props = ['timeRows'];
     props.forEach(function(prop){ delete fPs[prop]; });
     fPs.pnlFltrs = {};
 }
@@ -239,7 +243,7 @@ function updateRelatedUi(filtering) {
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  */
 function resetTimeFilter() {                                                    //console.log('tState = %O', tState);
-    fPs.fltrdRows = null;
+    fPs.timeRows = null;
     if (tblState.api && tblState.rowData) { 
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
@@ -308,7 +312,7 @@ function updateMemoryAndReturnTime(dateStr) {
 function filterTableByTime(time, type) {
     const rows = getRowsAfterTime(time, type);                                  //console.log("rows = %O", rows);
     tblState.api.setRowData(rows);
-    fPs.fltrdRows = rows;
+    fPs.timeRows = rows;
 }
 function getRowsAfterTime(filterTime, type) {
     const rowData = _u.snapshot(tblState.rowData);
@@ -361,7 +365,7 @@ function applySrcFltrs(tblState) {
 function reapplyTreeTextFltr() {                                            
     const entity = getTableEntityName();                                        //console.log("reapplying [%s] text filter", entity);
     if (getTreeFilterTextVal(entity) === "") { return; }
-    searchTreeText(entity);
+    filterTableByText(entity);
 }
 function getTableEntityName() {
     const names = { 'taxa': 'Taxon', 'locs': 'Location', 'auths': 'Author',
@@ -408,7 +412,7 @@ function seperateTaxonTreeByLvl(rowData) {                                      
 /*================== Search Panel Filter Functions ===================================================================*/
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {
-    const func = getTreeSearchHandler(entity);
+    const func = onTextFilterChange.bind(null, entity);  
     const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
     const span = _u.buildElem('span', { text: 'Name:' });
     const input = _u.buildElem('input', { 
@@ -421,33 +425,30 @@ export function buildTreeSearchHtml(entity) {
     $(lbl).append([span, input]);
     return lbl;
 }
-function getTreeSearchHandler(entity) { 
-    return entity === 'Publication' ? 
-        updatePubSearch : searchTreeText.bind(null, entity);
+function onTextFilterChange(entity, e) {
+    const map = {
+        'Location': filterLocs, 'Publication': updatePubSearch, 'Taxon': updateTaxonSearch };
+    const txt = getTreeFilterTextVal(entity);  
+    const hndlr = map[entity] ? map[entity] : filterTableByText;
+    hndlr(txt);
 }
-/**
- * When the search-tree text-input is submitted, by either pressing 'enter' or
- * by clicking on the 'search' button, the tree is rebuilt with only rows that  
- * contain the case insensitive substring.
- */
-function searchTreeText(entity) {                                               //console.log("----- Search Tree Text");
-    tblState = tState().get(null, ['api', 'curFocus', 'rowData']);
-    const text = getTreeFilterTextVal(entity);
-    const allRows = getAllCurRows(); 
-    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);  
+function filterTableByText(text) {  
+    tblState = tState().get(null, ['api', 'curFocus', 'rowData']);  
+    const allRows = getAllCurRows();                     
+    const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
     tblState.api.setRowData(newRows); 
-    setFocusFilterVal(text);
+    updateNameFilterMemory(text);
     updateFilterStatusMsg();
     db_ui.resetToggleTreeBttn(false);
-} 
-function setFocusFilterVal(text) { 
+}
+function updateNameFilterMemory(text) { 
     if (text === "") { return delete fPs.pnlFltrs.name; }
     fPs.pnlFltrs.name = '"'+text+'"'; 
 }
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
-function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText. rows = %O', rows)
+function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
     return rows.filter(row => {  
         const isRow = row.name.toLowerCase().indexOf(text) !== -1; 
         return isRow || (hasSubLocs(row) ? childRowsPassFilter(row, text) : false); 
@@ -513,20 +514,51 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
     }
 } /* End getRelatedTaxaToSelect */
 /*------------------ Location Filter Updates -----------------------------*/
-export function updateLocSearch(val) { 
+function filterLocs(text) {  
+    const selected = tState().get('selectedOpts');
+    const selType = getSelectedLocVal(selected);                         
+    if (selType) { return updateLocSearch(selected[selType], selType); }
+    filterTableByText(text);
+}
+function getSelectedLocVal(selected) {
+    const sels = Object.keys(selected);
+    return !sels.length ? null : sels.length == 1 ? 'Region' : 'Country';
+}
+export function updateLocSearch(val, selType) {                                 //console.log('updateLocSearch. val = [%s] selType = [%s]', val, selType);
     if (!val) { return; }
-    getComboboxValuesAndRebuildLocTree(val, getLocType(this.$input[0].id));
+    const locType = selType ? selType : getLocType(val, this.$input[0].id);   
+    const root = getNewLocRoot(val, locType);    
+    const txt = getTreeFilterTextVal('Location');  
+    updateLocFilterMemory(root, locType);
+    updateNameFilterMemory(txt);
+    rebuildLocTable(root, txt);
+    db_ui.resetToggleTreeBttn(false);
     if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
 } 
-function getLocType(selId) {
+function getLocType(val, selId) {                                        
     const selTypes = { selCountry: 'Country', selRegion: 'Region' };
-    return selTypes[selId];
+    const type = selTypes[selId];
+    return val !== 'all' ? type : (type == 'Country' ? 'Region' : false);
 }
-function getComboboxValuesAndRebuildLocTree(val, locType) {
-    const selVal = parseInt(val);  
+function getNewLocRoot(val, locType) {
+    return val == 'all' ? getParentId(locType) : [parseInt(val)];
+}
+function getParentId(locType) {                                                   
+    return !locType ? getTopRegions() : [tState().get('selectedOpts')['Region']];
+}
+function getTopRegions() {
+    return Object.values(tState().get('data')['topRegionNames']);      
+}
+function updateLocFilterMemory(loc, locType) {
+    if (loc.length > 1) { return resetLocComboMemory(); }
+    const selVal = parseInt(loc[0]);  
     tState().set({'selectedOpts': getSelectedVals(selVal, locType)});
-    updateLocFilter(locType, selVal);
-    rebuildLocTable([selVal]);                                                  //console.log('selected [%s] = %O', locType, _u.snapshot(tState().get('selectedOpts'));
+    fPs.pnlFltrs.combo = {};
+    fPs.pnlFltrs.combo[locType] = { text: locType, value: selVal };
+}
+function resetLocComboMemory() {
+    tState().set({'selectedOpts': {}});
+    delete fPs.pnlFltrs.combo; 
 }
 function getSelectedVals(val, type) {                                           //console.log("getSelectedVals. val = %s, selType = ", val, type)
     const selected = {};
@@ -540,11 +572,6 @@ function getSelectedVals(val, type) {                                           
         selected['Region'] = loc.region.id;
     }
 } /* End getSelectedVals */
-function updateLocFilter(locType, locId) {
-    fPs.pnlFltrs.combo = {};
-    fPs.pnlFltrs.combo[locType] = { text: locType, value: locId };
-    // updateFilterStatusMsg();
-}
 /*------------------ Source Filter Updates -------------------------------*/
 /**
  * When the publication type dropdown is changed or the table is filtered by 
@@ -601,7 +628,7 @@ export function updatePubSearch() {                                             
     }
 } /* End updatePubSearch */
 /* ========================== FILTER UTILITY METHODS ================================================================ */
-/** If table is filtered by an external filter, the rows are stored in fltrdRows. */
+/** If table is filtered by an external filter, the rows are stored in timeRows. */
 function getAllCurRows() { 
-    return fPs.fltrdRows || tblState.rowData;
+    return fPs.timeRows || tblState.rowData;
 } 
