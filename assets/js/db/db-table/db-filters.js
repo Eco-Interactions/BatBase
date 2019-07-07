@@ -454,55 +454,6 @@ function childRowsPassFilter(row, text) {
     row.children = rows;
     return rows.length > 0;
 }
-/*------------------ Taxon Filter Updates ---------------------------------*/
-/**
- * When a taxon is selected from one of the taxon-level comboboxes, the table 
- * is updated with the taxon as the top of the new tree. The remaining level 
- * comboboxes are populated with realted taxa, with ancestors selected.
- */
-export function updateTaxonSearch(val) {                                        
-    if (!val) { return; }                                                       //console.log("updateTaxonSearch val = ", val); 
-    const taxonRcrds = tState().get('rcrdsById');
-    const rcrd = getRootTaxonRcrd(val, taxonRcrds, this.currentResults.items);
-    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
-    addToFilterMemory();
-    rebuildTxnTable(rcrd, 'filtering');
-
-    function addToFilterMemory() {
-        const curLevel = rcrd.level.displayName;
-        const taxonName = rcrd.displayName;
-        if (!rcrd.parent || rcrd.parent == 1) { return delete fPs.pnlFltrs.combo; }
-        fPs.pnlFltrs.combo = {};
-        fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
-    }
-} /* End updateTaxonSearch */
-/**
- * When a taxon is selected from the filter comboboxes, the record is returned.
- * When 'all' is selected, the selected parent is returned, or the realm record.
- */
-function getRootTaxonRcrd(val, rcrds, opts) {
-    const id = val == 'all' ? getParentId(opts, rcrds) : val;
-    return _u.getDetachedRcrd(id, rcrds);  
-}
-function getParentId(opts, rcrds) {  
-    const prev = opts.filter(o => o.id !== 'all')[0];  
-    const prevRcrd = _u.getDetachedRcrd(prev.id, rcrds);  
-    return prevRcrd.parent;
-}
-/** The selected taxon's ancestors will be selected in their levels combobox. */
-function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
-    const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
-    const selected = {};                                                        //console.log("selected = %O", selected)
-    selectAncestorTaxa(selTaxonObj);
-    return selected;
-    /** Adds parent taxa to selected object, until the realm parent. */
-    function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
-        if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
-            selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
-            selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
-        }
-    }
-} /* End getRelatedTaxaToSelect */
 /*------------------ Location Filter Updates -----------------------------*/
 function filterLocs(text) {  
     const selected = tState().get('selectedOpts');
@@ -617,6 +568,55 @@ export function updatePubSearch() {                                             
         }
     }
 } /* End updatePubSearch */
+/*------------------ Taxon Filter Updates ---------------------------------*/
+/**
+ * When a taxon is selected from one of the taxon-level comboboxes, the table 
+ * is updated with the taxon as the top of the new tree. The remaining level 
+ * comboboxes are populated with realted taxa, with ancestors selected.
+ */
+export function updateTaxonSearch(val) {                                        
+    if (!val) { return; }                                                       //console.log("updateTaxonSearch val = ", val); 
+    const taxonRcrds = tState().get('rcrdsById');
+    const rcrd = getRootTaxonRcrd(val, taxonRcrds, this.currentResults.items);
+    tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
+    addToFilterMemory();
+    rebuildTxnTable(rcrd, 'filtering');
+
+    function addToFilterMemory() {
+        const curLevel = rcrd.level.displayName;
+        const taxonName = rcrd.displayName;
+        if (!rcrd.parent || rcrd.parent == 1) { return delete fPs.pnlFltrs.combo; }
+        fPs.pnlFltrs.combo = {};
+        fPs.pnlFltrs.combo[curLevel] = { text: taxonName, value: val };
+    }
+} /* End updateTaxonSearch */
+/**
+ * When a taxon is selected from the filter comboboxes, the record is returned.
+ * When 'all' is selected, the selected parent is returned, or the realm record.
+ */
+function getRootTaxonRcrd(val, rcrds, opts) {
+    const id = val == 'all' ? getParentId(opts, rcrds) : val;
+    return _u.getDetachedRcrd(id, rcrds);  
+}
+function getParentId(opts, rcrds) {  
+    const prev = opts.filter(o => o.id !== 'all')[0];  
+    const prevRcrd = _u.getDetachedRcrd(prev.id, rcrds);  
+    return prevRcrd.parent;
+}
+/** The selected taxon's ancestors will be selected in their levels combobox. */
+function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      //console.log("getRelatedTaxaToSelect called for %O", selTaxonObj);
+    const topTaxaIds = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda 
+    const selected = {};                                                        //console.log("selected = %O", selected)
+    selectAncestorTaxa(selTaxonObj);
+    return selected;
+    /** Adds parent taxa to selected object, until the realm parent. */
+    function selectAncestorTaxa(taxon) {                                        //console.log("selectedTaxonid = %s, obj = %O", taxon.id, taxon)
+        if ( topTaxaIds.indexOf(taxon.id) === -1 ) {
+            selected[taxon.level.displayName] = taxon.id;                       //console.log("setting lvl = ", taxon.level)
+            selectAncestorTaxa(_u.getDetachedRcrd(taxon.parent, taxonRcrds))
+        }
+    }
+} /* End getRelatedTaxaToSelect */
 /* ========================== FILTER UTILITY METHODS ================================================================ */
 /** If table is filtered by an external filter, the rows are stored in timeRows. */
 function getAllCurRows() { 
