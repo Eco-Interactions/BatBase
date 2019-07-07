@@ -127,7 +127,7 @@ function addName(name) {
     return name;
 }
 function getTimeFltrString(time) {
-    if (!time.date) { return null; }
+    if (!fPs.timeRows) { return null; }
     const type = time.type === 'cited' ? 'Published' : 'Updated';
     return 'Time '+ type;
 }
@@ -142,7 +142,7 @@ function getTableFilters(filters) {
 }
 function setFilterStatus(filters) {  
     if (filters.length > 0 || savedIntListLoaded()) { setStatus(getStatus(filters)); 
-    } else { resetTblFilters() }
+    } else { resetFilterUi() }
 }
 function getStatus(filters) {                                                   
     const list = savedIntListLoaded() ? '(LIST)' : ''; 
@@ -152,18 +152,6 @@ function getStatus(filters) {
     return loaded !== '' & fltrs !== '' ? `${loaded} ${fltrs}.` :
         loaded ? loaded : fltrs+'.';
 }
-// Removed because setting the "external filter status" doesn't seem to ever be used anymore.
-// function getStatus(filters) {
-//     if ($('#xtrnl-filter-status').text() === 'Filtering on: ') {
-//         return filters.join(', ') + '.';
-//     } else {
-//         const tempStatusTxt = $('#xtrnl-filter-status').text();
-//         if (tempStatusTxt.charAt(tempStatusTxt.length-2) !== ',') {  //So as not to add a second comma.
-//             setExternalFilterStatus(tempStatusTxt + ', ');
-//         }
-//         return filters.join(', ') + '.'; 
-//     }
-// }
 /** Returns an obj with the ag-grid filter models. */
 function getTableFilterModels() {  
     if (!tblState.api) { return {}; }
@@ -188,18 +176,22 @@ function getTableFilterModels() {
 function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
     $('#filter-status').text(status);
 }
-export function resetTblFilters() {  
+export function resetTblFilters() {
+    resetFilterUi();
+    fPs.pnlFltrs = {};
+}
+function resetFilterUi() {
     $('#filter-status').text('No Active Filters.');
     $('#focus-filters input').val('');
     if ($('#shw-chngd').prop('checked')) { 
         $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
     }
-    fPs.pnlFltrs = {};
 }
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
     fPs.pnlFltrs.time.type = val;
+    if (ifFilteringOnTime()) { filterTableByTime(); }
 }
 /**
  * When the interaction form is exited, the passed focus is selected and the 
@@ -216,18 +208,35 @@ function showUpdatesAfterTableLoad() {
 }
 /** The time-updated filter is enabled when the filter option is checked. */
 export function toggleTimeFilter(state, time) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
+    fPs.cal = fPs.cal || initCal(); 
     const filtering = ifFilteringOnTime(state);
-    updateMemory(time);
+    updateTimeFilterMemory(time);
     updateRelatedUi(filtering);
-    if (filtering) { showCal(time);
-    } else { resetTimeFilter(); }
-}
-function updateMemory(time) {
-    tblState = tState().get();
-    fPs.pnlFltrs.time = {date: time, type: _u.getSelVal('Time Filter')};
+    if (filtering) { filterTableByTime(time);
+    } else { resetTimeFilter(); } 
+} 
+/** 
+ * Instantiates the flatpickr calendar and returns the flatpickr instance.
+ * Add time updated filter
+ */
+function initCal() {
+    const confirmDatePlugin = require('../../libs/confirmDate.js'); 
+    const calOpts = {
+        altInput: true, maxDate: "today", enableTime: true,   
+        plugins: [confirmDatePlugin({showAlways: true})],
+        onReady: function() { this.amPM.textContent = "AM"; },
+        onClose: filterByTime
+    }; 
+    return $('#time-cal').flatpickr(calOpts);
 }
 function ifFilteringOnTime(state) {
     return state === 'disable' ? false : state === true ? true : $('#shw-chngd')[0].checked;
+}
+function updateTimeFilterMemory(time) {
+    if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
+    tblState = tState().get();
+    fPs.pnlFltrs.time.type =  _u.getSelVal('Time Filter');
+    if (time) { fPs.pnlFltrs.time.date = time; } 
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .6;
@@ -249,12 +258,7 @@ function resetTimeFilter() {                                                    
         syncFiltersAndUi();
     }
 }
-/** 
- * Instantiates the flatpickr calendar and opens the calendar. If a custom time
- * was previously selected and stored, it is reapplied.
- */
-function showCal(time) {                                                        //console.log('showFlatpickrCal. time? = [%s] fPs = %O', time, fPs);
-    fPs.cal = fPs.cal || initCal(); 
+function filterTableByTime(time) {                                              //console.log('filterTableByTime. time? = [%s] fPs = %O', time, fPs.pnlFltrs);
     if (time == 'today') { 
         filterToChangesToday(); 
     } else if (time) { 
@@ -265,21 +269,7 @@ function showCal(time) {                                                        
         fPs.cal.open();
         fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
     }
-}    
-/** 
- * Instantiates the flatpickr calendar and returns the flatpickr instance.
- * Add time updated filter
- */
-function initCal() {
-    const confirmDatePlugin = require('../../libs/confirmDate.js'); 
-    const calOpts = {
-        altInput: true, maxDate: "today", enableTime: true,   
-        plugins: [confirmDatePlugin({showAlways: true})],
-        onReady: function() { this.amPM.textContent = "AM"; },
-        onClose: filterByTime
-    }; 
-    return $('#time-cal').flatpickr(calOpts);
-}
+}   
 function reapplyPreviousTimeFilter(timeObj, skipSync) { 
     fPs.cal.setDate(timeObj.date);  
     filterByTime(null, timeObj.date, null, skipSync);
@@ -300,16 +290,16 @@ function filterToSpecifiedTime(time) {
  */
 function filterByTime(dates, dateStr, instance, skipSync) {
     const time = updateMemoryAndReturnTime(dateStr);
-    filterTableByTime(time, fPs.pnlFltrs.time.type);
+    filterInteractionsByTime(time, fPs.pnlFltrs.time.type);
     updateUiAfterTimeFilterChange(dateStr, skipSync);
 }
 function updateMemoryAndReturnTime(dateStr) {
     tblState = tState().get();
     const fltrSince = dateStr || fPs.pnlFltrs.time.date;
-    fPs.pnlFltrs.time.date =  fltrSince;
+    fPs.pnlFltrs.time.date = fltrSince;
     return new Date(fltrSince).getTime(); 
 }
-function filterTableByTime(time, type) {
+function filterInteractionsByTime(time, type) {
     const rows = getRowsAfterTime(time, type);                                  //console.log("rows = %O", rows);
     tblState.api.setRowData(rows);
     fPs.timeRows = rows;
