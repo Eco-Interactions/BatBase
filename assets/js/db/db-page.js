@@ -393,9 +393,9 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(topTaxon, filtering) {                          //console.log("topTaxon = %O", topTaxon)
+export function rebuildTxnTable(topTaxon, filtering, textFltr) {                //console.log("topTaxon = %O", topTaxon)
     clearPreviousTable();
-    startTxnTableBuildChain(topTaxon, filtering)
+    startTxnTableBuildChain(topTaxon, filtering, textFltr)
 }
 /**
  * Builds a family tree of taxon data with passed taxon as the top of the tree, 
@@ -403,9 +403,9 @@ export function rebuildTxnTable(topTaxon, filtering) {                          
  * The top taxon's id is added to the global focus storage obj's 'openRows' 
  * and will be expanded on table load. 
  */
-function startTxnTableBuildChain(topTaxon, filtering) {
+function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
     frmt_data.transformTxnDataAndLoadTable(
-        data_tree.buildTxnTree(topTaxon, filtering), tblState);
+        data_tree.buildTxnTree(topTaxon, filtering, textFltr), tblState);
     db_ui.loadTxnFilterPanelElems(tblState);
 }

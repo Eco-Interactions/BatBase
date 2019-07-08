@@ -55,7 +55,7 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
         let childRows = [];
         const locType = locRcrd.locationType.displayName; 
         if (locType === "Region" || locType === "Country") {
-            getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl, locType);
+            getUnspecifiedLocInts(locRcrd, locRcrd.interactions, pTreeLvl, locType);
             locRcrd.children.forEach(getChildLocData);
         } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
         return childRows;
@@ -63,7 +63,8 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
          * Groups interactions attributed directly to a location with child-locations
          * and adds them as it's first child row. 
          */
-        function getUnspecifiedLocInts(intsAry, treeLvl, locType) {   
+        function getUnspecifiedLocInts(rcrd, intsAry, treeLvl, locType) { 
+            if (rcrd.failedFltr) {  return; }
             const locName = locRcrd.displayName === "Unspecified" ? 
                 "Location" : locRcrd.displayName;
             if (intsAry.length > 0) { 
@@ -231,7 +232,7 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
         var realmMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
         var name = curTaxon.id in realmMap ?  
             realmMap[curTaxon.id] : curTaxon.displayName;
-        getUnspecifiedTaxonInts(name, curTreeLvl);
+        getUnspecifiedTaxonInts(curTaxon, name, curTreeLvl);
     }
     /**
      * Groups interactions attributed directly to a taxon with child-taxa
@@ -239,7 +240,8 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
      * Note: Realm interactions are built closed, otherwise they would be expanded
      * by default
      */
-    function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
+    function getUnspecifiedTaxonInts(rcrd, taxonName, treeLvl) { 
+        if (rcrd.failedFltr) {  return; }
         const realmIds = ['2', '3', '4'];  
         if (getIntCount(curTaxon) !== null) { 
             childRows.push({

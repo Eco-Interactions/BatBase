@@ -30,7 +30,7 @@ function buildLocDataTree(topLocs, textFltr) {
         topLoc = _u.getDetachedRcrd(id, focusRcrds);  
         tree[topLoc.displayName] = getLocChildren(topLoc);
     });  
-    tree = filterTreeByText(textFltr, tree, 'locs');
+    tree = filterTreeByText(textFltr, tree);
     tree = filterTreeToInteractionSet(tree, 'locs');
     return sortDataTree(tree);
 }
@@ -180,12 +180,12 @@ function buildAuthTree(authSrcRcrds, pubRcrds) {                                
  * realm taxon through all children. The taxon levels present in the tree are 
  * stored in tblState.
  */
-export function buildTxnTree(topTaxon, filtering) {                             //console.log("buildTaxonTree called for topTaxon = %O. filtering?", topTaxon, filtering);
+export function buildTxnTree(topTaxon, filtering, textFltr) {                   //console.log("buildTaxonTree called for topTaxon = %O. filtering? = %s. textFltr = ", topTaxon, filtering, textFltr);
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
 
     let tree = buildTxnDataTree(topTaxon);
-
+    tree = filterTreeByText(textFltr, tree);
     storeTaxonLevelData(topTaxon, filtering);
     return fillTreeWithInteractions('taxa', tree);  
 }
@@ -406,7 +406,7 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
     }
 } /* End fillHiddenColumns */
 /* =================== LOAD ONLY ROWS THAT PASS TEXT FILTER ================= */
-function filterTreeByText(text, tree, focus) {
+function filterTreeByText(text, tree) {
     if (!text) { return tree; }
     const fltrd = {};
 
@@ -417,10 +417,11 @@ function filterTreeByText(text, tree, focus) {
 
     return fltrd;
 }
-function getRowsWithText(branch, text) {                                        //console.log('getRowsWithText branch = %O', branch);
-    let hasText = branch.displayName.toLowerCase().includes(text.toLowerCase());
+function getRowsWithText(branch, text) {                                        
+    let hasText = branch.displayName.toLowerCase().includes(text.toLowerCase());//console.log('getRowsWithText hasText [%s] branch = %O', hasText, branch); 
     branch.children = branch.children.filter(c => getRowsWithText(c, text));
     branch.interactions = hasText ? branch.interactions : [];
+    branch.failedFltr = !hasText;
     return hasText || branch.children.length > 0;
 }
 /* =================== LOAD ONLY ENTITIES IN INTERACTION SET ================ */
@@ -482,9 +483,6 @@ function filterEntityAndSubs(ent, focus, set) {                                 
         return total + cnt;
     }
 } /* End filterEntityAndSubs */
-
-
-
 /* ================================ UTILITY ========================================================================= */
 /** Sorts the all levels of the data tree alphabetically. */
 function sortDataTree(tree) {
