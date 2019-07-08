@@ -400,6 +400,7 @@ function seperateTaxonTreeByLvl(rowData) {                                      
     }
 } /* End seperateTaxonTreeByLvl */
 /*================== Search Panel Filter Functions ===================================================================*/
+/*------------------------- Tree Name Filter -------------------------------- */
 /** Returns a text input with submit button that will filter tree by text string. */
 export function buildTreeSearchHtml(entity) {
     const func = onTextFilterChange.bind(null, entity);  
@@ -449,19 +450,24 @@ function getTreeFilterTextVal(entity) {                                         
 }
 function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
     return rows.filter(row => {  
-        const isRow = row.name.toLowerCase().indexOf(text) !== -1; 
-        return isRow || (hasSubLocs(row) ? childRowsPassFilter(row, text) : false); 
+        const isRow = ifRowContainsText(row, text); 
+        if (rowChildrenAreTreeEntities(row)) {
+            row.children = getTreeRowsWithText(row.children, text);
+        }  
+        return isRow || (nonSrcRowHasChildren(row) ? 
+            !row.children[0].hasOwnProperty('interactionType') : false );
     });
 }
-function hasSubLocs(row) {  
-    if (tblState.curFocus !== 'locs') { return; }
-    return row.children && row.children.length > 0 ? 
-        !row.children[0].hasOwnProperty('interactionType') : false;
+function ifRowContainsText(row, text) {
+    return row.name.toLowerCase().includes(text);
 }
-function childRowsPassFilter(row, text) {
-    const rows = getTreeRowsWithText(row.children, text); 
-    row.children = rows;
-    return rows.length > 0;
+function rowChildrenAreTreeEntities(row) {
+    if (tblState.curFocus === 'srcs') { return false; }
+    return row.children && !row.children[0].hasOwnProperty('interactionType');
+}
+function nonSrcRowHasChildren(row) { 
+    if (tblState.curFocus === 'srcs') { return false; }
+    return row.children && row.children.length > 0;
 }
 /*------------------ Location Filter Updates -----------------------------*/
 function filterLocs(text) {  
@@ -529,7 +535,7 @@ function getSelectedVals(val, type) {                                           
  * NOTE: All Source realms include text search.
  */
 export function updatePubSearch() {                                             //console.log('updatePubSearch.')
-    tblState = tState().get(null, ['api', 'rowData']);  
+    tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
     const newRows = getFilteredPubRows();
