@@ -225,7 +225,7 @@ function resetDeleteButton() {
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {                                                     //console.log('Applying Filter Set')
     const filters = app.fltr.details; 
-    app.fltr.active = true;
+    app.fltr.active = true; 
     reloadTableInFilterFocus(filters.view, filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
@@ -233,21 +233,21 @@ function applyFilterSet() {                                                     
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
 /* --- reloadTableInFilterFocus --- */
-function reloadTableInFilterFocus(view, focus) {   
+function reloadTableInFilterFocus(view, focus) {                                //console.log('reloadTableInFilterFocus view [%s] focus [%s]', view, focus)
     updateTableView(view);    
-    reloadTable(focus, app.fltr.id);
+    reloadTable(focus, view, app.fltr.id);
 }
-function reloadTable(focus, fltrId) { 
-    if (focus == tState().get('curFocus')) { 
-        resetDataTable();
-        _u.setSelVal('Saved Filter Set', fltrId); 
-    } else { $('#search-focus')[0].selectize.addItem(focus); }                        
-}
-/* End reloadTableInFilterFocus */
 function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
     _u.addToStorage('curView', JSON.stringify(view)); 
 }
+function reloadTable(focus, view, fltrId) { 
+    if (focus == tState().get('curFocus')) { 
+        resetDataTable(view);
+        _u.setSelVal('Saved Filter Set', fltrId); 
+    } else { $('#search-focus')[0].selectize.addItem(focus); }                        
+}
+/* End reloadTableInFilterFocus */
 function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs)
     const map = {
         combo: setComboboxFilter, name: setNameSearchFilter,
@@ -265,7 +265,7 @@ function setNameSearchFilter(text) {                                            
 }
 function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     _u.setSelVal('Time Filter', time.type);
-    db_filters.toggleTimeFilter(true, time.date);
+    if (time.date) { db_filters.toggleTimeFilter(true, time.date); }
 }
 function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
     app.tblApi = tState().get('api'); 
@@ -341,7 +341,7 @@ function hideSavedMsg() {
 /* ------------------------------- UI ----------------------------------------*/
 /* ---- Reset & Enable/Disable UI --- */
 function resetFilterUi() {
-    app.fltr = null;
+    if (app.filtr && !app.fltr.active) { app.fltr = null; }
     hideSavedMsg();
     clearFilterDetailFields();
     disableFilterSetInputs();

@@ -10,7 +10,7 @@
  *     selTimeFilter                    save-fltrs
  *     showTodaysUpdates                db_forms
  *     syncViewFiltersAndUi             save-ints
- *     toggleTimeFilter          db_page
+ *     toggleTimeFilter                 db_page
  *     updateFilterStatusMsg            db-page, init-tbl, save-fltrs
  *     updateLocSearch                  util
  *     updatePubSearch                  util
