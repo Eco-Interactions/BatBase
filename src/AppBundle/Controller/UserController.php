@@ -3,7 +3,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
+use AppBundle\Entity\UserNamed;
 use AppBundle\Form\UserType;
+use AppBundle\Service\CreateExampleData;
+
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -53,7 +56,7 @@ class UserController extends Controller
      * @Route("/create", name="admin_user_create")
      * @Method({"POST"})
      */
-    public function createAction(Request $request)
+    public function createAction(Request $request, CreateExampleData $createData)
     {
         $entity = new User();
         $form = $this->createCreateForm($entity);
@@ -61,17 +64,22 @@ class UserController extends Controller
 
         if ($form->isSubmitted()) {
             $em = $this->getDoctrine()->getManager();
+            $createData->filterSets();
+            $createData->interactionLists();
             $em->persist($entity);
-            $em->flush();
+            $em->flush(); 
 
             return $this->redirect($this->generateUrl('admin_user_show', array('id' => $entity->getId())));
         }
+
 
         return $this->render('User/new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
     }
+
+    
 
     /**
      * Creates a form to create a User entity.
