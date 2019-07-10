@@ -140,9 +140,9 @@ function editDataList() {
 }
 function fillListData(id) {
     const lists = _u.getDataFromStorage('dataLists');                           
-    const list = addActiveListToMemory(lists[id]);                              //console.log('activeList = %O', list);                                                 
+    const list = addActiveListToMemory(lists[id]);                              console.log('activeList = %O', list);                                                 
     fillListDataFields(
-        list.displayName, list.description, list.details.length);
+        list.displayName, list.description, list.details.length);  
 }
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {

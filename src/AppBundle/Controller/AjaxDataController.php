@@ -10,7 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
- * Ajax Data controller.
+ * Ajax Data controller:
+ *     getDataLastUpdatedState
+ *     getUpdatedEntityData
+ *     getUserLists
+ *     serializeGeoJsonData
+ *     serializeInteractionData
+ *     serializeLocationData
+ *     serializeSourceData
+ *     serializeTaxonData
  *
  * @Route("/ajax")
  */
@@ -97,7 +105,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/taxon", name="app_serialize_taxon")
      */
-    public function serializeTaxonDataAction(Request $request) 
+    public function serializeTaxonData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -121,7 +129,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/location", name="app_serialize_location")
      */
-    public function serializeLocationDataAction(Request $request) 
+    public function serializeLocationData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -146,7 +154,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/geo-json", name="app_serialize_geojson")
      */
-    public function serializeGeoJsonDataAction(Request $request) 
+    public function serializeGeoJsonData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -167,7 +175,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/source", name="app_serialize_source")
      */
-    public function serializeSourceDataAction(Request $request) 
+    public function serializeSourceData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -198,7 +206,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/interaction", name="app_serialize_interactions")
      */
-    public function serializeInteractionDataAction(Request $request) 
+    public function serializeInteractionData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);

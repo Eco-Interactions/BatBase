@@ -1,8 +1,9 @@
 /**
  * Handles adding, updating, and removing data from local storage.
- * Exports:
+ * Exports:                 Imported by:
  *     addNewDataToStorage
  *     initStoredData
+ *     replaceUserData              util
  *     resetStoredData
  *     updateEditedData
  *     updateUserNamedList
@@ -127,31 +128,6 @@ function loadDataTable() {                                                      
     storeData('pgDataUpdatedAt', getCurrentDate()); 
     initDataTable(); 
 }
-/*---------------- Update User Named Lists -----------------------------------*/
-export function updateUserNamedList(data, action) {                             //console.log('updating [%s] stored list data. %O', action, data);
-    const list = action == 'delete' ? data : JSON.parse(data.entity);  
-    const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
-    const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
-    const rcrds = _u.getDataFromStorage(rcrdKey);
-    const names = _u.getDataFromStorage(nameKey);
-
-    if (action == 'delete') { removeListData(); 
-    } else { updateListData(); }
-
-    storeData(rcrdKey, rcrds);
-    storeData(nameKey, names);
-
-    function removeListData() {  
-        delete rcrds[list.id];  
-        delete names[list.displayName];  
-    }
-    function updateListData() {
-        rcrds[list.id] = list;
-        names[list.displayName] = list.type !== 'filter' ? list.id :
-            {value: list.id, group: getFocusAndViewOptionGroupString(list)};
-        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
-    }
-} /* End updateUserNamedList */
 /*------------------ Update Submitted Form Data --------------------------*/
 export function updateEditedData(data, cb) {
     updateStoredData(data, cb);
@@ -465,7 +441,38 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     delete nameObj[taxonName];
     storeData(realm+level+'Names', nameObj);
 }
+
+/*---------------- Update User Named Lists -----------------------------------*/
+export function updateUserNamedList(data, action) {                             //console.log('updating [%s] stored list data. %O', action, data);
+    const list = action == 'delete' ? data : JSON.parse(data.entity);  
+    const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
+    const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
+    const rcrds = _u.getDataFromStorage(rcrdKey);
+    const names = _u.getDataFromStorage(nameKey);
+
+    if (action == 'delete') { removeListData(); 
+    } else { updateListData(); }
+
+    storeData(rcrdKey, rcrds);
+    storeData(nameKey, names);
+
+    function removeListData() {  
+        delete rcrds[list.id];  
+        delete names[list.displayName];  
+    }
+    function updateListData() {
+        rcrds[list.id] = list;
+        names[list.displayName] = list.type !== 'filter' ? list.id :
+            {value: list.id, group: getFocusAndViewOptionGroupString(list)};
+        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
+    }
+} /* End updateUserNamedList */
 /*------------------ Init Stored Data Methods --------------------------------*/
+export function replaceUserData(data, userName) {
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+    _u.addToStorage('user', userName);
+}
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
@@ -504,6 +511,7 @@ function ajaxAndStoreAllEntityData() {                                          
     ).then(function(a1, a2, a3, a4, a5) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
         $.each([a1, a2, a3, a4, a5], function(idx, a) { storeServerData(a[0]); });
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
+        storeData('user', $('body').data('user-name'));
         storeData('pgDataUpdatedAt', getCurrentDate());  
         initSearchState('taxa');
     });

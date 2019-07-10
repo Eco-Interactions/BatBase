@@ -7,6 +7,7 @@
  *     resetStoredFiltersUi         db-page
  *     savedFilterSetActive         db-filters
  *     selFilterSet                 util
+ *     updateFilterSel              util
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
@@ -34,19 +35,12 @@ export function savedFilterSetActive() {
 export function initFilterPanel() {
     addFilterPanelEvents();
     initTimeFilterUi();
-    initSavedFiltersUi();
+    disableFilterSetInputs();
 }
 function initTimeFilterUi() {
     _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
     $('#time-fltr')[0].selectize.disable();
     db_filters.toggleTimeFilter('disable');
-}
-function initSavedFiltersUi() {
-    initSavedFiltersCombobox();
-    disableFilterSetInputs();
-}
-function initSavedFiltersCombobox() {
-    updateFilterSel();
 }
 export function addFilterPanelEvents() {  
     $('#filter').click(toggleFilterPanel);                                      
@@ -93,6 +87,7 @@ export function toggleFilterPanel() {
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
+    updateFilterSel();
 }
 function updateFilterSel() {
     const opts = getSavedFilterOpts(_u.getOptsFromStoredData('savedFilterNames'));     
@@ -224,7 +219,7 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {                                                     //console.log('Applying Filter Set')
-    const filters = app.fltr.details; 
+    const filters = app.fltr.details;   
     app.fltr.active = true; 
     reloadTableInFilterFocus(filters.view, filters.focus);
     applyPanelFilters(filters.panel);
@@ -247,7 +242,6 @@ function reloadTable(focus, view, fltrId) {
         _u.setSelVal('Saved Filter Set', fltrId); 
     } else { $('#search-focus')[0].selectize.addItem(focus); }                        
 }
-/* End reloadTableInFilterFocus */
 function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs)
     const map = {
         combo: setComboboxFilter, name: setNameSearchFilter,

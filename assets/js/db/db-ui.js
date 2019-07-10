@@ -12,6 +12,7 @@
  *     loadTaxonComboboxes              db-page, db-filters     
  *     loadTxnFilterPanelElems          db-page, db-filters
  *     resetToggleTreeBttn              db_page, init-table
+ *     showLoadingDataPopUp             util
  *     showTips                         intro
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
@@ -58,9 +59,11 @@ function addDomEventListeners() {
     addPanelEvents();
 }
 /** Shows a loading popup message for the inital data-download wait. */
-export function showLoadingDataPopUp() {
-    showPopUpMsg(`Downloading and caching all interaction records. Please allow 
-        for a ~45 second download.`);   
+export function showLoadingDataPopUp(type) {
+    const msgs = { 'user': 'Downloading all user-specific data.' };
+    const msg = msgs[type] || `Downloading and caching all interaction records. 
+        Please allow for a ~45 second download.`;
+    showPopUpMsg(msg);   
 }
 function authDependentInit() {
     const initMap = {

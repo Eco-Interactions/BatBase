@@ -2,8 +2,8 @@
 import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
-import { addNewDataToStorage, initStoredData } from './db-sync.js';
-import { showPopUpMsg } from './db-ui.js';
+import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
+import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
 import { newIntList, selIntList } from './db-table/save-ints.js';
 import { newFilterSet, selFilterSet } from './db-table/save-fltrs.js';
 /* 
@@ -38,8 +38,8 @@ import { newFilterSet, selFilterSet } from './db-table/save-fltrs.js';
 let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
-const geoJsonKey = 'A life without cause is a life without effect!';  
-const localStorageKey = 'A life without cause is a life without effect!!'; 
+const geoJsonKey = 'A life without cause is a life without effect!!';  
+const localStorageKey = 'A life without cause is a life without effect!!!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -217,11 +217,18 @@ export function init_db() {
     if (!dataStorage.getItem(localStorageKey)) {
         clearDataStorage();
         initStoredData();
+    } else if (dataStorage.getItem('user') !== $('body').data('user-name')) {
+        showLoadingDataPopUp('user');
+        sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
     } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
 }
 export function clearDataStorage() {  
     dataStorage.clear();
     dataStorage.setItem(localStorageKey, true);
+}
+function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
+    replaceUserData(data, $('body').data('user-name'));
+    db_page.initSearchState('user');
 }
 /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
 function storeDataUpdatedTimes(ajaxData) {
