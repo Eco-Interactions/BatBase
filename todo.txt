@@ -5,21 +5,24 @@ Thoughts:
 
 >==== Change Log ====
     - Added "published" after to time filter
+    - Added 'all' options to the location and taxon combobox filters
+    - Added taxon tree text search to the taxon filters
+    - Added stub data for new users and the interaction lists and filter sets
+        - Backfilled for existing users
 
 Current:
-    - Add view filter to filter status message
-        - Keep it from saving filter set with only view filter selected
-            - Show 'No Active Filters' if only view is selected
+    - add user id to database and check to clear local storage with user changes
+        - update database download message to say it will clear
+    - Add note about keeping lists updated to the list tutorials
+    - Add note about test data for lists and sets
     - update tests with new filters
         - time updated/published
     - Add Lists to System Date
 
 Before conference:
-    - Add tutorial help points to the filter and int-list panels
+    - Write description for email updating current users to all the exciting changes!
+        - frame in context of the last conference to now
     - Double check all center points for multi-polygons
-    - Add "- All -" option to comboboxes in location and taxa view
-    - Add text search to taxon view
-    - Add "cited at" to time search filter
     - pre-load all new user accounts with example filter sets and int lists
     - Figure out how to "stress test" the site:
         - Large number of people using it

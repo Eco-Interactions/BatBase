@@ -1,31 +1,37 @@
 <?php
 
-namespace AppBundle\Service;
+namespace AppBundle\EventListener;
+
+use AppBundle\Entity\UserNamed;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Security;
+use FOS\UserBundle\Event\FilterUserResponseEvent;
+use FOS\UserBundle\FOSUserEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- * filterSets
- * interactionLists
- */
-class CreateExampleData
+class AddExampleDataAfterRegistration implements EventSubscriberInterface
 {
-    protected $em;
+    protected $container;
     protected $user;
 
-    public function __construct(EntityManagerInterface $entityManager, Security $security)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
-        $this->user = $security->getUser();
     }
 
+    public function addDataOnRegistration(FilterUserResponseEvent $event)
+    {
+        $this->user = $event->getUser();
+        $this->addFilterSets();
+        $this->addInteractionLists();
+        $this->em->flush();
+    }
     /**
      * Brazil - Arthropod, consumption
      * Journals - Arthropod, consumption, >=1990
      * Taxon - Hipposideridae >= 1988
      */
-    public function filterSets()
+    public function addFilterSets()
     {
         $keys = ['brazil', 'journal', 'taxon'];
 
@@ -33,14 +39,13 @@ class CreateExampleData
             $data = $this->getNamedData('set', $key);
             $this->createUserNamedEntity('filter', $data);
         }   
-        $this->em->flush();
     }
 
     /**
      * Phyllostomidae & Pteropodidae - Arthropod
      * Biotropica, Journal of Mammalogy, & Acta Chiropterologica - Arthropod
      */
-    public function interactionLists()
+    public function addInteractionLists()
     {
         $keys = ['bats', 'source'];
 
@@ -48,7 +53,6 @@ class CreateExampleData
             $data = $this->getNamedData('list', $key);
             $this->createUserNamedEntity('interaction', $data);
         }
-        $this->em->flush();
     }
 
     private function getNamedData($type, $key)
@@ -90,5 +94,12 @@ class CreateExampleData
         $entity->setDisplayName($data['name']);
         $entity->setType($type);        
         $this->em->persist($entity);
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return [
+            FOSUserEvents::REGISTRATION_COMPLETED => 'addDataOnRegistration'
+        ];
     }
 }

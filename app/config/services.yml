@@ -19,8 +19,6 @@ services:
         
     # controllers are imported separately to make sure they're public
     # and have a tag that allows actions to type-hint services
-    AppBundle\Service\:
-        resource: '../../src/AppBundle/Service'
 
     AppBundle\Controller\:
         resource: '../../src/AppBundle/Controller'
@@ -42,3 +40,9 @@ services:
             - { name: kernel.event_listener, 
                 event: kernel.controller,
                 method: onCoreController }
+
+    app.add_example_data:
+        class: AppBundle\EventListener\AddExampleDataAfterRegistration
+        autowire: true
+        tags:
+            - { name: kernel.event_subscriber }
