@@ -11,9 +11,6 @@ Thoughts:
         - Backfilled for existing users
 
 Current:
-    - add user id to database and check to clear local storage with user changes
-        - update database download message to say it will clear
-    - Add note about keeping lists updated to the list tutorials
     - Add note about test data for lists and sets
     - update tests with new filters
         - time updated/published

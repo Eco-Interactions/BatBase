@@ -28,6 +28,7 @@ function init() {
 /* ===================== MODALS/TIPS ======================================== */
 /* ------------ HELP MODALS ------------ */
 export function showHelpModal(key) {
+    if (intro) { return; }
     intro = require('../libs/intro.js').introJs();
     intro.onexit(() => intro = null);
     intro.oncomplete(() => intro = null);
@@ -90,7 +91,8 @@ function getSavedFilterSteps() {
         intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
             Saved sets include the grouping and view of the data and all applied filters from
             the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
-            in a "forest" habitat or all African "consumption" interactions in a "desert" habitat.`,
+            in a "forest" habitat or all African "consumption" interactions in a "desert" habitat.<br><br>
+            New users have preloaded examples to help demonstrate this feature.`,
         position: 'left'
     }];
 }
@@ -105,17 +107,18 @@ function getSavedListSteps() {
             position: 'top'
         },
         {
-            element: '#int-lists',
+            element: '#list-sel-cntnr',
             intro: `<h3><center>Select a list to manage or enter a new name to create.</center></h3><br>
-                After selecting, show the interactions in the table by clicking 
-                "Load Interaction List in Table".<br><br>Once loaded, sort and view
-                the interactions using the various filters and features of the page.<br><br>`,
+                New users have preloaded examples to help demonstrate this feature.`,
             position: 'right',
         },
         {
-            element: '#list-details',
-            intro: `<h3><center>Update the List Name and Description.</center></h3>`,
-            position: 'top',
+            element: '#load-list',
+            intro: `After selecting an existing list with interactions, show the 
+                interactions in the table by clicking 
+                "Load Interaction List in Table".<br><br>Once loaded, sort and view
+                the interactions using the various filters and features of the page.<br><br>`,
+            position: 'right',
         },
         {
             element: '#mod-list-pnl',
