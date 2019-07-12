@@ -276,7 +276,9 @@ function reapplyPreviousTimeFilter(timeObj, skipSync) {
 }
 function filterToChangesToday() {  
     const today = new Date().today();
+    $('#time-fltr')[0].selectize.addItem('updated');
     fPs.cal.setDate(today, false, 'Y-m-d');  
+    fPs.pnlFltrs.time.type = val;
     filterByTime(null, today);
 }
 function filterToSpecifiedTime(time) {
@@ -623,10 +625,10 @@ export function updateTaxonSearch(val, selLvl) {
  * When 'all' is selected, the selected parent is returned, or the realm record.
  */
 function getRootTaxonRcrd(val, rcrds, that) {
-    const id = val == 'all' ? getParentId(rcrds, that) : val;
+    const id = val == 'all' ? getTaxonParentId(rcrds, that) : val;
     return _u.getDetachedRcrd(id, rcrds);  
 }
-function getParentId(rcrds, that) {  
+function getTaxonParentId(rcrds, that) {  
     const prevId = getPreviouslySelectedTaxonId(that); 
     const prevRcrd = _u.getDetachedRcrd(prevId, rcrds);  
     return prevRcrd.parent;

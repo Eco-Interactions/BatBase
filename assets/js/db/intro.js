@@ -492,7 +492,7 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(14); }
+    if (tutKey === 'map') { intro.goToStep(15); }
 }
 function checkForDbLoad() {
     if ($('#sel-view').val()) { return; }  
