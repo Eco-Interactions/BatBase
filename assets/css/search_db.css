@@ -122,7 +122,7 @@ input[type="radio"], input[type="checkbox"] {
   background-color: #f2f9f8;
   content: "";
   display: block;
-  height: 10px;
+  height: 8px;
   position: absolute;
   width: 10px;
 }

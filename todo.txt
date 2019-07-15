@@ -4,44 +4,46 @@ Thoughts:
         trouble shoot when issues arrise.
 
 >==== Change Log ====
-    - Added "published" after to time filter
-    - Added 'all' options to the location and taxon combobox filters
-    - Added taxon tree text search to the taxon filters
-    - Added stub data for new users and the interaction lists and filter sets
-        - Backfilled for existing users
 
 Current:
-    - Add note about test data for lists and sets
-    - update tests with new filters
-        - time updated/published
+    - update tests 
+        - with new 'all' filters, time updated/published
+        - lists, sets, and their interactions
+            - create, edit, delete
+            - load each, then load the other too
+            - resettest filters when list loaded
     - Add Lists to System Date
 
 Before conference:
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Double check all center points for multi-polygons
-    - pre-load all new user accounts with example filter sets and int lists
+    - pre-load all existing user accounts with example filter sets and int lists
     - Figure out how to "stress test" the site:
         - Large number of people using it
 
 
 MEETING NOTES:
-    Questions:
-        - Do we still need the "Tips"?
     Point out:
-        - Table int count
-        - Panel features and UI
-        - tutorial jump points in panels 
+        - Table int count and taxon realm filter msg
+        - Added Panels. 
+        - Added tutorial hints and updated tutorial
+        - Added "published" after to time filter
+        - Added 'all' options to the location and taxon combobox filters
+        - Added taxon tree text search to the taxon filters
+        - Added stub data for new users and the interaction lists and filter sets
+            - Backfilling for existing users
+        - Updated the welcome message for new users
     Next/future rounds:
         Possible:
-            - Add "cited post" to "updated since" filter 
         Next:
             - UI:
-                - Polishing and updating tutorial
-            - Err handling:
-                - Fix taxon forms
+                - Update future dev page
             - testing:
-
+                - Finish updating tests
+        Then:
+            - Err handling:
+                - Fix taxon forms: by august 13th
         Future:
             - Review Data
                 * Identical tables

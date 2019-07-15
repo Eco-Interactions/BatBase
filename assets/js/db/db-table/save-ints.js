@@ -417,7 +417,7 @@ function resetTable() {                                                         
     enableModUi('add');
     $('#load-list').html('Load Interaction List in Table');
     $('#load-list').off('click').click(loadListInTable);
-    expandAllTableRows();
+    if (!$('#int-opts').hasClass('closed')) { expandAllTableRows(); }
     updateDetailHdr('Selected');
 }
 function removePreviousTable() {  

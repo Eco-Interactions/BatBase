@@ -277,8 +277,8 @@ function reapplyPreviousTimeFilter(timeObj, skipSync) {
 function filterToChangesToday() {  
     const today = new Date().today();
     $('#time-fltr')[0].selectize.addItem('updated');
+    fPs.pnlFltrs.time.type = 'updated';
     fPs.cal.setDate(today, false, 'Y-m-d');  
-    fPs.pnlFltrs.time.type = val;
     filterByTime(null, today);
 }
 function filterToSpecifiedTime(time) {
