@@ -11,7 +11,6 @@ Feature: Search page features and database table controls
             # RETURN THEM TO THE TABLE 
         ## TODO
         # CSV downloads
-        # time-updated filter
         # run through all slides in tutorial
 
     Background:
