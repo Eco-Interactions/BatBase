@@ -21,6 +21,7 @@ require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Asser
  *         Table Interactions
  *         Map Methods
  *         Form Functions
+ *         Assertion Steps
  *         Helper Steps
  *         Error Handling
  *     Private Helpers:
@@ -166,19 +167,6 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->changeTableSort('#sel-view', 'map', '#map');
     }
-    /**
-     * @When I click on a map marker
-     */
-    public function iClickOnAMapMarker()
-    {
-        $marker = $this->getUserSession()->getPage()->find('css', '.leaflet-marker-icon');
-        $this->handleNullAssert($marker, false, "Couldn't find marker on the map.");
-        try {
-            $marker->doubleClick();    
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Couldn't click elem.");
-        }
-    }
 
     /**
      * @When I select :text from the :label dropdown
@@ -216,69 +204,6 @@ class FeatureContext extends RawMinkContext implements Context
         $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
         $this->clickRowMapPin($row, $text);
     }
-
-    /**
-     * @Then I should see the map with the location summary popup
-     */
-    public function iShouldSeeTheMapWithTheLocationSummaryPopup()
-    {
-        $popup = $this->getUserSession()
-            ->evaluateScript("$('.leaflet-popup-content-wrapper').length > 0;");
-        $this->handleEqualAssert($popup, true, true, "Location summary popup not displayed.");
-    }
-
-    /**
-     * @Then I should see :text in the :label dropdown
-     */
-    public function iShouldSeeInTheDropdown($text, $label)
-    {
-        usleep(500000);
-        $selId = '#sel'.str_replace(' ','',$label);
-        $selector = $selId.' option:selected';  
-        $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
-        $this->handleEqualAssert($text, $selected, true, 
-            "Found [$selected] in the [$label] ($selId) field. Expected [$text].");
-    }
-    /**
-     * @Then I should see the map with markers 
-     * @Then I should see markers on the map
-     */
-    public function iShouldSeeTheMapWithMarkers()
-    {
-        $markers = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0;");
-        $this->handleNullAssert($markers, false, "Map did not update as expected. No markers found.");
-    }
-
-    /**
-     * @Then I should see :count interactions shown on the map
-     */
-    public function iShouldSeeInteractionsShownOnTheMap($count)
-    {
-        $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
-        if (!$elem) { 
-            usleep(50000); 
-            $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
-        }
-        $this->handleNullAssert($elem, false, 'No [interaction count legend] shown on map.');
-        $this->handleContainsAssert($count, $elem->getHtml(), true, 
-             "Should have found [$count] in the interaction count legend.");
-    }
-
-    /**
-     * @Then I should see :text in popup
-     */
-    public function iShouldSeeInPopup($text)
-    {
-        $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
-        if (!$elem) { 
-            usleep(50000); 
-            $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
-        }
-        $this->handleNullAssert($elem, false, 'No [popup] shown on map.');
-        $this->handleContainsAssert($text, $elem->getHtml(), true, 
-             "Should have found [$text] in popup.");
-    }
-
 /**---------------------- Table Interactions ---------------------------------*/
     /**
      * @Given I filter the table to interactions created today
@@ -495,6 +420,19 @@ class FeatureContext extends RawMinkContext implements Context
     }
 /** ------------------ Map Methods -------------------------------------------*/
     /**
+     * @When I click on a map marker
+     */
+    public function iClickOnAMapMarker()
+    {
+        $marker = $this->getUserSession()->getPage()->find('css', '.leaflet-marker-icon');
+        $this->handleNullAssert($marker, false, "Couldn't find marker on the map.");
+        try {
+            $marker->doubleClick();    
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Couldn't click elem.");
+        }
+    }
+    /**
      * @When I click on the map
      */
     public function iClickOnTheMap()
@@ -601,6 +539,68 @@ class FeatureContext extends RawMinkContext implements Context
     public function theMarkersPopupShouldHaveADescriptionOfThePosition()
     {
         $this->iPutABreakpoint("theMarkersPopupShouldHaveADescriptionOfThePosition");
+    }
+/* ---------------- Assertion Steps ----------------------------------------- */
+    /**
+     * @Then I should see the map with the location summary popup
+     */
+    public function iShouldSeeTheMapWithTheLocationSummaryPopup()
+    {
+        $popup = $this->getUserSession()
+            ->evaluateScript("$('.leaflet-popup-content-wrapper').length > 0;");
+        $this->handleEqualAssert($popup, true, true, "Location summary popup not displayed.");
+    }
+
+    /**
+     * @Then I should see :text in the :label dropdown
+     */
+    public function iShouldSeeInTheDropdown($text, $label)
+    {
+        usleep(500000);
+        $selId = '#sel'.str_replace(' ','',$label);
+        $selector = $selId.' option:selected';  
+        $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
+        $this->handleEqualAssert($text, $selected, true, 
+            "Found [$selected] in the [$label] ($selId) field. Expected [$text].");
+    }
+    /**
+     * @Then I should see the map with markers 
+     * @Then I should see markers on the map
+     */
+    public function iShouldSeeTheMapWithMarkers()
+    {
+        $markers = $this->getUserSession()->evaluateScript("$('.leaflet-marker-icon').length > 0;");
+        $this->handleNullAssert($markers, false, "Map did not update as expected. No markers found.");
+    }
+
+    /**
+     * @Then I should see :count interactions shown on the map
+     */
+    public function iShouldSeeInteractionsShownOnTheMap($count)
+    {
+        $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
+        if (!$elem) { 
+            usleep(50000); 
+            $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
+        }
+        $this->handleNullAssert($elem, false, 'No [interaction count legend] shown on map.');
+        $this->handleContainsAssert($count, $elem->getHtml(), true, 
+             "Should have found [$count] in the interaction count legend.");
+    }
+
+    /**
+     * @Then I should see :text in popup
+     */
+    public function iShouldSeeInPopup($text)
+    {
+        $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
+        if (!$elem) { 
+            usleep(50000); 
+            $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
+        }
+        $this->handleNullAssert($elem, false, 'No [popup] shown on map.');
+        $this->handleContainsAssert($text, $elem->getHtml(), true, 
+             "Should have found [$text] in popup.");
     }
 /**------------------- Form Functions ----------------------------------------*/
     /**
@@ -1012,6 +1012,7 @@ class FeatureContext extends RawMinkContext implements Context
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
+
 /** -------------------- Error Handling ------------------------------------- */        
     /**
      * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
