@@ -241,12 +241,12 @@ function updateTimeFilterMemory(time) {
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .6;
     $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
-    $('.time-fltr-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
+    $('.selTimeFilter-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
     db_ui.resetToggleTreeBttn(false);
     if (filtering) {
-        $('#time-fltr')[0].selectize.enable();
-    } else { $('#time-fltr')[0].selectize.disable(); }
+        $('#selTimeFilter')[0].selectize.enable();
+    } else { $('#selTimeFilter')[0].selectize.disable(); }
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
@@ -276,7 +276,7 @@ function reapplyPreviousTimeFilter(timeObj, skipSync) {
 }
 function filterToChangesToday() {  
     const today = new Date().today();
-    $('#time-fltr')[0].selectize.addItem('updated');
+    $('#selTimeFilter')[0].selectize.addItem('updated');
     fPs.pnlFltrs.time.type = 'updated';
     fPs.cal.setDate(today, false, 'Y-m-d');  
     filterByTime(null, today);

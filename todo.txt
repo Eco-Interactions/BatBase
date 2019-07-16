@@ -184,4 +184,8 @@ TODOs:
             - analytics for apps free
         - Try out some js debugging tools
 
+Code standards:
+    HTML
+        - Search page combobox elems prefixed with 'sel' + [Descriptive name]
+
 

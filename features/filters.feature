@@ -7,7 +7,7 @@ Feature: Filtering the data displayed in the database table
         # EACH VIEW'S FILTER OPTIONS: 
           # Comboboxes: Select option and reset combobox.
           # Text filters
-        # Time-updated/published  
+          # Time-updated/published  
         ## TODO: Test table column filters
 
     Background:

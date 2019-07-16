@@ -57,7 +57,7 @@ function buildAndShowIntPanel() {                                               
         initListCombobox();
         expandAllTableRows();
         window.setTimeout(function() { 
-            $('#saved-ints')[0].selectize.focus();  
+            $('#selIntList')[0].selectize.focus();  
             disableInputs();
         }, 500);         
     }
@@ -230,8 +230,8 @@ function updateUi() {
 }
 function syncFilterUi(focus) {
     syncViewFiltersAndUi(focus);
-    if ($('#saved-filters')[0].selectize) { 
-        $('#saved-filters')[0].selectize.clear() 
+    if ($('#selSavedFilters')[0].selectize) { 
+        $('#selSavedFilters')[0].selectize.clear() 
     }
 }
 function updateListLoadButton(text, clickFunc) {
@@ -288,7 +288,7 @@ function onListSubmitComplete(action, results) {
     const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
     updateUserNamedList(results.list, action);
     updateDataListSel();
-    $('#saved-ints')[0].selectize.addItem(list.id);
+    $('#selIntList')[0].selectize.addItem(list.id);
     showSavedMsg();
     toggleInstructions();  
     if (app.submitting === 'rmv') { loadListInTable(); }
@@ -298,7 +298,7 @@ function onListSubmitComplete(action, results) {
 function onListDeleteComplete(results) {                                        console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
     updateDataListSel();
-    $('#saved-ints')[0].selectize.open();
+    $('#selIntList')[0].selectize.open();
 }
 function showSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 1);
@@ -399,7 +399,7 @@ function updateDetailHdr(type) {
 function updateDataListSel() {
     const opts = _u.getOptsFromStoredData('dataListNames');                     
     opts.unshift({value: 'create', text: '...Add New Interaction List'});
-    _u.replaceSelOpts('#saved-ints', opts);
+    _u.replaceSelOpts('#selIntList', opts);
 }
 function resetPrevListUiState() {
     if (!app.listLoaded || app.submitting) { return; }

@@ -397,11 +397,11 @@ function getSelConfgObj(field) {
         'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
         'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
         'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
-        'Time Filter': { name: 'Filter', id: '#time-fltr' },
+        'Time Filter': { name: 'Filter', id: '#selTimeFilter' },
         'View': { name: 'View', id: '#sel-view', change: false, blur: true },
         // Search Page Comboboxes with Create Options and Sub-panels
-        'Int-lists': { name: 'Interaction List', id: '#saved-ints', add: newIntList, change: selIntList },
-        'Saved Filter Set': {name: field, id: '#saved-filters', add: newFilterSet, change: selFilterSet },
+        'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
+        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },
     };
     return confgs[field];
 }

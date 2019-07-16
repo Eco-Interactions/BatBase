@@ -75,7 +75,7 @@ function authDependentInit() {
 }
 function disableUserFeatures() {                                                //console.log('disableUserFeatures')
     $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, 
-        #saved-filters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
+        #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
         #stored-filters input, #stored-filters textarea`)
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
         .prop('title', "Please register to use these features.");

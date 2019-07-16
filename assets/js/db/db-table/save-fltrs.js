@@ -39,7 +39,7 @@ export function initFilterPanel() {
 }
 function initTimeFilterUi() {
     _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
-    $('#time-fltr')[0].selectize.disable();
+    $('#selTimeFilter')[0].selectize.disable();
     db_filters.toggleTimeFilter('disable');
 }
 export function addFilterPanelEvents() {  
@@ -49,12 +49,12 @@ export function addFilterPanelEvents() {
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
-    $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'saved-filters'));
+    $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'selSavedFilters'));
     $('#fltr-pnl-hlp').click(showHelpModal.bind(null, 'filter-panel'));
 }
 export function resetStoredFiltersUi() {
-    if (!$('#saved-filters')[0].selectize) { return; }
-    $('#saved-filters')[0].selectize.clear();
+    if (!$('#selSavedFilters')[0].selectize) { return; }
+    $('#selSavedFilters')[0].selectize.clear();
     $('#stored-filters input, #stored-filters textarea').val('');
 }
 export function updateFilterPanelHeader(focus) {  
@@ -92,7 +92,7 @@ function buildAndShowFilterPanel() {                                            
 function updateFilterSel() {
     const opts = getSavedFilterOpts(_u.getOptsFromStoredData('savedFilterNames'));     
     const optGroups = buildOptGroups(opts);                                      //console.log('optGroups = %O', optGroups);
-    if ($('#saved-filters')[0].selectize) {$('#saved-filters')[0].selectize.destroy();}
+    if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
     _u.initCombobox('Saved Filter Set', getSpecialOpts());
 
     function getSpecialOpts() { 
@@ -224,7 +224,7 @@ function applyFilterSet() {                                                     
     reloadTableInFilterFocus(filters.view, filters.focus);
     applyPanelFilters(filters.panel);
     applyTableFilters(filters.table);
-    $('#saved-filters')[0].selectize.addItem(app.fltr.id);
+    $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
 }
 /* --- reloadTableInFilterFocus --- */
@@ -304,7 +304,7 @@ function onFilterSubmitComplete(action, results) {
     const filter = JSON.parse(results.list.entity);                             //console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
     updateUserNamedList(results.list, action);
     updateFilterSel();
-    $('#saved-filters')[0].selectize.addItem(filter.id);
+    $('#selSavedFilters')[0].selectize.addItem(filter.id);
     addSetToFilterStatus();
     showSavedMsg();
 }
@@ -323,7 +323,7 @@ function onFilterDeleteComplete(results) {                                      
     updateUserNamedList(results.list, 'delete');
     resetFilterUi();
     updateFilterSel();
-    $('#saved-filters')[0].selectize.open();
+    $('#selSavedFilters')[0].selectize.open();
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);

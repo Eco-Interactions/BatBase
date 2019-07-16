@@ -42,7 +42,7 @@ export function showHelpModal(key) {
 function getHelpSteps(key) {
     const getSteps = {
         'filter-panel': getFilterPanelSteps,
-        'saved-filters': getSavedFilterSteps,
+        'selSavedFilters': getSavedFilterSteps,
         'saved-lists': getSavedListSteps
     };
     return getSteps[key]();
