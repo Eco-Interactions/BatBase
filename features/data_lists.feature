@@ -1,7 +1,7 @@
-Feature: Save and manage custom lists of interaction data
-    In order to have custom lists of interacitons
+Feature: Save and manage custom Lists of interaction data
+    In order to have custom Lists of interacitons
     As a user
-    I should be able to create, edit, and interact with the custom lists
+    I should be able to create, edit, and interact with the custom Lists
     
     ### WHAT IS BEING TESTED ###  
         # Create new interaction list
@@ -18,9 +18,9 @@ Feature: Save and manage custom lists of interaction data
 ## --------------- CREATE INTERACTION LIST --------------- ##
     @javascript
     Scenario:  I should be able to CREATE a list, add interactions, save, and view list.
-        Given I open the "lists" panel
+        Given I toggle "open" the lists panel
         And the database table is in "Location" view
-        When I enter "Test Interaction List" in the "Lists" dropdown field
+        When I select "Test Interaction List" from the "Lists" dropdown
         And I should see "Test Interaction List" in the "list" detail panel
         And I should see "Test Interaction List" in the "Lists" dropdown field
         And I open the "filter" panel
@@ -34,7 +34,7 @@ Feature: Save and manage custom lists of interaction data
 ## --------------- EDIT INTERACTION LIST --------------- ##
     @javascript
     Scenario:  I should be able to EDIT a list by adding interactions
-        Given I open the "lists" panel
+        Given I toggle "open" the lists panel
         And the database table is in "Location" view
         And I select "Test Interaction List" from the "Lists" dropdown
         And I should see "Test Interaction List" in the "Lists" dropdown field
@@ -44,11 +44,11 @@ Feature: Save and manage custom lists of interaction data
         And I press the "Save List" button
         Then I should see "6" interactions in the list
         And I should see "Test Interaction List" in the "Lists" dropdown field
-        And I should see "Test Interaction List" in the "list" detail panel
+        And I should see "Test Interaction List" in the "List" detail panel
 
     @javascript
     Scenario:  I should be able to EDIT a list by removing interactions
-        Given I open the "lists" panel
+        Given I toggle "open" the lists panel
         And I select "Test Interaction List" from the "Lists" dropdown
         And I press the "Load Interaction List in Table" button
         And I should see "6" interactions in the table
@@ -58,14 +58,17 @@ Feature: Save and manage custom lists of interaction data
         And I press the "Save List" button
         Then I should see "3" interactions in the list
         And I should see "Test Interaction List" in the "Lists" dropdown field
-        And I should see "Test Interaction List" in the "list" detail panel
+        And I should see "Test Interaction List" in the "List" detail panel
 
 ## --------------- DELETE INTERACTION LIST --------------- ##
     @javascript
     Scenario:  I should be able to DELETE a list.
-        Given I open the "lists" panel
+        Given I toggle "open" the lists panel
         And I select "Test Interaction List" from the "Lists" dropdown
         When I press the "Delete" button
         And I press the "Confirm" button
         Then I should see "" in the "Lists" dropdown field
-        And I should see "" in the "list" detail panel
+        And I should see "" in the "List" detail panel
+
+
+

@@ -14,8 +14,8 @@ require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Asser
 class FeatureContext extends RawMinkContext implements Context
 {    
     private static $dbChanges;
-    /** Used for mutli-editor testing. */
     private $curUser;
+    /** Used for mutli-editor testing. */
     private $editor1; 
     private $editor2;
 
@@ -267,7 +267,7 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * @Given I enter :text in the :prop dropdown field 
      */
-    public function iEnterInTheDropdownField($text, $prop)
+    public function iEnterInFormTheDropdownField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         try {
@@ -363,7 +363,7 @@ class FeatureContext extends RawMinkContext implements Context
     /**
      * @When I select :text from the :prop dropdown field
      */
-    public function iSelectFromTheDropdownField($text, $prop)
+    public function iSelectFromTheFormDropdownField($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->selectValueInCombobox($selId, $text);
@@ -397,7 +397,9 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iToggleTheFilterPanel('open');
         $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
         $checkbox->uncheck();  
-        usleep(300000);
+        $this->spin(function() {
+            return $this->getUserSession()->evaluateScript("!$('input#shw-chngd').prop('checked')");
+            }, 'Time filter not unchecked.');
     }
 
     /**
@@ -1356,25 +1358,25 @@ class FeatureContext extends RawMinkContext implements Context
     private function fillSrcAndLocFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling Source and Location fields.\n");
         foreach ($data as $field => $value) { 
-            $this->iSelectFromTheDropdownField($value, $field); 
+            $this->iSelectFromTheFormDropdownField($value, $field); 
         }
     }
     private function fillTaxaFields($data) 
     {                                                                           fwrite(STDOUT, "\n        Filling Taxa fields.\n");  
         $lvls = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');   
-        $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
+        $this->iSelectFromTheFormDropdownField($data[$lvls[0]], $lvls[0]);
         $this->iPressTheButton('Confirm');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
-        $this->iSelectFromTheDropdownField($data[$lvls[1]], $lvls[1]);
+        $this->iSelectFromTheFormDropdownField('Arthropod', 'Realm');
+        $this->iSelectFromTheFormDropdownField($data[$lvls[1]], $lvls[1]);
         $this->iPressTheButton('Confirm');
     }
     private function fillMiscIntFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling remaining fields.\n");
         $fields = array_keys($data); 
-        $this->iSelectFromTheDropdownField($data[0], 'Interaction Type');
-        $this->iSelectFromTheDropdownField($data[1], 'Interaction Tags');
+        $this->iSelectFromTheFormDropdownField($data[0], 'Interaction Type');
+        $this->iSelectFromTheFormDropdownField($data[1], 'Interaction Tags');
         $this->iTypeInTheField($data[2], 'Note', 'textarea');
     }
 
@@ -1434,8 +1436,8 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
-        $this->iSelectFromTheDropdownField('Sphingidaey', 'Family');
+        $this->iSelectFromTheFormDropdownField('Arthropod', 'Realm');
+        $this->iSelectFromTheFormDropdownField('Sphingidaey', 'Family');
         $this->iPressTheButton('Confirm');
         $this->curUser->getPage()->pressButton('Update Interaction');
         usleep(500000);

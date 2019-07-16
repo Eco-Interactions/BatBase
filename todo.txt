@@ -18,7 +18,6 @@ Before conference:
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Double check all center points for multi-polygons
-    - pre-load all existing user accounts with example filter sets and int lists
     - Figure out how to "stress test" the site:
         - Large number of people using it
 
@@ -41,6 +40,9 @@ MEETING NOTES:
                 - Update future dev page
             - testing:
                 - Finish updating tests
+                - Refactor TESTS
+                    - Make list of all behat statements being used for reference when adding/editing tests
+                    - Break out scenarios
         Then:
             - Err handling:
                 - Fix taxon forms: by august 13th
