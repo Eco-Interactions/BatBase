@@ -668,7 +668,7 @@ function newSelEl(opts, c, i, field) {                                          
     $(elem).data('field', field);
     return elem;
 }
-export function enableTableButtons() {                                          //console.log('enableTableButtons')
+export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
     $('.tbl-tools button, .tbl-tools input, #focus-opts, ' + app.enabledSelectors)
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');

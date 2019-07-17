@@ -318,8 +318,10 @@ function getRowsAfterTime(filterTime, type) {
 
         function checkIntRowForUpdates(row) { 
             const date = type === 'cited' ? row.year + '-01-01' : row.updatedAt;
-            const rowTime = new Date(date).getTime();                           //console.log("row [%O] rowTime = %O, rowTime > since = [%s]", row, rowTime, rowTime > filterTime);
-            return rowTime > filterTime;
+            let rowTime = new Date(date)
+            rowTime.setHours(rowTime.getHours()+8);     //Resets from PCT to GMT                       
+            rowTime = rowTime.getTime();                                        //console.log("row [%O] rowTime = %O >= since = %O [%s]", row, rowTime, filterTime, rowTime >= filterTime);
+            return rowTime >= filterTime;
         }
     } /* End addAllRowsWithUpdates */
 } /* End getRowsAfterTime */
