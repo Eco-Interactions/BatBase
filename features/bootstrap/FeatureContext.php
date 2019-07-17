@@ -176,11 +176,12 @@ class FeatureContext extends RawMinkContext implements Context
     {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
             'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
+        $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
         $selId = '#sel'.str_replace(' ','',$label);
         $elem = $this->getUserSession()->getPage()->find('css', $selId);
         $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
         $this->getUserSession()->
-            executeScript("$('$selId')[0].selectize.addItem('$vals[$text]');");
+            executeScript("$('$selId')[0].selectize.addItem('$val');");
     }
 
     /**
@@ -737,6 +738,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @When I uncheck the time-updated filter
+     * REFACTOR: merge with iToggleTheDateFilter
      */
     public function iUncheckTheTimeUpdatedFilter()
     {
@@ -747,6 +749,35 @@ class FeatureContext extends RawMinkContext implements Context
         $this->spin(function() {
             return $this->getUserSession()->evaluateScript("!$('input#shw-chngd').prop('checked')");
             }, 'Time filter not unchecked.');
+    }
+    /**
+     * @Given I toggle the date filter :state
+     */
+    public function iToggleTheDateFilter($state)
+    {
+        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd'); 
+        if ($state) { $checkbox->check(); } else { $checkbox->uncheck(); }
+        $this->spin(function() use ($state) {
+            return $this->getUserSession()->evaluateScript("$('input#shw-chngd').prop('checked') == $state");
+            }, 'Time filter not ['.($state ? 'en' : 'dis').'abled].');
+    }
+    /**
+     * @Given I set the time :type filter to :date
+     *
+     * REFACTOR: COMBINE WITH iFilterTheTableToInteractionsCreatedSince
+     */
+    public function iSetTheTimeFilterTo($type, $date)
+    {
+        $initialCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+        $this->setTimeFilterDefault($date);
+        $this->iToggleTheDateFilter(true);
+        $this->iSelectFromTheDropdown($type, 'Time Filter');
+        $this->clickOnElement('#filter-col1');
+        $this->spin(function() use ($initialCount) {
+            $postCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+            return $postCount !== $initialCount && $postCount > 0;
+            }, "Time filter did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
+        $this->setTimeFilterDefault($date, 'remove');
     }
 
     /**
@@ -833,12 +864,13 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $count = $this->getCurrentFieldCount($prop);     
         $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
-        $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+        $selector = $selId.' option:selected';  
+        $selected = $this->getUserSession()->evaluateScript("$('$selector').text();"); 
         while ($count > 1 && $selected !== $text) {
             $selId = substr($selId, 0, -1).--$count;
-            $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
+            $selected = $this->getUserSession()->evaluateScript("$('$selector').text();"); 
         }
-        $this->assertFieldValueIs($text, $selId.'+div>div>div');
+        $this->assertFieldValueIs($text, $selector);
     }
 
     /**
@@ -866,13 +898,14 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :prop dropdown field 
+     * @Then I should see :text in the :prop form dropdown 
      */
-    public function iShouldSeeInTheDropdownField($text, $prop)
+    public function iShouldSeeInTheFormDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getUserSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
-        $this->assertFieldValueIs($text, $selId.'+div>div>div');
+        $selector = $selId.' option:selected';  
+        $this->getUserSession()->wait(10000, "$('$selector').text() == '$text';");
+        $this->assertFieldValueIs($text, $selector);
     }
     /**
      * @Then I (should) see :text in the form header
@@ -1049,6 +1082,21 @@ class FeatureContext extends RawMinkContext implements Context
         usleep(500000);
         $this->assertFieldValueIs($text, $selId);
     }
+    /**
+     * There doesn't seem to be a way to set the date on the flatpickr calendar
+     * from these tests. Adding a data property to the calendar elem that will be
+     * read on calendar load and set that time as the default for the calendar. 
+     * Doesn't quite test the user's input, but should test the filter functionality.
+     */
+    private function setTimeFilterDefault($date, $reset = false)
+    {  
+        if ($reset) {
+            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', false);");    
+        } else {
+            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', '$date');");
+        }
+    }
+
 /** ---------------------- Get From Page -------------------------------------*/
     private function getAllTableRows()
     {
@@ -1263,6 +1311,12 @@ class FeatureContext extends RawMinkContext implements Context
     private function getUserSession()
     {
         return isset($this->curUser) ? $this->curUser : $this->getSession();
+    }
+    private function clickOnElement($selector)
+    {
+        $elem = $this->getUserSession()->getPage()->find('css', $selector); 
+        $this->handleNullAssert($elem, false, "Couldn't find the [$selector] element.");
+        $elem->click();
     }
 /** ================== Data Sync Feature Methods ===================================================================== */
     /**

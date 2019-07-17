@@ -102,6 +102,7 @@ Sort:
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
     - Accessibility REFACTORING 
         - text to speech, etc
+    - Change date time filter html to be more broad than the time updated/changed
     - refactor @initCOmbobox to take change methods when it makes more sense to pass rather than include 
 ##(Category){priority}[difficulty]##
 TODOs:

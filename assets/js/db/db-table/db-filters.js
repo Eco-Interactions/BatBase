@@ -191,7 +191,10 @@ function resetFilterUi() {
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
     fPs.pnlFltrs.time.type = val;
-    if (ifFilteringOnTime()) { filterTableByTime(); }
+    if (ifFilteringOnTime()) { 
+        fPs.cal = initCal();
+        filterTableByTime(); 
+    }
 }
 /**
  * When the interaction form is exited, the passed focus is selected and the 
@@ -208,26 +211,45 @@ function showUpdatesAfterTableLoad() {
 }
 /** The time-updated filter is enabled when the filter option is checked. */
 export function toggleTimeFilter(state, time) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
-    fPs.cal = fPs.cal || initCal(); 
+    fPs.cal = initCal(); //fPs.cal || 
     const filtering = ifFilteringOnTime(state);
     updateTimeFilterMemory(time);
     updateRelatedUi(filtering);
     if (filtering) { filterTableByTime(time);
     } else { resetTimeFilter(); } 
 } 
-/** 
- * Instantiates the flatpickr calendar and returns the flatpickr instance.
- * Add time updated filter
- */
+/** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
-    const confirmDatePlugin = require('../../libs/confirmDate.js'); 
+    if (fPs.cal) { fPs.cal.destroy(); }
     const calOpts = {
-        altInput: true, maxDate: "today", enableTime: true,   
-        plugins: [confirmDatePlugin({showAlways: true})],
-        onReady: function() { this.amPM.textContent = "AM"; },
-        onClose: filterByTime
+        altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),   
+        plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
+        onReady: getCalOnReadyMethod(), 
+        onClose: filterByTime, 
     }; 
+    addDefaultTimeIfTesting(calOpts);
     return $('#time-cal').flatpickr(calOpts);
+}
+function ifFilteringByUpdates() {
+    return fPs.pnlFltrs.time && fPs.pnlFltrs.time.type === 'updated'; 
+}
+function getCalPlugins() {
+    const confirmDatePlugin = require('../../libs/confirmDate.js'); 
+    return [confirmDatePlugin({showAlways: true})];
+}
+function getCalOnReadyMethod() {
+    return ifFilteringByUpdates() ? 
+            function() {this.amPM.textContent = "AM"} : Function.prototype;
+}
+/**
+ * There doesn't seem to be a way to set the date on the flatpickr calendar
+ * from the selenium/behat tests. A data property is added to the calendar elem 
+ * and that time is set as the default for the calendar. 
+ */
+function addDefaultTimeIfTesting(calOpts) {
+    const date = $('#selTimeFilter').data('default');  
+    if (!date) { return; }
+    calOpts.defaultDate = date;
 }
 function ifFilteringOnTime(state) {
     return state === 'disable' ? false : state === true ? true : $('#shw-chngd')[0].checked;
@@ -239,7 +261,7 @@ function updateTimeFilterMemory(time) {
     if (time) { fPs.pnlFltrs.time.date = time; } 
 }
 function updateRelatedUi(filtering) {
-    const opac = filtering ? 1 : .6;
+    const opac = filtering ? 1 : .4;
     $('#time-cal, .flatpickr-input').attr({'disabled': !filtering});  
     $('.selTimeFilter-sel, #time-cal, .flatpickr-input, #shw-chngd-ints label, #shw-chngd-ints div').css({'opacity': opac});
     $('#shw-chngd')[0].checked = filtering;
@@ -267,6 +289,7 @@ function filterTableByTime(time) {                                              
         reapplyPreviousTimeFilter(fPs.pnlFltrs.time);
     } else {
         fPs.cal.open();
+        if ($('#selTimeFilter').data('default')) { return; }
         fPs.cal.setDate(new Date().today(), false, 'Y-m-d');  
     }
 }   
