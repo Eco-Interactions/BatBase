@@ -45,7 +45,7 @@ Feature: Save and manage custom sets of filters
         Then I should see the table displayed in "Location" view
         And I should see "(SET) Country, Time Published." in the filter status bar
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
-        When I select "- All- " from the "Country" dropdown
+        When I select "all" from the "Country" dropdown
         And I press the "Update" button
         And I should see "Region, Time Published." in the save modal
         And I press the "Submit" button
@@ -53,12 +53,16 @@ Feature: Save and manage custom sets of filters
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
 
 ## --------------- DELETE  --------------- ##
+ ##The first "Given" step is only needed because sometimes the tutorial isn't fully closed and this was easier than adding another wait
     @javascript
     Scenario:  I should be able to DELETE a set of filters.
-        Given I toggle "open" the filter panel
+        Given the database table is in "Source" view 
+        And I toggle "open" the filter panel
         When I select "Test Filter Set" from the "Saved Filters" dropdown
         And I should see "Test Filter Set" in the "Saved Filters" dropdown
+        And I break "Press Delete and make sure it works. Tests not interacting with these buttons easily."
         And I press the "Delete" button
+        And I press the "Confirm" button
         Then I should see "No Active Filters" in the filter status bar 
         And I should see "" in the "Saved Filters" dropdown
 

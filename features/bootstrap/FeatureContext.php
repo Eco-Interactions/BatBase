@@ -177,7 +177,7 @@ class FeatureContext extends RawMinkContext implements Context
     public function iSelectFromTheDropdown($text, $label)
     {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
-            'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
+            'Book' => 2, 'Article' => 3, 'Map Data' => 'map', 'Test Filter Set' => 1 ];
         $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
         $selId = '#sel'.str_replace(' ','',$label);
         $elem = $this->getUserSession()->getPage()->find('css', $selId);
@@ -564,7 +564,7 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->spin(function() use ($text) {
                 $modalText = $this->getUserSession()->evaluateScript("$('.introjs-tooltiptext').text();");  
-                return strpos($filterMsg, $text) !== false;
+                return strpos($modalText, $text) !== false;
             }, "Did not find [$text] in the modal."
         );
     }
