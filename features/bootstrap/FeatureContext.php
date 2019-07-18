@@ -558,11 +558,13 @@ class FeatureContext extends RawMinkContext implements Context
     }
 /* ---------------- Assertion Steps ----------------------------------------- */
     /**
-     * @When I should see :arg1 in the save modal
+     * @When I should see :text in the save modal
      */
-    public function iShouldSeeInTheSaveModal($arg1)
+    public function iShouldSeeInTheSaveModal($text)
     {
-        throw new PendingException();
+        $modalText = $this->getUserSession()->evaluateScript("$('.introjs-tooltiptext').text();");  
+        $this->handleContainsAssert($text, $modalText, true, 
+            "Found [$modalText] in the modal. Expected [$text].");
     }
 
     /**
