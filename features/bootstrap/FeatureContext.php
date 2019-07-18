@@ -562,17 +562,23 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheSaveModal($text)
     {
-        $modalText = $this->getUserSession()->evaluateScript("$('.introjs-tooltiptext').text();");  
-        $this->handleContainsAssert($text, $modalText, true, 
-            "Found [$modalText] in the modal. Expected [$text].");
+        $this->spin(function() use ($text) {
+                $modalText = $this->getUserSession()->evaluateScript("$('.introjs-tooltiptext').text();");  
+                return strpos($filterMsg, $text) !== false;
+            }, "Did not find [$text] in the modal."
+        );
     }
 
     /**
-     * @Then I should see :arg1 in the filter status bar
+     * @Then I should see :text in the filter status bar
      */
-    public function iShouldSeeInTheFilterStatusBar($arg1)
+    public function iShouldSeeInTheFilterStatusBar($text)
     {
-        throw new PendingException();
+        $this->spin(function() use ($text) {
+                $filterMsg = $this->getUserSession()->evaluateScript("$('#filter-status').text();");  
+                return strpos($filterMsg, $text) !== false;
+            }, "Did not find [$text] in the filter status bar."
+        );
     }
     /**
      * @Then I should see the map with the location summary popup
