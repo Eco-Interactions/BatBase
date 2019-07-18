@@ -111,22 +111,6 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given I toggle :state the filter panel
-     */
-    public function iToggleTheFilterPanel($state)
-    {
-        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');");
-        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
-        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
-        $filterPanelToggle->click();
-        /* -- Spin until finished -- */
-        $stepComplete = function() use ($state){
-            $closed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');"); 
-            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
-        };      
-        $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
-    }
-    /**
      * @Given the database table is in :entity view
      */
     public function theDatabaseTableIsInSelectedView($entity)
@@ -168,6 +152,24 @@ class FeatureContext extends RawMinkContext implements Context
         $this->changeTableSort('#sel-view', 'map', '#map');
     }
 
+
+    /**
+     * @Given I toggle :state the filter panel
+     */
+    public function iToggleTheFilterPanel($state)
+    {
+        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');");
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
+        $filterPanelToggle->click();
+        /* -- Spin until finished -- */
+        $stepComplete = function() use ($state){
+            $closed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');"); 
+            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+        };      
+        $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+    }
+
     /**
      * @When I select :text from the :label dropdown
      * Search page elems.
@@ -193,6 +195,19 @@ class FeatureContext extends RawMinkContext implements Context
         $input->setValue($text);
         $input->keypress('13');
         usleep(500000);
+    }
+
+    /**
+     * @When I enter :text in the :label dropdown
+     */
+    public function iEnterInTheDropdown($text, $label)
+    {
+        $selId = '#sel'.str_replace(' ','',$label);
+        try {
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Couldn't find dropdown [$selId]");
+        }
     }
 
     /**
@@ -542,6 +557,21 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iPutABreakpoint("theMarkersPopupShouldHaveADescriptionOfThePosition");
     }
 /* ---------------- Assertion Steps ----------------------------------------- */
+    /**
+     * @When I should see :arg1 in the save modal
+     */
+    public function iShouldSeeInTheSaveModal($arg1)
+    {
+        throw new PendingException();
+    }
+
+    /**
+     * @Then I should see :arg1 in the filter status bar
+     */
+    public function iShouldSeeInTheFilterStatusBar($arg1)
+    {
+        throw new PendingException();
+    }
     /**
      * @Then I should see the map with the location summary popup
      */
