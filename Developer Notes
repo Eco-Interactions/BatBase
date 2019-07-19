@@ -84,6 +84,19 @@ Run Tests:
 ##  php bin/console doctrine:database:drop --force --env=test 
 ##  php bin/console doctrine:database:create --env=test
 ##  php bin/console doctrine:schema:update --force --env=test
+
+Writing tests: 
+    - spin method template:
+        $this->spin(function() use () {
+            try {
+
+            } catch (Exception $e) { return false; 
+            } finally {
+                // ... do stuff
+                return true;
+            }
+        }, 'msg');
+
 ##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
 >::Known BUGS::

@@ -29,7 +29,7 @@ Feature: Edit data in the database
         And I expand "Panama" in the data tree
         And I click on the edit pencil for the first interaction of "Summit Experimental Gardens"
         And I see "Editing Interaction"
-        When I change the "Location" form dropdown field to "Panama"
+        When I change the "Location" form dropdown to "Panama"
         And I press the "Update Interaction" button
         And I uncheck the time-updated filter
         And I expand "Central America" in the data tree
@@ -46,9 +46,9 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         And I focus on the "Subject" taxon field
         And I see "Select Subject Taxon"
-        When I select "Artibeus lituratus" from the "Species" form dropdown field
-        And I should see "Artibeus" in the "Genus" form dropdown field
-        And I press the "Confirm" button
+        When I select "Artibeus lituratus" from the "Species" form dropdown
+        And I should see "Artibeus" in the "Genus" form dropdown
+        And I press the "Select" button
         And I press the "Update Interaction" button
         And I uncheck the time-updated filter
         And I expand "Family Phyllostomidae" in the data tree
@@ -65,9 +65,9 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         And I focus on the "Object" taxon field
         And I see "Select Object Taxon"
-        When I select "Philodendron sphalerum" from the "Species" form dropdown field
-        And I should see "Philodendron" in the "Genus" form dropdown field
-        And I press the "Confirm" button
+        When I select "Philodendron sphalerum" from the "Species" form dropdown
+        And I should see "Philodendron" in the "Genus" form dropdown
+        And I press the "Select" button
         And I press the "Update Interaction" button
         And I uncheck the time-updated filter
         And I expand "Family Araceae" in the data tree
@@ -82,7 +82,7 @@ Feature: Edit data in the database
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
-        When I change the "Interaction Type" form dropdown field to "Consumption"
+        When I change the "Interaction Type" form dropdown to "Consumption"
         And I add the "Seed" interaction tag
         And I remove the "Flower" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
@@ -90,7 +90,7 @@ Feature: Edit data in the database
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
-        Then I should see "Consumption" in the "Interaction Type" form dropdown field
+        Then I should see "Consumption" in the "Interaction Type" form dropdown
         Then I should see the "Seed" interaction tag
         Then I should not see the "Flower" interaction tag
         Then I should see "New Test Note Description" in the "Note" field "textarea"
@@ -103,8 +103,8 @@ Feature: Edit data in the database
       # And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
       # And I click on the edit pencil for the first interaction of "Feeding habits"
       # And I see "Editing Interaction"
-      # When I change the "Publication" form dropdown field to "Book of Mammalogy"
-      # And I change the "Citation Title" form dropdown field to "Observations on the life histories of Panama bats"
+      # When I change the "Publication" form dropdown to "Book of Mammalogy"
+      # And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
       # And I press the "Update Interaction" button
       # And I uncheck the time-updated filter
       # And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
@@ -112,7 +112,7 @@ Feature: Edit data in the database
       # Then I should see "3" interactions under "Observations on the life histories of Panama bats"
       # And I should see "3" interactions under "Feeding habits"
 
-  ## -------------------------- Location -------------------------------------##
+  # -------------------------- Location -------------------------------------##
     @javascript
     Scenario:  I should be able to edit the data of an existing location
         Given the database table is in "Location" view
@@ -122,7 +122,7 @@ Feature: Edit data in the database
         And I see "Editing Location"
         When I change the "Display Name" field "input" to "Santa Ana-Captivity"
         And I change the "Description" field "textarea" to "Description..."
-        And I change the "Habitat Type" form dropdown field to "Captivity"
+        And I change the "Habitat Type" form dropdown to "Captivity"
         And I change the "Elevation" field "input" to "1000"
         And I change the "Elevation Max" field "input" to "2000"
         And I change the "Latitude" field "input" to "9.7489"
@@ -135,7 +135,7 @@ Feature: Edit data in the database
         And I see "Editing Location"
         Then I should see "Santa Ana-Captivity" in the "Display Name" field "input"
         And I should see "Description..." in the "Description" field "textarea"
-        Then I should see "Captivity" in the "Habitat Type" form dropdown field
+        Then I should see "Captivity" in the "Habitat Type" form dropdown
         Then I should see "1000" in the "Elevation" field "input"
         Then I should see "2000" in the "Elevation Max" field "input"
         Then I should see "9.7489" in the "Latitude" field "input"
@@ -147,13 +147,13 @@ Feature: Edit data in the database
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Forest" row
-        When I change the "Country" form dropdown field to "Panama"
+        When I change the "Country" form dropdown to "Panama"
         And I press the "Update Location" button
         And I expand "Central America" in the data tree
         Then I should see "Santa Ana-Forest" under "Panama" in the tree
         And I should not see "Santa Ana-Forest" under "Costa Rica" in the tree
 
-#   ## -------------------------- Source ---------------------------------------##
+  ## -------------------------- Source ---------------------------------------##
     @javascript
     Scenario:  I should be able to edit the data of an existing publication
         Given the database table is in "Source" view
@@ -161,23 +161,23 @@ Feature: Edit data in the database
         And I see "Editing Publication"
         When I change the "Title" field "input" to "Book of Mammalogy"
         And I change the "Description" field "textarea" to "Description..."
-        And I change the "Publication Type" form dropdown field to "Book"
+        And I change the "Publication Type" form dropdown to "Book"
         And I change the "Link Url" field "input" to "www.link.com"
         And I change the "Link Display" field "input" to "Book Website"
         And I change the "Doi" field "input" to "10.1037/rmh0000008"
-        And I change the "Publisher" form dropdown field to "University of Paris VI"
-        And I add "Cockle, Anya" to the "Authors" dynamic form dropdown field 
+        And I change the "Publisher" form dropdown to "University of Paris VI"
+        And I add "Cockle, Anya" to the "Authors" dynamic dropdown 
         And I press the "Update Publication" button
         And I select "Book" from the "Pub Type" dropdown
         And I click on the edit pencil for the "Book of Mammalogy" row
         And I see "Editing Publication"
         Then I should see "Book of Mammalogy" in the "Title" field "input"
         Then I should see "Description..." in the "Description" field "textarea"
-        Then I should see "Book" in the "Publication Type" form dropdown field
+        Then I should see "Book" in the "Publication Type" form dropdown
         Then I should see "www.link.com" in the "Link Url" field "input"
         Then I should see "Book Website" in the "Link Display" field "input"
-        Then I should see "University of Paris VI" in the "Publisher" form dropdown field
-        Then I should see "Cockle, Anya" in the "Authors" field dynamic dropdown
+        Then I should see "University of Paris VI" in the "Publisher" form dropdown
+        Then I should see "Cockle, Anya" in the "Authors" dynamic dropdown
 
     @javascript
     Scenario:  I should be able to edit the data of an existing author
@@ -230,14 +230,14 @@ Feature: Edit data in the database
         And I expand "Gardner, Alfred L" in the data tree
         When I click on the edit pencil for the "Feeding habits" row
         And I see "Editing Citation"
-        And I change the "Citation Type" form dropdown field to "Book"
+        And I change the "Citation Type" form dropdown to "Book"
         And I change the "Abstract" field "textarea" to "Test Abstract"
         And I change the "Edition" field "input" to "4"
         And I change the "Link Url" field "input" to "www.link.com"
         And I change the "Link Display" field "input" to "Citation Website"
         And I change the "Doi" field "input" to "10.1037/rmh0000008"
-        And I change the "Authors" dynamic form dropdown field to "Cockle, Anya"
-        And I add "Baker, Herbert G" to the "Authors" dynamic form dropdown field 
+        And I change the "Authors" dynamic dropdown field to "Cockle, Anya"
+        And I add "Baker, Herbert G" to the "Authors" dynamic dropdown 
         And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
         And I should not see "Gardner, Alfred L" in the tree 
@@ -247,13 +247,13 @@ Feature: Edit data in the database
         Then I should see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I should see "Test Abstract" in the "Abstract" field "textarea"
         And I should see "Feeding habits" in the "Title" field "input"
-        And I should see "Book" in the "Citation Type" form dropdown field
+        And I should see "Book" in the "Citation Type" form dropdown
         And I should see "4" in the "Edition" field "input"
         And I should see "www.link.com" in the "Link Url" field "input"
         And I should see "Citation Website" in the "Link Display" field "input"
         And I should see "10.1037/rmh0000008" in the "Doi" field "input"
-        And I should see "Baker, Herbert G" in the "Authors" field dynamic dropdown
-        And I should see "Cockle, Anya" in the "Authors" field dynamic dropdown
+        And I should see "Baker, Herbert G" in the "Authors" dynamic dropdown
+        And I should see "Cockle, Anya" in the "Authors" dynamic dropdown
 
     @javascript
     Scenario:  I should be able to change an interaction's publication
@@ -262,8 +262,8 @@ Feature: Edit data in the database
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
         And I click on the edit pencil for the first interaction of "Feeding habits"
         And I see "Editing Interaction"
-        When I change the "Publication" form dropdown field to "Journal of Mammalogy"
-        And I change the "Citation Title" form dropdown field to "Observations on the life histories of Panama bats"
+        When I change the "Publication" form dropdown to "Journal of Mammalogy"
+        And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
         And I press the "Update Interaction" button
         And I uncheck the time-updated filter
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
@@ -279,7 +279,7 @@ Feature: Edit data in the database
         And I click on the edit pencil for the "Order Lepidoptera" row
         And I see "Editing Taxon"
         When I change the "taxon name" field "input" to "Leopardil"
-        When I change the "taxon level" form dropdown field to "Class"
+        When I change the "taxon level" form dropdown to "Class"
         And I press the "Update Taxon" button
         Then I should see "Class Leopardil" in the tree
 
@@ -293,8 +293,8 @@ Feature: Edit data in the database
         And I see "Editing Taxon"
         When I press "Change Parent"
         And I see "Select New Taxon Parent"
-        When I select "Artibeus" from the "Genus" form dropdown field
-        And I press the "Confirm" button
+        When I select "Artibeus" from the "Genus" form dropdown
+        And I press the "Select" button
         And I press the "Update Taxon" button
         And I expand "Family Phyllostomidae" in the data tree
         Then I should see "Rhinophylla pumilio" under "Genus Artibeus" in the tree

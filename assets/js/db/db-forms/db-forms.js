@@ -1735,7 +1735,7 @@ function buildAndAppendRealmElems(realm, fLvl) {
 function customizeElemsForTaxonSelectForm(role) {
     $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
     $('#sub-hdr').append(getTaxonExitButton(role));
-    $('#sub-submit')[0].value = "Confirm";        
+    $('#sub-submit')[0].value = "Select";        
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(selectTaxon);
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
@@ -2012,7 +2012,7 @@ function buildParentTaxonEditFields() {
     setTaxonPrntNameElem(null, null, " ");
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     disableSubmitBttn('#top-submit');
-    $('#sub-submit')[0].value = 'Confirm';
+    $('#sub-submit')[0].value = 'Select';
 }
 function buildAndAppendEditParentElems(prntId) {
     var cntnr = _u.buildElem("div", { class: "sml-form flex-row pTaxon", id: "sub-form" });
