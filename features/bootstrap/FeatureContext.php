@@ -154,6 +154,39 @@ class FeatureContext extends RawMinkContext implements Context
 
 
     /**
+     * @When I select :modType :selType from the list modification panel
+     */
+    public function iSelectFromTheListModificationPanel($modType, $selType)
+    {
+        $vals = [ 'All Shown' => 'all', 'Select Rows' => 'some'];
+        $val = $vals[$selType];
+        $radio = $this->getUserSession()->getPage()->find('css', "#mod-".$val."-list");  
+        $this->handleNullAssert($radio, false, 'No [$selType] radio found.');
+        $radio->click();
+        $this->spin(function() use ($val, $selType) {
+            return $this->getUserSession()->evaluateScript("$('input#mod-".$val."-list:checked').val() == 'on'");
+            }, "The [$selType] radio is not checked.");
+    }
+
+    /**
+     * @Given I toggle :state the data lists panel
+     * Refactor combin with filter panel
+     */
+    public function iToggleTheDataListsPanel($state)
+    {
+        $isClosed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');");
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        $dataListsPanel = $this->getUserSession()->getPage()->find('css', 'button[name="int-set"]');  
+        $dataListsPanel->click();
+        /* -- Spin until finished -- */
+        $stepComplete = function() use ($state){
+            $closed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');"); 
+            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+        };      
+        $this->spin($stepComplete, 'Data Lists panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+    }
+
+    /**
      * @Given I toggle :state the filter panel
      */
     public function iToggleTheFilterPanel($state)
@@ -177,7 +210,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iSelectFromTheDropdown($text, $label)
     {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
         $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
-            'Book' => 2, 'Article' => 3, 'Map Data' => 'map', 'Test Filter Set' => 1 ];
+            'Book' => 2, 'Article' => 3, 'Map Data' => 'map', 'Test Filter Set' => 1,
+            'Test Interaction List' => 1, 'Panama' => 12 ];
         $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
         $selId = '#sel'.str_replace(' ','',$label);
         $elem = $this->getUserSession()->getPage()->find('css', $selId);
@@ -341,6 +375,8 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @Then I (should) see :count row(s) in the table data tree
+     *
+     * refactor: merge with ishouldseeinteractionsinthelist
      */
     public function iShouldSeeRowsInTheTableDataTree($count)
     {
@@ -433,6 +469,30 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree($parentNode);
         $row = $this->getTableRow($text);
         $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
+    }
+
+    /**
+     * @Then I should see :cnt interactions in the list
+     */
+    public function iShouldSeeInteractionsInTheList($cnt)
+    {
+        $this->spin(function() use ($cnt) {
+                $curCnt = $this->getUserSession()->evaluateScript("$('#int-list-cnt').text().match(/\d+/)[0];");
+                return $curCnt == $cnt;
+            }, "Didn't find [$cnt] interactions in the list."
+        );
+    }
+
+    /**
+     * @Given I should see :cnt interactions in the table
+     */
+    public function iShouldSeeInteractionsInTheTable($cnt)
+    {
+        $this->spin(function() use ($cnt) {
+                $curCnt = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+                return $curCnt == $cnt;
+            }, "Didn't find [$cnt] interactions in the table."
+        );
     }
 /** ------------------ Map Methods -------------------------------------------*/
     /**
@@ -1071,7 +1131,7 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iPressTheButton($bttnText)
     {
-        if (stripos($bttnText, "Confirm") !== false) { $bttnText = 'sub-submit'; } //Should not be necessary. No changes were made to the button, but suddenly it wasn't finding the confirm button, though the reset button (almost identical) was found fine. #ugh
+        // if (stripos($bttnText, "Confirm") !== false) { $bttnText = 'sub-submit'; } //Should not be necessary. No changes were made to the button, but suddenly it wasn't finding the confirm button, though the reset button (almost identical) was found fine. #ugh
         if (stripos($bttnText, "Update") !== false || 
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
         $this->getUserSession()->getPage()->pressButton($bttnText);

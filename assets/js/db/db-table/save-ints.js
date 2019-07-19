@@ -115,6 +115,7 @@ function updateUiForListCreate() {
 }
 function createDataList() {
     if (!$('#top-details input').val()) { return $('#top-details input').focus(); }
+    $('#submit-list').data('submitting', true); //Prevents selMode from being overwritten
     const data = buildListData();
     submitDataList(data, 'create', onListSubmitComplete.bind(null, 'create'));
 }
@@ -123,7 +124,7 @@ function createDataList() {
 export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
     if (val === 'create') { return newIntList(''); }
     if (!val && !app.submitting) { return resetListUi(); }
-    if (val === 'new') { return; } // New list typed into combobox
+    if (val === 'new'|| (!val && app.submitting)) { return; } // New list typed into combobox or mid edit-submit
     resetPrevListUiState();
     _uPnl.updateSubmitEvent('#submit-list', editDataList);
     fillListData(val);
