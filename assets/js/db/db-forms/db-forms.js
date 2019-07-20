@@ -1735,7 +1735,7 @@ function buildAndAppendRealmElems(realm, fLvl) {
 function customizeElemsForTaxonSelectForm(role) {
     $('#sub-hdr')[0].innerHTML = "Select " + role + " Taxon";
     $('#sub-hdr').append(getTaxonExitButton(role));
-    $('#sub-submit')[0].value = "Select";        
+    $('#sub-submit')[0].value = "Select Taxon";        
     $('#sub-cancel')[0].value = "Reset";
     $('#sub-submit').unbind("click").click(selectTaxon);
     $('#sub-cancel').unbind("click").click(resetTaxonSelectForm);
@@ -2012,7 +2012,7 @@ function buildParentTaxonEditFields() {
     setTaxonPrntNameElem(null, null, " ");
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     disableSubmitBttn('#top-submit');
-    $('#sub-submit')[0].value = 'Select';
+    $('#sub-submit')[0].value = 'Select Taxon';
 }
 function buildAndAppendEditParentElems(prntId) {
     var cntnr = _u.buildElem("div", { class: "sml-form flex-row pTaxon", id: "sub-form" });
@@ -2517,6 +2517,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
     const fVals = getCurrentFormFieldVals(fLvl);                                //console.log('vals before fill = %O', JSON.parse(JSON.stringify(fVals)));
     const fConfg = fP.forms[fLvl].confg;                                        //console.log('toggling optional fields. Show? [%s]', fP.forms.expanded[entity]);
     $('#'+entity+'_Rows').empty();
+    fP.forms[fLvl].reqElems = [];
     $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
     initComboboxes(entity, fLvl);
     fillComplexFormFields(fLvl);

@@ -21,7 +21,7 @@ Feature: Filtering the data displayed in the database table
       And I toggle "open" the filter panel
       When I "check" the time "cited" filter
       And I break "What time would be good to set the CITED at filter too? How many interactions then?"
-      And I set the time filter to "Januray 1, 2017"
+      And I set the time "cited" filter to "Januray 1, 2017"
       Then I should see "X" rows in the table data tree
       And I should see "X" interactions in the list
       And I should see "Time Published." in the filter status bar
@@ -32,7 +32,7 @@ Feature: Filtering the data displayed in the database table
       And I toggle "open" the filter panel
       When I "check" the time "updated" filter
       And I break "What time would be good to set the UPDATED at filter too? How many interactions then?"
-      And I set the time filter to "Januray 1, 2017"
+      And I set the time "updated" filter to "Januray 1, 2017"
       Then I should see "X" rows in the table data tree
       And I should see "X" interactions in the list
       And I should see "Time Updated." in the filter status bar

@@ -31,6 +31,7 @@ Feature: Edit data in the database
         And I see "Editing Interaction"
         When I change the "Location" form dropdown to "Panama"
         And I press the "Update Interaction" button
+        And I wait for the "top" form to close
         And I uncheck the time-updated filter
         And I expand "Central America" in the data tree
         And I expand "Panama" in the data tree
@@ -50,6 +51,7 @@ Feature: Edit data in the database
         And I should see "Artibeus" in the "Genus" form dropdown
         And I press the "Select" button
         And I press the "Update Interaction" button
+        And I wait for the "top" form to close
         And I uncheck the time-updated filter
         And I expand "Family Phyllostomidae" in the data tree
         And I expand "Genus Artibeus" in the data tree
@@ -69,6 +71,7 @@ Feature: Edit data in the database
         And I should see "Philodendron" in the "Genus" form dropdown
         And I press the "Select" button
         And I press the "Update Interaction" button
+        And I wait for the "top" form to close
         And I uncheck the time-updated filter
         And I expand "Family Araceae" in the data tree
         And I expand "Genus Philodendron" in the data tree
@@ -87,6 +90,7 @@ Feature: Edit data in the database
         And I remove the "Flower" interaction tag
         And I change the "Note" field "textarea" to "New Test Note Description"
         And I press the "Update Interaction" button
+        And I wait for the "top" form to close
         And I expand "Family Araceae" in the data tree
         And I click on the edit pencil for the first interaction of "Unspecified Araceae Interactions"
         And I see "Editing Interaction"
@@ -106,6 +110,7 @@ Feature: Edit data in the database
       # When I change the "Publication" form dropdown to "Book of Mammalogy"
       # And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
       # And I press the "Update Interaction" button
+        # And I wait for the "top" form to close
       # And I uncheck the time-updated filter
       # And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
       # And I expand "Book of Mammalogy" in the data tree
@@ -129,6 +134,7 @@ Feature: Edit data in the database
         And I change the "Longitude" field "input" to "83.7534"
         And I see the location's pin on the map
         And I press the "Update Location" button
+        And I wait for the "top" form to close
         And I expand "Central America" in the data tree
         And I expand "Costa Rica" in the data tree
         And I click on the edit pencil for the "Santa Ana-Captivity" row
@@ -149,6 +155,7 @@ Feature: Edit data in the database
         And I click on the edit pencil for the "Santa Ana-Forest" row
         When I change the "Country" form dropdown to "Panama"
         And I press the "Update Location" button
+        And I wait for the "top" form to close
         And I expand "Central America" in the data tree
         Then I should see "Santa Ana-Forest" under "Panama" in the tree
         And I should not see "Santa Ana-Forest" under "Costa Rica" in the tree
@@ -168,6 +175,7 @@ Feature: Edit data in the database
         And I change the "Publisher" form dropdown to "University of Paris VI"
         And I add "Cockle, Anya" to the "Authors" dynamic dropdown 
         And I press the "Update Publication" button
+        And I wait for the "top" form to close
         And I select "Book" from the "Pub Type" dropdown
         And I click on the edit pencil for the "Book of Mammalogy" row
         And I see "Editing Publication"
@@ -192,6 +200,7 @@ Feature: Edit data in the database
         And I change the "Link Url" field "input" to "www.link.com"
         And I change the "Link Display" field "input" to "Author Website"
         And I press the "Update Author" button
+        And I wait for the "top" form to close
         And I click on the edit pencil for the "Cockel, Joy Karen Jr" row
         And I see "Editing Author"
         Then I should see "Joy" in the "First Name" field "input"
@@ -214,6 +223,7 @@ Feature: Edit data in the database
         And I change the "Link Url" field "input" to "www.link.com"
         And I change the "Link Display" field "input" to "Publisher Website"
         And I press the "Update Publisher" button
+        And I wait for the "top" form to close
         And I click on the edit pencil for the "University of Paris V" row
         And I see "Editing Publisher"
         Then I should see "Nice" in the "City" field "input"
@@ -240,6 +250,7 @@ Feature: Edit data in the database
         And I add "Baker, Herbert G" to the "Authors" dynamic dropdown 
         And I see "Cockle, A. & H. G. Baker. 1977. Biology of bats of the New World family Phyllostomatidae (P. Bloedel, ed.). 4. Britanica Books, Wellingsworth, Britan." in the "Citation Text" field "textarea"
         And I press the "Update Citation" button
+        And I wait for the "top" form to close
         And I should not see "Gardner, Alfred L" in the tree 
         And I expand "Baker, Herbert G" in the data tree
         And I click on the edit pencil for the "Feeding habits" row
@@ -265,6 +276,7 @@ Feature: Edit data in the database
         When I change the "Publication" form dropdown to "Journal of Mammalogy"
         And I change the "Citation Title" form dropdown to "Observations on the life histories of Panama bats"
         And I press the "Update Interaction" button
+        And I wait for the "top" form to close
         And I uncheck the time-updated filter
         And I expand "Biology of bats of the New World family Phyllostomatidae" in the data tree
         And I expand "Journal of Mammalogy" in the data tree
@@ -281,6 +293,7 @@ Feature: Edit data in the database
         When I change the "taxon name" field "input" to "Leopardil"
         When I change the "taxon level" form dropdown to "Class"
         And I press the "Update Taxon" button
+        And I wait for the "top" form to close
         Then I should see "Class Leopardil" in the tree
 
     @javascript
@@ -296,5 +309,6 @@ Feature: Edit data in the database
         When I select "Artibeus" from the "Genus" form dropdown
         And I press the "Select" button
         And I press the "Update Taxon" button
+        And I wait for the "top" form to close
         And I expand "Family Phyllostomidae" in the data tree
         Then I should see "Rhinophylla pumilio" under "Genus Artibeus" in the tree
