@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 namespace Application\Migrations;
 
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * create form to prevent this type of error moving forward. 
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-final class Version20190612193647TaxaDataCleanup extends AbstractMigration implements ContainerAwareInterface
+class Version20190612193647TaxaDataCleanup extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
@@ -25,7 +25,10 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
         $this->container = $container;
     }
 
-    public function up(Schema $schema) : void
+    /**
+     * @param Schema $schema
+     */
+    public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
         $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);        
@@ -53,7 +56,7 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
     {
         foreach ($taxa as $stay => $remove) {                                   //print("\nNew Merge\n");
             $sty = $this->getEntity('Taxon', $stay);  
-            $rmv = $this->getEntity('Taxon', $remove);
+            $rmv = $this->getEntity('Taxon', $remove);  if($rmv == null){ print('null taxon = '.$remove."\n"); continue; }
 
             $this->moveChildrenAndInteractions($sty, $rmv);
             $this->updateParent($sty, $rmv);
@@ -63,7 +66,7 @@ final class Version20190612193647TaxaDataCleanup extends AbstractMigration imple
         }
     }
     private function updateParent($sty, $rmv)
-    {
+    {  
         $parent = $rmv->getParentTaxon();
         $sty->setParentTaxon($parent);
         $rmv->setParentTaxon(null);

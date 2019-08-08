@@ -145,10 +145,10 @@ function getResetFocus() {
     return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
 /** Resets table state to top focus options for the selected view. */
-export function resetDataTable() {                                              //console.log("---reseting table---")
+export function resetDataTable(view) {                                           //console.log("---reseting table---")
     const resetMap = { taxa: buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
     resetCurTreeState();
-    resetMap[tblState.curFocus](); 
+    resetMap[tblState.curFocus](view); 
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')

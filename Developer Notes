@@ -1,8 +1,8 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 
 >Test Users
-    - Test_User: testuser123
-    - EditorTestUser: testeditor123
+    - TestUser: testuser123
+    - testeditor: testeditor123
 
 ##------------------------- Serve Side ---------------------------------------##
 >.htaccess rewrite for batplant.org 
@@ -53,7 +53,11 @@
     - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
     - $ yarn run encore production --config-name server
 
-
+## Live & Learn ##
+> Changing Servers
+    Transfer:
+        - Cron jobs
+        - Email forwards
 ##------------------- TESTING ------------------------------------------------##
 >Testing software setup
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)

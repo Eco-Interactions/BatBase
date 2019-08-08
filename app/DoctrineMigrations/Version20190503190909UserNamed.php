@@ -48,6 +48,7 @@ final class Version20190503190909UserNamed extends AbstractMigration implements 
         $geoJson->setDisplayPoint(json_encode([105.3188, 61.5240]));
         $geoJson->setUpdatedBy($this->admin);
         $this->em->persist($geoJson);
+        $this->em->flush();
     }
 
     public function down(Schema $schema) : void

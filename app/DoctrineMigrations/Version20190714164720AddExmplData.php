@@ -31,10 +31,9 @@ class Version20190714164720AddExmplData extends AbstractMigration implements Con
         $addData = $this->container->get('app.add_example_data');
         $users = $this->em->getRepository('AppBundle:User')->findAll();
 
-        foreach ($users as $user) {
+        foreach ($users as $user) { 
             $addData->addExampleDataToUser($user);
         }
-
     }
 
     /**

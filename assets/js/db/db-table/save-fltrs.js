@@ -239,6 +239,7 @@ function updateTableView(view) {                                                
 function reloadTable(focus, view, fltrId) { 
     if (focus == tState().get('curFocus')) { 
         resetDataTable(view);
+        _u.setSelVal('View', view, 'silent'); 
         _u.setSelVal('Saved Filter Set', fltrId); 
     } else { $('#search-focus')[0].selectize.addItem(focus); }                        
 }
