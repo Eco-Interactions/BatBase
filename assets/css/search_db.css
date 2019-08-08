@@ -82,6 +82,9 @@ input[type="radio"], input[type="checkbox"] {
 .panel-open-toggle {
     box-shadow: inset 0px 4px 10px #C1C1CA;
 }
+.admin-open-toggle {
+    box-shadow: inset 0px 4px 10px darkslateblue;
+}
 /** ---- Filter Options ---- */
 #filter-opts {
     padding: 5px;

@@ -30,11 +30,13 @@ function hideEditorColumn() {
     tState().set({'initParams': {editor: false}}); 
     reloadTable();
     $('#rvw-data').data('shown', false);
+    $('#rvw-data').removeClass('admin-open-toggle');
 }
 function showEditorColumn() {
     tState().set({'initParams': {editor: true}}); 
     reloadTable();
     $('#rvw-data').data('shown', true);
+    $('#rvw-data').addClass('admin-open-toggle');
 }
 function reloadTable() {
     tblState = tState().get();
