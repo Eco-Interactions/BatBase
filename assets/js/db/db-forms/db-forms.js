@@ -2594,7 +2594,7 @@ function getFormConfg(entity) {
             "suggested": ["Class", "Order", "Family", "Genus", "Species"],
             "optional": [],
             "order": {
-                "sug": ["Class", "Order", "Family", "Genus", "Species"],
+                "sug": ["Species", "Genus", "Family", "Order", "Class"],
                 "opt": false },
             "exitHandler": { create: enableTaxonCombos }
         },
@@ -2758,7 +2758,7 @@ function getFormConfg(entity) {
             "suggested": ["Family", "Genus", "Species"],
             "optional": [],
             "order": {
-                "sug": ["Family", "Genus", "Species"],
+                "sug": ["Species", "Genus", "Family"],
                 "opt": false},
             "exitHandler": { create: enableTaxonCombos }
         },
@@ -2831,7 +2831,7 @@ function getFormConfg(entity) {
             "suggested": ["Family", "Genus", "Species"],
             "optional": [],
             "order": {
-                "sug": ["Family", "Genus", "Species"],
+                "sug": ["Species", "Genus", "Family"],
                 "opt": false },
             "exitHandler": { create: enableTaxonCombos }
         },
