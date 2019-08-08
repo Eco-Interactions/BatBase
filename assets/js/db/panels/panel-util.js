@@ -14,12 +14,16 @@
 import * as _u from '../util.js';
 import { initFilterPanel, toggleFilterPanelOrientation } from './save-fltrs.js';
 import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
+import { addDataReviewEvents } from './data-review.js';
 
 
 /* ----------------- EVENT RELATED ------------------ */
-export function addPanelEvents() {
+export function addPanelEvents(userRole) {
     initFilterPanel();
     addListPanelEvents();
+    if (userRole !== 'visitor' || userRole !== 'user') {
+        addDataReviewEvents();
+    }
 }
 export function updateSubmitEvent(id, event) {
     $(id).off('click').click(event);

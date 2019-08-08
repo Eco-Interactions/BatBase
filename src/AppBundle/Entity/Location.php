@@ -836,6 +836,19 @@ class Location
     }
 
     /**
+     * Get updated by user name.
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("updatedBy")
+     *
+     * @return string
+     */
+    public function serializeUpdatedBy()
+    {
+        $user = $this->updatedBy ? $this->updatedBy : $this->createdBy;
+        return $user ? $user->getFirstName() : 'Sarah';
+    }
+
+    /**
      * Set deleted at.
      *
      * @param \DateTime $deletedAt

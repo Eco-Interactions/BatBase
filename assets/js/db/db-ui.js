@@ -56,7 +56,7 @@ function addDomEventListeners() {
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.resetDataTable);
-    addPanelEvents();
+    addPanelEvents(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
 export function showLoadingDataPopUp(type) {
@@ -95,18 +95,16 @@ function enableEditorFeatures() {                                               
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn')
         .click(createEntity.bind(null, 'create', 'interaction'));
-    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This feature is only available to admins.');
+    $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
-        #new-data`;
+        #new-data, #rvw-data`;
 }
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn')
         .click(createEntity.bind(null, 'create', 'interaction'));
-    $('#rvw-data').addClass('adminbttn').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This is an upcoming feature!');
+    $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = '.map-dsbl';
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
