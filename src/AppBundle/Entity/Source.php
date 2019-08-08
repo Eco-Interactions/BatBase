@@ -1007,6 +1007,24 @@ class Source
     }
 
     /**
+     * Get updated by user name.
+     * Note: Returns null for records developer (ID = 6) modified
+     * @JMS\VirtualProperty
+     * @JMS\SerializedName("updatedBy")
+     *
+     * @return string
+     */
+    public function serializeUpdatedBy()
+    {
+        $createdBy = $this->createdBy ? 
+            ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
+        $user = $this->updatedBy ? 
+            ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
+
+        return !$user ? null : $user->getFirstName();
+    }
+
+    /**
      * Get deleted at.
      *
      * @return \DateTime

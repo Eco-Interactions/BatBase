@@ -29,7 +29,7 @@ import * as db_sync from './db-sync.js';
 import * as db_ui from './db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
 import { startWalkthrough } from './intro.js';
-import { resetStoredFiltersUi, updateFilterPanelHeader } from './db-table/save-fltrs.js';
+import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-fltrs.js';
 
 /**
  * Stores table state params needed across multiple modules. 

@@ -36,7 +36,8 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
         treeLvl: treeLvl,
         interactions: locRcrd.interactions.length > 0,     /* Location objects have collections of interactions as children. */     
         locGroupedInts: hasGroupedInteractionsRow(locRcrd),
-        type: locRcrd.locationType.displayName
+        type: locRcrd.locationType.displayName,
+        updatedBy: locRcrd.updatedBy,
     }; 
     function getLocDisplayName() {
         const trans = { 'Unspecified': 'Unspecified / Habitat Only' };
@@ -141,7 +142,8 @@ function getSrcRowData(src, treeLvl, idx, tblState) {                           
         children: getChildSrcRowData(src, treeLvl, idx),
         treeLvl: treeLvl,
         interactions: src.isDirect,   //Only rows with interaction are colored
-        rowColorIdx: idx
+        rowColorIdx: idx,
+        updatedBy: src.updatedBy,
     }; 
     /**
      * Recurses through each source's 'children' property and returns a row data obj 
@@ -200,6 +202,7 @@ function getTaxonRowData(taxon, treeLvl, tblState) {                            
         parentTaxon: taxon.parent && taxon.parent > 1 ? taxon.parent : false,
         taxonLvl: lvl,
         treeLvl: treeLvl,
+        updatedBy: taxon.updatedBy
     }; 
 } /* End getTaxonRowData */
 /**
@@ -317,6 +320,7 @@ function buildIntRowData(intRcrd, treeLvl, idx){                                
         note: intRcrd.note, 
         rowColorIdx: idx,
         updatedAt: intRcrd.updatedAt,
+        updatedBy: intRcrd.updatedBy,
         year: intRcrd.source.year
     };
     if (intRcrd.location) { getLocationData(intRcrd.location); }

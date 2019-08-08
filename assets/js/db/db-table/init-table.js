@@ -2,7 +2,7 @@
  * Loads the formatted data using the ag-grid library and handles table styling.
  * 
  * Exports:        Imported by:
- *     initTbl          format-data
+ *     initTbl          format-data, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_forms from '../db-forms/db-forms.js';
@@ -104,6 +104,7 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
+            {headerName: "Editor", field: "updatedBy", width: 80, hide: hideEditor(), headerTooltip: "Last Editied By", filter: unqVals },
             {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
@@ -208,7 +209,7 @@ function sortTaxonRows(a, b) {
             a.toLowerCase() > b.toLowerCase() ? 1 : -1;
     }
 }  /* End sortTaxonRows */
-/** ------ Edit Column ---------- */
+/** ------ Edit(or) Column(s) ---------- */
 function isNotEditor() {  
     return ['admin', 'editor', 'super'].indexOf(tblState.userRole) === -1;
 }
@@ -234,6 +235,9 @@ function getPencilHtml(id, entity, editFunc) {
     $('#search-tbl').on(
         'click', '#edit'+entity+id, db_forms.editEntity.bind(null, id, lcfirst(entity)));
     return editPencil;
+}
+function hideEditor() {
+    return tblState.initParams ? !tblState.initParams.editor : true;
 }
 /** -------- Map Column ---------- */
 function ifLocView() {                                           
