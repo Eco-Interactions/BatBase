@@ -148,6 +148,7 @@ function getResetFocus() {
 export function resetDataTable(view) {                                           //console.log("---reseting table---")
     const resetMap = { taxa: buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
     resetCurTreeState();
+    view = typeof view == 'string' ? view : null;
     resetMap[tblState.curFocus](view); 
 } 
 /** Resets storage props, buttons and filter status. */
