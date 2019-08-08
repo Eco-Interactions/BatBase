@@ -1008,6 +1008,7 @@ class Source
 
     /**
      * Get updated by user name.
+     * Note: Returns null for records developer (ID = 6) modified
      * @JMS\VirtualProperty
      * @JMS\SerializedName("updatedBy")
      *
@@ -1015,8 +1016,12 @@ class Source
      */
     public function serializeUpdatedBy()
     {
-        $user = $this->updatedBy ? $this->updatedBy : $this->createdBy;
-        return $user->getFirstName();
+        $createdBy = $this->createdBy ? 
+            ($this->createdBy->getId() == 6 ? null : $this->createdBy) : null;
+        $user = $this->updatedBy ? 
+            ($this->updatedBy->getId() == 6 ? null : $this->updatedBy) : $createdBy;
+
+        return !$user ? null : $user->getFirstName();
     }
 
     /**
