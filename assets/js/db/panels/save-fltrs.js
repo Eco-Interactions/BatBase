@@ -11,9 +11,9 @@
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
-import * as data_tree from './build-data-tree.js';
-import * as db_filters from './db-filters.js';
-import * as frmt_data from './format-data.js'; 
+import * as data_tree from '../db-table/build-data-tree.js';
+import * as db_filters from '../db-table/db-filters.js';
+import * as frmt_data from '../db-table/format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';

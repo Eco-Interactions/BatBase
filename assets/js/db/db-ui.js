@@ -23,8 +23,8 @@ import { createEntity } from './db-forms/db-forms.js';
 import * as db_page from './db-page.js';
 import * as db_filters from './db-table/db-filters.js';
 import { showInts } from './db-map/db-map.js';
-import { enableListReset, toggleSaveIntsPanel } from './db-table/save-ints.js';
-import { addPanelEvents, closeOpenPanels } from './db-table/panel-util.js';
+import { enableListReset, toggleSaveIntsPanel } from './panels/save-ints.js';
+import { addPanelEvents, closeOpenPanels } from './panels/panel-util.js';
 
 const app = {
     userRole: $('body').data("user-role"),

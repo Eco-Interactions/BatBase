@@ -4,8 +4,8 @@ import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
 import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
-import { newIntList, selIntList } from './db-table/save-ints.js';
-import { newFilterSet, selFilterSet } from './db-table/save-fltrs.js';
+import { newIntList, selIntList } from './panels/save-ints.js';
+import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 /* 
  * Exports:
  *   addEnterKeypressClick
