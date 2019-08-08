@@ -11,7 +11,6 @@ Feature: Search page features and database table controls
             # RETURN THEM TO THE TABLE 
         ## TODO
         # CSV downloads
-        # time-updated filter
         # run through all slides in tutorial
 
     Background:
@@ -63,7 +62,7 @@ Feature: Search page features and database table controls
 ## ------------------ SHOW SEARCH TIPS -------------------------------------- ##
     @javascript
     Scenario:  I should be able to show the search tips
-        When I press "Search Tips"
+        When I press "Tips"
         Then I should see "Tips for searching"
 # ------------------ START TUTORIAL ---------------------------------------- ##
     @javascript

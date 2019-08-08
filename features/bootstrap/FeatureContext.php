@@ -9,13 +9,33 @@ require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/vendor/autoload.php
 require_once(__DIR__.'/../../vendor/bin/.phpunit/phpunit-5.7/src/Framework/Assert/Functions.php');
 
 /**
- * Defines application features from the specific context.
+ * All application feature methods.
+ *
+ * Organization:
+ *     Events:
+ *         beforeSuite
+ *         afterFeature
+ *     Public Steps:
+ *         Database Methods 
+ *         Search Page Interactions
+ *         Table Interactions
+ *         Map Methods
+ *         Form Functions
+ *         Assertion Steps
+ *         Helper Steps
+ *         Error Handling
+ *     Private Helpers:
+ *         Page Interactions
+ *         Get from Page
+ *         Table Interactions
+ *         Misc Util
+ *    Data Sync Feature Methods
  */
 class FeatureContext extends RawMinkContext implements Context
 {    
     private static $dbChanges;
-    /** Used for mutli-editor testing. */
     private $curUser;
+    /** Used for mutli-editor testing. */
     private $editor1; 
     private $editor2;
 
@@ -27,9 +47,11 @@ class FeatureContext extends RawMinkContext implements Context
      * context constructor through behat.yml.
      */
     public function __construct(){}
-    /** --------------------------- Database Funcs ---------------------------*/
+/** ---------------- Events ------------------------------------------------- */
     /**
      * @BeforeSuite
+     *
+     * Creates/Resets test database with fixture data.
      */
     public static function beforeSuite()
     {   
@@ -43,6 +65,8 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @AfterFeature
+     *
+     * Resets back to fixture data.
      */
     public static function afterFeature()
     {
@@ -50,6 +74,7 @@ class FeatureContext extends RawMinkContext implements Context
         exec('php bin/console hautelook:fixtures:load --no-interaction --purge-with-truncate --env=test');        
         self::$dbChanges = false;
     }
+/** ------------------------- Database Methods -------------------------------*/
     /**
      * @Given the fixtures have been reloaded 
      */
@@ -71,7 +96,7 @@ class FeatureContext extends RawMinkContext implements Context
         $this->handleNullAssert($row, false, 'There are no rows in the database table.');
     }
 
-    /** -------------------------- Search Page Interactions ------------------*/
+/** -------------------------- Search Page Interactions --------------------- */
     /**
      * @Given I exit the tutorial
      */
@@ -80,30 +105,19 @@ class FeatureContext extends RawMinkContext implements Context
         $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
         $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
         $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
-        usleep(100000);
-        $this->getUserSession()->wait( 10000, "!$('#db-overlay').length" );
+        $this->spin(function(){
+            return $this->getUserSession()->evaluateScript("!$('.introjs-overlay').length");
+            }, 'Tutorial not closed.');
     }
 
     /**
-     * @Given I toggle :state the filter panel
-     */
-    public function iToggleTheFilterPanel($state)
-    {
-        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts').hasClass('closed');");
-        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
-        $filterPanelToggle = $this->getUserSession()->getPage()->find('css', '#filter');  
-        $filterPanelToggle->click();
-        usleep(300000);
-    }
-    /**
      * @Given the database table is in :entity view
      */
-    public function theDatabaseTableIsInSelectedView($entity)
+    public function theDatabaseTableIsInFocus($entity)
     {
         $vals = ['Taxon' => 'taxa', 'Location' => 'locs', 'Source' => 'srcs'];
-        $newElems = ['Taxon' => '#selSpecies', 'Location' => '#selRegion', 'Source' => '#selPubTypes'];
+        $newElems = ['Taxon' => '#selSpecies', 'Location' => '#selRegion', 'Source' => '#selPubType'];
         $this->changeTableSort('#search-focus', $vals[$entity], $newElems[$entity]);
-        usleep(500000);
     }
     /**
      * @Given I display locations in :loc View
@@ -113,7 +127,6 @@ class FeatureContext extends RawMinkContext implements Context
         $vals = ['Map' => 'map', 'Table' => 'tbl'];
         $newElems = ['Map' => '#map', 'Table' => '#search-tbl'];
         $this->changeTableSort('#sel-view', $vals[$loc], $newElems[$loc]);
-        usleep(500000);
     }
 
     /**
@@ -123,9 +136,9 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $vals = ['Authors' => 'auths', 'Publications' => 'pubs', 'Bats' => 2, 
             'Arthropoda' => 4, 'Plants' => 3, 'Publishers' => 'publ'];
-        $newElems = ['Authors' => '[name="srchTree"]', 'Publications' => '#selPubTypes', 
+        $newElems = ['Authors' => 'input[name="selAuthor"]', 'Publications' => '#selPubType', 
             'Bats' => '#selSpecies', 'Arthropoda' => '#selOrder', 'Plants' => '#selSpecies',
-            'Publishers' => '[name="srchTree"]'];
+            'Publishers' => 'input[name="selPublisher"]'];
         $this->changeTableSort('#sel-view', $vals[$type], $newElems[$type]);
     }
 
@@ -136,6 +149,345 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->changeTableSort('#sel-view', 'map', '#map');
     }
+
+
+    /**
+     * @When I select :modType :selType from the list modification panel
+     */
+    public function iSelectFromTheListModificationPanel($modType, $selType)
+    {
+        $vals = [ 'All Shown' => 'all', 'Select Rows' => 'some'];
+        $val = $vals[$selType];
+        $radio = $this->getUserSession()->getPage()->find('css', "#mod-".$val."-list");  
+        $this->handleNullAssert($radio, false, 'No [$selType] radio found.');
+        $radio->click();
+        $this->spin(function() use ($val, $selType) {
+            return $this->getUserSession()->evaluateScript("$('input#mod-".$val."-list:checked').val() == 'on'");
+            }, "The [$selType] radio is not checked.");
+    }
+
+    /**
+     * @Given I toggle :state the data lists panel
+     * Refactor combin with filter panel
+     */
+    public function iToggleTheDataListsPanel($state)
+    {
+        $isClosed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');");
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        $dataListsPanel = $this->getUserSession()->getPage()->find('css', 'button[name="int-set"]');  
+        $dataListsPanel->click();
+        /* -- Spin until finished -- */
+        $stepComplete = function() use ($state){
+            $closed = $this->getUserSession()->evaluateScript("$('#int-opts').hasClass('closed');"); 
+            if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+        };      
+        $this->spin($stepComplete, 'Data Lists panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+    }
+
+    /**
+     * @Given I toggle :state the filter panel
+     */
+    public function iToggleTheFilterPanel($state)
+    {
+        $isClosed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');");
+        if ($isClosed && $state == 'close' || !$isClosed && $state == 'open') { return; }
+        $toggleBttn = $this->getUserSession()->getPage()->find('css', '#filter');  
+        /* -- Spin until finished -- */
+        $stepComplete = function() use ($state, $toggleBttn){
+            try {
+                $toggleBttn->click();
+            } catch (Exception $e) { return false; 
+            } finally {
+                $closed = $this->getUserSession()->evaluateScript("$('#filter-opts-pnl').hasClass('closed');"); 
+                if ($closed && $state == 'close' || !$closed && $state == 'open') { return true; }
+            }
+        };      
+        $this->spin($stepComplete, 'Filter panel not ' . ($state == 'open' ? "expanded" : "collapsed"));
+    }
+
+    /**
+     * @When I select :text from the :label dropdown
+     * Search page elems.
+     */
+    public function iSelectFromTheDropdown($text, $label)
+    {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
+        $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
+            'Book' => 2, 'Article' => 3, 'Map Data' => 'map', 'Test Filter Set' => 1,
+            'Test Interaction List' => 1, 'Panama' => 12 ];
+        $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
+        $selId = '#sel'.str_replace(' ','',$label);
+        $elem = $this->getUserSession()->getPage()->find('css', $selId);
+        $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
+        $this->getUserSession()->
+            executeScript("$('$selId')[0].selectize.addItem('$val');");
+    }
+
+    /**
+     * @When I type :text in the :type text box and press enter
+     */
+    public function iTypeInTheTextBoxAndPressEnter($text, $type)
+    {
+        $input = $this->getUserSession()->getPage()->find('css', 'input[name="sel'.$type.'"]');
+        $input->setValue($text);
+        $input->keypress('13');
+    }
+
+    /**
+     * @When I enter :text in the :label dropdown
+     */
+    public function iEnterInTheDropdown($text, $label)
+    {
+        $selId = '#sel'.str_replace(' ','',$label);
+        try {
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        } catch (Exception $e) {
+            $this->iPutABreakpoint("Couldn't find dropdown [$selId]");
+        }
+    }
+
+    /**
+     * @When I click on the map pin for :text
+     */
+    public function iClickOnTheMapPinFor($text)
+    {
+        $this->spin(function() use ($text){
+            $row = $this->getTableRow($text);
+            if (!$row) { return false; }
+            $pin = $row->find('css', '[alt="Map Icon"]');
+            if (!$pin) { return false; }
+            $pin->click();
+            return true;
+        }, "Couldn't click [$text] row map pin.");
+    }
+/**---------------------- Table Interactions ---------------------------------*/
+    /**
+     * @Given I filter the table to interactions created today
+     */
+    public function iFilterTheTableToInteractionsCreatedToday()
+    {
+        $this->iToggleTheFilterPanel('open');
+        $this->iSetTheTimeFilterTo('updated', 'today');
+        $this->iToggleTheFilterPanel('close');
+        
+        $this->spin(function() {
+            $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
+            return $checked;
+        }, 'Date filter checkbox not checked.');
+    }
+
+    /**
+     * @Given I click on the edit pencil for the :text row
+     */
+    public function iClickOnTheEditPencilForTheRow($text)
+    {
+        $this->spin(function() use ($text){
+            $row = $this->getTableRow($text);
+            if (!$row) { return false; }
+            $this->clickRowEditPencil($row, $text);
+        }, "Couldn't find [$text] row edit pencil. ");
+    }
+
+    /**
+     * @When I change the :prop field :type to :text
+     */
+    public function iChangeTheFieldTo($prop, $type, $text)
+    { 
+        $map = [ "taxon name" => "#txn-name", 'Edition' => '#Volume_row input' ];
+        $curForm = $this->getOpenFormId();
+        $field = array_key_exists($prop, $map) ? $map[$prop] :
+            '#'.str_replace(' ','',$prop).'_row '.$type; 
+        $selector = $curForm.' '.$field;
+        $this->addValueToFormInput($selector, $text);
+        $this->assertFieldValueIs($text, $selector);
+    }
+
+    /**
+     * @When I expand :text in the data tree
+     */
+    public function iExpandInTheDataTree($text)
+    {
+        $this->spin(function() use ($text) {
+            $treeNode = $this->getRowTreeNode($text);  
+            if (!$treeNode) { return false; }  
+            $treeNode->doubleClick();
+            if (!$this->isRowExpanded($treeNode)) { $treeNode->click(); } //needed for one weird instance of this step "OGenus Species" epxnasion
+            return $this->isRowExpanded($treeNode);
+        }, "Couldn't expand [$text] row.");  
+    }
+
+    /**
+     * @When I collapse :text in the data tree
+     */
+    public function iCollapseInTheDataTree($text)
+    {
+        $this->spin(function() use ($text) {
+            $treeNode = $this->getRowTreeNode($text);  
+            if (!$treeNode) { return false; }
+            $treeNode->doubleClick();
+            return $this->isRowExpanded($treeNode) == false;
+        }, "Could not collapse [$text] row.");
+    }
+    /**
+     * @When I expand :txt in level :num of the data tree
+     */
+    public function iExpandInLevelOfTheDataTree($txt, $num)
+    {
+        $row = null;
+        $this->spin(function() use(&$row, $txt, $num){
+            $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row-level-'.--$num.' [colid="name"]');  
+            if (!$treeNodes) { return false; }
+            for ($i=0; $i < count($treeNodes); $i++) { 
+                if ($treeNodes[$i]->getText() === $txt) { $row = $treeNodes[$i]; break;}
+            }
+            return $row;
+        }, "Didn't find the [$txt] tree node.");
+        $row->doubleClick();
+    }
+
+    /**
+     * @Then the count column should show :count interactions
+     */
+    public function theCountColumnShouldShowInteractions($count)
+    {
+        $cell = $this->getUserSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
+        $this->handleContainsAssert($cell->getText(), $count, true, 'No interaction count found.');
+    }
+    /**
+     * @Then data in the interaction rows
+     * @Then I should see data in the interaction rows
+     * Note: Data is checked in the Subject Taxon column only.
+     */
+    public function dataInTheInteractionRows()
+    {   
+        $this->spin(function(){
+            $data = $this->getUserSession()->getPage()->find('css', '[colid="subject"] span');
+            return !$data ? false : ($data->getText() !== null);
+        }, 'No data found in the interaction rows.');
+    }
+
+    /**
+     * @Then I (should) see :count row(s) in the table data tree
+     *
+     * refactor: merge with ishouldseeinteractionsinthelist
+     */
+    public function iShouldSeeRowsInTheTableDataTree($count)
+    {
+        $this->spin(function() use ($count) {
+            $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
+            return !$rows ? false : (intval($count) == count($rows));
+        }, "Didn't find the expected [$count] rows in the table data tree.");
+    }
+
+    /**
+     * @Then I should see :text in the tree
+     */
+    public function iShouldSeeInTheTree($text)
+    {   
+        $this->spin(function() use ($text){
+            return $this->isInDataTree($text);            
+        }, "[$text] is not displayed in table data-tree.");
+    }    
+
+    /**
+     * @Then I should not see :text in the tree
+     */
+    public function iShouldNotSeeInTheTree($text)
+    {   
+        $this->spin(function() use ($text){
+            return !$this->isInDataTree($text);            
+        }, "[$text] should not be displayed in table data-tree.");
+    }    
+
+    /**
+     * @Then I should see :count interaction(s) under :nodeTxt
+     */
+    public function iShouldSeeInteractionsUnder($count, $nodeTxt)
+    {
+        $this->iExpandInTheDataTree($nodeTxt);
+        $rows = $this->getInteractionsRows($nodeTxt); 
+        $this->handleEqualAssert(count($rows), $count, true, 
+            "Found [". count($rows)."] rows under $nodeTxt. Expected $count");
+    } 
+
+    /**
+     * @Then I should see :count interactions attributed
+     */
+    public function iShouldSeeInteractionsAttributed($count)
+    {
+        $rows = $this->getInteractionsRows(); 
+        $this->handleEqualAssert(count($rows), $count, true, 
+            "Found [". count($rows)."] interaction rows. Expected [$count]");
+    }
+
+    /**
+     * @Then the expected data in the interaction row
+     * @Then the expected data in the :focus interaction row
+     */
+    public function theExpectedDataInTheInteractionRow($focus = null)
+    {
+        $cols = [ 'subject', 'object', 'interactionType', 'tags', 'citation', 
+            'habitat', 'location', 'country', 'region', 'note' ];
+        if ($focus) { unset($cols[array_search($focus ,$cols)]); }
+        $intRows = $this->getInteractionsRows();
+
+        foreach ($intRows as $row) {
+            foreach ($cols as $colId) {            
+                $selector = '[colid="'.$colId.'"]';
+                $data = $row->find('css', $selector); 
+                $this->handleNullAssert($data->getText(), false, 
+                    'No data found in the interaction\'s [$colId] column.');
+            }
+        }
+    }
+
+    /**
+     * @Then I should see :text under :parentTxt in the tree
+     */
+    public function iShouldSeeUnderInTheTree($text, $parentTxt)
+    {
+        $this->spin(function () use ($text, $parentTxt) {
+            $this->iExpandInTheDataTree($parentTxt);
+            $row = $this->getTableRow($text);
+            if (!$row) { return false; }
+            $this->iCollapseInTheDataTree($parentTxt);
+            return true;
+        }, "\nDid not find [$text] under [$parentTxt]");  
+    }
+
+    /**
+     * @Then I should not see :text under :parentNode in the tree
+     */
+    public function iShouldNotSeeUnderInTheTree($text, $parentNode)
+    {
+        $this->iExpandInTheDataTree($parentNode);
+        $row = $this->getTableRow($text);
+        $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
+    }
+
+    /**
+     * @Then I should see :cnt interactions in the list
+     */
+    public function iShouldSeeInteractionsInTheList($cnt)
+    {
+        $this->spin(function() use ($cnt) {
+                $curCnt = $this->getUserSession()->evaluateScript("$('#int-list-cnt').text().match(/\d+/)[0];");
+                return $curCnt == $cnt;
+            }, "Didn't find [$cnt] interactions in the list."
+        );
+    }
+
+    /**
+     * @Given I should see :cnt interactions in the table
+     */
+    public function iShouldSeeInteractionsInTheTable($cnt)
+    {
+        $this->spin(function() use ($cnt) {
+                $curCnt = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+                return $curCnt == $cnt;
+            }, "Didn't find [$cnt] interactions in the table."
+        );
+    }
+/** ------------------ Map Methods -------------------------------------------*/
     /**
      * @When I click on a map marker
      */
@@ -149,44 +501,130 @@ class FeatureContext extends RawMinkContext implements Context
             $this->iPutABreakpoint("Couldn't click elem.");
         }
     }
-
     /**
-     * @When I select :text from the :label dropdown
-     * Search page elems.
+     * @When I click on the map
      */
-    public function iSelectFromTheDropdown($text, $label)
-    {                                                                           //fwrite(STDOUT, "\niSelectFromTheDropdown\n");
-        $vals = [ 'Artibeus lituratus' => 13, 'Costa Rica' => 24, 'Journal' => 1, 
-            'Book' => 2, 'Article' => 3, 'Map Data' => 'map' ];
-        $selId = '#sel'.str_replace(' ','',$label);
-        $elem = $this->getUserSession()->getPage()->find('css', $selId);
-        $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
-        $this->getUserSession()->
-            executeScript("$('$selId')[0].selectize.addItem('$vals[$text]');");
-    }
-
-    /**
-     * @When I type :text in the :type text box and press enter
-     */
-    public function iTypeInTheTextBoxAndPressEnter($text, $type)
+    public function iClickOnTheMap()
     {
-        $input = $this->getUserSession()->getPage()->find('css', 'input[name="sel'.$type.'"]');
-        $input->setValue($text);
-        $input->keypress('13');
-        usleep(500000);
+        $this->getUserSession()->executeScript("$('#loc-map').click();");
+    }
+    /**
+     * @Given I press the :type button in the map
+     */
+    public function iPressTheButtonInTheMap($type)
+    {
+        $map = [
+            'New Location' => '.leaflet-control-create-icon',
+            'Click to select position' => '.leaflet-control-click-create-icon'
+        ];
+        $bttn = $this->getUserSession()->getPage()->find('css', $map[$type]);
+        $this->handleNullAssert($bttn, false, "No [$type] button found.");
+        $bttn->click();
     }
 
     /**
-     * @When I click on the map pin for :text
+     * @When I see the country's polygon drawn on the map
      */
-    public function iClickOnTheMapPinFor($text)
+    public function iSeeTheCountrysPolygonDrawnOnTheMap()
     {
-        usleep(500000);
-        $row = $this->getTableRow($text);
-        $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
-        $this->clickRowMapPin($row, $text);
+        // usleep(5000000);
+        // $poly = $this->getUserSession()->getPage()->find('css', 'path.leaflet-interactive');
+        // $this->handleNullAssert($poly, false, 'No polygon found on map');
     }
 
+    /**
+     * @When I press :bttnText in the added green pin's popup
+     */
+    public function iPressInTheAddedGreenPinsPopup($bttnText)
+    {
+        $this->clickOnPageElement('.leaflet-marker-icon.new-loc');
+        $this->clickOnPageElement("input[value='$bttnText']");
+    }
+
+    /**
+     * @Then I should see the map loaded
+     */
+    public function iShouldSeeTheMapLoaded()
+    {
+        $mapTile = $this->getUserSession()->getPage()->find('css', '.leaflet-tile-pane');
+        $this->handleNullAssert($mapTile, false, 'No map tiles found.');
+    }
+
+    /**
+     * @Then I should see :mCount location markers
+     * @Then I should see :mCount location markers and :cCount location clusters
+     * Note: Cluster count returns one extra for some reason I have yet to identify
+     */
+    public function iShouldSeeLocationMarkers($mCount, $cCount)
+    {
+        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
+        if ($cCount) {
+            $clusters = $this->getUserSession()->getPage()->findAll('css', 
+                'div.leaflet-marker-icon');  
+            $this->handleEqualAssert(count($clusters), $cCount+1, true, 'Found ['.count($clusters)."] clusters. Expected [$cCount].");
+        }
+        $this->handleEqualAssert(count($markers), $mCount, true, 'Found ['.count($markers)."] markers. Expected [$mCount].");
+    }
+
+    /**
+     * @Then I click on an existing location marker
+     */
+    public function iClickOnAnExistingLocationMarker()
+    {
+        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
+        $this->handleNullAssert($markers, false, 'No markers found on map.');
+        $markers[0]->click();
+    }
+
+    /**
+     * @Then the map should close
+     */
+    public function theMapShouldClose()
+    {
+        $map = $this->getUserSession()->getPage()->find('css', '#loc-map');
+        $this->handleNullAssert($map, true, 'Map should not be displayed, and yet...');
+    }
+
+    /**
+     * @Then the coordinate fields should be filled
+     */
+    public function theCoordinateFieldsShouldBeFilled()
+    {
+        $this->iPutABreakpoint("theCoordinateFieldsShouldBeFilled");
+    }
+
+    /**
+     * @Then the marker's popup should have a description of the position 
+     * Note: The description is derived from the reverse geocode results.
+     */
+    public function theMarkersPopupShouldHaveADescriptionOfThePosition()
+    {
+        $this->iPutABreakpoint("theMarkersPopupShouldHaveADescriptionOfThePosition");
+    }
+/* ---------------- Assertion Steps ----------------------------------------- */
+    /**
+     * @When I should see :text in the save modal
+     */
+    public function iShouldSeeInTheSaveModal($text)
+    {
+        $this->spin(function() use ($text) {
+                $modalText = $this->getUserSession()->evaluateScript("$('.introjs-tooltiptext').text();");  
+                return strpos($modalText, $text) !== false;
+            }, "Did not find [$text] in the modal."
+        );
+    }
+
+    /**
+     * @Then I should see :text in the filter status bar
+     */
+    public function iShouldSeeInTheFilterStatusBar($text)
+    {
+        $this->spin(function() use ($text) {
+                $filterMsg = $this->getUserSession()->evaluateScript("$('#filter-status').text();");  
+                return strpos(strtolower($filterMsg), strtolower($text)) !== false;
+            }, "Did not find [$text] in the filter status bar."
+        );
+    }
     /**
      * @Then I should see the map with the location summary popup
      */
@@ -202,12 +640,12 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInTheDropdown($text, $label)
     {
-        usleep(500000);
         $selId = '#sel'.str_replace(' ','',$label);
-        $selector = $selId.' option:selected';  
-        $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
-        $this->handleEqualAssert($text, $selected, true, 
-            "Found [$selected] in the [$label] ($selId) field. Expected [$text].");
+        $this->spin(function() use ($text, $selId) {
+            $selector = $selId.' option:selected';  
+            $selected = $this->getUserSession()->evaluateScript("$('$selector').text();");  
+            return $text == $selected;
+        }, "Did not find [$text] in the [$selId] field.");
     }
     /**
      * @Then I should see the map with markers 
@@ -224,14 +662,11 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInteractionsShownOnTheMap($count)
     {
-        $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
-        if (!$elem) { 
-            usleep(50000); 
+        $this->spin(function() use ($count) {
             $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
-        }
-        $this->handleNullAssert($elem, false, 'No [interaction count legend] shown on map.');
-        $this->handleContainsAssert($count, $elem->getHtml(), true, 
-             "Should have found [$count] in the interaction count legend.");
+            if (!$elem) { return false; }
+            return strpos($elem->getHtml(), $count) !== false;
+        }, "Did not find [$count] in the map interaction count legend.");
     }
 
     /**
@@ -239,17 +674,13 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iShouldSeeInPopup($text)
     {
-        $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
-        if (!$elem) { 
-            usleep(50000); 
+        $this->spin(function() use ($text) {
             $elem = $this->getUserSession()->getPage()->find('css', '.leaflet-popup-content');
-        }
-        $this->handleNullAssert($elem, false, 'No [popup] shown on map.');
-        $this->handleContainsAssert($text, $elem->getHtml(), true, 
-             "Should have found [$text] in popup.");
+            if (!$elem) { return false; }
+            return strpos($elem->getHtml(), $text) !== false;
+        }, "Did not find [$text] in the map popup.");
     }
-
-    /**------------------- Form Functions ------------------------------------*/
+/**------------------- Form Functions ----------------------------------------*/
     /**
      * @Given I open the new Interaction form
      */
@@ -259,9 +690,9 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given I enter :text in the :prop dropdown field 
+     * @Given I enter :text in the :prop form dropdown 
      */
-    public function iEnterInTheDropdownField($text, $prop)
+    public function iEnterInTheFormDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         try {
@@ -272,14 +703,45 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @When I change the :prop form dropdown to :text
+     */
+    public function iChangeTheFormDropdownTo($prop, $text)
+    {
+        $map = [ "taxon level" => "#txn-lvl" ];
+        $selId = array_key_exists($prop, $map) ? $map[$prop] :
+            '#'.str_replace(' ','',$prop).'-sel';  
+        $this->selectValueInCombobox($selId, $text);
+    }
+
+    /**
+     * @When I change the :prop dynamic dropdown field to :text
+     */
+    public function iChangeTheDynamicDropdownFieldTo($prop, $text)
+    {
+        $this->iSelectFromTheDynamicDropdown($text, $prop, false);     
+    }
+    
+    /**
+     * @When I add :text to the :prop dynamic dropdown 
+     */
+    public function iAddToTheDynamicDropdown($text, $prop)
+    {
+        $this->iSelectFromTheDynamicDropdown($text, $prop, true);     
+    }
+
+
+    /**
      * @Given I focus on the :role taxon field
      * @Given I focus on the :role combobox
      */
     public function iFocusOnTheTaxonField($role)
     {
         $selId = '#'.$role.'-sel';
-        $this->getUserSession()->executeScript("$('$selId')[0].selectize.focus();");
-        usleep(500000);
+
+        $this->spin(function() use ($selId) {
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.focus();");
+            return $this->getUserSession()->getPage()->find('css', "#sub-form");
+        }, "[$role] select form not opened.");
     }
 
     /**
@@ -350,24 +812,22 @@ class FeatureContext extends RawMinkContext implements Context
         $curForm = $this->getOpenFormId();
         $selector = $curForm.' '.$field;
         $this->addValueToFormInput($selector, $text);
-        usleep(500000);
-        $this->assertFieldValueIs($text, $selector);
     }
 
     /**
-     * @When I select :text from the :prop dropdown field
+     * @When I select :text from the :prop form dropdown
      */
-    public function iSelectFromTheDropdownField($text, $prop)
+    public function iSelectFromTheFormDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
         $this->selectValueInCombobox($selId, $text);
     }
 
     /**
-     * @When I select :text from the :prop field dynamic dropdown
+     * @When I select :text from the :prop dynamic dropdown
      * Note: Changes the last empty ($new) dropdown, or the last filled (!$new).
      */
-    public function iSelectFromTheFieldDynamicDropdown($text, $prop, $new = true)
+    public function iSelectFromTheDynamicDropdown($text, $prop, $new = true)
     {
         $count = $this->getCurrentFieldCount($prop); 
         $cnt = $new ? $count : --$count;
@@ -387,21 +847,39 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iUncheckTheTimeUpdatedFilter()
     {
-        usleep(1000000); //refactor to  [wait(test)]
         $this->iToggleTheFilterPanel('open');
-        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd');  
-        $checkbox->uncheck();  
-        usleep(300000);
+        $this->toggleTheDateFilter(false);
+        $this->iToggleTheFilterPanel('close');
+    }
+    /**
+     * @Given I set the time :type filter to :date
+     */
+    public function iSetTheTimeFilterTo($type, $date)
+    {
+        $initialCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+        $this->setTimeFilterDefault($date);
+        $this->toggleTheDateFilter(true);
+        $this->iSelectFromTheDropdown($type, 'Time Filter');
+        $this->clickOnPageElement('#filter-col1');
+        $this->spin(function() use ($initialCount) {
+            $postCount = $this->getUserSession()->evaluateScript("$('#tbl-cnt').text().match(/\d+/)[0];");
+            return $postCount !== $initialCount && $postCount > 0;
+            }, "Time filter did not update as expected. type = [$type]. date = [$date]. initial [$initialCount]. (After can't be zero)");
+        $this->setTimeFilterDefault($date, 'remove');
     }
 
     /**
-     * @When I enter :text in the :prop field dynamic dropdown
+     * @When I enter :text in the :prop dynamic dropdown
      */
-    public function iEnterInTheFieldDynamicDropdown($text, $prop)
+    public function iEnterInTheDynamicDropdown($text, $prop)
     {
         $count = $this->getCurrentFieldCount($prop);
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;
-        $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count; 
+
+        $this->spin(function() use ($selId, $text) {  
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.createItem('$text');");
+            return $this->getUserSession()->getPage()->find('css', '#sub2-hdr');
+        }, "New $prop form malfunctioning.");
     }
 
     /**
@@ -410,20 +888,24 @@ class FeatureContext extends RawMinkContext implements Context
     public function iAddTheInteractionTag($text)
     {                                                                           //fwrite(STDOUT, "\niAddTheInteractionTag\n");
         $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->getUserSession()->executeScript("$('#InteractionTags-sel')[0].selectize.addItem('$val');");
-        usleep(500000);
-        $this->textContainedInField($text, '#InteractionTags-sel');
+        $this->spin(function() use ($val, $text) { 
+            $this->getUserSession()->executeScript(
+                "$('#InteractionTags-sel')[0].selectize.addItem('$val');");
+            return $this->textContainedInField($text, '#InteractionTags-sel');
+        }, "[$text] tag wasn't added as expected.");        
     }
 
     /**
      * @When I remove the :text interaction tag
      */
     public function iRemoveTheInteractionTag($text)
-    {
+    {                           
         $val = $this->getValueToSelect('#InteractionTags-sel', $text);
-        $this->getUserSession()->executeScript("$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
-        usleep(500000);
-        $this->textContainedInField($text, '#InteractionTags-sel', false);
+        $this->spin(function() use ($val, $text) { 
+            $this->getUserSession()->executeScript(
+                "$('#InteractionTags-sel')[0].selectize.removeItem('$val');");
+            return $this->textContainedInField($text, '#InteractionTags-sel', false);
+        }, "[$text] tag wasn't removed as expected.");  
     }
 
     /**
@@ -471,19 +953,22 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :prop field dynamic dropdown
+     * @Then I should see :text in the :prop dynamic dropdown
      */
-    public function iShouldSeeInTheFieldDynamicDropdown($text, $prop)
+    public function iShouldSeeInTheDynamicDropdown($text, $prop)
     {
-        usleep(500000);
         $count = $this->getCurrentFieldCount($prop);     
-        $selId = '#'.str_replace(' ','',$prop).'-sel'.$count;  
-        $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
-        while ($count > 1 && $selected !== $text) {
-            $selId = substr($selId, 0, -1).--$count;
-            $selected = $this->getUserSession()->evaluateScript("$('$selId+div>div>div')[0].innerText;"); 
-        }
-        $this->assertFieldValueIs($text, $selId.'+div>div>div');
+        $selId = '#'.str_replace(' ','',$prop).'-sel#';  
+
+        $this->spin(function() use ($text, $count, $selId) {
+            while ($count > 0) {
+                $selId = substr($selId, 0, -1).$count;
+                $selector = $selId.' option:selected';  
+                $selected = $this->getUserSession()->evaluateScript("$('$selector').text();"); 
+                if ($text == $selected) { return true; }
+                --$count;
+            }
+        }, "Did not find [$text] in [$selId].");
     }
 
     /**
@@ -511,13 +996,14 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then I should see :text in the :prop dropdown field 
+     * @Then I should see :text in the :prop form dropdown 
      */
-    public function iShouldSeeInTheDropdownField($text, $prop)
+    public function iShouldSeeInTheFormDropdown($text, $prop)
     {
         $selId = '#'.str_replace(' ','',$prop).'-sel';
-        $this->getUserSession()->wait(10000, "$('$selId+div>div>div')[0].innerText == '$text';");
-        $this->assertFieldValueIs($text, $selId.'+div>div>div');
+        $selector = $selId.' option:selected';  
+        $this->getUserSession()->wait(10000, "$('$selector').text() == '$text';");
+        $this->assertFieldValueIs($text, $selector);
     }
     /**
      * @Then I (should) see :text in the form header
@@ -570,360 +1056,24 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Then the table should be filtered to interactions created today
-     */
-    public function theTableShouldBeFilteredToInteractionsCreatedSince()
-    {
-        usleep(500000);
-        $checked = $this->getUserSession()->evaluateScript("$('#shw-chngd').prop('checked');");
-        $this->handleEqualAssert($checked, true, true, "Updates-since filter is not checked.");
-    }
-
-    /**
      * @Then I add the data from all from previous scenarios in this feature
      */
     public function iAddTheDataFromAllFromPreviousScenariosInThisFeature()
     {
         throw new PendingException();
     }
-
-    /**------------------ Table Interaction Steps -----------------------------*/
-    /**
-     * @Given I filter the table to interactions created today
-     */
-    public function iFilterTheTableToInteractionsCreatedSince()
-    {
-        $this->getUserSession()->executeScript("$('#shw-chngd').click().change();");
-        $this->getUserSession()->executeScript("$('.flatpickr-confirm').click();");
-        $this->theTableShouldBeFilteredToInteractionsCreatedSince();
-        usleep(500000);
-    }
-
-    /**
-     * @Given I click on the edit pencil for the :text row
-     */
-    public function iClickOnTheEditPencilForTheRow($text)
-    {
-        usleep(500000);
-        $row = $this->getTableRow($text);
-        $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
-        $this->clickRowEditPencil($row, $text);
-    }
-
-    /**
-     * @When I change the :prop field :type to :text
-     */
-    public function iChangeTheFieldTo($prop, $type, $text)
-    { 
-        $map = [ "taxon name" => "#txn-name", 'Edition' => '#Volume_row input' ];
-        $curForm = $this->getOpenFormId();
-        $field = array_key_exists($prop, $map) ? $map[$prop] :
-            '#'.str_replace(' ','',$prop).'_row '.$type; 
-        $selector = $curForm.' '.$field;
-        $this->addValueToFormInput($selector, $text);
-        $this->assertFieldValueIs($text, $selector);
-    }
-
-    /**
-     * @When I change the :prop dropdown field to :text
-     */
-    public function iChangeTheDropdownFieldTo($prop, $text)
-    {
-        $map = [ "taxon level" => "#txn-lvl" ];
-        $selId = array_key_exists($prop, $map) ? $map[$prop] :
-            '#'.str_replace(' ','',$prop).'-sel';  
-        $this->selectValueInCombobox($selId, $text);
-    }
-
-    /**
-     * @When I change the :prop dynamic dropdown field to :text
-     */
-    public function iChangeTheDynamicDropdownFieldTo($prop, $text)
-    {
-        $this->iSelectFromTheFieldDynamicDropdown($text, $prop, false);     
-    }
-    
-    /**
-     * @When I add :text to the :prop dynamic dropdown field 
-     */
-    public function iAddToTheDynamicDropdownField($text, $prop)
-    {
-        $this->iSelectFromTheFieldDynamicDropdown($text, $prop, true);     
-    }
-
-    /**
-     * @When I expand :text in the data tree
-     */
-    public function iExpandInTheDataTree($text)
-    {
-        usleep(500000);
-        $row = $this->getTreeNode($text);  
-        $this->toggleRow($text, $row);
-    }
-
-    /**
-     * @When I collapse :text in the data tree
-     */
-    public function iCollapseInTheDataTree($text)
-    {
-        usleep(500000);
-        $row = $this->getTreeNode($text);  
-        $this->toggleRow($text, $row, 'close');
-    }
-    /**
-     * @When I expand :txt in level :num of the data tree
-     */
-    public function iExpandInLevelOfTheDataTree($txt, $num)
-    {
-        usleep(500000);
-        $treeNodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row-level-'.--$num.' [colid="name"]');  
-        $this->handleNullAssert($treeNodes, false, "No nodes found at level $num of the data tree.");
-        $row = null;
-        for ($i=0; $i < count($treeNodes); $i++) { 
-            if ($treeNodes[$i]->getText() === $txt) { $row = $treeNodes[$i]; break;}
-        }
-        $this->handleNullAssert($row, false, "Didn't find the [$txt] tree node.");
-        $row->doubleClick();
-    }
-
-    /**
-     * @Then the count column should show :count interactions
-     */
-    public function theCountColumnShouldShowInteractions($count)
-    {
-        $cell = $this->getUserSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
-        $this->handleContainsAssert($cell->getText(), $count, true, 'No interaction count found.');
-    }
-    /**
-     * @Then data in the interaction rows
-     * @Then I should see data in the interaction rows
-     * Note: Data is checked in the Subject Taxon column only.
-     */
-    public function dataInTheInteractionRows()
-    {   
-        $data = $this->getUserSession()->getPage()->find('css', '[colid="subject"] span');
-        $this->handleNullAssert($data->getText(), false, 
-            'No data found in the interaction rows.');
-    }
-
-    /**
-     * @Then I (should) see :count row(s) in the table data tree
-     */
-    public function iShouldSeeRowsInTheTableDataTree($count)
-    {
-        usleep(500000);
-        $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
-        $this->handleEqualAssert(intval($count), count($rows), true, 
-            "Found [". count($rows)."] interaction rows. Expected [$count]");
-    }
-
-    /**
-     * @Then I should see :text in the tree
-     */
-    public function iShouldSeeInTheTree($text)
-    {   
-        usleep(500000);
-        $inTree = $this->isInDataTree($text);
-        $this->handleEqualAssert($inTree, true, true, "[$text] is not displayed in table data-tree.");
-    }    
-
-    /**
-     * @Then I should not see :text in the tree
-     */
-    public function iShouldNotSeeInTheTree($text)
-    {   
-        usleep(500000);
-        $inTree = $this->isInDataTree($text);
-        $this->handleEqualAssert($inTree, false, true, 
-            "[$text] should not be displayed in table data-tree.");
-    }    
-
-    /**
-     * @Then I should see :count interaction(s) under :nodeTxt
-     */
-    public function iShouldSeeInteractionsUnder($count, $nodeTxt)
-    {
-        $this->iExpandInTheDataTree($nodeTxt);
-        $rows = $this->getInteractionsRows($nodeTxt); 
-        $this->handleEqualAssert(count($rows), $count, true, 
-            "Found [". count($rows)."] rows under $nodeTxt. Expected $count");
-    } 
-
-    /**
-     * @Then I should see :count interactions attributed
-     */
-    public function iShouldSeeInteractionsAttributed($count)
-    {
-        $rows = $this->getInteractionsRows(); 
-        $this->handleEqualAssert(count($rows), $count, true, 
-            "Found [". count($rows)."] interaction rows. Expected [$count]");
-    }
-
-    /**
-     * @Then the expected data in the interaction row
-     * @Then the expected data in the :focus interaction row
-     */
-    public function theExpectedDataInTheInteractionRow($focus = null)
-    {
-        $cols = [ 'subject', 'object', 'interactionType', 'tags', 'citation', 
-            'habitat', 'location', 'country', 'region', 'note' ];
-        if ($focus) { unset($cols[array_search($focus ,$cols)]); }
-        $intRows = $this->getInteractionsRows();
-
-        foreach ($intRows as $row) {
-            foreach ($cols as $colId) {            
-                $selector = '[colid="'.$colId.'"]';
-                $data = $row->find('css', $selector); 
-                $this->handleNullAssert($data->getText(), false, 
-                    'No data found in the interaction\'s [$colId] column.');
-            }
-        }
-    }
-
-    /**
-     * @Then I should see :text under :parentNode in the tree
-     */
-    public function iShouldSeeUnderInTheTree($text, $parentNode)
-    {
-        usleep(500000);
-        $this->iExpandInTheDataTree($parentNode);
-        $row = $this->getTableRow($text);
-        $this->handleNullAssert($row, false, "Couldn't find row for = [$text]");
-        $this->collapseDataTreeNode($parentNode);
-    }
-
-    /**
-     * @Then I should not see :text under :parentNode in the tree
-     */
-    public function iShouldNotSeeUnderInTheTree($text, $parentNode)
-    {
-        $this->iExpandInTheDataTree($parentNode);
-        $row = $this->getTableRow($text);
-        $this->handleNullAssert($row, true, "Shouldn't have found $text under $parentNode.");
-    }
-    /** ------------------ Map Methods ---------------------------------------*/
-    /**
-     * @When I click on the map
-     */
-    public function iClickOnTheMap()
-    {
-        $this->getUserSession()->executeScript("$('#loc-map').click();");
-        usleep(500000);    
-    }
-    /**
-     * @Given I press the :type button in the map
-     */
-    public function iPressTheButtonInTheMap($type)
-    {
-        $map = [
-            'New Location' => '.leaflet-control-create-icon',
-            'Click to select position' => '.leaflet-control-click-create-icon'
-        ];
-        $bttn = $this->getUserSession()->getPage()->find('css', $map[$type]);
-        $this->handleNullAssert($bttn, false, "No [$type] button found.");
-        $bttn->click();
-    }
-
-    /**
-     * @When I see the country's polygon drawn on the map
-     */
-    public function iSeeTheCountrysPolygonDrawnOnTheMap()
-    {
-        // usleep(5000000);
-        // $poly = $this->getUserSession()->getPage()->find('css', 'path.leaflet-interactive');
-        // $this->handleNullAssert($poly, false, 'No polygon found on map');
-    }
-
-    /**
-     * @When I press :bttnText in the added green pin's popup
-     */
-    public function iPressInTheAddedGreenPinsPopup($bttnText)
-    {
-        $marker = $this->getUserSession()->getPage()->find('css', 
-            '.leaflet-marker-icon.new-loc');
-        $this->handleNullAssert($marker, false, 'No new location marker found on map.');        
-        $marker->click(); 
-        
-        $bttn = $this->getUserSession()->getPage()->find('css', "input[value='$bttnText']");
-        $this->handleNullAssert($bttn, false, 'No [$bttnText] button found.');
-        $bttn->click();
-        usleep(50000);
-    }
-
-    /**
-     * @Then I should see the map loaded
-     */
-    public function iShouldSeeTheMapLoaded()
-    {
-        $mapTile = $this->getUserSession()->getPage()->find('css', '.leaflet-tile-pane');
-        $this->handleNullAssert($mapTile, false, 'No map tiles found.');
-    }
-
-    /**
-     * @Then I should see :mCount location markers
-     * @Then I should see :mCount location markers and :cCount location clusters
-     * Note: Cluster count returns one extra for some reason I have yet to identify
-     */
-    public function iShouldSeeLocationMarkers($mCount, $cCount)
-    {
-        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
-        if ($cCount) {
-            $clusters = $this->getUserSession()->getPage()->findAll('css', 
-                'div.leaflet-marker-icon');  
-            $this->handleEqualAssert(count($clusters), $cCount+1, true, 'Found ['.count($clusters)."] clusters. Expected [$cCount].");
-        }
-        $this->handleEqualAssert(count($markers), $mCount, true, 'Found ['.count($markers)."] markers. Expected [$mCount].");
-    }
-
-    /**
-     * @Then I click on an existing location marker
-     */
-    public function iClickOnAnExistingLocationMarker()
-    {
-        $markers = $this->getUserSession()->getPage()->findAll('css', 'img.leaflet-marker-icon');
-        $this->handleNullAssert($markers, false, 'No markers found on map.');
-        $markers[0]->click();
-    }
-
-    /**
-     * @Then the map should close
-     */
-    public function theMapShouldClose()
-    {
-        $map = $this->getUserSession()->getPage()->find('css', '#loc-map');
-        $this->handleNullAssert($map, true, 'Map should not be displayed, and yet...');
-    }
-
-    /**
-     * @Then the coordinate fields should be filled
-     */
-    public function theCoordinateFieldsShouldBeFilled()
-    {
-        $this->iPutABreakpoint("theCoordinateFieldsShouldBeFilled");
-    }
-
-    /**
-     * @Then the marker's popup should have a description of the position 
-     * Note: The description is derived from the reverse geocode results.
-     */
-    public function theMarkersPopupShouldHaveADescriptionOfThePosition()
-    {
-        $this->iPutABreakpoint("theMarkersPopupShouldHaveADescriptionOfThePosition");
-    }
-
-
-
-    /** ------------------ Helper Steps --------------------------------------*/
+/** ---------------------- Helper Steps --------------------------------------*/
     /**
      * @Given I see :text
      */
     public function iSee($text)
     {
-        try {
-            $this->assertSession()->pageTextContains($text);
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Did not find [$text] anywhere on page.");
-        }
+        $this->spin(function() use ($text) {
+            try {
+                $this->assertSession()->pageTextContains($text);
+            } catch (Exception $e) { return false; 
+            } finally { return true; }
+        }, "Did not find [$text] anywhere on page.");
     }
     /**
      * @Given I click on :text link
@@ -943,8 +1093,23 @@ class FeatureContext extends RawMinkContext implements Context
         $selector = '#'.$form.'-all-fields';
         $checkbox = $this->getUserSession()->getPage()->find('css', $selector);
         $this->handleNullAssert($checkbox, false, "Couldn't find the show all fields checkbox");  
-        $checkbox->check();  
+        $this->spin(function() use ($checkbox) {
+            $checkbox->check();  
+            return $checkbox->isSelected();
+        }, 'Could not check "Show all fields".');
     }
+
+    /**
+     * @When I wait for the :level form to close
+     */
+    public function iWaitForTheFormToClose($level)
+    {
+        $this->spin(function() use ($level) {
+            $form = $this->getUserSession()->getPage()->find('css', "#$level-form");
+            return !$form;
+        }, "Form [$level] did not close.");
+    }
+    
     /**
      * @When I press :bttnText :count times
      */
@@ -954,6 +1119,19 @@ class FeatureContext extends RawMinkContext implements Context
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
+    // /**
+    //  * @When /^(?:|I )click (?:on |)(?:|the )"([^"]*)"(?:|.*)$/
+    //  * @Then /^(?:|I )click (?:on |)(?:|the )"([^"]*)"(?:|.*)$/
+    //  */
+    // public function iClickOn($arg1)
+    // {
+    //     $findName = $this->getSession()->getPage()->find("css", $arg1);
+    //     if (!$findName) {
+    //         throw new Exception($arg1 . " could not be found");
+    //     } else {
+    //         $findName->click();
+    //     }
+    // }
     /**
      * @When I press the :bttnText button
      */
@@ -961,8 +1139,14 @@ class FeatureContext extends RawMinkContext implements Context
     {
         if (stripos($bttnText, "Update") !== false || 
             stripos($bttnText, "Create") !== false) { self::$dbChanges = true; }
-        $this->getUserSession()->getPage()->pressButton($bttnText);
-        usleep(1000000);
+
+        $this->spin(function() use ($bttnText) {  //fwrite(STDOUT, "bttnText = [$bttnText]");
+            try {
+                $this->getUserSession()->getPage()->pressButton($bttnText);
+            } catch(Exception $e) { return false; 
+            } finally { return true; }
+        }, "Couldn't interact with button [$bttnText]");
+
         if ($bttnText === 'Update Interaction') { 
             $this->ensureThatFormClosed(); 
         }
@@ -970,52 +1154,118 @@ class FeatureContext extends RawMinkContext implements Context
             $this->getUserSession()->getPage()->pressButton($bttnText);
         }
     }
-    /** -------------------- Asserts ---------------------------------------- */
-    private function isInDataTree($text)
+
+/** -------------------- Error Handling ------------------------------------- */        
+    /**
+     * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
+     *
+     * @Then (I )break :msg
+     * @Then (I )break 
+     */
+    public function iPutABreakpoint($msg = null)
     {
-        $treeNodes = $this->getAllTreeNodes();
-        $inTree = false;
-        for ($i=0; $i < count($treeNodes); $i++) { 
-            if ($treeNodes[$i]->getText() === $text) { $inTree = true; }
-        }
-        return $inTree;
+        if ($msg !== null) { fwrite(STDOUT, "\n".$msg."\n"); } 
+        fwrite(STDOUT, "\033[s    \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
+        while (fgets(STDIN, 1024) == '') {}
+        fwrite(STDOUT, "\033[u");
+        return;
     }
-    private function textContainedInField($text, $fieldId, $isIn = true)
-    {  
-        $fieldVal = $this->getFieldData($fieldId);
-        $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleContainsAssert($text, $fieldVal, $isIn, 
-            "$should_nt have found [$text] in [$fieldId]"); 
-    }
-    private function assertFieldValueIs($text, $fieldId, $isIn = true)
-    {  
-        $fieldVal = $this->getFieldData($fieldId);
-        $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleEqualAssert($text, $fieldVal, $isIn,  
-            "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
-    }
-    /** Check after submitting the Interaction Edit form. */
-    private function ensureThatFormClosed()
+/** ================== PRIVATE HELPER METHODS ======================================================================= */
+/** ------------ Page Interactions ------------------------------------------ */
+    private function addValueToFormInput($selector, $text)
     {
-        try {
-            $this->assertSession()->pageTextNotContains('Editing Interaction');
-        } catch (Exception $e) {
-            $this->iPutABreakpoint("Form did not submit/close as expected.");
-        }
-        
+        // $msg = "\nCouldn't set [".$text."] into [".$selector."].";
+        // try {
+        //     $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
+        //     $this->getUserSession()->executeScript("$('$selector').change();");        
+        // } catch (Exception $e) {
+        //     $this->iPutABreakpoint($msg);
+        // }
+
+        $this->spin(function() use ($selector, $text) {
+            $input = $this->getUserSession()->getPage()->find('css', $selector);
+            if (!$input) { return false; }
+            $input->setValue($text);
+            $this->getUserSession()->executeScript("$('$selector').change();");        
+            return $input->getValue() == $text;
+        }, "Could set [$text] in [$selector]");
     }
-    /** ------------------ Get From Page -------------------------------------*/
+    private function selectValueInCombobox($selId, $text)
+    {                                                                           //fwrite(STDOUT, "\n            selectValueInCombobox - [$text] in [$selId]\n");           
+        $val = $this->getValueToSelect($selId, $text); 
+
+        $this->spin(function() use ($selId, $text, $val) {
+            $this->getUserSession()->executeScript("$('$selId')[0].selectize.addItem('$val');");
+            return $this->getFieldData($selId) == $text;
+        }, "Could not select [$text] in [$selId]");
+    }
+    /**
+     * There doesn't seem to be a way to set the date on the flatpickr calendar
+     * from these tests. Adding a data property to the calendar elem that will be
+     * read on calendar load and set that time as the default for the calendar. 
+     * Doesn't quite test the user's input, but should test the filter functionality.
+     */
+    private function setTimeFilterDefault($date, $reset = false)
+    {  
+        if ($reset) {
+            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', false);");    
+        } else {
+            $this->getUserSession()->executeScript("$('#selTimeFilter').data('default', '$date');");
+        }
+    }
+
+    private function toggleTheDateFilter($state)
+    {
+        $checkbox = $this->getUserSession()->getPage()->find('css', 'input#shw-chngd'); 
+        $this->spin(function() use ($state, $checkbox) {
+            try {
+                if ($state) { $checkbox->check(); } else { $checkbox->uncheck(); }
+            } catch (Exception $e) { return; }            
+            return $checkbox->isSelected() == $state;
+            }, 'Time filter not ['.($state ? 'en' : 'dis').'abled].');
+    }
+/** ---------------------- Get From Page -------------------------------------*/
+    private function getTableRow($text)
+    {
+        $row = null;
+
+        $this->spin(function() use ($text, &$row){
+            $rows = $this->getAllTableRows();  
+            foreach ($rows as $r) {
+                $treeNode = $r->find('css', '[colid="name"]');                  //fwrite(STDOUT, "\nrowText = [".$treeNode->getText()."] text = [$text]");
+                if ($treeNode->getText() !== $text) { continue; }
+                $row = $r; 
+                return true;
+            }
+        }, null);
+
+        return $row;
+    }
     private function getAllTableRows()
     {
         $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container .ag-row');
         $this->handleNullAssert($rows, false, 'No nodes found in data tree.');
         return $rows;
     }
+    private function getRowTreeNode($text)
+    {
+        $row = null;
+
+        $this->spin(function() use ($text, &$row){
+            $rows = $this->getAllTreeNodes();  
+            foreach ($rows as $r) {
+                if ($r->getText() !== $text) { continue; }
+                $row = $r; 
+                return true;
+            }
+        }, "$text node not found in tree;");
+
+        return $row;                           //fwrite(STDOUT, "\nrowText = [".$treeNode->getText()."] text = [$text]");
+    }
     private function getAllTreeNodes()
     {
         $nodes = $this->getUserSession()->getPage()->findAll('css', 'div.ag-row [colid="name"]'); 
-        $this->handleNullAssert($nodes, false, 'No nodes found in data tree.');
-        return $nodes;
+        return count($nodes) ? $nodes : [];
     }
     private function getCurrentFieldCount($prop)
     {
@@ -1038,22 +1288,12 @@ class FeatureContext extends RawMinkContext implements Context
     {
         return  $this->getUserSession()->evaluateScript("$('$fieldId')[0].value;"); 
     }
-    private function getTableRow($text)
-    {
-        usleep(500000);
-        $rows = $this->getAllTableRows();
-        foreach ($rows as $row) {
-            $treeNode = $row->find('css', '[colid="name"]');
-            if ($treeNode->getText() == $text) { return $row; }
-        }
-    }
     /** 
      * Either returns all the interaction rows displayed in the table, or a subset
      * under a specified node in the tree.
      */
     private function getInteractionsRows($node = false)
     {  
-        usleep(500000);
         $intRows = [];
         $subSet = $node === false; 
         $rows = $this->getAllTableRows();
@@ -1081,97 +1321,55 @@ class FeatureContext extends RawMinkContext implements Context
             if ($elem !== null) { return $prefix; }
         }
     }
-    private function getTreeNode($text) 
-    {
-        usleep(500000);
-        $treeNodes = $this->getAllTreeNodes();
-        $row = null;
-        for ($i=0; $i < count($treeNodes); $i++) { 
-            if ($treeNodes[$i]->getText() === $text) { $row = $treeNodes[$i]; break;}
-        }
-        $this->handleNullAssert($row, false, "Didn't find the [$text] tree node.");
-        return $row;
-    }
-    private function toggleRow($text, $row, $close = false)
-    {
-        $row->doubleClick();
-        $clicked = $this->isRowExpanded($row);                                  
-        if ($clicked && !$close || !$clicked && $close) { fwrite(STDOUT, "\n       [$text] row opened.\n");return; }
-        if (!$clicked && !$close || !$clicked && $close) {
-            $row->doubleClick();
-        }
-        if (!$this->isRowExpanded($row)) {
-            $msg = $text . " row still not " . (!$close ? "expanded" : "collapsed"); 
-            $this->iPutABreakpoint($msg);
-        }
-    }
-    private function isRowExpanded($row)
-    {
-        $checkbox = $row->find('css', 'span.ag-group-expanded');
-        return $checkbox->isVisible();
-
-    }
     private function getValueToSelect($selId, $text)
     {
-        $opts = $this->getUserSession()->evaluateScript("$('$selId')[0].selectize.options;");
+        $opts = $this->getComboboxOptions($selId);
         foreach ($opts as $key => $optAry) {
             if ($optAry['text'] === $text) { return $optAry['value']; }
         } 
         $this->iPutABreakpoint("Couldn't find the option for [$text] in [$selId]");
     }
-    /** ------------------ Interactions --------------------------------------*/
+    private function getComboboxOptions($selId)
+    {
+        $opts = [];
+        $this->spin(function() use (&$opts, $selId) {
+            $opts = $this->getUserSession()->evaluateScript(
+                "$('$selId').length ? $('$selId')[0].selectize.options : false;");
+            return $opts;
+        }, "Could not find options for [$selId]");
+        return $opts;
+    }
+/** ------------------ Table Interactions ------------------------------------*/
     /**
      * Updates a select elem and checks the page updated by finding a 'new' elem.
      */
-    private function changeTableSort($elemId, $newVal, $newElemId)
+    private function changeTableSort($elemId, $newVal, $newElemSel)
     {                                                                           //fwrite(STDOUT, "\nchangeTableSort\n");
         $elem = $this->getUserSession()->evaluateScript("$('$elemId').length;"); 
         $this->getUserSession()->
             executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
-        $uiUpdated = $this->getUserSession()->evaluateScript("$('#newElemId').length > 0;");
-        $this->handleNullAssert($uiUpdated, false, "UI did not update as expected. Did not find [$newElemId].");
-    }
-    private function collapseDataTreeNode($text)
-    {
-        $row = $this->getTreeNode($text);
-        $row->doubleClick();
-    }
-
+        $newElem = $this->getUserSession()->getPage()->find('css', $newElemSel);
+        $this->handleNullAssert($newElem, false, "UI did not update as expected. Did not find [$newElemSel].");
+    }    
     private function clickRowEditPencil($row)
     {
-        $pencil = $row->find('css', '.tbl-edit');
-        $this->handleNullAssert($pencil, false, "Couldn't find the edit pencil for row.");
-        $pencil->click();
+        $this->spin(function() use ($row){
+            $pencil = $row->find('css', '.tbl-edit');
+            if (@$pencil) { return false; }
+            $pencil->click();
+        }, null);
     }
-    private function clickRowMapPin($row)
-    {
-        $pin = $row->find('css', '[alt="Map Icon"]');
-        $this->handleNullAssert($pin, false, "Couldn't find the map pin for row.");
-        $pin->click();
-    }
-    /** -------------------- Error Handling --------------------------------- */        
-    /**
-     * Pauses the scenario until the user presses a key. Useful when debugging a scenario.
-     *
-     * @Then (I )break :msg
-     * @Then (I )break 
-     */
-    public function iPutABreakpoint($msg = null)
-    {
-        if ($msg !== null) { fwrite(STDOUT, "\n".$msg."\n"); } 
-        fwrite(STDOUT, "\033[s    \033[93m[Breakpoint] Press \033[1;93m[RETURN]\033[0;93m to continue...\033[0m");
-        while (fgets(STDIN, 1024) == '') {}
-        fwrite(STDOUT, "\033[u");
-        return;
-    }
-
-    /** -------- Asserts ----------- */
+/** -------------------- Asserts -------------------------------------------- */
     private function handleContainsAssert($ndl, $hystk, $isIn, $msg)
     {                                                                           //print('Haystack = '.$hystk.', needle = '.$ndl);
         if ($isIn && strpos($hystk, $ndl) === false || !$isIn && strpos($hystk, $ndl) != false) { 
             $this->iPutABreakpoint($msg);
         }
     }
+    private function ifContainsText($hystk, $ndl)
+    {        
+        return strpos($hystk, $ndl) !== false;
+    }    
     private function handleEqualAssert($frst, $scnd, $isEq, $msg)
     {       
         if ($isEq && $frst != $scnd || !$isEq && $frst == $scnd) { 
@@ -1184,27 +1382,75 @@ class FeatureContext extends RawMinkContext implements Context
             $this->iPutABreakpoint($msg);
         }
     }
-    /** -------- Page Interactions ----------- */
-    private function addValueToFormInput($selector, $text)
+    private function isInDataTree($text)
     {
-        $msg = "\nCouldn't set [".$text."] into [".$selector."].";
-        try {
-            $this->getUserSession()->executeScript("$('$selector')[0].value = '$text';");        
-            $this->getUserSession()->executeScript("$('$selector').change();");        
-        } catch (Exception $e) {
-            $this->iPutABreakpoint($msg);
+        $treeNodes = $this->getAllTreeNodes();
+        $inTree = false;
+        for ($i=0; $i < count($treeNodes); $i++) { 
+            if ($treeNodes[$i]->getText() === $text) { $inTree = true; }
         }
+        return $inTree;
     }
-    /** Couldn't find a way to check whether elem exists before set value attempt. */
-    private function selectValueInCombobox($selId, $text)
-    {                                                                           //fwrite(STDOUT, "\n            selectValueInCombobox - [$text] in [$selId]\n");           
-        $msg = 'Error while selecting ['.$text.'] in ['.$selId.'].';
-        $val = $this->getValueToSelect($selId, $text); 
-        $this->getUserSession()->executeScript("$('$selId').length ? $('$selId')[0].selectize.addItem('$val') : null;");
-        usleep(500000);
-        $this->assertFieldValueIs($text, $selId);
+    private function textContainedInField($text, $fieldId, $isIn = true)
+    {  
+        $should_nt = $isIn ? 'Should' : "Shouldn't";
+        $fieldVal = $this->getFieldData($fieldId);
+        return !$isIn && strpos($fieldVal, $text) === false || 
+            $isIn && strpos($fieldVal, $text) != false;
     }
-    /** ------------------ Data Sync Feature -----------------------------------*/
+    private function assertFieldValueIs($text, $fieldId, $isIn = true)
+    {  
+        $fieldVal = $this->getFieldData($fieldId);
+        $should_nt = $isIn ? 'Should' : "Shouldn't";
+        $this->handleEqualAssert($text, $fieldVal, $isIn,  
+            "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
+    }
+    /** Check after submitting the Interaction Edit form. */
+    private function ensureThatFormClosed()
+    {
+        $this->spin(function() {
+            try {
+                $this->assertSession()->pageTextNotContains('Editing Interaction');
+            } catch (Exception $e) { return false; 
+            } finally { return true; }
+        }, "Form did not submit/close as expected.");
+    }
+    private function isRowExpanded($row)
+    {
+        $checkbox = $row->find('css', 'span.ag-group-expanded');  
+        return $checkbox == null ? false : $checkbox->isVisible();
+    }
+/** ---------------------------- Misc Util ---------------------------------- */
+    private function spin ($lambda, $errMsg, $wait = 5)
+    {
+        for ($i = 0; $i < $wait; $i++)
+        {
+            try {
+                if ($lambda()) {
+                    return true;
+                } else { }
+            } catch (Exception $e) {
+                // do nothing
+            }
+            sleep(1);
+        }
+        if (!$errMsg) { return; }
+        $this->iPutABreakpoint($errMsg);
+    }
+    private function getUserSession()
+    {
+        return isset($this->curUser) ? $this->curUser : $this->getSession();
+    }
+    private function clickOnPageElement($selector)
+    {
+        $this->spin(function() use ($selector) {
+            $elem = $this->getUserSession()->getPage()->find('css', $selector); 
+            if (!$elem) { return false; }
+            $elem->click(); 
+            return true;
+        }, "Couldn't click on the [$selector] element.");
+    }
+/** ================== Data Sync Feature Methods ===================================================================== */
     /**
      * @Given an editor logs into the website
      */
@@ -1331,30 +1577,32 @@ class FeatureContext extends RawMinkContext implements Context
         $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
-        usleep(1000000);                                                        fwrite(STDOUT, "\n  Interaction ".$count." complete\n");
+        $this->iWaitForTheFormToClose('top');                                   fwrite(STDOUT, "\n  Interaction ".$count." complete\n");
     }
     private function fillSrcAndLocFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling Source and Location fields.\n");
         foreach ($data as $field => $value) { 
-            $this->iSelectFromTheDropdownField($value, $field); 
+            $this->iSelectFromTheFormDropdown($value, $field); 
         }
     }
     private function fillTaxaFields($data) 
     {                                                                           fwrite(STDOUT, "\n        Filling Taxa fields.\n");  
         $lvls = array_keys($data);
         $this->iFocusOnTheTaxonField('Subject');   
-        $this->iSelectFromTheDropdownField($data[$lvls[0]], $lvls[0]);
-        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iSelectFromTheFormDropdown($data[$lvls[0]], $lvls[0]);
+        $this->iPressTheButton('Select Taxon');
+        $this->iWaitForTheFormToClose('sub');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
-        $this->iSelectFromTheDropdownField($data[$lvls[1]], $lvls[1]);
-        $this->getUserSession()->getPage()->pressButton('Confirm');
+        $this->iSelectFromTheFormDropdown('Arthropod', 'Realm');
+        $this->iSelectFromTheFormDropdown($data[$lvls[1]], $lvls[1]);
+        $this->iPressTheButton('Select Taxon');
+        $this->iWaitForTheFormToClose('sub');
     }
     private function fillMiscIntFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling remaining fields.\n");
         $fields = array_keys($data); 
-        $this->iSelectFromTheDropdownField($data[0], 'Interaction Type');
-        $this->iSelectFromTheDropdownField($data[1], 'Interaction Tags');
+        $this->iSelectFromTheFormDropdown($data[0], 'Interaction Type');
+        $this->iSelectFromTheFormDropdown($data[1], 'Interaction Tags');
         $this->iTypeInTheField($data[2], 'Note', 'textarea');
     }
 
@@ -1366,7 +1614,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function editorChangesLocationData()
     {                                                                           fwrite(STDOUT, "\n---- Editor changing Location data.\n");
-        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->theDatabaseTableIsInFocus('Location'); 
         $this->editLocationData();
         $this->moveLocationInteraction();
     }
@@ -1376,19 +1624,19 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheRow('Santa Ana-Forest');
         $this->iChangeTheFieldTo('Display Name', 'input', 'Santa Ana-Desert');
-        $this->iChangeTheDropdownFieldTo('Habitat Type', 'Desert');
+        $this->iChangeTheFormDropdownTo('Habitat Type', 'Desert');
         $this->curUser->getPage()->pressButton('Update Location');
-        usleep(500000);
+        $this->iWaitForTheFormToClose('top');
     }
     private function moveLocationInteraction()
     {                                                                           fwrite(STDOUT, "\n        Editing interaction location data.\n");
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Santa Ana-Desert');
-        $this->iChangeTheDropdownFieldTo('Location', 'Costa Rica');
+        $this->iChangeTheFormDropdownTo('Location', 'Costa Rica');
         $this->curUser->getPage()->pressButton('Update Interaction');
-        usleep(500000);
-        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->iWaitForTheFormToClose('top');
+        $this->theDatabaseTableIsInFocus('Location'); 
         $this->iUncheckTheTimeUpdatedFilter();
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
@@ -1396,7 +1644,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function editorChangesTaxonData()
     {                                                                           fwrite(STDOUT, "\n        Editor changing Taxon data.\n");
-        $this->theDatabaseTableIsInSelectedView('Taxon'); 
+        $this->theDatabaseTableIsInFocus('Taxon'); 
         $this->iGroupInteractionsBy('Arthropoda');
         $this->editTaxonData();
         $this->moveTaxonInteraction();
@@ -1407,20 +1655,21 @@ class FeatureContext extends RawMinkContext implements Context
         $this->iClickOnTheEditPencilForTheRow('Family Sphingidae');
         $this->iChangeTheFieldTo('taxon name', 'input', 'Sphingidaey');
         $this->curUser->getPage()->pressButton('Update Taxon');
-        usleep(500000);
+        $this->iWaitForTheFormToClose('top');
     }
     private function moveTaxonInteraction()
     {                                                                           fwrite(STDOUT, "\n--- Editor changing Taxon interaction data.\n");
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iClickOnTheEditPencilForTheFirstInteractionOf('Unspecified Lepidoptera Interactions');
         $this->iFocusOnTheTaxonField('Object');
-        $this->iSelectFromTheDropdownField('Arthropod', 'Realm');
-        $this->iSelectFromTheDropdownField('Sphingidaey', 'Family');
-        $this->curUser->getPage()->pressButton('Confirm');
+        $this->iSelectFromTheFormDropdown('Arthropod', 'Realm');
+        $this->iSelectFromTheFormDropdown('Sphingidaey', 'Family');
+        $this->iPressTheButton('Select Taxon');
+        $this->iWaitForTheFormToClose('sub');
         $this->curUser->getPage()->pressButton('Update Interaction');
-        usleep(500000);
+        $this->iWaitForTheFormToClose('top');
         $this->iUncheckTheTimeUpdatedFilter();
-        $this->theDatabaseTableIsInSelectedView('Taxon');
+        $this->theDatabaseTableIsInFocus('Taxon');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
@@ -1435,14 +1684,14 @@ class FeatureContext extends RawMinkContext implements Context
     }    
     private function checkSourceData()
     {
-        $this->theDatabaseTableIsInSelectedView('Source'); 
+        $this->theDatabaseTableIsInFocus('Source'); 
         $this->iExpandInTheDataTree('Revista de Biologia Tropical');
         $this->iExpandInTheDataTree('Two cases of bat pollination in Central America');
         $this->iShouldSeeInteractionsAttributed(6);
     }
     private function checkLocationData()
     {
-        $this->theDatabaseTableIsInSelectedView('Location'); 
+        $this->theDatabaseTableIsInFocus('Location'); 
         $this->iExpandInTheDataTree('Central America');
         $this->iExpandInTheDataTree('Costa Rica');
         $this->iShouldSeeInteractionsUnder('2', 'Unspecified Costa Rica Interactions');
@@ -1450,16 +1699,11 @@ class FeatureContext extends RawMinkContext implements Context
     }
     private function checkTaxonData()
     {
-        $this->theDatabaseTableIsInSelectedView('Taxon');
+        $this->theDatabaseTableIsInFocus('Taxon');
         $this->iGroupInteractionsBy('Arthropoda');
         $this->iExpandInTheDataTree('Order Lepidoptera');
         $this->iShouldSeeInteractionsUnder('1', 'Unspecified Lepidoptera Interactions');
         $this->iExpandInTheDataTree('Family Sphingidaey');
         $this->iShouldSeeInteractionsUnder('6', 'Unspecified Sphingidaey Interactions');
-    }
-    /** ---------- Misc Util ----------- */
-    private function getUserSession()
-    {
-        return isset($this->curUser) ? $this->curUser : $this->getSession();
     }
 }

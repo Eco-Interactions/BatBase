@@ -2,9 +2,10 @@
 import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
-import { addNewDataToStorage, initStoredData } from './db-sync.js';
-import { showPopUpMsg } from './db-table/db-ui.js';
-
+import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
+import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
+import { newIntList, selIntList } from './db-table/save-ints.js';
+import { newFilterSet, selFilterSet } from './db-table/save-fltrs.js';
 /* 
  * Exports:
  *   addEnterKeypressClick
@@ -13,10 +14,12 @@ import { showPopUpMsg } from './db-table/db-ui.js';
  *   buildElem
  *   buildSelectElem
  *   buildSimpleOpts
+ *   buildOptsObj
  *   clearDataStorage
  *   getDataFromStorage
  *   getDetachedRcrd
  *   getGeoJsonEntity
+ *   getOptsFromStoredData
  *   getSelVal
  *   initCombobox
  *   initComboboxes
@@ -25,6 +28,7 @@ import { showPopUpMsg } from './db-table/db-ui.js';
  *   isGeoJsonDataAvailable
  *   lcfirst 
  *   removeFromStorage
+ *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
  *   stripString
@@ -34,8 +38,8 @@ import { showPopUpMsg } from './db-table/db-ui.js';
 let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
-const geoJsonKey = 'A life without cause is a life without effect.';  
-const localStorageKey = 'A life without cause is a life without effect!!!!!'; 
+const geoJsonKey = 'A life without cause is a life without effect!!';  
+const localStorageKey = 'A life without cause is a life without effect!!!!!!'; 
 
 extendPrototypes();
 initGeoJsonData();
@@ -120,6 +124,7 @@ export function buildSelectElem(options, attrs, changeFunc, selected) {
         }
     }
 }
+/** ------- Options Methods --------- */
 /**
  * Creates an opts obj for each 'item' in array with the index as the value and 
  * the 'item' as the text.
@@ -141,6 +146,26 @@ export function alphaOptionObjs(a, b) {
     var y = b.text.toLowerCase();
     return x<y ? -1 : x>y ? 1 : 0;
 }  
+/** Builds options out of a stored entity-name object. */
+export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
+    var dataObj = getDataFromStorage(prop);  
+    var sortedNameKeys = Object.keys(dataObj).sort();
+    return buildOptsObj(dataObj, sortedNameKeys);
+}
+/** 
+ * Builds options out of the entity-name  object. Name (k) ID (v). If an option 
+ * group is passed, an additional 'group' key is added that will serve as a category 
+ * for the options in the group.
+ */
+export function buildOptsObj(entityObj, sortedKeys) {
+    return sortedKeys.map(function(name) {
+        return typeof entityObj[name] === 'object' ? 
+            { group: entityObj[name].group, 
+              text: ucfirst(name),
+              value: entityObj[name].value } :
+            { value: entityObj[name], text: ucfirst(name) }
+    });    
+}
 /*--------------------- Extend Prototypes/Libraries ----------------------*/
 function extendPrototypes() {
     extendDate();
@@ -192,11 +217,18 @@ export function init_db() {
     if (!dataStorage.getItem(localStorageKey)) {
         clearDataStorage();
         initStoredData();
+    } else if (dataStorage.getItem('user') !== $('body').data('user-name')) {
+        showLoadingDataPopUp('user');
+        sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
     } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
 }
 export function clearDataStorage() {  
     dataStorage.clear();
     dataStorage.setItem(localStorageKey, true);
+}
+function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
+    replaceUserData(data, $('body').data('user-name'));
+    db_page.initSearchState('user');
 }
 /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
 function storeDataUpdatedTimes(ajaxData) {
@@ -346,28 +378,30 @@ export function getTaxonName(taxon) {
  * Inits 'selectize' for each select elem in the form's 'selElems' array
  * according to the 'selMap' config. Empties array after intializing.
  */
-export function initCombobox(field) {                                           //console.log("initCombobox [%s]", field);
+export function initCombobox(field, options, change) {                          //console.log("initCombobox [%s] args = %O", field, arguments);
     const confg = getSelConfgObj(field); 
-    initSelectCombobox(confg);  
+    initSelectCombobox(confg, options, change);  
 } /* End initComboboxes */
 export function initComboboxes(fieldAry) {
     fieldAry.forEach(field => initCombobox(field));
 }
-/** REFACTOR AWAY FROM USING FIELD IN ID'S. CUZ WHY AM I ALREADY? */
 function getSelConfgObj(field) {  
     const confgs = { 
-        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus },
-        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
-        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Int-set': { name: 'Interaction Set', id: '#int-set', change: false },
-        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch },
-        'Saved Filters': {name: field, id: '#saved-filters', change: false },
-        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch },
-        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch },
-        'View': { name: 'View', id: '#sel-view', change: false }
+        // Search Page Filter/Focus Comboboxes that Affect UI & Table Directly
+        'Focus' : { name: field, id: '#search-focus', change: db_page.selectSearchFocus, blur: true },
+        'Class' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Country' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
+        'Family' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Genus' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Order' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Publication Type' : {name: field, id: '#selPubType', change: db_filters.updatePubSearch, blur: true },
+        'Region' : { name: field, id: '#sel'+field, change: db_filters.updateLocSearch, blur: true },
+        'Species' : { name: field, id: '#sel'+field, change: db_filters.updateTaxonSearch, blur: true },
+        'Time Filter': { name: 'Filter', id: '#selTimeFilter' },
+        'View': { name: 'View', id: '#sel-view', change: false, blur: true },
+        // Search Page Comboboxes with Create Options and Sub-panels
+        'Int-lists': { name: 'Interaction List', id: '#selIntList', add: newIntList, change: selIntList },
+        'Saved Filter Set': {name: field, id: '#selSavedFilters', add: newFilterSet, change: selFilterSet },
     };
     return confgs[field];
 }
@@ -376,20 +410,26 @@ function getSelConfgObj(field) {
  * Note: The 'selectize' library turns select dropdowns into input comboboxes
  * that allow users to search by typing.
  */
-function initSelectCombobox(confg) {                                            //console.log("initSelectCombobox. CONFG = %O", confg)
+function initSelectCombobox(confg, opts, change) {                              //console.log("initSelectCombobox. CONFG = %O", confg)
     const options = {
-        create: false,
-        onChange: confg.change,
-        onBlur: saveOrRestoreSelection,
-        placeholder: getPlaceholer(confg.id, confg.name)
+        create: confg.add || false,
+        onChange: change || confg.change,
+        onBlur: confg.blur ? saveOrRestoreSelection : null,
+        placeholder: getPlaceholer(confg.id, confg.name, confg.add)
     };
-    const sel = $(confg.id).selectize(options);  
-
+    if (opts) { addAdditionalOptions(); }                                       //console.log('options = %O', options);
+    $(confg.id).selectize(options);  
+    /** All non-standard options are added to this 'options' prop. */ 
+    function addAdditionalOptions() {
+        for (var opt in opts) {  
+            options[opt] = opts[opt];
+        }
+    }
 } /* End initSelectCombobox */
-function getPlaceholer(id, name, empty) {
+function getPlaceholer(id, name, add, empty) {
     const optCnt = empty ? 0 : $(id + ' > option').length;  
     const placeholder = 'Select ' + name
-    return optCnt ? 'Select ' + name : '- None -';
+    return optCnt || add ? 'Select ' + name : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
@@ -407,6 +447,7 @@ export function setSelVal(field, val, silent) {                                 
     saveSelVal($(confg.id), val);
 }
 /**
+ * For comboboxes on the database page that must remain filled for the UI to stay synced.
  * onBlur: the elem is checked for a value. If one is selected, it is saved. 
  * If none, the previous is restored. 
  */
@@ -423,7 +464,7 @@ function saveSelVal($elem, val) {
 }
 function updatePlaceholderText(id, newTxt, optCnt) {                            //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     const emptySel = optCnt === 0;
-    $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, emptySel);
+    $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, false, emptySel);
     $(id)[0].selectize.updatePlaceholder();
 }
 // export function enableComboboxes($pElems, enable) {   console.log('############ enableComboboxes used')
@@ -440,14 +481,16 @@ export function replaceSelOpts(selId, opts, changeHndlr, name) {                
     $selApi.addOption(opts);
     $selApi.refreshOptions(false);
     if (name) { updatePlaceholderText(selId, name, opts.length); }    
-    if (changeHndlr) { $selApi.on('change', changeHndlr); }  
+    if (changeHndlr) { 
+        $selApi.off('change');
+        $selApi.on('change', changeHndlr); 
+    }  
 }
 function clearCombobox($selApi) {
     $selApi.clearOptions();
     $selApi.off('change');
 }
 /* ------------- Unused ----------------------------------------------------- */
-
 // function alphaProperties(obj) {
 //     var sortable=[];
 //     var returnObj = {};

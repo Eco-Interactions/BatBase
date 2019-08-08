@@ -17,11 +17,11 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 
 /**
- * Crud-form controller.
+ * Date-entry/edit form controller.
  *
  * @Route("/crud", name="app_")
  */
-class CrudController extends Controller
+class DataEntryController extends Controller
 {
 /*------------------------------ CREATE --------------------------------------*/
     /**
@@ -475,7 +475,7 @@ class CrudController extends Controller
         $entity = $em->getRepository('AppBundle:SystemDate')
             ->findOneBy(['description' => $name]);
         if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime());
+        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
         $em->persist($entity);
     }
 }

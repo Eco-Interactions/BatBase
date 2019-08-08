@@ -1,5 +1,9 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
 
+>Test Users
+    - TestUser: testuser123
+    - testeditor: testeditor123
+
 ##------------------------- Serve Side ---------------------------------------##
 >.htaccess rewrite for batplant.org 
     RewriteEngine on
@@ -49,7 +53,11 @@
     - $ yarn run encore dev --config-name local --watch (run while actively working on asset code)
     - $ yarn run encore production --config-name server
 
-
+## Live & Learn ##
+> Changing Servers
+    Transfer:
+        - Cron jobs
+        - Email forwards
 ##------------------- TESTING ------------------------------------------------##
 >Testing software setup
 - Install selenium  (http://mink.behat.org/en/latest/drivers/selenium2.html)
@@ -80,12 +88,20 @@ Run Tests:
 ##  php bin/console doctrine:database:drop --force --env=test 
 ##  php bin/console doctrine:database:create --env=test
 ##  php bin/console doctrine:schema:update --force --env=test
-##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
->BEST PRACTICES
-## Standards decided upon and why
-comments:
-    //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
+Writing tests: 
+    - spin method template:
+        $this->spin(function() use () {
+            try {
+
+            } catch (Exception $e) { return false; 
+            } finally {
+                // ... do stuff
+                return true;
+            }
+        }, 'msg');
+
+##  php bin/console hautelook_alice:fixtures:load --no-interaction --env=test 
 
 >::Known BUGS::
 ## Bugs that I attempted to solve but ended up stumped or without time to delve in more. 
@@ -137,3 +153,12 @@ Errors:
             -- or equal/above the parent.
         -- Species must have genus parent
         -- Can't change genus that has species children
+
+
+>BEST PRACTICES
+## Standards decided upon and why
+alphabetize: 
+    Everything than can be should be.  (Adopted 2019-05-01)
+comments:
+    //right against the first letter to exclude uncommented instances of that word (consoles being the best -ever- to isolate)
+

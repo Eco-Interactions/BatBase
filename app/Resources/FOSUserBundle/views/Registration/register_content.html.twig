@@ -1,6 +1,6 @@
 <form action="{{ path('fos_user_registration_register') }}" method="POST" class="fos_user_registration_register">
 {{ form_start(form) }}
-    {{ form_errors(form) }}
+    <span style="color: red;"><b>{{ form_errors(form) }}</b></span>
 
     {{ form_row(form.first_name) }}
     {{ form_row(form.last_name) }}

@@ -1,3 +1,4 @@
+import { accessTableState as tState } from '../db-page.js';
 /** This filter presents all unique values of column to potentially filter on. */
 export default function UniqueValues() {}
 UniqueValues.prototype.init = function (params) {                               //console.log("UniqueValues.prototype.init. params = %O", params)
@@ -62,9 +63,12 @@ UniqueValues.prototype.createApi = function () {
         },
         selectEverything: function () { 
             that.eSelectAll.checked = true;
+            model.selectEverything();
         },
         selectNothing: function () {
             that.eSelectAll.checked = false;
+            model.selectNothing();
+            // that.refreshVirtualRows();
         },
         unselectValue: function (value) {
             model.unselectValue(value);
@@ -94,9 +98,8 @@ UniqueValues.prototype.createApi = function () {
             return model.getModel();
         },
         setModel: function (dataModel) {
-            if (dataModel === null) { that.eSelectAll.checked = true; } 
+            that.eSelectAll.checked = dataModel === null ? true : false;
             model.setModel(dataModel);
-            // that.refreshVirtualRows();
             that.filterChangedCallback();
         }, 
         refreshHeader: function() {
@@ -109,8 +112,8 @@ UniqueValues.prototype.afterGuiAttached = function(params) {
     this.refreshVirtualRows();
 };
 UniqueValues.prototype.onNewRowsLoaded = function () {}
-UniqueValues.prototype.onAnyFilterChanged = function () {
-    var colFilterModel = this.model.getModel();                             
+UniqueValues.prototype.onAnyFilterChanged = function () {                   
+    var colFilterModel = this.model.getModel();       
     if ( colFilterModel === null ) { return; }
     var col = Object.keys(colFilterModel)[0];
     var colFilterIconName = col + 'ColFilterIcon';                              //console.log("colFilterIconName = %O", colFilterIconName)
@@ -233,12 +236,16 @@ UnqValsColumnFilterModel.prototype.createAllUniqueValues = function () {
         this.allUniqueValues = getUniqueValuesPresent.bind(this)(uniqueValues);
     } else { 
         this.allUniqueValues = toStrings(this.getUniqueValues()); 
-        this.allUniqueValues.sort();
+        this.allUniqueValues.sort();  
+        if (this.allUniqueValues[0] === '( Blanks )') { 
+            const blank = this.allUniqueValues.shift();
+            this.allUniqueValues.push(blank);
+        }
     }
      
     function getUniqueValuesPresent(allValues) {
         const tableValues = this.getUniqueValues();  
-        return allValues.filter(v => {  
+        return allValues.filter(v => { 
             return tableValues.find(tV => tV ? tV.includes(v) : !v ? true : false)
         });
     }
@@ -249,9 +256,9 @@ UnqValsColumnFilterModel.prototype.getUniqueValues = function () {
     var result = [];
     this.rowModel.forEachNode(function (node) {
         if (!node.group) {
-            var value = _this.valueGetter(node);
-            if (value === "" || value === undefined) { value = null; }
-            addUniqueValueIfMissing(value);
+            var v = _this.valueGetter(node);
+            if (v === "" || v === undefined || v === null) { v = '( Blanks )'; }
+            addUniqueValueIfMissing(v);
         }
     });
     function addUniqueValueIfMissing(value) {
@@ -274,20 +281,25 @@ UnqValsColumnFilterModel.prototype.selectEverything = function () {
         this.selectedValuesMap[value] = null;
     }
     this.selectedValuesCount = count;
-    // this.
 };
 UnqValsColumnFilterModel.prototype.selectNothing = function () {
     this.selectedValuesMap = {};
-    this.selectedValuesCount = 0;
+    this.selectedValuesCount = 0;  
 };
 UnqValsColumnFilterModel.prototype.unselectValue = function (value) {
     if (this.selectedValuesMap[value] !== undefined) {
+        if (value == '( Blanks )') { 
+            delete this.selectedValuesMap['null'];
+        }
         delete this.selectedValuesMap[value];
         this.selectedValuesCount--;
     }
 };
-UnqValsColumnFilterModel.prototype.selectValue = function (value) {
+UnqValsColumnFilterModel.prototype.selectValue = function (value) {   
     if (this.selectedValuesMap[value] === undefined) {
+        if (value == '( Blanks )') { 
+            this.selectedValuesMap['null'] = null;
+        }
         this.selectedValuesMap[value] = null;
         this.selectedValuesCount++;
     }
@@ -317,29 +329,28 @@ UnqValsColumnFilterModel.prototype.getDisplayedValue = function (index) {
 UnqValsColumnFilterModel.prototype.isFilterActive = function () {
     return this.allUniqueValues.length !== this.selectedValuesCount;
 };
-UnqValsColumnFilterModel.prototype.getModel = function () {
-    var model = {};
-    var column = this.colDef.field;
-    model[column] = [];
+UnqValsColumnFilterModel.prototype.getModel = function () {  
     if (!this.isFilterActive()) { return null; }
-    var selectedValues = [];
-    iterateObject(this.selectedValuesMap, function (key) {
-        model[column].push(key);
-    });
+    const model = {};
+    const column = this.colDef.field;
+    model[column] = Object.keys(this.selectedValuesMap).map( k => {
+        return k == 'null' ? '( Blanks )' : k;
+    });  
     return model;
 };
 UnqValsColumnFilterModel.prototype.setModel = function (model, isSelectAll) {
     if (model && !isSelectAll) {
         this.selectNothing();
-        for (var i = 0; i < model.length; i++) {
-            var newValue = model[i];
-            if (this.allUniqueValues.indexOf(newValue) >= 0) {
-                this.selectValue(model[i]);
+        model.forEach(value => {
+            if (this.allUniqueValues.indexOf(value) >= 0) {
+                this.selectValue(value);
             } else {
-                tblOpts.api.showNoRowsOverlay(); 
-                console.warn('Value ' + newValue + ' is not a valid value for filter'); 
+                console.warn('Value [' + value + '] is not a valid value for filter'); 
+                if (model.length == 1) {
+                    tState().get('api').showNoRowsOverlay(); 
+                }
             }
-        }
+        });
     } else { this.selectEverything(); }
 };
 /*---------Unique Values Filter Utils--------------------------------------*/

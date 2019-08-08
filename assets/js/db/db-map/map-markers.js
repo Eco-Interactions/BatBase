@@ -33,7 +33,7 @@ export class LocMarker extends Marker {
         locRcrds = rcrds;
         this.formMarker = formMarker;
         this.self = L.marker(latLng, getCustomIcon(formMarker))
-            .bindPopup(this.popup, {closeOnClick: false})
+            .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
         this.addMarkerEvents();
@@ -81,7 +81,7 @@ export class IntMarker extends Marker {
         this.data = intData;
         this.focus = focus;
         this.self = L.marker(latLng, getCustomIcon())
-            .bindPopup(this.popup, {closeOnClick: false});
+            .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'});
         this.addMarkerEvents();
         this.self.on('popupclose', this.onPopupClose);
     }
@@ -127,6 +127,8 @@ export class LocCluster extends Marker {
         this.formMarker = formMarker;
         locRcrds = rcrds;
         this.popup.options.closeOnClick = false;
+        this.popup.options.maxWidth = '272';
+        this.popup.options.minWidth = '177';
         const opts = !formMarker ? false : {
             iconCreateFunction: () => L.divIcon({ 
                 html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
@@ -184,9 +186,11 @@ export class IntCluster extends Marker {
         super(latLng);
         bindClassContextToMethods(this); 
         this.map = map;
-        this.focus = focus,
-        this.data = data
+        this.focus = focus;
+        this.data = data;
         this.popup.options.closeOnClick = false;
+        this.popup.options.maxWidth = '272';
+        this.popup.options.minWidth = '177';
         this.self = L.markerClusterGroup();
         this.addClusterEvents();
         this.addMarkersToCluser(intCnt);
@@ -416,10 +420,12 @@ function getDescHtml(loc, strLngth) {
     return `<span title="${loc.description.replace(/"/g, '&quot;')}">Description: 
         <b>${desc}</b></span>`;
 }
-function getHabTypeHtml(loc, leaveBlank) {
+function getHabTypeHtml(loc, leaveBlank) {  
     if (isRegionOrCountry(loc)) { return getAllHabitatsWithin(loc); }
-    if (!loc.habitatType) { return leaveBlank ? '' : 'Habitat Type:'; }
-    return `Habitat: <b>${loc.habitatType.displayName}</b>`;
+    if (!loc.habitatType) { return leaveBlank ? '' : false; }
+    const name = loc.habitatType.displayName.includes('Caves') ? 
+        'Caves & Subterranean' : loc.habitatType.displayName;
+    return `Habitat: <b>${name}</b>`;
 }
 function getCoordsHtml(loc) {
     const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                         //console.log('geoJson = %O', geoData); 
@@ -457,7 +463,7 @@ function getLocSummaryPopup(loc) {
 function buildSummaryHtml(loc) {
     const name = getLocNameHtml(loc);
     const cnt = ifCountryGetIntCnt(loc) || false;
-    const desc = getDescHtml(loc, 99);
+    const desc = getDescHtml(loc, 66);
     const coords = getCoordsHtml(loc);
     const habType = getHabTypeHtml(loc);
     const bats = getBatsCitedHtml(loc);  
@@ -476,23 +482,24 @@ function ifCountryGetIntCnt(loc) {
 /** Build string of 3 most reported habitats and the count of remaining reported. */
 function getAllHabitatsWithin(loc) {                                            //console.log('getting habitats for = %O', loc);
     const habitats = {};
-    addHabitatsForLocAndChildren(loc.id);
-    return Object.keys(habitats).length ? buildHabHtml() : 'Habitat Types:'; 
+    addHabitatsForLocAndChildren(loc);
+    return Object.keys(habitats).length ? buildHabHtml() : false; 
 
-    function addHabitatsForLocAndChildren(id) { 
-        let loc = locRcrds[id]; 
+    function addHabitatsForLocAndChildren(l) {                                  
+        let loc = typeof l === 'object' ? l : locRcrds[l]; 
         if (loc.interactions.length) { addLocHabitat(loc); }
         if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }        
     }
     function addLocHabitat(loc) {
         if (!loc.habitatType) { return; }
-        const name = loc.habitatType.displayName;
+        const name = loc.habitatType.displayName.includes('Caves') ? 
+            'Caves & Subterranean' : loc.habitatType.displayName;
         if (!habitats[name]) { habitats[name] = 0; }
         ++habitats[name];
     }
     function buildHabHtml() {  
         const str = getTopThreeReportStr(habitats, buildLocSummaryStr);
-        return `Habitats: <b>&ensp; ${str}</b>`;
+        return `Habitats: <b>&ensp;&nbsp; ${str}</b>`;
     }
 }
 /** --- Cited Bats --- */
@@ -500,20 +507,25 @@ function getAllHabitatsWithin(loc) {                                            
 function getBatsCitedHtml(loc) {    
     const rcrds = _u.getDataFromStorage(['interaction', 'taxon']);
     const allBats = {};
-    getAllBatsWithin(loc.id);
+    getAllBatsWithin(loc); 
     const bats = getTopThreeReportStr(allBats, buildLocSummaryStr);
     return `Cited bats: <b>${bats}</b>`;
     
-    function getAllBatsWithin(id) {  
-        const loc = locRcrds[id];
+    function getAllBatsWithin(l) {  
+        const loc = typeof l == 'object' ? l : locRcrds[l];
         if (loc.interactions.length) { addBats(loc.interactions); }
         if (loc.children.length) { loc.children.forEach(getAllBatsWithin); }
     }
     function addBats(interactions) {
-        const ints = interactions.map(id => rcrds.interaction[id]);
+        if (typeof interactions[0] == 'object') { return addFltrdBats(interactions, allBats); }
+        const ints = interactions.map(id => rcrds.interaction[id]);  
         ints.forEach(int => trackBatInteraction(rcrds.taxon[int.subject], allBats));
     }
 } /* End getBatsCitedHtml */
+/** For displaying interactions that are filtered to a user-made list. */
+function addFltrdBats(ints, allBats) {
+    ints.forEach(int => trackBatInteraction(int.subject, allBats));
+}
 function trackBatInteraction(bat, allBats) {                                    //console.log('bat = %O', bat);
     let name = buildBatName(bat);
     if (Object.keys(allBats).indexOf(name) === -1) { allBats[name] = 0; }
@@ -563,7 +575,7 @@ function buildLocSummaryStr(sorted, ttl) {
     return ttl == 1 ? sorted[1][1] : formatString(sorted, ttl);
 }
 function formatString(sorted, ttl) {
-    const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;';
+    const tabs = '&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;';
     let str = concatNames(sorted, tabs);
     return finishLocTop3ReportString(str, ttl, tabs);
 }
@@ -621,7 +633,7 @@ function buildDetailsHtml(loc) {                                                
     const habType = getHabTypeHtml(loc);
     const elev = getElevHtml(loc);
     const coords = getCoordsHtml(loc);
-    const desc = getDescHtml(loc, 88);
+    const desc = getDescHtml(loc, 55);
     $(cntnr).append([name , [habType, elev, coords, desc].filter(e => e).join('<br>')]);   
     return cntnr;
 }
@@ -658,7 +670,7 @@ function buildLocDetails(loc) {
         ${loc.displayName}</b></span>`;
     const habType = getHabTypeHtml(loc, 'leaveBlank');
     const elev = getElevHtml(loc);
-    const desc = getDescHtml(loc, 88);
+    const desc = getDescHtml(loc, 55);
     return [name, habType, elev, desc].filter(e => e).join('<br>'); 
 }
 /* ============ New Location Popup ============== */

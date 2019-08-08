@@ -101,7 +101,7 @@ form button {
 #content-detail {
     position: absolute;
     width: 100%;
-    top: 510px;
+    top: 495px;
 }
 /*-------------- Image Slider -------------*/
 #slider-overlay {
@@ -128,7 +128,7 @@ form button {
 }
 #img-slider {
   width: 100%;
-  height: 432px;
+  height: 422px;
 }
 .slide {
   position: absolute;
@@ -701,6 +701,12 @@ label[for=fos_user_registration_form_about_me] {
     }
     #detail-block {
         margin: 0 .5em 2em .5em;
+    }
+    #content-detail {
+        top: 454px;
+    }
+    #img-slider, .slide {
+        height: 374px;
     }
     /*--- About DB Pg ---*/
     #about-db-maps, #db-new-data {

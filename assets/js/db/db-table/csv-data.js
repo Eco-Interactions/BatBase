@@ -7,7 +7,7 @@
  *     exportCsvData
  */
 import { accessTableState as tState } from '../db-page.js';
-import { collapseTree } from './db-ui.js';
+import { collapseTree } from '../db-ui.js';
 
 export default function exportCsvData() {
     const tblState = tState().get();
@@ -53,10 +53,7 @@ function selectRowsForExport(tblApi) {
     tblApi.expandAll();
     tblApi.getModel().rowsToDisplay.forEach(selectInteractions);                //console.log("selected rows = %O", tblOpts.api.getSelectedNodes())   
 }
-/**
- * A row is identified as an interaction row by the 'interactionType' property
- * present in the interaction row data.
- */
+/** An interaction row has 'interactionType' data. */
 function selectInteractions(rowNode) { 
     if (rowNode.data.interactionType !== undefined) {                       
         rowNode.setSelected(true);

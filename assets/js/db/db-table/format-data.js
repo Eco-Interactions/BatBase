@@ -1,20 +1,20 @@
 /**
  * Formats the tree data into the row-data format used in ag-grid.
  *
- * Exports:
- *     transformLocDataAndLoadTable
- *     transformSrcDataAndLoadTable
- *     transformTaxonDataAndLoadTable
+ * Exports:                         Imported by:
+ *     transformLocDataAndLoadTable         db-page, save-ints
+ *     transformSrcDataAndLoadTable         db-page, save-ints
+ *     transformTxnDataAndLoadTable         db-page, save-ints
  */
-import * as init_tbl from './init-table.js'
+import initTbl from './init-table.js'
 
 /*--------- Location Data Formatting ---------------------------------------------------------------------------------*/
 /**
  * Transforms the tree's location data into the table format and sends the data 
  * to the init-table module.
  */
-export function transformLocDataAndLoadTable(locTree, tblState) {
-    init_tbl.init("Location Tree", transformLocData(locTree, tblState));
+export function transformLocDataAndLoadTable(locTree, tblState) {  
+    initTbl("Location Tree", transformLocData(locTree, tblState), tblState);
 }
 function transformLocData(tree, tblState) {
     const finalRowData = [];                                                    //console.log("locTree = %O", tree);
@@ -55,7 +55,7 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
         let childRows = [];
         const locType = locRcrd.locationType.displayName; 
         if (locType === "Region" || locType === "Country") {
-            getUnspecifiedLocInts(locRcrd.interactions, pTreeLvl, locType);
+            getUnspecifiedLocInts(locRcrd, locRcrd.interactions, pTreeLvl, locType);
             locRcrd.children.forEach(getChildLocData);
         } else { childRows = getIntRowData(locRcrd.interactions, pTreeLvl); }
         return childRows;
@@ -63,7 +63,8 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
          * Groups interactions attributed directly to a location with child-locations
          * and adds them as it's first child row. 
          */
-        function getUnspecifiedLocInts(intsAry, treeLvl, locType) {   
+        function getUnspecifiedLocInts(rcrd, intsAry, treeLvl, locType) { 
+            if (rcrd.failedFltr) {  return; }
             const locName = locRcrd.displayName === "Unspecified" ? 
                 "Location" : locRcrd.displayName;
             if (intsAry.length > 0) { 
@@ -112,7 +113,7 @@ function hasChildInteractions(row) {
  */
 export function transformSrcDataAndLoadTable(srcTree, tblState) {               //console.log("transformSrcDataAndLoadTable called.")
     const rowData = transformSrcData(srcTree, tblState);                  
-    init_tbl.init(getSrcTreeName(tblState.curView), rowData);
+    initTbl(getSrcTreeName(tblState.curView), rowData, tblState);
 }
 function transformSrcData(tree, tblState) {
     let rowColorIdx = 0;
@@ -168,8 +169,8 @@ function getSrcTreeName(view) {
  * Transforms the tree's taxon record data into the table format and sends the data 
  * to the init-table module.
  */
-export function transformTaxonDataAndLoadTable(taxonTree, tblState) {           //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
-    init_tbl.init("Taxon Tree", transformTaxonData(taxonTree, tblState));
+export function transformTxnDataAndLoadTable(taxonTree, tblState) {             //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
+    initTbl("Taxon Tree", transformTaxonData(taxonTree, tblState), tblState);
 }
 function transformTaxonData(tree, tblState) {
     const finalRowData = [];
@@ -231,7 +232,7 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
         var realmMap = { '2': 'Bat', '3': 'Plant', '4': 'Arthropod' };  
         var name = curTaxon.id in realmMap ?  
             realmMap[curTaxon.id] : curTaxon.displayName;
-        getUnspecifiedTaxonInts(name, curTreeLvl);
+        getUnspecifiedTaxonInts(curTaxon, name, curTreeLvl);
     }
     /**
      * Groups interactions attributed directly to a taxon with child-taxa
@@ -239,7 +240,8 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
      * Note: Realm interactions are built closed, otherwise they would be expanded
      * by default
      */
-    function getUnspecifiedTaxonInts(taxonName, treeLvl) { 
+    function getUnspecifiedTaxonInts(rcrd, taxonName, treeLvl) { 
+        if (rcrd.failedFltr) {  return; }
         const realmIds = ['2', '3', '4'];  
         if (getIntCount(curTaxon) !== null) { 
             childRows.push({
@@ -314,7 +316,8 @@ function buildIntRowData(intRcrd, treeLvl, idx){                                
         tags: intRcrd.tags,
         note: intRcrd.note, 
         rowColorIdx: idx,
-        updatedAt: intRcrd.updatedAt
+        updatedAt: intRcrd.updatedAt,
+        year: intRcrd.source.year
     };
     if (intRcrd.location) { getLocationData(intRcrd.location); }
     return rowData;

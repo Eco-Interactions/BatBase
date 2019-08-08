@@ -1,15 +1,15 @@
 /**
  * Loads the formatted data using the ag-grid library and handles table styling.
  * 
- * Exports:
- *     init
+ * Exports:        Imported by:
+ *     initTbl          format-data
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
-import * as db_filters from './db-filters.js';
 import * as db_forms from '../db-forms/db-forms.js';
+import { updateFilterStatusMsg } from './db-filters.js';
 import unqVals from './ag-grid-unique-filter.js';
 import { lcfirst } from '../util.js';
-import { enableTableButtons } from './db-ui.js';
+import { enableTableButtons, resetToggleTreeBttn } from '../db-ui.js';
 import { accessTableState as tState, showLocOnMap } from '../db-page.js';
 
 let tblState;
@@ -18,45 +18,53 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export function init(viewTitle, rowData) {                                      //console.log("loading table. rowdata = %s", JSON.stringify(iParams.rowData, null, 2));
-    tblState = tState().get();
+export default function initTbl(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+    tblState = state;
     const tblDiv = document.querySelector('#search-tbl');
-    const tblOpts = getDefaultTblOpts();
+    const tblOpts = getDefaultTblOpts(viewTitle);
     tblOpts.rowData = rowData;
-    tblOpts.columnDefs = getColumnDefs(viewTitle);
     new agGrid.Grid(tblDiv, tblOpts);
     tblState.api = tblOpts.api;
     tState().set(
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
-    onTableInitComplete();
+    onTableInitComplete(rowData);
 }
 /** Base table options object. */
-function getDefaultTblOpts() {
+function getDefaultTblOpts(viewTitle) {  
     return {
-        columnDefs: getColumnDefs(),
-        rowSelection: 'multiple',   //Used for csv export
+        columnDefs: getColumnDefs(viewTitle),
+        enableColResize: true,
+        enableFilter: true,
+        enableSorting: true,
         getHeaderCellTemplate: getHeaderCellTemplate, 
         getNodeChildDetails: getNodeChildDetails,
         getRowClass: getRowStyleClass,
-        onRowGroupOpened: softRefresh,
         onBeforeFilterChanged: beforeFilterChange, 
         onAfterFilterChanged: afterFilterChanged,
-        onModelUpdated: onModelUpdated,
         onBeforeSortChanged: onBeforeSortChanged,
-        enableColResize: true,
-        enableSorting: true,
-        unSortIcon: true,
-        enableFilter: true,
-        rowHeight: 26
+        onModelUpdated: onModelUpdated,
+        onRowGroupOpened: softRefresh,
+        onRowSelected: rowSelected,
+        rowHeight: 26,
+        rowSelection: 'multiple',   //Used for csv export
+        unSortIcon: true
     };
 }
 function afterFilterChanged() {}                                                //console.log("afterFilterChange") 
 /** Resets Table Status' Active Filter display */
 function beforeFilterChange() {                                                 //console.log("beforeFilterChange")
-    db_filters.updateFilterStatusMsg();    
+    updateFilterStatusMsg();    
 } 
+/** If the interaction list panel is open, row selection triggers switch to add-by-one mode. */
+function rowSelected() {  
+    if ($('#int-opts').hasClass('closed') || $('#submit-list').data('submitting')) { return; }  
+    $('#unsel-rows').attr({'disabled': false}).fadeTo('slow', 1);
+    if (!$('#mod-some-list').prop('checked')) {
+        $('#mod-some-list').prop({checked: 'checked'}).change();
+    }
+}
 /**
  * Copied from agGrid's default template, with columnId added to create unique ID's
  * @param  {obj} params  {column, colDef, context, api}
@@ -96,13 +104,13 @@ function getColumnDefs(mainCol) {
             {headerName: taxonLvlPrefix + " Genus", field: "treeGenus", width: 150, hide: true },
             {headerName: taxonLvlPrefix + " Species", field: "treeSpecies", width: 150, hide: true },
             {headerName: "Edit", field: "edit", width: 50, hide: isNotEditor(), headerTooltip: "Edit", cellRenderer: addEditPencil },
-            {headerName: "Cnt", field: "intCnt", width: 47, volatile: true, headerTooltip: "Interaction Count" },
+            {headerName: "Cnt", field: "intCnt", width: 48, volatile: true, headerTooltip: "Interaction Count" },
             {headerName: "Map", field: "map", width: 39, hide: !ifLocView(), headerTooltip: "Show on Map", cellRenderer: addMapIcon },
             {headerName: "Subject Taxon", field: "subject", width: 141, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Object Taxon", field: "object", width: 135, cellRenderer: addToolTipToCells, comparator: sortByRankThenName },
             {headerName: "Type", field: "interactionType", width: 105, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Tags", field: "tags", width: 75, cellRenderer: addToolTipToCells, 
-                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '']}},
+                filter: unqVals, filterParams: {values: ['Arthropod', 'Flower', 'Fruit', 'Leaf', 'Seed', 'Secondary', '( Blanks )']}},
             {headerName: "Citation", field: "citation", width: 111, cellRenderer: addToolTipToCells},
             {headerName: "Habitat", field: "habitat", width: 100, cellRenderer: addToolTipToCells, filter: unqVals },
             {headerName: "Location", field: "location", width: 122, hide: ifLocView(), cellRenderer: addToolTipToCells },
@@ -157,7 +165,11 @@ function sortByRankThenName(a, b, nodeA, nodeB, isInverted) {                   
     if (tblState.curFocus !== "taxa") { return alphaSortVals(a, b); }
     return sortTaxonRows(a, b);
 } 
-
+function alphaSortVals(a, b) {
+    var x = a.toLowerCase();
+    var y = b.toLowerCase();
+    return x<y ? -1 : x>y ? 1 : 0;
+}  
 /** If the table is Taxon focused, sort the tree column by taxon-rank and name. */
 function sortTreeColumnIfTaxonFocused() {
     if (tblState.curFocus === 'taxa') {
@@ -305,11 +317,18 @@ function getNodeChildDetails(rcrd) {                                            
         return { group: true, expanded: rcrd.open, children: rcrd.children };
     } else { return null; }
 }
-function onTableInitComplete() {
+function onTableInitComplete(rowData) {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
+    updateFilterStatusMsg();
+    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
 } 
+function updateDisplayForShowingInteractionSet(rowData) {
+    if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }
+    tblState.api.expandAll(); 
+    resetToggleTreeBttn(true);
+}
 function hidePopUpMsg() {
     $('#db-popup, #db-overlay').hide();
     $('#db-popup').removeClass('loading'); //used in testing
@@ -352,20 +371,22 @@ function hideUnusedColFilterMenus() {
 /**
  * When the table rowModel is updated, the total interaction count for each 
  * tree node is updated. Interactions filtered out will not be included in the totals.
+ * Updates the total interaction count displayed in the tool bar. 
  */
-function onModelUpdated() {                                                     //console.log("--displayed rows = %O", tblState.api.getModel().rowsToDisplay);
-    // tblState = tState().get();  
+function onModelUpdated() {                                                     
     if (!tblState.api) { return; }
-    updateTotalRowIntCount(tblState.api.getModel().rootNode);
+    const ttlInts = updateTotalRowIntCounts(tblState.api.getModel().rootNode);  //console.log("-----new total ints = ", ttlInts);
+    updateTotalCountDisplay(ttlInts);
 }
 /**
  * Sets new interaction totals for each tree node @getChildrenCnt and then 
  * calls the table's softRefresh method, which refreshes any rows with "volatile"
  * set "true" in the columnDefs - currently only "Count".
  */
-function updateTotalRowIntCount(rootNode) {
-    getChildrenCnt(rootNode.childrenAfterFilter);  
+function updateTotalRowIntCounts(rootNode) {
+    const ttlInts = getChildrenCnt(rootNode.childrenAfterFilter);  
     tblState.api.softRefreshView();
+    return ttlInts;
 }
 function getChildrenCnt(nodeChildren) {                                         //console.log("nodeChildren =%O", nodeChildren)
     var nodeCnt, ttl = 0;
@@ -392,3 +413,7 @@ function addSubNodeInteractions(child) {
     }
     return cnt;
 }
+function updateTotalCountDisplay(cnt) {  
+    $("#tbl-cnt").text(`[ Interactions: ${cnt} ]`);
+}
+

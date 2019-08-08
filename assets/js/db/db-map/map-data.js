@@ -18,10 +18,10 @@ export default function buildMapDataObj(viewRcrds, locRcrds) {
     
     function getIntMapData(row) {                         
         if (row.data.treeLvl === 0) { curBaseNodeName = row.data.name; }                         
-        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }
-        buildInteractionMapData(row.data, _u.getDetachedRcrd(row.data.id, viewRcrds));
+        if (!row.data.interactions || hasUnspecifiedRow(row.data)) { return; }  
+        buildInteractionMapData(row, row.data, _u.getDetachedRcrd(row.data.id, viewRcrds));
     }
-    function buildInteractionMapData(rowData, rcrd) {
+    function buildInteractionMapData(row, rowData, rcrd) {  //console.log('buildIntMapData row = %O rowData = %O', rowData)
         const locs = {/*locId: { loc: loc, ints: [rcrd]*/};
         let noLocCnt = 0;
         const data = { 
@@ -29,12 +29,12 @@ export default function buildMapDataObj(viewRcrds, locRcrds) {
             name: getRowRcrdName(rowData, rcrd, curBaseNodeName),
             rcrd: rcrd
         };
-        rowData.children.forEach(addRowData); //interactions
+        row.childrenAfterFilter.forEach(addRowData); //interactions
         addToMapDataObj(data, locs, noLocCnt);
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
-        function addRowData(intRowData) {  
-            if (!intRowData.location) { return ++noLocCnt; }  
-            const intRcrd = _u.getDetachedRcrd(intRowData.id, intRcrds);        //console.log('intRcd = %O, locRcrds = %O', intRcrd, locRcrds);
+        function addRowData(intRow) {  
+            if (!intRow.data.location) { return ++noLocCnt; }  
+            const intRcrd = _u.getDetachedRcrd(intRow.data.id, intRcrds);       //console.log('----intRow = %O, intRcd = %O, locRcrds = %O', intRow, intRcrd, locRcrds);
             const loc = _u.getDetachedRcrd(intRcrd.location, locRcrds);
             addLocAndIntData(loc, intRcrd);
             ++data.intCnt;

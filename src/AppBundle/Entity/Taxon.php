@@ -590,9 +590,9 @@ class Taxon
      *
      * @return Taxon
      */
-    public function addSubjectRole(\AppBundle\Entity\Interaction $subjectRoles)
+    public function addSubjectRole(\AppBundle\Entity\Interaction $subjectRole)
     {
-        $this->subjectRoles[] = $subjectRoles;
+        $this->subjectRoles[] = $subjectRole;
 
         return $this;
     }
@@ -602,9 +602,9 @@ class Taxon
      *
      * @param \AppBundle\Entity\Interaction $subjectRoles
      */
-    public function removeSubjectRole(\AppBundle\Entity\Interaction $subjectRoles)
+    public function removeSubjectRole(\AppBundle\Entity\Interaction $subjectRole)
     {
-        $this->subjectRoles->removeElement($subjectRoles);
+        $this->subjectRoles->removeElement($subjectRole);
     }
 
     /**
@@ -672,6 +672,14 @@ class Taxon
         $interactions = $this->objectRoles;
         return $this->getInteractionids($interactions);
     }
+    // CURRENTLY ONLY USED IN DOCTRINE MIGRATIONS 
+    public function getInteractions()
+    {
+        $subj = $this->getSubjectRoles();  
+        $obj = $this->getObjectRoles();     
+
+        return count($subj) > 0 ? $subj : $obj;
+    }
 
     /**
      * Returns an array of ids for all passed interactions. 
@@ -679,6 +687,7 @@ class Taxon
     public function getInteractionids($interactions)
     {
         $allIntIds = [];
+
         foreach ($interactions as $interaction) {
             array_push($allIntIds, $interaction->getId());
         }

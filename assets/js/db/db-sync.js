@@ -1,10 +1,12 @@
 /**
  * Handles adding, updating, and removing data from local storage.
- * Exports:
+ * Exports:                 Imported by:
  *     addNewDataToStorage
  *     initStoredData
+ *     replaceUserData              util
  *     resetStoredData
  *     updateEditedData
+ *     updateUserNamedList
  */
 import * as _u from './util.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
@@ -28,7 +30,9 @@ function getCurrentDate() {
 export function addNewDataToStorage(dataUpdatedAt, reset) {  
     var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
     if (!pgUpdatedAt) { return initStoredData(); } 
-    if (!firstTimeIsMoreRecent(dataUpdatedAt.System, pgUpdatedAt)) {            console.log("Data up to date.");return; }
+    if (!ifEntityUpdates(dataUpdatedAt.System, pgUpdatedAt)) { 
+       return getUserSpecificUpdates(); 
+    }
     delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
     syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
 }
@@ -36,15 +40,26 @@ export function addNewDataToStorage(dataUpdatedAt, reset) {
  * Returns true if the first datetime is more recent than the second. 
  * Note: for cross-browser date comparisson, dashes must be replaced with slashes.
  */
-function firstTimeIsMoreRecent(timeOne, timeTwo) {  
+function ifEntityUpdates(timeOne, timeTwo) {  
     var time1 = timeOne.replace(/-/g,'/');  
     var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
 }
+/**
+ * Updates user specific data in local storage. Useful when the user changes on the
+ * same machine, or when the search page is first visited before a user logged in.
+ */
+function getUserSpecificUpdates() {
+    _u.sendAjaxQuery(null, "ajax/lists", storeUserSpecificData);                console.log('Data updated.');
+}
+function storeUserSpecificData(data) {
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+}
 /** Filter updatedAt entities and send those with updates to @ajaxNewData. */
 function syncUpdatedData(updatedAt, pgUpdatedAt) {                              console.log("Synching data updated since - ", pgUpdatedAt);
     var withUpdates = Object.keys(updatedAt).filter(function(entity){
-        return firstTimeIsMoreRecent(updatedAt[entity], pgUpdatedAt);
+        return ifEntityUpdates(updatedAt[entity], pgUpdatedAt);
     });                                                                         console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
     if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
     ajaxNewData(withUpdates, pgUpdatedAt);
@@ -426,7 +441,38 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     delete nameObj[taxonName];
     storeData(realm+level+'Names', nameObj);
 }
+
+/*---------------- Update User Named Lists -----------------------------------*/
+export function updateUserNamedList(data, action) {                             //console.log('updating [%s] stored list data. %O', action, data);
+    const list = action == 'delete' ? data : JSON.parse(data.entity);  
+    const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
+    const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
+    const rcrds = _u.getDataFromStorage(rcrdKey);
+    const names = _u.getDataFromStorage(nameKey);
+
+    if (action == 'delete') { removeListData(); 
+    } else { updateListData(); }
+
+    storeData(rcrdKey, rcrds);
+    storeData(nameKey, names);
+
+    function removeListData() {  
+        delete rcrds[list.id];  
+        delete names[list.displayName];  
+    }
+    function updateListData() {
+        rcrds[list.id] = list;
+        names[list.displayName] = list.type !== 'filter' ? list.id :
+            {value: list.id, group: getFocusAndViewOptionGroupString(list)};
+        if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
+    }
+} /* End updateUserNamedList */
 /*------------------ Init Stored Data Methods --------------------------------*/
+export function replaceUserData(data, userName) {
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+    _u.addToStorage('user', userName);
+}
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
@@ -460,10 +506,12 @@ export function initStoredData() {
 function ajaxAndStoreAllEntityData() {                                          console.log("ajaxAndStoreAllEntityData");
     $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
-        $.ajax("ajax/source"), $.ajax("ajax/interaction")
-    ).then(function(a1, a2, a3, a4) {                                           console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O", a1, a2, a3, a4) 
-        $.each([a1, a2, a3, a4], function(idx, a) { storeServerData(a[0]); });
-        deriveAndStoreData([a1[0], a2[0], a3[0], a4[0]]);
+        $.ajax("ajax/source"), $.ajax("ajax/interaction"),
+        $.ajax("ajax/lists"),
+    ).then(function(a1, a2, a3, a4, a5) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
+        $.each([a1, a2, a3, a4, a5], function(idx, a) { storeServerData(a[0]); });
+        deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
+        storeData('user', $('body').data('user-name'));
         storeData('pgDataUpdatedAt', getCurrentDate());  
         initSearchState('taxa');
     });
@@ -492,6 +540,7 @@ function deriveAndStoreData(data) {
     deriveAndStoreLocationData(data[1]);
     deriveAndStoreSourceData(data[2]);
     deriveInteractionData(data[3]);
+    deriveUserNamedListData(data[4]);
 }
 /** Stores an object of taxon names and ids for each level in each realm. */
 function deriveAndStoreTaxonData(data) {                                        //console.log("deriveAndStoreTaxonData called. data = %O", data);
@@ -620,7 +669,7 @@ function getEntityRcrds(ids, rcrds) {
     return data;
 }
 /** Returns an object with each entity record's displayName (key) and id. */
-function getNameDataObj(ids, rcrds) {
+function getNameDataObj(ids, rcrds) {                                           //console.log('ids = %O, rcrds = %O', ids, rcrds);
     var data = {};
     ids.forEach(function(id) { data[rcrds[id].displayName] = id; });            //console.log("nameDataObj = %O", data);
     return data;
@@ -642,6 +691,45 @@ function getTagData(tags, entity) {
         }
     }  
     return data;
+}
+/** 
+ * [type] - array of user created interaction and filter sets.
+ * [type]Names - an object with each set item's displayName(k) and id.
+ */
+function deriveUserNamedListData(data) {                                        //console.log('list data = %O', data)
+    const filters = {};
+    const filterIds = [];
+    const int_sets = {};
+    const int_setIds = [];
+
+    data.lists.forEach(l => { 
+        let entities = l.type == 'filter' ? filters : int_sets;
+        let idAry = l.type == 'filter' ? filterIds : int_setIds;
+        entities[l.id] = l;
+        idAry.push(l.id);
+    });
+
+    storeData('savedFilters', filters);
+    storeData('savedFilterNames', getFilterOptionGroupObj(filterIds, filters));
+    storeData('dataLists', int_sets);
+    storeData('dataListNames', getNameDataObj(int_setIds, int_sets));
+}
+function getFilterOptionGroupObj(ids, filters) {                                //console.log('getFilterOptionGroupObj ids = %O, filters = %O', ids, filters);
+    const data = {};
+    ids.forEach(function(id) { 
+        data[filters[id].displayName] = { 
+            value: id, group: getFocusAndViewOptionGroupString(filters[id]) }
+    });                                                                         //console.log("nameDataObj = %O", data);
+    return data;
+}
+function getFocusAndViewOptionGroupString(list) {
+    list.details = JSON.parse(list.details);                                    //console.log('getFocusAndViewOptionGroupString. list = %O', list)
+    const map = {
+        'srcs': 'Source', 'auths': 'Author', 'pubs': 'Publication', 'publ': 'Publisher',
+        'taxa': 'Taxon', '2': 'Bats', '3': 'Plants', '4': 'Arthropod'
+    };
+    return list.details.focus === 'locs' ? 'Location' : 
+        map[list.details.focus] + ' - ' + map[list.details.view];
 }
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */

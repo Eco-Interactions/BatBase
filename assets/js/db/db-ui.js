@@ -4,83 +4,110 @@
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
- *     init                             db_page
+ *     pg_init                          db_page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
- *     loadSearchLocHtml                
- *     loadTaxonComboboxes              
- *     resetToggleTreeBttn
- *     updateUiForTableView
- *     updateUiForMapView
+ *     loadLocFilterPanelElems          db-page, db-filters
+ *     loadTaxonComboboxes              db-page, db-filters     
+ *     loadTxnFilterPanelElems          db-page, db-filters
+ *     resetToggleTreeBttn              db_page, init-table
+ *     showLoadingDataPopUp             util
+ *     showTips                         intro
+ *     updateUiForTableView             db-page
+ *     updateUiForMapView               db-page
  */
-import * as _u from '../util.js';
-import exportCsvData from './csv-data.js';
-import { createEntity } from '../db-forms/db-forms.js';
-import * as db_page from '../db-page.js';
-import * as db_filters from './db-filters.js';
-import { showInts } from '../db-map/db-map.js';
+import * as _u from './util.js';
+import exportCsvData from './db-table/csv-data.js';
+import { createEntity } from './db-forms/db-forms.js';
+import * as db_page from './db-page.js';
+import * as db_filters from './db-table/db-filters.js';
+import { showInts } from './db-map/db-map.js';
+import { enableListReset, toggleSaveIntsPanel } from './db-table/save-ints.js';
+import { addPanelEvents, closeOpenPanels } from './db-table/panel-util.js';
 
-const userRole = $('body').data("user-role");
+const app = {
+    userRole: $('body').data("user-role"),
+    enabledSelectors: ''
+};
 
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
-export function init() {
+export function pg_init() {
     addDomEventListeners();
     adaptUiToScreenSize();
     authDependentInit();
-    disableSaveFilterUI();
 }
-/** Moves the buttons from the end of the search options panel to just the header row. */
+/** 
+ * Moves the buttons from the end of the search menu to just the header row.
+ * (Not used currently. Could revive in the future if the search menu grows.)
+ */
 function adaptUiToScreenSize() {
-    if ($(window).width() > 1500) { return; }
-    const elemCntnr = $('#db-opts-col5').detach();  
-    const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
-    $(elemCntnr)[0].className = 'flex-row';
-    $(cntnr).append(elemCntnr);
-    $('#tbl-ctrls-reloc').append(cntnr);
+    // if ($(window).width() > 1500) { return; }
+    // const elemCntnr = $('#data-opts').detach();  
+    // const cntnr = _u.buildElem('div', { class: 'flex-row' });
+    // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
+    // $(elemCntnr)[0].className = 'flex-row';
+    // $(cntnr).append(elemCntnr);
+    // $('#tbl-ctrls-reloc').append(cntnr);
 }
 function addDomEventListeners() {
-    db_filters.addDomEventListeners();
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
     $('button[name="reset-tbl"]').click(db_page.resetDataTable);
+    addPanelEvents();
 }
 /** Shows a loading popup message for the inital data-download wait. */
-export function showLoadingDataPopUp() {
-    showPopUpMsg(`Downloading and caching all interaction records. Please allow 
-        for a ~45 second download.`);   
+export function showLoadingDataPopUp(type) {
+    const msgs = { 'user': 'Downloading all user-specific data.' };
+    const msg = msgs[type] || `Downloading and caching all interaction records. 
+        Please allow for a ~45 second download.`;
+    showPopUpMsg(msg);   
 }
 function authDependentInit() {
-    if (userRole === "visitor") { disableUserFeatures();
-    } else if (userRole === "user"){ enableUserFeatures(); 
-    } else { enableEditorFeatures(); }
+    const initMap = {
+        visitor: disableUserFeatures, user: enableUserFeatures,
+        editor: enableEditorFeatures, admin: enableAdminFeatures,
+        super: enableAdminFeatures
+    };
+    initMap[app.userRole]();
 }
-function disableUserFeatures() {
-    $('button[name="int-set"], button[name="csv"], #new-data')
+function disableUserFeatures() {                                                //console.log('disableUserFeatures')
+    $(`button[name="csv"], #list-opts button, #new-data, #rvw-data, 
+        #selSavedFilters, .fltr-desc, #apply-filter, #save-filter, #delete-filter, 
+        #stored-filters input, #stored-filters textarea`)
         .css({'opacity': '.5', 'cursor': 'not-allowed' }).prop('disabled', true)
         .prop('title', "Please register to use these features.");
-}
-function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
-    $('button[name="csv"]').click(exportCsvData);  
-    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This is an upcoming feature!'); 
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
+    app.enabledSelectors = '#filter';
 }
 function enableUserFeatures() {                                                 //console.log('enableUserFeatures')
     $('button[name="csv"]').click(exportCsvData); 
-    $('button[name="int-set"]').css({'opacity': '.5', 'cursor': 'not-allowed' })
-        .prop('title', 'This is an upcoming feature!'); 
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
         .prop('title', 'This feature is only available to editors.');
+    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to admins.');
+    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"]`;
 }
-function disableSaveFilterUI() {
-    $('.saved-filters-sel, #save-filter, #stored-filters span')
-        .css('cursor', 'not-allowed !important')
-        .prop('title', 'This is an upcoming feature!').attr('disabled', true);
+function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
+    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#rvw-data').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This feature is only available to admins.');
+    app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
+        #new-data`;
+}
+function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
+    $('button[name="csv"]').click(exportCsvData);  
+    $('button[name="int-set"]').click(toggleSaveIntsPanel);
+    $('#new-data').addClass('adminbttn')
+        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#rvw-data').addClass('adminbttn').css({'opacity': '.5', 'cursor': 'not-allowed' })
+        .prop('title', 'This is an upcoming feature!');
+    app.enabledSelectors = '.map-dsbl';
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -164,12 +191,14 @@ function isNextOpenLeafRow(node) {                                              
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    loadTaxonViewOpts(data.realm);
-    setTaxonView();  
+    loadTxnViewOpts(data.realm);
+    setTaxonView(); 
 }
-function loadTaxonViewOpts(realms) {
+function loadTxnViewOpts(realms) {
+    if ($('#sel-view').data('focus') === 'taxa') { return; }
     const opts = getViewOpts(realms);
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
+    $('#sel-view').data('focus', 'taxa');
 }
 function getViewOpts(realms) {  
     const optsAry = [];
@@ -178,15 +207,24 @@ function getViewOpts(realms) {
     }
     return optsAry;
 }
-/** Restores stored realm from previous session or sets the default 'Plants'. */
+/** Restores stored realm from previous session or sets the default 'Bats'. */
 function setTaxonView() {
     const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
     if (!_u.getSelVal('View')) { 
-        const realmVal = storedView ? storedView : "3";  
+        const realmVal = storedView ? storedView : "2";  
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
 /* ---------------------------- TAXON FILTER UI ----------------------------- */
+export function loadTxnFilterPanelElems(tblState) {
+    if ($('#focus-filters div').length) { return loadTaxonComboboxes(tblState); }
+    loadTaxonComboboxes(tblState);
+    loadTxnNameSearchElem(tblState);
+}
+function loadTxnNameSearchElem(tblState) {
+    const searchTreeElem = db_filters.buildTreeSearchHtml('Taxon');
+    $('#focus-filters').append(searchTreeElem);
+}
 /**
  * Builds and initializes a search-combobox for each level present in the 
  * the unfiltered realm tree. Each level's box is populated with the names 
@@ -221,21 +259,28 @@ function buildTaxonSelectOpts(tblState) {                                       
         const taxonNames = Object.keys(taxaByLvl[lvl]).sort();                  //console.log("taxonNames = %O", taxonNames);
         optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
     }
+    function buildTaxonOptions(taxonNames, data) {
+        const opts = taxonNames.map(name => {
+            return { value: data[name],
+                     text: name}});
+        if (optionIsSelected(opts[0].value)) {  
+            opts.unshift({value: 'all', text: '- All -'});
+        }
+        return opts;
+    }
+    function optionIsSelected(id) { 
+        if (Object.keys(tblState.selectedOpts).length > 2) { return; }
+        return Object.keys(tblState.selectedOpts).some(k => id == tblState.selectedOpts[k]);
+    }
     function fillInLvlOpts(lvl) {                                               //console.log("fillInEmptyAncestorLvls. lvl = ", lvl);
         if (lvl in tblState.selectedOpts) {
             const taxon = _u.getDetachedRcrd(tblState.selectedOpts[lvl], tblState.rcrdsById);
-            optsObj[lvl] = [{value: taxon.id, text: taxon.displayName}];  
+            optsObj[lvl] = [
+                {value: 'all', text: '- All -'}, 
+                {value: taxon.id, text: taxon.displayName}];  
         } else { optsObj[lvl] = []; }
     }
 } /* End buildTaxonSelectOpts */
-function buildTaxonOptions(taxonNames, taxonData) {
-    return taxonNames.map(function(taxonKey){
-        return {
-            value: taxonData[taxonKey],
-            text: taxonKey
-        };
-    });
-}
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);
@@ -245,20 +290,14 @@ function loadLevelSelects(levelOptsObj, levels, tblState) {                     
     function buildTaxonSelects(opts, levels) {  
         const elems = [];
         levels.forEach(function(level) {                                        //console.log('----- building select box for level = [%s]', level);
-            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row' });
+            const lbl = _u.buildElem('label', { class: 'sel-cntnr flex-row taxonLbl' });
             const span = _u.buildElem('span', { text: level + ': ' });
-            const sel = newSelEl(opts[level], 'opts-box', 'sel' + level, level);
-            setTaxonElemStyles(lbl, sel, level);
+            const sel = newSelEl(opts[level], 'opts-box taxonSel', 'sel' + level, level);            
             $(lbl).append([span, sel])
             elems.push(lbl);
         });
         return elems;
     }
-}
-function setTaxonElemStyles(lbl, sel, level) {
-    const className = level === 'Species' ? 'species' : 'taxon';
-    $(lbl).addClass(className+'Lbl');
-    $(sel).addClass(className+'Sel');
 }
 function updateTaxonSelOptions(lvlOptsObj, levels, tblState) {                  //console.log("updateTaxonSelOptions. lvlObj = %O", lvlOptsObj)          
     levels.forEach(function(level) {                                            
@@ -280,13 +319,15 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * selected. 
  */ 
 export function initLocSearchUi(view) {
-    loadLocationViewOpts()
+    loadLocationViewOpts();
     setLocView(view);  
 } 
 function loadLocationViewOpts(argument) {
+    if ($('#sel-view').data('focus') === 'locs') { return; }
     const opts = [{ value: 'map', text: 'Map Data' },
                 { value: 'tree', text: 'Table Data' }];
     _u.replaceSelOpts('#sel-view', opts, db_page.onLocViewChange);
+    $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
     const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
@@ -298,10 +339,10 @@ function setLocView(view) {
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
-export function loadSearchLocHtml(tblState) {   
+export function loadLocFilterPanelElems(tblState) {   
     if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
-    loadSearchByNameElem();
+    loadLocNameSearchElem();
 }
 function updateLocSelOptions(tblState) {
     const opts = buildLocSelectOpts(tblState); 
@@ -310,7 +351,7 @@ function updateLocSelOptions(tblState) {
     });
     setSelectedLocVals(tblState.selectedOpts);
 }
-function loadSearchByNameElem() {  
+function loadLocNameSearchElem() {  
     const searchTreeElem = db_filters.buildTreeSearchHtml('Location');
     $('#focus-filters').append(searchTreeElem);
 }
@@ -361,6 +402,7 @@ function buildLocSelectOpts(tblState) {
         if (opts.Region.length === 2) { rmvTopRegion(); }        
         addMissingOpts();
         sortLocOpts();
+        addAllOption();
     }
     /** 
      * If both top & sub regions are in the table, only the sub-region opt is 
@@ -399,6 +441,11 @@ function buildLocSelectOpts(tblState) {
             opts[type] = opts[type].sort(_u.alphaOptionObjs); 
         }
     }
+    function addAllOption() {  
+        Object.keys(tblState.selectedOpts).forEach(type => {
+            opts[type].unshift({value: 'all', text: '- All -'})
+        });
+    }
 } /* End buildLocSelectOpts */
 /** Builds the location select elements */
 function buildLocSelects(locOptsObj) {  
@@ -415,7 +462,6 @@ function buildLocSelects(locOptsObj) {
         const sel = newSelEl(opts, 'opts-box', 'sel' + selName, selName);
         $(lbl).addClass('locLbl').append([span, sel]);
         $(sel).addClass('locSel');
-        // $(lbl).css('width', '282px').append([span, sel]);
         return lbl;
     }
 }
@@ -430,14 +476,16 @@ function setSelectedLocVals(selected) {                                         
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
 export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
-    loadSourceViewOpts();
+    loadSourceViewOpts();   
     setSrcView();  
 }
 function loadSourceViewOpts() {
+    if ($('#sel-view').data('focus') === 'srcs') { return ; }
     const opts = [{ value: "auths", text: "Authors" },
                   { value: "pubs", text: "Publications" },
                   { value: "publ", text: "Publishers" }];
     _u.replaceSelOpts('#sel-view', opts, db_page.onSrcViewChange);
+    $('#sel-view').data('focus', 'srcs');
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
 function setSrcView() {
@@ -498,7 +546,6 @@ function loadPubSearchHtml() {
 } /* End loadPubSearchHtml */
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
-    // clearCol2();        
     $('#focus-filters').append(searchTreeElem);
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
@@ -506,43 +553,33 @@ export function updateUiForMapView() {
     updateBttnToReturnRcrdsToTable();
     disableTableButtons();
     showPopUpMsg();
-    $('#tool-bar').fadeTo(100, 1);
-    $('#search-tbl').hide();
+    closeOpenPanels();
+    $('#tool-bar').fadeTo('fast', 1);
+    $('#search-tbl').hide();  
     $('#map').show(); 
 }
 export function updateUiForTableView() {
-    $('#search-tbl').fadeTo('100', 1);
+    $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'));
-    // $('#shw-map').attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'});  
     updateBttnToShowRcrdsOnMap();
-}
-export function updateUiForMappingInts() {
-    updateUiForMapView();
-    // _u.enableComboboxes($('#opts-col1 select, #opts-col2 select'), false);
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
-    const locRcrds = tblState.curFocus !== 'locs' ? 
-        _u.getDataFromStorage('location') : tblState.rcrdsById;  
-    $('#search-tbl').fadeTo('100', 0.3, () => {
-        updateUiForMappingInts();
-        showInts(tblState.curFocus, tblState.rcrdsById, locRcrds);
+    $('#search-tbl').fadeTo('fast', 0.3, () => {
+        updateUiForMapView();
+        showInts(tblState.curFocus, tblState.rcrdsById, getLocRcrds());
     });
+
+    function getLocRcrds() {
+        return tblState.curFocus !== 'locs' ? 
+            _u.getDataFromStorage('location') : tblState.rcrdsById;  
+    }
 }
 function updateBttnToReturnRcrdsToTable() {
-    // addMsgAboutTableViewFiltering();
     $('#shw-map').text('Return to Table View');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
-    // $('#shw-map').attr('disabled', false).css({'opacity': 1, cursor: 'pointer'});
 }
-// function addMsgAboutTableViewFiltering() {
-//     if ($('#filter-in-tbl-msg').length) { return $('#filter-in-tbl-msg').show();}
-//     const div = _u.buildElem('div', {id:'filter-in-tbl-msg'});
-//     div.innerHTML = `Return to filter data shown.`;
-//     $('#content-detail').prepend(div);
-// }
 function updateBttnToShowRcrdsOnMap() {
     $('#shw-map').text('Show Interactions on Map');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
@@ -551,24 +588,98 @@ function returnRcrdsToTable() {
     updateUiForTableView();
     if (_u.getSelVal('View') === 'map') { _u.setSelVal('View', 'tree'); }
 }
+/* ------------------ Search Tips ------------------------------------------- */
+export function showTips() {                                                           //console.log("show tips called.")
+    if (!$('#tips-close-bttn').length) { initSearchTips(); }
+    $('#b-overlay-popup').addClass("tips-popup");
+    $('#b-overlay, #b-overlay-popup').fadeIn(500);
+    $('#show-tips').html("Hide Tips");
+    $('#show-tips').off("click");
+    $('#show-tips').click(hideTips);
+}
+function initSearchTips() { 
+    $('#b-overlay-popup').html(getSearchTipsHtml());
+    bindEscEvents();
+}
+function hideTips() {
+    $('#b-overlay').fadeOut(500, removeTips);
+    $('#show-tips').html("Search Tips");
+    $('#show-tips').off("click");
+    $('#show-tips').click(showTips);
+    $('#b-overlay-popup').removeClass("tips-popup");
+    $('#b-overlay-popup').empty();
+}
+function removeTips() {                                                         //console.log("removeTips called.")
+    $('#b-overlay, #b-overlay-popup').css("display", "none");
+    $('#b-overlay-popup').removeClass("tips-popup");
+}
+function bindEscEvents() {
+    addCloseButton();
+    $(document).on('keyup',function(evt) {
+        if (evt.keyCode == 27) { hideTips(); }
+    });
+    $("#b-overlay").click(hideTips);
+    $('#show-tips').off("click");
+    $('#show-tips').click(hideTips);
+    $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
+}
+function addCloseButton() {
+    $("#b-overlay-popup").append(`
+        <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
+    $('#tips-close-bttn').click(hideTips)
+}
+function getSearchTipsHtml() {
+    return `
+        <h3>Tips for searching</h3>
+        <ul> 
+            <br><li><strong>To search by specific interaction or habitat types</strong>, click on the 
+            filter menu of the Type or Habitat columns and select which ones to include in your search.  
+            (<a href="definitions">Click here to see definitions</a> 
+            for each interaction and habitat type.)</li>
+            <br><li><strong>Interested in knowing all the fruit species known from a bat species’ 
+            diet?</strong> Search for the bat species by selecting "Taxon" in the "Group Interactions by"
+            field, then select "Bat" below in the "Group Taxon by" field, and then select only “Fruit” and “Seed” in the filter 
+            menu for the Tags column on the table. This will provide you with a list of all plant species known to have their 
+            fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
+            <br><li><strong>Or all of the flower species known from a bat species’ diet?</strong> 
+            Search for the bat species as described above, then select only “Flower” in the filter menu for the Tags column
+            on the table. This will provide you with a list of all plant species known to have their flowers visited, consumed, 
+            or pollinated by that particular bat species.</li>
+            <br><li><strong>Interested in knowing all of the bat species known to visit or 
+            pollinate a particular plant species/genus/family?</strong> Select "Taxon" for "Group Interactions by" 
+            and then "Plant" for “Group Taxa by” in the field below. You can narrow the search by selecting
+            family, genus, or species in the menu to the right. Next, select only “Flower” in the filter menu for the 
+            Tags column on the table. This will provide information on the bats that visited 
+            the flower as well as those that have been confirmed pollinating it.</li><br>
+            <li><strong>Want to see all interactions for a particular bat species/genus/family on a map?</strong> 
+            Search for the bat as described above, filtering as desired, and then click “Show Interactions on Map”. 
+            All interactions with GPS data will be displayed on the map.</li>
+            <br><li><b>Follow along with the tutorial for a guided tour 
+            of the search functionality.</b></li><br>
+        </ul>
+        <p> Note: "csv" stands for comma separated values. The interaction 
+        data in the table can be downloaded in this format, as a plain-text file containing tabular 
+        data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
+    `.replace(/\n\s+/g, '');
+}
 /* ========================== UTILITY =============================================================================== */
 function newSelEl(opts, c, i, field) {                                          //console.log('newSelEl for [%s]. args = %O', field, arguments);
     const elem = _u.buildSelectElem(opts, { class: c, id: i });
     $(elem).data('field', field);
     return elem;
 }
-export function enableTableButtons() {  
-    $('.tbl-tools button, .tbl-tools input')
+export function enableTableButtons() {                                          //console.log('enableTableButtons. enabled elems = %s', app.enabledSelectors);
+    $('.tbl-tools button, .tbl-tools input, #focus-opts, ' + app.enabledSelectors)
         .attr('disabled', false).css('cursor', 'pointer');
     $('button[name="show-hide-col"]').css('cursor', 'not-allowed');
-    $('.tbl-tools').fadeTo(100, 1);
-    $('button[name="futureDevBttn"]').fadeTo(100, .7);    
-    // authDependentInit(); 
+    $('.tbl-tools, ' + app.enabledSelectors).fadeTo('slow', 1);
+    enableListReset();
+    db_filters.enableClearFiltersButton();
 }
 export function disableTableButtons() {
-    $(`.tbl-tools button, .tbl-tools input`)
+    $('.tbl-tools, .map-dsbl').fadeTo('slow', .3); 
+    $(`.tbl-tools button, .tbl-tools input, .map-dsbl`)
         .attr('disabled', 'disabled').css('cursor', 'default');
-    $('.tbl-tools, button[name="futureDevBttn"]').fadeTo(100, .3); 
 }
 export function fadeTable() {  
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, .3);

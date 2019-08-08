@@ -10,7 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 
 /**
- * Ajax Data controller.
+ * Ajax Data controller:
+ *     getDataLastUpdatedState
+ *     getUpdatedEntityData
+ *     getUserLists
+ *     serializeGeoJsonData
+ *     serializeInteractionData
+ *     serializeLocationData
+ *     serializeSourceData
+ *     serializeTaxonData
  *
  * @Route("/ajax")
  */
@@ -97,7 +105,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/taxon", name="app_serialize_taxon")
      */
-    public function serializeTaxonDataAction(Request $request) 
+    public function serializeTaxonData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -121,7 +129,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/location", name="app_serialize_location")
      */
-    public function serializeLocationDataAction(Request $request) 
+    public function serializeLocationData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -146,7 +154,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/geo-json", name="app_serialize_geojson")
      */
-    public function serializeGeoJsonDataAction(Request $request) 
+    public function serializeGeoJsonData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -167,7 +175,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/source", name="app_serialize_source")
      */
-    public function serializeSourceDataAction(Request $request) 
+    public function serializeSourceData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -198,7 +206,7 @@ class AjaxDataController extends Controller
      *
      * @Route("/interaction", name="app_serialize_interactions")
      */
-    public function serializeInteractionDataAction(Request $request) 
+    public function serializeInteractionData(Request $request) 
     {
         if (!$request->isXmlHttpRequest()) {
             return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
@@ -217,16 +225,45 @@ class AjaxDataController extends Controller
         ));
         return $response;
     }
+    /**
+     * Gets all UserNamed entities created by the current user.
+     * @Route("/lists", name="app_serialize_user_named")
+     */
+    public function getUserLists(Request $request)
+    {    
+        if (!$request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message' => 'You can access this only using Ajax!'), 400);
+        }           
+        $em = $this->getDoctrine()->getManager();
+
+        $lists = $em->getRepository('AppBundle:UserNamed')
+            ->findBy(['createdBy' => $this->getUser()]);
+
+        $returnData = [];
+
+        foreach ($lists as $list) {
+            array_push($returnData, $this->container->get('jms_serializer')
+                ->serialize($list, 'json'));
+        }
+
+        $response = new JsonResponse();
+        $response->setData(array(
+            'lists' => $returnData
+        ));
+        return $response;
+    }
     /** Returns serialized Entity data. */
     private function serializeEntity($entity, $serializer, $em)
     {
         $entities = $em->getRepository('AppBundle:'.$entity)->findAll();
         $data = new \stdClass;   
 
-        foreach ($entities as $entity) {  
-            $id = $entity->getId();
+        for ($i=0; $i < count($entities); $i++) { 
+            $entity = $entities[$i];
+            $id = $entity->getId();                                             //print('id = '.$id."\n"); 
             $data->$id = $serializer->serialize($entity, 'json');
         }
         return $data;
+
     }
 }

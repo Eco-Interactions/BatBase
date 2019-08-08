@@ -2,20 +2,20 @@
 
 namespace Application\Migrations;
 
+// use AppBundle\Entity\User;
 use Doctrine\DBAL\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Template for doctrine migrations where the entity manager is necessary.
+ * Adds exmaple interaction lists and filter sets to all existing users.
  * Note: The 'updatedBy' admin is hardcoded to 6, Sarah.
  */
-class Version20170725183034MoveInts extends AbstractMigration implements ContainerAwareInterface
+class Version20190714164720AddExmplData extends AbstractMigration implements ContainerAwareInterface
 {
     private $container;
     private $em;
-    private $admin;
 
     public function setContainer(ContainerInterface $container = null)
     {
@@ -28,8 +28,12 @@ class Version20170725183034MoveInts extends AbstractMigration implements Contain
     public function up(Schema $schema)
     {
         $this->em = $this->container->get('doctrine.orm.entity_manager');
-        $this->admin = $this->em->getRepository('AppBundle:User')->findOneBy(['id' => 6]);
+        $addData = $this->container->get('app.add_example_data');
+        $users = $this->em->getRepository('AppBundle:User')->findAll();
 
+        foreach ($users as $user) { 
+            $addData->addExampleDataToUser($user);
+        }
     }
 
     /**

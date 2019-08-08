@@ -5,9 +5,16 @@
  * tutorial button and selecting the a smaller focus of the tutorial or the entire
  * set. 
  * The search tips available by clicking on "Show Tips".
+ *
+ * Exports:             Imported by:
+ *     exitModal                save-fltrs
+ *     startWalkthrough         db-page
+ *     showHelpModal            save-fltrs, save-ints
+ *     showSaveModal            save-fltrs
  */
 import * as db_page from './db-page.js';
 import * as _u from './util.js';
+import { showTips } from './db-ui.js';
 
 let intro, focus;
 
@@ -18,6 +25,151 @@ function init() {
     $("#show-tips").click(showTips);
     require('../../css/lib/introjs.min.css');
 }
+/* ===================== MODALS/TIPS ======================================== */
+/* ------------ HELP MODALS ------------ */
+export function showHelpModal(key) {
+    if (intro) { return; }
+    intro = require('../libs/intro.js').introJs();
+    intro.onexit(() => intro = null);
+    intro.oncomplete(() => intro = null);
+    intro.setOptions({
+        showBullets: false, 
+        showStepNumbers: false, 
+        steps: getHelpSteps(key), 
+        tooltipClass: 'intro-tips'});
+    intro.start();
+}
+function getHelpSteps(key) {
+    const getSteps = {
+        'filter-panel': getFilterPanelSteps,
+        'selSavedFilters': getSavedFilterSteps,
+        'saved-lists': getSavedListSteps
+    };
+    return getSteps[key]();
+}
+function getFilterPanelSteps() {
+    return [{
+        element: '#filter-col1',
+        intro: `<h3><center>Dynamic filters</center></h3><br><b>Location:</b> Region, country,
+            and name filters.<br><br><b>Source:</b> Name and publication type filters.
+            <br><br><b>Taxon:</b> Name and taxonomic rank filters.<br>
+             - The dropdowns show all taxa in the Taxon Tree<br>
+             - Select a specific taxon and the Tree will update to show interactions
+             for the taxon and lower related taxa. The other dropdowns 
+            will populate with the related taxa in the Tree.`, 
+        position: 'top',
+    },
+    {
+        element: '#shw-chngd-ints',
+        intro: `<h3><center>Check this box to filter interaction records by 
+            time updated/created.</center></h3><br><b></b>The time defaults 
+            to the current date. Use the calendar to select any date. That date 
+            will be saved and reapplied if the filter is turned reset when switching
+            between data views.<br><br>Only interactions created/updated after 
+            the selected time will be displayed.`,
+        position: 'top',
+        setUpFunc: toggleFilterPanelInTutorial
+    },
+    {
+        element: '.ag-header-viewport',
+        intro: `<h3><center>Table column filters</center></h3><br>Hovering 
+            over a column header reveals the filter menu for that column.<br><br>
+            Some columns can be filtered by text, others by selecting or 
+            deselecting values in that column.`,
+        position: 'top'
+    },
+    {
+        element: 'button[name="reset-tbl"]',
+        intro: `<b>Click here to clear all filters and reset the interactions in the table.</b>`,
+        position: 'right',
+        setUpFunc: clearFilters
+    }];
+}
+function getSavedFilterSteps() {
+    return [{
+        element: '#stored-filters',
+        intro: `<h3><center>Multiple filters can be saved and applied as a set.</center></h3><br>
+            Saved sets include the grouping and view of the data and all applied filters from
+            the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
+            in a "forest" habitat or all African "consumption" interactions in a "desert" habitat.<br><br>
+            New users have preloaded examples to help demonstrate this feature.`,
+        position: 'left'
+    }];
+}
+function getSavedListSteps() {
+    return [
+        {
+            element: '#int-opts',
+            intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, data from specific publishers or authors, 
+                or a perhaps few habitats in particular? <br><br>Save interactions as a list and 
+                use the filters and features to explore them as a group.<br><br>`,
+            position: 'top'
+        },
+        {
+            element: '#list-sel-cntnr',
+            intro: `<h3><center>Select a list to manage or enter a new name to create.</center></h3><br>
+                New users have preloaded examples to help demonstrate this feature.`,
+            position: 'right',
+        },
+        {
+            element: '#load-list',
+            intro: `After selecting an existing list with interactions, show the 
+                interactions in the table by clicking 
+                "Load Interaction List in Table".<br><br>Once loaded, sort and view
+                the interactions using the various filters and features of the page.<br><br>`,
+            position: 'right',
+        },
+        {
+            element: '#mod-list-pnl',
+            intro: `<h3><center>Add/remove list interactions.</center></h3><br>
+                <b>Add:</b> Select/create a list. Select interaction rows in the table, 
+                or the "All Shown" option, and click "Save List" to update the list.<br><br>
+                <b>Remove:</b> Select a list and click "Load Interaction List in Table". Select 
+                interaction rows in the table or the "All Shown" option and click
+                "Save List" to remove the selected interactions from the list.`,
+            position: 'top',
+        },
+        {
+            element: 'button[name="clear-list"]',
+            intro: `<h3><center>Click here to reset table to all database interactions.</center></h3>`,
+            position: 'bottom',
+        }
+    ];
+}
+/* ------------ SAVE MODALS ------------ */
+export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
+    if (intro) { return; }
+    const bttnText = noSave ? 'Cancel' : 'Submit'; 
+    const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
+    intro = require('../libs/intro.js').introJs();   
+    intro.oncomplete(subFunc);
+    // intro.onexit(exitModal.bind(null, cancelCb));
+    intro.setOptions(getModalOptions(text, elem, dir, bttnText));
+    intro.start();
+}
+export function exitModal(cancelCb) {
+    intro = null;
+    if (cancelCb) { cancelCb(); }
+}
+function getModalOptions(text, elem, direction, bttnText) {                                   
+    return {
+        showStepNumbers: false,
+        showBullets: false,
+        skipLabel: 'Cancel',
+        doneLabel: bttnText,
+        tooltipClass: 'modal-msg',
+        steps: getSlideConfg(text, elem, direction)
+    }; 
+}
+function getSlideConfg(text, elem, dir) {
+    return [{
+        element: elem,
+        intro: text,
+        position: dir
+    }];
+}
+/* ======================= TUTORIAL ========================================= */
 export function startWalkthrough(curFocus) {
     focus = curFocus;
     window.setTimeout(startIntroWalkthrough, 250); 
@@ -29,10 +181,9 @@ function startIntroWalkthrough(){
     intro.start();
 } 
 function buildIntro() {                                                         //console.log("buildIntro called")
-    const lib = require('../libs/intro.js');  
-    intro = lib.introJs();
-    intro.onexit(function() { resetTableState(); });
-    intro.oncomplete(function() { resetTableState(); });
+    intro = require('../libs/intro.js').introJs();
+    intro.onexit(() => resetTableState());
+    intro.oncomplete(() => resetTableState());
     intro.onafterchange(onAfterStepChange.bind(null));
     intro.setOptions(getIntroOptions());
 } 
@@ -46,10 +197,10 @@ function getIntroOptions() {
         steps: getSteps()
     };
 }
-function getSteps(step) {
+function getSteps() {
     return [ 
         {
-            element: '#db-opts-col5', 
+            element: '#help-opts', 
             intro: `<b><center>Welcome to the Bat Eco-Interactions <br> Database 
                 Search Page!</center></b><br><b>This tutorial demonstrates the 
                 various database features and search tools available.</b> There 
@@ -64,11 +215,11 @@ function getSteps(step) {
                 margin: 0 25px 5px 45px">Map View</button><button class="intro-bttn 
                 tbl-bttn" disabled="disabled" title="Coming soon" style="opacity: 
                 0.3; cursor: default;">Data Entry</button>`,
-            position: 'left',
+            position: 'right',
             setUpFunc: addBttnEvents
         },
         {
-            element: '#db-opts',
+            element: '#focus-opts',
             intro: `<h3><center>The interaction records are displayed by either 
                 <br>Location, Source, or Taxon.<center></h3><br><b>Location</b> 
                 - Where the interaction(s) were observed. Can be displayed in a 
@@ -83,7 +234,7 @@ function getSteps(step) {
             setUpFunc: checkForDbLoad
         },
         {
-            element:'#db-opts-col1',
+            element:'#focus-opts',
             intro: `<h3><center>Select the Taxon Tree view.<center></h3>
                 <br>Once Taxon has been selected in the “Group Interactions by” 
                 box, select one of the following: Bat, Plant, or Arthropod.<br><br>
@@ -140,31 +291,25 @@ function getSteps(step) {
             intro: `<h3><center>Click here to toggle the filter options panel open 
                 or closed.</center></h3>`, 
             position: 'bottom',
-            setUpFunc: toggleFilterPanel
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#focus-filters',
+            element: '#filter-col1',
             intro: `<h3><center>Taxon specific filters</center></h3><br>These dropdowns 
-                show all taxon levels that present in the Taxon Tree.</b> When first 
-                displayed, all taxa for each level will be available in the 
-                dropdown selection lists.<br><br><b>You can focus on any part of 
-                the taxon tree by selecting a specific taxon from a dropdown.</b> 
-                The Taxon Tree will change to show the selected taxon as the top 
-                of the tree.<br><br><b>When a dropdown is used to filter the data, 
-                the other dropdowns will also change to reflect the data shown.
-                </b><br><br>- Higher level rankings will be fixed and only lower 
-                ones associated with the selected taxon will be shown.<br>- Any 
-                levels that are not recorded in the Taxon's ancestry chain will 
-                have 'None' selected.`, 
-            position: 'bottom',
+                show all taxa in the selected realm, all Plants in this example.</b><br><br>
+                 - Select a specific taxon from a dropdown and the Tree will update to show 
+                the selected taxon as the top the of the data tree. The other dropdowns will 
+                populate with related taxa.`, 
+            position: 'top',
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
-            element: '#focus-filters',
+            element: '#filter-col1',
             intro: `<h3><center>Other view-specific filters</center></h3><br>
                 Locations can be filtered by region, country, and display name.<br><br>
-                Sources can be filtered by name, or by type (depending on the type
-                of source displayed in the table.)`, 
-            position: 'bottom',
+                Sources can be filtered by name, and by type of publication.`, 
+            position: 'top',
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: '#shw-chngd-ints',
@@ -174,12 +319,22 @@ function getSteps(step) {
                 will be saved and reapplied if the filter is turned reset when switching
                 between data views.<br><br>Only interactions created/updated after 
                 the selected time will be displayed.`,
-            position: 'left'
+            position: 'top',
+            setUpFunc: toggleFilterPanelInTutorial
+        },
+        {
+            element: '#stored-filters',
+            intro: `<h3><center>Filters can be saved and applied as a set.</center></h3><br>
+                Saved sets include the grouping and view of the data and all applied filters from
+                the panel and the table columns.<br><br>For example, a set could show all journal articles tagged with "arthropod" 
+                in a "forest" habitat or all African "consumption" interactions in
+                a "desert" habitat.<br><br><center>Register and log in to use these features.</center>`,
+            position: 'left',
+            setUpFunc: toggleFilterPanelInTutorial
         },
         {
             element: 'button[name="reset-tbl"]',
-            intro: `<b>Click here at any point to clear all filters and reset 
-                the results.</b>`,
+            intro: `<b>Click here to clear all filters and reset the interactions in the table.</b>`,
             position: 'right',
             setUpFunc: clearFilters
         },
@@ -190,7 +345,8 @@ function getSteps(step) {
                 columns are exported in the order they are displayed in the table 
                 below.<br><br>For an explanation of the csv format and how to 
                 use the file, see a note at the bottom of the "Search Tips"`,
-            position: 'left'
+            position: 'left',
+            setUpFunc: toggleFilterPanelInTutorial.bind(null, 'close')
         },
         {
             element: '#shw-map',
@@ -222,7 +378,7 @@ function getSteps(step) {
             position: 'top'
         },
         {
-            element: '#db-opts-col1',
+            element: '#focus-opts',
             intro: `<h3><center>The map is also available in Location mode.
                 </center></h3><br>Group interactions by "Location" and then select 
                 "Map Data" from the "View" box.<br><br><b>Every interaction with 
@@ -263,14 +419,22 @@ function getSteps(step) {
             setUpFunc: loadLocView.bind(null, 'tree')
         },
         {
-            element: '#db-opts-col5',
+            element: '#list-opts',
+            intro: `<h3><center>Create and manage custom lists of interactions.</center></h3><br>
+                Studying specific countries in Africa, data from specific publishers or authors, 
+                or a perhaps few habitats in particular? <br><br>Save interactions as a list and 
+                use the filters and features to explore them as a group.<br><br>`,
+            position: 'right',
+        },
+        {
+            element: '#help-opts',
             intro: `<b><center>Thank you for taking the time to learn about the 
                 <br>Bat Eco-Interactions Database Search Page!</b></center><br>
                 You can start this tutorial again at anytime. There are also 
                 "Search tips" to help you refine your search in various ways.<br>
                 <br><b><center>Register and log in to leave us feedback.<br> 
                 We'd love to hear from you!</b></center>` ,
-            position: 'left'
+            position: 'right'
         },
     ];
 }
@@ -328,7 +492,7 @@ function addBttnEvents() {
 }
 function showTutorial(tutKey) {  
     if (tutKey === 'full' || tutKey === 'tbl') { intro.nextStep(); }
-    if (tutKey === 'map') { intro.goToStep(14); }
+    if (tutKey === 'map') { intro.goToStep(15); }
 }
 function checkForDbLoad() {
     if ($('#sel-view').val()) { return; }  
@@ -339,86 +503,35 @@ function addDbLoadNotice() {
         <br><br><center><b>Please wait for database to finish downloading before 
         continuing.`);
 }
-function toggleFilterPanel(close) {
-    const closed = $('#filter-opts').hasClass('closed');
+function toggleFilterPanelInTutorial(close) {  
+    const closed = $('#filter-opts-pnl').hasClass('closed');   
     if ((close && closed) || !close && !closed) { return; }
     $('#filter').click();
 }
 function clearFilters() {
     $('button[name="reset-tbl"]').click();
-    toggleFilterPanel(true);
+    toggleFilterPanelInTutorial(true);
 }
-/* ------------------ Search Tips ------------------------------------------- */
-function initSearchTips() { 
-    $('#b-overlay-popup').html(getSearchTipsHtml());
-    bindEscEvents();
+function toggleListPanelInTutorial(close) {
+    const role = $('body').data('user-role');
+    const closed = $('#int-opts').hasClass('closed');   
+    if ((close && closed) || !close && !closed) { 
+        if (close && role == 'visitor') { $('#button[name="int-set"]').attr({disabled: true}); }
+        return;
+    }
+    if (!close) {
+        $('#button[name="int-set"]').attr({disabled: false}).click();
+    } else {
+        $('#button[name="int-set"]').attr({disabled: role !== 'visitor'}).click();
+    }
 }
-function showTips() {                                                           //console.log("show tips called.")
-    if (!$('#tips-close-bttn').length) { initSearchTips(); }
-    $('#b-overlay-popup').addClass("tips-popup");
-    $('#b-overlay, #b-overlay-popup').fadeIn(500);
-    $('#show-tips').html("Hide Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-}
-function hideTips() {
-    $('#b-overlay').fadeOut(500, removeTips);
-    $('#show-tips').html("Search Tips");
-    $('#show-tips').off("click");
-    $('#show-tips').click(showTips);
-    $('#b-overlay-popup').removeClass("tips-popup");
-    $('#b-overlay-popup').empty();
-}
-function removeTips() {                                                         //console.log("removeTips called.")
-    $('#b-overlay, #b-overlay-popup').css("display", "none");
-    $('#b-overlay-popup').removeClass("tips-popup");
-}
-function bindEscEvents() {
-    addCloseButton();
-    $(document).on('keyup',function(evt) {
-        if (evt.keyCode == 27) { hideTips(); }
-    });
-    $("#b-overlay").click(hideTips);
-    $('#show-tips').off("click");
-    $('#show-tips').click(hideTips);
-    $("#b-overlay-popup").click(function(e) { e.stopPropagation(); });
-}
-function addCloseButton() {
-    $("#b-overlay-popup").append(`
-        <button id="tips-close-bttn" class="tos-bttn">Close</button>`);
-    $('#tips-close-bttn').click(hideTips)
-}
-function getSearchTipsHtml() {
-    return `
-        <h3>Tips for searching</h3>
-        <ul> 
-            <br><li><strong>To search by specific interaction or habitat types</strong>, click on the 
-            filter menu of the Type or Habitat columns and select which ones to include in your search.  
-            (<a href="definitions">Click here to see definitions</a> 
-            for each interaction and habitat type.)</li>
-            <br><li><strong>Interested in knowing all the fruit species known from a bat species’ 
-            diet?</strong> Search for the bat species by selecting "Taxon" in the "Group Interactions by"
-            field, then select "Bat" below in the "Group Taxon by" field, and then select only “Fruit” and “Seed” in the filter 
-            menu for the Tags column on the table. This will provide you with a list of all plant species known to have their 
-            fruit consumed, seeds consumed, and seeds dispersed by that particular bat species.</li>
-            <br><li><strong>Or all of the flower species known from a bat species’ diet?</strong> 
-            Search for the bat species as described above, then select only “Flower” in the filter menu for the Tags column
-            on the table. This will provide you with a list of all plant species known to have their flowers visited, consumed, 
-            or pollinated by that particular bat species.</li>
-            <br><li><strong>Interested in knowing all of the bat species known to visit or 
-            pollinate a particular plant species/genus/family?</strong> Select "Taxon" for "Group Interactions by" 
-            and then "Plant" for “Group Taxa by” in the field below. You can narrow the search by selecting
-            family, genus, or species in the menu to the right. Next, select only “Flower” in the filter menu for the 
-            Tags column on the table. This will provide information on the bats that visited 
-            the flower as well as those that have been confirmed pollinating it.</li><br>
-            <li><strong>Want to see all interactions for a particular bat species/genus/family on a map?</strong> 
-            Search for the bat as described above, filtering as desired, and then click “Show Interactions on Map”. 
-            All interactions with GPS data will be displayed on the map.</li>
-            <br><li><b>Follow along with the tutorial for a guided tour 
-            of the search functionality.</b></li><br>
-        </ul>
-        <p> Note: "csv" stands for comma separated values. The interaction 
-        data in the table can be downloaded in this format, as a plain-text file containing tabular 
-        data, and can be imported into spreadsheet programs like Excel, Numbers, and Google Sheets.</p>
-    `.replace(/\n\s+/g, '');
-}
+/* ==================== SHARED HELPERS ====================================== */
+
+
+
+
+
+
+
+
+

@@ -3,13 +3,13 @@
  * Displays the map on the search database page.
  */
 /**
- * Exports:
- *   addVolatileMapPin
- *   clearMemory
- *   initFormMap
- *   initMap
- *   showInts
- *   showLoc
+ * Exports:                 Imported by:
+ *   addVolatileMapPin          db_forms
+ *   clearMemory                db_forms
+ *   initFormMap                db_forms
+ *   initMap                    db_page
+ *   showInts                   db_page, db_ui
+ *   showLoc                    db_page
  */
 import * as _u from '../util.js';
 import * as db_forms from '../db-forms/db-forms.js';
@@ -227,9 +227,10 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(rcrds) {                                                console.log('attempting to initMap')
+export function initMap(rcrds, fltrd) {                                         console.log('attempting to initMap')
     locRcrds = rcrds;
-    waitForDataThenContinue(buildAndShowMap.bind(null, addAllIntMrkrsToMap, 'map'));                                                 
+    const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
+    waitForDataThenContinue(buildAndShowMap.bind(null, dispFunc, 'map'));                                                 
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
@@ -290,7 +291,7 @@ function addAllIntMrkrsToMap() {
         }
         ttlShown += region.totalInts;
     }
-} 
+}
 function getRegionLocs() {
     const regionIds = _u.getDataFromStorage('topRegionNames');
     return Object.values(regionIds).map(id => locRcrds[id]);
@@ -299,17 +300,22 @@ function addMarkersForRegion(region) {
     if (region.displayName === "Unspecified") { return; }
     addMarkersForLocAndChildren(region);
 }
-function addMarkersForLocAndChildren(topLoc) {                                 
+function addMarkersForLocAndChildren(topLoc, fltrdSet) {                                 
     if (!topLoc.totalInts) { return; }                                          //console.log('addMarkersForLocAndChildren for [%s] = %O', topLoc.displayName, topLoc);
-    let intCnt = topLoc.totalInts; 
+    // let intCnt = fltrdSet ? topLoc.interactions.length : topLoc.totalInts; 
+    let intCnt = topLoc.interactions.length; 
     buildMarkersForLocChildren(topLoc.children);                               
     if (intCnt) { buildLocationMarkers(intCnt, topLoc); }
-
+    /**
+     * When displaying a user-made set "list" of interactions focused on locations in 
+     * "Map Data" view, the locations displayed on the map are only those in the set
+     * and their popup data reflects the data of the set. 
+     */
     function buildMarkersForLocChildren(locs) {
-        locs.forEach(id => {
-            let loc = locRcrds[id];
+        locs.forEach(l => {
+            let loc = typeof l === 'object' ? l : locRcrds[l];
             if (loc.locationType.displayName == 'Country') { 
-                return addMarkersForLocAndChildren(loc, false); 
+                return addMarkersForLocAndChildren(loc); 
             }
             buildLocationIntMarkers(loc, loc.interactions.length);
         });
@@ -335,9 +341,32 @@ function addMarkersForLocAndChildren(topLoc) {
         return topName.indexOf(subName) !== -1;
     }
 } /* End addMarkersForLocAndChildren */
+/**
+ * When the table is filtered to display a set of interactions created by the user, 
+ * that set is displayed when the loc view "Map Data" is selected.
+ */
+function addMrkrsInSet(tree) {                                                  //console.log('addMrkrsInSet. tree = %O', tree)
+    let ttlShown = 0, 
+    ttlNotShown = 0;
+    addMarkersInTree();
+    fillIntCntLegend(ttlShown, ttlNotShown);
+
+    function addMarkersInTree() {
+        for (let branch in tree) {
+            trackBranchIntCnt(tree[branch]);
+            addMarkersForLocAndChildren(tree[branch]);
+        }
+    }
+    function trackBranchIntCnt(branch) {
+        if (branch.displayName === "Unspecified") { 
+            return ttlNotShown += branch.totalInts; 
+        }
+        ttlShown += branch.totalInts;
+    }
+}
 /**----------------- Show Interaction Sets on Map --------------------------- */
 /** Shows the interactions displayed in the data-table on the map. */
-export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. tableData = %O', tableData);
+export function showInts(focus, viewRcrds, locRcrds) {                          //console.log('----------- showInts. focus [%s], viewRcrds [%O], locRcrds = [%O]', focus, viewRcrds, locRcrds);
     locRcrds = locRcrds;
     waitForDataThenContinue(buildAndShowMap.bind(null, showIntsOnMap, 'map'));                                                 
     
@@ -437,7 +466,7 @@ function buildFeature(loc, geoData) {                                           
             }
         };   
 }
-function addMarkerForEachInteraction(intCnt, latLng, loc) {                     //console.log('       adding [%s] markers at [%O]', intCnt, latLng);
+function addMarkerForEachInteraction(intCnt, latLng, loc) {           //console.log('adding [%s] markers at [%O]', intCnt, latLng);
     const MapMarker = intCnt === 1 ? 
         new MM.LocMarker(latLng, loc, locRcrds) :
         new MM.LocCluster(map, intCnt, latLng, loc, locRcrds);

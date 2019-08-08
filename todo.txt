@@ -1,34 +1,92 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
->ASAP<
+Thoughts:
+    - Leave redundant or unnecessary code commented out until tests are ran to help 
+        trouble shoot when issues arrise.
 
->{{{{{{{{{{{{{ CURRENT PRJOECT TODO }}}}}}}}}}}}}
-> Create Interaction Lists and UI
-
->REFACTORING
+>==== Change Log ====
 
 Current:
+    - update tests 
+        - with new 'all' filters, time updated/published
+        - lists, sets, and their interactions
+            - create, edit, delete
+            - load each, then load the other too
+            - resettest filters when list loaded
+    - Add Lists to System Date
 
-Next:
-    - Build backend for saving lists
-        - Store Interaction lists
-        - Store Filter Sets
-
-
-
-Before Release:
-    - Turn all form styles from percentages to pixels
-
-
-
-
-
-    - Add to Testing
-        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
-
-Planning Meeting Notes:
+Before conference:
+    - Write description for email updating current users to all the exciting changes!
+        - frame in context of the last conference to now
+    - Double check all center points for multi-polygons
+    - Figure out how to "stress test" the site:
+        - Large number of people using it
 
 
-Future:
+MEETING NOTES:
+    Point out:
+        - Table int count and taxon realm filter msg
+        - Added Panels. 
+        - Added tutorial hints and updated tutorial
+        - Added "published" after to time filter
+        - Added 'all' options to the location and taxon combobox filters
+        - Added taxon tree text search to the taxon filters
+        - Added stub data for new users and the interaction lists and filter sets
+            - Backfilling for existing users
+        - Updated the welcome message for new users
+    Next/future rounds:
+        Possible:
+        Next:
+            - UI:
+                - Update future dev page
+            - testing:
+                - Finish updating tests
+                - Refactor TESTS
+                    - Make list of all behat statements being used for reference when adding/editing tests
+                    - Break out scenarios
+        Then:
+            - Err handling:
+                - Fix taxon forms: by august 13th
+        Future:
+            - Review Data
+                * Identical tables
+                    - Pending Edits
+                        - entity, id, edits (json), timestamp
+                        - removed once approved 
+                    - Edit History
+                        - all fields pending has, plus approvedBy
+            - Data:
+                - Add more realms
+            - Edit form:
+                - Fix taxon forms
+                - allow selection of another location and merging of all data and 
+                    deletion of location being edited
+                - Turn all form styles from percentages to pixels
+            - Features: 
+                - Draw areas and select as parent location
+                - Get shape data for mising countries and regions
+                    - Eg, Central America. Priority?
+                - Adjust display point for country
+                - Replace agGrid with MIT alternative 
+    Feedback:
+
+
+
+>================ DEV Internal Task List ===================
+
+>taxon form BUGS
+    - When new taxon is created, the previous display name check isn't prompting the editor to change the name
+        Add more complicated check to make sure no other taxonym in the realm has the same name
+    - 103 duplicates
+    Solution ideas:
+        - Add text search to taxa views to help eliminate creating duplicates
+        - Reverse order of taxon level inputs in select form to encourage searching for the most specific taxon first
+
+Sort:
+    - ensure that entered coordinates are within selected country
+        on country change, on form submit
+    - Create review data interface after
+    - Add spanish translations to site
+    - Refactor getTableState to take one arg and determine if it's singular or an array
     - Upgrade to encore 0.21 & webpack 4
     - Break util into 
         - data storage
@@ -37,53 +95,20 @@ Future:
         - html
     - Refactor form code
         - break out css
+    - refactor out all styles for the panel displays
     - Figure out whether the explicit form services are necessary
     - Refactor TESTS
         - replace all usleeps with "spinner" wait methods
-
-
-MEETING NOTES:
-    Point out:
-    Next/future rounds:
-        Next:
-            - UI:
-                - Create saved lists of interactions 
-            - Err handling:
-                - ensure that entered coordinates are within selected country
-                    on country change, on form submit
-                - {high}[easy] When nothing is selected but a country, a habitat type, 
-                and the displayname, suggest to user they use the country-habitat combo. 
-            - testing:
-
-        Future:
-            - Data:
-                - Add more realms
-            - Edit form:
-                - allow selection of another location and merging of all data and 
-                    deletion of location being edited
-            - Features: 
-                - Draw areas and select as parent location
-                - Get shape data for mising countries and regions
-                    - Eg, Central America. Priority?
-                - Adjust display point for country
-    Feedback:
-
->======== Email ============
-TAYLOR:
-        
-Tullenda:
-    - Some location descriptions (Berenty Reserve) have typos and seems to be 
-        incomplete
-
->==== Change Log ====
->---- Add to Client Task List ---
-    - Create Interaction Lists
-    - Add more realms
-
->================ DEV Internal Task List ===================
+        - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
+    - Accessibility REFACTORING 
+        - text to speech, etc
+    - Change date time filter html to be more broad than the time updated/changed
+    - refactor @initCOmbobox to take change methods when it makes more sense to pass rather than include 
 ##(Category){priority}[difficulty]##
 TODOs:
 (CRUD FORMS/BACKEND)
+    - {high}[easy] When nothing is selected but a country, a habitat type, 
+        and the displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
     - {med}[med] Switch from localStorage to idb everywhere.
@@ -93,19 +118,19 @@ TODOs:
 (DATA)
 
 (SEARCH PAGE)
-    - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point.
+    - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
         - Unable to update as rowGrouping is now an enterprise feature (ie min $800 package)
     - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
     - {med}[med, long] Add data-entry tutorial.
     - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
         to that level and retain other filters - (updated at for example).
-    - {med}[???] Figure out what the "scroll-linked positioning effect." is on the page
     - {med}[easy] Change taxon row coloring when showing updated records
 
 (STATIC/MISC SITE)
+    - {low}[easy] Clean up security access control
     - {med}[complicated] Implement Encore for assets
     - {med}[complicated] Switch from pixels to percent with styles to better adapt to smaller screen resolutions
-    - {lox}[med] Graph active users over time. 
+    - {low}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
         - change password page (/profile/change-password)
@@ -150,3 +175,18 @@ TODOs:
             - https://github.com/selectize/selectize.js/commit/0c6fafc786d87cf30de6d1690565ec62ec0647c9
         - {low}[easy] Fix author field after create form exited
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
+
+
+
+
+
+    Other cool things, sort later:
+        - microsoft app center 
+            - analytics for apps free
+        - Try out some js debugging tools
+
+Code standards:
+    HTML
+        - Search page combobox elems prefixed with 'sel' + [Descriptive name]
+
+
