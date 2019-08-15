@@ -76,7 +76,11 @@ function acceptTos() {
 
 function getTosHtml() {
     return `<div id="terms-div">
-<h3>batplant.org Terms of use</h3>
+<h3>Privacy Policy</h3>
+<p>- We don't use cookies.<br>- We won't sell, rent or share our users' names and emails with anyone.<br>- We do use some of the local storage available in your browser to store interaction data, so you don't have to wait for it to download every time you visit the site.<br>- We do send out emails occasionally to let users know about major updates to the site. If this privacy policy ever changes, we'll email to let you know that. The same applies to our Terms of Use.<br>- We also use your email when verifying your new account and if you need to reset your password.<br>- If you have questions, please contact us at <a href="mailto:info@batplant.org" target="_top">info@batplant.org.</a><br></p>
+<br>
+<h3>Terms of Use</h3>
+<br>
 <span class="lbl top-em-mrg">General</span>
 <p>These Terms of Use apply to the use of the information at The Bat Eco-Interactions project. By submitting information to, accessing, using or downloading data from Bat Eco-Interactions, users enter into a binding agreement to accept the Terms of Use described herein.</p>
 
