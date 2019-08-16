@@ -10,6 +10,16 @@ ifNotChromeShowOptimizedMsg();
 function requireCss() {
     require('../../css/ei-reset.css');   
     require('../../css/oi.css');    
+    adjustLogoToScreenSizeAndBrowser();
+}
+/** Sets logo width for windows with less than 1500px widths or in firefox browsers. */
+function adjustLogoToScreenSizeAndBrowser() {
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {  
+        const width = $(window).width() > 1500 ? '325px' : '275px';
+        $('#side-logo').css('width', width);
+    } else if ($(window).width() < 1500) { 
+        $('#side-logo').css('width', '275px');
+    } 
 }
 function requireGlobalJquery() { 
     global.$ = $;

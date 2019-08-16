@@ -57,7 +57,8 @@ function requireCss() {
     require('../../css/lib/confirmDate.css');
     require('../../css/lib/flatpickr.min.css');    
     require('../../css/lib/selectize.default.css');
-    require('../../css/search_db.css');
+    require('../../css/search_db.css');  
+    require('../../css/moz-styles.css');
 }
 /**
  * Initializes the database and UI. The util init method will call @initSearchState

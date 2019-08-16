@@ -114,6 +114,7 @@ form button {
     position: relative;
     left: 65px;
     padding-bottom: 20px;
+    width: 375px;
 }
 #error_logo {
     width: 50%;

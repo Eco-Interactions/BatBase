@@ -498,7 +498,7 @@ function showNearbyLocationsAndUpdateForm(results) {                            
     if (!results) { return; }
     const cntryCode = results.address.country_code ? 
         results.address.country_code.toUpperCase() : null;
-    if (!cntryCode) { return; console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); }
+    if (!cntryCode) { return; } //console.log('########## No country found!!! Data = %O, Code = [%s]', data, data.country_code); 
     const cntryId = _u.getDataFromStorage('countryCodes')[cntryCode];           //console.log('cntryId = ', cntryId);
     volatile.prnt = cntryId; 
     if (map._container.id === 'map') { return addParentLocDataToMap(cntryId, null, 'map'); }

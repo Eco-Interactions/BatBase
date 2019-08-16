@@ -1534,7 +1534,7 @@ class FeatureContext extends RawMinkContext implements Context
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
     {
-        $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome');
+        $driver = new \Behat\Mink\Driver\Selenium2Driver('firefox');
         $session = new \Behat\Mink\Session($driver);
         $session->start();
         return $session;
