@@ -1,18 +1,17 @@
 default:
     extensions:
+        Behat\Symfony2Extension: ~
         Behat\MinkExtension:
             base_url: http://localhost/batplant/web/app_test.php
+            # browser_name: firefox
             sessions:
+                default: 
+                    goutte: ~
                 javascript:
-                  selenium2:
-                    capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']}, "marionette": true}
-            goutte: ~
-            selenium2: 
+                    selenium2: 
+                        capabilities: {"marionette": true} 
+            selenium2:
                 wd_host: "http://127.0.0.1:4444/wd/hub"
-            browser_name: chrome
-
-        Behat\Symfony2Extension: ~
-
     suites:
         default:
             contexts:
@@ -26,3 +25,15 @@ default:
         #         - Behat\MinkExtension\Context\MinkContext
         #     paths: [ %paths.base%/features/dataEntry ]
 
+ 
+##Chrome config:
+        # Behat\MinkExtension:
+        #     base_url: http://localhost/batplant/web/app_test.php
+        #     sessions:
+        #         javascript:
+        #           selenium2:
+        #             capabilities: {"browserName": "chrome", "browser": "chrome", 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']}, "marionette": true}
+        #     goutte: ~
+        #     selenium2: 
+        #         wd_host: "http://127.0.0.1:4444/wd/hub"
+        #     browser_name: chrome

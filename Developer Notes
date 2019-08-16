@@ -49,6 +49,9 @@ Writing tests:
 # https://knpuniversity.com/screencast/behat
 # 
 ##------------------------- Serve Side ---------------------------------------##
+> SSH
+    ssh user@batplant.org -p18765
+
 >.htaccess rewrite for batplant.org 
     RewriteEngine on
     RewriteCond %{HTTP_HOST} ^batplant.org$ [NC,OR]
