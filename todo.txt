@@ -15,6 +15,10 @@ Testing problems:
 >==== Change Log ====
 
 Current:
+    - bug with downloding data first time. 
+        Have to refresh sometimes before it will actually send the ajax call
+        - downloading user specific data loading message showing when user hasn't changed, eg by default
+
     - update tests 
         - with new 'all' filters, time updated/published
         - lists, sets, and their interactions

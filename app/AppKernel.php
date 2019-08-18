@@ -21,6 +21,7 @@ class AppKernel extends Kernel
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
+            new \Symfony\WebpackEncoreBundle\WebpackEncoreBundle()
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

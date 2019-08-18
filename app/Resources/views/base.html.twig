@@ -42,7 +42,7 @@
         <link rel="manifest" href="{{ asset('bundles/app/build/manifest.json') }}" />
 
         {% block stylesheets %}
-            <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+            {{ encore_entry_link_tags('app') }} 
         {% endblock stylesheets %}
         <!-- Javascript at end of body. -->
     </head>
@@ -101,9 +101,7 @@
     {% endblock body %}
 
     {% block javascripts %}
-        <script src="{{ asset('build/manifest.js') }}"></script>            
-        <script src="{{ asset('build/libs.js') }}"></script>
-        <script src="{{ asset('build/app.js') }}"></script>
+        {{ encore_entry_script_tags('app') }} 
     {% endblock javascripts %}
     </body>
 </html>

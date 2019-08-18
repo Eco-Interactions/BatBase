@@ -1,22 +1,16 @@
 const Encore = require('@symfony/webpack-encore');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
-// const CircularDependencyPlugin = require('circular-dependency-plugin')
-// const WorkboxPlugin = require('workbox-webpack-plugin');
 
-const autoProvidedVars = { L: 'leaflet' };
+const autoProvidedVars = { L: 'leaflet', $: 'jquery' };
 const appFiles = './assets/js/app/oi.js';
 const dbFiles = './assets/js/db/db-page.js';
 const fdbkFiles = './assets/js/misc/feedback-viewer.js';
-const libFiles = ['jquery', 'leaflet', 'leaflet-control-geocoder',
-        './assets/js/libs/selectize.min.js', './assets/js/libs/flatpickr.min.js'];
- 
+
 /** ================= Create local development config ======================= */
 Encore
     // the project directory where all compiled assets will be stored
-    .setOutputPath('web/build/')
+    .setOutputPath('web/build/local')
     // the public path used by the web server to access the previous directory
-    .setPublicPath('/batplant/web/build')
+    .setPublicPath('/batplant/web/build/local')
     /** The prefix isn't being recognized for some reason */
     .setManifestKeyPrefix('build')
     // allow legacy applications to use $/jQuery as an app variable 
@@ -47,7 +41,9 @@ Encore
     .addEntry('app', appFiles)
     .addEntry('db', dbFiles)
     .addEntry('feedback', fdbkFiles)
-    .createSharedEntry('libs', libFiles)
+    .createSharedEntry('libs', './assets/js/app/libs.js')
+    // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
+    .enableSingleRuntimeChunk()
 ; 
 const local = Encore.getWebpackConfig();
 
@@ -58,8 +54,10 @@ Encore.reset();
 
 /** ======================= Create server config ============================ */
 Encore
+    // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
+    .enableSingleRuntimeChunk()
     // the project directory where all compiled assets will be stored
-    .setOutputPath('web/build/')
+    .setOutputPath('web/build/server')
     // the public path used by the web server to access the previous directory
     .setPublicPath('/build')
     /** The prefix isn't being recognized for some reason */
@@ -89,19 +87,20 @@ Encore
     .addEntry('app', appFiles)
     .addEntry('db', dbFiles)
     .addEntry('feedback', fdbkFiles)
-    .createSharedEntry('libs', libFiles)
+    .splitEntryChunks('libs', './assets/js/app/libs.js')
 ; 
 const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)
 server.name = 'server';
 // Remove the old version of uglify (doesn't parce es6)
-server.plugins = server.plugins.filter(
-    plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
-);
+// server.plugins = server.plugins.filter(
+//     plugin => !(plugin instanceof webpack.optimize.UglifyJsPlugin)
+// );
 // Add the new one
-server.plugins.push(new UglifyJsPlugin());
+// server.plugins.push(new UglifyJsPlugin());
 
 // export the final configuration
 module.exports = [server, local];
+
 
 // Run [yarn run encore dev --config-name server] to generate assets for sites on server
