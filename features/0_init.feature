@@ -15,21 +15,21 @@ Feature: Search Page Database Initialization
     @javascript
     Scenario:  There should be 10 initial bat interactions in the database table.
         And I group interactions by "Bats"
-        Then I should see "Order Chiroptera"
+        Then I see "Order Chiroptera"
         And the count column should show "10" interactions
         And data in the interaction rows
 
     @javascript
     Scenario:  There should be 7 initial plant interactions in the database table.
         And I group interactions by "Plants"
-        Then I should see "Kingdom Plantae"
+        Then I see "Kingdom Plantae"
         And the count column should show "7" interactions
         And data in the interaction rows
 
     @javascript
     Scenario:  There should be 3 initial arthropod interactions in the database table.
         And I group interactions by "Arthropoda"
-        Then I should see "Phylum Arthropoda"
+        Then I see "Phylum Arthropoda"
         And the count column should show "3" interactions
         And data in the interaction rows
 
@@ -38,7 +38,7 @@ Feature: Search Page Database Initialization
     Scenario:  There should be 3 region location in initial the database table.
         Given the database table is in "Location" view
         Then I should see "3" rows in the table data tree
-        And I should see "Central America"
+        And I see "Central America"
         And data in the interaction rows
     
     @javascript
@@ -53,7 +53,7 @@ Feature: Search Page Database Initialization
     Scenario:  There should be 4 publications in the initial database table.
         Given the database table is in "Source" view
         Then I should see "4" rows in the table data tree
-        And I should see "Journal of Mammalogy" in the tree
+        And I see "Journal of Mammalogy"
         And data in the interaction rows
 
     @javascript
@@ -61,7 +61,7 @@ Feature: Search Page Database Initialization
         Given the database table is in "Source" view
         And I group interactions by "Authors"
         Then I should see "4" rows in the table data tree
-        And I should see "Cockle, Anya" in the tree
+        And I see "Cockle, Anya"
         And data in the interaction rows
 
     @javascript
@@ -69,5 +69,5 @@ Feature: Search Page Database Initialization
         Given the database table is in "Source" view
         And I group interactions by "Publishers"
         Then I should see "3" rows in the table data tree
-        And I should see "University of Paris VI" in the tree
+        And I see "University of Paris VI"
         And data in the interaction rows

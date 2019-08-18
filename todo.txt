@@ -3,6 +3,15 @@ Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
 
+Testing problems:
+    - https://github.com/minkphp/MinkSelenium2Driver/issues/293
+    - Latest chrome update breaks behat/selenium cojmpatibility. 
+        There is no easy way to revert to a version that would work
+    - Firefox has a long time bug with selenium causing difficulties selecting elements 
+    - Both caused by a shift into w3c tech... 
+    - Waiting it out seems like the best option for now
+        #tiredoftroubleshooting
+
 >==== Change Log ====
 
 Current:

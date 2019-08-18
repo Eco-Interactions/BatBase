@@ -91,9 +91,9 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theDatabaseHasLoaded()
     {
-        $this->getUserSession()->wait( 10000, "$('.ag-row').length" );
-        $row = $this->getUserSession()->getPage()->find('css', '[row=0]');
-        $this->handleNullAssert($row, false, 'There are no rows in the database table.');
+        $this->spin(function(){
+            return $this->getUserSession()->evaluateScript("$('.ag-row').length");
+        }, 'There are no rows in the database table.');
     }
 
 /** -------------------------- Search Page Interactions --------------------- */
@@ -101,13 +101,11 @@ class FeatureContext extends RawMinkContext implements Context
      * @Given I exit the tutorial
      */
     public function iExitTheTutorial()
-    {                                                                           //fwrite(STDOUT, "\n        Exiting the tutorial.\n");
-        $tutorial = $this->getUserSession()->getPage()->find('css', '.intro-tips');
-        $this->handleNullAssert($tutorial, false, 'Tutorial is not displayed.');
-        $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
+    {   
         $this->spin(function(){
+            $this->getUserSession()->executeScript("$('.introjs-overlay').click();");
             return $this->getUserSession()->evaluateScript("!$('.introjs-overlay').length");
-            }, 'Tutorial not closed.');
+        }, 'Tutorial not closed.');
     }
 
     /**
@@ -349,8 +347,10 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function theCountColumnShouldShowInteractions($count)
     {
-        $cell = $this->getUserSession()->getPage()->find('css', '[row=0] [colId="intCnt"]');
-        $this->handleContainsAssert($cell->getText(), $count, true, 'No interaction count found.');
+        $this->spin(function() use ($count){
+            $colCnt = $this->getUserSession()->evaluateScript('$("[row=0] [colId=\"intCnt\"]").text()');
+            return $this->ifContainsText($colCnt, $count);
+        }, "Count coulmn does not show [$count] interactions.");
     }
     /**
      * @Then data in the interaction rows
@@ -360,8 +360,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function dataInTheInteractionRows()
     {   
         $this->spin(function(){
-            $data = $this->getUserSession()->getPage()->find('css', '[colid="subject"] span');
-            return !$data ? false : ($data->getText() !== null);
+            $subj = $this->getUserSession()->evaluateScript('$("[colid=\"subject\"] span").text()');
+            return $subj;
         }, 'No data found in the interaction rows.');
     }
 
@@ -373,20 +373,20 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeRowsInTheTableDataTree($count)
     {
         $this->spin(function() use ($count) {
-            $rows = $this->getUserSession()->getPage()->findAll('css', '.ag-body-container>div'); 
-            return !$rows ? false : (intval($count) == count($rows));
+            $rowCnt = $this->getUserSession()->evaluateScript('$(".ag-body-container>div").length');
+            return !$rowCnt ? false : ($count == $rowCnt);
         }, "Didn't find the expected [$count] rows in the table data tree.");
     }
 
-    /**
-     * @Then I should see :text in the tree
-     */
-    public function iShouldSeeInTheTree($text)
-    {   
-        $this->spin(function() use ($text){
-            return $this->isInDataTree($text);            
-        }, "[$text] is not displayed in table data-tree.");
-    }    
+    // /**
+    //  * @Then I should see :text in the tree
+    //  */
+    // public function iShouldSeeInTheTree($text)
+    // {   
+    //     $this->spin(function() use ($text){
+    //         return $this->isInDataTree($text);            
+    //     }, "[$text] is not displayed in table data-tree.");
+    // }    
 
     /**
      * @Then I should not see :text in the tree
@@ -663,9 +663,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iShouldSeeInteractionsShownOnTheMap($count)
     {
         $this->spin(function() use ($count) {
-            $elem = $this->getUserSession()->getPage()->find('css', '#int-legend');
-            if (!$elem) { return false; }
-            return strpos($elem->getHtml(), $count) !== false;
+            $legendTxt = $this->getUserSession()->evaluateScript("$('#int-legend').text()");
+            return strpos($legendTxt, $count . ' shown');
         }, "Did not find [$count] in the map interaction count legend.");
     }
 
@@ -1346,10 +1345,12 @@ class FeatureContext extends RawMinkContext implements Context
     private function changeTableSort($elemId, $newVal, $newElemSel)
     {                                                                           //fwrite(STDOUT, "\nchangeTableSort\n");
         $elem = $this->getUserSession()->evaluateScript("$('$elemId').length;"); 
-        $this->getUserSession()->
-            executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
-        $newElem = $this->getUserSession()->getPage()->find('css', $newElemSel);
-        $this->handleNullAssert($newElem, false, "UI did not update as expected. Did not find [$newElemSel].");
+        $this->spin(function() use ($elemId, $newVal, $newElemSel){
+            $this->getUserSession()->
+                executeScript("$('$elemId')[0].selectize.addItem('$newVal');");
+
+            return $this->getUserSession()->evaluateScript("$('$newElemSel').length;");
+        }, "UI did not update as expected. Did not find [$newElemSel].");
     }    
     private function clickRowEditPencil($row)
     {
@@ -1360,6 +1361,9 @@ class FeatureContext extends RawMinkContext implements Context
         }, null);
     }
 /** -------------------- Asserts -------------------------------------------- */
+    /**
+     * Replace with spin and @ifContainsText
+     */
     private function handleContainsAssert($ndl, $hystk, $isIn, $msg)
     {                                                                           //print('Haystack = '.$hystk.', needle = '.$ndl);
         if ($isIn && strpos($hystk, $ndl) === false || !$isIn && strpos($hystk, $ndl) != false) { 
