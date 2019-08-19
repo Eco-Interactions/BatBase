@@ -399,7 +399,7 @@ span.lbl {
     box-shadow: 10px 10px 23px #888888;
 }
 #oimenu ul li {
-    width:230px;
+    width: max-content;
 }
 #oimenu ul a {
     line-height:120%;

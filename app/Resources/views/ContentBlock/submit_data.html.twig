@@ -1,0 +1,24 @@
+{% extends "layout.html.twig" %}
+
+{% set blocks = entities %}
+
+{% block headline %}Submit Publications to the Project{% endblock %}
+
+{% block detail %}
+    <div id="future-dev-pg" class="top-pgs">
+    {% embed 'two_cols_sect.html.twig' %}
+        {% block firstcol %}
+            <div id="upload-desc" class="wysiwyg">
+                {{ blocks["upload-desc"]|raw }}
+            </div>
+            <input type="text" name="upload-field">
+            <br>
+            <input type="button" name="submit" value="Submit">
+        {% endblock firstcol %}
+        {% block secondcol %}            
+            <h3>Publications currently being added to the database:</h3>
+            <embed src="{{ asset('bundles/app/files/Publications To Add.pdf') }}" height="455px" width="740px">
+        {% endblock secondcol%}
+    {% endembed %}
+    </div> 
+{% endblock detail %}

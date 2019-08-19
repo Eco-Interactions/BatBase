@@ -1,6 +1,4 @@
 <?php
-
-// src/AppBundle/Menu/Builder.php
 namespace AppBundle\Menu;
 
 use Knp\Menu\FactoryInterface;
@@ -20,7 +18,7 @@ class Builder implements ContainerAwareInterface
         $menu->addChild('About', array('uri' => '#'));
         $menu['About']->setAttribute('class', 'smtrigger arrow');
         $menu['About']->addChild('Project', array('route' => 'app_about'));
-        $menu['About']->addChild('Database', array('route' => 'app_db_top'));  //Citations
+        $menu['About']->addChild('Database', array('route' => 'app_db_top'));  
         $menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
         $menu['About']->addChild('Bibliography', array('route' => 'app_biblio'));
         $menu['About']->addChild('Coming Soon', array('route' => 'app_future_dev'));
@@ -28,11 +26,13 @@ class Builder implements ContainerAwareInterface
         if ($this->_isLoggedInUser($options['usrrole'])) {
             $menu->addChild($user_name, array('uri' => '#'));
             $menu[$user_name]->setAttribute('class', 'smtrigger arrow');
+            $menu[$user_name]->addChild('Submit Publication', array('route' => 'app_submit_data'));
             if ($this->_isAdmin($options['usrrole'])) {
                 $menu[$user_name]->addChild('View Feedback', array('route' => 'app_feedback'));
             }
             if ($this->_isSuper($options['usrrole'])) {
                 $menu[$user_name]->addChild('Online Users', array('route' => 'admin_user_online'));
+                $menu[$user_name]->addChild('New Content Block', array('route' => 'admin_content_block_new'));
             }
             $menu[$user_name]->addChild('Change Password', array('route' => 'fos_user_change_password'));
             $menu[$user_name]->addChild('Log Out', array('route' => 'fos_user_security_logout'));

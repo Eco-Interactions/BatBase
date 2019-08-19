@@ -7,6 +7,7 @@ use AppBundle\Form\ContentBlockType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -17,6 +18,20 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ContentBlockController extends Controller
 {
+    /** ---------------- SHOW PAGE ACTIONS ---------------------------------- */
+    /** Returns an associative array of the content blocks relevant data for a page. */
+    private function getPageBlocks($contentBlocks)
+    {
+        $returnData = [];
+
+        foreach ($contentBlocks as $block) {
+            $name = $block->getSlug();
+            $content = $block->getContent();
+            $returnData = array_merge($returnData, array($name => $content));
+        }
+
+        return $returnData;
+    }
     /**
      * Finds and displays Definition page content blocks.
      *
@@ -173,6 +188,27 @@ class ContentBlockController extends Controller
     }
 
     /**
+     * Finds and displays the submit publication page content blocks.
+     *
+     * @Route("/submit-data", name="app_submit_data")
+     */
+    public function submitDataAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $repo = $em->getRepository('AppBundle:ContentBlock');
+        $contentBlocks = $repo->findByPage("submit-data");
+
+        $returnData = $this->getPageBlocks($contentBlocks);
+
+        return $this->render('ContentBlock/submit_data.html.twig', array(
+            'entities' => $returnData,
+            )
+        );
+    }
+    /** ------------ CONTENT BLOCK ENTITY ACTIONS --------------------------- */
+
+    /**
      * Lists all Content Block entities.
      *
      * @Route("/admin/contentblock", name="admin_content_block")
@@ -222,12 +258,11 @@ class ContentBlockController extends Controller
      */
     private function createCreateForm(ContentBlock $entity)
     {
-        $form = $this->createForm(new ContentBlockType(), $entity, array(
+        $form = $this->createForm('AppBundle\Form\ContentBlockType', $entity, array(
             'action' => $this->generateUrl('admin_content_block_create'),
             'method' => 'POST',
         ));
-
-        $form->add('submit', 'submit', array('label' => 'Create'));
+        $form->add('submit', SubmitType::class, ['label' => 'Create']);
 
         return $form;
     }
@@ -394,19 +429,5 @@ class ContentBlockController extends Controller
             ->add('submit', 'submit', array('label' => 'Delete'))
             ->getForm()
         ;
-    }
-
-    /** Returns an associative array of the content blocks relevant data for a page. */
-    public function getPageBlocks($contentBlocks)
-    {
-        $returnData = [];
-
-        foreach ($contentBlocks as $block) {
-            $name = $block->getSlug();
-            $content = $block->getContent();
-            $returnData = array_merge($returnData, array($name => $content));
-        }
-
-        return $returnData;
     }
 }
