@@ -28,6 +28,8 @@ class Builder implements ContainerAwareInterface
             $menu[$user_name]->setAttribute('class', 'smtrigger arrow');
             $menu[$user_name]->addChild('Submit Publication', array('route' => 'app_submit_pub'));
             if ($this->_isAdmin($options['usrrole'])) {
+                $menu[$user_name]->addChild('View Submissions', array('route' => 'app_file_upload_list'));
+                $menu[$user_name]['View Submissions']->setAttribute('class', 'admin-menu');
                 $menu[$user_name]->addChild('View Feedback', array('route' => 'app_feedback'));
                 $menu[$user_name]['View Feedback']->setAttribute('class', 'admin-menu');
             }

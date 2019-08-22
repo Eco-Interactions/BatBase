@@ -35,7 +35,7 @@ class FileUploadController extends Controller
 
         $entities = $em->getRepository('AppBundle:FileUpload')->findAll();
 
-        return $this->render('Uploads/publications.html.twig', array(
+        return $this->render('Uploads/pdf_submissions.html.twig', array(
             'entities' => $entities,
         ));
     }
