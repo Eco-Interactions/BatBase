@@ -26,13 +26,16 @@ class Builder implements ContainerAwareInterface
         if ($this->_isLoggedInUser($options['usrrole'])) {
             $menu->addChild($user_name, array('uri' => '#'));
             $menu[$user_name]->setAttribute('class', 'smtrigger arrow');
-            $menu[$user_name]->addChild('Submit Publication', array('route' => 'app_submit_data'));
+            $menu[$user_name]->addChild('Submit Publication', array('route' => 'app_submit_pub'));
             if ($this->_isAdmin($options['usrrole'])) {
                 $menu[$user_name]->addChild('View Feedback', array('route' => 'app_feedback'));
+                $menu[$user_name]['View Feedback']->setAttribute('class', 'admin-menu');
             }
             if ($this->_isSuper($options['usrrole'])) {
                 $menu[$user_name]->addChild('Online Users', array('route' => 'admin_user_online'));
-                $menu[$user_name]->addChild('New Content Block', array('route' => 'admin_content_block_new'));
+                $menu[$user_name]->addChild('Content Blocks', array('route' => 'admin_content_block'));
+                $menu[$user_name]['Online Users']->setAttribute('class', 'super-admin-menu');
+                $menu[$user_name]['Content Blocks']->setAttribute('class', 'super-admin-menu');
             }
             $menu[$user_name]->addChild('Change Password', array('route' => 'fos_user_change_password'));
             $menu[$user_name]->addChild('Log Out', array('route' => 'fos_user_security_logout'));

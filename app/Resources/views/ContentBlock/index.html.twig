@@ -5,9 +5,14 @@
 {% set new_ent_route = path('admin_content_block_new') %}
 {% set this_ent_plural = 'Content Blocks' %}
 {% set this_ent_singl = 'Content Block' %}
+
 {% block headline %}
     Content Blocks
 {% endblock headline %}
+
+{% block headerright %}
+    <a href="{{ path('admin_content_block_new') }}" style="margin-left: auto;">New Content Block</a>
+{% endblock headerright %}
 
 {% block detail %}
 	<ul>

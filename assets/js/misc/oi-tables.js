@@ -99,7 +99,7 @@ function relocCtrls(tableName) {
     $filterDiv.detach();
     $pgLngthDiv.detach();
     $btnDiv.detach();
-    $( "#tbl-ctrls-reloc" ).append($pgLngthDiv);
-    $( "#tbl-ctrls-reloc" ).append($btnDiv);
-    $( "#tbl-ctrls-reloc" ).append($filterDiv);
+    $( "#hdr-right" ).append($pgLngthDiv);
+    $( "#hdr-right" ).append($btnDiv);
+    $( "#hdr-right" ).append($filterDiv);
 };

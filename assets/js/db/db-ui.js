@@ -48,7 +48,7 @@ function adaptUiToScreenSize() {
     // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     // $(elemCntnr)[0].className = 'flex-row';
     // $(cntnr).append(elemCntnr);
-    // $('#tbl-ctrls-reloc').append(cntnr);
+    // $('#hdr-right').append(cntnr);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);

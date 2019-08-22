@@ -71,11 +71,11 @@
                     {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
                     <div id="menu-bar-title">batplant.org</div>
                 </div>
-                <div id="hdrtext">
+                <div id="hdrtext" class="flex-row" style="justify-content: space-between;">
                     <div id="headln-txt">
                         {% block headline %}{% endblock %}
                     </div>
-                    <div id="tbl-ctrls-reloc"></div>
+                    <div id="right-hdr">{% block headerright %}{% endblock %}</div>
                 </div>
             </div>
             <div id="{% block pageid %}content-detail{% endblock pageid %}">

@@ -37,12 +37,17 @@ form label {
     vertical-align: text-top;
     margin-right: .5em;
 }
+label.required:before {
+    content: "*";
+}
 form button {
-    border: 1px solid;
-    border-radius: 10px;
-    margin: 23px 0 23px 0;
-    padding: .25em .5em .25em .5em;
-    font-size: 1.5em;
+    line-height: 1.6;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    color: #222;
+    margin: 0 .3em 0 .2em;
+    background: linear-gradient(#fff, #d3d3d3);
+    border-radius: 4px;
 }
 .tbl-bttn, .tos-bttn, .bei-bttn {
     margin: 0 .3em 0 .2em;
@@ -294,7 +299,7 @@ span.lbl {
     top: -1000px;
     right: -1000px;
 }
-#tbl-ctrls-reloc {
+#hdr-right {
     display: flex;
     justify-content: flex-start;
     background: White;
@@ -399,7 +404,7 @@ span.lbl {
     box-shadow: 10px 10px 23px #888888;
 }
 #oimenu ul li {
-    width: max-content;
+    width: 250px;
 }
 #oimenu ul a {
     line-height:120%;
@@ -414,6 +419,12 @@ span.lbl {
 }
 #oimenu .smtrigger:hover > ul {
     display:block;
+}
+.admin-menu {
+    background: rgba(26, 128, 230, .3);
+}
+.super-admin-menu {
+    background: rgba(54, 151, 111, .3);
 }
 /*--- List Styles ---*/
 #ul-big {                               /*Clean up old id references*/
@@ -600,6 +611,9 @@ form.fos_user_registration_register {
 }
 #reg-form-container {
     margin-top: 3em; 
+}
+#reg-form-container>form div div {
+    justify-content: space-between;
 }
 #fos_user_registration_form_first_name {
     margin-top: 0;

@@ -187,25 +187,6 @@ class ContentBlockController extends Controller
         );
     }
 
-    /**
-     * Finds and displays the submit publication page content blocks.
-     *
-     * @Route("/submit-data", name="app_submit_data")
-     */
-    public function submitDataAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $repo = $em->getRepository('AppBundle:ContentBlock');
-        $contentBlocks = $repo->findByPage("submit-data");
-
-        $returnData = $this->getPageBlocks($contentBlocks);
-
-        return $this->render('ContentBlock/submit_data.html.twig', array(
-            'entities' => $returnData,
-            )
-        );
-    }
     /** ------------ CONTENT BLOCK ENTITY ACTIONS --------------------------- */
 
     /**
@@ -338,12 +319,12 @@ class ContentBlockController extends Controller
      */
     private function createEditForm(ContentBlock $entity)
     {
-        $form = $this->createForm(new ContentBlockType(), $entity, array(
+        $form = $this->createForm('AppBundle\Form\ContentBlockType', $entity, array(
             'action' => $this->generateUrl('admin_content_block_update', array('slug' => $entity->getSlug())),
             'method' => 'PUT',
         ));
 
-        $form->add('submit', 'submit', array('label' => 'Update'));
+        $form->add('submit', SubmitType::class, array('label' => 'Update'));
 
         return $form;
     }
@@ -426,7 +407,7 @@ class ContentBlockController extends Controller
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_content_block_delete', array('slug' => $slug)))
             ->setMethod('DELETE')
-            ->add('submit', 'submit', array('label' => 'Delete'))
+            ->add('submit', SubmitType::class, array('label' => 'Delete'))
             ->getForm()
         ;
     }

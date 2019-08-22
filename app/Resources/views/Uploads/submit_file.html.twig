@@ -1,0 +1,31 @@
+{% form_theme form 'form/fields.html.twig' %}
+
+{% extends "layout.html.twig" %}
+
+{% block headline %}Submit Publications to the Project{% endblock %}
+
+{% block detail %}
+    <div id="future-dev-pg" class="top-pgs">
+    {% embed 'two_cols_sect.html.twig' %}
+        {% block firstcol %}
+            {% if success %}
+                <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
+                <br>
+            {% elseif success == 'error' %}
+                <p style="color: red; font-weight: 600;">There was an error while uploading. If 
+                    this problem persists, please send us an email at info@batplant.org 
+                    or "Leave Feedback" on this page.</p>
+                <br>
+            {% endif %}
+
+
+            {{ form_start(form) }}
+            {{ form_end(form) }}
+        {% endblock firstcol %}
+        {% block secondcol %}            
+            <h3>Publications currently being added to the database:</h3>
+            <embed src="{{ asset('bundles/app/files/Publications To Add.pdf') }}" height="455px" width="740px">
+        {% endblock secondcol%}
+    {% endembed %}
+    </div> 
+{% endblock detail %}
