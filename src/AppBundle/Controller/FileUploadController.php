@@ -75,6 +75,7 @@ class FileUploadController extends Controller
                 return $this->render('Uploads/submit_file.html.twig', [
                     'form' => $form->createView(),
                     'success' => 'error',
+                    'error' => $data
                 ]);
             }
             // stores the PDF file name instead of its contents
@@ -92,9 +93,7 @@ class FileUploadController extends Controller
                 'form' => $form->createView(),
                 'success' => true,
             ]);
-            // return $this->redirect($this->generateUrl('admin_user_edit', array('id' => $id)));
         }
-
         return $this->render('Uploads/submit_file.html.twig', [
             'form' => $form->createView(),
             'success' => null

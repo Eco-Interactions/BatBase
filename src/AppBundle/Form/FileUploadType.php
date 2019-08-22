@@ -20,7 +20,6 @@ class FileUploadType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('description', TextareaType::class)
             ->add('file', FileType::class, [
                 'label' => 'Submit PDF',
                 // unmapped means that this field is not associated to any entity property
@@ -29,7 +28,6 @@ class FileUploadType extends AbstractType
                 // in the associated entity, so you can use the PHP constraint classes
                 'constraints' => [
                     new File([
-                        'maxSize' => '1024k',
                         'mimeTypes' => [
                             'application/pdf',
                             'application/x-pdf',
@@ -38,6 +36,7 @@ class FileUploadType extends AbstractType
                     ])
                 ],
             ])
+            ->add('description', TextareaType::class)
         ;
     }
 
