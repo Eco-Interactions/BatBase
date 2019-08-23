@@ -15,6 +15,7 @@ Testing problems:
 >==== Change Log ====
 
 Current:
+    - Update where to upload pdfs to registration page, future dev, db about
     - bug with downloding data first time. 
         Have to refresh sometimes before it will actually send the ajax call
         - downloading user specific data loading message showing when user hasn't changed, eg by default

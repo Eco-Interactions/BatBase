@@ -30,9 +30,8 @@
         "knplabs/knp-menu-bundle": "~2",
         "stof/doctrine-extensions-bundle": "^1.2",
         "doctrine/doctrine-migrations-bundle": "^1.0",
-        "jms/serializer-bundle": "~2.0.0",
-        "trappar/alice-generator-bundle": "^1.1",
-        "symfony/webpack-encore-bundle": "^1.6"
+        "symfony/webpack-encore-bundle": "^1.6",
+        "jms/serializer-bundle": "^3.4"
     },
     "require-dev": {
         "sensio/generator-bundle": "^3.0",
@@ -60,7 +59,6 @@
         ],
         "post-update-cmd": [
             "@symfony-scripts"
-
         ]
     },
     "minimum-stability": "stable",

@@ -269,26 +269,6 @@ class Realm
     }
 
     /**
-     * Set deleted at.
-     *
-     * @param \DateTime $deletedAt
-     */
-    public function setDeletedAt($deletedAt)
-    {
-        $this->deletedAt = $deletedAt;
-    }
-
-    /**
-     * Get deleted at.
-     *
-     * @return \DateTime
-     */
-    public function getDeletedAt()
-    {
-        return $this->deletedAt;
-    }
-
-    /**
      * Get string representation of object.
      *
      * @return string

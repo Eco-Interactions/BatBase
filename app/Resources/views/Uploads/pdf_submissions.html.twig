@@ -8,26 +8,31 @@
 
 {% block detail %}
     <table id="pub_pdf_tbl" class="display" style="width: 100%;">
-    <thead>
-        <tr>
-            <th>Description</th>
-            <th>Preview PDF</th>
-            <th>Download PDF</th>
-            <th>User</th>
-            <th>Email</th>
-
-        </tr>
-    </thead>
-    <tbody>
-        {% for pub in entities %}
+        <thead>
             <tr>
-                <td>{{pub.description}}</td>
-                <td><input type="button" name="preview-pdf"></td>
-                <td><input type="button" name="download-pdf"></td>
-                <td>{{pub.createdBy.firstName}}  {{pub.createdBy.lastName}}</td>
-                <td>{{pub.createdBy.email}}</td>
+                <th>Delete</th>
+                <th>Preview/Download</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Email</th>
+
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for pub in entities %}
+                <tr>
+                    <td>
+                        <input type="button" name="delete-pdf">
+                    </td>
+                    <td>
+                        <input type="button" name="preview-pdf">
+                        <input type="button" name="download-pdf">
+                    </td>
+                    <td>{{pub.createdBy.firstName}}  {{pub.createdBy.lastName}}</td>
+                    <td>{{pub.createdBy.email}}</td>
+                    <td>{{pub.description}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock detail %}
