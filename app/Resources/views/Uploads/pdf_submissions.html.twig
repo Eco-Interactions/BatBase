@@ -10,23 +10,26 @@
     <table id="pub_pdf_tbl" class="display" style="width: 100%;">
         <thead>
             <tr>
-                <th>Delete</th>
-                <th>Preview/Download</th>
-                <th>Description</th>
-                <th>User</th>
-                <th>Email</th>
-
+                <th style="width: 111px;">Delete</th>
+                <th style="width: 222px;">Preview/Download</th>
+                <th style="width: 444px;">Description</th>
+                <th style="width: 122px;">User</th>
+                <th style="width: 222px;">Email</th>
             </tr>
         </thead>
         <tbody>
             {% for pub in entities %}
                 <tr>
                     <td>
-                        <input type="button" name="delete-pdf">
+                        <center>
+                            <input type="button" name="delete-pdf" value="Delete PDF" class="dt-bttn">
+                        </center>
                     </td>
                     <td>
-                        <input type="button" name="preview-pdf">
-                        <input type="button" name="download-pdf">
+                        <center>
+                            <input type="button" name="preview-pdf" value="Preview PDF" class="dt-bttn" style="margin-right: 2em !important;">
+                            <input type="button" name="download-pdf" value="Download PDF" class="dt-bttn">
+                        </center>
                     </td>
                     <td>{{pub.description}}</td>
                     <td>{{pub.createdBy.firstName}}  {{pub.createdBy.lastName}}</td>
