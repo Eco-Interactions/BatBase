@@ -49,10 +49,18 @@ form button {
     background: linear-gradient(#fff, #d3d3d3);
     border-radius: 4px;
 }
-.tbl-bttn, .tos-bttn, .bei-bttn {
-    margin: 0 .3em 0 .2em;
-    background: linear-gradient(#fff, #d3d3d3);
-    border-radius: 4px;
+.dt-bttn {
+    line-height: 1.4 !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+    color: #222 !important;
+    padding: 2px 3px 1px 3px !important;
+    width: 44px;
+}
+.tbl-bttn, .tos-bttn, .bei-bttn, .dt-bttn {
+    margin: 0 .3em 0 .2em !important;
+    background: linear-gradient(#fff, #d3d3d3) !important;
+    border-radius: 4px !important;
 }
 /*--------------- Util Styles ----------------------------------*/
 .top-em-mrg {

@@ -29,7 +29,8 @@ function requireGlobalJquery() {
 function initUi() {
     initTos();
     initImageSlider();
-    initStickyHeaderAndDataTable();
+    initStickyHeader();
+    initDataTable();
 }
 function initTos() {
     require('./tos.js').init();
@@ -47,27 +48,24 @@ function initImageSlider() {
         }, 1000)
     }, 10000);
 }
-/**
- * Initiates tables and rearranges realted UI. Used on the feedback and bilio pages.
- * TODO: Refactor to use ag-grid.
- */ 
-function initStickyHeaderAndDataTable() { 
-    const tableMngr = require('../misc/oi-tables.js');                                    
-    const tableName = $('#pg-container').data("has-tbl"); 
-    if (tableName === false) { return initStickyHeader(tableMngr); } 
-    tableMngr.init(tableName); 
-    initStickyHeader(tableMngr);
-} 
-function initStickyHeader(tableMngr) {
+function initStickyHeader() {
     const $stickyMenu = $('#sticky-hdr');
     $(window).scroll(function () {
-        if ($(window).scrollTop() > tableMngr.stickyOffset) {
+        if ($(window).scrollTop() > 423) {
                 $stickyMenu.addClass("top-sticky");
             } else {
                 $stickyMenu.removeClass("top-sticky");
             }
     });
 };
+/**
+ * Initiates tables and rearranges realted UI. Used on the feedback, pdf submission, and bilio pages.
+ */ 
+function initDataTable() { 
+    const tableName = $('#pg-container').data("has-tbl"); 
+    if (tableName === false) { return; } 
+    require('../misc/oi-tables.js').init(tableName);  
+} 
 /* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);

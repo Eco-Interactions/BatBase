@@ -9,6 +9,10 @@
   "license": "MIT",
   "dependencies": {
     "datatables": "^1.10.18",
+    "datatables.net-buttons-dt": "^1.5.6",
+    "datatables.net-fixedheader": "^3.1.5",
+    "datatables.net-fixedheader-dt": "^3.1.5",
+    "datatables.net-responsive": "^2.2.3",
     "idb-keyval": "^3.2.0",
     "jquery": "^3.4.1",
     "leaflet": "^1.5.1",
