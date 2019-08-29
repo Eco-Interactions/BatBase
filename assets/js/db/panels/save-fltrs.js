@@ -283,7 +283,8 @@ function showSaveFilterModal(success) {
     let readyToSave = true;  
     const modalHtml = buildModalHtml();
     const succFunc = readyToSave ? success : false;
-    showSaveModal(modalHtml, '#save-filter', 'right', succFunc, Function.prototype, !readyToSave);
+    const bttnText = readyToSave ? 'Submit' : 'Cancel';
+    showSaveModal(modalHtml, '#save-filter', 'right', succFunc, Function.prototype, bttnText);
     
     function buildModalHtml() {
         const hdr = '<h2> Saving Filter Set: </h2>';

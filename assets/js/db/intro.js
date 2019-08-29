@@ -10,20 +10,21 @@
  *     exitModal                save-fltrs
  *     startWalkthrough         db-page
  *     showHelpModal            save-fltrs, save-ints
- *     showSaveModal            save-fltrs
+ *     showSaveModal            save-fltrs, view-pdfs
  */
-import * as db_page from './db-page.js';
 import * as _u from './util.js';
+import { initDataTable } from './db-page.js';
 import { showTips } from './db-ui.js';
 
 let intro, focus;
 
-init();
+if (window.location.pathname.includes('search')) {
+    searchPageInit();
+}
 
-function init() {  
+function searchPageInit() {  
     $("#strt-tut").click(startIntroWalkthrough);
     $("#show-tips").click(showTips);
-    require('../../css/lib/introjs.min.css');
 }
 /* ===================== MODALS/TIPS ======================================== */
 /* ------------ HELP MODALS ------------ */
@@ -138,13 +139,12 @@ function getSavedListSteps() {
     ];
 }
 /* ------------ SAVE MODALS ------------ */
-export function showSaveModal(text, elem, dir, submitCb, cancelCb, noSave) {    //console.log('showing modal')
+export function showSaveModal(text, elem, dir, submitCb, cancelCb, bttnText) {  //console.log('showing modal')
     if (intro) { return; }
-    const bttnText = noSave ? 'Cancel' : 'Submit'; 
     const subFunc = !submitCb ? exitModal.bind(null, cancelCb) : submitCb;
     intro = require('../libs/intro.js').introJs();   
     intro.oncomplete(subFunc);
-    // intro.onexit(exitModal.bind(null, cancelCb));
+    intro.onexit(exitModal.bind(null, cancelCb));
     intro.setOptions(getModalOptions(text, elem, dir, bttnText));
     intro.start();
 }
@@ -455,7 +455,7 @@ function resetTableState() {
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
-    db_page.initDataTable(focus);
+    initDataTable(focus);
     intro = null;
 }
 /* ---------- Set Up Functions --------------------*/

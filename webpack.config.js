@@ -1,9 +1,6 @@
 const Encore = require('@symfony/webpack-encore');
 
 const autoProvidedVars = { L: 'leaflet', $: 'jquery' };
-const appFiles = './assets/js/app/oi.js';
-const dbFiles = './assets/js/db/db-page.js';
-const fdbkFiles = './assets/js/misc/feedback-viewer.js';
 
 /** ================= Create local development config ======================= */
 Encore
@@ -38,11 +35,11 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    .addEntry('app', appFiles)
-    .addEntry('db', dbFiles)
-    .addEntry('feedback', fdbkFiles)
+    .addEntry('app', './assets/js/app/oi.js')
+    .addEntry('db', './assets/js/db/db-page.js')
+    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
-    .createSharedEntry('libs', './assets/js/app/libs.js')
+    // .createSharedEntry('libs', './assets/js/app/libs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
 ; 
@@ -85,11 +82,12 @@ Encore
     //         importsDirectory: 'sw/'
     // }))
     /** ------- Site Js/Style Entries ----------------- */
-    .addEntry('app', appFiles)
-    .addEntry('db', dbFiles)
-    .addEntry('feedback', fdbkFiles)
+    .addEntry('app', './assets/js/app/oi.js')
+    .addEntry('db', './assets/js/db/db-page.js')
+    .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
-    .splitEntryChunks('libs', './assets/js/app/libs.js')
+    // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
+    .enableSingleRuntimeChunk()
 ; 
 const server = Encore.getWebpackConfig();
 // Set a unique name for the config (needed to generate assets via cli!)

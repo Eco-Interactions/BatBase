@@ -47,8 +47,11 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
  */
 let tblState = {};
 /** ------------- Page Init --------------------------------------------- */
-requireCss();
-initDbPage();
+if (window.location.pathname.includes('search')) {
+    requireCss();
+    requireJs();
+    initDbPage();
+}
 
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
@@ -59,6 +62,11 @@ function requireCss() {
     require('../../css/lib/selectize.default.css');
     require('../../css/search_db.css');  
     require('../../css/moz-styles.css');
+}
+function requireJs() {
+    require('leaflet-control-geocoder');
+    require('../libs/selectize.min.js');
+    require('../libs/flatpickr.min.js');
 }
 /**
  * Initializes the database and UI. The util init method will call @initSearchState

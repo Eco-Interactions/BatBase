@@ -1,15 +1,23 @@
 /**
  * Submitted Publications' Page: Manage submitted publication pdfs. [Admin+]
  */
+import { exitModal, showSaveModal } from '../db/intro.js';
 
-addPdfEvents();
-
+if (window.location.pathname.includes('pdfs')) {
+    addPdfEvents();
+}
 function addPdfEvents() {
     $('input[name="delete-pdf').click(handleDeletePdf);
     $('input[name="view-pdf').click(handleOpenPdf);
 }
 function handleDeletePdf() {   console.log('delete pdf');
-    const url = 'pub/'+$(this).data('id')+'/delete';
+    const id = $(this).data('id');
+    const msg = '<center><h2>Are you sure you want to delete?</h2><br>';
+    showSaveModal(msg, 'input[data-id="'+id+'"]', 'left', 
+        deletePdf.bind(null, id), Function.prototype, 'Confirm');
+}
+function deletePdf(id) {
+    const url = 'pub/'+id+'/delete';
     $.ajax({
         method: "POST",
         url: url, 

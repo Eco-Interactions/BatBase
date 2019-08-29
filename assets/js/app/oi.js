@@ -10,6 +10,7 @@ ifNotChromeShowOptimizedMsg();
 function requireCss() {
     require('../../css/ei-reset.css');   
     require('../../css/oi.css');    
+    require('../../css/lib/introjs.min.css');  
     adjustLogoToScreenSizeAndBrowser();
 }
 /** Sets logo width for windows with less than 1500px widths or in firefox browsers. */

@@ -111,7 +111,7 @@ class FileUploadController extends Controller
         $entity = $em->getRepository('AppBundle:FileUpload')->find($id);
         
         if (!$entity) {
-            throw $this->createNotFoundException('Unable to find User entity.');
+            throw $this->createNotFoundException('Unable to find File Upload entity.');
         }
 
         $em->remove($entity);
