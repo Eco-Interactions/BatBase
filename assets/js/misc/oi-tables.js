@@ -15,7 +15,7 @@ export function init(tableName) {
                 feedback_tbl: [     5,  'onehund'],
                 online_users_tbl:[  0,  'onehund'],
                 biblio_tbl:   [     0,  'fivehund'],
-                pub_pdf_tbl:   [    3,  'onehund'],
+                pub_pdf_tbl:   [    2,  'onehund'],
     };
     const params = tables[tableName];
     initOiDataTable(params[0], params[1], tableName);

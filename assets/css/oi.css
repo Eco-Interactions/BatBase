@@ -716,11 +716,16 @@ label[for=fos_user_registration_form_about_me] {
     background: #2D7853;
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
-/*--------------- Upload Files --------------------------*/
+/*--------------- Upload Files / PDFS --------------------------*/
 form[name="appbundle_file_upload"] textarea {
     width: 100%;
 }
-
+.pdf-popup {
+    width: 1000px;
+    margin: 5em auto;
+    height: 600px;
+}
+/*--------------- Responsive Styles -------------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) {
     #pg-container {

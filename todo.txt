@@ -3,34 +3,34 @@ Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
 
-Testing problems:
-    - https://github.com/minkphp/MinkSelenium2Driver/issues/293
-    - Latest chrome update breaks behat/selenium cojmpatibility. 
-        There is no easy way to revert to a version that would work
-    - Firefox has a long time bug with selenium causing difficulties selecting elements 
-    - Both caused by a shift into w3c tech... 
-    - Waiting it out seems like the best option for now
-        #tiredoftroubleshooting
-
 >==== Change Log ====
+    - PDF submission
+        - submission page
+            - Need content reviewed/edited
+        - view submissions page
+            - locked down to admin? or just editor? Maybe only admins delete?
+            - do we want a way for editors to leave notes for each other? Or a way 
+                to indicate that someone has "checked out" a submission?
+            - process to keep submissions synced with the "publications to be added" doc?
 
 Current:
     - Update where to upload pdfs to registration page, future dev, db about
     - bug with downloding data first time. 
         Have to refresh sometimes before it will actually send the ajax call
         - downloading user specific data loading message showing when user hasn't changed, eg by default
+    - Fix taxon forms
+    - Write description for email updating current users to all the exciting changes!
+        - frame in context of the last conference to now
 
+Next:
     - update tests 
         - with new 'all' filters, time updated/published
         - lists, sets, and their interactions
             - create, edit, delete
             - load each, then load the other too
             - resettest filters when list loaded
+        - pdf submission and view page
     - Add Lists to System Date
-
-Before conference:
-    - Write description for email updating current users to all the exciting changes!
-        - frame in context of the last conference to now
     - Double check all center points for multi-polygons
     - Figure out how to "stress test" the site:
         - Large number of people using it
@@ -38,28 +38,17 @@ Before conference:
 
 MEETING NOTES:
     Point out:
-        - Table int count and taxon realm filter msg
-        - Added Panels. 
-        - Added tutorial hints and updated tutorial
-        - Added "published" after to time filter
-        - Added 'all' options to the location and taxon combobox filters
-        - Added taxon tree text search to the taxon filters
-        - Added stub data for new users and the interaction lists and filter sets
-            - Backfilling for existing users
-        - Updated the welcome message for new users
+        - 
     Next/future rounds:
         Possible:
         Next:
             - UI:
-                - Update future dev page
             - testing:
                 - Finish updating tests
                 - Refactor TESTS
                     - Make list of all behat statements being used for reference when adding/editing tests
                     - Break out scenarios
         Then:
-            - Err handling:
-                - Fix taxon forms: by august 13th
         Future:
             - Review Data
                 * Identical tables
@@ -68,14 +57,13 @@ MEETING NOTES:
                         - removed once approved 
                     - Edit History
                         - all fields pending has, plus approvedBy
-            - Data:
+            - Data
                 - Add more realms
-            - Edit form:
-                - Fix taxon forms
+            - Edit form:\
                 - allow selection of another location and merging of all data and 
                     deletion of location being edited
                 - Turn all form styles from percentages to pixels
-            - Features: 
+            - Features
                 - Draw areas and select as parent location
                 - Get shape data for mising countries and regions
                     - Eg, Central America. Priority?

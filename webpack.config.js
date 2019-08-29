@@ -41,6 +41,7 @@ Encore
     .addEntry('app', appFiles)
     .addEntry('db', dbFiles)
     .addEntry('feedback', fdbkFiles)
+    .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     .createSharedEntry('libs', './assets/js/app/libs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
@@ -87,6 +88,7 @@ Encore
     .addEntry('app', appFiles)
     .addEntry('db', dbFiles)
     .addEntry('feedback', fdbkFiles)
+    .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
     .splitEntryChunks('libs', './assets/js/app/libs.js')
 ; 
 const server = Encore.getWebpackConfig();
