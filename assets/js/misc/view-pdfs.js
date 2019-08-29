@@ -1,5 +1,5 @@
 /**
- * Submitted Publications' Page: Manage submitted publication pdfs.
+ * Submitted Publications' Page: Manage submitted publication pdfs. [Admin+]
  */
 
 addPdfEvents();
@@ -9,7 +9,19 @@ function addPdfEvents() {
     $('input[name="view-pdf').click(handleOpenPdf);
 }
 function handleDeletePdf() {   console.log('delete pdf');
-    // body...
+    const url = 'pub/'+$(this).data('id')+'/delete';
+    $.ajax({
+        method: "POST",
+        url: url, 
+        success: reloadPage,
+        error: ajaxError
+    });
+}
+function reloadPage() {
+    location.reload();
+}
+function ajaxError(jqXHR, textStatus, errorThrown) {
+    console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
 }
 function handleOpenPdf() {                                                      //console.log('preview pdf');
     $("#b-overlay-popup").html(getPdfPreviewHtml($(this).data('filename')));

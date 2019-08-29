@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 // use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\HttpFoundation\Response;
 /**
  * Image Upload controller.
  *
@@ -27,7 +27,7 @@ class FileUploadController extends Controller
     /**
      * Lists all Image Upload entities.
      *
-     * @Route("/", name="app_file_upload_list")
+     * @Route("/view-pdfs", name="app_file_upload_list")
      */
     public function indexAction()
     {
@@ -100,6 +100,25 @@ class FileUploadController extends Controller
         ]);
     }
 
+    /**
+     * Deletes a File.
+     *
+     * @Route("/pub/{id}/delete", name="app_delete_pub")
+     */
+    public function deleteAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('AppBundle:FileUpload')->find($id);
+        
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find User entity.');
+        }
+
+        $em->remove($entity);
+        $em->flush();
+        
+        return new Response();
+    }
     /** ==================== IMAGE UPLOADS ================================== */
     // /**
     //  * Lists all Image Upload entities.
