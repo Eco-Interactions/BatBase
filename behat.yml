@@ -10,12 +10,11 @@ default:
                 wd_host: "http://127.0.0.1:4444/wd/hub"
                 capabilities: 
                     browser: chrome
-                    version: "76"
                     marionette: true
                     extra_capabilities: 
-                        goog:chromeOptions: 
+                        chromeOptions: 
+                            binary: '/Applications/Chromium.app/Contents/MacOS/Chromium'
                             args: ['--disable-gpu', '--window-size=1400,1440']
-                            w3c: false
                 # capabilities: { "browser": "chrome", "version": "*", "marionette": true, "extra_capabilities": { "chromeOptions": { "w3c": false } }, 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']} }
     suites:
         default:
