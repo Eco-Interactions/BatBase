@@ -210,9 +210,9 @@ function getSteps() {
                 'Exit', or anywhere on the greyed background.<br><br><b><center>
                 Move to the next slide or select an area to begin.<br></center>
                 </b><br><button class="intro-bttn tbl-bttn" style="margin: 0 25px 
-                5px 45px">Full Tutorial</button><button class="intro-bttn tbl-bttn">
+                5px 45px !important">Full Tutorial</button><button class="intro-bttn tbl-bttn">
                 Table View</button><button class="intro-bttn tbl-bttn" style="
-                margin: 0 25px 5px 45px">Map View</button><button class="intro-bttn 
+                margin: 0 25px 5px 45px !important">Map View</button><button class="intro-bttn 
                 tbl-bttn" disabled="disabled" title="Coming soon" style="opacity: 
                 0.3; cursor: default;">Data Entry</button>`,
             position: 'right',
