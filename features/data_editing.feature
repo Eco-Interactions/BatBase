@@ -49,7 +49,7 @@ Feature: Edit data in the database
         And I see "Select Subject Taxon"
         When I select "Artibeus lituratus" from the "Species" form dropdown
         And I should see "Artibeus" in the "Genus" form dropdown
-        And I press the "Select" button
+        And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
         And I uncheck the time-updated filter
@@ -69,7 +69,7 @@ Feature: Edit data in the database
         And I see "Select Object Taxon"
         When I select "Philodendron sphalerum" from the "Species" form dropdown
         And I should see "Philodendron" in the "Genus" form dropdown
-        And I press the "Select" button
+        And I press the "Select Taxon" button
         And I press the "Update Interaction" button
         And I wait for the "top" form to close
         And I uncheck the time-updated filter

@@ -16,11 +16,17 @@ After next server update:
                 to indicate that someone has "checked out" a submission?
             - process to keep submissions synced with the "publications to be added" doc?
 
+Email to Kelly:
+    - Sorry. I was talking from a perspective of having made changes that I hadn't 
+    ever put on the live site. That must have confused several things. 
+
 Current:
-    - bug with downloding data first time. 
-        Have to refresh sometimes before it will actually send the ajax call
-        - downloading user specific data loading message showing when user hasn't changed, eg by default
-    - Fix taxon forms
+    - Bugs
+        - table doesn't reset when taxon text filter is cleared (With no other filters selected)
+        - bug with downloding data first time. 
+            Have to refresh sometimes before it will actually send the ajax call
+            - downloading user specific data loading message showing when user hasn't changed, eg by default
+        - Fix taxon forms
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Make site mobile-friendly
@@ -37,6 +43,7 @@ Next:
     - Double check all center points for multi-polygons
     - Figure out how to "stress test" the site:
         - Large number of people using it
+    - Add property to realm taxa - all contained levels (ie, plant -> family, genus, species)
 
 
 MEETING NOTES:
@@ -44,6 +51,9 @@ MEETING NOTES:
         - 
     Next/future rounds:
         Possible:
+            - Data Review panel (1-2 months)
+            - Refactoring forms (1-2 weeks) 
+
         Next:
             - UI:
             - testing:

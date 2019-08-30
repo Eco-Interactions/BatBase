@@ -233,7 +233,7 @@ function initFormParams(action, entity, id) {
  * Adds the properties and confg that will be used throughout the code for 
  * generating, validating, and submitting sub-form. 
  * -- Property descriptions:
- * > action - eg, Create, Edit.
+ * > action - create || edit
  * > confg - The form config object used during form building.
  * > typeConfg - Form confg for sub-types of entity forms. Eg, publication-types.
  * > fieldConfg - Form fields and types, values entered, and the required fields.
@@ -1658,7 +1658,7 @@ function finishTaxonSelectUi(role) {
     customizeElemsForTaxonSelectForm(role);
     if (!$('#'+role+'-sel').val()) { focusFirstCombobox(selCntnr);   
     } else { onLevelSelection($('#'+role+'-sel').val()); }
-    updateComboboxOptions('#'+role+'-sel', []);
+    _u.replaceSelOpts('#'+role+'-sel', []);
 }
 /** Shows a New Taxon form with the only field, displayName, filled and ready to submit. */
 function initTaxonForm(value) { 
@@ -1807,12 +1807,18 @@ function getTaxonDisplayName(taxon) {
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
 function getSelectedTaxon() {
-    var selElems = $('#sub-form .selectized').toArray().reverse(); 
+    var selElems = $('#sub-form .selectized').toArray(); 
+    reverseSelElemsIfEditingTaxonParent(selElems);
     var selected = selElems.find(isSelectedTaxon);                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
     return fP.records.taxon[$(selected).val()];
 }
-function isSelectedTaxon(elem) {
-    if (elem.id.includes('-sel')) { return $(elem).val(); }
+function reverseSelElemsIfEditingTaxonParent(selElems) {
+    if (fP.action == 'edit' && fP.forms.top.entity == 'taxon') { 
+        selElems = selElems.reverse(); 
+    }
+}
+function isSelectedTaxon(elem) { 
+    if (elem.id.includes('-sel') && !elem.id.includes('Realm')) { return $(elem).val(); }
 }   
 /**
  * When a taxon at a level is selected, all child level comboboxes are
@@ -1904,10 +1910,9 @@ function repopulateCombosWithRelatedTaxa(selId) {
         var topLvl = fP.forms.taxonPs.realm === "Arthropod" ? 3 : 5; 
         for (var i = 7; i >= topLvl; i--) {
             if (opts[i]) { continue; }
-            opts[i] = [{ value: "", text: "None" }];                    
+            opts[i] = [];                    
             if (i < selLvl) {  
                 opts[i] = opts[i].concat(getTaxonOpts(lvls[i-1]));                    
-                selected[i] = "";
             }
         }
     }
@@ -1928,7 +1933,7 @@ function repopulateLevelCombos(optsObj, selected) {
  * its direct ancestors.
  */
 function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName)
-    updateComboboxOptions('#'+lvlName+'-sel', opts);
+    _u.replaceSelOpts('#'+lvlName+'-sel', opts);
     if (lvl in selected) { setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); }
 }
 /*-------- Edit Taxon Methods ----------*/
@@ -2494,7 +2499,7 @@ function updateComboboxOptions(selId, opts, focus) {
     selApi.clearOptions();
     selApi.addOption(opts);
     selApi.refreshOptions(false);
-    if (focus === true) { selApi.focus(); }
+    if (focus === true) {  }
 }
 function getSelVal(id) {                                                        //console.log('getSelVal [%s]', id);
     return $(id)[0].selectize.getValue();  
@@ -3195,7 +3200,7 @@ function buildFormRow(field, input, fLvl, isReq, rowClss) {                     
         id: field + '_row'});
     const errorDiv = _u.buildElem('div', { id: field+'_errs'}); 
     const fieldCntnr = _u.buildElem('div', { class: 'field-row flex-row'});
-    const label = _u.buildElem('label', {text: _u.ucfirst(fieldName), id:field+'-lbl'});
+    const label = _u.buildElem('label', {text: _u.ucfirst(fieldName).trim(), id:field+'-lbl'});
     const pin = fLvl === 'top' ? getPinElem(field) : null;     
     if (isReq) { handleRequiredField(label, input, fLvl); } 
     $(fieldCntnr).append([label, input, pin]);

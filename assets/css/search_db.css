@@ -904,9 +904,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-left: 1em !important;
 }
 /** ------------- Field Styles ------------- */
-.field-row .required:after {
-  content: "*";
-}
 .top-pin {
     margin: .6em 0 0 .6em !important;
 }
