@@ -255,7 +255,7 @@ function seperateTaxonTreeByLvl(topTaxon) {
         return obj;
     }
 } /* End seperateTaxonTreeByLvl */
-function getRealmLvls(realm) {  console.log('realm = ', realm)
+function getRealmLvls(realm) {  
     const map = {
         'Bat': ['Family', 'Genus', 'Species'],
         'Plant': ['Family', 'Genus', 'Species'],

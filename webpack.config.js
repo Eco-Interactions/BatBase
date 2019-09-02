@@ -12,14 +12,14 @@ Encore
     // the project directory where all compiled assets will be stored
     .setOutputPath('web/build')
 
-
+//--->
    /* ==== DEV ==== */
-    .setPublicPath('/batplant/web/build')
+    // .setPublicPath('/batplant/web/build')
     
    /* ==== PROD ==== */ 
     // the public path used by the web server to access the previous directory
     // .setPublicPath('/build')
-
+//--->
 
     /** The prefix isn't being recognized for some reason */
     .setManifestKeyPrefix('build')
