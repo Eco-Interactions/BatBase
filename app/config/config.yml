@@ -87,7 +87,4 @@ fos_user:
             type: AppBundle\Form\ProfileType
 
 webpack_encore:
-    output_path: "%kernel.project_dir%/web/build/local"
-    builds:
-        local: '%kernel.project_dir%/web/build/local'
-        server: '%kernel.project_dir%/web/build/server'
+    output_path: "%kernel.project_dir%/web/build"
