@@ -4,6 +4,7 @@ requireGlobalJquery();
 initUi();
 authDependantInit();  
 ifNotChromeShowOptimizedMsg();
+clearFieldForPdfSubmissions();
 // registerServiceWorker();
 
 /* ------------ Styles and Scripts ------------------*/
@@ -67,6 +68,12 @@ function initDataTable() {
     if (tableName === false) { return; } 
     require('../misc/oi-tables.js').init(tableName);  
 } 
+/** Not quite sure how to show a success message and reload form, will loop back when there's more time. */
+function clearFieldForPdfSubmissions() {
+    if (window.location.pathname.includes('upload/publication')) {
+        $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
+    }
+}
 /* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);

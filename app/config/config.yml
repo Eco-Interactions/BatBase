@@ -4,7 +4,7 @@ imports:
     - { resource: services.yml }
 
 parameters:
-    publication_file_dir: '%kernel.project_dir%/web/uploads/publications'
+    publication_file_dir: '%kernel.project_dir%/assets/uploads/publications'
 
 framework:
     translator:

@@ -28,7 +28,7 @@ import * as db_map from './db-map/db-map.js';
 import * as db_sync from './db-sync.js';
 import * as db_ui from './db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
-import { startWalkthrough } from './intro.js';
+import { startWalkthrough } from './db-tutorial.js';
 import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-fltrs.js';
 
 /**
@@ -396,7 +396,7 @@ function storeAndReturnView(val) {
 }
 /** This catches errors in realm value caused by exiting mid-tutorial.  */
 function getSelValOrDefault(val) {
-    return !val ? 3 : isNaN(val) ? 3 : val;
+    return !val ? 2 : isNaN(val) ? 2 : val;
 }
 /**
  * Builds a taxon data-tree for the passed taxon. The taxon levels present in 

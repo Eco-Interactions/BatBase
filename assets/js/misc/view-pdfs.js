@@ -1,7 +1,7 @@
 /**
  * Submitted Publications' Page: Manage submitted publication pdfs. [Admin+]
  */
-import { exitModal, showSaveModal } from '../db/intro.js';
+import { exitModal, showSaveModal } from '../misc/intro-core.js';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();

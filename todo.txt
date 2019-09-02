@@ -30,6 +30,9 @@ Current:
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Make site mobile-friendly
+    - Add to dev notes: workaround with webpack and asset building
+    - save dev version of live site for logs at some new subdomain
+        - to be used for testing to check if new bugs existed in last update
 
 Next:
     - update tests 
