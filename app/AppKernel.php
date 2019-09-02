@@ -21,6 +21,7 @@ class AppKernel extends Kernel
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
+            new \Symfony\WebpackEncoreBundle\WebpackEncoreBundle()
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
@@ -29,7 +30,7 @@ class AppKernel extends Kernel
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
             $bundles[] = new Hautelook\AliceBundle\HautelookAliceBundle();
-            $bundles[] = new Trappar\AliceGeneratorBundle\TrapparAliceGeneratorBundle();
+            // $bundles[] = new Trappar\AliceGeneratorBundle\TrapparAliceGeneratorBundle();
             $bundles[] = new DAMA\DoctrineTestBundle\DAMADoctrineTestBundle();
         }
 

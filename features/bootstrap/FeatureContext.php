@@ -282,6 +282,7 @@ class FeatureContext extends RawMinkContext implements Context
             $row = $this->getTableRow($text);
             if (!$row) { return false; }
             $this->clickRowEditPencil($row, $text);
+            return true;
         }, "Couldn't find [$text] row edit pencil. ");
     }
 
@@ -378,15 +379,15 @@ class FeatureContext extends RawMinkContext implements Context
         }, "Didn't find the expected [$count] rows in the table data tree.");
     }
 
-    // /**
-    //  * @Then I should see :text in the tree
-    //  */
-    // public function iShouldSeeInTheTree($text)
-    // {   
-    //     $this->spin(function() use ($text){
-    //         return $this->isInDataTree($text);            
-    //     }, "[$text] is not displayed in table data-tree.");
-    // }    
+    /**
+     * @Then I should see :text in the tree
+     */
+    public function iShouldSeeInTheTree($text)
+    {   
+        $this->spin(function() use ($text){
+            return $this->isInDataTree($text);            
+        }, "[$text] is not displayed in table data-tree.");
+    }    
 
     /**
      * @Then I should not see :text in the tree
@@ -1356,8 +1357,9 @@ class FeatureContext extends RawMinkContext implements Context
     {
         $this->spin(function() use ($row){
             $pencil = $row->find('css', '.tbl-edit');
-            if (@$pencil) { return false; }
+            if (!$pencil) { return false; }
             $pencil->click();
+            return true;
         }, null);
     }
 /** -------------------- Asserts -------------------------------------------- */

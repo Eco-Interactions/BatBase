@@ -121,28 +121,6 @@ class GeoJson
     }
 
     /**
-     * Set slug.
-     *
-     * @return string
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-
-        return $this;
-    }
-
-    /**
-     * Get slug.
-     *
-     * @return string
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-
-    /**
      * Set type.
      *
      * @param string $type

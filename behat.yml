@@ -3,19 +3,18 @@ default:
         Behat\Symfony2Extension: ~
         Behat\MinkExtension:
             base_url: http://localhost/batplant/web/app_test.php
-            browser_name: chrome
+            browser_name: chromium
             goutte: ~
             javascript_session: selenium2
             selenium2: 
                 wd_host: "http://127.0.0.1:4444/wd/hub"
                 capabilities: 
-                    browser: chrome
-                    version: "76"
+                    browser: chromium
                     marionette: true
                     extra_capabilities: 
-                        goog:chromeOptions: 
+                        chromeOptions: 
+                            binary: '/Applications/Chromium.app/Contents/MacOS/Chromium'
                             args: ['--disable-gpu', '--window-size=1400,1440']
-                            w3c: false
                 # capabilities: { "browser": "chrome", "version": "*", "marionette": true, "extra_capabilities": { "chromeOptions": { "w3c": false } }, 'chrome': {'switches': ['--disable-gpu', '--window-size=1400,1440']} }
     suites:
         default:

@@ -49,7 +49,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
         // $dups = $this->getAllTaxaWithDuplicatedDisplayNames();                  print('dups = '.count($dups)); print("\n");
         // $hasInts = $this->removeDupsWithNoInteractions($dups);                  print("\nafter blanks are removed = ".count($hasInts)); print("\n");
         
-        $this->mergeDupsWithParentChanges($this->getTaxaToMerge('prntChngs'));
+        // $this->mergeDupsWithParentChanges($this->getTaxaToMerge('prntChngs'));
         $this->mergeSimpleDups($this->getTaxaToMerge('simple'));
     }
     private function mergeDupsWithParentChanges($taxa)
@@ -102,9 +102,9 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
         }
     }
     /** ------------ SHARED ------------------------- */
-    private function getTaxaToMerge($type)
-    {
-        $map = [
+    /** 
+     * Used for the initial cleanup.
+     * $map = [
             'prntChngs' => [ 918 => 1738, 797 => 1776, 1092 => 1777, 814 => 1781, 
                 1370 => 1791, 314 => 1796, 881 => 1809, 943 => 1843 ],
             'simple' => [ 948 => 1797,  1821 => 1823, 1825 => 1827,  1867 => [1868, 1869, 1870], 
@@ -121,6 +121,17 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
                 1969 => 2066, 1466 => 2099, 98 => 2122, 485 => [2208, 2206], 2225 => 1146, 
                 2298 => 2299, 2252 => 2405, 2227 => 2414, 2446 => 2444, 1580 => [2462, 2466, 2467], 
                 1696 => 2471, 2211 => 2475, 916 => 2478, 2486 => 2484, 2209 => 2207, 499 => 2172, 82 => 1770, 88 => 1762]
+        ];
+     */
+    private function getTaxaToMerge($type)
+    {               // taxon to keep => to merge and remove
+        $map = [
+            'prntChngs' => [ ],
+            'simple' => [ 870 => 2274, 869 => 2273, 2211 => [ 2510, 2285 ], 964 => 2532, 
+                2572 => 2006, 2583 => 2584, 99 => 2601, 1001 => 2660, 2587 => 2674,
+                1872 => 2686, 2669 => [ 2728, 2724 ], 2670 => [ 2729, 2725 ], 467 => 2602,
+                316 => 2568, 871 => 2275
+            ]
         ];
         return $map[$type];
     }
@@ -196,7 +207,7 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
     private function getRemainingDuplicates()
     {
         $dups = $this->getAllTaxaWithDuplicatedDisplayNames();
-        $this->removeSingledDups($dups);  //print('dups remaining = '.count($dups)."\n");
+        $this->removeSingledDups($dups);  print('dups remaining = '.count($dups)."\n"); 
     }
 
 
@@ -242,19 +253,20 @@ class Version20190612193647TaxaDataCleanup extends AbstractMigration implements 
     // }
 
     private function removeSingledDups(&$taxa)
-    {
+    {    //print(count($taxa)." to check for duplicates\n");
         $done = 0;
-        for ($i=0; $i < count($taxa); $i++) { 
+        $cnt = count($taxa);
+        for ($i=0; $i < $cnt; $i++) {  //print("\n$i");
             $cleared = $this->clearIfNoLongerDupped($taxa[$i]);
             if ($cleared) {
                 unset($taxa[$i]);
                 ++$done;
             }
-        }                                                                       print("  Taxa no longer duplicated = ".$done."\n");
+        }                                                                       //print("  Taxa no longer duplicated = ".$done."\n");
     }
 
     private function clearIfNoLongerDupped($taxon)
-    {
+    { 
         $taxa = $this->em->getRepository('AppBundle:Taxon')->findBy(
             [ 'displayName' => $taxon->getDisplayName() ]);                     
         if (count($taxa) === 1) { return true; }                                //print("\n   Matching taxa to merge = ".count($taxa));

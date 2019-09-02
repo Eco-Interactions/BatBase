@@ -19,8 +19,6 @@ Feature: Filtering the data displayed in the database table
     Scenario:  I should be able to filter the data by date published.
       Given the database table is in "Location" view
       And I toggle "open" the filter panel
-      And I break "What time would be good to set the CITED at filter too? How many interactions then?"
-      When I "check" the time "cited" filter
       And I set the time "cited" filter to "Januray 1, 1990"
       Then I should see "3" rows in the table data tree
       And I should see "6" interactions in the table

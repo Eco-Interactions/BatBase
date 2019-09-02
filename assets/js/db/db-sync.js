@@ -303,7 +303,7 @@ function addInteractionToEntity(prop, rcrd, entity) {
 }
 /** Adds the Interaction to the taxon's subject/objectRole collection.  */
 function addInteractionRole(prop, rcrd, entity) {  
-    var taxa = allRcrds['taxon'] || getDataFromLocalStorage('taxon');               //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+    var taxa = allRcrds['taxon'] || getDataFromLocalStorage('taxon');           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
     var taxon = taxa[rcrd[prop]];
     addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
     storeData("taxon", taxa);        
@@ -389,7 +389,7 @@ function rmvIntFromEntity(prop, rcrd, entity, edits) {
 }
 /** Removes the Interaction and updates parent location total counts.  */
 function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
-    const rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);                //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+    const rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);              //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
     const oldLoc = rcrds[edits[prop].old];
     const newLoc = rcrds[edits[prop].new];
     rmvIdFromAry(oldLoc.interactions, rcrd.id);
@@ -550,10 +550,10 @@ function deriveAndStoreTaxonData(data) {                                        
 }
 function getObjectRealmNames(realms) {                                          //console.log('getObjectRealmNames. [%s] realms = %O',Object.keys(realms).length, realms);
     let data = {};
-    for (let i=1; i <= Object.keys(realms).length; i++) { 
-        if (realms[i].displayName === 'Bat') { continue; }  
+    Object.keys(realms).forEach(i => {
+        if (realms[i].displayName === 'Bat') { return; }  
         data[realms[i].displayName] = realms[i].id;
-    }
+    });
     return data;
 }
 function storeTaxaByLevelAndRealm(taxa) {
@@ -570,10 +570,11 @@ function storeTaxaByLvl(realm, taxonObj) {
 /** Each taxon is sorted by realm and then level. 'Animalia' is skipped. */
 function separateTaxaByLevelAndRealm(taxa) {  
     const data = { "Bat": {}, "Plant": {}, "Arthropod": {} };
-    for (let id = 1; id <= Object.keys(taxa).length; id++) {
-        if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { continue; }
+    Object.keys(taxa).forEach(id => {
+        if (undefined == taxa[id] || 'animalia' == taxa[id].slug) { return; }
         addTaxonData(taxa[id]);
-    }
+
+    })
     return data;
     /** Adds the taxon's name (k) and id to it's level's obj. */
     function addTaxonData(taxon) {

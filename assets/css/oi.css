@@ -37,17 +37,29 @@ form label {
     vertical-align: text-top;
     margin-right: .5em;
 }
-form button {
-    border: 1px solid;
-    border-radius: 10px;
-    margin: 23px 0 23px 0;
-    padding: .25em .5em .25em .5em;
-    font-size: 1.5em;
+label.required:before {
+    content: "*";
 }
-.tbl-bttn, .tos-bttn, .bei-bttn {
+form button {
+    line-height: 1.6;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    color: #222;
     margin: 0 .3em 0 .2em;
     background: linear-gradient(#fff, #d3d3d3);
     border-radius: 4px;
+}
+.dt-bttn {
+    line-height: 1.4 !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+    color: #222 !important;
+    padding: 2px 3px 1px 3px !important;
+}
+.tbl-bttn, .tos-bttn, .bei-bttn, .dt-bttn {
+    margin: 0 .3em 0 .2em !important;
+    background: linear-gradient(#fff, #d3d3d3) !important;
+    border-radius: 4px !important;
 }
 /*--------------- Util Styles ----------------------------------*/
 .top-em-mrg {
@@ -88,6 +100,26 @@ form button {
 .flex-col {
     display: flex;
     flex-direction: column; 
+}
+/*----------------------------- Intro.js -------------------------------------*/
+.intro-tips {
+    width: 420px;
+    text-align: justify;
+}
+a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
+    cursor: pointer;
+}
+.intro-bttn {
+    width: 144px;
+    height: 22px;
+}
+.modal-msg {
+    min-width: 333px !important;
+}
+.hlp-bttn {
+    height: 22px !important;
+    width: 23px !important;
+    font-weight: 600;
 }
 /*-------------------------- Main Layout -------------------------------------*/
 #pg-container {
@@ -294,7 +326,7 @@ span.lbl {
     top: -1000px;
     right: -1000px;
 }
-#tbl-ctrls-reloc {
+#hdr-right {
     display: flex;
     justify-content: flex-start;
     background: White;
@@ -399,7 +431,7 @@ span.lbl {
     box-shadow: 10px 10px 23px #888888;
 }
 #oimenu ul li {
-    width:230px;
+    width: 250px;
 }
 #oimenu ul a {
     line-height:120%;
@@ -414,6 +446,12 @@ span.lbl {
 }
 #oimenu .smtrigger:hover > ul {
     display:block;
+}
+.admin-menu {
+    background: rgba(26, 128, 230, .3);
+}
+.super-admin-menu {
+    background: rgba(54, 151, 111, .3);
 }
 /*--- List Styles ---*/
 #ul-big {                               /*Clean up old id references*/
@@ -601,6 +639,9 @@ form.fos_user_registration_register {
 #reg-form-container {
     margin-top: 3em; 
 }
+#reg-form-container>form div div {
+    justify-content: space-between;
+}
 #fos_user_registration_form_first_name {
     margin-top: 0;
 }
@@ -695,6 +736,16 @@ label[for=fos_user_registration_form_about_me] {
     background: #2D7853;
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6);
 }
+/*--------------- Upload Files / PDFS --------------------------*/
+form[name="appbundle_file_upload"] textarea {
+    width: 100%;
+}
+.pdf-popup {
+    width: 1000px;
+    margin: 5em auto;
+    height: 600px;
+}
+/*--------------- Responsive Styles -------------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) {
     #pg-container {

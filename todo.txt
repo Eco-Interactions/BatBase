@@ -3,58 +3,65 @@ Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
 
-Testing problems:
-    - https://github.com/minkphp/MinkSelenium2Driver/issues/293
-    - Latest chrome update breaks behat/selenium cojmpatibility. 
-        There is no easy way to revert to a version that would work
-    - Firefox has a long time bug with selenium causing difficulties selecting elements 
-    - Both caused by a shift into w3c tech... 
-    - Waiting it out seems like the best option for now
-        #tiredoftroubleshooting
+After next server update:
+    - Update where to upload pdfs to registration page, future dev, db about
 
 >==== Change Log ====
+    - PDF submission
+        - submission page
+            - Need content reviewed/edited
+        - view submissions page
+            - locked down to admin? or just editor? Maybe only admins delete?
+            - do we want a way for editors to leave notes for each other? Or a way 
+                to indicate that someone has "checked out" a submission?
+            - process to keep submissions synced with the "publications to be added" doc?
+
+Email to Kelly:
+    - Sorry. I was talking from a perspective of having made changes that I hadn't 
+    ever put on the live site. That must have confused several things. 
 
 Current:
+    - Bugs
+        - table doesn't reset when taxon text filter is cleared (With no other filters selected)
+        - bug with downloding data first time. 
+            Have to refresh sometimes before it will actually send the ajax call
+            - downloading user specific data loading message showing when user hasn't changed, eg by default
+        - Fix taxon forms
+    - Write description for email updating current users to all the exciting changes!
+        - frame in context of the last conference to now
+    - Make site mobile-friendly
+
+Next:
     - update tests 
         - with new 'all' filters, time updated/published
         - lists, sets, and their interactions
             - create, edit, delete
             - load each, then load the other too
             - resettest filters when list loaded
+        - pdf submission and view page
     - Add Lists to System Date
-
-Before conference:
-    - Write description for email updating current users to all the exciting changes!
-        - frame in context of the last conference to now
     - Double check all center points for multi-polygons
     - Figure out how to "stress test" the site:
         - Large number of people using it
+    - Add property to realm taxa - all contained levels (ie, plant -> family, genus, species)
 
 
 MEETING NOTES:
     Point out:
-        - Table int count and taxon realm filter msg
-        - Added Panels. 
-        - Added tutorial hints and updated tutorial
-        - Added "published" after to time filter
-        - Added 'all' options to the location and taxon combobox filters
-        - Added taxon tree text search to the taxon filters
-        - Added stub data for new users and the interaction lists and filter sets
-            - Backfilling for existing users
-        - Updated the welcome message for new users
+        - 
     Next/future rounds:
         Possible:
+            - Data Review panel (1-2 months)
+            - Refactoring forms (1-2 weeks) 
+
         Next:
             - UI:
-                - Update future dev page
             - testing:
                 - Finish updating tests
                 - Refactor TESTS
                     - Make list of all behat statements being used for reference when adding/editing tests
                     - Break out scenarios
         Then:
-            - Err handling:
-                - Fix taxon forms: by august 13th
         Future:
             - Review Data
                 * Identical tables
@@ -63,14 +70,13 @@ MEETING NOTES:
                         - removed once approved 
                     - Edit History
                         - all fields pending has, plus approvedBy
-            - Data:
+            - Data
                 - Add more realms
-            - Edit form:
-                - Fix taxon forms
+            - Edit form:\
                 - allow selection of another location and merging of all data and 
                     deletion of location being edited
                 - Turn all form styles from percentages to pixels
-            - Features: 
+            - Features
                 - Draw areas and select as parent location
                 - Get shape data for mising countries and regions
                     - Eg, Central America. Priority?
@@ -82,18 +88,9 @@ MEETING NOTES:
 
 >================ DEV Internal Task List ===================
 
->taxon form BUGS
-    - When new taxon is created, the previous display name check isn't prompting the editor to change the name
-        Add more complicated check to make sure no other taxonym in the realm has the same name
-    - 103 duplicates
-    Solution ideas:
-        - Add text search to taxa views to help eliminate creating duplicates
-        - Reverse order of taxon level inputs in select form to encourage searching for the most specific taxon first
-
 Sort:
     - ensure that entered coordinates are within selected country
         on country change, on form submit
-    - Create review data interface after
     - Add spanish translations to site
     - Refactor getTableState to take one arg and determine if it's singular or an array
     - Upgrade to encore 0.21 & webpack 4
@@ -104,10 +101,9 @@ Sort:
         - html
     - Refactor form code
         - break out css
-    - refactor out all styles for the panel displays
+    - Refactor out all styles for the panel displays
     - Figure out whether the explicit form services are necessary
     - Refactor TESTS
-        - replace all usleeps with "spinner" wait methods
         - Registration emails are sent https://symfony.com/doc/3.4/email/testing.html
     - Accessibility REFACTORING 
         - text to speech, etc

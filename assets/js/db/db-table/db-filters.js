@@ -462,7 +462,7 @@ function onTextFilterChange(entity, e) {
 function getTreeFilterTextVal(entity) {                                         //console.log('getTreeFilterTextVal entity = ', entity);
     return $('input[name="sel'+entity+'"]').val().trim().toLowerCase();
 }
-function filterTableByText(text) {                                              //console.log('filterTableByText [%s]', text);
+function filterTableByText(text) {                                              //console.log('----filterTableByText [%s]', text);
     tblState = tState().get(null, ['api', 'curFocus', 'rowData']);  
     const allRows = getAllCurRows();                     
     const newRows = text === "" ? allRows : getTreeRowsWithText(allRows, text);
@@ -475,7 +475,8 @@ function updateNameFilterMemory(text) {
     if (text === "") { return delete fPs.pnlFltrs.name; }
     fPs.pnlFltrs.name = '"'+text+'"'; 
 }
-function getTreeRowsWithText(rows, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
+function getTreeRowsWithText(data, text) {                                      //console.log('getTreeRowsWithText [%s] rows = %O', text, rows)
+    const rows = data.map(row => Object.assign({}, row));
     return rows.filter(row => {  
         const isRow = ifRowContainsText(row, text); 
         if (rowChildrenAreTreeEntities(row)) {
@@ -489,8 +490,7 @@ function ifRowContainsText(row, text) {
     return row.name.toLowerCase().includes(text);
 }
 function rowChildrenAreTreeEntities(row) {
-    if (tblState.curFocus === 'srcs') { return false; }
-    return row.children && !row.children[0].hasOwnProperty('interactionType');
+    return nonSrcRowHasChildren(row) && !row.children[0].hasOwnProperty('interactionType');
 }
 function nonSrcRowHasChildren(row) { 
     if (tblState.curFocus === 'srcs') { return false; }
@@ -681,6 +681,6 @@ function getRelatedTaxaToSelect(selTaxonObj, taxonRcrds) {                      
 } /* End getRelatedTaxaToSelect */
 /* ========================== FILTER UTILITY METHODS ================================================================ */
 /** If table is filtered by an external filter, the rows are stored in timeRows. */
-function getAllCurRows() { 
+function getAllCurRows() {                                                      //console.log('getAllCurRows. timeRows = %O, baseRowData = %O', fPs.timeRows, tblState.rowData);
     return fPs.timeRows || tblState.rowData;
 } 

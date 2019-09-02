@@ -10,7 +10,7 @@
  *     initTaxonSearchUi                db_page
  *     loadLocFilterPanelElems          db-page, db-filters
  *     loadTaxonComboboxes              db-page, db-filters     
- *     loadTxnFilterPanelElems          db-page, db-filters
+ *     loadTxnFilterPanelElems          db-page
  *     resetToggleTreeBttn              db_page, init-table
  *     showLoadingDataPopUp             util
  *     showTips                         intro
@@ -48,7 +48,7 @@ function adaptUiToScreenSize() {
     // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
     // $(elemCntnr)[0].className = 'flex-row';
     // $(cntnr).append(elemCntnr);
-    // $('#tbl-ctrls-reloc').append(cntnr);
+    // $('#hdr-right').append(cntnr);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
@@ -191,6 +191,7 @@ function isNextOpenLeafRow(node) {                                              
 export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
     loadTxnViewOpts(data.realm);
     setTaxonView(); 
+    $('#focus-filters').empty();  
 }
 function loadTxnViewOpts(realms) {
     if ($('#sel-view').data('focus') === 'taxa') { return; }
@@ -241,11 +242,11 @@ export function loadTaxonComboboxes(tblState) {
  * If there is no data after filtering at a level, a 'none' option obj is built
  * and will be selected.
  */
-function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts rcrds = %O", rcrdsByLvl);
+function buildTaxonSelectOpts(tblState) {                                       //console.log("buildTaxonSelectOpts levels = %O", tblState.taxaByLvl);
     const optsObj = {};
     const taxaByLvl = tblState.taxaByLvl;       
-    const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
-    curRealmLvls.forEach(buildLvlOptions);
+    // const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
+    tblState.allRealmLvls .forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {
@@ -258,6 +259,7 @@ function buildTaxonSelectOpts(tblState) {                                       
         optsObj[lvl] = buildTaxonOptions(taxonNames, taxaByLvl[lvl]);
     }
     function buildTaxonOptions(taxonNames, data) {
+        if (!taxonNames.length) { return []; }
         const opts = taxonNames.map(name => {
             return { value: data[name],
                      text: name}});
@@ -282,7 +284,7 @@ function buildTaxonSelectOpts(tblState) {                                       
 function loadLevelSelects(levelOptsObj, levels, tblState) {                     //console.log("loadLevelSelectElems. lvlObj = %O", levelOptsObj)
     const elems = buildTaxonSelects(levelOptsObj, levels);
     $('#focus-filters').append(elems);
-    _u.initComboboxes(tblState.allRealmLvls.slice(1));
+    _u.initComboboxes(tblState.allRealmLvls);
     setSelectedTaxonVals(tblState.selectedOpts, tblState);
     
     function buildTaxonSelects(opts, levels) {  

@@ -4,7 +4,7 @@
 
 {% block stylesheets %}
     {{parent()}}
-    <link rel="stylesheet" href="{{ asset('build/db.css') }}" />
+    {{ encore_entry_link_tags('db') }} 
 {% endblock %}
 
 {# Javascript after detail block. #}
@@ -227,6 +227,7 @@
 {% endblock detail %}
 
 {% block javascripts %} 
-    {{parent()}}    
+    {{parent()}}   
+    {{ encore_entry_script_tags('db') }} 
     <script src="{{ asset('build/db.js') }}"></script>
 {% endblock %}

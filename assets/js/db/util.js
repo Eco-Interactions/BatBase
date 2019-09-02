@@ -213,14 +213,19 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
  * downloads any new or changed data.
  */
 export function init_db() {
-    showPopUpMsg('Loading...');
+    const storedUser = getStoredUserName(dataStorage.getItem('user'));
+    showPopUpMsg('Loading...');                                                 if ($('body').data('env') == 'dev') {console.log('storage key = [%s]', dataStorage.getItem(localStorageKey));}
     if (!dataStorage.getItem(localStorageKey)) {
         clearDataStorage();
         initStoredData();
-    } else if (dataStorage.getItem('user') !== $('body').data('user-name')) {
+    } else if (storedUser != $('body').data('user-name')) {    
         showLoadingDataPopUp('user');
         sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
     } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
+}
+/** Problems parsing name to string solved with this check. */
+function getStoredUserName(name) {
+    return name ? name.split('"').join('') : false;  
 }
 export function clearDataStorage() {  
     dataStorage.clear();

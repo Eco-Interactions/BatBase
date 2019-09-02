@@ -224,8 +224,8 @@ function storeTaxonLevelData(topTaxon, filtering) {                             
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
 function storeLevelData(topTaxon) {                                             //console.log('topTaxon = %O', topTaxon)
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon);                         //console.log("All realm levels from taxaByLvl = %O", taxaByLvl)
-    const allRealmLvls = Object.keys(taxaByLvl);
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon);                         
+    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', taxaByLvl, allRealmLvls);
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
 function updateTaxaByLvl(topTaxon) {
@@ -255,6 +255,14 @@ function seperateTaxonTreeByLvl(topTaxon) {
         return obj;
     }
 } /* End seperateTaxonTreeByLvl */
+function getRealmLvls(realm) {  
+    const map = {
+        'Bat': ['Family', 'Genus', 'Species'],
+        'Plant': ['Family', 'Genus', 'Species'],
+        'Arthropod': ['Class', 'Order', 'Family', 'Genus', 'Species']
+    };
+    return map[realm];
+}
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
 function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);

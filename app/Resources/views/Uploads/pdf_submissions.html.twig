@@ -1,0 +1,43 @@
+{% extends "layout.html.twig" %}
+
+{% block datatable %}pub_pdf_tbl{% endblock datatable %}
+
+{% block headline %}
+    Submitted Publications
+{% endblock headline %}
+
+{% block detail %}
+    <table id="pub_pdf_tbl" class="display" style="width: 100%;">
+        <thead>
+            <tr>
+                <th style="width: 444px;">Description</th>
+                <th style="width: 122px;">User</th>
+                <th style="width: 222px;">Email</th>
+                <th style="width: 222px;">Manage Submission</th>
+                <!-- <th style="width: 111px;">Delete</th> -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for pub in entities %}
+                <tr>
+                    <td>{{pub.description}}</td>
+                    <td>{{pub.createdBy.firstName}}  {{pub.createdBy.lastName}}</td>
+                    <td>{{pub.createdBy.email}}</td>
+                    <!-- </td> -->
+                    <!-- <td> -->
+                    <td>
+                        <center>
+                            <input type="button" name="view-pdf" value="View/Download PDF" class="dt-bttn" style="margin-right: 2em !important;" data-filename="{{ pub.fileName }}">
+                            <input type="button" name="delete-pdf" value="Delete" class="dt-bttn"data-id="{{ pub.id }}">
+                        </center>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock detail %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('pdfs') }} 
+{% endblock javascripts %}
