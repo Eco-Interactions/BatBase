@@ -3,10 +3,7 @@ const Encore = require('@symfony/webpack-encore');
 const autoProvidedVars = { L: 'leaflet', $: 'jquery' };
 
 /** ================= CLI ======================= */
-//  --- DEV ---
-// yarn run encore dev --public-path="/batplant/web/build"
-//  --- PROD ---
-// yarn run encore production --public-path="/build"
+// yarn run encore [dev|production] [--watch]
 /** ================= Configuration ======================= */
 Encore
     // the project directory where all compiled assets will be stored
@@ -14,7 +11,7 @@ Encore
 
 //--->
    /* ==== DEV ==== */
-    // .setPublicPath('/batplant/web/build')
+    .setPublicPath('/batplant/web/build')
     
    /* ==== PROD ==== */ 
     // the public path used by the web server to access the previous directory
@@ -47,10 +44,17 @@ Encore
     //         skipWaiting: true,
     //         importsDirectory: 'sw/'
     // }))
+    /** ------- Loaders ----------------- */
+    // .configureLoaderRule('images', loaderRule => {
+    //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
+    //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };
+    // })
+    // .addLoader({ test: /\.(pdf)$/, loader: 'file-loader', 
+    //     options: { name: '../uploads/publications/[name].[ext]' } })
     /** ------- Files to process ----------------- */
     // .copyFiles({
-    //     from: './assets/uploads/publications'
-    //     to: 'publications/[path][name].[hash:8].[ext]'
+    //     from: './assets/uploads/publications',
+    //     to: 'publications/[name].[hash:8].[ext]'
     // })
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
@@ -64,7 +68,7 @@ Encore
 ; 
 const confg = Encore.getWebpackConfig();
 
-// Change the kind of source map generated in development mode
+// Change the source map generated in development mode so logs show the original code line numbers
 if (!Encore.isProduction()) {
     confg.devtool = 'eval-source-map';
 }

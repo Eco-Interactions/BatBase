@@ -27,7 +27,8 @@
                     <!-- <td> -->
                     <td>
                         <center>
-                            <input type="button" name="view-pdf" value="View/Download PDF" class="dt-bttn" style="margin-right: 2em !important;" data-filename="{{ pub.fileName }}">
+                            <input type="button" name="view-pdf" value="View/Download PDF" class="dt-bttn" style="margin-right: 2em !important;" data-filename="{{ pub.fileName | trim('.pdf') }}">
+                            <object id="{{ pub.fileName | trim('.pdf') }}" data="{{ asset('uploads/publications/' ~ pub.fileName) }}" width="100%" height="100%" style="display: none;"></object>
                             <input type="button" name="delete-pdf" value="Delete" class="dt-bttn"data-id="{{ pub.id }}">
                         </center>
                     </td>

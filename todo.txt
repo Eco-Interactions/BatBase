@@ -21,6 +21,7 @@ Email to Kelly:
     ever put on the live site. That must have confused several things. 
 
 Current:
+    - Force forms to stay at the width needed for field alignment.
     - Bugs
         - table doesn't reset when taxon text filter is cleared (With no other filters selected)
         - bug with downloding data first time. 
