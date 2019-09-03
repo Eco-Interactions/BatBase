@@ -20,18 +20,22 @@ security:
             logout_on_user_change: true
 
     access_control:
-        - { path: feedback/post, roles: ROLE_USER }
-        - { path: lists/edit, roles: ROLE_USER }
-        - { path: lists/delete, roles: ROLE_USER }
-        - { path: login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: profile/edit, roles: ROLE_USER }
-        - { path: /.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: /edit$, roles: ROLE_EDITOR }
         - { path: /delete$, roles: ROLE_ADMIN }
         - { path: /update$, roles: ROLE_ADMIN }
         - { path: /new$, roles: ROLE_ADMIN }
         - { path: ^/admin/, role: ROLE_ADMIN }
-        - { path: ^/crud/, role: ROLE_EDITOR }
+
+        # - { path: /edit$, roles: ROLE_EDITOR }
+        # - { path: ^/crud/, role: ROLE_EDITOR }
+        - { path: upload/view-pdfs$, roles: ROLE_EDITOR }
+
+        - { path: feedback/post, roles: ROLE_USER }
+        - { path: lists/edit, roles: ROLE_USER }
+        - { path: lists/delete, roles: ROLE_USER }
+        - { path: profile/edit, roles: ROLE_USER }
+        
+        - { path: login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
