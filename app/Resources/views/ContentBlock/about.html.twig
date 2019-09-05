@@ -32,35 +32,45 @@
 	<hr>
 	<div id="team-sect" class="top-em-mrg">
 		<div id="team-hdr"><h3>The Bat Eco-Interactions Team</h3></div>
-		{% embed 'three_cols_sect.html.twig' %}
+		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
-				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
+				<div class="bio-img"><img src="{{ asset('build/images/team-cullen.jpg') }}" alt="Cullen Image"></div>
 				<div id="team-cullen" class="wysiwyg">
 					{{ blocks["team-cullen"]|raw }}
 				</div>
 			{% endblock %}
 			{% block secondcol %}
-				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
+				<div class="bio-img"><img src="{{ asset('build/images/team-tuli.jpg') }}" alt="Tuli Image"></div>
 				<div id="team-tuli" class="wysiwyg">
 					{{ blocks["team-tuli"]|raw }}
 				</div>
 			{% endblock %}
-			{% block thirdcol %}
-				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-chanda.jpg') }}" alt="Chanda Image"></div>
+		{% endembed %}
+		<br>
+		{% embed 'two_cols_sect.html.twig' %}
+			{% block firstcol %}
+				<div class="bio-img"><img src="{{ asset('build/images/team-chanda.jpg') }}" alt="Chanda Image"></div>
 				<div id="team-chanda" class="wysiwyg">
 					{{ blocks["team-chanda"]|raw }}
 				</div>
 			{% endblock %}
+			{% block secondcol %}
+				<div class="bio-img"><img src="{{ asset('build/images/team-kelly.jpg') }}" alt="Kelly Image"></div>
+				<div id="team-kelly" class="wysiwyg">
+					{{ blocks["team-kelly"]|raw }} 
+				</div>
+			{% endblock %}
 		{% endembed %}
+		<br>
 		{% embed 'two_cols_sect.html.twig' %}
 			{% block firstcol %}
-				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
+				<div class="bio-img"><img src="{{ asset('build/images/team-taylor.jpg') }}" alt="Taylor Image"></div>
 				<div id="team-taylor" class="wysiwyg">
 					{{ blocks["team-taylor"]|raw }}
 				</div>
 			{% endblock %}
 			{% block secondcol %}
-				<div class="bio-img"><img src="{{ asset('bundles/app/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
+				<div class="bio-img"><img src="{{ asset('build/images/team-sarah.jpg') }}" alt="Sarah Image"></div>
 				<div id="team-sarah" class="wysiwyg">
 					{{ blocks["team-sarah"]|raw }}
 				</div>
