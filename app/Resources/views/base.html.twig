@@ -39,7 +39,7 @@
         <meta name="robots" content="index, follow" />
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
         <meta name="viewport" content="width=device-width, user-scalable=no" />
-        <link rel="manifest" href="{{ asset('bundles/app/build/manifest.json') }}" />
+        <link rel="manifest" href="{{ asset('build/manifest.json') }}" />
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }} 
@@ -52,17 +52,17 @@
         <div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
             {% block masthead %}
              <div id="slider-overlay">
-                <img src="{{ asset('bundles/app/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org">
+                <img src="{{ asset('build/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org">
             </div>
             <div id="img-slider">
                 <div class="slide" style="opacity: 1;">
-                    <img src="{{ asset('bundles/app/images/cactusbat.jpg') }}">
+                    <img src="{{ asset('build/images/cactusbat.jpg') }}">
                 </div>
                 <div class="slide">
-                    <img src="{{ asset('bundles/app/images/twobats.jpg') }}">
+                    <img src="{{ asset('build/images/twobats.jpg') }}">
                 </div>
                 <div class="slide">
-                    <img src="{{ asset('bundles/app/images/inflower.jpg') }}">
+                    <img src="{{ asset('build/images/inflower.jpg') }}">
                 </div>
             </div>
             {% endblock %}

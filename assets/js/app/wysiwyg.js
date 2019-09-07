@@ -99,7 +99,7 @@ function getBlockContainerId(editId) {
  * any div with class 'wysiwyg', on the page.
  */
 function addEditPencils() {     
-    var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'bundles/app/images/eif.pencil.svg';  
+    var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'build/images/eif.pencil.svg';  
     var contentBlocks = $('.wysiwyg');  //console.log("contentBlocks = %O", contentBlocks);
     
     for (var i = 0; i < contentBlocks.length; i++) {
