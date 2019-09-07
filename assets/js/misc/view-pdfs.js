@@ -1,7 +1,7 @@
 /**
  * Submitted Publications' Page: Manage submitted publication pdfs. [Admin+]
  */
-import { exitModal, showSaveModal } from '../db/intro.js';
+import { exitModal, showSaveModal } from '../misc/intro-core.js';
 
 if (window.location.pathname.includes('pdfs')) {
     addPdfEvents();
@@ -31,15 +31,22 @@ function reloadPage() {
 function ajaxError(jqXHR, textStatus, errorThrown) {
     console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
 }
-function handleOpenPdf() {                                                      //console.log('preview pdf');
-    $("#b-overlay-popup").html(getPdfPreviewHtml($(this).data('filename')));
+function handleOpenPdf() {                                                      
+    $("#b-overlay-popup").html(getPdfPreviewHtml($(this).attr('data-filename')));
     $("#b-overlay-popup").addClass("pdf-popup");
     bindEscEvents();
     $('#b-overlay, #b-overlay-popup').fadeIn(500);
 }
-function getPdfPreviewHtml(filename) {
-    const src = "../../../web/uploads/publications/"+filename;
-    return '<object data='+src+' width="100%" height="100%"></object>';
+/**
+ * Clones hidden pdf object element and returns. 
+ * Note: Couldn't figure out how to get webpack to work with files users upload
+ * on the server, so using twig to create the elems, rather than dynamically 
+ * building them here. There is probably a better way to do this. 
+ */
+function getPdfPreviewHtml(id) {  
+    const $pdf = $('#'+id).clone();
+    $pdf.css('display', 'inherit');  
+    return $pdf[0];
 }
 function bindEscEvents() {
     $(document).on('keyup',function(evt) {

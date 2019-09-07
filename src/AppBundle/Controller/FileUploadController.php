@@ -66,16 +66,11 @@ class FileUploadController extends Controller
                     $this->getParameter('publication_file_dir'),
                     $newFilename
                 );
-            } catch (FileException $e) {
-                $data = [
-                    'type' => 'validation_error',
-                    'title' => 'There was an error uploading the PDF. If this persists, please <a href="mailto:info@batplant.com">Email Us</a>.',
-                    'errors' => $e->getMessage()
-                ];
+            } catch (FileException $e) { 
                 return $this->render('Uploads/submit_file.html.twig', [
                     'form' => $form->createView(),
-                    'success' => 'error',
-                    'error' => $data
+                    'success' => false,
+                    'error' => $e->getMessage()
                 ]);
             }
             // stores the PDF file name instead of its contents
@@ -92,11 +87,13 @@ class FileUploadController extends Controller
             return $this->render('Uploads/submit_file.html.twig', [
                 'form' => $form->createView(),
                 'success' => true,
+                'error' =>  false
             ]);
         }
         return $this->render('Uploads/submit_file.html.twig', [
             'form' => $form->createView(),
-            'success' => null
+            'success' => null,
+            'error' => null
         ]);
     }
 

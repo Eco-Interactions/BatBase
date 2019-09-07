@@ -48,9 +48,8 @@
 composer.lock
 
 # Local Files
-/assets/hide/*
+/web/uploads/publications/*
 *.sublime-project
 *.sublime-workspace
 *.DS_Store
 .DS_Store
-/web/uploads/publications/*

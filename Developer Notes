@@ -13,10 +13,10 @@ Run Tests:
     - Functional Tests (Behat/Mink):
         all tests: ./vendor/bin/behat 
         single feature: ./vendor/bin/behat features/[FeatureName].feature
-    - Unit Tests:
-        $phpunit = ./vendor/bin/simple-phpunit
-        [$phpunit] -c app/ tests   
-        [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
+    # - Unit Tests:
+    #     $phpunit = ./vendor/bin/simple-phpunit
+    #     [$phpunit] -c app/ tests   
+    #     [$phpunit] -c app/ tests/AppBundle/Controller/<Entity>ControllerTest.php   
 ##Automatically ran at the start of tests:
 ##  (generate fixtures as needed: php bin/console generate:fixtures)
 ##  php bin/console doctrine:database:drop --force --env=test 

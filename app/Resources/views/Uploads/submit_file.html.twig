@@ -12,12 +12,16 @@
                     from over 375 citations, and we are adding more every day. You can contribute
                     to this effort by submitting publications to be entered into the database.
                 </h4>
-                {% if success %}
-                    <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
-                {% elseif success == 'error' %}
+                {% if error %}
                     <p style="color: red; font-weight: 600;">There was an error while uploading. If 
                         this problem persists, please send us an email at info@batplant.org 
-                        or "Leave Feedback" on this page.</p>
+                        or "Leave Feedback" on this page.
+                    </p>
+                    {% if app.environment == 'dev' %}
+                        <p style="color: red;">{{ error }}</p>
+                    {% endif %}
+                {% elseif success %}
+                    <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
                 {% endif %}
 
 

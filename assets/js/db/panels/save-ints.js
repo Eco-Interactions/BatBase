@@ -18,7 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../db-table/db-filters.js';
-import { showHelpModal } from '../intro.js';
+import { showHelpModal } from '../../misc/intro-core.js';
 
 /**
  * list - List open in panel

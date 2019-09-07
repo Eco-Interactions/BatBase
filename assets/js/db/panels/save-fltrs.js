@@ -18,7 +18,7 @@ import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
-import { exitModal, showHelpModal, showSaveModal } from '../intro.js';
+import { exitModal, showHelpModal, showSaveModal } from '../../misc/intro-core.js';
 
 /**
  * fltr - List open in panel
