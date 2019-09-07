@@ -16,21 +16,14 @@ After next server update:
                 to indicate that someone has "checked out" a submission?
             - process to keep submissions synced with the "publications to be added" doc?
 
-Email to Kelly:
-    - Sorry. I was talking from a perspective of having made changes that I hadn't 
-    ever put on the live site. That must have confused several things. 
-
 Current:
+    - tutorial broke at column defs
     - Force forms to stay at the width needed for field alignment.
-    - Bugs
-        - table doesn't reset when taxon text filter is cleared (With no other filters selected)
-        - bug with downloding data first time. 
-            Have to refresh sometimes before it will actually send the ajax call
-            - downloading user specific data loading message showing when user hasn't changed, eg by default
-        - Fix taxon forms
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Make site mobile-friendly
+        - testing mobile versions
+            - https://github.com/suncat2000/MobileDetectBundle/issues/76
     - Add to dev notes: workaround with webpack and asset building
     - save dev version of live site for logs at some new subdomain
         - to be used for testing to check if new bugs existed in last update
