@@ -9,7 +9,7 @@ greens-pallete:
     lightest:   #a2dadd
 */
 /*--- Base Styles ---*/
-a:link {
+/*a:link {
     color: #1b3b1b;
     text-decoration: underline;
 }
@@ -20,7 +20,7 @@ a:hover {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 a:active {
-}
+}*//*
 button {
     border: 1px solid;
     border-radius: 2px;
@@ -60,9 +60,9 @@ form button {
     margin: 0 .3em 0 .2em !important;
     background: linear-gradient(#fff, #d3d3d3) !important;
     border-radius: 4px !important;
-}
+}*/
 /*--------------- Util Styles ----------------------------------*/
-.top-em-mrg {
+./*top-em-mrg {
     margin-top: 1em;
 }
 .bot-em-mrg {
@@ -85,22 +85,7 @@ form button {
 }
 .waiting {
     cursor: wait;
-}
-/*-------- Flex ----------*/
-.flex-wrap {
-    flex-wrap: wrap;
-}
-.flex-grow {
-    flex-grow: 1;
-}
-.flex-row {
-    display: flex;
-    flex-direction: row;
-}
-.flex-col {
-    display: flex;
-    flex-direction: column; 
-}
+}*/
 /*----------------------------- Intro.js -------------------------------------*/
 .intro-tips {
     width: 420px;
@@ -122,7 +107,7 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     font-weight: 600;
 }
 /*-------------------------- Main Layout -------------------------------------*/
-#pg-container {
+/*#pg-container {
     max-width: 1500px;
     position: relative;
     margin: 0 auto;
@@ -134,9 +119,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
     position: absolute;
     width: 100%;
     top: 495px;
-}
+}*/
 /*-------------- Image Slider -------------*/
-#slider-overlay {
+/*#slider-overlay {
     position: absolute;
     top: 80px;
     left: 60px;
@@ -170,9 +155,9 @@ a[role="button"], .tos-bttn, .exit-bttn, .tbl-edit {
   height: 423px;
   transition: all 3s ease-in-out;
   opacity: 0;
-}
+}*/
 /* ========== PAGE CONTENT STYLES ============= */
-.two-col-outer, .three-col-outer, .four-col-outer {
+/*.two-col-outer, .three-col-outer, .four-col-outer {
     margin-top: 10px;
     display: flex;
     justify-content: center;
@@ -196,7 +181,8 @@ span.lbl {
     flex-grow: 8;
     font-size: 1.1em;
     padding-right: 2em;
-}#error_content {
+}
+#error_content {
     text-align: center;
 }
 #error_content h1 {
@@ -239,7 +225,7 @@ span.lbl {
     padding: 1em 0 3em 0;
     border-top:1px solid #000;
     justify-content: space-between;
-}
+}*/
 /*----------- wysiwyg editor ------------------*/
 .wysiwyg {
     position: relative;

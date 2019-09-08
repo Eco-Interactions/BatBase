@@ -27,6 +27,8 @@ Current:
     - Add to dev notes: workaround with webpack and asset building
     - save dev version of live site for logs at some new subdomain
         - to be used for testing to check if new bugs existed in last update
+    - testing
+        - test error pages load without masthead elem in twig
 
 Next:
     - update tests 

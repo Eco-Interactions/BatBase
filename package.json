@@ -5,6 +5,8 @@
     "@symfony/webpack-encore": "^0.28.0",
     "babel-loader": "^8.0.6",
     "file-loader": "^4.2.0",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2",
     "webpack-notifier": "^1.8.0"
   },
   "license": "MIT",

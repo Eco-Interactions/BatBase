@@ -9,7 +9,8 @@ clearFieldForPdfSubmissions();
 
 /* ------------ Styles and Scripts ------------------*/
 function requireCss() {
-    require('../../css/ei-reset.css');   
+    require('../../styles/ei-reset.styl');   
+    require('../../styles/oi.styl');    
     require('../../css/oi.css');    
     require('../../css/lib/introjs.min.css');  
     adjustLogoToScreenSizeAndBrowser();

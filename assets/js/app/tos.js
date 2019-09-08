@@ -22,7 +22,7 @@ function showTos() {
 }
 function addCloseButton() {
     $("#b-overlay-popup").append(`
-        <button id="close-tos-bttn" class="bei-bttn">Close</button>`);
+        <button id="close-tos-bttn" class="tos-bttn">Close</button>`);
     $('#close-tos-bttn').click(closeTosWindow)
 }
 function showTosWindow() {  console.log("showTosWindow called")

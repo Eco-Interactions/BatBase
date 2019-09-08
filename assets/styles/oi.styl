@@ -1,0 +1,210 @@
+/*
+ * Main style sheet for batplant.org
+ */
+/* ==================== VARIABLES ========================== */
+--container-width = 0
+--img-hdr-height = 0
+
+/* greens-pallete */
+--darkest-g = #1b3b1b
+--darker-g = #245A37
+--dark-g = #2D7853
+--med-g = #36976F
+--light-g = #3fb58b
+--lighter-g = #77cab8
+--lightest-g = #a2dadd
+
+/* ==================== ROOT ELEM STYLES ========================== */
+// Include paddings inside width for everything
+*
+    box-sizing border-box
+a:link 
+    color: --dark-g
+    text-decoration: underline
+    
+a:visited 
+    color: --dark-g
+    
+a:hover 
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2)
+    
+button 
+    border: 1px solid     
+    border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
+    border-radius: 4px
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+    // font-size: 15px
+    color: #222
+    margin: 0 .3em 0 .2em
+    line-height: 1.4;
+    background: linear-gradient(#fff, #d3d3d3)
+    
+form input, form select, form textarea 
+    font-size: 1em
+    padding: .2em
+    margin: .5em .5em .5em 0
+    
+form textarea 
+    // vertical-align: top
+
+form label
+    // vertical-align: text-top
+    margin-right: .5em
+
+input[type='button']
+    @extend button
+
+input[type='submit']
+    @extend button
+    
+label.required:before 
+    content: "*"
+
+span.lbl
+    font-weight: bold
+/* ==================== UTILITY STYLES ========================== */
+.top-em-mrg 
+    margin-top: 1em
+
+.bot-em-mrg
+    margin-bottom: 1em
+    
+.em-mrg
+    margin: 1em
+
+.hiddenElem 
+    display: none
+
+.invis
+    visibility: hidden
+
+.waiting 
+    cursor: wait
+/*-------- Flex ----------*/
+.flex-wrap 
+    flex-wrap: wrap
+
+.flex-row 
+    display: flex
+    flex-direction: row
+
+.flex-col 
+    display: flex
+    flex-direction: column
+/* ==================== MAIN LAYOUT ========================== */
+#pg-container
+    max-width: 1500px       /* RESPONSIVE */
+    position: relative
+    margin: 0 auto
+    
+#content-detail
+    position: absolute
+    width: 100%
+    top: 495px            /* RESPONSIVE */
+
+/* --------- PAGE CONTENT ----------------- */
+.two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
+    margin-top: 10px /* RESPONSIVE */
+    display: flex
+    justify-content: center
+    // flex-direction: row
+
+.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col
+    border-right: 1px solid #cccccc
+    margin-right: 2em  /* RESPONSIVE */
+    padding: 0 1.25em 0 0  /* RESPONSIVE */
+
+.inln-flds 
+    padding: 15px 0 10px 0  /* RESPONSIVE */
+
+.inln-flds span 
+    padding: 0 5px 0 55px  /* RESPONSIVE */
+
+.main-col 
+    flex-grow: 8  /* RESPONSIVE */
+    font-size: 1.1em  /* RESPONSIVE */
+    padding-right: 2em  /* RESPONSIVE */
+
+#detail-block 
+    margin: 1em .5em 2em 1em  /* RESPONSIVE */
+
+#detail-block h4 
+    margin-top: 15px  /* RESPONSIVE */
+
+#detail-block h5 
+    margin-bottom: 5px  /* RESPONSIVE */
+
+.top-pgs h3 
+    font-size: 1.2em
+    margin: .75em 0 .5em 0  /* RESPONSIVE */
+
+.top-pgs p, #terms-div p  /* RESPONSIVE */     
+    margin: .2em 0 0 1em
+    padding: .3em 0 .3em 0
+    font-size: 1.05em
+
+.top-pgs ul li, .top-pgs ol li /* RESPONSIVE */
+    margin: .2em 0 0 1.8em
+    padding: .3em 0 .3em 0
+    font-size: 1.05em
+
+.top-pgs .second-col 
+    margin: 0 20px 0 5px   /* RESPONSIVE */
+
+#footer 
+    font-size: 1em
+    width:100%
+    padding: 1em 0 3em 0
+    border-top:1px solid #000
+    justify-content: space-between
+
+
+/*-------------- IMAGE SLIDER -------------*/
+#slider-overlay 
+    position: absolute
+    top: 80px    /* RESPONSIVE */
+    left: 60px   /* RESPONSIVE */
+    z-index: 500
+
+#side-logo 
+    position: relative
+    left: 65px   /* RESPONSIVE */
+    padding-bottom: 20px   /* RESPONSIVE */
+    width: 375px   /* RESPONSIVE */
+
+
+#chrome-opt-msg /* Shown on all browsers except chrome */
+    position: relative
+    color: silver
+    width: 633px   /* RESPONSIVE */
+    top: -66px  /* RESPONSIVE */
+    left: -44px  /* RESPONSIVE */
+
+#img-slider 
+  width: 100%
+  height: 422px   /* RESPONSIVE */
+
+.slide 
+  position: absolute
+  z-index: 1
+  width: 100%
+  height: 423px  /* RESPONSIVE */
+  transition: all 3s ease-in-out
+  opacity: 0
+
+
+
+
+#error_logo /* Logo used on error and 404 pages */
+    width: 50%   /* RESPONSIVE */
+    margin: 2% auto 0 auto
+
+
+
+.dt-bttn //data-tables
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    padding: 2px 3px 1px 3px !important;
+
+.tos-bttn
+    margin: 0 .3em 0 .2em !important;

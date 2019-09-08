@@ -37,6 +37,7 @@ Encore
     // such as '_' for the 'underscore' library
     .autoProvideVariables(autoProvidedVars)  
     /** ------- Loaders ----------------- */
+    .enableStylusLoader()
     // .configureLoaderRule('images', loaderRule => {
     //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
     //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };

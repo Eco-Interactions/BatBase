@@ -22,7 +22,7 @@ function addEditContentButton() {
     });  //console.log("button = %O", button)
     button.css({
         position: "absolute",
-        top: "8px",         // We were using px for the 'batplant.org' just above this button...  
+        top: "4px",         // We were using px for the 'batplant.org' just above this button...  
         right: "10px"       // in the interest of visual consistency, I am using px to style this as well.
     });
     $('#hdrtext').append(button);
