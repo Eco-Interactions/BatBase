@@ -65,7 +65,7 @@ function initStickyHeader() {
  * Initiates tables and rearranges realted UI. Used on the feedback, pdf submission, and bilio pages.
  */ 
 function initDataTable() { 
-    const tableName = $('#pg-container').data("has-tbl"); 
+    const tableName = $('#pg-container').data("dt"); 
     if (tableName === false) { return; } 
     require('../misc/oi-tables.js').init(tableName);  
 } 

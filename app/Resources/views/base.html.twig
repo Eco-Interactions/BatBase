@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<!--  SET eifusername & eifrole  -->
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    <!-- {% set eifisuser = true %} -->
     {% set eifusername = app.user.username %}
     {% if is_granted('ROLE_SUPER_ADMIN') %}
         {% set eifrole = 'super' %}
@@ -16,17 +15,16 @@
         {% set eifrole = 'visitor' %}
     {% endif %}
 {% else %}
-<!--    {% set eifisuser = false %} -->
     {% set eifusername = '' %}
     {% set eifrole = 'visitor' %}
 {% endif %}
-
+<!--  SET targeturl  -->
 {% if is_granted("ROLE_USER") %}
     {% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% else %}
     {% set targeturl = "false" %}
 {% endif %}
-
+<!--  SET menu  -->
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
 <html {% block pagedata %}{% endblock %}>
@@ -47,61 +45,20 @@
         <!-- Javascript at end of body. -->
     </head>
 
-    <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}" data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" data-user-name="{{ eifusername }}">
-    {% block body %}
-        <div id="pg-container" data-has-tbl="{% block datatable %}false{% endblock datatable %}">
-            {% block masthead %}
-             <div id="slider-overlay">
-                <img src="{{ asset('build/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org">
+    <body data-env="{{ app.environment }}" data-ajax-target-url="{{ targeturl }}"
+        data-this-url="{{ app.request.pathinfo }}" data-user-role="{{ eifrole }}" 
+        data-user-name="{{ eifusername }}">
+        {% block body %}
+            <div id="pg-container" data-dt="{% block datatable %}false{% endblock %}">
+                {% block masthead %}{% endblock %}
+                {% block menu %}{% endblock %}
+                {% block pagecontent %}{% endblock %}
             </div>
-            <div id="img-slider">
-                <div class="slide" style="opacity: 1;">
-                    <img src="{{ asset('build/images/cactusbat.jpg') }}">
-                </div>
-                <div class="slide">
-                    <img src="{{ asset('build/images/twobats.jpg') }}">
-                </div>
-                <div class="slide">
-                    <img src="{{ asset('build/images/inflower.jpg') }}">
-                </div>
-            </div>
-            {% endblock %}
-            <div id="sticky-hdr">
-                <div id="hdrmenu">
-                    {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
-                    <div id="menu-bar-title">batplant.org</div>
-                </div>
-                <div id="hdrtext" class="flex-row" style="justify-content: space-between;">
-                    <div id="headln-txt">
-                        {% block headline %}{% endblock %}
-                    </div>
-                    <div id="hdr-right">{% block headerright %}{% endblock %}</div>
-                </div>
-            </div>
-            <div id="{% block pageid %}content-detail{% endblock pageid %}">
-                <div id="detail-block">{% block detail %}{% endblock %}</div>
-                <div id="footer" class="flex-row">
-                    {% block footer %}
-                        <span>Site and Data Copyright 2015 batplant.org -
-                            Bat photos Copyright: Merlin D. Tuttle/Bat Conservation International
-                            <a href="http://www.batcon.org/">www.batcon.org</a>
-                        </span>
-                        <span>
-                            <a id="footer-tos" href="Javascript:void(0)">
-                                batplant.org Terms of Use</a>
-                        </span>
-                    {% endblock %}
-                </div>
-            </div>
-        </div>
-        <div id="b-overlay" class="flex-col">
-            <div id="b-overlay-popup"></div>
-        </div>
-        {# <div id="b-popup"></div> #}
-    {% endblock body %}
+            {% block modal %}{% endblock %}
+        {% endblock %}
 
-    {% block javascripts %}
-        {{ encore_entry_script_tags('app') }} 
-    {% endblock javascripts %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }} 
+        {% endblock javascripts %}  
     </body>
 </html>

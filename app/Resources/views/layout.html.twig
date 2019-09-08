@@ -1,1 +1,57 @@
 {% extends '::base.html.twig' %}
+
+{% block masthead %}
+    <div id="slider-overlay">
+        <img src="{{ asset('build/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org">
+    </div>
+    <div id="img-slider">
+        <div class="slide" style="opacity: 1;">
+            <img src="{{ asset('build/images/cactusbat.jpg') }}">
+        </div>
+        <div class="slide">
+            <img src="{{ asset('build/images/twobats.jpg') }}">
+        </div>
+        <div class="slide">
+            <img src="{{ asset('build/images/inflower.jpg') }}">
+        </div>
+    </div>
+{% endblock %}
+
+{% block menu %}
+    <div id="sticky-hdr">
+        <div id="hdrmenu">
+            {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
+            <div id="menu-bar-title">batplant.org</div>
+        </div>
+        <div id="hdrtext" class="flex-row" style="justify-content: space-between;">
+            <div id="headln-txt">
+                {% block headline %}{% endblock %}
+            </div>
+            <div id="hdr-right">{% block headerright %}{% endblock %}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block pagecontent %}
+    <div id="{% block pageid %}content-detail{% endblock pageid %}">
+        <div id="detail-block">{% block detail %}{% endblock %}</div>
+        {% block footer %}
+            <div id="footer" class="flex-row">
+                <span>Site and Data Copyright 2015 batplant.org -
+                    Bat photos Copyright: Merlin D. Tuttle/Bat Conservation International
+                    <a href="http://www.batcon.org/">www.batcon.org</a>
+                </span>
+                <span>
+                    <a id="footer-tos" href="Javascript:void(0)">
+                        batplant.org Terms of Use</a>
+                </span>
+            </div>
+        {% endblock %}
+    </div>
+{% endblock %}
+
+{% block modal %}
+    <div id="b-overlay" class="flex-col">
+        <div id="b-overlay-popup"></div>
+    </div>
+{% endblock %}
