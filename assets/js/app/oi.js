@@ -38,13 +38,22 @@ function initTos() {
     require('./tos.js').init();
 }
 function initImageSlider() {    
+    setSliderContainerStyles();
+    setSlideInterval();
+}
+/* Sets container height and then adds bottom border to the main menu */
+function setSliderContainerStyles() {
+    $('#img-slider').css('height', $('#img-slider img:nth-child(1)').outerHeight());
+    $('#hdrmenu, #pg-hdr').css('border-bottom', '1px solid Gray');
+}
+function setSlideInterval() {
     let curSlide = 1,
-        nxtSlide = 2;         
-  
-    window.setInterval(() => { 
-    $('#img-slider div:nth-child('+nxtSlide+')').css({opacity: 1}); 
+        nxtSlide = 2;       
+
+    window.setInterval(() => {
+    $('#img-slider img:nth-child('+nxtSlide+')').css({opacity: 1}); 
         window.setTimeout(() => {   
-            $('#img-slider div:nth-child('+curSlide+')').css({opacity: 0}); 
+            $('#img-slider img:nth-child('+curSlide+')').css({opacity: 0}); 
             curSlide = nxtSlide;
             nxtSlide = curSlide === 3 ? 1 : curSlide + 1;
         }, 1000)

@@ -1,31 +1,30 @@
 {% extends '::base.html.twig' %}
 
 {% block masthead %}
-    <div id="slider-overlay">
-        <img src="{{ asset('build/images/logo_vert_pale_txt.svg') }}" id="side-logo" alt="batplant.org">
-    </div>
-    <div id="img-slider">
-        <div class="slide" style="opacity: 1;">
-            <img src="{{ asset('build/images/cactusbat.jpg') }}">
+    {% if is_full_view() or is_tablet_view() %}
+        {% set img1 = is_full_view() ? 'cactusbat.jpg' : 'cactusbat_750w.jpg' %}
+        {% set img2 = is_full_view() ? 'twobats.jpg' : 'twobats_750w.jpg' %}
+        {% set img3 = is_full_view() ? 'inflower.jpg' : 'inflower_750w.jpg' %}
+        <div id="slider-logo"></div>
+        <div id="img-slider">
+            <img class="slide" style="opacity: 1;" src="{{ asset('build/images/'~img1) }}">
+            <img class="slide" src="{{ asset('build/images/'~img2) }}">
+            <img class="slide" src="{{ asset('build/images/'~img3) }}">
         </div>
-        <div class="slide">
-            <img src="{{ asset('build/images/twobats.jpg') }}">
-        </div>
-        <div class="slide">
-            <img src="{{ asset('build/images/inflower.jpg') }}">
-        </div>
-    </div>
+    {% else %}
+        <div id="mbl-hdr-img"></div>
+    {% endif %}
 {% endblock %}
 
 {% block menu %}
     <div id="sticky-hdr">
         <div id="hdrmenu">
-            {% if is_full_view() %}
+            {% if is_full_view() or is_tablet_view() %}
                 {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
             {% endif %}
             <div id="site-name">batplant.org</div>
         </div>
-        <div id="hdrtext" class="flex-row" style="justify-content: space-between;">
+        <div id="pg-hdr" class="flex-row" style="justify-content: space-between;">
             <div id="headln-txt">
                 {% block headline %}{% endblock %}
             </div>

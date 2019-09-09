@@ -28,6 +28,9 @@ a:visited
 a:hover 
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2)
     
+body
+    min-width 100vw
+    
 button 
     border: 1px solid     
     border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
@@ -100,31 +103,32 @@ span.lbl
     
 .flex-wrap 
     flex-wrap: wrap
-/* ==================== MAIN LAYOUT ========================== */
-.content-width
-    max-width: 100%       
+/* ==================== MAIN LAYOUT ========================== */            
+$content-width
+    max-width: 100vw       
     @media screen and (min-width: 1500px)
             max-width: 1500px       
     @media screen and (max-width: 1500px) and (min-width: 1330px)
             max-width: 1330px
             
 #pg-container
-    @extend .content-width
+    @extend $content-width
     position: relative
-    margin: 0 auto
+    margin: 0 auto    
 /*-------------- IMAGE SLIDER -------------*/
-#slider-overlay 
+#slider-logo 
+    content url('../images/logo_vert_pale_txt.svg')
     position: absolute
     top: 15%
     left: 5%
-    z-index: 500
-
-#side-logo 
-    position: relative
-    left: 65px   /* RESPONSIVE */
-    padding-bottom: 20px   /* RESPONSIVE */
-    width: 375px   /* RESPONSIVE */
-
+    z-index: 5
+    width 30vw
+    @media screen and (min-width: 700px)
+        width 26vw
+    @media screen and (min-width: 1000px)
+        width 24vw
+    @media screen and (min-width: 1300px)
+        width 20vw
 
 #chrome-opt-msg /* Shown on all browsers except chrome */
     position: relative
@@ -139,8 +143,9 @@ $slider-height
         height: 375px
     
 #img-slider 
-    width: 100%
-    height: $slider-height
+    @extend $content-width
+    max-width: 100vw;
+    overflow hidden
 
 .slide 
     position: absolute
@@ -148,59 +153,136 @@ $slider-height
     width: 100%
     transition: all 3s ease-in-out
     opacity: 0
-    height: $slider-height
-        
+    object-fit: cover
+    @extends $slider-height
+
 .active-slide
     z-index: 1
     opacity: 1
+
+#mbl-hdr-img
+    content url('../images/logo_vert_pale_txt.svg')
+    background-color Black
+    height 33vh
+    padding: 22px
+    width: 100vw
+/**--------------- Header Menu Styles -------------------*/
+#sticky-hdr
+    @extend $content-width
+
+#hdrmenu 
+    display: flex
+    justify-content: space-between
+    height: 43px
+    line-height: 43px
+    // border-bottom: 1px solid Gray
+    background-color: White
+    
+.top-sticky 
+    @extend $content-width
+    z-index: 1001 
+    position: fixed 
+    top: 0 
+    background-color: White
+    width: 100%
+
+#site-name 
+    text-align: center
+    font-size: 23px
+    color: DimGray
+    height: 43px
+    line-height: 43px
+    margin-right .5em
+/* -- PAGE HEADER BAR -- */
+#pg-hdr 
+    display: flex
+    position: relative
+    justify-content: space-between;
+    text-align: right;
+    font-size: 21px;
+    height: 43px;
+    padding: 9px 8px 0 12px;
+
+#hdr-right 
+    display: flex
+    justify-content: flex-start
+    background: White
+    
+#hdricopen {
+    width: 1em;
+    height: auto;
+    z-index: 0;
+    margin: 0 1em 0 .5em;
+    position: relative;
+    top: .1em;
+}
+#hdrmenu ul li {
+    position:relative;
+    display:inline-block;
+    margin:0;
+    padding: 0;
+}
+#hdrmenu ul li.current-menu-item {
+    background:#ddd;
+}
 /* --------- PAGE CONTENT ----------------- */
-.two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
-    margin-top: 10px /* RESPONSIVE */
-    // display: flex
-    justify-content: center
-    // flex-direction: row
+--static-hdr-height = calc(39vh + 86px)
+#content-detail
+    position: absolute
+    max-width: 100%
+    top: --static-hdr-height
+    @media screen and (min-width: 1330px)
+        top: 461px
+    @media screen and (max-width: 666px)
+        top: calc(33vh + 86px)
+    
+// .two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
+//     margin-top: 10px /* RESPONSIVE */
+//     // display: flex
+//     justify-content: center
+//     // flex-direction: row
 
-.first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col
-    border-right: 1px solid #cccccc
-    margin-right: 2em  /* RESPONSIVE */
-    padding: 0 1.25em 0 0  /* RESPONSIVE */
+// .first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col
+//     border-right: 1px solid #cccccc
+//     margin-right: 2em  /* RESPONSIVE */
+//     padding: 0 1.25em 0 0  /* RESPONSIVE */
 
-.inln-flds 
-    padding: 15px 0 10px 0  /* RESPONSIVE */
+// .inln-flds 
+//     padding: 15px 0 10px 0  /* RESPONSIVE */
 
-.inln-flds span 
-    padding: 0 5px 0 55px  /* RESPONSIVE */
+// .inln-flds span 
+//     padding: 0 5px 0 55px  /* RESPONSIVE */
 
-.main-col 
-    flex-grow: 8  /* RESPONSIVE */
-    font-size: 1.1em  /* RESPONSIVE */
-    padding-right: 2em  /* RESPONSIVE */
+// .main-col 
+//     flex-grow: 8  /* RESPONSIVE */
+//     font-size: 1.1em  /* RESPONSIVE */
+//     padding-right: 2em  /* RESPONSIVE */
 
-#detail-block 
-    margin: 1em .5em 2em 1em  /* RESPONSIVE */
+// #detail-block 
+//     margin: 1em .5em 2em 1em  /* RESPONSIVE */
 
-#detail-block h4 
-    margin-top: 15px  /* RESPONSIVE */
+// #detail-block h4 
+//     margin-top: 15px  /* RESPONSIVE */
 
-#detail-block h5 
-    margin-bottom: 5px  /* RESPONSIVE */
+// #detail-block h5 
+//     margin-bottom: 5px   RESPONSIVE 
 
-.top-pgs h3 
-    font-size: 1.2em
-    margin: .75em 0 .5em 0  /* RESPONSIVE */
+// .top-pgs h3 
+//     font-size: 1.2em
+//     margin: .75em 0 .5em 0  /* RESPONSIVE */
 
-.top-pgs p, #terms-div p  /* RESPONSIVE */     
-    margin: .2em 0 0 1em
-    padding: .3em 0 .3em 0
-    font-size: 1.05em
+// .top-pgs p, #terms-div p  /* RESPONSIVE */     
+//     margin: .2em 0 0 1em
+//     padding: .3em 0 .3em 0
+//     font-size: 1.05em
 
-.top-pgs ul li, .top-pgs ol li /* RESPONSIVE */
-    margin: .2em 0 0 1.8em
-    padding: .3em 0 .3em 0
-    font-size: 1.05em
+// .top-pgs ul li, .top-pgs ol li /* RESPONSIVE */
+//     margin: .2em 0 0 1.8em
+//     padding: .3em 0 .3em 0
+//     font-size: 1.05em
 
-.top-pgs .second-col 
-    margin: 0 20px 0 5px   /* RESPONSIVE */
+// .top-pgs .second-col 
+//     margin: 0 20px 0 5px   /* RESPONSIVE */
 
 #footer 
     font-size: 1em
