@@ -20,8 +20,10 @@
 {% block menu %}
     <div id="sticky-hdr">
         <div id="hdrmenu">
-            {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
-            <div id="menu-bar-title">batplant.org</div>
+            {% if is_full_view() %}
+                {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
+            {% endif %}
+            <div id="site-name">batplant.org</div>
         </div>
         <div id="hdrtext" class="flex-row" style="justify-content: space-between;">
             <div id="headln-txt">

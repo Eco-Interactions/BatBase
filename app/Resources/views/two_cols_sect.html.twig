@@ -1,8 +1,14 @@
-<div class="two-col-outer">
-	<div class="first-col">
+{% if is_mobile_view() or is_tablet_view() %}
+    {% set layoutclass = 'flex-col' %}
+{% else %}
+    {% set layoutclass = 'flex-row' %}
+{% endif %}
+
+<div class="two-col-outer {{ layoutclass }}">
+	<div class="first-col flex-col">
 		{% block firstcol %}{% endblock %}
 	</div>
-	<div class="second-col">
+	<div class="second-col flex-col">
 		{% block secondcol %}{% endblock %}
 	</div>
 </div>

@@ -80,10 +80,16 @@ span.lbl
 
 .waiting 
     cursor: wait
+/*--- List Styles ---*/
+.disc-list>li 
+    list-style: disc
+    display: list-item
+    padding-left: 2em
+    
+.circle-list>li 
+    list-style: circle
+    display: list-item
 /*-------- Flex ----------*/
-.flex-wrap 
-    flex-wrap: wrap
-
 .flex-row 
     display: flex
     flex-direction: row
@@ -91,21 +97,66 @@ span.lbl
 .flex-col 
     display: flex
     flex-direction: column
+    
+.flex-wrap 
+    flex-wrap: wrap
 /* ==================== MAIN LAYOUT ========================== */
+.content-width
+    max-width: 100%       
+    @media screen and (min-width: 1500px)
+            max-width: 1500px       
+    @media screen and (max-width: 1500px) and (min-width: 1330px)
+            max-width: 1330px
+            
 #pg-container
-    max-width: 1500px       /* RESPONSIVE */
+    @extend .content-width
     position: relative
     margin: 0 auto
-    
-#content-detail
+/*-------------- IMAGE SLIDER -------------*/
+#slider-overlay 
     position: absolute
-    width: 100%
-    top: 495px            /* RESPONSIVE */
+    top: 15%
+    left: 5%
+    z-index: 500
 
+#side-logo 
+    position: relative
+    left: 65px   /* RESPONSIVE */
+    padding-bottom: 20px   /* RESPONSIVE */
+    width: 375px   /* RESPONSIVE */
+
+
+#chrome-opt-msg /* Shown on all browsers except chrome */
+    position: relative
+    color: silver
+    width: 633px   /* RESPONSIVE */
+    top: -66px  /* RESPONSIVE */
+    left: -44px  /* RESPONSIVE */
+
+$slider-height
+    height: 39vh
+    @media screen and (min-width: 1330px)
+        height: 375px
+    
+#img-slider 
+    width: 100%
+    height: $slider-height
+
+.slide 
+    position: absolute
+    z-index: 0
+    width: 100%
+    transition: all 3s ease-in-out
+    opacity: 0
+    height: $slider-height
+        
+.active-slide
+    z-index: 1
+    opacity: 1
 /* --------- PAGE CONTENT ----------------- */
 .two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
     margin-top: 10px /* RESPONSIVE */
-    display: flex
+    // display: flex
     justify-content: center
     // flex-direction: row
 
@@ -159,39 +210,6 @@ span.lbl
     justify-content: space-between
 
 
-/*-------------- IMAGE SLIDER -------------*/
-#slider-overlay 
-    position: absolute
-    top: 80px    /* RESPONSIVE */
-    left: 60px   /* RESPONSIVE */
-    z-index: 500
-
-#side-logo 
-    position: relative
-    left: 65px   /* RESPONSIVE */
-    padding-bottom: 20px   /* RESPONSIVE */
-    width: 375px   /* RESPONSIVE */
-
-
-#chrome-opt-msg /* Shown on all browsers except chrome */
-    position: relative
-    color: silver
-    width: 633px   /* RESPONSIVE */
-    top: -66px  /* RESPONSIVE */
-    left: -44px  /* RESPONSIVE */
-
-#img-slider 
-  width: 100%
-  height: 422px   /* RESPONSIVE */
-
-.slide 
-  position: absolute
-  z-index: 1
-  width: 100%
-  height: 423px  /* RESPONSIVE */
-  transition: all 3s ease-in-out
-  opacity: 0
-
 
 
 
@@ -201,6 +219,11 @@ span.lbl
 
 
 
+#tbl-ctrl-div  // data-tables button container
+    position: absolute
+    top: -1000px
+    right: -1000px
+    
 .dt-bttn //data-tables
     font-size: 14px !important;
     line-height: 1.4 !important;
@@ -208,3 +231,66 @@ span.lbl
 
 .tos-bttn
     margin: 0 .3em 0 .2em !important;
+
+
+
+/* -- MENU -- */
+#oimenu
+    // width: 1000px
+    // padding: 0
+    // margin: 0
+
+#oimenu a 
+    color: Black
+    display: inline-block
+    text-align: center
+    text-decoration: none
+    font-weight: 700
+    font-size: 23px
+    line-height: 32px
+    padding: .2em 1em .2em .5em
+
+.arrow > a:after 
+  content: " \25BC"
+  font-size: .5em
+  display: block
+  position: absolute
+  top: .5em
+  right: .7em
+
+#oimenu li:hover 
+    background: LightGrey;
+
+#oimenu ul {
+    display:none;
+    z-index: 1000;
+    position:absolute;
+    top:100%;
+    left:0;
+    background: WhiteSmoke;
+    padding: 0;
+    box-shadow: 10px 10px 23px #888888;
+}
+#oimenu ul li {
+    width: 250px;
+}
+#oimenu ul a {
+    line-height:120%;
+    padding:10px 15px;
+}
+#oimenu ul ul {
+    top:0;
+    left:100%;
+}
+#oimenu .smtrigger > ul {
+    display:none;
+}
+#oimenu .smtrigger:hover > ul {
+    display:block;
+}
+.admin-menu {
+    background: rgba(26, 128, 230, .3);
+}
+.super-admin-menu {
+    background: rgba(54, 151, 111, .3);
+}

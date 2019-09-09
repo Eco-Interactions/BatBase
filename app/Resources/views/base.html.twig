@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--  SET eifusername & eifrole  -->
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
     {% set eifusername = app.user.username %}
     {% if is_granted('ROLE_SUPER_ADMIN') %}
@@ -18,13 +17,11 @@
     {% set eifusername = '' %}
     {% set eifrole = 'visitor' %}
 {% endif %}
-<!--  SET targeturl  -->
 {% if is_granted("ROLE_USER") %}
     {% set targeturl = app.request.getSchemeAndHttpHost() ~ path('app_home') %}
 {% else %}
     {% set targeturl = "false" %}
 {% endif %}
-<!--  SET menu  -->
 {% set menu = knp_menu_get('AppBundle:Builder:mainMenu', [], {'usrrole': eifrole, 'usrname': eifusername }) %}
 
 <html {% block pagedata %}{% endblock %}>

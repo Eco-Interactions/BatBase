@@ -1,14 +1,13 @@
 /* ============================== MAIN JS =================================== */
-requireCss();
+requireStyles();
 requireGlobalJquery();
 initUi();
 authDependantInit();  
 ifNotChromeShowOptimizedMsg();
 clearFieldForPdfSubmissions();
-// registerServiceWorker();
 
 /* ------------ Styles and Scripts ------------------*/
-function requireCss() {
+function requireStyles() {
     require('../../styles/ei-reset.styl');   
     require('../../styles/oi.styl');    
     require('../../css/oi.css');    
@@ -16,7 +15,7 @@ function requireCss() {
     adjustLogoToScreenSizeAndBrowser();
 }
 /** Sets logo width for windows with less than 1500px widths or in firefox browsers. */
-function adjustLogoToScreenSizeAndBrowser() {
+function adjustLogoToScreenSizeAndBrowser() {  /* TODO RESPONSIVE */
     if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {  
         const width = $(window).width() > 1500 ? '325px' : '275px';
         $('#side-logo').css('width', width);
@@ -53,8 +52,9 @@ function initImageSlider() {
 }
 function initStickyHeader() {
     const $stickyMenu = $('#sticky-hdr');
+    const staticHdrHeight = $('#img-slider').outerHeight();
     $(window).scroll(function () {
-        if ($(window).scrollTop() > 423) {
+        if ($(window).scrollTop() > staticHdrHeight) {
                 $stickyMenu.addClass("top-sticky");
             } else {
                 $stickyMenu.removeClass("top-sticky");
@@ -117,15 +117,3 @@ function addMsgAboutChromeOptimization() {
         feedback to let us know.`;
     $('#slider-overlay').prepend(div);
 }
-// function registerServiceWorker() { //console.log('env = ', $)
-//      if ('serviceWorker' in navigator) {
-//         window.addEventListener('load', () => {
-//             navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
-//                 .then(registration => {
-//                     console.log('SW registered: ', registration);
-//                 }).catch(registrationError => {
-//                     console.log('SW registration failed: ', registrationError);
-//                 });
-//         });
-//     }
-// }
