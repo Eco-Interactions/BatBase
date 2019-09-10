@@ -3,8 +3,9 @@ requireStyles();
 requireGlobalJquery();
 initUi();
 authDependantInit();  
-ifNotChromeShowOptimizedMsg();
 clearFieldForPdfSubmissions();
+
+let timeout;
 
 /* ------------ Styles and Scripts ------------------*/
 function requireStyles() {
@@ -12,16 +13,6 @@ function requireStyles() {
     require('../../styles/oi.styl');    
     require('../../css/oi.css');    
     require('../../css/lib/introjs.min.css');  
-    adjustLogoToScreenSizeAndBrowser();
-}
-/** Sets logo width for windows with less than 1500px widths or in firefox browsers. */
-function adjustLogoToScreenSizeAndBrowser() {  /* TODO RESPONSIVE */
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {  
-        const width = $(window).width() > 1500 ? '325px' : '275px';
-        $('#side-logo').css('width', width);
-    } else if ($(window).width() < 1500) { 
-        $('#side-logo').css('width', '275px');
-    } 
 }
 function requireGlobalJquery() { 
     global.$ = $;
@@ -29,10 +20,12 @@ function requireGlobalJquery() {
 }
 /* ---------------------------- UI ------------------------------------------ */
 function initUi() {
+    addWindowResizeEvent();
     initTos();
-    initImageSlider();
     initStickyHeader();
     initDataTable();
+    ifNotChromeShowOptimizedMsg();
+    initImageSlider();
 }
 function initTos() {
     require('./tos.js').init();
@@ -43,8 +36,22 @@ function initImageSlider() {
 }
 /* Sets container height and then adds bottom border to the main menu */
 function setSliderContainerStyles() {
-    $('#img-slider').css('height', $('#img-slider img:nth-child(1)').outerHeight());
+    setSliderAndContentSize();
     $('#hdrmenu, #pg-hdr').css('border-bottom', '1px solid Gray');
+}
+/**
+ * Sets slider height based on absolute positioned child image. 
+ * On mobile, sets the content blocks' tops value (header logo plus menu height)
+ */
+function setSliderAndContentSize() { 
+    const imgHeight = $('#img-slider img:nth-child(1)').outerHeight();  
+    const cntnrHeight = $('#slider-overlay').outerHeight();
+    const logoHeight = $('#slider-logo').outerHeight();  
+    const contentHeight = (cntnrHeight || logoHeight) + 86;
+    $('#img-slider').css('height', imgHeight);
+    if (!imgHeight) { //mobile devices
+        $('#content-detail').css('top', contentHeight);
+    }
 }
 function setSlideInterval() {
     let curSlide = 1,
@@ -85,6 +92,16 @@ function clearFieldForPdfSubmissions() {
         $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
     }
 }
+function addWindowResizeEvent() {
+    window.addEventListener('resize', resetSliderHeight);
+}
+function resetSliderHeight() {
+    if (timeout) { return; }
+    timeout = window.setTimeout(() => {
+        setSliderAndContentSize();
+        timeout = false;
+    }, 2500);
+}
 /* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
@@ -102,7 +119,7 @@ function initFeedbackUi() {
     feedback.init();
 }
 function ifNotChromeShowOptimizedMsg() {
-    const isChrome = checkIfChrome();
+    const isChrome = checkIfChrome(); 
     if (isChrome) { return; }
     addMsgAboutChromeOptimization();
 }
@@ -120,10 +137,17 @@ function checkIfChrome() {
             isIEedge === false) ? true : false;
 }
 function addMsgAboutChromeOptimization() {
+    const msg = buildMsgHtml();
+    const logo = $('#slider-logo').detach();
+    $(logo).addClass('overlay');
+    $('#slider-overlay').css('padding', '2em');
+    $('#slider-overlay').prepend([msg, logo]);
+}
+function buildMsgHtml() {
     const div = document.createElement("div");
     div.id = 'chrome-opt-msg';
     div.innerHTML = `<b>This site is developed and tested with chrome.</b> If 
         you encounter issues with other browsers, please log in and leave 
         feedback to let us know.`;
-    $('#slider-overlay').prepend(div);
+    return div;
 }

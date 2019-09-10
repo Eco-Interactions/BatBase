@@ -10,9 +10,11 @@
             <img class="slide" style="opacity: 1;" src="{{ asset('build/images/'~img1) }}">
             <img class="slide" src="{{ asset('build/images/'~img2) }}">
             <img class="slide" src="{{ asset('build/images/'~img3) }}">
+            <div id="slider-overlay"></div>   {# Shows browser optimization msg. #}
         </div>
     {% else %}
-        <div id="mbl-hdr-img"></div>
+        <div id="slider-overlay"></div> {# Shows browser optimization msg. #}
+        <div id="slider-logo" class="mobile-hdr"></div>
     {% endif %}
 {% endblock %}
 
