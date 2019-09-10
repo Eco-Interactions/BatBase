@@ -1,10 +1,10 @@
-{% if is_mobile_view() or is_tablet_view() %}
+{% if is_mobile_view() %}
     {% set layoutclass = 'flex-col' %}
 {% else %}
     {% set layoutclass = 'flex-row' %}
 {% endif %}
 
-<div class="two-col-outer {{ layoutclass }}">
+<div class="two-col-cntnr flex-row flex-wrap">
 	<div class="first-col flex-col">
 		{% block firstcol %}{% endblock %}
 	</div>

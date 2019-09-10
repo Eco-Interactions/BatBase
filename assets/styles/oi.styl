@@ -53,7 +53,13 @@ form textarea
 form label
     // vertical-align: text-top
     margin-right: .5em
-
+    
+h2
+    font-size: 1.4em;
+    
+h3
+    font-size: 1.3em;
+    
 input[type='button']
     @extend button
 
@@ -230,12 +236,30 @@ $slider-height
 #content-detail
     position: absolute
     max-width: 100%
+    padding .5em
     top: --static-hdr-height
     @media screen and (min-width: 1330px)
+        margin-top 1em
         top: 461px
     @media screen and (max-width: 666px)
         top: calc(33vh + 86px)
-    
+
+.two-col-cntnr > div
+    flex: 1 1 420px;
+
+.top-pgs p 
+    margin 1em
+    font-size 1.15em
+
+#footer 
+    width: 100%
+    padding: 1em 0 3em 0
+    border-top: 1px solid #000
+    justify-content: space-between
+
+#footer p 
+    font-size .8em
+
 // .two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
 //     margin-top: 10px /* RESPONSIVE */
 //     // display: flex
@@ -284,12 +308,6 @@ $slider-height
 // .top-pgs .second-col 
 //     margin: 0 20px 0 5px   /* RESPONSIVE */
 
-#footer 
-    font-size: 1em
-    width:100%
-    padding: 1em 0 3em 0
-    border-top:1px solid #000
-    justify-content: space-between
 
 
 
