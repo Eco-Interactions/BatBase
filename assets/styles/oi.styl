@@ -90,6 +90,9 @@ span.lbl
 .waiting 
     cursor: wait
 /*--- List Styles ---*/
+ol>li 
+    list-style: decimal;
+    display: list-item;
 .disc-list>li 
     list-style: disc
     display: list-item
@@ -144,7 +147,8 @@ $content-width
     left: -44px  /* RESPONSIVE */
 
 $slider-height
-    height: 39vh
+    height: 33vh
+    max-height 423px
     @media screen and (min-width: 1330px)
         height: 375px
     
@@ -229,23 +233,20 @@ $slider-height
     padding: 0;
 }
 #hdrmenu ul li.current-menu-item {
-    background:#ddd;
+    background: #ddd;
 }
 /* --------- PAGE CONTENT ----------------- */
---static-hdr-height = calc(39vh + 86px)
 #content-detail
     position: absolute
     max-width: 100%
     padding .5em
-    top: --static-hdr-height
+    margin-top 1em
+    top: calc(33vh + 86px) > 506px ? 506px : calc(33vh + 86px);
     @media screen and (min-width: 1330px)
-        margin-top 1em
         top: 461px
-    @media screen and (max-width: 666px)
+    @media screen and (max-width: 1330px)
+        margin-top .5em
         top: calc(33vh + 86px)
-
-.two-col-cntnr > div
-    flex: 1 1 420px;
 
 .top-pgs p 
     margin 1em
@@ -256,9 +257,54 @@ $slider-height
     padding: 1em 0 3em 0
     border-top: 1px solid #000
     justify-content: space-between
+    margin-top 1em
 
 #footer p 
     font-size .8em
+/* ---- PAGE SPECIFIC ---- */
+.first-col, .second-col 
+    max-width 100vw
+    padding .5em
+
+/*-- HOME --*/
+#home-pg .two-col-cntnr > div, #team .first-col, #team .second-col
+    flex: 1 1 420px;
+/*-- PROJECT --*/
+#about-pg .first-col
+    @extend .flex-col
+    flex: 2 1 980px
+    
+#about-pg .second-col
+    @extend .flex-col
+    flex: 1 0 500px
+    
+// #team .first-col, 
+//     flex: 1 0 500px
+    
+// #team .second-col
+//     flex: 2 1 980px
+//     max-width 100vw
+        
+#team-hdr
+    text-align: center
+    margin: 2em auto 2em auto
+    width 100%
+    
+.bio-img 
+    height: 200px
+    width: 160px
+    float: left
+    margin: 0 1em 1.5em 0
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
+
+/*-- ABOUT DB --*/
+#def-pg .first-col
+    flex: 1 0 500px
+    max-width 100vw
+    
+#def-pg .second-col
+    flex: 2 1 980px
+    max-width 100vw
 
 // .two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
 //     margin-top: 10px /* RESPONSIVE */

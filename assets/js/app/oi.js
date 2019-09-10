@@ -69,6 +69,7 @@ function initStickyHeader() {
                 $stickyMenu.removeClass("top-sticky");
             }
     });
+    $(window).scroll();
 };
 /**
  * Initiates tables and rearranges realted UI. Used on the feedback, pdf submission, and bilio pages.
