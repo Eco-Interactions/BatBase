@@ -105,8 +105,10 @@ function resetSliderHeight() {
 function authDependantInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
     if (userRole === 'visitor') { return; }
-    if (['admin', 'super'].indexOf(userRole) !== -1) { initEditContentUi(); }
     initFeedbackUi();     
+    if (userRole === 'admin' && window.innerWidth > 750 || userRole === 'super') { 
+        initEditContentUi(); 
+    } 
     
     function initEditContentUi() {
         const wysiwyg = require('./wysiwyg.js');
