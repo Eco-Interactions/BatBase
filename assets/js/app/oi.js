@@ -22,10 +22,10 @@ function requireGlobalJquery() {
 function initUi() {
     addWindowResizeEvent();
     initTos();
-    initStickyHeader();
     initDataTable();
     ifNotChromeShowOptimizedMsg();
     initImageSlider();
+    initStickyHeader();
 }
 function initTos() {
     require('./tos.js').init();
@@ -67,13 +67,12 @@ function setSlideInterval() {
     }, 10000);
 }
 function initStickyHeader() {
-    const $stickyMenu = $('#sticky-hdr');
     const staticHdrHeight = $('#img-slider').outerHeight();
     $(window).scroll(function () {
         if ($(window).scrollTop() > staticHdrHeight) {
-                $stickyMenu.addClass("top-sticky");
+                $('#sticky-hdr').addClass("top-sticky");
             } else {
-                $stickyMenu.removeClass("top-sticky");
+                $('#sticky-hdr').removeClass("top-sticky");
             }
     });
     $(window).scroll();
@@ -142,6 +141,10 @@ function addMsgAboutChromeOptimization() {
     $(logo).addClass('overlay');
     $('#slider-overlay').css('padding', '2em');
     $('#slider-overlay').prepend([msg, logo]);
+    $('#sticky-hdr').css({
+        'top': $('#slider-overlay').outerHeight(),
+        'position': 'absolute'
+    });
 }
 function buildMsgHtml() {
     const div = document.createElement("div");

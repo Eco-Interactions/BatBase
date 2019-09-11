@@ -60,9 +60,13 @@ function relocCtrls(tableName) {
     const $filterDiv = $('#' + tableName + '_filter');
     const $pgLngthDiv = $('#' + tableName + '_length');
     const $btnDiv = $('#tbl-ctrl-div .dt-buttons');
-    $btnDiv.attr('id', 'btn-div');
+    $btnDiv.attr({'id': 'btn-div', 'class': 'flex-row'});
     $filterDiv.detach();
     $pgLngthDiv.detach();
-    $btnDiv.detach();
-    $('#hdr-right').append([$pgLngthDiv, $btnDiv, $filterDiv]);
+    $btnDiv.prepend($pgLngthDiv).append($filterDiv).detach();
+    if (window.innerWidth < 750) { 
+        $('#content-detail').prepend($btnDiv);
+    } else {
+        $('#hdr-right').append($btnDiv);
+    }
 };

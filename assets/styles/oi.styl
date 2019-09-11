@@ -15,6 +15,7 @@
 // Include paddings inside width for everything
 *
     box-sizing border-box
+    
 a:link 
     color: --dark-g
     text-decoration: underline
@@ -33,7 +34,6 @@ button
     border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
     border-radius: 4px
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
-    // font-size: 15px
     color: #222
     margin: 0 .3em 0 .2em
     line-height: 1.4;
@@ -43,12 +43,8 @@ form input, form select, form textarea
     font-size: 1em
     padding: .2em
     margin: .5em .5em .5em 0
-    
-form textarea 
-    // vertical-align: top
 
 form label
-    // vertical-align: text-top
     margin-right: .5em
     
 h2
@@ -86,19 +82,7 @@ span.lbl
 
 .waiting 
     cursor: wait
-/*--- List Styles ---*/
-ol>li 
-    list-style: decimal;
-    display: list-item;
-.disc-list>li 
-    list-style: disc
-    display: list-item
-    padding-left: 2em
-    
-.circle-list>li 
-    list-style: circle
-    display: list-item
-/*-------- Flex ----------*/
+/*------------- Flex ------------------*/
 .flex-row 
     display: flex
     flex-direction: row
@@ -109,11 +93,34 @@ ol>li
     
 .flex-wrap 
     flex-wrap: wrap
+/*------------ List Styles -------------*/
+$list-styles 
+    list-style-position: outside;
+    display: list-item;
+    padding: .25em .75em .25em 0 
+    
+ol>li 
+    @extends $list-styles
+    list-style: decimal;
+
+.disc-list>li 
+    @extends $list-styles
+    list-style: disc
+    
+.circle-list>li 
+    @extends $list-styles
+    list-style: circle
+
+.disc-list, .circle-list
+    padding-inline-start: 1.5em
+    padding-top .5em
 /* ==================== MAIN LAYOUT ========================== */            
 $content-width
-    max-width: 100vw       
+    max-width: 100vw   
+    width 1330px
     @media screen and (min-width: 1500px)
-            max-width: 1500px       
+            max-width: 1500px 
+            width 1500px      
     @media screen and (max-width: 1500px) and (min-width: 1330px)
             max-width: 1330px
             
@@ -175,6 +182,10 @@ $slider-height
         max-width: 50vw;
     @media screen and (min-width: 1000px) and (max-width: 1330px)
         max-width: 40vw;
+
+#slider-overlay.mobile-hdr
+    max-width 100vw
+    background-color black
     
 #chrome-opt-msg /* Shown on all browsers except chrome */
     position: relative
@@ -196,20 +207,21 @@ $slider-height
 /**--------------- Header Menu Styles -------------------*/
 #sticky-hdr
     @extend $content-width
+    
+#sticky-hdr.mobile
+    width 100vw
 
 #hdrmenu 
     display: flex
     justify-content: space-between
     height: 43px
     line-height: 43px
-    // border-bottom: 1px solid Gray
     background-color: White
     
 .top-sticky 
-    @extend $content-width
     z-index: 1001 
-    position: fixed 
-    top: 0 
+    position: fixed !important //necessary when showing browser...
+    top: 0 !important  //... optimization message (non-chrome browsers)
     background-color: White
     width: 100%
 
@@ -252,7 +264,7 @@ $slider-height
 #hdrmenu ul li.current-menu-item {
     background: #ddd;
 }
-/* --------- PAGE CONTENT ----------------- */
+/* ---------------------- PAGE CONTENT -------------------------- */
 #content-detail
     position: absolute
     max-width: 100%
@@ -278,30 +290,22 @@ $slider-height
 
 #footer p 
     font-size .8em
-/* ---- PAGE SPECIFIC ---- */
+/* ====================== PAGE SPECIFIC ===================================== */
 .first-col, .second-col 
     max-width 100vw
     padding .5em
-
-/*-- HOME --*/
+/*---------------- HOME ---------------------*/
 #home-pg .two-col-cntnr > div, #team .first-col, #team .second-col
     flex: 1 1 420px;
-/*-- PROJECT --*/
+/*--------------- PROJECT -------------------*/
 #about-pg .first-col
     @extend .flex-col
-    flex: 2 1 980px
+    flex: 1 1 600px
     
 #about-pg .second-col
     @extend .flex-col
-    flex: 1 0 500px
-    
-// #team .first-col, 
-//     flex: 1 0 500px
-    
-// #team .second-col
-//     flex: 2 1 980px
-//     max-width 100vw
-        
+    flex: 1 0 375px
+
 #team-hdr
     text-align: center
     margin: 2em auto 2em auto
@@ -313,87 +317,87 @@ $slider-height
     float: left
     margin: 0 1em 1.5em 0
     box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
+/*-------------- ABOUT DB ------------------*/
+#about-db .first-col
+    flex: 1 1 400px
+    max-width 100vw
+    
+#about-db .second-col
+    flex: 1 0 375px
+    max-width 100vw
 
-/*-- ABOUT DB --*/
+#about-db-how-to-use ul 
+    padding-inline-start: 2.5em
+    padding-bottom 1em
+    padding-top 0
+
+.db-about-imgs
+    @extends .flex-col 
+    align-items center
+
+.db-about-imgs>img 
+    padding .25em 0 3em 0
+/*-------------- DEFINITIONS ----------------*/
 #def-pg .first-col
-    flex: 1 0 500px
+    flex: 1 0 300px
     max-width 100vw
     
 #def-pg .second-col
-    flex: 2 1 980px
+    flex: 2 1 800px
     max-width 100vw
-
-// .two-col-outer, .three-col-outer, .four-col-outer  /* RESPONSIVE - make the col layouts flex/grid? */
-//     margin-top: 10px /* RESPONSIVE */
-//     // display: flex
-//     justify-content: center
-//     // flex-direction: row
-
-// .first-col, .three-col-outer .second-col, .four-col-outer .second-col, .four-col-outer .third-col
-//     border-right: 1px solid #cccccc
-//     margin-right: 2em  /* RESPONSIVE */
-//     padding: 0 1.25em 0 0  /* RESPONSIVE */
-
-// .inln-flds 
-//     padding: 15px 0 10px 0  /* RESPONSIVE */
-
-// .inln-flds span 
-//     padding: 0 5px 0 55px  /* RESPONSIVE */
-
-// .main-col 
-//     flex-grow: 8  /* RESPONSIVE */
-//     font-size: 1.1em  /* RESPONSIVE */
-//     padding-right: 2em  /* RESPONSIVE */
-
-// #detail-block 
-//     margin: 1em .5em 2em 1em  /* RESPONSIVE */
-
-// #detail-block h4 
-//     margin-top: 15px  /* RESPONSIVE */
-
-// #detail-block h5 
-//     margin-bottom: 5px   RESPONSIVE 
-
-// .top-pgs h3 
-//     font-size: 1.2em
-//     margin: .75em 0 .5em 0  /* RESPONSIVE */
-
-// .top-pgs p, #terms-div p  /* RESPONSIVE */     
-//     margin: .2em 0 0 1em
-//     padding: .3em 0 .3em 0
-//     font-size: 1.05em
-
-// .top-pgs ul li, .top-pgs ol li /* RESPONSIVE */
-//     margin: .2em 0 0 1.8em
-//     padding: .3em 0 .3em 0
-//     font-size: 1.05em
-
-// .top-pgs .second-col 
-//     margin: 0 20px 0 5px   /* RESPONSIVE */
-
-
-
-
-
-
-#error_logo /* Logo used on error and 404 pages */
-    width: 50%   /* RESPONSIVE */
-    margin: 2% auto 0 auto
-
-
-
+/*------------- FUTURE DEV -----------------*/
+#add-pubs
+    margin 1em 0 2em 0
+    height: 40vh
+    width: 100vw
+    @media screen and (min-width: 1330px)
+        height 445px
+        width 100%
+        
+#future-dev-pg .first-col
+    flex: 1 1 400px
+    max-width 100vw
+    
+#future-dev-pg .second-col
+    flex: 2 1 400px
+    max-width 100vw
+/*------------- DATA TABLES STYLES -----------------*/
 #tbl-ctrl-div  // data-tables button container
     position: absolute
     top: -1000px
     right: -1000px
     
+#btn-div
+    flex-wrap wrap 
+    justify-content center
+
+#btn-div > *
+    margin-right 1em
+
+input[type="search"]
+    border 1px solid grey
+    height 23px
+    
 .dt-bttn //data-tables
     font-size: 14px !important;
     line-height: 1.4 !important;
     padding: 2px 3px 1px 3px !important;
+    height 25px
+/*------------- MISC STYLES -----------------*/
+#error_logo /* Logo used on error and 404 pages */
+    width: 50%   /* RESPONSIVE */
+    margin: 2% auto 0 auto
 
 .tos-bttn
     margin: 0 .3em 0 .2em !important;
+
+
+
+
+
+
+
+
 
 
 

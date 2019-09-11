@@ -22,6 +22,8 @@ Current:
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Make site mobile-friendly
+        - todo
+            - get mobile images for db about page
         - testing mobile versions
             - https://github.com/suncat2000/MobileDetectBundle/issues/76
     - Add to dev notes: workaround with webpack and asset building

@@ -36,8 +36,11 @@
 	{% endembed %}
 	</div>
 	<hr>
-	<img id="about-db-maps" src="{{ asset('build/images/ConceptualMap740x552.JPG') }}" alt="Conceptual Map of Data">
-	<img id="db-new-data" class="about-db-maps" src="{{ asset('build/images/NewData740x552.JPG') }}" alt="New Data Workflow">
+	{% set cntnrClass = is_full_view() ? '' : 'db-about-imgs' %}
+	<div class="{{ cntnrClass }}">
+		<img id="about-db-maps" src="{{ asset('build/images/ConceptualMap740x552.JPG') }}" alt="Conceptual Map of Data">
+		<img id="db-new-data" class="about-db-maps" src="{{ asset('build/images/NewData740x552.JPG') }}" alt="New Data Workflow">
+	</div>
 {% endblock detail %}
 
 

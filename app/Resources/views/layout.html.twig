@@ -13,13 +13,14 @@
             <div id="slider-overlay"></div>   {# Shows browser optimization msg. #}
         </div>
     {% else %}
-        <div id="slider-overlay"></div> {# Shows browser optimization msg. #}
+        <div id="slider-overlay" class="mobile-hdr"></div> {# Shows browser optimization msg. #}
         <div id="slider-logo" class="mobile-hdr"></div>
     {% endif %}
 {% endblock %}
 
 {% block menu %}
-    <div id="sticky-hdr">
+    {% set menuClass = is_mobile_view() ? 'mobile' : '' %}
+    <div id="sticky-hdr" class="{{ menuClass }}">
         <div id="hdrmenu">
             {% if is_full_view() or is_tablet_view() %}
                 {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
