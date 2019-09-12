@@ -64,6 +64,7 @@ function relocCtrls(tableName) {
     $filterDiv.detach();
     $pgLngthDiv.detach();
     $btnDiv.prepend($pgLngthDiv).append($filterDiv).detach();
+    if ($('#online_users_tbl_wrapper').length) { return; }
     if (window.innerWidth < 750) { 
         $('#content-detail').prepend($btnDiv);
     } else {

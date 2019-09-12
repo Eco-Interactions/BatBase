@@ -43,6 +43,7 @@ form input, form select, form textarea
     font-size: 1em
     padding: .2em
     margin: .5em .5em .5em 0
+    border 1px solid rgba(128, 128, 128, .4)
 
 form label
     margin-right: .5em
@@ -148,7 +149,7 @@ $slider-height
     @media screen and (min-width: 800px) and (max-width 1300px)
         height 20vw
     @media screen and (min-width: 600px) and (max-width 800px)
-        height 30vw
+        height 28vw
 
 #slider-logo.mobile-hdr
     position relative
@@ -267,7 +268,7 @@ $slider-height
 /* ---------------------- PAGE CONTENT -------------------------- */
 #content-detail
     position: absolute
-    max-width: 100%
+    width: 100%
     padding .5em
     margin-top 1em
     top: calc(33vh + 86px) > 506px ? 506px : calc(33vh + 86px);
@@ -290,31 +291,6 @@ $slider-height
 
 #footer p 
     font-size .8em
-/*----------- wysiwyg editor ------------------*/
-.wysiwyg 
-    position: relative
-
-.wsywigEdit 
-    position: absolute
-    top: 0
-    right: 0
-    height: 1.5em
-    z-index: 10
-    cursor: pointer
-
-#pg-hdr > button 
-    width: 148px
-
-.adminbttn 
-    background: #3399ff !important
-    color: white !important
-    border-radius: 5px !important
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.3)
-
-.adminbttn:hover 
-    background: #1A80E6
-    box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
-
 /* ------- Pop Up and Overlay Styles ------ */
 #b-overlay 
     display: none
@@ -340,27 +316,28 @@ $slider-height
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75)
     z-index: 2000
     border-radius: 5px
-/* --------- TOS POPUP ------------- */
-.tos-popup 
-    height: 88vh
-    width: 44vw
-    top: 2vh
     margin: auto
-    overflow-y: scroll
     padding: 2em
-
-#close-tos-bttn
-    align-self: flex-end
-/* --------- FEEDBACK POPUP ------------- */
-.feedback-popup 
-    background-color: #a2dadd !important
-    padding: 2em
-    margin auto
     top 3em
+    max-height 86vh
     max-width 90vw
     @media screen and (min-width: 750px)
         max-width 700px
+        max-height 50%
         top 25%
+/* --------- TOS POPUP ------------- */
+.tos-popup 
+    overflow-y: scroll
+    
+.tos-popup p 
+    padding .25em 0 .25em 0
+
+.tos-bttn
+    align-self: flex-end
+    margin-top .5em
+/* --------- FEEDBACK POPUP ------------- */
+.feedback-popup 
+    background-color: #a2dadd !important
 
 .feedback-popup > p 
     margin-bottom: .7em
@@ -388,6 +365,57 @@ $slider-height
 .feedback-popup > button:hover 
     background: #2D7853
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
+/*----------- wysiwyg editor ------------------*/
+.wysiwyg 
+    position: relative
+
+.wsywigEdit 
+    position: absolute
+    top: 0
+    right: 0
+    height: 1.5em
+    z-index: 10
+    cursor: pointer
+
+#pg-hdr > button 
+    width: 148px
+
+.adminbttn 
+    background: #3399ff !important
+    color: white !important
+    border-radius: 5px !important
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.3)
+
+.adminbttn:hover 
+    background: #1A80E6
+    box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
+/*------------- DATA TABLES STYLES -----------------*/
+#tbl-ctrl-div  // data-tables button container
+    position: absolute
+    top: -1000px
+    right: -1000px
+    
+#btn-div
+    flex-wrap wrap 
+    justify-content center
+
+#btn-div > *
+    margin-right 1em
+
+input[type="search"]
+    border 1px solid grey
+    height 23px
+    
+.dt-bttn //data-tables
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    padding: 2px 3px 1px 3px !important;
+    height 25px
+/*------------- MISC STYLES -----------------*/
+#error_logo /* Logo used on error and 404 pages */
+    width: 50%   /* RESPONSIVE */
+    margin: 2% auto 0 auto
+
 /* ====================== PAGE SPECIFIC ===================================== */
 .first-col, .second-col 
     max-width 100vw
@@ -459,36 +487,21 @@ $slider-height
 #future-dev-pg .second-col
     flex: 2 1 400px
     max-width 100vw
-/*------------- DATA TABLES STYLES -----------------*/
-#tbl-ctrl-div  // data-tables button container
-    position: absolute
-    top: -1000px
-    right: -1000px
+/*------------- REGISTRATION -----------------*/
+.two-col-outer .first-col
+    flex: 2 1 420px;
     
-#btn-div
-    flex-wrap wrap 
-    justify-content center
+.two-col-outer .second-col
+    flex: 1 1 420px;
 
-#btn-div > *
-    margin-right 1em
+#reg-form-container>form div div 
+    justify-content: space-between
 
-input[type="search"]
-    border 1px solid grey
-    height 23px
-    
-.dt-bttn //data-tables
-    font-size: 14px !important;
-    line-height: 1.4 !important;
-    padding: 2px 3px 1px 3px !important;
-    height 25px
-/*------------- MISC STYLES -----------------*/
-#error_logo /* Logo used on error and 404 pages */
-    width: 50%   /* RESPONSIVE */
-    margin: 2% auto 0 auto
-
-.tos-bttn
-    margin: 0 .3em 0 .2em !important;
-
+#reg-form-container>form div div input, #reg-form-container>form div div textarea
+    width 100%
+/*--------------- Upload Files / PDFS --------------------------*/
+form[name="appbundle_file_upload"] textarea
+    width: 100%;
 
 
 

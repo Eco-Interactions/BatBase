@@ -7,14 +7,7 @@ After next server update:
     - Update where to upload pdfs to registration page, future dev, db about
 
 >==== Change Log ====
-    - PDF submission
-        - submission page
-            - Need content reviewed/edited
-        - view submissions page
-            - locked down to admin? or just editor? Maybe only admins delete?
-            - do we want a way for editors to leave notes for each other? Or a way 
-                to indicate that someone has "checked out" a submission?
-            - process to keep submissions synced with the "publications to be added" doc?
+    - All pages look good on all device sizes and the modern browers: chrome, firefox, and safari (IE?)
 
 Current:
     - tutorial broke at column defs
@@ -24,6 +17,10 @@ Current:
     - Make site mobile-friendly
         - todo
             - get mobile images for db about page
+            - Lock out pages with tables on mobile
+                - view submissions
+                - view feedback
+                - database?
         - testing mobile versions
             - https://github.com/suncat2000/MobileDetectBundle/issues/76
     - Add to dev notes: workaround with webpack and asset building
