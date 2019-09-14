@@ -11,7 +11,6 @@ let timeout;
 function requireStyles() {
     require('../../styles/ei-reset.styl');   
     require('../../styles/oi.styl');    
-    require('../../css/oi.css');    
     require('../../css/lib/introjs.min.css');  
 }
 function requireGlobalJquery() { 
@@ -99,7 +98,7 @@ function resetSliderHeight() {
     timeout = window.setTimeout(() => {
         setSliderAndContentSize();
         timeout = false;
-    }, 2500);
+    }, 2100);
 }
 /* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 

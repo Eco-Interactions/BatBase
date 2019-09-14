@@ -1,0 +1,35 @@
+/*
+ * Style sheet for the Database Search page. 
+ *
+ * Note: Fully refactoring from css -> stylus has not been prioritized. Moving
+ * pieces over as they get worked on
+ */
+ /* ====================== PAGE STYLES ====================================== */
+#content-detail
+    margin-top 0
+/*--- Database Search Page Styles ---*/
+#detail-block input, #detail-block textarea, #detail-block select
+    padding: 4px
+
+/** ------- Intro.js ------- */
+.intro-tips  // Walkthrough tutorial 
+    width: 420px
+    text-align: justify
+
+.intro-bttn // Buttons inside page walkthrough
+    width: 144px
+    height: 22px
+
+.hlp-bttn // Question marks in panels triggering intro tutorial slides. 
+    height: 22px !important
+    width: 23px !important
+    font-weight: 600
+/*--------- Search Tips Popup ---------*/
+#tips-close-bttn 
+    position: relative
+    margin-top: .5em
+    left: 91%
+    bottom: -2vh
+
+.tips-popup 
+    overflow-y: scroll

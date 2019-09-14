@@ -16,7 +16,6 @@ import { initFilterPanel, toggleFilterPanelOrientation } from './save-fltrs.js';
 import { addListPanelEvents, toggleListPanelOrientation } from './save-ints.js';
 import { addDataReviewEvents } from './data-review.js';
 
-
 /* ----------------- EVENT RELATED ------------------ */
 export function addPanelEvents(userRole) {
     initFilterPanel();
@@ -35,11 +34,12 @@ export function closeOpenPanels() {
     })
 }
 export function togglePanel(id, state) {
-    const col = getMenuColumn(id);
-    const colClass = getColumnSpacerId(id);
-    if (state === 'open') { openPanel(id, col, colClass); }
-    else { closePanel(id, col, colClass) }
+    const tab = getMenuColumn(id);
+    const tabSpcr = getColumnSpacerId(id);
+    if (state === 'open') { openPanel(id, tab, tabSpcr); }
+    else { closePanel(id, tab, tabSpcr) }
 }
+/** Section of search options bar */
 function getMenuColumn(id) {
     return { 
         '#filter-opts-pnl': '#filter-opts', 
@@ -52,44 +52,44 @@ function getColumnSpacerId(id) {
         '#int-opts': 'hide-int-bttm-border', 
     }[id];
 }
-/* ----- Open Panel(s) ----- */
-function openPanel(id, col, colClass) {
-    if (!bothPanelsOpen(id)) { cssOpenPanel(id, col, colClass);
-    } else { openVerticalPanels(id, col, colClass); }
+/* -------------------------- Open Panel(s) ----------------------------- */
+function openPanel(id, tab, tabSpcr) {
+    if (!bothPanelsOpen(id)) { cssOpenPanel(id, tab, tabSpcr);
+    } else { openVerticalPanels(id, tab, tabSpcr); }
 }
 function bothPanelsOpen(id) {
     const otherPnl = id.includes('int') ? '#filter-opts-pnl' : '#int-opts';
     return !$(otherPnl).hasClass('closed'); 
 }
-function cssOpenPanel(id, col, colClass) {
+function cssOpenPanel(id, tab, tabSpcr) {
     const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
     $(bttn).addClass('panel-open-toggle');
     $(id).removeClass('closed');  
-    $(col).addClass('shw-col-borders ' + colClass);
+    $(tab).addClass('shw-col-borders ' + tabSpcr);
     window.setTimeout(function() { 
         $(id).css('overflow-y', 'visible')}, 500);  
 }
-function openVerticalPanels(id, col, colClass) {
+function openVerticalPanels(id, tab, tabSpcr) {
     $('#fltr-int-panl-cntnr').attr('class', 'flex-row');
     $('#filter-opts-pnl, #int-opts').removeClass('flex-row').addClass('flex-col');
-    toggleFilterPanelOrientation('vert');
+    cssOpenPanel(id, tab, tabSpcr);
     toggleListPanelOrientation('vert');
-    cssOpenPanel(id, col, colClass);
+    toggleFilterPanelOrientation('vert');
 }
-/* --- Close Panel(s) --- */
-function closePanel(id, col, colClass) {
-    if (!bothPanelsOpen(id)) { cssClosePanel(id, col, colClass);
-    } else { closeVerticalPanel(id, col, colClass); }
+/* ------------------------ Close Panel(s) --------------------------------- */
+function closePanel(id, tab, tabSpcr) {
+    if (!bothPanelsOpen(id)) { cssClosePanel(id, tab, tabSpcr);
+    } else { closeVerticalPanel(id, tab, tabSpcr); }
 }
-function cssClosePanel(id, col, colClass) {
+function cssClosePanel(id, tab, tabSpcr) {
     const bttn = id.includes('int') ? 'button[name="int-set"]' : '#filter';
     $(bttn).removeClass('panel-open-toggle');
     $(id).css('overflow-y', 'hidden');
-    $(col).removeClass('shw-col-borders ' + colClass);
+    $(tab).removeClass('shw-col-borders ' + tabSpcr);
     $(id).addClass('closed');
 }
-function closeVerticalPanel(id, col, colClass) {
-    cssClosePanel(id, col, colClass);
+function closeVerticalPanel(id, tab, tabSpcr) {
+    cssClosePanel(id, tab, tabSpcr);
     window.setTimeout(() => {
         toggleFilterPanelOrientation('horz', id.includes('filter'));
         toggleListPanelOrientation('horz');

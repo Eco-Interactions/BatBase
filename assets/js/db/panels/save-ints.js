@@ -28,6 +28,7 @@ import { showHelpModal } from '../../misc/intro-core.js';
  * submitting - True when updates are in submit process
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
+ * timeout - present when window is being resized.
 ] */
 let app = {};
 
@@ -36,6 +37,7 @@ export function savedIntListLoaded() {                                          
 }
 
 export function addListPanelEvents() {
+    window.addEventListener('resize', resizeIntPanelTab);
     $('button[name="clear-list"]').click(resetTable);
     $('input[name="mod-list"]').on('change', toggleInstructions);
     $('#unsel-rows').click(deselectAllRows);
@@ -46,9 +48,40 @@ export function addListPanelEvents() {
     $('#cncl-list-delete').click(cancelDelete);
     $('#svd-list-hlp').click(showHelpModal.bind(null, 'saved-lists'));
 }
+/* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
+function resizeIntPanelTab() {
+    if ($('#list-opts').hasClass('closed')) { return; }
+    if (app.timeout) { return; }
+    app.timeout = window.setTimeout(() => {
+        sizeIntPanelTab()
+        app.timeout = false;
+    }, 500);
+}
+function sizeIntPanelTab() {
+    const pseudo = getPseudoStyle();
+    $('.hide-int-bttm-border:before').remove();
+    $('.hide-int-bttm-border').append(pseudo);
+}
+function getPseudoStyle() {
+    const panelT = $('#int-opts').position().top;
+    const tabW = $('#list-opts').innerWidth();  
+    const tabL = $('#list-opts').position().left + 1;                           //console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    return `<style>.hide-int-bttm-border:before { 
+        position: absolute;
+        content: '';
+        height: 3px;
+        z-index: 10;
+        width: ${tabW}px;
+        top: ${panelT}px;
+        left: ${tabL}px;
+        background: #e2f2f3;
+        }</style>`;  
+}
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
-    if ($('#int-opts').hasClass('closed')) { buildAndShowIntPanel(); 
+    if ($('#int-opts').hasClass('closed')) { 
+        buildAndShowIntPanel(); 
+        sizeIntPanelTab();
     } else { _uPnl.togglePanel('#int-opts', 'close'); }
 }
 function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')

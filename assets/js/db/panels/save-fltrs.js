@@ -25,6 +25,7 @@ import { exitModal, showHelpModal, showSaveModal } from '../../misc/intro-core.j
  *     active - true when loading saved filters
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
+ * timeout - present when window is being resized.
  */
 let app = {};
 
@@ -43,6 +44,7 @@ function initTimeFilterUi() {
     db_filters.toggleTimeFilter('disable');
 }
 export function addFilterPanelEvents() {  
+    window.addEventListener('resize', resizeFilterPanelTab);
     $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(db_filters.toggleTimeFilter);
     $('#delete-filter').click(deleteFilterSet);
@@ -51,6 +53,65 @@ export function addFilterPanelEvents() {
     $('#cncl-set-delete').click(cancelDelete);
     $('#svd-fltr-hlp').click(showHelpModal.bind(null, 'selSavedFilters'));
     $('#fltr-pnl-hlp').click(showHelpModal.bind(null, 'filter-panel'));
+}
+/* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
+function resizeFilterPanelTab() {
+    if ($('#filter-opts-pnl').hasClass('closed')) { return; }
+    if (app.timeout) { return; }
+    app.timeout = window.setTimeout(() => {
+        sizeFilterPanelTab()
+        app.timeout = false;
+    }, 500);
+}
+/**
+ * Working around a timeout in panel_util. Utlimately, this should be refactored
+ * into the util file, but I'm in a time crunch. 
+ */
+function sizeFilterPanelTab() {
+    window.setTimeout(function() { 
+        const split = $('#filter-opts-pnl').hasClass('vert');
+        const pseudo = split ? getSplitPseudoBorderStyle() : getPseudoBorderStyle();
+        const elemClass = '.hide-fltr-bttm-border' + (split ? '-vert' : '');
+        $(elemClass + ':before').remove();
+        $(elemClass).append(pseudo);
+    }, 300);
+}
+function getPseudoBorderStyle() {
+    const panelT = $('#filter-opts-pnl').position().top;
+    const tabW = $('#filter-opts').innerWidth();  
+    const tabL = $('#filter-opts').position().left + 1;                         //console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
+    return `<style>.hide-fltr-bttm-border:before { 
+        position: absolute;
+        content: '';
+        height: 3px;
+        z-index: 10;
+        width: ${tabW}px;
+        top: ${panelT}px;
+        left: ${tabL}px;
+        background: #f2f9f8;
+        }</style>`;  
+}
+function getSplitPseudoBorderStyle() {
+    const panelT = $('#filter-opts-pnl').position().top;
+    const tabL = getLeftSplitPos(); 
+    const tabW = $('#filter-opts').innerWidth();
+    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       //console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    return `<style>.hide-fltr-bttm-border-vert:before { 
+        position: absolute;
+        content: '';
+        height: 5px;
+        z-index: 10;
+        max-width: 133px;
+        width: ${borderW}px;
+        top: ${panelT}px;
+        left: ${tabL}px;
+        background: #f2f9f8;
+        }</style>`;  
+}
+function getLeftSplitPos() {
+    const pnlL = $('#filter-opts-pnl').position().left;
+    const tabL = $('#filter-opts').position().left + 1;
+    return pnlL > (tabL - 2) ? pnlL : tabL;
 }
 export function resetStoredFiltersUi() {
     if (!$('#selSavedFilters')[0].selectize) { return; }
@@ -69,6 +130,7 @@ export function updateFilterPanelHeader(focus) {
 export function toggleFilterPanelOrientation(style, close) {
     if (style == 'vert') { stackFilterPanel();
     } else { spreadFilterPanel(close); }
+    sizeFilterPanelTab(); 
 }
 function stackFilterPanel() {
     $('#filter-opts-pnl, #filter-col1, #stored-filters').addClass('vert');
@@ -81,7 +143,9 @@ function spreadFilterPanel(close) {
 }
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
 export function toggleFilterPanel() {  
-    if ($('#filter-opts-pnl').hasClass('closed')) { buildAndShowFilterPanel(); 
+    if ($('#filter-opts-pnl').hasClass('closed')) { 
+        buildAndShowFilterPanel(); 
+        sizeFilterPanelTab();
     } else { _uPnl.togglePanel('#filter-opts-pnl', 'close'); }
 }
 /* ============== CREATE/OPEN FILTER SET ==================================== */

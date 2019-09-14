@@ -1,12 +1,6 @@
-/*--- Database Search Page Styles ---*/
-#detail-block input, #detail-block textarea, #detail-block select {
-    border: #666 1px solid;
-    border-radius: 3px;
-}
 /* ---- Selectize ----------------------------------------------------------- */
 .selectize-input {
     padding: 4px 33px 4px 4px !important;
-    border-color: #666 !important;
 }
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
@@ -18,6 +12,7 @@
 #db-opts {  /* .flex-row also on elem */
     margin: 1em auto 0 auto;
     width: 100%;
+    min-width: 1330px;
     font-size: 1.1em;
 }
 #db-opts button {
@@ -92,46 +87,12 @@ input[type="radio"], input[type="checkbox"] {
     border-left: 1px black solid;
     border-right: 1px black solid;
 }
-/* Hides border just beneath the filter options in db-opts to create full filter area */
-.hide-fltr-bttm-border:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 133px;
-    left: 726px;
-    top: 56px;
-    background: #f2f9f8;
-    z-index: 10;
-}
-.hide-fltr-bttm-border-vert:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    top: 56px;
-    background: #f2f9f8;
-    z-index: 10;
-    width: 100px;
-    left: 759px;    
-}
 #filter-opts.shw-col-borders {
     background: rgba(121, 201, 183, .1);
 }
 #filter-opts-pnl {
     max-height: 222px;
     border-radius: 10px;
-}
-/* Hides left corner of panel when both panels are opened. */
-#filter-opts-pnl.vert::before {
-  background-color: #f2f9f8;
-  content: "";
-  display: block;
-  height: 8px;
-  position: absolute;
-  width: 10px;
-}
-#filter-opts-pnl.vert::before {
-  top: 58px;
-  left: 754px;
 }
 #filter-opts-pnl.vert {
     max-height: 444px;
@@ -274,17 +235,6 @@ button[name="futureDevBttn"] {
 }
 #list-opts.shw-col-borders {
     background: #e2f2f3;
-}
-/* Hides border just beneath the filter options in db-opts to create full filter area */
-.hide-int-bttm-border:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 126px;
-    left: 140px;
-    top: 56px;
-    background: #e2f2f3;
-    z-index: 10;
 }
 #int-opts {
     max-height: 222px;
@@ -565,32 +515,6 @@ button[name="show-hide-col"] {
 #xpand-tree {
     margin-right: .3em;
 }
-/*------------------------------- Search Tips Popup --------------------------*/
-#tips-close-bttn {
-    position: relative;
-    margin-top: .5em;
-    left: 91%;
-    bottom: -2vh;
-}
-.tips-popup {
-    top: 4vh;
-    /*position: relative;*/
-    font-size: 1.1em;
-    height: 700px;
-    width: 808px;
-    padding: 2.2em;
-    text-align: left;
-    margin: auto;
-    overflow-y: scroll;
-}
-.tips-popup li {
-    display: block;
-    padding-left: 1em;
-}
-.tips-popup ul {
-    width: 755px;
-    margin: auto;
-}
 /**------------------------------ Data Table Styes -------------------------- */
 #db-view {
     height: 86vh;
@@ -727,12 +651,16 @@ button[name="show-hide-col"] {
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
 .form-popup {
+    flex: 0 0 1330px;
     height: 88vh;
-    flex-grow: 0;
+    width: 1330px !important;
+    top: 5% !important;
     padding: 15px;
     text-align: left;
     justify-content: space-between;
     flex-direction: column;
+    max-width: 1330px !important;
+    max-height: 88vh !important;
 }
 .form-ovrly {
     align-items: center;
@@ -859,11 +787,10 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     margin-top: .3em;
 }
 .top-row {
-    width: 481px;
-    margin-right: 1em;
+    max-width: 458px;
 }
 .full-row {
-    width: 979px;
+    width: 917px;
 }
 .sub-row {
     width: 398px; 
@@ -1082,15 +1009,8 @@ input.active-icon {
     #db-opts {
         margin: 1em auto 0 .5em;
     }
-    .tips-popup {
-        width: 77%;
-    }
     #fltr-int-panl-cntnr #filter-opts-pnl.vert {
         width: 604px;
-    }
-    .hide-fltr-bttm-border-vert:before {
-        width: 132px;
-        left: 727px;
     }
     #filter-opts-pnl #stored-filters button {
         width: 60px;
@@ -1121,18 +1041,12 @@ input.active-icon {
         flex-grow: 1;
     }
     /*--------------- Database CRUD Popup -------------*/
-    #b-overlay .form-popup {
-        padding: 15px;
-    }
-    #b-overlay #form-main {
-        padding: 5px 0 0 20px;
-    }
     #b-overlay #sub2-form.sml-form {  
         min-width: 366px;
     }
     #b-overlay .top-row {
         padding: .2em 0 .3em  0;
-        width: 434px;
+        min-width: 434px;
         margin-right: 1em;
     }
     #b-overlay .sub-row {
@@ -1183,15 +1097,4 @@ input.active-icon {
     #b-overlay .sml-field {
         width: 175px;
     }
-} 
-@media only screen and (min-width: 1900px) {   /*and (max-width: 1920px)*/ 
-/*    #b-overlay .hide-fltr-bttm-border-vert:before {
-        left: 754px;
-    }
-    #b-overlay .hide-fltr-bttm-border:before {
-        left: 726px;
-    }    
-    #b-overlay .hide-int-bttm-border:before {
-        left: 140px;
-    }*/
 } 

@@ -37,12 +37,12 @@ function showFormPopup(actionHdr, entity, id) {
 function setFormSize(entity) {
     var sizeConfgs = { 
         '1500': {
-            'Interaction': { popup: '1510px', form: '999px' },
-            'Publication': { popup: '1313px', form: '999px' },
+            'Interaction': { popup: '1510px', form: '942px' },
+            'Publication': { popup: '1313px', form: '942px' },
             'Publisher': { popup: '784px', form: '484px' },
-            'Citation': { popup: '1313px', form: '999px' },
+            'Citation': { popup: '1313px', form: '942px' },
             'Author': { popup: '777px', form: '484px' },
-            'Location': { popup: '1313px', form: '999px' },
+            'Location': { popup: '1313px', form: '942px' },
             'Taxon': { popup: '752px', form: '454px' },
         },
         '1366': {
