@@ -1,0 +1,95 @@
+// HOME
+// PROJECT
+// ABOUT DB 
+// DEFINITIONS
+// FUTURE DEV
+// REGISTRAION
+// UPLOAD PDFS
+/*----- (SEARCH PAGE IN DEDICATED FILE: DB.STYL & SEARCH_DB.CSS) -------------*/
+/*---------------- HOME ---------------------*/
+#home-pg .two-col-cntnr > div, #team .first-col, #team .second-col
+    flex: 1 1 420px;
+/*--------------- PROJECT -------------------*/
+#about-pg .first-col
+    @extend .flex-col
+    flex: 1 1 600px
+    
+#about-pg .second-col
+    @extend .flex-col
+    flex: 1 0 375px
+
+#team-hdr
+    text-align: center
+    margin: 2em auto 2em auto
+    width 100%
+    
+.bio-img 
+    height: 200px
+    width: 160px
+    float: left
+    margin: 0 1em 1.5em 0
+    box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
+/*-------------- ABOUT DB ------------------*/
+#about-db .first-col
+    flex: 1 1 400px
+    max-width 100vw
+    
+#about-db .second-col
+    flex: 1 0 375px
+    max-width 100vw
+
+#about-db-how-to-use ul 
+    padding-inline-start: 2.5em
+    padding-bottom 1em
+    padding-top 0
+
+.db-about-imgs
+    @extends .flex-col 
+    align-items center
+
+.db-about-imgs>img 
+    padding .25em 0 3em 0
+/*-------------- DEFINITIONS ----------------*/
+#def-pg .first-col
+    flex: 1 0 300px
+    max-width 100vw
+    
+#def-pg .second-col
+    flex: 2 1 800px
+    max-width 100vw
+/*------------- FUTURE DEV -----------------*/
+#add-pubs
+    margin 1em 0 2em 0
+    height: 40vh
+    width: 100vw
+    @media screen and (min-width: 1330px)
+        height 445px
+        width 100%
+        
+#future-dev-pg .first-col
+    flex: 1 1 400px
+    max-width 100vw
+    
+#future-dev-pg .second-col
+    flex: 2 1 400px
+    max-width 100vw
+/*--------------- UPLOAD PDFS --------------------------*/
+form[name="appbundle_file_upload"] textarea
+    width: 100%;
+
+.pdf-popup
+    width: 1000px
+    margin: 5em auto
+    height: 600px
+/*------------- REGISTRATION -----------------*/
+.two-col-outer .first-col
+    flex: 2 1 420px;
+    
+.two-col-outer .second-col
+    flex: 1 1 420px;
+
+#reg-form-container>form div div 
+    justify-content: space-between
+
+#reg-form-container>form div div input, #reg-form-container>form div div textarea
+    width 100%

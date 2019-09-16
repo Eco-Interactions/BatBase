@@ -1,123 +1,18 @@
 /*
  * Main style sheet for batplant.org
  */
-/* ==================== VARIABLES ========================== */
+/* ----------- VARIABLES ------------------ */
 /* greens-pallete */
---darkest-g = #1b3b1b
---darker-g = #245A37
+// --darkest-g = #1b3b1b
+// --darker-g = #245A37
 --dark-g = #2D7853
---med-g = #36976F
---light-g = #3fb58b
---lighter-g = #77cab8
---lightest-g = #a2dadd
-
-/* ==================== ROOT ELEM STYLES ========================== */
-// Include paddings inside width for everything
-*
-    box-sizing border-box
-    
-a:link 
-    color: --dark-g
-    text-decoration: underline
-    
-a:visited 
-    color: --dark-g
-    
-a:hover 
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2)
-    
-body
-    min-width 100vw
-    
-button 
-    border: 1px solid     
-    border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
-    border-radius: 4px
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
-    color: #222
-    margin: 0 .3em 0 .2em
-    line-height: 1.4;
-    background: linear-gradient(#fff, #d3d3d3)
-    cursor: pointer;
-
-    
-form input, form select, form textarea 
-    font-size: 1em
-    padding: .2em
-    margin: .5em .5em .5em 0
-    border 1px solid rgba(128, 128, 128, .4)
-
-form label
-    margin-right: .5em
-    
-h2
-    font-size: 1.4em;
-    
-h3
-    font-size: 1.3em;
-    
-input[type='button']
-    @extend button
-
-input[type='submit']
-    @extend button
-    
-label.required:before 
-    content: "*"
-
-span.lbl
-    font-weight: bold
-/* ==================== UTILITY STYLES ========================== */
-.top-em-mrg 
-    margin-top: 1em
-
-.bot-em-mrg
-    margin-bottom: 1em
-    
-.em-mrg
-    margin: 1em
-
-// .hidden
-//     display: none
-
-.invis  // Used in data entry forms
-    visibility: hidden
-
-.waiting 
-    cursor: wait
-/*------------- Flex ------------------*/
-.flex-row 
-    display: flex
-    flex-direction: row
-
-.flex-col 
-    display: flex
-    flex-direction: column
-    
-.flex-wrap 
-    flex-wrap: wrap
-/*------------ List Styles -------------*/
-$list-styles 
-    list-style-position: outside;
-    display: list-item;
-    padding: .25em .75em .25em 0 
-    
-ol>li 
-    @extends $list-styles
-    list-style: decimal;
-
-.disc-list>li 
-    @extends $list-styles
-    list-style: disc
-    
-.circle-list>li 
-    @extends $list-styles
-    list-style: circle
-
-.disc-list, .circle-list
-    padding-inline-start: 1.5em
-    padding-top .5em
-/* ==================== MAIN LAYOUT ========================== */            
+// --med-g = #36976F
+// --light-g = #3fb58b
+// --lighter-g = #77cab8
+// --lightest-g = #a2dadd
+/* ---------- ROOT ELEM & UTIL ------------- */
+@import "root-util"
+/* ----------- PAGE STRUCTURE -------------- */
 $content-width
     max-width: 100vw   
     width 1330px
@@ -131,85 +26,7 @@ $content-width
     @extend $content-width
     position: relative
     margin: 0 auto    
-/*-------------- IMAGE SLIDER -------------*/
-$slider-height
-    height: 33vh
-    max-height 423px
-    @media screen and (min-width: 1330px)
-        height: 375px
-    @media screen and (max-width: 500px)
-        height: 27vh
-
-#slider-logo 
-    content url('../images/logo_vert_pale_txt.svg')
-    position: absolute
-    top: 15%
-    left: 5%
-    z-index: 5
-    max-height 225px
-    height 14vw
-    @media screen and (min-width: 800px) and (max-width 1300px)
-        height 20vw
-    @media screen and (min-width: 400px) and (max-width 800px)
-        height 28vw
-
-#slider-logo.mobile-hdr
-    position relative
-    background-color Black
-    height 27vh
-    padding: 22px
-    width: 100vw
-    left 0px
-
-#slider-logo.overlay 
-    position relative
-    max-width 20vw 
-    top 0px
-    @media screen and (max-width: 500px)
-        max-width: 90vw;
-    @media screen and (min-width: 500px) 
-        max-width: 35vw;
-        top 1em
     
-#slider-overlay
-    @extends $slider-height
-    position: absolute
-    z-index: 10
-    height max-content
-    max-width: 30vw;
-    @media screen and (max-width: 500px)
-        max-width: 100vw;
-        background-color black
-        position relative
-    @media screen and (min-width: 700px) and (max-width: 1000px)
-        max-width: 50vw;
-    @media screen and (min-width: 1000px) and (max-width: 1330px)
-        max-width: 40vw;
-
-#slider-overlay.mobile-hdr
-    max-width 100vw
-    background-color black
-    
-#chrome-opt-msg /* Shown on all browsers except chrome */
-    position: relative
-    color: silver
-    
-#img-slider 
-    @extend $content-width
-    max-width: 100vw;
-    overflow hidden
-
-.slide 
-    @extends $slider-height
-    position: absolute
-    z-index: 0
-    width: 100%
-    transition: all 2s ease-in-out
-    opacity: 0
-    object-fit: cover
-/**--------------- Header Menu Styles -------------------*/
-@import "nav"
-/* ---------------------- PAGE CONTENT -------------------------- */
 #content-detail
     position: absolute
     z-index: -1
@@ -222,6 +39,10 @@ $slider-height
     @media screen and (max-width: 1330px)
         margin-top .5em
         top: calc(33vh + 86px)
+
+.first-col, .second-col 
+    max-width 100vw
+    padding .5em
 
 .top-pgs p 
     margin 1em
@@ -236,222 +57,13 @@ $slider-height
 
 #footer p 
     font-size .8em
-/* ------- Pop Up and Overlay Styles ------ */
-#b-overlay 
-    display: none
-    position: fixed
-    top: 0
-    bottom: 0
-    background: rgba(0,0,0,.8)
-    width: 100vw
-    height: 100vh
-    z-index: 1500
-    justify-content: center
-
-.overlay 
-    position: fixed
-    top: 0
-    bottom: 0
-    width: 100vw
-    height: 100vh
-
-#b-overlay-popup 
-    position: relative
-    background-color: WhiteSmoke
-    box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75)
-    z-index: 2000
-    border-radius: 5px
-    margin: auto
-    padding: 2em
-    top 3em
-    max-height 86vh
-    max-width 90vw
-    @media screen and (min-width: 750px)
-        max-width 700px
-        max-height 50%
-        top 25%
-/* --------- TOS POPUP ------------- */
-.tos-popup 
-    overflow-y: scroll
-    
-.tos-popup p 
-    padding .25em 0 .25em 0
-
-.tos-bttn
-    align-self: flex-end
-    margin-top .5em
-/* --------- FEEDBACK POPUP ------------- */
-.feedback-popup 
-    background-color: #a2dadd !important
-
-.feedback-popup > p 
-    margin-bottom: .7em
-    
-.feedback-popup input 
-    margin-bottom: .5em;
-    width 100%
-
-.feedback-popup > textarea 
-    display: block
-    width 100%
-    height 100px
-    margin: .7em 0 .5em 0
-
-.feedback-popup > button 
-    border: 1px solid #1b3b1b
-    background: #245A37
-    color: #a2dadd
-    font-weight: bold
-    border-radius: 5px
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
-    padding: .5em
-    margin: .5em 1em 0 0
-
-.feedback-popup > button:hover 
-    background: #2D7853
-    box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
-/*----------- wysiwyg editor ------------------*/
-.wysiwyg 
-    position: relative
-
-.wsywigEdit 
-    position: absolute
-    top: 0
-    right: 0
-    height: 1.5em
-    z-index: 10
-    cursor: pointer
-
-#pg-hdr > button 
-    width: 148px
-
-.adminbttn 
-    background: #3399ff !important
-    color: white !important
-    border-radius: 5px !important
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.3)
-
-.adminbttn:hover 
-    background: #1A80E6
-    box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
-/*------------- DATA TABLES STYLES -----------------*/
-#tbl-ctrl-div  // data-tables button container
-    position: absolute
-    top: -1000px
-    right: -1000px
-    
-#btn-div
-    flex-wrap wrap 
-    justify-content center
-
-#btn-div > *
-    margin-right 1em
-
-input[type="search"]
-    border 1px solid grey
-    height 23px
-    
-.dt-bttn //data-tables
-    font-size: 14px !important;
-    line-height: 1.4 !important;
-    padding: 2px 3px 1px 3px !important;
-    height 25px
-/*------------- MISC STYLES -----------------*/
-#error_logo /* Logo used on error and 404 pages */
-    width: 50%   /* RESPONSIVE */
-    margin: 2% auto 0 auto
-
-.modal-msg // intro.js modal message window
-    min-width: 333px !important
-/* ====================== PAGE SPECIFIC ===================================== */
-/*----- (SEARCH PAGE IN DEDICATED FILE: DB.STYL & SEARCH_DB.CSS) -------------*/
-.first-col, .second-col 
-    max-width 100vw
-    padding .5em
-/*---------------- HOME ---------------------*/
-#home-pg .two-col-cntnr > div, #team .first-col, #team .second-col
-    flex: 1 1 420px;
-/*--------------- PROJECT -------------------*/
-#about-pg .first-col
-    @extend .flex-col
-    flex: 1 1 600px
-    
-#about-pg .second-col
-    @extend .flex-col
-    flex: 1 0 375px
-
-#team-hdr
-    text-align: center
-    margin: 2em auto 2em auto
-    width 100%
-    
-.bio-img 
-    height: 200px
-    width: 160px
-    float: left
-    margin: 0 1em 1.5em 0
-    box-shadow: 2px 2px 3px rgba(0,0,0,0.6)
-/*-------------- ABOUT DB ------------------*/
-#about-db .first-col
-    flex: 1 1 400px
-    max-width 100vw
-    
-#about-db .second-col
-    flex: 1 0 375px
-    max-width 100vw
-
-#about-db-how-to-use ul 
-    padding-inline-start: 2.5em
-    padding-bottom 1em
-    padding-top 0
-
-.db-about-imgs
-    @extends .flex-col 
-    align-items center
-
-.db-about-imgs>img 
-    padding .25em 0 3em 0
-/*-------------- DEFINITIONS ----------------*/
-#def-pg .first-col
-    flex: 1 0 300px
-    max-width 100vw
-    
-#def-pg .second-col
-    flex: 2 1 800px
-    max-width 100vw
-/*------------- FUTURE DEV -----------------*/
-#add-pubs
-    margin 1em 0 2em 0
-    height: 40vh
-    width: 100vw
-    @media screen and (min-width: 1330px)
-        height 445px
-        width 100%
-        
-#future-dev-pg .first-col
-    flex: 1 1 400px
-    max-width 100vw
-    
-#future-dev-pg .second-col
-    flex: 2 1 400px
-    max-width 100vw
-/*------------- REGISTRATION -----------------*/
-.two-col-outer .first-col
-    flex: 2 1 420px;
-    
-.two-col-outer .second-col
-    flex: 1 1 420px;
-
-#reg-form-container>form div div 
-    justify-content: space-between
-
-#reg-form-container>form div div input, #reg-form-container>form div div textarea
-    width 100%
-/*--------------- Upload Files / PDFS --------------------------*/
-form[name="appbundle_file_upload"] textarea
-    width: 100%;
-
-.pdf-popup
-    width: 1000px
-    margin: 5em auto
-    height: 600px
+/*------------ IMAGE SLIDER ---------------- */
+@import "img-slider"
+/* -------- HEADER & NAVIGATION ------------ */
+@import "nav"
+/* ------- OVERLAY & POPUP WINDOWS ---------- */
+@import "popups"
+/* ------- WYSIWYG / DATATABLES / MISC ------ */
+@import "misc"
+/* ----------- PAGE SPECIFIC ---------------- */
+@import "pages"
