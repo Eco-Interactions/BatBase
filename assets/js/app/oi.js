@@ -5,7 +5,10 @@ initUi();
 authDependantInit();  
 clearFieldForPdfSubmissions();
 
-let timeout;
+/*
+ * timeout - present when window is being resized.
+ */
+const app = {};
 
 /* ------------ Styles and Scripts ------------------*/
 function requireStyles() {
@@ -19,12 +22,15 @@ function requireGlobalJquery() {
 }
 /* ---------------------------- UI ------------------------------------------ */
 function initUi() {
-    addWindowResizeEvent();
+    initNavMenu();
     initTos();
     initDataTable();
     ifNotChromeShowOptimizedMsg();
     initImageSlider();
     initStickyHeader();
+}
+function initNavMenu() {
+    require('./nav.js').initMenu();
 }
 function initTos() {
     require('./tos.js').init();
@@ -32,6 +38,7 @@ function initTos() {
 function initImageSlider() {    
     setSliderContainerStyles();
     setSlideInterval();
+    window.addEventListener('resize', resetSliderHeight);
 }
 /* Sets container height and then adds bottom border to the main menu */
 function setSliderContainerStyles() {
@@ -65,6 +72,13 @@ function setSlideInterval() {
         }, 1000)
     }, 10000);
 }
+function resetSliderHeight() {
+    if (app.timeout) { return; }
+    app.timeout = window.setTimeout(() => {
+        setSliderAndContentSize();
+        app.timeout = false;
+    }, 2100);
+}
 function initStickyHeader() {
     const staticHdrHeight = $('#img-slider').outerHeight();
     $(window).scroll(function () {
@@ -89,16 +103,6 @@ function clearFieldForPdfSubmissions() {
     if (window.location.pathname.includes('upload/publication')) {
         $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
     }
-}
-function addWindowResizeEvent() {
-    window.addEventListener('resize', resetSliderHeight);
-}
-function resetSliderHeight() {
-    if (timeout) { return; }
-    timeout = window.setTimeout(() => {
-        setSliderAndContentSize();
-        timeout = false;
-    }, 2100);
 }
 /* ------------------ Auth Dependant --------------------- */
 function authDependantInit() { 

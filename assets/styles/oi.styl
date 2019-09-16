@@ -77,10 +77,10 @@ span.lbl
 .em-mrg
     margin: 1em
 
-.hiddenElem 
-    display: none
+// .hidden
+//     display: none
 
-.invis
+.invis  // Used in data entry forms
     visibility: hidden
 
 .waiting 
@@ -150,7 +150,7 @@ $slider-height
     height 14vw
     @media screen and (min-width: 800px) and (max-width 1300px)
         height 20vw
-    @media screen and (min-width: 600px) and (max-width 800px)
+    @media screen and (min-width: 400px) and (max-width 800px)
         height 28vw
 
 #slider-logo.mobile-hdr
@@ -208,68 +208,11 @@ $slider-height
     opacity: 0
     object-fit: cover
 /**--------------- Header Menu Styles -------------------*/
-#sticky-hdr
-    @extend $content-width
-    
-#sticky-hdr.mobile
-    width 100vw
-
-#hdrmenu 
-    display: flex
-    justify-content: space-between
-    height: 43px
-    line-height: 43px
-    background-color: White
-    
-.top-sticky 
-    z-index: 1001 
-    position: fixed !important //necessary when showing browser...
-    top: 0 !important  //... optimization message (non-chrome browsers)
-    background-color: White
-    width: 100%
-
-#site-name 
-    text-align: center
-    font-size: 23px
-    color: DimGray
-    height: 43px
-    line-height: 43px
-    margin-right .5em
-/* -- PAGE HEADER BAR -- */
-#pg-hdr 
-    display: flex
-    position: relative
-    justify-content: space-between;
-    text-align: right;
-    font-size: 21px;
-    height: 43px;
-    padding: 9px 8px 0 12px;
-
-#hdr-right 
-    display: flex
-    justify-content: flex-start
-    background: White
-    
-#hdricopen {
-    width: 1em;
-    height: auto;
-    z-index: 0;
-    margin: 0 1em 0 .5em;
-    position: relative;
-    top: .1em;
-}
-#hdrmenu ul li {
-    position:relative;
-    display:inline-block;
-    margin:0;
-    padding: 0;
-}
-#hdrmenu ul li.current-menu-item {
-    background: #ddd;
-}
+@import "nav"
 /* ---------------------- PAGE CONTENT -------------------------- */
 #content-detail
     position: absolute
+    z-index: -1
     width: 100%
     padding .5em
     margin-top 1em
@@ -512,72 +455,3 @@ form[name="appbundle_file_upload"] textarea
     width: 1000px
     margin: 5em auto
     height: 600px
-
-
-
-
-
-
-
-
-
-/* -- MENU -- */
-#oimenu
-    // width: 1000px
-    // padding: 0
-    // margin: 0
-
-#oimenu a 
-    color: Black
-    display: inline-block
-    text-align: center
-    text-decoration: none
-    font-weight: 700
-    font-size: 23px
-    line-height: 32px
-    padding: .2em 1em .2em .5em
-
-.arrow > a:after 
-  content: " \25BC"
-  font-size: .5em
-  display: block
-  position: absolute
-  top: .5em
-  right: .7em
-
-#oimenu li:hover 
-    background: LightGrey;
-
-#oimenu ul {
-    display:none;
-    z-index: 1000;
-    position:absolute;
-    top:100%;
-    left:0;
-    background: WhiteSmoke;
-    padding: 0;
-    box-shadow: 10px 10px 23px #888888;
-}
-#oimenu ul li {
-    width: 250px;
-}
-#oimenu ul a {
-    line-height:120%;
-    padding:10px 15px;
-}
-#oimenu ul ul {
-    top:0;
-    left:100%;
-}
-#oimenu .smtrigger > ul {
-    display:none;
-}
-#oimenu .smtrigger:hover > ul {
-    display:block;
-}
-.admin-menu {
-    background: rgba(26, 128, 230, .3);
-}
-.super-admin-menu {
-    background: rgba(54, 151, 111, .3);
-}

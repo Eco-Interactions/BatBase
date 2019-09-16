@@ -22,10 +22,14 @@
     {% set menuClass = is_mobile_view() ? 'mobile' : '' %}
     <div id="sticky-hdr" class="{{ menuClass }}">
         <div id="hdrmenu">
-            {% if is_full_view() or is_tablet_view() %}
+            <nav class="invis">
+                <div id="mobile-menu-bar">
+                    <span class="toggle">☰ Menu</span>
+                    <div class="site-name">batplant.org</div>
+                </div>
                 {{ knp_menu_render(menu, {'currentAsLink': true, 'currentClass': 'active', 'compressed': true}) }}
-            {% endif %}
-            <div id="site-name">batplant.org</div>
+                <div id="site-name">batplant.org</div>
+            </nav>
         </div>
         <div id="pg-hdr" class="flex-row" style="justify-content: space-between;">
             <div id="headln-txt">

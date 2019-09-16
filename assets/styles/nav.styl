@@ -1,0 +1,173 @@
+/**--------------- Header Menu Styles -------------------*/
+#sticky-hdr
+    @extend $content-width
+    
+#sticky-hdr.mobile
+    width 100vw
+
+.top-sticky 
+    z-index: 1001 
+    position: fixed !important //necessary when showing browser...
+    top: 0 !important  //... optimization message (non-chrome browsers)
+    background-color: White
+    width: 100%
+
+    
+#hdrmenu 
+    display: flex
+    justify-content: space-between
+    height: 43px
+    line-height: 43px
+    background: White
+    transition: all 2s ease-in-out
+    
+#hdrmenu.vert 
+    height: fit-content
+    
+/* ------------- MENU --------------- */
+$menu-font
+    color: Black
+    text-decoration: none
+    font-weight: 700
+    font-size: 21px
+    line-height: 32px
+    padding: .2em 1em .2em .5em
+    @media screen and (max-width: 600px)
+        font-size: 19px
+    
+/* ---- Mobile Nav ---- */
+#mobile-menu-bar
+    @extends .flex-row
+    justify-content space-between
+    width: 100vw
+      
+.toggle 
+    @extends $menu-font
+    height 0
+
+#oimenu.vert.closed
+    border-radius: 0
+    padding: 0
+    border: 0
+    height: 0
+    overflow-y: hidden    
+
+#oimenu.vert
+    @extends .flex-col
+    width: 100%
+    background: WhiteSmoke
+    max-height: fit-content;
+    overflow-y: hidden    
+
+
+#oimenu.vert .smtrigger.closed > ul
+    max-height: 0;
+    overflow-y: hidden
+    
+#oimenu.vert .smtrigger > ul
+    max-height: fit-content;
+    width 95vw
+
+#oimenu.vert .smtrigger > ul li
+    width 95vw    
+/* ---- Shared Nav ---- */
+#oimenu a 
+    @extends $menu-font
+    text-align: center
+
+.smtrigger
+    position: relative
+    
+.smtrigger > a:after 
+    content: " \25BC"
+    font-size: .5em
+    display: block
+    position: absolute
+    top: .5em
+    right: .7em
+
+#oimenu li:hover 
+    background: LightGrey
+
+#oimenu ul.closed
+    max-height 0
+    
+#oimenu ul 
+    max-height: fit-content
+    z-index: 1000
+    position: absolute
+    top: 100%
+    left: 9px
+    bottom: 9px
+    background: WhiteSmoke
+    padding: 0
+    box-shadow: 10px 10px 23px #888888
+
+#oimenu ul li 
+    position:relative;
+    width: 250px
+    z-index: 1001
+    margin:0;
+    padding: 0;
+    
+#oimenu ul a 
+    line-height: 120%
+    padding: 10px 15px
+    
+
+#oimenu ul li a 
+    z-index 1001
+
+#oimenu ul li.current-menu-item
+    background: #ddd;
+
+#oimenu .smtrigger > ul 
+    // display: none
+    // max-height: 0
+
+#oimenu .smtrigger:hover > ul
+    // max-height: fit-content
+    // display: block
+
+.admin-menu 
+    background: rgba(26, 128, 230, .3)
+
+.super-admin-menu 
+    background: rgba(54, 151, 111, .3)
+
+#site-name, .site-name 
+    text-align: center
+    font-size: 23px
+    color: DimGray
+    height: 43px
+    line-height: 43px
+    margin-right .5em
+    @media screen and (max-width: 600px)
+        font-size: 19px
+/* -- PAGE HEADER BAR -- */
+#pg-hdr 
+    display: flex
+    position: relative
+    justify-content: space-between
+    // text-align: right
+    min-height: 43px
+    max-height fit-content
+    padding: 9px 8px 3px 12px
+    background: white
+    font-size: 21px
+    @media screen and (max-width: 600px)
+        font-size: 19px
+
+#hdr-right 
+    display: flex
+    justify-content: flex-start
+    background: White
+    
+#hdricopen { //Edit pencil on content block show page
+    width: 1em;
+    height: auto;
+    z-index: 0;
+    margin: 0 1em 0 .5em;
+    position: relative;
+    top: .1em;
+}

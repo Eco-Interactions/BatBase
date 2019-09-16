@@ -16,7 +16,7 @@ class Builder implements ContainerAwareInterface
         $menu->setChildrenAttributes(array('id' => 'oimenu'));
         $menu->addChild('Home', array('route' => 'app_home'));
         $menu->addChild('About', array('uri' => '#'));
-        $menu['About']->setAttribute('class', 'smtrigger arrow');
+        $menu['About']->setAttribute('class', 'closed smtrigger');
         $menu['About']->addChild('Project', array('route' => 'app_about'));
         $menu['About']->addChild('Database', array('route' => 'app_db_top'));  
         $menu['About']->addChild('Definitions', array('route' => 'app_definitions'));
@@ -25,7 +25,7 @@ class Builder implements ContainerAwareInterface
         $menu->addChild('Database', array('route' => 'app_search_show'));
         if ($this->_isLoggedInUser($options['usrrole'])) {
             $menu->addChild($user_name, array('uri' => '#'));
-            $menu[$user_name]->setAttribute('class', 'smtrigger arrow');
+            $menu[$user_name]->setAttribute('class', 'closed smtrigger');
             $menu[$user_name]->addChild('Submit Publication', array('route' => 'app_submit_pub'));
             if ($this->_isAdmin($options['usrrole'])) {
                 $menu[$user_name]->addChild('View Submissions', array('route' => 'app_file_upload_list'));

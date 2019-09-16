@@ -8,14 +8,13 @@ var $body = $('body');
 var $masthead = $('#hdrmenu');
 var feedbackUrl = $body.data('ajax-target-url') + 'feedback/post';
 var thisUrl = $body.data('this-url');
-var $lastTopMenu = $('#oimenu>li.last');
     
 /** Creates the "Leave Feedback" menu option for all registered users. */
 function init() {
-    if (feedbackUrl !== "false") {
-        $lastTopMenu.after('<li id="feedback-menu"><a href="#">Leave Feedback</a></li>');
-        $('#feedback-menu').on('click', showFeedbackPopup);
-    }
+    if (feedbackUrl == "false") { return; }
+    const fdbkElem = '<li id="feedback-menu"><a href="#">Leave Feedback</a></li>';
+    $('#oimenu>.last>ul').prepend(fdbkElem);
+    $('#feedback-menu').on('click', showFeedbackPopup);
 }
 function showFeedbackPopup() {
     createFeedbackPopUp();
