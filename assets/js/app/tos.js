@@ -1,18 +1,21 @@
-const exports = module.exports = { init: init };
-
-function init() {
+/*
+ * Code related to the Terms of Service & Privacy Notice popup.
+ * 
+ * Exports:         Imported by: 
+ *     initTos              oi
+ */
+export function initTos() {
     $('#reg-tos, #footer-tos, .tos-trigger').click(showTos);
     hideRegistrationSubmit();
 }
-
-/** If this is the registration page, diable the submit button. */
+/** If this is the registration page, disable the submit button. */
 function hideRegistrationSubmit() {
     if ($("#reg-submit")) { replaceWithAcceptTosBttn(); }
 }
 function replaceWithAcceptTosBttn() {
     $('#reg-submit').hide()
 }
-/** Show the ToS. If this is the registration page, show the 'accept' elements */
+/** Show the ToS. On the registration page, show the 'accept' elements */
 function showTos() {  
     if ($(this)[0].id === "reg-tos") { 
         showTosWindow();

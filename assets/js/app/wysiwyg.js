@@ -1,4 +1,3 @@
-const exports = module.exports = {};
 /*=================== Content Block WYSIWYG ======================================================*/
 require('../../libs/wysiwyg/trumbowyg.min.js');
 require('../../libs/wysiwyg/ui/trumbowyg.min.css');
@@ -7,7 +6,7 @@ let userRole;
 /**
  *  Adds edit content button to the top of any page with editable content blocks.
  */
-exports.init = function(role) { 
+export function init(role) {
     userRole = role;
     var contentBlocks = $('.wysiwyg');                                          //console.log("contentBlocks = %O", contentBlocks);
     if (contentBlocks.length > 0) { addEditContentButton(); }
