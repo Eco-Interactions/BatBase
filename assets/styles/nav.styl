@@ -19,11 +19,9 @@
     height: 43px
     line-height: 43px
     background: White
-    transition: all 2s ease-in-out
     
 #hdrmenu.vert 
     height: fit-content
-    
 /* ------------- MENU --------------- */
 $menu-font
     color: Black
@@ -34,7 +32,10 @@ $menu-font
     padding: .2em 1em .2em .5em
     @media screen and (max-width: 600px)
         font-size: 19px
-    
+
+.content-overlay 
+    background: rgba(0,0,0,.6)
+    height: fit-content
 /* ---- Mobile Nav ---- */
 #mobile-menu-bar
     @extends .flex-row
@@ -56,13 +57,12 @@ $menu-font
     @extends .flex-col
     width: 100%
     background: WhiteSmoke
-    max-height: fit-content;
-    overflow-y: hidden    
-
+    max-height: fit-content
+    overflow-y: hidden
 
 #oimenu.vert .smtrigger.closed > ul
     max-height: 0;
-    overflow-y: hidden
+    overflow-y: hidden 
     
 #oimenu.vert .smtrigger > ul
     max-height: fit-content;
@@ -71,6 +71,10 @@ $menu-font
 #oimenu.vert .smtrigger > ul li
     width 95vw    
 /* ---- Shared Nav ---- */
+nav 
+    width 100%
+    justify-content space-between
+    
 #oimenu a 
     @extends $menu-font
     text-align: center
@@ -88,9 +92,6 @@ $menu-font
 
 #oimenu li:hover 
     background: LightGrey
-
-#oimenu ul.closed
-    max-height 0
     
 #oimenu ul 
     max-height: fit-content
@@ -104,30 +105,24 @@ $menu-font
     box-shadow: 10px 10px 23px #888888
 
 #oimenu ul li 
-    position:relative;
+    position: relative;
     width: 250px
     z-index: 1001
     margin:0;
     padding: 0;
     
 #oimenu ul a 
-    line-height: 120%
     padding: 10px 15px
-    
-
-#oimenu ul li a 
-    z-index 1001
 
 #oimenu ul li.current-menu-item
     background: #ddd;
 
 #oimenu .smtrigger > ul 
-    // display: none
-    // max-height: 0
+    max-height: 0
+    overflow-y hidden
 
 #oimenu .smtrigger:hover > ul
-    // max-height: fit-content
-    // display: block
+    max-height: fit-content
 
 .admin-menu 
     background: rgba(26, 128, 230, .3)

@@ -13,36 +13,52 @@ const app = {
     breakpoint: 575
 };
 
-export function initMenu() {                                                    console.log('Initializing menu');
+export function initMenu() {                                                    //console.log('Initializing menu');
     addWindowResizeEvent();
-    if (window.innerWidth < app.breakpoint) {
-        initResponsiveNav();
+    if (window.innerWidth < app.breakpoint) { initResponsiveNav();
     } else {
         $('#mobile-menu-bar').hide();
+        $('#oimenu').addClass('flex-row');
     }
+    $('nav').removeClass('invis');
 }
 function addWindowResizeEvent() {
     const hndlr = window.innerWidth > app.breakpoint ? collapseNav : expandNav;
     window.addEventListener('resize', hndlr);
 }
-function initResponsiveNav() {                                                  console.log('initResponsiveNav')
+function initResponsiveNav() {                                                  //console.log('initResponsiveNav')
+    updateMenuStylesForMobile();
+    addClickEvents();
+}
+function updateMenuStylesForMobile() {
+    $('nav').removeClass('flex-row');
     $('#site-name').hide();
+    $('#mobile-menu-bar').show();
     $('#hdrmenu').addClass('vert');
     $('#oimenu').addClass('vert closed');
-    $('.toggle').css('height', 'fit-content').click(toggleMenu);
+    $('.toggle').css('height', 'fit-content');
+    $('#oimenu ul').css('position', 'relative');
+}
+function addClickEvents() {
+    $('.toggle').click(toggleMenu);
     $('li.smtrigger').click(toggleSubMenu);
     $('li.smtrigger ul a').click((e) => e.stopPropagation());
-    $('#oimenu ul').css('position', 'relative');
-    $('nav').removeClass('invis');
 }
-function toggleMenu() {                             console.log('toggleMenu. display = %s, trans = %s', $('#oimenu').css('display'), $('#oimenu').css('transition'));
-    if ($('#oimenu').hasClass('closed')) {                      console.log('showing menu')
-        $('#oimenu').removeClass('closed'); 
-    } else {                                                console.log('hiding menu')
-        $('#oimenu').addClass('closed');
-    }
+function toggleMenu() {                                                         //console.log('toggleMenu. display = %s, trans = %s', $('#oimenu').css('display'), $('#oimenu').css('transition'));
+    if ($('#oimenu').hasClass('closed')) { showMobileMenu();
+    } else { hideMobileMenu(); }
 }
-function toggleSubMenu(e) {                                              console.log('this ? %O. e = %O', this, e);
+function showMobileMenu() {
+    $('#oimenu').removeClass('closed'); 
+    $('#content-detail').addClass('content-overlay').click(toggleMenu);
+    $('#pg-hdr').css('background', 'rgba(0,0,0,.8)');
+}
+function hideMobileMenu() {   
+    $('#oimenu').addClass('closed');
+    $('#content-detail').removeClass('content-overlay').off('click', toggleMenu);
+    $('#pg-hdr').css('background', '#fff');
+}
+function toggleSubMenu(e) {                                                     //console.log('this ? %O. e = %O', this, e);
     event.preventDefault();
     if ($(this).hasClass('closed')) {                                   
         $(this).removeClass('closed');                                
@@ -52,7 +68,7 @@ function toggleSubMenu(e) {                                              console
     }
 }
 function collapseNav() {  
-    if (window.innerWidth > app.breakpoint || app.timeout) { return; }          console.log('collapseNav')
+    if (window.innerWidth > app.breakpoint || app.timeout) { return; }          //console.log('collapseNav')
     app.timeout = window.setTimeout(() => {
         initResponsiveNav();
         window.removeEventListener('resize', collapseNav);
@@ -61,7 +77,7 @@ function collapseNav() {
     }, 500);
 }
 function expandNav() {  
-    if (window.innerWidth < app.breakpoint || app.timeout) { return; }          console.log('expandNav')
+    if (window.innerWidth < app.breakpoint || app.timeout) { return; }          //console.log('expandNav')
     app.timeout = window.setTimeout(() => {
         removeResponsiveNav()
         window.removeEventListener('resize', expandNav);
@@ -71,8 +87,12 @@ function expandNav() {
 }
 function removeResponsiveNav() {
     $('#mobile-menu-bar').hide();
-    $('#oimenu').removeClass('collapse');
+    $('#site-name').show();
+    $('nav').addClass('flex-row');
+    $('#oimenu').addClass('flex-row');
+    $('#oimenu').removeClass('vert closed');
+    $('#hdrmenu').removeClass('vert');
     $('#oimenu ul').css('position', 'absolute');
-    $('.toggle').css('display', 'none').off('click');
-    $('.smtrigger .arrow .dropdown').off('click');
+    $('.toggle').css('height', '0').off('click', toggleMenu);
+    $('li.smtrigger').off('click', toggleSubMenu);
 }
