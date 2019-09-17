@@ -55,6 +55,7 @@ function initStickyHeader() {
 function handlePageSpecificUiInit() {
     initDataTable();
     clearFieldForPdfSubmissions();
+    showOverlayOnMobile();
 }
 /**
  * Initiates tables and rearranges related UI. 
@@ -71,12 +72,36 @@ function clearFieldForPdfSubmissions() {
         $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
     }
 }
+/*
+ * For pages that are not able to be used on mobile devices, show a popup directing
+ * users to view page on a computer.
+ */
+function showOverlayOnMobile() {
+    if (isMobileFriendlyPage() || window.innerWidth > 1200) { return; } 
+    showMobilePopupMsg();
+}
+function isMobileFriendlyPage() {
+    const pages = ['search', 'view-pdfs', 'feedback'];
+    const path = window.location.pathname;  console.log('path = ', path)
+    return !pages.find(pg => path.includes(pg));
+}
+function showMobilePopupMsg() {
+    const overlay = $('<div></div>').addClass('mobile-opt-overlay');
+    const popup = $('<div></div>').addClass('popup');
+    $(popup).html(getMobileMsgHtml());
+    $(overlay).append(popup);
+    $('#content-detail').prepend(overlay);
+    $('#b-overlay-popup').fadeIn(500);
+}
+function getMobileMsgHtml() {
+    return '<h2>This page can only be viewed on a computer.<h2>';
+}
 /* ========================= AUTH DEPENDENT ================================= */
 function authDependentInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
     if (userRole === 'visitor') { return; }
     initFeedbackUi();     
-    if (userRole === 'admin' && window.innerWidth > 750 || userRole === 'super') { 
+    if (userRole === 'admin' && window.innerWidth > 550 || userRole === 'super') { 
         initEditContentUi(); 
     } 
     

@@ -47,7 +47,7 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
  */
 let tblState = {};
 /** ------------- Page Init --------------------------------------------- */
-if (window.location.pathname.includes('search')) {
+if (window.location.pathname.includes('search') && window.innerWidth > 1200) {
     requireCss();
     requireJs();
     initDbPage();

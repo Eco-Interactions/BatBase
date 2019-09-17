@@ -4,6 +4,9 @@
  * Exports:         Imported by: 
  *     initSlider           oi
  */
+/* Present during window resizing. */
+let timeout;
+
 export function initSlider() {    
     setSliderContainerStyles();
     setSlideInterval();
@@ -20,13 +23,18 @@ function setSliderContainerStyles() {
  */
 function setSliderAndContentSize() { 
     const imgHeight = $('#img-slider img:nth-child(1)').outerHeight();  
+    if (!imgHeight) { //mobile devices
+        setContentTopValue();
+    } else {
+        $('#img-slider').css('height', imgHeight);
+        $('#slider-logo').css('height', (imgHeight/2));
+    }
+}
+function setContentTopValue() {
     const cntnrHeight = $('#slider-overlay').outerHeight();
     const logoHeight = $('#slider-logo').outerHeight();  
     const contentHeight = (cntnrHeight || logoHeight) + 86;
-    $('#img-slider').css('height', imgHeight);
-    if (!imgHeight) { //mobile devices
-        $('#content-detail').css('top', contentHeight);
-    }
+    $('#content-detail').css('top', contentHeight);
 }
 function setSlideInterval() {
     let curSlide = 1,
@@ -42,10 +50,10 @@ function setSlideInterval() {
     }, 10000);
 }
 function resetSliderHeight() {
-    if (app.timeout) { return; }
-    app.timeout = window.setTimeout(() => {
+    if (timeout) { return; }
+    timeout = window.setTimeout(() => {
         setSliderAndContentSize();
-        app.timeout = false;
+        timeout = false;
     }, 2100);
 }
 function initStickyHeader() {

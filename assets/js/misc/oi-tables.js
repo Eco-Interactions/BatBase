@@ -1,7 +1,6 @@
 /**
  * Initializes the Data Table library and table on certain pages.  
  */
-
 import 'datatables';
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import 'datatables.net-buttons';
@@ -18,7 +17,8 @@ export function init(tableName) {
                 pub_pdf_tbl:   [    2,  'onehund'],
     };
     const params = tables[tableName];
-    initOiDataTable(params[0], params[1], tableName);
+    initOiDataTable([0], params[1], tableName);
+    if (window.innerWidth < 1280 && tableName !== 'biblio_tbl') { return; } //Popup is displayed directing users to view page on computer.
     relocCtrls(tableName);
 } 
 function initOiDataTable(lastExptCol, dataLngth, tblName) {
@@ -63,7 +63,8 @@ function relocCtrls(tableName) {
     $btnDiv.attr({'id': 'btn-div', 'class': 'flex-row'});
     $filterDiv.detach();
     $pgLngthDiv.detach();
-    $btnDiv.prepend($pgLngthDiv).append($filterDiv).detach();
+    $btnDiv.append($filterDiv).detach();
+    addPgLengthIf(tableName, $btnDiv, $pgLngthDiv);
     if ($('#online_users_tbl_wrapper').length) { return; }
     if (window.innerWidth < 750) { 
         $('#content-detail').prepend($btnDiv);
@@ -71,3 +72,8 @@ function relocCtrls(tableName) {
         $('#hdr-right').append($btnDiv);
     }
 };
+/* If not viewing the bibliography table on a screen smaller than 1220 pixels wide. */
+function addPgLengthIf(tableName, $btnDiv, $pgLngthDiv) {
+    if (tableName == 'biblio_tbl' && window.innerWidth < 1220) { return; }
+    $btnDiv.prepend($pgLngthDiv);
+}

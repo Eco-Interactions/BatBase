@@ -1,6 +1,7 @@
 // BASE 
 // TOS 
-// FEEDBACK 
+// FEEDBACK
+// MOBILE OPT 
 /* -------------- BASE STYLES ------------ */
 #b-overlay 
     display: none
@@ -13,14 +14,14 @@
     z-index: 1500
     justify-content: center
 
-.overlay 
+.overlay // Used for logo and optimization popups on mobile
     position: fixed
     top: 0
     bottom: 0
     width: 100vw
     height: 100vh
 
-#b-overlay-popup 
+.popup
     position: relative
     background-color: WhiteSmoke
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75)
@@ -29,7 +30,7 @@
     margin: auto
     padding: 2em
     top 3em
-    max-height 86vh
+    max-height 80vh
     max-width 90vw
     @media screen and (min-width: 750px)
         max-width 700px
@@ -75,3 +76,11 @@
 .feedback-popup > button:hover 
     background: #2D7853
     box-shadow: 3px 3px 4px rgba(0,0,0,0.6)
+/* --------- MOBILE OPT ------------- */
+.mobile-opt-overlay
+    position absolute
+    height 100%
+    width 100vw
+    background: rgba(0,0,0,.8)
+    z-index: 777
+    justify-content: center
