@@ -1,17 +1,49 @@
 /*
  * Style sheet for the Database Search page. 
+ * Note: Screens must have a pixel width of at least 1280 to view this page.
  *
  * Note: Fully refactoring from css -> stylus has not been prioritized. Moving
  * pieces over as they get worked on
+ *
+ * CODE SECTIONS:
+ *     ROOT ELEM STYLES
+ *     SEARCH OPTIONS BAR
+ *     MISC
+ *         INTRO.JS
+ *         TIPS POPUP      
  */
  /* ====================== PAGE STYLES ====================================== */
 #content-detail
     margin-top 0
-/*--- Database Search Page Styles ---*/
+/*--- ROOT ELEM STYLES ---*/
 #detail-block input, #detail-block textarea, #detail-block select
     padding: 4px
 
-/** ------- Intro.js ------- */
+/* ================= SEARCH OPTIONS BAR STYLES ============================== */
+
+#focus-opts 
+    flex: 0 0 458px
+    padding: 5px
+    align-items: center
+    @media screen and (min-width: 1200px) and (max-width: 1330px) 
+        flex: 0 0 427px
+        font-size .9em
+
+#focus-opts span
+    padding-top: 6px
+
+/*------------ Buttons ----------------------*/
+#shw-map
+    width: 150px
+
+
+#rvw-data:before 
+    @media screen and (min-width: 1200px) and (max-width: 1330px) 
+        content: ''
+        width 0
+
+ /* ====================== MISC STYLES ====================================== */
+/** ------- INTRO.JS ------- */
 .intro-tips  // Walkthrough tutorial 
     width: 420px
     text-align: justify
@@ -24,7 +56,7 @@
     height: 22px !important
     width: 23px !important
     font-weight: 600
-/*--------- Search Tips Popup ---------*/
+/*--------- TIPS POPUP ---------*/
 #tips-close-bttn 
     position: relative
     margin-top: .5em

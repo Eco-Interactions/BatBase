@@ -27,14 +27,6 @@
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
 }
-#focus-opts {
-    flex: 0 0 458px;
-    padding: 5px;
-    align-items: center;
-}
-#focus-opts span {
-    padding-top: 6px;
-}
 .focus-sel {
     width: 88px;
     margin: 0 .5em 0 .5em;
@@ -441,8 +433,7 @@ input[name="mod-list"] {
     color: #666;
 }
 #view-fltr {
-/*    padding-top: 2px;
-*/    font-size: .9em;
+    font-size: .9em;
     color: #666;
     margin-right: 3px;
 }
@@ -487,9 +478,6 @@ button[name="csv"]:before {
     content: url(./images/eye.svg);
     width: 19px;
 }
-#shw-map {
-    width: 204px;
-}
 #shw-map:before {
     content: url(./images/globe-africa.svg);
     width: 17px;
@@ -497,7 +485,6 @@ button[name="csv"]:before {
 button[name="int-set"]:before {
     content: url(./images/tasks.svg);
     width: 16px;
-
 }
 button[name="xpand-all"] {
     width: 105px;
@@ -1007,7 +994,7 @@ input.active-icon {
 @media screen and (max-width: 1500px) { 
     /*--------------- Search Page ---------------------*/
     #db-opts {
-        margin: 1em auto 0 .5em;
+        /*margin: 1em auto 0 .5em;*/
     }
     #fltr-int-panl-cntnr #filter-opts-pnl.vert {
         width: 604px;

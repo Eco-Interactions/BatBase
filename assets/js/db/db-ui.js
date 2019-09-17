@@ -577,11 +577,11 @@ function showTableRecordsOnMap() {                                              
     }
 }
 function updateBttnToReturnRcrdsToTable() {
-    $('#shw-map').text('Return to Table View');
+    $('#shw-map').text('Return to Table');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
 }
 function updateBttnToShowRcrdsOnMap() {
-    $('#shw-map').text('Show Interactions on Map');
+    $('#shw-map').text('Map Interactions');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
 }
 function returnRcrdsToTable() {
@@ -593,7 +593,7 @@ export function showTips() {                                                    
     if (!$('#tips-close-bttn').length) { initSearchTips(); }
     $('#b-overlay-popup').addClass("tips-popup");
     $('#b-overlay, #b-overlay-popup').fadeIn(500);
-    $('#show-tips').html("Hide Tips");
+    $('#show-tips').html("Tips");
     $('#show-tips').off("click");
     $('#show-tips').click(hideTips);
 }
@@ -603,7 +603,7 @@ function initSearchTips() {
 }
 function hideTips() {
     $('#b-overlay').fadeOut(500, removeTips);
-    $('#show-tips').html("Search Tips");
+    $('#show-tips').html("Tips");
     $('#show-tips').off("click");
     $('#show-tips').click(showTips);
     $('#b-overlay-popup').removeClass("tips-popup");
