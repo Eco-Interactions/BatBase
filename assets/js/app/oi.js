@@ -40,10 +40,12 @@ function initTos() {
 function initImageSlider() {    
     require('./img-slider.js').initSlider();
 }
+/* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
-    const staticHdrHeight = $('#img-slider').outerHeight();
+    const hdrHeight = $('#img-slider').outerHeight() || $('#slider-logo').outerHeight();  
+
     $(window).scroll(function () {
-        if ($(window).scrollTop() > staticHdrHeight) {
+        if ($(window).scrollTop() > hdrHeight) {
                 $('#sticky-hdr').addClass("top-sticky");
             } else {
                 $('#sticky-hdr').removeClass("top-sticky");
@@ -77,13 +79,15 @@ function clearFieldForPdfSubmissions() {
  * users to view page on a computer.
  */
 function showOverlayOnMobile() {
-    if (isMobileFriendlyPage() || window.innerWidth > 1200) { return; } 
+    if (isMobileFriendlyPage()) { return; } 
     showMobilePopupMsg();
 }
 function isMobileFriendlyPage() {
-    const pages = ['search', 'view-pdfs', 'feedback'];
-    const path = window.location.pathname;  console.log('path = ', path)
-    return !pages.find(pg => path.includes(pg));
+    const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
+    const path = window.location.pathname;  
+    return !Object.keys(map).find(pg => { 
+        return path.includes(pg) && window.innerWidth < map[pg];
+    });
 }
 function showMobilePopupMsg() {
     const overlay = $('<div></div>').addClass('mobile-opt-overlay');

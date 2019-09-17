@@ -6,8 +6,6 @@ import 'datatables.net-dt/css/jquery.dataTables.css';
 import 'datatables.net-buttons';
 import 'datatables.net-buttons-dt/css/buttons.dataTables.css';
 import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-fixedheader';
-import 'datatables.net-fixedheader-dt/css/fixedHeader.dataTables.css';
 
 export function init(tableName) { 
     const tables = {  /*      exportCol,  dataLngth  */
@@ -26,7 +24,6 @@ function initOiDataTable(lastExptCol, dataLngth, tblName) {
     const confg = getTblCfg(dataLngth, xportCols);                              //console.log('confg = %O', confg);
     const $tableElem = $('#' + tblName);                                        //console.log('tableElem = %O', $tableElem)
     $tableElem.DataTable(confg);
-    new $.fn.dataTable.FixedHeader( $tableElem, { header: true, headerOffset: 86 } );
 }  
 function getExportColArray(lastShownColIdx) {
     const ary = [];
