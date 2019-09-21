@@ -24,12 +24,15 @@ function initUi() {
     initTos();
     handlePageSpecificUiInit();
     authDependentInit();  
+    $('#b-overlay').hide(); // Hides loading overlay on mobile
+    $('.popup').show();
 }
 function initHeaderAndNav() {
     ifNotChromeShowOptimizedMsg();
     initNavMenu();
     initImageSlider();
     initStickyHeader(); //Must load after image slider and the nav menus
+    $('#pg-hdr').css('z-index', '1'); // Otherwise elem flashes under img-slider on page load
 }
 function initNavMenu() {
     require('./nav.js').initMenu();

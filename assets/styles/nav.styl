@@ -18,7 +18,8 @@
     height: 43px
     line-height: 43px
     background: White
-    // z-index 1001
+    border-bottom: 1px solid Gray
+    z-index 1001
     
 #hdrmenu.vert 
     height: fit-content
@@ -46,12 +47,16 @@ $menu-font
     @extends $menu-font
     height 0
 
+#oimenu
+    display none 
+    width fit-content 
+    
 #oimenu.vert.closed
     border-radius: 0
     padding: 0
     border: 0
     height: 0
-    overflow-y: hidden    
+    overflow-y: hidden  
 
 #oimenu.vert
     @extends .flex-col
@@ -140,7 +145,7 @@ nav
     color: DimGray
     height: 43px
     line-height: 43px
-    margin-right .5em
+    margin-right 1em
     @media screen and (max-width: 600px)
         font-size: 19px
 /* -- PAGE HEADER BAR -- */
@@ -155,6 +160,7 @@ nav
     background: white
     font-size: 21px
     z-index -1 //Otherwise, shows through img-slider on page load
+    border-bottom: 1px solid Gray
     @media screen and (max-width: 600px)
         font-size: 19px
 

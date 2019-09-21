@@ -8,11 +8,13 @@
     position: fixed
     top: 0
     bottom: 0
-    background: rgba(0,0,0,.8)
+    background: rgba(0,0,0,.6)
     width: 100vw
     height: 100vh
     z-index: 1500
     justify-content: center
+    @media screen and (max-width: 750px)
+        display: fixed
 
 .overlay // Used for logo and optimization popups on mobile
     position: fixed
@@ -22,10 +24,11 @@
     height: 100vh
 
 .popup
+    display: none
     position: relative
     background-color: WhiteSmoke
     box-shadow: 3px 3px 20px 1px rgba(0,0,0,0.75)
-    z-index: 2000
+    z-index: 20000
     border-radius: 5px
     margin: auto
     padding: 2em

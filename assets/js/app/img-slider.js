@@ -15,7 +15,6 @@ export function initSlider() {
 /* Sets container height and then adds bottom border to the main menu */
 function setSliderContainerStyles() {
     setSliderAndContentSize();
-    $('#hdrmenu, #pg-hdr').css('border-bottom', '1px solid Gray');
 }
 /**
  * Sets slider height based on absolute positioned child image. 
@@ -23,18 +22,18 @@ function setSliderContainerStyles() {
  */
 function setSliderAndContentSize() { 
     const imgHeight = $('#img-slider img:nth-child(1)').outerHeight();  
-    if (!imgHeight) { //mobile devices
-        setContentTopValue();
-    } else {
+    const top = !imgHeight ? getMobileTopValue() : imgHeight + 86;
+    if (imgHeight) { //non-mobile devices
         $('#img-slider').css('height', imgHeight);
         $('#slider-logo').css('height', (imgHeight/2));
     }
+    $('#content-detail').css('top', top);
 }
-function setContentTopValue() {
+/** Note: #slider-overlay used for non-chrome browsers. */
+function getMobileTopValue() {
     const cntnrHeight = $('#slider-overlay').outerHeight();
     const logoHeight = $('#slider-logo').outerHeight();  
-    const contentHeight = (cntnrHeight || logoHeight) + 86;
-    $('#content-detail').css('top', contentHeight);
+    return (cntnrHeight || logoHeight) + 86;
 }
 function setSlideInterval() {
     let curSlide = 1,

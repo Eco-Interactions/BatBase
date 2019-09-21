@@ -14,17 +14,18 @@ const app = {
 };
 
 export function initMenu() {                                                    //console.log('Initializing menu');
-    addWindowResizeEvent();
+    addEvents()
     if (window.innerWidth < app.breakpoint) { initResponsiveNav();
     } else {
         $('#mobile-menu-bar').hide();
         $('#oimenu').addClass('flex-row');
     }
-    $('nav').removeClass('invis');
+    $('#oimenu').css('display', 'flex'); 
 }
-function addWindowResizeEvent() {
+function addEvents() {
     const hndlr = window.innerWidth > app.breakpoint ? collapseNav : expandNav;
     window.addEventListener('resize', hndlr);
+    window.addEventListener("orientationchange", hndlr);
 }
 function initResponsiveNav() {                                                  //console.log('initResponsiveNav')
     updateMenuStylesForMobile();
@@ -33,7 +34,7 @@ function initResponsiveNav() {                                                  
 function updateMenuStylesForMobile() {
     $('nav').removeClass('flex-row');
     $('#site-name').hide();
-    $('#mobile-menu-bar').show();
+    $('#mobile-menu-bar').css('display', 'flex');
     $('#hdrmenu').addClass('vert');
     $('#oimenu').addClass('vert closed');
     $('.toggle').css('height', 'fit-content');
