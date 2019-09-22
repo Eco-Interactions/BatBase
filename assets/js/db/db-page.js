@@ -63,6 +63,7 @@ function requireCss() {
     require('../../css/search_db.css');  
     require('../../css/moz-styles.css');
     require('../../styles/db/db.styl');  
+    require('../../styles/db/forms.styl');  
 }
 function requireJs() {
     require('leaflet-control-geocoder');

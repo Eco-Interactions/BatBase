@@ -27,11 +27,10 @@ let fP = {};
 /** Builds and shows the popup form's structural elements. */
 function showFormPopup(actionHdr, entity, id) {
     const title = actionHdr + ' ' + entity;
-    $('#b-overlay-popup').addClass('form-popup');
     $('#b-overlay').addClass('form-ovrly');
+    $('#b-overlay-popup').addClass('form-popup');
     $('#b-overlay-popup').append(getFormWindowElems(entity, id, title));
     setFormSize(entity);
-    $('#b-overlay, #b-overlay-popup').css({display: 'flex'});        
 }
 /** Adds the width to both the popup window and the form element for each entity. */
 function setFormSize(entity) {
@@ -95,13 +94,13 @@ function exitFormPopup(e, skipReset) {
     hideSearchFormPopup();
     if (!skipReset) { refocusTableIfFormWasSubmitted(); }
     $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup");
+    $("#b-overlay-popup").removeClass("form-popup").css({width: 'unset'});
     $("#b-overlay-popup").empty();
     fP = {};
     db_map.clearMemory();
 }
 function hideSearchFormPopup() {
-    $('#b-overlay-popup, #b-overlay').css({display: 'none'});
+    $('#b-overlay').css({display: 'none'});
 }
 /**
  * If the form was not submitted the table does not reload. Otherwise, if exiting 
@@ -565,8 +564,8 @@ export function createEntity(id, entity) {                                      
 /** This prevents the potential of two map instances clashing. */
 function resetSearchPageIfInMapView() {
     if (getSelVal('#search-focus') !== 'locs') { return; }
-    if (getSelVal('#sel-realm') !== 'map') { return; }
-    setSelVal('#sel-realm', 'tree');
+    if (getSelVal('#sel-view') !== 'map') { return; }
+    setSelVal('#sel-view', 'tree');
 }
 /**
  * Inits the interaction form with all fields displayed and the first field, 

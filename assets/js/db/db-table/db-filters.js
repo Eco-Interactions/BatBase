@@ -224,7 +224,7 @@ function initCal() {
     const calOpts = {
         altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),   
         plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
-        onReady: getCalOnReadyMethod(), 
+        onReady: getCalOnReadyMethod(), disableMobile: true,
         onClose: filterByTime, 
     }; 
     addDefaultTimeIfTesting(calOpts);

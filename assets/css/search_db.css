@@ -12,7 +12,7 @@
 #db-opts {  /* .flex-row also on elem */
     margin: 1em auto 0 auto;
     width: 100%;
-    min-width: 1330px;
+    min-width: 1205px;
     font-size: 1.1em;
 }
 #db-opts button {
@@ -97,7 +97,7 @@ input[type="radio"], input[type="checkbox"] {
     padding-top: 5px;
 }
 #filter-col1 {
-    flex: 0 0 618px;
+    flex: 0 1 618px;
     border-right: black 1px solid;
 }
 #filter-col1.vert {
@@ -258,14 +258,10 @@ button[name="futureDevBttn"] {
     flex: initial;
 }
 #list-sel-cntnr.vert {
-    justify-content: space-around;
+    justify-content: space-between;
 }
-/*#int-lists button {*/
-    /*margin-top: auto;*/
-/*}*/
 #list-sel-cntnr.vert .int-list-sel {
-    width: 300px;
-
+    flex: 1 0 264px;
 }
 #load-list-cntnr {
     align-self: flex-end;
@@ -274,6 +270,7 @@ button[name="futureDevBttn"] {
 }
 #load-list-cntnr.vert {
     margin: 0;
+    align-self: center;
 }
 #load-list {
     margin-right: 0;
@@ -291,10 +288,6 @@ button[name="futureDevBttn"] {
 .int-list-sel {
     margin: auto 0 auto 0;
 }
-/*#saved-lists {
-    width: 333px;
-    height: 25px;
-}*/
 #list-details {
     flex: 0 1 490px;
     border-left: black 1px solid;
@@ -315,13 +308,13 @@ button[name="futureDevBttn"] {
     margin: .2em;
 }
 #list-details input {
-    min-width: 415px;
+    min-width: 333px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
 }
 #list-details.vert input {
-    min-width: 434px;
+    min-width: 306px;
 }
 #list-details textarea {
     width: 488px;
@@ -344,7 +337,7 @@ button[name="futureDevBttn"] {
     width: 40px;
 }
 #mod-list-pnl {
-    flex: 1 0 412px;
+    flex: 1 1 412px;
     padding-left: 0px;
 }
 #mod-list-pnl.vert {
@@ -502,7 +495,7 @@ button[name="show-hide-col"] {
 #xpand-tree {
     margin-right: .3em;
 }
-/**------------------------------ Data Table Styes -------------------------- */
+/**------------------------------ Table Styes ------------------------------- */
 #db-view {
     height: 86vh;
     border: black 1px solid;
@@ -637,22 +630,6 @@ button[name="show-hide-col"] {
     opacity: .2;
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
-.form-popup {
-    flex: 0 0 1330px;
-    height: 88vh;
-    width: 1330px !important;
-    top: 5% !important;
-    padding: 15px;
-    text-align: left;
-    justify-content: space-between;
-    flex-direction: column;
-    max-width: 1330px !important;
-    max-height: 88vh !important;
-}
-.form-ovrly {
-    align-items: center;
-    height: 91vh;
-}
 #top-hdr {
     font-size: 1.3em;
     margin-bottom: 1em;
@@ -703,6 +680,9 @@ button[name="show-hide-col"] {
 }
 .det-div div {
     padding: .5em 0 0 .5em;
+}
+.det-div div li {
+    padding: .2em
 }
 .cnt-div {
     margin: .5em;
@@ -1021,7 +1001,7 @@ input.active-icon {
         width: 201px;
     }
     #int-opts #list-details textarea {
-        width: 415px;
+        width: 333px;
     }
     #int-opts.vert #list-details textarea {
         width: auto;

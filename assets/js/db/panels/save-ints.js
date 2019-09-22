@@ -115,6 +115,7 @@ function stackIntListPanel() {
     $(`#int-opts, #int-lists, #list-details, #mod-list-pnl, #load-list-cntnr,
         #list-sel-cntnr, #list-count`).addClass('vert');
     stackListElems();
+    if (window.innerWidth < 1313) { $('#load-list-cntnr div').text('(Filters reset)'); }
 }
 function stackListElems() {
     $('#top-details').append($('#list-count').detach());

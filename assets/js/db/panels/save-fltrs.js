@@ -74,7 +74,7 @@ function sizeFilterPanelTab() {
         const elemClass = '.hide-fltr-bttm-border' + (split ? '-vert' : '');
         $(elemClass + ':before').remove();
         $(elemClass).append(pseudo);
-    }, 300);
+    }, 555);
 }
 function getPseudoBorderStyle() {
     const panelT = $('#filter-opts-pnl').position().top;
