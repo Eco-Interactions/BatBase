@@ -15,13 +15,19 @@
                 {{ blocks["future-developments-overview"]|raw }}
             </div>
         {% endblock firstcol %}
-        {% block secondcol %}            
-            <h3>Publications currently being added to the database:</h3>
-            <object id='add-pubs' data="{{ asset('build/files/Publications To Add.pdf') }}"></object>
-            <h3>Suggestions?</h3>
-            <p>If you have suggestions for additional publications or articles, 
-                please send the relevant information and a pdf of it to 
-                <a href="mailto:info@batplant.org?subject=Future%20Developments">info@batplant.org</a>.</p>
+        {% block secondcol %}    
+            <h3>Publications being added to the database:</h3>
+            {% if is_full_view() %}        
+                <object id='add-pubs' data="{{ asset('build/files/Publications To Add.pdf') }}"></object>
+            {% else %}
+                <p><a href="{{ asset('build/files/Publications To Add.pdf') }}" 
+                    target="_blank">Click to view PDF in a new tab.</a></p>
+            {% endif %}
+            <h4 class="top-em-mrg">Submitting new publications:</h4> 
+            <p>We are now able to recieve new publications submitted through this
+                website on our <a href="{{ path('app_submit_pub') }}">
+                Submit Publication</a> page.
+            </p>
         {% endblock secondcol%}
     {% endembed %}
     </div>

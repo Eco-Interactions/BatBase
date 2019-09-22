@@ -5,7 +5,7 @@
 {% block headline %}Submit Publication{% endblock %}
 
 {% block detail %}
-    <div class="top-pgs">
+    <div id="pub-sbmt-pg" class="top-pgs">
         {% embed 'two_cols_sect.html.twig' %}
             {% block firstcol %}
                 <h4> The Bat Eco-Interactions Database currently has over 7500 interactions
@@ -31,7 +31,7 @@
                 {{ form_end(form) }}
             {% endblock firstcol %}
             {% block secondcol %}   
-                {% if not is_mobile_view() %}         
+                {% if is_full_view() %}         
                     <h4>Publications currently being added to the database:</h4>
                     <br>
                     <object id='add-pubs' data="{{ asset('build/files/Publications To Add.pdf') }}"></object>

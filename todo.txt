@@ -6,6 +6,21 @@ Thoughts:
 After next server update:
     - Update where to upload pdfs to registration page, future dev, db about
 
+
+Updates:
+    - Publication upload
+    - Site designed for mobile use
+    - Data entry forms improved
+        - Added mapping to location forms
+    - Ability to save set of filters and lists of interactions
+
+    Upcoming: 
+        - Adding "Virus" realms, and more.
+        - Data review features
+        - Figure out how to get Logs in UI for new editors
+
+
+
 >==== Change Log ====
     - All pages look good on all device sizes and the modern browers: chrome, firefox, and safari (IE?)
 
@@ -17,10 +32,6 @@ Current:
     - Make site mobile-friendly
         - todo
             - get mobile images for db about page
-            - Lock out pages with tables on mobile
-                - view submissions
-                - view feedback
-                - database?
         - testing mobile versions
             - https://github.com/suncat2000/MobileDetectBundle/issues/76
     - Add to dev notes: workaround with webpack and asset building

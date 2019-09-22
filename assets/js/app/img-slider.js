@@ -55,14 +55,3 @@ function resetSliderHeight() {
         timeout = false;
     }, 2100);
 }
-function initStickyHeader() {
-    const staticHdrHeight = $('#img-slider').outerHeight();
-    $(window).scroll(function () {
-        if ($(window).scrollTop() > staticHdrHeight) {
-                $('#sticky-hdr').addClass("top-sticky");
-            } else {
-                $('#sticky-hdr').removeClass("top-sticky");
-            }
-    });
-    $(window).scroll();
-};

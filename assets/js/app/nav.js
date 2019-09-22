@@ -64,6 +64,7 @@ function hideMobileMenu() {
 function toggleSubMenu(e) {                                                     //console.log('this ? %O. e = %O', this, e);
     event.preventDefault();
     if ($(this).hasClass('closed')) {                                   
+        $('li.smtrigger').addClass('closed'); // closes all open sub-menus
         $(this).removeClass('closed');                                
         this.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
     } else {
