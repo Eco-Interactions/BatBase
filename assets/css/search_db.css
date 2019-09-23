@@ -495,6 +495,10 @@ button[name="show-hide-col"] {
 #xpand-tree {
     margin-right: .3em;
 }
+.skipFormData {
+    color: slategray;
+    padding-top: .5em;
+}
 /**------------------------------ Table Styes ------------------------------- */
 #db-view {
     height: 86vh;
@@ -652,12 +656,6 @@ button[name="show-hide-col"] {
     text-align: center;
     padding-top: 4px;
 }
-#form-main {
-    padding: 5px 0 0 5px;
-    height: 81vh;
-    overflow-x: hidden;
-    overflow-y: scroll;
-}
 #form-details {
     flex: 1 1 333px;
     margin: .5em .2em 0 .2em;
@@ -712,33 +710,12 @@ button[name="show-hide-col"] {
     left: 24%;
     font-size: .75em !important;
 }
-.med-form {
-    border: 1px solid grey;
-    border-radius: 5px;
-    width: 808px;
-    padding: 3px;
-    margin: 11px 0 10px 100px;
-}
-.sml-form {
-    border: 1px solid grey;
-    border-radius: 5px;
-    padding: 5px;
-    min-width: 385px;
-    margin-top: .5em;
-}
 div[id$="_Rows"] {
     min-width: 100%;
 }
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
-}
-.sml-left {
-    position: relative;
-    left: 10px;
-}
-.sml-right {
-    position: relative;
-    right: 25px;
+    width: 100%;
 }
 #sub-hdr, #sub2-hdr {
     font-size: 1.1em;
@@ -752,18 +729,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .field-row {
     justify-content: space-between;
     margin-top: .3em;
-}
-.top-row {
-    max-width: 458px;
-}
-.full-row {
-    width: 917px;
-}
-.sub-row {
-    width: 398px; 
-}
-.sub2-row {
-    width: 372px;
 }
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
@@ -805,34 +770,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: .2em;
     margin: 0;
     font-size: .95em;
-    /*border: gray 1px solid;*/
-    /*border-radius: 4px;*/
-}
-.xlrg-field {
-    width: 643px;
-}
-.top.xlrg-field {
-    width: 800px;
-}
-.lrg-field {
-    width: 302px;
-}
-.med-field { 
-    width: 240px; 
-}
-.sml-field {
-    width: 200px;
-}
-#top-form textarea {
-    height: 63px;
 }
 #Note-txt {
     border-color: #b8b8b8;
-}
-#top-form label {
-    font-size: 1em;
-    padding: 9px 0 2px 0;
-    width: 125px;
 }
 .bttn-cntnr {
     align-self: flex-end;
@@ -1006,62 +946,5 @@ input.active-icon {
     #int-opts.vert #list-details textarea {
         width: auto;
         flex-grow: 1;
-    }
-    /*--------------- Database CRUD Popup -------------*/
-    #b-overlay #sub2-form.sml-form {  
-        min-width: 366px;
-    }
-    #b-overlay .top-row {
-        padding: .2em 0 .3em  0;
-        min-width: 434px;
-        margin-right: 1em;
-    }
-    #b-overlay .sub-row {
-        width: 384px; /*375*/
-    }
-    #b-overlay .long-sub-row {
-        width: 750px;
-    }
-    #b-overlay .sub2-row {
-        width: 363px;
-    }
-    #b-overlay .med-form {
-        width: 777px;
-        margin: 11px 0 10px 60px;
-    }
-    #b-overlay .full-row {
-        padding: .2em 0 .3em  0;
-        width: 850px;
-    }
-    #form-main.edit #citation_Rows .full-row {
-        padding: .2em .75em .3em  0;
-        width: 895px;
-    }
-    #b-overlay #citation_Rows .full-row {
-        padding: .2em .75em .3em  .75em;
-        width: 766px;
-    }
-    #b-overlay #Note_row div.field-row {        
-        width: 888px;
-    }
-    #b-overlay #top-form label {
-        font-size: 1em;
-        padding: 5px 0 2px 0;
-        width: 121px;
-    }  
-    #b-overlay .top.xlrg-field {
-        width: 751px;
-    }
-    #b-overlay .xlrg-field {
-        width: 614px;
-    }
-    #b-overlay .lrg-field {
-        width: 289px;
-    } 
-    #b-overlay .med-field {
-        width: 232px;
-    }
-    #b-overlay .sml-field {
-        width: 175px;
     }
 } 

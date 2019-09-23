@@ -1,22 +1,102 @@
 // Core Form
+//      Large 
+//      Medium
+//      Small
+//      Sub-forms
+//      Fields
+//      Row Containers
 /*-------------------------- Database CRUD Popup -----------------------------*/
 /* ============= Core Form =================== */
 .form-ovrly
     align-items: center
     display flex !important
-    // height: 91vh
     
 .form-popup 
-    flex: 0 1 1330px
     display flex
-    max-height: 88vh
-    min-width: 1200px
-    max-width: 1330px;
-    top: 5% !important
-    padding: 15px
+    top: 0 !important
     text-align: left
     justify-content: space-between
     flex-direction: column
-    @media screen and (max-width: 1330px) 
-        padding 7px
+    overflow-y: scroll;
 
+#form-main
+    padding: 5px 0 0 5px;
+    overflow-x: hidden;
+/* --- Large (Interaction) Forms --- */
+.form-popup.lrg-form
+    padding: 15px
+    flex: 0 1 1330px
+    max-height: 88vh
+    min-width: 1200px
+    height 88vh 
+
+#form-main.lrg-form
+    height 88vh 
+    flex 1 1 942px
+/* --- Medium Forms --- */
+.form-popup.med-form
+    padding: 15px
+    flex: 0 1 1212px
+    height 77vh
+    max-height: 77vh
+    min-width: 1200px
+    max-width: 666px
+    
+#form-main.med-form
+    height 77vh
+    flex 1 1 909px
+/* --- Small Forms --- */
+.form-popup.sml-form
+    padding: 15px
+    flex: 0 0 750px
+    height 55vh
+    max-height: 55vh
+    min-width: unset
+    
+#form-main.sml-form
+    height 55vh
+    flex 0 0 400px
+/* --- Sub-forms --- */
+$sub-form-styles 
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 5px;
+    
+.med-sub-form
+    @extends $sub-form-styles
+    flex: 1 1 808px
+    margin: 11px 0 10px 55px;
+    
+.sml-sub-form
+    @extends $sub-form-styles
+    flex: 1 1 385px
+    margin-top: .5em;
+    
+/* --------- Row Containers -------- */
+.top-row 
+    min-width 300px
+
+.full-row 
+    width: 100%
+/* --------- Fields -------- */
+#top-form label 
+    font-size: 1em
+    padding: 9px 0 2px 0
+    flex: 0 1 113px
+
+#top-form textarea
+    height: 63px 
+    flex-grow 1
+
+.top.xlrg-field 
+    width: 96%
+    
+.lrg-field 
+    flex: 1 1 302px
+    
+.med-field { 
+    flex: 1 1 240px
+}
+.sml-field {
+    flex: 0 1 200px
+}

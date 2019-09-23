@@ -30,33 +30,22 @@ function showFormPopup(actionHdr, entity, id) {
     $('#b-overlay').addClass('form-ovrly');
     $('#b-overlay-popup').addClass('form-popup');
     $('#b-overlay-popup').append(getFormWindowElems(entity, id, title));
-    setFormSize(entity);
+    addFormStyleClass(entity);
 }
 /** Adds the width to both the popup window and the form element for each entity. */
-function setFormSize(entity) {
-    var sizeConfgs = { 
-        '1500': {
-            'Interaction': { popup: '1510px', form: '942px' },
-            'Publication': { popup: '1313px', form: '942px' },
-            'Publisher': { popup: '784px', form: '484px' },
-            'Citation': { popup: '1313px', form: '942px' },
-            'Author': { popup: '777px', form: '484px' },
-            'Location': { popup: '1313px', form: '942px' },
-            'Taxon': { popup: '752px', form: '454px' },
-        },
-        '1366': {
-            'Interaction': { popup: '97%', form: '924px' },
-            'Publication': { popup: '1212px', form: '920px' },
-            'Publisher': { popup: '750px', form: '460px' },
-            'Citation': { popup: '1212px', form: '920px' },
-            'Author': { popup: '750px', form: '460px' },
-            'Location': { popup: '1212px', form: '920px' },
-            'Taxon': { popup: '808px', form: '450px' },
-    }};
-    var wKey = $(window).width() > 1499 ? '1500' : '1366';
-    var confg = sizeConfgs[wKey][entity];                                       //console.log("setFormSize [%s] confg = %O", entity, confg);
-    $('.form-popup').css({'width': confg.popup});
-    $('#form-main').css({'flex': '0 0 '+ confg.form});
+function addFormStyleClass(entity, remove) {
+    const map = {
+        'Interaction': 'lrg-form',  'Publication': 'med-form',
+        'Publisher': 'sml-form',    'Citation': 'med-form',
+        'Author': 'sml-form',       'Location': 'med-form',
+        'Taxon': 'sml-form'
+    };
+    $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
+    $('#form-main, .form-popup').addClass(map[entity]);
+}
+function setCoreRowStyles(formId, rowClass) {
+    const w = $(formId).innerWidth() / 2 - 3;  
+    $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
 }
 /**
  * Returns the form window elements - the form and the detail panel.
@@ -94,7 +83,7 @@ function exitFormPopup(e, skipReset) {
     hideSearchFormPopup();
     if (!skipReset) { refocusTableIfFormWasSubmitted(); }
     $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup").css({width: 'unset'});
+    $("#b-overlay-popup").removeClass("form-popup");
     $("#b-overlay-popup").empty();
     fP = {};
     db_map.clearMemory();
@@ -543,11 +532,17 @@ function addSource(fieldId, prop, rcrd) {
 }
 /* ---- On Form Fill Complete --- */
 function onFormFillComplete(id, entity) {                                       //console.log('onFormFillComplete. entity = ', entity);
-    const map = { 'location': finishLocEditForm };
+    const map = { 
+        'citation': setSrcEditRowStyle, 'location': finishLocEditForm,
+        'publication': setSrcEditRowStyle };
     if (!map[entity]) { return; }
     map[entity](id);
 }
+function setSrcEditRowStyle() {
+    setCoreRowStyles('#form-main', '.top-row');
+}
 function finishLocEditForm(id) {
+    setCoreRowStyles('#form-main', '.top-row');
     db_map.addVolatileMapPin(id, 'edit', getSelVal('#Country-sel'));
 }
 /*--------------------------- Create Form --------------------------------------------------------*/
@@ -559,6 +554,7 @@ export function createEntity(id, entity) {                                      
     initFormParams('create', entity);
     showFormPopup('New', _u.ucfirst(entity), null);
     initCreateForm();
+    setCoreRowStyles('#form-main', '.top-row');
     resetSearchPageIfInMapView();
 }
 /** This prevents the potential of two map instances clashing. */
@@ -692,9 +688,10 @@ function initPubForm(value) {                                               //co
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publication', null, fLvl); }
     $('#CitationTitle_row').after(initSubForm(
-        'publication', fLvl, 'flex-row med-form', {'Title': val}, '#Publication-sel'));
+        'publication', fLvl, 'flex-row med-sub-form', {'Title': val}, '#Publication-sel'));
     initComboboxes('publication', 'sub');
     $('#Title_row input').focus();
+    setCoreRowStyles('#publication_Rows', '.sub-row');
     return { 'value': '', 'text': 'Creating Publication...' };
 }
 /**
@@ -704,6 +701,7 @@ function initPubForm(value) {                                               //co
 function loadPubTypeFields(typeId) { 
     loadSrcTypeFields('publication', typeId, this.$input[0]);
     ifBookAddAuthEdNote(typeId, '#'+this.$input[0].id);
+    setCoreRowStyles('#publication_Rows', '.sub-row');
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote(id, elemId) {                                
@@ -751,11 +749,12 @@ function initCitForm(value) {                                                   
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
     $('#CitationTitle_row').after(initSubForm(
-        'citation', fLvl, 'flex-row med-form', {'Title': val}, '#CitationTitle-sel'));
+        'citation', fLvl, 'flex-row med-sub-form', {'Title': val}, '#CitationTitle-sel'));
     initComboboxes('citation', 'sub');
     selectDefaultCitType(fLvl);
     enableCombobox('#Publication-sel', false);
     $('#Abstract_row textarea').focus();
+    setCoreRowStyles('#citation_Rows', '.sub-row');
     return { 'value': '', 'text': 'Creating Citation...' };
 }
 function selectDefaultCitType(fLvl) {
@@ -791,6 +790,7 @@ function loadCitTypeFields(typeId) {
     loadSrcTypeFields('citation', typeId, this.$input[0]);
     handleSpecialCaseTypeUpdates(this.$input[0], fLvl);
     handleCitText(fLvl);
+    setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
 }
 /**
  * Shows/hides the author field depending on whether the publication has
@@ -1392,11 +1392,12 @@ function buildLocForm(val, fLvl) {
         'DisplayName': val === 'create' ? '' : val, //clears form trigger value
         'Country': $('#Country-Region-sel').val() }; 
     $('#Location_row').after(initSubForm(
-        'location', fLvl, 'flex-row med-form', vals, '#Location-sel'));
+        'location', fLvl, 'flex-row med-sub-form', vals, '#Location-sel'));
     initComboboxes('location', 'sub');
     enableCombobox('#Country-Region-sel', false);
     $('#Latitude_row input').focus();
     $('#sub-submit').val('Create without GPS data');
+    setCoreRowStyles('#location_Rows', '.sub-row');
     if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
 }
 function finishLocEditFormBuild() {  
@@ -1589,7 +1590,7 @@ function initSubjectSelect() {                                                  
     if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Subject', fLvl); }  
     initTaxonParams('Subject', 'Bat');
     $('#Subject_row').append(initSubForm(
-        'subject', fLvl, 'sml-left sml-form', {}, '#Subject-sel'));
+        'subject', fLvl, 'sml-sub-form', {}, '#Subject-sel'));
     initComboboxes('subject', fLvl);           
     finishTaxonSelectUi('Subject');  
     enableCombobox('#Object-sel', false);
@@ -1607,7 +1608,7 @@ function initObjectSelect() {                                                   
     const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
     initTaxonParams('Object', realmName);
     $('#Object_row').append(initSubForm(
-        'object', fLvl, 'sml-right sml-form', {}, '#Object-sel'));
+        'object', fLvl, 'sml-sub-form', {}, '#Object-sel'));
     initComboboxes('object', fLvl);             
     setSelVal('#Realm-sel', fP.forms.taxonPs.realmTaxon.realm.id);
     enableCombobox('#Subject-sel', false);
@@ -1678,7 +1679,7 @@ function showNewTaxonForm(val, selLvl, fLvl) {                                  
 
     function buildTaxonForm() {
         $('#'+selLvl+'_row').append(initSubForm(
-            'taxon', fLvl, 'sml-form', {'DisplayName': val}, '#'+selLvl+'-sel'));
+            'taxon', fLvl, 'sml-sub-form', {'DisplayName': val}, '#'+selLvl+'-sel'));
         enableSubmitBttn('#'+fLvl+'-submit');
         $('#'+fLvl+'-hdr')[0].innerText += ' '+ selLvl;
         $('#DisplayName_row input').focus();
@@ -2019,7 +2020,7 @@ function buildParentTaxonEditFields() {
     $('#sub-submit')[0].value = 'Select Taxon';
 }
 function buildAndAppendEditParentElems(prntId) {
-    var cntnr = _u.buildElem("div", { class: "sml-form flex-row pTaxon", id: "sub-form" });
+    var cntnr = _u.buildElem("div", { class: "sml-sub-form flex-row pTaxon", id: "sub-form" });
     var elems = buildParentTaxonEditElems(prntId);
     $(cntnr).append(elems);
     $('#Parent_row').after(cntnr);
@@ -2235,7 +2236,7 @@ function initPublisherForm (value) {                                            
     const prntLvl = getNextFormLevel('parent', fLvl);
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('Publisher', null, fLvl); }
     $('#Publisher_row').append(initSubForm(
-        'publisher', fLvl, 'sml-right sml-form', {'DisplayName': val}, '#Publisher-sel'));
+        'publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, '#Publisher-sel'));
     disableSubmitBttn('#'+prntLvl+'-submit');
     $('#DisplayName_row input').focus();
     return { 'value': '', 'text': 'Creating Publisher...' };
@@ -2317,7 +2318,7 @@ function handleNewAuthForm(authCnt, value, authType) {
     const val = value === 'create' ? '' : value;
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr(authType, parentSelId, fLvl); }
     $('#'+authType+'_row').append(initSubForm( _u.lcfirst(singular), 
-        fLvl, 'sml-left sml-form', {'LastName': val}, parentSelId));
+        fLvl, 'sml-sub-form', {'LastName': val}, parentSelId));
     handleSubmitBttns();
     $('#FirstName_row input').focus();
     return { 'value': '', 'text': 'Creating '+singular+'...' };
@@ -2523,18 +2524,22 @@ function toggleShowAllFields(entity, fLvl) {                                    
     $('#'+entity+'_Rows').empty();
     fP.forms[fLvl].reqElems = [];
     $('#'+entity+'_Rows').append(getFormFieldRows(entity, fConfg, fVals, fLvl));
+    
     initComboboxes(entity, fLvl);
     fillComplexFormFields(fLvl);
-    finishSrcForms();
+    finishComplexForms();
 
-    function finishSrcForms() {
-        if (['citation', 'publication'].indexOf(entity) === -1) { return; }
+    function finishComplexForms() {
+        if (['citation', 'publication', 'location'].indexOf(entity) === -1) { return; }
         if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
         if (entity === 'citation') { 
             handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
             handleCitText(fLvl);
         }
-        updateFieldLabelsForType(entity, fLvl);
+        if (entity !== 'location') {
+            updateFieldLabelsForType(entity, fLvl);
+        }
+        setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
 function ifOpenSubForm(fLvl) {
