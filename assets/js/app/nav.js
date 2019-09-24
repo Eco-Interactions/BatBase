@@ -15,12 +15,7 @@ const app = {
 
 export function initMenu() {                                                    //console.log('Initializing menu');
     addEvents()
-    if (window.innerWidth < app.breakpoint) { initResponsiveNav();
-    } else {
-        $('#mobile-menu-bar').hide();
-        $('#oimenu').addClass('flex-row');
-    }
-    $('#oimenu').css('display', 'flex'); 
+    if (window.innerWidth < app.breakpoint) { initResponsiveNav(); }
 }
 function addEvents() {
     const hndlr = window.innerWidth > app.breakpoint ? collapseNav : expandNav;

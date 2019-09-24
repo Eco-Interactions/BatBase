@@ -82,26 +82,28 @@ function clearFieldForPdfSubmissions() {
  * users to view page on a computer.
  */
 function showOverlayOnMobile() {
-    if (isMobileFriendlyPage()) { return; } 
-    showMobilePopupMsg();
+    const mblMsg = getMobileMsg();
+    if (!mblMsg) { return; } 
+    showMobilePopupMsg(mblMsg);
 }
-function isMobileFriendlyPage() {
+function getMobileMsg() {
     const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
     const path = window.location.pathname;  
-    return !Object.keys(map).find(pg => { 
-        return path.includes(pg) && window.innerWidth < map[pg];
-    });
+    const pg = Object.keys(map).find(pg => path.includes(pg));  
+    if (!pg || pg && window.innerWidth > map[pg]) { return false; }
+    return getMobileMsgHtml(map[pg])
 }
-function showMobilePopupMsg() {
+function getMobileMsgHtml(minWidth) {
+    return `<center><h2>Page must be viewed on screen at least ${minWidth} pixels wide.<h2>
+        <br><p>This screen is ${window.innerWidth} pixels wide.</p></center>`;
+}
+function showMobilePopupMsg(mblMsg) {
     const overlay = $('<div></div>').addClass('mobile-opt-overlay');
     const popup = $('<div></div>').addClass('popup');
-    $(popup).html(getMobileMsgHtml());
+    $(popup).html(mblMsg);
     $(overlay).append(popup);
     $('#content-detail').prepend(overlay);
     $('#b-overlay-popup').fadeIn(500);
-}
-function getMobileMsgHtml() {
-    return '<h2>This page can only be viewed on a computer.<h2>';
 }
 /* ========================= AUTH DEPENDENT ================================= */
 function authDependentInit() { 

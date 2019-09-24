@@ -40,6 +40,7 @@ $menu-font
 /* ---- Mobile Nav ---- */
 #mobile-menu-bar
     @extends .flex-row
+    display none
     justify-content space-between
     width: 100vw
       
@@ -48,7 +49,7 @@ $menu-font
     height 0
 
 #oimenu
-    display none 
+    @extends .flex-row
     width fit-content 
     
 #oimenu.vert.closed
