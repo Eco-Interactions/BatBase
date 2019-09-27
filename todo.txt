@@ -57,7 +57,8 @@ Next:
 
 MEETING NOTES:
     Point out:
-        - 
+        - Safari - Local storage doesn't work for our large amount of data. Will 
+            need to refactor into idb or spend time writing special handling for safari
     Next/future rounds:
         Possible:
             - Data Review panel (1-2 months)

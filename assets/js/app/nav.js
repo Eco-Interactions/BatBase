@@ -14,7 +14,7 @@ const app = {
 };
 
 export function initMenu() {                                                    //console.log('Initializing menu');
-    addEvents()
+    addEvents();
     if (window.innerWidth < app.breakpoint) { initResponsiveNav(); }
 }
 function addEvents() {
@@ -48,13 +48,17 @@ function showMobileMenu() {
     $('#oimenu').removeClass('closed'); 
     $('#content-detail').addClass('content-overlay').click(toggleMenu);
     $('#pg-hdr').css('background', 'rgba(0,0,0,.8)');
-    $('#content-detail').css('position', 'unset');  //"fixes" bug with mobile menu in chrome
+    if ($('body').data('browser') === 'Chrome') {
+        $('#content-detail').css('position', 'unset');  //"fixes" bug with mobile menu in chrome
+    }
 }
 function hideMobileMenu() {   
     $('#oimenu').addClass('closed');
     $('#content-detail').removeClass('content-overlay').off('click', toggleMenu);
     $('#pg-hdr').css('background', '#fff');
-    $('#content-detail').css('position', 'absolute'); //"fixes" bug with mobile menu in chrome
+    if ($('body').data('browser') === 'Chrome') {
+        $('#content-detail').css('position', 'absolute'); //"fixes" bug with mobile menu in chrome
+    }
 }
 function toggleSubMenu(e) {                                                     //console.log('this ? %O. e = %O', this, e);
     event.preventDefault();

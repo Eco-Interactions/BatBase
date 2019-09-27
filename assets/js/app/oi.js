@@ -28,11 +28,11 @@ function initUi() {
     $('.popup').show();
 }
 function initHeaderAndNav() {
-    ifNotChromeShowOptimizedMsg();
+    handleBrowserSpecificLoad();
     initNavMenu();
     initImageSlider();
     initStickyHeader(); //Must load after image slider and the nav menus
-    $('#pg-hdr').css('z-index', '1'); // Otherwise elem flashes under img-slider on page load
+    $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
 }
 function initNavMenu() {
     require('./nav.js').initMenu();
@@ -45,7 +45,8 @@ function initImageSlider() {
 }
 /* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
-    const hdrHeight = $('#img-slider').outerHeight() || $('#slider-logo').outerHeight();  
+    const hdrHeight = $('#img-slider').outerHeight() || 
+     $('#slider-overlay').outerHeight() || $('#slider-logo').outerHeight();  
 
     $(window).scroll(function () {
         if ($(window).scrollTop() > hdrHeight) {
@@ -88,21 +89,28 @@ function showOverlayOnMobile() {
 }
 function getMobileMsg() {
     const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
+    const winWidth = window.visualViewport.width || window.innerWidth;
     const path = window.location.pathname;  
     const pg = Object.keys(map).find(pg => path.includes(pg));  
-    if (!pg || pg && window.innerWidth > map[pg]) { return false; }
+    if (!pg || isSearchPgOnSafari(pg) || winWidth > map[pg])  { return false; }
     return getMobileMsgHtml(map[pg])
-}
-function getMobileMsgHtml(minWidth) {
-    return `<center><h2>Page must be viewed on screen at least ${minWidth} pixels wide.<h2>
-        <br><p>This screen is ${window.innerWidth} pixels wide.</p></center>`;
+
+    /** Note: search page code doesn't load on mobile devices. */
+    function isSearchPgOnSafari(pg) {                                           //console.log('pg = %s, width = ', pg, winWidth)
+        return pg == 'search' && $('body').data('browser') == 'Safari' 
+            && winWidth > 600;
+    }
+    function getMobileMsgHtml(minWidth) {
+        return `<center><h2>Page must be viewed on screen at least ${minWidth} pixels wide.<h2>
+            <br><p>This screen is ${winWidth} pixels wide.</p></center>`;
+    }
 }
 function showMobilePopupMsg(mblMsg) {
     const overlay = $('<div></div>').addClass('mobile-opt-overlay');
     const popup = $('<div></div>').addClass('popup');
     $(popup).html(mblMsg);
     $(overlay).append(popup);
-    $('#content-detail').prepend(overlay);
+    $('#detail-block').prepend(overlay);
     $('#b-overlay-popup').fadeIn(500);
 }
 /* ========================= AUTH DEPENDENT ================================= */
@@ -124,23 +132,32 @@ function initFeedbackUi() {
     feedback.init();
 }
 /* ======================= BROWSER SPECIFIC ================================= */
-function ifNotChromeShowOptimizedMsg() {
-    const isChrome = checkIfChrome(); 
-    if (isChrome) { return; }
+function handleBrowserSpecificLoad() {
+    const brwsr = getBrowserName();  
+    $('body').data('browser', brwsr);
+    if (brwsr == 'Chrome') { return; }
     addMsgAboutChromeOptimization();
 }
-function checkIfChrome() {
-    const isChromium = window.chrome;
-    const winNav = window.navigator;
-    const vendorName = winNav.vendor;
-    const isOpera = typeof window.opr !== "undefined";
-    const isIEedge = winNav.userAgent.indexOf("Edge") > -1;
-    const isIOSChrome = winNav.userAgent.match("CriOS");
-
-    return isIOSChrome ? true : 
-            (isChromium !== null && typeof isChromium !== "undefined" &&
-            vendorName === "Google Inc." && isOpera === false && 
-            isIEedge === false) ? true : false;
+function getBrowserName() {
+    return isOpera() || isIEedge() || isChrome() || isSafari();
+    
+    function isOpera() {
+        return typeof window.opr !== "undefined" ? 'Opera' : false;
+    }
+    function isIEedge() {
+        return window.navigator.userAgent.indexOf("Edge") > -1 ? 'IE' : false;
+    }
+    function isChrome() {
+        const isChromium = window.chrome;
+        const vendorName = window.navigator.vendor;
+        const isIOSChrome = window.navigator.userAgent.match("CriOS");
+        return isIOSChrome ? 'Chrome' : 
+                (isChromium !== null && typeof isChromium !== "undefined" &&
+                vendorName === "Google Inc.") ? 'Chrome' : false;
+    }
+    function isSafari() {
+        return window.safari ? 'Safari' : false;
+    }
 }
 function addMsgAboutChromeOptimization() {
     const msg = buildMsgHtml();
@@ -148,10 +165,12 @@ function addMsgAboutChromeOptimization() {
     $(logo).addClass('overlay');
     $('#slider-overlay').css('padding', '2em');
     $('#slider-overlay').prepend([msg, logo]);
-    $('#sticky-hdr').css({
-        'top': $('#slider-overlay').outerHeight(),
-        'position': 'absolute'
-    });
+    window.setTimeout(() => {
+        $('#sticky-hdr').css({
+            'top': $('#slider-overlay').outerHeight(),
+            'position': 'absolute'
+        });
+    }, 750);
 }
 function buildMsgHtml() {
     const div = document.createElement("div");

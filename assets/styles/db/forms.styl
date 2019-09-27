@@ -29,26 +29,31 @@
     max-height: 88vh
     min-width: 1200px
     height 88vh 
+    max-width 96vw
 
 #form-main.lrg-form
     height 88vh 
-    flex 1 1 942px
+    flex 1 0 942px
 /* --- Medium Forms --- */
 .form-popup.med-form
     padding: 15px
-    flex: 0 1 1212px
+    width 1212px
     height 77vh
     max-height: 77vh
     min-width: 1200px
-    max-width: 666px
+    // max-width: 666px
     
 #form-main.med-form
     height 77vh
-    flex 1 1 909px
+    flex 1 0 909px
+    width 909px
+    
+#form-main.med-form .top-row
+    width 450px
 /* --- Small Forms --- */
 .form-popup.sml-form
     padding: 15px
-    flex: 0 0 750px
+    width 750px
     height 55vh
     max-height: 55vh
     min-width: unset
@@ -74,7 +79,7 @@ $sub-form-styles
     
 /* --------- Row Containers -------- */
 .top-row 
-    min-width 300px
+    width 468px
 
 .full-row 
     width: 100%

@@ -230,6 +230,7 @@
 
 {% block javascripts %} 
     {{parent()}}   
-    {{ encore_entry_script_tags('db') }} 
-    <script src="{{ asset('build/db.js') }}"></script>
+    {% if is_full_view() or is_tablet_view() %}
+        {{ encore_entry_script_tags('db') }} 
+    {% endif %}
 {% endblock %}

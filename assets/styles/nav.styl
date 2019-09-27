@@ -43,6 +43,8 @@ $menu-font
     display none
     justify-content space-between
     width: 100vw
+    z-index 1
+    background-color WhiteSmoke
       
 .toggle 
     @extends $menu-font
@@ -80,6 +82,7 @@ $menu-font
 nav 
     width 100%
     justify-content space-between
+    z-index 1
     
 #oimenu a 
     @extends $menu-font
@@ -133,7 +136,8 @@ nav
 
 #oimenu .smtrigger:hover > ul
     max-height: fit-content
-
+    height fit-content //fixes Safari bug
+    
 .admin-menu 
     background: rgba(26, 128, 230, .3)
 

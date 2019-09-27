@@ -47,7 +47,8 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
  */
 let tblState = {};
 /** ------------- Page Init --------------------------------------------- */
-if (window.location.pathname.includes('search') && window.innerWidth > 1200) {
+const winWidth = window.visualViewport.width || window.innerWidth;  
+if (window.location.pathname.includes('search') && winWidth > 1200) {  
     requireCss();
     requireJs();
     initDbPage();
@@ -74,7 +75,8 @@ function requireJs() {
  * Initializes the database and UI. The util init method will call @initSearchState
  * after handling the initializing of the local data storage.
  */
-function initDbPage () {    
+function initDbPage () { 
+    if ($('body').data('browser') === 'Safari') { return db_ui.showBrowserWarningPopup(); } //Show popup saying that safari is not a supported browser  
     _u.init_db();
     db_ui.pg_init();
 }
