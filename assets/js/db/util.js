@@ -1,5 +1,5 @@
 
-import * as idb from 'idb-keyval'; //set, get, del, clear
+import * as _db from './idb-util';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
@@ -18,14 +18,11 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   clearDataStorage
  *   getDataFromStorage
  *   getDetachedRcrd
- *   getGeoJsonEntity
  *   getOptsFromStoredData
  *   getSelVal
  *   initCombobox
  *   initComboboxes
  *   init_db
- *   initGeoJsonData
- *   isGeoJsonDataAvailable
  *   lcfirst 
  *   removeFromStorage
  *   replaceSelOpts
@@ -35,15 +32,27 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   snapshot
  *   ucfirst 
 */
-let geoJson;
+// let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
 const dataStorage = getDataStorage();
-const geoJsonKey = 'A life without cause is a life without effect!!!!!';  
+// const geoJsonKey = 'A life without cause is a life without effect!!!!!';  
 const localStorageKey = 'A life without cause is a life without effect!!!!!!!'; 
 
 extendPrototypes();
-initGeoJsonData();
-
+// initGeoJsonData();
+/*----------------- Indexed DB Util --------------------------------------*/
+export function initGeoJsonData() {
+    return _db.initGeoJsonData();
+}
+export function getGeoJsonEntity(id) {
+    return _db.getGeoJsonEntity(id);
+}
+export function updateGeoJsonData(cb) {
+    return _db.updateGeoJsonData(cb);
+}
+export function isGeoJsonDataAvailable() {
+    return _db.isGeoJsonDataAvailable();
+}
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
     $(elem).keypress(function(e){ //Enter
@@ -300,53 +309,53 @@ export function addToStorage(key, val) {                                        
 export function removeFromStorage(key) {
     dataStorage.removeItem(key);
 }
-/** --------- IDB Storage --------------- */
-/** 
- * Checks whether the dataKey exists in indexDB cache. 
- * If it is, the stored geoJson is fetched and stored in the global variable. 
- * If not, the db is cleared and geoJson is redownloaded. 
- */
-export function initGeoJsonData() {  
-    idb.get(geoJsonKey).then(clearIdbCheck);
-}
-function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
-    if (storedKey) { return getGeoJsonData(); } 
-    idb.clear();                                                                //console.log('actually clearing');
-    downloadGeoJson();
-}
-function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
-    idb.get('geoJson').then(storeGeoJson);
-}
-function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
-    if (!geoData) { return downloadGeoJson(); }
-    geoJson = geoData; 
-}
-function downloadGeoJson(cb) {                                                  
-    return dataStorage.getItem('interaction') ?
-        downloadGeoJsonAfterLocalDbInit(cb) :
-        window.setTimeout(downloadGeoJson, 800);   
-}
-function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
-    sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
+// /** --------- IDB Storage --------------- */
+// /** 
+//  * Checks whether the dataKey exists in indexDB cache. 
+//  * If it is, the stored geoJson is fetched and stored in the global variable. 
+//  * If not, the db is cleared and geoJson is redownloaded. 
+//  */
+// export function initGeoJsonData() {  
+//     idb.get(geoJsonKey).then(clearIdbCheck);
+// }
+// function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
+//     if (storedKey) { return getGeoJsonData(); } 
+//     idb.clear();                                                                //console.log('actually clearing');
+//     downloadGeoJson();
+// }
+// function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
+//     idb.get('geoJson').then(storeGeoJson);
+// }
+// function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
+//     if (!geoData) { return downloadGeoJson(); }
+//     geoJson = geoData; 
+// }
+// function downloadGeoJson(cb) {                                                  
+//     return dataStorage.getItem('interaction') ?
+//         downloadGeoJsonAfterLocalDbInit(cb) :
+//         window.setTimeout(downloadGeoJson, 800);   
+// }
+// function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
+//     sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
     
-    function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
-        idb.set('geoJson', data.geoJson);
-        storeGeoJson(data.geoJson);
-        idb.set(geoJsonKey, true);
-        if (cb) { cb(); }
-    }
-}
-export function isGeoJsonDataAvailable() {
-    return geoJson;
-}
-export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
-    geoJson = false;
-    downloadGeoJson(cb);
-}
-export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
-    return isGeoJsonDataAvailable() ?  JSON.parse(geoJson[id]) :
-        updateGeoJsonData(getGeoJsonEntity.bind(null, id));
-}
+//     function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
+//         idb.set('geoJson', data.geoJson);
+//         storeGeoJson(data.geoJson);
+//         idb.set(geoJsonKey, true);
+//         if (cb) { cb(); }
+//     }
+// }
+// export function isGeoJsonDataAvailable() {
+//     return geoJson;
+// }
+// export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
+//     geoJson = false;
+//     downloadGeoJson(cb);
+// }
+// export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
+//     return isGeoJsonDataAvailable() ?  JSON.parse(geoJson[id]) :
+//         updateGeoJsonData(getGeoJsonEntity.bind(null, id));
+// }
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     return $.ajax({

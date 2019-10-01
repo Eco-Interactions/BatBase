@@ -126,25 +126,14 @@ TODOs:
         and the displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
-    - {med}[med] Switch from localStorage to idb everywhere.
-    - {med}[med] add err in CRUD controllers eliminating the possibility of 
-        creating orphans (Maybe not needed with the JS side handling this.)
 
 (DATA)
 
 (SEARCH PAGE)
     - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
         - Unable to update as rowGrouping is now an enterprise feature (ie min $800 package)
-    - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
-    - {med}[med, long] Add data-entry tutorial.
-    - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
-        to that level and retain other filters - (updated at for example).
-    - {med}[easy] Change taxon row coloring when showing updated records
 
 (STATIC/MISC SITE)
-    - {low}[easy] Clean up security access control
-    - {med}[complicated] Implement Encore for assets
-    - {med}[complicated] Switch from pixels to percent with styles to better adapt to smaller screen resolutions
     - {low}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
@@ -152,7 +141,6 @@ TODOs:
         - update profile page (/profile/edit)
         - Reorder fields for profile edit form
     - {low}[med] Update read me for site.
-    - {low}[easy] Resize slider-header when screen size changes 
 
 (SYNC-DATA)
     - {high}[med] Add error handling for pending updates that can't be resolved 
@@ -192,16 +180,7 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-
-
-
     Other cool things, sort later:
         - microsoft app center 
             - analytics for apps free
         - Try out some js debugging tools
-
-Code standards:
-    HTML
-        - Search page combobox elems prefixed with 'sel' + [Descriptive name]
-
-
