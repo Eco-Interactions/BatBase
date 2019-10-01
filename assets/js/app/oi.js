@@ -89,16 +89,27 @@ function showOverlayOnMobile() {
 }
 function getMobileMsg() {
     const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
-    const winWidth = window.visualViewport.width || window.innerWidth;
+    const winWidth = Math.round(window.visualViewport.width || window.innerWidth);
     const path = window.location.pathname;  
     const pg = Object.keys(map).find(pg => path.includes(pg));  
-    if (!pg || isSearchPgOnSafari(pg) || winWidth > map[pg])  { return false; }
+    if (!pg || isSearchPgOnApple(pg) || winWidth > map[pg])  { return false; }
     return getMobileMsgHtml(map[pg])
 
     /** Note: search page code doesn't load on mobile devices. */
-    function isSearchPgOnSafari(pg) {                                           //console.log('pg = %s, width = ', pg, winWidth)
-        return pg == 'search' && $('body').data('browser') == 'Safari' 
-            && winWidth > 600;
+    function isSearchPgOnApple(pg) {                                            //console.log('pg = %s, apple? ', pg, ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1)
+        if (pg == 'search' && 
+            ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1) {
+            showBrowserWarningPopup();
+            return true;
+        };    
+        function showBrowserWarningPopup() {                                    
+            const overlay = $('<div></div>').addClass('mobile-opt-overlay');
+            const popup = $('<div></div>').addClass('popup');
+            $(popup).html(`<center><h2>This page not supported on Safari Browser currently.</h2>`);
+            $(overlay).append(popup);
+            $('#detail-block').prepend(overlay);
+            $('.popup').fadeIn(500);
+        }
     }
     function getMobileMsgHtml(minWidth) {
         return `<center><h2>Page must be viewed on screen at least ${minWidth} pixels wide.<h2>
@@ -139,7 +150,7 @@ function handleBrowserSpecificLoad() {
     addMsgAboutChromeOptimization();
 }
 function getBrowserName() {
-    return isOpera() || isIEedge() || isChrome() || isSafari();
+    return isOpera() || isIEedge() || isIphone() || isChrome() || isSafari();
     
     function isOpera() {
         return typeof window.opr !== "undefined" ? 'Opera' : false;
@@ -157,6 +168,9 @@ function getBrowserName() {
     }
     function isSafari() {
         return window.safari ? 'Safari' : false;
+    }
+    function isIphone() {
+        return /CriOS|iPad|iPhone|iPod/.test(navigator.platform) ? 'iPhone' : false;
     }
 }
 function addMsgAboutChromeOptimization() {
