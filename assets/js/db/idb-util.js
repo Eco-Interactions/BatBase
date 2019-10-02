@@ -1,58 +1,92 @@
 /**
  * IndexedDB
  *
+ * CODE SECTIONS:
+ *     INIT
+ *     GETTERS
+ *     SETTERS
+ *         
  * Exports:             Imported by:
  *     getGeoJsonEntity
- *     initGeoJsonData
+ *     initDb
  *     isGeoJsonDataAvailable
  *     updateGeoJsonData
  */
 import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _u from './util.js';
+import * as db_page from './db-page.js';
+
+import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
+
 
 const _db = {
     geoJson: null, 
-    v: .001
+    v: .002
 };
-
-initGeoJsonData();
-
+initDb();
+/** ----------------------- INIT -------------------------------------------- */
 /** 
  * Checks whether the dataKey exists in indexDB cache. 
  * If it is, the stored geoJson is fetched and stored in the global variable. 
  * If not, the db is cleared and geoJson is redownloaded. 
  */
-export function initGeoJsonData() {  
-    idb.get(_db.v).then(clearIdbCheck);
+export function initDb() {
+    getData(_db.v).then(updateDbIfNeeded);
 }
-function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
-    if (storedKey) { return getGeoJsonData(); } 
-    idb.clear();                                                                //console.log('actually clearing');
-    downloadGeoJson();
+function updateDbIfNeeded(dbCurrent) {                                          console.log('Download DB? ', !dbCurrent);                                          //console.log('clearing Idb? ', storedKey === undefined);
+    if (dbCurrent) { return checkForDbDataChanges() } 
+    idb.clear();     
+    idb.set(_db.v, true);
+    initStoredData();
 }
-function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
-    idb.get('geoJson').then(storeGeoJson);
+function checkForDbDataChanges() {
+    getData('pgDataUpdatedAt').then(pgUpdatedAt => {                            //console.log('pgUpdatedAt = ', pgUpdatedAt)
+        if (!pgUpdatedAt) { return updateDbIfNeeded(false); }
+        getData('user').then(checkUserData);
+        _u.sendAjaxQuery({}, "ajax/data-state", 
+            addNewDataToStorage.bind(null, pgUpdatedAt));
+    });
 }
-function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
-    if (!geoData) { return downloadGeoJson(); }
-    _db.geoJson = geoData; 
+function checkUserData(dbUser) {
+    if (dbUser == $('body').data('user-name')) { return; }
+    _u.sendAjaxQuery({}, "ajax/lists", 
+        replaceUserData.bind(null, $('body').data('user-name')));
 }
-function downloadGeoJson(cb) { 
-    return downloadGeoJsonAfterLocalDbInit(cb);                                                 
-    // return dataStorage.getItem('interaction') ?
-    //     downloadGeoJsonAfterLocalDbInit(cb) :
-    //     window.setTimeout(downloadGeoJson, 800);   
+/** ----------------------- GETTERS ----------------------------------------- */
+export async function getData(props) {                                          console.log('     GET [%O]', props);
+    if (!Array.isArray(props)) { return idb.get(props); }
+    return await getStoredDataObj(props);
 }
-function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
-    _u.sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-    
-    function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
-        idb.set('geoJson', data.geoJson);
-        storeGeoJson(data.geoJson);
-        idb.set(_db.v, true);
-        if (cb) { cb(); }
-    }
+async function getStoredDataObj(props) {
+    const data = {};
+    props.forEach(prop => {
+        idb.get(prop).then( d => {  if (!d) { console.log("  ### no stored data for [%s]", prop); /* console.trace(); */ }
+            data.prop = d
+        });
+    });  
+    return data;
+} 
+/** ----------------------- SETTERS ----------------------------------------- */
+export function setData(k, v) {                                                 console.log('      SET [%s] => [%O]', k, v);
+    idb.set(k, v);
 }
+export function removeData(k) {
+    idb.del(k);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function isGeoJsonDataAvailable() {
     return !!_db.geoJson;
 }

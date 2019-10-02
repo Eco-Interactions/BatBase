@@ -89,7 +89,7 @@ function showOverlayOnMobile() {
 }
 function getMobileMsg() {
     const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
-    const winWidth = Math.round(window.visualViewport.width || window.innerWidth);
+    const winWidth = Math.round(window.visualViewport ? window.visualViewport.width : window.innerWidth);
     const path = window.location.pathname;  
     const pg = Object.keys(map).find(pg => path.includes(pg));  
     if (!pg || isSearchPgOnApple(pg) || winWidth > map[pg])  { return false; }

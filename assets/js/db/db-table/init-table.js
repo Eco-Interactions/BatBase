@@ -20,6 +20,13 @@ let tblState;
  */
 export default function initTbl(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
+    destroyPreviousTable(state.api);
+    initTable(viewTitle, rowData);
+}
+function destroyPreviousTable(tblApi) {
+    if (tblApi) { tblApi.destroy(); }
+}
+function initTable(viewTitle, rowData) {
     const tblDiv = document.querySelector('#search-tbl');
     const tblOpts = getDefaultTblOpts(viewTitle);
     tblOpts.rowData = rowData;

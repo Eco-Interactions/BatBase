@@ -46,7 +46,7 @@ class AjaxDataController extends Controller
         }
         $response = new JsonResponse();
         $response->setData(array(
-            'dataState' => $state,
+            'state' => $state,
         ));
         return $response;
     }
@@ -152,7 +152,7 @@ class AjaxDataController extends Controller
     /**
      * Returns an object keyed with location ids with their geoJson as values. 
      *
-     * @Route("/geo-json", name="app_serialize_geojson")
+     * @Route("/geojson", name="app_serialize_geojson")
      */
     public function serializeGeoJsonData(Request $request) 
     {

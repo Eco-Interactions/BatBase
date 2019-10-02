@@ -47,7 +47,7 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
  */
 let tblState = {};
 /** ------------- Page Init --------------------------------------------- */
-const winWidth = window.visualViewport.width || window.innerWidth;  
+const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
 if (window.location.pathname.includes('search') && winWidth > 1200) {  
     requireCss();
     requireJs();
@@ -72,12 +72,11 @@ function requireJs() {
     require('../libs/flatpickr.min.js');
 }
 /**
- * Initializes the database and UI. The util init method will call @initSearchState
- * after handling the initializing of the local data storage.
+ * Initializes the UI. The idb-util init method will call @initSearchState
+ * after handling the initializing of data storage.
  */
 function initDbPage () { 
-    if ($('body').data('browser') === 'Safari') { return db_ui.showBrowserWarningPopup(); } //Show popup saying that safari is not a supported browser  
-    _u.init_db();
+    // _u.init_db();
     db_ui.pg_init();
 }
 /**
@@ -196,8 +195,8 @@ export function selectSearchFocus(f) {
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 
     };  
-    if (!_u.getDataFromStorage('pgDataUpdatedAt')) { return; } 
     updateFocusAndBuildTable(focus, builderMap[focus]); 
+    // if (!_u.getDataFromStorage('pgDataUpdatedAt')) { return; } 
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
@@ -209,7 +208,7 @@ function updateFocusAndBuildTable(focus, tableBuilder) {                        
     updateFilterPanelHeader(focus);
 } 
 function clearPreviousTable() {                                                 //console.log("clearing table");
-    if (tblState.api) { tblState.api.destroy(); }  
+    // if (tblState.api) { tblState.api.destroy(); }  
     $('#map').hide(); //Clears location map view
     $('#search-tbl').show();
 }

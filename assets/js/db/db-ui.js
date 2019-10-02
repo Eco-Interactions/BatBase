@@ -13,7 +13,6 @@
  *     loadTxnFilterPanelElems          db-page
  *     resetToggleTreeBttn              db_page, init-table
  *     showLoadingDataPopUp             util
- *     showBrowserWarningPopup          db-page
  *     showTips                         intro
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
@@ -31,14 +30,6 @@ const app = {
     userRole: $('body').data("user-role"),
     enabledSelectors: ''
 };
-export function showBrowserWarningPopup() {
-    const overlay = $('<div></div>').addClass('mobile-opt-overlay');
-    const popup = $('<div></div>').addClass('popup');
-    $(popup).html(`<center><h2>This page not supported on Safari Browser currently.</h2>`);
-    $(overlay).append(popup);
-    $('#detail-block').prepend(overlay);
-    $('.popup').fadeIn(500);
-}
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function pg_init() {
     addDomEventListeners();

@@ -457,8 +457,6 @@ function resetTable() {                                                         
 }
 function removePreviousTable() {  
     resetTableStateParams();
-    app.tblApi = app.tblState ? app.tblState.api : tState().get('api');  
-    app.tblApi.destroy();
 }
 function expandAllTableRows() {
     app.tblApi = tState().get('api');

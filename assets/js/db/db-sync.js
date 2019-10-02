@@ -1,7 +1,7 @@
 /**
  * Handles adding, updating, and removing data from local storage.
  * Exports:                 Imported by:
- *     addNewDataToStorage
+ *     addNewDataToStorage          idb-util
  *     initStoredData
  *     replaceUserData              util
  *     resetStoredData
@@ -9,6 +9,7 @@
  *     updateUserNamedList
  */
 import * as _u from './util.js';
+import * as _db from './idb-util.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
@@ -27,14 +28,17 @@ function getCurrentDate() {
  * On a browser's first visit to the page, all data is downloaded and the 
  * search page ui is initialized @initStoredData.
  */
-export function addNewDataToStorage(dataUpdatedAt, reset) {  
-    var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
-    if (!pgUpdatedAt) { return initStoredData(); } 
-    if (!ifEntityUpdates(dataUpdatedAt.System, pgUpdatedAt)) { 
-       return getUserSpecificUpdates(); 
-    }
-    delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
-    syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
+export function addNewDataToStorage(pgUpdatedAt, data) {                 console.log("pgDataUpdatedAt = [%s], serverState = [%O]", pgUpdatedAt, data.state);
+    if (!ifEntityUpdates(data.state.System, pgUpdatedAt)) { return initSearchState(); }
+    delete data.state.System;  //System updatedAt is no longer needed.
+    syncUpdatedData(data.state, pgUpdatedAt);
+     // var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgDataUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
+    // if (!pgUpdatedAt) { return initStoredData(); } 
+    // if (!ifEntityUpdates(dataUpdatedAt.System, pgUpdatedAt)) { 
+    //    return getUserSpecificUpdates(); 
+    // }
+    // delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
+    // syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
 }
 /**
  * Returns true if the first datetime is more recent than the second. 
@@ -49,9 +53,9 @@ function ifEntityUpdates(timeOne, timeTwo) {
  * Updates user specific data in local storage. Useful when the user changes on the
  * same machine, or when the search page is first visited before a user logged in.
  */
-function getUserSpecificUpdates() {
-    _u.sendAjaxQuery(null, "ajax/lists", storeUserSpecificData);                console.log('Data updated.');
-}
+// function getUserSpecificUpdates() {
+//     _u.sendAjaxQuery(null, "ajax/lists", storeUserSpecificData);                //console.log('Data updated.');
+// }
 function storeUserSpecificData(data) {
     data.lists = data.lists.map(l => JSON.parse(l));
     deriveUserNamedListData(data);
@@ -468,17 +472,17 @@ export function updateUserNamedList(data, action) {                             
     }
 } /* End updateUserNamedList */
 /*------------------ Init Stored Data Methods --------------------------------*/
-export function replaceUserData(data, userName) {
+export function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
     data.lists = data.lists.map(l => JSON.parse(l));
     deriveUserNamedListData(data);
-    _u.addToStorage('user', userName);
+    storeData('user', userName);
 }
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
     db_ui.showLoadingDataPopUp();
-    _u.clearDataStorage();
-    _u.addToStorage('curFocus', prevFocus);
+    idb.clear();
+    storeData('curFocus', prevFocus);
     ajaxAndStoreAllEntityData();
 }
 /**
@@ -507,13 +511,13 @@ function ajaxAndStoreAllEntityData() {                                          
     $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
         $.ajax("ajax/source"), $.ajax("ajax/interaction"),
-        $.ajax("ajax/lists"),
-    ).then(function(a1, a2, a3, a4, a5) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
-        $.each([a1, a2, a3, a4, a5], function(idx, a) { storeServerData(a[0]); });
+        $.ajax("ajax/lists"),  $.ajax("ajax/geojson")
+    ).then(function(a1, a2, a3, a4, a5, a6) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
+        $.each([a1, a2, a3, a4, a5, a6], function(idx, a) { storeServerData(a[0]); });
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
         storeData('pgDataUpdatedAt', getCurrentDate());  
-        initSearchState('taxa');
+        initSearchState();
     });
 }
 /**
@@ -735,7 +739,8 @@ function getFocusAndViewOptionGroupString(list) {
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */
 function storeData(key, data) {
-    _u.addToStorage(key, JSON.stringify(data));
+    // _u.addToStorage(key, JSON.stringify(data));
+    _u.addToStorage(key, data);
 }
 /**
  * Attempts to update the data and catches any errors.

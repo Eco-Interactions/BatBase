@@ -34,16 +34,13 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 */
 // let geoJson;
 /* dataStorage = window.localStorage (sessionStorage for tests) */
-const dataStorage = getDataStorage();
+// const dataStorage = getDataStorage();
 // const geoJsonKey = 'A life without cause is a life without effect!!!!!';  
-const localStorageKey = 'A life without cause is a life without effect!!!!!!!'; 
+// const localStorageKey = 'A life without cause is a life without effect!!!!!!!'; 
 
 extendPrototypes();
 // initGeoJsonData();
 /*----------------- Indexed DB Util --------------------------------------*/
-export function initGeoJsonData() {
-    return _db.initGeoJsonData();
-}
 export function getGeoJsonEntity(id) {
     return _db.getGeoJsonEntity(id);
 }
@@ -222,34 +219,35 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
  * downloads any new or changed data.
  */
 export function init_db() {
-    const storedUser = getStoredUserName(dataStorage.getItem('user'));
-    showPopUpMsg('Loading...');                                                 if ($('body').data('env') == 'dev') {console.log('storage key = [%s]', dataStorage.getItem(localStorageKey));}
-    if (!dataStorage.getItem(localStorageKey)) {
-        clearDataStorage();
-        initStoredData();
-    } else if (storedUser != $('body').data('user-name')) {    
-        showLoadingDataPopUp('user');
-        sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
-    } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
+    _db.initDb();
+    // const storedUser = getStoredUserName(dataStorage.getItem('user'));
+    // showPopUpMsg('Loading...');                                                 if ($('body').data('env') == 'dev') {console.log('storage key = [%s]', dataStorage.getItem(localStorageKey));}
+    // if (!dataStorage.getItem(localStorageKey)) {
+    //     clearDataStorage();
+    //     initStoredData();
+    // } else if (storedUser != $('body').data('user-name')) {    
+    //     showLoadingDataPopUp('user');
+    //     sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
+    // } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
 }
 /** Problems parsing name to string solved with this check. */
-function getStoredUserName(name) {
-    return name ? name.split('"').join('') : false;  
-}
-export function clearDataStorage() {  
-    dataStorage.clear();
-    dataStorage.setItem(localStorageKey, true);
-}
-function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
-    replaceUserData(data, $('body').data('user-name'));
-    db_page.initSearchState('user');
-}
-/** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
-function storeDataUpdatedTimes(ajaxData) {
-    dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
-    addNewDataToStorage(ajaxData.dataState);
-    db_page.initSearchState();
-}
+// function getStoredUserName(name) {
+//     return name ? name.split('"').join('') : false;  
+// }
+// export function clearDataStorage() {  
+//     dataStorage.clear();
+//     dataStorage.setItem(localStorageKey, true);
+// }
+// function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
+//     replaceUserData(data, $('body').data('user-name'));
+//     db_page.initSearchState();
+// }
+// /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
+// function storeDataUpdatedTimes(ajaxData) {
+//     // dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
+//     addNewDataToStorage(ajaxData.dataState);
+//     db_page.initSearchState();
+// }
 /** --------- Local Storage --------------- */
 /**
  * Gets data from data storage for each storage property passed. If an array
@@ -257,57 +255,60 @@ function storeDataUpdatedTimes(ajaxData) {
  * If a property is not found, false is returned. 
  */
 export function getDataFromStorage(props) {
-    if (!Array.isArray(props)) { return getStoredData(); }
-    return getStoredDataObj();
+    return _db.getData(props);
+    // if (!Array.isArray(props)) { return getStoredData(); }
+    // return getStoredDataObj();
 
-    function getStoredData() {
-        var data = dataStorage.getItem(props);  if (!data) { console.log("  ### no stored data for [%s]", props); /* console.trace(); */ }
-        return data ? JSON.parse(data) : false;
-    }
-    function getStoredDataObj() {
-        var data = {};
-        var allFound = props.every(function(prop){                              //console.log("getting [%s] data", prop)
-            return getPropData(prop);                             
-        });  
-        return allFound ? data : false;
-        function getPropData(prop) {
-                var jsonData = dataStorage.getItem(prop) || false;                              
-                if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
-                data[prop] = JSON.parse(jsonData);                              //console.log("data for %s - %O", entity, data[entity]);
-                return true;   
-        }
-    } /* End getDataObj */
+    // function getStoredData() {
+    //     var data = dataStorage.getItem(props);  if (!data) { console.log("  ### no stored data for [%s]", props); /* console.trace(); */ }
+    //     return data ? JSON.parse(data) : false;
+    // }
+    // function getStoredDataObj() {
+    //     var data = {};
+    //     var allFound = props.every(function(prop){                              //console.log("getting [%s] data", prop)
+    //         return getPropData(prop);                             
+    //     });  
+    //     return allFound ? data : false;
+    //     function getPropData(prop) {
+    //             var jsonData = dataStorage.getItem(prop) || false;                              
+    //             if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
+    //             data[prop] = JSON.parse(jsonData);                              //console.log("data for %s - %O", entity, data[entity]);
+    //             return true;   
+    //     }
+    // } /* End getDataObj */
 } /* End getDataFromStorage */
-function getDataStorage() {
-    const env = $('body').data('env');
-    const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
-    if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
-        return false; 
-    } 
-    if (env === 'test') { window[storageType].clear(); }
-    return window[storageType];  
+// function getDataStorage() {
+//     const env = $('body').data('env');
+//     const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
+//     if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
+//         return false; 
+//     } 
+//     if (env === 'test') { window[storageType].clear(); }
+//     return window[storageType];  
     
-    function storageAvailable(type) {
-        try {
-            var storage = window[type];
-            var x = '__storage_test__';
+//     function storageAvailable(type) {
+//         try {
+//             var storage = window[type];
+//             var x = '__storage_test__';
 
-            storage.setItem(x, x);
-            storage.removeItem(x);
-            return true;
-        }
-        catch(e) {
-            return false;
-        }
-    }
-} /* End getDataStorage */
+//             storage.setItem(x, x);
+//             storage.removeItem(x);
+//             return true;
+//         }
+//         catch(e) {
+//             return false;
+//         }
+//     }
+// } /* End getDataStorage */
 export function addToStorage(key, val) {                                        //console.log('addToStorage. k = [%s] v = [%s] valType = ', key, val, typeof(val));
-    if (dataStorage) {                                                          //console.log("dataStorage active.");
-        dataStorage.setItem(key, val);
-    } else { console.log("####__ No Local Storage Available__####"); }
+    _db.setData(key, val);
+    // if (dataStorage) {                                                          //console.log("dataStorage active.");
+    //     dataStorage.setItem(key, val);
+    // } else { console.log("####__ No Local Storage Available__####"); }
 }
 export function removeFromStorage(key) {
-    dataStorage.removeItem(key);
+    _db.removeData(key);
+    // dataStorage.removeItem(key);
 }
 // /** --------- IDB Storage --------------- */
 // /** 
