@@ -212,8 +212,9 @@ function updateFocusAndBuildTable(focus, tableBuilder) {                        
 } 
 function clearPreviousTable() {                                                 //console.log("clearing table");
     // if (tblState.api) { tblState.api.destroy(); }  
+    $('#search-tbl').fadeTo(500, .3);
     $('#map').hide(); //Clears location map view
-    $('#search-tbl').show();
+    // $('#search-tbl').show();
 }
 function focusNotChanged(focus) {
     return focus === tblState.curFocus;
@@ -379,6 +380,7 @@ export function onTxnViewChange(val) {                                          
 }
 function buildTxnTable(val) {                                                   //console.log('onTxnViewChange')
     const realmTaxon = storeAndReturnRealmRcrd(val);
+    clearPreviousTable();
     resetCurTreeState();
     rebuildTxnTable(realmTaxon);
 }

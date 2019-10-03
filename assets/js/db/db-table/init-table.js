@@ -22,6 +22,7 @@ export default function initTbl(viewTitle, rowData, state) {                    
     tblState = state;
     destroyPreviousTable(state.api);
     initTable(viewTitle, rowData);
+    onTableInitComplete(rowData);
 }
 function destroyPreviousTable(tblApi) {
     if (tblApi) { tblApi.destroy(); }
@@ -36,7 +37,6 @@ function initTable(viewTitle, rowData) {
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
-    onTableInitComplete(rowData);
 }
 /** Base table options object. */
 function getDefaultTblOpts(viewTitle) {  
@@ -347,6 +347,7 @@ function hidePopUpMsg() {
 }
 function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
+    $('#search-tbl').fadeTo(250, 1);
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 

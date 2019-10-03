@@ -188,13 +188,15 @@ function isNextOpenLeafRow(node) {                                              
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
 export function initTaxonSearchUi(curView) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
-    loadTxnViewOpts();
-    setTaxonView(curView); 
-    $('#focus-filters').empty();  
+    _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
+        loadTxnViewOpts(realms);
+        setTaxonView(curView); 
+        $('#focus-filters').empty();  
+    });
 }
-function loadTxnViewOpts() {
+function loadTxnViewOpts(realms) {
     if ($('#sel-view').data('focus') === 'taxa') { return; }
-    _u.getData('realms').then(buildAndLoadTxnOpts);
+    buildAndLoadTxnOpts(realms);
 }
 function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
