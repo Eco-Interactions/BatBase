@@ -151,11 +151,11 @@ export function toggleFilterPanel() {
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
-    updateFilterSel();
+    _u.getData('savedFilterNames').then(updateFilterSel);
 }
-function updateFilterSel() {
-    const opts = getSavedFilterOpts(_u.getOptsFromStoredData('savedFilterNames'));     
-    const optGroups = buildOptGroups(opts);                                      //console.log('optGroups = %O', optGroups);
+function updateFilterSel(filterNames) {                                         //console.log('filterNames = %O', filterNames);
+    const opts = getSavedFilterOpts(Object.keys(filterNames));     
+    const optGroups = buildOptGroups(opts);                                     //console.log('optGroups = %O', optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
     _u.initCombobox('Saved Filter Set', getSpecialOpts());
 

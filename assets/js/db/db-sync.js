@@ -512,8 +512,8 @@ function ajaxAndStoreAllEntityData() {                                          
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
         $.ajax("ajax/source"), $.ajax("ajax/interaction"),
         $.ajax("ajax/lists"),  $.ajax("ajax/geojson")
-    ).then(function(a1, a2, a3, a4, a5, a6) {                                       console.log("Ajax success: a1 = %O, a2 = %O, a3 = %O, a4 = %O, a5=%O", a1, a2, a3, a4, a5) 
-        $.each([a1, a2, a3, a4, a5, a6], function(idx, a) { storeServerData(a[0]); });
+    ).then(function(a1, a2, a3, a4, a5, a6) {                                   console.log("Ajax success: args = %O", arguments); 
+        $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
         storeData('pgDataUpdatedAt', getCurrentDate());  

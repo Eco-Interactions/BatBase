@@ -336,13 +336,13 @@ function buildSourceTable() {
 /** Event fired when the source view select box has been changed. */
 export function onSrcViewChange(val) {                                         //console.log('-------- SrcViewChange. [%s]', val)
     if (!val) { return; }
+    $('#focus-filters').empty();
     rebuildSrcTable(val);
 }
 function rebuildSrcTable(val) {
     clearPreviousTable();
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
-    $('#focus-filters').empty();
     startSrcTableBuildChain(val);
 }
 function startSrcTableBuildChain(val) {
@@ -364,9 +364,9 @@ function storeSrcView(val) {
 function buildTaxonTable() {                                                    //console.log("Building Taxon Table.");
     _u.getData('taxon').then(beginTaxonLoad)
 }
-function beginTaxonLoad(taxa) {                                                 console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
+function beginTaxonLoad(taxa) {                                                 
     if (!taxa) { return alert("Error loading taxon data from storage. Try reloading the page."); }  
-    tblState.rcrdsById = taxa;  
+    tblState.rcrdsById = taxa;                                                  console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd();
     db_ui.initTaxonSearchUi(realmTaxon.id);
     startTxnTableBuildChain(realmTaxon);
@@ -374,12 +374,12 @@ function beginTaxonLoad(taxa) {                                                 
 /** Event fired when the taxon view select box has been changed. */
 export function onTxnViewChange(val) {                                          //console.log('rebuildTxnTable. val = [%s]', val) 
     if (!val) { return; }
+    $('#focus-filters').empty();  
     buildTxnTable(val);
 }
 function buildTxnTable(val) {                                                   //console.log('onTxnViewChange')
     const realmTaxon = storeAndReturnRealmRcrd(val);
     resetCurTreeState();
-    $('#focus-filters').empty();  
     rebuildTxnTable(realmTaxon);
 }
 /**
