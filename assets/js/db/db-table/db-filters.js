@@ -12,6 +12,7 @@
  *     syncViewFiltersAndUi             save-ints
  *     toggleTimeFilter                 db_page
  *     updateFilterStatusMsg            db-page, init-tbl, save-fltrs
+ *     updateTaxonFilterViewMsg         db-page
  *     updateLocSearch                  util
  *     updatePubSearch                  util
  *     updateTaxonSearch                util
@@ -70,8 +71,9 @@ function filtersActive() {
     return tbl || pnl;
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
-export function updateFilterViewMsg() {                                                     
-    const view = _u.getDataFromStorage('curView'); 
+/** Used in taxon views to indicate the filtering happening at the view level. */
+export function updateTaxonFilterViewMsg(curView) {                                                     
+    const view = curView ||  _u.getDataFromStorage('curView'); 
     const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
     const msg = map[view] ? `[${map[view]}]` : '';
     $('#view-fltr').text(msg);

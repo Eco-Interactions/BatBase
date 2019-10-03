@@ -187,13 +187,16 @@ function isNextOpenLeafRow(node) {                                              
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    loadTxnViewOpts(data.realm);
-    setTaxonView(); 
+export function initTaxonSearchUi(curView) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
+    loadTxnViewOpts();
+    setTaxonView(curView); 
     $('#focus-filters').empty();  
 }
-function loadTxnViewOpts(realms) {
+function loadTxnViewOpts() {
     if ($('#sel-view').data('focus') === 'taxa') { return; }
+    _u.getData('realms').then(buildAndLoadTxnOpts);
+}
+function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
     $('#sel-view').data('focus', 'taxa');
@@ -206,10 +209,9 @@ function getViewOpts(realms) {
     return optsAry;
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */
-function setTaxonView() {
-    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
+function setTaxonView(curView) {
     if (!_u.getSelVal('View')) { 
-        const realmVal = storedView ? storedView : "2";  
+        const realmVal = curView ? curView : "2";  
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
@@ -245,7 +247,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     const optsObj = {};
     const taxaByLvl = tblState.taxaByLvl;       
     // const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
-    tblState.allRealmLvls .forEach(buildLvlOptions);
+    tblState.allRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {

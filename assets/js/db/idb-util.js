@@ -58,16 +58,16 @@ export async function getData(props) {                                          
     return await getStoredDataObj(props);
 }
 async function getStoredDataObj(props) {
-    const data = {};
-    props.forEach(prop => {
-        idb.get(prop).then( d => {  if (!d) { console.log("  ### no stored data for [%s]", prop); /* console.trace(); */ }
-            data.prop = d
-        });
-    });  
-    return data;
+    const promises = [];
+    $(props).each((i, prop) => promises.push(idb.get(prop)));
+    return Promise.all(promises).then(data => {  
+        const obj = {};
+        $(data).each((i, d) => { obj[props[i]] = data[i]});
+        return obj;
+    });
 } 
 /** ----------------------- SETTERS ----------------------------------------- */
-export function setData(k, v) {                                                 console.log('      SET [%s] => [%O]', k, v);
+export function setData(k, v) {                                                 console.log('         SET [%s] => [%O]', k, v);
     idb.set(k, v);
 }
 export function removeData(k) {

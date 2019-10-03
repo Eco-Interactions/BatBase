@@ -214,8 +214,10 @@ function buildTxnDataTree(topTaxon) {
     }
 } /* End buildTaxonTree */
 function storeTaxonLevelData(topTaxon, filtering) {                             //console.log('storeTaxonLevelData. filtering?', filtering);
-    if (!filtering) { storeLevelData(topTaxon); 
-    } else { updateTaxaByLvl(topTaxon); }
+    _u.getData('levelNames').then(levels => { 
+        if (!filtering) { storeLevelData(topTaxon, levels); 
+        } else { updateTaxaByLvl(topTaxon, levels); }
+    });
 }
 /**
  * Stores in the global tblState obj:
@@ -223,16 +225,17 @@ function storeTaxonLevelData(topTaxon, filtering) {                             
  *   level and keyed under their display name.
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
-function storeLevelData(topTaxon) {                                             //console.log('topTaxon = %O', topTaxon)
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon);                         
+function storeLevelData(topTaxon, levels) {                                     //console.log('topTaxon = %O', topTaxon)
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                         
     const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', taxaByLvl, allRealmLvls);
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
-function updateTaxaByLvl(topTaxon) {
-    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(topTaxon)});              //console.log("taxaByLvl = %O", taxaByLvl)
+function updateTaxaByLvl(topTaxon, levels) {
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                 //console.log("taxaByLvl = %O", taxaByLvl)
+    tState().set({'taxaByLvl': taxaByLvl});          
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(topTaxon) {
+function seperateTaxonTreeByLvl(topTaxon, levels) {
     const separated = {};
     separate(topTaxon);
     return sortObjByLevelRank(separated);
@@ -247,9 +250,8 @@ function seperateTaxonTreeByLvl(topTaxon) {
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
         const obj = {};
-        levels.forEach(lvl => {
+        Object.keys(levels).forEach(lvl => {
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
@@ -265,16 +267,16 @@ function getRealmLvls(realm) {
 }
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
-function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
-    const entities = ['interaction', 'taxon', 'location', 'source'];
-    const entityData = _u.getDataFromStorage(entities); 
-    const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
-    fillMethods[focus](dataTree, entityData);
+async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
+    const fill = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
+    const entities = ['interaction', 'taxon', 'location', 'source', 'levelNames'];
+    const data = await _u.getData(entities);  
+    fill[focus](dataTree, data);
     return dataTree;
-} /* End fillTree */
+} 
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
     fillTaxaInteractions(dataTree);  
-    fillHiddenTaxonColumns(dataTree);
+    fillHiddenTaxonColumns(dataTree, Object.keys(entityData.levelNames));
 
     function fillTaxaInteractions(treeLvl) {                                    //console.log("fillTaxonInteractions called. taxonTree = %O", dataTree) 
         for (let taxon in treeLvl) {   
@@ -334,7 +336,7 @@ function replaceInteractions(interactionsAry, entityData) {                     
         if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
             return fillIntRcrd(
                 _u.getDetachedRcrd(intId, entityData.interaction), entityData); 
-        }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
+        } 
     });
 }
 /** Returns a filled record with all references replaced with entity records. */
@@ -358,9 +360,8 @@ function getIntTags(tagAry) {
 /**
  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
  */
-function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
+function fillHiddenTaxonColumns(curTaxonTree, lvls) {                           //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
     var curTaxonHeirarchy = {};
-    var lvls = Object.keys(_u.getDataFromStorage('levelNames'));                //console.log('lvls = %O', lvls);
     getTaxonDataAtTreeLvl(curTaxonTree);
 
     function getTaxonDataAtTreeLvl(treeLvl) {

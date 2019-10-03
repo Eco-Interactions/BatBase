@@ -41,6 +41,17 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 extendPrototypes();
 // initGeoJsonData();
 /*----------------- Indexed DB Util --------------------------------------*/
+/**
+ * Gets data from data storage for each storage property passed. If an array
+ * is passed, an object with each prop as the key for it's data is returned. 
+ * If a property is not found, false is returned. 
+ */
+export async function getData(props) {
+    return await _db.getData(props);
+}
+export function setData(k, v) {
+    _db.setData(k, v);
+}
 export function getGeoJsonEntity(id) {
     return _db.getGeoJsonEntity(id);
 }
