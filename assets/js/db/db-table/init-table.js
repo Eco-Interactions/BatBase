@@ -28,10 +28,9 @@ function destroyPreviousTable(tblApi) {
     if (tblApi) { tblApi.destroy(); }
 }
 function initTable(viewTitle, rowData) {
-    const tblDiv = document.querySelector('#search-tbl');
     const tblOpts = getDefaultTblOpts(viewTitle);
     tblOpts.rowData = rowData;
-    new agGrid.Grid(tblDiv, tblOpts);
+    new agGrid.Grid($('#search-tbl')[0], tblOpts);
     tblState.api = tblOpts.api;
     tState().set(
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
@@ -347,7 +346,6 @@ function hidePopUpMsg() {
 }
 function showTable() {
     $('#borderLayout_eRootPanel, #tool-bar').fadeTo(100, 1);
-    $('#search-tbl').fadeTo(250, 1);
 }
 /**
  * Hides the "tree" column's filter button. (Filtering on the group 

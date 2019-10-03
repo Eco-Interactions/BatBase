@@ -4,13 +4,14 @@
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
- *     pg_init                          db_page
+ *     fadeTable                        db-page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
  *     loadLocFilterPanelElems          db-page, db-filters
  *     loadTaxonComboboxes              db-page, db-filters     
  *     loadTxnFilterPanelElems          db-page
+ *     pg_init                          db_page
  *     resetToggleTreeBttn              db_page, init-table
  *     showLoadingDataPopUp             util
  *     showTips                         intro
@@ -323,7 +324,8 @@ function setSelectedTaxonVals(selected, tblState) {                             
  */ 
 export function initLocSearchUi(view) {
     loadLocationViewOpts();
-    setLocView(view);  
+    if (view) { setLocView(view); 
+    } else { _u.getData('curView'.then(setLocView)); }
 } 
 function loadLocationViewOpts(argument) {
     if ($('#sel-view').data('focus') === 'locs') { return; }
@@ -333,9 +335,7 @@ function loadLocationViewOpts(argument) {
     $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
-    const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
-    const locView = storedView || 'tree';
-    _u.setSelVal('View', locView, 'silent');
+    _u.setSelVal('View', view, 'silent');
 }
 /* ------------------------- LOCATION FILTER UI ----------------------------- */
 /**
@@ -363,14 +363,15 @@ function loadLocNameSearchElem() {
  * set any previously 'selected' values.
  */
 function loadLocComboboxes(tblState) {  
-    const opts = buildLocSelectOpts(tblState); 
-    const selElems = buildLocSelects(opts);
-    $('#focus-filters').append(selElems);
-    _u.initComboboxes(['Region', 'Country']);
-    setSelectedLocVals(tblState.selectedOpts);
+    _u.getData(['countryNames', 'regionNames']).then(data => {
+        const opts = buildLocSelectOpts(tblState, data); 
+        const selElems = buildLocSelects(opts);
+        $('#focus-filters').append(selElems);
+        _u.initComboboxes(['Region', 'Country']);
+        setSelectedLocVals(tblState.selectedOpts);
+    });
 }/** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts(tblState) {  
-    const data = _u.getDataFromStorage(['countryNames', 'regionNames']);
+function buildLocSelectOpts(tblState, data) {  
     const processedOpts = { Region: [], Country: [] };
     const opts = { Region: [], Country: [] };  
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
