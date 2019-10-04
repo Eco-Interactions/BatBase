@@ -298,7 +298,7 @@ function reloadTableInFilterFocus(view, focus) {                                
 }
 function updateTableView(view) {                                                //console.log('updateTableView')
     view =  view ? view : 'tree'; //Location filters are only saved in tree view
-    _u.addToStorage('curView', JSON.stringify(view)); 
+    _u.setData('curView', JSON.stringify(view)); 
 }
 function reloadTable(focus, view, fltrId) { 
     if (focus == tState().get('curFocus')) { 

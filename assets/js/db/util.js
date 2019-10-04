@@ -9,7 +9,6 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 /* 
  * Exports:
  *   addEnterKeypressClick
- *   addToStorage
  *   alphaOptionObjs
  *   buildElem
  *   buildSelectElem
@@ -265,109 +264,13 @@ export function init_db() {
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export function getDataFromStorage(props) {
+export function getDataFromStorage(props) { console.log('REPLACE'); console.trace();
     return _db.getData(props);
-    // if (!Array.isArray(props)) { return getStoredData(); }
-    // return getStoredDataObj();
-
-    // function getStoredData() {
-    //     var data = dataStorage.getItem(props);  if (!data) { console.log("  ### no stored data for [%s]", props); /* console.trace(); */ }
-    //     return data ? JSON.parse(data) : false;
-    // }
-    // function getStoredDataObj() {
-    //     var data = {};
-    //     var allFound = props.every(function(prop){                              //console.log("getting [%s] data", prop)
-    //         return getPropData(prop);                             
-    //     });  
-    //     return allFound ? data : false;
-    //     function getPropData(prop) {
-    //             var jsonData = dataStorage.getItem(prop) || false;                              
-    //             if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
-    //             data[prop] = JSON.parse(jsonData);                              //console.log("data for %s - %O", entity, data[entity]);
-    //             return true;   
-    //     }
-    // } /* End getDataObj */
 } /* End getDataFromStorage */
-// function getDataStorage() {
-//     const env = $('body').data('env');
-//     const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
-//     if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
-//         return false; 
-//     } 
-//     if (env === 'test') { window[storageType].clear(); }
-//     return window[storageType];  
-    
-//     function storageAvailable(type) {
-//         try {
-//             var storage = window[type];
-//             var x = '__storage_test__';
-
-//             storage.setItem(x, x);
-//             storage.removeItem(x);
-//             return true;
-//         }
-//         catch(e) {
-//             return false;
-//         }
-//     }
-// } /* End getDataStorage */
-export function addToStorage(key, val) {                                        //console.log('addToStorage. k = [%s] v = [%s] valType = ', key, val, typeof(val));
-    _db.setData(key, val);
-    // if (dataStorage) {                                                          //console.log("dataStorage active.");
-    //     dataStorage.setItem(key, val);
-    // } else { console.log("####__ No Local Storage Available__####"); }
-}
-export function removeFromStorage(key) {
+export function removeFromStorage(key) {console.log('REPLACE'); console.trace();
     _db.removeData(key);
     // dataStorage.removeItem(key);
 }
-// /** --------- IDB Storage --------------- */
-// /** 
-//  * Checks whether the dataKey exists in indexDB cache. 
-//  * If it is, the stored geoJson is fetched and stored in the global variable. 
-//  * If not, the db is cleared and geoJson is redownloaded. 
-//  */
-// export function initGeoJsonData() {  
-//     idb.get(geoJsonKey).then(clearIdbCheck);
-// }
-// function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
-//     if (storedKey) { return getGeoJsonData(); } 
-//     idb.clear();                                                                //console.log('actually clearing');
-//     downloadGeoJson();
-// }
-// function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
-//     idb.get('geoJson').then(storeGeoJson);
-// }
-// function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
-//     if (!geoData) { return downloadGeoJson(); }
-//     geoJson = geoData; 
-// }
-// function downloadGeoJson(cb) {                                                  
-//     return dataStorage.getItem('interaction') ?
-//         downloadGeoJsonAfterLocalDbInit(cb) :
-//         window.setTimeout(downloadGeoJson, 800);   
-// }
-// function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
-//     sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-    
-//     function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
-//         idb.set('geoJson', data.geoJson);
-//         storeGeoJson(data.geoJson);
-//         idb.set(geoJsonKey, true);
-//         if (cb) { cb(); }
-//     }
-// }
-// export function isGeoJsonDataAvailable() {
-//     return geoJson;
-// }
-// export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
-//     geoJson = false;
-//     downloadGeoJson(cb);
-// }
-// export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
-//     return isGeoJsonDataAvailable() ?  JSON.parse(geoJson[id]) :
-//         updateGeoJsonData(getGeoJsonEntity.bind(null, id));
-// }
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     return $.ajax({
@@ -392,7 +295,7 @@ export function getDetachedRcrd(rcrdKey, rcrds) {                               
        return snapshot(rcrds[rcrdKey]);
     }
     catch (e) { 
-       console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+       // console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
     }
 }
 export function getTaxonName(taxon) {                                           

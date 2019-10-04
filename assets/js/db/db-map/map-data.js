@@ -8,10 +8,9 @@
 import { accessTableState as tState } from '../db-page.js';
 import * as _u from '../util.js';
 
-export default function buildMapDataObj(viewRcrds, locRcrds) { 
+export default function buildMapDataObj(viewRcrds, rcrds) { 
     const tblState = tState().get(null, ['api', 'curFocus', 'curView', 'rowData']);
     const mapData = { 'none': { ttl: 0, ints: {}, locs: null }}; 
-    const intRcrds = _u.getDataFromStorage('interaction');
     let curBaseNodeName; //used for Source rows
     tblState.api.forEachNodeAfterFilter(getIntMapData);   
     return mapData;  
@@ -34,8 +33,8 @@ export default function buildMapDataObj(viewRcrds, locRcrds) {
         /** Adds to mapData obj by geoJsonId, or tracks if no location data. */
         function addRowData(intRow) {  
             if (!intRow.data.location) { return ++noLocCnt; }  
-            const intRcrd = _u.getDetachedRcrd(intRow.data.id, intRcrds);       //console.log('----intRow = %O, intRcd = %O, locRcrds = %O', intRow, intRcrd, locRcrds);
-            const loc = _u.getDetachedRcrd(intRcrd.location, locRcrds);
+            const intRcrd = _u.getDetachedRcrd(intRow.data.id, rcrds.ints);       //console.log('----intRow = %O, intRcd = %O, rcrds.locs = %O', intRow, intRcrd, rcrds.locs);
+            const loc = _u.getDetachedRcrd(intRcrd.location, rcrds.locs);
             addLocAndIntData(loc, intRcrd);
             ++data.intCnt;
         }

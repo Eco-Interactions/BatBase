@@ -741,8 +741,7 @@ function getFocusAndViewOptionGroupString(list) {
 /*--------------- Shared Helpers -----------------------------*/
 /** Stores passed data under the key in dataStorage. */
 function storeData(key, data) {
-    // _u.addToStorage(key, JSON.stringify(data));
-    _u.addToStorage(key, data);
+    _u.setData(key, data);
 }
 /**
  * Attempts to update the data and catches any errors.

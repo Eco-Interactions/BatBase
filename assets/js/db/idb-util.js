@@ -53,23 +53,28 @@ function checkUserData(dbUser) {
         replaceUserData.bind(null, $('body').data('user-name')));
 }
 /** ----------------------- GETTERS ----------------------------------------- */
-export async function getData(props) {                                          console.log('     GET [%O]', props);
-    if (!Array.isArray(props)) { return getStoredData(props); }
-    return await getStoredDataObj(props);
+/**
+ * Gets data from Indexed DB for each key passed. If an array
+ * is passed, an object with each prop as the key for it's data is returned. 
+ * If a property is not found, false is returned. 
+ */
+export async function getData(keys) {                                          console.log('     GET [%O]', keys);
+    if (!Array.isArray(keys)) { return getStoredData(keys); }
+    return await getStoredDataObj(keys);
 }
-function getStoredData(prop) {
-    return Promise.resolve(idb.get(prop).then(d => returnStoredData(d, prop)));
+function getStoredData(key) {
+    return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key)));
 }
-function returnStoredData(data, prop) {
-    if (data == undefined) { return alert(`Error loading [${prop}] data. Try reloading the page.`); }  
+function returnStoredData(data, key) {
+    if (data == undefined) { return alert(`Error loading [${key}] data. Try reloading the page.`); }  
     return data;
 }
-async function getStoredDataObj(props) {
+async function getStoredDataObj(keys) {
     const promises = [];
-    $(props).each((i, prop) => promises.push(getStoredData(prop)));
+    $(keys).each((i, key) => promises.push(getStoredData(key)));
     return Promise.all(promises).then(data => {  
         const obj = {};
-        $(data).each((i, d) => { obj[props[i]] = d});
+        $(data).each((i, d) => { obj[keys[i]] = d});
         return obj;
     });
 } 
