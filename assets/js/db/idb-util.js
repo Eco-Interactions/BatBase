@@ -58,18 +58,18 @@ function checkUserData(dbUser) {
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export async function getData(keys) {                                          console.log('     GET [%O]', keys);
+export function getData(keys) {                                                 console.log('     GET [%O]', keys);
     if (!Array.isArray(keys)) { return getStoredData(keys); }
-    return await getStoredDataObj(keys);
+    return Promise.resolve(getStoredDataObj(keys));
 }
 function getStoredData(key) {
     return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key)));
 }
-function returnStoredData(data, key) {
+function returnStoredData(data, key) {                                          //console.log('data = %O, key = ', data, key)
     if (data == undefined) { return alert(`Error loading [${key}] data. Try reloading the page.`); }  
     return data;
 }
-async function getStoredDataObj(keys) {
+function getStoredDataObj(keys) {
     const promises = [];
     $(keys).each((i, key) => promises.push(getStoredData(key)));
     return Promise.all(promises).then(data => {  

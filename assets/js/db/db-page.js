@@ -16,7 +16,7 @@
  *     rebuildTxnTable          db-filters
  *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-fltrs, save-ints    
- *     selectSearchFocus        db-filters, save-fltrs
+ *     selectSearchFocus        db-ui, db-filters, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap
@@ -99,7 +99,7 @@ export function showIntroAndLoadingMsg() {
 /** After new data is downlaoded, the search state is initialized and page loaded. */
 export function initSearchState(focus) {                                        //console.log('initSearchState');
     setTableInitState();      
-    selectInitialSearchFocus(focus);
+    db_ui.selectInitialSearchFocus(focus);
 } 
 function setTableInitState() {
     resetTableParams('taxa');
@@ -111,22 +111,6 @@ export function resetSearchState() {                                            
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.resetTblFilters();    
     selectSearchFocus();
-}
-/** Selects either Taxon, Location or Source in the table-focus dropdown. */
-function selectInitialSearchFocus(f) {                                          //console.log('--------------selectInitialSearchFocus')
-    const focus = f || 'taxa';
-    _u.initComboboxes(['Focus', 'View']);
-    _u.replaceSelOpts('#search-focus', getFocusOpts())
-    _u.setSelVal('Focus', focus, 'silent');
-    selectSearchFocus();
-    updateFilterPanelHeader(focus);
-}
-function getFocusOpts() {
-    return [
-        { value: 'locs', text: 'Location' },
-        { value: 'srcs', text: 'Source' },
-        { value: 'taxa', text: 'Taxon' },
-    ];
 }
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
@@ -206,7 +190,6 @@ export function selectSearchFocus(f) {
         'taxa': buildTaxonTable 
     };  
     updateFocusAndBuildTable(focus, builderMap[focus]); 
-    // if (!_u.getDataFromStorage('pgDataUpdatedAt')) { return; } 
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
@@ -328,15 +311,14 @@ export function showLocOnMap(geoJsonId, zoom) {
  * to @initSrcSearchUi to begin the data-table build.  
  */
 function buildSourceTable() {
-    const data = _u.getDataFromStorage('source');
-    if (data) { 
-        tblState.rcrdsById = data;
-        db_ui.initSrcSearchUi(data);
-        onSrcViewChange(tblState.curView);
-    } else { console.log('Error loading source data from storage.'); }
+    _u.getData('source').then(srcs => {
+        tblState.rcrdsById = srcs;
+        db_ui.initSrcSearchUi(srcs, 'pubs');
+        startSrcTableBuildChain(); //tblState.curView
+    });
 }
 /** Event fired when the source view select box has been changed. */
-export function onSrcViewChange(val) {                                         //console.log('-------- SrcViewChange. [%s]', val)
+export function onSrcViewChange(val) {                                          //console.log('-------- SrcViewChange. [%s]', val)
     if (!val) { return; }
     $('#focus-filters').empty();
     rebuildSrcTable(val);
@@ -349,9 +331,10 @@ function rebuildSrcTable(val) {
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    db_ui.loadSrcSearchUi(tblState.curView);
-    frmt_data.transformSrcDataAndLoadTable(
-        data_tree.buildSrcTree(tblState.curView), tblState);
+    data_tree.buildSrcTree(tblState.curView).then(tree => {
+        frmt_data.transformSrcDataAndLoadTable(tree, tblState);
+        db_ui.loadSrcSearchUi(tblState.curView);
+    });
 }
 function storeSrcView(val) {  
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
@@ -367,7 +350,7 @@ function buildTaxonTable() {                                                    
     _u.getData('taxon').then(beginTaxonLoad)
 }
 function beginTaxonLoad(taxa) {                                                 
-    tblState.rcrdsById = taxa;                                                  console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
+    tblState.rcrdsById = taxa;                                                  //console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd();
     db_ui.initTaxonSearchUi(realmTaxon.id);
     startTxnTableBuildChain(realmTaxon);

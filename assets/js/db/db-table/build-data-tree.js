@@ -46,21 +46,11 @@ function getLocChildData(childId) {
 }
 /* ========================= SOURCE TREE ============================================================================ */
 /** (Re)builds source tree for the selected source realm. */
-export function buildSrcTree(realm) {
+export async function buildSrcTree(realm) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
-    const tree = buildSrcRealmTree(realm, getRealmRcrds(realm));
+    const tree = await buildSrcRealmTree(realm);
     return fillTreeWithInteractions('srcs', tree);
-}
-/** Returns the records for the source realm currently selected. */
-function getRealmRcrds(realm) {
-    const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
-    return getTreeRcrdAry(valMap[realm]);
-}
-/** Returns an array with all records from the stored record object. */
-function getTreeRcrdAry(realmRcrdKey) {
-    const srcRcrdIdAry = _u.getDataFromStorage(realmRcrdKey);  
-    return srcRcrdIdAry.map(function(id) { return _u.getDetachedRcrd(id, focusRcrds)});
 }
 /**
  * Builds the source data tree for the selected source realm (source type)
@@ -69,13 +59,31 @@ function getTreeRcrdAry(realmRcrdKey) {
  * Publications->Citations->Interactions. 
  * Publishers->Publications->Citations->Interactions. 
  */
-function buildSrcRealmTree(realm, rcrds) {                              
-    const pubRcrds = _u.getDataFromStorage('publication');
-    const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
-    let tree = treeMap[realm](rcrds, pubRcrds);
-    tree = filterTreeToInteractionSet(tree, 'srcs');
-    return sortDataTree(tree);
+function buildSrcRealmTree(realm) {     
+    const bldr = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
+    const realmSrcKey = getSrcRcrdKey(realm);
+    return Promise.all([_u.getData(['publication', 'author']),_u.getData(realmSrcKey)])
+        .then(data => { 
+            const srcData = data[1].map(id => _u.getDetachedRcrd(id, focusRcrds))
+            let tree = bldr[realm](srcData, data[0]);
+            tree = filterTreeToInteractionSet(tree, 'srcs');
+            return sortDataTree(tree);
+        }).catch(e => console.log('e = %O', e));
 }  
+function getSrcRcrdKey(realm) {
+    const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
+    return keys[realm];
+}
+/** Returns the records for the source realm currently selected. */
+function getRealmRcrds(realm) {
+    return getTreeRcrdAry(valMap[realm]);
+}
+/** Returns an array with all records from the stored record object. */
+function getTreeRcrdAry(realmRcrdKey) {
+    const srcRcrdIdAry = _u.getDataFromStorage(realmRcrdKey);  
+
+    return srcRcrdIdAry.map(function(id) { return });
+}
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
  * Returns a tree object with Publications as the base nodes of the data tree. 
@@ -86,7 +94,8 @@ function buildSrcRealmTree(realm, rcrds) {
  * ->->Citation Title
  * ->->->Interactions Records
  */
-function buildPubTree(pubSrcRcrds, pubRcrds) {                                  //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+function buildPubTree(pubSrcRcrds, data) {                                      //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+    const pubRcrds = data.publication;
     const tree = {};
     pubSrcRcrds.forEach(function(pub) { 
         tree[pub.displayName] = getPubData(pub, pubRcrds); 
@@ -115,7 +124,8 @@ function getPubChildren(rcrd, pubRcrds) {                                       
  * ->->->Citation Title
  * ->->->->Interactions Records
  */
-function buildPublTree(pubSrcRcrds, pubRcrds) {                                 //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+function buildPublTree(pubSrcRcrds, data) {                                 //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+    const pubRcrds = data.publication;
     const tree = {};
     const noPubl = [];
     pubSrcRcrds.forEach(function(pub) { addPubl(pub); });
@@ -153,8 +163,9 @@ function buildPublTree(pubSrcRcrds, pubRcrds) {                                 
  * ->->Citation Title (Publication Title)
  * ->->->Interactions Records
  */
-function buildAuthTree(authSrcRcrds, pubRcrds) {                                //console.log("----buildAuthSrcTree. authSrcRcrds = %O, pubRcrds", authSrcRcrds, pubRcrds);
-    const authRcrds = _u.getDataFromStorage('author');  
+function buildAuthTree(authSrcRcrds, data) {                                //console.log("----buildAuthSrcTree. authSrcRcrds = %O, pubRcrds", authSrcRcrds, pubRcrds);
+    const pubRcrds = data.publication;
+    const authRcrds = data.author;
     const tree = {};
     authSrcRcrds.forEach(rcrd => getAuthData(rcrd));
     return tree;  
@@ -270,7 +281,7 @@ function getRealmLvls(realm) {
 async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
     const fill = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
     const entities = ['interaction', 'taxon', 'location', 'source', 'levelNames'];
-    const data = await _u.getData(entities);  
+    const data = await _u.getData(entities);
     fill[focus](dataTree, data);
     return dataTree;
 } 
@@ -318,14 +329,12 @@ function fillSrcTree(dataTree, entityData) {
      * Recurses through each source's 'children' property until all sources 
      * have any interaction ids replaced with the interaction records. 
      */
-    function fillSrcInteractions(curSrc) {                                      //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+    function fillSrcInteractions(curSrc) {                                      //console.log("fillSrcInteractions. curSrc = %O", curSrc);
         const srcChildren = [];
         if (curSrc.isDirect) { replaceSrcInts(curSrc); }
-        curSrc.children.forEach(function(childSrc){
-            fillSrcInteractions(childSrc); 
-        });
+        curSrc.children.forEach(childSrc => fillSrcInteractions(childSrc));
     }
-    function replaceSrcInts(curSrc) {
+    function replaceSrcInts(curSrc) {  
         curSrc.interactions = replaceInteractions(curSrc.interactions, entityData); 
     }
 

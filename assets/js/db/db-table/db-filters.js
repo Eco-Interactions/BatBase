@@ -72,8 +72,7 @@ function filtersActive() {
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /** Used in taxon views to indicate the filtering happening at the view level. */
-export function updateTaxonFilterViewMsg(curView) {                                                     
-    const view = curView ||  _u.getDataFromStorage('curView'); 
+export function updateTaxonFilterViewMsg(view) {                                                     
     const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
     const msg = map[view] ? `[${map[view]}]` : '';
     $('#view-fltr').text(msg);
@@ -402,11 +401,14 @@ function reapplyPubFltr() {                                                     
  * show only taxa in the filtered tree.
  */
 function updateTaxonComboboxes(tblState) {
-    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(getAllCurRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
-    db_ui.loadTaxonComboboxes(tblState);
+    _u.getData('levelNames').then(lvls => {
+        const taxaByLvl = seperateTaxonTreeByLvl(lvls, getAllCurRows(tblState));
+        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
+        db_ui.loadTaxonComboboxes(tblState);
+    });
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(rowData) {                                      //console.log('rowData = %O', rowData);
+function seperateTaxonTreeByLvl(lvls, rowData) {                                //console.log('rowData = %O', rowData);
     const separated = {};
     rowData.forEach(data => separate(data));
     return sortObjByLevelRank(separated);
@@ -420,9 +422,8 @@ function seperateTaxonTreeByLvl(rowData) {                                      
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
         const obj = {};
-        levels.forEach(lvl => { 
+        lvls.forEach(lvl => { 
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
@@ -563,28 +564,31 @@ function getSelectedVals(val, type) {                                           
  * publication text, the table is rebuilt with the filtered data.
  * NOTE: All Source realms include text search.
  */
-export function updatePubSearch() {                                             //console.log('updatePubSearch.')
+export async function updatePubSearch() {                                       //console.log('updatePubSearch.')
     tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
-    const newRows = getFilteredPubRows();
+    const newRows = await getFilteredPubRows();
     setPubFilters();
     tblState.api.setRowData(newRows);
     db_ui.resetToggleTreeBttn(false);
 
-    function getFilteredPubRows() {                             
+    function getFilteredPubRows() {
         if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
-        if (txt === '') { return getPubTypeRows(typeId); }
-        const pubTypes = _u.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[typeId].publications;        
-        return getAllCurRows().filter(row => 
-            pubIds.indexOf(row.pubId) !== -1 && 
-            row.name.toLowerCase().indexOf(txt) !== -1);
+        return _u.getData('publicationType').then(pTypes => {
+            if (txt === '') { return getAllPubTypeRows(pTypes); }
+            return getPubTypeRows(pTypes[typeId].publications);
+        });
+    }
+    function getPubTypeRows(typeIds) {
+        return getAllCurRows().filter(row => {
+            return typeIds.indexOf(row.pubId) !== -1 && 
+                row.name.toLowerCase().indexOf(txt) !== -1;
+        });
     }
     /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows() { 
-        const pubTypes = _u.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[typeId].publications;      
+    function getAllPubTypeRows(pTypes) { 
+        const pubIds = pTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
     function setPubFilters() { 

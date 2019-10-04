@@ -13,6 +13,7 @@
  *     loadTxnFilterPanelElems          db-page
  *     pg_init                          db_page
  *     resetToggleTreeBttn              db_page, init-table
+ *     selectInitialSearchFocus         db-page
  *     showLoadingDataPopUp             util
  *     showTips                         intro
  *     updateUiForTableView             db-page
@@ -26,6 +27,8 @@ import * as db_filters from './db-table/db-filters.js';
 import { showInts } from './db-map/db-map.js';
 import { enableListReset, toggleSaveIntsPanel } from './panels/save-ints.js';
 import { addPanelEvents, closeOpenPanels } from './panels/panel-util.js';
+import { updateFilterPanelHeader } from './panels/save-fltrs.js';
+
 
 const app = {
     userRole: $('body').data("user-role"),
@@ -34,21 +37,7 @@ const app = {
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function pg_init() {
     addDomEventListeners();
-    adaptUiToScreenSize();
     authDependentInit();
-}
-/** 
- * Moves the buttons from the end of the search menu to just the header row.
- * (Not used currently. Could revive in the future if the search menu grows.)
- */
-function adaptUiToScreenSize() {
-    // if ($(window).width() > 1500) { return; }
-    // const elemCntnr = $('#data-opts').detach();  
-    // const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
-    // $(elemCntnr)[0].className = 'flex-row';
-    // $(cntnr).append(elemCntnr);
-    // $('#hdr-right').append(cntnr);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
@@ -106,6 +95,22 @@ function enableAdminFeatures() {                                                
         .click(createEntity.bind(null, 'create', 'interaction'));
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = '.map-dsbl';
+}
+/** Selects either Taxon, Location or Source in the table-focus dropdown. */
+export function selectInitialSearchFocus(f) {                                          //console.log('--------------selectInitialSearchFocus')
+    const focus = f || 'taxa';
+    _u.initComboboxes(['Focus', 'View']);
+    _u.replaceSelOpts('#search-focus', getFocusOpts())
+    _u.setSelVal('Focus', focus, 'silent');
+    db_page.selectSearchFocus();
+    updateFilterPanelHeader(focus);
+}
+function getFocusOpts() {
+    return [
+        { value: 'locs', text: 'Location' },
+        { value: 'srcs', text: 'Source' },
+        { value: 'taxa', text: 'Taxon' },
+    ];
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -192,7 +197,6 @@ export function initTaxonSearchUi(curView) {                                    
     _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
         loadTxnViewOpts(realms);
         setTaxonView(curView); 
-        $('#focus-filters').empty();  
     });
 }
 function loadTxnViewOpts(realms) {
@@ -220,7 +224,7 @@ function setTaxonView(curView) {
 }
 /* ---------------------------- TAXON FILTER UI ----------------------------- */
 export function loadTxnFilterPanelElems(tblState) {
-    if ($('#focus-filters div').length) { return loadTaxonComboboxes(tblState); }
+    if ($('#focus-filters label').length) { return loadTaxonComboboxes(tblState); }
     loadTaxonComboboxes(tblState);
     loadTxnNameSearchElem(tblState);
 }
@@ -237,7 +241,7 @@ function loadTxnNameSearchElem(tblState) {
 export function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
-    const loadFunc = $('#focus-filters div').length ? updateTaxonSelOptions : loadLevelSelects;
+    const loadFunc = $('#focus-filters label').length ? updateTaxonSelOptions : loadLevelSelects;
     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     loadFunc(lvlOptsObj, levels, tblState);
 }
@@ -343,7 +347,7 @@ function setLocView(view) {
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
 export function loadLocFilterPanelElems(tblState) {   
-    if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
+    if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
 }
@@ -478,9 +482,9 @@ function setSelectedLocVals(selected) {                                         
  * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
-export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
+export function initSrcSearchUi(srcData, view) {                                      //console.log("=========init source search ui");
     loadSourceViewOpts();   
-    setSrcView();  
+    setSrcView(view);  
 }
 function loadSourceViewOpts() {
     if ($('#sel-view').data('focus') === 'srcs') { return ; }
@@ -491,11 +495,9 @@ function loadSourceViewOpts() {
     $('#sel-view').data('focus', 'srcs');
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
-function setSrcView() {
-    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = ", storedView)
-    const srcView = storedView || 'pubs';  
-    db_page.accessTableState().set({'curView': srcView});
-    if (!_u.getSelVal('View')) { _u.setSelVal('View', srcView, 'silent'); } 
+function setSrcView(view) {
+    db_page.accessTableState().set({'curView': view});
+    if (!_u.getSelVal('View')) { _u.setSelVal('View', view, 'silent'); } 
 }
 /* ------------------------- SOURCE FILTER UI ------------------------------- */
 /**
@@ -506,7 +508,7 @@ function setSrcView() {
  * contained in the data tree.
  */
 export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
-    if ($('#focus-filters div').length) { return; }
+    if ($('#focus-filters label').length) { return; }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
     buildUi[realm](); 
@@ -517,36 +519,37 @@ function loadAuthSearchHtml() {
     $('#focus-filters').append(searchTreeElem);
 }
 function loadPubSearchHtml() {
-    const pubTypeElem = buildPubTypeSelect();
+    _u.getData('publicationType').then(pTypes => loadPubSearchElems(pTypes));
+}
+function loadPubSearchElems(pubTypes) {
+    const pubTypeElem = buildPubTypeSelect(pubTypes);
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
-    // $(searchTreeElem).css('width', '228px');
-    $('#focus-filters').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
+    $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
-    
-    function buildPubTypeSelect() {
-        const pubTypeOpts = buildPubSelectOpts();
-        return buildPubSelects(pubTypeOpts);
+}           
+
+function buildPubTypeSelect(pubTypes) {
+    const pubTypeOpts = buildPubSelectOpts(pubTypes);
+    return buildPubSelects(pubTypeOpts);
+}
+function buildPubSelectOpts(pubTypes) {
+    const opts = [{value: 'all', text: '- All -'}];
+    for (let t in pubTypes) {
+        opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
     }
-    function buildPubSelectOpts() {
-        const pubTypes = _u.getDataFromStorage('publicationType');           
-        const opts = [{value: 'all', text: '- All -'}];
-        for (let t in pubTypes) {
-            opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
-        }
-        return opts.sort(_u.alphaOptionObjs);  
-    }
-    /** Builds the publication type dropdown */
-    function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
-        const span = _u.buildElem('span', { text: 'Type:' });
-        const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
-        const lblW = $(window).width() > 1500 ? '222px' : '230px';
-        $(sel).css('width', '177px');
-        $(lbl).css('width', lblW).append([span, sel]);
-        return lbl;
-    }
-} /* End loadPubSearchHtml */
+    return opts.sort(_u.alphaOptionObjs);  
+}
+/** Builds the publication type dropdown */
+function buildPubSelects(opts) {                                                //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+    const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
+    const span = _u.buildElem('span', { text: 'Type:' });
+    const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+    const lblW = $(window).width() > 1500 ? '222px' : '230px';
+    $(sel).css('width', '177px');
+    $(lbl).css('width', lblW).append([span, sel]);
+    return lbl;
+}
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
     $('#focus-filters').append(searchTreeElem);
@@ -571,12 +574,14 @@ function showTableRecordsOnMap() {                                              
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
     $('#search-tbl').fadeTo('fast', 0.3, () => {
         updateUiForMapView();
-        showInts(tblState.curFocus, tblState.rcrdsById, getLocRcrds());
+        getLocRcrds().then( rcrds => {
+            showInts(tblState.curFocus, tblState.rcrdsById, rcrds);
+        });
     });
 
     function getLocRcrds() {
-        return tblState.curFocus !== 'locs' ? 
-            _u.getDataFromStorage('location') : tblState.rcrdsById;  
+        return Promise.resolve(tblState.curFocus !== 'locs' ? 
+            _u.getData('location') : tblState.rcrdsById);  
     }
 }
 function updateBttnToReturnRcrdsToTable() {
