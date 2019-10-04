@@ -363,14 +363,13 @@ function loadLocNameSearchElem() {
  * set any previously 'selected' values.
  */
 function loadLocComboboxes(tblState) {  
-    _u.getData(['countryNames', 'regionNames']).then(data => {
-        const opts = buildLocSelectOpts(tblState, data); 
-        const selElems = buildLocSelects(opts);
-        $('#focus-filters').append(selElems);
-        _u.initComboboxes(['Region', 'Country']);
-        setSelectedLocVals(tblState.selectedOpts);
-    });
-}/** Builds arrays of options objects for the location comboboxes. */
+    const opts = buildLocSelectOpts(tblState); 
+    const selElems = buildLocSelects(opts);
+    $('#focus-filters').append(selElems);
+    _u.initComboboxes(['Region', 'Country']);
+    setSelectedLocVals(tblState.selectedOpts);
+}
+/** Builds arrays of options objects for the location comboboxes. */
 function buildLocSelectOpts(tblState, data) {  
     const processedOpts = { Region: [], Country: [] };
     const opts = { Region: [], Country: [] };  
@@ -390,10 +389,10 @@ function buildLocSelectOpts(tblState, data) {
         if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
     }
     /** If the location has interactions an option object is built for it. */
-    function buildLocOpt(rowData, name, type) {
+    function buildLocOpt(rowData, name, type) {  
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        const id = data[_u.lcfirst(type) + "Names"][name];             
+        const id = rowData.id;             
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);

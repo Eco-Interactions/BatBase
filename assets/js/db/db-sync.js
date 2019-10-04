@@ -9,7 +9,6 @@
  *     updateUserNamedList
  */
 import * as _u from './util.js';
-import * as _db from './idb-util.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
@@ -29,7 +28,7 @@ function getCurrentDate() {
  * search page ui is initialized @initStoredData.
  */
 export function addNewDataToStorage(pgUpdatedAt, data) {                 console.log("pgDataUpdatedAt = [%s], serverState = [%O]", pgUpdatedAt, data.state);
-    if (!ifEntityUpdates(data.state.System, pgUpdatedAt)) { return initSearchState(); }
+    if (!ifEntityUpdates(data.state.System, pgUpdatedAt)) { return initSearchPage(); }
     delete data.state.System;  //System updatedAt is no longer needed.
     syncUpdatedData(data.state, pgUpdatedAt);
      // var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgDataUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
@@ -39,6 +38,9 @@ export function addNewDataToStorage(pgUpdatedAt, data) {                 console
     // }
     // delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
     // syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
+}
+function initSearchPage() {
+    _u.getData('curFocus').then(f => initSearchState(f));
 }
 /**
  * Returns true if the first datetime is more recent than the second. 

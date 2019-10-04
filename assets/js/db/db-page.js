@@ -97,24 +97,24 @@ export function showIntroAndLoadingMsg() {
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchState() {                                             //console.log('initSearchState');
+export function initSearchState(focus) {                                        //console.log('initSearchState');
     setTableInitState();      
-    selectInitialSearchFocus();
+    selectInitialSearchFocus(focus);
 } 
 function setTableInitState() {
     resetTableParams('taxa');
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.resetTblFilters();
 }
 export function resetSearchState() {                                            //console.log('resetSearchState');
     resetTableParams();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.resetTblFilters();    
     selectSearchFocus();
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
-    const focus = tblState.curFocus || 'taxa';
+function selectInitialSearchFocus(f) {                                          //console.log('--------------selectInitialSearchFocus')
+    const focus = f || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
@@ -236,7 +236,6 @@ function buildLocationTable(v) {                                                
     _u.getData(['location', 'topRegionNames']).then(beginLocationLoad);
     
     function beginLocationLoad(data) {
-        if (!data) { return alert("Error loading location data. Try reloading the page."); }  
         addLocDataToTableParams(data);
         db_ui.initLocSearchUi(view);
         updateLocView(view);
@@ -368,7 +367,6 @@ function buildTaxonTable() {                                                    
     _u.getData('taxon').then(beginTaxonLoad)
 }
 function beginTaxonLoad(taxa) {                                                 
-    if (!taxa) { return alert("Error loading taxon data. Try reloading the page."); }  
     tblState.rcrdsById = taxa;                                                  console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
     const realmTaxon = storeAndReturnRealmRcrd();
     db_ui.initTaxonSearchUi(realmTaxon.id);

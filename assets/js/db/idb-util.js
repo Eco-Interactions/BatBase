@@ -21,7 +21,7 @@ import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.
 
 const _db = {
     geoJson: null, 
-    v: .002
+    v: .003
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
@@ -54,15 +54,22 @@ function checkUserData(dbUser) {
 }
 /** ----------------------- GETTERS ----------------------------------------- */
 export async function getData(props) {                                          console.log('     GET [%O]', props);
-    if (!Array.isArray(props)) { return idb.get(props); }
+    if (!Array.isArray(props)) { return getStoredData(props); }
     return await getStoredDataObj(props);
+}
+function getStoredData(prop) {
+    return Promise.resolve(idb.get(prop).then(d => returnStoredData(d, prop)));
+}
+function returnStoredData(data, prop) {
+    if (data == undefined) { return alert(`Error loading [${prop}] data. Try reloading the page.`); }  
+    return data;
 }
 async function getStoredDataObj(props) {
     const promises = [];
-    $(props).each((i, prop) => promises.push(idb.get(prop)));
+    $(props).each((i, prop) => promises.push(getStoredData(prop)));
     return Promise.all(promises).then(data => {  
         const obj = {};
-        $(data).each((i, d) => { obj[props[i]] = data[i]});
+        $(data).each((i, d) => { obj[props[i]] = d});
         return obj;
     });
 } 
