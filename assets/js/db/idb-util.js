@@ -47,6 +47,10 @@ function checkForDbDataChanges() {
             addNewDataToStorage.bind(null, pgUpdatedAt));
     });
 }
+/**
+ * Updates user specific data in local storage. Useful when the user changes on the
+ * same machine, or when the search page is first visited before a user logged in.
+ */
 function checkUserData(dbUser) {
     if (dbUser == $('body').data('user-name')) { return; }
     _u.sendAjaxQuery({}, "ajax/lists", 
@@ -58,20 +62,20 @@ function checkUserData(dbUser) {
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export function getData(keys) {                                                 console.log('     GET [%O]', keys);
-    if (!Array.isArray(keys)) { return getStoredData(keys); }
-    return Promise.resolve(getStoredDataObj(keys));
+export function getData(keys, returnUndefined) {                                                 console.log('     GET [%O]', keys);
+    if (!Array.isArray(keys)) { return getStoredData(keys, returnUndefined); }
+    return Promise.resolve(getStoredDataObj(keys, returnUndefined));
 }
-function getStoredData(key) {
-    return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key)));
+function getStoredData(key, returnUndefined) {
+    return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key, returnUndefined)));
 }
-function returnStoredData(data, key) {                                          //console.log('data = %O, key = ', data, key)
-    if (data == undefined) { return alert(`Error loading [${key}] data. Try reloading the page.`); }  
+function returnStoredData(data, key, returnUndefined) {                                          //console.log('data = %O, key = ', data, key)
+    if (data == undefined && !returnUndefined) { return alert(`Error loading [${key}] data. Try reloading the page.`); }  
     return data;
 }
-function getStoredDataObj(keys) {
+function getStoredDataObj(keys, returnUndefined) {
     const promises = [];
-    $(keys).each((i, key) => promises.push(getStoredData(key)));
+    $(keys).each((i, key) => promises.push(getStoredData(key, returnUndefined)));
     return Promise.all(promises).then(data => {  
         const obj = {};
         $(data).each((i, d) => { obj[keys[i]] = d});

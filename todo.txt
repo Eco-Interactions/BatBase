@@ -25,9 +25,17 @@ Updates:
     - All pages look good on all device sizes and the modern browers: chrome, firefox, and safari (IE?)
 
 Current:
-    - tutorial broke at column defs
-    - map column pins in location view errors
+    - move to idb
+        - Add "catch" to all async calls
+        - combine the add & remove sync methods to reduce time waiting on async calls?
+        - test that data redownloads totally
+            - that updated from other editors update on page refresh 
+            - that user data updates as expected
+    - set email alerts up on feedback
 
+
+    - put clear db storage key in db.
+        - add action that resets and refreshes the database
 
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now

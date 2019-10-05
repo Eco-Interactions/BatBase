@@ -134,21 +134,20 @@ function setTableState(stateObj) {                                              
 /*---------------------- STATE MANAGMENT -------------------------------------*/
 /** Resets on focus change. */
 function resetTableParams(focus) {  
+    if (focus) { return Promise.resolve(resetTblParams(focus)); }
+    return Promise.resolve(_u.getData('curFocus').then(f => resetTblParams(f)));
+}
+function resetTblParams(focus) {
     const intSet =  tblState.intSet;
     const prevApi = tblState.api; //will be destroyed before new table loads. Visually jarring to remove before the new one is ready.
     tblState = {
         api: prevApi,
-        curFocus: focus || getResetFocus(),
+        curFocus: focus,
         openRows: [],
         selectedOpts: {},
         userRole: $('body').data("user-role")
     };
     if (intSet) { tblState.intSet = intSet; }
-}
-function getResetFocus() {
-    const foci = ['locs', 'srcs', 'taxa'];
-    const storedFocus = _u.getDataFromStorage('curFocus');
-    return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
 }
 /** Resets table state to top focus options for the selected view. */
 export function resetDataTable(view) {                                           //console.log("---reseting table---")
@@ -200,18 +199,17 @@ function updateFocusAndBuildTable(focus, tableBuilder) {                        
     clearOnFocusChange(focus, tableBuilder);
     updateFilterPanelHeader(focus);
 } 
-
 function focusNotChanged(focus) {
     return focus === tblState.curFocus;
 }
 function clearOnFocusChange(focus, tableBuilder) {
     _u.setData('curView', false);
     db_filters.resetTblFilters();
-    resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
     _u.replaceSelOpts('#sel-view', false);
     $('#focus-filters').empty();  
-    tableBuilder();
+    db_filters.updateTaxonFilterViewMsg(null);
+    resetTableParams(focus).then(() => tableBuilder());
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(v) {                                                //console.log("Building Location Table.");

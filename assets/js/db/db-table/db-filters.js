@@ -74,7 +74,7 @@ function filtersActive() {
 /** Used in taxon views to indicate the filtering happening at the view level. */
 export function updateTaxonFilterViewMsg(view) {                                                     
     const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
-    const msg = map[view] ? `[${map[view]}]` : '';
+    const msg = view ? `[${map[view]}]` : '';
     $('#view-fltr').text(msg);
 }
 /**

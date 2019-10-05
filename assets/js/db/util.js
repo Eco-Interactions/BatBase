@@ -31,22 +31,30 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   snapshot
  *   ucfirst 
 */
-// let geoJson;
-/* dataStorage = window.localStorage (sessionStorage for tests) */
-// const dataStorage = getDataStorage();
-// const geoJsonKey = 'A life without cause is a life without effect!!!!!';  
-// const localStorageKey = 'A life without cause is a life without effect!!!!!!!'; 
-
 extendPrototypes();
-// initGeoJsonData();
-/*----------------- Indexed DB Util --------------------------------------*/
+/*------------------------ IDB Storage Methods ---------------------------------------------------------------------------*/
+/** 
+ * On page load, clears local storage data if triggered by datakey change and 
+ * downloads any new or changed data.
+ */
+export function init_db() {
+    _db.initDb();
+}
+/** --------- Local Storage --------------- */
+export function getDataFromStorage(props) { console.log('REPLACE'); console.trace();
+    return _db.getData(props);
+} /* End getDataFromStorage */
+export function removeFromStorage(key) {console.log('REPLACE'); console.trace();
+    _db.removeData(key);
+}
+/*-------- Indexed DB -------------*/
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export async function getData(props) {
-    return await _db.getData(props);
+export async function getData(props, returnUndefined) {
+    return await _db.getData(props, returnUndefined);
 }
 export function setData(k, v) {
     _db.setData(k, v);
@@ -223,54 +231,7 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
         }
       }
 }
-/*--------------------------Storage Methods---------------------------------------------------------------------------*/
-/** 
- * On page load, clears local storage data if triggered by datakey change and 
- * downloads any new or changed data.
- */
-export function init_db() {
-    _db.initDb();
-    // const storedUser = getStoredUserName(dataStorage.getItem('user'));
-    // showPopUpMsg('Loading...');                                                 if ($('body').data('env') == 'dev') {console.log('storage key = [%s]', dataStorage.getItem(localStorageKey));}
-    // if (!dataStorage.getItem(localStorageKey)) {
-    //     clearDataStorage();
-    //     initStoredData();
-    // } else if (storedUser != $('body').data('user-name')) {    
-    //     showLoadingDataPopUp('user');
-    //     sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
-    // } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
-}
-/** Problems parsing name to string solved with this check. */
-// function getStoredUserName(name) {
-//     return name ? name.split('"').join('') : false;  
-// }
-// export function clearDataStorage() {  
-//     dataStorage.clear();
-//     dataStorage.setItem(localStorageKey, true);
-// }
-// function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
-//     replaceUserData(data, $('body').data('user-name'));
-//     db_page.initSearchState();
-// }
-// /** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
-// function storeDataUpdatedTimes(ajaxData) {
-//     // dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
-//     addNewDataToStorage(ajaxData.dataState);
-//     db_page.initSearchState();
-// }
-/** --------- Local Storage --------------- */
-/**
- * Gets data from data storage for each storage property passed. If an array
- * is passed, an object with each prop as the key for it's data is returned. 
- * If a property is not found, false is returned. 
- */
-export function getDataFromStorage(props) { console.log('REPLACE'); console.trace();
-    return _db.getData(props);
-} /* End getDataFromStorage */
-export function removeFromStorage(key) {console.log('REPLACE'); console.trace();
-    _db.removeData(key);
-    // dataStorage.removeItem(key);
-}
+
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     return $.ajax({
