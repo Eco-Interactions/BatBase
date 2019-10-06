@@ -276,7 +276,7 @@ function updateRelatedUi(filtering) {
  */
 function resetTimeFilter() {                                                    //console.log('tState = %O', tState);
     fPs.timeRows = null;
-    if (tblState.api && tblState.rowData) { 
+    if (tblState.api && tblState.rowData && !tblState.onInitComplete) { 
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
     }
@@ -404,7 +404,7 @@ function updateTaxonComboboxes(tblState) {
     _u.getData('levelNames').then(lvls => {
         const taxaByLvl = seperateTaxonTreeByLvl(lvls, getAllCurRows(tblState));
         tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
-        db_ui.loadTaxonComboboxes(tblState);
+        db_ui.loadTxnFilterPanelElems(tblState);
     });
 }
 /** Returns an object with taxon records by level and keyed with display names. */

@@ -11,8 +11,6 @@
  *     enableListReset              db-ui
  */
 import * as _u from '../util.js';
-import * as data_tree from '../db-table/build-data-tree.js';
-import * as frmt_data from '../db-table/format-data.js'; 
 import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
 import { accessTableState as tState, resetSearchState } from '../db-page.js';
@@ -275,32 +273,16 @@ function updateListLoadButton(text, clickFunc) {
 }
 function buildFocusDataTreeAndLoadGrid(dataFocus) {
     const bldrs = {
-        'locs': buildLocTreeInts, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
+        'locs': db_page.rebuildLocTable, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
     }
     bldrs[dataFocus]();
 }
-/* ---- Locs ---- */
-function buildLocTreeInts() {
-    const regions = getRegionIds();
-    frmt_data.transformLocDataAndLoadTable(
-        data_tree.buildLocTree(regions), app.tblState);
+function buildSrcTreeInts() {  
+    db_page.startSrcTableBuildChain();        
 }
-function getRegionIds() {
-    const ids = [];
-    const regions = _u.getDataFromStorage('topRegionNames');
-    for (let name in regions) { ids.push(regions[name]); } 
-    return ids;
-}
-/* ---- Srcs ---- */
-function buildSrcTreeInts() {                                                   
-    frmt_data.transformSrcDataAndLoadTable(
-        data_tree.buildSrcTree(app.tblState.curView), app.tblState);
-}
-/* ---- Taxa ---- */
-function buildTxnTreeInts() {                                                   
+function buildTxnTreeInts() {                                                   console.log('tblState = %O', tblState);                                          
     const realmTaxon = _u.getDataFromStorage('taxon')[getId(app.tblState.taxaByLvl)];
-    frmt_data.transformTxnDataAndLoadTable(
-        data_tree.buildTxnTree(realmTaxon), app.tblState);
+    db_page.startTxnTableBuildChain(realmTaxon);
 }
 function getId(taxaByLvl) {
     const realmLvl = Object.keys(taxaByLvl).filter(lvl => {
@@ -468,14 +450,3 @@ function deselectAllRows() {                                                    
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));       
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
-
-
-
-
-
-
-
-
-
-
-

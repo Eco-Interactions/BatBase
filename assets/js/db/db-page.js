@@ -12,8 +12,9 @@
  *     onLocViewChange          db_ui
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
- *     rebuildLocTable          db-filters
- *     rebuildTxnTable          db-filters
+ *     rebuildLocTable          db-filters, save-ints
+ *     rebuildSrcTable          save-ints
+ *     rebuildTxnTable          db-filters, save-ints
  *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-fltrs, save-ints    
  *     selectSearchFocus        db-ui, db-filters, save-fltrs
@@ -214,6 +215,10 @@ function clearOnFocusChange(focus, tableBuilder) {
     db_filters.updateTaxonFilterViewMsg(null);
     resetTableParams(focus).then(() => tableBuilder());
 }
+/* ==================== TABLE LOAD ========================================== */
+function loadTbl(tblName, rowData) {
+    require('./db-table/init.js').init(tblName, rowData, tblState);
+}
 /* ==================== LOCATION SEARCH ============================================================================= */
 function buildLocationTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
     const view = v || 'tree';
@@ -271,10 +276,12 @@ function getTopRegionIds() {
     for (let name in regions) { ids.push(regions[name]); } 
     return ids;
 }
-function startLocTableBuildChain(topLocs, textFltr) {
-    data_tree.buildLocTree(topLocs, textFltr).then( tree => {
-        frmt_data.transformLocDataAndLoadTable(tree, tblState);
+function startLocTableBuildChain(topLocs, textFltr) {               
+    data_tree.buildLocTree(topLocs, textFltr).then( tree => {  
+        const rowData = frmt_data.buildLocRowData(tree, tblState)
+        loadTbl('Location Tree', rowData);
         db_ui.loadLocFilterPanelElems(tblState);
+        if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
     });
 }
 /** -------------------- LOCATION MAP --------------------------------------- */
@@ -321,17 +328,17 @@ function buildSourceTable(v) {                                      /*Perm-log*/
 function getSrcDataAndBuildTable(view) {
     _u.getData('source').then(srcs => {
         tblState.rcrdsById = srcs;
-        db_ui.initSrcSearchUi(srcs, view);
+        db_ui.initSrcSearchUi(view);
         startSrcTableBuildChain(); //tblState.curView
     });
 }
 /** Event fired when the source view select box has been changed. */
-export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --SrcViewChange. [%s]', val)
+export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --SrcViewChange. view ? [%s]', val)
     if (!val) { return; }
     $('#focus-filters').empty();
     rebuildSrcTable(val);
 }
-function rebuildSrcTable(val) {                                     /*Perm-log*/console.log('       --rebuildSrcTable. [%s]', val)
+export function rebuildSrcTable(val) {                              /*Perm-log*/console.log('       --rebuildSrcTable. view ? [%s]', val)
     db_ui.fadeTable();
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
@@ -340,8 +347,11 @@ function rebuildSrcTable(val) {                                     /*Perm-log*/
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
     data_tree.buildSrcTree(tblState.curView).then(tree => {
-        frmt_data.transformSrcDataAndLoadTable(tree, tblState);
-        db_ui.loadSrcSearchUi(tblState.curView);
+        const rowData = frmt_data.buildSrcRowData(tree, tblState)
+        loadTbl('Source Tree', rowData, tblState);
+        db_ui.loadSrcFilterPanelElems(tblState.curView).then(() => {
+            if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
+        });
     });
 }
 function storeSrcView(val) {  
@@ -418,7 +428,9 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/
 function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
     tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", tblState.openRows)
     data_tree.buildTxnTree(topTaxon, filtering, textFltr).then(tree => {
-        frmt_data.transformTxnDataAndLoadTable(tree, tblState);
+        const rowData = frmt_data.buildTxnRowData(tree, tblState)
+        loadTbl('Taxon Tree', rowData, tblState);
         db_ui.loadTxnFilterPanelElems(tblState);
+        if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
     });
 }

@@ -2,7 +2,7 @@
  * Loads the formatted data using the ag-grid library and handles table styling.
  * 
  * Exports:        Imported by:
- *     initTbl          format-data, data-review
+ *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_forms from '../db-forms/db-forms.js';
@@ -18,7 +18,7 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export default function initTbl(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export function init(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
     destroyPreviousTable(state.api);
     initTable(viewTitle, rowData);
@@ -331,8 +331,8 @@ function onTableInitComplete(rowData) {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
+    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
     updateFilterStatusMsg();
-    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
 } 
 function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }

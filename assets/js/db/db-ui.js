@@ -9,8 +9,8 @@
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
  *     loadLocFilterPanelElems          db-page, db-filters
- *     loadTaxonComboboxes              db-page, db-filters     
- *     loadTxnFilterPanelElems          db-page
+ *     loadSrcFilterPanelElems          db-page, db-filters
+ *     loadTxnFilterPanelElems          db-page, db-filters     
  *     pg_init                          db_page
  *     resetToggleTreeBttn              db_page, init-table
  *     selectInitialSearchFocus         db-page
@@ -238,7 +238,7 @@ function loadTxnNameSearchElem(tblState) {
  * of every taxon at that level in the displayed, filtered, table-tree. After 
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
-export function loadTaxonComboboxes(tblState) {
+function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
     const loadFunc = $('#focus-filters label').length ? updateTaxonSelOptions : loadLevelSelects;
@@ -326,7 +326,7 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * data-tree view, by default, or loads the data-map view, if previously 
  * selected. 
  */ 
-export function initLocSearchUi(view) {
+export function initLocSearchUi(view) {                             /*Perm-log*/console.log("       --Init Location UI. view ? [%s]", view);        
     loadLocationViewOpts();
     if (view) { setLocView(view); 
     } else { _u.getData('curView'.then(setLocView)); }
@@ -346,7 +346,7 @@ function setLocView(view) {
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
-export function loadLocFilterPanelElems(tblState) {   
+export function loadLocFilterPanelElems(tblState) {                 /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
     if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
@@ -482,7 +482,7 @@ function setSelectedLocVals(selected) {                                         
  * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
-export function initSrcSearchUi(srcData, view) {                                      //console.log("=========init source search ui");
+export function initSrcSearchUi(view) {                             /*Perm-log*/console.log("       --Init source UI. view ? [%s]", view);
     loadSourceViewOpts();   
     setSrcView(view);  
 }
@@ -507,19 +507,22 @@ function setSrcView(view) {
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
+export function loadSrcFilterPanelElems(realm) {                    /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
     if ($('#focus-filters label').length) { return; }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
-    buildUi[realm](); 
+    return buildUi[realm](); 
 } 
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
     $('#focus-filters').append(searchTreeElem);
+    return Promise.resolve();
 }
 function loadPubSearchHtml() {
-    _u.getData('publicationType').then(pTypes => loadPubSearchElems(pTypes));
+    return Promise.resolve(_u.getData('publicationType').then(pTypes => {
+        loadPubSearchElems(pTypes)
+    }));
 }
 function loadPubSearchElems(pubTypes) {
     const pubTypeElem = buildPubTypeSelect(pubTypes);
@@ -553,6 +556,7 @@ function buildPubSelects(opts) {                                                
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
     $('#focus-filters').append(searchTreeElem);
+    return Promise.resolve();
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {

@@ -281,54 +281,72 @@ function resetDeleteButton() {
     $('#delete-filter').show();
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
-function applyFilterSet() {                                                     //console.log('Applying Filter Set')
-    const filters = app.fltr.details;   
+function applyFilterSet() {                                                     
+    const filters = app.fltr.details;                               /*Perm-log*/console.log('Applying Filter Set = %O', filters);
     app.fltr.active = true; 
-    reloadTableInFilterFocus(filters.view, filters.focus);
-    applyPanelFilters(filters.panel);
-    applyTableFilters(filters.table);
+    reloadTableThenApplyFilters(filters, app.fltr.id);
+}
+function reloadTableThenApplyFilters(filters, id) { 
+    const cb = onTableReloadComplete.bind(null, filters, id);
+    if (filters.focus == tState().get('curFocus')) {    
+        tState().set({onInitComplete: cb});
+        resetDataTable(filters.view, cb);
+        _u.setSelVal('View', filters.view, 'silent'); 
+    } else { 
+        tState().set({onInitComplete: setViewThenContinue});
+        selectSearchFocus(filters.focus, filters.view);
+        _u.setSelVal('Focus', filters.focus, 'silent'); 
+    }                        
+    function setViewThenContinue() {
+        if (filters.view == tState().get('curView')) { return cb();
+        } else { 
+            const view =  filters.view ? filters.view : 'tree'; //Location filters are only saved in tree view
+            tState().set({onInitComplete: cb});
+            _u.setData('curView', view); 
+            _u.setSelVal('View', view); 
+        }
+    }
+}
+function onTableReloadComplete(filters, id) {                       /*temp-log*/console.log('onTableReloadComplete. filters = %O, id = [%s]', filters, id);
+    _u.setSelVal('Saved Filter Set', id); 
+    setFiltersThatResetTableThenApplyRemaining(filters);
+}
+function setFiltersThatResetTableThenApplyRemaining(filters) {
+    if (filters.focus == 'srcs') { return setSrcCombo(filters); }
+    const resetCb = applyRemainingFilters.bind(null, filters);
+    setComboboxFilter(filters.panel.combo, resetCb);
+}
+function setSrcCombo(filters) {
+    setComboboxFilter(filters.panel.combo);
+    applyRemainingFilters(filters);
+}
+function setComboboxFilter(filter, resetCb) {                       /*debg-log*/console.log('setComboboxFilter. filter = %O, resetCb = %O', filter, resetCb);
+    const name = Object.keys(filter)[0];  
+    const id = name === 'Publication Type' ? 'PubType' : name; 
+    tState().set({onInitComplete: resetCb});
+    $(`#sel${id}`)[0].selectize.addItem(filter[name].value);
+}
+function applyRemainingFilters(filters) {                           /*temp-log*/console.log('       //applyRemainingFilters = %O', filters);
+    setNameSearchFilter(filters.panel.name);
+    setTimeUpdatedFilter(filters.panel.time);
+    applyColumnFilters(filters.table);
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
+    tState().set({onInitComplete: null});
 }
-/* --- reloadTableInFilterFocus --- */
-function reloadTableInFilterFocus(view, focus) {                                //console.log('reloadTableInFilterFocus view [%s] focus [%s]', view, focus)
-    updateTableView(view);    
-    reloadTable(focus, view, app.fltr.id);
-}
-function updateTableView(view) {                                                //console.log('updateTableView')
-    view =  view ? view : 'tree'; //Location filters are only saved in tree view
-    _u.setData('curView', JSON.stringify(view)); 
-}
-function reloadTable(focus, view, fltrId) { 
-    if (focus == tState().get('curFocus')) { 
-        resetDataTable(view);
-        _u.setSelVal('View', view, 'silent'); 
-        _u.setSelVal('Saved Filter Set', fltrId); 
-    } else { $('#search-focus')[0].selectize.addItem(focus); }                        
-}
-function applyPanelFilters(fs) {                                                //console.log('applyPanelFilters = %O', fs)
-    const map = {
-        combo: setComboboxFilter, name: setNameSearchFilter,
-        time: setTimeUpdatedFilter
-    };
-    Object.keys(map).forEach(type => fs[type] ? map[type](fs[type]) : null);    //Calls filters in an order that ensures optimized application, eg, less redundant processes
-}
-function setComboboxFilter(fObj) {                                              //console.log('setComboboxFilter. fObj = %O', fObj);
-    const name = Object.keys(fObj)[0];  
-    const id = name === 'Publication Type' ? 'PubType' : name;
-    $(`#sel${id}`)[0].selectize.addItem(fObj[name].value);
-}
-function setNameSearchFilter(text) {                                            //console.log('setNameSearchFilter. text = %s', text);
+function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = %s', text);
+    if (!text) { return; }
     $('#focus-filters input').val(text);
 }
-function setTimeUpdatedFilter(time) {                                           //console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
+function setTimeUpdatedFilter(time) {                               /*debg-log*/console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
+    if (!time) { return; } 
     _u.setSelVal('Time Filter', time.type);
     if (time.date) { db_filters.toggleTimeFilter(true, time.date); }
 }
-function applyTableFilters(filters) {                                           //console.log('tblState = %O', app.tblState)                                        //console.log('applyTableFilters = %O', filters);
+function applyColumnFilters(filters) {                              /*temp-log*/console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
     for (let name in filters) {  
-        const colName = Object.keys(filters[name])[0];                          //console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
+        const colName = Object.keys(filters[name])[0];              /*debg-log*///console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
         app.tblApi.getFilterApi(colName).setModel(filters[name][colName]);
     }
     delete app.tblApi;
