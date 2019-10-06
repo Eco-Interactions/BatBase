@@ -181,7 +181,7 @@ export function getOptsFromStoredData(prop) {                                   
  * group is passed, an additional 'group' key is added that will serve as a category 
  * for the options in the group.
  */
-export function buildOptsObj(entityObj, sortedKeys) {
+export function buildOptsObj(entityObj, sortedKeys) {                           //console.log('buildOpts from obj = %O, order = %O', entityObj, sortedKeys);
     return sortedKeys.map(function(name) {
         return typeof entityObj[name] === 'object' ? 
             { group: entityObj[name].group, 

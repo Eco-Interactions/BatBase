@@ -62,16 +62,20 @@ function checkUserData(dbUser) {
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export function getData(keys, returnUndefined) {                                                 console.log('     GET [%O]', keys);
+export function getData(keys, returnUndefined) {                                //console.log('     GET [%O]', keys);
     if (!Array.isArray(keys)) { return getStoredData(keys, returnUndefined); }
     return Promise.resolve(getStoredDataObj(keys, returnUndefined));
 }
 function getStoredData(key, returnUndefined) {
     return Promise.resolve(idb.get(key).then(d => returnStoredData(d, key, returnUndefined)));
 }
-function returnStoredData(data, key, returnUndefined) {                                          //console.log('data = %O, key = ', data, key)
-    if (data == undefined && !returnUndefined) { return alert(`Error loading [${key}] data. Try reloading the page.`); }  
+function returnStoredData(data, key, returnUndefined) {                         //console.log('[%s] = %O (returnUndefined ? [%s])', key, data, returnUndefined);
+    if (data == undefined && !returnUndefined) { return logAndAlert(key); }  
     return data;
+}
+function logAndAlert() {
+    alert(`Error loading [${key}] data. Try reloading the page.`);
+    console.log(`Error loading [${key}] data.`);
 }
 function getStoredDataObj(keys, returnUndefined) {
     const promises = [];
@@ -83,7 +87,7 @@ function getStoredDataObj(keys, returnUndefined) {
     });
 } 
 /** ----------------------- SETTERS ----------------------------------------- */
-export function setData(k, v) {                                                 console.log('         SET [%s] => [%O]', k, v);
+export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);
     idb.set(k, v);
 }
 export function removeData(k) {

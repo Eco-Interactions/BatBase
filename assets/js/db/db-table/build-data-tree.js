@@ -74,16 +74,6 @@ function getSrcRcrdKey(realm) {
     const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
     return keys[realm];
 }
-/** Returns the records for the source realm currently selected. */
-function getRealmRcrds(realm) {
-    return getTreeRcrdAry(valMap[realm]);
-}
-/** Returns an array with all records from the stored record object. */
-function getTreeRcrdAry(realmRcrdKey) {
-    const srcRcrdIdAry = _u.getDataFromStorage(realmRcrdKey);  
-
-    return srcRcrdIdAry.map(function(id) { return });
-}
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
  * Returns a tree object with Publications as the base nodes of the data tree. 

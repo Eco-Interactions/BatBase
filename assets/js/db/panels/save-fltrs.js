@@ -47,7 +47,7 @@ export function addFilterPanelEvents() {
     window.addEventListener('resize', resizeFilterPanelTab);
     $('#filter').click(toggleFilterPanel);                                      
     $('#shw-chngd').change(db_filters.toggleTimeFilter);
-    $('#delete-filter').click(deleteFilterSet);
+    $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
     $('#cncl-set-delete').click(cancelDelete);
@@ -79,7 +79,7 @@ function sizeFilterPanelTab() {
 function getPseudoBorderStyle() {
     const panelT = $('#filter-opts-pnl').position().top;
     const tabW = $('#filter-opts').innerWidth();  
-    const tabL = $('#filter-opts').position().left + 1;                         //console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
+    const tabL = $('#filter-opts').position().left + 1;             /*debg-log*///console.log('sizePanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); console.trace();//1px border
     return `<style>.hide-fltr-bttm-border:before { 
         position: absolute;
         content: '';
@@ -95,7 +95,7 @@ function getSplitPseudoBorderStyle() {
     const panelT = $('#filter-opts-pnl').position().top;
     const tabL = getLeftSplitPos(); 
     const tabW = $('#filter-opts').innerWidth();
-    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       //console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    const borderW = Math.abs(tabL - $('#misc-opts').position().left + 1);       /*debg-log*///console.log('sizeSplitPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
     return `<style>.hide-fltr-bttm-border-vert:before { 
         position: absolute;
         content: '';
@@ -149,13 +149,13 @@ export function toggleFilterPanel() {
     } else { _uPnl.togglePanel('#filter-opts-pnl', 'close'); }
 }
 /* ============== CREATE/OPEN FILTER SET ==================================== */
-function buildAndShowFilterPanel() {                                            //console.log('buildAndShowFilterPanel')
+function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           --buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
     _u.getData('savedFilterNames').then(updateFilterSel);
 }
-function updateFilterSel(filterNames) {                                         //console.log('filterNames = %O', filterNames);
-    const opts = getSavedFilterOpts(Object.keys(filterNames));     
-    const optGroups = buildOptGroups(opts);                                     //console.log('optGroups = %O', optGroups);
+function updateFilterSel(filterNames) {                             /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
+    const opts = getSavedFilterOpts(filterNames);     
+    const optGroups = buildOptGroups(opts);                         /*debg-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
     _u.initCombobox('Saved Filter Set', getSpecialOpts());
 
@@ -180,8 +180,8 @@ function updateFilterSel(filterNames) {                                         
         };
     }         
 }
-function getSavedFilterOpts(opts) {
-    if (opts.length > 1) { opts = opts.sort(_u.alphaOptionObjs); }
+function getSavedFilterOpts(filterData) {  
+    const opts = _u.buildOptsObj(filterData, Object.keys(filterData).sort());
     opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'}); 
     return opts;
 }
@@ -191,7 +191,7 @@ function buildOptGroups(opts) {
     return groups;
 }
 /* ------ CREATE FILTER SET ------- */
-export function newFilterSet(val) {                                             //console.log('creating filter set. val = %s', val);
+export function newFilterSet(val) {                                 /*debg-log*///console.log('newFilterSet. val = %s', val);
     enableFilterSetInputs('create');
     updateSubmitButton(createFilterSet, savedIntListLoaded());
     $('#filter-set-name + input').val(val).focus();
@@ -207,10 +207,10 @@ export function selFilterSet(val) {
     if (val === 'new') { return; } // New list typed into combobox
     resetFilterUi();
     if (val === 'create') { return newFilterSet(); }                            
-    if (!val) { return;  }                                                      //console.log('loading filter set. val = %s', val);
+    if (!val) { return;  }                                          /*debg-log*///console.log('loading filter set. val = %s', val);
     enableFilterSetInputs();
     updateSubmitButton(editFilterSet, savedIntListLoaded());
-    fillFilterData(val);
+    _u.getData('savedFilters').then(filters => fillFilterData(val, filters));
 }
 function editFilterSet() {  
     const data = buildFilterData();
@@ -218,9 +218,8 @@ function editFilterSet() {
     _uPnl.submitUpdates(data, 'edit', onFilterSubmitComplete.bind(null, 'edit'));
     exitModal();
 }
-function fillFilterData(id) {
-    const filters = _u.getDataFromStorage('savedFilters');                           
-    const filter = addActiveFilterToMemory(filters[id]);                        console.log('activeFilter = %O', filter);                                                 
+function fillFilterData(id, filters) {
+    const filter = addActiveFilterToMemory(filters[id]);            /*debg-log*///console.log('activeFilter = %O', filter);                                                 
     fillFilterDetailFields(filter.displayName, filter.description);
 }
 function fillFilterDetailFields(name, description) {
@@ -242,7 +241,7 @@ function buildFilterData() {
  * Returns a json object with the current focus, view, and active filters in the
  * filter panel and the table column headers.
  */
-function getFilterSetJson(tState) {                                             //console.log('tblState = %O', tState)
+function getFilterSetJson(tState) {                                             
     const fState = db_filters.getFilterState();
     const filters = {
         focus: tState.curFocus, panel: fState.panel,
@@ -260,12 +259,12 @@ function getColumnHeaderFilters(models) {
         colTitles.forEach(col => { 
             if (!models[col]) { return; }  
             filters[col] = models[col];
-        });                                                                     //console.log('tableFilters = %O', filters);
+        });                                                                     
         return filters;
     }
 }
 /* ====================== DELETE FILTER SET ================================= */
-function deleteFilterSet() {                                                    //console.log('deleteInteractionList')
+function showCnfrmDeleteBttns() {                                   /*debg-log*///console.log('deleteInteractionList')
     $('#delete-filter').hide();
     $('#set-confm-cntnr').show();  
     hideSavedMsg();  
@@ -367,7 +366,7 @@ function submitFilterSet(data, action, successFunc) {
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
 }
 function onFilterSubmitComplete(action, results) {          
-    const filter = JSON.parse(results.list.entity);                             //console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
+    const filter = JSON.parse(results.list.entity);                 /*debg-log*///console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
     updateUserNamedList(results.list, action);
     updateFilterSel();
     $('#selSavedFilters')[0].selectize.addItem(filter.id);
@@ -385,7 +384,7 @@ function dataFiltersSaved(fltr) {
     const tableFilters = Object.keys(fltr.details.table).length > 0;
     return panleFilters || tableFilters;
 }
-function onFilterDeleteComplete(results) {                                      //console.log('listDeleteComplete results = %O', results)
+function onFilterDeleteComplete(results) {                          /*debg-log*///console.log('listDeleteComplete results = %O', results)
     updateUserNamedList(results.list, 'delete');
     resetFilterUi();
     updateFilterSel();
