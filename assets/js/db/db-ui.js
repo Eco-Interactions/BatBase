@@ -44,7 +44,7 @@ function addDomEventListeners() {
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.resetDataTable);
+    $('button[name="reset-tbl"]').click(db_page.resetDataTable.bind(null, false));
     addPanelEvents(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
@@ -508,11 +508,15 @@ function setSrcView(view) {
  * contained in the data tree.
  */
 export function loadSrcFilterPanelElems(realm) {                    /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
-    if ($('#focus-filters label').length) { return; }
+    if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
     return buildUi[realm](); 
 } 
+function clearPanelCombos(realm) {
+    if (realm !== 'pubs') { return Promise.resolve(); }
+    return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
+}
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
@@ -521,7 +525,7 @@ function loadAuthSearchHtml() {
 }
 function loadPubSearchHtml() {
     return Promise.resolve(_u.getData('publicationType').then(pTypes => {
-        loadPubSearchElems(pTypes)
+        loadPubSearchElems(pTypes);
     }));
 }
 function loadPubSearchElems(pubTypes) {

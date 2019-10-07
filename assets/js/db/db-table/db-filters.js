@@ -211,13 +211,13 @@ function showUpdatesAfterTableLoad() {
     toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeFilter(state, time) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
+export function toggleTimeFilter(state, time, skipSync) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
     fPs.cal = initCal(); //fPs.cal || 
     const filtering = ifFilteringOnTime(state);
     updateTimeFilterMemory(time);
     updateRelatedUi(filtering);
     if (filtering) { filterTableByTime(time);
-    } else { resetTimeFilter(); } 
+    } else { resetTimeFilter(skipSync); } 
 } 
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
@@ -274,9 +274,9 @@ function updateRelatedUi(filtering) {
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  */
-function resetTimeFilter() {                                                    //console.log('tState = %O', tState);
+function resetTimeFilter(skipSync) {                                                    //console.log('tState = %O', tState);
     fPs.timeRows = null;
-    if (tblState.api && tblState.rowData && !tblState.onInitComplete) { 
+    if (!skipSync && tblState.api && tblState.rowData && !tblState.onInitComplete) { 
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
     }
@@ -423,7 +423,7 @@ function seperateTaxonTreeByLvl(lvls, rowData) {                                
     }
     function sortObjByLevelRank(taxonObj) {
         const obj = {};
-        lvls.forEach(lvl => { 
+        Object.keys(lvls).forEach(lvl => { 
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
