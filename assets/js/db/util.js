@@ -172,9 +172,10 @@ export function alphaOptionObjs(a, b) {
 }  
 /** Builds options out of a stored entity-name object. */
 export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
-    var dataObj = getDataFromStorage(prop);  
-    var sortedNameKeys = Object.keys(dataObj).sort();
-    return buildOptsObj(dataObj, sortedNameKeys);
+    return Promise.resolve(_db.getData(prop).then(dataObj => {
+        var sortedNameKeys = Object.keys(dataObj).sort();
+        return buildOptsObj(dataObj, sortedNameKeys);
+    }));
 }
 /** 
  * Builds options out of the entity-name  object. Name (k) ID (v). If an option 

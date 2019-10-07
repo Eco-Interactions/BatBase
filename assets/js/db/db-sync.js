@@ -449,19 +449,24 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
 }
 
 /*---------------- Update User Named Lists -----------------------------------*/
-export function updateUserNamedList(data, action) {                             //console.log('updating [%s] stored list data. %O', action, data);
+export function updateUserNamedList(data, action, cb) {                             //console.log('updating [%s] stored list data. %O', action, data);
+    let rcrds, names;
     const list = action == 'delete' ? data : JSON.parse(data.entity);  
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
     const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
-    const rcrds = _u.getDataFromStorage(rcrdKey);
-    const names = _u.getDataFromStorage(nameKey);
+    _u.getData([rcrdKey, nameKey]).then(data => syncListData(data));
 
-    if (action == 'delete') { removeListData(); 
-    } else { updateListData(); }
+    function syncListData(data) {
+        rcrds = data[rcrdKey];
+        names = data[nameKey];
 
-    storeData(rcrdKey, rcrds);
-    storeData(nameKey, names);
-
+        if (action == 'delete') { removeListData(); 
+        } else { updateListData(); }
+        
+        storeData(rcrdKey, rcrds);
+        storeData(nameKey, names);
+        cb();
+    }
     function removeListData() {  
         delete rcrds[list.id];  
         delete names[list.displayName];  

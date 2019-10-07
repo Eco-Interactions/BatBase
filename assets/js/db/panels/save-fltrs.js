@@ -15,7 +15,7 @@ import * as data_tree from '../db-table/build-data-tree.js';
 import * as db_filters from '../db-table/db-filters.js';
 import * as frmt_data from '../db-table/format-data.js'; 
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetSearchState, selectSearchFocus, resetDataTable } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { savedIntListLoaded } from './save-ints.js';
 import { exitModal, showHelpModal, showSaveModal } from '../../misc/intro-core.js';
@@ -385,11 +385,12 @@ function submitFilterSet(data, action, successFunc) {
 }
 function onFilterSubmitComplete(action, results) {          
     const filter = JSON.parse(results.list.entity);                 /*debg-log*///console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
-    updateUserNamedList(results.list, action);
-    updateFilterSel();
-    $('#selSavedFilters')[0].selectize.addItem(filter.id);
-    addSetToFilterStatus();
-    showSavedMsg();
+    updateUserNamedList(results.list, action, () => {
+        updateFilterSel();
+        $('#selSavedFilters')[0].selectize.addItem(filter.id);
+        addSetToFilterStatus();
+        showSavedMsg();
+    });
 }
 function addSetToFilterStatus() {
     if (!dataFiltersSaved(app.fltr)) { return; }
@@ -403,10 +404,11 @@ function dataFiltersSaved(fltr) {
     return panleFilters || tableFilters;
 }
 function onFilterDeleteComplete(results) {                          /*debg-log*///console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete');
-    resetFilterUi();
-    updateFilterSel();
-    $('#selSavedFilters')[0].selectize.open();
+    updateUserNamedList(results.list, 'delete', () => {
+        resetFilterUi();
+        updateFilterSel();
+        $('#selSavedFilters')[0].selectize.open();
+    });
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);

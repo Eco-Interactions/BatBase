@@ -9,15 +9,30 @@
  *     toggleListPanelOrientation   panel-util
  *     toggleSaveIntsPanel          db-ui
  *     enableListReset              db-ui
+ *
+ * CODE SECTIONS:
+ *     SHOW/HIDE LIST PANEL
+ *         Toggle Panel Vertically or Horizontally
+ *     CREATE/OPEN INTERACTION LIST
+ *     EDIT INTERACTION LIST
+ *     DELETE INTERACTION LIST
+ *     LOAD INTERACTION LIST IN TABLE
+ *     UTILITY
+ *         SUBMIT AND SUCCESS METHODS
+ *         UI
+ *             PSEUDO TAB INVISIBLE BOTTOM BORDER
+ *             Select Rows Radio Toggles
+ *             Reset & Enable/Disable UI
+ *             Table Methods
+ *             
  */
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, resetSearchState } from '../db-page.js';
+import { accessTableState as tState, selectSearchFocus, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../db-table/db-filters.js';
 import { showHelpModal } from '../../misc/intro-core.js';
-
 /**
  * list - List open in panel
  * listLoaded - List loaded in table
@@ -27,13 +42,12 @@ import { showHelpModal } from '../../misc/intro-core.js';
  * tblApi - AgGrid table api
  * tblState - state data for table and search page
  * timeout - present when window is being resized.
-] */
+ */
 let app = {};
 
-export function savedIntListLoaded() {                                          //console.log('savedIntListLoaded? ', app.listLoaded);
+export function savedIntListLoaded() {                                          
     return app.listLoaded;
 }
-
 export function addListPanelEvents() {
     window.addEventListener('resize', resizeIntPanelTab);
     $('button[name="clear-list"]').click(resetTable);
@@ -46,51 +60,18 @@ export function addListPanelEvents() {
     $('#cncl-list-delete').click(cancelDelete);
     $('#svd-list-hlp').click(showHelpModal.bind(null, 'saved-lists'));
 }
-/* --- TAB PSEUDO INVISIBLE BOTTOM BORDER -------- */
-function resizeIntPanelTab() {
-    if ($('#list-opts').hasClass('closed')) { return; }
-    if (app.timeout) { return; }
-    app.timeout = window.setTimeout(() => {
-        sizeIntPanelTab()
-        app.timeout = false;
-    }, 500);
-}
-function sizeIntPanelTab() {
-    const pseudo = getPseudoStyle();
-    $('.hide-int-bttm-border:before').remove();
-    $('.hide-int-bttm-border').append(pseudo);
-}
-function getPseudoStyle() {
-    const panelT = $('#int-opts').position().top;
-    const tabW = $('#list-opts').innerWidth();  
-    const tabL = $('#list-opts').position().left + 1;                           //console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
-    return `<style>.hide-int-bttm-border:before { 
-        position: absolute;
-        content: '';
-        height: 3px;
-        z-index: 10;
-        width: ${tabW}px;
-        top: ${panelT}px;
-        left: ${tabL}px;
-        background: #e2f2f3;
-        }</style>`;  
-}
 /* ====================== SHOW/HIDE LIST PANEL ============================== */
-export function toggleSaveIntsPanel() {                                         console.log('toggle data lists panel');
+export function toggleSaveIntsPanel() {                                         
     if ($('#int-opts').hasClass('closed')) { 
         buildAndShowIntPanel(); 
         sizeIntPanelTab();
     } else { _uPnl.togglePanel('#int-opts', 'close'); }
 }
-function buildAndShowIntPanel() {                                               //console.log('buildAndShowIntPanel')
+function buildAndShowIntPanel() {                                               
     _uPnl.togglePanel('#int-opts', 'open');
     if (!tState().get('intSet')) {
         initListCombobox();
         expandAllTableRows();
-        window.setTimeout(function() { 
-            $('#selIntList')[0].selectize.focus();  
-            disableInputs();
-        }, 500);         
     }
 }
 export function enableListReset() {  
@@ -102,7 +83,7 @@ export function enableListReset() {
             .attr('disabled', false).css({'opacity': 1, 'cursor': 'pointer'}); 
     }
 }
-/* --- Toggle Panel Vertically or Horizontally --- */
+/* --------------- Toggle Panel Vertically or Horizontally ------------------ */
 export function toggleListPanelOrientation(style) {
     if (style == 'vert') { stackIntListPanel();
     } else { spreadIntListPanel(); }
@@ -131,7 +112,7 @@ function filtersApplied() {
 /* ============== CREATE/OPEN INTERACTION LIST ============================== */
 /* ------ CREATE LIST ------- */
 /** Creates a new list of saved interactions. */
-export function newIntList(val) {                                               //console.log('creating interaction list. val = ', val);
+export function newIntList(val) {                                   /*debg-log*///console.log('creating interaction list. val = ', val);
     _uPnl.updateSubmitEvent('#submit-list', createDataList);
     updateUiForListCreate();
     fillListDataFields(val, '', 0);
@@ -153,13 +134,13 @@ function createDataList() {
 }
 /* ------ OPEN LIST ------- */
 /** Opens a saved list of interactions. */
-export function selIntList(val) {                                               //console.log('selecting interaction list. val = ', val);
+export function selIntList(val) {                                               
     if (val === 'create') { return newIntList(''); }
     if (!val && !app.submitting) { return resetListUi(); }
     if (val === 'new'|| (!val && app.submitting)) { return; } // New list typed into combobox or mid edit-submit
+    fillListData(val);
     resetPrevListUiState();
     _uPnl.updateSubmitEvent('#submit-list', editDataList);
-    fillListData(val);
     enableInputs();
     enableModUi('add');
     updateDetailHdr('Selected');
@@ -172,10 +153,11 @@ function editDataList() {
     submitDataList(data, 'edit', onListSubmitComplete.bind(null, 'edit'));
 }
 function fillListData(id) {
-    const lists = _u.getDataFromStorage('dataLists');                           
-    const list = addActiveListToMemory(lists[id]);                              console.log('activeList = %O', list);                                                 
-    fillListDataFields(
-        list.displayName, list.description, list.details.length);  
+    _u.getData('dataLists').then(lists => {
+        const list = addActiveListToMemory(lists[id]);              /*debg-log*/console.log('activeList = %O', list);                                                 
+        fillListDataFields(
+            list.displayName, list.description, list.details.length);  
+    });
 }
 /* ====================== EDIT INTERACTION LIST ============================= */
 function buildListData() {
@@ -211,7 +193,7 @@ function getUpdatedIntSet(mode) {
         app.list.details.filter(id => rows.indexOf(id) === -1);
 }
 /* ====================== DELETE INTERACTION LIST =========================== */
-function deleteInteractionList() {                                              //console.log('deleteInteractionList')
+function deleteInteractionList() {                                  /*debg-log*///console.log('deleteInteractionList')
     $('#delete-list').hide();
     $('#list-confm-cntnr').show();    
 }
@@ -232,21 +214,12 @@ function resetDeleteButton() {
  * Loads the interaction set in the table, where it can be explored and filtered
  * with the standard UI options
  */
-function loadListInTable() {                                                    //console.log('----Loading Interaction List in Table. %O', app.list);
+function loadListInTable() {                                        /*debg-log*/console.log('----Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    buildFocusDataTreeAndLoadGrid(app.tblState.curFocus);
-    updateUi();
-    delete app.tblState;
+    resetDataTable();
 }
-/**
- * Refactor to remove the table rebuild/teardown. It is here because I am crunched 
- * for time and it was the simplest way to clear the panel filters.
- */
 function prepareMemoryForTableLoad() {
-    tState().set({'intSet': app.list.details});
-    removePreviousTable();
-    resetSearchState();  //tblRebuild
-    removePreviousTable(); //tblTeardown
+    tState().set({'intSet': app.list.details, onInitComplete: updateUi});
     app.tblState = tState().get();  
     app.listLoaded = true;
 }
@@ -260,6 +233,8 @@ function updateUi() {
     updateFilterStatusMsg();
     enableListReset();
     updateDetailHdr('Loaded');
+    tState().set({onInitComplete: null});
+    delete app.tblState;
 }
 function syncFilterUi(focus) {
     syncViewFiltersAndUi(focus);
@@ -270,25 +245,6 @@ function syncFilterUi(focus) {
 function updateListLoadButton(text, clickFunc) {
     $('#load-list').html(text);
     $('#load-list').off('click').click(clickFunc);
-}
-function buildFocusDataTreeAndLoadGrid(dataFocus) {
-    const bldrs = {
-        'locs': db_page.rebuildLocTable, 'srcs': buildSrcTreeInts, 'taxa': buildTxnTreeInts
-    }
-    bldrs[dataFocus]();
-}
-function buildSrcTreeInts() {  
-    db_page.startSrcTableBuildChain();        
-}
-function buildTxnTreeInts() {                                                   console.log('tblState = %O', tblState);                                          
-    const realmTaxon = _u.getDataFromStorage('taxon')[getId(app.tblState.taxaByLvl)];
-    db_page.startTxnTableBuildChain(realmTaxon);
-}
-function getId(taxaByLvl) {
-    const realmLvl = Object.keys(taxaByLvl).filter(lvl => {
-        return Object.keys(taxaByLvl[lvl]).length == 1;
-    });
-    return taxaByLvl[realmLvl][Object.keys(taxaByLvl[realmLvl])[0]];  
 }
 /* ====================== UTILITY =========================================== */
 function addActiveListToMemory(list) {
@@ -302,20 +258,23 @@ function submitDataList(data, action, hndlr) {
     _uPnl.submitUpdates(data, action, hndlr);
 }
 function onListSubmitComplete(action, results) {                                      
-    const list = JSON.parse(results.list.entity);                               console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action);
-    updateDataListSel();
-    $('#selIntList')[0].selectize.addItem(list.id);
+    const list = JSON.parse(results.list.entity);                   /*temp-log*/console.log('listSubmitComplete results = %O, list = %O', results, list)
+    updateUserNamedList(results.list, action, () => {
+        updateListComboboxOptions().then(() => updateUiAfterListSubmit(list));
+    });
+}
+function updateUiAfterListSubmit(list) {
+    $('#selIntList')[0].selectize.addItem(list.id)
     showSavedMsg();
     toggleInstructions();  
     if (app.submitting === 'rmv') { loadListInTable(); }
     delete app.submitting;
     $('#submit-list').data('submitting', false);
 }
-function onListDeleteComplete(results) {                                        console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete');
-    updateDataListSel();
-    $('#selIntList')[0].selectize.open();
+function onListDeleteComplete(results) {                            /*temp-log*/console.log('listDeleteComplete results = %O', results)
+    updateUserNamedList(results.list, 'delete', () => {
+        updateListComboboxOptions().then(() => $('#selIntList')[0].selectize.open());
+    });
 }
 function showSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 1);
@@ -324,10 +283,13 @@ function showSavedMsg() {
 function hideSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 0);
 }
-/* ------------------------------- UI ----------------------------------------*/
+/* =============================== UI ======================================= */
 function initListCombobox() {
     _u.initCombobox('Int-lists');   
-    updateDataListSel();
+    updateListComboboxOptions().then(() => {
+        window.setTimeout(() => $('#selIntList')[0].selectize.focus(), 500);
+        disableInputs();
+    });
 }
 function fillListDataFields(nameVal, descVal, intCnt) {
     $('#list-details input').val(nameVal).focus();
@@ -337,8 +299,37 @@ function fillListDataFields(nameVal, descVal, intCnt) {
         $('#load-list, #load-list+div').attr({disabled: false}).css({opacity: 1}); 
     }
 }
+/* --- PSEUDO TAB INVISIBLE BOTTOM BORDER -------- */
+function resizeIntPanelTab() {
+    if ($('#list-opts').hasClass('closed')) { return; }
+    if (app.timeout) { return; }
+    app.timeout = window.setTimeout(() => {
+        sizeIntPanelTab()
+        app.timeout = false;
+    }, 500);
+}
+function sizeIntPanelTab() {
+    const pseudo = getPseudoStyle();
+    $('.hide-int-bttm-border:before').remove();
+    $('.hide-int-bttm-border').append(pseudo);
+}
+function getPseudoStyle() {
+    const panelT = $('#int-opts').position().top;
+    const tabW = $('#list-opts').innerWidth();  
+    const tabL = $('#list-opts').position().left + 1;               /*debg-log*///console.log('sizeIntPanelTab. T = [%s], W = [%s], L = [%s]', panelT, tabW, tabL); //1px border
+    return `<style>.hide-int-bttm-border:before { 
+        position: absolute;
+        content: '';
+        height: 3px;
+        z-index: 10;
+        width: ${tabW}px;
+        top: ${panelT}px;
+        left: ${tabL}px;
+        background: #e2f2f3;
+        }</style>`;  
+}
 /* --- Select Rows Radio Toggles ---- */
-function toggleInstructions() {                                                 //console.log('toggleInstructions');
+function toggleInstructions() {                                                 
     $('#mod-info').fadeTo('fast', 0); 
     addInfoMsgAndUpdateTableSelection();  
     $('#mod-info').fadeTo('fast', 1);
@@ -378,21 +369,21 @@ function clearAndDisableInputs() {
     disableModUi();
     disableInputs();
 }
-function enableInputs(creating) {                                               //console.log('enableInputs')
+function enableInputs(creating) {                                               
     $(`#list-details input, #list-details textarea, #list-details span, #mod-list-pnl > span:first-child, 
         #int-opts button, #mod-mode, #mod-radios input, #mod-radios label`)
         .attr({'disabled': false}).css({'opacity': '1'});
     if (creating) { $('#delete-list').attr({'disabled': 'disabled'}).css({'opacity': '.5'});; }
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);
 }
-function disableInputs() {                                                      //console.log('disableInputs')
+function disableInputs() {                                                      
     $(`#list-details input, #list-details textarea, #list-details span, #list-sel-cntnr button, 
         #mod-list-pnl button, #mod-list-pnl > span:first-child, #load-list+div, 
         #mod-mode, #mod-radios input, #mod-radios label`)
             .attr({'disabled': 'disabled'}).css({'opacity': '.5'});
     $('#mod-rmv-list, label[for="mod-rmv-list"]').css({display: 'none'});
 }
-function enableModUi(m) {                                                       //console.log('enableModUi')
+function enableModUi(m) {                                                       
     const mode = app.submitting || m;
     const inactiveMode = mode === 'add' ? 'rmv' : 'add';
     const label = mode === 'add' ? 
@@ -413,10 +404,12 @@ function enableSubmitBttn() {
 function updateDetailHdr(type) {
     $('#list-details>span').html(type + ' List Details');
 }
-function updateDataListSel() {
-    const opts = _u.getOptsFromStoredData('dataListNames');                     
-    opts.unshift({value: 'create', text: '...Add New Interaction List'});
-    _u.replaceSelOpts('#selIntList', opts);
+function updateListComboboxOptions() {
+    return Promise.resolve(_u.getOptsFromStoredData('dataListNames').then(
+        opts => { 
+            opts.unshift({value: 'create', text: '...Add New Interaction List'});
+            _u.replaceSelOpts('#selIntList', opts);
+    }));
 }
 function resetPrevListUiState() {
     if (!app.listLoaded || app.submitting) { return; }
@@ -426,26 +419,25 @@ function resetPrevListUiState() {
 }
 /* --- Table Methods --- */
 /** Resets interactions displayed to the full default set of the current focus. */
-function resetTable() {                                                         //console.log('- - - - - -resetingTable');
-    removePreviousTable();
+function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    resetSearchState();
+    tState().set({onInitComplete: updateUiAfterTableReset});
+    resetDataTable();
+}
+function updateUiAfterTableReset() {
     enableModUi('add');
     $('#load-list').html('Load Interaction List in Table');
     $('#load-list').off('click').click(loadListInTable);
     if (!$('#int-opts').hasClass('closed')) { expandAllTableRows(); }
     updateDetailHdr('Selected');
 }
-function removePreviousTable() {  
-    resetTableStateParams();
-}
 function expandAllTableRows() {
     app.tblApi = tState().get('api');
     app.tblApi.expandAll();
     resetToggleTreeBttn(true);
 }
-function deselectAllRows() {                                                    //console.log('unselect all rows');
+function deselectAllRows() {                                                    
     app.tblApi = tState().get('api');
     app.tblApi.getModel().rowsToDisplay.forEach(selectInteractions.bind(null, false));       
     $('#unsel-rows').attr({'disabled': true}).fadeTo('slow', .6);

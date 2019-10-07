@@ -22,7 +22,6 @@ import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuild
 import * as db_ui from '../db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../panels/save-fltrs.js';
 import { savedIntListLoaded } from '../panels/save-ints.js';
-
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -574,8 +573,8 @@ export async function updatePubSearch() {                                       
     db_ui.resetToggleTreeBttn(false);
 
     function getFilteredPubRows() {
-        if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
-        return _u.getData('publicationType').then(pTypes => {
+        if (!typeId || typeId == 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
+        return _u.getData('publicationType').then(pTypes => {  
             if (txt === '') { return getAllPubTypeRows(pTypes); }
             return getPubTypeRows(pTypes[typeId].publications);
         });

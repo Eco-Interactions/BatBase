@@ -15,7 +15,6 @@
  *     rebuildLocTable          db-filters, save-ints
  *     rebuildSrcTable          save-ints
  *     rebuildTxnTable          db-filters, save-ints
- *     resetSearchState         save-ints
  *     resetDataTable           db-ui, save-fltrs, save-ints    
  *     selectSearchFocus        db-ui, db-filters, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
@@ -108,12 +107,6 @@ function setTableInitState() {
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.resetTblFilters();
 }
-export function resetSearchState() {                                            //console.log('resetSearchState');
-    resetTableParams();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
-    db_filters.resetTblFilters();    
-    selectSearchFocus();
-}
 /* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
     return {
@@ -155,7 +148,7 @@ function resetTblParams(focus) {
 }
 /** Resets table state to top focus options for the selected view. */
 export function resetDataTable(view, e) {                           /*Perm-log*/console.log('   --resetting search table. View ? [%s]', view);
-    const changeView = view !== false && view !== tblState.curView;
+    const changeView = view && view !== tblState.curView;
     const resetMap = { 
         taxa: changeView ? onTxnViewChange : buildTxnTable, 
         locs: rebuildLocTable, 
