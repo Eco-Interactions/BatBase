@@ -151,10 +151,10 @@ export function toggleFilterPanel() {
 /* ============== CREATE/OPEN FILTER SET ==================================== */
 function buildAndShowFilterPanel() {                                /*perm-log*/console.log('           --buildAndShowFilterPanel')
     _uPnl.togglePanel('#filter-opts-pnl', 'open');
-    _u.getData('savedFilterNames').then(updateFilterSel);
+    _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
 }
-function updateFilterSel(filterNames) {                             /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
-    const opts = getSavedFilterOpts(filterNames);     
+function updateFilterSel(filterOpts) {                              /*debg-log*///console.log('updateFilterSel. filterNames = %O', filterNames);
+    const opts = getSavedFilterOpts(filterOpts);     
     const optGroups = buildOptGroups(opts);                         /*debg-log*///console.log('opts = %O, optGroups = %O', opts, optGroups);
     if ($('#selSavedFilters')[0].selectize) {$('#selSavedFilters')[0].selectize.destroy();}
     _u.initCombobox('Saved Filter Set', getSpecialOpts());
@@ -180,8 +180,7 @@ function updateFilterSel(filterNames) {                             /*debg-log*/
         };
     }         
 }
-function getSavedFilterOpts(filterData) {  
-    const opts = _u.buildOptsObj(filterData, Object.keys(filterData).sort());
+function getSavedFilterOpts(opts) {  
     opts.unshift({text: '... New Filter Set', value: 'create', group: 'Create'}); 
     return opts;
 }

@@ -21,7 +21,7 @@
  */
 import * as _u from './util.js';
 import exportCsvData from './db-table/csv-data.js';
-import { createEntity } from './db-forms/db-forms.js';
+import { initNewDataForm } from './db-forms/db-forms.js';
 import * as db_page from './db-page.js';
 import * as db_filters from './db-table/db-filters.js';
 import { showInts } from './db-map/db-map.js';
@@ -82,8 +82,7 @@ function enableUserFeatures() {                                                 
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
         #new-data, #rvw-data`;
@@ -91,8 +90,7 @@ function enableEditorFeatures() {                                               
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = '.map-dsbl';
 }

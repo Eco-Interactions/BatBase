@@ -172,10 +172,9 @@ export function alphaOptionObjs(a, b) {
 }  
 /** Builds options out of a stored entity-name object. */
 export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
-    return Promise.resolve(_db.getData(prop).then(dataObj => {
-        var sortedNameKeys = Object.keys(dataObj).sort();
-        return buildOptsObj(dataObj, sortedNameKeys);
-    }));
+    return _db.getData(prop).then(data => {
+        return buildOptsObj(data, Object.keys(data).sort());
+    });
 }
 /** 
  * Builds options out of the entity-name  object. Name (k) ID (v). If an option 
@@ -249,6 +248,11 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
+}
+export function alertErr(err) {                                                 console.log('err = %O', err);
+    alert(`ERROR. Try reloading the page. If error persists, please follow these steps and send the error to the developer.
+        \nClick Chrome menu -> "More Tools" -> "Developer Tools." 
+        \nOnce the panel loads, take a screenshot and email it to Sarah.`);
 }
 /* ------------- Data Util -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
