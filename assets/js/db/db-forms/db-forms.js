@@ -160,7 +160,7 @@ function addDataToCntDetailPanel(refObj) {
  * is added se the side detail panel of the form. For other entity edit-forms: 
  * the total number of referencing records is added. 
  */
-function addDataToIntDetailPanel(ent, propObj) {
+function addDataToIntDetailPanel(ent, propObj) {                                //console.log('ent = [%s], propObj = %O', ent, propObj);
     var html = getDataHtmlString(propObj);
     clearDetailPanel(ent)
     .then(() => $('#'+ent+'-det div').append(html));
@@ -204,10 +204,12 @@ function buildFormElem() {
  * > submitFocus - Stores the table-focus for the entity of the most recent 
         form submission. Will be used on form-exit.
  */
-function initFormParams(action, entity, id) {   
+function initFormParams(action, entity, id) {  
+    const  entities = ['source', 'location', 'taxon', 'citation', 'publication', 
+        'author', 'publisher'];
     const prevSubmitFocus = fP.submitFocus;
     const xpandedForms = fP.forms ? fP.forms.expanded : {};
-    return _u.getData(['source', 'location', 'taxon']).then(data => {
+    return _u.getData(entities).then(data => {
         fP = {
             action: action,
             editing: action === 'edit' ? { core: id || null, detail: null } : false,
@@ -264,7 +266,7 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       
  * if no handler is stored, edit forms have a default of @exitFormHandler
  * and create forms default to noOp.
  */
-function getFormExitHandler(confg, action) {                                    //console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
+function getFormExitHandler(confg, action) {                                    console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
     return confg.exitHandler && confg.exitHandler[action] ? 
         confg.exitHandler[action] :
         action === 'edit' ? exitFormPopup : Function.prototype;
@@ -335,7 +337,7 @@ function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
     const prnt = getParentEntity(ent);
     const entity = prnt || ent;
-    const rcrd = getEntityRecord(entity, id);                                   console.log('[%s] rcrd = %O', entity, rcrd);
+    const rcrd = getRcrd(entity, id);                                   console.log('[%s] rcrd = %O', entity, rcrd);
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
@@ -344,7 +346,7 @@ function fillEntityData(ent, id) {
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = getEntityRecord(ent, id);                                      //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = getRcrd(ent, id);                                      //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     hndlrs[ent](ent, id, rcrd);
 }
 function fillIntData(entity, id, rcrd) {  
@@ -371,7 +373,7 @@ function fillLocData(entity, id, rcrd) {
         setSelVal('#Country-sel', rcrd.country.id, 'silent');
     }
     function storeLocGeoJson(id) {                                              
-        fP.forms.top.geoJson = _u.getGeoJsonEntity(id);
+        fP.forms.top.geoJson = _u.getData('geoJson').then(data => data[id]);
     }
 } /* End fillLocData */
 function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
@@ -405,7 +407,7 @@ function removeEmptyDetailPanelElems() {
 }
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
-    var src = getEntityRecord("source", id);
+    var src = getRcrd("source", id);
     var fields = getSourceFields(entity);  
     setSrcData();
     setDetailData();
@@ -415,7 +417,7 @@ function fillSrcData(entity, id, rcrd) {
         fillSrcDataInDetailPanel(entity, src);            
     }
     function setDetailData() {
-        var detail = getEntityRecord(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+        var detail = getRcrd(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
         fillFields(detail, fields.detail);
         setAdditionalFields(entity, src, detail);
         fP.editing.detail = detail.id;
@@ -507,8 +509,9 @@ function setTitleField(entity, srcRcrd) {                                       
     const name = entity === 'publication' ? 
         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
     $('#Title_row input[type="text"]').val(name).change();
+
     function getCitTitle(citId) {
-        return getEntityRecord('citation', citId).displayName;
+        return getRcrd('citation', citId).displayName;
     }
 } /* End setTitleField */
 function setPublisherField(entity, srcRcrd) { 
@@ -1094,43 +1097,33 @@ function buildPublString(pub) {
     function getPublRcrd(pub) {
         if (!pub.parent) { return false; }
         const publSrc = fP.records.source[pub.parent];
-        return getEntityRecord('publisher', publSrc.publisher);
+        return getRcrd('publisher', publSrc.publisher);
     }
 } /* End buildPublString */
 /** ----- Publication and Citation Shared form helpers ------------ */
 /** Adds source data to the interaction form's detail panel. */
 function updateSrcDetailPanel(entity) {
     const data = {}; 
-    buildSourceData()
-    .then(addDataToIntDetailPanel.bind(null, 'src', data));
+    buildSourceData();
+    addDataToIntDetailPanel('src', data);
 
     function buildSourceData() {
-        let pub, pubType, cit, citType;
         const pubSrc = fP.records.source[$('#Publication-sel').val()];
+        const pub = getRcrd('publication', pubSrc.publication);
+        const pubType = getSrcType(pub, 'publication');  
         const citId = $('#CitationTitle-sel').val();
         const citSrc = citId ? fP.records.source[citId] : false;
+        const cit = citSrc ? getRcrd('citation', citSrc.citation) : false;
+        const citType = cit ? getSrcType(cit, 'citation') : false; 
 
-        return Promise.all([
-            getEntityRecord('publication', pubSrc.publication), 
-            getCitIfSelected()])
-            .then(addSrcDataToDetailPanel);
+        addCitationText();
+        addPubTitleData();
+        addCitTitleData();
+        addAuths();
+        addEds();
+        addYear();
+        addAbstract();
 
-        function getCitIfSelected() {
-            return citSrc ? getEntityRecord('citation', citSrc.citation) : false;
-        }
-        function addSrcDataToDetailPanel(data) {
-            pub = data[0];
-            pubType = getSrcType(pub, 'publication');  
-            cit = data[1];
-            citType = cit ? getSrcType(cit, 'citation') : false; 
-            addCitationText();
-            addPubTitleData();
-            addCitTitleData();
-            addAuths();
-            addEds();
-            addYear();
-            addAbstract();
-        }
         function addCitationText() {
             data['Citation'] = cit ? cit.fullText : '(Select Citation)';
         }
@@ -1582,7 +1575,7 @@ function initTaxonParams(role, realmName, id) {                                 
         }
     }
 }
-function setTaxonParams(role, realmName, id) {                                  //console.log('setTaxonParams. args = %O', arguments)
+function setTaxonParams(role, realmName, id) {                                  console.log('setTaxonParams. args = %O', arguments)
     const tPs = fP.forms.taxonPs;
     tPs.realm = realmName;
     return getRealmTaxon(realmName).then(updateTaxonParams);
@@ -1765,32 +1758,31 @@ function enableTxnCombos(enable) {
  * in the selected Taxon realm, plant (default) or arthropod, filled with the 
  * taxa at that level. 
  */
-function onRealmSelection(val) {                                                //console.log("onRealmSelection. val = ", val)
-    let realm, fLvl;
+function onRealmSelection(val) {                                                console.log("onRealmSelection. val = ", val)
     if (val === '' || isNaN(parseInt(val))) { return; }          
     if ($('#realm-lvls').length) { $('#realm-lvls').remove(); } 
+    const fLvl = getSubFormLvl('sub');
     _u.getData('realm')
     .then(setRealmTaxonParams)
-    .then(buildFormRows.bind(null, realm, {}, fLvl, null))
-    .then(appendRealmRowsAndFinishBuild.bind(null, realm, fLvl));
+    .then(buildAndAppendRealmRows);
 
     function setRealmTaxonParams(realms) {
-        realm = realms[val].slug;
-        fLvl = getSubFormLvl('sub');
-        return setTaxonParams('Object', _u.ucfirst(realm))
+        const realm = realms[val].slug;
+        return setTaxonParams('Object', _u.ucfirst(realm)).then(() => realm);
     }
-}
-/**
- * A row for each level present in the selected Taxon realm filled with the taxa 
- * at that level. 
- */
-function appendRealmRowsAndFinishBuild(realm, fLvl, rows) {
-    const realmElems = _u.buildElem('div', { id: 'realm-lvls' });
-    $(realmElems).append(rows);
-    $('#Realm_row').append(realmElems);
-    fP.forms[fLvl].fieldConfg.vals.Realm = { val: null, type: 'select' };
-    initComboboxes(realm, fLvl);  
-    finishTaxonSelectUi('Object');          
+    /** A row for each level present in the realm filled with the taxa at that level.  */
+    function buildAndAppendRealmRows(realm) {
+        buildFormRows(realm, {}, fLvl, null)
+        .then(rows => appendRealmRowsAndFinishBuild(realm, rows, fLvl));
+    }
+    function appendRealmRowsAndFinishBuild(realm, rows, fLvl) {
+        const realmElems = _u.buildElem('div', { id: 'realm-lvls' });
+        $(realmElems).append(rows);
+        $('#Realm_row').append(realmElems);
+        fP.forms[fLvl].fieldConfg.vals.Realm = { val: null, type: 'select' };
+        initComboboxes(realm, fLvl);  
+        finishTaxonSelectUi('Object');          
+    }
 }
 /** Adds a close button. Updates the Header and the submit/cancel buttons. */
 function customizeElemsForTaxonSelectForm(role) {
@@ -2465,9 +2457,8 @@ function getFormattedAuthorNames(auths, eds) {                                  
 } /* End getFormattedAuthorNames */
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
-function getEntityRecord(entity, id) {                                          console.log('getEntityRecord [%s] id = [%s]. fPs = %O', entity, id, fP);
-    if (fP.records[entity]) { return Promise.resolve(cloneRcrd()); }
-    return addDataToStoredRcrds(entity).then(cloneRcrd);
+function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fPs = %O', entity, id, fP);
+    if (fP.records[entity]) { return cloneRcrd(); }  console.log('###### [%s] not in record data', entity);
     
     function cloneRcrd() {
         return _u.snapshot(fP.records[entity][id]);
@@ -3273,8 +3264,7 @@ function getCitTypeOpts(prop) {
     return _u.getData(prop).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
-        getCitTypeNames()
-        .then(names => _u.buildOptsObj(types, names.sort()));
+        return _u.buildOptsObj(types, getCitTypeNames().sort())
     }
     function getCitTypeNames() {
         const opts = {
@@ -3282,22 +3272,18 @@ function getCitTypeOpts(prop) {
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        return setPubInParams().then(() => {
-            return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
-        });                                                       
+        setPubInParams()
+        return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
     }
     function setPubInParams() {
-        return Promise.all([getPubRcrd(), getSrcRcrd($('#Publication-sel').val())])
-            .then((data) => fP.forms[fLvl].pub = { pub: data[0], src: data[1]});
-    }
-    function getPubRcrd() {
-        return getEntityRecord('publication', pubSrc.publication);
+        const pub = getRcrd('publication', pubSrc.publication);
+        const pubSrc = getSrcRcrd($('#Publication-sel').val());
+        fP.forms[fLvl].pub = { pub: data[0], src: data[1]};
     }
     function getSrcRcrd(pubId) {
-        if (pubId) { return Promise.resolve(fP.records.source[pubId]); }
-        return getEntityRecord('source', fP.editing.core).then(rcrd => {
-            fP.records.source[rcrd.parent];
-        });
+        if (pubId) { return fP.records.source[pubId]; }
+        const rcrd = getRcrd('source', fP.editing.core)
+        return fP.records.source[rcrd.parent];
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
@@ -4201,7 +4187,7 @@ function updateRelatedCitations(data) {                                         
     function getChildCites(srcs) {  
         const cites = [];
         srcs.forEach(id => {
-            const src = getEntityRecord('source', id); 
+            const src = getRcrd('source', id); 
             if (src.citation) { return cites.push(id); }
             src.children.forEach(cId => cites.push(cId))
         });
@@ -4211,8 +4197,8 @@ function updateRelatedCitations(data) {                                         
         cites.forEach(id => updateCitText(id, srcData));
     }
     function updateCitText(id, chngdSrc) {
-        const citSrc = getEntityRecord('source', id);
-        const cit = getEntityRecord('citation', citSrc.citation);
+        const citSrc = getRcrd('source', id);
+        const cit = getRcrd('citation', citSrc.citation);
         const citText = rebuildCitationText(citSrc, cit, chngdSrc);             //console.log('citation text = ', citText);
         updatedCitationData(citSrc, citText);
     }
@@ -4227,7 +4213,7 @@ function updatedCitationData(citSrc, text) {
  * are filled.
  */
 function rebuildCitationText(citSrc, cit) {
-    const pubSrc = getEntityRecord('source', citSrc.parent);                    //console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
+    const pubSrc = getRcrd('source', citSrc.parent);                    //console.log('rebuildCitationText. citSrc = %O, cit = %O, pub = %O', citSrc, cit, pubSrc);
     const type = cit.citationType.displayName;                                  //console.log("type = ", type);
     const getFullText = { 'Article': rbldArticleCit, 'Book': rbldBookCit, 
         'Chapter': rbldChapterCit, 'Ph.D. Dissertation': rbldDissertThesisCit, 
