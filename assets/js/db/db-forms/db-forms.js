@@ -162,14 +162,8 @@ function addDataToCntDetailPanel(refObj) {
  */
 function addDataToIntDetailPanel(ent, propObj) {
     var html = getDataHtmlString(propObj);
-    clearDetailPanel(ent);
-    $('#'+ent+'-det div').append(html);
-}
-function clearDetailPanel(ent, reset) {                                         //console.log('clearDetailPanel for [%s]', ent)
-    if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
-    if (ent === 'pub') { ent = 'src'; }
-    $('#'+ent+'-det div').empty();
-    if (reset) { $('#'+ent+'-det div').append('None selected.') }
+    clearDetailPanel(ent)
+    .then(() => $('#'+ent+'-det div').append(html));
 }
 /** Returns a ul with an li for each data property */
 function getDataHtmlString(props) {
@@ -178,6 +172,13 @@ function getDataHtmlString(props) {
         html.push('<li><b>'+prop+'</b>: '+ props[prop]+ '</li>');
     }
     return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
+}
+function clearDetailPanel(ent, reset) {                                         //console.log('clearDetailPanel for [%s]', ent)
+    if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
+    if (ent === 'pub') { ent = 'src'; }
+    $('#'+ent+'-det div').empty();
+    if (reset) { $('#'+ent+'-det div').append('None selected.') }
+    return Promise.resolve();
 }
 /** Builds the form elem container. */
 function buildFormElem() {
@@ -663,26 +664,6 @@ function onPubClear() {
     enableCombobox('#CitationTitle-sel', false);
     clearDetailPanel('pub', true);
 }
-/** Displays the selected publication's data in the side detail panel. */
-function fillPubDetailPanel(id) {  
-    var srcRcrd = fP.records.source[id];  
-    var propObj = getPubDetailDataObj(srcRcrd);
-    addDataToIntDetailPanel('pub', propObj);
-}
-/** Returns an object with selected publication's data. */
-function getPubDetailDataObj(srcRcrd) {  
-    var pubRcrd = getEntityRecord('publication', srcRcrd.publication);      //console.log("srcRcrd = %O, pubRcrd = %O", srcRcrd, pubRcrd);
-    return {
-        'Title': srcRcrd.displayName, 'Description': srcRcrd.description || '',            
-        'Publication Type': pubRcrd.publicationType ? pubRcrd.publicationType.displayName : '', 
-        'Publisher': getPublisher(srcRcrd), 'Authors': getAuthorNames(srcRcrd),
-        'Editors': getAuthorNames(srcRcrd, true)
-    };
-}
-function getPublisher(srcRcrd) {
-    if (!srcRcrd.parent) { return ''; }
-    return fP.records.source[srcRcrd.parent].displayName;
-}
 /**
  * When a user enters a new publication into the combobox, a create-publication
  * form is built and appended to the interaction form. An option object is 
@@ -1120,28 +1101,36 @@ function buildPublString(pub) {
 /** Adds source data to the interaction form's detail panel. */
 function updateSrcDetailPanel(entity) {
     const data = {}; 
-    buildSourceData();
-    addDataToIntDetailPanel('src', data);
+    buildSourceData()
+    .then(addDataToIntDetailPanel.bind(null, 'src', data));
 
     function buildSourceData() {
+        let pub, pubType, cit, citType;
         const pubSrc = fP.records.source[$('#Publication-sel').val()];
-        const pub = getEntityRecord('publication', pubSrc.publication);
-        const pubType = getSrcType(pub, 'publication');  
-        
-
         const citId = $('#CitationTitle-sel').val();
         const citSrc = citId ? fP.records.source[citId] : false;
-        const cit = citSrc ? getEntityRecord('citation', citSrc.citation) : false;
-        const citType = cit ? getSrcType(cit, 'citation') : false; 
-        
-        addCitationText();
-        addPubTitleData();
-        addCitTitleData();
-        addAuths();
-        addEds();
-        addYear();
-        addAbstract();
 
+        return Promise.all([
+            getEntityRecord('publication', pubSrc.publication), 
+            getCitIfSelected()])
+            .then(addSrcDataToDetailPanel);
+
+        function getCitIfSelected() {
+            return citSrc ? getEntityRecord('citation', citSrc.citation) : false;
+        }
+        function addSrcDataToDetailPanel(data) {
+            pub = data[0];
+            pubType = getSrcType(pub, 'publication');  
+            cit = data[1];
+            citType = cit ? getSrcType(cit, 'citation') : false; 
+            addCitationText();
+            addPubTitleData();
+            addCitTitleData();
+            addAuths();
+            addEds();
+            addYear();
+            addAbstract();
+        }
         function addCitationText() {
             data['Citation'] = cit ? cit.fullText : '(Select Citation)';
         }
@@ -1640,7 +1629,7 @@ function initSubjectSelect() {                                                  
     .then(initSubjForm)
     .then(appendSubjFormAndFinishBuild);
 
-    function initSubForm() {
+    function initSubjForm() {
         return initSubForm('subject', fLvl, 'sml-sub-form', {}, '#Subject-sel');
     }
     function appendSubjFormAndFinishBuild(form) {
@@ -2476,10 +2465,13 @@ function getFormattedAuthorNames(auths, eds) {                                  
 } /* End getFormattedAuthorNames */
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
-function getEntityRecord(entity, id) {                                          console.log('getEntityRecord [%s] id = [%s]. fPs = %O', entity, id, _u.snapshot(fP));
-    return _u.snapshot(fP.records[entity][id]);
-    // const rcrds = _u.getDataFromStorage(entity);                                //console.log("[%s] id = %s, rcrds = %O", entity, id, rcrds)
-    // return rcrds[id];
+function getEntityRecord(entity, id) {                                          console.log('getEntityRecord [%s] id = [%s]. fPs = %O', entity, id, fP);
+    if (fP.records[entity]) { return Promise.resolve(cloneRcrd()); }
+    return addDataToStoredRcrds(entity).then(cloneRcrd);
+    
+    function cloneRcrd() {
+        return _u.snapshot(fP.records[entity][id]);
+    }
 }
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -3053,11 +3045,9 @@ function getFieldOrder(fConfg, typeConfg, entity) {
 function buildRows(fieldObj, entity, fVals, fLvl) {                             //console.log("buildRows. fLvl = [%s] fields = [%O]", fLvl, fieldObj);
     const rows = [];
     for (let field in fieldObj.fields) {                                        //console.log("  field = ", field);
-        buildRow(field, fieldObj, entity, fVals, fLvl).then(row => {
-            rows.push(row)
-        });
-    }
-    return rows;
+        rows.push(buildRow(field, fieldObj, entity, fVals, fLvl));
+    }  
+    return Promise.all(rows);
 }
 /**
  * @return {div} Form field row with required-state and value (if passed) set.  
@@ -3066,7 +3056,7 @@ function buildRow(field, fieldsObj, entity, fVals, fLvl) {                      
     return buildFieldInput(fieldsObj.fields[field], entity, field, fLvl)
         .then(buildFieldRow);
 
-    function buildFieldRow(input) {
+    function buildFieldRow(input) {                                             //console.log('input = %O', input);
         const isReq = isFieldRequried(field, fLvl, fieldsObj.required);    
         addFieldToFormFieldObj();
         fillFieldIfValuePassed();
@@ -3283,29 +3273,31 @@ function getCitTypeOpts(prop) {
     return _u.getData(prop).then(buildCitTypeOpts);
 
     function buildCitTypeOpts(types) {
-        const names = getCitTypeNames();                                        //console.log('types = %O', names);
-        return _u.buildOptsObj(types, names.sort());
+        getCitTypeNames()
+        .then(names => _u.buildOptsObj(types, names.sort()));
     }
-
     function getCitTypeNames() {
         const opts = {
             'Book': ['Book', 'Chapter'], 'Journal': ['Article'],
             'Other': ['Museum record', 'Other', 'Report'],
             'Thesis/Dissertation': ["Master's Thesis", 'Ph.D. Dissertation']
         };
-        setPubInParams();                                                       //console.log('type = ', fP.forms[fLvl].pub.pub.publicationType.displayName)
-        return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
+        return setPubInParams().then(() => {
+            return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
+        });                                                       
     }
     function setPubInParams() {
-        const pubSrc = getPubSrc();    
-        const pub = getEntityRecord('publication', pubSrc.publication);
-        fP.forms[fLvl].pub = { src: pubSrc, pub: pub };
+        return Promise.all([getPubRcrd(), getSrcRcrd($('#Publication-sel').val())])
+            .then((data) => fP.forms[fLvl].pub = { pub: data[0], src: data[1]});
     }
-    function getPubSrc() {
-        const pubId = $('#Publication-sel').val() ? 
-            $('#Publication-sel').val() : 
-            getEntityRecord('source', fP.editing.core).parent;
-        return fP.records.source[pubId];
+    function getPubRcrd() {
+        return getEntityRecord('publication', pubSrc.publication);
+    }
+    function getSrcRcrd(pubId) {
+        if (pubId) { return Promise.resolve(fP.records.source[pubId]); }
+        return getEntityRecord('source', fP.editing.core).then(rcrd => {
+            fP.records.source[rcrd.parent];
+        });
     }
 } /* End getCitTypeOpts */
 /** Returns an array of taxonyms for the passed level and the form's realm. */
@@ -4057,7 +4049,7 @@ function onDataSynced(data, msg, errTag) {                                      
     if (isEditForm() && !hasChngs(data)) { 
         return showSuccessMsg('No changes detected.', 'red'); }  
     if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
-    updateStoredFormParamsData(data)
+    addDataToStoredRcrds(data.core)
     .then(handleFormComplete);
 
     function isEditForm() {
@@ -4065,9 +4057,9 @@ function onDataSynced(data, msg, errTag) {                                      
     }
 } /* End afterStoredDataUpdated */
 /** Updates the core records in the global form params object. */
-function updateStoredFormParamsData(data) {                                     //console.log('updateStoredFormParams. fPs = %O', fP);
-    return _u.getData(data.core).then(newData => {
-        fP.records[data.core] = newData;
+function addDataToStoredRcrds(entity) {                                         //console.log('updateStoredFormParams. fPs = %O', fP);
+    return _u.getData(entity).then(newData => {
+        fP.records[entity] = newData;
     });
 }
 /*------------------ Top-Form Success Methods --------------------*/
