@@ -73,9 +73,9 @@ function returnStoredData(data, key, returnUndefined) {                         
     if (data == undefined && !returnUndefined) { return logAndAlert(key); }  
     return data;
 }
-function logAndAlert() {
-    alert(`Error loading [${key}] data. Try reloading the page.`);
+function logAndAlert(key) {
     console.log(`Error loading [${key}] data.`);
+    alert(`Error loading [${key}] data. Try reloading the page.`);
 }
 function getStoredDataObj(keys, returnUndefined) {
     const promises = [];
