@@ -98,7 +98,7 @@ export function showIntroAndLoadingMsg() {
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchState(focus) {                                        //console.log('initSearchState');
+export function initSearchState(focus) {                                        console.log('initSearchState. focus = ', focus);
     setTableInitState();      
     db_ui.selectInitialSearchFocus(focus);
 } 

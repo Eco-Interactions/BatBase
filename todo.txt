@@ -27,11 +27,20 @@ Updates:
 Current:
     - move to idb
         - Add "catch" to all async calls
-        - combine the add & remove sync methods to reduce time waiting on async calls?
+        - db-sync
+            - combine the add & remove sync methods to reduce time waiting on async calls?
+            - optimize storeData calls too
         - test that data redownloads totally
             - that updated from other editors update on page refresh 
             - that user data updates as expected
     - set email alerts up on feedback
+
+    - Adding realms
+        - Add 'isRealm' flag to Taxon
+        - Add 'sub-ranks' to Realm
+
+    - form refactor
+        - don't allow creation of anything without display name
 
 
     - put clear db storage key in db.

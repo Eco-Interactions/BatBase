@@ -747,11 +747,11 @@ function initCitForm(value) {                                                   
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr('CitationTitle', '#CitationTitle-sel', fLvl); }
     initSubForm('citation', fLvl, 'flex-row med-sub-form', {'Title': val}, 
         '#CitationTitle-sel')
-    .then(appendCitFormAndFinishBuild);
+    .then(appendCitFormAndFinishBuild.bind(null, fLvl));
     _u.getData(['author', 'publication']).then(data => addSourceDataToMemory(data));
     return { 'value': '', 'text': 'Creating Citation...' };
 }
-function appendCitFormAndFinishBuild(form) {
+function appendCitFormAndFinishBuild(fLvl, form) {
     $('#CitationTitle_row').after(form);
     initComboboxes('citation', 'sub');
     selectDefaultCitType(fLvl).then(finishCitFormUiLoad);
@@ -765,9 +765,9 @@ function addSourceDataToMemory(data) {
     Object.keys(data).forEach(k => fP.records[k] = data[k]);
 }
 function selectDefaultCitType(fLvl) {
-    return _u.getData('citTypeNames').then(setCitType);
+    return _u.getData('citTypeNames').then(setCitType.bind(null, fLvl));
 }
-function setCitType(citTypes) {
+function setCitType(fLvl, citTypes) {
     const pubType = fP.forms[fLvl].pub.pub.publicationType.displayName;
     const dfaults = {
         'Book': getBookDefault(pubType, fLvl), 'Journal': 'Article', 
@@ -913,13 +913,13 @@ function handleCitText(formLvl) {                                               
     const $elem = $('#CitationText_row textarea');
     if (!$elem.val()) { initializeCitField($elem); } 
     getCitationFieldText($elem, fLvl)
-    .then(updateCitField);
+    .then(updateCitField.bind(null, $elem));
 } 
-function updateCitField(citText) {
+function updateCitField($elem, citText) {
     if (!citText) { return; }
     $elem.val(citText).change();
 }                   
-function initializeCitField() {
+function initializeCitField($elem) {
     $elem.prop('disabled', true).unbind('change').css({height: '6.6em'});
 }
 /** Returns the citation field text or false if there are no updates. */
@@ -939,151 +939,151 @@ function ifNoChildFormOpen(fLvl) {
 function buildCitationText(fLvl) {
     const type = $('#CitationType-sel option:selected').text();                 //console.log("type = ", type);
     return getFormValueData('citation', null, null).then(generateCitText);    
-}
-function generateCitText(formVals) {
-    const builder = { 'Article': articleCit, 'Book': bookCit, 
-        'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
-        'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
-        "Master's Thesis": dissertThesisCit };
-    return builder[type](type);                                
-    /**
-     * Articles, Museum records, etc.
-     * Citation example with all data available: 
-     *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-     *     [Initials. Last]. Year. Title of article. Title of Journal 
-     *     Volume (Issue): Pages.
-     */
-    function  articleCit(type) {                                      
-        const athrs = getFormAuthors();
-        const year = _u.stripString(formVals.year);
-        const title = _u.stripString(formVals.title);
-        const pub = getPublicationName();
-        const vip = getVolumeIssueAndPages(); 
-        let fullText = [athrs, year, title].map(addPunc).join(' ')+' '; 
-        fullText += vip ? (pub+' '+vip) : pub;
-        return fullText + '.';
-    }
-    /**
-     * Citation example with all data available: 
-     *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-     *     [Initials. Last]. Year. Book Title (Editor 1 [initials, last name],
-     *      & Editor X [initials, last name], eds.). Edition. Publisher Name, 
-     *      City, Country.
-     */
-    function bookCit(type) {
-        const athrs = getPubAuthors() || getFormAuthors();
-        const year = getPubYear();
-        const titlesAndEds = getTitlesAndEditors();
-        const ed = formVals.edition;
-        const pages = getBookPages();
-        const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';  
-        const allFields = [athrs, year, titlesAndEds, ed, pages, publ];
-        return allFields.filter(f=>f).map(addPunc).join(' ');
-    }
-    /** 
-     * Citation example with all data available: 
-     *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-     *     [Initials. Last]. Year. Chapter Title. In: Book Title (Editor 1 
-     *     [initials, last name], & Editor X [initials, last name], eds.). 
-     *     pp. pages. Publisher Name, City, Country.
-     */
-    function chapterCit(type) {
-        const athrs = getPubAuthors() || getFormAuthors();
-        const year = getPubYear();
-        const titlesAndEds = getTitlesAndEditors();
-        const pages = getBookPages();
-        const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
-        const allFields = [athrs, year, titlesAndEds, pages, publ]; 
-        return allFields.filter(f => f).join('. ')+'.';
-    }
-    /**
-     * Citation example with all data available: 
-     *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-     *     [Initials. Last]. Year. Title.  Academic degree. Academic 
-     *     Institution, City, Country.
-     */
-    function dissertThesisCit(type) {
-        const athrs = getPubAuthors();
-        const year = getPubYear();
-        const title = _u.stripString(formVals.title);
-        const degree = type === "Master's Thesis" ? 'M.S. Thesis' : type;
-        const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
-        return [athrs, year, title, degree, publ].join('. ')+'.';
-    }
-    /**
-     * Citation example with all data available: 
-     *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
-     *     [Initials. Last]. Year. Title. Volume (Issue): Pages. Publisher 
-     *     Name, City, Country.
-     */
-    function otherCit(type) {
-        const athrs = getFormAuthors() ? getFormAuthors() : getPubAuthors();
-        const year = formVals.year ? _u.stripString(formVals.year) : getPubYear();
-        const title = _u.stripString(formVals.title);
-        const vip = getVolumeIssueAndPages();
-        const publ = getPublisherData();
-        return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
-    }
-        /** ---------- citation full text helpers ----------------------- */
-    function getPubYear() {
-        return _u.stripString(fP.forms[fLvl].pub.src.year);
-    }
-    function getPublicationName() {
-        return _u.stripString(fP.forms[fLvl].pub.src.displayName);
-    }
-    function getBookPages(argument) {
-        if (!formVals.pages) { return false; }
-        return 'pp. ' + _u.stripString(formVals.pages);
-    }
-    function getFormAuthors(eds) { 
-        const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
-        if (!Object.keys(auths).length) { return false; }
-        return getFormattedAuthorNames(auths, eds);
-    }
-    function getPubAuthors() {
-        const auths = fP.forms[fLvl].pub.src.authors;
-        if (!auths) { return false; }
-        return getFormattedAuthorNames(auths);
-    }
-    function getPubEditors() {
-        const eds = fP.forms[fLvl].pub.src.editors;  
-        if (!eds) { return false }
-        const names = getFormattedAuthorNames(eds, true);
-        const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
-        return '('+ names + edStr + ')';
-    }
-    /** Formats publisher data and returns the Name, City, Country. */
-    function getPublisherData() {
-        return buildPublString(fP.forms[fLvl].pub.src);
+    function generateCitText(formVals) {
+        const builder = { 'Article': articleCit, 'Book': bookCit, 
+            'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
+            'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
+            "Master's Thesis": dissertThesisCit };
+        return builder[type](type);                                
+        /**
+         * Articles, Museum records, etc.
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title of article. Title of Journal 
+         *     Volume (Issue): Pages.
+         */
+        function  articleCit(type) {                                      
+            const athrs = getFormAuthors();
+            const year = _u.stripString(formVals.year);
+            const title = _u.stripString(formVals.title);
+            const pub = getPublicationName();
+            const vip = getVolumeIssueAndPages(); 
+            let fullText = [athrs, year, title].map(addPunc).join(' ')+' '; 
+            fullText += vip ? (pub+' '+vip) : pub;
+            return fullText + '.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Book Title (Editor 1 [initials, last name],
+         *      & Editor X [initials, last name], eds.). Edition. Publisher Name, 
+         *      City, Country.
+         */
+        function bookCit(type) {
+            const athrs = getPubAuthors() || getFormAuthors();
+            const year = getPubYear();
+            const titlesAndEds = getTitlesAndEditors();
+            const ed = formVals.edition;
+            const pages = getBookPages();
+            const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';  
+            const allFields = [athrs, year, titlesAndEds, ed, pages, publ];
+            return allFields.filter(f=>f).map(addPunc).join(' ');
+        }
+        /** 
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Chapter Title. In: Book Title (Editor 1 
+         *     [initials, last name], & Editor X [initials, last name], eds.). 
+         *     pp. pages. Publisher Name, City, Country.
+         */
+        function chapterCit(type) {
+            const athrs = getPubAuthors() || getFormAuthors();
+            const year = getPubYear();
+            const titlesAndEds = getTitlesAndEditors();
+            const pages = getBookPages();
+            const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
+            const allFields = [athrs, year, titlesAndEds, pages, publ]; 
+            return allFields.filter(f => f).join('. ')+'.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title.  Academic degree. Academic 
+         *     Institution, City, Country.
+         */
+        function dissertThesisCit(type) {
+            const athrs = getPubAuthors();
+            const year = getPubYear();
+            const title = _u.stripString(formVals.title);
+            const degree = type === "Master's Thesis" ? 'M.S. Thesis' : type;
+            const publ = getPublisherData() ? getPublisherData() : '[NEEDS PUBLISHER DATA]';
+            return [athrs, year, title, degree, publ].join('. ')+'.';
+        }
+        /**
+         * Citation example with all data available: 
+         *     1st Author [Last name, Initials.], 2nd+ Author(s) & Last Author 
+         *     [Initials. Last]. Year. Title. Volume (Issue): Pages. Publisher 
+         *     Name, City, Country.
+         */
+        function otherCit(type) {
+            const athrs = getFormAuthors() ? getFormAuthors() : getPubAuthors();
+            const year = formVals.year ? _u.stripString(formVals.year) : getPubYear();
+            const title = _u.stripString(formVals.title);
+            const vip = getVolumeIssueAndPages();
+            const publ = getPublisherData();
+            return [athrs, year, title, vip, publ].filter(f=>f).join('. ') +'.';
+        }
+            /** ---------- citation full text helpers ----------------------- */
+        function getPubYear() {
+            return _u.stripString(fP.forms[fLvl].pub.src.year);
+        }
+        function getPublicationName() {
+            return _u.stripString(fP.forms[fLvl].pub.src.displayName);
+        }
+        function getBookPages(argument) {
+            if (!formVals.pages) { return false; }
+            return 'pp. ' + _u.stripString(formVals.pages);
+        }
+        function getFormAuthors(eds) { 
+            const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          console.log('auths = %O', auths);
+            if (!Object.keys(auths).length) { return false; }
+            return getFormattedAuthorNames(auths, eds);
+        }
+        function getPubAuthors() {
+            const auths = fP.forms[fLvl].pub.src.authors;
+            if (!auths) { return false; }
+            return getFormattedAuthorNames(auths);
+        }
+        function getPubEditors() {
+            const eds = fP.forms[fLvl].pub.src.editors;  
+            if (!eds) { return false }
+            const names = getFormattedAuthorNames(eds, true);
+            const edStr = Object.keys(eds).length > 1 ? ', eds.' : ', ed.';
+            return '('+ names + edStr + ')';
+        }
+        /** Formats publisher data and returns the Name, City, Country. */
+        function getPublisherData() {
+            return buildPublString(fP.forms[fLvl].pub.src);
+        } 
+        /**
+         * Returns: Chapter title. In: Publication title [if there are editors,
+         * they are added in parentheses here.]. 
+         */
+        function getTitlesAndEditors() { 
+            const chap = formVals.chapterTitle ? 
+                _u.stripString(formVals.chapterTitle) : false;
+            const pub = _u.stripString(getPublicationName());
+            const titles = chap ? (chap + '. In: ' + pub) : pub;
+            const eds = getPubEditors();
+            return eds ? (titles + ' ' + eds) : titles;
+        }
+        /** 
+         * Formats volume, issue, and page range data and returns either: 
+         *     Volume (Issue): pag-es || Volume (Issue) || Volume: pag-es || 
+         *     Volume || (Issue): pag-es || Issue || pag-es || null
+         * Note: all possible returns wrapped in parentheses.
+         */
+        function getVolumeIssueAndPages() {  
+            const iss = formVals.issue ? '('+formVals.issue+')' : null;
+            const vol = formVals.volume ? formVals.volume : null;
+            const pgs = formVals.pages ? formVals.pages : null;
+            return vol && iss && pgs ? (vol+' '+iss+': '+pgs) :
+                vol && iss ? (vol+' '+iss) : vol && pgs ? (vol+': '+pgs) :
+                    vol ? (vol) : iss && pgs ? (iss+': '+pgs) : iss ? (iss) : 
+                        pgs ? (pgs) : (null);
+        }
     } 
-    /**
-     * Returns: Chapter title. In: Publication title [if there are editors,
-     * they are added in parentheses here.]. 
-     */
-    function getTitlesAndEditors() { 
-        const chap = formVals.chapterTitle ? 
-            _u.stripString(formVals.chapterTitle) : false;
-        const pub = _u.stripString(getPublicationName());
-        const titles = chap ? (chap + '. In: ' + pub) : pub;
-        const eds = getPubEditors();
-        return eds ? (titles + ' ' + eds) : titles;
-    }
-    /** 
-     * Formats volume, issue, and page range data and returns either: 
-     *     Volume (Issue): pag-es || Volume (Issue) || Volume: pag-es || 
-     *     Volume || (Issue): pag-es || Issue || pag-es || null
-     * Note: all possible returns wrapped in parentheses.
-     */
-    function getVolumeIssueAndPages() {  
-        const iss = formVals.issue ? '('+formVals.issue+')' : null;
-        const vol = formVals.volume ? formVals.volume : null;
-        const pgs = formVals.pages ? formVals.pages : null;
-        return vol && iss && pgs ? (vol+' '+iss+': '+pgs) :
-            vol && iss ? (vol+' '+iss) : vol && pgs ? (vol+': '+pgs) :
-                vol ? (vol) : iss && pgs ? (iss+': '+pgs) : iss ? (iss) : 
-                    pgs ? (pgs) : (null);
-    }
-} /* End buildCitationText */
+}/* End buildCitationText */
 /** Handles adding the punctuation for the data in the citation. */
 function addPunc(data) {  
     return /[.!?,;:]$/.test(data) ? data : data+'.';
