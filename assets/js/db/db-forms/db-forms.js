@@ -692,9 +692,13 @@ function appendPubFormAndFinishBuild(form) {
  * previous type-fields and initializes the selectized dropdowns.
  */
 function loadPubTypeFields(typeId) { 
-    loadSrcTypeFields('publication', typeId, this.$input[0]);
-    ifBookAddAuthEdNote(typeId, '#'+this.$input[0].id);
-    setCoreRowStyles('#publication_Rows', '.sub-row');
+    loadSrcTypeFields('publication', typeId, this.$input[0])
+    .then(finishPubTypeFields.bind(this));
+
+    function finishPubTypeFields() {
+        ifBookAddAuthEdNote(typeId, '#'+this.$input[0].id);
+        setCoreRowStyles('#publication_Rows', '.sub-row');
+    }
 }
 /** Shows the user a note above the author and editor elems. */
 function ifBookAddAuthEdNote(id, elemId) {                                
@@ -758,7 +762,7 @@ function finishCitFormUiLoad() {
     setCoreRowStyles('#citation_Rows', '.sub-row');
 }
 function addSourceDataToMemory(data) {
-    Object.keys(data).forEach(k => fPs.records[k] = data[k]);
+    Object.keys(data).forEach(k => fP.records[k] = data[k]);
 }
 function selectDefaultCitType(fLvl) {
     return _u.getData('citTypeNames').then(setCitType);
@@ -791,10 +795,14 @@ function finishCitEditFormBuild() {
 function loadCitTypeFields(typeId) {
     const fLvl = getSubFormLvl('sub');
     if (!fP.editing) { handlePubData(typeId, this.$input[0], fLvl); }
-    loadSrcTypeFields('citation', typeId, this.$input[0]);
-    handleSpecialCaseTypeUpdates(this.$input[0], fLvl);
-    handleCitText(fLvl);
-    setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
+    loadSrcTypeFields('citation', typeId, this.$input[0])
+    .then(finishCitTypeFields.bind(this));
+
+    function finishCitTypeFields() {
+        handleSpecialCaseTypeUpdates(this.$input[0], fLvl);
+        handleCitText(fLvl);
+        setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
+    }
 }
 /**
  * Shows/hides the author field depending on whether the publication has
@@ -1188,7 +1196,7 @@ function updateSrcDetailPanel(entity) {
 function loadSrcTypeFields(type, typeId, elem) {                                //console.log('loadSrcTypeFields. [%s] elem = %O', type, elem);
     const fLvl = getSubFormLvl('sub');
     resetOnFormTypeChange(type, typeId, fLvl);
-    getSrcTypeRows(type, typeId, fLvl)
+    return getSrcTypeRows(type, typeId, fLvl)
     .then(finishSrcTypeFormBuild);
         
     function finishSrcTypeFormBuild(rows) {
@@ -2369,12 +2377,12 @@ function onAuthSelection(val, ed) {                                             
 function onEdSelection(val) {                                                   //console.log("Add existing author = %s", val);
     handleAuthSelect(val, 'editor');
 }
-function handleAuthSelect(val, ed) {
+function handleAuthSelect(val, ed) {                                            
+    if (val === '' || parseInt(val) === NaN) { return; }
+    const authType = ed ? 'Editors' : 'Authors';                                console.log("       ++--Selecting [%s] [%s]", authType,val);
     const fLvl = getSubFormLvl('sub');
-    const authType = ed ? 'Editors' : 'Authors';
     let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
     if (val === 'create') { return openCreateForm(authType, --cnt); }        
-    if (val === '' || parseInt(val) === NaN) { return; }
     if (fP.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
     if (lastAuthComboEmpty(cnt-1, authType)) { return; }
     buildNewAuthorSelect(cnt, val, fLvl, authType);
@@ -2384,16 +2392,27 @@ function lastAuthComboEmpty(cnt, authType) {
     return $('#'+authType+'-sel'+cnt).val() === '';
 }
 /** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
-    const parentFormEntity = fP.forms[prntLvl].entity;
-    const singular = authType.slice(0, -1);
-    const change = authType === 'Editors' ? onEdSelection : onAuthSelection;
+function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
+    buildMultiSelectElems(null, authType, prntLvl, cnt)
+    .then(appendNewAuthSelect);
+
+    function appendNewAuthSelect(sel) {
+        $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
+        initSelectCombobox(getAuthSelConfg(authType, cnt), prntLvl);
+    }
+}
+function getAuthSelConfg(authType, cnt) {
+    return { 
+        add: getAuthAddFunc(authType, cnt), change: getAuthChngFnc(authType),
+        id: '#'+authType+'-sel'+cnt,        name: authType.slice(0, -1) //removes 's' for singular type
+    };
+}
+function getAuthChngFnc(authType) {
+    return authType === 'Editors' ? onEdSelection : onAuthSelection;
+}
+function getAuthAddFunc(authType, cnt) {
     const add = authType === 'Editors' ? initEdForm : initAuthForm;
-    const selConfg = { name: singular, id: '#'+authType+'-sel'+cnt, 
-        change: change, add: add.bind(null, cnt) };
-    const sel = buildMultiSelectElems(null, authType, prntLvl, cnt);
-    $('#'+authType+'-sel-cntnr').append(sel).data('cnt', cnt);
-    initSelectCombobox(selConfg, prntLvl);
+    return add.bind(null, cnt);
 }
 /** Removes the already selected authors from the new dropdown options. */
 // function removeAllSelectedAuths(sel, fLvl, authType) { 
@@ -2495,7 +2514,7 @@ function getFormattedAuthorNames(auths, eds) {                                  
 } /* End getFormattedAuthorNames */
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
-function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fPs = %O', entity, id, fP);
+function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fP = %O', entity, id, fP);
     if (fP.records[entity]) { return _u.snapshot(fP.records[entity][id]); }  console.log('###### [%s] not in record data', entity);
 }
 /*------------------- Combobox (selectized) Methods ----------------------*/
@@ -2614,7 +2633,7 @@ function getSelVal(id) {                                                        
 function getSelTxt(id) {                                                        //console.log('getSelTxt. id = ', id);
     return $(id)[0].innerText;
 }
-function setSelVal(id, val, silent) {                                           //console.log('setSelVal [%s] = [%s]', id, val);
+function setSelVal(id, val, silent) {                                           console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize; 
     $selApi.addItem(val, silent); 
 }
@@ -2633,7 +2652,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
     getFormFieldRows(entity, fConfg, fVals, fLvl)
     .then(appendAndFinishRebuild);
 
-    function appendAndFinishRebuild(form) {
+    function appendAndFinishRebuild(rows) {
         $('#'+entity+'_Rows').append(rows);
         initComboboxes(entity, fLvl);
         fillComplexFormFields(fLvl);
@@ -3208,11 +3227,11 @@ function buildMultiSelectElems(entity, field, fLvl, cnt) {
     return buildSelectCombo(entity, field, fLvl, cnt)
         .then(returnFinishedMultiSelectField);
 
-    function returnFinishedMultiSelectField(field) {
+    function returnFinishedMultiSelectField(fieldElem) {
         const wrapper = _u.buildElem('div', {class: 'flex-row'});
         const lbl = buildMultiSelectLbl(cnt)
-        $(field).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
-        $(wrapper).append([lbl, field]);
+        $(fieldElem).change(storeMultiSelectValue.bind(null, fLvl, cnt, field));
+        $(wrapper).append([lbl, fieldElem]);
         return wrapper;
     }
 
@@ -3310,12 +3329,12 @@ function getCitTypeOpts(prop) {
         return opts[fP.forms[fLvl].pub.pub.publicationType.displayName];
     }
     function setPubInParams() {
-        const pub = getRcrd('publication', pubSrc.publication);
         const pubSrc = getSrcRcrd($('#Publication-sel').val());
-        fP.forms[fLvl].pub = { pub: data[0], src: data[1]};
+        const pub = getRcrd('publication', pubSrc.publication);
+        fP.forms[fLvl].pub = { pub: pub, src: pubSrc};
     }
     function getSrcRcrd(pubId) {
-        if (pubId) { return fP.records.source[pubId]; }
+        if (pubId) { return fP.records.source[pubId]; } //When not editing citation record.
         const rcrd = getRcrd('source', fP.editing.core)
         return fP.records.source[rcrd.parent];
     }
@@ -3434,8 +3453,8 @@ function checkIntFieldsAndEnableSubmit() {
     if (fP.forms.top.unchanged) { resetForNewForm(); }
 }
 /** Returns true if all the required elements for the current form have a value. */
-function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("->-> ifAllRequiredFieldsFilled... fLvl = %s. fPs = %O", fLvl, fP)
-    const reqElems = fP.forms[fLvl].reqElems;                          
+function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
+    const reqElems = fP.forms[fLvl].reqElems;                                   //console.log('reqElems = %O', reqElems);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
@@ -3450,10 +3469,14 @@ function isRequiredFieldFilled(fLvl, elem) {                                    
  * no author value, the first editor value is returned instead. 
  */
 function isCntnrFilled(elem) {                                                  //console.log('isCntnrFilled? elem = %O', elem);
-    const authVal = $('#Authors-sel-cntnr')[0].firstChild.children[1].value;
-    const edVal = $('#Editors-sel-cntnr').length ? 
-        $('#Editors-sel-cntnr')[0].firstChild.children[1].value : false;
-    return authVal ? authVal : edVal;         
+    return isAFieldSelected('Authors') || isAFieldSelected('Editors');         
+}
+function isAFieldSelected(entity) {                                             //console.log('[%s] field = %O', entity, $('#'+entity+'-sel-cntnr')[0]);
+    if (!$('#'+entity+'-sel-cntnr').length) { return false; } //When no editor select is loaded.
+    const fields = $('#'+entity+'-sel-cntnr')[0].firstChild.children;           //console.log('fields = %O', fields);
+    let isSelected = false;
+    $.each(fields, (i, field) => { if ($(field).val()) { isSelected = true; } });
+    return isSelected;
 }
 /** Returns true if the next sub-level form exists in the dom. */
 function hasOpenSubForm(fLvl) {
@@ -4069,7 +4092,7 @@ function onDataSynced(data) {                                      console.log('
     if (isEditForm() && !hasChngs(data)) { 
         return showSuccessMsg('No changes detected.', 'red'); }  
     if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
-    addDataToStoredRcrds(data.core)
+    addDataToStoredRcrds(data.core, data.detail)
     .then(handleFormComplete.bind(null, data));
 
     function isEditForm() {
@@ -4077,9 +4100,10 @@ function onDataSynced(data) {                                      console.log('
     }
 } /* End afterStoredDataUpdated */
 /** Updates the core records in the global form params object. */
-function addDataToStoredRcrds(entity) {                                         //console.log('updateStoredFormParams. fPs = %O', fP);
+function addDataToStoredRcrds(entity, detailEntity) {                           console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
     return _u.getData(entity).then(newData => {
         fP.records[entity] = newData;
+        if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source's detail entities: pub, cit, auth
     });
 }
 /*------------------ Top-Form Success Methods --------------------*/
