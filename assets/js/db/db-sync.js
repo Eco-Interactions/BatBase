@@ -1,25 +1,33 @@
 /**
- * Handles adding, updating, and removing data from local storage.
+ * Handles adding, updating, and removing data from local Indexed DB storage.
+ * 
  * Exports:                 Imported by:
  *     addNewDataToStorage          idb-util
- *     initStoredData
- *     replaceUserData              util
- *     resetStoredData
- *     updateEditedData
- *     updateUserNamedList
+ *     initStoredData               idb-util
+ *     replaceUserData              idb-util
+ *     resetStoredData              db-forms
+ *     updateLocalDb                db-forms
+ *     updateUserNamedList          save-ints
+ *
+ * Code Sections:
+ *     DATABASE SYNC
+ *     AFTER FORM SUBMIT
+ *         ADD DATA
+ *         REMOVE DATA
+ *     INIT DATABASE
+ *     HELPERS
+ *         ERRS
+ * 
  */
 import * as _u from './util.js';
 import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-page.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
 let failed = { errors: [], updates: {}};
-let allRcrds = {};
+/** Stores entity data while updating to reduce async db calls. */
+let mmryData = {};
 
-/** Returns the current date time in the format: Y-m-d H:i:s */
-function getCurrentDate() {
-    return new Date().today() + " " + new Date().timeNow();
-}
-/*------------------ Page Load Data Sync ---------------------------------*/
+/* ========================= DATABASE SYNC ================================== */
 /**
  * On search page load, the system updatedAt flag is compared against the page's. 
  * If there they system data has updates more recent than the last sync, the 
@@ -27,17 +35,10 @@ function getCurrentDate() {
  * On a browser's first visit to the page, all data is downloaded and the 
  * search page ui is initialized @initStoredData.
  */
-export function addNewDataToStorage(pgUpdatedAt, data) {                 console.log("pgDataUpdatedAt = [%s], serverState = [%O]", pgUpdatedAt, data.state);
+export function addNewDataToStorage(pgUpdatedAt, data) {                        console.log("pgDataUpdatedAt = [%s], serverState = [%O]", pgUpdatedAt, data.state);
     if (!ifEntityUpdates(data.state.System, pgUpdatedAt)) { return initSearchPage(); }
     delete data.state.System;  //System updatedAt is no longer needed.
     syncUpdatedData(data.state, pgUpdatedAt);
-     // var pgUpdatedAt = reset ? false : _u.getDataFromStorage('pgDataUpdatedAt'); console.log("pgDataUpdatedAt = [%s], sysUpdatedAt = [%s]", pgUpdatedAt, dataUpdatedAt.System);
-    // if (!pgUpdatedAt) { return initStoredData(); } 
-    // if (!ifEntityUpdates(dataUpdatedAt.System, pgUpdatedAt)) { 
-    //    return getUserSpecificUpdates(); 
-    // }
-    // delete dataUpdatedAt.System;  //System updatedAt is no longer needed.
-    // syncUpdatedData(dataUpdatedAt, pgUpdatedAt);
 }
 function initSearchPage() {
     _u.getData('curFocus').then(f => initSearchState(f));
@@ -51,17 +52,6 @@ function ifEntityUpdates(timeOne, timeTwo) {
     var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
 }
-/**
- * Updates user specific data in local storage. Useful when the user changes on the
- * same machine, or when the search page is first visited before a user logged in.
- */
-// function getUserSpecificUpdates() {
-//     _u.sendAjaxQuery(null, "ajax/lists", storeUserSpecificData);                //console.log('Data updated.');
-// }
-function storeUserSpecificData(data) {
-    data.lists = data.lists.map(l => JSON.parse(l));
-    deriveUserNamedListData(data);
-}
 /** Filter updatedAt entities and send those with updates to @ajaxNewData. */
 function syncUpdatedData(updatedAt, pgUpdatedAt) {                              console.log("Synching data updated since - ", pgUpdatedAt);
     var withUpdates = Object.keys(updatedAt).filter(function(entity){
@@ -72,17 +62,14 @@ function syncUpdatedData(updatedAt, pgUpdatedAt) {                              
 }
 /** 
  * Sends an ajax call for each entity with updates. On return, the new data 
- * is stored @processUpdatedData. Interactions are sent after all other entity
- * updates. Finally, any failed updates are retried and then the search page 
- * is reloaded.
+ * is stored @processUpdatedData. Any failed updates are retried and then the 
+ * search page is reloaded.
  * TODO: Add 'fail' callback for server errors. Send back any errors and 
  * describe them to the user. 
  */ 
-function ajaxNewData(entities, lastUpdated) { 
-    const ints = entities.indexOf('Interaction') !== -1 ?  
-        entities.splice(entities.indexOf('Interaction'), 1) : false;    
+function ajaxNewData(entities, lastUpdated) {                                   console.log('   --ajaxNewData. entities = %O', entities);
     const promises = entities.map(e => getNewData(e)); 
-    $.when(...promises).then(processUpdatedData).then(updateInteractions)
+    $.when(...promises).then(processUpdatedData)
         .done(retryFailedUpdatesAndLoadTable);
      
     function getNewData(entity, func) {                                         //console.log('getting new data for ', entity); 
@@ -90,41 +77,36 @@ function ajaxNewData(entities, lastUpdated) {
         const hndlr = func || null;
         return _u.sendAjaxQuery(data, "ajax/sync-data", hndlr); 
     } 
-    function updateInteractions() {                                         
-        return ints ? getNewData('Interaction', processUpdatedEntityData) : null;
-    }
 } /* End ajaxNewData */ 
 /** Sends each entity's ajax return to be processed and stored. */
 function processUpdatedData() {    
     if (arguments[1] === "success") { return processUpdatedEntityData(...arguments); }
+    const proms = [];
     for (let data in arguments) { 
-        processUpdatedEntityData(arguments[data][0]);
+        proms.push(processUpdatedEntityData(arguments[data][0]));
     }
 } 
 /** Parses and sends the returned data to @storeUpdatedData. */ 
 function processUpdatedEntityData() { 
     const results = arguments[0]; 
-    const entity = Object.keys(results)[0];                                     //console.log("[%s] data returned from server = %O", entity, results); 
+    const entity = Object.keys(results)[0];                                     console.log("   --[%s] data returned from server = %O", entity, results); 
     const data = parseData(results[entity]); 
-    storeUpdatedData(data, entity); 
+    return storeUpdatedData(data, entity); 
 }
 /** Sends the each updated record to the update handler for the entity. */ 
 function storeUpdatedData(rcrds, entity) { 
+    const proms = [];
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
     const entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
         addCoreEntityData : addDetailEntityData; 
     for (let id in rcrds) { 
-        entityHndlr(_u.lcfirst(entity), rcrds[id]); 
+        proms.push(entityHndlr(_u.lcfirst(entity), rcrds[id])); 
     } 
-} 
-/** Stores interaction data and inits the search-page table.*/ 
-function storeDataAndRetryFailedUpdates(results) { 
-    processUpdatedData(results); 
-    retryFailedUpdatesAndLoadTable();
+    return Promise.all(proms);
 } 
 function retryFailedUpdatesAndLoadTable() {                                     //console.log('retryFailedUpdatesAndLoadTable')
     retryFailedUpdates();
-    loadDataTable(); //TODO: send errors during init update to search page and show error message to user.
+    initSearchState('taxa'); //TODO: send errors during init update to search page and show error message to user.
 }
 /**
  * Updates the stored data's updatedAt flag, and initializes the search-page 
@@ -134,46 +116,55 @@ function loadDataTable() {                                                      
     storeData('pgDataUpdatedAt', getCurrentDate()); 
     initDataTable(); 
 }
-/*------------------ Update Submitted Form Data --------------------------*/
-export function updateEditedData(data, cb) {
-    updateStoredData(data, cb);
-}
+/* ======================== AFTER FORM SUBMIT =============================== */
 /**
  * On crud-form submit success, the returned data is added to, or updated in, 
  * all relevant stored data @updateEntityData. The stored data's lastUpdated 
- * flag, 'pgDataUpdatedAt', is updated. The callback returns to db_forms.
+ * flag, 'pgDataUpdatedAt', is updated. 
  */
-function updateStoredData(data, cb) {                                           //console.log("updateStoredData data recieved = %O", data);
-    updateEntityData(data);
-    storeData('pgDataUpdatedAt', getCurrentDate());                             //console.log('pgDataUpdatedAt = ', getCurrentDate())
-    retryFailedUpdates();
-    sendDataUpdateStatus(data, cb);
-}
-function sendDataUpdateStatus(data, onDataSynced) {                             //console.log('sendDataUpdateStatus. data = %O, errs = %O', data, failed.errors);  
-    const errs = failed.errors;  
-    const msg = errs.length ? errs[0][0] : null;
-    const tag = errs.length ? errs[0][1] : null;
-    data.errors = errs.length ? errs : false;
-    onDataSynced(data, msg, tag);
+export function updateLocalDb(data) {                                           console.log("   --updateLocalDb data recieved = %O", data);
+    return updateEntityData(data)
+    .then(retryFailedUpdates)
+    .then(addErrsToReturnDataAndClearMemory.bind(null, data))
+    .then(storeData.bind(null, 'pgDataUpdatedAt', getCurrentDate()))
+    .then(() => data);
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
 function updateEntityData(data) {
-    addCoreEntityData(data.core, data.coreEntity);
-    if (data.detailEntity) { 
-        addDetailEntityData(data.detail, data.detailEntity);
-    }
-    updateAffectedData(data);
+    return addCoreEntityData(data.core, data.coreEntity)
+    .then(updateDetailEntityData.bind(null, data))
+    .then(updateAffectedData.bind(null, data))
+    .then(d => d);
 }
-/*------------------ Add-to-Storage Methods ------------------------------*/
+function updateDetailEntityData(data) {
+    if (!data.detailEntity) { return Promise.resolve(); }
+    return addDetailEntityData(data.detail, data.detailEntity);
+}
+/* ------------------------------ ADD DATA ---------------------------------- */
 /** Updates stored-data props related to a core-entity record with new data. */
-function addCoreEntityData(entity, rcrd) {                                      //console.log("Updating Core entity. %s. %O", entity, rcrd);
-    var propHndlrs = getAddDataHndlrs(entity, rcrd);
-    updateDataProps(propHndlrs, entity, rcrd);
-    updateCoreData(entity, rcrd);
+function addCoreEntityData(entity, rcrd) {                                      console.log("       --Updating Core entity. %s. %O", entity, rcrd);
+    return updateCoreData(entity, rcrd)
+    .then(updateCoreDataProps.bind(null, entity, rcrd));
 }
-/** Returns an object of related data properties and their update methods. */
-function getAddDataHndlrs(entity, rcrd) {
-    var type = getEntityType(entity, rcrd);                                     //console.log("type = ", type);
+/** 
+ * Updates the stored core-records array and the stored entityType array. 
+ * Note: Taxa are the only core entity without 'types'.
+ */
+function updateCoreData(entity, rcrd) {                                         //console.log("           --Updating Record data", entity);
+    return addToRcrdProp(entity, rcrd)
+    .then(addToCoreTypeProp.bind(null, entity, rcrd));
+} 
+function addToCoreTypeProp(entity, rcrd) {    
+    if (entity === "taxon") { return Promise.resolve(); }
+    return addToTypeProp(entity+"Type", rcrd, entity);
+}
+function updateCoreDataProps(entity, rcrd) {
+    const updateFuncs = getRelDataHndlrs(entity, rcrd);                         //console.log('updatedatahandlers = %O', updateFuncs);
+    return updateDataProps(entity, rcrd, updateFuncs)
+}
+/** Returns an object of relational data properties and their update methods. */
+function getRelDataHndlrs(entity, rcrd) {
+    var type = entity === "source" ? getSourceType(entity, rcrd) : false;       //console.log("type = ", type);
     var update = {
         'source': {
             'author': { 'authSrcs': addToRcrdAryProp },
@@ -198,35 +189,28 @@ function getAddDataHndlrs(entity, rcrd) {
     };
     return type ? update[entity][type] : update[entity];
 }
-/** 
- * Returns the record's entity'Type' for entities with stored data related to 
- * a 'type'. Eg, the sourceTypes author, publication, etc.
- */
-function getEntityType(entity, rcrd) {
-    if (entity === "source") { return getSourceType(entity, rcrd); }
-    return false;
-}
 /** Returns the records source-type. */
 function getSourceType(entity, rcrd) {
     var type = _u.lcfirst(entity)+"Type";
     return _u.lcfirst(rcrd[type].displayName);
 }
-/** Sends entity-record data to each storage property-type handler. */
-function updateDataProps(propHndlrs, entity, rcrd) {                            //console.log("updateDataProps %O. [%s]. %O", propHndlrs, entity, rcrd);
-    var params = { entity: entity, rcrd: rcrd, stage: 'addData' };
-    for (var prop in propHndlrs) {
-        updateData(propHndlrs[prop], prop, params);
-    }
-}
 /** 
- * Updates the stored core-records array and the stored entityType array. 
- * Note: Taxa are the only core entity without 'types'.
+ * Returns the record's entity'Type' for entities with stored data related to 
+ * a 'type'. Eg, the sourceTypes author, publication, etc.
  */
-function updateCoreData(entity, rcrd) {                                         //console.log("Updating [%s] Core data", entity);
-    addToRcrdProp(entity, rcrd);
-    if (entity === "taxon") { return; }
-    addToTypeProp(entity+"Type", rcrd, entity); 
-} 
+// function getEntityType(entity, rcrd) {
+//     if (entity === "source") { return getSourceType(entity, rcrd); }
+//     return false;
+// }
+/** Sends entity-record data to each storage property-type handler. */
+function updateDataProps(entity, rcrd, updateFuncs) {                           console.log("       --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
+    const proms = [];
+    const params = { entity: entity, rcrd: rcrd, stage: 'addData' };
+    for (let prop in updateFuncs) {
+        proms.push(updateData(updateFuncs[prop], prop, params));
+    }
+    return Promise.all(proms);
+}
 /** Updates stored-data props related to a detail-entity record with new data. */
 function addDetailEntityData(entity, rcrd) {                                    //console.log("Updating Detail entity. %s. %O", entity, rcrd);
     var update = {
@@ -236,33 +220,37 @@ function addDetailEntityData(entity, rcrd) {                                    
         'publisher': { 'publisher': addToRcrdProp },
         'geoJson': { 'geoJson': addGeoJson } 
     };
-    updateDataProps(update[entity], entity, rcrd)
+    return updateDataProps(entity, rcrd, update[entity]);
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdProp(prop, rcrd, entity) {  
-    var rcrdObj = allRcrds[prop] || getDataFromLocalStorage(prop);              //console.log("addToRcrdProp. [%s] = %O. rcrd = %O", prop, rcrdObj, rcrd);
-    rcrdObj[rcrd.id] = rcrd;
-    storeData(prop, rcrdObj);
+    return _u.getData(prop).then(rcrds => {                                     //console.log("               --addToRcrdProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+        rcrds[rcrd.id] = rcrd;
+        return storeData(prop, rcrds);
+    });
 }
 /** Add the new record to the prop's stored records object.  */
 function addToRcrdAryProp(prop, rcrd, entity) {  
-    var rcrdAry = allRcrds[prop] || getDataFromLocalStorage(prop);              //console.log("addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrdAry, rcrd);
-    addIfNewRcrd(rcrdAry, rcrd.id);
-    storeData(prop, rcrdAry);
+    return _u.getData(prop).then(rcrds => {                                     //console.log("               --addToRcrdAryProp. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+        addIfNewRcrd(rcrds, rcrd.id);
+        return storeData(prop, rcrds);
+    });
 }
 /** Add the new entity's display name and id to the prop's stored names object.  */
 function addToNameProp(prop, rcrd, entity) {
-    var nameObj =  allRcrds[prop] || getDataFromLocalStorage(prop);             //console.log("addToNameProp. [%s] = %O. rcrd = %O", prop, nameObj, rcrd);
-    nameObj[rcrd.displayName] = rcrd.id;
-    storeData(prop, nameObj);
+    return _u.getData(prop).then(nameObj => {                                   //console.log("               --addToNameProp. [%s] = %O. rcrd = %O", prop, nameObj, rcrd);
+        nameObj[rcrd.displayName] = rcrd.id;
+        return storeData(prop, nameObj);
+    });
 }
 /** Add the new record's id to the entity-type's stored id array.  */
-function addToTypeProp(prop, rcrd, entity) {
-    var typeObj =  allRcrds[prop] || getDataFromLocalStorage(prop);             //console.log("addToTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-    var typeId = rcrd[prop] ? rcrd[prop].id : false;
+function addToTypeProp(prop, rcrd, entity) {                                    
+    const typeId = rcrd[prop] ? rcrd[prop].id : false;
     if (!typeId) { return; }
-    typeObj[typeId][entity+'s'].push(rcrd.id);
-    storeData(prop, typeObj);
+    return _u.getData(prop).then(typeObj => {                                   //console.log("               --addToTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+        typeObj[typeId][entity+'s'].push(rcrd.id);
+        return storeData(prop, typeObj);
+    });
 }
 function addIfNewRcrd(ary, id) {
     if (ary.indexOf(id) === -1) { ary.push(id); }                               //console.log("Pushing id %s to array.", id);
@@ -270,59 +258,63 @@ function addIfNewRcrd(ary, id) {
 /** Adds a new child record's id to it's parent's 'children' array. */ 
 function addToParentRcrd(prop, rcrd, entity) {                              
     if (!rcrd.parent) { return; }
-    var parentObj = allRcrds[prop] || getDataFromLocalStorage(prop);           //console.log("addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
-    var parent = parentObj[rcrd.parent];
-    addIfNewRcrd(parent.children, rcrd.id);
-    storeData(prop, parentObj);
+    return _u.getData(prop).then(parentObj => {                                 //console.log("               --addToParentRcrd. [%s] = %O. rcrd = %O", prop, parentObj, rcrd);
+        const parent = parentObj[rcrd.parent];
+        addIfNewRcrd(parent.children, rcrd.id);
+        return storeData(prop, parentObj);
+    });
 }
 /** Adds a new tagged record to the tag's array of record ids. */
 function addToTagProp(prop, rcrd, entity) {                                 
     if (rcrd.tags.length > 0) {
-        var tagObj = allRcrds[prop] || getDataFromLocalStorage(prop);           //console.log("addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
-        rcrd.tags.forEach(function(tag){
-            addIfNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id);                
+        return _u.getData(prop).then(tagObj => {                                //console.log("               --addToTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+            rcrd.tags.forEach((tag) => {
+                addIfNewRcrd(tagObj[tag.id][entity+'s'], rcrd.id);         
+            });
+            return storeData(prop, tagObj);
         });
     }
+    return Promise.resolve();
 }
 /** Adds the Taxon's name to the stored names for it's realm and level.  */
 function addToTaxonNames(prop, rcrd, entity) {
     const realm = rcrd.realm.displayName;
     const level = rcrd.level.displayName;  
     const nameProp = realm+level+"Names";
-    addPropIfNewLevel(nameProp);
-    addToNameProp(realm+level+"Names", rcrd, entity);
-}
+    return _u.getData(prop, true).then(nameObj => {                             
 /** Creates the level property if no taxa have been saved at this level and realm.  */
-function addPropIfNewLevel(nameProp) {
-    var lvlObj = allRcrds[nameProp] || getDataFromLocalStorage(nameProp);
-    if (lvlObj) { return; }                                                     //console.log(`creating new level for [${nameProp}]`);
-    storeData(nameProp, {});
+        if (!nameObj) { storeData(prop, {}); }
+        addToNameProp(realm+level+"Names", rcrd, entity);
+    });
 }
 /** Adds the Interaction to the stored entity's collection.  */
-function addInteractionToEntity(prop, rcrd, entity) {
+function addInteractionToEntity(prop, rcrd, entity) {                           //console.log('addInteractionToEntity. prop = [%s] rcrd = %O', prop, rcrd);
     if (!rcrd[prop]) {return;}
-    var rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);                //console.log("addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
-    var storedEntity = rcrds[rcrd[prop]];
-    addIfNewRcrd(storedEntity.interactions, rcrd.id);
-    if (prop === 'source') { storedEntity.isDirect = true; }
-    storeData(prop, rcrds);
+    return _u.getData(prop).then(rcrds => {                                     //console.log("               --addInteractionToEntity. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);
+        const storedEntity = rcrds[rcrd[prop]];
+        addIfNewRcrd(storedEntity.interactions, rcrd.id);
+        if (prop === 'source') { storedEntity.isDirect = true; }
+        return storeData(prop, rcrds);
+    });
 }
 /** Adds the Interaction to the taxon's subject/objectRole collection.  */
 function addInteractionRole(prop, rcrd, entity) {  
-    var taxa = allRcrds['taxon'] || getDataFromLocalStorage('taxon');           //console.log("addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
-    var taxon = taxa[rcrd[prop]];
-    addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
-    storeData("taxon", taxa);        
+    return _u.getData('taxon').then(taxa => {                                   //console.log("               --addInteractionRole. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+        const taxon = taxa[rcrd[prop]];
+        addIfNewRcrd(taxon[prop+"Roles"], rcrd.id);
+        return storeData("taxon", taxa);            
+    });     
 }
 /** When a Publication/Citation has been updated, add new author contributions. */
-function addContribData(prop, rcrd, entity) {                                   //console.log("-----addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
+function addContribData(prop, rcrd, entity) {                                   //console.log("               --addContribData. [%s] [%s]. rcrd = %O", prop, entity, rcrd);
     if (!rcrd[prop]) { return; }
-    const srcObj = allRcrds['source'] || getDataFromLocalStorage('source');
-    for (let ord in rcrd[prop]) {
-        let authId = rcrd[prop][ord];
-        addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
-    }
-    storeData('source', srcObj);
+    return _u.getData('source').then(srcObj => {
+        for (let ord in rcrd[prop]) {
+            const authId = rcrd[prop][ord];
+            addIfNewRcrd(srcObj[authId].contributions, rcrd.id);
+        }
+        return storeData('source', srcObj);
+    });
 }
 /**
  * As IDB is only used for geoJson at this point, the geoJson prob is set to false
@@ -332,28 +324,34 @@ function addContribData(prop, rcrd, entity) {                                   
 function addGeoJson(prop, rcrd, entity) {                                       //console.log('addGeoJson. prop = [%s], rcrd = %O, entity = [%s]', prop, rcrd, entity); //'geoJson', obvi, 'location'
     idb.set('geoJson', false);
 }
-/*------------ Remove-from-Storage Methods -------------------------------*/
+/* ---------------------------- REMOVE DATA --------------------------------- */
 /** Updates any stored data that was affected during editing. */
-function updateAffectedData(data) {                                             //console.log("updateAffectedData called. data = %O", data);
-    if (data.coreEdits && hasEdits(data.coreEdits)) { 
-        updateAffectedDataProps(data.core, data.coreEntity, data.coreEdits);
-    }
-    if (data.detailEdits && hasEdits(data.detailEdits)) { 
+function updateAffectedData(data) {                                             console.log("           --updateAffectedData called. data = %O", data);
+    return updateRelatedCoreData(data, data.coreEdits)
+    .then(updateRelatedDetailData.bind(null, data));
+}
+function updateRelatedCoreData(data, edits) {
+    return !hasEdits(edits) ? Promise.resolve() :
+        updateAffectedDataProps(data.core, data.coreEntity, edits);
+}
+function updateRelatedDetailData(data) {
+    return !hasEdits(data.detailEdits) ? Promise.resolve() :
         updateAffectedDataProps(data.detail, data.detailEntity, data.detailEdits);
-    }  
 }
 function hasEdits(editObj) {
-    return Object.keys(editObj).length > 0;
+    return editObj && Object.keys(editObj).length > 0;
 }
 /** Updates relational storage props for the entity. */
-function updateAffectedDataProps(entity, rcrd, edits) {                         //console.log("updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
+function updateAffectedDataProps(entity, rcrd, edits) {                         console.log("               --updateAffectedDataProps called for [%s]. edits = %O", entity, edits);
+    const proms = [];
     var propHndlrs = getRmvDataPropHndlrs(entity);
     var params = { entity: entity, rcrd: rcrd, stage: 'rmvData' };
     for (var prop in edits) {                                               
         if (prop in propHndlrs) {
-            updateData(propHndlrs[prop], prop, params, edits);
+            proms.push(updateData(propHndlrs[prop], prop, params, edits));
         }
     }
+    return Promise.all(proms);
 }
 /** Returns an object with relational properties and their removal handlers. */
 function getRmvDataPropHndlrs(entity) {
@@ -382,26 +380,29 @@ function rmvIdFromAry(ary, id) {
 /** Removes a record's id from the previous parent's 'children' array. */ 
 function rmvFromParent(prop, rcrd, entity, edits) {  
     if (!edits[prop].old) { return; }
-    var rcrds = allRcrds[entity] || getDataFromLocalStorage(entity);            //console.log("rmvFromParent. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);  
-    rmvIdFromAry(rcrds[edits[prop].old].children, rcrd.id);                
-    storeData(entity, rcrds);
+    return _u.getData(entity).then(rcrds => {                                   //console.log("               --rmvFromParent. [%s] = %O. rcrd = %O", prop, rcrds, rcrd);  
+        rmvIdFromAry(rcrds[edits[prop].old].children, rcrd.id);                
+        return storeData(entity, rcrds);
+    });
 }
 /** Removes the Interaction from the stored entity's collection. */
 function rmvIntFromEntity(prop, rcrd, entity, edits) {   
-    var rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);                //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
-    var storedEntity = rcrds[edits[prop].old];
-    rmvIdFromAry(storedEntity.interactions, rcrd.id);
-    storeData(prop, rcrds);
+    return _u.getData(prop).then(rcrds => {                                     //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+        const storedEntity = rcrds[edits[prop].old];
+        rmvIdFromAry(storedEntity.interactions, rcrd.id);
+        return storeData(prop, rcrds);
+    });
 }
 /** Removes the Interaction and updates parent location total counts.  */
 function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
-    const rcrds = allRcrds[prop] || getDataFromLocalStorage(prop);              //console.log("rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
-    const oldLoc = rcrds[edits[prop].old];
-    const newLoc = rcrds[edits[prop].new];
-    rmvIdFromAry(oldLoc.interactions, rcrd.id);
-    adjustLocAndParentCnts(oldLoc, false);
-    adjustLocAndParentCnts(newLoc, true);
-    storeData('location', rcrds);
+    return _u.getData(prop).then(rcrds => {                                     //console.log("               --rmvIntFromEntity. [%s] = %O. rcrd = %O, edits = %O", prop, rcrds, rcrd, edits);
+        const oldLoc = rcrds[edits[prop].old];
+        const newLoc = rcrds[edits[prop].new];
+        rmvIdFromAry(oldLoc.interactions, rcrd.id);
+        adjustLocAndParentCnts(oldLoc, false);
+        adjustLocAndParentCnts(newLoc, true);
+        return storeData('location', rcrds);
+    });
 
     function adjustLocAndParentCnts(loc, addTo) {
         addTo ? ++loc.totalInts : --loc.totalInts; 
@@ -410,46 +411,50 @@ function rmvIntAndAdjustTotalCnts(prop, rcrd, entity, edits) {
 } /* End rmvIntAndAdjustTotalCnts */
 /** Removes the Interaction from the taxon's subject/objectRole collection. */
 function rmvIntFromTaxon(prop, rcrd, entity, edits) {  
-    var taxa = allRcrds['taxon'] || getDataFromLocalStorage('taxon');           //console.log("rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
-    var taxon = taxa[edits[prop].old];      
-    rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
-    storeData("taxon", taxa);           
+    return _u.getData('taxon').then(taxa => {                                   //console.log("               --rmvIntFromTaxon. [%s] = %O. taxa = %O", prop, taxa, rcrd);
+        const taxon = taxa[edits[prop].old];      
+        rmvIdFromAry(taxon[prop+"Roles"], rcrd.id);
+        return storeData("taxon", taxa);   
+    });  
 }
 /** Removes the record from the entity-type's stored array. */
 function rmvFromTypeProp(prop, rcrd, entity, edits) { 
     if (!edits[prop].old) { return; }
-    var typeObj = allRcrds[prop] || getDataFromLocalStorage(prop);              //console.log("rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
-    var type = typeObj[edits[prop].old];
-    rmvIdFromAry(type[entity+'s'], rcrd.id);
-    storeData(prop, typeObj);
+    return _u.getData(prop).then(typeObj => {                                   //console.log("               --rmvFromTypeProp. [%s] = %O. rcrd = %O", prop, typeObj, rcrd);
+        const type = typeObj[edits[prop].old];
+        rmvIdFromAry(type[entity+'s'], rcrd.id);
+        return storeData(prop, typeObj);
+    });
 }
 /** Removes a record from the tag's array of record ids. */
 function rmvFromTagProp(prop, rcrd, entity, edits) {                                 
     if (!edits.tag.removed) { return; }
-    var tagObj = allRcrds[prop] || getDataFromLocalStorage(prop);               //console.log("rmvFromTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
-    edits.tag.removed.forEach(function(tagId){
-        rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
+    return _u.getData(prop).then(tagObj => {                                    //console.log("               --rmvFromTagProp. [%s] = %O. rcrd = %O", prop, tagObj, rcrd);
+        edits.tag.removed.forEach(function(tagId){
+            rmvIdFromAry(tagObj[tagId][entity+'s'], rcrd.id);                
+        });
+        return storeData(prop, tagObj);
     });
-    storeData(prop, tagObj);
 }
-function rmvContrib(prop, rcrd, entity, edits) {                                //console.log("rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
-    const srcObj = allRcrds['source'] || getDataFromLocalStorage('source');
-    edits.contributor.removed.forEach(id => 
-        rmvIdFromAry(srcObj[id].contributions, rcrd.id));
-    storeData('source', srcObj);
+function rmvContrib(prop, rcrd, entity, edits) {                                //console.log("               --rmvContrib. edits = %O. rcrd = %O", edits, rcrd)
+    return _u.getData('source').then(srcObj => {                                       
+        edits.contributor.removed.forEach(id => 
+            rmvIdFromAry(srcObj[id].contributions, rcrd.id));
+        return storeData('source', srcObj);
+    });
 }
 function rmvFromNameProp(prop, rcrd, entity, edits) { 
-    var lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
-    var realm = rcrd.realm.displayName;
-    var level = edits.level ? lvls[edits.level.old-1] : rcrd.level.displayName;
-    var taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
-    var nameObj =  allRcrds[realm+level+'Names'] || getDataFromLocalStorage(realm+level+'Names');                //console.log("nameObj [%s] = %O, rcrd = %O, edits = %O",realm+level+'Names', nameObj, rcrd, edits)
-    delete nameObj[taxonName];
-    storeData(realm+level+'Names', nameObj);
+    const lvls = ["Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"];
+    const realm = rcrd.realm.displayName;
+    const level = edits.level ? lvls[edits.level.old-1] : rcrd.level.displayName;
+    const taxonName = edits.displayName ? edits.displayName.old : rcrd.displayName;
+    return _u.getData(realm+level+'Names').then(nameObj => {                    //console.log("               --rmvFromNameProp [%s] = %O, rcrd = %O, edits = %O",realm+level+'Names', nameObj, rcrd, edits)
+        delete nameObj[taxonName];
+        return storeData(realm+level+'Names', nameObj);  
+    });
 }
-
 /*---------------- Update User Named Lists -----------------------------------*/
-export function updateUserNamedList(data, action, cb) {                             //console.log('updating [%s] stored list data. %O', action, data);
+export function updateUserNamedList(data, action, cb) {                         console.log('   --Updating [%s] stored list data. %O', action, data);
     let rcrds, names;
     const list = action == 'delete' ? data : JSON.parse(data.entity);  
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
@@ -478,12 +483,7 @@ export function updateUserNamedList(data, action, cb) {                         
         if (data.edits && data.edits.displayName) { delete names[data.edits.displayName.old]; }
     }
 } /* End updateUserNamedList */
-/*------------------ Init Stored Data Methods --------------------------------*/
-export function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
-    data.lists = data.lists.map(l => JSON.parse(l));
-    deriveUserNamedListData(data);
-    storeData('user', userName);
-}
+/* ====================== INIT DATABASE ===================================== */
 /** When there is an error while storing data, all data is redownloaded. */
 export function resetStoredData() {
     const prevFocus = window.localStorage.getItem('curFocus');
@@ -514,12 +514,12 @@ export function initStoredData() {
  *       Source, SourceType, Tag
  *   /interaction - Interaction, InteractionType  
  */
-function ajaxAndStoreAllEntityData() {                                          console.log("ajaxAndStoreAllEntityData");
+function ajaxAndStoreAllEntityData() {                                          console.log("   --ajaxAndStoreAllEntityData");
     $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
         $.ajax("ajax/source"), $.ajax("ajax/interaction"),
         $.ajax("ajax/lists"),  $.ajax("ajax/geojson")
-    ).then(function(a1, a2, a3, a4, a5, a6) {                                   console.log("Ajax success: args = %O", arguments); 
+    ).then(function(a1, a2, a3, a4, a5, a6) {                                   console.log("       --Ajax success: args = %O", arguments); 
         $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
@@ -743,10 +743,15 @@ function getFocusAndViewOptionGroupString(list) {
     return list.details.focus === 'locs' ? 'Location' : 
         map[list.details.focus] + ' - ' + map[list.details.view];
 }
-/*--------------- Shared Helpers -----------------------------*/
+export function replaceUserData(userName, data) {                               //console.log('replaceUserData. [%s] = %O', userName, data);
+    data.lists = data.lists.map(l => JSON.parse(l));
+    deriveUserNamedListData(data);
+    storeData('user', userName);
+}
+/* =========================== HELPERS ====================================== */
 /** Stores passed data under the key in dataStorage. */
 function storeData(key, data) {
-    _u.setData(key, data);
+    return _u.setData(key, data);
 }
 /**
  * Attempts to update the data and catches any errors.
@@ -757,17 +762,16 @@ function storeData(key, data) {
  */
 function updateData(updateFunc, prop, params, edits) {                          //console.log('prop [%s] -> params [%O]', prop, params);
     try {
-        updateFunc(prop, params.rcrd, params.entity, edits);
+        return updateFunc(prop, params.rcrd, params.entity, edits);
     } catch (e) {   console.log('###### Error with [%s] params = [%O] e = %O', prop, params, e);
-        handleFailedUpdate(prop, updateFunc, params, edits);
+        return handleFailedUpdate(prop, updateFunc, params, edits);
     }
 }
-function getDataFromLocalStorage(prop) {
-    const data = _u.getDataFromStorage(prop);
-    allRcrds[prop] = data;
-    return data;
+/** Returns the current date time in the format: Y-m-d H:i:s */
+function getCurrentDate() {
+    return new Date().today() + " " + new Date().timeNow();
 }
-/*----------------- Errs ---------------------------------------*/
+/*------------------------------ ERRS ----------------------------------------*/
 /**
  * If this is the first failure, it is added to other failed updates to be 
  * retried at the end of the update process. If this is the second error, 
@@ -779,6 +783,7 @@ function handleFailedUpdate(prop, updateFunc, params, edits) {                  
     } else {
         addToFailedUpdates(updateFunc, prop, params, edits);       
     }
+    return Promise.resolve();
 }
 function addToFailedUpdates(updateFunc, prop, params, edits) {                  //console.log('addToFailedUpdates. edits = %O', edits);
     if (!failed.updates[params.entity]) { failed.updates[params.entity] = {}; }
@@ -797,6 +802,15 @@ function retryFailedUpdates() {                                                 
         }            
     }
     delete failed.twice;
+    return Promise.resolve();
+}
+function addErrsToReturnDataAndClearMemory(data) {                              //console.log('       --getUpdateReportOpj. data = %O, errs = %O', data, failed.errors);  
+    if (failed.errors.length) {
+        data.errors = { msg: failed.errors[0][0], tag: failed.errors[0][1] };
+    }
+    mmryData = {};
+    failed = { errors: [], updates: {}};
+    return Promise.resolve();
 }
 /** Sends a message and error tag back to the form to be displayed to the user. */
 function reportDataUpdateErr(edits, prop, rcrd, entity, stage) {

@@ -1707,7 +1707,6 @@ function finishTaxonSelectUi(role) {
     customizeElemsForTaxonSelectForm(role);
     if (ifResettingTxn(role)) { resetPrevTaxonSelection($('#'+role+'-sel').val());
     } else { focusFirstCombobox(selCntnr); }
-        // onLevelSelection($('#'+role+'-sel').val()); }
     _u.replaceSelOpts('#'+role+'-sel', []);
 }
 function ifResettingTxn(role) {  
@@ -2719,7 +2718,7 @@ function returnFinishedRows(entity, rows) {
  * > order - Order to display the fields in both the default and expanded forms. 
  * > exitHandler - optional Obj with handlers for exiting create/edit forms.
  */
-function getFormConfg(entity) {
+function getFormConfg(entity) {                                                 //console.log('getFormConfg [%s]', entity);
     const fieldMap = { 
         "arthropod": {
             "add": {},  
@@ -3799,11 +3798,11 @@ function getFormValueData(entity, fLvl, submitting) {
         } 
         return fP.forms.taxonPs.realmTaxon.id;
     }
+    function returnFormVals() {
+        checkForErrors(entity, formVals, fLvl);
+        return formVals;
+    }
 } /* End getFormValueData */
-function returnFormVals() {
-    checkForErrors(entity, formVals, fLvl);
-    return formVals;
-}
 function checkForErrors(entity, formVals, fLvl) {
     const errs = { author: checkDisplayNameForDups, editor: checkDisplayNameForDups };
     if (!errs[entity]) { return; }
@@ -4050,7 +4049,7 @@ function getEntityUrl(action) {
 }
 /*------------------ Form Success Methods --------------------------------*/
 /**
- * Ajax success callback. Updates the stored data @db_sync.updateEditedData and 
+ * Ajax success callback. Updates the stored data @db_sync.updateLocalDb and 
  * the stored core records in the fP object. Exit's the successfully submitted 
  * form @exitFormAndSelectNewEntity.  
  */
@@ -4060,18 +4059,18 @@ function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        
 }
 /** Calls the appropriate data storage method and updates fP. */  
 function storeData(data) {  
-    db_sync.updateEditedData(data, onDataSynced);
+    db_sync.updateLocalDb(data).then(onDataSynced);
 }
 /** afterStoredDataUpdated callback */
-function onDataSynced(data, msg, errTag) {                                      //console.log('data update complete. args = %O', arguments);
+function onDataSynced(data) {                                      console.log('data update complete. data = %O', data);
     toggleWaitOverlay(false);
-    if (errTag) { return errUpdatingData(msg, errTag); }
+    if (data.errors) { return errUpdatingData(data.errors); }
     if (data.citationUpdate) { return; }
     if (isEditForm() && !hasChngs(data)) { 
         return showSuccessMsg('No changes detected.', 'red'); }  
     if (isEditForm() && data.core == 'source') { updateRelatedCitations(data); }
     addDataToStoredRcrds(data.core)
-    .then(handleFormComplete);
+    .then(handleFormComplete.bind(null, data));
 
     function isEditForm() {
         return fP.forms[fP.ajaxFormLvl].action === 'edit';
@@ -4113,7 +4112,7 @@ function resetInteractionForm() {
     initFormParams('create', 'interaction')
     .then(resetFormUi);
 
-    function resetFormUi(vals) {
+    function resetFormUi() {
         resetIntFields(vals); 
         $('#top-cancel').val(' Close ');  
         disableSubmitBttn("#top-submit");
@@ -4447,7 +4446,9 @@ function getFormErrMsg(errTag) {
     return '<span>' + msg[errTag] + '</span>'; 
 }
 /**------------- Data Storage Errors --------------*/
-function errUpdatingData(errMsg, errTag) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
+function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
+    const errMsg = data.msg;
+    const errTag = data.tag;
     const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
     const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
         ${errTag}</b><br><br>This form will close and all stored data will be 
