@@ -3687,7 +3687,7 @@ function getFormValueData(entity, fLvl, submitting) {
         return getSelVal('#'+_u.ucfirst(fieldName)+'-sel');
     }
     function handleAdditionalEntityData(entity) {
-        if (!submitting) { return; }
+        if (!submitting) { return Promise.resolve(); }
         const dataHndlrs = {
             'author': [ getAuthFullName, getAuthDisplayName ],
             'editor': [ getAuthFullName, getAuthDisplayName ],
@@ -3857,12 +3857,13 @@ function checkForDuplicate(opts, name) {
 /** Returns an obj with the order (k) of the values (v) inside of the container. */
 function getSelectedVals(cntnr, fieldName) {
     let vals = {};
-    const elems = cntnr.children; 
-    for (let i = 0; i <= elems.length-1; ++i) {                                 //console.log('getSelectedVals. elem = %O', elems[i]);
-        let input = elems[i].children[1];
-        if (input.value) { vals[i+1] = input.value; }
-    }                                                                           //console.log('vals = %O', JSON.parse(JSON.stringify(vals)))
+    $.each(cntnr.children, (i, elem) => getCntnrFieldValue(i+1, elem.children));              
     return vals;
+        
+    function getCntnrFieldValue(cnt, subElems) {                                     
+        $.each(subElems, (i, subEl) => { 
+            if (subEl.value) { vals[cnt] = subEl.value; }});  
+    }                                                                   
 }
 /**
  * Builds a form data object @buildFormData. Sends it to the server @submitFormData

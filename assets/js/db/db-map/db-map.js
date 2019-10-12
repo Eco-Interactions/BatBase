@@ -490,9 +490,7 @@ function buildFeature(loc, geoData) {                                           
         };   
 }
 function addMarkerForEachInteraction(intCnt, latLng, loc) {                     //console.log('adding [%s] markers at [%O]', intCnt, latLng);
-    const params = {
-        loc: loc, latLng: latLng, rcrds: app.data
-    }
+    const params = { loc: loc, latLng: latLng, rcrds: app.data };
     const MapMarker = intCnt > 1 ? 
         new MM.LocCluster(app.map, intCnt, params) : new MM.LocMarker(params);
     app.popups[loc.displayName] = MapMarker.popup;  
@@ -604,8 +602,9 @@ function buildLocData(results, cntrys) {                                        
 }
 /** Note: MarkerType triggers the marker's popup build method.  */
 function replaceMapPin(latLng, loc, zoomFlag) {
+    const params = { latLng: latLng, loc: loc, rcrds: app.data };
     const markerType = zoomFlag === 'edit' ? 'edite-loc' : 'new-loc';
-    const marker = new MM.LocMarker(latLng, loc, null, markerType);
+    const marker = new MM.LocMarker(params, markerType);
     removePreviousMapPin(loc);
     if (loc && zoomFlag !== 'edit') {                                           console.log('Adding parent data for loc = %O', loc)
         $('#Country-sel')[0].selectize.addItem(loc.cntryId, 'silent'); 
@@ -701,21 +700,32 @@ function addChildLocsToMap(prnt, coords, type, locId) {
     function addLocsWithGpsDataToMap() {
         locs.forEach(loc => {
             if (loc.id === locId) { return; }
-            if (prnt.geoJsonId == loc.geoJsonId) { return noGpsLocs.push(loc); }
-            const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId);
+            const latLng = getGpsData(loc);
             if (!latLng) { return noGpsLocs.push(loc); }
-            const tag = (type === 'edit' ? 'edit' : '') +
-                'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
-            const Marker = new MM.LocMarker(latLng, loc, app.data, tag);
-            app.map.addLayer(Marker.layer);
-            app.volatile.markers.push(Marker.layer);
+            buildLocMarker(loc, latLng);
         });
+    }
+    function getGpsData(loc) {
+        return prnt.geoJsonId != loc.geoJsonId ? 
+            getCenterCoordsOfLoc(loc, loc.geoJsonId) : false;
+    }
+    function buildLocMarker(loc, latLng) {
+        const params = { latLng: latLng, loc: loc, rcrds: app.data };
+        const tag = getMarkerType(loc, latLng);
+        const Marker = new MM.LocMarker(params, tag);
+        app.map.addLayer(Marker.layer);
+        app.volatile.markers.push(Marker.layer);
+    }
+    function getMarkerType(loc, latLng) {
+        return (type === 'edit' ? 'edit' : '') +
+            'form'+ (loc.locationType.displayName === 'Country' ? '-c' : '');
     }
     function addLocsWithoutGpsDataToMap(cnt) {  
         if (!coords) { return; }
+        const params = { latLng: coords, loc: noGpsLocs, rcrds: app.data };
         const Marker = cnt === 1 ? 
-            new MM.LocMarker(coords, noGpsLocs, app.data, 'form-noGps') : 
-            new MM.LocCluster(app.map, cnt, coords, noGpsLocs, app.data, 'form-noGps');
+            new MM.LocMarker(params, 'form-noGps') : 
+            new MM.LocCluster(app.map, cnt, params, 'form-noGps');
         app.map.addLayer(Marker.layer);
         app.volatile.markers.push(Marker.layer);
     }

@@ -27,13 +27,13 @@ class Marker {
 } /* End Marker Super Class */
 /** Single location marker. */
 export class LocMarker extends Marker {
-    constructor (params, formMarker) { 
+    constructor (params, markerType) {                                          //console.log('New LocMarker. params = %O, markerType = [%s]', params, markerType)
         data = params.rcrds;
         super(params.latLng);
         this.loc = params.loc;
-        this.formMarker = formMarker;
+        this.markerType = markerType;
         bindClassContextToMethods(this); 
-        this.self = L.marker(params.latLng, getCustomIcon(formMarker))
+        this.self = L.marker(params.latLng, getCustomIcon(markerType))
             .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
@@ -52,7 +52,7 @@ export class LocMarker extends Marker {
     /** --- Event Handlers --- */
     openPopup(e) {            
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.formMarker);
+        ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.markerType);
         this.self.openPopup();
     }
     /** 
@@ -120,22 +120,22 @@ export class IntMarker extends Marker {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End IntMarker Class */
-export class LocCluster extends Marker {
-    constructor (map, intCnt, params, formMarker) { 
+export class LocCluster extends Marker {  
+    constructor (map, intCnt, params, markerType) {                             //console.log('New LocCluster. cnt = [%s] params = %O, markerType = [%s]', intCnt, params, markerType)
         data = params.rcrds;
         super(params.latLng);   
         this.map = map;
         this.loc = params.loc;
-        this.formMarker = formMarker;
+        this.markerType = markerType;
         bindClassContextToMethods(this); 
-        this.self = L.markerClusterGroup(this.getClusterConfg(intCnt, formMarker));
+        this.self = L.markerClusterGroup(this.getClusterConfg(intCnt, markerType));
         this.addClusterEvents();
         this.addPopupOptions();
         this.addMarkersToCluser(intCnt);
         this.map.on('popupclose', this.closeLayerPopup);
     }
-    getClusterConfg(intCnt, formMarker) { 
-        return !formMarker ? null : {
+    getClusterConfg(intCnt, markerType) { 
+        return !markerType ? null : {
             iconCreateFunction: () => L.divIcon({ 
                 html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
         }; 
@@ -161,7 +161,7 @@ export class LocCluster extends Marker {
         }
     }
     setDefaultPopupHtml() {
-        const content = this.formMarker ? getNoGpsLocDetailsHtml(this.loc) : 
+        const content = this.markerType ? getNoGpsLocDetailsHtml(this.loc) : 
             getLocationSummaryHtml(this.loc);
         this.popup.setContent(content);
     }
