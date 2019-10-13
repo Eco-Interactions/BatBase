@@ -219,7 +219,7 @@ function initFormParams(action, entity, id) {
             records: data,
             submitFocus: prevSubmitFocus || false
         };
-        initFormLevelParamsObj(entity, 'top', null, getFormConfg(entity), action); //console.log("#### Init fP = %O", _u.snapshot(fP))
+        initFormLevelParamsObj(entity, 'top', null, getFormConfg(entity), action); console.log("#### Init fP = %O, curfP = %O", _u.snapshot(fP), fP);
     });
 }
 /**
@@ -249,7 +249,6 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       
     fP.forms[level] = {
         action: action,
         confg: formConfg,
-        typeConfg: false,
         fieldConfg: { fields: {}, vals: {}, required: [] },
         entity: entity,
         exitHandler: getFormExitHandler(formConfg, action),
@@ -275,20 +274,52 @@ function getFormExitHandler(confg, action) {                                    
 /*--------------------------- Edit Form --------------------------------------*/
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export function editEntity(id, entity) {                                        console.log("Editing [%s] [%s]", entity, id);  
-    initFormParams("edit", entity, id);
-    showFormPopup('Editing', _u.ucfirst(entity), id);
-    initEditForm(id, entity);    
-    onFormFillComplete(id, entity);
+    initFormParams("edit", entity, id).then(() => {
+        showFormPopup('Editing', _u.ucfirst(entity), id);
+        initEditForm(id, entity).then(() => onEditFormLoadComplete(id, entity));    
+    });
 }
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
     const form = buildFormElem();  
-    const formFields = getEditFormFields(id, entity);
-    $(form).append(formFields);
-    $('#form-main').append(form);     
-    finishEditFormBuild(entity);
-    fillExistingData(entity, id);
+    return getEditFormFields(id, entity).then(fields => {  
+        $(form).append(fields);
+        $('#form-main').append(form);     
+        finishEditFormBuild(entity);
+        if (entity !== 'interaction') { return fillExistingData(entity, id); }
+        _u.getData('interaction').then(ints => {
+            fP.records.interaction = ints;
+            fillExistingData(entity, id);
+        });
+    });
 }   
+/** Returns the form fields for the passed entity.  */
+function getEditFormFields(id, entity) {
+    const rowCntnr = _u.buildElem('div', {
+        id: entity+'_Rows', class: 'flex-row flex-wrap'});
+    const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
+        'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
+    const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
+    fP.forms.expanded[entity] = true;
+    return fieldBldr(entity, id).then(fields => {
+        $(rowCntnr).append(fields);                              
+        return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
+    });
+}   
+function getIntFormFields(entity, id) {
+    return buildIntFormFields('edit');
+}
+function getSrcTypeFields(entity, id) {
+    const srcRcrd = getRcrd('source', id);
+    const type = getRcrd(entity, srcRcrd[entity]);
+    const typeId = type[entity+'Type'].id;
+    return getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
+}
+/** Returns the passed entity's form fields. */
+function buildEditFormFields(entity, id) {
+    const formConfg = getFormConfg(entity);
+    return getFormFieldRows(entity, formConfg, {}, 'top', false);
+}
 function finishEditFormBuild(entity) {
     const hndlrs = {
         'citation': finishCitEditFormBuild, 'interaction': finishIntFormBuild, 
@@ -300,31 +331,6 @@ function finishEditFormBuild(entity) {
         $('#top-cancel').unbind('click').click(exitFormPopup);
         $('.all-fields-cntnr').hide();
     }
-}
-/** Returns the form fields for the passed entity.  */
-function getEditFormFields(id, entity) {
-    const rowCntnr = _u.buildElem('div', {
-        id: entity+'_Rows', class: 'flex-row flex-wrap'});
-    const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
-        'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
-    const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
-    fP.forms.expanded[entity] = true;
-    $(rowCntnr).append(fieldBldr(entity, id));                              
-    return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
-}   
-function getIntFormFields(entity, id) {
-    return buildIntFormFields('edit');
-}
-function getSrcTypeFields(entity, id) {
-    const srcRcrd = getEntityRecord('source', id);
-    const typeRcrd = getEntityRecord(entity, srcRcrd[entity]);
-    const typeId = typeRcrd[entity+'Type'].id;
-    return getSrcTypeRows(entity, typeId, 'top', typeRcrd[entity+'Type'].displayName)
-}
-/** Returns the passed entity's form fields. */
-function buildEditFormFields(entity, id) {
-    const formConfg = getFormConfg(entity);
-    return getFormFieldRows(entity, formConfg, {}, 'top', false);
 }
 /*------------------- Fills Edit Form Fields -----------------------------*/
 /** Fills form with existing data for the entity being edited. */
@@ -341,7 +347,8 @@ function addDisplayNameToForm(ent, id) {
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
-function fillEntityData(ent, id) {
+/** Note: Source types will get their record data at fillSrcData. */
+function fillEntityData(ent, id) {  
     const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
@@ -407,17 +414,27 @@ function removeEmptyDetailPanelElems() {
 }
 /** Fills all data for the source-type entity.  */
 function fillSrcData(entity, id, rcrd) { 
-    var src = getRcrd("source", id);
-    var fields = getSourceFields(entity);  
-    setSrcData();
-    setDetailData();
-
+    var src = getRcrd("source", id);                                            
+    var detail = getRcrd(entity, src[entity]);                                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    var fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
+    setSrcType()
+    .then(() => {
+        setSrcData();
+        setDetailData();
+    });
+    function setSrcType() {
+        if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
+        const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
+        const typeId = detail[typeProp].id;
+        const typeName = detail[typeProp].displayName;
+        const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
+        return loadSrcTypeFields(entity, typeId, typeElem, typeName);
+    }
     function setSrcData() {
         fillFields(src, fields.core);
         fillSrcDataInDetailPanel(entity, src);            
     }
     function setDetailData() {
-        var detail = getRcrd(entity, src[entity]);                      //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
         fillFields(detail, fields.detail);
         setAdditionalFields(entity, src, detail);
         fP.editing.detail = detail.id;
@@ -691,19 +708,18 @@ function appendPubFormAndFinishBuild(form) {
  * previous type-fields and initializes the selectized dropdowns.
  */
 function loadPubTypeFields(typeId) { 
-    loadSrcTypeFields('publication', typeId, this.$input[0])
-    .then(finishPubTypeFields.bind(this));
+    const elem = this.$input[0];  
+    return loadSrcTypeFields('publication', typeId, elem)
+    .then(finishPubTypeFields);
 
     function finishPubTypeFields() {
-        ifBookAddAuthEdNote(typeId, '#'+this.$input[0].id);
+        ifBookAddAuthEdNote();
         setCoreRowStyles('#publication_Rows', '.sub-row');
     }
 }
 /** Shows the user a note above the author and editor elems. */
-function ifBookAddAuthEdNote(id, elemId) {                                
-    const typeElemId = elemId || '#PublicationType-sel';  
-    const type = getSelTxt(typeElemId); 
-    if (type !== 'Book') { return; }
+function ifBookAddAuthEdNote() {        
+    if ($('#PublicationType-sel')[0].innerText !== 'Book') { return; }
     const note = _u.buildElem('div', { class: 'skipFormData' });
     $(note).html('<i>Note: there must be at least one author OR editor ' +
         'selected for book publications.</i>')
@@ -782,7 +798,6 @@ function finishCitEditFormBuild() {
     initComboboxes('citaion', 'top'); 
     $('#top-cancel').unbind('click').click(exitFormPopup);
     $('.all-fields-cntnr').hide();
-    selectDefaultCitType('top');
     handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /**
@@ -792,12 +807,13 @@ function finishCitEditFormBuild() {
  */
 function loadCitTypeFields(typeId) {
     const fLvl = getSubFormLvl('sub');
-    if (!fP.editing) { handlePubData(typeId, this.$input[0], fLvl); }
-    loadSrcTypeFields('citation', typeId, this.$input[0])
-    .then(finishCitTypeFields.bind(this));
+    const elem = this.$input[0];
+    if (!fP.editing) { handlePubData(typeId, elem, fLvl); }
+    return loadSrcTypeFields('citation', typeId, elem)
+    .then(finishCitTypeFields);
 
     function finishCitTypeFields() {
-        handleSpecialCaseTypeUpdates(this.$input[0], fLvl);
+        handleSpecialCaseTypeUpdates(elem, fLvl);
         handleCitText(fLvl);
         setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
     }
@@ -1191,23 +1207,23 @@ function updateSrcDetailPanel(entity) {
  * any type-specific labels for fields.  
  * Eg, Pubs have Book, Journal, Dissertation and 'Other' field confgs.
  */
-function loadSrcTypeFields(type, typeId, elem) {                                //console.log('loadSrcTypeFields. [%s] elem = %O', type, elem);
+function loadSrcTypeFields(subEntity, typeId, elem, typeName) {                 //console.log('loadSrcTypeFields. [%s] elem = %O', type, elem);
     const fLvl = getSubFormLvl('sub');
-    resetOnFormTypeChange(type, typeId, fLvl);
-    return getSrcTypeRows(type, typeId, fLvl)
+    resetOnFormTypeChange(subEntity, typeId, fLvl);
+    return getSrcTypeRows(subEntity, typeId, fLvl, typeName)
     .then(finishSrcTypeFormBuild);
         
     function finishSrcTypeFormBuild(rows) {
-        $('#'+type+'_Rows').append(rows);
-        initComboboxes(type, fLvl);
+        $('#'+subEntity+'_Rows').append(rows);
+        initComboboxes(subEntity, fLvl);
         fillComplexFormFields(fLvl);
         checkReqFieldsAndToggleSubmitBttn(elem, fLvl);
-        updateFieldLabelsForType(type, fLvl);
-        focusFieldInput(type);
+        updateFieldLabelsForType(subEntity, fLvl);
+        focusFieldInput(subEntity);
     }
 }
-function resetOnFormTypeChange(type, typeId, fLvl) {  
-    const capsType = _u.ucfirst(type);
+function resetOnFormTypeChange(subEntity, typeId, fLvl) {  
+    const capsType = _u.ucfirst(subEntity);   
     fP.forms[fLvl].fieldConfg.vals[capsType+'Type'].val = typeId;
     fP.forms[fLvl].reqElems = [];
     disableSubmitBttn('#'+fLvl+'-submit'); 
@@ -2356,14 +2372,15 @@ function initPublisherForm (value) {                                            
 /*-------------- Author --------------------------------------------------*/
 /** Loops through author object and adds each author/editor to the form. */
 function selectExistingAuthors(field, authObj, fLvl) {                          //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
-    for (let ord in authObj) { //ord(er)
-        selectAuthor(ord, authObj[ord], field, fLvl);
-    }
+    Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
+        const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
+        return p.then(selNextAuth);
+    }, Promise.resolve());
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {
     setSelVal('#'+field+'-sel'+ cnt, authId, 'silent');
-    buildNewAuthorSelect(++cnt, authId, fLvl, field);
+    return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
 /**
  * When an author is selected, a new author combobox is initialized underneath
@@ -2378,7 +2395,7 @@ function onEdSelection(val) {                                                   
 }
 function handleAuthSelect(val, ed) {                                            
     if (val === '' || parseInt(val) === NaN) { return; }
-    const authType = ed ? 'Editors' : 'Authors';                                console.log("       ++--Selecting [%s] [%s]", authType,val);
+    const authType = ed ? 'Editors' : 'Authors';                                
     const fLvl = getSubFormLvl('sub');
     let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
     if (val === 'create') { return openCreateForm(authType, --cnt); }        
@@ -2391,8 +2408,8 @@ function lastAuthComboEmpty(cnt, authType) {
     return $('#'+authType+'-sel'+cnt).val() === '';
 }
 /** Builds a new, empty author combobox */
-function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
-    buildMultiSelectElems(null, authType, prntLvl, cnt)
+function buildNewAuthorSelect(cnt, val, prntLvl, authType) {                    //console.log("buildNewAuthorSelect. cnt [%s] val [%s] type [%s]", cnt, val, authType)
+    return buildMultiSelectElems(null, authType, prntLvl, cnt)
     .then(appendNewAuthSelect);
 
     function appendNewAuthSelect(sel) {
@@ -2513,7 +2530,10 @@ function getFormattedAuthorNames(auths, eds) {                                  
 /*------------------- Shared Form Builders ---------------------------------------------------*/
 /** Returns the record for the passed id and entity-type. */
 function getRcrd(entity, id) {                                                  //console.log('getRcrd [%s] id = [%s]. fP = %O', entity, id, fP);
-    if (fP.records[entity]) { return _u.snapshot(fP.records[entity][id]); }  console.log('###### [%s] not in record data', entity);
+    if (fP.records[entity]) { 
+        const rcrd = fP.records[entity][id];
+        if (!rcrd) { return console.log('!!!!!!!! No [%s] found in [%s] records = %O', id, entity, fP.records); console.trace() }
+        return _u.snapshot(fP.records[entity][id]); }
 }
 /*------------------- Combobox (selectized) Methods ----------------------*/
 /**
@@ -2631,7 +2651,7 @@ function getSelVal(id) {                                                        
 function getSelTxt(id) {                                                        //console.log('getSelTxt. id = ', id);
     return $(id)[0].innerText;
 }
-function setSelVal(id, val, silent) {                                           console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
+function setSelVal(id, val, silent) {                                           //console.log('setSelVal [%s] = [%s]. silent ? ', id, val, silent);
     const $selApi = $(id)[0].selectize; 
     $selApi.addItem(val, silent); 
 }
