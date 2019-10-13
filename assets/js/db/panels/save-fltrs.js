@@ -118,6 +118,7 @@ export function resetStoredFiltersUi() {
     $('#selSavedFilters')[0].selectize.clear();
     $('#stored-filters input, #stored-filters textarea').val('');
 }
+/** Adds the focus to the filter panel header, "[Focus] and Time Filters" */
 export function updateFilterPanelHeader(focus) {  
     const map = {
         locs: 'Location', srcs: 'Source', taxa: 'Taxon'

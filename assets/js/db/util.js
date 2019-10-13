@@ -7,14 +7,16 @@ import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
 import { newIntList, selIntList } from './panels/save-ints.js';
 import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 /* 
- * Exports:
+ * Exports:                     Imported by:
+ *     (IDB Storage Methods)
+ *         getData
+ *         setData
  *   addEnterKeypressClick
  *   alphaOptionObjs
  *   buildElem
  *   buildSelectElem
  *   buildSimpleOpts
  *   buildOptsObj
- *   clearDataStorage
  *   getDataFromStorage
  *   getDetachedRcrd
  *   getOptsFromStoredData
@@ -23,7 +25,6 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   initComboboxes
  *   init_db
  *   lcfirst 
- *   removeFromStorage
  *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
@@ -32,41 +33,17 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   ucfirst 
 */
 extendPrototypes();
-/*------------------------ IDB Storage Methods ---------------------------------------------------------------------------*/
-/** 
- * On page load, clears local storage data if triggered by datakey change and 
- * downloads any new or changed data.
- */
-export function init_db() {
-    _db.initDb();
-}
-/** --------- Local Storage --------------- */
-export function getDataFromStorage(props) { console.log('REPLACE'); console.trace();
-    return _db.getData(props);
-} /* End getDataFromStorage */
-export function removeFromStorage(key) {console.log('REPLACE'); console.trace();
-    _db.removeData(key);
-}
-/*-------- Indexed DB -------------*/
+/*------------------------ IDB Storage Methods -----------------------------------------------------------------------*/
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
  * If a property is not found, false is returned. 
  */
-export async function getData(props, returnUndefined) {
-    return await _db.getData(props, returnUndefined);
+export function getData(props, returnUndefined) {
+    return _db.getData(props, returnUndefined);
 }
 export function setData(k, v) {
     _db.setData(k, v);
-}
-export function getGeoJsonEntity(id) {
-    return _db.getGeoJsonEntity(id);
-}
-export function updateGeoJsonData(cb) {
-    return _db.updateGeoJsonData(cb);
-}
-export function isGeoJsonDataAvailable() {
-    return _db.isGeoJsonDataAvailable();
 }
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
@@ -231,7 +208,6 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
         }
       }
 }
-
 /*-----------------AJAX Callbacks---------------------------------------------*/
 export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
     return $.ajax({

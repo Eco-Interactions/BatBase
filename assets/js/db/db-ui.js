@@ -5,13 +5,13 @@
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
  *     fadeTable                        db-page
+ *     init                             db_page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
  *     loadLocFilterPanelElems          db-page, db-filters
  *     loadSrcFilterPanelElems          db-page, db-filters
  *     loadTxnFilterPanelElems          db-page, db-filters     
- *     pg_init                          db_page
  *     resetToggleTreeBttn              db_page, init-table
  *     selectInitialSearchFocus         db-page
  *     showLoadingDataPopUp             util
@@ -20,6 +20,7 @@
  *     updateUiForMapView               db-page
  */
 import * as _u from './util.js';
+import { accessTableState as tState } from './db-page.js';
 import exportCsvData from './db-table/csv-data.js';
 import { initNewDataForm } from './db-forms/db-forms.js';
 import * as db_page from './db-page.js';
@@ -35,7 +36,7 @@ const app = {
     enabledSelectors: ''
 };
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
-export function pg_init() {
+export function init() {
     addDomEventListeners();
     authDependentInit();
 }
@@ -100,8 +101,8 @@ export function selectInitialSearchFocus(f) {                                   
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
+    tState().set({onInitComplete: updateFilterPanelHeader.bind(null, focus)});
     db_page.selectSearchFocus();
-    updateFilterPanelHeader(focus);
 }
 function getFocusOpts() {
     return [
@@ -575,6 +576,7 @@ export function updateUiForTableView() {
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
     updateBttnToShowRcrdsOnMap();
+    tState().set({onInitComplete: null});
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);

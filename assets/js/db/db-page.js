@@ -59,18 +59,15 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
 let tblState = {};
 /** ==================== PAGE INIT ========================================== */
 initDbPage();
-/**
- * Initializes the UI unless on mobile device. The idb-util init method will 
- * call @initSearchState once local database is ready.
- */
+/** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
     const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
     if (winWidth < 1200) { return; }
     requireCss();
     requireJs();
-    db_ui.pg_init();
+    db_ui.init();
+    //The idb-util.initDb will call @initSearchState once local database is ready.
 }
-
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
     require('../../css/lib/ag-grid.css');
@@ -181,8 +178,8 @@ export function initDataTable(focus) {                              /*Perm-log*/
     db_filters.resetTblFilters();
     resetStoredFiltersUi();
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
+    tblState.onInitComplete = db_ui.updateUiForTableView;
     selectSearchFocus(focus);
-    db_ui.updateUiForTableView();
 }
 export function selectSearchFocus(f, view) {                                          
     if (f == '') { return; } //Combobox cleared by user

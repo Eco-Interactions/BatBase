@@ -29,7 +29,7 @@
 import * as _u from '../util.js';
 import * as _uPnl from './panel-util.js';
 import { updateUserNamedList } from '../db-sync.js';
-import { accessTableState as tState, selectSearchFocus, resetDataTable } from '../db-page.js';
+import { accessTableState as tState, resetDataTable } from '../db-page.js';
 import { resetToggleTreeBttn } from '../db-ui.js';
 import { updateFilterStatusMsg, syncViewFiltersAndUi, resetTableStateParams } from '../db-table/db-filters.js';
 import { showHelpModal } from '../../misc/intro-core.js';

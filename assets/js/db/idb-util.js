@@ -7,10 +7,8 @@
  *     SETTERS
  *         
  * Exports:             Imported by:
- *     getGeoJsonEntity
- *     initDb
- *     isGeoJsonDataAvailable
- *     updateGeoJsonData
+ *     getData              util 
+ *     setData              util
  */
 import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _u from './util.js';
@@ -30,10 +28,10 @@ initDb();
  * If it is, the stored geoJson is fetched and stored in the global variable. 
  * If not, the db is cleared and geoJson is redownloaded. 
  */
-export function initDb() {
-    getData(_db.v).then(updateDbIfNeeded);
+function initDb() {
+    getData(_db.v, true).then(updateDbIfNeeded);
 }
-function updateDbIfNeeded(dbCurrent) {                                          console.log('Download DB? ', !dbCurrent);                                          //console.log('clearing Idb? ', storedKey === undefined);
+function updateDbIfNeeded(dbCurrent) {                                          console.log('Download DB? ', !dbCurrent);
     if (dbCurrent) { return checkForDbDataChanges() } 
     idb.clear();     
     idb.set(_db.v, true);
@@ -90,31 +88,6 @@ function getStoredDataObj(keys, returnUndefined) {
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);
     idb.set(k, v);
 }
-export function removeData(k) {
-    idb.del(k);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export function isGeoJsonDataAvailable() {
-    return !!_db.geoJson;
-}
-export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
-    _db.geoJson = false;
-    downloadGeoJson(cb);
-}
-export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
-    return isGeoJsonDataAvailable() ?  JSON.parse(_db.geoJson[id]) :
-        updateGeoJsonData(getGeoJsonEntity.bind(null, id));
-}
+// function removeData(k) {
+//     idb.del(k);
+// }
