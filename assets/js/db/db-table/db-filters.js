@@ -18,7 +18,7 @@
  *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
+import { accessTableState as tState, initDataTable, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from '../db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../panels/save-fltrs.js';
 import { savedIntListLoaded } from '../panels/save-ints.js';
@@ -68,6 +68,17 @@ function filtersActive() {
     const tbl = Object.keys(getTableFilters([])).length > 0;
     const pnl = Object.keys(fPs.pnlFltrs).length > 0;
     return tbl || pnl;
+}
+export function resetTblFilters() {
+    resetFilterUi();
+    resetTableStateParams();
+}
+function resetFilterUi() {
+    $('#filter-status').text('No Active Filters.');
+    $('#focus-filters input').val('');
+    if ($('#shw-chngd').prop('checked')) { 
+        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
+    }
 }
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
 /** Used in taxon views to indicate the filtering happening at the view level. */
@@ -176,17 +187,6 @@ function getTableFilterModels() {
 function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
     $('#filter-status').text(status);
 }
-export function resetTblFilters() {
-    resetFilterUi();
-    fPs.pnlFltrs = {};
-}
-function resetFilterUi() {
-    $('#filter-status').text('No Active Filters.');
-    $('#focus-filters input').val('');
-    if ($('#shw-chngd').prop('checked')) { 
-        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
-    }
-}
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
@@ -200,14 +200,15 @@ export function selTimeFilter(val) {                                            
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-export function showTodaysUpdates(focus) {                                      //console.log("showingUpdated from today")
-    if (focus) { _u.setSelVal('Focus', focus); 
-    } else { selectSearchFocus(); }
-    window.setTimeout(showUpdatesAfterTableLoad, 200);
+export function showTodaysUpdates(focus) {                                      //console.log("showTodaysUpdates. focus ? [%s] ", focus)
+    tState().set({onInitComplete: showUpdatesAfterTableLoad});
+    if (focus == _u.getSelVal('Focus')) { initDataTable(focus); 
+    } else { _u.setSelVal('Focus', focus); }
 }
 function showUpdatesAfterTableLoad() {
     _u.setSelVal('Time Filter', 'updated');
     toggleTimeFilter(true, 'today');
+    tState().set({onInitComplete: false});
 }
 /** The time-updated filter is enabled when the filter option is checked. */
 export function toggleTimeFilter(state, time, skipSync) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
@@ -256,9 +257,10 @@ function ifFilteringOnTime(state) {
 }
 function updateTimeFilterMemory(time) {
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
-    tblState = tState().get();
     fPs.pnlFltrs.time.type =  _u.getSelVal('Time Filter');
-    if (time) { fPs.pnlFltrs.time.date = time; } 
+    if (!time) { return; }
+    fPs.pnlFltrs.time.date = time;
+    tblState = tState().get();
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .4;
@@ -268,7 +270,10 @@ function updateRelatedUi(filtering) {
     db_ui.resetToggleTreeBttn(false);
     if (filtering) {
         $('#selTimeFilter')[0].selectize.enable();
-    } else { $('#selTimeFilter')[0].selectize.disable(); }
+    } else { 
+        $('#selTimeFilter')[0].selectize.disable()
+        $('#selTimeFilter')[0].selectize.clear(); 
+    }
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
@@ -359,9 +364,9 @@ function updateUiAfterTimeFilterChange(time, skipSync) {
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi() {                                                   //console.log('tblState = %O', tblState);
+function syncFiltersAndUi(time) {                                                   //console.log('tblState = %O', tblState);
     db_ui.resetToggleTreeBttn(false);
-    syncViewFiltersAndUi(tblState.curFocus);
+    if (time != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
     updateFilterStatusMsg();  
 }
 export function syncViewFiltersAndUi(focus) {

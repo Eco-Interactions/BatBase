@@ -49,7 +49,7 @@ function initAppMemory() {
         volatile: {}
     };
 }
-export function clearMemory() {                                                 console.log('clearing memory')
+export function clearMemory() {                                                 //console.log('clearing map memory')
     initAppMemory();
 }
 /** =================== Init Methods ======================================== */
@@ -175,7 +175,7 @@ function getGeocoderOptions() {
         geocoder: app.geoCoder
     };
 }
-function drawPolygonAndUpdateUi(mapId, e) {                                            console.log("geocoding results = %O", e);
+function drawPolygonAndUpdateUi(mapId, e) {                                     console.log("geocoding results = %O", e);
     drawPolygon(e.geocode.bbox, e.geocode.properties.address);
     if (mapId == 'loc-map') {
         showNearbyLocationsAndUpdateForm(e.geocode.properties);
@@ -247,19 +247,19 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(rcrds, fltrd) {                                         console.log('attempting to initMap')
-    app.data.locs = rcrds;
+export function initMap(data, fltrd) {                                          console.log('initMap')
+    app.data = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
     downloadDataAndBuildMap(dispFunc, 'map');                                               
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
-export function showLoc(id, zoom, rcrds) {                 
-    app.data.locs = rcrds;        
+export function showLoc(id, zoom, data) {                 
+    app.data = data;        
     downloadDataAndBuildMap(showLocInMap, 'map');
     
     function showLocInMap() {
-        const loc = app.data.locs[id];                                               console.log('show loc = %O, zoom = %s', loc, zoom)
+        const loc = app.data.locs[id];                                          console.log('show loc = %O, zoom = %s', loc, zoom)
         const latLng = getCenterCoordsOfLoc(loc, loc.geoJsonId); 
         if (!latLng) { return noGeoDataErr(); }
         zoomToLocAndShowPopup(loc, latLng, zoom);
@@ -462,7 +462,7 @@ function zoomIfAllInSameRegion(data) {
 }
 /* -------------- Helpers ------------------------------------------------ */
 function getCenterCoordsOfLoc(loc, geoId) { 
-    if (!geoId) { return false; }                                               //console.log('geoJson obj = %O', geo[geoJsonId]);
+    if (!geoId) { return false; }                                               //console.log('geoJson obj = %O', app.data.geo[geoId]);
     return getLatLngObj(app.data.geo[geoId].displayPoint); 
 } 
 /** Return a leaflet LatLng object from the GeoJSON Long, Lat point */
@@ -588,11 +588,11 @@ function updateUiAfterFormGeocode(latLng, zoomFlag, results) {                  
 function updateMapPin(latLng, results, zoomFlag) {                              //console.log('updateMapPin. point = %O name = %O', latLng, name);
     if (!results) { return replaceMapPin(latLng, null, zoomFlag); }
     _u.getData('countryCodes').then(cntrys => {
-        const loc = results ? buildLocData(results.properties, ) : null;
+        const loc = results ? buildLocData(results, cntrys) : null;
         // const loc = results ? buildLocData(results.properties, results.name) : null;
         replaceMapPin(latLng, loc, zoomFlag);  
+        $('#'+app.map._container.id).css('cursor', 'default');
     });
-    $('#'+app.map._container.id).css('cursor', 'default');
 }
 function buildLocData(results, cntrys) {                                        //console.log('buildLocData. data = %O', data);
     return {

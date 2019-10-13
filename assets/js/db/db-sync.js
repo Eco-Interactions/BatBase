@@ -218,7 +218,7 @@ function addDetailEntityData(entity, rcrd) {                                    
         'citation': { 'citation': addToRcrdProp }, //Not necessary to add to citation type object.
         'publication': { 'publication': addToRcrdProp, 'publicationType': addToTypeProp },
         'publisher': { 'publisher': addToRcrdProp },
-        'geoJson': { 'geoJson': addGeoJson } 
+        'geoJson': { 'geoJson': addToRcrdProp } 
     };
     return updateDataProps(entity, rcrd, update[entity]);
 }
@@ -315,14 +315,6 @@ function addContribData(prop, rcrd, entity) {                                   
         }
         return storeData('source', srcObj);
     });
-}
-/**
- * As IDB is only used for geoJson at this point, the geoJson prob is set to false
- * so that all geoJson will be fetched from the server fresh the next time it is
- * used. This is to reduce the number of calls to the server.
- */
-function addGeoJson(prop, rcrd, entity) {                                       //console.log('addGeoJson. prop = [%s], rcrd = %O, entity = [%s]', prop, rcrd, entity); //'geoJson', obvi, 'location'
-    idb.set('geoJson', false);
 }
 /* ---------------------------- REMOVE DATA --------------------------------- */
 /** Updates any stored data that was affected during editing. */

@@ -892,22 +892,6 @@ input.active-icon {
     background-color: rgba(40, 143, 235, .4);
     border-color: #288feb;
 }
-/* --- Marker Drag Elem --- */
-.leaflet-control-drag-icon {
-    background-image: url('./images/arrows-alt.svg');
-}
-/* --- Create New Loc Elem --- */
-.leaflet-control-create-icon {
-    background-image: url('./images/map-marker-alt.svg');
-}
-/* --- Click To Create New Loc Elem --- */
-.leaflet-control-click-create-icon {
-    background-image: url('./images/map-marked-alt.svg');
-}
-/* --- Draw New Loc Boundary Elem --- */
-.leaflet-control-draw-icon {
-    background-image: url('./images/pencil-alt.svg');
-}
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */

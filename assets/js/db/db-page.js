@@ -81,6 +81,7 @@ function requireCss() {
     require('../../css/search_db.css');  
     require('../../css/moz-styles.css');
     require('../../styles/db/db.styl');  
+    require('../../styles/db/map.styl');  
     require('../../styles/db/forms.styl');  
 }
 function requireJs() {
@@ -301,15 +302,24 @@ function buildLocMap() {
  * and their popup data reflects the data of the set. 
  */
 function showLocsInSetOnMap() {
-    const locTree = data_tree.buildLocTree(getTopRegionIds());
-    db_map.initMap(tblState.rcrdsById, locTree);
+    data_tree.buildLocTree(getTopRegionIds())
+    .then(getGeoJsonAndShowLocsOnMap);
+}
+function getGeoJsonAndShowLocsOnMap(tree) {
+    _u.getData('geoJson').then(geo => {  
+        const data = { geo: geo, locs: tblState.rcrdsById};
+        db_map.initMap(data, locTree);
+    });
 }
 /** Switches to map view and centeres map on selected location. */
 export function showLocOnMap(geoJsonId, zoom) {
     db_ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent');
-    db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
-    $('#tbl-filter-status').html('No Active Filters.');
+    _u.getData('geoJson').then(geo => {  
+        const data = { geo: geo, locs: tblState.rcrdsById};
+        db_map.showLoc(geoJsonId, zoom, data);
+        $('#tbl-filter-status').html('No Active Filters.');
+    });
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
 /**
