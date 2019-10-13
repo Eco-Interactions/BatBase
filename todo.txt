@@ -35,16 +35,23 @@ Current:
             - that user data updates as expected
     - set email alerts up on feedback
 
+    - Refactoring forms
+        - don't allow creation of anything without display name
+        - store data in memory when updating data db-sync
+        - add warning to new taxon forms without a parent level filled in.
+            - when resetting taxon obj forms, remember which realm and reload 
+        - serialized realm obj 
+            - add lvls within and realm lvl
+
+        - put clear db storage key in db.
+            - add action that resets and refreshes the database
+
     - Adding realms
         - Add 'isRealm' flag to Taxon
         - Add 'sub-ranks' to Realm
 
-    - form refactor
-        - don't allow creation of anything without display name
 
 
-    - put clear db storage key in db.
-        - add action that resets and refreshes the database
 
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now

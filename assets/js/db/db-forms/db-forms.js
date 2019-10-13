@@ -219,7 +219,7 @@ function initFormParams(action, entity, id) {
             records: data,
             submitFocus: prevSubmitFocus || false
         };
-        initFormLevelParamsObj(entity, 'top', null, getFormConfg(entity), action); //console.log("#### Init fPs = %O", _u.snapshot(fP))
+        initFormLevelParamsObj(entity, 'top', null, getFormConfg(entity), action); //console.log("#### Init fP = %O", _u.snapshot(fP))
     });
 }
 /**
@@ -266,7 +266,7 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       
  * if no handler is stored, edit forms have a default of @exitFormHandler
  * and create forms default to noOp.
  */
-function getFormExitHandler(confg, action) {                                    console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
+function getFormExitHandler(confg, action) {                                    //console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
     return confg.exitHandler && confg.exitHandler[action] ? 
         confg.exitHandler[action] :
         action === 'edit' ? exitFormPopup : Function.prototype;
@@ -537,7 +537,7 @@ function addSource(fieldId, prop, rcrd) {
     setSelVal('#CitationTitle-sel', rcrd.source);
 }
 /* ---- On Form Fill Complete --- */
-function onFormFillComplete(id, entity) {                                       //console.log('onFormFillComplete. entity = ', entity);
+function onEditFormLoadComplete(id, entity) {                                       //console.log('onEditFormLoadComplete. entity = ', entity);
     const map = { 
         'citation': setSrcEditRowStyle, 'location': finishLocEditForm,
         'publication': setSrcEditRowStyle };
@@ -679,7 +679,6 @@ function initPubForm(value) {                                               //co
     initSubForm('publication', fLvl, 'flex-row med-sub-form', {'Title': val}, 
         '#Publication-sel')
     .then(appendPubFormAndFinishBuild);
-    return { 'value': '', 'text': 'Creating Publication...' };
 }
 function appendPubFormAndFinishBuild(form) {
     $('#CitationTitle_row').after(form);
@@ -749,7 +748,6 @@ function initCitForm(value) {                                                   
         '#CitationTitle-sel')
     .then(appendCitFormAndFinishBuild.bind(null, fLvl));
     _u.getData(['author', 'publication']).then(data => addSourceDataToMemory(data));
-    return { 'value': '', 'text': 'Creating Citation...' };
 }
 function appendCitFormAndFinishBuild(fLvl, form) {
     $('#CitationTitle_row').after(form);
@@ -1403,7 +1401,6 @@ export function initLocForm(val) {                                              
     if ($('#loc-map').length !== 0) { $('#loc-map').remove(); }
     buildLocForm(val, fLvl)
     .then(onLocFormLoadComplete);
-    return { 'value': '', 'text': 'Creating Location...' };
 }
 function buildLocForm(val, fLvl) {    
     const vals = {
@@ -1576,7 +1573,7 @@ function initTaxonParams(role, realmName, id) {                                 
             curRealmLvls: realmLvls[realmName],
             realmTaxon: realmTaxon,
             prevSel: (prevSel ? 
-                { val: prevSel, text: fP.records.taxon[prevSel].displayName } :
+                { val: prevSel, text: getTaxonDisplayName(fP.records.taxon[prevSel]) } :
                 { val: null, text: null })
         };         
         if (reset) { fP.forms.taxonPs.prevSel.reset = true; } //removed once reset complete
@@ -1709,7 +1706,7 @@ function enableTaxonCombos() {
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
  */
-function finishTaxonSelectUi(role) {
+function finishTaxonSelectUi(role) {                                            //console.log('finishTaxonSelectUi')
     const fLvl = getSubFormLvl('sub');
     const selCntnr = role === 'Subject' ? '#'+fLvl+'-form' : '#realm-lvls';
     customizeElemsForTaxonSelectForm(role);
@@ -1729,12 +1726,11 @@ function initTaxonForm(value) {
         return formInitErr(selLvl, 'noGenus', fLvl);
     }
     enableTxnCombos(false);
-    return showNewTaxonForm(val, selLvl, fLvl);
+    showNewTaxonForm(val, selLvl, fLvl);
 } 
 function showNewTaxonForm(val, selLvl, fLvl) {                                  //console.log("showNewTaxonForm. val, selVal, fLvl = %O", arguments)
     fP.forms.taxonPs.formTaxonLvl = selLvl;
     buildTaxonForm().then(disableSubmitButtonIfEmpty.bind(null, '#sub2-submit', val));
-    return { 'value': '', 'text': 'Creating '+selLvl+'...' };
 
     function buildTaxonForm() {
         return initSubForm('taxon', fLvl, 'sml-sub-form', {'DisplayName': val}, 
@@ -1826,7 +1822,7 @@ function exitTaxonSelectForm(role) {
     }
 }
 /** Removes and replaces the taxon form. */
-function resetTaxonSelectForm() {                                           
+function resetTaxonSelectForm() {                                               //console.log('resetTaxonSelectForm')                                     
     const prevTaxonId = fP.forms.taxonPs.prevSel.val;
     const initTaxonSelectForm = fP.forms.taxonPs.realm === 'Bat' ? 
         initSubjectSelect : initObjectSelect;
@@ -1838,8 +1834,8 @@ function resetTaxonSelectForm() {
 function resetPrevTaxonSelection(selId) {                                       //console.log('seId = %s, prevSel = %O', selId, fP.forms.taxonPs.prevSel);
     const id = selId || fP.forms.taxonPs.prevSel.val; 
     if (!id) { return; }
-    const taxon = fP.records.taxon[id];                                         console.log('resetPrevTaxonSelection. taxon = %O. prevTaxonId = %s', taxon, id);
-    fP.forms.taxonPs.prevSel = {val: taxon.id, text:taxon.displayName};         //console.log('taxon = %O. prevSel = %O', taxon, fP.forms.taxonPs.prevSel);
+    const taxon = fP.records.taxon[id];                                         //console.log('resetPrevTaxonSelection. taxon = %O. prevTaxonId = %s', taxon, id);
+    fP.forms.taxonPs.prevSel = {val: taxon.id, text: getTaxonDisplayName(taxon)};        
     if (ifRealmReset(taxon.realm)) { return setSelVal('#Realm-sel', taxon.realm.id); }
     setSelVal('#'+taxon.level.displayName+'-sel', id);
     window.setTimeout(() => { delete fP.forms.taxonPs.reset; }, 1000);
@@ -1872,19 +1868,21 @@ function getTaxonDisplayName(taxon) {
         taxon.displayName : taxon.level.displayName +' '+ taxon.displayName;
 }
 /** Finds the most specific level with a selection and returns that taxon record. */
-function getSelectedTaxon() {
-    var selElems = $('#sub-form .selectized').toArray(); 
-    reverseSelElemsIfEditingTaxonParent(selElems);
-    var selected = selElems.find(isSelectedTaxon);                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
-    return fP.records.taxon[$(selected).val()];
+function getSelectedTaxon(aboveLvl) {
+    var selElems = $('#sub-form .selectized').toArray();  
+    var selected = selElems.find(isSelectedTaxon.bind(null, aboveLvl));                              //console.log("getSelectedTaxon. selElems = %O selected = %O", selElems, selected);
+    return !selected ? false : fP.records.taxon[$(selected).val()];
 }
-function reverseSelElemsIfEditingTaxonParent(selElems) {
-    if (fP.action == 'edit' && fP.forms.top.entity == 'taxon') { 
-        selElems = selElems.reverse(); 
+function isSelectedTaxon(clrdLvl, elem) { 
+    if (elem.id.includes('-sel') && !elem.id.includes('Realm')) { 
+        if (clrdLvl && lvlIsChildOfClearedLvl(elem.id.split('-sel')[0])) { return; }
+        return $(elem).val(); 
     }
-}
-function isSelectedTaxon(elem) { 
-    if (elem.id.includes('-sel') && !elem.id.includes('Realm')) { return $(elem).val(); }
+
+    function lvlIsChildOfClearedLvl(lvlName) {
+        var lvls = fP.forms.taxonPs.lvls;  
+        return lvls.indexOf(lvlName) > lvls.indexOf(clrdLvl);
+    }
 }   
 /**
  * When a taxon at a level is selected, all child level comboboxes are
@@ -1893,47 +1891,51 @@ function isSelectedTaxon(elem) {
  * are all empty, disable the 'select' button.
  * NOTE: Change event fires twice upon selection. Worked around using @captureSecondFire
  */
-function onLevelSelection(val) {                                                //console.log("onLevelSelection. val = [%s] isNaN?", val, isNaN(parseInt(val)))
+function onLevelSelection(val) {                                                //console.log("onLevelSelection. val = [%s] isNaN? [%s]. recentChange? ", val, isNaN(parseInt(val)), fP.forms.taxonPs.recentChange);
     if (val === 'create') { return openLevelCreateForm(this.$input[0]); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
-    const fLvl = getSubFormLvl('sub');
     fP.forms.taxonPs.recentChange = true;  // Flag used to filter out the second change event
+    const fLvl = getSubFormLvl('sub');
     repopulateCombosWithRelatedTaxa(val);
     enableSubmitBttn('#'+fLvl+'-submit');             
 }
 function openLevelCreateForm(selElem) {
     openCreateForm(selElem.id.split('-sel')[0]);
 }
-function syncTaxonCombos(elem) {                                                
-    if (fP.forms.taxonPs.recentChange) { return captureSecondFire(); }          console.log("syncTaxonCombos. elem = %O", elem)
-    resetChildLevelCombos(elem);
-}
 /*
- * Note: There is a closed issue for the library (#84) that seems to address
- * this second change-event fire, but it is still an issue here. Instead of 
- * figuring out the cause, this method captures that event and filters it out.
+ * Note: Change event is fired when replacing select options, even though it should
+ * not be. Capturing these false changes with the 'recent change' flag.
  */
-function captureSecondFire() {                                                  //console.log("Capturing second fire.")
-    //Now deleted at end of build chain
+function syncTaxonCombos(elem) {                                                
+    if (fP.forms.taxonPs.recentChange) { return; }                              //console.log("syncTaxonCombos.");
+    fP.forms.taxonPs.recentChange = true;  // Flag used to filter out the second change event
+    resetChildLevelCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
 }
-function resetChildLevelCombos(elem) {                                          console.log("resetChildLevelCombos. elem = %O", elem)
-    const lvlName = elem.id.split('-sel')[0];  console.log
+function resetChildLevelCombos(selTxn) {                                        //console.log("resetChildLevelCombos. selTxn = %O", selTxn)
+    const lvlName = selTxn ? selTxn.level.displayName : getRealmTopLevel(selTxn.realm);
     if (lvlName == 'Species') { return; }
     getChildlevelOpts(lvlName)
-    .then(opts => repopulateLevelCombos(opts, {}));
+    .then(opts => repopulateLevelCombos(opts, {}))
+    .then(() => delete fP.forms.taxonPs.recentChange);
+}
+function getRealmTopLevel(realm) {
+    return realm.displayName == 'Arthropod' ? 'Class' : 'Family'; 
 }
 function getChildlevelOpts(lvlName) { 
     var opts = {};
     var lvls = fP.forms.taxonPs.lvls;
-    var lvlIdx = lvls.indexOf(lvlName);
+    var lvlIdx = lvls.indexOf(lvlName)+2; //Skips selected level
     return buildChildLvlOpts().then(() => opts);
 
     function buildChildLvlOpts() {
         const proms = [];
-        for (var i = lvlIdx+1; i < 8; i++) { 
-            proms.push(getTaxonOpts(lvls[i-1]).then(o => opts[lvls[i-1]] = o));
-        }                                                                           //console.log("getChildlevelOpts. opts = %O", opts);
+        for (var i = lvlIdx; i <= 7; i++) { 
+            proms.push(getTaxonOpts(lvls[i-1]).then(addToOpts.bind(null, i)));
+        }                                                                       //console.log("getChildlevelOpts. opts = %O", opts);
         return Promise.all(proms);
+    }
+    function addToOpts(i, o) {  
+        opts[i] = o;
     }
 }
 /**
@@ -1953,7 +1955,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
         .then(repopulateLevelCombos.bind(null, opts, selected))
         .then(() => delete fP.forms.taxonPs.recentChange);
 
-    function addRelatedChild(id) {  
+    function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
         var childTxn = fP.records.taxon[id];  
         var level = childTxn.level.id;
         addOptToLevelAry(childTxn, level);
@@ -1968,19 +1970,19 @@ function repopulateCombosWithRelatedTaxa(selId) {
         .then(buildOptsForEmptyLevels)
         .then(addCreateOpts);
     }
-    function getSiblingOpts(taxon) {                                            //console.log('getSiblingOpts. taxon = %O', taxon);
-        return getTaxonOpts(taxon.level.displayName).then(o => { 
+    function getSiblingOpts(taxon) {                                            
+        return getTaxonOpts(taxon.level.displayName).then(o => {                //console.log('getSiblingOpts. taxon = %O', taxon);
             opts[taxon.level.id] = o;
             selected[taxon.level.id] = taxon.id;
         });  
     }
-    function getAncestorOpts(prntId) {
+    function getAncestorOpts(prntId) {                                          //console.log('getAncestorOpts. prntId = [%s]', prntId);
         var realmTaxa = [1, 2, 3, 4]; //animalia, chiroptera, plantae, arthropoda
         if (realmTaxa.indexOf(prntId) !== -1 ) { return Promise.resolve(); }
         const prntTaxon = getRcrd('taxon', prntId);
-        selected[prntTaxon.level.id] = prntTaxon.id;                            //console.log("setting lvl = ", taxon.level)
+        selected[prntTaxon.level.id] = prntTaxon.id;                            
         return getTaxonOpts(prntTaxon.level.displayName)
-            .then(o => { 
+            .then(o => {                                                        //console.log("--getAncestorOpts - setting lvl = ", prntTaxon.level)
                 opts[prntTaxon.level.id] = o;
                 return getAncestorOpts(prntTaxon.parent);
             });
@@ -1990,25 +1992,23 @@ function repopulateCombosWithRelatedTaxa(selId) {
      * Ancestor levels are populated with all taxa at the level and will have 
      * the 'none' value selected.
      */
-    function buildOptsForEmptyLevels() {                                        //console.log('buildOptsForEmptyLevels')
+    function buildOptsForEmptyLevels() {                                        //console.log('buildOptsForEmptyLevels. opts = %O', _u.snapshot(opts));
         const topLvl = fP.forms.taxonPs.realm === "Arthropod" ? 3 : 5;  
         const proms = [];
         fillOptsForEmptyLevels();  
         return Promise.all(proms);
 
-        function fillOptsForEmptyLevels() {
-            for (var i = 7; i >= topLvl; i--) {  
+        function fillOptsForEmptyLevels() {             
+            for (var i = 7; i >= topLvl; i--) {                                 //console.log('fillOptsForEmptyLevels. lvl = ', i);
                 if (opts[i]) { continue; } 
-                const lvlName = lvls[i-1];
-                proms.push(getTaxonOpts(lvlName)
-                    .then(addAncestorOpts.bind(null, taxon.level.id, i, lvlName)));
+                if (i > taxon.level.id) { opts[i] = []; continue; }
+                buildAncestorOpts(i);
             }
         }
-        function addAncestorOpts(selLvl, id, lvlName, o) { 
-            opts[id] = o; 
-            if (id > selLvl) { return; }
+        function buildAncestorOpts(id) {
             selected[id] = 'none';
-            o.unshift({ value: 'none', text: '- None -'});
+            proms.push(getTaxonOpts(lvls[id-1])
+                .then(o => opts[id] = o ));
         }
     }
     function addCreateOpts() {                      
@@ -2018,9 +2018,9 @@ function repopulateCombosWithRelatedTaxa(selId) {
         return Promise.resolve();
     }
 } /* End fillAncestorTaxa */    
-function repopulateLevelCombos(optsObj, selected) {                             //console.log('repopulateLevelCombos. optsObj = %O, selected = %O', optsObj, selected);
+function repopulateLevelCombos(optsObj, selected) {                             //console.log('repopulateLevelCombos. optsObj = %O, selected = %O', optsObj, selected); //console.trace();
     var lvls = fP.forms.taxonPs.lvls;  
-    Object.keys(optsObj).forEach(l => {   console.log("lvl = %s, name = ", l, lvls[l-1])
+    Object.keys(optsObj).forEach(l => {                                         //console.log("lvl = %s, name = ", l, lvls[l-1]); 
         repopulateLevelCombo(optsObj[l], lvls[l-1], l, selected)
     });
 }
@@ -2028,12 +2028,12 @@ function repopulateLevelCombos(optsObj, selected) {                             
  * Replaces the options for the level combo. Selects the selected taxon and 
  * its direct ancestors.
  */
-function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName)
+function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName);
     _u.replaceSelOpts('#'+lvlName+'-sel', opts);
     if (lvl in selected) { 
+        if (selected[lvl] == 'none') { return _u.updatePlaceholderText('#'+lvlName+'-sel', null, 0); }
         setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); 
-        $('#'+lvlName+'-sel').find("option[value='none']").hide();
-    }
+    } 
 }
 /*-------- Edit Taxon Methods ----------*/
 /**
@@ -2346,7 +2346,6 @@ function initPublisherForm (value) {                                            
     initSubForm('publisher', fLvl, 'sml-sub-form', {'DisplayName': val}, 
         '#Publisher-sel')
     .then(appendPublFormAndFinishBuild);
-    return { 'value': '', 'text': 'Creat ing Publisher...' };
 
     function appendPublFormAndFinishBuild(form) {
         $('#Publisher_row').append(form);
@@ -2441,8 +2440,7 @@ function handleNewAuthForm(authCnt, value, authType) {
     if ($('#'+fLvl+'-form').length !== 0) { return openSubFormErr(authType, parentSelId, fLvl); }
     initSubForm( _u.lcfirst(singular), fLvl, 'sml-sub-form', {'LastName': val}, 
         parentSelId)
-        .then(appendAuthFormAndFinishBuild);
-    return { 'value': '', 'text': 'Creating '+singular+'...' };
+    .then(appendAuthFormAndFinishBuild);
 
     function appendAuthFormAndFinishBuild(form) {        
         $('#'+authType+'_row').append(form);
@@ -3149,7 +3147,7 @@ function storeFieldValue(elem, fieldName, fLvl, value) {
 /** Stores value at index of the order on form, ie the cnt position. */
 function storeMultiSelectValue(fLvl, cnt, field, e) {                           //console.log('storeMultiSelectValue. lvl = %s, cnt = %s, field = %s, e = %O', fLvl, cnt, field, e);
     if (e.target.value === "create") { return; }
-    const vals = fP.forms[fLvl].fieldConfg.vals;                           //console.log('getCurrentFormFieldVals. vals = %O', vals);
+    const vals = fP.forms[fLvl].fieldConfg.vals;                                //console.log('getCurrentFormFieldVals. vals = %O', vals);
     const value = e.target.value || null;
     if (!vals[field].val) { vals[field].val = {}; }
     vals[field].val[cnt] = value;
@@ -4086,7 +4084,7 @@ function storeData(data) {
     db_sync.updateLocalDb(data).then(onDataSynced);
 }
 /** afterStoredDataUpdated callback */
-function onDataSynced(data) {                                      console.log('data update complete. data = %O', data);
+function onDataSynced(data) {                                                   console.log('data update complete. data = %O', data);
     toggleWaitOverlay(false);
     if (data.errors) { return errUpdatingData(data.errors); }
     if (data.citationUpdate) { return; }
@@ -4187,7 +4185,7 @@ function getPinnedFieldVals() {
  * Resets the top-form in preparation for another entry. Pinned field values are 
  * persisted. All other fields will be reset. 
  */
-function resetIntFields(vals) {
+function resetIntFields(vals) {                                                 //console.log('resetIntFields. vals = %O', vals);
     disableSubmitBttn("#top-submit");
     initInteractionParams();
     resetUnpinnedFields(vals);

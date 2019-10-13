@@ -324,7 +324,7 @@ function initSelectCombobox(confg, opts, change) {                              
 function getPlaceholer(id, name, add, empty) {
     const optCnt = empty ? 0 : $(id + ' > option').length;  
     const placeholder = 'Select ' + name
-    return optCnt || add ? 'Select ' + name : '- None -';
+    return optCnt || add ? placeholder : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
@@ -357,7 +357,7 @@ function saveOrRestoreSelection() {                                             
 function saveSelVal($elem, val) {
     $elem.data('val', val);
 }
-function updatePlaceholderText(id, newTxt, optCnt) {                            //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+export function updatePlaceholderText(id, newTxt, optCnt) {                     //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     const emptySel = optCnt === 0;
     $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, false, emptySel);
     $(id)[0].selectize.updatePlaceholder();
