@@ -52,7 +52,7 @@ class UserNamedController extends Controller
     /**
      * Deletes the user-named filter set or interaction list.
      *
-     * @Route("/delete", name="list_delete")
+     * @Route("/remove", name="list_delete")
      */
     public function listDeleteAction(Request $request)
     {

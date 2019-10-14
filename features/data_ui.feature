@@ -82,7 +82,7 @@ Feature: Search page features and database table controls
       When I select "Journal" from the "Pub Type" dropdown
       And I should see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
-      And I press the "Show Interactions on Map" button
+      And I press the "Map Interactions" button
       Then I should see "1" interactions shown on the map
       And I click on a map marker
       And I should see "Journal of Mammalogy -" in popup

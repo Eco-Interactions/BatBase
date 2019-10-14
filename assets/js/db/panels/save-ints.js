@@ -199,7 +199,7 @@ function deleteInteractionList() {                                  /*debg-log*/
 }
 function confmDelete() {
     resetDeleteButton();
-    _uPnl.submitUpdates({id: app.list.id}, 'delete', onListDeleteComplete);
+    _uPnl.submitUpdates({id: app.list.id}, 'remove', onListDeleteComplete);
     delete app.rowSelMode;
 }
 function cancelDelete() {

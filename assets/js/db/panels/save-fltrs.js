@@ -271,7 +271,7 @@ function showCnfrmDeleteBttns() {                                   /*debg-log*/
 }
 function confmDelete() {  
     resetDeleteButton();
-    _uPnl.submitUpdates({id: app.fltr.id}, 'delete', onFilterDeleteComplete);
+    _uPnl.submitUpdates({id: app.fltr.id}, 'remove', onFilterDeleteComplete);
 }
 function cancelDelete() {
     resetDeleteButton();
