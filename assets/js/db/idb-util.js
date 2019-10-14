@@ -15,12 +15,11 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _u from './util.js';
 import * as db_page from './db-page.js';
 
-import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
-
+import { syncLocalDbWithServer, initStoredData, replaceUserData } from './db-sync.js';
 
 const _db = {
     geoJson: null, 
-    v: .003
+    v: .009
 };
 initDb();
 /** ----------------------- INIT -------------------------------------------- */
@@ -31,26 +30,23 @@ initDb();
  * Note: Testing clears idb on load, except as needed for data-entry testing. @addNewDataToStorage
  */
 function initDb() {
-    getData(_db.v, true).then(updateDbIfNeeded);
+    getData(_db.v, true).then(resetDbIfNeeded);
 }
-function handleTestDbInit() {
-    updateDbIfNeeded(false);
-}
-function updateDbIfNeeded(dbCurrent) {                                          console.log('Download DB? ', !dbCurrent);
-    return dbCurrent ? checkForServerUpdates() : downloadFullDb();
+function resetDbIfNeeded(noResetNeeded) {                                       console.log('Download DB? ', !noResetNeeded);
+    return noResetNeeded ? checkForServerUpdates() : downloadFullDb();
 }
 export function downloadFullDb() {                                              console.log('   --DOWNLOADING FULL DB');
     idb.clear();     
-    idb.set(_db.v, true);
-    initStoredData();
+    initStoredData().then(() => idb.set(_db.v, true));
 }
+/**
+ * On page load, syncs local database with sever data. 
+ * If there they system data has updates more recent than the last sync, the 
+ * updated data is ajaxed and stored @syncUpdatedData. Once the database is ready,
+ * db_sync calls @initSearchPage. 
+ */
 function checkForServerUpdates() {
-    getData('pgDataUpdatedAt').then(pgUpdatedAt => {                            //console.log('pgUpdatedAt = ', pgUpdatedAt)
-        if (!pgUpdatedAt) { return updateDbIfNeeded(false); }
-        getData('user').then(checkUserData);
-        _u.sendAjaxQuery({}, "ajax/data-state", 
-            addNewDataToStorage.bind(null, pgUpdatedAt));
-    });
+    _u.getData('lclDataUpdtdAt').then(syncLocalDbWithServer);
 }
 /**
  * Updates user specific data in local storage. Useful when the user changes on the
@@ -92,28 +88,9 @@ function logAndAlert(key) {
     alert(getAlertMsg(key));
 }
 function getAlertMsg(key) {
-    return `Error loading [${key}] data. Try reloading the page.\n\n${getUserLvlAlert()}`;
+    return `Error loading [${key}] data. Try reloading the page. If error persists, ${_u.getErrMsgForUserRole()}`;
 }
-function getUserLvlAlert() {
-    const userRole = $('body').data('user-role');
-    const msgs = {
-        visitor: getVisitorErrMsg, user: getUserErrMsg, editor: getEditorErrMsg
-    };
-    return msgs[userRole]();
-}
-function getVisitorErrMsg() {
-    return `If the problem persists, please contact us at info@batplant.org and let us know.`;
-}
-function getUserErrMsg() {
-    return `If the problem persists, please contact us by Leaving Feedback on this page (from the user menu).`;
-}
-function getEditorErrMsg() {
-    return `If the problem persists, please open the browser logs, take a screen shot, and email to the developer.
 
-Open Chrome menu -> More Tools -> Developer Tools.
-
-Please include a description of the steps to reproduce this error and any useful information or additional screenshots.`;
-}
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);
     return idb.set(k, v);

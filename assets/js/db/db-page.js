@@ -154,7 +154,8 @@ export function resetDataTable(view, e) {                           /*Perm-log*/
     };
     resetCurTreeState();
     view = typeof view == 'string' ? view : null;
-    resetMap[tblState.curFocus](view); 
+    resetMap[tblState.curFocus](view)
+    .catch(err => _u.alertErr(err));; 
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
@@ -188,7 +189,7 @@ export function selectSearchFocus(f, view) {
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 
     };  
-    updateFocusAndBuildTable(focus, builderMap[focus].bind(null, view)); 
+    updateFocusAndBuildTable(focus, builderMap[focus].bind(null, view));
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
@@ -278,7 +279,7 @@ function startLocTableBuildChain(topLocs, textFltr) {
         loadTbl('Location Tree', rowData);
         db_ui.loadLocFilterPanelElems(tblState);
         if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
-    });
+    }).catch(err => _u.alertErr(err));
 }
 /** -------------------- LOCATION MAP --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
@@ -327,10 +328,11 @@ function buildSourceTable(v) {                                      /*Perm-log*/
     _u.getData('curView', true).then(storedView => {
         const view = storedView || 'pubs';
         getSrcDataAndBuildTable(view);
-    });
+    })
+    .catch(err => _u.alertErr(err));;
 }
 function getSrcDataAndBuildTable(view) {
-    _u.getData('source').then(srcs => {
+    return _u.getData('source').then(srcs => {
         tblState.rcrdsById = srcs;
         db_ui.initSrcSearchUi(view);
         startSrcTableBuildChain(); //tblState.curView
@@ -350,13 +352,14 @@ export function rebuildSrcTable(val) {                              /*Perm-log*/
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    data_tree.buildSrcTree(tblState.curView).then(tree => {
+    data_tree.buildSrcTree(tblState.curView)
+    .then(tree => {
         const rowData = frmt_data.buildSrcRowData(tree, tblState)
         loadTbl('Source Tree', rowData, tblState);
         db_ui.loadSrcFilterPanelElems(tblState.curView).then(() => {
             if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
         });
-    });
+    }).catch(err => _u.alertErr(err));;
 }
 function storeSrcView(val) {  
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
@@ -373,7 +376,7 @@ function buildTaxonTable(v) {                                       /*Perm-log*/
     _u.getData('curView', true).then(storedView => {
         const view = storedView || getSelValOrDefault(_u.getSelVal('View'));
         getTxnDataAndBuildTable(view);
-    });
+    }).catch(err => _u.alertErr(err));;
 }
 function getTxnDataAndBuildTable(view) {
     _u.getData('taxon').then(beginTaxonLoad.bind(null, view))
@@ -402,7 +405,7 @@ function buildTxnTable(val) {
  * the taxon's record.
  */
 function storeAndReturnRealmRcrd(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));/*debg-log*/console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));/*debg-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
     const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     /*debg-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
     _u.setData('curView', realmId);
@@ -437,5 +440,5 @@ function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
         loadTbl('Taxon Tree', rowData, tblState);
         db_ui.loadTxnFilterPanelElems(tblState);
         if (!!tblState.onInitComplete) { return tblState.onInitComplete(); }
-    });
+    }).catch(err => _u.alertErr(err));;
 }

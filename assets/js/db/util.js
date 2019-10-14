@@ -153,8 +153,8 @@ export function alphaOptionObjs(a, b) {
 }  
 /** Builds options out of a stored entity-name object. */
 export function getOptsFromStoredData(prop) {                                   
-    return _db.getData(prop, true).then(data => {                               console.log('       --getOptsFromStoredData. NO STORED DATA FOR [%s].', prop);
-        if (!data) { return []; }
+    return _db.getData(prop, true).then(data => {                               //console.log('       --getOptsFromStoredData. [%s].', prop);
+        if (!data) { console.log('NO STORED DATA for [%s]', prop);return []; }
         return buildOptsObj(data, Object.keys(data).sort());
     });
 }
@@ -214,7 +214,7 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
       }
 }
 /*-----------------AJAX Callbacks---------------------------------------------*/
-export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 logAjaxData(dataPkg, arguments);
     return $.ajax({
         method: "POST",
         url: url,
@@ -230,10 +230,31 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
 }
-export function alertErr(err) {                                                 console.log('err = %O', err);
-    alert(`ERROR. Try reloading the page. If error persists, please follow these steps and send the error to the developer.
-        \nClick Chrome menu -> "More Tools" -> "Developer Tools." 
-        \nOnce the panel loads, take a screenshot and email it to Sarah.`);
+function logAjaxData(dataPkg, args) {
+    if (['dev', 'test'].indexOf($('body').data('env') != -1)) {
+        console.log("           Sending Ajax data =%O arguments = %O", dataPkg, args);
+    } else { console.log("          Sending Ajax data =%O", dataPkg); }
+}
+export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
+    alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
+}
+export function getErrMsgForUserRole() {
+    const userRole = $('body').data('user-role');
+    const msgs = { visitor: getVisitorErrMsg, user: getUserErrMsg };
+    return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
+}
+function getVisitorErrMsg() {
+    return `please contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+}
+function getUserErrMsg() {
+    return `please contact us by Leaving Feedback on this page (from the user menu) and let us know about the issue you are experiencing.`;
+}
+function getEditorErrMsg() {
+    return `please follow these steps and email Kelly or Sarah. Open the browser logs, take a screen shot, and email to the developer.
+        \n\nOpen the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
+        \n\nOnce the panel loads and the "console" tab is displayed, take a screenshot.
+        \n\nEmail a description of the steps to reproduce this error and any additional information or screenshots that might help.
+        \n\nThank you for your patience!`;
 }
 /* ------------- Data Util -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */

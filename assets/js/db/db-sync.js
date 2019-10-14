@@ -25,7 +25,6 @@ import { initDataTable, initSearchState, showIntroAndLoadingMsg } from './db-pag
 let failed = { errors: [], updates: {}};
 /** Stores entity data while updating to reduce async db calls. */
 let mmryData = {};
-
 /* ========================= DATABASE SYNC ================================== */
 /**
  * On search page load, the system updatedAt flag is compared against the page's. 
@@ -34,11 +33,37 @@ let mmryData = {};
  * On a browser's first visit to the page, all data is downloaded and the 
  * search page ui is initialized @initStoredData.
  */
-export function addNewDataToStorage(pgUpdatedAt, data) {                        console.log("addNewDataToStorage. pgDataUpdatedAt = [%s], serverState = [%O]", pgUpdatedAt, data.state);
-    if (ifTestEnvDbNeedsReset(data.state.System)) { return _u.downloadFullDb(); }
-    if (!ifEntityUpdates(data.state.System, pgUpdatedAt)) { return initSearchPage(); }
-    delete data.state.System;  //System updatedAt is no longer needed.
-    syncUpdatedData(data.state, pgUpdatedAt);
+export function syncLocalDbWithServer(lclUpdtdAt) {                             console.log("   /--syncLocalDbWithServer");
+    _u.sendAjaxQuery({}, "ajax/data-state", checkAgainstLocalDataState);
+    
+    function checkAgainstLocalDataState(srvrUpdtdAt) {  
+        if (ifTestEnvDbNeedsReset(srvrUpdtdAt.state.System)) { return _u.downloadFullDb(); }
+        const entities = checkEachEntityForUpdates(srvrUpdtdAt.state);
+        return entities.length ? syncDb(entities) : initSearchPage();
+    }
+    function checkEachEntityForUpdates(srvrUpdtdAt) {                           //console.log('checkEachEntityForUpdates. srvrUpdtdAt = %O, lcl = %O', srvrUpdtdAt.state, lclUpdtdAt);
+        delete srvrUpdtdAt.System;
+        return Object.keys(srvrUpdtdAt).map(entity => {                         //console.log('   --[%s] updates ? ', entity, entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]));
+            return entityHasUpdates(srvrUpdtdAt[entity], lclUpdtdAt[entity]) ? 
+                { name: entity, updated: lclUpdtdAt[entity] } : false;
+        }).filter(e => e);
+    }
+}
+function syncDb(entities) {
+    downloadAndStoreNewData(entities)
+    .then(retryFailedUpdatesAndLoadTable)
+    .then(storeLocalDataState);
+}
+function storeLocalDataState() {
+    _u.sendAjaxQuery({}, "ajax/data-state").then(srvrState => {
+        storeData('lclDataUpdtdAt', srvrState.state);  
+    }); 
+}
+function trackTimeUpdated(entity, rcrd) {
+    _u.getData('lclDataUpdtdAt').then(stateObj => {
+        stateObj[entity] = rcrd.serverUpdatedAt;
+        storeData('lclDataUpdtdAt', stateObj);  
+    }); 
 }
 /** Db is reset unless testing suite did not reload database. */
 function ifTestEnvDbNeedsReset(systemUpdateAt) { 
@@ -51,18 +76,10 @@ function initSearchPage() {
  * Returns true if the first datetime is more recent than the second. 
  * Note: for cross-browser date comparisson, dashes must be replaced with slashes.
  */
-function ifEntityUpdates(timeOne, timeTwo) {  
+function entityHasUpdates(timeOne, timeTwo) {  
     var time1 = timeOne.replace(/-/g,'/');  
     var time2 = timeTwo.replace(/-/g,'/');                                      //console.log("firstTimeMoreRecent? ", Date.parse(time1) > Date.parse(time2))
     return Date.parse(time1) > Date.parse(time2);
-}
-/** Filter updatedAt entities and send those with updates to @ajaxNewData. */
-function syncUpdatedData(updatedAt, pgUpdatedAt) {                              console.log("Syncing data updated since - ", pgUpdatedAt);
-    var withUpdates = Object.keys(updatedAt).filter(function(entity){
-        return ifEntityUpdates(updatedAt[entity], pgUpdatedAt);
-    });                                                                         console.log("entities with updates = %O", JSON.parse(JSON.stringify(withUpdates)));
-    if (!withUpdates) { console.log("No updated entities found when system flagged as updated."); return; }
-    ajaxNewData(withUpdates, pgUpdatedAt);
 }
 /** 
  * Sends an ajax call for each entity with updates. On return, the new data 
@@ -71,31 +88,25 @@ function syncUpdatedData(updatedAt, pgUpdatedAt) {                              
  * TODO: Add 'fail' callback for server errors. Send back any errors and 
  * describe them to the user. 
  */ 
-function ajaxNewData(entities, lastUpdated) {                                   console.log('   --ajaxNewData. entities = %O', entities);
+function downloadAndStoreNewData(entities) {                                    console.log('   --downloadAndStoreNewData. entities = %O', entities);
     const promises = entities.map(e => getNewData(e)); 
-    $.when(...promises).then(processUpdatedData)
-        .done(retryFailedUpdatesAndLoadTable);
-     
-    function getNewData(entity, func) {                                         //console.log('getting new data for ', entity); 
-        let data = { entity: entity, updatedAt: lastUpdated }; 
-        const hndlr = func || null;
-        return _u.sendAjaxQuery(data, "ajax/sync-data", hndlr); 
-    } 
-} /* End ajaxNewData */ 
+    return Promise.all(promises).then(processUpdatedData);
+} 
+function getNewData(entity) {                                                   //console.log('getting new data for ', entity); 
+    let data = { entity: entity.name, updatedAt: entity.updated }; 
+    return _u.sendAjaxQuery(data, "ajax/sync-data"); 
+} 
 /** Sends each entity's ajax return to be processed and stored. */
-function processUpdatedData() {    
-    if (arguments[1] === "success") { return processUpdatedEntityData(...arguments); }
-    const proms = [];
-    for (let data in arguments) { 
-        proms.push(processUpdatedEntityData(arguments[data][0]));
-    }
+function processUpdatedData(data) {                                             //console.log('processUpdatedData = %O', data);
+    return data.reduce((p, entData) => {
+        const updateFunc = processUpdatedEntityData.bind(null, entData);
+        return p.then(updateFunc);
+    }, Promise.resolve());
 } 
 /** Parses and sends the returned data to @storeUpdatedData. */ 
-function processUpdatedEntityData() { 
-    const results = arguments[0]; 
-    const entity = Object.keys(results)[0];                                     console.log("   --[%s] data returned from server = %O", entity, results); 
-    const data = parseData(results[entity]); 
-    return storeUpdatedData(data, entity); 
+function processUpdatedEntityData(data) {                                       
+    const entity = Object.keys(data)[0];                                        console.log("       --processUpdatedEntityData [%s] = %O", entity, data[entity]); 
+    return storeUpdatedData(parseData(data[entity]), entity); 
 }
 /** Sends the each updated record to the update handler for the entity. */ 
 function storeUpdatedData(rcrds, entity) { 
@@ -116,21 +127,21 @@ function retryFailedUpdatesAndLoadTable() {                                     
  * Updates the stored data's updatedAt flag, and initializes the search-page 
  * table with the updated data @initDataTable. 
  */
-function loadDataTable() {                                                      //console.log('Finished updating! Loading search table.')
-    storeData('pgDataUpdatedAt', getCurrentDate()); 
-    initDataTable(); 
+function loadDataTable() {    
+    storeLocalDataState();
+    initDataTable();                                                  //console.log('Finished updating! Loading search table.')
 }
 /* ======================== AFTER FORM SUBMIT =============================== */
 /**
  * On crud-form submit success, the returned data is added to, or updated in, 
- * all relevant stored data @updateEntityData. The stored data's lastUpdated 
- * flag, 'pgDataUpdatedAt', is updated. 
+ * all relevant stored data @updateEntityData. Local storage state is stored and 
+ * the data, along with any errors or messages, is returned.
  */
-export function updateLocalDb(data) {                                           console.log("   --updateLocalDb data recieved = %O", data);
+export function updateLocalDb(data) {                                           console.log("   /--updateLocalDb data recieved = %O", data);
     return updateEntityData(data)
     .then(retryFailedUpdates)
     .then(addErrsToReturnDataAndClearMemory.bind(null, data))
-    .then(storeData.bind(null, 'pgDataUpdatedAt', getCurrentDate()))
+    .then(storeLocalDataState)
     .then(() => data);
 }
 /** Stores both core and detail entity data, and updates data affected by edits. */
@@ -148,7 +159,8 @@ function updateDetailEntityData(data) {
 /** Updates stored-data props related to a core-entity record with new data. */
 function addCoreEntityData(entity, rcrd) {                                      console.log("       --Updating Core entity. %s. %O", entity, rcrd);
     return updateCoreData(entity, rcrd)
-    .then(updateCoreDataProps.bind(null, entity, rcrd));
+    .then(updateCoreDataProps.bind(null, entity, rcrd))
+    .then(trackTimeUpdated.bind(null, entity, rcrd));
 }
 /** 
  * Updates the stored core-records array and the stored entityType array. 
@@ -208,6 +220,10 @@ function updateDataProps(entity, rcrd, updateFuncs) {                           
 }
 /** Updates stored-data props related to a detail-entity record with new data. */
 function addDetailEntityData(entity, rcrd) {                                    //console.log("Updating Detail entity. %s. %O", entity, rcrd);
+    return updateDetailData(entity, rcrd)
+    .then(trackTimeUpdated.bind(null, entity, rcrd));
+}
+function updateDetailData(entity, rcrd) {
     var update = {
         'author': { 'author': addToRcrdProp },
         'citation': { 'citation': addToRcrdProp }, //Not necessary to add to citation type object.
@@ -450,7 +466,10 @@ export function updateUserNamedList(data, action, cb) {                         
     const list = action == 'delete' ? data : JSON.parse(data.entity);  
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
     const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
-    _u.getData([rcrdKey, nameKey]).then(data => syncListData(data));
+    
+    _u.getData([rcrdKey, nameKey])
+    .then(data => syncListData(data))
+    .then(trackTimeUpdated.bind(null, entity, rcrd));
 
     function syncListData(data) {
         rcrds = data[rcrdKey];
@@ -485,18 +504,16 @@ export function resetStoredData() {
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @ajaxAndStoreAllEntityData. The stored 
- * data's lastUpdated flag, 'pgDataUpdatedAt', is created. A data-loading 
+ * from the server and stored locally @ajaxAndStoreAllEntityData. A data-loading 
  * popup message and intro-walkthrough are shown on the Search page.
  */
 export function initStoredData() {
-    ajaxAndStoreAllEntityData();
     showIntroAndLoadingMsg();
+    return ajaxAndStoreAllEntityData();
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
- * from the server and stored locally @storeEntityData. The stored data's 
- * lastUpdated flag, 'pgDataUpdatedAt', is created. Then the Database search page 
+ * from the server and stored locally @storeEntityData. Database search page 
  * table build begins @initSearchState.
  * Entities downloaded with each ajax call:
  *   /taxon - Taxon, Realm, Level 
@@ -506,7 +523,7 @@ export function initStoredData() {
  *   /interaction - Interaction, InteractionType  
  */
 function ajaxAndStoreAllEntityData() {                                          console.log("   --ajaxAndStoreAllEntityData");
-    $.when(
+    return $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
         $.ajax("ajax/source"), $.ajax("ajax/interaction"),
         $.ajax("ajax/lists"),  $.ajax("ajax/geojson")
@@ -514,8 +531,8 @@ function ajaxAndStoreAllEntityData() {                                          
         $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
-        storeData('pgDataUpdatedAt', getCurrentDate());  
         initSearchState();
+        storeLocalDataState();
     });
 }
 /**

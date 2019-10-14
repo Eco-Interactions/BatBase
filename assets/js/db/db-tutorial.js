@@ -305,6 +305,13 @@ function setDbLoadDependentState() {
     $('#sel-view')[0].selectize.addItem('3');
 }
 function resetTableState() {
+    _u.getData('taxa', true)
+    .then(txnData => {
+        if (!txnData) { return window.setTimeout(resetTableState, 300); }
+        resetUiAndReloadTable();
+    });
+}
+function resetUiAndReloadTable() {
     focus = focus || "taxa";
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);

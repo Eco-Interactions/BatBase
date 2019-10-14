@@ -277,10 +277,12 @@ function getFormExitHandler(confg, action) {                                    
 /*--------------------------- Edit Form --------------------------------------*/
 /** Shows the entity's edit form in a pop-up window on the search page. */
 export function editEntity(id, entity) {                                        console.log("Editing [%s] [%s]", entity, id);  
-    initFormParams("edit", entity, id).then(() => {
+    initFormParams("edit", entity, id)
+    .then(() => {
         showFormPopup('Editing', _u.ucfirst(entity), id);
         initEditForm(id, entity).then(() => onEditFormLoadComplete(id, entity));    
-    });
+    })
+    .catch(err => _u.alertErr(err));;
 }
 /** Inits the edit top-form, filled with all existing data for the record. */
 function initEditForm(id, entity) {  
@@ -1879,7 +1881,7 @@ function resetPrevTaxonSelection(selId) {                                       
     setSelVal('#'+taxon.level.displayName+'-sel', id);
     window.setTimeout(() => { delete fP.forms.taxonPs.reset; }, 1000);
 }
-function ifRealmReset(realm) {  console.log('realm = %O. selRealmID = ', realm, $('#Realm-sel').val());
+function ifRealmReset(realm) {  
     return realm.displayName !== 'Bat' && $('#Realm-sel').val() != realm.id;
 }
 function preventComboboxFocus(realm) {
