@@ -97,14 +97,17 @@ function hideSearchFormPopup() {
  * an interaction, the table will refocus into source-view. Exiting the interaction
  * forms also sets the 'int-updated-at' filter to 'today'.
  */
-function refocusTableIfFormWasSubmitted() {                                     console.log('submitFocus = [%s]', fP.submitFocus);
+function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
     if (!fP.submitFocus) { return; }
     if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
     db_page.initDataTable(fP.submitFocus);
 }
 function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    var focus  = fP.action === 'create' ? 'srcs' : null;
+    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
     showTodaysUpdates(focus);   
+}
+function getCurFocus() {
+    return db_page.accessTableState().get('curFocus');
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
@@ -343,7 +346,7 @@ function addDisplayNameToForm(ent, id) {
     if (ent === 'interaction') { return; }
     const prnt = getParentEntity(ent);
     const entity = prnt || ent;
-    const rcrd = getRcrd(entity, id);                                   console.log('[%s] rcrd = %O', entity, rcrd);
+    const rcrd = getRcrd(entity, id);                                           
     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
 }
@@ -353,7 +356,7 @@ function fillEntityData(ent, id) {
         'location': fillLocData, 'publication': fillSrcData, 
         'publisher': fillSrcData, 'taxon': fillTaxonData, 
         'interaction': fillIntData };
-    const rcrd = getRcrd(ent, id);                                      //console.log("fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    const rcrd = getRcrd(ent, id);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
     hndlrs[ent](ent, id, rcrd);
 }
 function fillIntData(entity, id, rcrd) {  
@@ -822,7 +825,7 @@ function loadCitTypeFields(typeId) {
 
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(elem, fLvl);
-        handleCitText(fLvl);
+        if (!fP.citTimeout) { handleCitText(fLvl); }
         setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
     }
 }
@@ -929,15 +932,21 @@ function addExistingPubContribs(fLvl, auths) {
  * Checks all required citation fields and sets the Citation Text field.
  * If all required fields are filled, the citation text is generated and 
  * displayed. If not, the default text is displayed in the disabled textarea.
+ * Note: to prevent multiple rebuilds, a timeout is used.
  */
-function handleCitText(formLvl) {                                               //console.log('handleCitText')
-    const fLvl = formLvl || getSubFormLvl('sub');
-    const $elem = $('#CitationText_row textarea');
-    if (!$elem.val()) { initializeCitField($elem); } 
-    getCitationFieldText($elem, fLvl)
-    .then(updateCitField.bind(null, $elem));
+function handleCitText(formLvl) {                                               //console.log('   --handleCitText')
+    fP.citTimeout = window.setTimeout(buildCitTextAndUpdateField, 500);
+
+    function buildCitTextAndUpdateField() {                                     //console.log('      --buildCitTextAndUpdateField')
+        const fLvl = formLvl || getSubFormLvl('sub');
+        const $elem = $('#CitationText_row textarea');
+        if (!$elem.val()) { initializeCitField($elem); } 
+        delete fP.citTimeout;
+        return getCitationFieldText($elem, fLvl)
+        .then(updateCitField.bind(null, $elem));
+    }
 } 
-function updateCitField($elem, citText) {
+function updateCitField($elem, citText) {  
     if (!citText) { return; }
     $elem.val(citText).change();
 }                   
@@ -948,8 +957,12 @@ function initializeCitField($elem) {
 function getCitationFieldText($elem, fLvl) {
     const dfault = 'The citation will display here once all required fields '+
         'are filled.';
-    return Promise.resolve(ifNoChildFormOpen(fLvl) && ifAllRequiredFieldsFilled(fLvl) ? 
-        buildCitationText(fLvl) : $elem.val() === dfault ? false : dfault);
+    return Promise.resolve(getCitationText());
+
+    function getCitationText() {
+        return ifNoChildFormOpen(fLvl) && ifAllRequiredFieldsFilled(fLvl) ? 
+           buildCitationText(fLvl) : ($elem.val() === dfault ? false : dfault);
+    }
 }
 function ifNoChildFormOpen(fLvl) {  
     return $('#'+getNextFormLevel('child', fLvl)+'-form').length == 0; 
@@ -959,9 +972,10 @@ function ifNoChildFormOpen(fLvl) {
  * are filled.
  */
 function buildCitationText(fLvl) {
-    const type = $('#CitationType-sel option:selected').text();                 //console.log("type = ", type);
-    return getFormValueData('citation', null, null).then(generateCitText);    
-    function generateCitText(formVals) {
+    const type = $('#CitationType-sel option:selected').text();                 //console.log("buildCitationText for [%s]", type);
+    return getFormValueData('citation', null, null).then(generateCitText); 
+
+    function generateCitText(formVals) {                                        //console.log('generateCitText. formVals = %O', formVals);
         const builder = { 'Article': articleCit, 'Book': bookCit, 
             'Chapter': chapterCit, 'Ph.D. Dissertation': dissertThesisCit, 
             'Other': otherCit, 'Report': otherCit, 'Museum record': otherCit, 
@@ -1057,7 +1071,7 @@ function buildCitationText(fLvl) {
             return 'pp. ' + _u.stripString(formVals.pages);
         }
         function getFormAuthors(eds) { 
-            const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          console.log('auths = %O', auths);
+            const auths = getSelectedVals($('#Authors-sel-cntnr')[0]);          //console.log('auths = %O', auths);
             if (!Object.keys(auths).length) { return false; }
             return getFormattedAuthorNames(auths, eds);
         }
@@ -2383,7 +2397,8 @@ function initPublisherForm (value) {                                            
 }
 /*-------------- Author --------------------------------------------------*/
 /** Loops through author object and adds each author/editor to the form. */
-function selectExistingAuthors(field, authObj, fLvl) {                          //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
+function selectExistingAuthors(field, authObj, fLvl) {       
+    if (!authObj) { return Promise.resolve(); }                                 //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
     Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
         const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
         return p.then(selNextAuth);
@@ -2411,9 +2426,12 @@ function handleAuthSelect(val, ed) {
     const fLvl = getSubFormLvl('sub');
     let cnt = $('#'+authType+'-sel-cntnr').data('cnt') + 1;                          
     if (val === 'create') { return openCreateForm(authType, --cnt); }        
-    if (fP.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
+    if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }
     if (lastAuthComboEmpty(cnt-1, authType)) { return; }
     buildNewAuthorSelect(cnt, val, fLvl, authType);
+}
+function citationFormNeedsCitTextUpdate(fLvl) {
+    return fP.forms[fLvl].entity === 'citation' && !fP.citTimeout;
 }
 /** Stops the form from adding multiple empty combos to the end of the field. */
 function lastAuthComboEmpty(cnt, authType) {  
@@ -2693,7 +2711,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
         if (entity === 'publication') { ifBookAddAuthEdNote(fVals.PublicationType)}
         if (entity === 'citation') { 
             handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], fLvl);
-            handleCitText(fLvl);
+            if (!fP.citTimeout) { handleCitText(fLvl); }
         }
         if (entity !== 'location') {
             updateFieldLabelsForType(entity, fLvl);
@@ -3173,7 +3191,7 @@ function isFieldRequried(field, fLvl, reqFields) {                              
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
     if (fieldName === 'Authors' || fieldName === 'Editors') { return; }
-    if (fP.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }
+    if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }
     fP.forms[fLvl].fieldConfg.vals[fieldName].val = val;
 }
 /** Stores value at index of the order on form, ie the cnt position. */
@@ -3455,7 +3473,7 @@ function checkRequiredFields(e) {                                               
     const input = e.currentTarget;
     const fLvl = $(input).data('fLvl');  
     checkReqFieldsAndToggleSubmitBttn(input, fLvl);
-    if (fP.forms[fLvl].entity === 'citation') { handleCitText(fLvl); }  
+    if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }  
 }
 /**
  * Note: The 'unchanged' property exists only after the create interaction form 
@@ -3483,15 +3501,19 @@ function checkIntFieldsAndEnableSubmit() {
     if (fP.forms.top.unchanged) { resetForNewForm(); }
 }
 /** Returns true if all the required elements for the current form have a value. */
-function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
+function ifAllRequiredFieldsFilled(fLvl) {                                      //console.log("   ->-> ifAllRequiredFieldsFilled... fLvl = %s. fP = %O", fLvl, fP)
     const reqElems = fP.forms[fLvl].reqElems;                                   //console.log('reqElems = %O', reqElems);          
     return reqElems.every(isRequiredFieldFilled.bind(null, fLvl));
 }
 /** Note: checks the first input of multiSelect container elems.  */
-function isRequiredFieldFilled(fLvl, elem) {                                    //console.log('   checking elem = %O, id = ', elem, elem.id);
-    if ($('.'+fLvl+'-active-errs').length) { return false; }
-    return elem.value ? true : 
-        elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;  
+function isRequiredFieldFilled(fLvl, elem) {                                    
+    if ($('.'+fLvl+'-active-errs').length) { return false; }                    //console.log('       --checking [%s] = %O, value ? ', elem.id, elem, getElemValue(elem));
+    return getElemValue(elem);
+
+    function getElemValue(elem) {
+        return elem.value ? true : 
+            elem.id.includes('-cntnr') ? isCntnrFilled(elem) : false;  
+    }
 }
 /**
  * Returns true if the first field of the author/editor container has a value. 
@@ -3866,7 +3888,7 @@ function checkForErrors(entity, formVals, fLvl) {
  * If it does, a prompt is given to the user to check to ensure they are not 
  * creating a duplicate, and to add initials if they are sure this is a new author. 
  */
-function checkDisplayNameForDups(entity, vals, fLvl) {                                //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
+function checkDisplayNameForDups(entity, vals, fLvl) {                          //console.log('checkDisplayNameForDups [%s] vals = %O', entity, vals);
     if (fP.action === 'edit') { return; }
     const cntnr = $('#'+_u.ucfirst(entity)+'s-sel1')[0];
     const opts = cntnr.selectize.options;  
@@ -4080,7 +4102,7 @@ function getRelationshipFields(entity) {
 }
 /*------------------ Form Submit Methods ---------------------------------*/
 /** Sends the passed form data object via ajax to the appropriate controller. */
-function submitFormData(formData, fLvl, entity) {                               console.log("submitFormData [ %s ]= %O", fLvl, formData);
+function submitFormData(formData, fLvl, entity) {                               console.log("   --submitFormData [ %s ]= %O", fLvl, formData);
     var coreEntity = getCoreFormEntity(entity);       
     var url = getEntityUrl(fP.forms[fLvl].action);
     if (fP.editing) { formData.ids = fP.editing; }
@@ -4107,7 +4129,7 @@ function getEntityUrl(action) {
  * the stored core records in the fP object. Exit's the successfully submitted 
  * form @exitFormAndSelectNewEntity.  
  */
-function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
+function formSubmitSucess(ajaxData, textStatus, jqXHR) {                        console.log("       --Ajax Success! data = %O, textStatus = %s, jqXHR = %O", ajaxData, textStatus, jqXHR);                   
     var data = parseData(ajaxData.results);
     storeData(data);
 }
@@ -4116,7 +4138,7 @@ function storeData(data) {
     db_sync.updateLocalDb(data).then(onDataSynced);
 }
 /** afterStoredDataUpdated callback */
-function onDataSynced(data) {                                                   console.log('data update complete. data = %O', data);
+function onDataSynced(data) {                                                   console.log('       --Data update complete. data = %O', data);
     toggleWaitOverlay(false);
     if (data.errors) { return errUpdatingData(data.errors); }
     if (data.citationUpdate) { return; }
@@ -4131,10 +4153,10 @@ function onDataSynced(data) {                                                   
     }
 } /* End afterStoredDataUpdated */
 /** Updates the core records in the global form params object. */
-function addDataToStoredRcrds(entity, detailEntity) {                           console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
+function addDataToStoredRcrds(entity, detailEntity) {                           //console.log('updateStoredFormParams. [%s] (detail ? [%s]) fP = %O', entity, detailEntity, fP);
     return _u.getData(entity).then(newData => {
         fP.records[entity] = newData;
-        if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source's detail entities: pub, cit, auth
+        if (detailEntity) { return addDataToStoredRcrds(detailEntity); } //Source & Location's detail entities: publications, citations, authors, geojson
     });
 }
 /*------------------ Top-Form Success Methods --------------------*/

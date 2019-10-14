@@ -7,6 +7,7 @@
  *     SETTERS
  *         
  * Exports:             Imported by:
+ *     downloadFullDb       db-sync
  *     getData              util 
  *     setData              util
  */
@@ -27,17 +28,23 @@ initDb();
  * Checks whether the dataKey exists in indexDB cache. 
  * If it is, the stored geoJson is fetched and stored in the global variable. 
  * If not, the db is cleared and geoJson is redownloaded. 
+ * Note: Testing clears idb on load, except as needed for data-entry testing. @addNewDataToStorage
  */
 function initDb() {
     getData(_db.v, true).then(updateDbIfNeeded);
 }
+function handleTestDbInit() {
+    updateDbIfNeeded(false);
+}
 function updateDbIfNeeded(dbCurrent) {                                          console.log('Download DB? ', !dbCurrent);
-    if (dbCurrent) { return checkForDbDataChanges() } 
+    return dbCurrent ? checkForServerUpdates() : downloadFullDb();
+}
+export function downloadFullDb() {                                              console.log('   --DOWNLOADING FULL DB');
     idb.clear();     
     idb.set(_db.v, true);
     initStoredData();
 }
-function checkForDbDataChanges() {
+function checkForServerUpdates() {
     getData('pgDataUpdatedAt').then(pgUpdatedAt => {                            //console.log('pgUpdatedAt = ', pgUpdatedAt)
         if (!pgUpdatedAt) { return updateDbIfNeeded(false); }
         getData('user').then(checkUserData);
@@ -71,10 +78,6 @@ function returnStoredData(data, key, returnUndefined) {                         
     if (data == undefined && !returnUndefined) { return logAndAlert(key); }  
     return data;
 }
-function logAndAlert(key) {
-    console.log(`Error loading [${key}] data.`);
-    alert(`Error loading [${key}] data. Try reloading the page.`);
-}
 function getStoredDataObj(keys, returnUndefined) {
     const promises = [];
     $(keys).each((i, key) => promises.push(getStoredData(key, returnUndefined)));
@@ -84,9 +87,37 @@ function getStoredDataObj(keys, returnUndefined) {
         return obj;
     });
 } 
+function logAndAlert(key) {
+    console.log(`Error loading [${key}] data.`); console.trace();
+    alert(getAlertMsg(key));
+}
+function getAlertMsg(key) {
+    const msg = getUserLvlAlert();
+    return `Error loading [${key}] data. Try reloading the page.\n\n${msg}`;
+}
+function getUserLvlAlert() {
+    const userRole = $('body').data('user-role');
+    const msgs = {
+        visitor: getVisitorErrMsg, user: getUserErrMsg, editor: getEditorErrMsg
+    };
+    return msgs[userRole];
+}
+function getVisitorErrMsg() {
+    return `If the problem persists, please contact us at info@batplant.org and let us know.`;
+}
+function getUserErrMsg() {
+    return `If the problem persists, please contact us by Leaving Feedback on this page (from the user menu).`;
+}
+function getEditorErrMsg() {
+    return `If the problem persists, please open the browser logs, take a screen shot, and email to the developer.
+
+Open Chrome menu -> More Tools -> Developer Tools.
+
+Please describe the steps to reproduce this error and include any useful information or additional screenshots.`;
+}
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);
-    idb.set(k, v);
+    return idb.set(k, v);
 }
 // function removeData(k) {
 //     idb.del(k);

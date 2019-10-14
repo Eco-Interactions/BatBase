@@ -62,7 +62,7 @@ initDbPage();
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
     const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
-    if (winWidth < 1200) { return; }
+    if (winWidth < 1200 && $('body').data('env') != 'test') { return; }
     requireCss();
     requireJs();
     db_ui.init();
@@ -313,8 +313,7 @@ export function showLocOnMap(geoJsonId, zoom) {
     db_ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent');
     _u.getData('geoJson').then(geo => {  
-        const data = { geo: geo, locs: tblState.rcrdsById};
-        db_map.showLoc(geoJsonId, zoom, data);
+        db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
         $('#tbl-filter-status').html('No Active Filters.');
     });
 }

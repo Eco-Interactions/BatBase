@@ -247,15 +247,15 @@ function fillIntCntLegend(shown, notShown) {
         ${notShown} without GPS data</span>`;
 }
 /** ---------------- Init Map ----------------------------------------------- */
-export function initMap(data, fltrd) {                                          console.log('initMap')
-    app.data = data;
+export function initMap(data, fltrd) {                                          console.log('initMap. data = %O', data);
+    app.data.locs = data;
     const dispFunc = !fltrd ? addAllIntMrkrsToMap : addMrkrsInSet.bind(null, fltrd);
     downloadDataAndBuildMap(dispFunc, 'map');                                               
 }
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom, data) {                 
-    app.data = data; //geo & locs    
+    app.data.locs = data; 
     downloadDataAndBuildMap(showLocInMap, 'map');
     
     function showLocInMap() {
@@ -292,7 +292,7 @@ function buildLocPopup(loc, latLng) {
  * is a "Location" button that will replace the name popup with a 
  * summary of the interactions at the location.
  */
-async function addAllIntMrkrsToMap() {  
+function addAllIntMrkrsToMap() {  
     let ttlShown = 0, 
     ttlNotShown = 0,
     regions;
@@ -317,7 +317,7 @@ async function addAllIntMrkrsToMap() {
     }
 }
 function getRegionLocs() {
-    return Promise.resolve(_u.getData('topRegionNames').then(data => {
+    return Promise.resolve(_u.getData('topRegionNames').then(data => {  
         return Object.values(data).map(id => app.data.locs[id]);
     }));
 }

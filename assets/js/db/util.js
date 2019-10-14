@@ -9,6 +9,7 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 /* 
  * Exports:                     Imported by:
  *     (IDB Storage Methods)
+ *         downloadFullDb           db-sync
  *         getData
  *         setData
  *   addEnterKeypressClick
@@ -34,6 +35,9 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 */
 extendPrototypes();
 /*------------------------ IDB Storage Methods -----------------------------------------------------------------------*/
+export function downloadFullDb() {
+    _db.downloadFullDb();
+}
 /**
  * Gets data from data storage for each storage property passed. If an array
  * is passed, an object with each prop as the key for it's data is returned. 
@@ -43,7 +47,7 @@ export function getData(props, returnUndefined) {
     return _db.getData(props, returnUndefined);
 }
 export function setData(k, v) {
-    _db.setData(k, v);
+    return _db.setData(k, v);
 }
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {

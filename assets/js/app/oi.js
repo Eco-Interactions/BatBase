@@ -84,7 +84,7 @@ function clearFieldForPdfSubmissions() {
  */
 function showOverlayOnMobile() {
     const mblMsg = getMobileMsg();
-    if (!mblMsg) { return; } 
+    if (!mblMsg || $('body').data('env') == 'test') { return; } 
     showMobilePopupMsg(mblMsg);
 }
 function getMobileMsg() {

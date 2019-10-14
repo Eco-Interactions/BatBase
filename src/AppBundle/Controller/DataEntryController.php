@@ -142,22 +142,22 @@ class DataEntryController extends Controller
     }
     /*---------- Detail Entity ------------------------------------------*/
     /** If the core-entity is 'Source', process any detail-entity data. */
-    private function handleDetailEntity($cFormData, $dFormData, &$returnData, $em)
+    private function handleDetailEntity($cFormData, $formData, &$returnData, $em)
     {
-        if (property_exists($cFormData, "false")) { return false; }
-        return $this->setDetailEntityData($cFormData, $dFormData, $returnData, $em);  
+        if (property_exists($formData, "false")) { return false; }
+        return $this->setDetailEntityData($cFormData, $formData, $returnData, $em);  
     }
     /**
      * Sets all detail-entity data and returns the entity. 
      * Note: Publishers are the only 'sourceType' with no detail-entity.
      */
-    private function setDetailEntityData($cFormData, $dFormData, &$returnData, &$em)
+    private function setDetailEntityData($cFormData, $formData, &$returnData, &$em)
     {
         $dName = property_exists($cFormData->rel, "sourceType") ? 
             $cFormData->rel->sourceType : 'geoJson';                            //print('detail name = '.$dName);
         $returnData->detail = $dName;
         if (!property_exists($cFormData, "hasDetail")) { return false; }
-        $dData = $dFormData->$dName;
+        $dData = $formData->$dName;
         
         return $this->setDetailData( $dData, $dName, $returnData, $em );
     }

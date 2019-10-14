@@ -914,9 +914,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iSeeInTheField($text, $prop, $type)
     {
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
-        $curForm = $this->getOpenFormId();
-        $selector = $curForm.' '.$field;      
-        $this->assertFieldValueIs($text, $selector);        
+        $selector = $this->getOpenFormId().' '.$field;   
+        $this->assertFieldValueIs($text, $selector);
     }
     
     /**
@@ -1405,11 +1404,13 @@ class FeatureContext extends RawMinkContext implements Context
             $isIn && strpos($fieldVal, $text) != false;
     }
     private function assertFieldValueIs($text, $fieldId, $isIn = true)
-    {  
-        $fieldVal = $this->getFieldData($fieldId);
+    {   
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleEqualAssert($text, $fieldVal, $isIn,  
-            "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
+        $this->spin(function () use ($text, $fieldId, $isIn)
+        {
+            $fieldVal = $this->getFieldData($fieldId); 
+            return $isIn ? $fieldVal == $text : $fieldVal != $text;       
+        }, "$should_nt  have found [$text] in [$fieldId].");
     }
     /** Check after submitting the Interaction Edit form. */
     private function ensureThatFormClosed()
