@@ -81,7 +81,7 @@ function buildAndShowMap(loadFunc, mapId, type) {                               
     app.map = getMapInstance(mapId);
     app.map.setMaxBounds(getMapBounds());
     app.map.on('click', onMapClick.bind(null, type));
-    app.map.on('load', loadFunc);
+    app.map.on('load', loadFunc.bind(null, mapId));
     addMapTiles(mapId);
     addGeoCoderToMap(mapId);
     addTipsLegend();
@@ -255,7 +255,7 @@ export function initMap(data, fltrd) {                                          
 /** ---------------- Show Location on Map ----------------------------------- */
 /** Centers the map on the location and zooms according to type of location. */
 export function showLoc(id, zoom, data) {                 
-    app.data = data;        
+    app.data = data; //geo & locs    
     downloadDataAndBuildMap(showLocInMap, 'map');
     
     function showLocInMap() {
@@ -647,6 +647,7 @@ function finishFormMap(parentId, type) {                                        
     }
     if (!parentId) { return; }
     addParentLocDataToMap(parentId, null, type);
+    $('#loc-map').data('loaded', true);
 }
 /** 
  * Draws containing country polygon on map and displays all locations within. 
