@@ -92,15 +92,14 @@ function logAndAlert(key) {
     alert(getAlertMsg(key));
 }
 function getAlertMsg(key) {
-    const msg = getUserLvlAlert();
-    return `Error loading [${key}] data. Try reloading the page.\n\n${msg}`;
+    return `Error loading [${key}] data. Try reloading the page.\n\n${getUserLvlAlert()}`;
 }
 function getUserLvlAlert() {
     const userRole = $('body').data('user-role');
     const msgs = {
         visitor: getVisitorErrMsg, user: getUserErrMsg, editor: getEditorErrMsg
     };
-    return msgs[userRole];
+    return msgs[userRole]();
 }
 function getVisitorErrMsg() {
     return `If the problem persists, please contact us at info@batplant.org and let us know.`;
@@ -113,7 +112,7 @@ function getEditorErrMsg() {
 
 Open Chrome menu -> More Tools -> Developer Tools.
 
-Please describe the steps to reproduce this error and include any useful information or additional screenshots.`;
+Please include a description of the steps to reproduce this error and any useful information or additional screenshots.`;
 }
 /** ----------------------- SETTERS ----------------------------------------- */
 export function setData(k, v) {                                                 //console.log('         SET [%s] => [%O]', k, v);

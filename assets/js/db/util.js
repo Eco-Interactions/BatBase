@@ -152,8 +152,9 @@ export function alphaOptionObjs(a, b) {
     return x<y ? -1 : x>y ? 1 : 0;
 }  
 /** Builds options out of a stored entity-name object. */
-export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
-    return _db.getData(prop).then(data => {
+export function getOptsFromStoredData(prop) {                                   
+    return _db.getData(prop, true).then(data => {                               console.log('       --getOptsFromStoredData. NO STORED DATA FOR [%s].', prop);
+        if (!data) { return []; }
         return buildOptsObj(data, Object.keys(data).sort());
     });
 }

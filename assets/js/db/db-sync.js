@@ -559,7 +559,7 @@ function getObjectRealmNames(realms) {                                          
     return data;
 }
 function storeTaxaByLevelAndRealm(taxa) {
-    var realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym name data = %O", nameData);
+    var realmData = separateTaxaByLevelAndRealm(taxa);                          //console.log("taxonym realmData = %O", realmData);
     for (var realm in realmData) {  
         storeTaxaByLvl(realm, realmData[realm]);
     }

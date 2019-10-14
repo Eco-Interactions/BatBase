@@ -79,7 +79,7 @@ function getHeaderHtml(title) {
     return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
 }
 /** Returns popup and overlay to their original/default state. */
-function exitFormPopup(e, skipReset) { 
+function exitFormPopup(e, skipReset) {                                          console.log('           --exitFormPopup')
     hideSearchFormPopup();
     if (!skipReset) { refocusTableIfFormWasSubmitted(); }
     $("#b-overlay").removeClass("form-ovrly");
@@ -779,12 +779,13 @@ function initCitForm(value) {                                                   
 function appendCitFormAndFinishBuild(fLvl, form) {
     $('#CitationTitle_row').after(form);
     initComboboxes('citation', 'sub');
-    selectDefaultCitType(fLvl).then(finishCitFormUiLoad);
+    selectDefaultCitType(fLvl).then(finishCitFormUiLoad.bind(null, fLvl));
 }
-function finishCitFormUiLoad() {
+function finishCitFormUiLoad(fLvl) {
     enableCombobox('#Publication-sel', false);
     $('#Abstract_row textarea').focus();
     setCoreRowStyles('#citation_Rows', '.sub-row');
+    if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#'+fLvl+'-submit'); }
 }
 function addSourceDataToMemory(data) {
     Object.keys(data).forEach(k => fP.records[k] = data[k]);
@@ -1686,7 +1687,7 @@ function initSubjectSelect() {                                                  
  * are repopulated with related taxa and the 'select' button is enabled. 
  * Note: The selected realm's level combos are built @onRealmSelection. 
  */
-function initObjectSelect() {                                                   //console.log("########### initObjectSelect fieldVal = [%s]", $('#Object-sel').val());
+function initObjectSelect() {                                                   console.log("           --initObjectSelect fieldVal = [%s]", $('#Object-sel').val());
     const fLvl = getSubFormLvl('sub');
     if ($('#'+fLvl+'-form').length !== 0) { return errIfAnotherSubFormOpen('Object', fLvl); }
     const realmName = getSelectedObjectRealm($('#Object-sel').val()); 
@@ -1808,7 +1809,7 @@ function enableTxnCombos(enable) {
  * in the selected Taxon realm, plant (default) or arthropod, filled with the 
  * taxa at that level. 
  */
-function onRealmSelection(val) {                                                console.log("onRealmSelection. val = ", val)
+function onRealmSelection(val) {                                                console.log("               --onRealmSelection. val = ", val)
     if (val === '' || isNaN(parseInt(val))) { return Promise.resolve(); }          
     if ($('#realm-lvls').length) { $('#realm-lvls').remove(); } 
     const fLvl = getSubFormLvl('sub');
@@ -3598,8 +3599,8 @@ function getBttnEvents(entity, level) {                                         
  * and contextually enables to parent form's submit button. Calls the exit 
  * handler stored in the form's params object.
  */
-function exitForm(formId, fLvl, focus, data) {                                  //console.log("Exiting form. id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
-    $(formId).remove();
+function exitForm(formId, fLvl, focus, data) {                                  //console.log("               --exitForm id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
+    $(formId).remove();  
     resetFormCombobox(fLvl, focus);
     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
     fP.forms[fLvl].exitHandler(data);
@@ -4463,7 +4464,7 @@ function rebuildCitationText(citSrc, cit) {
  * Exits the successfully submitted form @exitForm. Adds and selects the new 
  * entity in the form's parent elem @addAndSelectEntity.
  */
-function exitFormAndSelectNewEntity(data) {                                     //console.log('exitFormAndSelectNewEntity')
+function exitFormAndSelectNewEntity(data) {                                     console.log('           --exitFormAndSelectNewEntity. data = %O', data);
     const fLvl = fP.ajaxFormLvl;           
     exitForm('#'+fLvl+'-form', fLvl, false, data); 
     if (fP.forms[fLvl].pSelId) { addAndSelectEntity(data, fLvl); }
