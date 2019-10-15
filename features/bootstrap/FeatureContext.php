@@ -1541,7 +1541,14 @@ class FeatureContext extends RawMinkContext implements Context
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
     {
-        $driver = new \Behat\Mink\Driver\Selenium2Driver('firefox');
+        $opts = [
+            'browser' => 'chromium',
+            'chrome' => [
+                'binary' => '/Applications/Chromium.app/Contents/MacOS/Chromium',
+                'args' => ['--disable-gpu', '--window-size=1400,1440']], 
+            'marionette' => true,
+        ];
+        $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome', $opts);
         $session = new \Behat\Mink\Session($driver);
         $session->start();
         return $session;
@@ -1557,7 +1564,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function userCreatesInteractions($editor, $cntAry)
     {                                                                           fwrite(STDOUT, "\---- userCreatesInteractions.\n");
-        $this->curUser->getPage()->pressButton('Add Data');
+        $this->curUser->getPage()->pressButton('New');
         foreach ($cntAry as $cnt) {                                             fwrite(STDOUT, "\n    Creating interaction $cnt\n");
             $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
         }                                                                       fwrite(STDOUT, "\n    Interactions added. Exiting form\n");
@@ -1584,7 +1591,14 @@ class FeatureContext extends RawMinkContext implements Context
         $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
-        $this->iWaitForTheFormToClose('top');                                   fwrite(STDOUT, "\n  Interaction ".$count." complete\n");
+        $this->waitForInteractionFormToReset();
+    }
+    private function waitForInteractionFormToReset()
+    {
+        $this->spin(function()
+        {
+            return $this->curUser->evaluateScript("$('#success').length > 0");
+        }, 'Interaction form did not reset.');
     }
     private function fillSrcAndLocFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling Source and Location fields.\n");
@@ -1615,9 +1629,10 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function editorTableLoads($editor)
     {
-        $editor->wait( 5000, "$('.ag-row').length" );
-        $tableRows = $editor->evaluateScript("$('.ag-row').length > 0");
-        assertTrue($tableRows);
+        $this->spin(function() use ($editor)
+        {
+            return $editor->evaluateScript("$('.ag-row').length > 0");
+        }, 'Rows not loaded in table.');
     }
     private function editorChangesLocationData()
     {                                                                           fwrite(STDOUT, "\n---- Editor changing Location data.\n");

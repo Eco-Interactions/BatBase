@@ -226,7 +226,7 @@ class DataEntryController extends Controller
                 call_user_func($edgeCases[$rEntityName], $val);
             } else {
                 $relEntity = $this->getEntity($rEntityName, $val, $em);
-                $this->setRelDataAndTrackEdits($entity, $rEntityName, $relEntity, $edits);
+                $this->setRelDataAndTrackEdits($entity, $rEntityName, $relEntity, $edits, $em);
             }
         }
     }
@@ -373,7 +373,7 @@ class DataEntryController extends Controller
     private function addInteractionToSource($id, $entity, &$edits, &$em)
     {
         $relEntity = $this->getEntity("Source", $id, $em);
-        $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits);
+        $this->setRelDataAndTrackEdits($entity, "source", $relEntity, $edits, $em);
         $className = $em->getClassMetadata(get_class($entity))->getName(); 
         if ($className === "AppBundle\Entity\Interaction" && !$relEntity->getIsDirect()) {
             $relEntity->setIsDirect(true);
@@ -399,20 +399,26 @@ class DataEntryController extends Controller
      * Checks whether current value is equal to the passed value. If not, the 
      * entity is updated with the new value and the field is added to the edits obj.   
      */
-    private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits) 
+    private function setRelDataAndTrackEdits(&$entity, $field, $newVal, &$edits, &$em) 
     {
-        $setField = 'set'. ucfirst($field);                                     
-        $getField = 'get'. ucfirst($field);                                     
+        $setField = 'set'. ucfirst($field);
+        $getField = 'get'. ucfirst($field);
         
-        $curVal = $entity->$getField() ? $entity->$getField()->getId() : null;
+        $oldVal = $entity->$getField() ? $entity->$getField()->getId() : null;
+        $oldEntity = $entity->$getField();
+
         if ($newVal === null) { 
-            if ($curVal === null) { return; }
-        } else if ($curVal === $newVal->getId()) { return; }
+            if ($oldVal === null) { return; }
+        } else if ($oldVal === $newVal->getId()) { return; }
 
         if ($edits->editing) { 
             $newValue = $newVal === null ? null : $newVal->getId();
-            $edits->$field = [ "old" => $curVal, "new" => $newValue ]; }
+            $edits->$field = [ "old" => $oldVal, "new" => $newValue ]; 
+        }
+
         $entity->$setField($newVal);
+        if ($oldEntity !== null) { $em->persist($oldEntity); }
+
     }
     /*---------- Flush and Return Data ---------------------------------------*/
     /**

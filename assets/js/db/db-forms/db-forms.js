@@ -1876,6 +1876,13 @@ function resetPrevTaxonSelection(selId) {                                       
     const id = selId || fP.forms.taxonPs.prevSel.val; 
     if (!id) { return; }
     const taxon = fP.records.taxon[id];                                         //console.log('resetPrevTaxonSelection. taxon = %O. prevTaxonId = %s', taxon, id);
+    if (realmTaxonPrevSelected(taxon)) { return; }
+    selectPrevTaxon(taxon);
+}
+function realmTaxonPrevSelected(taxon) { 
+    return fP.forms.taxonPs.curRealmLvls[0] == taxon.level.displayName;
+}
+function selectPrevTaxon(taxon) {
     fP.forms.taxonPs.prevSel = {val: taxon.id, text: getTaxonDisplayName(taxon)};        
     if (ifRealmReset(taxon.realm)) { return setSelVal('#Realm-sel', taxon.realm.id); }
     setSelVal('#'+taxon.level.displayName+'-sel', id);
@@ -1960,7 +1967,7 @@ function resetChildLevelCombos(selTxn) {                                        
     .then(opts => repopulateLevelCombos(opts, {}))
     .then(() => delete fP.forms.taxonPs.recentChange);
 }
-function getRealmTopLevel(realm) {
+function getRealmTopLevel() {
     return fP.forms.taxonPs.curRealmLvls[1];
 }
 function getChildlevelOpts(lvlName) { 

@@ -125,7 +125,8 @@ export function updateFilterPanelHeader(focus) {
     };
     const hdrPieces = $('#focus-filter-hdr').text().split(' ');  
     hdrPieces.splice(0, 1, map[focus]);  
-    $('#focus-filter-hdr').text(hdrPieces.join(' '));
+    $('#focus-filter-hdr').text(hdrPieces.join(' '));   
+    tState().set({'onInitComplete' : false});
 }
 /* --- Toggle Panel Vertically or Horizontally --- */
 export function toggleFilterPanelOrientation(style, close) {

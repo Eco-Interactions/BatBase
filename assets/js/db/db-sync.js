@@ -109,15 +109,14 @@ function processUpdatedEntityData(data) {
     return storeUpdatedData(parseData(data[entity]), entity); 
 }
 /** Sends the each updated record to the update handler for the entity. */ 
-function storeUpdatedData(rcrds, entity) { 
-    const proms = [];
+function storeUpdatedData(rcrds, entity) {  
     const coreEntities = ['Interaction', 'Location', 'Source', 'Taxon']; 
     const entityHndlr = coreEntities.indexOf(entity) !== -1 ?  
         addCoreEntityData : addDetailEntityData; 
-    for (let id in rcrds) { 
-        proms.push(entityHndlr(_u.lcfirst(entity), rcrds[id])); 
-    } 
-    return Promise.all(proms);
+    return Object.keys(rcrds).reduce((p, id) => {
+        const updateFunc = entityHndlr.bind(null, _u.lcfirst(entity), rcrds[id]);
+        return p.then(updateFunc);
+    }, Promise.resolve());
 } 
 function retryFailedUpdatesAndLoadTable() {                                     //console.log('retryFailedUpdatesAndLoadTable')
     retryFailedUpdates();

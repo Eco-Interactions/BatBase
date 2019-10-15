@@ -330,9 +330,9 @@ function fillSrcTree(dataTree, entityData) {
 
 } /* End fillSrcTree */
 /** Replace the interaction ids with their interaction records. */
-function replaceInteractions(interactionsAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-    return interactionsAry.map(function(intId){
-        if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
+function replaceInteractions(interactionsAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O, intRcrds = %O", interactionsAry, entityData.interaction);
+    return interactionsAry.map(function(intId){  
+        if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(entityData.interaction[intId]));
             return fillIntRcrd(
                 _u.getDetachedRcrd(intId, entityData.interaction), entityData); 
         } 
@@ -397,12 +397,12 @@ function fillHiddenTaxonColumns(curTaxonTree, lvls) {                           
         var topIdx = lvls.indexOf(parentLvl);
         for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
     }
-    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
-        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             //console.log('role = ', role)
+    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', _u.snapshot(curTaxonHeirarchy));
+        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             
             if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
         });
     } 
-    function addTaxonTreeFields(intRcrdObj) {                               
+    function addTaxonTreeFields(intRcrdObj) {     
         for (var lvl in curTaxonHeirarchy) {
             var colName = 'tree' + lvl; 
             intRcrdObj[colName] = lvl === 'Species' ? 

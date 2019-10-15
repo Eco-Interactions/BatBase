@@ -350,6 +350,7 @@ class Interaction
      */
     public function setSubject(\AppBundle\Entity\Taxon $subject)
     {
+        if ($this->subject) { $this->subject->removeSubjectRole($this); }
         $this->subject = $subject;
 
         return $this;
@@ -384,6 +385,7 @@ class Interaction
      */
     public function setObject(\AppBundle\Entity\Taxon $object)
     {
+        if ($this->object) { $this->object->removeObjectRole($this); }
         $this->object = $object;
 
         return $this;
