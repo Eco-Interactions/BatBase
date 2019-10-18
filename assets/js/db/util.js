@@ -386,6 +386,13 @@ function clearCombobox($selApi) {
     $selApi.clearOptions();
     $selApi.off('change');
 }
+export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);
+    const confg = getSelConfgObj(field);
+    const $selApi = $(confg.id)[0].selectize; 
+    const change = confg.change;
+    $selApi.addItem(val, 'silent');
+    return change(val);
+}
 /* ------------- Unused ----------------------------------------------------- */
 // function alphaProperties(obj) {
 //     var sortable=[];

@@ -41,12 +41,12 @@ export function initFilterPanel() {
 function initTimeFilterUi() {
     _u.initCombobox('Time Filter', null, db_filters.selTimeFilter);
     $('#selTimeFilter')[0].selectize.disable();
-    db_filters.toggleTimeFilter('disable');
+    db_filters.toggleTimeFilter('disable'); //inits disabled ui
 }
 export function addFilterPanelEvents() {  
     window.addEventListener('resize', resizeFilterPanelTab);
     $('#filter').click(toggleFilterPanel);                                      
-    $('#shw-chngd').change(db_filters.toggleTimeFilter);
+    $('#shw-chngd').change(db_filters.toggleTimeFilter.bind(null, null, null, null));
     $('#delete-filter').click(showCnfrmDeleteBttns);
     $('#apply-filter').click(applyFilterSet);
     $('#confm-set-delete').click(confmDelete);
@@ -126,7 +126,6 @@ export function updateFilterPanelHeader(focus) {
     const hdrPieces = $('#focus-filter-hdr').text().split(' ');  
     hdrPieces.splice(0, 1, map[focus]);  
     $('#focus-filter-hdr').text(hdrPieces.join(' '));   
-    tState().set({'onInitComplete' : false});
 }
 /* --- Toggle Panel Vertically or Horizontally --- */
 export function toggleFilterPanelOrientation(style, close) {
@@ -288,63 +287,48 @@ function applyFilterSet() {
     reloadTableThenApplyFilters(filters, app.fltr.id);
 }
 function reloadTableThenApplyFilters(filters, id) { 
-    const cb = onTableReloadComplete.bind(null, filters, id);
-    if (filters.focus == tState().get('curFocus')) {    
-        tState().set({onInitComplete: cb});
-        resetDataTable(filters.view, cb);
-        _u.setSelVal('View', filters.view, 'silent'); 
-    } else { 
-        tState().set({onInitComplete: setViewThenContinue});
-        selectSearchFocus(filters.focus, filters.view);
-        _u.setSelVal('Focus', filters.focus, 'silent'); 
-    }                        
-    function setViewThenContinue() {
-        if (filters.view == tState().get('curView')) { return cb();
-        } else { 
-            const view =  filters.view ? filters.view : 'tree'; //Location filters are only saved in tree view
-            tState().set({onInitComplete: cb});
-            _u.setData('curView', view); 
-            _u.setSelVal('View', view); 
-        }
-    }
+    _u.setSelVal('Focus', filters.focus, 'silent'); 
+    setView(filters);
+    selectSearchFocus(filters.focus, filters.view)
+    .then(onTableReloadComplete.bind(null, filters, id));     
+}
+function setView(filters) {
+    if (filters.view == tState().get('curView')) { return; }
+    const view =  filters.view ? filters.view : 'tree'; //Location filters are only saved in tree view
+    _u.setData('curView', view); 
+    _u.setSelVal('View', filters.view, 'silent'); 
 }
 function onTableReloadComplete(filters, id) {                       /*temp-log*/console.log('onTableReloadComplete. filters = %O, id = [%s]', filters, id);
     _u.setSelVal('Saved Filter Set', id); 
     setFiltersThatResetTableThenApplyRemaining(filters);
 }
 function setFiltersThatResetTableThenApplyRemaining(filters) {
-    if (filters.focus == 'srcs') { return setSrcCombo(filters); }
-    const resetCb = applyRemainingFilters.bind(null, filters);
-    setComboboxFilter(filters.panel.combo, resetCb);
+    if (!filters.panel.combo) { return applyRemainingFilters(filters); }
+    setComboboxFilter(filters.panel.combo)
+    .then(applyRemainingFilters.bind(null, filters));
 }
-function setSrcCombo(filters) {
-    setComboboxFilter(filters.panel.combo);
-    applyRemainingFilters(filters);
-}
-function setComboboxFilter(filter, resetCb) {                       /*debg-log*/console.log('setComboboxFilter. filter = %O, resetCb = %O', filter, resetCb);
+function setComboboxFilter(filter) {                                /*debg-log*///console.log('setComboboxFilter. filter = %O', filter);
     const name = Object.keys(filter)[0];  
-    const id = name === 'Publication Type' ? 'PubType' : name; 
-    tState().set({onInitComplete: resetCb});
-    $(`#sel${id}`)[0].selectize.addItem(filter[name].value);
+    return _u.triggerComboChangeReturnPromise(name, filter[name].value);
 }
-function applyRemainingFilters(filters) {                           /*temp-log*/console.log('       //applyRemainingFilters = %O', filters);
+function applyRemainingFilters(filters) {                           /*temp-log*///console.log('       //applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
     setTimeUpdatedFilter(filters.panel.time);
     applyColumnFilters(filters.table);
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
-    tState().set({onInitComplete: null});
+    tState().set({onInitComplete: null});  console.log('setting init func null')
 }
 function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = %s', text);
     if (!text) { return; }
     $('#focus-filters input').val(text);
 }
-function setTimeUpdatedFilter(time) {                               /*debg-log*/console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
+function setTimeUpdatedFilter(time) {                               /*debg-log*///console.log('setTimeUpdatedFilter. time = %s. today = %s', time, new Date().today());
     if (!time) { return; } 
     _u.setSelVal('Time Filter', time.type);
     if (time.date) { db_filters.toggleTimeFilter(true, time.date); }
 }
-function applyColumnFilters(filters) {                              /*temp-log*/console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
+function applyColumnFilters(filters) {                              /*temp-log*///console.log('applyColumnFilters filters = %O, tblState = %O', filters, app.tblState);
     app.tblApi = tState().get('api'); 
     for (let name in filters) {  
         const colName = Object.keys(filters[name])[0];              /*debg-log*///console.log('col = [%s]. Model = %O', colName, filters[name][colName]);
@@ -384,11 +368,16 @@ function submitFilterSet(data, action, successFunc) {
     const envUrl = $('body').data("ajax-target-url");
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
 }
-function onFilterSubmitComplete(action, results) {          
-    const filter = JSON.parse(results.list.entity);                 /*debg-log*///console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
-    updateUserNamedList(results.list, action, () => {
-        updateFilterSel();
-        $('#selSavedFilters')[0].selectize.addItem(filter.id);
+function onFilterSubmitComplete(action, results) {
+    const filter = JSON.parse(results.list.entity);                 /*debg-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
+    updateUserNamedList(results.list, action)
+    .then(onUpdateSuccessUpdateFilterUi.bind(null, filter.id));
+}
+function onUpdateSuccessUpdateFilterUi(id) {
+    _u.getOptsFromStoredData('savedFilterNames')
+    .then(updateFilterSel)
+    .then(() => {
+        $('#selSavedFilters')[0].selectize.addItem(id);
         addSetToFilterStatus();
         showSavedMsg();
     });
@@ -405,11 +394,13 @@ function dataFiltersSaved(fltr) {
     return panleFilters || tableFilters;
 }
 function onFilterDeleteComplete(results) {                          /*debg-log*///console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete', () => {
-        resetFilterUi();
-        updateFilterSel();
-        $('#selSavedFilters')[0].selectize.open();
-    });
+    updateUserNamedList(results.list, 'delete')
+    .then(onDeleteSuccessUpdateFilterUi);
+}
+function onDeleteSuccessUpdateFilterUi() {
+    resetFilterUi();
+    _u.getOptsFromStoredData('savedFilterNames').then(updateFilterSel);
+    $('#selSavedFilters')[0].selectize.open();
 }
 function showSavedMsg() {
     $('#set-submit-msg').fadeTo('slow', 1);
@@ -457,16 +448,3 @@ function updateSubmitButton(func, listLoaded) {
         _uPnl.updateSubmitEvent('#save-filter', showSaveFilterModal.bind(null, func));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

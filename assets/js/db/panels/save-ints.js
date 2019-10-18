@@ -216,14 +216,15 @@ function resetDeleteButton() {
  */
 function loadListInTable() {                                        /*debg-log*/console.log('----Loading Interaction List in Table. %O', app.list);
     prepareMemoryForTableLoad();
-    resetDataTable();
+    resetDataTable()
+    .then(updateRelatedListUi);
 }
 function prepareMemoryForTableLoad() {
-    tState().set({'intSet': app.list.details, onInitComplete: updateUi});
+    tState().set({'intSet': app.list.details});
     app.tblState = tState().get();  
     app.listLoaded = true;
 }
-function updateUi() {
+function updateRelatedListUi() {
     app.tblState.api.expandAll();
     resetToggleTreeBttn(true);
     syncFilterUi(app.tblState.curFocus);
@@ -233,7 +234,6 @@ function updateUi() {
     updateFilterStatusMsg();
     enableListReset();
     updateDetailHdr('Loaded');
-    tState().set({onInitComplete: null});
     delete app.tblState;
 }
 function syncFilterUi(focus) {
@@ -259,9 +259,9 @@ function submitDataList(data, action, hndlr) {
 }
 function onListSubmitComplete(action, results) {                                      
     const list = JSON.parse(results.list.entity);                   /*temp-log*/console.log('listSubmitComplete results = %O, list = %O', results, list)
-    updateUserNamedList(results.list, action, () => {
-        updateListComboboxOptions().then(() => updateUiAfterListSubmit(list));
-    });
+    updateUserNamedList(results.list, action)
+    .then(updateListComboboxOptions)
+    .then(updateUiAfterListSubmit.bind(null, list));
 }
 function updateUiAfterListSubmit(list) {
     $('#selIntList')[0].selectize.addItem(list.id)
@@ -272,9 +272,9 @@ function updateUiAfterListSubmit(list) {
     $('#submit-list').data('submitting', false);
 }
 function onListDeleteComplete(results) {                            /*temp-log*/console.log('listDeleteComplete results = %O', results)
-    updateUserNamedList(results.list, 'delete', () => {
-        updateListComboboxOptions().then(() => $('#selIntList')[0].selectize.open());
-    });
+    updateUserNamedList(results.list, 'delete')
+    .then(updateListComboboxOptions)
+    .then(() => $('#selIntList')[0].selectize.open());
 }
 function showSavedMsg() {
     $('#list-submit-msg').fadeTo('slow', 1);
@@ -422,8 +422,8 @@ function resetPrevListUiState() {
 function resetTable() {                     
     tState().set({'intSet': false});                                            
     delete app.listLoaded;
-    tState().set({onInitComplete: updateUiAfterTableReset});
-    resetDataTable();
+    resetDataTable()
+    .then(updateUiAfterTableReset);
 }
 function updateUiAfterTableReset() {
     enableModUi('add');

@@ -26,13 +26,13 @@ Updates:
 
 Current:
     - move to idb
-        - Add "catch" to all async calls
-        - Add better alert/logs.
+        - Set all times to base UTF. Adjusting to PNW time has messed up the "show today's updates" feature.
 
         - after server update
             - db-sync
                 - combine the add & remove sync methods to reduce time waiting on async calls?
                 - optimize storeData calls too
+                - look into whether there are other places where something is removed from a collection and needs to be flagged for updates so other editors get all the updated data.
             - test that data redownloads totally
                 - that updated from other editors update on page refresh 
                 - that user data updates as expected

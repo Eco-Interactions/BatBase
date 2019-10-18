@@ -228,7 +228,7 @@ function storeTaxonLevelData(topTaxon, filtering) {                             
  */
 function storeLevelData(topTaxon, levels) {                                     //console.log('topTaxon = %O', topTaxon)
     const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                         
-    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', taxaByLvl, allRealmLvls);
+    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', _u.snapshot(taxaByLvl), _u.snapshot(allRealmLvls));
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
 function updateTaxaByLvl(topTaxon, levels) {

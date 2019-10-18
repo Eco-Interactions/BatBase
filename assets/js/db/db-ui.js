@@ -101,8 +101,8 @@ export function selectInitialSearchFocus(f) {                                   
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())
     _u.setSelVal('Focus', focus, 'silent');
-    tState().set({onInitComplete: updateFilterPanelHeader.bind(null, focus)});
-    db_page.selectSearchFocus();
+    db_page.selectSearchFocus()
+    .then(updateFilterPanelHeader.bind(null, focus));
 }
 function getFocusOpts() {
     return [
@@ -575,8 +575,7 @@ export function updateUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    updateBttnToShowRcrdsOnMap();
-    tState().set({onInitComplete: null});
+    updateBttnToShowRcrdsOnMap(); 
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);

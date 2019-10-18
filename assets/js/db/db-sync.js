@@ -60,9 +60,9 @@ function storeLocalDataState() {
     }); 
 }
 function trackTimeUpdated(entity, rcrd) {
-    _u.getData('lclDataUpdtdAt').then(stateObj => {
+    return _u.getData('lclDataUpdtdAt').then(stateObj => {
         stateObj[entity] = rcrd.serverUpdatedAt;
-        storeData('lclDataUpdtdAt', stateObj);  
+        return storeData('lclDataUpdtdAt', stateObj);  
     }); 
 }
 /** Db is reset unless testing suite did not reload database. */
@@ -460,26 +460,25 @@ function rmvFromNameProp(prop, rcrd, entity, edits) {
     }); 
 }
 /*---------------- Update User Named Lists -----------------------------------*/
-export function updateUserNamedList(data, action, cb) {                         console.log('   --Updating [%s] stored list data. %O', action, data);
+export function updateUserNamedList(data, action) {                             console.log('   --Updating [%s] stored list data. %O', action, data);
     let rcrds, names;
     const list = action == 'delete' ? data : JSON.parse(data.entity);  
     const rcrdKey = list.type == 'filter' ? 'savedFilters' : 'dataLists';
     const nameKey = list.type == 'filter' ? 'savedFilterNames' : 'dataListNames';  
     
-    _u.getData([rcrdKey, nameKey])
-    .then(data => syncListData(data))
-    .then(trackTimeUpdated.bind(null, entity, rcrd));
+    return _u.getData([rcrdKey, nameKey])
+    .then(storedData => syncListData(storedData))
+    .then(trackTimeUpdated.bind(null, 'UserNamed', list));
 
-    function syncListData(data) {
-        rcrds = data[rcrdKey];
-        names = data[nameKey];
+    function syncListData(storedData) {                                         //console.log('syncListData = %O', storedData);
+        rcrds = storedData[rcrdKey];
+        names = storedData[nameKey];
 
         if (action == 'delete') { removeListData(); 
         } else { updateListData(); }
         
         storeData(rcrdKey, rcrds);
         storeData(nameKey, names);
-        cb();
     }
     function removeListData() {  
         delete rcrds[list.id];  

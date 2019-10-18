@@ -200,15 +200,14 @@ export function selTimeFilter(val) {                                            
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-export function showTodaysUpdates(focus) {                                      //console.log("showTodaysUpdates. focus ? [%s] ", focus)
-    tState().set({onInitComplete: showUpdatesAfterTableLoad});
-    if (focus == _u.getSelVal('Focus')) { initDataTable(focus); 
-    } else { _u.setSelVal('Focus', focus); }
+export function showTodaysUpdates(focus) {                                      console.log("showTodaysUpdates. focus ? [%s] ", focus)
+    _u.setSelVal('Focus', focus, 'silent');
+    initDataTable(focus)
+    .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {
     _u.setSelVal('Time Filter', 'updated');
     toggleTimeFilter(true, 'today');
-    tState().set({onInitComplete: false});
 }
 /** The time-updated filter is enabled when the filter option is checked. */
 export function toggleTimeFilter(state, time, skipSync) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
@@ -272,15 +271,14 @@ function updateRelatedUi(filtering) {
         $('#selTimeFilter')[0].selectize.enable();
     } else { 
         $('#selTimeFilter')[0].selectize.disable()
-        $('#selTimeFilter')[0].selectize.clear(); 
     }
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  */
-function resetTimeFilter(skipSync) {                                                    //console.log('tState = %O', tState);
+function resetTimeFilter(skipSync) {                                            //console.log('resetTimeFilter. skipSync?', skipSync);
     fPs.timeRows = null;
-    if (!skipSync && tblState.api && tblState.rowData && !tblState.onInitComplete) { 
+    if (!skipSync && tblState.api && tblState.rowData) { 
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
     }
@@ -404,15 +402,16 @@ function reapplyPubFltr() {                                                     
  * updated based on the rows displayed in the grid so that the combobox options
  * show only taxa in the filtered tree.
  */
-function updateTaxonComboboxes(tblState) {
-    _u.getData('levelNames').then(lvls => {
-        const taxaByLvl = seperateTaxonTreeByLvl(lvls, getAllCurRows(tblState));
+function updateTaxonComboboxes() {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
+    const rowData = _u.snapshot(getAllCurRows());
+    _u.getData('levelNames').then(lvls => {  
+        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
         tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
-        db_ui.loadTxnFilterPanelElems(tblState);
+        db_ui.loadTxnFilterPanelElems(tState().get());
     });
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(lvls, rowData) {                                //console.log('rowData = %O', rowData);
+function seperateTaxonTreeByLvl(lvls, rowData) {                                
     const separated = {};
     rowData.forEach(data => separate(data));
     return sortObjByLevelRank(separated);
@@ -521,9 +520,12 @@ export function updateLocSearch(val, selType) {                                 
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
     updateNameFilterMemory(txt);
-    rebuildLocTable(root, txt);
     db_ui.resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+    rebuildLocTable(root, txt)
+    .then(() => {
+        if ($('#shw-chngd')[0].checked) { 
+            reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+    });
 } 
 function getLocType(val, selId) {                                        
     const selTypes = { selCountry: 'Country', selRegion: 'Region' };
