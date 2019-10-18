@@ -481,7 +481,7 @@ class DataEntryController extends Controller
         $entity = $em->getRepository('AppBundle:SystemDate')
             ->findOneBy(['description' => $name]);
         if (!$entity) { return; }
-        $entity->setDateVal(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
+        $entity->setDateVal(new \DateTime('now'));
         $em->persist($entity);
     }
 }

@@ -1885,7 +1885,7 @@ function realmTaxonPrevSelected(taxon) {
 function selectPrevTaxon(taxon) {
     fP.forms.taxonPs.prevSel = {val: taxon.id, text: getTaxonDisplayName(taxon)};        
     if (ifRealmReset(taxon.realm)) { return setSelVal('#Realm-sel', taxon.realm.id); }
-    setSelVal('#'+taxon.level.displayName+'-sel', id);
+    setSelVal('#'+taxon.level.displayName+'-sel', taxon.id);
     window.setTimeout(() => { delete fP.forms.taxonPs.reset; }, 1000);
 }
 function ifRealmReset(realm) {  

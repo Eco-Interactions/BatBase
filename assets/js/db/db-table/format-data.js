@@ -280,26 +280,26 @@ function getIntRowData(intRcrdAry, treeLvl, idx) {
     return [];
 }
 /** Returns an interaction rowData object with flat data in table-ready format. */
-function buildIntRowData(intRcrd, treeLvl, idx){                                
+function buildIntRowData(intRcrd, treeLvl, idx){              
     var rowData = {
-        isParent: false,
-        name: "",
-        treeLvl: treeLvl,
-        type: "intRcrd", 
+        citation: intRcrd.source.description,   //Table data
+        entity: "Interaction",       //Not sure what this is all used for...
         id: intRcrd.id,
-        entity: "Interaction",
-        interactionType: intRcrd.interactionType.displayName,
-        citation: intRcrd.source.description,
-        subject: getTaxonName(intRcrd.subject),
-        object: getTaxonName(intRcrd.object),
-        tags: intRcrd.tags,
-        note: intRcrd.note, 
-        rowColorIdx: idx,
-        updatedAt: intRcrd.updatedAt,
-        updatedBy: intRcrd.updatedBy,
-        year: intRcrd.source.year
+        interactionType: intRcrd.interactionType.displayName,   //Table data
+        isParent: false,  //Tell grid and various code not to expect sub-nodes
+        name: "",           // Blank tree field
+        note: intRcrd.note,    //Table data
+        object: getTaxonName(intRcrd.object),   //Table data
+        rowColorIdx: idx,       //Not sure what this is all used for...
+        subject: getTaxonName(intRcrd.subject),   //Table data
+        tags: intRcrd.tags,   //Table data
+        treeLvl: treeLvl,       //Not sure what this is all used for...
+        type: "intRcrd",        //Not sure what this is all used for...
+        updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
+        updatedBy: intRcrd.updatedBy,  
+        year: intRcrd.source.year       //When filtering interactions by publication date
     };
-    if (intRcrd.location) { getLocationData(intRcrd.location); }
+    if (intRcrd.location) { getLocationData(intRcrd.location); }  //Table & csv export data
     return rowData;
     /** Adds to 'rowData' any location properties present in the intRcrd. */
     function getLocationData(locObj) {

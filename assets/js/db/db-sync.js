@@ -291,12 +291,10 @@ function addToTaxonNames(prop, rcrd, entity) {
     const realm = rcrd.realm.displayName;
     const level = rcrd.level.displayName;  
     const nameProp = realm+level+"Names";
-    return _u.getData(prop, true).then(nameObj => {                             
+    const addFunc = addToNameProp.bind(null, nameProp, rcrd, entity);
+    return _u.getData(nameProp, true).then(nameObj => {                         //console.log('addToTaxonNames. [%s] = %O', nameProp, nameObj);                    
 /** Creates the level property if no taxa have been saved at this level and realm.  */
-        return nameObj ?
-            addToNameProp(realm+level+"Names", rcrd, entity) :   
-            storeData(realm+level+"Names", {})
-                .then(() => addToNameProp(realm+level+"Names", rcrd, entity));
+        return nameObj ? addFunc() : storeData(nameProp, {}).then(addFunc);
     });
 }
 /** Adds the Interaction to the stored entity's collection.  */

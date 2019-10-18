@@ -607,7 +607,7 @@ class Taxon
     public function removeSubjectRole(\AppBundle\Entity\Interaction $subjectRole)
     {
         $this->subjectRoles->removeElement($subjectRole);
-        $this->updated = new \DateTime('now', new \DateTimeZone('America/Los_Angeles'));
+        $this->updated = new \DateTime('now');
     }
 
     /**
@@ -653,7 +653,7 @@ class Taxon
     public function removeObjectRole(\AppBundle\Entity\Interaction $objectRoles)
     {
         $this->objectRoles->removeElement($objectRoles);
-        $this->updated = new \DateTime('now', new \DateTimeZone('America/Los_Angeles'));
+        $this->updated = new \DateTime('now');
     }
 
     /**
