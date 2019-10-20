@@ -1,4 +1,4 @@
-Feature: Search page features and database table controls
+ Feature: Search page features and database table controls
     In order to interact with the database
     As a web visitor
     I should be able to use the various features and controls on the search page
@@ -24,6 +24,7 @@ Feature: Search page features and database table controls
     Scenario:  I should be able to expand the data tree completely
         Given I see "2" rows in the table data tree
         When I press "Expand All"
+        Then I should see "10" interactions in the table
         Then I should see "22" rows in the table data tree
 
     @javascript

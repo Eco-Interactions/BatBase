@@ -282,7 +282,7 @@ function resetDeleteButton() {
 }
 /* ================== APPLY FILTER SET TO TABLE DATA ======================== */
 function applyFilterSet() {                                                     
-    const filters = app.fltr.details;                               /*Perm-log*/console.log('Applying Filter Set = %O', filters);
+    const filters = app.fltr.details;                               /*Perm-log*/console.log('//Applying Filter Set = %O', filters);
     app.fltr.active = true; 
     reloadTableThenApplyFilters(filters, app.fltr.id);
 }
@@ -298,7 +298,7 @@ function setView(filters) {
     _u.setData('curView', view); 
     _u.setSelVal('View', filters.view, 'silent'); 
 }
-function onTableReloadComplete(filters, id) {                       /*temp-log*/console.log('onTableReloadComplete. filters = %O, id = [%s]', filters, id);
+function onTableReloadComplete(filters, id) {                       /*temp-log*/console.log('   --onTableReloadComplete. filters = %O', filters);
     _u.setSelVal('Saved Filter Set', id); 
     setFiltersThatResetTableThenApplyRemaining(filters);
 }
@@ -307,17 +307,16 @@ function setFiltersThatResetTableThenApplyRemaining(filters) {
     setComboboxFilter(filters.panel.combo)
     .then(applyRemainingFilters.bind(null, filters));
 }
-function setComboboxFilter(filter) {                                /*debg-log*///console.log('setComboboxFilter. filter = %O', filter);
-    const name = Object.keys(filter)[0];  
+function setComboboxFilter(filter) {                                
+    const name = Object.keys(filter)[0];                            /*debg-log*/console.log('       --setComboboxFilter. [%s] filter = %O', name, filter);
     return _u.triggerComboChangeReturnPromise(name, filter[name].value);
 }
-function applyRemainingFilters(filters) {                           /*temp-log*///console.log('       //applyRemainingFilters = %O', filters);
+function applyRemainingFilters(filters) {                           /*temp-log*/console.log('       --applyRemainingFilters = %O', filters);
     setNameSearchFilter(filters.panel.name);
     setTimeUpdatedFilter(filters.panel.time);
     applyColumnFilters(filters.table);
     $('#selSavedFilters')[0].selectize.addItem(app.fltr.id);
     delete app.fltr.active; //Next time the status bar updates, the filters have changed outside the set
-    tState().set({onInitComplete: null});  console.log('setting init func null')
 }
 function setNameSearchFilter(text) {                                /*debg-log*///console.log('setNameSearchFilter. text = %s', text);
     if (!text) { return; }
@@ -369,9 +368,9 @@ function submitFilterSet(data, action, successFunc) {
     _u.sendAjaxQuery(data, envUrl + 'lists/' + action, onFilterSubmitComplete.bind(null, action));
 }
 function onFilterSubmitComplete(action, results) {
-    const filter = JSON.parse(results.list.entity);                 /*debg-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, filter);
+    addActiveFilterToMemory(JSON.parse(results.list.entity));                     /*debg-log*/console.log('onFilterSubmitComplete results = %O, filter = %O', results, app.fltr);
     updateUserNamedList(results.list, action)
-    .then(onUpdateSuccessUpdateFilterUi.bind(null, filter.id));
+    .then(onUpdateSuccessUpdateFilterUi.bind(null, app.fltr.id));
 }
 function onUpdateSuccessUpdateFilterUi(id) {
     _u.getOptsFromStoredData('savedFilterNames')

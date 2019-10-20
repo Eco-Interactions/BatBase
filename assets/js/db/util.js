@@ -31,6 +31,7 @@ import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
  *   setSelVal
  *   stripString
  *   snapshot
+ *   triggerComboChangeReturnPromise
  *   ucfirst 
 */
 extendPrototypes();
@@ -231,11 +232,11 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     }
 }
 function logAjaxData(dataPkg, args) {
-    if (['dev', 'test'].indexOf($('body').data('env') != -1)) {
-        console.log("           Sending Ajax data =%O arguments = %O", dataPkg, args);
+    if (['dev', 'test'].indexOf($('body').data('env') != -1)) { console.log("           Sending Ajax data =%O arguments = %O", dataPkg, args);
     } else { console.log("          Sending Ajax data =%O", dataPkg); }
 }
 export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
+    if ($('body').data('env') === 'test') { return; }
     alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
 }
 export function getErrMsgForUserRole() {
@@ -373,18 +374,18 @@ export function updatePlaceholderText(id, newTxt, optCnt) {                     
 export function replaceSelOpts(selId, opts, changeHndlr, name) {                //console.log('replaceSelOpts. args = %O', arguments)
     const $selApi = $(selId)[0].selectize;
     if (!opts) { return clearCombobox($selApi); }
-    $selApi.clearOptions(); 
-    $selApi.addOption(opts);
-    $selApi.refreshOptions(false);
     if (name) { updatePlaceholderText(selId, name, opts.length); }    
     if (changeHndlr) { 
         $selApi.off('change');
         $selApi.on('change', changeHndlr); 
     }  
+    $selApi.clearOptions(); 
+    $selApi.addOption(opts);
+    $selApi.refreshOptions(false);
 }
 function clearCombobox($selApi) {
-    $selApi.clearOptions();
     $selApi.off('change');
+    $selApi.clearOptions();
 }
 export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);
     const confg = getSelConfgObj(field);

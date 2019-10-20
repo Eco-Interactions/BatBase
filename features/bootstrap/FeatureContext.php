@@ -214,10 +214,14 @@ class FeatureContext extends RawMinkContext implements Context
             'Test Interaction List' => 1, 'Panama' => 12 ];
         $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
         $selId = '#sel'.str_replace(' ','',$label);
-        $elem = $this->getUserSession()->getPage()->find('css', $selId);
-        $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
-        $this->getUserSession()->
-            executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->spin(function() use ($selId, $val)
+        {
+            $elem = $this->getUserSession()->getPage()->find('css', $selId);
+            if (!$elem) { return false; }
+            $this->getUserSession()->
+                executeScript("$('$selId')[0].selectize.addItem('$val');");
+            return true;
+        }, "Couldn't select [$val] from the [$selId] elem.");
     }
 
     /**
@@ -368,8 +372,6 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @Then I (should) see :count row(s) in the table data tree
-     *
-     * refactor: merge with ishouldseeinteractionsinthelist
      */
     public function iShouldSeeRowsInTheTableDataTree($count)
     {

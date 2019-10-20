@@ -334,7 +334,7 @@ function getSrcDataAndBuildTable(view) {
     });
 }
 /** Event fired when the source view select box has been changed. */
-export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val)
+export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val);
     if (!val) { return; }
     $('#focus-filters').empty();
     return rebuildSrcTable(val);

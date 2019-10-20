@@ -85,6 +85,7 @@ function getStoredDataObj(keys, returnUndefined) {
 } 
 function logAndAlert(key) {
     console.log(`Error loading [${key}] data.`); console.trace();
+    if ($('body').data('env') === 'test') { return; }
     alert(getAlertMsg(key));
 }
 function getAlertMsg(key) {
