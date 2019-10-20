@@ -200,7 +200,7 @@ export function selTimeFilter(val) {                                            
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-export function showTodaysUpdates(focus) {                                      console.log("       //showTodaysUpdates. focus ? [%s] ", focus)
+export function showTodaysUpdates(focus) {                                      console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
     _u.setSelVal('Focus', focus, 'silent');
     initDataTable(focus)
     .then(showUpdatesAfterTableLoad);
@@ -210,7 +210,7 @@ function showUpdatesAfterTableLoad() {
     toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeFilter(state, time, skipSync) {                       console.log('       //toggleTimeFilter. state = %s, time? ', state, time);
+export function toggleTimeFilter(state, time, skipSync) {                       console.log('       +-toggleTimeFilter. state = %s, time? ', state, time);
     fPs.cal = initCal(); //fPs.cal || 
     const filtering = ifFilteringOnTime(state);
     updateTimeFilterMemory(time);
@@ -521,7 +521,7 @@ function checkLocElems() {
     return locType.length == 1 ? locType[0] : null;
 }
 export function updateLocSearch(val, selType) {                                 
-    if (!val) { return; }                                                       console.log('       --updateLocSearch. val = [%s] selType = [%s]', val, selType); console.trace();
+    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); console.trace();
     const locType = selType ? selType : getLocType(val, this);                  
     const root = getNewLocRoot(val, locType);    
     const txt = getTreeFilterTextVal('Location');  
@@ -578,7 +578,7 @@ function getSelectedVals(val, type) {                                           
  * publication text, the table is rebuilt with the filtered data.
  * NOTE: All Source realms include text search.
  */
-export async function updatePubSearch() {                                       console.log('       --updatePubSearch.')
+export async function updatePubSearch() {                                       console.log('       +-updatePubSearch.')
     tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
@@ -649,7 +649,7 @@ function getSelectedTaxonLvl(selected) {
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 export function updateTaxonSearch(val, selLvl) {                                        
-    if (!val) { return; }                                                       console.log('       --updateTaxonSearch.')  
+    if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
     const taxonRcrds = tState().get('rcrdsById');  
     const rcrd = getRootTaxonRcrd(val, taxonRcrds);
     const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 

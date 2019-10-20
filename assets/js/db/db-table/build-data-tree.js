@@ -18,7 +18,7 @@ let tblState;
  * Note: If loading a user-named data set (intSet), only the entities within 
  * those interactions are added to the data tree.
  */ 
-export function buildLocTree(topLocs, textFltr) {                               //console.log("passed 'top' locIds = %O", topLocs)
+export function buildLocTree(topLocs, textFltr) {                               
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
     return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));

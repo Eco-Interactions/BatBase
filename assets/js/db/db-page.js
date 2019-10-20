@@ -94,7 +94,7 @@ export function showIntroAndLoadingMsg() {
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchState(focus) {                                        console.log('initSearchState. focus = ', focus);
+export function initSearchState(focus) {                                        //console.log('initSearchState. focus = ', focus);
     setTableInitState();      
     db_ui.selectInitialSearchFocus(focus);
 } 
@@ -141,7 +141,7 @@ function resetTblParams(focus) {
     if (intSet) { tblState.intSet = intSet; }
 }
 /** Resets table state to top focus options for the selected view. */
-export function resetDataTable(view, e) {                           /*Perm-log*/console.log('   --resetting search table. View ? [%s]', view);
+export function resetDataTable(view, e) {                           /*Perm-log*/console.log('   //resetting search table. View ? [%s]', view);
     const changeView = view && view !== tblState.curView;
     const resetMap = { 
         taxa: changeView ? onTxnViewChange : buildTxnTable, 
@@ -169,7 +169,7 @@ function resetCurTreeStorageProps() {
     db_filters.resetTableStateParams();
 }
 /**  Table-rebuild entry point after form-window close.  */
-export function initDataTable(focus) {                              /*Perm-log*/console.log('   --resetting search table. Focus ? [%s]', focus);
+export function initDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
     resetStoredFiltersUi();
@@ -179,7 +179,7 @@ export function initDataTable(focus) {                              /*Perm-log*/
 }
 export function selectSearchFocus(f, view) {                                          
     if (f == '') { return; } //Combobox cleared by user
-    const focus = f ? f : _u.getSelVal('Focus');                    /*Perm-log*/console.log("   --select(ing)SearchFocus = [%s], view ? [%s]", focus, view); 
+    const focus = f ? f : _u.getSelVal('Focus');                    /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view); 
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 
@@ -236,7 +236,7 @@ export function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || _u.getSelVal('View');                                      //console.log('updateLocView. view = [%s]', val);
+    const val = v || _u.getSelVal('View');                          /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
@@ -278,7 +278,7 @@ function startLocTableBuildChain(topLocs, textFltr) {
 }
 /** -------------------- LOCATION MAP --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
-export function showLocInDataTable(loc) {                                       //console.log('showing Loc = %O', loc);
+export function showLocInDataTable(loc) {                          /*Perm-log*/console.log("       --Showing Location in Table");
     db_ui.updateUiForTableView();
     _u.setSelVal('View', 'tree', 'silent');
     rebuildLocTable([loc.id]);
@@ -306,7 +306,7 @@ function getGeoJsonAndShowLocsOnMap(tree) {
     });
 }
 /** Switches to map view and centeres map on selected location. */
-export function showLocOnMap(geoJsonId, zoom) {
+export function showLocOnMap(geoJsonId, zoom) {                     /*Perm-log*/console.log("       --Showing Location on Map");
     db_ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent');
     _u.getData('geoJson').then(geo => {  
