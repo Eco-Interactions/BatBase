@@ -1938,12 +1938,10 @@ function isSelectedTaxon(clrdLvl, elem) {
  * repopulated with related taxa and the 'select' button is enabled. If the
  * combo was cleared, ensure the remaining dropdowns are in sync or, if they
  * are all empty, disable the 'select' button.
- * NOTE: Change event fires twice upon selection. Worked around using @captureSecondFire
  */
-function onLevelSelection(val) {                                                console.log("           --onLevelSelection. val = [%s] isNaN? [%s]. recentChange? ", val, isNaN(parseInt(val)), fP.forms.taxonPs.recentChange);
+function onLevelSelection(val) {                                                console.log("           --onLevelSelection. val = [%s] isNaN? [%s]", val, isNaN(parseInt(val)));
     if (val === 'create') { return openLevelCreateForm(this.$input[0]); }
     if (val === '' || isNaN(parseInt(val))) { return syncTaxonCombos(this.$input[0]); } 
-    fP.forms.taxonPs.recentChange = true;  // Flag used to filter out the second change event
     const fLvl = getSubFormLvl('sub');
     repopulateCombosWithRelatedTaxa(val);
     enableSubmitBttn('#'+fLvl+'-submit');             
@@ -1951,21 +1949,14 @@ function onLevelSelection(val) {                                                
 function openLevelCreateForm(selElem) {
     openCreateForm(selElem.id.split('-sel')[0]);
 }
-/*
- * Note: Change event is fired when replacing select options, even though it should
- * not be. Capturing these false changes with the 'recent change' flag.
- */
 function syncTaxonCombos(elem) {                                                
-    if (fP.forms.taxonPs.recentChange) { return; }                              //console.log("syncTaxonCombos.");
-    fP.forms.taxonPs.recentChange = true;  // Flag used to filter out the second change event
     resetChildLevelCombos(getSelectedTaxon(elem.id.split('-sel')[0]));
 }
 function resetChildLevelCombos(selTxn) {                                        //console.log("resetChildLevelCombos. selTxn = %O", selTxn)
     const lvlName = selTxn ? selTxn.level.displayName : getRealmTopLevel();
     if (lvlName == 'Species') { return; }
     getChildlevelOpts(lvlName)
-    .then(opts => repopulateLevelCombos(opts, {}))
-    .then(() => delete fP.forms.taxonPs.recentChange);
+    .then(opts => repopulateLevelCombos(opts, {}));
 }
 function getRealmTopLevel() {
     return fP.forms.taxonPs.curRealmLvls[1];
@@ -2001,8 +1992,7 @@ function repopulateCombosWithRelatedTaxa(selId) {
     
     taxon.children.forEach(addRelatedChild); 
     return buildUpdatedTaxonOpts()
-        .then(repopulateLevelCombos.bind(null, opts, selected))
-        .then(() => delete fP.forms.taxonPs.recentChange);
+        .then(repopulateLevelCombos.bind(null, opts, selected));
 
     function addRelatedChild(id) {                                              //console.log('addRelatedChild. id = ', id);
         var childTxn = fP.records.taxon[id];  
@@ -2078,7 +2068,8 @@ function repopulateLevelCombos(optsObj, selected) {                             
  * its direct ancestors.
  */
 function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   //console.log("repopulateLevelCombo for lvl = %s (%s)", lvl, lvlName);
-    _u.replaceSelOpts('#'+lvlName+'-sel', opts);
+    _u.replaceSelOpts('#'+lvlName+'-sel', opts, () => {});
+    $('#'+lvlName+'-sel')[0].selectize.on('change', onLevelSelection);
     if (lvl in selected) { 
         if (selected[lvl] == 'none') { return _u.updatePlaceholderText('#'+lvlName+'-sel', null, 0); }
         setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); 
@@ -2408,7 +2399,7 @@ function initPublisherForm (value) {                                            
 /*-------------- Author --------------------------------------------------*/
 /** Loops through author object and adds each author/editor to the form. */
 function selectExistingAuthors(field, authObj, fLvl) {       
-    if (!authObj) { return Promise.resolve(); }                                 //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
+    if (!authObj || !$('#'+field+'-sel-cntnr').length) { return Promise.resolve(); }                                 //console.log('reselectAuthors. field = [%s] auths = %O', field, authObj);
     Object.keys(authObj).reduce((p, ord) => { //p(romise), ord(er)  
         const selNextAuth = selectAuthor.bind(null, ord, authObj[ord], field, fLvl);
         return p.then(selNextAuth);
@@ -2416,6 +2407,7 @@ function selectExistingAuthors(field, authObj, fLvl) {
 }
 /** Selects the passed author and builds a new, empty author combobox. */
 function selectAuthor(cnt, authId, field, fLvl) {
+    if (!$('#'+field+'-sel'+ cnt).length) { return; }
     setSelVal('#'+field+'-sel'+ cnt, authId, 'silent');
     return buildNewAuthorSelect(++cnt, authId, fLvl, field);
 }
@@ -4781,7 +4773,8 @@ function clrFormLvlErr(elem, fLvl) {
 function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
     const subLvl = getNextFormLevel('child', fLvl);
         $(elem).fadeTo(400, 0, clearErrElem);
-    if (!$('#'+subLvl+'-form').length) { enableSubmitBttn('#'+fLvl+'-submit'); }
+    if (!$('#'+subLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) { 
+        enableSubmitBttn('#'+fLvl+'-submit'); }
 
     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');

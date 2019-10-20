@@ -210,7 +210,7 @@ function getSourceType(entity, rcrd) {
     return _u.lcfirst(rcrd[type].displayName);
 }
 /** Sends entity-record data to each storage property-type handler. */
-function updateDataProps(entity, rcrd, updateFuncs) {                           console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
+function updateDataProps(entity, rcrd, updateFuncs) {                           //console.log("           --updateDataProps [%s]. %O. updateFuncs = %O", entity, rcrd, updateFuncs);
     const params = { entity: entity, rcrd: rcrd, stage: 'addData' };
     return Object.keys(updateFuncs).reduce((promise, prop) => {
         const updateFunc = updateData.bind(null, updateFuncs[prop], prop, params);
