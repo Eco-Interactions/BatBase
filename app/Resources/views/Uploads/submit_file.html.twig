@@ -2,16 +2,17 @@
 
 {% extends "layout.html.twig" %}
 
-{% block headline %}Submit Publications to the Project{% endblock %}
+{% block headline %}Submit Publication{% endblock %}
 
 {% block detail %}
-    <div class="top-pgs">
+    <div id="pub-sbmt-pg" class="top-pgs">
         {% embed 'two_cols_sect.html.twig' %}
             {% block firstcol %}
                 <h4> The Bat Eco-Interactions Database currently has over 7500 interactions
                     from over 375 citations, and we are adding more every day. You can contribute
                     to this effort by submitting publications to be entered into the database.
                 </h4>
+                <br>
                 {% if error %}
                     <p style="color: red; font-weight: 600;">There was an error while uploading. If 
                         this problem persists, please send us an email at info@batplant.org 
@@ -24,16 +25,17 @@
                     <p style="color: green; font-weight: 600;">Thank you for your submission!</p>
                 {% endif %}
 
-
                 {{ form_start(form) }}
                     {{ form_row(form.file) }}
                     {{ form_row(form.description) }}
                 {{ form_end(form) }}
             {% endblock firstcol %}
-            {% block secondcol %}            
-                <h4>Publications currently being added to the database:</h4>
-                <br>
-                <embed src="{{ asset('bundles/app/files/Publications To Add.pdf') }}" height="455px" width="740px">
+            {% block secondcol %}   
+                {% if is_full_view() %}         
+                    <h4>Publications currently being added to the database:</h4>
+                    <br>
+                    <object id='add-pubs' data="{{ asset('build/files/Publications To Add.pdf') }}"></object>
+                {% endif %}
             {% endblock secondcol%}
         {% endembed %}
     </div> 

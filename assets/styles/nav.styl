@@ -1,0 +1,184 @@
+/**--------------- Header Menu Styles -------------------*/
+#sticky-hdr
+    @extend $content-width
+    
+#sticky-hdr.mobile
+    width 100vw
+
+.top-sticky 
+    z-index: 1002 
+    position: fixed !important //necessary when showing browser optimization message (non-chrome browsers)
+    top: 0 !important  //... and on mobile devices
+    background-color: White
+    width: 100%
+
+#hdrmenu 
+    display: flex
+    justify-content: space-between
+    height: 43px
+    line-height: 43px
+    background: White
+    border-bottom: 1px solid Gray
+    z-index 1001
+    
+#hdrmenu.vert 
+    height: fit-content
+/* ------------- MENU --------------- */
+$menu-font
+    color: Black
+    text-decoration: none
+    font-weight: 700
+    font-size: 21px
+    line-height: 32px
+    padding: .2em 1em .2em .5em
+    @media screen and (max-width: 600px)
+        font-size: 19px
+
+.content-overlay 
+    background: rgba(0,0,0,.6)
+    height: fit-content
+/* ---- Mobile Nav ---- */
+#mobile-menu-bar
+    @extends .flex-row
+    display none
+    justify-content space-between
+    width: 100vw
+    z-index 1
+    background-color WhiteSmoke
+      
+.toggle 
+    @extends $menu-font
+    height 0
+
+#oimenu
+    @extends .flex-row
+    width fit-content 
+    
+#oimenu.vert.closed
+    border-radius: 0
+    padding: 0
+    border: 0
+    height: 0
+    overflow-y: hidden  
+
+#oimenu.vert
+    @extends .flex-col
+    width: 100%
+    background: WhiteSmoke
+    max-height: fit-content
+    overflow-y: hidden
+
+#oimenu.vert .smtrigger.closed > ul
+    max-height: 0;
+    overflow-y: hidden 
+    
+#oimenu.vert .smtrigger > ul
+    max-height: fit-content;
+    width 95vw
+
+#oimenu.vert .smtrigger > ul li
+    width 95vw    
+/* ---- Shared Nav ---- */
+nav 
+    width 100%
+    justify-content space-between
+    z-index 1
+    
+#oimenu a 
+    @extends $menu-font
+    text-align: left
+    width 100%
+    margin: 0 
+    display: block 
+    width: 100%
+
+.smtrigger
+    position: relative
+    
+.smtrigger > a:after 
+    content: " \25BC"
+    font-size: .5em
+    display: block
+    position: absolute
+    top: .5em
+    right: .7em
+
+#oimenu li:hover 
+    background: LightGrey
+    
+#oimenu ul 
+    max-height: fit-content
+    z-index: 1000
+    position: absolute
+    top: 100%
+    left: 9px
+    bottom: 9px
+    background: WhiteSmoke
+    padding: 0
+    box-shadow: 10px 10px 23px #888888
+
+#oimenu ul li 
+    position: relative;
+    width: 250px
+    z-index: 1001
+    margin:0;
+    padding: 0;
+    
+#oimenu ul a 
+    padding: 10px 15px
+
+#oimenu ul li.current-menu-item
+    background: #ddd;
+
+#oimenu .smtrigger > ul 
+    max-height: 0
+    overflow-y hidden
+
+#oimenu .smtrigger:hover > ul
+    max-height: fit-content
+    height fit-content //fixes Safari bug
+    
+.admin-menu 
+    background: rgba(26, 128, 230, .3)
+
+.super-admin-menu 
+    background: rgba(54, 151, 111, .3)
+
+#site-name, .site-name 
+    text-align: center
+    font-size: 23px
+    color: DimGray
+    height: 43px
+    line-height: 43px
+    margin-right 1em
+    @media screen and (max-width: 600px)
+        font-size: 19px
+/* -- PAGE HEADER BAR -- */
+#pg-hdr 
+    display: flex
+    position: relative
+    justify-content: space-between
+    // text-align: right
+    min-height: 43px
+    max-height fit-content
+    padding: 9px 8px 3px 12px
+    background: white
+    font-size: 21px
+    z-index -1 //Otherwise, shows through img-slider on page load
+    border-bottom: 1px solid Gray
+    @media screen and (max-width: 600px)
+        font-size: 19px
+
+#hdr-right 
+    display: flex
+    justify-content: flex-start
+    background: White
+    
+#hdricopen { //Edit pencil on content block show page
+    width: 1em;
+    height: auto;
+    z-index: 0;
+    margin: 0 1em 0 .5em;
+    position: relative;
+    top: .1em;
+}

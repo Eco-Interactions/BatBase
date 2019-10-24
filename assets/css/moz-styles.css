@@ -2,7 +2,7 @@
     #filter-opts {
         width: 139px;
     }
-    .hide-fltr-bttm-border:before {
+   /* .hide-fltr-bttm-border:before {
         width: 137px;
         left: 731px;
         top: 59px;
@@ -11,15 +11,15 @@
         top: 59px;
         width: 107px;
         left: 764px;    
-    }
+    }*/
     #list-opts {
         width: 132px;
     }
-    .hide-int-bttm-border:before {
+/*    .hide-int-bttm-border:before {
         width: 131px;
         left: 144px;
         top: 59px;
-    }
+    }*/
     #shw-map {
         width: 206px;
     }
@@ -36,7 +36,7 @@
         #content-detail  #focus-opts {
             flex: 0 0 442px;
         }
-        #content-detail .hide-int-bttm-border::before {
+/*        #content-detail .hide-int-bttm-border::before {
             left: 144px;
             top: 57px;
         }
@@ -52,6 +52,6 @@
         #content-detail #filter-opts-pnl.vert::before {
             top: 60px;
             left: 718px;
-        }
+        }*/
     }
 }

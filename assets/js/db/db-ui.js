@@ -4,58 +4,48 @@
  * Exports:                         Imported by:
  *     addDomEventListeners             db_page
  *     collapseTree                     csv-data
- *     pg_init                          db_page
+ *     fadeTable                        db-page
+ *     init                             db_page
  *     initLocSearchUi                  db_page
  *     initSrcSearchUi                  db_page
  *     initTaxonSearchUi                db_page
  *     loadLocFilterPanelElems          db-page, db-filters
- *     loadTaxonComboboxes              db-page, db-filters     
- *     loadTxnFilterPanelElems          db-page
+ *     loadSrcFilterPanelElems          db-page, db-filters
+ *     loadTxnFilterPanelElems          db-page, db-filters     
  *     resetToggleTreeBttn              db_page, init-table
+ *     selectInitialSearchFocus         db-page
  *     showLoadingDataPopUp             util
  *     showTips                         intro
  *     updateUiForTableView             db-page
  *     updateUiForMapView               db-page
  */
 import * as _u from './util.js';
+import { accessTableState as tState } from './db-page.js';
 import exportCsvData from './db-table/csv-data.js';
-import { createEntity } from './db-forms/db-forms.js';
+import { initNewDataForm } from './db-forms/db-forms.js';
 import * as db_page from './db-page.js';
 import * as db_filters from './db-table/db-filters.js';
 import { showInts } from './db-map/db-map.js';
 import { enableListReset, toggleSaveIntsPanel } from './panels/save-ints.js';
 import { addPanelEvents, closeOpenPanels } from './panels/panel-util.js';
+import { updateFilterPanelHeader } from './panels/save-fltrs.js';
+
 
 const app = {
     userRole: $('body').data("user-role"),
     enabledSelectors: ''
 };
-
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
-export function pg_init() {
+export function init() {
     addDomEventListeners();
-    adaptUiToScreenSize();
     authDependentInit();
-}
-/** 
- * Moves the buttons from the end of the search menu to just the header row.
- * (Not used currently. Could revive in the future if the search menu grows.)
- */
-function adaptUiToScreenSize() {
-    // if ($(window).width() > 1500) { return; }
-    // const elemCntnr = $('#data-opts').detach();  
-    // const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    // $(cntnr).css({ width: '100%', 'justify-content': 'flex-end' });
-    // $(elemCntnr)[0].className = 'flex-row';
-    // $(cntnr).append(elemCntnr);
-    // $('#hdr-right').append(cntnr);
 }
 function addDomEventListeners() {
     $('button[name="xpand-all"]').click(toggleExpandTree);
     $('button[name="xpand-1"]').click(expandTreeByOne);
     $('button[name="collapse-1"]').click(collapseTreeByOne);
     $('#shw-map').click(showTableRecordsOnMap);
-    $('button[name="reset-tbl"]').click(db_page.resetDataTable);
+    $('button[name="reset-tbl"]').click(db_page.resetDataTable.bind(null, false));
     addPanelEvents(app.userRole);
 }
 /** Shows a loading popup message for the inital data-download wait. */
@@ -93,8 +83,7 @@ function enableUserFeatures() {                                                 
 function enableEditorFeatures() {                                               //console.log('enableEditorFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
         #new-data, #rvw-data`;
@@ -102,10 +91,25 @@ function enableEditorFeatures() {                                               
 function enableAdminFeatures() {                                                //console.log('enableAdminFeatures')
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
-    $('#new-data').addClass('adminbttn')
-        .click(createEntity.bind(null, 'create', 'interaction'));
+    $('#new-data').addClass('adminbttn').click(initNewDataForm);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = '.map-dsbl';
+}
+/** Selects either Taxon, Location or Source in the table-focus dropdown. */
+export function selectInitialSearchFocus(f) {                                          //console.log('--------------selectInitialSearchFocus')
+    const focus = f || 'taxa';
+    _u.initComboboxes(['Focus', 'View']);
+    _u.replaceSelOpts('#search-focus', getFocusOpts())
+    _u.setSelVal('Focus', focus, 'silent');
+    db_page.selectSearchFocus()
+    .then(updateFilterPanelHeader.bind(null, focus));
+}
+function getFocusOpts() {
+    return [
+        { value: 'locs', text: 'Location' },
+        { value: 'srcs', text: 'Source' },
+        { value: 'taxa', text: 'Taxon' },
+    ];
 }
 /* ============================== TOGGLE TABLE ROWS ================================================================= */
 /**
@@ -188,13 +192,17 @@ function isNextOpenLeafRow(node) {                                              
 /* ====================== DATABASE ENTITY VIEW UI =================================================================== */
 /* ---------------------------- TAXON VIEW -------------------------------------------------------------------------- */
 /** Loads the taxon view options and updates the data-view combobox. */
-export function initTaxonSearchUi(data) {                                       //console.log("initTaxonSearchUi. data = %O", data);
-    loadTxnViewOpts(data.realm);
-    setTaxonView(); 
-    $('#focus-filters').empty();  
+export function initTaxonSearchUi(curView) {                                       //console.log("initTaxonSearchUi. realms = %O", realms);
+    _u.getData('realm').then( realms => {                                       //console.log('--initTaxonSearchUi. realms = %O', realms)
+        loadTxnViewOpts(realms);
+        setTaxonView(curView); 
+    });
 }
 function loadTxnViewOpts(realms) {
     if ($('#sel-view').data('focus') === 'taxa') { return; }
+    buildAndLoadTxnOpts(realms);
+}
+function buildAndLoadTxnOpts(realms) {
     const opts = getViewOpts(realms);
     _u.replaceSelOpts('#sel-view', opts, db_page.onTxnViewChange);
     $('#sel-view').data('focus', 'taxa');
@@ -207,16 +215,15 @@ function getViewOpts(realms) {
     return optsAry;
 }
 /** Restores stored realm from previous session or sets the default 'Bats'. */
-function setTaxonView() {
-    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = [%s] taxonView = [%s]", storedView, _u.getSelVal('View'))
+function setTaxonView(curView) {
     if (!_u.getSelVal('View')) { 
-        const realmVal = storedView ? storedView : "2";  
+        const realmVal = curView ? curView : "2";  
         _u.setSelVal('View', realmVal, 'silent');
     }
 }
 /* ---------------------------- TAXON FILTER UI ----------------------------- */
 export function loadTxnFilterPanelElems(tblState) {
-    if ($('#focus-filters div').length) { return loadTaxonComboboxes(tblState); }
+    if ($('#focus-filters label').length) { return loadTaxonComboboxes(tblState); }
     loadTaxonComboboxes(tblState);
     loadTxnNameSearchElem(tblState);
 }
@@ -230,10 +237,10 @@ function loadTxnNameSearchElem(tblState) {
  * of every taxon at that level in the displayed, filtered, table-tree. After 
  * appending, the selects are initialized with the 'selectize' library @initComboboxes.
  */
-export function loadTaxonComboboxes(tblState) {
+function loadTaxonComboboxes(tblState) {
     const lvlOptsObj = buildTaxonSelectOpts(tblState);
     const levels = Object.keys(lvlOptsObj);
-    const loadFunc = $('#focus-filters div').length ? updateTaxonSelOptions : loadLevelSelects;
+    const loadFunc = $('#focus-filters label').length ? updateTaxonSelOptions : loadLevelSelects;
     if (levels.indexOf(tblState.realmLvl) !== -1) { levels.shift(); } //Removes realm level
     loadFunc(lvlOptsObj, levels, tblState);
 }
@@ -246,7 +253,7 @@ function buildTaxonSelectOpts(tblState) {                                       
     const optsObj = {};
     const taxaByLvl = tblState.taxaByLvl;       
     // const curRealmLvls = tblState.allRealmLvls.slice(1);  //Skips realm lvl
-    tblState.allRealmLvls .forEach(buildLvlOptions);
+    tblState.allRealmLvls.forEach(buildLvlOptions);
     return optsObj;
 
     function buildLvlOptions(lvl) {
@@ -318,9 +325,10 @@ function setSelectedTaxonVals(selected, tblState) {                             
  * data-tree view, by default, or loads the data-map view, if previously 
  * selected. 
  */ 
-export function initLocSearchUi(view) {
+export function initLocSearchUi(view) {                             /*Perm-log*/console.log("       --Init Location UI. view ? [%s]", view);        
     loadLocationViewOpts();
-    setLocView(view);  
+    if (view) { setLocView(view); 
+    } else { _u.getData('curView'.then(setLocView)); }
 } 
 function loadLocationViewOpts(argument) {
     if ($('#sel-view').data('focus') === 'locs') { return; }
@@ -330,17 +338,15 @@ function loadLocationViewOpts(argument) {
     $('#sel-view').data('focus', 'locs');
 }
 function setLocView(view) {
-    const storedView = view || _u.getDataFromStorage('curView');                //console.log("setLocView. storedView = ", storedView)
-    const locView = storedView || 'tree';
-    _u.setSelVal('View', locView, 'silent');
+    _u.setSelVal('View', view, 'silent');
 }
 /* ------------------------- LOCATION FILTER UI ----------------------------- */
 /**
  * Builds the Location search comboboxes @loadLocComboboxes. Transform tree
  * data into table rows and load the table @transformLocDataAndLoadTable.
  */
-export function loadLocFilterPanelElems(tblState) {   
-    if ($('#focus-filters div').length) { return updateLocSelOptions(tblState); }
+export function loadLocFilterPanelElems(tblState) {                 /*Perm-log*/console.log("       --Init Location Filter Panel UI.");
+    if ($('#focus-filters label').length) { return updateLocSelOptions(tblState); }
     loadLocComboboxes(tblState);
     loadLocNameSearchElem();
 }
@@ -365,9 +371,9 @@ function loadLocComboboxes(tblState) {
     $('#focus-filters').append(selElems);
     _u.initComboboxes(['Region', 'Country']);
     setSelectedLocVals(tblState.selectedOpts);
-}/** Builds arrays of options objects for the location comboboxes. */
-function buildLocSelectOpts(tblState) {  
-    const data = _u.getDataFromStorage(['countryNames', 'regionNames']);
+}
+/** Builds arrays of options objects for the location comboboxes. */
+function buildLocSelectOpts(tblState, data) {  
     const processedOpts = { Region: [], Country: [] };
     const opts = { Region: [], Country: [] };  
     tblState.api.getModel().rowsToDisplay.forEach(buildLocOptsForNode);
@@ -386,10 +392,10 @@ function buildLocSelectOpts(tblState) {
         if (row.childrenAfterFilter) { row.childrenAfterFilter.forEach(buildLocOptsForNode); }
     }
     /** If the location has interactions an option object is built for it. */
-    function buildLocOpt(rowData, name, type) {
+    function buildLocOpt(rowData, name, type) {  
         if (name.includes('Unspecified')) { return; }
         if (processedOpts[type].indexOf(name) !== -1) { return; }
-        const id = data[_u.lcfirst(type) + "Names"][name];             
+        const id = rowData.id;             
         if (isOpenRow(id)) { addToSelectedObj(id, type); }
         opts[type].push({ value: id, text: name.split('[')[0] }); 
         processedOpts[type].push(name);
@@ -475,9 +481,9 @@ function setSelectedLocVals(selected) {                                         
  * If the source-realm combobox isn't displayed, build it @buildSrcViewHtml.
  * If no realm selected, set the default realm value. Start table build @buildSrcTree.
  */
-export function initSrcSearchUi(srcData) {                                      //console.log("=========init source search ui");
+export function initSrcSearchUi(view) {                             /*Perm-log*/console.log("       --Init source UI. view ? [%s]", view);
     loadSourceViewOpts();   
-    setSrcView();  
+    setSrcView(view);  
 }
 function loadSourceViewOpts() {
     if ($('#sel-view').data('focus') === 'srcs') { return ; }
@@ -488,11 +494,9 @@ function loadSourceViewOpts() {
     $('#sel-view').data('focus', 'srcs');
 } 
 /** Restores stored realm from previous session or sets the default 'Publications'. */
-function setSrcView() {
-    const storedView = _u.getDataFromStorage('curView');                        //console.log("storedView = ", storedView)
-    const srcView = storedView || 'pubs';  
-    db_page.accessTableState().set({'curView': srcView});
-    if (!_u.getSelVal('View')) { _u.setSelVal('View', srcView, 'silent'); } 
+function setSrcView(view) {
+    db_page.accessTableState().set({'curView': view});
+    if (!_u.getSelVal('View')) { _u.setSelVal('View', view, 'silent'); } 
 }
 /* ------------------------- SOURCE FILTER UI ------------------------------- */
 /**
@@ -502,51 +506,60 @@ function setSrcView() {
  * NOTE: This is the entry point for source table rebuilds as filters alter data
  * contained in the data tree.
  */
-export function loadSrcSearchUi(realm) {                                        //console.log("buildSrcSearchUiAndTable called. realm = [%s]", realm);
-    if ($('#focus-filters div').length) { return; }
+export function loadSrcFilterPanelElems(realm) {                    /*Perm-log*/console.log("       --Init Source Filter Panel UI. realm = [%s]", realm);
+    if ($('#focus-filters label').length) { return clearPanelCombos(realm); }
     const buildUi = { 'auths': loadAuthSearchHtml, 'pubs': loadPubSearchHtml, 
         'publ':loadPublSearchHtml }; 
-    buildUi[realm](); 
+    return buildUi[realm](); 
 } 
+function clearPanelCombos(realm) {
+    if (realm !== 'pubs') { return Promise.resolve(); }
+    return Promise.resolve($('#selPubType')[0].selectize.clear('silent'));
+}
 /** Builds a text input for searching author names. */
 function loadAuthSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Author');
     $('#focus-filters').append(searchTreeElem);
+    return Promise.resolve();
 }
 function loadPubSearchHtml() {
-    const pubTypeElem = buildPubTypeSelect();
+    return Promise.resolve(_u.getData('publicationType').then(pTypes => {
+        loadPubSearchElems(pTypes);
+    }));
+}
+function loadPubSearchElems(pubTypes) {
+    const pubTypeElem = buildPubTypeSelect(pubTypes);
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publication');
-    // $(searchTreeElem).css('width', '228px');
-    $('#focus-filters').append([searchTreeElem, pubTypeElem]); //searchTreeElem, 
+    $('#focus-filters').append([searchTreeElem, pubTypeElem]);
     _u.initCombobox('Publication Type');
     _u.setSelVal('Publication Type', 'all', 'silent');
-    
-    function buildPubTypeSelect() {
-        const pubTypeOpts = buildPubSelectOpts();
-        return buildPubSelects(pubTypeOpts);
+}           
+
+function buildPubTypeSelect(pubTypes) {
+    const pubTypeOpts = buildPubSelectOpts(pubTypes);
+    return buildPubSelects(pubTypeOpts);
+}
+function buildPubSelectOpts(pubTypes) {
+    const opts = [{value: 'all', text: '- All -'}];
+    for (let t in pubTypes) {
+        opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
     }
-    function buildPubSelectOpts() {
-        const pubTypes = _u.getDataFromStorage('publicationType');           
-        const opts = [{value: 'all', text: '- All -'}];
-        for (let t in pubTypes) {
-            opts.push({ value: pubTypes[t].id, text: pubTypes[t].displayName });
-        }
-        return opts.sort(_u.alphaOptionObjs);  
-    }
-    /** Builds the publication type dropdown */
-    function buildPubSelects(opts) {                                            //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
-        const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
-        const span = _u.buildElem('span', { text: 'Type:' });
-        const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
-        const lblW = $(window).width() > 1500 ? '222px' : '230px';
-        $(sel).css('width', '177px');
-        $(lbl).css('width', lblW).append([span, sel]);
-        return lbl;
-    }
-} /* End loadPubSearchHtml */
+    return opts.sort(_u.alphaOptionObjs);  
+}
+/** Builds the publication type dropdown */
+function buildPubSelects(opts) {                                                //console.log("buildPubSelects pubTypeOpts = %O", pubTypeOpts)
+    const lbl = _u.buildElem('label', {class: "sel-cntnr flex-row"});
+    const span = _u.buildElem('span', { text: 'Type:' });
+    const sel = newSelEl(opts, '', 'selPubType', 'Publication Type');
+    const lblW = $(window).width() > 1500 ? '222px' : '230px';
+    $(sel).css('width', '177px');
+    $(lbl).css('width', lblW).append([span, sel]);
+    return lbl;
+}
 function loadPublSearchHtml() {
     const searchTreeElem = db_filters.buildTreeSearchHtml('Publisher');
     $('#focus-filters').append(searchTreeElem);
+    return Promise.resolve();
 }
 /* ====================== SWITCH BETWEEN MAP AND TABLE UI =========================================================== */
 export function updateUiForMapView() {
@@ -562,26 +575,28 @@ export function updateUiForTableView() {
     $('#search-tbl').fadeTo('fast', 1);
     $('#map, #filter-in-tbl-msg').hide();
     enableTableButtons();
-    updateBttnToShowRcrdsOnMap();
+    updateBttnToShowRcrdsOnMap(); 
 }
 function showTableRecordsOnMap() {                                              console.log('-----------showTableRecordsOnMap');
     const tblState = db_page.accessTableState().get(null, ['curFocus', 'rcrdsById']);
     $('#search-tbl').fadeTo('fast', 0.3, () => {
         updateUiForMapView();
-        showInts(tblState.curFocus, tblState.rcrdsById, getLocRcrds());
+        getLocRcrds().then( rcrds => {
+            showInts(tblState.curFocus, tblState.rcrdsById, rcrds);
+        });
     });
 
     function getLocRcrds() {
-        return tblState.curFocus !== 'locs' ? 
-            _u.getDataFromStorage('location') : tblState.rcrdsById;  
+        return Promise.resolve(tblState.curFocus !== 'locs' ? 
+            _u.getData('location') : tblState.rcrdsById);  
     }
 }
 function updateBttnToReturnRcrdsToTable() {
-    $('#shw-map').text('Return to Table View');
+    $('#shw-map').text('Return to Table');
     $('#shw-map').off('click').on('click', returnRcrdsToTable);
 }
 function updateBttnToShowRcrdsOnMap() {
-    $('#shw-map').text('Show Interactions on Map');
+    $('#shw-map').text('Map Interactions');
     $('#shw-map').off('click').on('click', showTableRecordsOnMap);
 }
 function returnRcrdsToTable() {
@@ -593,7 +608,7 @@ export function showTips() {                                                    
     if (!$('#tips-close-bttn').length) { initSearchTips(); }
     $('#b-overlay-popup').addClass("tips-popup");
     $('#b-overlay, #b-overlay-popup').fadeIn(500);
-    $('#show-tips').html("Hide Tips");
+    $('#show-tips').html("Tips");
     $('#show-tips').off("click");
     $('#show-tips').click(hideTips);
 }
@@ -603,7 +618,7 @@ function initSearchTips() {
 }
 function hideTips() {
     $('#b-overlay').fadeOut(500, removeTips);
-    $('#show-tips').html("Search Tips");
+    $('#show-tips').html("Tips");
     $('#show-tips').off("click");
     $('#show-tips').click(showTips);
     $('#b-overlay-popup').removeClass("tips-popup");

@@ -121,7 +121,7 @@ class Interaction
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      * @JMS\Expose
-     * @JMS\SerializedName("updatedAt")
+     * @JMS\SerializedName("serverUpdatedAt")
      */
     private $updated;
 
@@ -348,6 +348,7 @@ class Interaction
      */
     public function setSubject(\AppBundle\Entity\Taxon $subject)
     {
+        if ($this->subject) { $this->subject->removeSubjectRole($this); }
         $this->subject = $subject;
 
         return $this;
@@ -382,6 +383,7 @@ class Interaction
      */
     public function setObject(\AppBundle\Entity\Taxon $object)
     {
+        if ($this->object) { $this->object->removeObjectRole($this); }
         $this->object = $object;
 
         return $this;

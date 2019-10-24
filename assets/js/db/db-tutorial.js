@@ -20,24 +20,21 @@ if (window.location.pathname.includes('search')) {
 }
 
 function searchPageInit() {  
-    $("#strt-tut").click(startIntroWalkthrough);
+    $("#strt-tut").click(startWalkthrough.bind(null, null));
     $("#show-tips").click(showTips);
 }
 /* ======================= TUTORIAL ========================================= */
-export function startWalkthrough(curFocus) {
-    focus = curFocus;
-    window.setTimeout(startIntroWalkthrough, 250); 
-}
-function startIntroWalkthrough(){
-    if (intro) { return; }                                                      //console.log("intro = %O", intro)
+export function startWalkthrough(curFocus){  
+    if (intro) { return; } 
+    if (curFocus) { focus = curFocus; }      
     buildIntro();
     setTableState();
     intro.start();
 } 
-function buildIntro() {                                                         //console.log("buildIntro called")
+function buildIntro() {                                                         
     intro = require('../libs/intro.js').introJs();
-    intro.onexit(() => resetTableState());
-    intro.oncomplete(() => resetTableState());
+    intro.onexit(resetTableState);
+    intro.oncomplete(resetTableState);
     intro.onafterchange(onAfterStepChange.bind(null));
     intro.setOptions(getIntroOptions());
 } 
@@ -304,13 +301,19 @@ function setDbLoadDependentState() {
     $('#search-focus')[0].selectize.addItem('taxa');
     $('#sel-view')[0].selectize.addItem('3');
 }
-function resetTableState() {
+function resetTableState() {   
+    _u.getData('taxon', true).then(txnData => {
+        if (!txnData) { return window.setTimeout(resetTableState, 300); }
+        resetUiAndReloadTable();
+    });
+}
+function resetUiAndReloadTable() {                                              //console.log('resetUiAndReloadTable')
     focus = focus || "taxa";
+    intro = null;
     $('#db-view').css("height", "888px");
     $('#show-tips').click(showTips);
     $('#search-focus')[0].selectize.addItem(focus, 'silent');
     initDataTable(focus);
-    intro = null;
 }
 /* ---------- Set Up Functions --------------------*/
 function onAfterStepChange(stepElem) {                                          //console.log('onAfterStepChange elem = %O. curStep = %s, intro = %O', stepElem, intro._currentStep, intro);

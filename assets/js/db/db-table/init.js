@@ -2,7 +2,7 @@
  * Loads the formatted data using the ag-grid library and handles table styling.
  * 
  * Exports:        Imported by:
- *     initTbl          format-data, data-review
+ *     init            db_page, data-review
  */
 import * as agGrid from '../../../grid/ag-grid.min.js';
 import * as db_forms from '../db-forms/db-forms.js';
@@ -18,18 +18,24 @@ let tblState;
  * Builds the table options object and passes everyting into agGrid, which 
  * creates and shows the table.
  */
-export default function initTbl(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
+export function init(viewTitle, rowData, state) {                    //console.log('initTable [%s], rowData = %O, tblState = %O', viewTitle, rowData, state);
     tblState = state;
-    const tblDiv = document.querySelector('#search-tbl');
+    destroyPreviousTable(state.api);
+    initTable(viewTitle, rowData);
+    onTableInitComplete(rowData);
+}
+function destroyPreviousTable(tblApi) {
+    if (tblApi) { tblApi.destroy(); }
+}
+function initTable(viewTitle, rowData) {
     const tblOpts = getDefaultTblOpts(viewTitle);
     tblOpts.rowData = rowData;
-    new agGrid.Grid(tblDiv, tblOpts);
+    new agGrid.Grid($('#search-tbl')[0], tblOpts);
     tblState.api = tblOpts.api;
     tState().set(
         {'api': tblOpts.api, 'columnApi': tblOpts.columnApi, 'rowData': rowData});
     sortTreeColumnIfTaxonFocused(); 
     onModelUpdated();
-    onTableInitComplete(rowData);
 }
 /** Base table options object. */
 function getDefaultTblOpts(viewTitle) {  
@@ -325,8 +331,8 @@ function onTableInitComplete(rowData) {
     hidePopUpMsg();
     enableTableButtons();
     hideUnusedColFilterMenus();
+    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }  
     updateFilterStatusMsg();
-    if (tblState.intSet) { updateDisplayForShowingInteractionSet(rowData); }
 } 
 function updateDisplayForShowingInteractionSet(rowData) {
     if (rowData.length == 0) { return tblState.api.showNoRowsOverlay(); }

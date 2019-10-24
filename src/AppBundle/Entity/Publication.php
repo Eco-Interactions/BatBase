@@ -88,6 +88,8 @@ class Publication
      *
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
+     * @JMS\Expose
+     * @JMS\SerializedName("serverUpdatedAt")
      */
     private $updated;
 

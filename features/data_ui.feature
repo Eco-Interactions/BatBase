@@ -1,4 +1,4 @@
-Feature: Search page features and database table controls
+ Feature: Search page features and database table controls
     In order to interact with the database
     As a web visitor
     I should be able to use the various features and controls on the search page
@@ -24,6 +24,7 @@ Feature: Search page features and database table controls
     Scenario:  I should be able to expand the data tree completely
         Given I see "2" rows in the table data tree
         When I press "Expand All"
+        Then I should see "10" interactions in the table
         Then I should see "22" rows in the table data tree
 
     @javascript
@@ -82,7 +83,7 @@ Feature: Search page features and database table controls
       When I select "Journal" from the "Pub Type" dropdown
       And I should see "Journal of Mammalogy"
       And I should see "2" rows in the table data tree
-      And I press the "Show Interactions on Map" button
+      And I press the "Map Interactions" button
       Then I should see "1" interactions shown on the map
       And I click on a map marker
       And I should see "Journal of Mammalogy -" in popup

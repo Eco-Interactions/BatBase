@@ -1,0 +1,75 @@
+/*
+ * Style sheet for the Database Search page. 
+ * Note: Screens must have a pixel width of at least 1280 to view this page.
+ *
+ * Note: Fully refactoring from css -> stylus has not been prioritized. Moving
+ * pieces over as they get worked on
+ *
+ * CODE SECTIONS:
+ *     ROOT ELEM STYLES
+ *     SEARCH OPTIONS BAR
+ *     PANEL
+ *     MISC
+ *         INTRO.JS
+ *         TIPS POPUP      
+ */
+ /* ====================== PAGE STYLES ====================================== */
+#content-detail
+    margin-top 0
+/*--- ROOT ELEM STYLES ---*/
+#detail-block input, #detail-block textarea, #detail-block select
+    padding: 4px
+
+/* ================= SEARCH OPTIONS BAR STYLES ============================== */
+#focus-opts 
+    flex: 0 0 458px
+    padding: 5px
+    align-items: center
+    @media screen and (min-width: 1200px) and (max-width: 1330px) 
+        flex: 0 0 427px
+        font-size .9em
+
+#focus-opts span
+    padding-top: 6px
+
+/*------------ Buttons ----------------------*/
+#shw-map
+    width: 150px
+
+#rvw-data:before 
+    @media screen and (min-width: 1200px) and (max-width: 1330px) 
+        content: ''
+        width 0
+        
+/* ======================= PANEL STYLES ====================================== */
+#list-opts 
+    @media screen and (min-width: 1200px) and (max-width: 1330px)
+        padding: 5px 2px
+        width unset
+
+/* ======================= MISC STYLES ====================================== */
+/** ------- INTRO.JS ------- */
+.intro-tips  // Walkthrough tutorial 
+    width: 420px
+    text-align: justify
+
+.intro-bttn // Buttons inside page walkthrough
+    width: 144px
+    height: 27px
+
+.hlp-bttn // Question marks in panels triggering intro tutorial slides. 
+    height: 22px !important
+    width: 23px !important
+    font-weight: 600
+/*--------- TIPS POPUP ---------*/
+#tips-close-bttn 
+    position: relative
+    margin-top: .5em
+    left: 91%
+    bottom: -2vh
+
+.tips-popup 
+    overflow-y: scroll
+    max-height 80vh
+    top 5%
+    max-width 777px

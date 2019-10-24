@@ -1,14 +1,11 @@
 /**
  * Initializes the Data Table library and table on certain pages.  
  */
-
 import 'datatables';
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import 'datatables.net-buttons';
 import 'datatables.net-buttons-dt/css/buttons.dataTables.css';
 import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-fixedheader';
-import 'datatables.net-fixedheader-dt/css/fixedHeader.dataTables.css';
 
 export function init(tableName) { 
     const tables = {  /*      exportCol,  dataLngth  */
@@ -18,7 +15,8 @@ export function init(tableName) {
                 pub_pdf_tbl:   [    2,  'onehund'],
     };
     const params = tables[tableName];
-    initOiDataTable(params[0], params[1], tableName);
+    initOiDataTable([0], params[1], tableName);
+    if (window.innerWidth < 1280 && tableName !== 'biblio_tbl') { return; } //Popup is displayed directing users to view page on computer.
     relocCtrls(tableName);
 } 
 function initOiDataTable(lastExptCol, dataLngth, tblName) {
@@ -26,7 +24,6 @@ function initOiDataTable(lastExptCol, dataLngth, tblName) {
     const confg = getTblCfg(dataLngth, xportCols);                              //console.log('confg = %O', confg);
     const $tableElem = $('#' + tblName);                                        //console.log('tableElem = %O', $tableElem)
     $tableElem.DataTable(confg);
-    new $.fn.dataTable.FixedHeader( $tableElem, { header: true, headerOffset: 86 } );
 }  
 function getExportColArray(lastShownColIdx) {
     const ary = [];
@@ -60,9 +57,20 @@ function relocCtrls(tableName) {
     const $filterDiv = $('#' + tableName + '_filter');
     const $pgLngthDiv = $('#' + tableName + '_length');
     const $btnDiv = $('#tbl-ctrl-div .dt-buttons');
-    $btnDiv.attr('id', 'btn-div');
+    $btnDiv.attr({'id': 'btn-div', 'class': 'flex-row'});
     $filterDiv.detach();
     $pgLngthDiv.detach();
-    $btnDiv.detach();
-    $('#hdr-right').append([$pgLngthDiv, $btnDiv, $filterDiv]);
+    $btnDiv.append($filterDiv).detach();
+    addPgLengthIf(tableName, $btnDiv, $pgLngthDiv);
+    if ($('#online_users_tbl_wrapper').length) { return; }
+    if (window.innerWidth < 750) { 
+        $('#content-detail').prepend($btnDiv);
+    } else {
+        $('#hdr-right').append($btnDiv);
+    }
 };
+/* If not viewing the bibliography table on a screen smaller than 1220 pixels wide. */
+function addPgLengthIf(tableName, $btnDiv, $pgLngthDiv) {
+    if (tableName == 'biblio_tbl' && window.innerWidth < 1220) { return; }
+    $btnDiv.prepend($pgLngthDiv);
+}

@@ -36,15 +36,8 @@ Encore
     // you can use this method to provide other common global variables,
     // such as '_' for the 'underscore' library
     .autoProvideVariables(autoProvidedVars)  
-    // .addPlugin(
-    //     new WorkboxPlugin.GenerateSW({
-    //         // these options encourage the ServiceWorkers to get in there fast 
-    //         // and not allow any straggling "old" SWs to hang around
-    //         clientsClaim: true,
-    //         skipWaiting: true,
-    //         importsDirectory: 'sw/'
-    // }))
     /** ------- Loaders ----------------- */
+    .enableStylusLoader()
     // .configureLoaderRule('images', loaderRule => {
     //     loaderRule.test = /\.(png|svg|jpe?g|gif)$/;
     //     loaderRule.options = { name: 'images/[name].[hash:8].[ext]' };
@@ -52,18 +45,21 @@ Encore
     // .addLoader({ test: /\.(pdf)$/, loader: 'file-loader', 
     //     options: { name: '../uploads/publications/[name].[ext]' } })
     /** ------- Files to process ----------------- */
-    // .copyFiles({
-    //     from: './assets/uploads/publications',
-    //     to: 'publications/[name].[hash:8].[ext]'
-    // })
+    .copyFiles([{
+        from: './assets/images',
+        to: 'images/[name].[ext]'
+    },{
+        from: './assets/files',
+        to: 'files/[name].[ext]'
+    }])
     /** ------- Site Js/Style Entries ----------------- */
     .addEntry('app', './assets/js/app/oi.js')
     .addEntry('db', './assets/js/db/db-page.js')
     .addEntry('feedback', './assets/js/misc/feedback-viewer.js')
     .addEntry('pdfs', './assets/js/misc/view-pdfs.js')
-    // .createSharedEntry('libs', './assets/js/app/libs.js')
     // if the same module (e.g. jquery) is required by multiple entry files, they will require the same object.
     .enableSingleRuntimeChunk()
+    // Optimizes code by breaking files into the smallest size needed to run the page (builds lots of files)
     .splitEntryChunks()
 ; 
 const confg = Encore.getWebpackConfig();

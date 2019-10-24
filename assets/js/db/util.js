@@ -1,5 +1,5 @@
 
-import * as idb from 'idb-keyval'; //set, get, del, clear
+import * as _db from './idb-util';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_page from './db-page.js';
 import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.js';
@@ -7,43 +7,49 @@ import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
 import { newIntList, selIntList } from './panels/save-ints.js';
 import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
 /* 
- * Exports:
+ * Exports:                     Imported by:
+ *     (IDB Storage Methods)
+ *         downloadFullDb           db-sync
+ *         getData
+ *         setData
  *   addEnterKeypressClick
- *   addToStorage
  *   alphaOptionObjs
  *   buildElem
  *   buildSelectElem
  *   buildSimpleOpts
  *   buildOptsObj
- *   clearDataStorage
  *   getDataFromStorage
  *   getDetachedRcrd
- *   getGeoJsonEntity
  *   getOptsFromStoredData
  *   getSelVal
  *   initCombobox
  *   initComboboxes
  *   init_db
- *   initGeoJsonData
- *   isGeoJsonDataAvailable
  *   lcfirst 
- *   removeFromStorage
  *   replaceSelOpts
  *   sendAjaxQuery
  *   setSelVal
  *   stripString
  *   snapshot
+ *   triggerComboChangeReturnPromise
  *   ucfirst 
 */
-let geoJson;
-/* dataStorage = window.localStorage (sessionStorage for tests) */
-const dataStorage = getDataStorage();
-const geoJsonKey = 'A life without cause is a life without effect!!';  
-const localStorageKey = 'A life without cause is a life without effect!!!!!!!'; 
-
 extendPrototypes();
-initGeoJsonData();
-
+/*------------------------ IDB Storage Methods -----------------------------------------------------------------------*/
+export function downloadFullDb() {
+    _db.downloadFullDb();
+}
+/**
+ * Gets data from data storage for each storage property passed. If an array
+ * is passed, an object with each prop as the key for it's data is returned. 
+ * If a property is not found, false is returned. 
+ */
+export function getData(props, returnUndefined) {
+    return _db.getData(props, returnUndefined);
+}
+export function setData(k, v) {
+    return _db.setData(k, v);
+}
 /*---------- Keypress event Helpers --------------------------------------*/
 export function addEnterKeypressClick(elem) {
     $(elem).keypress(function(e){ //Enter
@@ -147,17 +153,18 @@ export function alphaOptionObjs(a, b) {
     return x<y ? -1 : x>y ? 1 : 0;
 }  
 /** Builds options out of a stored entity-name object. */
-export function getOptsFromStoredData(prop) {                                   //console.log("prop = ", prop)
-    var dataObj = getDataFromStorage(prop);  
-    var sortedNameKeys = Object.keys(dataObj).sort();
-    return buildOptsObj(dataObj, sortedNameKeys);
+export function getOptsFromStoredData(prop) {                                   
+    return _db.getData(prop, true).then(data => {                               //console.log('       --getOptsFromStoredData. [%s].', prop);
+        if (!data) { console.log('NO STORED DATA for [%s]', prop);return []; }
+        return buildOptsObj(data, Object.keys(data).sort());
+    });
 }
 /** 
  * Builds options out of the entity-name  object. Name (k) ID (v). If an option 
  * group is passed, an additional 'group' key is added that will serve as a category 
  * for the options in the group.
  */
-export function buildOptsObj(entityObj, sortedKeys) {
+export function buildOptsObj(entityObj, sortedKeys) {                           //console.log('buildOpts from obj = %O, order = %O', entityObj, sortedKeys);
     return sortedKeys.map(function(name) {
         return typeof entityObj[name] === 'object' ? 
             { group: entityObj[name].group, 
@@ -207,148 +214,8 @@ function addOnDestroyedEvent() { //Note: this will fire after .off('destroy')
         }
       }
 }
-/*--------------------------Storage Methods---------------------------------------------------------------------------*/
-/** 
- * On page load, clears local storage data if triggered by datakey change and 
- * downloads any new or changed data.
- */
-export function init_db() {
-    const storedUser = getStoredUserName(dataStorage.getItem('user'));
-    showPopUpMsg('Loading...');                                                 if ($('body').data('env') == 'dev') {console.log('storage key = [%s]', dataStorage.getItem(localStorageKey));}
-    if (!dataStorage.getItem(localStorageKey)) {
-        clearDataStorage();
-        initStoredData();
-    } else if (storedUser != $('body').data('user-name')) {    
-        showLoadingDataPopUp('user');
-        sendAjaxQuery({}, "ajax/lists", replaceAllUserData);
-    } else { sendAjaxQuery({}, "ajax/data-state", storeDataUpdatedTimes); }
-}
-/** Problems parsing name to string solved with this check. */
-function getStoredUserName(name) {
-    return name ? name.split('"').join('') : false;  
-}
-export function clearDataStorage() {  
-    dataStorage.clear();
-    dataStorage.setItem(localStorageKey, true);
-}
-function replaceAllUserData(data) {                                             //console.log('replaceAllUserData data = %O', data);
-    replaceUserData(data, $('body').data('user-name'));
-    db_page.initSearchState('user');
-}
-/** Stores the datetime object. Checks for updated data @addNewDataToStorage. */
-function storeDataUpdatedTimes(ajaxData) {
-    dataStorage.setItem('dataUpdatedAt', ajaxData.dataState);                   console.log("dataState = %O", ajaxData.dataState);
-    addNewDataToStorage(ajaxData.dataState);
-    db_page.initSearchState();
-}
-/** --------- Local Storage --------------- */
-/**
- * Gets data from data storage for each storage property passed. If an array
- * is passed, an object with each prop as the key for it's data is returned. 
- * If a property is not found, false is returned. 
- */
-export function getDataFromStorage(props) {
-    if (!Array.isArray(props)) { return getStoredData(); }
-    return getStoredDataObj();
-
-    function getStoredData() {
-        var data = dataStorage.getItem(props);  if (!data) { console.log("  ### no stored data for [%s]", props); /* console.trace(); */ }
-        return data ? JSON.parse(data) : false;
-    }
-    function getStoredDataObj() {
-        var data = {};
-        var allFound = props.every(function(prop){                              //console.log("getting [%s] data", prop)
-            return getPropData(prop);                             
-        });  
-        return allFound ? data : false;
-        function getPropData(prop) {
-                var jsonData = dataStorage.getItem(prop) || false;                              
-                if (!jsonData) { console.log("no stored data for [%s]", prop);return false; }
-                data[prop] = JSON.parse(jsonData);                              //console.log("data for %s - %O", entity, data[entity]);
-                return true;   
-        }
-    } /* End getDataObj */
-} /* End getDataFromStorage */
-function getDataStorage() {
-    const env = $('body').data('env');
-    const storageType = env === 'test' ? 'sessionStorage' : 'localStorage';     //console.log('storageType = %s, env = %s', storageType, $('body').data('env'));
-    if (!storageAvailable(storageType)) {console.log("####__ No Local Storage Available__####"); 
-        return false; 
-    } 
-    if (env === 'test') { window[storageType].clear(); }
-    return window[storageType];  
-    
-    function storageAvailable(type) {
-        try {
-            var storage = window[type];
-            var x = '__storage_test__';
-
-            storage.setItem(x, x);
-            storage.removeItem(x);
-            return true;
-        }
-        catch(e) {
-            return false;
-        }
-    }
-} /* End getDataStorage */
-export function addToStorage(key, val) {                                        //console.log('addToStorage. k = [%s] v = [%s] valType = ', key, val, typeof(val));
-    if (dataStorage) {                                                          //console.log("dataStorage active.");
-        dataStorage.setItem(key, val);
-    } else { console.log("####__ No Local Storage Available__####"); }
-}
-export function removeFromStorage(key) {
-    dataStorage.removeItem(key);
-}
-/** --------- IDB Storage --------------- */
-/** 
- * Checks whether the dataKey exists in indexDB cache. 
- * If it is, the stored geoJson is fetched and stored in the global variable. 
- * If not, the db is cleared and geoJson is redownloaded. 
- */
-export function initGeoJsonData() {  
-    idb.get(geoJsonKey).then(clearIdbCheck);
-}
-function clearIdbCheck(storedKey) {                                             console.log('clearing Idb? ', storedKey === undefined);
-    if (storedKey) { return getGeoJsonData(); } 
-    idb.clear();                                                                //console.log('actually clearing');
-    downloadGeoJson();
-}
-function getGeoJsonData() {                                                     //console.log('getGeoJsonData')
-    idb.get('geoJson').then(storeGeoJson);
-}
-function storeGeoJson(geoData) {                                                //console.log('stor(ing)GeoJson. geoData ? ', !geoData);
-    if (!geoData) { return downloadGeoJson(); }
-    geoJson = geoData; 
-}
-function downloadGeoJson(cb) {                                                  
-    return dataStorage.getItem('interaction') ?
-        downloadGeoJsonAfterLocalDbInit(cb) :
-        window.setTimeout(downloadGeoJson, 800);   
-}
-function downloadGeoJsonAfterLocalDbInit(cb) {                                  console.log('downloading all geoJson data!');
-    sendAjaxQuery({}, 'ajax/geo-json', storeServerGeoJson);                     
-    
-    function storeServerGeoJson(data) {                                         //console.log('server geoJson = %O', data.geoJson);
-        idb.set('geoJson', data.geoJson);
-        storeGeoJson(data.geoJson);
-        idb.set(geoJsonKey, true);
-        if (cb) { cb(); }
-    }
-}
-export function isGeoJsonDataAvailable() {
-    return geoJson;
-}
-export function updateGeoJsonData(cb) {                                         //console.log('------ updateGeoJsonData')
-    geoJson = false;
-    downloadGeoJson(cb);
-}
-export function getGeoJsonEntity(id) {                                          //console.log('        geoJson = %O', geoJson);
-    return isGeoJsonDataAvailable() ?  JSON.parse(geoJson[id]) :
-        updateGeoJsonData(getGeoJsonEntity.bind(null, id));
-}
 /*-----------------AJAX Callbacks---------------------------------------------*/
-export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 console.log("Sending Ajax data =%O arguments = %O", dataPkg, arguments)
+export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 logAjaxData(dataPkg, arguments);
     return $.ajax({
         method: "POST",
         url: url,
@@ -358,11 +225,37 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     });
     
     function dataSubmitSucess(data, textStatus, jqXHR) { 
-        console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR);
+        if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
+            console.log("               Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR); }
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
     }
+}
+function logAjaxData(dataPkg, args) {
+    if (['dev', 'test'].indexOf($('body').data('env') != -1)) { console.log("           --Sending Ajax data =%O arguments = %O", dataPkg, args);
+    } else { console.log("          --Sending Ajax data =%O", dataPkg); }
+}
+export function alertErr(err) {                                                 console.log('err = %O', err);console.trace();
+    if ($('body').data('env') === 'test') { return; }
+    alert(`ERROR. Try reloading the page. If error persists, ${getErrMsgForUserRole()}`);
+}
+export function getErrMsgForUserRole() {
+    const userRole = $('body').data('user-role');
+    const msgs = { visitor: getVisitorErrMsg, user: getUserErrMsg };
+    return msgs[userRole] ? msgs[userRole]() : getEditorErrMsg();
+}
+function getVisitorErrMsg() {
+    return `please contact us at info@batplant.org and let us know about the issue you are experiencing.`;
+}
+function getUserErrMsg() {
+    return `please contact us by Leaving Feedback on this page (from the user menu) and let us know about the issue you are experiencing.`;
+}
+function getEditorErrMsg() {
+    return `please follow these steps and email Kelly or Sarah. 
+> Open the browser logs: Open Chrome menu -> "More Tools" -> "Developer Tools".
+> Once the panel loads and the "console" tab is displayed, take a screenshot.
+> Email a description of the steps to reproduce this error and any additional information or screenshots that might help. Thanks!`;
 }
 /* ------------- Data Util -------------------------------------------------- */
 /**  Returns a copy of the record detached from the original. */
@@ -371,7 +264,7 @@ export function getDetachedRcrd(rcrdKey, rcrds) {                               
        return snapshot(rcrds[rcrdKey]);
     }
     catch (e) { 
-       console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+       // console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
     }
 }
 export function getTaxonName(taxon) {                                           
@@ -434,7 +327,7 @@ function initSelectCombobox(confg, opts, change) {                              
 function getPlaceholer(id, name, add, empty) {
     const optCnt = empty ? 0 : $(id + ' > option').length;  
     const placeholder = 'Select ' + name
-    return optCnt || add ? 'Select ' + name : '- None -';
+    return optCnt || add ? placeholder : '- None -';
 }
 export function getSelVal(field) {                                              //console.log('getSelVal [%s]', field);
     const confg = getSelConfgObj(field);                                        //console.log('getSelVal [%s] = [%s]', field, $(confg.id)[0].selectize.getValue());
@@ -467,7 +360,7 @@ function saveOrRestoreSelection() {                                             
 function saveSelVal($elem, val) {
     $elem.data('val', val);
 }
-function updatePlaceholderText(id, newTxt, optCnt) {                            //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
+export function updatePlaceholderText(id, newTxt, optCnt) {                     //console.log('updating placeholder text to [%s] for elem = %O', newTxt, elem);
     const emptySel = optCnt === 0;
     $(id)[0].selectize.settings.placeholder = getPlaceholer(id, newTxt, false, emptySel);
     $(id)[0].selectize.updatePlaceholder();
@@ -482,18 +375,25 @@ function updatePlaceholderText(id, newTxt, optCnt) {                            
 export function replaceSelOpts(selId, opts, changeHndlr, name) {                //console.log('replaceSelOpts. args = %O', arguments)
     const $selApi = $(selId)[0].selectize;
     if (!opts) { return clearCombobox($selApi); }
-    $selApi.clearOptions(); 
-    $selApi.addOption(opts);
-    $selApi.refreshOptions(false);
     if (name) { updatePlaceholderText(selId, name, opts.length); }    
     if (changeHndlr) { 
         $selApi.off('change');
         $selApi.on('change', changeHndlr); 
     }  
+    $selApi.clearOptions(); 
+    $selApi.addOption(opts);
+    $selApi.refreshOptions(false);
 }
 function clearCombobox($selApi) {
-    $selApi.clearOptions();
     $selApi.off('change');
+    $selApi.clearOptions();
+}
+export function triggerComboChangeReturnPromise(field, val) {                   //console.log('triggerComboChange [%s] = [%s]', field, val);
+    const confg = getSelConfgObj(field);
+    const $selApi = $(confg.id)[0].selectize; 
+    const change = confg.change;
+    $selApi.addItem(val, 'silent');
+    return change(val);
 }
 /* ------------- Unused ----------------------------------------------------- */
 // function alphaProperties(obj) {

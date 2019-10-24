@@ -1,4 +1,3 @@
-const exports = module.exports = {};
 /*=================== Content Block WYSIWYG ======================================================*/
 require('../../libs/wysiwyg/trumbowyg.min.js');
 require('../../libs/wysiwyg/ui/trumbowyg.min.css');
@@ -7,7 +6,7 @@ let userRole;
 /**
  *  Adds edit content button to the top of any page with editable content blocks.
  */
-exports.init = function(role) { 
+export function init(role) {
     userRole = role;
     var contentBlocks = $('.wysiwyg');                                          //console.log("contentBlocks = %O", contentBlocks);
     if (contentBlocks.length > 0) { addEditContentButton(); }
@@ -22,10 +21,10 @@ function addEditContentButton() {
     });  //console.log("button = %O", button)
     button.css({
         position: "absolute",
-        top: "8px",         // We were using px for the 'batplant.org' just above this button...  
+        top: "4px",         // We were using px for the 'batplant.org' just above this button...  
         right: "10px"       // in the interest of visual consistency, I am using px to style this as well.
     });
-    $('#hdrtext').append(button);
+    $('#pg-hdr').append(button);
     $('#editContentBttn').data('editing', false);  // tracks which content block contains the active editor, if any.
 }
 /**
@@ -99,7 +98,7 @@ function getBlockContainerId(editId) {
  * any div with class 'wysiwyg', on the page.
  */
 function addEditPencils() {     
-    var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'bundles/app/images/eif.pencil.svg';  
+    var editIcoSrc = ($('body').data('env') === "dev" ? '../' : '') + 'build/images/eif.pencil.svg';  
     var contentBlocks = $('.wysiwyg');  //console.log("contentBlocks = %O", contentBlocks);
     
     for (var i = 0; i < contentBlocks.length; i++) {

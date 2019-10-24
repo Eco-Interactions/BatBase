@@ -52,7 +52,7 @@ class UserNamedController extends Controller
     /**
      * Deletes the user-named filter set or interaction list.
      *
-     * @Route("/delete", name="list_delete")
+     * @Route("/remove", name="list_delete")
      */
     public function listDeleteAction(Request $request)
     {
@@ -94,7 +94,7 @@ class UserNamedController extends Controller
         $returnData->entity = $list;
         $returnData->edits = new \stdClass;
 
-        $list->setLastLoaded(new \DateTime('now', new \DateTimeZone('America/Los_Angeles')));
+        $list->setLastLoaded(new \DateTime('now'));
         $this->setListData($data, $list, $em, $returnData->edits);
         $em->persist($list);
 

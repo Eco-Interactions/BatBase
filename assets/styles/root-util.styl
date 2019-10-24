@@ -1,0 +1,111 @@
+// ROOT ELEMS
+// UTILITY
+// FLEX
+// LISTs
+/* ==================== ROOT ELEMS ========================== */
+// Include paddings inside width for everything
+*
+    box-sizing border-box
+    
+a:link 
+    color: --dark-g
+    text-decoration: underline
+    
+a:visited 
+    color: --dark-g
+    
+a:hover 
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2)
+    
+body
+    min-width 100vw
+    
+button 
+    border: 1px solid     
+    border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186)
+    border-radius: 4px
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+    color: #222
+    margin: 0 .3em 0 .2em
+    line-height: 1.4;
+    background: linear-gradient(#fff, #d3d3d3)
+    cursor: pointer;
+
+    
+form input, form select, form textarea 
+    font-size: 1em
+    padding: .2em
+    margin: .5em .5em .5em 0
+    border 1px solid rgba(128, 128, 128, .4)
+    max-width 90vw
+
+form label
+    margin-right: .5em
+    
+h2
+    font-size: 1.4em;
+    
+h3
+    font-size: 1.3em;
+    
+input[type='button']
+    @extend button
+
+input[type='submit']
+    @extend button
+    
+label.required:before 
+    content: "*"
+
+span.lbl
+    font-weight: bold
+/* ==================== UTILITY ========================== */
+.top-em-mrg 
+    margin-top: 1em
+
+.bot-em-mrg
+    margin-bottom: 1em
+    
+.em-mrg
+    margin: 1em
+
+// .hidden
+//     display: none
+
+.invis  // Used in data entry forms
+    visibility: hidden
+
+.waiting 
+    cursor: wait
+/*------------- Flex ------------------*/
+.flex-row 
+    display: flex
+    flex-direction: row
+
+.flex-col 
+    display: flex
+    flex-direction: column
+    
+.flex-wrap 
+    flex-wrap: wrap
+/*------------ Lists -------------*/
+$list-styles 
+    list-style-position: outside;
+    display: list-item;
+    padding: .25em .75em .25em 0 
+    
+ol>li 
+    @extends $list-styles
+    list-style: decimal;
+
+.disc-list>li 
+    @extends $list-styles
+    list-style: disc
+    
+.circle-list>li 
+    @extends $list-styles
+    list-style: circle
+
+.disc-list, .circle-list
+    padding-inline-start: 1.5em
+    padding-top .5em

@@ -2,9 +2,9 @@ import * as _u from '../util.js';
 import { showLocInDataTable } from '../db-page.js';
 import * as db_forms from '../db-forms/db-forms.js';
 import 'leaflet.markercluster';
-
-let locRcrds;
-
+/* (k) entity, (v) all entity data - locs, ints, geoJson, taxa */
+let data;
+/** Base marker class */
 class Marker {
     constructor (latLng) {
         this.latLng = latLng;
@@ -25,14 +25,15 @@ class Marker {
         this.self.off('mouseout').on('mouseout', func);
     }
 } /* End Marker Super Class */
+/** Single location marker. */
 export class LocMarker extends Marker {
-    constructor (latLng, loc, rcrds, formMarker) { 
-        super(latLng);
+    constructor (params, markerType) {                                          //console.log('New LocMarker. params = %O, markerType = [%s]', params, markerType)
+        data = params.rcrds;
+        super(params.latLng);
+        this.loc = params.loc;
+        this.markerType = markerType;
         bindClassContextToMethods(this); 
-        this.loc = loc;
-        locRcrds = rcrds;
-        this.formMarker = formMarker;
-        this.self = L.marker(latLng, getCustomIcon(formMarker))
+        this.self = L.marker(params.latLng, getCustomIcon(markerType))
             .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'})
             .on('mouseover', this.openPopup);
         this.self.on('popupclose', this.onPopupClose);
@@ -51,7 +52,7 @@ export class LocMarker extends Marker {
     /** --- Event Handlers --- */
     openPopup(e) {            
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
-        ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.formMarker);
+        ifLocPopupEmpty.bind(this)(this.popup.getContent(), this.markerType);
         this.self.openPopup();
     }
     /** 
@@ -75,12 +76,13 @@ export class LocMarker extends Marker {
     }
 } /* End LocMarker Class */
 export class IntMarker extends Marker {
-    constructor (focus, latLng, intData) {
-        super(latLng);
+    constructor (params) {
+        data = params.rcrds;
+        super(params.latLng);
+        this.intData = params.intData;
+        this.focus = params.focus;
         bindClassContextToMethods(this); 
-        this.data = intData;
-        this.focus = focus;
-        this.self = L.marker(latLng, getCustomIcon())
+        this.self = L.marker(params.latLng, getCustomIcon())
             .bindPopup(this.popup, {closeOnClick: false, maxWidth: '272', minWidth: '177'});
         this.addMarkerEvents();
         this.self.on('popupclose', this.onPopupClose);
@@ -97,7 +99,7 @@ export class IntMarker extends Marker {
     openPopup(e) {                       
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { 
-            this.popup.setContent(getIntPopupHtml(this.focus, this.data));
+            this.popup.setContent(getIntPopupHtml(this.focus, this.intData));
         }
         this.self.openPopup();
     }
@@ -118,25 +120,31 @@ export class IntMarker extends Marker {
         this.timeout = window.setTimeout(this.closePopup, 700);
     }
 } /* End IntMarker Class */
-export class LocCluster extends Marker {
-    constructor (map, intCnt, latLng, loc, rcrds, formMarker) { 
-        super(latLng);   
-        bindClassContextToMethods(this); 
+export class LocCluster extends Marker {  
+    constructor (map, intCnt, params, markerType) {                             //console.log('New LocCluster. cnt = [%s] params = %O, markerType = [%s]', intCnt, params, markerType)
+        data = params.rcrds;
+        super(params.latLng);   
         this.map = map;
-        this.loc = loc;
-        this.formMarker = formMarker;
-        locRcrds = rcrds;
-        this.popup.options.closeOnClick = false;
-        this.popup.options.maxWidth = '272';
-        this.popup.options.minWidth = '177';
-        const opts = !formMarker ? false : {
+        this.loc = params.loc;
+        this.markerType = markerType;
+        bindClassContextToMethods(this); 
+        this.self = L.markerClusterGroup(this.getClusterConfg(intCnt, markerType));
+        this.addClusterEvents();
+        this.addPopupOptions();
+        this.addMarkersToCluser(intCnt);
+        this.map.on('popupclose', this.closeLayerPopup);
+    }
+    getClusterConfg(intCnt, markerType) { 
+        return !markerType ? null : {
             iconCreateFunction: () => L.divIcon({ 
                 html: intCnt, className: 'form-noGps', iconSize: L.point(32, 32)})
         }; 
-        this.self = opts ? L.markerClusterGroup(opts) : L.markerClusterGroup();
-        this.addClusterEvents();
-        this.addMarkersToCluser(intCnt);
-        this.map.on('popupclose', this.closeLayerPopup);
+
+    }
+    addPopupOptions() {
+        this.popup.options.closeOnClick = false;
+        this.popup.options.maxWidth = '272';
+        this.popup.options.minWidth = '177';
     }
     addClusterEvents() {
         this.self.on('clustermouseover', this.openClusterPopup)
@@ -153,7 +161,7 @@ export class LocCluster extends Marker {
         }
     }
     setDefaultPopupHtml() {
-        const content = this.formMarker ? getNoGpsLocDetailsHtml(this.loc) : 
+        const content = this.markerType ? getNoGpsLocDetailsHtml(this.loc) : 
             getLocationSummaryHtml(this.loc);
         this.popup.setContent(content);
     }
@@ -182,12 +190,13 @@ export class LocCluster extends Marker {
     }
 } /* End LocCluster Class */
 export class IntCluster extends Marker {
-    constructor (map, intCnt, focus, latLng, data) {
-        super(latLng);
+    constructor (map, intCnt, params) {
+        data = params.rcrds;
+        super(params.latLng);
         bindClassContextToMethods(this); 
         this.map = map;
-        this.focus = focus;
-        this.data = data;
+        this.focus = params.focus;
+        this.intData = params.intData;
         this.popup.options.closeOnClick = false;
         this.popup.options.maxWidth = '272';
         this.popup.options.minWidth = '177';
@@ -214,7 +223,7 @@ export class IntCluster extends Marker {
     openClusterPopup(c) {
         if (this.timeout) { clearMarkerTimeout(this.timeout); }
         if (!this.popup.getContent()) { 
-            this.popup.setContent(getIntPopupHtml(this.focus, this.data));
+            this.popup.setContent(getIntPopupHtml(this.focus, this.intData));
         }
         this.map.openPopup(this.popup);
     }
@@ -284,7 +293,7 @@ function getCustomIcon(iconType) {                                              
 } /* End getCustomIcon */
 /** ---------------- Interaction Marker/Popup Helpers ----------------------  */
 function getIntPopupHtml(focus, intData) {                                      //console.log('getIntPopupHtml. intData = %O', intData);
-    const locHtml = getLocNameHtml(intData.locs[0]);
+    const locHtml = getLocNameHtml(intData.locs[0]); 
     const intHtml = getIntSummaryHtml(focus, intData.ints, intData.ttl);
     return `<div>${locHtml}${intHtml}</div>`;
 }
@@ -321,14 +330,13 @@ function buildSrcIntSummary(name, ints, focus) {                                
 }
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getTop3CitedBats(ints) {    
-    const taxa = _u.getDataFromStorage('taxon');
     const allBats = {};
     getAllBatsCited();
     const bats = getTopThreeReportStr(allBats, buildBatSummaryStr);
     return `Bat${Object.keys(allBats).length == 1 ? '' : 's'}: ${bats}`;
     
     function getAllBatsCited() {
-        ints.forEach(int => trackBatInteraction(taxa[int.subject], allBats));
+        ints.forEach(int => trackBatInteraction(data.taxa[int.subject], allBats));
     }
 } /* End getTop3CitedBats */
 /**
@@ -398,7 +406,7 @@ function buildLocMarkerContent(type, loc) {
         'form-noGps': getNoGpsLocDetailsHtml, 'new-loc': getGeocodedLocHtml 
     };         
     const editing = type ? ifEditingReturnTrueAndUpdateType() : false;  
-    return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc, locRcrds);
+    return map[type] ? map[type](loc, editing) : getLocationSummaryHtml(loc);
 
     function ifEditingReturnTrueAndUpdateType() {
         const isEditing = type.includes('edit');
@@ -427,8 +435,8 @@ function getHabTypeHtml(loc, leaveBlank) {
         'Caves & Subterranean' : loc.habitatType.displayName;
     return `Habitat: <b>${name}</b>`;
 }
-function getCoordsHtml(loc) {
-    const geoData = _u.getGeoJsonEntity(loc.geoJsonId);                         //console.log('geoJson = %O', geoData); 
+function getCoordsHtml(loc) { 
+    const geoData = data.geo[loc.geoJsonId];                                    //console.log('geoJson = %O', geoData); 
     if (geoData.type !== 'Point' || isRegionOrCountry(loc)) { return false; }
     let coords = JSON.parse(geoData.displayPoint)
     coords = coords.map(c => Number(c).toFixed(6)); 
@@ -450,7 +458,7 @@ function getSelectLocationBttn(loc, editing) {
  * Used when displaying interactions by location on the search page.
 */
 export function getLocationSummaryHtml(loc, rcrds) {                            //console.log('loc = %O rcrds = %O', loc, rcrds);
-    locRcrds = locRcrds || rcrds;
+    data = rcrds || data;
     return getLocSummaryPopup(loc);
 }
 function getLocSummaryPopup(loc) {
@@ -486,7 +494,7 @@ function getAllHabitatsWithin(loc) {                                            
     return Object.keys(habitats).length ? buildHabHtml() : false; 
 
     function addHabitatsForLocAndChildren(l) {                                  
-        let loc = typeof l === 'object' ? l : locRcrds[l]; 
+        let loc = typeof l === 'object' ? l : data.locs[l]; 
         if (loc.interactions.length) { addLocHabitat(loc); }
         if (loc.children.length) { loc.children.forEach(addHabitatsForLocAndChildren); }        
     }
@@ -505,21 +513,20 @@ function getAllHabitatsWithin(loc) {                                            
 /** --- Cited Bats --- */
 /** Build string of 3 most reported taxonyms and the count of remaining taxa reported. */
 function getBatsCitedHtml(loc) {    
-    const rcrds = _u.getDataFromStorage(['interaction', 'taxon']);
     const allBats = {};
     getAllBatsWithin(loc); 
     const bats = getTopThreeReportStr(allBats, buildLocSummaryStr);
     return `Cited bats: <b>${bats}</b>`;
     
     function getAllBatsWithin(l) {  
-        const loc = typeof l == 'object' ? l : locRcrds[l];
+        const loc = typeof l == 'object' ? l : data.locs[l];
         if (loc.interactions.length) { addBats(loc.interactions); }
         if (loc.children.length) { loc.children.forEach(getAllBatsWithin); }
     }
-    function addBats(interactions) {
+    function addBats(interactions) { 
         if (typeof interactions[0] == 'object') { return addFltrdBats(interactions, allBats); }
-        const ints = interactions.map(id => rcrds.interaction[id]);  
-        ints.forEach(int => trackBatInteraction(rcrds.taxon[int.subject], allBats));
+        const ints = interactions.map(id => data.ints[id]);  
+        ints.forEach(int => trackBatInteraction(data.taxa[int.subject], allBats));
     }
 } /* End getBatsCitedHtml */
 /** For displaying interactions that are filtered to a user-made list. */

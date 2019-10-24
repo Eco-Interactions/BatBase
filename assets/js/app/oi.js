@@ -1,70 +1,74 @@
-/* ============================== MAIN JS =================================== */
-requireCss();
-requireGlobalJquery();
+// CODE SECTIONS:
+//  TOP CALLS
+//  STYLES & SCRIPTS
+//  UI INIT
+//  PAGE SPECIFIC
+//  BROWSER SPECIFIC
+/* ======================== TOP CALLS ======================================= */
+requireStyles();
+setGlobalJquery();
 initUi();
-authDependantInit();  
-ifNotChromeShowOptimizedMsg();
-clearFieldForPdfSubmissions();
-// registerServiceWorker();
-
-/* ------------ Styles and Scripts ------------------*/
-function requireCss() {
-    require('../../css/ei-reset.css');   
-    require('../../css/oi.css');    
+/* ==================== STYLES & SCRIPTS ==================================== */
+function requireStyles() {
+    require('../../styles/ei-reset.styl');   
+    require('../../styles/oi.styl');    
     require('../../css/lib/introjs.min.css');  
-    adjustLogoToScreenSizeAndBrowser();
 }
-/** Sets logo width for windows with less than 1500px widths or in firefox browsers. */
-function adjustLogoToScreenSizeAndBrowser() {
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {  
-        const width = $(window).width() > 1500 ? '325px' : '275px';
-        $('#side-logo').css('width', width);
-    } else if ($(window).width() < 1500) { 
-        $('#side-logo').css('width', '275px');
-    } 
-}
-function requireGlobalJquery() { 
+function setGlobalJquery() { 
     global.$ = $;
     global.jQuery = $;
 }
-/* ---------------------------- UI ------------------------------------------ */
+/* ========================== UI INIT ======================================= */
 function initUi() {
+    initHeaderAndNav();
     initTos();
+    handlePageSpecificUiInit();
+    authDependentInit();  
+    $('#b-overlay').hide(); // Hides loading overlay on mobile
+    $('.popup').show();
+}
+function initHeaderAndNav() {
+    handleBrowserSpecificLoad();
+    initNavMenu();
     initImageSlider();
-    initStickyHeader();
-    initDataTable();
+    initStickyHeader(); //Must load after image slider and the nav menus
+    $('#pg-hdr').css('z-index', '0'); // Otherwise elem flashes under img-slider on page load
+}
+function initNavMenu() {
+    require('./nav.js').initMenu();
 }
 function initTos() {
-    require('./tos.js').init();
+    require('./tos.js').initTos();
 }
 function initImageSlider() {    
-    let curSlide = 1,
-        nxtSlide = 2;         
-  
-    window.setInterval(() => { 
-    $('#img-slider div:nth-child('+nxtSlide+')').css({opacity: 1}); 
-        window.setTimeout(() => {   
-            $('#img-slider div:nth-child('+curSlide+')').css({opacity: 0}); 
-            curSlide = nxtSlide;
-            nxtSlide = curSlide === 3 ? 1 : curSlide + 1;
-        }, 1000)
-    }, 10000);
+    require('./img-slider.js').initSlider();
 }
+/* Header sticks when image header scrolls off screen. */
 function initStickyHeader() {
-    const $stickyMenu = $('#sticky-hdr');
+    const hdrHeight = $('#img-slider').outerHeight() || 
+     $('#slider-overlay').outerHeight() || $('#slider-logo').outerHeight();  
+
     $(window).scroll(function () {
-        if ($(window).scrollTop() > 423) {
-                $stickyMenu.addClass("top-sticky");
+        if ($(window).scrollTop() > hdrHeight) {
+                $('#sticky-hdr').addClass("top-sticky");
             } else {
-                $stickyMenu.removeClass("top-sticky");
+                $('#sticky-hdr').removeClass("top-sticky");
             }
     });
+    $(window).scroll();
 };
+/* ========================== PAGE SPECIFIC ================================= */
+function handlePageSpecificUiInit() {
+    initDataTable();
+    clearFieldForPdfSubmissions();
+    showOverlayOnMobile();
+}
 /**
- * Initiates tables and rearranges realted UI. Used on the feedback, pdf submission, and bilio pages.
+ * Initiates tables and rearranges related UI. 
+ * Used on the feedback, pdf submission, and bilio pages.
  */ 
 function initDataTable() { 
-    const tableName = $('#pg-container').data("has-tbl"); 
+    const tableName = $('#pg-container').data("dt"); 
     if (tableName === false) { return; } 
     require('../misc/oi-tables.js').init(tableName);  
 } 
@@ -74,57 +78,119 @@ function clearFieldForPdfSubmissions() {
         $('textarea#appbundle_file_upload_description').val(''); //Clears field after form submit. 
     }
 }
-/* ------------------ Auth Dependant --------------------- */
-function authDependantInit() { 
+/*
+ * For pages that are not able to be used on mobile devices, show a popup directing
+ * users to view page on a computer.
+ */
+function showOverlayOnMobile() {
+    const mblMsg = getMobileMsg();
+    if (!mblMsg || $('body').data('env') == 'test') { return; } 
+    showMobilePopupMsg(mblMsg);
+}
+function getMobileMsg() {
+    const map = { search: 1200, 'view-pdfs': 800, feedback: 800};
+    const winWidth = Math.round(window.visualViewport ? window.visualViewport.width : window.innerWidth);
+    const path = window.location.pathname;  
+    const pg = Object.keys(map).find(pg => path.includes(pg));  
+    if (!pg || isSearchPgOnApple(pg) || winWidth > map[pg])  { return false; }
+    return getMobileMsgHtml(map[pg])
+
+    /** Note: search page code doesn't load on mobile devices. */
+    function isSearchPgOnApple(pg) {                                            //console.log('pg = %s, apple? ', pg, ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1)
+        if (pg == 'search' && 
+            ['Safari', 'iPhone'].indexOf($('body').data('browser')) !== -1) {
+            showBrowserWarningPopup();
+            return true;
+        };    
+        function showBrowserWarningPopup() {                                    
+            const overlay = $('<div></div>').addClass('mobile-opt-overlay');
+            const popup = $('<div></div>').addClass('popup');
+            $(popup).html(`<center><h2>This page not supported on Safari Browser currently.</h2>`);
+            $(overlay).append(popup);
+            $('#detail-block').prepend(overlay);
+            $('.popup').fadeIn(500);
+        }
+    }
+    function getMobileMsgHtml(minWidth) {
+        return `<center><h2>Page must be viewed on screen at least ${minWidth} pixels wide.<h2>
+            <br><p>This screen is ${winWidth} pixels wide.</p></center>`;
+    }
+}
+function showMobilePopupMsg(mblMsg) {
+    const overlay = $('<div></div>').addClass('mobile-opt-overlay');
+    const popup = $('<div></div>').addClass('popup');
+    $(popup).html(mblMsg);
+    $(overlay).append(popup);
+    $('#detail-block').prepend(overlay);
+    $('#b-overlay-popup').fadeIn(500);
+}
+/* ========================= AUTH DEPENDENT ================================= */
+function authDependentInit() { 
     const userRole = $('body').data("user-role");                               //console.log("userRole = ", userRole);
     if (userRole === 'visitor') { return; }
-    if (['admin', 'super'].indexOf(userRole) !== -1) { initEditContentUi(); }
     initFeedbackUi();     
+    if (userRole === 'admin' && window.innerWidth > 550 || userRole === 'super') { 
+        initEditContentUi(); 
+    } 
     
     function initEditContentUi() {
         const wysiwyg = require('./wysiwyg.js');
         wysiwyg.init(userRole);
     }
-}  /* End authDependantInit */
+}  /* End authDependentInit */
 function initFeedbackUi() {
     const feedback = require('./feedback.js');
     feedback.init();
 }
-function ifNotChromeShowOptimizedMsg() {
-    const isChrome = checkIfChrome();
-    if (isChrome) { return; }
+/* ======================= BROWSER SPECIFIC ================================= */
+function handleBrowserSpecificLoad() {
+    const brwsr = getBrowserName();  
+    $('body').data('browser', brwsr);
+    if (brwsr == 'Chrome') { return; }
     addMsgAboutChromeOptimization();
 }
-function checkIfChrome() {
-    const isChromium = window.chrome;
-    const winNav = window.navigator;
-    const vendorName = winNav.vendor;
-    const isOpera = typeof window.opr !== "undefined";
-    const isIEedge = winNav.userAgent.indexOf("Edge") > -1;
-    const isIOSChrome = winNav.userAgent.match("CriOS");
-
-    return isIOSChrome ? true : 
-            (isChromium !== null && typeof isChromium !== "undefined" &&
-            vendorName === "Google Inc." && isOpera === false && 
-            isIEedge === false) ? true : false;
+function getBrowserName() {
+    return isOpera() || isIEedge() || isIphone() || isChrome() || isSafari();
+    
+    function isOpera() {
+        return typeof window.opr !== "undefined" ? 'Opera' : false;
+    }
+    function isIEedge() {
+        return window.navigator.userAgent.indexOf("Edge") > -1 ? 'IE' : false;
+    }
+    function isChrome() {
+        const isChromium = window.chrome;
+        const vendorName = window.navigator.vendor;
+        const isIOSChrome = window.navigator.userAgent.match("CriOS");
+        return isIOSChrome ? 'Chrome' : 
+                (isChromium !== null && typeof isChromium !== "undefined" &&
+                vendorName === "Google Inc.") ? 'Chrome' : false;
+    }
+    function isSafari() {
+        return window.safari ? 'Safari' : false;
+    }
+    function isIphone() {
+        return /CriOS|iPad|iPhone|iPod/.test(navigator.platform) ? 'iPhone' : false;
+    }
 }
 function addMsgAboutChromeOptimization() {
+    const msg = buildMsgHtml();
+    const logo = $('#slider-logo').detach();
+    $(logo).addClass('overlay');
+    $('#slider-overlay').css('padding', '2em');
+    $('#slider-overlay').prepend([msg, logo]);
+    window.setTimeout(() => {
+        $('#sticky-hdr').css({
+            'top': $('#slider-overlay').outerHeight(),
+            'position': 'absolute'
+        });
+    }, 750);
+}
+function buildMsgHtml() {
     const div = document.createElement("div");
     div.id = 'chrome-opt-msg';
     div.innerHTML = `<b>This site is developed and tested with chrome.</b> If 
         you encounter issues with other browsers, please log in and leave 
         feedback to let us know.`;
-    $('#slider-overlay').prepend(div);
+    return div;
 }
-// function registerServiceWorker() { //console.log('env = ', $)
-//      if ('serviceWorker' in navigator) {
-//         window.addEventListener('load', () => {
-//             navigator.serviceWorker.register('/batplant/web/build/service-worker.js')
-//                 .then(registration => {
-//                     console.log('SW registered: ', registration);
-//                 }).catch(registrationError => {
-//                     console.log('SW registration failed: ', registrationError);
-//                 });
-//         });
-//     }
-// }

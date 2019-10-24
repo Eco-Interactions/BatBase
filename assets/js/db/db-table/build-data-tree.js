@@ -18,7 +18,7 @@ let tblState;
  * Note: If loading a user-named data set (intSet), only the entities within 
  * those interactions are added to the data tree.
  */ 
-export function buildLocTree(topLocs, textFltr) {                               //console.log("passed 'top' locIds = %O", topLocs)
+export function buildLocTree(topLocs, textFltr) {                               
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
     return fillTreeWithInteractions('locs', buildLocDataTree(topLocs, textFltr));
@@ -46,21 +46,11 @@ function getLocChildData(childId) {
 }
 /* ========================= SOURCE TREE ============================================================================ */
 /** (Re)builds source tree for the selected source realm. */
-export function buildSrcTree(realm) {
+export async function buildSrcTree(realm) {
     tblState = tState().get(null, ['rcrdsById', 'intSet']);
     focusRcrds = tblState.rcrdsById;
-    const tree = buildSrcRealmTree(realm, getRealmRcrds(realm));
+    const tree = await buildSrcRealmTree(realm);
     return fillTreeWithInteractions('srcs', tree);
-}
-/** Returns the records for the source realm currently selected. */
-function getRealmRcrds(realm) {
-    const valMap = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
-    return getTreeRcrdAry(valMap[realm]);
-}
-/** Returns an array with all records from the stored record object. */
-function getTreeRcrdAry(realmRcrdKey) {
-    const srcRcrdIdAry = _u.getDataFromStorage(realmRcrdKey);  
-    return srcRcrdIdAry.map(function(id) { return _u.getDetachedRcrd(id, focusRcrds)});
 }
 /**
  * Builds the source data tree for the selected source realm (source type)
@@ -69,13 +59,21 @@ function getTreeRcrdAry(realmRcrdKey) {
  * Publications->Citations->Interactions. 
  * Publishers->Publications->Citations->Interactions. 
  */
-function buildSrcRealmTree(realm, rcrds) {                              
-    const pubRcrds = _u.getDataFromStorage('publication');
-    const treeMap = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
-    let tree = treeMap[realm](rcrds, pubRcrds);
-    tree = filterTreeToInteractionSet(tree, 'srcs');
-    return sortDataTree(tree);
+function buildSrcRealmTree(realm) {     
+    const bldr = { 'pubs': buildPubTree, 'auths': buildAuthTree, 'publ': buildPublTree };
+    const realmSrcKey = getSrcRcrdKey(realm);
+    return Promise.all([_u.getData(['publication', 'author']),_u.getData(realmSrcKey)])
+        .then(data => { 
+            const srcData = data[1].map(id => _u.getDetachedRcrd(id, focusRcrds))
+            let tree = bldr[realm](srcData, data[0]);
+            tree = filterTreeToInteractionSet(tree, 'srcs');
+            return sortDataTree(tree);
+        }).catch(e => console.log('e = %O', e));
 }  
+function getSrcRcrdKey(realm) {
+    const keys = { 'auths': 'authSrcs', 'pubs': 'pubSrcs', 'publ': 'pubSrcs' };
+    return keys[realm];
+}
 /*-------------- Publication Source Tree -------------------------------------------*/
 /**
  * Returns a tree object with Publications as the base nodes of the data tree. 
@@ -86,7 +84,8 @@ function buildSrcRealmTree(realm, rcrds) {
  * ->->Citation Title
  * ->->->Interactions Records
  */
-function buildPubTree(pubSrcRcrds, pubRcrds) {                                  //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+function buildPubTree(pubSrcRcrds, data) {                                      //console.log("buildPubSrcTree. Tree = %O", pubSrcRcrds);
+    const pubRcrds = data.publication;
     const tree = {};
     pubSrcRcrds.forEach(function(pub) { 
         tree[pub.displayName] = getPubData(pub, pubRcrds); 
@@ -115,7 +114,8 @@ function getPubChildren(rcrd, pubRcrds) {                                       
  * ->->->Citation Title
  * ->->->->Interactions Records
  */
-function buildPublTree(pubSrcRcrds, pubRcrds) {                                 //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+function buildPublTree(pubSrcRcrds, data) {                                 //console.log("buildPublSrcTree. Tree = %O", pubRcrds);
+    const pubRcrds = data.publication;
     const tree = {};
     const noPubl = [];
     pubSrcRcrds.forEach(function(pub) { addPubl(pub); });
@@ -153,8 +153,9 @@ function buildPublTree(pubSrcRcrds, pubRcrds) {                                 
  * ->->Citation Title (Publication Title)
  * ->->->Interactions Records
  */
-function buildAuthTree(authSrcRcrds, pubRcrds) {                                //console.log("----buildAuthSrcTree. authSrcRcrds = %O, pubRcrds", authSrcRcrds, pubRcrds);
-    const authRcrds = _u.getDataFromStorage('author');  
+function buildAuthTree(authSrcRcrds, data) {                                //console.log("----buildAuthSrcTree. authSrcRcrds = %O, pubRcrds", authSrcRcrds, pubRcrds);
+    const pubRcrds = data.publication;
+    const authRcrds = data.author;
     const tree = {};
     authSrcRcrds.forEach(rcrd => getAuthData(rcrd));
     return tree;  
@@ -214,8 +215,10 @@ function buildTxnDataTree(topTaxon) {
     }
 } /* End buildTaxonTree */
 function storeTaxonLevelData(topTaxon, filtering) {                             //console.log('storeTaxonLevelData. filtering?', filtering);
-    if (!filtering) { storeLevelData(topTaxon); 
-    } else { updateTaxaByLvl(topTaxon); }
+    _u.getData('levelNames').then(levels => { 
+        if (!filtering) { storeLevelData(topTaxon, levels); 
+        } else { updateTaxaByLvl(topTaxon, levels); }
+    });
 }
 /**
  * Stores in the global tblState obj:
@@ -223,16 +226,17 @@ function storeTaxonLevelData(topTaxon, filtering) {                             
  *   level and keyed under their display name.
  * > allRealmLvls - array of all levels present in the current realm tree.
  */
-function storeLevelData(topTaxon) {                                             //console.log('topTaxon = %O', topTaxon)
-    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon);                         
-    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', taxaByLvl, allRealmLvls);
+function storeLevelData(topTaxon, levels) {                                     //console.log('topTaxon = %O', topTaxon)
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                         
+    const allRealmLvls = getRealmLvls(topTaxon.realm.displayName);              //console.log('taxaByLvl = %O, allRealmLvls = %O', _u.snapshot(taxaByLvl), _u.snapshot(allRealmLvls));
     tState().set({taxaByLvl: taxaByLvl, allRealmLvls: allRealmLvls});
 }
-function updateTaxaByLvl(topTaxon) {
-    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(topTaxon)});              //console.log("taxaByLvl = %O", taxaByLvl)
+function updateTaxaByLvl(topTaxon, levels) {
+    const taxaByLvl = seperateTaxonTreeByLvl(topTaxon, levels);                 //console.log("taxaByLvl = %O", taxaByLvl)
+    tState().set({'taxaByLvl': taxaByLvl});          
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(topTaxon) {
+function seperateTaxonTreeByLvl(topTaxon, levels) {
     const separated = {};
     separate(topTaxon);
     return sortObjByLevelRank(separated);
@@ -247,9 +251,8 @@ function seperateTaxonTreeByLvl(topTaxon) {
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
         const obj = {};
-        levels.forEach(lvl => {
+        Object.keys(levels).forEach(lvl => {
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
@@ -265,16 +268,16 @@ function getRealmLvls(realm) {
 }
 /* ====================== Interaction Fill Methods ================================================================== */
 /** Replaces all interaction ids with records for every node in the tree.  */
-function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
-    const entities = ['interaction', 'taxon', 'location', 'source'];
-    const entityData = _u.getDataFromStorage(entities); 
-    const fillMethods = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
-    fillMethods[focus](dataTree, entityData);
+async function fillTreeWithInteractions(focus, dataTree) {                            //console.log('fillTreeWithInteractions. [%s], tree = %O', focus, dataTree);
+    const fill = { taxa: fillTaxonTree, locs: fillLocTree, srcs: fillSrcTree };
+    const entities = ['interaction', 'taxon', 'location', 'source', 'levelNames'];
+    const data = await _u.getData(entities);
+    fill[focus](dataTree, data);
     return dataTree;
-} /* End fillTree */
+} 
 function fillTaxonTree(dataTree, entityData) {                                  //console.log("fillingTaxonTree. dataTree = %O", dataTree);
     fillTaxaInteractions(dataTree);  
-    fillHiddenTaxonColumns(dataTree);
+    fillHiddenTaxonColumns(dataTree, Object.keys(entityData.levelNames));
 
     function fillTaxaInteractions(treeLvl) {                                    //console.log("fillTaxonInteractions called. taxonTree = %O", dataTree) 
         for (let taxon in treeLvl) {   
@@ -316,25 +319,23 @@ function fillSrcTree(dataTree, entityData) {
      * Recurses through each source's 'children' property until all sources 
      * have any interaction ids replaced with the interaction records. 
      */
-    function fillSrcInteractions(curSrc) {                                      //console.log("fillSrcInteractions. curSrc = %O. parentSrc = %O", curSrc, parentSrc);
+    function fillSrcInteractions(curSrc) {                                      //console.log("fillSrcInteractions. curSrc = %O", curSrc);
         const srcChildren = [];
         if (curSrc.isDirect) { replaceSrcInts(curSrc); }
-        curSrc.children.forEach(function(childSrc){
-            fillSrcInteractions(childSrc); 
-        });
+        curSrc.children.forEach(childSrc => fillSrcInteractions(childSrc));
     }
-    function replaceSrcInts(curSrc) {
+    function replaceSrcInts(curSrc) {  
         curSrc.interactions = replaceInteractions(curSrc.interactions, entityData); 
     }
 
 } /* End fillSrcTree */
 /** Replace the interaction ids with their interaction records. */
-function replaceInteractions(interactionsAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O", interactionsAry);
-    return interactionsAry.map(function(intId){
-        if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(intRcrds[intId]));
+function replaceInteractions(interactionsAry, entityData) {                     //console.log("replaceInteractions called. interactionsAry = %O, intRcrds = %O", interactionsAry, entityData.interaction);
+    return interactionsAry.map(function(intId){  
+        if (typeof intId === "number") {                                        //console.log("new record = %O",  _u.snapshot(entityData.interaction[intId]));
             return fillIntRcrd(
                 _u.getDetachedRcrd(intId, entityData.interaction), entityData); 
-        }  console.log("####replacing interactions a second time? Ary = %O", interactionsAry);
+        } 
     });
 }
 /** Returns a filled record with all references replaced with entity records. */
@@ -358,9 +359,8 @@ function getIntTags(tagAry) {
 /**
  * Fills additional columns with flattened taxon-tree parent chain data for csv exports.
  */
-function fillHiddenTaxonColumns(curTaxonTree) {                                 //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
+function fillHiddenTaxonColumns(curTaxonTree, lvls) {                           //console.log('fillHiddenTaxonColumns. curTaxonTree = %O', curTaxonTree);
     var curTaxonHeirarchy = {};
-    var lvls = Object.keys(_u.getDataFromStorage('levelNames'));                //console.log('lvls = %O', lvls);
     getTaxonDataAtTreeLvl(curTaxonTree);
 
     function getTaxonDataAtTreeLvl(treeLvl) {
@@ -397,12 +397,12 @@ function fillHiddenTaxonColumns(curTaxonTree) {                                 
         var topIdx = lvls.indexOf(parentLvl);
         for (var i = ++topIdx; i < lvls.length; i++) { curTaxonHeirarchy[lvls[i]] = null; }
     }
-    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', JSON.parse(JSON.stringify(curTaxonHeirarchy)));
-        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             //console.log('role = ', role)
+    function fillInteractionRcrdsWithTaxonTreeData(taxon) {                     //console.log('curTaxonHeirarchy = %O', _u.snapshot(curTaxonHeirarchy));
+        $(['subjectRoles', 'objectRoles']).each(function(i, role) {             
             if (taxon[role].length > 0) { taxon[role].forEach(addTaxonTreeFields) }
         });
     } 
-    function addTaxonTreeFields(intRcrdObj) {                               
+    function addTaxonTreeFields(intRcrdObj) {     
         for (var lvl in curTaxonHeirarchy) {
             var colName = 'tree' + lvl; 
             intRcrdObj[colName] = lvl === 'Species' ? 

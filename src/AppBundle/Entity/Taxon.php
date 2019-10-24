@@ -161,6 +161,8 @@ class Taxon
      *
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
+     * @JMS\Expose
+     * @JMS\SerializedName("serverUpdatedAt")
      */
     private $updated;
 
@@ -605,6 +607,7 @@ class Taxon
     public function removeSubjectRole(\AppBundle\Entity\Interaction $subjectRole)
     {
         $this->subjectRoles->removeElement($subjectRole);
+        $this->updated = new \DateTime('now');
     }
 
     /**
@@ -650,6 +653,7 @@ class Taxon
     public function removeObjectRole(\AppBundle\Entity\Interaction $objectRoles)
     {
         $this->objectRoles->removeElement($objectRoles);
+        $this->updated = new \DateTime('now');
     }
 
     /**

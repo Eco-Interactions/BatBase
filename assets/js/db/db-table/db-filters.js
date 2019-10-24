@@ -12,16 +12,16 @@
  *     syncViewFiltersAndUi             save-ints
  *     toggleTimeFilter                 db_page
  *     updateFilterStatusMsg            db-page, init-tbl, save-fltrs
+ *     updateTaxonFilterViewMsg         db-page
  *     updateLocSearch                  util
  *     updatePubSearch                  util
  *     updateTaxonSearch                util
  */
 import * as _u from '../util.js';
-import { accessTableState as tState, selectSearchFocus, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
+import { accessTableState as tState, initDataTable, rebuildLocTable, rebuildTxnTable } from '../db-page.js';
 import * as db_ui from '../db-ui.js';
 import { resetStoredFiltersUi, savedFilterSetActive } from '../panels/save-fltrs.js';
 import { savedIntListLoaded } from '../panels/save-ints.js';
-
 /** 
  * Filter Params
  *     cal - Stores the flatpickr calendar instance. 
@@ -69,11 +69,22 @@ function filtersActive() {
     const pnl = Object.keys(fPs.pnlFltrs).length > 0;
     return tbl || pnl;
 }
+export function resetTblFilters() {
+    resetFilterUi();
+    resetTableStateParams();
+}
+function resetFilterUi() {
+    $('#filter-status').text('No Active Filters.');
+    $('#focus-filters input').val('');
+    if ($('#shw-chngd').prop('checked')) { 
+        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
+    }
+}
 /* ====================== UPDATE FILTER STATUS BAR ================================================================== */
-export function updateFilterViewMsg() {                                                     
-    const view = _u.getDataFromStorage('curView'); 
+/** Used in taxon views to indicate the filtering happening at the view level. */
+export function updateTaxonFilterViewMsg(view) {                                                     
     const map = {2: 'Bats', 3: 'Plants', 4: 'Bugs'};
-    const msg = map[view] ? `[${map[view]}]` : '';
+    const msg = view ? `[${map[view]}]` : '';
     $('#view-fltr').text(msg);
 }
 /**
@@ -176,17 +187,6 @@ function getTableFilterModels() {
 function setStatus(status) {                                                    //console.log("setFilterStatus. status = ", status)
     $('#filter-status').text(status);
 }
-export function resetTblFilters() {
-    resetFilterUi();
-    fPs.pnlFltrs = {};
-}
-function resetFilterUi() {
-    $('#filter-status').text('No Active Filters.');
-    $('#focus-filters input').val('');
-    if ($('#shw-chngd').prop('checked')) { 
-        $('#shw-chngd').prop('checked', false).change(); //resets updatedAt table filter
-    }
-}
 /* ====================== TIME-UPDATED FILTER ======================================================================= */
 export function selTimeFilter(val) {                                            //console.log('selTimeFilter. = ', val);
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
@@ -200,23 +200,23 @@ export function selTimeFilter(val) {                                            
  * When the interaction form is exited, the passed focus is selected and the 
  * table is refreshed with the 'interactions updates since' filter set to 'today'.
  */
-export function showTodaysUpdates(focus) {                                      //console.log("showingUpdated from today")
-    if (focus) { _u.setSelVal('Focus', focus); 
-    } else { selectSearchFocus(); }
-    window.setTimeout(showUpdatesAfterTableLoad, 200);
+export function showTodaysUpdates(focus) {                                      console.log("       +-showTodaysUpdates. focus ? [%s] ", focus)
+    _u.setSelVal('Focus', focus, 'silent');
+    initDataTable(focus)
+    .then(showUpdatesAfterTableLoad);
 }
 function showUpdatesAfterTableLoad() {
     _u.setSelVal('Time Filter', 'updated');
     toggleTimeFilter(true, 'today');
 }
 /** The time-updated filter is enabled when the filter option is checked. */
-export function toggleTimeFilter(state, time) {                                 //console.log('toggleTimeFilter. state = %s, time? ', state, time);
+export function toggleTimeFilter(state, time, skipSync) {                       console.log('       +-toggleTimeFilter. state = %s, time? ', state, time);
     fPs.cal = initCal(); //fPs.cal || 
     const filtering = ifFilteringOnTime(state);
     updateTimeFilterMemory(time);
     updateRelatedUi(filtering);
     if (filtering) { filterTableByTime(time);
-    } else { resetTimeFilter(); } 
+    } else { resetTimeFilter(skipSync); } 
 } 
 /** Instantiates the flatpickr calendar and returns the flatpickr instance. */
 function initCal() {
@@ -224,7 +224,7 @@ function initCal() {
     const calOpts = {
         altInput: true, maxDate: "today", enableTime: ifFilteringByUpdates(),   
         plugins: ifFilteringByUpdates() ? getCalPlugins() : [],
-        onReady: getCalOnReadyMethod(), 
+        onReady: getCalOnReadyMethod(), disableMobile: true,
         onClose: filterByTime, 
     }; 
     addDefaultTimeIfTesting(calOpts);
@@ -256,9 +256,10 @@ function ifFilteringOnTime(state) {
 }
 function updateTimeFilterMemory(time) {
     if (!fPs.pnlFltrs.time) { fPs.pnlFltrs.time = {}; }
-    tblState = tState().get();
     fPs.pnlFltrs.time.type =  _u.getSelVal('Time Filter');
-    if (time) { fPs.pnlFltrs.time.date = time; } 
+    tblState = tState().get();
+    if (!time) { return; }
+    fPs.pnlFltrs.time.date = time;
 }
 function updateRelatedUi(filtering) {
     const opac = filtering ? 1 : .4;
@@ -268,14 +269,16 @@ function updateRelatedUi(filtering) {
     db_ui.resetToggleTreeBttn(false);
     if (filtering) {
         $('#selTimeFilter')[0].selectize.enable();
-    } else { $('#selTimeFilter')[0].selectize.disable(); }
+    } else { 
+        $('#selTimeFilter')[0].selectize.disable()
+    }
 }
 /** 
  * Disables the calendar, if shown, and resets table with active filters reapplied.
  */
-function resetTimeFilter() {                                                    //console.log('tState = %O', tState);
+function resetTimeFilter(skipSync) {                                            //console.log('resetTimeFilter. skipSync?', skipSync);
     fPs.timeRows = null;
-    if (tblState.api && tblState.rowData) { 
+    if (!skipSync && tblState.api && tblState.rowData) { 
         tblState.api.setRowData(tblState.rowData);
         syncFiltersAndUi();
     }
@@ -350,7 +353,7 @@ function getRowsAfterTime(filterTime, type) {
 } /* End getRowsAfterTime */
 function updateUiAfterTimeFilterChange(time, skipSync) {
     $('.flatpickr-input').val(time);
-    if (skipSync) { console.log('skipping filter sync');return; }
+    if (skipSync) { return; } //console.log('skipping filter sync');
     syncFiltersAndUi(time);
 }
 /**
@@ -359,9 +362,9 @@ function updateUiAfterTimeFilterChange(time, skipSync) {
  * Source, both auth and pub views, must be reapplied.)
  * The table filter's status message is updated. The time-updated radios are synced.
  */
-function syncFiltersAndUi() {                                                   //console.log('tblState = %O', tblState);
+function syncFiltersAndUi(time) {                                               console.log('       --syncFiltersAndUi after time-filter change');
     db_ui.resetToggleTreeBttn(false);
-    syncViewFiltersAndUi(tblState.curFocus);
+    if (time != new Date().today()) { syncViewFiltersAndUi(tblState.curFocus); } 
     updateFilterStatusMsg();  
 }
 export function syncViewFiltersAndUi(focus) {
@@ -399,12 +402,16 @@ function reapplyPubFltr() {                                                     
  * updated based on the rows displayed in the grid so that the combobox options
  * show only taxa in the filtered tree.
  */
-function updateTaxonComboboxes(tblState) {
-    tState().set({'taxaByLvl': seperateTaxonTreeByLvl(getAllCurRows(tblState))}); //console.log("taxaByLvl = %O", taxaByLvl)
-    db_ui.loadTaxonComboboxes(tblState);
+function updateTaxonComboboxes() {                                              //console.log('updateTaxonComboboxes. tblState = %O', tblState)
+    const rowData = _u.snapshot(getAllCurRows());
+    _u.getData('levelNames').then(lvls => {  
+        const taxaByLvl = seperateTaxonTreeByLvl(lvls, rowData);
+        tState().set({'taxaByLvl': taxaByLvl});                                 //console.log("taxaByLvl = %O", taxaByLvl)
+        db_ui.loadTxnFilterPanelElems(tState().get());
+    });
 }
 /** Returns an object with taxon records by level and keyed with display names. */
-function seperateTaxonTreeByLvl(rowData) {                                      //console.log('rowData = %O', rowData);
+function seperateTaxonTreeByLvl(lvls, rowData) {                                
     const separated = {};
     rowData.forEach(data => separate(data));
     return sortObjByLevelRank(separated);
@@ -418,9 +425,8 @@ function seperateTaxonTreeByLvl(rowData) {                                      
         }
     }
     function sortObjByLevelRank(taxonObj) {
-        const levels = Object.keys(_u.getDataFromStorage('levelNames'));        //console.log("levels = %O", levels)
         const obj = {};
-        levels.forEach(lvl => { 
+        Object.keys(lvls).forEach(lvl => { 
             if (lvl in taxonObj) { obj[lvl] = taxonObj[lvl]; }
         });
         return obj;
@@ -498,29 +504,40 @@ function nonSrcRowHasChildren(row) {
 }
 /*------------------ Location Filter Updates -----------------------------*/
 function filterLocs(text) {  
-    const selected = tState().get('selectedOpts');
-    const selType = getSelectedLocVal(selected);                         
+    const selType = getSelectedLocType();  
     if (selType) { return updateLocSearch(selected[selType], selType); }
     filterTableByText(text);
 }
+function getSelectedLocType() {
+    const selected = tState().get('selectedOpts');
+    return getSelectedLocVal(selected);                         
+}
 function getSelectedLocVal(selected) {
     const sels = Object.keys(selected);
-    return !sels.length ? null : sels.length == 1 ? 'Region' : 'Country';
+    return !sels.length ? checkLocElems() : (sels.length == 1 ? 'Region' : 'Country');
 }
-export function updateLocSearch(val, selType) {                                 //console.log('updateLocSearch. val = [%s] selType = [%s]', val, selType);
-    if (!val) { return; }
-    const locType = selType ? selType : getLocType(val, this.$input[0].id);   
+function checkLocElems() {
+    const locType = ['Country', 'Region'].filter(type => $('#sel'+type).val());
+    return locType.length == 1 ? locType[0] : null;
+}
+export function updateLocSearch(val, selType) {                                 
+    if (!val) { return; }                                                       console.log('       +-updateLocSearch. val = [%s] selType = [%s]', val, selType); console.trace();
+    const locType = selType ? selType : getLocType(val, this);                  
     const root = getNewLocRoot(val, locType);    
     const txt = getTreeFilterTextVal('Location');  
     updateLocFilterMemory(root, locType);
     updateNameFilterMemory(txt);
-    rebuildLocTable(root, txt);
     db_ui.resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+    return rebuildLocTable(root, txt)
+    .then(() => {
+        if ($('#shw-chngd')[0].checked) { 
+            reapplyPreviousTimeFilter(fPs.pnlFltrs.time, 'skip'); }
+    });
 } 
-function getLocType(val, selId) {                                        
+function getLocType(val, that) {        
+    if (that == undefined) { return getSelectedLocType(); }                             
     const selTypes = { selCountry: 'Country', selRegion: 'Region' };
-    const type = selTypes[selId];
+    const type = selTypes[that.$input[0].id];
     return val !== 'all' ? type : (type == 'Country' ? 'Region' : false);
 }
 function getNewLocRoot(val, locType) {
@@ -561,28 +578,32 @@ function getSelectedVals(val, type) {                                           
  * publication text, the table is rebuilt with the filtered data.
  * NOTE: All Source realms include text search.
  */
-export function updatePubSearch() {                                             //console.log('updatePubSearch.')
+export async function updatePubSearch() {                                       console.log('       +-updatePubSearch.')
     tblState = tState().get(null, ['api', 'rowData', 'curFocus']);  
     const typeId = _u.getSelVal('Publication Type'); 
     const txt = getTreeFilterTextVal('Publication');
-    const newRows = getFilteredPubRows();
+    const newRows = await getFilteredPubRows();
     setPubFilters();
     tblState.api.setRowData(newRows);
     db_ui.resetToggleTreeBttn(false);
+    return Promise.resolve(); //Needed when loading filter set
 
-    function getFilteredPubRows() {                             
-        if (typeId === 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
-        if (txt === '') { return getPubTypeRows(typeId); }
-        const pubTypes = _u.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[typeId].publications;        
-        return getAllCurRows().filter(row => 
-            pubIds.indexOf(row.pubId) !== -1 && 
-            row.name.toLowerCase().indexOf(txt) !== -1);
+    function getFilteredPubRows() {
+        if (!typeId || typeId == 'all') { return getTreeRowsWithText(getAllCurRows(), txt); }
+        return _u.getData('publicationType').then(pTypes => {  
+            if (txt === '') { return getAllPubTypeRows(pTypes); }
+            return getPubTypeRows(pTypes[typeId].publications);
+        });
+    }
+    function getPubTypeRows(typeIds) {
+        return getAllCurRows().filter(row => {
+            return typeIds.indexOf(row.pubId) !== -1 && 
+                row.name.toLowerCase().indexOf(txt) !== -1;
+        });
     }
     /** Returns the rows for publications with their id in the selected type's array */
-    function getPubTypeRows() { 
-        const pubTypes = _u.getDataFromStorage('publicationType'); 
-        const pubIds = pubTypes[typeId].publications;      
+    function getAllPubTypeRows(pTypes) { 
+        const pubIds = pTypes[typeId].publications;      
         return getAllCurRows().filter(row => pubIds.indexOf(row.pubId) !== -1);
     }
     function setPubFilters() { 
@@ -628,13 +649,13 @@ function getSelectedTaxonLvl(selected) {
  * comboboxes are populated with realted taxa, with ancestors selected.
  */
 export function updateTaxonSearch(val, selLvl) {                                        
-    if (!val) { return; }                                                       
+    if (!val) { return; }                                                       console.log('       +-updateTaxonSearch.')  
     const taxonRcrds = tState().get('rcrdsById');  
-    const rcrd = getRootTaxonRcrd(val, taxonRcrds, this);
+    const rcrd = getRootTaxonRcrd(val, taxonRcrds);
     const txt = getTreeFilterTextVal('Taxon');                                  //console.log("updateTaxonSearch txt = [%s] txn = %O", txt, rcrd); 
     tState().set({'selectedOpts': getRelatedTaxaToSelect(rcrd, taxonRcrds)});   //console.log("selectedVals = %O", tParams.selectedVals);
     addToFilterMemory();
-    rebuildTxnTable(rcrd, 'filtering', txt);
+    return rebuildTxnTable(rcrd, 'filtering', txt);
 
     function addToFilterMemory() {
         const curLevel = rcrd.level.displayName;
@@ -649,18 +670,17 @@ export function updateTaxonSearch(val, selLvl) {
  * When a taxon is selected from the filter comboboxes, the record is returned.
  * When 'all' is selected, the selected parent is returned, or the realm record.
  */
-function getRootTaxonRcrd(val, rcrds, that) {
-    const id = val == 'all' ? getTaxonParentId(rcrds, that) : val;
+function getRootTaxonRcrd(val, rcrds) {
+    const id = val == 'all' ? getTaxonParentId(rcrds) : val;
     return _u.getDetachedRcrd(id, rcrds);  
 }
-function getTaxonParentId(rcrds, that) {  
-    const prevId = getPreviouslySelectedTaxonId(that); 
+function getTaxonParentId(rcrds) {  
+    const prevId = getPreviouslySelectedTaxonId(); 
     const prevRcrd = _u.getDetachedRcrd(prevId, rcrds);  
     return prevRcrd.parent;
 }
 /** Returns the ID of the parent of the reset taxon combobox */
 function getPreviouslySelectedTaxonId(that) { 
-    if (that) { return that.currentResults.items.filter(o => o.id !== 'all')[0].id; }
     const selected = tState().get('selectedOpts');
     const lvl = getSelectedTaxonLvl(selected);
     return selected[lvl];

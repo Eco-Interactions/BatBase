@@ -10,7 +10,6 @@
  *     addDataReviewEvents          panel-util
  */
 import { accessTableState as tState } from '../db-page.js';
-import initTbl from '../db-table/init-table.js'
 
 let tblState;
 
@@ -42,7 +41,7 @@ function reloadTable() {
     tblState = tState().get();
     const treeName = getTreeName(tblState.curView);
     tblState.api.destroy();
-    initTbl(treeName, tblState.rowData, tblState);
+    require('../db-table/init.js').init(treeName, tblState.rowData, tblState);
 }
 function getTreeName(focus, view) {
     const map = {

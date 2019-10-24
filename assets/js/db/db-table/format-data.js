@@ -1,30 +1,21 @@
 /**
  * Formats the tree data into the row-data format used in ag-grid.
  *
- * Exports:                         Imported by:
- *     transformLocDataAndLoadTable         db-page, save-ints
- *     transformSrcDataAndLoadTable         db-page, save-ints
- *     transformTxnDataAndLoadTable         db-page, save-ints
+ * Exports:                Imported by:
+ *     buildLocRowData         db-page
+ *     buildSrcRowData         db-page
+ *     buildTxnRowData         db-page
  */
-import initTbl from './init-table.js'
-
 /*--------- Location Data Formatting ---------------------------------------------------------------------------------*/
-/**
- * Transforms the tree's location data into the table format and sends the data 
- * to the init-table module.
- */
-export function transformLocDataAndLoadTable(locTree, tblState) {  
-    initTbl("Location Tree", transformLocData(locTree, tblState), tblState);
-}
-function transformLocData(tree, tblState) {
-    const finalRowData = [];                                                    //console.log("locTree = %O", tree);
-    for (let topNode in tree) {                                                 //console.log("topNode = ", topNode)
+export function buildLocRowData(tree, tblState) {
+    const finalRowData = [];                                                    
+    for (let topNode in tree) {                                                 
         finalRowData.push(getLocRowData(tree[topNode], 0, tblState)); 
     }
     return removeLocsWithoutInteractions(finalRowData);
 }
 /** Returns a row data object for the passed location and it's children.  */
-function getLocRowData(locRcrd, treeLvl, tblState) {                            //console.log("--getLocRowData called for %s = %O, tblState = %O", locRcrd.displayName, locRcrd, tblState);
+function getLocRowData(locRcrd, treeLvl, tblState) {                /*debg-log*///console.log("--getLocRowData called for %s = %O, tblState = %O", locRcrd.displayName, locRcrd, tblState);
     return {
         id: locRcrd.id,
         entity: "Location",
@@ -52,7 +43,7 @@ function getLocRowData(locRcrd, treeLvl, tblState) {                            
      * grouped under the first child row as "Unspecified [locName] Interactions", 
      * otherwise interaction rows are added directly beneath the taxon.
      */
-    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {                   //console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
+    function getLocRowDataForRowChildren(locRcrd, pTreeLvl) {       /*debg-log*///console.log("getLocRowDataForChildren called. locRcrd = %O", locRcrd)
         let childRows = [];
         const locType = locRcrd.locationType.displayName; 
         if (locType === "Region" || locType === "Country") {
@@ -108,15 +99,7 @@ function hasChildInteractions(row) {
     });
 }
 /*--------- Source Data Formatting -----------------------------------------------------------------------------------*/
-/**
- * Transforms the tree's source record data into table row format and sends the 
- * data to the init-table module.
- */
-export function transformSrcDataAndLoadTable(srcTree, tblState) {               //console.log("transformSrcDataAndLoadTable called.")
-    const rowData = transformSrcData(srcTree, tblState);                  
-    initTbl(getSrcTreeName(tblState.curView), rowData, tblState);
-}
-function transformSrcData(tree, tblState) {
+export function buildSrcRowData(tree, tblState) {
     let rowColorIdx = 0;
     const finalRowData = [];
 
@@ -126,7 +109,7 @@ function transformSrcData(tree, tblState) {
     }
     return finalRowData;  
 }
-function getSrcRowData(src, treeLvl, idx, tblState) {                           //console.log("getSrcRowData. source = %O", src);
+function getSrcRowData(src, treeLvl, idx, tblState) {               /*debg-log*///console.log("getSrcRowData. source = %O", src);
     const entity = src.sourceType.displayName;
     const detailId = entity === "Publication" ? src.publication.id : null;  
     const displayName = src.displayName.includes('(citation)') ? 
@@ -167,25 +150,18 @@ function getSrcTreeName(view) {
     return prefix[view] + ' Tree';
 }
 /*-------- Taxon Data Formatting ------------------------------------------*/
-/**
- * Transforms the tree's taxon record data into the table format and sends the data 
- * to the init-table module.
- */
-export function transformTxnDataAndLoadTable(taxonTree, tblState) {             //console.log("transformTaxonDataAndLoadTable called. taxonTree = %O", taxonTree)
-    initTbl("Taxon Tree", transformTaxonData(taxonTree, tblState), tblState);
-}
-function transformTaxonData(tree, tblState) {
+export function buildTxnRowData(tree, tblState) {
     const finalRowData = [];
     for (let topTaxon in tree) {
         finalRowData.push(getTaxonRowData(tree[topTaxon], 0, tblState));
     }
-    return finalRowData;                                                        //console.log("rowData = %O", finalRowData);
+    return finalRowData;                                                        
 }
 /**
  * Recurses through each taxon's 'children' property and returns a row data obj 
  * for each taxon in the tree.
  */
-function getTaxonRowData(taxon, treeLvl, tblState) {                            //console.log("taxonRowData. taxon = %O, tblState = %O", taxon, tblState);
+function getTaxonRowData(taxon, treeLvl, tblState) {                /*debg-log*///console.log("taxonRowData. taxon = %O, tblState = %O", taxon, tblState);
     const lvl = taxon.level.displayName;
     const name = lvl === "Species" ? taxon.displayName : lvl+" "+taxon.displayName;
     const intCount = getIntCount(taxon); 
@@ -269,7 +245,7 @@ function getTaxonChildRowData(curTaxon, curTreeLvl, tblState) {
         });
     }
 } /* End getTaxonChildRowData */
-function getTaxonIntRows(taxon, treeLvl, tblState) {                            //console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
+function getTaxonIntRows(taxon, treeLvl, tblState) {                /*debg-log*///console.log("getTaxonInteractions for = %O. tblState = %O", taxon, tblState);
     const ints = [];
     ['subjectRoles', 'objectRoles'].forEach(function(role) {
         taxon[role].forEach(function(intRcrd){
@@ -286,7 +262,7 @@ function buildTaxonIntRowData(intRcrd, treeLvl, tblState) {
     });
     return rowData;                
 }
-function getCurTaxonLvlCols(tblState) {                                         //console.log("taxaByLvl = %O", tParams.taxaByLvl)
+function getCurTaxonLvlCols(tblState) {                                         
     var lvls = Object.keys(tblState.taxaByLvl);
     return lvls.map(function(lvl){ return 'tree' + lvl; });
 }
@@ -297,33 +273,33 @@ function getCurTaxonLvlCols(tblState) {                                         
  */
 function getIntRowData(intRcrdAry, treeLvl, idx) {
     if (intRcrdAry) {
-        return intRcrdAry.map(function(intRcrd){                                //console.log("intRcrd = %O", intRcrd);
+        return intRcrdAry.map(function(intRcrd){                                
             return buildIntRowData(intRcrd, treeLvl, idx);
         });
     }
     return [];
 }
 /** Returns an interaction rowData object with flat data in table-ready format. */
-function buildIntRowData(intRcrd, treeLvl, idx){                                //console.log("intRcrd = %O", intRcrd);
+function buildIntRowData(intRcrd, treeLvl, idx){              
     var rowData = {
-        isParent: false,
-        name: "",
-        treeLvl: treeLvl,
-        type: "intRcrd", 
+        citation: intRcrd.source.description,   //Table data
+        entity: "Interaction",       //Not sure what this is all used for...
         id: intRcrd.id,
-        entity: "Interaction",
-        interactionType: intRcrd.interactionType.displayName,
-        citation: intRcrd.source.description,
-        subject: getTaxonName(intRcrd.subject),
-        object: getTaxonName(intRcrd.object),
-        tags: intRcrd.tags,
-        note: intRcrd.note, 
-        rowColorIdx: idx,
-        updatedAt: intRcrd.updatedAt,
-        updatedBy: intRcrd.updatedBy,
-        year: intRcrd.source.year
+        interactionType: intRcrd.interactionType.displayName,   //Table data
+        isParent: false,  //Tell grid and various code not to expect sub-nodes
+        name: "",           // Blank tree field
+        note: intRcrd.note,    //Table data
+        object: getTaxonName(intRcrd.object),   //Table data
+        rowColorIdx: idx,       //Not sure what this is all used for...
+        subject: getTaxonName(intRcrd.subject),   //Table data
+        tags: intRcrd.tags,   //Table data
+        treeLvl: treeLvl,       //Not sure what this is all used for...
+        type: "intRcrd",        //Not sure what this is all used for...
+        updatedAt: intRcrd.serverUpdatedAt,  //When filtering interactions by time updated
+        updatedBy: intRcrd.updatedBy,  
+        year: intRcrd.source.year       //When filtering interactions by publication date
     };
-    if (intRcrd.location) { getLocationData(intRcrd.location); }
+    if (intRcrd.location) { getLocationData(intRcrd.location); }  //Table & csv export data
     return rowData;
     /** Adds to 'rowData' any location properties present in the intRcrd. */
     function getLocationData(locObj) {

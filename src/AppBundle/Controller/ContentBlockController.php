@@ -198,7 +198,10 @@ class ContentBlockController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entities = $em->getRepository('AppBundle:ContentBlock')->findAll();
+        $entities = $em->getRepository('AppBundle:ContentBlock')->findBy(
+            array(),
+            array('name' => 'ASC')
+        );
 
         return $this->render('ContentBlock/index.html.twig', array(
             'entities' => $entities,

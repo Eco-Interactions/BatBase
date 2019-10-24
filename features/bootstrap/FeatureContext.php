@@ -214,10 +214,14 @@ class FeatureContext extends RawMinkContext implements Context
             'Test Interaction List' => 1, 'Panama' => 12 ];
         $val = array_key_exists($text, $vals) ? $vals[$text] : $text;
         $selId = '#sel'.str_replace(' ','',$label);
-        $elem = $this->getUserSession()->getPage()->find('css', $selId);
-        $this->handleNullAssert($elem, false, "Couldn't find the [$selId] elem");
-        $this->getUserSession()->
-            executeScript("$('$selId')[0].selectize.addItem('$val');");
+        $this->spin(function() use ($selId, $val)
+        {
+            $elem = $this->getUserSession()->getPage()->find('css', $selId);
+            if (!$elem) { return false; }
+            $this->getUserSession()->
+                executeScript("$('$selId')[0].selectize.addItem('$val');");
+            return true;
+        }, "Couldn't select [$val] from the [$selId] elem.");
     }
 
     /**
@@ -368,8 +372,6 @@ class FeatureContext extends RawMinkContext implements Context
 
     /**
      * @Then I (should) see :count row(s) in the table data tree
-     *
-     * refactor: merge with ishouldseeinteractionsinthelist
      */
     public function iShouldSeeRowsInTheTableDataTree($count)
     {
@@ -914,9 +916,8 @@ class FeatureContext extends RawMinkContext implements Context
     public function iSeeInTheField($text, $prop, $type)
     {
         $field = '#'.str_replace(' ','',$prop).'_row '.$type;
-        $curForm = $this->getOpenFormId();
-        $selector = $curForm.' '.$field;      
-        $this->assertFieldValueIs($text, $selector);        
+        $selector = $this->getOpenFormId().' '.$field;   
+        $this->assertFieldValueIs($text, $selector);
     }
     
     /**
@@ -1405,11 +1406,13 @@ class FeatureContext extends RawMinkContext implements Context
             $isIn && strpos($fieldVal, $text) != false;
     }
     private function assertFieldValueIs($text, $fieldId, $isIn = true)
-    {  
-        $fieldVal = $this->getFieldData($fieldId);
+    {   
         $should_nt = $isIn ? 'Should' : "Shouldn't";
-        $this->handleEqualAssert($text, $fieldVal, $isIn,  
-            "$should_nt have found [$text] in [$fieldId]. Actually found: [$fieldVal]."); 
+        $this->spin(function () use ($text, $fieldId, $isIn)
+        {
+            $fieldVal = $this->getFieldData($fieldId); 
+            return $isIn ? $fieldVal == $text : $fieldVal != $text;       
+        }, "$should_nt  have found [$text] in [$fieldId].");
     }
     /** Check after submitting the Interaction Edit form. */
     private function ensureThatFormClosed()
@@ -1540,7 +1543,14 @@ class FeatureContext extends RawMinkContext implements Context
     /** ------------------ multi-editor feature helpers ----------------- */
     private function getEditorSession()
     {
-        $driver = new \Behat\Mink\Driver\Selenium2Driver('firefox');
+        $opts = [
+            'browser' => 'chromium',
+            'chrome' => [
+                'binary' => '/Applications/Chromium.app/Contents/MacOS/Chromium',
+                'args' => ['--disable-gpu', '--window-size=1400,1440']], 
+            'marionette' => true,
+        ];
+        $driver = new \Behat\Mink\Driver\Selenium2Driver('chrome', $opts);
         $session = new \Behat\Mink\Session($driver);
         $session->start();
         return $session;
@@ -1556,7 +1566,7 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function userCreatesInteractions($editor, $cntAry)
     {                                                                           fwrite(STDOUT, "\---- userCreatesInteractions.\n");
-        $this->curUser->getPage()->pressButton('Add Data');
+        $this->curUser->getPage()->pressButton('New');
         foreach ($cntAry as $cnt) {                                             fwrite(STDOUT, "\n    Creating interaction $cnt\n");
             $this->iSubmitTheNewInteractionFormWithTheFixtureEntities($cnt);
         }                                                                       fwrite(STDOUT, "\n    Interactions added. Exiting form\n");
@@ -1583,7 +1593,14 @@ class FeatureContext extends RawMinkContext implements Context
         $miscData = [ 'Consumption', 'Flower', 'Interaction '.$count];
         $this->fillMiscIntFields($miscData);
         $this->curUser->getPage()->pressButton('Create Interaction');
-        $this->iWaitForTheFormToClose('top');                                   fwrite(STDOUT, "\n  Interaction ".$count." complete\n");
+        $this->waitForInteractionFormToReset();
+    }
+    private function waitForInteractionFormToReset()
+    {
+        $this->spin(function()
+        {
+            return $this->curUser->evaluateScript("$('#success').length > 0");
+        }, 'Interaction form did not reset.');
     }
     private function fillSrcAndLocFields($data)
     {                                                                           fwrite(STDOUT, "\n        Filling Source and Location fields.\n");
@@ -1614,9 +1631,10 @@ class FeatureContext extends RawMinkContext implements Context
 
     private function editorTableLoads($editor)
     {
-        $editor->wait( 5000, "$('.ag-row').length" );
-        $tableRows = $editor->evaluateScript("$('.ag-row').length > 0");
-        assertTrue($tableRows);
+        $this->spin(function() use ($editor)
+        {
+            return $editor->evaluateScript("$('.ag-row').length > 0");
+        }, 'Rows not loaded in table.');
     }
     private function editorChangesLocationData()
     {                                                                           fwrite(STDOUT, "\n---- Editor changing Location data.\n");

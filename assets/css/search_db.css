@@ -1,12 +1,6 @@
-/*--- Database Search Page Styles ---*/
-#detail-block input, #detail-block textarea, #detail-block select {
-    border: #666 1px solid;
-    border-radius: 3px;
-}
 /* ---- Selectize ----------------------------------------------------------- */
 .selectize-input {
     padding: 4px 33px 4px 4px !important;
-    border-color: #666 !important;
 }
 .selectize-input, .selectize-control.single .selectize-input.input-active {
     display: inline-flex;
@@ -18,6 +12,7 @@
 #db-opts {  /* .flex-row also on elem */
     margin: 1em auto 0 auto;
     width: 100%;
+    min-width: 1205px;
     font-size: 1.1em;
 }
 #db-opts button {
@@ -31,14 +26,6 @@
 }
 input[type="radio"], input[type="checkbox"] {
     margin-right: 0;
-}
-#focus-opts {
-    flex: 0 0 458px;
-    padding: 5px;
-    align-items: center;
-}
-#focus-opts span {
-    padding-top: 6px;
 }
 .focus-sel {
     width: 88px;
@@ -92,46 +79,12 @@ input[type="radio"], input[type="checkbox"] {
     border-left: 1px black solid;
     border-right: 1px black solid;
 }
-/* Hides border just beneath the filter options in db-opts to create full filter area */
-.hide-fltr-bttm-border:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 133px;
-    left: 726px;
-    top: 56px;
-    background: #f2f9f8;
-    z-index: 10;
-}
-.hide-fltr-bttm-border-vert:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    top: 56px;
-    background: #f2f9f8;
-    z-index: 10;
-    width: 100px;
-    left: 759px;    
-}
 #filter-opts.shw-col-borders {
     background: rgba(121, 201, 183, .1);
 }
 #filter-opts-pnl {
     max-height: 222px;
     border-radius: 10px;
-}
-/* Hides left corner of panel when both panels are opened. */
-#filter-opts-pnl.vert::before {
-  background-color: #f2f9f8;
-  content: "";
-  display: block;
-  height: 8px;
-  position: absolute;
-  width: 10px;
-}
-#filter-opts-pnl.vert::before {
-  top: 58px;
-  left: 754px;
 }
 #filter-opts-pnl.vert {
     max-height: 444px;
@@ -144,7 +97,7 @@ input[type="radio"], input[type="checkbox"] {
     padding-top: 5px;
 }
 #filter-col1 {
-    flex: 0 0 618px;
+    flex: 0 1 618px;
     border-right: black 1px solid;
 }
 #filter-col1.vert {
@@ -275,17 +228,6 @@ button[name="futureDevBttn"] {
 #list-opts.shw-col-borders {
     background: #e2f2f3;
 }
-/* Hides border just beneath the filter options in db-opts to create full filter area */
-.hide-int-bttm-border:before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 126px;
-    left: 140px;
-    top: 56px;
-    background: #e2f2f3;
-    z-index: 10;
-}
 #int-opts {
     max-height: 222px;
     align-items: stretch;
@@ -316,14 +258,10 @@ button[name="futureDevBttn"] {
     flex: initial;
 }
 #list-sel-cntnr.vert {
-    justify-content: space-around;
+    justify-content: space-between;
 }
-/*#int-lists button {*/
-    /*margin-top: auto;*/
-/*}*/
 #list-sel-cntnr.vert .int-list-sel {
-    width: 300px;
-
+    flex: 1 0 264px;
 }
 #load-list-cntnr {
     align-self: flex-end;
@@ -332,6 +270,7 @@ button[name="futureDevBttn"] {
 }
 #load-list-cntnr.vert {
     margin: 0;
+    align-self: center;
 }
 #load-list {
     margin-right: 0;
@@ -349,10 +288,6 @@ button[name="futureDevBttn"] {
 .int-list-sel {
     margin: auto 0 auto 0;
 }
-/*#saved-lists {
-    width: 333px;
-    height: 25px;
-}*/
 #list-details {
     flex: 0 1 490px;
     border-left: black 1px solid;
@@ -373,13 +308,13 @@ button[name="futureDevBttn"] {
     margin: .2em;
 }
 #list-details input {
-    min-width: 415px;
+    min-width: 333px;
     font-weight: 600;
     font-size: .8em;
     padding-left: 3px;
 }
 #list-details.vert input {
-    min-width: 434px;
+    min-width: 306px;
 }
 #list-details textarea {
     width: 488px;
@@ -402,7 +337,7 @@ button[name="futureDevBttn"] {
     width: 40px;
 }
 #mod-list-pnl {
-    flex: 1 0 412px;
+    flex: 1 1 412px;
     padding-left: 0px;
 }
 #mod-list-pnl.vert {
@@ -491,8 +426,7 @@ input[name="mod-list"] {
     color: #666;
 }
 #view-fltr {
-/*    padding-top: 2px;
-*/    font-size: .9em;
+    font-size: .9em;
     color: #666;
     margin-right: 3px;
 }
@@ -537,9 +471,6 @@ button[name="csv"]:before {
     content: url(./images/eye.svg);
     width: 19px;
 }
-#shw-map {
-    width: 204px;
-}
 #shw-map:before {
     content: url(./images/globe-africa.svg);
     width: 17px;
@@ -547,7 +478,6 @@ button[name="csv"]:before {
 button[name="int-set"]:before {
     content: url(./images/tasks.svg);
     width: 16px;
-
 }
 button[name="xpand-all"] {
     width: 105px;
@@ -565,33 +495,11 @@ button[name="show-hide-col"] {
 #xpand-tree {
     margin-right: .3em;
 }
-/*------------------------------- Search Tips Popup --------------------------*/
-#tips-close-bttn {
-    position: relative;
-    margin-top: .5em;
-    left: 91%;
-    bottom: -2vh;
+.skipFormData {
+    color: slategray;
+    padding-top: .5em;
 }
-.tips-popup {
-    top: 4vh;
-    /*position: relative;*/
-    font-size: 1.1em;
-    height: 700px;
-    width: 808px;
-    padding: 2.2em;
-    text-align: left;
-    margin: auto;
-    overflow-y: scroll;
-}
-.tips-popup li {
-    display: block;
-    padding-left: 1em;
-}
-.tips-popup ul {
-    width: 755px;
-    margin: auto;
-}
-/**------------------------------ Data Table Styes -------------------------- */
+/**------------------------------ Table Styes ------------------------------- */
 #db-view {
     height: 86vh;
     border: black 1px solid;
@@ -726,18 +634,6 @@ button[name="show-hide-col"] {
     opacity: .2;
 }
 /*-------------------------- Database CRUD Popup -----------------------------*/
-.form-popup {
-    height: 88vh;
-    flex-grow: 0;
-    padding: 15px;
-    text-align: left;
-    justify-content: space-between;
-    flex-direction: column;
-}
-.form-ovrly {
-    align-items: center;
-    height: 91vh;
-}
 #top-hdr {
     font-size: 1.3em;
     margin-bottom: 1em;
@@ -759,12 +655,6 @@ button[name="show-hide-col"] {
     margin-bottom: 10px;
     text-align: center;
     padding-top: 4px;
-}
-#form-main {
-    padding: 5px 0 0 5px;
-    height: 81vh;
-    overflow-x: hidden;
-    overflow-y: scroll;
 }
 #form-details {
     flex: 1 1 333px;
@@ -788,6 +678,9 @@ button[name="show-hide-col"] {
 }
 .det-div div {
     padding: .5em 0 0 .5em;
+}
+.det-div div li {
+    padding: .2em
 }
 .cnt-div {
     margin: .5em;
@@ -817,33 +710,12 @@ button[name="show-hide-col"] {
     left: 24%;
     font-size: .75em !important;
 }
-.med-form {
-    border: 1px solid grey;
-    border-radius: 5px;
-    width: 808px;
-    padding: 3px;
-    margin: 11px 0 10px 100px;
-}
-.sml-form {
-    border: 1px solid grey;
-    border-radius: 5px;
-    padding: 5px;
-    min-width: 385px;
-    margin-top: .5em;
-}
 div[id$="_Rows"] {
     min-width: 100%;
 }
 [id$="_row"] {
     padding: .2em .75em .3em  .75em;    
-}
-.sml-left {
-    position: relative;
-    left: 10px;
-}
-.sml-right {
-    position: relative;
-    right: 25px;
+    width: 100%;
 }
 #sub-hdr, #sub2-hdr {
     font-size: 1.1em;
@@ -857,19 +729,6 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
 .field-row {
     justify-content: space-between;
     margin-top: .3em;
-}
-.top-row {
-    width: 481px;
-    margin-right: 1em;
-}
-.full-row {
-    width: 979px;
-}
-.sub-row {
-    width: 398px; 
-}
-.sub2-row {
-    width: 372px;
 }
 [id$="-sel-cntnr"]>div {
     margin-top: .5em
@@ -911,34 +770,9 @@ form[name="top"] p, form[name="top"] .bttn-cntnr {
     padding: .2em;
     margin: 0;
     font-size: .95em;
-    /*border: gray 1px solid;*/
-    /*border-radius: 4px;*/
-}
-.xlrg-field {
-    width: 643px;
-}
-.top.xlrg-field {
-    width: 800px;
-}
-.lrg-field {
-    width: 302px;
-}
-.med-field { 
-    width: 240px; 
-}
-.sml-field {
-    width: 200px;
-}
-#top-form textarea {
-    height: 63px;
 }
 #Note-txt {
     border-color: #b8b8b8;
-}
-#top-form label {
-    font-size: 1em;
-    padding: 9px 0 2px 0;
-    width: 125px;
 }
 .bttn-cntnr {
     align-self: flex-end;
@@ -986,7 +820,7 @@ select[id$="txn-lvl"] + div {
 #loc-map {
     border: 1px grey solid;
     height: 366px;
-    width: 97%;
+    width: 92%;
     margin: 1em auto 0 auto;
 }
 .loc-gps-note {
@@ -1058,39 +892,16 @@ input.active-icon {
     background-color: rgba(40, 143, 235, .4);
     border-color: #288feb;
 }
-/* --- Marker Drag Elem --- */
-.leaflet-control-drag-icon {
-    background-image: url('./images/arrows-alt.svg');
-}
-/* --- Create New Loc Elem --- */
-.leaflet-control-create-icon {
-    background-image: url('./images/map-marker-alt.svg');
-}
-/* --- Click To Create New Loc Elem --- */
-.leaflet-control-click-create-icon {
-    background-image: url('./images/map-marked-alt.svg');
-}
-/* --- Draw New Loc Boundary Elem --- */
-.leaflet-control-draw-icon {
-    background-image: url('./images/pencil-alt.svg');
-}
 /*----------------------------------------------------------------------------*/
 /*------------------ Screen Width < 1500px -----------------------------------*/
 /* Designed for laptop resolutions as low as 1366x768 and 1334x889 */
 @media screen and (max-width: 1500px) { 
     /*--------------- Search Page ---------------------*/
     #db-opts {
-        margin: 1em auto 0 .5em;
-    }
-    .tips-popup {
-        width: 77%;
+        /*margin: 1em auto 0 .5em;*/
     }
     #fltr-int-panl-cntnr #filter-opts-pnl.vert {
         width: 604px;
-    }
-    .hide-fltr-bttm-border-vert:before {
-        width: 132px;
-        left: 727px;
     }
     #filter-opts-pnl #stored-filters button {
         width: 60px;
@@ -1114,84 +925,10 @@ input.active-icon {
         width: 201px;
     }
     #int-opts #list-details textarea {
-        width: 415px;
+        width: 333px;
     }
     #int-opts.vert #list-details textarea {
         width: auto;
         flex-grow: 1;
     }
-    /*--------------- Database CRUD Popup -------------*/
-    #b-overlay .form-popup {
-        padding: 15px;
-    }
-    #b-overlay #form-main {
-        padding: 5px 0 0 20px;
-    }
-    #b-overlay #sub2-form.sml-form {  
-        min-width: 366px;
-    }
-    #b-overlay .top-row {
-        padding: .2em 0 .3em  0;
-        width: 434px;
-        margin-right: 1em;
-    }
-    #b-overlay .sub-row {
-        width: 384px; /*375*/
-    }
-    #b-overlay .long-sub-row {
-        width: 750px;
-    }
-    #b-overlay .sub2-row {
-        width: 363px;
-    }
-    #b-overlay .med-form {
-        width: 777px;
-        margin: 11px 0 10px 60px;
-    }
-    #b-overlay .full-row {
-        padding: .2em 0 .3em  0;
-        width: 850px;
-    }
-    #form-main.edit #citation_Rows .full-row {
-        padding: .2em .75em .3em  0;
-        width: 895px;
-    }
-    #b-overlay #citation_Rows .full-row {
-        padding: .2em .75em .3em  .75em;
-        width: 766px;
-    }
-    #b-overlay #Note_row div.field-row {        
-        width: 888px;
-    }
-    #b-overlay #top-form label {
-        font-size: 1em;
-        padding: 5px 0 2px 0;
-        width: 121px;
-    }  
-    #b-overlay .top.xlrg-field {
-        width: 751px;
-    }
-    #b-overlay .xlrg-field {
-        width: 614px;
-    }
-    #b-overlay .lrg-field {
-        width: 289px;
-    } 
-    #b-overlay .med-field {
-        width: 232px;
-    }
-    #b-overlay .sml-field {
-        width: 175px;
-    }
-} 
-@media only screen and (min-width: 1900px) {   /*and (max-width: 1920px)*/ 
-/*    #b-overlay .hide-fltr-bttm-border-vert:before {
-        left: 754px;
-    }
-    #b-overlay .hide-fltr-bttm-border:before {
-        left: 726px;
-    }    
-    #b-overlay .hide-int-bttm-border:before {
-        left: 140px;
-    }*/
 } 

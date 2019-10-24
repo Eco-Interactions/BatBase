@@ -1,4 +1,7 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
+Tasks for others? 
+    - Expand tests
+        - filter sets: test going from each focus into each of the different ones/views
 Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
@@ -6,34 +9,66 @@ Thoughts:
 After next server update:
     - Update where to upload pdfs to registration page, future dev, db about
 
->==== Change Log ====
-    - PDF submission
-        - submission page
-            - Need content reviewed/edited
-        - view submissions page
-            - locked down to admin? or just editor? Maybe only admins delete?
-            - do we want a way for editors to leave notes for each other? Or a way 
-                to indicate that someone has "checked out" a submission?
-            - process to keep submissions synced with the "publications to be added" doc?
 
-Email to Kelly:
-    - Sorry. I was talking from a perspective of having made changes that I hadn't 
-    ever put on the live site. That must have confused several things. 
+Updates:
+    - Publication upload
+    - Site designed for mobile use
+    - Data entry forms improved
+        - Added mapping to location forms
+    - Ability to save set of filters and lists of interactions
+
+    Upcoming: 
+        - Adding "Virus" realms, and more.
+        - Data review features
+        - Figure out how to get Logs in UI for new editors
+
+
+
+>==== Change Log ====
+    - All pages look good on all device sizes and the modern browers: chrome, firefox, and safari (IE?)
 
 Current:
-    - Force forms to stay at the width needed for field alignment.
-    - Bugs
-        - table doesn't reset when taxon text filter is cleared (With no other filters selected)
-        - bug with downloding data first time. 
-            Have to refresh sometimes before it will actually send the ajax call
-            - downloading user specific data loading message showing when user hasn't changed, eg by default
-        - Fix taxon forms
+    - move to idb
+        - Set all times to base UTF. Adjusting to PNW time has messed up the "show today's updates" feature.
+
+        - after server update
+            - db-sync
+                - combine the add & remove sync methods to reduce time waiting on async calls?
+                - optimize storeData calls too
+                - look into whether there are other places where something is removed from a collection and needs to be flagged for updates so other editors get all the updated data.
+            - test that data redownloads totally
+                - that updated from other editors update on page refresh 
+                - that user data updates as expected
+    - set email alerts up on feedback
+
+    - Refactoring forms
+        - don't allow creation of anything without display name
+        - store data in memory when updating data db-sync
+        - add warning to new taxon forms without a parent level filled in.
+            - when resetting taxon obj forms, remember which realm and reload 
+        - serialized realm obj 
+            - add lvls within and realm lvl
+
+        - put clear db storage key in db.
+            - add action that resets and refreshes the database
+
+    - Adding realms
+        - Add 'isRealm' flag to Taxon
+        - Add 'sub-ranks' to Realm
+
+
+
+
     - Write description for email updating current users to all the exciting changes!
         - frame in context of the last conference to now
     - Make site mobile-friendly
+        - testing mobile versions
+            - https://github.com/suncat2000/MobileDetectBundle/issues/76
     - Add to dev notes: workaround with webpack and asset building
     - save dev version of live site for logs at some new subdomain
         - to be used for testing to check if new bugs existed in last update
+    - testing
+        - test error pages load without masthead elem in twig
 
 Next:
     - update tests 
@@ -52,7 +87,8 @@ Next:
 
 MEETING NOTES:
     Point out:
-        - 
+        - Safari - Local storage doesn't work for our large amount of data. Will 
+            need to refactor into idb or spend time writing special handling for safari
     Next/future rounds:
         Possible:
             - Data Review panel (1-2 months)
@@ -120,25 +156,14 @@ TODOs:
         and the displayname, suggest to user they use the country-habitat combo. 
     - {high}[med] add error to interaction form for when an 'invisible' error 
         occurs on entity selection (figure out how to trigger, then do this)
-    - {med}[med] Switch from localStorage to idb everywhere.
-    - {med}[med] add err in CRUD controllers eliminating the possibility of 
-        creating orphans (Maybe not needed with the JS side handling this.)
 
 (DATA)
 
 (SEARCH PAGE)
     - {---}[---] Upgrade to the latest AgGrid. Super out of date at this point
         - Unable to update as rowGrouping is now an enterprise feature (ie min $800 package)
-    - {med}[med] Replace Data Tables with AgGrid on the feedback and biblio pages
-    - {med}[med, long] Add data-entry tutorial.
-    - {low}[med] Add an 'All' option to taxon and location dropdowns to reset data 
-        to that level and retain other filters - (updated at for example).
-    - {med}[easy] Change taxon row coloring when showing updated records
 
 (STATIC/MISC SITE)
-    - {low}[easy] Clean up security access control
-    - {med}[complicated] Implement Encore for assets
-    - {med}[complicated] Switch from pixels to percent with styles to better adapt to smaller screen resolutions
     - {low}[med] Graph active users over time. 
         - daily max users?
     - {med}[easy] Add headers and css styles to FOS pages 
@@ -146,7 +171,6 @@ TODOs:
         - update profile page (/profile/edit)
         - Reorder fields for profile edit form
     - {low}[med] Update read me for site.
-    - {low}[easy] Resize slider-header when screen size changes 
 
 (SYNC-DATA)
     - {high}[med] Add error handling for pending updates that can't be resolved 
@@ -186,16 +210,7 @@ TODOs:
         - {med}[easy] Fix 'no changes detected' when only author/editor data is changed
 
 
-
-
-
     Other cool things, sort later:
         - microsoft app center 
             - analytics for apps free
         - Try out some js debugging tools
-
-Code standards:
-    HTML
-        - Search page combobox elems prefixed with 'sel' + [Descriptive name]
-
-

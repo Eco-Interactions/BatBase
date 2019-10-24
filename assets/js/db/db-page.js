@@ -8,29 +8,38 @@
  * Exports:                 Imported by:
  *     accessTableState         Almost everything else
  *     initSearchState          db_sync, util
- *     initDataTable            db_sync
+ *     initDataTable            db_sync, db-forms, db-filters, db-tutorial
  *     onLocViewChange          db_ui
  *     onSrcViewChange          db_ui
  *     onTxnViewChange          db_ui
- *     rebuildLocTable          db-filters
- *     rebuildTxnTable          db-filters
- *     resetSearchState         save-ints
+ *     rebuildLocTable          db-filters, save-ints
+ *     rebuildTxnTable          db-filters, save-ints
  *     resetDataTable           db-ui, save-fltrs, save-ints    
- *     selectSearchFocus        db-filters, save-fltrs
+ *     selectSearchFocus        db-ui, save-fltrs
  *     showIntroAndLoadingMsg   db_sync
  *     showLocInDataTable
  *     showLocOnMap
+ *
+ * CODE SECTIONS:
+ *     TABLE STATE OBJ
+ *     PAGE INIT
+ *     TABLE "STATE"
+ *         STATE MANAGMENT
+ *     LOCATION SEARCH
+ *         LOCATION TABLE
+ *         LCOATION MAP
+ *     SOURCE SEARCH
+ *     TAXON SEARCH
  */
 import * as _u from './util.js';
 import * as data_tree from './db-table/build-data-tree.js';
 import * as db_filters from './db-table/db-filters.js';
 import * as db_map from './db-map/db-map.js';
-import * as db_sync from './db-sync.js';
 import * as db_ui from './db-ui.js';
 import * as frmt_data from './db-table/format-data.js'; 
 import { startWalkthrough } from './db-tutorial.js';
 import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-fltrs.js';
-
+/** ==================== TABLE STATE OBJ ==================================== */
 /**
  * Stores table state params needed across multiple modules. 
  * {obj} api            Ag-grid API (available after table-init complete)
@@ -46,13 +55,17 @@ import { resetStoredFiltersUi, updateFilterPanelHeader } from './panels/save-flt
  * {str} userRole       Stores the role of the user.
  */
 let tblState = {};
-/** ------------- Page Init --------------------------------------------- */
-if (window.location.pathname.includes('search')) {
+/** ==================== PAGE INIT ========================================== */
+initDbPage();
+/** Initializes the UI unless on mobile device.  */
+function initDbPage () { 
+    const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
+    if (winWidth < 1200 && $('body').data('env') != 'test') { return; }
     requireCss();
     requireJs();
-    initDbPage();
+    db_ui.init();
+    //The idb-util.initDb will call @initSearchState once local database is ready.
 }
-
 /** Loads css files used on the search database page, using Encore webpack. */
 function requireCss() {
     require('../../css/lib/ag-grid.css');
@@ -62,19 +75,14 @@ function requireCss() {
     require('../../css/lib/selectize.default.css');
     require('../../css/search_db.css');  
     require('../../css/moz-styles.css');
+    require('../../styles/db/db.styl');  
+    require('../../styles/db/map.styl');  
+    require('../../styles/db/forms.styl');  
 }
 function requireJs() {
     require('leaflet-control-geocoder');
     require('../libs/selectize.min.js');
     require('../libs/flatpickr.min.js');
-}
-/**
- * Initializes the database and UI. The util init method will call @initSearchState
- * after handling the initializing of the local data storage.
- */
-function initDbPage () {    
-    _u.init_db();
-    db_ui.pg_init();
 }
 /**
  * The first time a browser visits the search page, all data is downloaded
@@ -86,38 +94,16 @@ export function showIntroAndLoadingMsg() {
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
-export function initSearchState() {                                             //console.log('initSearchState');
-    resetState();      
-    selectInitialSearchFocus();
+export function initSearchState(focus) {                                        //console.log('initSearchState. focus = ', focus);
+    setTableInitState();      
+    db_ui.selectInitialSearchFocus(focus);
 } 
-function resetState() {
-    resetTableParams();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
+function setTableInitState() {
+    resetTableParams('taxa');
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }//resets updatedAt table filter
     db_filters.resetTblFilters();
 }
-export function resetSearchState() {                                            //console.log('resetSearchState');
-    resetTableParams();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
-    db_filters.resetTblFilters();    
-    selectSearchFocus();
-}
-/** Selects either Taxon, Location or Source in the table-focus dropdown. */
-function selectInitialSearchFocus() {                                           //console.log('--------------selectInitialSearchFocus')
-    const focus = tblState.curFocus || 'taxa';
-    _u.initComboboxes(['Focus', 'View']);
-    _u.replaceSelOpts('#search-focus', getFocusOpts())
-    _u.setSelVal('Focus', focus, 'silent');
-    selectSearchFocus();
-    updateFilterPanelHeader(focus);
-}
-function getFocusOpts() {
-    return [
-        { value: 'locs', text: 'Location' },
-        { value: 'srcs', text: 'Source' },
-        { value: 'taxa', text: 'Taxon' },
-    ];
-}
-/* ================== Table "State" Methods ========================================================================= */
+/* ================== TABLE "STATE" ========================================= */
 export function accessTableState() {
     return {
         get: getTableState,
@@ -136,35 +122,41 @@ function getStateObj(keys) {
 function setTableState(stateObj) {                                              //console.log('setTableState. stateObj = %O', stateObj);
     Object.keys(stateObj).forEach(k => { tblState[k] = stateObj[k]; })
 }
-/*-------------------- "State" Managment Methods -----------------------------*/
+/*---------------------- STATE MANAGMENT -------------------------------------*/
 /** Resets on focus change. */
 function resetTableParams(focus) {  
+    if (focus) { return Promise.resolve(resetTblParams(focus)); }
+    return Promise.resolve(_u.getData('curFocus').then(f => resetTblParams(f)));
+}
+function resetTblParams(focus) {
     const intSet =  tblState.intSet;
+    const prevApi = tblState.api; //will be destroyed before new table loads. Visually jarring to remove before the new one is ready.
     tblState = {
-        curFocus: focus || getResetFocus(),
+        api: prevApi,
+        curFocus: focus,
         openRows: [],
         selectedOpts: {},
         userRole: $('body').data("user-role")
     };
     if (intSet) { tblState.intSet = intSet; }
 }
-function getResetFocus() {
-    const foci = ['locs', 'srcs', 'taxa'];
-    const storedFocus = _u.getDataFromStorage('curFocus');
-    return foci.indexOf(storedFocus) !== -1 ? storedFocus : 'taxa';
-}
 /** Resets table state to top focus options for the selected view. */
-export function resetDataTable(view) {                                           //console.log("---reseting table---")
-    const resetMap = { taxa: buildTxnTable, locs: rebuildLocTable, srcs: rebuildSrcTable };
+export function resetDataTable(view, e) {                           /*Perm-log*/console.log('   //resetting search table. View ? [%s]', view);
+    const changeView = view && view !== tblState.curView;
+    const resetMap = { 
+        taxa: changeView ? onTxnViewChange : buildTxnTable, 
+        locs: rebuildLocTable, 
+        srcs: changeView ? onSrcViewChange : rebuildSrcTable 
+    };
     resetCurTreeState();
     view = typeof view == 'string' ? view : null;
-    resetMap[tblState.curFocus](view); 
+    return resetMap[tblState.curFocus](view);
 } 
 /** Resets storage props, buttons and filter status. */
 function resetCurTreeState() {                                                  //console.log('\n### Restting tree state ###')
     resetCurTreeStorageProps();
     db_ui.resetToggleTreeBttn(false);
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }     //resets updatedAt table filter
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
     db_filters.updateFilterStatusMsg();
     resetStoredFiltersUi();
 }
@@ -177,65 +169,59 @@ function resetCurTreeStorageProps() {
     db_filters.resetTableStateParams();
 }
 /**  Table-rebuild entry point after form-window close.  */
-export function initDataTable(focus) {                                          //console.log('resetting search table.')
+export function initDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
     resetStoredFiltersUi();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }
-    selectSearchFocus(focus);
-    db_ui.updateUiForTableView();
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
+    return selectSearchFocus(focus)
+    .then(db_ui.updateUiForTableView);
 }
-export function selectSearchFocus(f) {                                          
+export function selectSearchFocus(f, view) {                                          
     if (f == '') { return; } //Combobox cleared by user
-    const focus = f ? f : _u.getSelVal('Focus');                                console.log("---select(ing)SearchFocus = ", focus); 
+    const focus = f ? f : _u.getSelVal('Focus');                    /*Perm-log*/console.log("   //select(ing)SearchFocus = [%s], view ? [%s]", focus, view); 
     const builderMap = { 
         'locs': buildLocationTable, 'srcs': buildSourceTable,
         'taxa': buildTaxonTable 
     };  
-    if (!_u.getDataFromStorage('pgDataUpdatedAt')) { return; } 
-    updateFocusAndBuildTable(focus, builderMap[focus]); 
+    return updateFocusAndBuildTable(focus, builderMap[focus].bind(null, view));
 }
 /** Updates the top sort (focus) of the data table: 'taxa', 'locs' or 'srcs'. */
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
-    clearPreviousTable();
-    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable'); }
+    db_ui.fadeTable();
+    if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
     if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
-    storeStateValue('curFocus', focus);
-    clearOnFocusChange(focus, tableBuilder);
+    _u.setData('curFocus', focus);
     updateFilterPanelHeader(focus);
+    return clearOnFocusChange(focus)
+    .then(tableBuilder);
 } 
-function clearPreviousTable() {                                                 //console.log("clearing table");
-    if (tblState.api) { tblState.api.destroy(); }  
-    $('#map').hide(); //Clears location map view
-    $('#search-tbl').show();
-}
 function focusNotChanged(focus) {
     return focus === tblState.curFocus;
 }
-function clearOnFocusChange(focus, tableBuilder) {
-    storeStateValue('curView', false);
+function clearOnFocusChange(focus) {
+    _u.setData('curView', false);
     db_filters.resetTblFilters();
-    resetTableParams(focus);
     db_ui.resetToggleTreeBttn(false); 
     _u.replaceSelOpts('#sel-view', false);
     $('#focus-filters').empty();  
-    tableBuilder();
+    db_filters.updateTaxonFilterViewMsg(null);
+    return resetTableParams(focus);
 }
-function storeStateValue(key, value) {
-    _u.addToStorage(key, JSON.stringify(value));
+/* ==================== TABLE LOAD ========================================== */
+function loadTbl(tblName, rowData) {
+    require('./db-table/init.js').init(tblName, rowData, tblState);
 }
 /* ==================== LOCATION SEARCH ============================================================================= */
-function buildLocationTable(view) {
-    const data = getLocData();
-    if (data) { 
+function buildLocationTable(v) {                                    /*Perm-log*/console.log("       --Building Location Table. View ? [%s]", v);
+    const view = v || 'tree';
+    return _u.getData(['location', 'topRegionNames']).then(beginLocationLoad);
+    
+    function beginLocationLoad(data) {
         addLocDataToTableParams(data);
         db_ui.initLocSearchUi(view);
-        updateLocView(view);
-    } else { console.log('Error loading location data from storage.'); }
-}
-function getLocData() {
-    const locDataStorageProps = [ 'location', 'topRegionNames' ];  
-    return _u.getDataFromStorage(locDataStorageProps);
+        return updateLocView(view);
+    }
 }
 function addLocDataToTableParams(data) {
     tblState.rcrdsById = data.location;                                    
@@ -250,33 +236,32 @@ export function onLocViewChange(val) {
  * An optional calback (cb) will redirect the standard map-load sequence.
  */
 function updateLocView(v) {                                                     
-    const val = v || _u.getSelVal('View');                                      //console.log('updateLocView. view = [%s]', val);
+    const val = v || _u.getSelVal('View');                          /*Perm-log*/console.log('           --updateLocView. view = [%s]', val);
     resetLocUi(val);
     resetCurTreeState();
     db_ui.resetToggleTreeBttn(false);
-    showLocInteractionData(val);
+    return showLocInteractionData(val);
 }
 function resetLocUi(view) { 
-    clearPreviousTable();
+    db_ui.fadeTable();
     if (view === 'tree') { db_ui.updateUiForTableView(); }
 }
 function showLocInteractionData(view) {                                         //console.log('showLocInteractionData. view = ', view);
-    storeStateValue('curView', view);                      
+    _u.setData('curView', view);                      
     return view === 'tree' ? rebuildLocTable() : buildLocMap();
 }
-/** ------------ Location Table Methods ------------------------------------- */
+/** --------------- LOCATION TABLE ------------------------------------------ */
 /**
  * Rebuilds loc tree with passed location, or the default top regions, as the
  * base node(s) of the new tree with all sub-locations nested beneath @buildLocTree.
  * Resets 'openRows' and clears tree. Continues @buildLocTableTree.
  * Note: This is also the entry point for filter-related table rebuilds.
  */
-export function rebuildLocTable(topLoc, textFltr) {                             //console.log("-------rebuilding loc tree. topLoc = %O", topLoc);
+export function rebuildLocTable(topLoc, textFltr) {                 /*Perm-log*/console.log("       --rebuilding loc tree. topLoc = %O", topLoc);
     const topLocs = topLoc || getTopRegionIds();    
     tblState.openRows = topLocs.length === 1 ? topLocs : [];
-    clearPreviousTable();
-    db_filters.updateFilterViewMsg();
-    startLocTableBuildChain(topLocs, textFltr);
+    db_ui.fadeTable();
+    return startLocTableBuildChain(topLocs, textFltr);
 }
 function getTopRegionIds() {
     const ids = [];
@@ -284,23 +269,26 @@ function getTopRegionIds() {
     for (let name in regions) { ids.push(regions[name]); } 
     return ids;
 }
-function startLocTableBuildChain(topLocs, textFltr) {
-    frmt_data.transformLocDataAndLoadTable(
-        data_tree.buildLocTree(topLocs, textFltr), tblState);
-    db_ui.loadLocFilterPanelElems(tblState);
+function startLocTableBuildChain(topLocs, textFltr) {               
+    return data_tree.buildLocTree(topLocs, textFltr).then( tree => {  
+        const rowData = frmt_data.buildLocRowData(tree, tblState)
+        loadTbl('Location Tree', rowData);
+        return db_ui.loadLocFilterPanelElems(tblState);
+    }).catch(err => _u.alertErr(err));
 }
-/** ------------ Location Map Methods --------------------------------------- */
+/** -------------------- LOCATION MAP --------------------------------------- */
 /** Filters the data-table to the location selected from the map view. */
-export function showLocInDataTable(loc) {                                       //console.log('showing Loc = %O', loc);
+export function showLocInDataTable(loc) {                          /*Perm-log*/console.log("       --Showing Location in Table");
     db_ui.updateUiForTableView();
-    rebuildLocTable([loc.id]);
     _u.setSelVal('View', 'tree', 'silent');
+    rebuildLocTable([loc.id]);
 }
 /** Initializes the google map in the data table. */
 function buildLocMap() {    
     db_ui.updateUiForMapView();      
     if (tblState.intSet) { return showLocsInSetOnMap(); }
     db_map.initMap(tblState.rcrdsById);           
+    return Promise.resolve();
 }
 /**
  * When displaying a user-made set "list" of interactions focused on locations in 
@@ -308,51 +296,67 @@ function buildLocMap() {
  * and their popup data reflects the data of the set. 
  */
 function showLocsInSetOnMap() {
-    const locTree = data_tree.buildLocTree(getTopRegionIds());
-    db_map.initMap(tblState.rcrdsById, locTree);
+    data_tree.buildLocTree(getTopRegionIds())
+    .then(getGeoJsonAndShowLocsOnMap);
+}
+function getGeoJsonAndShowLocsOnMap(tree) {
+    _u.getData('geoJson').then(geo => {  
+        const data = { geo: geo, locs: tblState.rcrdsById};
+        db_map.initMap(data, locTree);
+    });
 }
 /** Switches to map view and centeres map on selected location. */
-export function showLocOnMap(geoJsonId, zoom) {
+export function showLocOnMap(geoJsonId, zoom) {                     /*Perm-log*/console.log("       --Showing Location on Map");
     db_ui.updateUiForMapView();
     _u.setSelVal('View', 'map', 'silent');
-    db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
-    $('#tbl-filter-status').html('No Active Filters.');
+    _u.getData('geoJson').then(geo => {  
+        db_map.showLoc(geoJsonId, zoom, tblState.rcrdsById);
+        $('#tbl-filter-status').html('No Active Filters.');
+    });
 }
 /* ==================== SOURCE SEARCH =============================================================================== */
 /**
  * Get all data needed for the Source-focused table from data storage and send  
  * to @initSrcSearchUi to begin the data-table build.  
  */
-function buildSourceTable() {
-    const data = _u.getDataFromStorage('source');
-    if (data) { 
-        tblState.rcrdsById = data;
-        db_ui.initSrcSearchUi(data);
-        onSrcViewChange(tblState.curView);
-    } else { console.log('Error loading source data from storage.'); }
+function buildSourceTable(v) {                                      /*Perm-log*/console.log("       --Building Source Table. view ? [%s]", v);
+    if (v) { return getSrcDataAndBuildTable(v); }
+    return _u.getData('curView', true).then(storedView => {
+        const view = storedView || 'pubs';
+        return getSrcDataAndBuildTable(view);
+    });
+}
+function getSrcDataAndBuildTable(view) {
+    return _u.getData('source').then(srcs => {
+        tblState.rcrdsById = srcs;
+        db_ui.initSrcSearchUi(view);
+        return startSrcTableBuildChain(); //tblState.curView
+    });
 }
 /** Event fired when the source view select box has been changed. */
-export function onSrcViewChange(val) {                                         //console.log('-------- SrcViewChange. [%s]', val)
+export function onSrcViewChange(val) {                              /*Perm-log*/console.log('       --onSrcViewChange. view ? [%s]', val);
     if (!val) { return; }
-    rebuildSrcTable(val);
-}
-function rebuildSrcTable(val) {
-    clearPreviousTable();
-    resetCurTreeState();
-    db_filters.updateFilterViewMsg();
-    db_ui.resetToggleTreeBttn(false);
     $('#focus-filters').empty();
-    startSrcTableBuildChain(val);
+    return rebuildSrcTable(val);
+}
+function rebuildSrcTable(val) {                                     /*Perm-log*/console.log('       --rebuildSrcTable. view ? [%s]', val)
+    db_ui.fadeTable();
+    resetCurTreeState();
+    db_ui.resetToggleTreeBttn(false);
+    return startSrcTableBuildChain(val);
 }
 function startSrcTableBuildChain(val) {
     storeSrcView(val);
-    db_ui.loadSrcSearchUi(tblState.curView);
-    frmt_data.transformSrcDataAndLoadTable(
-        data_tree.buildSrcTree(tblState.curView), tblState);
+    return data_tree.buildSrcTree(tblState.curView)
+    .then(tree => {
+        const rowData = frmt_data.buildSrcRowData(tree, tblState)
+        loadTbl('Source Tree', rowData, tblState);
+        return db_ui.loadSrcFilterPanelElems(tblState.curView);
+    }).catch(err => _u.alertErr(err));
 }
 function storeSrcView(val) {  
     const viewVal = val || _u.getSelVal('View');                                //console.log("storeAndReturnCurViewRcrds. viewVal = ", viewVal)
-    storeStateValue('curView', viewVal);
+    _u.setData('curView', viewVal);
     tblState.curView = viewVal;    
 }
 /* ==================== TAXON SEARCH  =============================================================================== */
@@ -360,38 +364,47 @@ function storeSrcView(val) {
  * Get all data needed for the Taxon-focused table from data storage and send 
  * to @initTaxonSearchUi to begin the data-table build.  
  */
-function buildTaxonTable() {                                                    //console.log("Building Taxon Table.");
-    const data = _u.getDataFromStorage(['realm', 'taxon']); 
-    if (data) { 
-        tblState.rcrdsById = data.taxon;
-        db_ui.initTaxonSearchUi(data);
-        startTxnTableBuildChain(storeAndReturnView());
-    } else { console.log("Error loading taxon data from storage."); }
+function buildTaxonTable(v) {                                       /*Perm-log*/console.log("       --Building Taxon Table. view ? [%s]", v);
+    if (v) { return getTxnDataAndBuildTable(v); }
+    return _u.getData('curView', true).then(storedView => {
+        const view = storedView || getSelValOrDefault(_u.getSelVal('View'));
+        return getTxnDataAndBuildTable(view);
+    }).catch(err => _u.alertErr(err));
+}
+function getTxnDataAndBuildTable(view) {
+    return _u.getData('taxon').then(beginTaxonLoad.bind(null, view))
+}
+function beginTaxonLoad(realmId, taxa) {                                                 
+    tblState.rcrdsById = taxa;                                                  //console.log('Building Taxon Table. taxa = %O', _u.snapshot(taxa));
+    const realmTaxon = storeAndReturnRealmRcrd(realmId);
+    db_ui.initTaxonSearchUi(realmTaxon.id);
+    return startTxnTableBuildChain(realmTaxon);
 }
 /** Event fired when the taxon view select box has been changed. */
-export function onTxnViewChange(val) {                                          //console.log('rebuildTxnTable. val = [%s]', val) 
+export function onTxnViewChange(val) {                              /*Perm-log*/console.log('       --onTxnViewChange. [%s]', val)
     if (!val) { return; }
+    $('#focus-filters').empty();  
     buildTxnTable(val);
 }
-function buildTxnTable(val) {                                                   //console.log('onTxnViewChange')
-    const realmTaxon = storeAndReturnView(val);
+function buildTxnTable(val) {                                                   
+    const realmTaxon = storeAndReturnRealmRcrd(val);
+    db_ui.fadeTable();
     resetCurTreeState();
-    $('#focus-filters').empty();  
-    rebuildTxnTable(realmTaxon);
+    return rebuildTxnTable(realmTaxon);
 }
 /**
  * Gets the currently selected taxon realm/view's id, gets the record for the taxon, 
  * stores both it's id and level in the global focusStorage, and returns 
  * the taxon's record.
  */
-function storeAndReturnView(val) {
-    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));            //console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
-    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     //console.log("realmTaxon = %O", realmTaxonRcrd);
+function storeAndReturnRealmRcrd(val) {
+    const realmId = val || getSelValOrDefault(_u.getSelVal('View'));/*debg-log*///console.log('storeAndReturnView. val [%s], realmId [%s]', val, realmId)
+    const realmTaxonRcrd = _u.getDetachedRcrd(realmId, tblState.rcrdsById);     /*debg-log*///console.log("realmTaxon = %O", realmTaxonRcrd);
     const realmLvl = realmTaxonRcrd.level;
-    storeStateValue('curView', realmId);
-    db_filters.updateFilterViewMsg(realmTaxonRcrd.displayName);
-    tblState.curView = realmId;
-    tblState.realmLvl = realmLvl;   
+    _u.setData('curView', realmId);
+    db_filters.updateTaxonFilterViewMsg(realmId);
+    tblState.realmLvl = realmLvl;  
+    tblState.curView = realmId; 
     return realmTaxonRcrd;
 }
 /** This catches errors in realm value caused by exiting mid-tutorial.  */
@@ -403,9 +416,9 @@ function getSelValOrDefault(val) {
  * the tree are stored or updated before continuing @getInteractionsAndFillTable.
  * Note: This is the entry point for filter-related taxon-table rebuilds.
  */
-export function rebuildTxnTable(topTaxon, filtering, textFltr) {                //console.log("topTaxon = %O", topTaxon)
-    clearPreviousTable();
-    startTxnTableBuildChain(topTaxon, filtering, textFltr)
+export function rebuildTxnTable(topTaxon, filtering, textFltr) {    /*Perm-log*/console.log('       --rebuildTxnTable. topTaxon = %O, filtering ? [%s], textFilter ? [%s]', topTaxon, filtering, textFltr);
+    db_ui.fadeTable();
+    return startTxnTableBuildChain(topTaxon, filtering, textFltr)
 }
 /**
  * Builds a family tree of taxon data with passed taxon as the top of the tree, 
@@ -414,8 +427,10 @@ export function rebuildTxnTable(topTaxon, filtering, textFltr) {                
  * and will be expanded on table load. 
  */
 function startTxnTableBuildChain(topTaxon, filtering, textFltr) {
-    tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", openRows)
-    frmt_data.transformTxnDataAndLoadTable(
-        data_tree.buildTxnTree(topTaxon, filtering, textFltr), tblState);
-    db_ui.loadTxnFilterPanelElems(tblState);
+    tblState.openRows = [topTaxon.id.toString()];                               //console.log("openRows=", tblState.openRows)
+    return data_tree.buildTxnTree(topTaxon, filtering, textFltr).then(tree => {
+        const rowData = frmt_data.buildTxnRowData(tree, tblState)
+        loadTbl('Taxon Tree', rowData, tblState);
+        return db_ui.loadTxnFilterPanelElems(tblState);
+    }).catch(err => _u.alertErr(err));
 }
