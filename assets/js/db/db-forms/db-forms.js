@@ -34,6 +34,9 @@ let fP = {};
 export function clearFormMemory() {
     fP = {};
 }
+export function getFormParams() {
+    return fP;
+}
 // export function accessFormState() {
 //     return {
 //         get: getFormState,
