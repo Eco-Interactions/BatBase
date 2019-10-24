@@ -226,7 +226,7 @@ export function sendAjaxQuery(dataPkg, url, successCb, errCb) {                 
     
     function dataSubmitSucess(data, textStatus, jqXHR) { 
         if (['dev', 'test'].indexOf($('body').data('env') != -1)) { 
-            console.log("Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR); }
+            console.log("               Ajax Success! data = %O, textStatus = %s, jqXHR = %O", data, textStatus, jqXHR); }
     }
     function ajaxError(jqXHR, textStatus, errorThrown) {
         console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);

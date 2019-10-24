@@ -1,4 +1,7 @@
 ##Tip: Syntax highlight file with YAML to see highlighting##
+Tasks for others? 
+    - Expand tests
+        - filter sets: test going from each focus into each of the different ones/views
 Thoughts:
     - Leave redundant or unnecessary code commented out until tests are ran to help 
         trouble shoot when issues arrise.
