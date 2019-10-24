@@ -3192,8 +3192,8 @@ function isFieldRequried(field, fLvl, reqFields) {                              
  */
 function storeFieldValue(elem, fieldName, fLvl, value) {            
     const val = value || $(elem).val();                             
-    if (fieldName === 'Authors' || fieldName === 'Editors') { return; }
-    if (citationFormNeedsCitTextUpdate(fLvl)) { handleCitText(fLvl); }
+    if (['Authors', 'Editors'].indexOf(fieldName) != -1) { return; }
+    if (citationFormNeedsCitTextUpdate(fLvl) && fieldName !== "CitationText") { handleCitText(fLvl); }
     fP.forms[fLvl].fieldConfg.vals[fieldName].val = val;
 }
 /** Stores value at index of the order on form, ie the cnt position. */
