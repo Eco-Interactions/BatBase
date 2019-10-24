@@ -7,7 +7,9 @@
  * allow editing and saving of the content within using the trumbowyg library.
  * 
  * Exports:             Imported by:
+ *     accessFormState          form_ui
  *     addNewLocation
+ *     clearFormMemory          form-ui
  *     editEntity
  *     initLocForm
  *     initNewDataForm          db-ui
@@ -22,136 +24,35 @@ import { showTodaysUpdates } from '../db-table/db-filters.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
+import * as form_ui from './form-ui.js';
+
 let fP = {};
-/*-------------- Form HTML Methods -------------------------------------------*/
-/** Builds and shows the popup form's structural elements. */
-function showFormPopup(actionHdr, entity, id) {
-    const title = actionHdr + ' ' + entity;
-    $('#b-overlay').addClass('form-ovrly');
-    $('#b-overlay-popup').addClass('form-popup');
-    $('#b-overlay-popup').append(getFormWindowElems(entity, id, title));
-    addFormStyleClass(entity);
-}
-/** Adds the width to both the popup window and the form element for each entity. */
-function addFormStyleClass(entity, remove) {
-    const map = {
-        'Interaction': 'lrg-form',  'Publication': 'med-form',
-        'Publisher': 'sml-form',    'Citation': 'med-form',
-        'Author': 'sml-form',       'Location': 'med-form',
-        'Taxon': 'sml-form'
-    };
-    $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
-    $('#form-main, .form-popup').addClass(map[entity]);
-}
-function setCoreRowStyles(formId, rowClass) {
-    const w = $(formId).innerWidth() / 2 - 3;  
-    $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
-}
-/**
- * Returns the form window elements - the form and the detail panel.
- * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
- */
-function getFormWindowElems(entity, id, title) {
-    return [getExitButtonRow(), getFormHtml(entity, id, title)];
-}
-function getExitButtonRow() {
-    var row = _u.buildElem('div', { class: 'exit-row' });
-    $(row).append(getExitButton());
-    return row;        
-}
-function getExitButton() {
-    const bttn = _u.buildElem('input', { 'id': 'exit-form', 
-        'class': 'tbl-bttn exit-bttn', 'type': 'button', 'value': 'X' });
-    $(bttn).click(exitFormPopup);
-    return bttn;
-}
-function getFormHtml(entity, id, title) {
-    const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    $(cntnr).append([getMainFormHtml(title), getDetailPanelElems(entity, id)]);
-    return cntnr;
-}
-function getMainFormHtml(title) {
-     const formWin = _u.buildElem('div', { id: 'form-main', class: fP.action });
-    $(formWin).append(getHeaderHtml(title));
-    return formWin;
-}
-function getHeaderHtml(title) {
-    return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
-}
-/** Returns popup and overlay to their original/default state. */
-function exitFormPopup(e, skipReset) {                                          console.log('           --exitFormPopup')
-    hideSearchFormPopup();
-    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
-    $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup");
-    $("#b-overlay-popup").empty();
+/* ======= SORT ============= */
+
+
+/* ================== FORM "STATE" ========================================= */
+export function clearFormMemory() {
     fP = {};
-    db_map.clearMemory();
 }
-function hideSearchFormPopup() {
-    $('#b-overlay').css({display: 'none'});
-}
-/**
- * If the form was not submitted the table does not reload. Otherwise, if exiting 
- * the edit-forms, the table will reload with the current focus; or, after creating 
- * an interaction, the table will refocus into source-view. Exiting the interaction
- * forms also sets the 'int-updated-at' filter to 'today'.
- */
-function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    if (!fP.submitFocus) { return; }
-    if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
-    db_page.initDataTable(fP.submitFocus);
-}
-function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
-    showTodaysUpdates(focus);   
-}
-function getCurFocus() {
-    return db_page.accessTableState().get('curFocus');
-}
-function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
-    var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
-        getSubEntityEditDetailElems : getInteractionDetailElems;
-    var cntnr = _u.buildElem('div', { 'id': 'form-details' });
-    var intIdStr = id ? 'Id:  ' + id : '';
-    $(cntnr).append(_u.buildElem('h3', { 'text': entity + ' Details' }));
-    $(cntnr).append(getDetailElemFunc(entity, id, cntnr));
-    $(cntnr).append(_u.buildElem('p', { id: 'ent-id',  'text': intIdStr }));
-    return cntnr;
-}
-function getInteractionDetailElems(entity, id, cntnr) {
-    return ['src','loc'].map(en => initDetailDiv(en));
-}
-function initDetailDiv(ent) {
-    var entities = {'src': 'Source', 'loc': 'Location'};
-    var div = _u.buildElem('div', { 'id': ent+'-det', 'class': 'det-div' });
-    $(div).append(_u.buildElem('h5', { 'text': entities[ent]+':' }));        
-    $(div).append(_u.buildElem('div', { 'text': 'None selected.' }));
-    return div;
-}
-/** Returns the elems that will display the count of references to the entity. */
-function getSubEntityEditDetailElems(entity, id, cntnr) {                       //console.log("getSubEntityEditDetailElems for [%s]", entity);
-    var refEnts = {
-        'Author': [ 'cit', 'int' ],     'Citation': [ 'int' ],
-        'Location': [ 'int' ],          'Publication': ['cit', 'int' ],
-        'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],   
-        'Publisher': [ 'pub', 'int']  
-    };
-    var div = _u.buildElem('div', { 'id': 'det-cnt-cntnr' });
-    $(div).append(_u.buildElem('span'));        
-    $(div).append(refEnts[entity].map(en => initCountDiv(en)));
-    return div;
-}
-function initCountDiv(ent) { 
-    var entities = { 'cit': 'Citations', 'fam': 'Families', 'gen': 'Genera', 
-        'int': 'Interactions', 'loc': 'Locations', 'ord': 'Orders',
-        'pub': 'Publications', 'spc': 'Species', 'txn': 'Taxa', 
-    };
-    var div = _u.buildElem('div', { 'id': ent+'-det', 'class': 'cnt-div flex-row' });
-    $(div).append(_u.buildElem('div', {'text': '0' }));
-    $(div).append(_u.buildElem('span', {'text': entities[ent] }));
-    return div;
-}
+// export function accessFormState() {
+//     return {
+//         get: getFormState,
+//         set: setFormState
+//     };
+// }
+// /** Returns form state to requesting module. */
+// function getFormState(k, keys) {                                                //console.log('getFormState. params? ', arguments);
+//     return k ? fP[k] : keys ? getStateObj(keys) : fP;
+// }
+// function getStateObj(keys) {
+//     const obj = {};
+//     keys.forEach(k => obj[k] = fP[k] || null);                            //console.log('stateObj = %O', obj)
+//     return obj;
+// }
+// function setFormState(stateObj) {                                              //console.log('setFormState. stateObj = %O', stateObj);
+//     Object.keys(stateObj).forEach(k => { fP[k] = stateObj[k]; })
+// }
+
 /** Adds a count of references to the entity-being-edited, by entity, to the panel. */
 function addDataToCntDetailPanel(refObj) {
     for (var ent in refObj) {
@@ -164,9 +65,8 @@ function addDataToCntDetailPanel(refObj) {
  * the total number of referencing records is added. 
  */
 function addDataToIntDetailPanel(ent, propObj) {                                //console.log('ent = [%s], propObj = %O', ent, propObj);
-    var html = getDataHtmlString(propObj);
-    clearDetailPanel(ent)
-    .then(() => $('#'+ent+'-det div').append(html));
+    var html = getDataHtmlString(propObj);   
+    clearDetailPanel(ent, false, html)   
 }
 /** Returns a ul with an li for each data property */
 function getDataHtmlString(props) {
@@ -176,11 +76,12 @@ function getDataHtmlString(props) {
     }
     return '<ul class="ul-reg">' + html.join('\n') + '</ul>';
 }
-function clearDetailPanel(ent, reset) {                                         //console.log('clearDetailPanel for [%s]', ent)
+function clearDetailPanel(ent, reset, html) {                                   //console.log('clearDetailPanel for [%s]. html = ', ent, html)
     if (ent === 'cit') { return updateSrcDetailPanel('cit'); }
     if (ent === 'pub') { ent = 'src'; }
+    const newDetails = reset ? 'None selected.' : html;
     $('#'+ent+'-det div').empty();
-    if (reset) { $('#'+ent+'-det div').append('None selected.') }
+    $('#'+ent+'-det div').append(newDetails); 
     return Promise.resolve();
 }
 /** Builds the form elem container. */
@@ -271,7 +172,7 @@ function initFormLevelParamsObj(entity, level, pSel, formConfg, action) {       
 function getFormExitHandler(confg, action) {                                    //console.log('getFormExitHandler. action = %s, confg = %O', action, confg);
     return confg.exitHandler && confg.exitHandler[action] ? 
         confg.exitHandler[action] :
-        action === 'edit' ? exitFormPopup : Function.prototype;
+        action === 'edit' ? form_ui.exitFormPopup : Function.prototype;
 }
 /*------------------- Form Functions -------------------------------------------------------------*/
 /*--------------------------- Edit Form --------------------------------------*/
@@ -279,7 +180,7 @@ function getFormExitHandler(confg, action) {                                    
 export function editEntity(id, entity) {                                        console.log("Editing [%s] [%s]", entity, id);  
     initFormParams("edit", entity, id)
     .then(() => {
-        showFormPopup('Editing', _u.ucfirst(entity), id);
+        form_ui.showFormPopup('Edit', _u.ucfirst(entity), id, fP);
         initEditForm(id, entity).then(() => onEditFormLoadComplete(id, entity));    
     })
     .catch(err => _u.alertErr(err));;
@@ -333,7 +234,7 @@ function finishEditFormBuild(entity) {
     if (entity in hndlrs) { hndlrs[entity]()  
     } else {
         initComboboxes(entity, 'top'); 
-        $('#top-cancel').unbind('click').click(exitFormPopup);
+        $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
         $('.all-fields-cntnr').hide();
     }
 }
@@ -567,7 +468,7 @@ function onEditFormLoadComplete(id, entity) {                                   
     map[entity](id);
 }
 function setSrcEditRowStyle() {
-    setCoreRowStyles('#form-main', '.top-row');
+    form_ui.setCoreRowStyles('#form-main', '.top-row');
 }
 function finishLocEditForm(id) {
     addMapToLocForm('#location_Rows', 'edit');
@@ -575,7 +476,7 @@ function finishLocEditForm(id) {
 }
 function finishLocFormAfterMapLoad(id) {
     if ($('#loc-map').data('loaded')) {
-        setCoreRowStyles('#form-main', '.top-row');
+        form_ui.setCoreRowStyles('#form-main', '.top-row');
         db_map.addVolatileMapPin(id, 'edit', getSelVal('#Country-sel'));
     } else {
         window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
@@ -600,7 +501,7 @@ export function initNewDataForm() {                                             
  */
 function buildAndShowCreateForm(fields) {                                       console.log('       --buildAndShowCreateForm');
     const form = buildCreateFormElems(fields);   
-    showFormPopup('New', 'Interaction', null);
+    form_ui.showFormPopup('New', 'Interaction', null, fP);
     $('#form-main').append(form);   
     finishIntFormBuild();
     finishCreateFormBuild();
@@ -613,7 +514,7 @@ function buildCreateFormElems(fields) {
     return form;
 }
 function finishCreateFormBuild() {
-    setCoreRowStyles('#form-main', '.top-row');
+    form_ui.setCoreRowStyles('#form-main', '.top-row');
     focusCombobox('#Publication-sel', false);
     enableCombobox('#CitationTitle-sel', false);
 }
@@ -625,7 +526,7 @@ function finishCreateFormBuild() {
 function finishIntFormBuild() {                                                 console.log('           --finishIntFormBuild');
     initComboboxes('interaction', 'top');
     ['Subject', 'Object'].forEach(addTaxonFocusListener);
-    $('#top-cancel').unbind('click').click(exitFormPopup);
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
     $('#Note_row label')[0].innerText += 's';
     $('#Country-Region_row label')[0].innerText = 'Country/Region';
     addLocationSelectionMethodsNote();
@@ -714,7 +615,7 @@ function appendPubFormAndFinishBuild(form) {
     $('#CitationTitle_row').after(form);
     initComboboxes('publication', 'sub');
     $('#Title_row input').focus();
-    setCoreRowStyles('#publication_Rows', '.sub-row');
+    form_ui.setCoreRowStyles('#publication_Rows', '.sub-row');
 }
 /**
  * Loads the deafult fields for the selected Publication Type. Clears any 
@@ -727,7 +628,7 @@ function loadPubTypeFields(typeId) {                                            
 
     function finishPubTypeFields() {
         ifBookAddAuthEdNote();
-        setCoreRowStyles('#publication_Rows', '.sub-row');
+        form_ui.setCoreRowStyles('#publication_Rows', '.sub-row');
     }
 }
 /** Shows the user a note above the author and editor elems. */
@@ -786,7 +687,7 @@ function appendCitFormAndFinishBuild(fLvl, form) {                              
 function finishCitFormUiLoad(fLvl) {
     enableCombobox('#Publication-sel', false);
     $('#Abstract_row textarea').focus();
-    setCoreRowStyles('#citation_Rows', '.sub-row');
+    form_ui.setCoreRowStyles('#citation_Rows', '.sub-row');
     if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#'+fLvl+'-submit'); }
 }
 function addSourceDataToMemory(data) {
@@ -810,7 +711,7 @@ function getBookDefault(pubType, fLvl) {
 }
 function finishCitEditFormBuild() {
     initComboboxes('citaion', 'top'); 
-    $('#top-cancel').unbind('click').click(exitFormPopup);
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
     $('.all-fields-cntnr').hide();
     handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
@@ -829,7 +730,7 @@ function loadCitTypeFields(typeId) {                                            
     function finishCitTypeFields() {
         handleSpecialCaseTypeUpdates(elem, fLvl);
         if (!fP.citTimeout) { handleCitText(fLvl); }
-        setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
+        form_ui.setCoreRowStyles('#citation_Rows', '.'+fLvl+'-row');
     }
 }
 /**
@@ -1159,9 +1060,9 @@ function updateSrcDetailPanel(entity) {                                         
         const pub = getRcrd('publication', pubSrc.publication);
         const pubType = getSrcType(pub, 'publication');  
         const citId = $('#CitationTitle-sel').val();
-        const citSrc = citId ? fP.records.source[citId] : false;
+        const citSrc = citId ? fP.records.source[citId] : false;  
         const cit = citSrc ? getRcrd('citation', citSrc.citation) : false;
-        const citType = cit ? getSrcType(cit, 'citation') : false; 
+        const citType = cit ? getSrcType(cit, 'citation') : false;   console.log('citation src [%s] = %O, details = %O', citId, citSrc, cit); 
 
         addCitationText();
         addPubTitleData();
@@ -1172,7 +1073,7 @@ function updateSrcDetailPanel(entity) {                                         
         addAbstract();
 
         function addCitationText() {
-            data['Citation'] = cit ? cit.fullText : '(Select Citation)';
+            data['Citation'] = cit ? cit.fullText : '(Select Citation)';  console.log('cit full text', cit.fullText)
         }
         function addPubTitleData() {
             const pubTitleField = pubType && pubType !== 'Other' ? 
@@ -1456,7 +1357,7 @@ function buildLocForm(val, fLvl) {
         enableCombobox('#Country-Region-sel', false);
         $('#Latitude_row input').focus();
         $('#sub-submit').val('Create without GPS data');
-        setCoreRowStyles('#location_Rows', '.sub-row');
+        form_ui.setCoreRowStyles('#location_Rows', '.sub-row');
         if (vals.DisplayName && vals.Country) { enableSubmitBttn('#sub-submit'); }
     }
 }
@@ -1472,7 +1373,7 @@ function finishLocEditFormBuild() {
     updateCountryChangeMethod();
     addListenerToGpsFields(
         db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
-    $('#top-cancel').unbind('click').click(exitFormPopup);
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
     $('.all-fields-cntnr').hide();
 }
 function updateCountryChangeMethod() {
@@ -2090,7 +1991,7 @@ function getTaxonEditFields(entity, id) {
         .then(buildTaxonEditFields.bind(null, taxon));
 }
 function finishTaxonEditFormBuild() {
-    $('#top-cancel').off('click').click(exitFormPopup);
+    $('#top-cancel').off('click').click(form_ui.exitFormPopup);
     $('#top-submit').off('click').click(submitTaxonEdit);
     initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
     $('.all-fields-cntnr').hide();
@@ -2718,7 +2619,7 @@ function toggleShowAllFields(entity, fLvl) {                                    
         if (entity !== 'location') {
             updateFieldLabelsForType(entity, fLvl);
         }
-        setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
+        form_ui.setCoreRowStyles('#'+entity+'_Rows', '.'+fLvl+'-row');
     }
 } /* End toggleShowAllFields */
 function ifOpenSubForm(fLvl) {
@@ -4544,7 +4445,7 @@ function errUpdatingData(data) {                                      //console.
         .css('disabled', 'disabled').fadeTo('400', 0.5);
 }
 function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-    exitFormPopup(null, 'skipTableReset');
+    form_ui.exitFormPopup(null, 'skipTableReset');
     db_sync.resetStoredData();
 }
 /**
