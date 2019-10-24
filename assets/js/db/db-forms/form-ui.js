@@ -3,6 +3,7 @@
  * 
  * CODE SECTIONS:
  *     INIT FORM HTML
+ *     EXIT FORM
  *     HELPERS
  *         
  * Exports:             Imported by:
@@ -21,15 +22,12 @@ let fP;
 /* ======================== INIT FORM HTML ================================== */
 /** Builds and shows the popup form's structural elements. */
 export function showFormPopup(action, entity, id, params) {
-    fP = params;  console.log('fP = %O', fP);
-    const title = getFormTitle(action, entity);
+    fP = params;  
     $('#b-overlay').addClass('form-ovrly');
     $('#b-overlay-popup').addClass('form-popup');
-    $('#b-overlay-popup').append(getFormWindowElems(entity, id, title, action));
+    $('#b-overlay-popup').append(getFormWindowElems(entity, id, action));
     addFormStyleClass(entity);
-}
-function getFormTitle(action, entity) { 
-    return (action == 'New' ? 'New ' : 'Editing ') + entity;
+    fP = null;
 }
 /** Adds the width to both the popup window and the form element for each entity. */
 function addFormStyleClass(entity, remove) {
@@ -46,8 +44,8 @@ function addFormStyleClass(entity, remove) {
  * Returns the form window elements - the form and the detail panel.
  * section>(div#form-main(header, form), div#form-details(hdr, pub, cit, loc), footer)
  */
-function getFormWindowElems(entity, id, title, action) {
-    return [getExitButtonRow(), getFormHtml(entity, id, title, action)];
+function getFormWindowElems(entity, id, action) {
+    return [getExitButtonRow(), getFormHtml(entity, id, action)];
 }
 function getExitButtonRow() {
     var row = _u.buildElem('div', { class: 'exit-row' });
@@ -60,49 +58,19 @@ function getExitButton() {
     $(bttn).click(exitFormPopup);
     return bttn;
 }
-function getFormHtml(entity, id, title, action) {
+function getFormHtml(entity, id, action) {
     const cntnr = _u.buildElem('div', { class: 'flex-row' });
-    $(cntnr).append([getMainFormHtml(title, action), getDetailPanelElems(entity, id)]);
+    $(cntnr).append([getMainFormHtml(entity, action), getDetailPanelElems(entity, id)]);
     return cntnr;
 }
-function getMainFormHtml(title, action) { console.log('fP = %O', fP);
+function getMainFormHtml(entity, action) { 
     const formWin = _u.buildElem('div', { id: 'form-main', class: fP.action });
-    $(formWin).append(getHeaderHtml(title));
+    $(formWin).append(getHeaderHtml(entity, action));
     return formWin;
 }
-function getHeaderHtml(title) {
+function getHeaderHtml(entity, action) {
+    const title = (action == 'New' ? 'New ' : 'Editing ') + entity;    
     return _u.buildElem('h1', { 'id': 'top-hdr', 'text': title });
-}
-/** Returns popup and overlay to their original/default state. */
-export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
-    hideSearchFormPopup();
-    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
-    $("#b-overlay").removeClass("form-ovrly");
-    $("#b-overlay-popup").removeClass("form-popup");
-    $("#b-overlay-popup").empty();
-    db_map.clearMemory();
-    db_forms.clearFormMemory();
-}
-/**
- * If the form was not submitted the table does not reload. Otherwise, if exiting 
- * the edit-forms, the table will reload with the current focus; or, after creating 
- * an interaction, the table will refocus into source-view. Exiting the interaction
- * forms also sets the 'int-updated-at' filter to 'today'.
- */
-function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
-    if (!fP.submitFocus) { return; }
-    if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
-    db_page.initDataTable(fP.submitFocus);
-}
-function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
-    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
-    showTodaysUpdates(focus);   
-}
-function getCurFocus() {
-    return db_page.accessTableState().get('curFocus');
-}
-function hideSearchFormPopup() {
-    $('#b-overlay').css({display: 'none'});
 }
 function getDetailPanelElems(entity, id) {                                      //console.log("getDetailPanelElems. action = %s, entity = %s", fP.action, fP.entity)
     var getDetailElemFunc = fP.action === 'edit' && fP.entity !== 'interaction' ?
@@ -147,8 +115,41 @@ function initCountDiv(ent) {
     $(div).append(_u.buildElem('span', {'text': entities[ent] }));
     return div;
 }
+/* ============================ EXIT FORM =================================== */
+/** Returns popup and overlay to their original/default state. */
+export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
+    fP = db_forms.getFormParams();
+    hideSearchFormPopup();
+    if (!skipReset) { refocusTableIfFormWasSubmitted(); }
+    $("#b-overlay").removeClass("form-ovrly");
+    $("#b-overlay-popup").removeClass("form-popup");
+    $("#b-overlay-popup").empty();
+    db_map.clearMemory();
+    db_forms.clearFormMemory();
+    fP = null;
+}
+function hideSearchFormPopup() {
+    $('#b-overlay').css({display: 'none'});
+}
+/**
+ * If the form was not submitted the table does not reload. Otherwise, if exiting 
+ * the edit-forms, the table will reload with the current focus; or, after creating 
+ * an interaction, the table will refocus into source-view. Exiting the interaction
+ * forms also sets the 'int-updated-at' filter to 'today'.
+ */
+function refocusTableIfFormWasSubmitted() {                                     //console.log('refocusTableIfFormWasSubmitted. submitFocus = [%s]', fP.submitFocus);
+    if (!fP.submitFocus) { return; }
+    if (fP.submitFocus == 'int') { return refocusAndShowUpdates(); }   
+    db_page.initDataTable(fP.submitFocus);
+}
+function refocusAndShowUpdates() {                                              //console.log('refocusAndShowUpdates.')
+    var focus  = fP.action === 'create' ? 'srcs' : getCurFocus();
+    showTodaysUpdates(focus);   
+}
+function getCurFocus() {
+    return db_page.accessTableState().get('curFocus');
+}
 /* =============================== HELPERS ================================== */
-
 export function setCoreRowStyles(formId, rowClass) {
     const w = $(formId).innerWidth() / 2 - 3;  
     $(rowClass).css({'flex': '0 1 '+w+'px', 'max-width': w});
