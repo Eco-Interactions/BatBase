@@ -51,52 +51,34 @@ import * as db_page from '../db-page.js';
 import * as db_map from '../db-map/db-map.js';
 import * as idb from 'idb-keyval'; //set, get, del, clear
 
-import * as _errs from './f-errs.js';
 import * as form_ui from './form-ui.js';
-import * as _cmbx from './combobox-util.js';
-import * as _fCnfg from './f-confg.js';
-import { buildFormBttns } from './form-ui/save-exit-bttns.js';
-import { showEntityEditForm } from './edit/edit-forms.js';
 
 let fP = {};
 /* ======= SORT ============= */
-export function getSelConfgs() {
-    return { 
-        'Authors': { name: 'Authors', id: '#Authors-sel1', change: onAuthSelection, 
-            add: initAuthForm.bind(null, 1) },
-        'CitationType': { name: 'Citation Type', change: loadCitTypeFields, add: false },
-        'CitationTitle': { name: 'Citation', change: onCitSelection, add: initCitForm },
-        'Class': { name: 'Class', change: onLevelSelection, add: initTaxonForm },
-        'Country-Region': { name: 'Country-Region', change: onCntryRegSelection, add: false },
-        'Country': { name: 'Country', change: focusParentAndShowChildLocs.bind(null, 'create'), add: false },
-        'Editors': { name: 'Editors', id: '#Editors-sel1', change: onEdSelection, 
-            add: initEdForm.bind(null, 1) },
-        'Family': { name: 'Family', change: onLevelSelection, add: initTaxonForm },
-        'Genus': { name: 'Genus', change: onLevelSelection, add: initTaxonForm },
-        'HabitatType':  { name: 'Habitat Type', change: false, add: false },
-        'InteractionTags': { name: 'Interaction Tags', change: false, add: false , 
-            options: { delimiter: ",", maxItems: null }},         
-        'InteractionType': { name: 'Interaction Type', change: focusIntTypePin, add: false },
-        'Location': { name: 'Location', change: onLocSelection, add: initLocForm },
-        'Kingdom': { name: 'Kingdom', change: false, add: false },
-        'Order': { name: 'Order', change: onLevelSelection, add: initTaxonForm },
-        'Phylum': { name: 'Phylum', change: false, add: false },
-        'PublicationType': { name: 'Publication Type', change: loadPubTypeFields, add: false },
-        'Publisher': { name: 'Publisher', change: onPublSelection, add: initPublisherForm },
-        'Realm': { name: 'Realm', change: onRealmSelection, add: false },
-        'Species': { name: 'Species', change: onLevelSelection, add: initTaxonForm },
-        'Publication': { name: 'Publication', change: onPubSelection, add: initPubForm },
-        'Subject': { name: 'Subject', change: onSubjectSelection, add: false },
-        'Object': { name: 'Object', change: onObjectSelection, add: false },
-    };
-}
+
+
 /* ================== FORM "STATE" ========================================= */
 export function clearFormMemory() {
     fP = {};
 }
-export function getFormParams() {
-    return fP;
-}
+// export function accessFormState() {
+//     return {
+//         get: getFormState,
+//         set: setFormState
+//     };
+// }
+// /** Returns form state to requesting module. */
+// function getFormState(k, keys) {                                                //console.log('getFormState. params? ', arguments);
+//     return k ? fP[k] : keys ? getStateObj(keys) : fP;
+// }
+// function getStateObj(keys) {
+//     const obj = {};
+//     keys.forEach(k => obj[k] = fP[k] || null);                            //console.log('stateObj = %O', obj)
+//     return obj;
+// }
+// function setFormState(stateObj) {                                              //console.log('setFormState. stateObj = %O', stateObj);
+//     Object.keys(stateObj).forEach(k => { fP[k] = stateObj[k]; })
+// }
 
 /** Adds a count of references to the entity-being-edited, by entity, to the panel. */
 export function addDataToCntDetailPanel(refObj) {
@@ -224,8 +206,309 @@ function getFormExitHandler(confg, action) {                                    
 // /** Shows the entity's edit form in a pop-up window on the search page. */
 export function editEntity(id, entity) {                                        console.log("   //editEntity [%s] [%s]", entity, id);  
     initFormParams("edit", entity, id)
-    .then(() => showEntityEditForm(id, entity, fP));
+    .then(() => {
+        form_ui.showFormPopup('Edit', _u.ucfirst(entity), id, fP);
+        initEditForm(id, entity).then(() => onEditFormLoadComplete(id, entity));    
+    })
+    .catch(err => _u.alertErr(err));;
+}
+/** Inits the edit top-form, filled with all existing data for the record. */
+function initEditForm(id, entity) {  
+    const form = buildFormElem();  
+    return getEditFormFields(id, entity).then(fields => {  
+        $(form).append(fields);
+        $('#form-main').append(form);     
+        finishEditFormBuild(entity);
+        if (entity !== 'interaction') { return fillExistingData(entity, id); }
+        _u.getData('interaction').then(ints => {
+            fP.records.interaction = ints;
+            fillExistingData(entity, id);
+        });
+    });
 }   
+/** Returns the form fields for the passed entity.  */
+function getEditFormFields(id, entity) {
+    const rowCntnr = _u.buildElem('div', {
+        id: entity+'_Rows', class: 'flex-row flex-wrap'});
+    const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
+        'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
+    const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
+    fP.forms.expanded[entity] = true;
+    return fieldBldr(entity, id).then(fields => {
+        $(rowCntnr).append(fields);                              
+        return [rowCntnr, buildFormBttns(entity, 'top', 'edit')];
+    });
+}   
+function getIntFormFields(entity, id) {
+    return buildIntFormFields('edit');
+}
+function getSrcTypeFields(entity, id) {
+    const srcRcrd = getRcrd('source', id);
+    const type = getRcrd(entity, srcRcrd[entity]);
+    const typeId = type[entity+'Type'].id;
+    return getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
+}
+/** Returns the passed entity's form fields. */
+function buildEditFormFields(entity, id) {
+    const formConfg = getFormConfg(entity);
+    return getFormFieldRows(entity, formConfg, {}, 'top', false);
+}
+function finishEditFormBuild(entity) {
+    const hndlrs = {
+        'citation': finishCitEditFormBuild, 'interaction': finishIntFormBuild, 
+        'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
+    };
+    if (entity in hndlrs) { hndlrs[entity]()  
+    } else {
+        initComboboxes(entity, 'top'); 
+        $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+        $('.all-fields-cntnr').hide();
+    }
+}
+/*------------------- Fills Edit Form Fields -----------------------------*/
+/** Fills form with existing data for the entity being edited. */
+function fillExistingData(entity, id) {
+    addDisplayNameToForm(entity, id);
+    fillEntityData(entity, id); 
+    if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
+}
+function addDisplayNameToForm(ent, id) {
+    if (ent === 'interaction') { return; }
+    const prnt = getParentEntity(ent);
+    const entity = prnt || ent;
+    const rcrd = getRcrd(entity, id);                                           
+    $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
+    $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
+}
+/** Note: Source types will get their record data at fillSrcData. */
+function fillEntityData(ent, id) {  
+    const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
+        'location': fillLocData, 'publication': fillSrcData, 
+        'publisher': fillSrcData, 'taxon': fillTaxonData, 
+        'interaction': fillIntData };
+    const rcrd = getRcrd(ent, id);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
+    hndlrs[ent](ent, id, rcrd);
+}
+function fillIntData(entity, id, rcrd) {  
+    const fields = {
+        'InteractionType': 'select', 'Location': 'select', 'Note': 'textArea', 
+        'Object': 'taxon', 'Source': 'source', 'Subject': 'taxon', 
+        'InteractionTags': 'tags' };
+    fillFields(rcrd, fields, true);
+}
+function fillLocData(entity, id, rcrd) {
+    const fields = getCoreFieldDefs(entity);  
+    handleLatLongFields();
+    fillFields(rcrd, fields);
+    addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
+    fP.editing.detail = rcrd.geoJsonId || null;
+    if (rcrd.geoJsonId) { storeLocGeoJson(rcrd.geoJsonId); }
+    /* Sets values without triggering each field's change method. */
+    function handleLatLongFields() {
+        delete fields.Latitude;
+        delete fields.Longitude;
+        delete fields.Country;
+        $('#Latitude_row input').val(rcrd.latitude);
+        $('#Longitude_row input').val(rcrd.longitude);
+        setSelVal('#Country-sel', rcrd.country.id, 'silent');
+    }
+    function storeLocGeoJson(id) {                                              
+        fP.forms.top.geoJson = _u.getData('geoJson').then(data => data[id]);
+    }
+} /* End fillLocData */
+function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
+    var refs = { 
+        'int': getTtlIntCnt('taxon', rcrd, 'objectRoles') || 
+            getTtlIntCnt('taxon', rcrd, 'subjectRoles')
+    };
+    getTaxonChildRefs(rcrd);  
+    addDataToCntDetailPanel(refs);
+    removeEmptyDetailPanelElems();
+
+    function getTaxonChildRefs(txn) {
+        txn.children.forEach(function(child) { addChildRefData(child); });
+    }
+    function addChildRefData(id) {
+        var lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
+        var child = fP.records.taxon[id];              
+        var lvlK = lvlKeys[child.level.displayName];       
+        if (!refs[lvlK]) { refs[lvlK] = 0; }
+        refs[lvlK] += 1;
+        getTaxonChildRefs(child);
+    }
+} /* End fillTaxonData */
+function removeEmptyDetailPanelElems() {  
+    var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
+        'Species': 'Species', 'Interactions': 'Interaction' };                                       
+    $.each($('[id$="-det"] div'), function(i, elem) {
+        if (elem.innerText == 0) {  elem.parentElement.remove(); }
+        if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
+    });
+}
+/** Fills all data for the source-type entity.  */
+function fillSrcData(entity, id, rcrd) { 
+    var src = getRcrd("source", id);                                            
+    var detail = getRcrd(entity, src[entity]);                                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
+    var fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
+    setSrcType()
+    .then(() => {
+        setSrcData();
+        setDetailData();
+    });
+    function setSrcType() {
+        if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
+        const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
+        const typeId = detail[typeProp].id;
+        const typeName = detail[typeProp].displayName;
+        const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
+        return loadSrcTypeFields(entity, typeId, typeElem, typeName);
+    }
+    function setSrcData() {
+        fillFields(src, fields.core);
+        fillSrcDataInDetailPanel(entity, src);            
+    }
+    function setDetailData() {
+        fillFields(detail, fields.detail);
+        setAdditionalFields(entity, src, detail);
+        fP.editing.detail = detail.id;
+    }
+} /* End fillSrcData */
+function getSourceFields(entity) {
+    return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity).add };
+}
+/** Adds a count of all refences to the entity to the form's detail-panel. */
+function fillSrcDataInDetailPanel(entity, srcRcrd) {                            //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
+    var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
+    addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
+    addDataToCntDetailPanel(refObj);
+
+    function addAddtionalRefs() {
+        if (entity === 'citation') { return; }
+        const ref = entity === 'publisher' ? 'pub' : 'cit';
+        refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
+    }
+} /* End fillSrcDataInDetailPanel */
+function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
+    return entity === 'citation' ? 
+        rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
+}
+/** ----------- Shared ---------------------------- */
+function getTtlIntCnt(entity, rcrd, intProp) {                                  //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
+    var ints = rcrd[intProp].length;
+    if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
+    if (rcrd.contributions) { ints += getChildIntCnt(entity, rcrd.contributions, intProp);}        
+    return ints;
+}
+function getChildIntCnt(entity, children, intProp) {
+    var ints = 0;
+    children.forEach(function(child){ 
+        child = fP.records[entity][child];
+        ints += getTtlIntCnt(entity, child, intProp); 
+    });
+    return ints;
+}
+function fillFields(rcrd, fields, shwAll) {                                     //console.log('rcrd = %O, fields = %O', rcrd, fields);
+    const fieldHndlrs = {
+        'text': setText, 'textArea': setTextArea, 'select': setSelect, 
+        'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
+        'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
+        'taxon': addTaxon
+    };
+    for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
+        if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
+        addDataToField(field, fieldHndlrs[fields[field]], rcrd);
+    }  
+}
+function addDataToField(field, fieldHndlr, rcrd) {                              //console.log("addDataToField [%s] [%0] rcrd = %O", field, fieldHndlr, rcrd);
+    var elemId = field.split(' ').join('');
+    var prop = _u.lcfirst(elemId);
+    fieldHndlr(elemId, prop, rcrd);
+}
+/** Adds multiSelect values to the form's val object. */
+function addToFormVals(fieldId, prop, rcrd) {                                   //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    const vals = fP.forms.top.fieldConfg.vals;
+    vals[fieldId] = {type: 'multiSelect'};
+    vals[fieldId].val = rcrd[prop]; 
+    if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
+    selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
+}
+function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
+}
+function setTextArea(fieldId, prop, rcrd) {
+    $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();   
+}
+function setSelect(fieldId, prop, rcrd) {                                       //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
+    var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
+    setSelVal('#'+fieldId+'-sel', id);
+}
+function setTagField(fieldId, prop, rcrd) {                                     //console.log("setTagField. rcrd = %O", rcrd)
+    var tags = rcrd[prop] || rcrd.tags;
+    tags.forEach(tag => setSelVal('#'+fieldId+'-sel', tag.id));
+}    
+function setCntry(fieldId, prop, rcrd) {
+    setSelVal('#Country-sel', rcrd.country.id);
+}
+function setAdditionalFields(entity, srcRcrd, detail) {
+    setTitleField(entity, srcRcrd);
+    setPublisherField(entity, srcRcrd);
+    setCitationEdgeCaseFields(entity, detail);
+}
+function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
+    if (["publication", "citation"].indexOf(entity) === -1) { return; }
+    const name = entity === 'publication' ? 
+        srcRcrd.displayName : getCitTitle(srcRcrd.citation);
+    $('#Title_row input[type="text"]').val(name).change();
+
+    function getCitTitle(citId) {
+        return getRcrd('citation', citId).displayName;
+    }
+} /* End setTitleField */
+function setPublisherField(entity, srcRcrd) { 
+    if (entity !== 'publication' || !fieldIsDisplayed('Publisher', 'top')) { return; }    
+    setSelVal('#Publisher-sel', srcRcrd.parent);
+}
+function setCitationEdgeCaseFields(entity, citRcrd) {
+    if (entity !== 'citation') { return; }
+    $('#CitationText_row textarea').val(citRcrd.fullText);
+    $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
+    $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
+    $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
+}
+function addTaxon(fieldId, prop, rcrd) {                                        //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
+    var selApi = $('#'+ fieldId + '-sel')[0].selectize;
+    var taxon = fP.records.taxon[rcrd[prop]];                          
+    selApi.addOption({ value: taxon.id, text: getTaxonDisplayName(taxon) });
+    selApi.addItem(taxon.id);
+}
+function addSource(fieldId, prop, rcrd) {
+    var citSrc = fP.records.source[rcrd.source];  
+    setSelVal('#Publication-sel', citSrc.parent);
+    setSelVal('#CitationTitle-sel', rcrd.source);
+}
+/* ---- On Form Fill Complete --- */
+function onEditFormLoadComplete(id, entity) {                                       //console.log('onEditFormLoadComplete. entity = ', entity);
+    const map = { 
+        'citation': setSrcEditRowStyle, 'location': finishLocEditForm,
+        'publication': setSrcEditRowStyle };
+    if (!map[entity]) { return; }
+    map[entity](id);
+}
+function setSrcEditRowStyle() {
+    form_ui.setCoreRowStyles('#form-main', '.top-row');
+}
+function finishLocEditForm(id) {
+    addMapToLocForm('#location_Rows', 'edit');
+    finishLocFormAfterMapLoad(id);
+}
+function finishLocFormAfterMapLoad(id) {
+    if ($('#loc-map').data('loaded')) {
+        form_ui.setCoreRowStyles('#form-main', '.top-row');
+        db_map.addVolatileMapPin(id, 'edit', getSelVal('#Country-sel'));
+    } else {
+        window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
+    }
+}
 /*--------------------------- Create Form --------------------------------------------------------*/
 /**
  * Fills the global fP obj with the basic form params @initFormParams. 
@@ -234,15 +517,46 @@ export function editEntity(id, entity) {                                        
  * new entities of the field-type by selecting the 'add...' option from the 
  * field's combobox and completing the appended sub-form.
  */
-export function initNewDataForm() {                                             console.log('   //Building New Interaction Form');
-    initFormParams('create', 'interaction')
-    .then(() => buildIntFormFields('create'))
-    .then(fields => form_ui.buildAndAppendForm(fP, 'top', fields))
-    .then(() => form_ui.finishEntityFormBuild('interaction'))
-    .then(form_ui.finishCreateFormBuild)
-    .catch(err => _u.alertErr(err));
+function buildAndShowCreateForm(fields) {                                       console.log('       --buildAndShowCreateForm');
+    const form = buildCreateFormElems(fields);   
+    form_ui.showFormPopup('New', 'Interaction', null, fP);
+    $('#form-main').append(form);   
+    finishIntFormBuild();
+    finishCreateFormBuild();
+}
+function buildCreateFormElems(fields) {
+    const form = buildFormElem();
+    const div = _u.buildElem('div', { id: 'interaction_Rows', class: 'flex-row flex-wrap' });
+    $(div).append(fields); 
+    $(form).append([div, buildFormBttns('interaction', 'top', 'create')]);
+    return form;
+}
+function finishCreateFormBuild() {
+    form_ui.setCoreRowStyles('#form-main', '.top-row');
+    focusCombobox('#Publication-sel', false);
+    enableCombobox('#CitationTitle-sel', false);
 }
 /*------------------- Interaction Form Methods (Shared) ----------------------*/ 
+/**
+ * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
+ * required field elems to the form's config object.  
+ */
+function finishIntFormBuild() {                                                 console.log('           --finishIntFormBuild');
+    initComboboxes('interaction', 'top');
+    ['Subject', 'Object'].forEach(addTaxonFocusListener);
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+    $('#Note_row label')[0].innerText += 's';
+    $('#Country-Region_row label')[0].innerText = 'Country/Region';
+    addLocationSelectionMethodsNote();
+    addReqElemsToConfg();    
+    $('.all-fields-cntnr').hide();
+    focusCombobox('#Publication-sel', true);
+}
+/** Displays the [Role] Taxon select form when the field gains focus. */ 
+function addTaxonFocusListener(role) {
+    const func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
+    $('#form-main').on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
+}
 function addReqElemsToConfg() {
     const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
         "InteractionType"];
@@ -412,6 +726,12 @@ function getBookDefault(pubType, fLvl) {
     if (pubType !== 'Book') { return 'Book'; }
     const pubAuths = fP.forms[fLvl].pub.src.authors;
     return pubAuths ? 'Book' : 'Chapter';
+}
+function finishCitEditFormBuild() {
+    initComboboxes('citaion', 'top'); 
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+    $('.all-fields-cntnr').hide();
+    handleSpecialCaseTypeUpdates($('#CitationType-sel')[0], 'top');
 }
 /**
  * Adds relevant data from the parent publication into formVals before 
@@ -1066,6 +1386,19 @@ function onLocFormLoadComplete() {
     addListenerToGpsFields();
     scrollToLocFormWindow();
 }
+function finishLocEditFormBuild() {  
+    initComboboxes('Location', 'top'); 
+    updateCountryChangeMethod();
+    addListenerToGpsFields(
+        db_map.addVolatileMapPin.bind(null, fP.editing.core, 'edit', false));
+    $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+    $('.all-fields-cntnr').hide();
+}
+function updateCountryChangeMethod() {
+    $('#Country-sel')[0].selectize.off('change');
+    $('#Country-sel')[0].selectize.on('change', 
+        focusParentAndShowChildLocs.bind(null, 'edit'));
+}
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
 export function enableCountryRegionField() {  
     _cmbx.enableCombobox('#Country-Region-sel');
@@ -1642,6 +1975,271 @@ function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   
         if (selected[lvl] == 'none') { return _u.updatePlaceholderText('#'+lvlName+'-sel', null, 0); }
         _cmbx.setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); 
     } 
+}
+/*-------- Edit Taxon Methods ----------*/
+/**
+ * Returns the elements of the edit-taxon form. 
+ * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
+ * <select>[Taxon-level]</>    <input type="text">[Taxon Display-name]</>
+ *     <button>Update Taxon</> <button>Cancel</>
+ */
+function getTaxonEditFields(entity, id) {
+    const taxon = fP.records.taxon[id];  
+    const realm = taxon.realm.displayName;
+    const role = realm === 'Bat' ? 'Subject' : 'Object';
+    return initTaxonParams(role, realm, id)
+        .then(buildTaxonEditFields.bind(null, taxon));
+}
+function finishTaxonEditFormBuild() {
+    $('#top-cancel').off('click').click(form_ui.exitFormPopup);
+    $('#top-submit').off('click').click(submitTaxonEdit);
+    initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
+    $('.all-fields-cntnr').hide();
+}
+function buildTaxonEditFields(taxon) {
+    const prntElems = getPrntTaxonElems(taxon);
+    const txnElems = getEditTaxonFields(taxon)
+    return prntElems.concat(txnElems);
+}
+function getPrntTaxonElems(taxon) {                                             //console.log("getPrntTaxonElems for %O", taxon);
+    const prnt = fP.records.taxon[taxon.parent]; 
+    const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt) ];
+    return [ buildTaxonEditFormRow('Parent', elems, 'top') ];
+}
+function buildNameElem(prnt) {
+    var div = _u.buildElem('div', { id: 'txn-prnt' });
+    setTaxonPrntNameElem(prnt, div);
+    $(div).css({'padding-top': '4px'});
+    return div;
+}
+function setTaxonPrntNameElem(prnt, elem, pText) {
+    var div = elem || $('#txn-prnt')[0];
+    var text = pText || getTaxonDisplayName(prnt);
+    div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
+    if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
+}
+function buildEditPrntBttn(prnt) {
+    var bttn = _u.buildElem('input', { type: 'button', value: 'Change Parent', 
+        id: 'chng-prnt', class: 'ag-fresh tbl-bttn' });
+    $(bttn).click(buildParentTaxonEditFields);
+    return bttn;
+}
+function getEditTaxonFields(taxon) {                                            //console.log("getEditTaxonFields for [%s]", taxon.displayName);
+    const input = _u.buildElem('input', { id: 'txn-name', type: 'text', value: taxon.displayName });
+    const lvlSel = getlvlSel(taxon, 'top')
+    return [buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
+}
+function getlvlSel(taxon, fLvl) {
+    const opts = getTaxonLvlOpts(taxon); 
+    const sel = _u.buildSelectElem(opts, { id: 'txn-lvl' });
+    $(sel).data({ 'txn': taxon.id, 'lvl': taxon.level.id });
+    return sel;
+}
+/** Returns an array of options for the levels in the taxon's realm. */
+function getTaxonLvlOpts(taxon) {
+    const opts = {};
+    const realmLvls = fP.forms.taxonPs.curRealmLvls.map(lvl => lvl);  
+    realmLvls.shift();  //Removes the realm-level
+    buildLvlOptsObj();
+    return _u.buildOptsObj(opts, Object.keys(opts));
+
+    function buildLvlOptsObj() {
+        const lvls = _u.snapshot(fP.forms.taxonPs.lvls);                            //console.log('realmLvls = %O, allLvls = %O', _u.snapshot(realmLvls), _u.snapshot(lvls));
+        for (let i = lvls.length - 1; i >= 0; i--) {
+            if (realmLvls.indexOf(lvls[i]) != -1) { opts[lvls[i]] = i+1; }
+        }
+    }
+}
+/**
+ * Returns a level select with all levels in the taxon-parent's realm and a 
+ * combobox with all taxa at the parent's level and the current parent selected.
+ * Changing the level select repopulates the taxa with those at the new level.
+ * Entering a taxon that does not already exists will open the 'create' form.
+ */
+function buildParentTaxonEditFields() {   
+    buildParentTaxonEditElems($('#txn-prnt').data('txn'))        
+    .then(appendPrntFormElems)
+    .then(finishPrntFormBuild);
+}
+function appendPrntFormElems(elems) {
+    const cntnr = _u.buildElem("div", { class: "sml-sub-form flex-row pTaxon", id: "sub-form" });
+    $(cntnr).append(elems);
+    $('#Parent_row').after(cntnr);
+}
+function buildParentTaxonEditElems(prntId) {
+    var prnt = fP.records.taxon[prntId];
+    var hdr = [buildEditParentHdr()];
+    var bttns = [buildFormBttns("parent", "sub", "edit", true)];
+    return getParentEditFields(prnt).then(fields => hdr.concat(fields, bttns));
+}
+function buildEditParentHdr() {
+    var hdr = _u.buildElem("h3", { text: "Select New Taxon Parent", id:'sub-hdr' });
+    return hdr;
+}
+function getParentEditFields(prnt) {  
+    const realm = _u.lcfirst(prnt.realm.displayName);      
+    const realmSelRow = getRealmLvlRow(prnt);
+    return buildFormRows(realm, {}, 'sub', null, 'edit')
+        .then(modifyAndReturnPrntRows);
+    
+    function modifyAndReturnPrntRows(rows) {
+        $(rows).css({ 'padding-left': '.7em' });
+        fP.forms.taxonPs.prntSubFormLvl = 'sub2';
+        return [realmSelRow, rows];
+    }
+}
+function getRealmLvlRow(taxon) { 
+    const realmLvl = fP.forms.taxonPs.curRealmLvls[0];
+    const lbl = _u.buildElem('label', { text: realmLvl });
+    const taxonym = _u.buildElem('span', { text: taxon.realm.displayName });
+    $(taxonym).css({ 'padding-top': '.55em' });
+    return buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub');
+}
+/**
+ * Initializes the edit-parent form's comboboxes. Selects the current parent.
+ * Hides the species row. Adds styles and modifies event listeners. 
+ */
+function finishPrntFormBuild() {                                                //console.log("fP = %O", fP);    
+    var realmLvl = fP.forms.taxonPs.curRealmLvls[0];
+    initComboboxes(null, 'sub');
+    selectParentTaxon($('#txn-prnt').data('txn'), realmLvl);
+    $('#Species_row').hide();
+    $('#'+realmLvl+'_row .field-row')[0].className += ' realm-row';
+    $('#sub-submit').attr('disabled', false).css('opacity', '1');
+    $('#sub-submit').off('click').click(closePrntEdit);
+    $('#sub-cancel').off('click').click(cancelPrntEdit);
+    setTaxonPrntNameElem(null, null, " ");
+    $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
+    disableSubmitBttn('#top-submit');
+    $('#sub-submit')[0].value = 'Select Taxon';
+}
+function selectParentTaxon(prntId, realmLvl) {                                  //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
+    var parentLvl = fP.records.taxon[prntId].level.displayName;  
+    if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
+    clearAllOtherLvls();
+    setSelVal('#'+parentLvl+'-sel', prntId);
+}
+function clearAllOtherLvls() {
+    $.each($('#sub-form select[id$="-sel"]'), function(i, elem){ 
+        $(elem)[0].selectize.clear('silent');
+    });
+}
+function closePrntEdit() {                                                  
+    var prnt =  getSelectedTaxon() || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
+    exitPrntEdit(prnt);
+}
+function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
+    var prnt = fP.records.taxon[$('#txn-prnt').data('txn')];
+    exitPrntEdit(prnt);
+}
+function exitPrntEdit(prnt) {
+    if (checkForParentLvlErrs(prnt.level.id)) { return; }
+    resetAfterEditParentClose(prnt);
+}
+function resetAfterEditParentClose(prnt) {
+    clearLvlErrs('#Parent_errs', 'sub');
+    fP.forms.taxonPs.prntSubFormLvl = null;
+    $('#sub-form').remove();
+    $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
+    setTaxonPrntNameElem(prnt);
+    enableSubmitBttn('#top-submit');
+}
+/**
+ * Ensures that the new taxon-level is higher than its children, and that a 
+ * species taxon being edited has a genus parent selected.
+ */
+function checkForTaxonLvlErrs(txnLvl) {  
+    var prntLvl = $('#txn-prnt').data('lvl');                                   //console.log("checkForTaxonLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
+    var errObj = {
+        'isGenusPrnt': isGenusPrnt(),
+        'needsHigherLvl': lvlIsLowerThanKidLvls(txnLvl),
+    };
+    for (var tag in errObj) {  
+        if (errObj[tag]) { return sendTxnErrRprt(tag, 'Taxon'); }
+    }
+    if ($('.top-active-errs').length) { clrNeedsHigherLvl(null, null, null, txnLvl); }
+    checkForParentLvlErrs(prntLvl);
+}
+/** Returns true if the taxon's original level is Genus and it has children. */
+function isGenusPrnt() {
+    var orgTxnLvl = $('#txn-lvl').data('lvl');
+    var txnId = $('#txn-lvl').data('txn');
+    return orgTxnLvl == 6 && getHighestChildLvl(txnId) < 8;
+}
+/** 
+ * Returns true if the passed level is lower or equal to the highest level of 
+ * the taxon-being-edited's children.  
+ */
+function lvlIsLowerThanKidLvls(txnLvl) {                                    
+    var highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                //console.log('lvlIsLowerThanKidLvls. txnLvl = %s, childHigh = %s', txnLvl, highLvl)                  
+    return txnLvl >= highLvl;
+}
+function getHighestChildLvl(taxonId) {
+    var high = 8;
+    fP.records.taxon[taxonId].children.forEach(checkChildLvl);
+    return high;
+
+    function checkChildLvl(id) {
+        var child = fP.records.taxon[id]
+        if (child.level.id < high) { high = child.level.id; }
+    }
+} /* End getHighestChildLvl */
+/**
+ * Ensures that the parent taxon has a higher taxon-level and that a species 
+ * taxon being edited has a genus parent selected.
+ */
+function checkForParentLvlErrs(prnt) {
+    var prntLvl = prnt || $('#txn-prnt').data('lvl'); 
+    var txnLvl = $('#txn-lvl').val();                                           //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
+    var errs = [
+        { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
+        { 'needsGenusPrnt': txnLvl == 7 && prntLvl != 6 }];
+    var hasErrs = !errs.every(checkForErr);                                     //console.log('hasErrs? ', hasErrs)
+    if (!hasErrs && $('.top-active-errs').length) {
+        clearLvlErrs('#Parent_errs', 'sub'); 
+    }
+    return hasErrs;
+
+    function checkForErr(errObj) {                                         
+        for (var err in errObj) { 
+            return errObj[err] ? sendTxnErrRprt(err, 'Parent') : true;
+        }                                                                   
+    }
+} /* End checkForParentLvlErrs */
+function sendTxnErrRprt(errTag, field) {                                              
+    reportFormFieldErr(field, errTag, 'top');
+    disableSubmitBttn('#top-submit');
+    return false;
+}
+function clearLvlErrs(elemId, fLvl) {                                           //console.log('clearLvlErrs.')
+    clearErrElemAndEnableSubmit($(elemId)[0], fLvl);
+}
+/** Inits a taxon select-elem with the selectize library. */
+function initTaxonEditCombo(selId, chngFunc, createFunc) {                      //console.log("initTaxonEditCombo. selId = ", selId);
+    var chng = chngFunc || Function.prototype;
+    var options = { create: false, onChange: chng, placeholder: null }; 
+    $('#'+selId).selectize(options);
+    setSelVal('#'+selId, $('#'+selId).data('lvl'), 'silent');
+}
+/**
+ * Each element is built, nested, and returned as a completed row. 
+ * rowDiv>(errorDiv, fieldDiv>inputElems)
+ */
+function buildTaxonEditFormRow(field, inputElems, fLvl) {
+    var rowDiv = _u.buildElem('div', { class: fLvl + '-row', id: field + '_row'});
+    var errorDiv = _u.buildElem('div', { id: field+'_errs'}); 
+    var fieldCntnr = _u.buildElem('div', { class: 'field-row flex-row'});
+    $(fieldCntnr).append(inputElems);
+    $(rowDiv).append([errorDiv, fieldCntnr]);
+    return rowDiv;
+} 
+function submitTaxonEdit() {
+    var vals = {
+        displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
+        level: $('#Taxon_row select').text(),
+        parentTaxon: $('#txn-prnt').data('txn')
+    };                                                                          //console.log("taxon vals = %O", vals);
+    buildFormDataAndSubmit('top', vals);
 }
 /*-------------- Interaction Detail Fields -------------------------------*/
 function buildIntTypeField() {                                                  console.log('       --buildIntTypeField');
@@ -3299,292 +3897,292 @@ function parseData(data) {
     data.detailEntity = JSON.parse(data.detailEntity);
     return data;
 }
-// /*------------------- Form Error Handlers --------------------------------*/
-// /**------------- Form Submit-Errors --------------*/
-// /** Builds and appends an error elem that displays the error to the user. */
-// function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
-//     const fLvl = fP.ajaxFormLvl;                                          
-//     const elem = getFormErrElem(fLvl);
-//     const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
-//     const msg = getFormErrMsg(errTag);
-//     toggleWaitOverlay(false);
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     disableSubmitBttn('#'+fLvl+'-submit');
-// }
-// /**
-//  * Returns an error tag based on the server error text. Reports duplicated 
-//  * authors or editors, non-unique display names, or returns a generic 
-//  * form-error message.
-//  */
-// function getFormErrTag(errTxt) {                                                //console.log("errTxt = %O", errTxt) 
-//     return isDuplicateAuthorErr(errTxt) ?
-//         'dupSelAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
-//         'dupEnt'  : 'genSubmitErr';
-// }
-// function isDuplicateAuthorErr(errTxt) {
-//     return errTxt.DBALException.includes("Duplicate entry") &&
-//         errTxt.DBALException.includes("contribution");
-// }
-// function getFormErrMsg(errTag) {
-//     var msg = {
-//         'dupSelAuth': 'An author is selected multiple times.',
-//         'dupEnt' : 'A record with this display name already exists.',
-//         'genSubmitErr': 'There was an error during form submission. Please note the ' + 
-//             'record ID and the changes attempted and send to the developer.'
-//     };
-//     return '<span>' + msg[errTag] + '</span>'; 
-// }
-// /**------------- Data Storage Errors --------------*/
-// function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
-//     const errMsg = data.msg;
-//     const errTag = data.tag;
-//     const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
-//     const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
-//         ${errTag}</b><br><br>This form will close and all stored data will be 
-//         redownloaded.</span>`;
-//     const confirm = _u.buildElem('span', { class: 'flex-row', 
-//             'text': `Please click "OK" to continue.` });
-//     const bttn = _u.buildElem('input', { type: 'button', value: 'OK', 
-//             class: 'tbl-bttn exit-bttn' });
-//     $(confirm).append(bttn);
-//     $(cntnr).append([msg, confirm]);
-//     $('#top-hdr').after(cntnr);
-//     $(bttn).click(reloadAndRedownloadData);
-//     $('#top-submit, #top-cancel, #exit-form').off('click')
-//         .css('disabled', 'disabled').fadeTo('400', 0.5);
-// }
-// function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
-//     form_ui.exitFormPopup(null, 'skipTableReset');
-//     db_sync.resetStoredData();
-// }
-// /**
-//  * When the user attempts to create an entity that uses the sub-form and there 
-//  * is already an instance using that form, show the user an error message and 
-//  * reset the select elem. 
-//  */
-// function _errs.openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, fP = %O ", selId, fP)
-//     var selId = id || '#'+field+'-sel';
-//     return _errs.formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
-// }
-// /** 
-//  * When an error prevents a form init, this method shows an error to the user
-//  * and resets the combobox that triggered the form. 
-//  */
-// function _errs.formInitErr(field, errTag, fLvl, id, skipClear) {                      //console.log("_errs.formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
-//     const selId = id || '#'+field+'-sel';
-//     _errs.reportFormFieldErr(field, errTag, fLvl);
-//     if (skipClear) { return; }
-//     window.setTimeout(function() {_cmbx.clearCombobox(selId)}, 10);
-//     return { 'value': '', 'text': 'Select ' + field };
-// }
-// /**
-//  * Shows the user an error message above the field row. The user can clear the 
-//  * error manually with the close button, or automatically by resolving the error.
-//  */
-// function _errs.reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
-//     const errMsgMap = {
-//         'dupAuth': handleDupAuth,
-//         'fillAuthBlanks': handleAuthBlanks,
-//         'fillEdBlanks': handleEdBlanks,
-//         'isGenusPrnt': handleIsGenusPrnt,
-//         'invalidCoords': handleInvalidCoords,
-//         'needsGenusName': handleNeedsGenusName,
-//         'needsGenusPrnt': handleNeedsGenusParent, 
-//         'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
-//         'needsHigherLvl': handleNeedsHigherLvl,
-//         'needsLocData': handleNeedsLocData,
-//         'noGenus': handleNoGenus,
-//         'openSubForm': handleOpenSubForm,
-//     };
-//     const errElem = getFieldErrElem(fieldName, fLvl);
-//     errMsgMap[errTag](errElem, errTag, fLvl, fieldName);
-// }
-// /* ----------- Field-Error Handlers --------------------------------------*/
-// function handleDupAuth(elem, errTag, fLvl, fieldName) {  
-//     const msg = `<span>An author with this name already exists in the database.\n
-//         If you are sure this is a new author, add initials or modify their name 
-//         and submit again. </span>`;
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrDupAuth(elem, fLvl, e) { 
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {  
-//     const msg = "<span>Genus' with species children must remain at genus.</span>";
-//     setErrElemAndExitBttn(elem, msg, errTag, 'top');
-// }
-// function clrIsGenusPrnt(elem, fLvl, e) { 
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, 'top');
-// }
-// /** Note: error used for the location form. */
-// function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
-//     const msg = `<span>Invalid coordinate format.</span>`;
-//     $(`#${fieldName}_row input[type="text"]`).on('input', 
-//         clrInvalidCoords.bind(null, elem, fLvl, null, fieldName)); 
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('.err-exit').hide();
-// }
-// function clrInvalidCoords(elem, fLvl, e, fieldName) {
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
-// }
-// function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
-//     const genus = _cmbx.getSelTxt('#Genus-sel');
-//     const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
-//     $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrNeedsGenusName(elem, fLvl, e) {
-//     $('#DisplayName_row input')[0].value = '';
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {  
-//     const msg = '<span>Please select a genus parent for the species taxon.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, 'top');
-// }
-// function clrNeedsGenusPrntErr(elem, fLvl, e) {            
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, 'top');
-// }
-// /** Note: error for the create-taxon form. */
-// function handleNoGenus(elem, errTag, fLvl, fieldName) {  
-//     const msg = '<span>Please select a genus before creating a species.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('#Genus-sel').change(function(e){
-//         if (e.target.value) { clrNoGenusErr(elem, fLvl); }
-//     });
-// }
-// function clrNoGenusErr(elem, fLvl, e) {                                            
-//     $('#Genus-sel').off('change');
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) { 
-//     const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// /** Clears the cause, either the parent-selection process or the taxon's level. */
-// function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if ($('#sub-form').length) { return selectParentTaxon(
-//         $('#txn-prnt').data('txn'), fP.forms.taxonPs.curRealmLvls[0]); 
-//     }
-//     $('#txn-lvl').data('lvl', $('#txn-lvl').val());
-// }
-// /** Note: error for the edit-taxon form. */
-// function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
-//     var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
-//     var lvlName = fP.forms.taxonPs.lvls[childLvl-1];
-//     var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
-//         'Please select a level higher than '+lvlName+'</div>';
-//     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-// }
-// function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
-//     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
-//     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
-//     $('#txn-lvl').data('lvl', txnLvl);
-//     clearLvlErrs('#Taxon_errs', fLvl);
-//     enableChngPrntBtttn();
-// }
-// /** Enables the button if the change-parent form isn't already open. */
-// function enableChngPrntBtttn() {
-//     if ($('#sub-form').length ) { return; }
-//     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
-// }
-// /** Note: error used for the location form when selecting new location from map. */
-// function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
-//     const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     $('div.new-loc-popup').prepend(msg);
-// }
-// function clrNeedsLocData(elem, fLvl, e) {
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     $('.new-loc-popup #err').remove();
-// }
-// /** Note: error used for the publication form. */
-// function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please finish the open '+ _u.ucfirst(subEntity) + ' form.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// /** Note: error used for the publication/citation form. */
-// function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please fill the blank in the order of authors.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// /** Note: error used for the publication form. */
-// function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
-//     var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
-//     var msg = '<p>Please fill the blank in the order of editors.</p>';
-//     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-//     setOnFormCloseListenerToClearErr(elem, fLvl);
-// }
-// function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
-//     const elem = $('#'+field+'_errs')[0];    
-//     clearErrElemAndEnableSubmit(elem, fLvl);
-//     if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-submit'); }
-// }
-// /* ----------- Error-Elem Methods -------------- */
-// function setOnFormCloseListenerToClearErr(elem, fLvl) {
-//     $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
-// }
-// function clrOpenSubForm(elem, fLvl) {   
-//     clearLvlErrs(elem, fLvl);
-// }
-// /** Returns the error div for the passed field. */
-// function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
-//     var field = fieldName.split(' ').join('');
-//     var elem = $('#'+field+'_errs')[0];    
-//     $(elem).addClass(fLvl+'-active-errs');
-//     return elem;
-// }   
-// function getFormErrElem(fLvl) {
-//     const elem = _u.buildElem('div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }); 
-//     $('#'+fLvl+'-hdr').after(elem);
-//     return elem;
-// }
-// function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
-//     elem.innerHTML = msg;
-//     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-//     disableSubmitBttn('#'+fLvl+'-submit');
-// }
-// function getErrExitBttn(errTag, elem, fLvl) {
-//     const exitHdnlrs = {
-//         'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
-//         'needsGenusName': clrNeedsGenusName, 
-//         'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
-//         'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
-//         'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm, 
-//         'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
-//         'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
-//         'fillAuthBlanks': false, 'fillEdBlanks': false
-//     };
-//     if (!exitHdnlrs[errTag]) { return []; }
-//     const bttn = getExitButton();
-//     bttn.className += ' err-exit';
-//     $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
-//     return bttn;
-// }
-// function clrFormLvlErr(elem, fLvl) {
-//     const childFormLvl = getNextFormLevel('child', fLvl);
-//     $('#'+fLvl+'_errs').remove();
-//     if (!$('#'+childFormLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) {
-//         enableSubmitBttn('#'+fLvl+'-submit');
-//     }
-// }
-// function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-//     const subLvl = getNextFormLevel('child', fLvl);
-//         $(elem).fadeTo(400, 0, clearErrElem);
-//     if (!$('#'+subLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) { 
-//         enableSubmitBttn('#'+fLvl+'-submit'); }
+/*------------------- Form Error Handlers --------------------------------*/
+/**------------- Form Submit-Errors --------------*/
+/** Builds and appends an error elem that displays the error to the user. */
+function formSubmitError(jqXHR, textStatus, errorThrown) {                      //console.log("ajaxError. responseText = [%O] - jqXHR:%O", jqXHR.responseText, jqXHR);
+    const fLvl = fP.ajaxFormLvl;                                          
+    const elem = getFormErrElem(fLvl);
+    const errTag = getFormErrTag(JSON.parse(jqXHR.responseText));
+    const msg = getFormErrMsg(errTag);
+    toggleWaitOverlay(false);
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    disableSubmitBttn('#'+fLvl+'-submit');
+}
+/**
+ * Returns an error tag based on the server error text. Reports duplicated 
+ * authors or editors, non-unique display names, or returns a generic 
+ * form-error message.
+ */
+function getFormErrTag(errTxt) {                                                //console.log("errTxt = %O", errTxt) 
+    return isDuplicateAuthorErr(errTxt) ?
+        'dupSelAuth' : errTxt.DBALException.includes("Duplicate entry") ? 
+        'dupEnt'  : 'genSubmitErr';
+}
+function isDuplicateAuthorErr(errTxt) {
+    return errTxt.DBALException.includes("Duplicate entry") &&
+        errTxt.DBALException.includes("contribution");
+}
+function getFormErrMsg(errTag) {
+    var msg = {
+        'dupSelAuth': 'An author is selected multiple times.',
+        'dupEnt' : 'A record with this display name already exists.',
+        'genSubmitErr': 'There was an error during form submission. Please note the ' + 
+            'record ID and the changes attempted and send to the developer.'
+    };
+    return '<span>' + msg[errTag] + '</span>'; 
+}
+/**------------- Data Storage Errors --------------*/
+function errUpdatingData(data) {                                      //console.log('errUpdatingData. errMsg = [%s], errTag = [%s]', errMsg, errTag);
+    const errMsg = data.msg;
+    const errTag = data.tag;
+    const cntnr = _u.buildElem('div', { class: 'flex-col', id:'data_errs' });
+    const msg = `<span>${errMsg}<br><br>Please report this error to the developer: <b> 
+        ${errTag}</b><br><br>This form will close and all stored data will be 
+        redownloaded.</span>`;
+    const confirm = _u.buildElem('span', { class: 'flex-row', 
+            'text': `Please click "OK" to continue.` });
+    const bttn = _u.buildElem('input', { type: 'button', value: 'OK', 
+            class: 'tbl-bttn exit-bttn' });
+    $(confirm).append(bttn);
+    $(cntnr).append([msg, confirm]);
+    $('#top-hdr').after(cntnr);
+    $(bttn).click(reloadAndRedownloadData);
+    $('#top-submit, #top-cancel, #exit-form').off('click')
+        .css('disabled', 'disabled').fadeTo('400', 0.5);
+}
+function reloadAndRedownloadData() {                                            //console.log('reloadAndRedownloadData called. prevFocus = ', fP.submitFocus);
+    form_ui.exitFormPopup(null, 'skipTableReset');
+    db_sync.resetStoredData();
+}
+/**
+ * When the user attempts to create an entity that uses the sub-form and there 
+ * is already an instance using that form, show the user an error message and 
+ * reset the select elem. 
+ */
+function openSubFormErr(field, id, fLvl, skipClear) {                           //console.log("selId = %s, fP = %O ", selId, fP)
+    var selId = id || '#'+field+'-sel';
+    return formInitErr(field, 'openSubForm', fLvl, selId, skipClear);
+}
+/** 
+ * When an error prevents a form init, this method shows an error to the user
+ * and resets the combobox that triggered the form. 
+ */
+function formInitErr(field, errTag, fLvl, id, skipClear) {                      //console.log("formInitErr: [%s]. field = [%s] at [%s], id = %s", errTag, field, fLvl, id)
+    const selId = id || '#'+field+'-sel';
+    reportFormFieldErr(field, errTag, fLvl);
+    if (skipClear) { return; }
+    window.setTimeout(function() {clearCombobox(selId)}, 10);
+    return { 'value': '', 'text': 'Select ' + field };
+}
+/**
+ * Shows the user an error message above the field row. The user can clear the 
+ * error manually with the close button, or automatically by resolving the error.
+ */
+function reportFormFieldErr(fieldName, errTag, fLvl) {                          //console.log("###__formFieldError- '%s' for '%s' @ '%s'", errTag, fieldName, fLvl);
+    const errMsgMap = {
+        'dupAuth': handleDupAuth,
+        'fillAuthBlanks': handleAuthBlanks,
+        'fillEdBlanks': handleEdBlanks,
+        'isGenusPrnt': handleIsGenusPrnt,
+        'invalidCoords': handleInvalidCoords,
+        'needsGenusName': handleNeedsGenusName,
+        'needsGenusPrnt': handleNeedsGenusParent, 
+        'needsHigherLvlPrnt': handleNeedsHigherLvlPrnt,
+        'needsHigherLvl': handleNeedsHigherLvl,
+        'needsLocData': handleNeedsLocData,
+        'noGenus': handleNoGenus,
+        'openSubForm': handleOpenSubForm,
+    };
+    const errElem = getFieldErrElem(fieldName, fLvl);
+    errMsgMap[errTag](errElem, errTag, fLvl, fieldName);
+}
+/* ----------- Field-Error Handlers --------------------------------------*/
+function handleDupAuth(elem, errTag, fLvl, fieldName) {  
+    const msg = `<span>An author with this name already exists in the database.\n
+        If you are sure this is a new author, add initials or modify their name 
+        and submit again. </span>`;
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrDupAuth(elem, fLvl, e) { 
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
+/** Note: error for the edit-taxon form. */
+function handleIsGenusPrnt(elem, errTag, fLvl, fieldName) {  
+    const msg = "<span>Genus' with species children must remain at genus.</span>";
+    setErrElemAndExitBttn(elem, msg, errTag, 'top');
+}
+function clrIsGenusPrnt(elem, fLvl, e) { 
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    clearErrElemAndEnableSubmit(elem, 'top');
+}
+/** Note: error used for the location form. */
+function handleInvalidCoords(elem, errTag, fLvl, fieldName) {
+    const msg = `<span>Invalid coordinate format.</span>`;
+    $(`#${fieldName}_row input[type="text"]`).on('input', 
+        clrInvalidCoords.bind(null, elem, fLvl, null, fieldName)); 
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    $('.err-exit').hide();
+}
+function clrInvalidCoords(elem, fLvl, e, fieldName) {
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    if (fieldName) { $(`#${fieldName}_Row input[type="text"]`).off('input'); }
+}
+function handleNeedsGenusName(elem, errTag, fLvl, fieldName) {
+    const genus = getSelTxt('#Genus-sel');
+    const msg = `<span>Species must begin with the Genus name "${genus}".</span>`;
+    $('#DisplayName_row input').change(clearErrElemAndEnableSubmit.bind(null, elem, fLvl));
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrNeedsGenusName(elem, fLvl, e) {
+    $('#DisplayName_row input')[0].value = '';
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
+/** Note: error for the edit-taxon form. */
+function handleNeedsGenusParent(elem, errTag, fLvl, fieldName) {  
+    const msg = '<span>Please select a genus parent for the species taxon.</span>';
+    setErrElemAndExitBttn(elem, msg, errTag, 'top');
+}
+function clrNeedsGenusPrntErr(elem, fLvl, e) {            
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    clearErrElemAndEnableSubmit(elem, 'top');
+}
+/** Note: error for the create-taxon form. */
+function handleNoGenus(elem, errTag, fLvl, fieldName) {  
+    const msg = '<span>Please select a genus before creating a species.</span>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    $('#Genus-sel').change(function(e){
+        if (e.target.value) { clrNoGenusErr(elem, fLvl); }
+    });
+}
+function clrNoGenusErr(elem, fLvl, e) {                                            
+    $('#Genus-sel').off('change');
+    clearErrElemAndEnableSubmit(elem, fLvl);
+}
+/** Note: error for the edit-taxon form. */
+function handleNeedsHigherLvlPrnt(elem, errTag, fLvl, fieldName) { 
+    const msg = '<span>The parent taxon must be at a higher taxonomic level.</span>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+/** Clears the cause, either the parent-selection process or the taxon's level. */
+function clrNeedsHigherLvlPrnt(elem, fLvl, e) {          
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'));
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    if ($('#sub-form').length) { return selectParentTaxon(
+        $('#txn-prnt').data('txn'), fP.forms.taxonPs.curRealmLvls[0]); 
+    }
+    $('#txn-lvl').data('lvl', $('#txn-lvl').val());
+}
+/** Note: error for the edit-taxon form. */
+function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {  
+    var childLvl = getHighestChildLvl($('#txn-lvl').data('txn'));
+    var lvlName = fP.forms.taxonPs.lvls[childLvl-1];
+    var msg = '<div>Taxon level must be higher than that of child taxa. &nbsp&nbsp&nbsp' +
+        'Please select a level higher than '+lvlName+'</div>';
+    $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+}
+function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
+    var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
+    setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
+    $('#txn-lvl').data('lvl', txnLvl);
+    clearLvlErrs('#Taxon_errs', fLvl);
+    enableChngPrntBtttn();
+}
+/** Enables the button if the change-parent form isn't already open. */
+function enableChngPrntBtttn() {
+    if ($('#sub-form').length ) { return; }
+    $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
+}
+/** Note: error used for the location form when selecting new location from map. */
+function handleNeedsLocData(elem, errTag, fLvl, fieldName) {
+    const msg = `<div id='err'>Please fill required fields and submit again.</div>`;
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    $('div.new-loc-popup').prepend(msg);
+}
+function clrNeedsLocData(elem, fLvl, e) {
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    $('.new-loc-popup #err').remove();
+}
+/** Note: error used for the publication form. */
+function handleOpenSubForm(elem, errTag, fLvl, fieldName) {  
+    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
+    var msg = '<p>Please finish the open '+ _u.ucfirst(subEntity) + ' form.</p>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    setOnFormCloseListenerToClearErr(elem, fLvl);
+}
+/** Note: error used for the publication/citation form. */
+function handleAuthBlanks(elem, errTag, fLvl, fieldName) {  
+    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
+    var msg = '<p>Please fill the blank in the order of authors.</p>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    setOnFormCloseListenerToClearErr(elem, fLvl);
+}
+/** Note: error used for the publication form. */
+function handleEdBlanks(elem, errTag, fLvl, fieldName) {  
+    var subEntity = fP.forms[fLvl] ? fP.forms[fLvl].entity : '';
+    var msg = '<p>Please fill the blank in the order of editors.</p>';
+    setErrElemAndExitBttn(elem, msg, errTag, fLvl);
+    setOnFormCloseListenerToClearErr(elem, fLvl);
+}
+function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
+    const elem = $('#'+field+'_errs')[0];    
+    clearErrElemAndEnableSubmit(elem, fLvl);
+    if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-submit'); }
+}
+/* ----------- Error-Elem Methods -------------- */
+function setOnFormCloseListenerToClearErr(elem, fLvl) {
+    $('#'+fLvl+'-form').bind('destroyed', clrOpenSubForm.bind(null, elem, fLvl));
+}
+function clrOpenSubForm(elem, fLvl) {   
+    clearLvlErrs(elem, fLvl);
+}
+/** Returns the error div for the passed field. */
+function getFieldErrElem(fieldName, fLvl) {                                     //console.log("getFieldErrElem for %s", fieldName);
+    var field = fieldName.split(' ').join('');
+    var elem = $('#'+field+'_errs')[0];    
+    $(elem).addClass(fLvl+'-active-errs');
+    return elem;
+}   
+function getFormErrElem(fLvl) {
+    const elem = _u.buildElem('div', { id: fLvl+'_errs', class: fLvl+'-active-errs' }); 
+    $('#'+fLvl+'-hdr').after(elem);
+    return elem;
+}
+function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
+    elem.innerHTML = msg;
+    $(elem).append(getErrExitBttn(errTag, elem, fLvl));
+    disableSubmitBttn('#'+fLvl+'-submit');
+}
+function getErrExitBttn(errTag, elem, fLvl) {
+    const exitHdnlrs = {
+        'isGenusPrnt': clrIsGenusPrnt, 'invalidCoords': clrInvalidCoords,
+        'needsGenusName': clrNeedsGenusName, 
+        'needsGenusPrnt': clrNeedsGenusPrntErr, 'noGenus': clrNoGenusErr, 
+        'needsHigherLvl': clrNeedsHigherLvl, 'needsHigherLvlPrnt': clrNeedsHigherLvlPrnt,
+        'needsLocData': clrNeedsLocData, 'openSubForm': clrOpenSubForm, 
+        'dupSelAuth': clrFormLvlErr, 'dupAuth': clrDupAuth,
+        'dupEnt': clrFormLvlErr, 'genSubmitErr': clrFormLvlErr, 
+        'fillAuthBlanks': false, 'fillEdBlanks': false
+    };
+    if (!exitHdnlrs[errTag]) { return []; }
+    const bttn = getExitButton();
+    bttn.className += ' err-exit';
+    $(bttn).off('click').click(exitHdnlrs[errTag].bind(null, elem, fLvl));
+    return bttn;
+}
+function clrFormLvlErr(elem, fLvl) {
+    const childFormLvl = getNextFormLevel('child', fLvl);
+    $('#'+fLvl+'_errs').remove();
+    if (!$('#'+childFormLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) {
+        enableSubmitBttn('#'+fLvl+'-submit');
+    }
+}
+function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+    const subLvl = getNextFormLevel('child', fLvl);
+        $(elem).fadeTo(400, 0, clearErrElem);
+    if (!$('#'+subLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) { 
+        enableSubmitBttn('#'+fLvl+'-submit'); }
 
 //     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
 //         $(elem).removeClass(fLvl+'-active-errs');
