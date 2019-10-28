@@ -3,36 +3,41 @@
  * 
  * CODE SECTIONS:
  *     INIT FORM HTML
+ *         APPEND FIELDS AND FORM
+ *     AFTER FORM INIT COMPLETE
+ *         INTERACTION CREATE FORM
+ *         EDIT FORMS
+ *         ENTITY FORMS
  *     EXIT FORM
  *     HELPERS
  *         
  * Exports:             Imported by:
+ *     finishCreateFormBuild    db-forms
+ *     finishIntFormBuild       db-forms
+ *     finishEntityFormBuild    db-forms
  *     setCoreRowStyles         db-forms
- *     showFormPopup            db-forms
  *     exitFormPopup            db-forms
  */
 import * as _u from '../util.js';
+import * as _cmbx from './combobox-util.js';
 import * as db_map from '../db-map/db-map.js';
 import * as db_page from '../db-page.js';
 import * as db_forms from './db-forms.js';
-// import { accessFormState as fState } from './db-forms.js';
+import { buildFormBttns } from './form-ui/save-exit-bttns.js';
 
-// fState = {};
 let fP;
 /* ======================== INIT FORM HTML ================================== */
 /** Builds and shows the popup form's structural elements. */
-export function showFormPopup(action, entity, id, params) {
-    fP = params;  
+function showFormPopup(action, entity, id) {
     $('#b-overlay').addClass('form-ovrly');
     $('#b-overlay-popup').addClass('form-popup');
     $('#b-overlay-popup').append(getFormWindowElems(entity, id, action));
     addFormStyleClass(entity);
-    fP = null;
 }
 /** Adds the width to both the popup window and the form element for each entity. */
 function addFormStyleClass(entity, remove) {
     const map = {
-        'Interaction': 'lrg-form',  'Publication': 'med-form',
+        'interaction': 'lrg-form',  'Publication': 'med-form',
         'Publisher': 'sml-form',    'Citation': 'med-form',
         'Author': 'sml-form',       'Location': 'med-form',
         'Taxon': 'sml-form'
@@ -115,6 +120,92 @@ function initCountDiv(ent) {
     $(div).append(_u.buildElem('span', {'text': entities[ent] }));
     return div;
 }
+/* -------------------- APPEND FIELDS AND FORM ------------------------------ */
+export function buildAndAppendForm(params, fLvl, fields, id) {  //console.log('params = %O', params);
+    fP = params;
+    showFormPopup(fP.action, fP.entity, id);
+    const form = buildFormElem();  
+    const fieldContainer = buildEntityFieldContainer(params.entity, fields);
+    $(form).append([fieldContainer, buildFormBttns(params.entity, fLvl, params.action, null, fP)]);
+    $('#form-main').append(form);  
+    return Promise.resolve();
+}
+/** Builds the form elem container. */
+function buildFormElem() {
+    var form = document.createElement("form");
+    $(form).attr({"action": "", "method": "POST", "name": "top"});
+    form.className = "flex-row";
+    form.id = "top-form";
+    return form;
+}
+function buildEntityFieldContainer(entity, fields) {
+    const div = _u.buildElem('div', { id: entity+'_Rows', class: 'flex-row flex-wrap' });
+    $(div).append(fields); 
+    return div;
+}
+/* ==================== AFTER FORM INIT COMPLETE ============================ */
+/**
+ * 
+ */
+export function finishEntityFormBuild(entity, action) {
+    const hndlrs = {
+        'interaction': finishIntFormBuild, 
+        // 'citation': finishCitEditFormBuild, 
+        // 'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
+    };
+    if (entity in hndlrs) { hndlrs[entity]()  
+    } else {
+        // _cmbx.initFormCombos(entity, 'top'); 
+        // $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
+        // $('.all-fields-cntnr').hide();
+    }
+}
+/* --------- INTERACTION CREATE FORM ------------------ */
+export function finishCreateFormBuild() {
+    setCoreRowStyles('#form-main', '.top-row');
+    _cmbx.focusCombobox('#Publication-sel', false);
+    _cmbx.enableCombobox('#CitationTitle-sel', false);
+}
+/**
+ * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
+ * required field elems to the form's config object.  
+ */
+export function finishIntFormBuild() {                                                 console.log('           --finishIntFormBuild');
+    _cmbx.initFormCombos('interaction', 'top', fP.forms.top.selElems);
+    ['Subject', 'Object'].forEach(addTaxonFocusListener);
+    $('#top-cancel').unbind('click').click(exitFormPopup);
+    $('#Note_row label')[0].innerText += 's';
+    $('#Country-Region_row label')[0].innerText = 'Country/Region';
+    addLocationSelectionMethodsNote();
+    addReqElemsToConfg();    
+    $('.all-fields-cntnr').hide();
+    _cmbx.focusCombobox('#Publication-sel', true);
+}
+/** Displays the [Role] Taxon select form when the field gains focus. */ 
+function addTaxonFocusListener(role) {
+    const func = { 'Subject': db_forms.initSubjectSelect, 'Object': db_forms.initObjectSelect };
+    $('#form-main').on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
+}
+/** Adds a message above the location fields in interaction forms. */
+function addLocationSelectionMethodsNote() {
+    const cntnr = _u.buildElem('div', {id: 'loc-note', class: 'skipFormData'});
+    const mapText = _u.buildElem('span', {class:'map-link', 
+        text: 'click here to use the map interface.'});
+    $(mapText).click(db_forms.showInteractionFormMap);
+    const note = [`<span>Select or create a location using the fields below or </span>`,
+        mapText];
+    $(cntnr).append(note);
+    $('#Country-Region_row').before(cntnr);
+}
+function addReqElemsToConfg() {
+    const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
+        "InteractionType"];
+    fP.forms.top.reqElems = reqFields.map(function(field) {
+        return $('#'+field+'-sel')[0];
+    });
+}
+/* ---------- EDIT FORMS ------------------- */
+/* --------- ENTITY FORMS ------------------ */
 /* ============================ EXIT FORM =================================== */
 /** Returns popup and overlay to their original/default state. */
 export function exitFormPopup(e, skipReset) {                                   console.log('           --exitFormPopup')
