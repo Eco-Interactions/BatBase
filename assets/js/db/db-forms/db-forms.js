@@ -23,11 +23,9 @@
  *     buildIntFormFields
  *     getRcrd                  edit-forms
  *     getSrcTypeRows           edit-forms
- *     getFormConfg             ""
  *     getFormFieldRows         ""
  *     getParentEntity          ""
  *     ifAllRequiredFieldsFilled    ""
- *     getCoreFieldDefs         ""
  *     addDataToCntDetailPanel  ""
  *     loadSrcTypeFields        ""
  *     fieldIsDisplayed         ""
@@ -42,6 +40,10 @@
  *     getNextFormLevel         f-errs
  *     toggleSubmitBttn         edit-forms, f-errs
  *     focusParentAndShowChildLocs      edit-forms
+ *     enableTaxonCombos        f-confg 
+ *     enableCountryRegionField     f-confg
+ *     enablePubField           f-confg
+ *     resetInteractionForm     f-confg
  */
 import * as _u from '../util.js';
 import * as db_sync from '../db-sync.js';
@@ -52,6 +54,7 @@ import * as idb from 'idb-keyval'; //set, get, del, clear
 import * as _errs from './f-errs.js';
 import * as form_ui from './form-ui.js';
 import * as _cmbx from './combobox-util.js';
+import * as _fCnfg from './f-confg.js';
 import { buildFormBttns } from './form-ui/save-exit-bttns.js';
 import { showEntityEditForm } from './edit/edit-forms.js';
 
@@ -87,8 +90,6 @@ export function getSelConfgs() {
         'Object': { name: 'Object', change: onObjectSelection, add: false },
     };
 }
-
-
 /* ================== FORM "STATE" ========================================= */
 export function clearFormMemory() {
     fP = {};
@@ -96,24 +97,6 @@ export function clearFormMemory() {
 export function getFormParams() {
     return fP;
 }
-// export function accessFormState() {
-//     return {
-//         get: getFormState,
-//         set: setFormState
-//     };
-// }
-// /** Returns form state to requesting module. */
-// function getFormState(k, keys) {                                                //console.log('getFormState. params? ', arguments);
-//     return k ? fP[k] : keys ? getStateObj(keys) : fP;
-// }
-// function getStateObj(keys) {
-//     const obj = {};
-//     keys.forEach(k => obj[k] = fP[k] || null);                            //console.log('stateObj = %O', obj)
-//     return obj;
-// }
-// function setFormState(stateObj) {                                              //console.log('setFormState. stateObj = %O', stateObj);
-//     Object.keys(stateObj).forEach(k => { fP[k] = stateObj[k]; })
-// }
 
 /** Adds a count of references to the entity-being-edited, by entity, to the panel. */
 export function addDataToCntDetailPanel(refObj) {
@@ -242,312 +225,14 @@ function getFormExitHandler(confg, action) {                                    
 export function editEntity(id, entity) {                                        console.log("   //editEntity [%s] [%s]", entity, id);  
     initFormParams("edit", entity, id)
     .then(() => showEntityEditForm(id, entity, fP));
-//     .then(() => {
-//         // form_ui.showFormPopup('Edit', _u.ucfirst(entity), id, fP);
-//         initEditForm(id, entity).then(() => onEditFormLoadComplete(id, entity));    
-//     })
-//     .catch(err => _u.alertErr(err));;
-// }
-// /** Inits the edit top-form, filled with all existing data for the record. */
-// function initEditForm(id, entity) {  
-//     return getEditFormFields(id, entity)
-//         .then(fields => form_ui.buildAndAppendForm(fP, 'top', fields, id))
-//         .then(finishEditFormBuild.bind(null, entity));
-
-//     //     if (entity !== 'interaction') { return fillExistingData(entity, id); }
-//     //     _u.getData('interaction').then(ints => {
-//     //         fP.records.interaction = ints;
-//     //         fillExistingData(entity, id);
-//     //     });
-//     // });
 }   
-// /** Returns the form fields for the passed entity.  */
-// function getEditFormFields(id, entity) {
-//     const rowCntnr = _u.buildElem('div', {
-//         id: entity+'_Rows', class: 'flex-row flex-wrap'});
-//     const edgeCase = { 'citation': getSrcTypeFields, 'interaction': getIntFormFields, 
-//         'publication': getSrcTypeFields, 'taxon': getTaxonEditFields };
-//     const fieldBldr = entity in edgeCase ? edgeCase[entity] : buildEditFormFields;  
-//     fP.forms.expanded[entity] = true;
-//     return fieldBldr(entity, id).then(fields => {
-//         $(rowCntnr).append(fields);                              
-//         return [rowCntnr, buildFormBttns(entity, 'top', 'edit', null, fP)];
-//     });
-// }   
-// function getIntFormFields(entity, id) {
-//     return buildIntFormFields('edit');
-// }
-// function getSrcTypeFields(entity, id) {
-//     const srcRcrd = getRcrd('source', id);
-//     const type = getRcrd(entity, srcRcrd[entity]);
-//     const typeId = type[entity+'Type'].id;
-//     return getSrcTypeRows(entity, typeId, 'top', type[entity+'Type'].displayName);
-// }
-// /** Returns the passed entity's form fields. */
-// function buildEditFormFields(entity, id) {
-//     const formConfg = getFormConfg(entity);
-//     return getFormFieldRows(entity, formConfg, {}, 'top', false);
-// }
-// function finishEditFormBuild(entity) {
-//     const hndlrs = {
-//         'citation': finishCitEditFormBuild, 'interaction': form_ui.finishEntityFormBuild.bind(null, 'interaction'), 
-//         'location': finishLocEditFormBuild, 'taxon': finishTaxonEditFormBuild,
-//     };
-//     if (entity in hndlrs) { hndlrs[entity]()  
-//     } else {
-//         _cmbx.initFormCombos(entity, 'top', fP.forms.top.selElems); 
-//         $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
-//         $('.all-fields-cntnr').hide();
-//     }
-// }
-// /*------------------- Fills Edit Form Fields -----------------------------*/
-// /** Fills form with existing data for the entity being edited. */
-// function fillExistingData(entity, id) {
-//     addDisplayNameToForm(entity, id);
-//     fillEntityData(entity, id); 
-//     if (ifAllRequiredFieldsFilled('top')) { enableSubmitBttn('#top-submit'); }
-// }
-// function addDisplayNameToForm(ent, id) {
-//     if (ent === 'interaction') { return; }
-//     const prnt = getParentEntity(ent);
-//     const entity = prnt || ent;
-//     const rcrd = getRcrd(entity, id);                                           
-//     $('#top-hdr')[0].innerText += ': ' + rcrd.displayName; 
-//     $('#det-cnt-cntnr span')[0].innerText = 'This ' + ent + ' is referenced by:';
-// }
-// /** Note: Source types will get their record data at fillSrcData. */
-// function fillEntityData(ent, id) {  
-//     const hndlrs = { 'author': fillSrcData, 'citation': fillSrcData,
-//         'location': fillLocData, 'publication': fillSrcData, 
-//         'publisher': fillSrcData, 'taxon': fillTaxonData, 
-//         'interaction': fillIntData };
-//     const rcrd = getRcrd(ent, id);                                              console.log("   --fillEntityData [%s] [%s] = %O", ent, id, rcrd);
-//     hndlrs[ent](ent, id, rcrd);
-// }
-// function fillIntData(entity, id, rcrd) {  
-//     const fields = {
-//         'InteractionType': 'select', 'Location': 'select', 'Note': 'textArea', 
-//         'Object': 'taxon', 'Source': 'source', 'Subject': 'taxon', 
-//         'InteractionTags': 'tags' };
-//     fillFields(rcrd, fields, true);
-// }
-// function fillLocData(entity, id, rcrd) {
-//     const fields = getCoreFieldDefs(entity);  
-//     handleLatLongFields();
-//     fillFields(rcrd, fields);
-//     addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
-//     fP.editing.detail = rcrd.geoJsonId || null;
-//     if (rcrd.geoJsonId) { storeLocGeoJson(rcrd.geoJsonId); }
-//     /* Sets values without triggering each field's change method. */
-//     function handleLatLongFields() {
-//         delete fields.Latitude;
-//         delete fields.Longitude;
-//         delete fields.Country;
-//         $('#Latitude_row input').val(rcrd.latitude);
-//         $('#Longitude_row input').val(rcrd.longitude);
-//         _cmbx.setSelVal('#Country-sel', rcrd.country.id, 'silent');
-//     }
-//     function storeLocGeoJson(id) {                                              
-//         fP.forms.top.geoJson = _u.getData('geoJson').then(data => data[id]);
-//     }
-// } /* End fillLocData */
-// function fillTaxonData(entity, id, rcrd) {                                      //console.log('fillTaxonData. rcrd = %O', rcrd)
-//     var refs = { 
-//         'int': getTtlIntCnt('taxon', rcrd, 'objectRoles') || 
-//             getTtlIntCnt('taxon', rcrd, 'subjectRoles')
-//     };
-//     getTaxonChildRefs(rcrd);  
-//     addDataToCntDetailPanel(refs);
-//     removeEmptyDetailPanelElems();
-
-//     function getTaxonChildRefs(txn) {
-//         txn.children.forEach(function(child) { addChildRefData(child); });
-//     }
-//     function addChildRefData(id) {
-//         var lvlKeys = {'Order':'ord','Family':'fam','Genus':'gen','Species':'spc'};
-//         var child = fP.records.taxon[id];              
-//         var lvlK = lvlKeys[child.level.displayName];       
-//         if (!refs[lvlK]) { refs[lvlK] = 0; }
-//         refs[lvlK] += 1;
-//         getTaxonChildRefs(child);
-//     }
-// } /* End fillTaxonData */
-// function removeEmptyDetailPanelElems() {  
-//     var singular = { 'Orders': 'Order', 'Families': 'Family', 'Genera': 'Genus',
-//         'Species': 'Species', 'Interactions': 'Interaction' };                                       
-//     $.each($('[id$="-det"] div'), function(i, elem) {
-//         if (elem.innerText == 0) {  elem.parentElement.remove(); }
-//         if (elem.innerText == 1) {  elem.nextSibling.innerText = singular[elem.nextSibling.innerText]; }
-//     });
-// }
-// /** Fills all data for the source-type entity.  */
-// function fillSrcData(entity, id, rcrd) { 
-//     var src = getRcrd("source", id);                                            
-//     var detail = getRcrd(entity, src[entity]);                                  //console.log("fillSrcData [%s] src = %O, [%s] = %O", id, src, entity, detail);
-//     var fields = getSourceFields(entity);                                       //console.log('fields = %O', fields)
-//     setSrcType()
-//     .then(() => {
-//         setSrcData();
-//         setDetailData();
-//     });
-//     function setSrcType() {
-//         if (['citation', 'publication'].indexOf(entity) == -1) { return Promise.resolve(); }
-//         const typeProp = entity == 'citation' ? 'citationType' : 'publicationType';
-//         const typeId = detail[typeProp].id;
-//         const typeName = detail[typeProp].displayName;
-//         const typeElem = $('#'+_u.ucfirst(entity)+'Type-sel')[0];
-//         return loadSrcTypeFields(entity, typeId, typeElem, typeName);
-//     }
-//     function setSrcData() {
-//         fillFields(src, fields.core);
-//         fillSrcDataInDetailPanel(entity, src);            
-//     }
-//     function setDetailData() {
-//         fillFields(detail, fields.detail);
-//         setAdditionalFields(entity, src, detail);
-//         fP.editing.detail = detail.id;
-//     }
-// } /* End fillSrcData */
-// function getSourceFields(entity) {
-//     return { core: getCoreFieldDefs(entity), detail: getFormConfg(entity).add };
-// }
-// /** Adds a count of all refences to the entity to the form's detail-panel. */
-// function fillSrcDataInDetailPanel(entity, srcRcrd) {                            //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
-//     var refObj = { 'int': getSrcIntCnt(entity, srcRcrd) };
-//     addAddtionalRefs();                                                         //console.log('refObj = %O', refObj);
-//     addDataToCntDetailPanel(refObj);
-
-//     function addAddtionalRefs() {
-//         if (entity === 'citation') { return; }
-//         const ref = entity === 'publisher' ? 'pub' : 'cit';
-//         refObj[ref] = srcRcrd.children.length || srcRcrd.contributions.length;
-//     }
-// } /* End fillSrcDataInDetailPanel */
-// function getSrcIntCnt(entity, rcrd) {                                           //console.log('getSrcIntCnt. rcrd = %O', rcrd);
-//     return entity === 'citation' ? 
-//         rcrd.interactions.length : getTtlIntCnt('source', rcrd, 'interactions'); 
-// }
-// /** ----------- Shared ---------------------------- */
-// function getTtlIntCnt(entity, rcrd, intProp) {                                  //console.log('getTtlIntCnt. [%s] rcrd = %O', intProp, rcrd);
-//     var ints = rcrd[intProp].length;
-//     if (rcrd.children.length) { ints += getChildIntCnt(entity, rcrd.children, intProp);}
-//     if (rcrd.contributions) { ints += getChildIntCnt(entity, rcrd.contributions, intProp);}        
-//     return ints;
-// }
-// function getChildIntCnt(entity, children, intProp) {
-//     var ints = 0;
-//     children.forEach(function(child){ 
-//         child = fP.records[entity][child];
-//         ints += getTtlIntCnt(entity, child, intProp); 
-//     });
-//     return ints;
-// }
-// function fillFields(rcrd, fields, shwAll) {                                     //console.log('rcrd = %O, fields = %O', rcrd, fields);
-//     const fieldHndlrs = {
-//         'text': setText, 'textArea': setTextArea, 'select': setSelect, 
-//         'fullTextArea': setTextArea, 'multiSelect': addToFormVals,
-//         'tags': setTagField, 'cntry': setCntry, 'source': addSource, 
-//         'taxon': addTaxon
-//     };
-//     for (let field in fields) {                                                 //console.log('------- Setting field [%s]', field);
-//         if (!fieldIsDisplayed(field, 'top') && !shwAll) { continue; }           //console.log("field [%s] type = [%s] fields = [%O] fieldHndlr = %O", field, fields[field], fields, fieldHndlrs[fields[field]]);
-//         addDataToField(field, fieldHndlrs[fields[field]], rcrd);
-//     }  
-// }
-// function addDataToField(field, fieldHndlr, rcrd) {                              //console.log("addDataToField [%s] [%0] rcrd = %O", field, fieldHndlr, rcrd);
-//     var elemId = field.split(' ').join('');
-//     var prop = _u.lcfirst(elemId);
-//     fieldHndlr(elemId, prop, rcrd);
-// }
-// /** Adds multiSelect values to the form's val object. */
-// function addToFormVals(fieldId, prop, rcrd) {                                   //console.log("addToFormVals [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-//     const vals = fP.forms.top.fieldConfg.vals;
-//     vals[fieldId] = {type: 'multiSelect'};
-//     vals[fieldId].val = rcrd[prop]; 
-//     if (!$('#'+_u.ucfirst(prop)+'-sel-cntnr').length) { return; }
-//     selectExistingAuthors(_u.ucfirst(prop), rcrd[prop], 'top');
-// }
-// function setText(fieldId, prop, rcrd) {                                         //console.log("setTextField [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-//     $('#'+fieldId+'_row input').val(rcrd[prop]).change();   
-// }
-// function setTextArea(fieldId, prop, rcrd) {
-//     $('#'+fieldId+'_row textarea').val(rcrd[prop]).change();   
-// }
-// function setSelect(fieldId, prop, rcrd) {                                       //console.log("setSelect [%s] [%s] rcrd = %O", fieldId, prop, rcrd);
-//     var id = rcrd[prop] ? rcrd[prop].id ? rcrd[prop].id : rcrd[prop] : null;
-//     _cmbx.setSelVal('#'+fieldId+'-sel', id);
-// }
-// function setTagField(fieldId, prop, rcrd) {                                     //console.log("setTagField. rcrd = %O", rcrd)
-//     var tags = rcrd[prop] || rcrd.tags;
-//     tags.forEach(tag => _cmbx.setSelVal('#'+fieldId+'-sel', tag.id));
-// }    
-// function setCntry(fieldId, prop, rcrd) {
-//     _cmbx.setSelVal('#Country-sel', rcrd.country.id);
-// }
-// function setAdditionalFields(entity, srcRcrd, detail) {
-//     setTitleField(entity, srcRcrd);
-//     setPublisherField(entity, srcRcrd);
-//     setCitationEdgeCaseFields(entity, detail);
-// }
-// function setTitleField(entity, srcRcrd) {                                       //console.log("setTitleField [%s] rcrd = %O", entity, srcRcrd)
-//     if (["publication", "citation"].indexOf(entity) === -1) { return; }
-//     const name = entity === 'publication' ? 
-//         srcRcrd.displayName : getCitTitle(srcRcrd.citation);
-//     $('#Title_row input[type="text"]').val(name).change();
-
-//     function getCitTitle(citId) {
-//         return getRcrd('citation', citId).displayName;
-//     }
-// } /* End setTitleField */
-// function setPublisherField(entity, srcRcrd) { 
-//     if (entity !== 'publication' || !fieldIsDisplayed('Publisher', 'top')) { return; }    
-//     _cmbx.setSelVal('#Publisher-sel', srcRcrd.parent);
-// }
-// function setCitationEdgeCaseFields(entity, citRcrd) {
-//     if (entity !== 'citation') { return; }
-//     $('#CitationText_row textarea').val(citRcrd.fullText);
-//     $('#Issue_row input[type="text"]').val(citRcrd.publicationIssue);
-//     $('#Pages_row input[type="text"]').val(citRcrd.publicationPages);
-//     $('#Volume_row input[type="text"]').val(citRcrd.publicationVolume);
-// }
-// function addTaxon(fieldId, prop, rcrd) {                                        //console.log("addTaxon [%s] [%O] rcrd = %O", fieldId, prop, rcrd);
-//     var selApi = $('#'+ fieldId + '-sel')[0].selectize;
-//     var taxon = fP.records.taxon[rcrd[prop]];                          
-//     selApi.addOption({ value: taxon.id, text: getTaxonDisplayName(taxon) });
-//     selApi.addItem(taxon.id);
-// }
-// function addSource(fieldId, prop, rcrd) {
-//     var citSrc = fP.records.source[rcrd.source];  
-//     _cmbx.setSelVal('#Publication-sel', citSrc.parent);
-//     _cmbx.setSelVal('#CitationTitle-sel', rcrd.source);
-// }
-// /* ---- On Form Fill Complete --- */
-// function onEditFormLoadComplete(id, entity) {                                       //console.log('onEditFormLoadComplete. entity = ', entity);
-//     const map = { 
-//         'citation': setSrcEditRowStyle, 'location': finishLocEditForm,
-//         'publication': setSrcEditRowStyle };
-//     if (!map[entity]) { return; }
-//     map[entity](id);
-// }
-// function setSrcEditRowStyle() {
-//     form_ui.setCoreRowStyles('#form-main', '.top-row');
-// }
-// function finishLocEditForm(id) {
-//     addMapToLocForm('#location_Rows', 'edit');
-//     finishLocFormAfterMapLoad(id);
-// }
-// function finishLocFormAfterMapLoad(id) {
-//     if ($('#loc-map').data('loaded')) {
-//         form_ui.setCoreRowStyles('#form-main', '.top-row');
-//         db_map.addVolatileMapPin(id, 'edit', _cmbx.getSelVal('#Country-sel'));
-//     } else {
-//         window.setTimeout(() => finishLocFormAfterMapLoad(id), 500);
-//     }
-// }
 /*--------------------------- Create Form --------------------------------------------------------*/
 /**
  * Fills the global fP obj with the basic form params @initFormParams. 
- * Init the create interaction form and append into the popup window @buildAndShowForm. 
+ * Inits the interaction form with all fields displayed and the first field, 
+ * publication, in focus. From within many of the fields the user can create 
+ * new entities of the field-type by selecting the 'add...' option from the 
+ * field's combobox and completing the appended sub-form.
  */
 export function initNewDataForm() {                                             console.log('   //Building New Interaction Form');
     initFormParams('create', 'interaction')
@@ -557,45 +242,7 @@ export function initNewDataForm() {                                             
     .then(form_ui.finishCreateFormBuild)
     .catch(err => _u.alertErr(err));
 }
-/**
- * Inits the interaction form with all fields displayed and the first field, 
- * publication, in focus. From within many of the fields the user can create 
- * new entities of the field-type by selecting the 'add...' option from the 
- * field's combobox and completing the appended sub-form.
- */
-// function buildAndShowCreateForm(fields) {                                       console.log('       --buildAndShowCreateForm');
-    // const form = buildCreateFormElems(fields);   
-    // form_ui.showFormPopup('New', 'Interaction', null, fP);
-    // $('#form-main').append(form);   
-    // finishIntFormBuild();
-    // finishCreateFormBuild();
-// }
-// function buildCreateFormElems(fields) {
-//     const form = buildFormElem();
-//     $(form).append([div, buildFormBttns('interaction', 'top', 'create')]);
-//     return form;
-// }
 /*------------------- Interaction Form Methods (Shared) ----------------------*/ 
-/**
- * Inits the selectize comboboxes, adds/modifies event listeners, and adds 
- * required field elems to the form's config object.  
- */
-// function finishIntFormBuild() {                                                 console.log('           --finishIntFormBuild');
-//     _cmbx.initFormCombos('interaction', 'top');
-//     ['Subject', 'Object'].forEach(addTaxonFocusListener);
-//     $('#top-cancel').unbind('click').click(form_ui.exitFormPopup);
-//     $('#Note_row label')[0].innerText += 's';
-//     $('#Country-Region_row label')[0].innerText = 'Country/Region';
-//     addLocationSelectionMethodsNote();
-//     addReqElemsToConfg();    
-//     $('.all-fields-cntnr').hide();
-//     _cmbx.focusCombobox('#Publication-sel', true);
-// }
-// /** Displays the [Role] Taxon select form when the field gains focus. */ 
-// function addTaxonFocusListener(role) {
-//     const func = { 'Subject': initSubjectSelect, 'Object': initObjectSelect };
-//     $('#form-main').on('focus', '#'+role+'-sel + div div.selectize-input', func[role]);
-// }
 function addReqElemsToConfg() {
     const reqFields = ["Publication", "CitationTitle", "Subject", "Object", 
         "InteractionType"];
@@ -1080,7 +727,7 @@ function addPunc(data) {
     return /[.!?,;:]$/.test(data) ? data : data+'.';
 }
 /** When the Citation sub-form is exited, the Publication combo is reenabled. */
-function enablePubField() {
+export function enablePubField() {
     _cmbx.enableCombobox('#Publication-sel');
     fillCitationField($('#Publication-sel').val());
 }
@@ -1219,7 +866,7 @@ export function getSrcTypeRows(entity, typeId, fLvl, type) {                    
 function setSourceTypeConfg(entity, id, fLvl, tName) {
     const typeElemId = '#'+_u.ucfirst(entity)+'Type-sel'; 
     const type = tName || _cmbx.getSelTxt(typeElemId);
-    fP.forms[fLvl].typeConfg = getFormConfg(entity).types[type];                //console.log('srcTypeConfg for [%s] = [%O]', type, fP.forms[fLvl].typeConfg);             
+    fP.forms[fLvl].typeConfg = _fCnfg.getFormConfg(entity).types[type];                //console.log('srcTypeConfg for [%s] = [%O]', type, fP.forms[fLvl].typeConfg);             
 }
 /**
  * Changes form-field labels to more specific and user-friendly labels for 
@@ -1420,7 +1067,7 @@ function onLocFormLoadComplete() {
     scrollToLocFormWindow();
 }
 /** When the Location sub-form is exited, the Country/Region combo is reenabled. */
-function enableCountryRegionField() {  
+export function enableCountryRegionField() {  
     _cmbx.enableCombobox('#Country-Region-sel');
     $('#loc-note').fadeTo(400, 1);
 }
@@ -1666,11 +1313,6 @@ function onObjectSelection(val) {                                               
     enableTaxonCombos();
     if (!fP.editing) { $('#Object_pin').focus(); }
 }
-/** When the taxon-select forms are exited, the top-combos are reenabled. */
-function enableTaxonCombos() { 
-    _cmbx.enableCombobox('#Subject-sel');
-    _cmbx.enableCombobox('#Object-sel');
-}
 /**
  * Customizes the taxon-select form ui. Either re-sets the existing taxon selection
  * or brings the first level-combo into focus. Clears the [role]'s' combobox. 
@@ -1730,9 +1372,6 @@ function submitSpecies(fLvl) {                                                  
 }
 export function enableTaxonCombos(disable) {
     const enable = disable == undefined ? true : false;
-    $.each($('#sub-form select'), (i, sel) => _cmbx.enableCombobox('#'+sel.id, enable));
-}
-function enableTxnCombos(enable) {  
     $.each($('#sub-form select'), (i, sel) => _cmbx.enableCombobox('#'+sel.id, enable));
 }
 /**
@@ -2004,271 +1643,6 @@ function repopulateLevelCombo(opts, lvlName, lvl, selected) {                   
         _cmbx.setSelVal('#'+lvlName+'-sel', selected[lvl], 'silent'); 
     } 
 }
-// /*-------- Edit Taxon Methods ----------*/
-// /**
-//  * Returns the elements of the edit-taxon form. 
-//  * <div>Parent Taxon: [Level][Display-name]</> <bttnInput>"Edit Parent"</>
-//  * <select>[Taxon-level]</>    <input type="text">[Taxon Display-name]</>
-//  *     <button>Update Taxon</> <button>Cancel</>
-//  */
-// export function getTaxonEditFields(entity, id) {
-//     const taxon = fP.records.taxon[id];  
-//     const realm = taxon.realm.displayName;
-//     const role = realm === 'Bat' ? 'Subject' : 'Object';
-//     return initTaxonParams(role, realm, id)
-//         .then(buildTaxonEditFields.bind(null, taxon));
-// }
-// function finishTaxonEditFormBuild() {
-//     $('#top-cancel').off('click').click(form_ui.exitFormPopup);
-//     $('#top-submit').off('click').click(submitTaxonEdit);
-//     initTaxonEditCombo('txn-lvl', checkForTaxonLvlErrs); 
-//     $('.all-fields-cntnr').hide();
-// }
-// function buildTaxonEditFields(taxon) {
-//     const prntElems = getPrntTaxonElems(taxon);
-//     const txnElems = getEditTaxonFields(taxon)
-//     return prntElems.concat(txnElems);
-// }
-// function getPrntTaxonElems(taxon) {                                             //console.log("getPrntTaxonElems for %O", taxon);
-//     const prnt = fP.records.taxon[taxon.parent]; 
-//     const elems = [ buildNameElem(prnt), buildEditPrntBttn(prnt) ];
-//     return [ buildTaxonEditFormRow('Parent', elems, 'top') ];
-// }
-// function buildNameElem(prnt) {
-//     var div = _u.buildElem('div', { id: 'txn-prnt' });
-//     setTaxonPrntNameElem(prnt, div);
-//     $(div).css({'padding-top': '4px'});
-//     return div;
-// }
-// function setTaxonPrntNameElem(prnt, elem, pText) {
-//     var div = elem || $('#txn-prnt')[0];
-//     var text = pText || getTaxonDisplayName(prnt);
-//     div.innerHTML = '<b>Taxon Parent</b>: &nbsp ' + text;
-//     if (prnt) { $(div).data('txn', prnt.id).data('lvl', prnt.level.id); }
-// }
-// function buildEditPrntBttn(prnt) {
-//     var bttn = _u.buildElem('input', { type: 'button', value: 'Change Parent', 
-//         id: 'chng-prnt', class: 'ag-fresh tbl-bttn' });
-//     $(bttn).click(buildParentTaxonEditFields);
-//     return bttn;
-// }
-// function getEditTaxonFields(taxon) {                                            //console.log("getEditTaxonFields for [%s]", taxon.displayName);
-//     const input = _u.buildElem('input', { id: 'txn-name', type: 'text', value: taxon.displayName });
-//     const lvlSel = getlvlSel(taxon, 'top')
-//     return [buildTaxonEditFormRow('Taxon', [lvlSel, input], 'top')];
-// }
-// function getlvlSel(taxon, fLvl) {
-//     const opts = getTaxonLvlOpts(taxon); 
-//     const sel = _u.buildSelectElem(opts, { id: 'txn-lvl' });
-//     $(sel).data({ 'txn': taxon.id, 'lvl': taxon.level.id });
-//     return sel;
-// }
-// /** Returns an array of options for the levels in the taxon's realm. */
-// function getTaxonLvlOpts(taxon) {
-//     const opts = {};
-//     const realmLvls = fP.forms.taxonPs.curRealmLvls.map(lvl => lvl);  
-//     realmLvls.shift();  //Removes the realm-level
-//     buildLvlOptsObj();
-//     return _u.buildOptsObj(opts, Object.keys(opts));
-
-//     function buildLvlOptsObj() {
-//         const lvls = _u.snapshot(fP.forms.taxonPs.lvls);                            //console.log('realmLvls = %O, allLvls = %O', _u.snapshot(realmLvls), _u.snapshot(lvls));
-//         for (let i = lvls.length - 1; i >= 0; i--) {
-//             if (realmLvls.indexOf(lvls[i]) != -1) { opts[lvls[i]] = i+1; }
-//         }
-//     }
-// }
-// /**
-//  * Returns a level select with all levels in the taxon-parent's realm and a 
-//  * combobox with all taxa at the parent's level and the current parent selected.
-//  * Changing the level select repopulates the taxa with those at the new level.
-//  * Entering a taxon that does not already exists will open the 'create' form.
-//  */
-// function buildParentTaxonEditFields() {   
-//     buildParentTaxonEditElems($('#txn-prnt').data('txn'))        
-//     .then(appendPrntFormElems)
-//     .then(finishPrntFormBuild);
-// }
-// function appendPrntFormElems(elems) {
-//     const cntnr = _u.buildElem("div", { class: "sml-sub-form flex-row pTaxon", id: "sub-form" });
-//     $(cntnr).append(elems);
-//     $('#Parent_row').after(cntnr);
-// }
-// function buildParentTaxonEditElems(prntId) {
-//     var prnt = fP.records.taxon[prntId];
-//     var hdr = [buildEditParentHdr()];
-//     var bttns = [buildFormBttns("parent", "sub", "edit", true, fP)];
-//     return getParentEditFields(prnt).then(fields => hdr.concat(fields, bttns));
-// }
-// function buildEditParentHdr() {
-//     var hdr = _u.buildElem("h3", { text: "Select New Taxon Parent", id:'sub-hdr' });
-//     return hdr;
-// }
-// function getParentEditFields(prnt) {  
-//     const realm = _u.lcfirst(prnt.realm.displayName);      
-//     const realmSelRow = getRealmLvlRow(prnt);
-//     return buildFormRows(realm, {}, 'sub', null, 'edit')
-//         .then(modifyAndReturnPrntRows);
-    
-//     function modifyAndReturnPrntRows(rows) {
-//         $(rows).css({ 'padding-left': '.7em' });
-//         fP.forms.taxonPs.prntSubFormLvl = 'sub2';
-//         return [realmSelRow, rows];
-//     }
-// }
-// function getRealmLvlRow(taxon) { 
-//     const realmLvl = fP.forms.taxonPs.curRealmLvls[0];
-//     const lbl = _u.buildElem('label', { text: realmLvl });
-//     const taxonym = _u.buildElem('span', { text: taxon.realm.displayName });
-//     $(taxonym).css({ 'padding-top': '.55em' });
-//     return buildTaxonEditFormRow(realmLvl, [lbl, taxonym], 'sub');
-// }
-// /**
-//  * Initializes the edit-parent form's comboboxes. Selects the current parent.
-//  * Hides the species row. Adds styles and modifies event listeners. 
-//  */
-// function finishPrntFormBuild() {                                                //console.log("fP = %O", fP);    
-//     var realmLvl = fP.forms.taxonPs.curRealmLvls[0];
-//     _cmbx.initFormCombos(null, 'sub', fP.forms.sub.selElems);
-//     selectParentTaxon($('#txn-prnt').data('txn'), realmLvl);
-//     $('#Species_row').hide();
-//     $('#'+realmLvl+'_row .field-row')[0].className += ' realm-row';
-//     $('#sub-submit').attr('disabled', false).css('opacity', '1');
-//     $('#sub-submit').off('click').click(closePrntEdit);
-//     $('#sub-cancel').off('click').click(cancelPrntEdit);
-//     setTaxonPrntNameElem(null, null, " ");
-//     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
-//     disableSubmitBttn('#top-submit');
-//     $('#sub-submit')[0].value = 'Select Taxon';
-// }
-// function selectParentTaxon(prntId, realmLvl) {                                  //console.log('selectParentTaxon. prntId [%s], realmLvl [%s]', prntId, realmLvl);                 
-//     var parentLvl = fP.records.taxon[prntId].level.displayName;  
-//     if (parentLvl == realmLvl) { return clearAllOtherLvls(); }
-//     clearAllOtherLvls();
-//     _cmbx.setSelVal('#'+parentLvl+'-sel', prntId);
-// }
-// function clearAllOtherLvls() {
-//     $.each($('#sub-form select[id$="-sel"]'), function(i, elem){ 
-//         $(elem)[0].selectize.clear('silent');
-//     });
-// }
-// function closePrntEdit() {                                                  
-//     var prnt =  getSelectedTaxon() || fP.forms.taxonPs.realmTaxon;              //console.log("closePrntEdit called. prnt = %O", prnt);
-//     exitPrntEdit(prnt);
-// }
-// function cancelPrntEdit() {                                                     //console.log("cancelPrntEdit called.");
-//     var prnt = fP.records.taxon[$('#txn-prnt').data('txn')];
-//     exitPrntEdit(prnt);
-// }
-// function exitPrntEdit(prnt) {
-//     if (checkForParentLvlErrs(prnt.level.id)) { return; }
-//     resetAfterEditParentClose(prnt);
-// }
-// function resetAfterEditParentClose(prnt) {
-//     clearLvlErrs('#Parent_errs', 'sub');
-//     fP.forms.taxonPs.prntSubFormLvl = null;
-//     $('#sub-form').remove();
-//     $('#chng-prnt').attr({'disabled': false}).css({'opacity': '1'});
-//     setTaxonPrntNameElem(prnt);
-//     enableSubmitBttn('#top-submit');
-// }
-// /**
-//  * Ensures that the new taxon-level is higher than its children, and that a 
-//  * species taxon being edited has a genus parent selected.
-//  */
-// function checkForTaxonLvlErrs(txnLvl) {  
-//     var prntLvl = $('#txn-prnt').data('lvl');                                   //console.log("checkForTaxonLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
-//     var errObj = {
-//         'isGenusPrnt': isGenusPrnt(),
-//         'needsHigherLvl': lvlIsLowerThanKidLvls(txnLvl),
-//     };
-//     for (var tag in errObj) {  
-//         if (errObj[tag]) { return sendTxnErrRprt(tag, 'Taxon'); }
-//     }
-//     if ($('.top-active-errs').length) { clrNeedsHigherLvl(null, null, null, txnLvl); }
-//     checkForParentLvlErrs(prntLvl);
-// }
-// /** Returns true if the taxon's original level is Genus and it has children. */
-// function isGenusPrnt() {
-//     var orgTxnLvl = $('#txn-lvl').data('lvl');
-//     var txnId = $('#txn-lvl').data('txn');
-//     return orgTxnLvl == 6 && getHighestChildLvl(txnId) < 8;
-// }
-// /** 
-//  * Returns true if the passed level is lower or equal to the highest level of 
-//  * the taxon-being-edited's children.  
-//  */
-// function lvlIsLowerThanKidLvls(txnLvl) {                                    
-//     var highLvl = getHighestChildLvl($('#txn-lvl').data('txn'));                //console.log('lvlIsLowerThanKidLvls. txnLvl = %s, childHigh = %s', txnLvl, highLvl)                  
-//     return txnLvl >= highLvl;
-// }
-// function getHighestChildLvl(taxonId) {
-//     var high = 8;
-//     fP.records.taxon[taxonId].children.forEach(checkChildLvl);
-//     return high;
-
-//     function checkChildLvl(id) {
-//         var child = fP.records.taxon[id]
-//         if (child.level.id < high) { high = child.level.id; }
-//     }
-// } /* End getHighestChildLvl */
-// /**
-//  * Ensures that the parent taxon has a higher taxon-level and that a species 
-//  * taxon being edited has a genus parent selected.
-//  */
-// function checkForParentLvlErrs(prnt) {
-//     var prntLvl = prnt || $('#txn-prnt').data('lvl'); 
-//     var txnLvl = $('#txn-lvl').val();                                           //console.log("checkForParentLvlErrs. taxon = %s. parent = %s", txnLvl, prntLvl);
-//     var errs = [
-//         { 'needsHigherLvlPrnt': txnLvl <= prntLvl },
-//         { 'needsGenusPrnt': txnLvl == 7 && prntLvl != 6 }];
-//     var hasErrs = !errs.every(checkForErr);                                     //console.log('hasErrs? ', hasErrs)
-//     if (!hasErrs && $('.top-active-errs').length) {
-//         clearLvlErrs('#Parent_errs', 'sub'); 
-//     }
-//     return hasErrs;
-
-//     function checkForErr(errObj) {                                         
-//         for (var err in errObj) { 
-//             return errObj[err] ? sendTxnErrRprt(err, 'Parent') : true;
-//         }                                                                   
-//     }
-// } /* End checkForParentLvlErrs */
-// function sendTxnErrRprt(errTag, field) {                                              
-//     _errs.reportFormFieldErr(field, errTag, 'top');
-//     disableSubmitBttn('#top-submit');
-//     return false;
-// }
-// function clearLvlErrs(elemId, fLvl) {                                           //console.log('clearLvlErrs.')
-//     clearErrElemAndEnableSubmit($(elemId)[0], fLvl);
-// }
-// /** Inits a taxon select-elem with the selectize library. */
-// function initTaxonEditCombo(selId, chngFunc, createFunc) {                      //console.log("initTaxonEditCombo. selId = ", selId);
-//     var chng = chngFunc || Function.prototype;
-//     var options = { create: false, onChange: chng, placeholder: null }; 
-//     $('#'+selId).selectize(options);
-//     _cmbx.setSelVal('#'+selId, $('#'+selId).data('lvl'), 'silent');
-// }
-// /**
-//  * Each element is built, nested, and returned as a completed row. 
-//  * rowDiv>(errorDiv, fieldDiv>inputElems)
-//  */
-// function buildTaxonEditFormRow(field, inputElems, fLvl) {
-//     var rowDiv = _u.buildElem('div', { class: fLvl + '-row', id: field + '_row'});
-//     var errorDiv = _u.buildElem('div', { id: field+'_errs'}); 
-//     var fieldCntnr = _u.buildElem('div', { class: 'field-row flex-row'});
-//     $(fieldCntnr).append(inputElems);
-//     $(rowDiv).append([errorDiv, fieldCntnr]);
-//     return rowDiv;
-// } 
-// function submitTaxonEdit() {
-//     var vals = {
-//         displayName: $('#Taxon_row > div.field-row.flex-row > input[type="text"]').val(),
-//         level: $('#Taxon_row select').text(),
-//         parentTaxon: $('#txn-prnt').data('txn')
-//     };                                                                          //console.log("taxon vals = %O", vals);
-//     buildFormDataAndSubmit('top', vals);
-// }
 /*-------------- Interaction Detail Fields -------------------------------*/
 function buildIntTypeField() {                                                  console.log('       --buildIntTypeField');
     return _u.getOptsFromStoredData('intTypeNames')
@@ -2574,7 +1948,7 @@ function initSubForm(formEntity, fLvl, formClasses, fVals, selId) {             
  * row elems. Inits the params for the sub-form in the global fP obj.
  */
 export function buildFormRows(entity, fVals, level, pSel, action) {                    //console.log('buildFormRows. args = %O', arguments)
-    const formConfg = getFormConfg(entity);                                 
+    const formConfg = _fCnfg.getFormConfg(entity);                                 
     initFormLevelParamsObj(entity, level, pSel, formConfg, (action || 'create'));        
     return getFormFieldRows(entity, formConfg, fVals, level, false)
         .then(returnFinishedRows.bind(null, entity));
@@ -2585,314 +1959,6 @@ function returnFinishedRows(entity, rows) {
     $(rowCntnr).append(rows);
     return rowCntnr;
 }
-/**
- * Returns a form-config object for the passed entity. 
- * -- Property descriptions:  
- * > add - Additonal fields for a detail-entity. E.g. Citation is a detail-entity
- *   of Source with a unique combination of fields from Source and itself.
- * > required - Required fields for the entity.
- * > suggested - Suggested fields for the entity.
- *   NOTE: The required and suggested fields will be the default shown in form. 
- * > optional - All remaining available fields for the entity.
- * > order - Order to display the fields in both the default and expanded forms. 
- * > exitHandler - optional Obj with handlers for exiting create/edit forms.
- */
-export function getFormConfg(entity) {                                                 //console.log('getFormConfg [%s]', entity);
-    const fieldMap = { 
-        "arthropod": {
-            "add": {},  
-            "required": [],
-            "suggested": ["Class", "Order", "Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family", "Order", "Class"],
-                "opt": false },
-            "exitHandler": { create: enableTaxonCombos }
-        },
-        "author": { 
-            "add": { "FirstName": "text", "MiddleName": "text", 
-                "LastName": "text", "Suffix": "text"}, 
-            "required": ["LastName"], 
-            "suggested": ["FirstName", "MiddleName"],
-            "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
-            "order": {
-                "sug": ["FirstName", "MiddleName", "LastName"],
-                "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
-                    "LinkUrl", "LinkDisplay"]},
-        },
-        "bat": {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Family", "Genus", "Species"],
-                "opt": false }, 
-            //Because there is only one subject realm, the exithandler lives in the subject confg 
-        },
-        'citation': {
-            'add': { 'Title': 'text', 'Volume': 'text', 'Abstract': 'fullTextArea',
-                'Issue': 'text', 'Pages': 'text', 'CitationType': 'select', 
-                'CitationText': 'fullTextArea'},
-            'required': ['Title', 'CitationType'],  
-            'suggested': ['CitationText'], 
-            'optional': ['Abstract'],
-            'order': {
-                'sug': ['CitationText', 'Title', 'CitationType'], 
-                'opt': ['CitationText', 'Abstract', 'Title', 'CitationType']},  
-            'types': {
-                'Article': {                        
-                    'name': 'Article',
-                    'required': ['Authors', 'Year'],
-                    'suggested': ['Issue', 'Pages', 'Volume'],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
-                        'opt': ['Year', 'Pages', 'Volume', 'Issue', 
-                            'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
-                },
-                'Book': {
-                    'name': 'Book',
-                    'required': ['Authors'],
-                    'suggested': ['Volume', 'Pages'],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Volume', 'Pages', 'Authors'],
-                        'opt': ['Volume', 'Doi', 'LinkDisplay', 'LinkUrl', 'Pages', 'Authors']},
-                },
-                'Chapter': {
-                    'name': 'Chapter',
-                    'required': ['Pages', 'Authors'],
-                    'suggested': [],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Pages', 'Authors'],
-                        'opt': ['Pages', 'Doi', 'LinkDisplay', 'LinkUrl', 
-                            'Authors' ]},
-                },
-                "Master's Thesis": {
-                    'name': "Master's Thesis",
-                    'required': [],
-                    'suggested': [],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': [],
-                        'opt': ['LinkDisplay', 'LinkUrl', 'Doi']},
-                },
-                'Museum record': {
-                    'name': 'Museum record',
-                    'required': [],
-                    'suggested': ['Authors', 'Year', 'Pages'],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Year', 'Pages', 'Authors'],
-                        'opt': ['Year', 'Pages', 'LinkDisplay', 'LinkUrl', 
-                            'Doi', 'Authors']},
-                },
-                'Other': {
-                    'name': 'Other',
-                    'required': [],
-                    'suggested': ['Authors', 'Year', 'Issue', 'Pages', 'Volume'],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
-                        'opt': ['Year', 'Pages', 'Volume', 'Issue', 
-                            'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
-                },
-                'Ph.D. Dissertation': {
-                    'name': 'Ph.D. Dissertation',
-                    'required': [],
-                    'suggested': [],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': [],
-                        'opt': ['LinkDisplay', 'LinkUrl', 'Doi']},
-                },
-                'Report': {
-                    'name': 'Report',
-                    'required': [],
-                    'suggested': ['Authors', 'Year', 'Pages'],
-                    'optional': ['Doi', 'LinkDisplay', 'LinkUrl'],
-                    'order': {
-                        'sug': ['Year', 'Pages', 'Volume', 'Issue', 'Authors'],
-                        'opt': ['Year', 'Pages', 'Volume', 'Issue', 
-                            'LinkDisplay', 'LinkUrl', 'Doi', 'Authors']},
-                }
-            },
-            'exitHandler': { create: enablePubField }
-        },    
-        'editor': { 
-            "add": { "FirstName": "text", "MiddleName": "text", 
-                "LastName": "text", "Suffix": "text"}, 
-            "required": ["LastName"], 
-            "suggested": ["FirstName", "MiddleName"],
-            "optional": ["Suffix", "LinkUrl", "LinkDisplay"],
-            "order": {
-                "sug": ["FirstName", "MiddleName", "LastName"],
-                "opt": ["FirstName", "MiddleName", "LastName", "Suffix", 
-                    "LinkUrl", "LinkDisplay"]},
-        },                                  
-        'interaction': {
-            "add": {},  
-            "required": ["InteractionType"],
-            "suggested": ["InteractionTags", "Note"],
-            "optional": [],
-            "order": {
-                "sug": ["InteractionType","InteractionTags", "Note"],
-                "opt": false },
-            "exitHandler": { create: resetInteractionForm }
-        },
-        'location': {
-            'add': {},  
-            'required': ['DisplayName', 'Country'],
-            'suggested': ['Description', 'HabitatType', 'Latitude', 'Longitude',
-                'Elevation', 'ElevationMax'],
-            'optional': [],
-            'order': {
-                'sug': ['Latitude', 'Longitude', 'DisplayName', 'Description', 
-                    'Country', 'HabitatType', 'Elevation', 'ElevationMax' ],
-                'opt': false },
-            'exitHandler': { create: enableCountryRegionField }
-        },
-        'object': {
-            "add": {"Realm": "select"},  
-            "required": [],
-            "suggested": ["Realm"],
-            "optional": [],
-            "order": {
-                "sug": ["Realm"],
-                "opt": false }, 
-        },
-        'plant': {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family"],
-                "opt": false},
-            "exitHandler": { create: enableTaxonCombos }
-        },
-        'publication': {
-            "add": { "Title" : "text", "PublicationType": "select", 
-                "Publisher": "select"},  
-            "required": ["PublicationType", "Title"],
-            "suggested": [],
-            "optional": [],
-            "order": {
-                "sug": ["Title", "PublicationType"],
-                "opt": ["Title", "PublicationType"] },
-            "types": {
-                "Book": {
-                    "name": 'Book',
-                    "required": ["Authors", 'Editors', "Publisher", "Year"],
-                    "suggested": [],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order": {
-                        "sug": ["Year", "Publisher", "Authors", 'Editors'],
-                        "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
-                            "Description", "Publisher", "Authors", 'Editors']},
-                },
-                "Journal": {
-                    "name": 'Journal',
-                    "required": [],
-                    "suggested": [],
-                    "optional": ["Year", "Description", "LinkDisplay", "LinkUrl", 
-                        "Doi", "Publisher", "Authors" ],
-                    "order": {
-                        "sug": [],
-                        "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl",
-                        "Description", "Publisher", "Authors" ]},
-                },
-                "Other": {
-                    "name": 'Other',
-                    "required": ["Authors", 'Year'],
-                    "suggested": ["Publisher"],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order":  {
-                        "sug": ["Year", "Publisher", "Authors"],
-                        "opt": ["Year", "Doi", "LinkDisplay", "LinkUrl", 
-                            "Description", "Publisher", "Authors"]},
-                },
-                "Thesis/Dissertation": {
-                    "name": 'Thesis/Dissertation',
-                    "required": ["Authors", "Publisher", "Year"],
-                    "suggested": [],
-                    "optional": ["Description", "LinkDisplay", "LinkUrl", "Doi"],
-                    "order":  {
-                        "sug": ["Year", "Publisher", "Authors"],
-                        "opt": ["Year", "Description", "LinkDisplay", 
-                            "LinkUrl", "Doi", "Publisher", "Authors"]},
-                },
-            }
-        },
-        'publisher': { 
-            "add": { "City": "text", "Country": "text"}, 
-            "required": ["DisplayName", "City", "Country"],
-            "suggested": [],
-            "optional": ["Description", "LinkUrl", "LinkDisplay"],
-            "order": {
-                "sug": ["DisplayName", "City", "Country"],
-                "opt": ["DisplayName", "City", "Country", "Description", 
-                    "LinkUrl", "LinkDisplay"]},
-        },
-        'subject': {
-            "add": {},  
-            "required": [],
-            "suggested": ["Family", "Genus", "Species"],
-            "optional": [],
-            "order": {
-                "sug": ["Species", "Genus", "Family"],
-                "opt": false },
-            "exitHandler": { create: enableTaxonCombos }
-        },
-        'taxon': {
-            "add": {},  
-            "required": ["DisplayName"],
-            "suggested": [],
-            "optional": [],
-            "order": {
-                "sug": ["DisplayName"],
-                "opt": false },
-            "exitHandler": { create: onTaxonCreateFormExit }
-        },
-    };
-    return fieldMap[entity];
-}
-/**
- * Returns an object of fields and field types for the passed entity.
- * Note: Source's have sub-entities that will return the core source fields.
- */
-export function getCoreFieldDefs(entity) {  
-    const coreEntityMap = {
-        "author": "source",         "citation": "source",
-        "publication": "source",    "publisher": "source",
-        "location": "location",     "subject": "taxonLvls",
-        "object": "taxonLvls",      "plant": "taxonLvls",
-        "arthropod": "taxonLvls",   "taxon": "taxon",
-        "interaction": "interaction","bat": "taxonLvls",          
-        'editor': 'source',
-    };
-    const fields = {
-        "location": { "DisplayName": "text", "Description": "textArea", 
-            "Elevation": "text", "ElevationMax": "text", "Longitude": "text", 
-            "Latitude": "text", "HabitatType": "select", "Country": "select", 
-        }, 
-        "interaction": { "InteractionType": "select", "Note": "fullTextArea", 
-            "InteractionTags": "tags"
-        },
-        "source": { "DisplayName": "text", "Description": "textArea", 
-            "Year": "text", "Doi": "text", "LinkDisplay": "text", 
-            "LinkUrl": "text", "Authors": "multiSelect", "Editors": "multiSelect"
-        },
-        "taxonLvls": {
-            "Class": "select", "Order": "select", "Family": "select", 
-            "Genus": "select", "Species": "select"
-        },
-        "taxon": { "DisplayName": "text" }
-    };
-    return fields[coreEntityMap[entity]];
-}    
 /** -------------------- Form Row Builders ------------------------------ */
 /**
  * Returns rows for the entity form fields. If the form is a source-type, 
@@ -3347,75 +2413,6 @@ function hasOpenSubForm(fLvl) {
     const childFormLvl = getNextFormLevel('child', fLvl);
     return $('#'+childFormLvl+'-form').length > 0;
 }
-// /**
-//  * Returns a container with 'Create [Entity]' and 'Cancel' buttons bound to events
-//  * specific to their form container @getBttnEvents, and a left spacer that 
-//  * pushes the buttons to the bottom right of their form container.
-//  */
-// function buildFormBttns(entity, level, action, noShwFields) { 
-//     const cntnr = _u.buildElem("div", { class: "flex-row bttn-cntnr" });
-//     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
-//     const spacer = $('<div></div>').css("flex-grow", 2);
-//     const submitBttns = buildSubmitAndCancelBttns(level, action, entity);
-//     $(cntnr).append([shwFields, spacer].concat(submitBttns));
-//     return cntnr;
-// }
-// /** 
-//  * Returns the html of a checkbox labeled 'Show all fields' that toggles the 
-//  * form fields displayed between the default fields and all available.
-//  * If there are no additional fields for the form, no checkbox is returned. 
-//  * @return {elem} Checkbox and label that will 'Show all fields'
-//  */
-// function buildAddFieldsCheckbox(entity, level) {  
-//     if (fP.forms[level].confg.order.opt === false) { return; }
-//     const cntnr = _u.buildElem('div', {class: 'all-fields-cntnr'});
-//     const chckBox = _u.buildElem('input', { id: level+'-all-fields', 
-//         type: 'checkbox', value: 'Show all fields' }) 
-//     const lbl = _u.buildElem('label', { for: level+'-all-fields', 
-//         text: 'Show all fields.' }); 
-//     if (fP.forms.expanded[entity]) { chckBox.checked = true; }
-//     $(chckBox).change(toggleShowAllFields.bind(chckBox, _u.lcfirst(entity), level));
-//     _u.addEnterKeypressClick(chckBox);
-//     $(cntnr).append([chckBox, lbl]);
-//     return cntnr;
-// }
-// /** Returns the buttons with the events bound. */
-// function buildSubmitAndCancelBttns(level, action, entity) {
-//     const bttn = { create: "Create", edit: "Update" };
-//     const events = getBttnEvents(entity, level);                                //console.log("events = %O", events);
-//     const submit = buildFormButton(
-//         'submit', level, bttn[action] + " " + _u.ucfirst(entity));
-//     const cancel = buildFormButton('cancel', level, 'Cancel');
-//     $(submit).attr("disabled", true).css("opacity", ".6").click(events.submit);
-//     $(cancel).css("cursor", "pointer").click(events.cancel);
-//     return [submit, cancel];
-// }
-// /** Returns a (submit or cancel) button for the form level. */
-// function buildFormButton(action, level, val) {
-//     return _u.buildElem("input", { id: level +'-'+action, 
-//         class: "ag-fresh tbl-bttn", type: "button", value: val});
-// }
-// /**
-//  * Returns an object with 'submit' and 'cancel' events bound to the passed level's
-//  * form container.  
-//  */
-// function getBttnEvents(entity, level) {                                         //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
-//     return { 
-//         submit: getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-//         cancel: exitForm.bind(null, '#'+level+'-form', level, true) 
-//     };
-// }
-// /**
-//  * Removes the form container with the passed id, clears and enables the combobox,
-//  * and contextually enables to parent form's submit button. Calls the exit 
-//  * handler stored in the form's params object.
-//  */
-// function exitForm(formId, fLvl, focus, data) {                                  //console.log("               --exitForm id = %s, fLvl = %s, exitHandler = %O", formId, fLvl, fP.forms[fLvl].exitHandler);      
-//     $(formId).remove();  
-//     resetFormCombobox(fLvl, focus);
-//     if (fLvl !== 'top') { ifParentFormValidEnableSubmit(fLvl); }
-//     fP.forms[fLvl].exitHandler(data);
-// }
 /** Returns the 'next' form level- either the parent or child. */
 export function getNextFormLevel(next, curLvl) {
     const fLvls = fP.formLevels;
