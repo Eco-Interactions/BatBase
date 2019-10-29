@@ -13,7 +13,7 @@ import * as _cmbx from '../combobox-util.js';
 
 let fP;
 
-export function buildFormBttns(entity, level, action, noShwFields, params) {    console.log('buildFormBttns'); console.trace();
+export function buildFormBttns(entity, level, action, noShwFields, params) {    //console.log('buildFormBttns'); 
     fP = params;   
     const cntnr = _u.buildElem("div", { class: "flex-row bttn-cntnr" });
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
