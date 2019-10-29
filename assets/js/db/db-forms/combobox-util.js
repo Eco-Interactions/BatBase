@@ -70,9 +70,10 @@ export function clearCombobox(selId) {                                          
  * Clears and enables the parent combobox for the exited form. Removes any 
  * placeholder options and, optionally, brings it into focus.
  */
-export function resetFormCombobox(fLvl, focus) {        
-    if (!fP.forms[fLvl].pSelId) { return; }
-    const combobox = $(fP.forms[fLvl].pSelId)[0].selectize;   
+export function resetFormCombobox(fLvl, focus) {      
+    const selId = db_forms.getFormParams().forms[fLvl].pSelId;  
+    if (!selId) { return; }
+    const combobox = $(selId)[0].selectize;   
     combobox.clear();
     combobox.enable();
     combobox.removeOption(''); //Removes the "Creating [entity]..." placeholder.

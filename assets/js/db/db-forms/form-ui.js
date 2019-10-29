@@ -23,6 +23,7 @@ import * as _cmbx from './combobox-util.js';
 import * as db_map from '../db-map/db-map.js';
 import * as db_page from '../db-page.js';
 import * as db_forms from './db-forms.js';
+import { showTodaysUpdates } from '../db-table/db-filters.js';
 import { buildFormBttns } from './form-ui/save-exit-bttns.js';
 
 let fP;
@@ -37,10 +38,10 @@ function showFormPopup(action, entity, id) {
 /** Adds the width to both the popup window and the form element for each entity. */
 function addFormStyleClass(entity, remove) {
     const map = {
-        'interaction': 'lrg-form',  'Publication': 'med-form',
-        'Publisher': 'sml-form',    'Citation': 'med-form',
-        'Author': 'sml-form',       'Location': 'med-form',
-        'Taxon': 'sml-form'
+        'interaction': 'lrg-form',  'publication': 'med-form',
+        'publisher': 'sml-form',    'citation': 'med-form',
+        'author': 'sml-form',       'location': 'med-form',
+        'taxon': 'sml-form'
     };
     $('#form-main, .form-popup').removeClass(['lrg-form', 'med-form', 'sml-form']);
     $('#form-main, .form-popup').addClass(map[entity]);
@@ -98,12 +99,12 @@ function initDetailDiv(ent) {
     return div;
 }
 /** Returns the elems that will display the count of references to the entity. */
-function getSubEntityEditDetailElems(entity, id, cntnr) {                       //console.log("getSubEntityEditDetailElems for [%s]", entity);
+function getSubEntityEditDetailElems(entity, id, cntnr) {                       console.log("getSubEntityEditDetailElems for [%s]", entity);
     var refEnts = {
-        'Author': [ 'cit', 'int' ],     'Citation': [ 'int' ],
-        'Location': [ 'int' ],          'Publication': ['cit', 'int' ],
-        'Taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],   
-        'Publisher': [ 'pub', 'int']  
+        'author': [ 'cit', 'int' ],     'citation': [ 'int' ],
+        'location': [ 'int' ],          'publication': ['cit', 'int' ],
+        'taxon': [ 'ord', 'fam', 'gen', 'spc', 'int' ],   
+        'publisher': [ 'pub', 'int']  
     };
     var div = _u.buildElem('div', { 'id': 'det-cnt-cntnr' });
     $(div).append(_u.buildElem('span'));        

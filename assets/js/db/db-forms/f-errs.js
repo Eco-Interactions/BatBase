@@ -5,6 +5,9 @@
  *     formInitErr              db-forms
  *     formSubmitError          db-forms
  *     openSubFormErr           db-forms
+ *     clearErrElemAndEnableSubmit      edit-forms
+ *     clrNeedsHigherLvl        edit-forms
+ *     clrContribFieldErr       db-forms
  */
 import * as _u from '../util.js';
 import * as db_sync from '../db-sync.js';
@@ -25,7 +28,7 @@ export function formSubmitError(jqXHR, textStatus, errorThrown) {               
     const msg = getFormErrMsg(errTag);
     toggleWaitOverlay(false);
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
-    disableSubmitBttn('#'+fLvl+'-submit');
+    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', false);
 }
 /**
  * Returns an error tag based on the server error text. Reports duplicated 
@@ -202,7 +205,7 @@ function handleNeedsHigherLvl(elem, errTag, fLvl, fieldName) {
     $('#chng-prnt').attr({'disabled': true}).css({'opacity': '.6'});
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
 }
-function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
+export function clrNeedsHigherLvl(elem, fLvl, e, taxonLvl) {    
     var txnLvl = taxonLvl || $('#txn-lvl').data('lvl'); 
     _cmbx.setSelVal('#txn-lvl', $('#txn-lvl').data('lvl'), 'silent');
     $('#txn-lvl').data('lvl', txnLvl);
@@ -245,10 +248,10 @@ function handleEdBlanks(elem, errTag, fLvl, fieldName) {
     setErrElemAndExitBttn(elem, msg, errTag, fLvl);
     setOnFormCloseListenerToClearErr(elem, fLvl);
 }
-function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
+export function clrContribFieldErr(field, fLvl) {                                      //console.log('clrContribFieldErr.')
     const elem = $('#'+field+'_errs')[0];    
     clearErrElemAndEnableSubmit(elem, fLvl);
-    if (ifAllRequiredFieldsFilled(fLvl)) { enableSubmitBttn('#sub-submit'); }
+    if (db_forms.ifAllRequiredFieldsFilled(fLvl)) { db_forms.toggleSubmitBttn('#sub-submit', true); }
 }
 /* ----------- Error-Elem Methods -------------- */
 function setOnFormCloseListenerToClearErr(elem, fLvl) {
@@ -272,7 +275,7 @@ function getFormErrElem(fLvl) {
 function setErrElemAndExitBttn(elem, msg, errTag, fLvl) {                       //console.log('setErrElemAndExitBttn. args = %O', arguments)
     elem.innerHTML = msg;
     $(elem).append(getErrExitBttn(errTag, elem, fLvl));
-    disableSubmitBttn('#'+fLvl+'-submit');
+    db_forms.toggleSubmitBttn('#'+fLvl+'-submit', false);
 }
 function getErrExitBttn(errTag, elem, fLvl) {
     const exitHdnlrs = {
@@ -292,17 +295,18 @@ function getErrExitBttn(errTag, elem, fLvl) {
     return bttn;
 }
 function clrFormLvlErr(elem, fLvl) {
-    const childFormLvl = getNextFormLevel('child', fLvl);
+    const childFormLvl = db_forms.getNextFormLevel('child', fLvl);
     $('#'+fLvl+'_errs').remove();
-    if (!$('#'+childFormLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) {
-        enableSubmitBttn('#'+fLvl+'-submit');
+    if (!$('#'+childFormLvl+'-form').length && db_forms.ifAllRequiredFieldsFilled(fLvl)) {
+        db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
     }
 }
-function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
-    const subLvl = getNextFormLevel('child', fLvl);
+export function clearErrElemAndEnableSubmit(elem, fLvl) {                              //console.log('clearErrElemAndEnableSubmit. [%O] innerHTML = [%s] bool? ', elem, elem.innerHTML, !!elem.innerHTML)
+    const subLvl = db_forms.getNextFormLevel('child', fLvl);
         $(elem).fadeTo(400, 0, clearErrElem);
-    if (!$('#'+subLvl+'-form').length && ifAllRequiredFieldsFilled(fLvl)) { 
-        enableSubmitBttn('#'+fLvl+'-submit'); }
+    if (!$('#'+subLvl+'-form').length && db_forms.ifAllRequiredFieldsFilled(fLvl)) { 
+        db_forms.toggleSubmitBttn('#'+fLvl+'-submit', true);
+    }
 
     function clearErrElem() {                                                   //console.log('fLvl = ', fLvl);
         $(elem).removeClass(fLvl+'-active-errs');
