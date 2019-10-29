@@ -13,7 +13,7 @@ import * as _cmbx from '../combobox-util.js';
 
 let fP;
 
-export function buildFormBttns(entity, level, action, noShwFields, params) { 
+export function buildFormBttns(entity, level, action, noShwFields, params) {    console.log('buildFormBttns'); console.trace();
     fP = params;   
     const cntnr = _u.buildElem("div", { class: "flex-row bttn-cntnr" });
     const shwFields = noShwFields ? null : buildAddFieldsCheckbox(entity, level);
@@ -36,13 +36,13 @@ function buildAddFieldsCheckbox(entity, level) {                                
     const lbl = _u.buildElem('label', { for: level+'-all-fields', 
         text: 'Show all fields.' }); 
     if (fP.forms.expanded[entity]) { chckBox.checked = true; }
-    $(chckBox).change(toggleShowAllFields.bind(chckBox, _u.lcfirst(entity), level));
+    $(chckBox).change(db_forms.toggleShowAllFields.bind(chckBox, _u.lcfirst(entity), level));
     _u.addEnterKeypressClick(chckBox);
     $(cntnr).append([chckBox, lbl]);
     return cntnr;
 }
 /** Returns the buttons with the events bound. */
-function buildSubmitAndCancelBttns(level, action, entity) {
+function buildSubmitAndCancelBttns(level, action, entity) { console.log('level = [%s], fP = %O', level, fP);
     const bttn = { create: "Create", edit: "Update" };
     const events = getBttnEvents(entity, level);                                //console.log("events = %O", events);
     const submit = buildFormButton(
@@ -62,9 +62,10 @@ function buildFormButton(action, level, val) {
  * form container.  
  */
 function getBttnEvents(entity, level) {                                         //console.log("getBttnEvents for [%s] @ [%s]", entity, level);
+    const cnclFunc = fP.forms[level] ? fP.forms[level].exitHandler : Function.prototype;
     return { 
         submit: db_forms.getFormValuesAndSubmit.bind(null, '#'+level+'-form', level, entity), 
-        cancel: exitForm.bind(null, '#'+level+'-form', level, true, fP.forms[level].exitHandler) 
+        cancel: exitForm.bind(null, '#'+level+'-form', level, true, cnclFunc) 
     };
 }
 /**

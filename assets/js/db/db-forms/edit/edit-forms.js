@@ -11,8 +11,6 @@ import * as db_forms from '../db-forms.js';
 import * as form_ui from '../form-ui.js';
 import { buildFormBttns } from '../form-ui/save-exit-bttns.js';
 import * as db_map from '../../db-map/db-map.js';
-import * as _fCnfg from '../f-confg.js';
-
 
 let fP;
 
@@ -63,7 +61,7 @@ function getSrcTypeFields(entity, id) {
 }
 /** Returns the passed entity's form fields. */
 function buildEditFormFields(entity, id) {
-    const formConfg = _fCnfg.getFormConfg(entity);
+    const formConfg = db_forms.getFormConfg(entity);
     return db_forms.getFormFieldRows(entity, formConfg, {}, 'top', false);
 }
 function finishEditFormBuild(entity) {
@@ -121,7 +119,7 @@ function fillIntData(entity, id, rcrd) {
     fillFields(rcrd, fields, true);
 }
 function fillLocData(entity, id, rcrd) {
-    const fields = _fCnfg.getCoreFieldDefs(entity);  
+    const fields = db_forms.getCoreFieldDefs(entity);  
     handleLatLongFields();
     fillFields(rcrd, fields);
     db_forms.addDataToCntDetailPanel({ 'int': rcrd.interactions.length });
@@ -198,7 +196,7 @@ function fillSrcData(entity, id, rcrd) {
     }
 } /* End fillSrcData */
 function getSourceFields(entity) {
-    return { core: _fCnfg.getCoreFieldDefs(entity), detail: _fCnfg.getFormConfg(entity).add };
+    return { core: db_forms.getCoreFieldDefs(entity), detail: db_forms.getFormConfg(entity).add };
 }
 /** Adds a count of all refences to the entity to the form's detail-panel. */
 function fillSrcDataInDetailPanel(entity, srcRcrd) {                            //console.log('fillSrcDataInDetailPanel. [%s]. srcRcrd = %O', entity, srcRcrd);
