@@ -37,6 +37,7 @@ const app = {
 };
 /* ============================= DATABASE SEARCH PAGE INIT ========================================================== */
 export function init() {
+    showPopUpMsg('Loading...');
     addDomEventListeners();
     authDependentInit();
 }
@@ -84,6 +85,7 @@ function enableEditorFeatures() {                                               
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
+    $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = `#filter, button[name="csv"], button[name="int-set"], 
         #new-data, #rvw-data`;
@@ -92,11 +94,12 @@ function enableAdminFeatures() {                                                
     $('button[name="csv"]').click(exportCsvData);  
     $('button[name="int-set"]').click(toggleSaveIntsPanel);
     $('#new-data').addClass('adminbttn').click(initNewDataForm);
+    $('#rst-data').addClass('adminbttn').click(_u.resetLocalDb);
     $('#rvw-data').addClass('adminbttn');
     app.enabledSelectors = '.map-dsbl';
 }
 /** Selects either Taxon, Location or Source in the table-focus dropdown. */
-export function selectInitialSearchFocus(f) {                                          //console.log('--------------selectInitialSearchFocus')
+export function selectInitialSearchFocus(f) {                                   console.log('--------------selectInitialSearchFocus [%s]', f);
     const focus = f || 'taxa';
     _u.initComboboxes(['Focus', 'View']);
     _u.replaceSelOpts('#search-focus', getFocusOpts())

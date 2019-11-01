@@ -6,6 +6,7 @@ import { addNewDataToStorage, initStoredData, replaceUserData } from './db-sync.
 import { showLoadingDataPopUp, showPopUpMsg } from './db-ui.js';
 import { newIntList, selIntList } from './panels/save-ints.js';
 import { newFilterSet, selFilterSet } from './panels/save-fltrs.js';
+import { exitModal, showSaveModal } from '../misc/intro-core.js';
 /* 
  * Exports:                     Imported by:
  *     (IDB Storage Methods)
@@ -38,6 +39,14 @@ extendPrototypes();
 /*------------------------ IDB Storage Methods -----------------------------------------------------------------------*/
 export function downloadFullDb() {
     _db.downloadFullDb();
+}
+export function resetLocalDb() {
+    const msg = 'Are you sure you want to reset all local data?';
+    showSaveModal(msg, '#rst-data', 'left', resetDb, Function.prototype, 'Yes');
+    function resetDb() {
+        exitModal();
+        _db.downloadFullDb(true);
+    }
 }
 /**
  * Gets data from data storage for each storage property passed. If an array
@@ -263,8 +272,7 @@ export function getDetachedRcrd(rcrdKey, rcrds) {                               
     try {
        return snapshot(rcrds[rcrdKey]);
     }
-    catch (e) { 
-       // console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
+    catch (e) {  console.log("#########-ERROR- couldn't get record [%s] from %O", rcrdKey, rcrds);
     }
 }
 export function getTaxonName(taxon) {                                           

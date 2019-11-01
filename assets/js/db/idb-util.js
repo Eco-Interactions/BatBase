@@ -35,9 +35,9 @@ function initDb() {
 function resetDbIfNeeded(noResetNeeded) {                                       console.log('Download DB? ', !noResetNeeded);
     return noResetNeeded ? checkForServerUpdates() : downloadFullDb();
 }
-export function downloadFullDb() {                                              console.log('   --DOWNLOADING FULL DB');
+export function downloadFullDb(reset) {                                         console.log('   --DOWNLOADING FULL DB');
     idb.clear();     
-    initStoredData().then(() => idb.set(_db.v, true));
+    initStoredData(reset).then(() => idb.set(_db.v, true));
 }
 /**
  * On page load, syncs local database with sever data. 

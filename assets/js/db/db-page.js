@@ -60,7 +60,7 @@ initDbPage();
 /** Initializes the UI unless on mobile device.  */
 function initDbPage () { 
     const winWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;  
-    if (winWidth < 1200 && $('body').data('env') != 'test') { return; }
+    if (winWidth < 1200 && $('body').data('env') != 'test') { return; } //Popup shown in oi.js
     requireCss();
     requireJs();
     db_ui.init();
@@ -88,9 +88,10 @@ function requireJs() {
  * The first time a browser visits the search page, all data is downloaded
  * from the server and stored in dataStorage. The intro-walkthrough is shown.
  */
-export function showIntroAndLoadingMsg() {
+export function showIntroAndLoadingMsg(reset) {
     db_ui.showLoadingDataPopUp();
     _u.initComboboxes(['Focus', 'View']);
+    if (reset) { return; }
     startWalkthrough('taxa');
 }
 /** After new data is downlaoded, the search state is initialized and page loaded. */
@@ -168,7 +169,7 @@ function resetCurTreeStorageProps() {
     tblState.selectedOpts = {};
     db_filters.resetTableStateParams();
 }
-/**  Table-rebuild entry point after form-window close.  */
+/**  Table-rebuild entry point after local database updates.  */
 export function initDataTable(focus) {                              /*Perm-log*/console.log('   //resetting search table. Focus ? [%s]', focus);
     db_ui.resetToggleTreeBttn(false);
     db_filters.resetTblFilters();
@@ -190,8 +191,8 @@ export function selectSearchFocus(f, view) {
 function updateFocusAndBuildTable(focus, tableBuilder) {                        //console.log("updateFocusAndBuildTable called. focus = [%s], tableBuilder = %O", focus, tableBuilder)
     db_ui.fadeTable();
     if ($('#shw-chngd')[0].checked) { db_filters.toggleTimeFilter('disable', null, 'skipSync'); }     //resets updatedAt table filter
-    if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     _u.setData('curFocus', focus);
+    if (focusNotChanged(focus)) { return tableBuilder(); }                      //console.log('--- Focus reset to [%s]', focus);
     updateFilterPanelHeader(focus);
     return clearOnFocusChange(focus)
     .then(tableBuilder);

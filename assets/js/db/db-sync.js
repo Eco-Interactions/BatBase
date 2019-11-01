@@ -523,9 +523,9 @@ export function resetStoredData() {
  * from the server and stored locally @ajaxAndStoreAllEntityData. A data-loading 
  * popup message and intro-walkthrough are shown on the Search page.
  */
-export function initStoredData() {
-    showIntroAndLoadingMsg();
-    return ajaxAndStoreAllEntityData();
+export function initStoredData(reset) {
+    showIntroAndLoadingMsg(reset);
+    return ajaxAndStoreAllEntityData(reset);
 }
 /**
  * The first time a browser visits the search page all entity data is downloaded
@@ -538,7 +538,7 @@ export function initStoredData() {
  *       Source, SourceType, Tag
  *   /interaction - Interaction, InteractionType  
  */
-function ajaxAndStoreAllEntityData() {                                          console.log("   --ajaxAndStoreAllEntityData");
+function ajaxAndStoreAllEntityData(reset) {                                     console.log("   --ajaxAndStoreAllEntityData");
     return $.when(
         $.ajax("ajax/taxon"), $.ajax("ajax/location"), 
         $.ajax("ajax/source"), $.ajax("ajax/interaction"),
@@ -547,7 +547,8 @@ function ajaxAndStoreAllEntityData() {                                          
         $.each([a1, a2, a3, a4, a5, a6], (idx, a) => storeServerData(a[0]));
         deriveAndStoreData([a1[0], a2[0], a3[0], a4[0], a5[0]]);
         storeData('user', $('body').data('user-name'));
-        initSearchState();
+        if (reset) { initDataTable(); 
+        } else { initSearchState(); }
         storeLocalDataState();
     });
 }
